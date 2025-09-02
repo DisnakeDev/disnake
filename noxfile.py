@@ -4,11 +4,22 @@
 from __future__ import annotations
 
 import pathlib
-from typing import Dict, List, Optional, Sequence, Tuple
+import sys
+from typing import Dict, List, Sequence, Tuple
 
 import nox
 
 PYPROJECT = nox.project.load_toml()
+
+
+def use_min_python_of(version: str) -> str | None:
+    """Use the minimum necessary python for this run, but if the environment is a specific venv, then use that one."""
+    major, minor = version.split(".")
+    if sys.version_info < (int(major), int(minor)):
+        # If the current Python version is less than the required version, use the required version
+        return f"{major}.{minor}"
+    return None
+
 
 nox.options.error_on_external_run = True
 nox.options.reuse_venv = "yes"
@@ -35,9 +46,8 @@ def install_deps(
     *,
     extras: Sequence[str] = EMPTY_SEQUENCE,
     groups: Sequence[str] = EMPTY_SEQUENCE,
+    dependencies: Sequence[str] = EMPTY_SEQUENCE,  # a parameter itself for pip
     project: bool = True,
-    fork_strategy: Optional[str] = None,
-    resolution: Optional[str] = None,
 ) -> None:
     if not project and extras:  # cannot install extras without also installing the project
         raise TypeError("Cannot install extras without also installing the project")
@@ -54,6 +64,9 @@ def install_deps(
         if groups:
             command.extend(nox.project.dependency_groups(PYPROJECT, *groups))
         session.install(*command)
+        # install separately in case it conflicts with a just-installed dependency (for overriding a locked dep)
+        if dependencies:
+            session.install(*dependencies)
         return None
 
     # install with UV
@@ -71,13 +84,15 @@ def install_deps(
             command.append(f"--group={g}")
     if not project:
         command.append("--no-install-project")
-    session.run_install(
-        *command,
-        env={"UV_PROJECT_ENVIRONMENT": session.virtualenv.location},
-    )
+
+    session.run_install(*command, env={"UV_PROJECT_ENVIRONMENT": session.virtualenv.location})
+
+    if dependencies:
+        # this will use uv as it is the runner
+        session.install(*dependencies)
 
 
-@nox.session
+@nox.session(reuse_venv=True)
 def docs(session: nox.Session) -> None:
     """Build and generate the documentation.
 
@@ -130,6 +145,20 @@ def slotscheck(session: nox.Session) -> None:
     """Run slotscheck."""
     install_deps(session, groups=["tools"])
     session.run("python", "-m", "slotscheck", "--verbose", "-m", "disnake")
+
+
+@nox.session(requires=["check-manifest"])
+def build(session: nox.Session) -> None:
+    """Build a dist."""
+    import pathlib
+
+    dist_path = pathlib.Path("dist")
+    if dist_path.exists():
+        import shutil
+
+        shutil.rmtree(dist_path)
+    install_deps(session, dependencies=["build"])
+    session.run("python", "-m", "build", "--outdir", "dist")
 
 
 @nox.session
@@ -196,7 +225,7 @@ def autotyping(session: nox.Session) -> None:
         )
 
 
-@nox.session(name="codemod")
+@nox.session(name="codemod", python=use_min_python_of("3.11"))
 def codemod(session: nox.Session) -> None:
     """Run libcst codemods."""
     install_deps(session, groups=["codemod"])
@@ -243,6 +272,7 @@ def pyright(session: nox.Session) -> None:
     env = {
         "PYRIGHT_PYTHON_IGNORE_WARNINGS": "1",
     }
+
     try:
         session.run("python", "-m", "pyright", *session.posargs, env=env)
     except KeyboardInterrupt:
@@ -292,3 +322,54 @@ def coverage(session: nox.Session) -> None:
         )
     if "erase" in session.posargs:
         session.run("coverage", "erase")
+
+
+@nox.session(default=False, python=False)
+def dev(session: nox.Session) -> None:
+    """Set up a development environment using uv.
+
+    This will create a .venv/ directory if it does not exist, and install all dependencies
+    needed for development.
+
+    If a .python-version file does not exist, it will be created with the earliest supported
+    Python version from pyproject.toml.
+    """
+    import pathlib
+
+    if not pathlib.Path(".python-version").exists():
+        session.run(
+            "uv",
+            "python",
+            "pin",
+            nox.project.python_versions(PYPROJECT)[
+                0
+            ],  # use the earliest supported python version if not already pinned
+            external=True,
+        )
+    env = {
+        "UV_PROJECT_ENVIRONMENT": str(pathlib.Path(".venv").absolute()),
+        "VIRTUAL_ENV": str(pathlib.Path(".venv").absolute()),
+    }
+    session.log("Creating a new virtual environment with uv...")
+    session.run("uv", "venv", ".venv", "--allow-existing", external=True, env=env)
+
+    session.log("Creating a `uv.lock` file/updating it with the current dependencies...")
+    session.run("uv", "lock", external=True, env=env)
+
+    session.log("Installing all dependencies...")
+    session.run("uv", "sync", "--all-extras", "--all-groups", external=True, env=env)
+
+    session.log("Creating and installing pre-commit hook environments...")
+    session.run("uv", "run", "pre-commit", "install", "--install-hooks", external=True, env=env)
+
+    session.log("Creating all nox environments...")
+    session.run(
+        "uv",
+        "run",
+        "nox",
+        "-N",
+        "--install-only",
+        env=env,
+        external=True,
+        silent=True,
+    )
