@@ -1,0 +1,1 @@
+Add :class:`Nameplate` and :class:`Collectibles` classes, as well as :attr:`User.collectibles` and :attr:`ClientUser.collectibles` attributes.

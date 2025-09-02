@@ -758,7 +758,7 @@ def test_as_chunks_size(max_size: int) -> None:
         ([], ()),
         ([disnake.CommandInter, int, Optional[str]], (disnake.CommandInter, int, Optional[str])),
         # check flattening + deduplication (both of these are done automatically in 3.9.1+)
-        ([float, Literal[1, 2, Literal[3, 4]], Literal["a", "bc"]], (float, 1, 2, 3, 4, "a", "bc")),
+        ([float, Literal[1, 2, Literal[3, 4]], Literal["a", "bc"]], (float, 1, 2, 3, 4, "a", "bc")),  # noqa: RUF041
         ([Literal[1, 1, 2, 3, 3]], (1, 2, 3)),
     ],
 )
@@ -786,7 +786,7 @@ def test_normalise_optional_params(params, expected) -> None:
         # complex types
         (List[int], List[int], False),
         (Dict[float, "List[yarl.URL]"], Dict[float, List[yarl.URL]], True),
-        (Literal[1, Literal[False], "hi"], Literal[1, False, "hi"], False),
+        (Literal[1, Literal[False], "hi"], Literal[1, False, "hi"], False),  # noqa: RUF041
         # unions
         (Union[timezone, float], Union[timezone, float], False),
         (Optional[int], Optional[int], False),
