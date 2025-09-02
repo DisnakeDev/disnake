@@ -749,7 +749,7 @@ class _WebhookState(Generic[WebhookT]):
 
         self._thread: Optional[Snowflake] = thread
 
-    def _get_guild(self, guild_id: int | None) -> Guild | None:
+    def _get_guild(self, guild_id: Optional[int]) -> Optional[Guild]:
         if self._parent is not None:
             return self._parent._get_guild(guild_id)
         return None
