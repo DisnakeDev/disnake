@@ -578,8 +578,7 @@ class FFmpegOpusAudio(FFmpegAudio):
                 _log.exception("Fallback probe using '%s' failed", executable)
             else:
                 _log.info("Fallback probe found codec=%s, bitrate=%s", codec, bitrate)
-        else:
-            _log.info("Probe found codec=%s, bitrate=%s", codec, bitrate)
+        _log.info("Probe found codec=%s, bitrate=%s", codec, bitrate)
         return codec, bitrate
 
     @staticmethod
