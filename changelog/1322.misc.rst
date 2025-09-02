@@ -1,1 +1,2 @@
-Migrate away from PDM and to uv for developer venv and dependency management. Speed gains during development improve significantly, and setting up a new environment now takes just a few seconds to lock and install.
+- Migrate away from PDM and to uv for developer venv and dependency management. This includes CI and ``noxfile.py`` changes.
+- Replace `pdm setup_env` and other development tasks with nox itself. See `CONTRIBUTING.md <https://github.com/DisnakeDev/disnake/blob/master/CONTRIBUTING.md>_` for additional information.
