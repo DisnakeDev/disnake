@@ -10,9 +10,10 @@
 
 from __future__ import annotations
 
+import os
 import pathlib
 import sys
-from typing import Dict, List, Sequence, Tuple
+from typing import Any, Dict, List, Sequence, Tuple
 
 import nox
 
@@ -62,8 +63,10 @@ def install_deps(
 
     command: List[str] = []
 
+    force_use_uv = os.getenv("CI") is not None and session.venv_backend == "none"
+
     # If not using uv, install with pip
-    if getattr(session, "venv_backend", None) != "uv":
+    if not force_use_uv and session.venv_backend != "uv":
         if project:
             command.append("-e")
             command.append(".")
@@ -81,9 +84,14 @@ def install_deps(
     command = [
         "uv",
         "sync",
-        f"--python={session.virtualenv.location}",
         "--no-default-groups",
     ]
+    env: Dict[str, Any] = {}
+
+    if not force_use_uv:
+        command.append(f"--python={session.virtualenv.location}")
+        env["UV_PROJECT_ENVIRONMENT"] = str(session.virtualenv.location)
+
     if extras:
         for e in extras:
             command.append(f"--extra={e}")
@@ -93,14 +101,20 @@ def install_deps(
     if not project:
         command.append("--no-install-project")
 
-    session.run_install(*command, env={"UV_PROJECT_ENVIRONMENT": session.virtualenv.location})
+    session.run_install(
+        *command,
+        env=env,
+    )
 
     if dependencies:
-        # this will use uv as it is the runner
-        session.install(*dependencies)
+        if force_use_uv:
+            session.run_install("uv", "pip", "install", *dependencies)
+        else:
+            # this will use uv as it is the runner
+            session.install(*dependencies)
 
 
-@nox.session(reuse_venv=True)
+@nox.session(reuse_venv=True, python="3.8")
 def docs(session: nox.Session) -> None:
     """Build and generate the documentation.
 
@@ -268,13 +282,11 @@ def pyright(session: nox.Session) -> None:
         project=True,
         extras=["speed", "voice"],
         groups=[
-            "test",
-            "nox",
-            "changelog",
-            "docs",
-            "codemod",
-            "typing",
-            "tools",
+            "test",  # tests/
+            "nox",  # noxfile.py
+            "docs",  # docs/
+            "codemod",  # scripts/
+            "typing",  # pyright
         ],
     )
     env = {
