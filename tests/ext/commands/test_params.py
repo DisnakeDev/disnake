@@ -118,7 +118,7 @@ class TestBaseRange:
     def test_backwards_compatible(self, create: Any, expected) -> None:
         with pytest.warns(DeprecationWarning, match=r"without an explicit type argument"):
             value = create()
-            assert (value.underlying_type, value.min_value, value.max_value) == expected
+        assert (value.underlying_type, value.min_value, value.max_value) == expected
 
 
 class TestRange:
