@@ -6,3 +6,5 @@ include disnake/ext/commands/py.typed
 include disnake/ext/tasks/py.typed
 global-exclude *.py[cod]
 exclude uv.lock
+exclude noxfile.py
+exclude noxfile.py.lock

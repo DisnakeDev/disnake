@@ -149,7 +149,7 @@ def docs(session: nox.Session) -> None:
 @nox.session
 def lint(session: nox.Session) -> None:
     """Check all files for linting errors"""
-    install_deps(session, groups=["tools"])
+    install_deps(session, project=False, groups=["tools"])
 
     session.run("pre-commit", "run", "--all-files", *session.posargs)
 
@@ -157,14 +157,14 @@ def lint(session: nox.Session) -> None:
 @nox.session(name="check-manifest")
 def check_manifest(session: nox.Session) -> None:
     """Run check-manifest."""
-    install_deps(session, groups=["tools"])
+    install_deps(session, project=False, groups=["tools"])
     session.run("check-manifest", "-v")
 
 
 @nox.session()
 def slotscheck(session: nox.Session) -> None:
     """Run slotscheck."""
-    install_deps(session, groups=["tools"])
+    install_deps(session, project=False, groups=["tools"])
     session.run("python", "-m", "slotscheck", "--verbose", "-m", "disnake")
 
 
@@ -178,18 +178,23 @@ def build(session: nox.Session) -> None:
         import shutil
 
         shutil.rmtree(dist_path)
-    install_deps(session, dependencies=["build"])
+    install_deps(session, project=False, dependencies=["build"])
     session.run("python", "-m", "build", "--outdir", "dist")
 
 
-@nox.session
+@nox.session(python="3.13")
 def autotyping(session: nox.Session) -> None:
     """Run autotyping.
 
     Because of the nature of changes that autotyping makes, and the goal design of examples,
     this runs on each folder in the repository with specific settings.
     """
-    install_deps(session, project=False, groups=["codemod"])
+    install_deps(
+        session,
+        project=False,
+        groups=["codemod"],
+        dependencies=["libcst==1.8.2"],
+    )
 
     base_command = ["python", "-m", "libcst.tool", "codemod", "autotyping.AutotypeCommand"]
     if not session.interactive:
@@ -249,7 +254,11 @@ def autotyping(session: nox.Session) -> None:
 @nox.session(name="codemod", python=use_min_python_of("3.11"))
 def codemod(session: nox.Session) -> None:
     """Run libcst codemods."""
-    install_deps(session, groups=["codemod"])
+    install_deps(
+        session,
+        groups=["codemod"],
+        dependencies=["libcst==1.8.2"],
+    )
 
     base_command = ["python", "-m", "libcst.tool"]
     base_command_codemod = [*base_command, "codemod"]
