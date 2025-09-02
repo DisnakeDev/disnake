@@ -45,7 +45,7 @@ nox.options.sessions = [
 # used to reset cached coverage data once for the first test run only
 reset_coverage = True
 
-EMPTY_SEQUENCE: Sequence[str] = set()  # type: ignore
+EMPTY_SEQUENCE: Sequence[str] = ()
 
 
 def install_deps(
