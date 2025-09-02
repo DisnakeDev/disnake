@@ -57,7 +57,7 @@ voice = [
 
 [dependency-groups]
 nox = [
-    "nox==2025.5.1",
+    "nox>=2025.5.1",
 ]
 tools = [
     "pre-commit~=3.0",
