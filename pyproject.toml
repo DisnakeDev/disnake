@@ -359,8 +359,6 @@ testpaths = "tests"
 addopts = "--strict-markers -Werror -s"
 xfail_strict = true
 asyncio_mode = "strict"
-asyncio_default_fixture_loop_scope = "function"
-filterwarnings= "default"
 
 [tool.coverage.run]
 branch = true
