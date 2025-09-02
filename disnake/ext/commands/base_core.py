@@ -728,6 +728,7 @@ def default_member_permissions(
     moderate_members: bool = ...,
     move_members: bool = ...,
     mute_members: bool = ...,
+    pin_messages: bool = ...,
     priority_speaker: bool = ...,
     read_message_history: bool = ...,
     read_messages: bool = ...,
