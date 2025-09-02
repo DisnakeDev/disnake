@@ -62,7 +62,7 @@ docs = [
     "sphinxcontrib-towncrier==0.5.0a0; python_version >= '3.11'",
     "sphinxcontrib-trio~=1.1.2; python_version >= '3.11'",
     "sphinxext-opengraph==0.9.1 ; python_version >= '3.11'",
-    "towncrier==23.6.0"
+    "towncrier==23.6.0; python_version >= '3.11'"
 ]
 
 [dependency-groups]
