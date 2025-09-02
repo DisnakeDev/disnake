@@ -47,18 +47,29 @@ jobs:
           version: ${{ env.USE_UV_VERSION }}
           enable-cache: true
 
+      - name: Restore uv lock
+        uses: actions/cache/restore@v4
+        id: cache-uv-lock
+        with:
+          key: uv-lock-resolved-${{ env.UV_RESOLUTION}}-${{hashFiles('pyproject.toml', 'uv.lock')}}
+          restore-keys: |
+            uv-lock-resolved-${{ env.UV_RESOLUTION }}
+          path: uv.lock
+          enableCrossOsArchive: true
+
       - name: Lock dependencies
 
         env:
           UV_FROZEN: 0
         run: uv lock --refresh
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/cache/save@v4
+        if: steps.cache-uv-lock.outputs.cache-hit != 'true' && steps.cache-uv-lock.outputs.cache-hit != 'false'
         name: upload-uv-lock
         with:
-          name: uv-lock-${{hashFiles('pyproject.toml')}}-resolved-${{ env.UV_RESOLUTION}}
+          key: uv-lock-resolved-${{ env.UV_RESOLUTION}}-${{hashFiles('pyproject.toml', 'uv.lock')}}
           path: uv.lock
-          if-no-files-found: error
+          enableCrossOsArchive: true
 
   # used for pyright and tests
   determine-python-versions:

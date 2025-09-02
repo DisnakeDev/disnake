@@ -18,9 +18,15 @@ runs:
   using: composite
   steps:
     - name: Download uv lock
-      uses: actions/download-artifact@v5
+      uses: actions/cache/restore@v4
+      id: restore-uv-lock
       with:
-        name: uv-lock-${{hashFiles('pyproject.toml')}}-resolved-${{ env.UV_RESOLUTION }}
+        key: uv-lock-resolved-${{ env.UV_RESOLUTION }}
+        path: uv.lock
+        restore-keys: |
+          uv-lock-resolved-${{ env.UV_RESOLUTION }}
+        enableCrossOsArchive: true
+        fail-on-cache-miss: true
 
     - name: Set up uv with python ${{ inputs.python-version }}
       id: setup-python
