@@ -594,7 +594,7 @@ class UserPrimaryGuild:
         if the system clears the identity, e.g. the server no longer supports tags. This will be ``False``
         if the user manually removes their tag.
     tag: Optional[str]
-        The text of the user's server tag. Limited to 4 characters.
+        The text of the user's server tag, up to 4 characters.
     """
 
     __slots__ = (
