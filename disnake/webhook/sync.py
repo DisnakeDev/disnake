@@ -63,7 +63,7 @@ if TYPE_CHECKING:
     from ..types.webhook import Webhook as WebhookPayload
 
     try:
-        from requests import Response, Session
+        from requests import Response
     except ModuleNotFoundError:
         pass
 
