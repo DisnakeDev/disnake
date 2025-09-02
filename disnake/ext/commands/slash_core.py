@@ -871,7 +871,7 @@ def slash_command(
     """
 
     def decorator(func: CommandCallback) -> InvokableSlashCommand:
-        if not asyncio.iscoroutinefunction(func):
+        if not utils.iscoroutinefunction(func):
             raise TypeError(f"<{func.__qualname__}> must be a coroutine function")
         if hasattr(func, "__command_flag__"):
             raise TypeError("Callback is already a command.")

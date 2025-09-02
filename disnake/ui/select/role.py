@@ -21,7 +21,7 @@ from ...components import RoleSelectMenu
 from ...enums import ComponentType, SelectDefaultValueType
 from ...object import Object
 from ...role import Role
-from ...utils import MISSING
+from ...utils import MISSING, iscoroutine, iscoroutinefunction
 from .base import BaseSelect, P, SelectDefaultValueInputType, V_co, _create_decorator
 
 if TYPE_CHECKING:

@@ -2,24 +2,13 @@
 
 from __future__ import annotations
 
-import asyncio
 import os
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    ClassVar,
-    Optional,
-    Tuple,
-    TypeVar,
-    Union,
-    overload,
-)
+from typing import TYPE_CHECKING, Any, Callable, ClassVar, Optional, Tuple, TypeVar, Union, overload
 
 from ..components import Button as ButtonComponent
 from ..enums import ButtonStyle, ComponentType
 from ..partial_emoji import PartialEmoji, _EmojiTag
-from ..utils import MISSING
+from ..utils import MISSING, iscoroutinefunction
 from .item import DecoratedItem, Item
 
 __all__ = (
@@ -365,7 +354,7 @@ def button(
         raise TypeError("cls argument must be callable")
 
     def decorator(func: ItemCallbackType[V_co, B_co]) -> DecoratedItem[B_co]:
-        if not asyncio.iscoroutinefunction(func):
+        if not iscoroutinefunction(func):
             raise TypeError("button function must be a coroutine function")
 
         func.__discord_ui_model_type__ = cls

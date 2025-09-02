@@ -50,6 +50,11 @@ from urllib.parse import parse_qs, urlencode
 
 from .enums import Locale
 
+if sys.version_info >= (3, 11):
+    from inspect import iscoroutine as iscoroutine, iscoroutinefunction as iscoroutinefunction
+else:
+    from asyncio import iscoroutine as iscoroutine, iscoroutinefunction as iscoroutinefunction
+
 try:
     import orjson
 except ModuleNotFoundError:

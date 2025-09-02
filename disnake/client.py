@@ -840,7 +840,7 @@ class Client:
             else (name if isinstance(name, str) else f"on_{name.value}")
         )
 
-        if not asyncio.iscoroutinefunction(func):
+        if not utils.iscoroutinefunction(func):
             raise TypeError("Listeners must be coroutines")
 
         if name_ in self.extra_events:
@@ -1866,7 +1866,7 @@ class Client:
         TypeError
             The coroutine passed is not actually a coroutine.
         """
-        if not asyncio.iscoroutinefunction(coro):
+        if not utils.iscoroutinefunction(coro):
             raise TypeError("event registered must be a coroutine function")
 
         setattr(self, coro.__name__, coro)

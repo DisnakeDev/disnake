@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 import collections
 import collections.abc
 import inspect
@@ -13,6 +12,7 @@ import warnings
 from typing import TYPE_CHECKING, Any, Callable, Iterable, List, Optional, Type, TypeVar, Union
 
 import disnake
+from disnake.utils import iscoroutinefunction
 
 from . import errors
 from .common_bot_base import CommonBotBase
@@ -355,7 +355,7 @@ class BotBase(CommonBotBase, GroupMixin):
         TypeError
             The coroutine passed is not actually a coroutine.
         """
-        if not asyncio.iscoroutinefunction(coro):
+        if not disnake.utils.iscoroutinefunction(coro):
             raise TypeError("The pre-invoke hook must be a coroutine.")
 
         self._before_invoke = coro
@@ -390,7 +390,7 @@ class BotBase(CommonBotBase, GroupMixin):
         TypeError
             The coroutine passed is not actually a coroutine.
         """
-        if not asyncio.iscoroutinefunction(coro):
+        if not iscoroutinefunction(coro):
             raise TypeError("The post-invoke hook must be a coroutine.")
 
         self._after_invoke = coro
