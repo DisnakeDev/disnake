@@ -207,7 +207,7 @@ jobs:
       run: uv sync --no-default-groups --group test --no-editable
 
     - name: Install nox environment
-      run: uv run nox -s test --install-only --force-python ${{ steps.setup-env.outputs.python-version }}
+      run: uv run --no-sync nox -s test --install-only --force-python ${{ steps.setup-env.outputs.python-version }}
 
     - name: Run pytest
       id: run_tests

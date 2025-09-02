@@ -16,6 +16,8 @@ from typing import Dict, List, Sequence, Tuple
 
 import nox
 
+nox.needs_version = ">=2025.5.1"
+
 PYPROJECT = nox.project.load_toml()
 
 
@@ -38,7 +40,6 @@ nox.options.sessions = [
     "pyright",
     "test",
 ]
-nox.needs_version = ">=2025.5.1"
 
 
 # used to reset cached coverage data once for the first test run only
