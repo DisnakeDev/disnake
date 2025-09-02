@@ -1935,7 +1935,7 @@ def bot_has_role(item: int) -> Callable[[T], T]:
         if ctx.guild is None:
             raise NoPrivateMessage
 
-        me = cast(disnake.Member, ctx.me)
+        me = cast("disnake.Member", ctx.me)
         if isinstance(item, int):
             role = disnake.utils.get(me.roles, id=item)
         else:
@@ -1965,7 +1965,7 @@ def bot_has_any_role(*items: int) -> Callable[[T], T]:
         if ctx.guild is None:
             raise NoPrivateMessage
 
-        me = cast(disnake.Member, ctx.me)
+        me = cast("disnake.Member", ctx.me)
         getter = functools.partial(disnake.utils.get, me.roles)
         if any(
             getter(id=item) is not None if isinstance(item, int) else getter(name=item) is not None
@@ -2014,6 +2014,7 @@ def has_permissions(
     moderate_members: bool = ...,
     move_members: bool = ...,
     mute_members: bool = ...,
+    pin_messages: bool = ...,
     priority_speaker: bool = ...,
     read_message_history: bool = ...,
     read_messages: bool = ...,
@@ -2138,6 +2139,7 @@ def bot_has_permissions(
     moderate_members: bool = ...,
     move_members: bool = ...,
     mute_members: bool = ...,
+    pin_messages: bool = ...,
     priority_speaker: bool = ...,
     read_message_history: bool = ...,
     read_messages: bool = ...,
@@ -2240,6 +2242,7 @@ def has_guild_permissions(
     moderate_members: bool = ...,
     move_members: bool = ...,
     mute_members: bool = ...,
+    pin_messages: bool = ...,
     priority_speaker: bool = ...,
     read_message_history: bool = ...,
     read_messages: bool = ...,
@@ -2339,6 +2342,7 @@ def bot_has_guild_permissions(
     moderate_members: bool = ...,
     move_members: bool = ...,
     mute_members: bool = ...,
+    pin_messages: bool = ...,
     priority_speaker: bool = ...,
     read_message_history: bool = ...,
     read_messages: bool = ...,
