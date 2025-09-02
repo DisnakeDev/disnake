@@ -5,10 +5,12 @@
 from __future__ import annotations
 
 from pprint import pformat
-from typing import Optional, Tuple
+from typing import TYPE_CHECKING, Optional, Tuple
 
-import disnake
 from disnake.ext import commands
+
+if TYPE_CHECKING:
+    import disnake
 
 
 def injected(user: disnake.User, channel: disnake.TextChannel):

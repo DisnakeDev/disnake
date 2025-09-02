@@ -20,7 +20,6 @@ from typing import (
     overload,
 )
 
-from disnake.app_commands import ApplicationCommand
 from disnake.enums import ApplicationCommandType
 from disnake.flags import ApplicationInstallTypes, InteractionContextTypes
 from disnake.permissions import Permissions
@@ -32,6 +31,7 @@ from .errors import CheckFailure, CommandError, CommandInvokeError, CommandOnCoo
 if TYPE_CHECKING:
     from typing_extensions import Concatenate, ParamSpec, Self
 
+    from disnake.app_commands import ApplicationCommand
     from disnake.interactions import ApplicationCommandInteraction
 
     from ._types import AppCheck, Coro, Error, Hook

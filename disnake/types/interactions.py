@@ -6,20 +6,20 @@ from typing import TYPE_CHECKING, Dict, List, Literal, Optional, TypedDict, Unio
 
 from typing_extensions import NotRequired
 
-from .appinfo import ApplicationIntegrationType
-from .channel import ChannelType
 from .components import MessageTopLevelComponent, Modal
-from .embed import Embed
-from .entitlement import Entitlement
-from .i18n import LocalizationDict
-from .member import Member, MemberWithUser
-from .role import Role
 from .snowflake import Snowflake
-from .threads import ThreadMetadata
-from .user import User
 
 if TYPE_CHECKING:
+    from .appinfo import ApplicationIntegrationType
+    from .channel import ChannelType
+    from .embed import Embed
+    from .entitlement import Entitlement
+    from .i18n import LocalizationDict
+    from .member import Member, MemberWithUser
     from .message import AllowedMentions, Attachment, Message
+    from .role import Role
+    from .threads import ThreadMetadata
+    from .user import User
 
 
 ApplicationCommandType = Literal[1, 2, 3]

@@ -25,7 +25,6 @@ from typing import (
 import disnake.abc
 import disnake.utils
 
-from .context import BotT, Context
 from .core import Command, Group
 from .errors import CommandError
 
@@ -36,6 +35,7 @@ if TYPE_CHECKING:
     from .bot import AutoShardedBot, Bot
     from .bot_base import BotBase
     from .cog import Cog
+    from .context import BotT, Context
 
     # note: no InteractionBot
     AnyBot = Union[Bot, AutoShardedBot]

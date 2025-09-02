@@ -42,7 +42,6 @@ from .object import Object
 from .partial_emoji import PartialEmoji
 from .permissions import PermissionOverwrite, Permissions
 from .role import Role
-from .sticker import GuildSticker, StandardSticker, StickerItem
 from .utils import _overload_with_permissions
 from .voice_client import VoiceClient, VoiceProtocol
 
@@ -75,6 +74,7 @@ if TYPE_CHECKING:
     from .message import Message, MessageReference, PartialMessage
     from .poll import Poll
     from .state import ConnectionState
+    from .sticker import GuildSticker, StandardSticker, StickerItem
     from .threads import AnyThreadArchiveDuration, ForumTag
     from .types.channel import (
         Channel as ChannelPayload,
