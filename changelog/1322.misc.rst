@@ -1,2 +1,1 @@
-- Migrate away from PDM and to uv for developer venv and dependency management. This includes CI and ``noxfile.py`` changes.
-- Replace `pdm setup_env` and other development tasks with nox itself. See `CONTRIBUTING.md <https://github.com/DisnakeDev/disnake/blob/master/CONTRIBUTING.md>_` for additional information.
+Migrate away from pdm and replace with ``uv`` and ``nox``. See `CONTRIBUTING.md <https://github.com/DisnakeDev/disnake/blob/master/CONTRIBUTING.md>`_ for additional information.
