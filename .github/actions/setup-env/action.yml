@@ -32,14 +32,9 @@ runs:
       id: setup-python
       uses: astral-sh/setup-uv@v6
       with:
+        python-version: ${{ inputs.python-version }}
         version: ${{ inputs.uv-version }}
         enable-cache: true
-
-    - name: Install python ${{ inputs.python-version }}
-      id: install-python
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ inputs.python-version }}
 
     - name: Set python version
       id: python-version
