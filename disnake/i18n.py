@@ -138,7 +138,7 @@ class Localized(Generic[StringT]):
     @classmethod
     def _cast(cls, string: Union[Optional[str], Localized[Any]], required: bool) -> Localized[Any]:
         if not isinstance(string, Localized):
-            string = cls(string, data=None)
+            string = cls(string, data=None)  # type: ignore (this is checked below)
 
         # enforce the `StringT` type at runtime
         if required and string.string is None:

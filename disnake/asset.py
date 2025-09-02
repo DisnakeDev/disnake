@@ -156,7 +156,7 @@ class AssetMixin:
             filename = yarl.URL(self.url).name
             # if the filename doesn't have an extension (e.g. widget member avatars),
             # try to infer it from the data
-            if not os.path.splitext(filename)[1]:
+            if filename and not os.path.splitext(filename)[1]:
                 ext = utils._get_extension_for_data(data)
                 if ext:
                     filename += ext

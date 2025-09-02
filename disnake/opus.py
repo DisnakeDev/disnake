@@ -211,7 +211,7 @@ def libopus_loader(name: str) -> Any:
 
         try:
             if item[1]:
-                func.argtypes = item[1]
+                func.argtypes = item[1]  # type: ignore
 
             func.restype = item[2]
         except KeyError:

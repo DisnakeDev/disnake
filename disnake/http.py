@@ -258,7 +258,7 @@ class HTTPClient:
 
     async def ws_connect(self, url: str, *, compress: int = 0) -> aiohttp.ClientWebSocketResponse:
         if hasattr(aiohttp, "ClientWSTimeout"):
-            timeout = aiohttp.ClientWSTimeout(ws_close=30.0)  # pyright: ignore[reportGeneralTypeIssues]
+            timeout = aiohttp.ClientWSTimeout(ws_close=30.0)  # pyright: ignore[reportCallIssue]
         else:
             timeout = 30.0
         return await self.__session.ws_connect(

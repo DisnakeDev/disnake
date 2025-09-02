@@ -1010,7 +1010,7 @@ class PermissionsConverter(Converter[disnake.Permissions]):
                 break
 
             if callable(attr):
-                perms.append(attr())
+                perms.append(attr())  # pyright: ignore[reportArgumentType]
             else:
                 perms.append(disnake.Permissions(**{name: True}))
         else:
@@ -1194,12 +1194,12 @@ class Greedy(List[T]):
             raise TypeError("Greedy[...] expects a type or a Converter instance.")
 
         if converter in (str, type(None)) or origin is Greedy:
-            raise TypeError(f"Greedy[{converter.__name__}] is invalid.")
+            raise TypeError(f"Greedy[{converter.__name__}] is invalid.")  # pyright: ignore[reportAttributeAccessIssue]
 
         if origin is Union and type(None) in args:
             raise TypeError(f"Greedy[{converter!r}] is invalid.")
 
-        return cls(converter=converter)
+        return cls(converter=converter)  # pyright: ignore[reportArgumentType]
 
 
 def _convert_to_bool(argument: str) -> bool:
