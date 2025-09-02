@@ -530,7 +530,7 @@ class User(BaseUser, disnake.abc.Messageable):
 
         .. versionadded:: 2.11
         """
-        if self._primary_guild:
+        if self._primary_guild is not None:
             return UserPrimaryGuild(
                 state=self._state,
                 data=self._primary_guild,
