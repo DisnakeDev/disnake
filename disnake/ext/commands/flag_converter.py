@@ -257,7 +257,7 @@ class FlagsMeta(type):
         __commands_flag_prefix__: str
 
     def __new__(
-        cls: FlagsMetaT,
+        cls,
         name: str,
         bases: Tuple[type, ...],
         attrs: Dict[str, Any],
@@ -265,7 +265,7 @@ class FlagsMeta(type):
         case_insensitive: bool = MISSING,
         delimiter: str = MISSING,
         prefix: str = MISSING,
-    ) -> FlagsMetaT:
+    ) -> Self:
         attrs["__commands_is_flag__"] = True
 
         try:

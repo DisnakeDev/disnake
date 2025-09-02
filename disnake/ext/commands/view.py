@@ -74,7 +74,7 @@ class StringView:
         self.index = self.end
         return result
 
-    def read(self, n) -> str:
+    def read(self, n: int) -> str:
         result = self.buffer[self.index : self.index + n]
         self.previous = self.index
         self.index += n

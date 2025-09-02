@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: MIT
 
-
 from typing import TYPE_CHECKING
 
 import pytest

@@ -822,7 +822,7 @@ class InteractionBotBase(CommonBotBase):
         self, test_guilds: Optional[Sequence[int]] = None
     ) -> Tuple[List[ApplicationCommand], Dict[int, List[ApplicationCommand]]]:
         global_cmds: List[ApplicationCommand] = []
-        guilds = {}
+        guilds: Dict[int, ApplicationCommand] = {}
 
         for cmd in self.application_commands_iterator():
             if not cmd.auto_sync:

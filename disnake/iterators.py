@@ -57,7 +57,6 @@ if TYPE_CHECKING:
         AuditLogEvent,
     )
     from .types.entitlement import Entitlement as EntitlementPayload
-    from .types.gateway import GuildMemberUpdateEvent as GuildMemberUpdateEventPayload
     from .types.guild import Ban as BanPayload, Guild as GuildPayload
     from .types.guild_scheduled_event import (
         GuildScheduledEventUser as GuildScheduledEventUserPayload,
@@ -825,7 +824,7 @@ class MemberIterator(_AsyncIterator["Member"]):
             for element in reversed(data):
                 await self.members.put(self.create_member(element))
 
-    def create_member(self, data: MemberWithUserPayload | GuildMemberUpdateEventPayload) -> Member:
+    def create_member(self, data: MemberWithUserPayload) -> Member:
         from .member import Member
 
         return Member(data=data, guild=self.guild, state=self.state)

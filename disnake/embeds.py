@@ -834,7 +834,7 @@ class Embed:
         return result
 
     @classmethod
-    def set_default_colour(cls, value: Optional[Union[int, Colour]]) -> Colour | None:
+    def set_default_colour(cls, value: Optional[Union[int, Colour]]) -> Optional[Colour]:
         """Set the default colour of all new embeds.
 
         .. versionadded:: 2.4

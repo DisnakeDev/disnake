@@ -3309,9 +3309,7 @@ class Guild(Hashable):
         """
         data = await self._state.http.get_all_integrations(self.id)
 
-        def convert(
-            d: IntegrationPayload,
-        ) -> Integration:
+        def convert(d: IntegrationPayload) -> Integration:
             factory, _ = _integration_factory(d["type"])
             return factory(guild=self, data=d)
 
@@ -4590,7 +4588,7 @@ class Guild(Hashable):
             raise ValueError("limit must be at least 1")
         limit = min(1000, limit)
         members = await self._state.http.search_guild_members(self.id, query=query, limit=limit)
-        resp = []
+        resp: List[Member] = []
         for member in members:
             member = Member(state=self._state, data=member, guild=self)
             if cache and member.id not in self._members:

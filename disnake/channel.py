@@ -5135,7 +5135,7 @@ class PartialMessageable(disnake.abc.Messageable, Hashable):
 
 def _guild_channel_factory(
     channel_type: int,
-) -> Tuple[Union[Type[GuildChannelType], None], ChannelType]:
+) -> Tuple[Optional[Type[GuildChannelType]], ChannelType]:
     value = try_enum(ChannelType, channel_type)
     if value is ChannelType.text:
         return TextChannel, value
@@ -5157,7 +5157,9 @@ def _guild_channel_factory(
 
 def _channel_factory(
     channel_type: int,
-) -> Tuple[Union[Type[GuildChannelType], Type[DMChannel], Type[GroupChannel], None], ChannelType]:
+) -> Tuple[
+    Optional[Union[Type[GuildChannelType], Type[DMChannel], Type[GroupChannel]]], ChannelType
+]:
     cls, value = _guild_channel_factory(channel_type)
     if value is ChannelType.private:
         return DMChannel, value

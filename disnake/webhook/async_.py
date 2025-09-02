@@ -754,7 +754,7 @@ class _WebhookState(Generic[WebhookT]):
             return self._parent._get_guild(guild_id)
         return None
 
-    def store_user(self, data) -> BaseUser | User:
+    def store_user(self, data) -> Union[BaseUser, User]:
         if self._parent is not None:
             return self._parent.store_user(data)
         # state parameter is artificial

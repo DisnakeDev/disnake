@@ -12,7 +12,6 @@ from functools import partial
 from itertools import groupby
 from typing import (
     TYPE_CHECKING,
-    Any,
     Callable,
     ClassVar,
     Dict,
@@ -362,7 +361,7 @@ class View:
         print(f"Ignoring exception in view {self} for item {item}:", file=sys.stderr)
         traceback.print_exception(error.__class__, error, error.__traceback__, file=sys.stderr)
 
-    async def _scheduled_task(self, item: Item, interaction: MessageInteraction) -> Any:
+    async def _scheduled_task(self, item: Item, interaction: MessageInteraction) -> None:
         try:
             if self.timeout:
                 self.__timeout_expiry = time.monotonic() + self.timeout

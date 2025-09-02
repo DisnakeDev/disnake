@@ -1612,7 +1612,7 @@ class _InteractionMessageState:
         self._interaction: Interaction = interaction
         self._parent: ConnectionState = parent
 
-    def _get_guild(self, guild_id) -> Guild | None:
+    def _get_guild(self, guild_id) -> Optional[Guild]:
         return self._parent._get_guild(guild_id)
 
     def store_user(self, data) -> User:

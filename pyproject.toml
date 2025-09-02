@@ -248,7 +248,7 @@ ignore = [
 ]
 "scripts/*.py" = [
     "S101", # use of assert is okay in scripts
-   "ANN", # missing type annotations in scripts is fine
+    "ANN", # missing type annotations in scripts is fine
 ]
 # we are not using noqa in the example files themselves
 "examples/*.py" = [
