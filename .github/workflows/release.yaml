@@ -27,11 +27,11 @@ jobs:
 
       - name: Build package
         run: |
-          uvx --from=build pyproject-build
+          uvx --from=build~=1.3 pyproject-build
           ls -la dist/
 
       - name: Twine check
-        run: uvx twine check --strict dist/*
+        run: uvx twine~=6.1 check --strict dist/*
 
       - name: Show metadata
         run: |

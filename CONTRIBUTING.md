@@ -91,6 +91,8 @@ This will:
 > If you're wondering why this command is unique, and uses `uvx` and not `uv`, its because `uvx` is a different part of uv.
 > This command downloads `nox` to an ephemeral environment, and then runs `nox` within that environment.
 > `nox` itself then runs the environment set-up session `dev` which is defined within [`noxfile.py`](./noxfile.py)
+>
+> That all said, you can also use `uv run noxfile.py` in place of any `nox` or `uv run nox` invoke.
 
 Other tools used in this project include [ruff](https://docs.astral.sh/ruff) (formatter and linter), and [pyright](https://microsoft.github.io/pyright/#/) (type-checker). For the most part, these automatically run on every commit with no additional action required - see below for details.
 
@@ -147,7 +149,7 @@ To build the documentation locally, use `uv run nox -s docs` and visit <http://1
 We've recently migrated from `pdm` to [`uv`][uv] for dependency and environment management for local development, in hopes of a developer experience with less friction.
 
 1. delete `pdm.lock` and `.pdm-python`
-2. run `uvx nox -s dev`to recreate the .venv, refresh installation of pre-commit, and install all dependencies for the nox environments.
+2. run `uv run noxfile.py -s dev`to recreate the .venv, refresh installation of pre-commit, and install all dependencies for the nox environments.
 
 ### Migrating `pdm`'s scripts to `nox`
 
@@ -171,12 +173,13 @@ uv run nox -s docs
 uv run nox -s lint
 uv run nox -s pyright
 uv run nox -s test
-uvx nox -s dev
+uv run noxfile.py -s dev
 ```
 
 If it would be easier, `nox` can be installed to your path with `uv tool install nox`, and used as if it wasn't in the project venv: nox will integrate with our noxfile and use the correct version of nox when needed.
 
 > [!TIP]
 > To provide arguments to the selected sessions with `nox`, pass them **after** `--`. For example, to tell `pre-commit` to only run `ruff format`, run `nox -s lint -- ruff-format`.
+
 
 [uv]: https://docs.astral.sh/uv

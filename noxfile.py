@@ -382,13 +382,16 @@ def dev(session: nox.Session) -> None:
     session.run("uv", "run", "pre-commit", "install", "--install-hooks", external=True, env=env)
 
     session.log("Creating all nox environments...")
+
     session.run(
-        "uv",
-        "run",
         "nox",
         "-N",
         "--install-only",
         env=env,
-        external=True,
+        external=False,  # force use ourselves
         silent=True,
     )
+
+
+if __name__ == "__main__":
+    nox.main()

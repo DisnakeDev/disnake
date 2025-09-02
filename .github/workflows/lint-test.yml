@@ -76,7 +76,7 @@ jobs:
       - name: Determine Python versions to test and lint against
         id: set-matrix
         run: |
-          echo test-python-versions=$(uvx nox -s test --list --json | jq -c '[.[].python]') | tee --append $GITHUB_OUTPUT
+          echo test-python-versions=$(uv run noxfile.py -s test --list --json | jq -c '[.[].python]') | tee --append $GITHUB_OUTPUT
 
   lint:
     runs-on: ubuntu-latest
@@ -105,7 +105,7 @@ jobs:
           uv-version: ${{ env.USE_UV_VERSION }}
 
       - name: Run sphinx-build
-        run: uvx nox --force-python ${{ steps.setup-env.outputs.python-version }} -s docs -- --keep-going -W -w $GITHUB_STEP_SUMMARY
+        run: uv run noxfile.py --force-python ${{ steps.setup-env.outputs.python-version }} -s docs -- --keep-going -W -w $GITHUB_STEP_SUMMARY
 
   pyright:
     runs-on: ubuntu-latest
@@ -191,7 +191,7 @@ jobs:
           uvx --from=build pyproject-build
           ls -la dist/
 
-          uvx twine check --strict dist/*
+          uvx twine~=6.1 check --strict dist/*
 
       # run the libcst parsers and check for changes
       - name: libcst codemod
@@ -236,7 +236,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install nox environment
-        run: uvx nox -s test --install-only --force-python ${{ steps.setup-env.outputs.python-version }}
+        run: uv run noxfile.py -s test --install-only --force-python ${{ steps.setup-env.outputs.python-version }}
 
       - name: Run pytest
         id: run_tests
@@ -245,7 +245,7 @@ jobs:
           TZ: "America/New_York"
         run: |
           echo "$GITHUB_STEP_SUMMARY_HEADER" | sed "s/#name#/Test Summary/" >> $GITHUB_STEP_SUMMARY
-          uvx nox --force-python ${{ steps.setup-env.outputs.python-version }} -s test -- --color=no --cov-report= | tee -a $GITHUB_STEP_SUMMARY
+          uv run noxfile.py --force-python ${{ steps.setup-env.outputs.python-version }} -s test -- --color=no --cov-report= | tee -a $GITHUB_STEP_SUMMARY
           echo "$GITHUB_STEP_SUMMARY_FOOTER" >> $GITHUB_STEP_SUMMARY
 
       - name: Print Coverage Output

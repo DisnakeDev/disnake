@@ -103,6 +103,9 @@ docs = [
 required-version = ">=0.8.4"
 default-groups = "all"
 
+[tool.nox]
+script-venv-backend = "uv|virtualenv"
+
 [tool.ruff]
 line-length = 100
 target-version = "py38"
