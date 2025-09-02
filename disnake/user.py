@@ -619,6 +619,6 @@ class UserPrimaryGuild:
     def badge(self) -> Optional[Asset]:
         """Optional[:class:`Asset`]: Returns the server tag badge, if any."""
         # if badge is not None identity_guild_id won't be None either
-        if self._badge and self.identity_guild_id:
+        if self._badge is not None and self.identity_guild_id is not None:
             return Asset._from_clan_badge(self._state, self.identity_guild_id, self._badge)
         return None
