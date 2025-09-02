@@ -25,8 +25,8 @@ defaults:
 
 env:
   USE_UV_VERSION: "0.8.14"
-  UV_FROZEN: 1
   UV_RESOLUTION: "highest"
+  UV_LOCKED: 1
 
 
 jobs:
@@ -51,23 +51,31 @@ jobs:
         uses: actions/cache/restore@v4
         id: cache-uv-lock
         with:
-          key: uv-lock-resolved-${{ env.UV_RESOLUTION}}-${{hashFiles('pyproject.toml', 'uv.lock')}}
+          key: uv-lock-resolved-${{ env.UV_RESOLUTION }}
           restore-keys: |
             uv-lock-resolved-${{ env.UV_RESOLUTION }}
           path: uv.lock
           enableCrossOsArchive: true
 
-      - name: Lock dependencies
+      - name: Check if uv.lock changed
+        id: uv-lock-changed
+        continue-on-error: true
+        if: steps.cache-uv-lock.outputs.cache-hit == 'true' || steps.cache-uv-lock.outputs.cache-hit == 'false'
+        run: |
+            uv lock --check
 
+      - name: Lock dependencies
+        if: steps.uv-lock-changed.outcome == 'failure' || steps.cache-uv-lock.outputs.cache-hit != 'true' && steps.cache-uv-lock.outputs.cache-hit != 'false'
+        id: lock-uv-deps
         env:
-          UV_FROZEN: 0
+          UV_LOCKED: 0
         run: uv lock --refresh
 
       - uses: actions/cache/save@v4
-        if: steps.cache-uv-lock.outputs.cache-hit != 'true' && steps.cache-uv-lock.outputs.cache-hit != 'false'
+        if: steps.lock-uv-deps.outcome == 'success'  && steps.uv-lock-changed.outcome == 'failure'
         name: upload-uv-lock
         with:
-          key: uv-lock-resolved-${{ env.UV_RESOLUTION}}-${{hashFiles('pyproject.toml', 'uv.lock')}}
+          key: uv-lock-resolved-${{ env.UV_RESOLUTION}}-${{hashFiles('uv.lock')}}
           path: uv.lock
           enableCrossOsArchive: true
 
