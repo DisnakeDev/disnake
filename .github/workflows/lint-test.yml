@@ -156,7 +156,7 @@ jobs:
           uv-version: ${{ env.USE_UV_VERSION }}
 
       - name: Install dependencies
-        run: uv run --no-default-groups --group nox nox -s pyright --no-venv --install-only --force-python ${{ steps.setup-env.outputs.python-version }}
+        run: uv run noxfile.py -s pyright --no-venv --install-only --force-python ${{ steps.setup-env.outputs.python-version }}
 
       - name: Add .venv/bin to PATH
         run: dirname "$(uv python find)" >> $GITHUB_PATH
