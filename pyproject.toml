@@ -57,6 +57,8 @@ voice = [
 
 [dependency-groups]
 nox = [
+    # note: nox should be synced with nox.needs_version in noxfile.py
+    # and the pinned nox version in noxfile.py must be within these bounds
     "nox>=2025.5.1",
 ]
 tools = [
@@ -101,7 +103,6 @@ docs = [
 
 [tool.uv]
 required-version = ">=0.8.4"
-default-groups = "all"
 
 [tool.nox]
 script-venv-backend = "uv|virtualenv"

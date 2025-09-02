@@ -284,6 +284,7 @@ def pyright(session: nox.Session) -> None:
             "test",  # tests/
             "nox",  # noxfile.py
             "docs",  # docs/
+            "tools",  # test_bot/ uses python-dotenv
             "codemod",  # scripts/
             "typing",  # pyright
         ],

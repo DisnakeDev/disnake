@@ -196,11 +196,11 @@ jobs:
 
       - name: Run slotscheck
         if: (success() || failure()) && steps.setup.outcome == 'success'
-        run: uv run nox -s slotscheck
+        run: uv run noxfile.py -s slotscheck
 
       - name: Run check-manifest
         if: (success() || failure()) && steps.setup.outcome == 'success'
-        run: uv run nox -s check-manifest
+        run: uv run noxfile.py -s check-manifest
 
       # This only runs if the previous steps were successful, no point in running it otherwise
       - name: Try building package
@@ -213,7 +213,7 @@ jobs:
       # run the libcst parsers and check for changes
       - name: libcst codemod
         run: |
-          uv run nox -s codemod -- run-all
+          uv run noxfile.py -s codemod -- run-all
           if [ -n "$(git status --porcelain)" ]; then
             echo "::error::Please run 'uv run nox -s codemod -- run-all' locally and commit the changes." >&2;
             echo "::group::git diff"
