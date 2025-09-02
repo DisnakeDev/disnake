@@ -52,8 +52,19 @@ from .enums import Locale
 
 if sys.version_info >= (3, 11):
     from inspect import iscoroutine as iscoroutine, iscoroutinefunction as iscoroutinefunction
+
+    def get_event_loop():
+        try:
+            return asyncio.get_running_loop()
+        except RuntimeError:
+            return asyncio.new_event_loop()
 else:
-    from asyncio import iscoroutine as iscoroutine, iscoroutinefunction as iscoroutinefunction
+    from asyncio import (
+        get_event_loop as get_event_loop,
+        iscoroutine as iscoroutine,
+        iscoroutinefunction as iscoroutinefunction,
+    )
+
 
 try:
     import orjson

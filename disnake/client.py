@@ -8,7 +8,6 @@ import signal
 import sys
 import traceback
 import types
-import warnings
 from datetime import datetime, timedelta
 from errno import ECONNRESET
 from typing import (
@@ -407,9 +406,7 @@ class Client:
         self.ws: DiscordWebSocket = None  # type: ignore
 
         if loop is None:
-            with warnings.catch_warnings():
-                warnings.simplefilter("ignore", DeprecationWarning)
-                self.loop: asyncio.AbstractEventLoop = asyncio.get_event_loop()
+            self.loop: asyncio.AbstractEventLoop = utils.get_event_loop()
         else:
             self.loop: asyncio.AbstractEventLoop = loop
 
