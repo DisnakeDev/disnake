@@ -28,7 +28,6 @@ env:
   UV_RESOLUTION: "highest"
   UV_LOCKED: 1
 
-
 jobs:
   lock-dependencies:
     # The only purpose of this is to create a lockfile, which will be cached
@@ -62,7 +61,7 @@ jobs:
         continue-on-error: true
         if: steps.cache-uv-lock.outputs.cache-hit == 'true' || steps.cache-uv-lock.outputs.cache-hit == 'false'
         run: |
-            uv lock --check
+          uv lock --check
 
       - name: Lock dependencies
         if: steps.uv-lock-changed.outcome == 'failure' || steps.cache-uv-lock.outputs.cache-hit != 'true' && steps.cache-uv-lock.outputs.cache-hit != 'false'
@@ -84,6 +83,8 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       test-python-versions: ${{ steps.set-matrix.outputs.test-python-versions }}
+      libcst-python-version: ${{ steps.set-matrix.outputs.libcst-python-version }}
+      misc-checks-python-version: ${{ steps.set-matrix.outputs.misc-checks-python-version }}
     steps:
       - uses: actions/checkout@v4
       - name: Install uv
@@ -91,12 +92,14 @@ jobs:
         with:
           version: ${{ env.USE_UV_VERSION }}
           enable-cache: true
+          python-version: 3.8
 
       - name: Determine Python versions to test and lint against
         id: set-matrix
         run: |
           echo test-python-versions=$(uv run noxfile.py -s test --list --json | jq -c '[.[].python]') | tee --append $GITHUB_OUTPUT
-
+          echo libcst-python-version=$(uv run noxfile.py -s codemod --list --json | jq -rc '[.[].python].[0]') | tee --append $GITHUB_OUTPUT
+          echo misc-checks-python-version=$(uv run noxfile.py -s test --list --json | jq -rc '[.[].python].[0]') | tee --append $GITHUB_OUTPUT
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -190,6 +193,7 @@ jobs:
   misc:
     runs-on: ubuntu-latest
     needs:
+      - determine-python-versions
       - lock-dependencies
       - lint
     steps:
@@ -199,25 +203,38 @@ jobs:
         id: setup
         uses: ./.github/actions/setup-env
         with:
-          python-version: 3.8
+          python-version: ${{ needs.determine-python-versions.outputs.misc-checks-python-version }}
           uv-version: ${{ env.USE_UV_VERSION }}
 
       - name: Run slotscheck
         if: (success() || failure()) && steps.setup.outcome == 'success'
         run: uv run noxfile.py -s slotscheck
 
-      - name: Run check-manifest
-        if: (success() || failure()) && steps.setup.outcome == 'success'
-        run: uv run noxfile.py -s check-manifest
-
-      # This only runs if the previous steps were successful, no point in running it otherwise
       - name: Try building package
+        if: (success() || failure()) && steps.setup.outcome == 'success'
         run: |
-          uvx --from=build pyproject-build
+          uv run noxfile.py -s build
           ls -la dist/
 
+      - name: Check the built package
+        run: |
           uvx twine~=6.1 check --strict dist/*
 
+  codemod:
+    runs-on: ubuntu-latest
+    needs:
+      - determine-python-versions
+      - lock-dependencies
+      - lint
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up environment
+        id: setup
+        uses: ./.github/actions/setup-env
+        with:
+          python-version: ${{ needs.determine-python-versions.outputs.libcst-python-version }}
+          uv-version: ${{ env.USE_UV_VERSION }}
       # run the libcst parsers and check for changes
       - name: libcst codemod
         run: |
@@ -288,6 +305,7 @@ jobs:
       - docs
       - pyright
       - misc
+      - codemod
       - pytest
 
     runs-on: ubuntu-latest

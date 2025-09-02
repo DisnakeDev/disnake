@@ -13,7 +13,7 @@ from __future__ import annotations
 import os
 import pathlib
 import sys
-from typing import Any, Dict, List, Sequence, Tuple
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 import nox
 
@@ -22,12 +22,12 @@ nox.needs_version = ">=2025.5.1"
 PYPROJECT = nox.project.load_toml()
 
 
-def use_min_python_of(version: str) -> str | None:
+def use_min_python_of(python: str, *, preferred: Optional[str] = None) -> str | None:
     """Use the minimum necessary python for this run, but if the environment is a specific venv, then use that one."""
-    major, minor = version.split(".")
+    major, minor = python.split(".")
     if sys.version_info < (int(major), int(minor)):
         # If the current Python version is less than the required version, use the required version
-        return f"{major}.{minor}"
+        return preferred or python
     return None
 
 
@@ -183,7 +183,7 @@ def build(session: nox.Session) -> None:
     session.run("python", "-m", "build", "--outdir", "dist")
 
 
-@nox.session(python="3.13")
+@nox.session(python=use_min_python_of("3.11", preferred="3.13"))
 def autotyping(session: nox.Session) -> None:
     """Run autotyping.
 
@@ -252,7 +252,7 @@ def autotyping(session: nox.Session) -> None:
         )
 
 
-@nox.session(name="codemod", python=use_min_python_of("3.11"))
+@nox.session(name="codemod", python=use_min_python_of("3.11", preferred="3.13"))
 def codemod(session: nox.Session) -> None:
     """Run libcst codemods."""
     install_deps(
