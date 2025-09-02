@@ -38,7 +38,7 @@ from ..http import Route, set_attachments, to_multipart, to_multipart_with_attac
 from ..message import Message
 from ..mixins import Hashable
 from ..object import Object
-from ..ui.action_row import MessageUIComponent, components_to_dict
+from ..ui.action_row import normalize_components_to_dict
 from ..user import BaseUser, User
 
 __all__ = (
@@ -63,11 +63,12 @@ if TYPE_CHECKING:
     from ..http import Response
     from ..mentions import AllowedMentions
     from ..message import Attachment
+    from ..poll import Poll
     from ..state import ConnectionState
     from ..sticker import GuildSticker, StandardSticker, StickerItem
     from ..types.message import Message as MessagePayload
     from ..types.webhook import Webhook as WebhookPayload
-    from ..ui.action_row import Components
+    from ..ui._types import MessageComponents
     from ..ui.view import View
 
 MISSING = utils.MISSING
@@ -290,8 +291,9 @@ class AsyncWebhookAdapter:
         files: Optional[List[File]] = None,
         thread_id: Optional[int] = None,
         wait: bool = False,
+        with_components: bool = True,
     ) -> Response[Optional[MessagePayload]]:
-        params = {"wait": int(wait)}
+        params = {"wait": int(wait), "with_components": int(with_components)}
         if thread_id:
             params["thread_id"] = thread_id
 
@@ -507,10 +509,11 @@ def handle_message_parameters_dict(
     embed: Optional[Embed] = MISSING,
     embeds: List[Embed] = MISSING,
     view: Optional[View] = MISSING,
-    components: Optional[Components[MessageUIComponent]] = MISSING,
+    components: Optional[MessageComponents] = MISSING,
     allowed_mentions: Optional[AllowedMentions] = MISSING,
     previous_allowed_mentions: Optional[AllowedMentions] = None,
     stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = MISSING,
+    poll: Poll = MISSING,
     # these parameters are exclusive to webhooks in forum/media channels
     thread_name: str = MISSING,
     applied_tags: Sequence[Snowflake] = MISSING,
@@ -539,10 +542,23 @@ def handle_message_parameters_dict(
 
     if content is not MISSING:
         payload["content"] = str(content) if content is not None else None
+
+    is_v2 = False
     if view is not MISSING:
         payload["components"] = view.to_components() if view is not None else []
     if components is not MISSING:
-        payload["components"] = [] if components is None else components_to_dict(components)
+        if components:
+            payload["components"], is_v2 = normalize_components_to_dict(components)
+        else:
+            payload["components"] = []
+
+    # set cv2 flag automatically
+    if is_v2:
+        flags = MessageFlags._from_value(0 if flags is MISSING else flags.value)
+        flags.is_components_v2 = True
+    # components v2 cannot be used with other content fields
+    if flags and flags.is_components_v2 and (content or embeds or stickers or poll):
+        raise ValueError("Cannot use v2 components with content, embeds, stickers, or polls")
 
     if attachments is not MISSING:
         payload["attachments"] = [] if attachments is None else [a.to_dict() for a in attachments]
@@ -579,6 +595,8 @@ def handle_message_parameters_dict(
         payload["thread_name"] = thread_name
     if applied_tags:
         payload["applied_tags"] = [t.id for t in applied_tags]
+    if poll is not MISSING:
+        payload["poll"] = poll._to_dict()
 
     return DictPayloadParameters(payload=payload, files=files)
 
@@ -598,10 +616,11 @@ def handle_message_parameters(
     embed: Optional[Embed] = MISSING,
     embeds: List[Embed] = MISSING,
     view: Optional[View] = MISSING,
-    components: Optional[Components[MessageUIComponent]] = MISSING,
+    components: Optional[MessageComponents] = MISSING,
     allowed_mentions: Optional[AllowedMentions] = MISSING,
     previous_allowed_mentions: Optional[AllowedMentions] = None,
     stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = MISSING,
+    poll: Poll = MISSING,
     # these parameters are exclusive to webhooks in forum/media channels
     thread_name: str = MISSING,
     applied_tags: Sequence[Snowflake] = MISSING,
@@ -626,6 +645,7 @@ def handle_message_parameters(
         stickers=stickers,
         thread_name=thread_name,
         applied_tags=applied_tags,
+        poll=poll,
     )
 
     if params.files:
@@ -783,7 +803,8 @@ class WebhookMessage(Message):
         files: List[File] = MISSING,
         attachments: Optional[List[Attachment]] = MISSING,
         view: Optional[View] = MISSING,
-        components: Optional[Components[MessageUIComponent]] = MISSING,
+        components: Optional[MessageComponents] = MISSING,
+        flags: MessageFlags = MISSING,
         allowed_mentions: Optional[AllowedMentions] = None,
     ) -> WebhookMessage:
         """|coro|
@@ -848,6 +869,19 @@ class WebhookMessage(Message):
 
             .. versionadded:: 2.4
 
+            .. note::
+                Passing v2 components here automatically sets the :attr:`~MessageFlags.is_components_v2` flag.
+                Setting this flag cannot be reverted. Note that this also disables the
+                ``content`` and ``embeds`` fields.
+                If the message previously had any of these fields set, you must set them to ``None``.
+
+        flags: :class:`MessageFlags`
+            The new flags to set for this message. Overrides existing flags.
+            Only :attr:`~MessageFlags.suppress_embeds` and :attr:`~MessageFlags.is_components_v2`
+            are supported.
+
+            .. versionadded:: 2.11
+
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
             See :meth:`.abc.Messageable.send` for more information.
@@ -859,9 +893,10 @@ class WebhookMessage(Message):
         Forbidden
             Edited a message that is not yours.
         TypeError
-            You specified both ``embed`` and ``embeds`` or ``file`` and ``files``
+            You specified both ``embed`` and ``embeds`` or ``file`` and ``files``.
         ValueError
-            The length of ``embeds`` was invalid
+            The length of ``embeds`` was invalid, or
+            you tried to send v2 components together with ``content`` or ``embeds``.
         WebhookTokenMissing
             There was no token associated with this webhook.
 
@@ -885,6 +920,7 @@ class WebhookMessage(Message):
             attachments=attachments,
             view=view,
             components=components,
+            flags=flags,
             allowed_mentions=allowed_mentions,
             thread=self._state._thread,
         )
@@ -1494,14 +1530,14 @@ class Webhook(BaseWebhook):
         embeds: List[Embed] = ...,
         allowed_mentions: AllowedMentions = ...,
         view: View = ...,
-        components: Components[MessageUIComponent] = ...,
+        components: MessageComponents = ...,
+        poll: Poll = ...,
         thread: Snowflake = ...,
         thread_name: str = ...,
         applied_tags: Sequence[Snowflake] = ...,
         wait: Literal[True],
         delete_after: float = ...,
-    ) -> WebhookMessage:
-        ...
+    ) -> WebhookMessage: ...
 
     @overload
     async def send(
@@ -1520,14 +1556,14 @@ class Webhook(BaseWebhook):
         embeds: List[Embed] = ...,
         allowed_mentions: AllowedMentions = ...,
         view: View = ...,
-        components: Components[MessageUIComponent] = ...,
+        components: MessageComponents = ...,
+        poll: Poll = ...,
         thread: Snowflake = ...,
         thread_name: str = ...,
         applied_tags: Sequence[Snowflake] = ...,
         wait: Literal[False] = ...,
         delete_after: float = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     async def send(
         self,
@@ -1545,12 +1581,13 @@ class Webhook(BaseWebhook):
         embeds: List[Embed] = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         view: View = MISSING,
-        components: Components[MessageUIComponent] = MISSING,
+        components: MessageComponents = MISSING,
         thread: Snowflake = MISSING,
         thread_name: str = MISSING,
         applied_tags: Sequence[Snowflake] = MISSING,
         wait: bool = False,
         delete_after: float = MISSING,
+        poll: Poll = MISSING,
     ) -> Optional[WebhookMessage]:
         """|coro|
 
@@ -1626,6 +1663,15 @@ class Webhook(BaseWebhook):
 
             .. versionadded:: 2.4
 
+            .. note::
+                Passing v2 components here automatically sets the :attr:`~MessageFlags.is_components_v2` flag.
+                Setting this flag cannot be reverted. Note that this also disables the
+                ``content``, ``embeds``, and ``poll`` fields.
+
+            .. note::
+                Non-application-owned webhooks can only send non-interactive components,
+                e.g. link buttons or v2 layout components.
+
         thread: :class:`~disnake.abc.Snowflake`
             The thread to send this message to.
 
@@ -1669,13 +1715,19 @@ class Webhook(BaseWebhook):
 
         flags: :class:`MessageFlags`
             The flags to set for this message.
-            Only :attr:`~MessageFlags.suppress_embeds`, :attr:`~MessageFlags.ephemeral`
-            and :attr:`~MessageFlags.suppress_notifications` are supported.
+            Only :attr:`~MessageFlags.suppress_embeds`, :attr:`~MessageFlags.ephemeral`,
+            :attr:`~MessageFlags.suppress_notifications`, and :attr:`~MessageFlags.is_components_v2`
+            are supported.
 
             If parameters ``suppress_embeds`` or ``ephemeral`` are provided,
             they will override the corresponding setting of this ``flags`` parameter.
 
             .. versionadded:: 2.9
+
+        poll: :class:`Poll`
+            The poll to send with the message.
+
+            .. versionadded:: 2.10
 
         Raises
         ------
@@ -1694,7 +1746,8 @@ class Webhook(BaseWebhook):
         WebhookTokenMissing
             There was no token associated with this webhook.
         ValueError
-            The length of ``embeds`` was invalid.
+            The length of ``embeds`` was invalid, or
+            you tried to send v2 components together with ``content``, ``embeds``, or ``poll``.
 
         Returns
         -------
@@ -1749,6 +1802,7 @@ class Webhook(BaseWebhook):
             applied_tags=applied_tags,
             allowed_mentions=allowed_mentions,
             previous_allowed_mentions=previous_mentions,
+            poll=poll,
         )
 
         adapter = async_context.get()
@@ -1840,7 +1894,8 @@ class Webhook(BaseWebhook):
         files: List[File] = MISSING,
         attachments: Optional[List[Attachment]] = MISSING,
         view: Optional[View] = MISSING,
-        components: Optional[Components[MessageUIComponent]] = MISSING,
+        components: Optional[MessageComponents] = MISSING,
+        flags: MessageFlags = MISSING,
         allowed_mentions: Optional[AllowedMentions] = None,
         thread: Optional[Snowflake] = None,
     ) -> WebhookMessage:
@@ -1910,14 +1965,29 @@ class Webhook(BaseWebhook):
 
             .. versionadded:: 2.0
 
-        components: |components_type|
+        components: Optional[|components_type|]
             A list of components to update this message with. This cannot be mixed with ``view``.
+            If ``None`` is passed then the components are removed.
 
             .. versionadded:: 2.4
+
+            .. note::
+                Passing v2 components here automatically sets the :attr:`~MessageFlags.is_components_v2` flag.
+                Setting this flag cannot be reverted. Note that this also disables the
+                ``content`` and ``embeds`` fields.
+                If the message previously had any of these fields set, you must set them to ``None``.
+
+        flags: :class:`MessageFlags`
+            The new flags to set for this message. Overrides existing flags.
+            Only :attr:`~MessageFlags.suppress_embeds` and :attr:`~MessageFlags.is_components_v2`
+            are supported.
+
+            .. versionadded:: 2.11
 
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
             See :meth:`.abc.Messageable.send` for more information.
+
         thread: Optional[:class:`~disnake.abc.Snowflake`]
             The thread the message is in, if any.
 
@@ -1935,7 +2005,8 @@ class Webhook(BaseWebhook):
         WebhookTokenMissing
             There was no token associated with this webhook.
         ValueError
-            The length of ``embeds`` was invalid
+            The length of ``embeds`` was invalid, or
+            you tried to send v2 components together with ``content`` or ``embeds``.
 
         Returns
         -------
@@ -1968,6 +2039,7 @@ class Webhook(BaseWebhook):
             embeds=embeds,
             view=view,
             components=components,
+            flags=flags,
             allowed_mentions=allowed_mentions,
             previous_allowed_mentions=previous_mentions,
         )

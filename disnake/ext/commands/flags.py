@@ -35,16 +35,16 @@ class CommandSyncFlags(BaseFlags):
             Checks if two CommandSyncFlags instances are not equal.
         .. describe:: x <= y
 
-            Checks if an CommandSyncFlags instance is a subset of another CommandSyncFlags instance.
+            Checks if a CommandSyncFlags instance is a subset of another CommandSyncFlags instance.
         .. describe:: x >= y
 
-            Checks if an CommandSyncFlags instance is a superset of another CommandSyncFlags instance.
+            Checks if a CommandSyncFlags instance is a superset of another CommandSyncFlags instance.
         .. describe:: x < y
 
-            Checks if an CommandSyncFlags instance is a strict subset of another CommandSyncFlags instance.
+            Checks if a CommandSyncFlags instance is a strict subset of another CommandSyncFlags instance.
         .. describe:: x > y
 
-            Checks if an CommandSyncFlags instance is a strict superset of another CommandSyncFlags instance.
+            Checks if a CommandSyncFlags instance is a strict superset of another CommandSyncFlags instance.
         .. describe:: x | y, x |= y
 
             Returns a new CommandSyncFlags instance with all enabled flags from both x and y.
@@ -100,13 +100,11 @@ class CommandSyncFlags(BaseFlags):
         sync_global_commands: bool = ...,
         sync_guild_commands: bool = ...,
         sync_on_cog_actions: bool = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     @_generated
-    def __init__(self: NoReturn) -> None:
-        ...
+    def __init__(self: NoReturn) -> None: ...
 
     def __init__(self, **kwargs: bool) -> None:
         self.value = all_flags_value(self.VALID_FLAGS)

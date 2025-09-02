@@ -1,1 +1,0 @@
-|commands| Fix erroneous :class:`LocalizationWarning`\s when using localized slash command parameters in cogs.

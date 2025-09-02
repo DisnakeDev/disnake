@@ -49,6 +49,7 @@ __all__ = (
     "BadInviteArgument",
     "EmojiNotFound",
     "GuildStickerNotFound",
+    "GuildSoundboardSoundNotFound",
     "GuildScheduledEventNotFound",
     "PartialEmojiConversionFailure",
     "BadBoolArgument",
@@ -497,6 +498,24 @@ class GuildStickerNotFound(BadArgument):
     def __init__(self, argument: str) -> None:
         self.argument: str = argument
         super().__init__(f'Sticker "{argument}" not found.')
+
+
+class GuildSoundboardSoundNotFound(BadArgument):
+    """Exception raised when the bot can not find the soundboard sound.
+
+    This inherits from :exc:`BadArgument`
+
+    .. versionadded:: 2.10
+
+    Attributes
+    ----------
+    argument: :class:`str`
+        The soundboard sound supplied by the caller that was not found
+    """
+
+    def __init__(self, argument: str) -> None:
+        self.argument: str = argument
+        super().__init__(f'Soundboard sound "{argument}" not found.')
 
 
 class GuildScheduledEventNotFound(BadArgument):

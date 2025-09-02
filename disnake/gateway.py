@@ -62,22 +62,18 @@ if TYPE_CHECKING:
     T = TypeVar("T")
 
     class DispatchFunc(Protocol):
-        def __call__(self, event: str, *args: Any) -> None:
-            ...
+        def __call__(self, event: str, *args: Any) -> None: ...
 
     class GatewayErrorFunc(Protocol):
         async def __call__(
             self, event: str, data: Any, shard_id: Optional[int], exc: Exception, /
-        ) -> None:
-            ...
+        ) -> None: ...
 
     class CallHooksFunc(Protocol):
-        async def __call__(self, key: str, *args: Any, **kwargs: Any) -> None:
-            ...
+        async def __call__(self, key: str, *args: Any, **kwargs: Any) -> None: ...
 
     class HookFunc(Protocol):
-        async def __call__(self, *args: Any) -> None:
-            ...
+        async def __call__(self, *args: Any) -> None: ...
 
 
 _log = logging.getLogger(__name__)
@@ -280,14 +276,11 @@ class HeartbeatWebSocket(Protocol):
     loop: asyncio.AbstractEventLoop
     _max_heartbeat_timeout: float
 
-    async def close(self, code: int) -> None:
-        ...
+    async def close(self, code: int) -> None: ...
 
-    async def send_heartbeat(self, data: HeartbeatCommand) -> None:
-        ...
+    async def send_heartbeat(self, data: HeartbeatCommand) -> None: ...
 
-    def get_heartbeat_data(self) -> Optional[int]:
-        ...
+    def get_heartbeat_data(self) -> Optional[int]: ...
 
 
 class DiscordWebSocket:
@@ -687,6 +680,21 @@ class DiscordWebSocket:
         return float("inf") if heartbeat is None else heartbeat.latency
 
     def _can_handle_close(self) -> bool:
+        # bandaid fix for https://github.com/aio-libs/aiohttp/issues/8138
+        # tl;dr: on aiohttp >= 3.9.0 and python < 3.11.0, aiohttp returns close code 1000 (OK)
+        # on abrupt connection loss, not 1006 (ABNORMAL_CLOSURE) like one would expect, ultimately
+        # due to faulty ssl lifecycle handling in cpython.
+        # If we end up in a situation where the close code is 1000 but we didn't
+        # initiate the closure (i.e. `self._close_code` isn't set), assume this has happened and
+        # try to reconnect.
+        if self._close_code is None and self.socket.close_code == 1000:
+            _log.info(
+                "Websocket remote in shard ID %s closed with %s. Assuming the connection dropped.",
+                self.shard_id,
+                self.socket.close_code,
+            )
+            return True  # consider this a reconnectable close code
+
         code = self._close_code or self.socket.close_code
         return code not in (1000, 4004, 4010, 4011, 4012, 4013, 4014)
 
@@ -1038,7 +1046,7 @@ class DiscordVoiceWebSocket:
         state.port = struct.unpack_from(">H", recv, len(recv) - 2)[0]
         _log.debug("detected ip: %s port: %s", state.ip, state.port)
 
-        # there *should* always be at least one supported mode (xsalsa20_poly1305)
+        # there *should* always be at least one supported mode
         modes: List[SupportedModes] = [
             mode for mode in data["modes"] if mode in self._connection.supported_modes
         ]

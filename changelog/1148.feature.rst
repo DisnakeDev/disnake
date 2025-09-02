@@ -1,1 +1,0 @@
-Add :attr:`Locale.es_LATAM` locale.

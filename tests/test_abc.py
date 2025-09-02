@@ -156,12 +156,11 @@ class TestGuildChannelEdit:
 
 class TestUserProtocol:
     def _test_typing_assignable(self) -> None:
-        def handle_abc_user(user: disnake.abc.User) -> None:
-            ...
+        def handle_abc_user(user: disnake.abc.User) -> None: ...
 
         # All of these should match the abc.User protocol and thus type-check correctly
         # (they could just inherit from the protocol to ensure correct implementation,
         # but we really only want structural (i.e. implicit) subtyping)
-        handle_abc_user(cast(disnake.User, ...))
-        handle_abc_user(cast(disnake.ClientUser, ...))
-        handle_abc_user(cast(disnake.Member, ...))
+        handle_abc_user(cast("disnake.User", ...))
+        handle_abc_user(cast("disnake.ClientUser", ...))
+        handle_abc_user(cast("disnake.Member", ...))

@@ -1,0 +1,1 @@
+|tasks| Correctly handle :meth:`Loop.change_interval <ext.tasks.Loop.change_interval>` when called from :meth:`~ext.tasks.Loop.before_loop` or through other means before initial loop run.

@@ -28,6 +28,7 @@ import disnake
 from disnake.app_commands import ApplicationCommand, Option
 from disnake.custom_warnings import SyncWarning
 from disnake.enums import ApplicationCommandType
+from disnake.flags import ApplicationInstallTypes, InteractionContextTypes
 from disnake.utils import warn_deprecated
 
 from . import errors
@@ -148,6 +149,8 @@ class InteractionBotBase(CommonBotBase):
         sync_commands_debug: bool = MISSING,
         sync_commands_on_cog_unload: bool = MISSING,
         test_guilds: Optional[Sequence[int]] = None,
+        default_install_types: Optional[ApplicationInstallTypes] = None,
+        default_contexts: Optional[InteractionContextTypes] = None,
         **options: Any,
     ) -> None:
         if test_guilds and not all(isinstance(guild_id, int) for guild_id in test_guilds):
@@ -198,6 +201,9 @@ class InteractionBotBase(CommonBotBase):
 
         self._command_sync_flags = command_sync_flags
         self._sync_queued: asyncio.Lock = asyncio.Lock()
+
+        self._default_install_types = default_install_types
+        self._default_contexts = default_contexts
 
         self._slash_command_checks = []
         self._slash_command_check_once = []
@@ -285,6 +291,7 @@ class InteractionBotBase(CommonBotBase):
         if slash_command.name in self.all_slash_commands:
             raise CommandRegistrationError(slash_command.name)
 
+        slash_command._apply_defaults(self)
         slash_command.body.localize(self.i18n)
         self.all_slash_commands[slash_command.name] = slash_command
 
@@ -315,6 +322,7 @@ class InteractionBotBase(CommonBotBase):
         if user_command.name in self.all_user_commands:
             raise CommandRegistrationError(user_command.name)
 
+        user_command._apply_defaults(self)
         user_command.body.localize(self.i18n)
         self.all_user_commands[user_command.name] = user_command
 
@@ -347,6 +355,7 @@ class InteractionBotBase(CommonBotBase):
         if message_command.name in self.all_message_commands:
             raise CommandRegistrationError(message_command.name)
 
+        message_command._apply_defaults(self)
         message_command.body.localize(self.i18n)
         self.all_message_commands[message_command.name] = message_command
 
@@ -486,9 +495,11 @@ class InteractionBotBase(CommonBotBase):
         *,
         name: LocalizedOptional = None,
         description: LocalizedOptional = None,
-        dm_permission: Optional[bool] = None,
+        dm_permission: Optional[bool] = None,  # deprecated
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         nsfw: Optional[bool] = None,
+        install_types: Optional[ApplicationInstallTypes] = None,
+        contexts: Optional[InteractionContextTypes] = None,
         options: Optional[List[Option]] = None,
         guild_ids: Optional[Sequence[int]] = None,
         connectors: Optional[Dict[str, str]] = None,
@@ -519,6 +530,11 @@ class InteractionBotBase(CommonBotBase):
         dm_permission: :class:`bool`
             Whether this command can be used in DMs.
             Defaults to ``True``.
+
+            .. deprecated:: 2.10
+                Use ``contexts`` instead.
+                This is equivalent to the :attr:`.InteractionContextTypes.bot_dm` flag.
+
         default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]
             The default required permissions for this command.
             See :attr:`.ApplicationCommand.default_member_permissions` for details.
@@ -530,6 +546,23 @@ class InteractionBotBase(CommonBotBase):
             Defaults to ``False``.
 
             .. versionadded:: 2.8
+
+        install_types: Optional[:class:`.ApplicationInstallTypes`]
+            The installation types where the command is available.
+            Defaults to :attr:`.ApplicationInstallTypes.guild` only.
+            Only available for global commands.
+
+            See :ref:`app_command_contexts` for details.
+
+            .. versionadded:: 2.10
+
+        contexts: Optional[:class:`.InteractionContextTypes`]
+            The interaction contexts where the command can be used.
+            Only available for global commands.
+
+            See :ref:`app_command_contexts` for details.
+
+            .. versionadded:: 2.10
 
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``
@@ -564,6 +597,8 @@ class InteractionBotBase(CommonBotBase):
                 dm_permission=dm_permission,
                 default_member_permissions=default_member_permissions,
                 nsfw=nsfw,
+                install_types=install_types,
+                contexts=contexts,
                 guild_ids=guild_ids,
                 connectors=connectors,
                 auto_sync=auto_sync,
@@ -579,9 +614,11 @@ class InteractionBotBase(CommonBotBase):
         self,
         *,
         name: LocalizedOptional = None,
-        dm_permission: Optional[bool] = None,
+        dm_permission: Optional[bool] = None,  # deprecated
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         nsfw: Optional[bool] = None,
+        install_types: Optional[ApplicationInstallTypes] = None,
+        contexts: Optional[InteractionContextTypes] = None,
         guild_ids: Optional[Sequence[int]] = None,
         auto_sync: Optional[bool] = None,
         extras: Optional[Dict[str, Any]] = None,
@@ -603,6 +640,11 @@ class InteractionBotBase(CommonBotBase):
         dm_permission: :class:`bool`
             Whether this command can be used in DMs.
             Defaults to ``True``.
+
+            .. deprecated:: 2.10
+                Use ``contexts`` instead.
+                This is equivalent to the :attr:`.InteractionContextTypes.bot_dm` flag.
+
         default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]
             The default required permissions for this command.
             See :attr:`.ApplicationCommand.default_member_permissions` for details.
@@ -614,6 +656,23 @@ class InteractionBotBase(CommonBotBase):
             Defaults to ``False``.
 
             .. versionadded:: 2.8
+
+        install_types: Optional[:class:`.ApplicationInstallTypes`]
+            The installation types where the command is available.
+            Defaults to :attr:`.ApplicationInstallTypes.guild` only.
+            Only available for global commands.
+
+            See :ref:`app_command_contexts` for details.
+
+            .. versionadded:: 2.10
+
+        contexts: Optional[:class:`.InteractionContextTypes`]
+            The interaction contexts where the command can be used.
+            Only available for global commands.
+
+            See :ref:`app_command_contexts` for details.
+
+            .. versionadded:: 2.10
 
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``.
@@ -635,13 +694,15 @@ class InteractionBotBase(CommonBotBase):
         """
 
         def decorator(
-            func: InteractionCommandCallback[CogT, UserCommandInteraction, P]
+            func: InteractionCommandCallback[CogT, UserCommandInteraction, P],
         ) -> InvokableUserCommand:
             result = user_command(
                 name=name,
                 dm_permission=dm_permission,
                 default_member_permissions=default_member_permissions,
                 nsfw=nsfw,
+                install_types=install_types,
+                contexts=contexts,
                 guild_ids=guild_ids,
                 auto_sync=auto_sync,
                 extras=extras,
@@ -656,9 +717,11 @@ class InteractionBotBase(CommonBotBase):
         self,
         *,
         name: LocalizedOptional = None,
-        dm_permission: Optional[bool] = None,
+        dm_permission: Optional[bool] = None,  # deprecated
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         nsfw: Optional[bool] = None,
+        install_types: Optional[ApplicationInstallTypes] = None,
+        contexts: Optional[InteractionContextTypes] = None,
         guild_ids: Optional[Sequence[int]] = None,
         auto_sync: Optional[bool] = None,
         extras: Optional[Dict[str, Any]] = None,
@@ -680,6 +743,11 @@ class InteractionBotBase(CommonBotBase):
         dm_permission: :class:`bool`
             Whether this command can be used in DMs.
             Defaults to ``True``.
+
+            .. deprecated:: 2.10
+                Use ``contexts`` instead.
+                This is equivalent to the :attr:`.InteractionContextTypes.bot_dm` flag.
+
         default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]
             The default required permissions for this command.
             See :attr:`.ApplicationCommand.default_member_permissions` for details.
@@ -691,6 +759,23 @@ class InteractionBotBase(CommonBotBase):
             Defaults to ``False``.
 
             .. versionadded:: 2.8
+
+        install_types: Optional[:class:`.ApplicationInstallTypes`]
+            The installation types where the command is available.
+            Defaults to :attr:`.ApplicationInstallTypes.guild` only.
+            Only available for global commands.
+
+            See :ref:`app_command_contexts` for details.
+
+            .. versionadded:: 2.10
+
+        contexts: Optional[:class:`.InteractionContextTypes`]
+            The interaction contexts where the command can be used.
+            Only available for global commands.
+
+            See :ref:`app_command_contexts` for details.
+
+            .. versionadded:: 2.10
 
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``
@@ -712,13 +797,15 @@ class InteractionBotBase(CommonBotBase):
         """
 
         def decorator(
-            func: InteractionCommandCallback[CogT, MessageCommandInteraction, P]
+            func: InteractionCommandCallback[CogT, MessageCommandInteraction, P],
         ) -> InvokableMessageCommand:
             result = message_command(
                 name=name,
                 dm_permission=dm_permission,
                 default_member_permissions=default_member_permissions,
                 nsfw=nsfw,
+                install_types=install_types,
+                contexts=contexts,
                 guild_ids=guild_ids,
                 auto_sync=auto_sync,
                 extras=extras,
@@ -1175,7 +1262,7 @@ class InteractionBotBase(CommonBotBase):
             message_commands = True
 
         def decorator(
-            func: Callable[[ApplicationCommandInteraction], Any]
+            func: Callable[[ApplicationCommandInteraction], Any],
         ) -> Callable[[ApplicationCommandInteraction], Any]:
             # T was used instead of Check to ensure the type matches on return
             self.add_app_command_check(

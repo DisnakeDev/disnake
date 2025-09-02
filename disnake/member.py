@@ -63,6 +63,7 @@ if TYPE_CHECKING:
         GuildVoiceState as GuildVoiceStatePayload,
         VoiceState as VoiceStatePayload,
     )
+    from .user import Collectibles
 
     VocalGuildChannel = Union[VoiceChannel, StageChannel]
 
@@ -272,6 +273,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         "_user",
         "_state",
         "_avatar",
+        "_banner",
         "_communication_disabled_until",
         "_flags",
         "_avatar_decoration_data",
@@ -294,6 +296,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         banner: Optional[Asset]
         accent_color: Optional[Colour]
         accent_colour: Optional[Colour]
+        collectibles: Collectibles
 
     @overload
     def __init__(
@@ -302,8 +305,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         data: Union[MemberWithUserPayload, GuildMemberUpdateEvent],
         guild: Guild,
         state: ConnectionState,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     def __init__(
@@ -313,8 +315,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         guild: Guild,
         state: ConnectionState,
         user_data: UserPayload,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     def __init__(
         self,
@@ -340,6 +341,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         self.nick: Optional[str] = data.get("nick")
         self.pending: bool = data.get("pending", False)
         self._avatar: Optional[str] = data.get("avatar")
+        self._banner: Optional[str] = data.get("banner")
         timeout_datetime = utils.parse_time(data.get("communication_disabled_until"))
         self._communication_disabled_until: Optional[datetime.datetime] = timeout_datetime
         self._flags: int = data.get("flags", 0)
@@ -385,11 +387,15 @@ class Member(disnake.abc.Messageable, _UserTag):
 
     @classmethod
     def _try_upgrade(
-        cls, *, data: UserWithMemberPayload, guild: Guild, state: ConnectionState
+        cls,
+        *,
+        data: Union[UserPayload, UserWithMemberPayload],
+        guild: Guild,
+        state: ConnectionState,
     ) -> Union[User, Self]:
         # A User object with a 'member' key
         try:
-            member_data = data.pop("member")
+            member_data = data.pop("member")  # type: ignore
         except KeyError:
             return state.create_user(data)
         else:
@@ -409,6 +415,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         self.activities = member.activities
         self._state = member._state
         self._avatar = member._avatar
+        self._banner = member._banner
         self._communication_disabled_until = member.current_timeout
         self._flags = member._flags
 
@@ -437,6 +444,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         self.premium_since = utils.parse_time(data.get("premium_since"))
         self._roles = utils.SnowflakeList(map(int, data["roles"]))
         self._avatar = data.get("avatar")
+        self._banner = data.get("banner")
         timeout_datetime = utils.parse_time(data.get("communication_disabled_until"))
         self._communication_disabled_until = timeout_datetime
         self._flags = data.get("flags", 0)
@@ -447,7 +455,8 @@ class Member(disnake.abc.Messageable, _UserTag):
     ) -> Optional[Tuple[User, User]]:
         self.activities = tuple(create_activity(a, state=self._state) for a in data["activities"])
         self._client_status = {
-            sys.intern(key): sys.intern(value) for key, value in data.get("client_status", {}).items()  # type: ignore
+            sys.intern(key): sys.intern(value)  # type: ignore
+            for key, value in data.get("client_status", {}).items()
         }
         self._client_status[None] = sys.intern(data["status"])
 
@@ -619,6 +628,21 @@ class Member(disnake.abc.Messageable, _UserTag):
             return None
         return Asset._from_guild_avatar(self._state, self.guild.id, self.id, self._avatar)
 
+    # TODO
+    # implement a `display_banner` property
+    # for more info on why this wasn't implemented read this discussion
+    # https://github.com/DisnakeDev/disnake/pull/1204#discussion_r1685773429
+    @property
+    def guild_banner(self) -> Optional[Asset]:
+        """Optional[:class:`Asset`]: Returns an :class:`Asset` for the guild banner
+        the member has. If unavailable, ``None`` is returned.
+
+        .. versionadded:: 2.10
+        """
+        if self._banner is None:
+            return None
+        return Asset._from_guild_banner(self._state, self.guild.id, self.id, self._banner)
+
     @property
     def activity(self) -> Optional[ActivityTypes]:
         """Optional[Union[:class:`BaseActivity`, :class:`Spotify`]]: Returns the primary
@@ -786,8 +810,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         *,
         clean_history_duration: Union[int, datetime.timedelta] = 86400,
         reason: Optional[str] = None,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     async def ban(
@@ -795,8 +818,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         *,
         delete_message_days: Literal[0, 1, 2, 3, 4, 5, 6, 7] = 1,
         reason: Optional[str] = None,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     async def ban(
         self,
@@ -1170,8 +1192,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         *,
         duration: Optional[Union[float, datetime.timedelta]],
         reason: Optional[str] = None,
-    ) -> Member:
-        ...
+    ) -> Member: ...
 
     @overload
     async def timeout(
@@ -1179,8 +1200,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         *,
         until: Optional[datetime.datetime],
         reason: Optional[str] = None,
-    ) -> Member:
-        ...
+    ) -> Member: ...
 
     async def timeout(
         self,

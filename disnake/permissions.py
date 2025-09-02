@@ -191,12 +191,14 @@ class Permissions(BaseFlags):
         moderate_members: bool = ...,
         move_members: bool = ...,
         mute_members: bool = ...,
+        pin_messages: bool = ...,
         priority_speaker: bool = ...,
         read_message_history: bool = ...,
         read_messages: bool = ...,
         request_to_speak: bool = ...,
         send_messages: bool = ...,
         send_messages_in_threads: bool = ...,
+        send_polls: bool = ...,
         send_tts_messages: bool = ...,
         send_voice_messages: bool = ...,
         speak: bool = ...,
@@ -215,16 +217,14 @@ class Permissions(BaseFlags):
         view_channel: bool = ...,
         view_creator_monetization_analytics: bool = ...,
         view_guild_insights: bool = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     @_generated
     def __init__(
         self,
         permissions: int = 0,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @_overload_with_permissions
     def __init__(self, permissions: int = 0, **kwargs: bool) -> None:
@@ -411,6 +411,9 @@ class Permissions(BaseFlags):
 
         .. versionchanged:: 2.10
             Moved :attr:`use_application_commands` permission to :attr:`apps`.
+
+        .. versionchanged:: 2.11
+            Added :attr:`pin_messages` permission.
         """
         return cls(
             send_messages=True,
@@ -428,6 +431,8 @@ class Permissions(BaseFlags):
             read_message_history=True,
             send_tts_messages=True,
             send_voice_messages=True,
+            pin_messages=True,
+            send_polls=True,
         )
 
     @classmethod
@@ -593,12 +598,14 @@ class Permissions(BaseFlags):
         moderate_members: bool = ...,
         move_members: bool = ...,
         mute_members: bool = ...,
+        pin_messages: bool = ...,
         priority_speaker: bool = ...,
         read_message_history: bool = ...,
         read_messages: bool = ...,
         request_to_speak: bool = ...,
         send_messages: bool = ...,
         send_messages_in_threads: bool = ...,
+        send_polls: bool = ...,
         send_tts_messages: bool = ...,
         send_voice_messages: bool = ...,
         speak: bool = ...,
@@ -617,15 +624,13 @@ class Permissions(BaseFlags):
         view_channel: bool = ...,
         view_creator_monetization_analytics: bool = ...,
         view_guild_insights: bool = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     @_generated
     def update(
         self,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @_overload_with_permissions
     def update(self, **kwargs: bool) -> None:
@@ -1059,6 +1064,14 @@ class Permissions(BaseFlags):
         return 1 << 46
 
     @flag_value
+    def send_polls(self) -> int:
+        """:class:`bool`: Returns ``True`` if a user can send polls.
+
+        .. versionadded:: 2.10
+        """
+        return 1 << 49
+
+    @flag_value
     def use_external_apps(self) -> int:
         """:class:`bool`: Returns ``True`` if a user's apps can send public responses.
 
@@ -1069,6 +1082,14 @@ class Permissions(BaseFlags):
         .. versionadded:: 2.10
         """
         return 1 << 50
+
+    @flag_value
+    def pin_messages(self) -> int:
+        """:class:`bool`: Returns ``True`` if a user can pin and unpin messages.
+
+        .. versionadded:: 2.11
+        """
+        return 1 << 51
 
 
 def _augment_from_permissions(cls):
@@ -1169,12 +1190,14 @@ class PermissionOverwrite:
         moderate_members: Optional[bool]
         move_members: Optional[bool]
         mute_members: Optional[bool]
+        pin_messages: Optional[bool]
         priority_speaker: Optional[bool]
         read_message_history: Optional[bool]
         read_messages: Optional[bool]
         request_to_speak: Optional[bool]
         send_messages: Optional[bool]
         send_messages_in_threads: Optional[bool]
+        send_polls: Optional[bool]
         send_tts_messages: Optional[bool]
         send_voice_messages: Optional[bool]
         speak: Optional[bool]
@@ -1236,12 +1259,14 @@ class PermissionOverwrite:
         moderate_members: Optional[bool] = ...,
         move_members: Optional[bool] = ...,
         mute_members: Optional[bool] = ...,
+        pin_messages: Optional[bool] = ...,
         priority_speaker: Optional[bool] = ...,
         read_message_history: Optional[bool] = ...,
         read_messages: Optional[bool] = ...,
         request_to_speak: Optional[bool] = ...,
         send_messages: Optional[bool] = ...,
         send_messages_in_threads: Optional[bool] = ...,
+        send_polls: Optional[bool] = ...,
         send_tts_messages: Optional[bool] = ...,
         send_voice_messages: Optional[bool] = ...,
         speak: Optional[bool] = ...,
@@ -1260,15 +1285,13 @@ class PermissionOverwrite:
         view_channel: Optional[bool] = ...,
         view_creator_monetization_analytics: Optional[bool] = ...,
         view_guild_insights: Optional[bool] = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     @_generated
     def __init__(
         self,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @_overload_with_permissions
     def __init__(self, **kwargs: Optional[bool]) -> None:
@@ -1370,12 +1393,14 @@ class PermissionOverwrite:
         moderate_members: Optional[bool] = ...,
         move_members: Optional[bool] = ...,
         mute_members: Optional[bool] = ...,
+        pin_messages: Optional[bool] = ...,
         priority_speaker: Optional[bool] = ...,
         read_message_history: Optional[bool] = ...,
         read_messages: Optional[bool] = ...,
         request_to_speak: Optional[bool] = ...,
         send_messages: Optional[bool] = ...,
         send_messages_in_threads: Optional[bool] = ...,
+        send_polls: Optional[bool] = ...,
         send_tts_messages: Optional[bool] = ...,
         send_voice_messages: Optional[bool] = ...,
         speak: Optional[bool] = ...,
@@ -1394,15 +1419,13 @@ class PermissionOverwrite:
         view_channel: Optional[bool] = ...,
         view_creator_monetization_analytics: Optional[bool] = ...,
         view_guild_insights: Optional[bool] = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     @_generated
     def update(
         self,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @_overload_with_permissions
     def update(self, **kwargs: Optional[bool]) -> None:

@@ -7,40 +7,118 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
+    ClassVar,
     Coroutine,
+    Dict,
     Generic,
     Optional,
     Protocol,
     Tuple,
+    Type,
     TypeVar,
     overload,
 )
 
-__all__ = ("Item", "WrappedComponent")
+__all__ = (
+    "UIComponent",
+    "WrappedComponent",
+    "Item",
+)
 
-ItemT = TypeVar("ItemT", bound="Item")
+I = TypeVar("I", bound="Item[Any]")
 V_co = TypeVar("V_co", bound="Optional[View]", covariant=True)
 
 if TYPE_CHECKING:
-    from typing_extensions import ParamSpec, Self
+    from typing_extensions import Self
 
     from ..client import Client
-    from ..components import NestedComponent
+    from ..components import ActionRowChildComponent, Component
     from ..enums import ComponentType
     from ..interactions import MessageInteraction
-    from ..types.components import Component as ComponentPayload
+    from ..types.components import ActionRowChildComponent as ActionRowChildComponentPayload
     from .view import View
 
-    ItemCallbackType = Callable[[Any, ItemT, MessageInteraction], Coroutine[Any, Any, Any]]
-
-else:
-    ParamSpec = TypeVar
+    ItemCallbackType = Callable[[V_co, I, MessageInteraction], Coroutine[Any, Any, Any]]
 
 ClientT = TypeVar("ClientT", bound="Client")
+UIComponentT = TypeVar("UIComponentT", bound="UIComponent")
 
 
-class WrappedComponent(ABC):
+def ensure_ui_component(obj: UIComponentT, name: str) -> UIComponentT:
+    if not isinstance(obj, UIComponent):
+        raise TypeError(f"{name} should be a valid UI component, got {type(obj).__name__}.")
+    return obj
+
+
+class UIComponent(ABC):
     """Represents the base UI component that all UI components inherit from.
+
+    The following classes implement this ABC:
+
+    - :class:`disnake.ui.ActionRow`
+    - :class:`disnake.ui.Button`
+    - subtypes of :class:`disnake.ui.BaseSelect` (:class:`disnake.ui.ChannelSelect`, :class:`disnake.ui.MentionableSelect`, :class:`disnake.ui.RoleSelect`, :class:`disnake.ui.StringSelect`, :class:`disnake.ui.UserSelect`)
+    - :class:`disnake.ui.TextInput`
+    - :class:`disnake.ui.Section`
+    - :class:`disnake.ui.TextDisplay`
+    - :class:`disnake.ui.Thumbnail`
+    - :class:`disnake.ui.MediaGallery`
+    - :class:`disnake.ui.File`
+    - :class:`disnake.ui.Separator`
+    - :class:`disnake.ui.Container`
+
+    .. versionadded:: 2.11
+    """
+
+    __repr_attributes__: ClassVar[Tuple[str, ...]]
+
+    @property
+    @abstractmethod
+    def _underlying(self) -> Component: ...
+
+    def __repr__(self) -> str:
+        attrs = " ".join(
+            f"{key.lstrip('_')}={getattr(self, key)!r}" for key in self.__repr_attributes__
+        )
+        return f"<{type(self).__name__} {attrs}>"
+
+    @property
+    def is_v2(self) -> bool:
+        return self._underlying.is_v2
+
+    @property
+    def type(self) -> ComponentType:
+        return self._underlying.type
+
+    @property
+    def id(self) -> int:
+        """:class:`int`: The numeric identifier for the component.
+        This is always present in components received from the API,
+        and unique within a message.
+
+        .. versionadded:: 2.11
+        """
+        return self._underlying.id
+
+    @id.setter
+    def id(self, value: int) -> None:
+        self._underlying.id = value
+
+    def to_component_dict(self) -> Dict[str, Any]:
+        return self._underlying.to_dict()
+
+    @classmethod
+    def from_component(cls, component: Component, /) -> Self:
+        return cls()
+
+
+# Essentially the same as the base `UIComponent`, with the addition of `width`.
+class WrappedComponent(UIComponent):
+    """Represents the base UI component that all :class:`ActionRow`\\-compatible
+    UI components inherit from.
+
+    This class adds more functionality on top of the :class:`UIComponent` base class,
+    specifically for action rows.
 
     The following classes implement this ABC:
 
@@ -51,32 +129,22 @@ class WrappedComponent(ABC):
     .. versionadded:: 2.4
     """
 
-    __repr_attributes__: Tuple[str, ...]
+    # the purpose of these two is just more precise typechecking compared to the base type
+    if TYPE_CHECKING:
+
+        @property
+        @abstractmethod
+        def _underlying(self) -> ActionRowChildComponent: ...
+
+        def to_component_dict(self) -> ActionRowChildComponentPayload: ...
 
     @property
     @abstractmethod
-    def _underlying(self) -> NestedComponent:
-        ...
-
-    @property
-    @abstractmethod
-    def width(self) -> int:
-        ...
-
-    def __repr__(self) -> str:
-        attrs = " ".join(f"{key}={getattr(self, key)!r}" for key in self.__repr_attributes__)
-        return f"<{type(self).__name__} {attrs}>"
-
-    @property
-    def type(self) -> ComponentType:
-        return self._underlying.type
-
-    def to_component_dict(self) -> ComponentPayload:
-        return self._underlying.to_dict()
+    def width(self) -> int: ...
 
 
 class Item(WrappedComponent, Generic[V_co]):
-    """Represents the base UI item that all UI items inherit from.
+    """Represents the base UI item that all interactive UI items inherit from.
 
     This class adds more functionality on top of the :class:`WrappedComponent` base class.
     This functionality mostly relates to :class:`disnake.ui.View`.
@@ -89,15 +157,13 @@ class Item(WrappedComponent, Generic[V_co]):
     .. versionadded:: 2.0
     """
 
-    __repr_attributes__: Tuple[str, ...] = ("row",)
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = ("row",)
 
     @overload
-    def __init__(self: Item[None]) -> None:
-        ...
+    def __init__(self: Item[None]) -> None: ...
 
     @overload
-    def __init__(self: Item[V_co]) -> None:
-        ...
+    def __init__(self: Item[V_co]) -> None: ...
 
     def __init__(self) -> None:
         self._view: V_co = None  # type: ignore
@@ -111,15 +177,11 @@ class Item(WrappedComponent, Generic[V_co]):
         # only called upon edit and we're mainly interested during initial creation time.
         self._provided_custom_id: bool = False
 
-    def refresh_component(self, component: NestedComponent) -> None:
+    def refresh_component(self, component: ActionRowChildComponent) -> None:
         return None
 
     def refresh_state(self, interaction: MessageInteraction) -> None:
         return None
-
-    @classmethod
-    def from_component(cls, component: NestedComponent) -> Self:
-        return cls()
 
     def is_dispatchable(self) -> bool:
         return False
@@ -160,29 +222,15 @@ class Item(WrappedComponent, Generic[V_co]):
         pass
 
 
-I_co = TypeVar("I_co", bound=Item, covariant=True)
+SelfViewT = TypeVar("SelfViewT", bound="Optional[View]")
 
 
-# while the decorators don't actually return a descriptor that matches this protocol,
+# While the decorators don't actually return a descriptor that matches this protocol,
 # this protocol ensures that type checkers don't complain about statements like `self.button.disabled = True`,
-# which work as `View.__init__` replaces the handler with the item
-class DecoratedItem(Protocol[I_co]):
+# which work as `View.__init__` replaces the handler with the item.
+class DecoratedItem(Protocol[I]):
     @overload
-    def __get__(self, obj: None, objtype: Any) -> ItemCallbackType:
-        ...
+    def __get__(self, obj: None, objtype: Type[SelfViewT]) -> ItemCallbackType[SelfViewT, I]: ...
 
     @overload
-    def __get__(self, obj: Any, objtype: Any) -> I_co:
-        ...
-
-
-T_co = TypeVar("T_co", covariant=True)
-P = ParamSpec("P")
-
-
-class Object(Protocol[T_co, P]):
-    def __new__(cls) -> T_co:
-        ...
-
-    def __init__(self, *args: P.args, **kwargs: P.kwargs) -> None:
-        ...
+    def __get__(self, obj: Any, objtype: Any) -> I: ...

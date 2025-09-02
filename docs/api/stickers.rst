@@ -60,46 +60,14 @@ Enumerations
 StickerType
 ~~~~~~~~~~~
 
-.. class:: StickerType
-
-    Represents the type of sticker.
-
-    .. versionadded:: 2.0
-
-    .. attribute:: standard
-
-        Represents a standard sticker that all users can use.
-
-    .. attribute:: guild
-
-        Represents a custom sticker created in a guild.
+.. autoclass:: StickerType()
+    :members:
 
 StickerFormatType
 ~~~~~~~~~~~~~~~~~
 
-.. class:: StickerFormatType
-
-    Represents the type of sticker images.
-
-    .. versionadded:: 1.6
-
-    .. attribute:: png
-
-        Represents a sticker with a png image.
-
-    .. attribute:: apng
-
-        Represents a sticker with an apng image.
-
-    .. attribute:: lottie
-
-        Represents a sticker with a lottie image.
-
-    .. attribute:: gif
-
-        Represents a sticker with a gif image.
-
-        .. versionadded:: 2.8
+.. autoclass:: StickerFormatType()
+    :members:
 
 Events
 ------

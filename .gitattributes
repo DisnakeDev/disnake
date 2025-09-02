@@ -1,0 +1,3 @@
+# force LF for pyproject to make hashFiles in CI consistent (windows <3)
+# (see https://github.com/actions/runner/issues/498)
+pyproject.toml text eol=lf

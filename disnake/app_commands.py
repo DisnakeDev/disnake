@@ -17,9 +17,10 @@ from .enums import (
     try_enum,
     try_enum_to_int,
 )
+from .flags import ApplicationInstallTypes, InteractionContextTypes
 from .i18n import Localized
 from .permissions import Permissions
-from .utils import MISSING, _get_as_snowflake, _maybe_cast
+from .utils import MISSING, _get_as_snowflake, _maybe_cast, deprecated, warn_deprecated
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -465,7 +466,7 @@ class Option:
             o.localize(store)
 
 
-class ApplicationCommand(ABC):
+class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventually
     """The base class for application commands.
 
     The following classes implement this ABC:
@@ -485,34 +486,44 @@ class ApplicationCommand(ABC):
 
         .. versionadded:: 2.5
 
-    dm_permission: :class:`bool`
-        Whether this command can be used in DMs.
-        Defaults to ``True``.
-
-        .. versionadded:: 2.5
-
     nsfw: :class:`bool`
         Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
         Defaults to ``False``.
 
         .. versionadded:: 2.8
+
+    install_types: Optional[:class:`ApplicationInstallTypes`]
+        The installation types where the command is available.
+        Defaults to :attr:`ApplicationInstallTypes.guild` only.
+        Only available for global commands.
+
+        .. versionadded:: 2.10
+
+    contexts: Optional[:class:`InteractionContextTypes`]
+        The interaction contexts where the command can be used.
+        Only available for global commands.
+
+        .. versionadded:: 2.10
     """
 
-    __repr_info__: ClassVar[Tuple[str, ...]] = (
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
         "type",
         "name",
-        "dm_permission",
-        "default_member_permisions",
+        "default_member_permissions",
         "nsfw",
+        "install_types",
+        "contexts",
     )
 
     def __init__(
         self,
         type: ApplicationCommandType,
         name: LocalizedRequired,
-        dm_permission: Optional[bool] = None,
+        dm_permission: Optional[bool] = None,  # deprecated
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         nsfw: Optional[bool] = None,
+        install_types: Optional[ApplicationInstallTypes] = None,
+        contexts: Optional[InteractionContextTypes] = None,
     ) -> None:
         self.type: ApplicationCommandType = enum_if_int(ApplicationCommandType, type)
 
@@ -520,8 +531,6 @@ class ApplicationCommand(ABC):
         self.name: str = name_loc.string
         self.name_localizations: LocalizationValue = name_loc.localizations
         self.nsfw: bool = False if nsfw is None else nsfw
-
-        self.dm_permission: bool = True if dm_permission is None else dm_permission
 
         self._default_member_permissions: Optional[int]
         if default_member_permissions is None:
@@ -534,10 +543,37 @@ class ApplicationCommand(ABC):
         else:
             self._default_member_permissions = default_member_permissions.value
 
+        # note: this defaults to `[0]` for syncing purposes only
+        self.install_types: Optional[ApplicationInstallTypes] = install_types
+        self.contexts: Optional[InteractionContextTypes] = contexts
+
+        # TODO(3.0): refactor
+        # These are for ext.commands defaults. It's quite ugly to do it this way,
+        # but since __eq__ and to_dict functionality is encapsulated here and can't be moved trivially,
+        # it'll do until the presumably soon-ish refactor of the entire commands framework.
+        self._default_install_types: Optional[ApplicationInstallTypes] = None
+        self._default_contexts: Optional[InteractionContextTypes] = None
+
         self._always_synced: bool = False
 
         # reset `default_permission` if set before
         self._default_permission: bool = True
+
+        self._dm_permission: Optional[bool] = dm_permission
+        if self._dm_permission is not None:
+            warn_deprecated(
+                "dm_permission is deprecated, use contexts instead.",
+                stacklevel=2,
+                # the call stack can have different depths, depending on how the
+                # user created the command, so we can't reliably set a fixed stacklevel
+                skip_internal_frames=True,
+            )
+
+            # if both are provided, raise an exception
+            # (n.b. these can be assigned to later, in which case no exception will be raised.
+            # assume the user knows what they're doing, in that case)
+            if self.contexts is not None:
+                raise ValueError("Cannot use both `dm_permission` and `contexts` at the same time")
 
     @property
     def default_member_permissions(self) -> Optional[Permissions]:
@@ -557,44 +593,129 @@ class ApplicationCommand(ABC):
             return None
         return Permissions(self._default_member_permissions)
 
+    @property
+    @deprecated("contexts")
+    def dm_permission(self) -> bool:
+        """
+        Whether this command can be used in DMs with the bot.
+
+        .. versionadded:: 2.5
+
+        .. deprecated:: 2.10
+            Use :attr:`contexts` instead.
+            This is equivalent to the :attr:`InteractionContextTypes.bot_dm` flag.
+        """
+        # a `None` value is equivalent to `True` here
+        return self._dm_permission is not False
+
+    @dm_permission.setter
+    @deprecated("contexts")
+    def dm_permission(self, value: bool) -> None:
+        self._dm_permission = value
+
     def __repr__(self) -> str:
-        attrs = " ".join(f"{key}={getattr(self, key)!r}" for key in self.__repr_info__)
+        attrs = " ".join(f"{key}={getattr(self, key)!r}" for key in self.__repr_attributes__)
         return f"<{type(self).__name__} {attrs}>"
 
     def __str__(self) -> str:
         return self.name
 
     def __eq__(self, other) -> bool:
-        return (
+        if not isinstance(other, ApplicationCommand):
+            return False
+
+        if not (
             self.type == other.type
             and self.name == other.name
             and self.name_localizations == other.name_localizations
             and self.nsfw == other.nsfw
             and self._default_member_permissions == other._default_member_permissions
-            # ignore `dm_permission` if comparing guild commands
-            and (
-                any(
-                    (isinstance(obj, _APIApplicationCommandMixin) and obj.guild_id)
-                    for obj in (self, other)
-                )
-                or self.dm_permission == other.dm_permission
-            )
             and self._default_permission == other._default_permission
-        )
+        ):
+            return False
+
+        # ignore global-only fields if comparing guild commands
+        if not any(
+            (isinstance(obj, _APIApplicationCommandMixin) and obj.guild_id) for obj in (self, other)
+        ):
+            if self._install_types_with_default != other._install_types_with_default:
+                return False
+
+            # `contexts` takes priority over `dm_permission`;
+            # ignore `dm_permission` if `contexts` is set,
+            # since the API returns both even when only `contexts` was provided
+            self_contexts = self._contexts_with_default
+            other_contexts = other._contexts_with_default
+            if self_contexts is not None or other_contexts is not None:
+                if self_contexts != other_contexts:
+                    return False
+            else:
+                # this is a bit awkward; `None` is equivalent to `True` in this case
+                if (self._dm_permission is not False) != (other._dm_permission is not False):
+                    return False
+
+        return True
+
+    @property
+    def _install_types_with_default(self) -> Optional[ApplicationInstallTypes]:
+        # if this is an api-provided command object, keep things as-is
+        if self.install_types is None and not isinstance(self, _APIApplicationCommandMixin):
+            if self._default_install_types is not None:
+                return self._default_install_types
+
+            # The purpose of this default is to avoid re-syncing after the updating to the new version,
+            # at least as long as the user hasn't enabled user installs in the dev portal
+            # (i.e. if they haven't, the api defaults to this value as well).
+            # Additionally, this provides consistency independent of the dev portal configuration,
+            # even if it might not be ideal.
+            # In an ideal world, we would make use of `application_info().install_types_config`.
+            return ApplicationInstallTypes(guild=True)
+
+        return self.install_types
+
+    @property
+    def _contexts_with_default(self) -> Optional[InteractionContextTypes]:
+        # (basically the same logic as `_install_types_with_default`, but without a fallback)
+        if (
+            self.contexts is None
+            and not isinstance(self, _APIApplicationCommandMixin)
+            and self._default_contexts is not None
+            # only use default if legacy `dm_permission` wasn't set
+            and self._dm_permission is None
+        ):
+            return self._default_contexts
+
+        return self.contexts
 
     def to_dict(self) -> EditApplicationCommandPayload:
         data: EditApplicationCommandPayload = {
             "type": try_enum_to_int(self.type),
             "name": self.name,
-            "dm_permission": self.dm_permission,
+            "default_member_permissions": (
+                str(self._default_member_permissions)
+                if self._default_member_permissions is not None
+                else None
+            ),
             "default_permission": True,
             "nsfw": self.nsfw,
         }
 
-        if self._default_member_permissions is None:
-            data["default_member_permissions"] = None
-        else:
-            data["default_member_permissions"] = str(self._default_member_permissions)
+        install_types = (
+            self._install_types_with_default.values
+            if self._install_types_with_default is not None
+            else None
+        )
+        data["integration_types"] = install_types
+
+        contexts = (
+            self._contexts_with_default.values if self._contexts_with_default is not None else None
+        )
+        data["contexts"] = contexts
+
+        # don't set `dm_permission` if `contexts` is set
+        if contexts is None:
+            data["dm_permission"] = self._dm_permission is not False
+
         if (loc := self.name_localizations.data) is not None:
             data["name_localizations"] = loc
 
@@ -605,15 +726,22 @@ class ApplicationCommand(ABC):
 
 
 class _APIApplicationCommandMixin:
-    __repr_info__ = ("id",)
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = ("id",)
 
     def _update_common(self, data: ApplicationCommandPayload) -> None:
+        if not isinstance(self, ApplicationCommand):
+            raise TypeError("_APIApplicationCommandMixin must be used with ApplicationCommand")
+
         self.id: int = int(data["id"])
         self.application_id: int = int(data["application_id"])
         self.guild_id: Optional[int] = _get_as_snowflake(data, "guild_id")
         self.version: int = int(data["version"])
+
         # deprecated, but kept until API stops returning this field
         self._default_permission = data.get("default_permission") is not False
+
+        # same deal, also deprecated.
+        self._dm_permission = data.get("dm_permission")
 
 
 class UserCommand(ApplicationCommand):
@@ -628,27 +756,38 @@ class UserCommand(ApplicationCommand):
 
         .. versionadded:: 2.5
 
-    dm_permission: :class:`bool`
-        Whether this command can be used in DMs.
-        Defaults to ``True``.
-
-        .. versionadded:: 2.5
-
     nsfw: :class:`bool`
         Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
         Defaults to ``False``.
 
         .. versionadded:: 2.8
+
+    install_types: Optional[:class:`ApplicationInstallTypes`]
+        The installation types where the command is available.
+        Defaults to :attr:`ApplicationInstallTypes.guild` only.
+        Only available for global commands.
+
+        .. versionadded:: 2.10
+
+    contexts: Optional[:class:`InteractionContextTypes`]
+        The interaction contexts where the command can be used.
+        Only available for global commands.
+
+        .. versionadded:: 2.10
     """
 
-    __repr_info__ = ("name", "dm_permission", "default_member_permissions")
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = tuple(
+        n for n in ApplicationCommand.__repr_attributes__ if n != "type"
+    )
 
     def __init__(
         self,
         name: LocalizedRequired,
-        dm_permission: Optional[bool] = None,
+        dm_permission: Optional[bool] = None,  # deprecated
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         nsfw: Optional[bool] = None,
+        install_types: Optional[ApplicationInstallTypes] = None,
+        contexts: Optional[InteractionContextTypes] = None,
     ) -> None:
         super().__init__(
             type=ApplicationCommandType.user,
@@ -656,6 +795,8 @@ class UserCommand(ApplicationCommand):
             dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
             nsfw=nsfw,
+            install_types=install_types,
+            contexts=contexts,
         )
 
 
@@ -673,15 +814,23 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
 
         .. versionadded:: 2.5
 
-    dm_permission: :class:`bool`
-        Whether this command can be used in DMs.
-
-        .. versionadded:: 2.5
-
     nsfw: :class:`bool`
         Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
 
         .. versionadded:: 2.8
+
+    install_types: Optional[:class:`ApplicationInstallTypes`]
+        The installation types where the command is available.
+        Defaults to :attr:`ApplicationInstallTypes.guild` only.
+        Only available for global commands.
+
+        .. versionadded:: 2.10
+
+    contexts: Optional[:class:`InteractionContextTypes`]
+        The interaction contexts where the command can be used.
+        Only available for global commands.
+
+        .. versionadded:: 2.10
 
     id: :class:`int`
         The user command's ID.
@@ -693,7 +842,10 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
         Autoincrementing version identifier updated during substantial record changes.
     """
 
-    __repr_info__ = UserCommand.__repr_info__ + _APIApplicationCommandMixin.__repr_info__
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
+        *UserCommand.__repr_attributes__,
+        *_APIApplicationCommandMixin.__repr_attributes__,
+    )
 
     @classmethod
     def from_dict(cls, data: ApplicationCommandPayload) -> Self:
@@ -703,9 +855,18 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
 
         self = cls(
             name=Localized(data["name"], data=data.get("name_localizations")),
-            dm_permission=data.get("dm_permission") is not False,
             default_member_permissions=_get_as_snowflake(data, "default_member_permissions"),
             nsfw=data.get("nsfw"),
+            install_types=(
+                ApplicationInstallTypes._from_values(install_types)
+                if (install_types := data.get("integration_types")) is not None
+                else None
+            ),
+            contexts=(
+                InteractionContextTypes._from_values(contexts)
+                if (contexts := data.get("contexts")) is not None
+                else None
+            ),
         )
         self._update_common(data)
         return self
@@ -723,27 +884,38 @@ class MessageCommand(ApplicationCommand):
 
         .. versionadded:: 2.5
 
-    dm_permission: :class:`bool`
-        Whether this command can be used in DMs.
-        Defaults to ``True``.
-
-        .. versionadded:: 2.5
-
     nsfw: :class:`bool`
         Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
         Defaults to ``False``.
 
         .. versionadded:: 2.8
+
+    install_types: Optional[:class:`ApplicationInstallTypes`]
+        The installation types where the command is available.
+        Defaults to :attr:`ApplicationInstallTypes.guild` only.
+        Only available for global commands.
+
+        .. versionadded:: 2.10
+
+    contexts: Optional[:class:`InteractionContextTypes`]
+        The interaction contexts where the command can be used.
+        Only available for global commands.
+
+        .. versionadded:: 2.10
     """
 
-    __repr_info__ = ("name", "dm_permission", "default_member_permissions")
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = tuple(
+        n for n in ApplicationCommand.__repr_attributes__ if n != "type"
+    )
 
     def __init__(
         self,
         name: LocalizedRequired,
-        dm_permission: Optional[bool] = None,
+        dm_permission: Optional[bool] = None,  # deprecated
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         nsfw: Optional[bool] = None,
+        install_types: Optional[ApplicationInstallTypes] = None,
+        contexts: Optional[InteractionContextTypes] = None,
     ) -> None:
         super().__init__(
             type=ApplicationCommandType.message,
@@ -751,6 +923,8 @@ class MessageCommand(ApplicationCommand):
             dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
             nsfw=nsfw,
+            install_types=install_types,
+            contexts=contexts,
         )
 
 
@@ -768,15 +942,23 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
 
         .. versionadded:: 2.5
 
-    dm_permission: :class:`bool`
-        Whether this command can be used in DMs.
-
-        .. versionadded:: 2.5
-
     nsfw: :class:`bool`
         Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
 
         .. versionadded:: 2.8
+
+    install_types: Optional[:class:`ApplicationInstallTypes`]
+        The installation types where the command is available.
+        Defaults to :attr:`ApplicationInstallTypes.guild` only.
+        Only available for global commands.
+
+        .. versionadded:: 2.10
+
+    contexts: Optional[:class:`InteractionContextTypes`]
+        The interaction contexts where the command can be used.
+        Only available for global commands.
+
+        .. versionadded:: 2.10
 
     id: :class:`int`
         The message command's ID.
@@ -788,7 +970,10 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
         Autoincrementing version identifier updated during substantial record changes.
     """
 
-    __repr_info__ = MessageCommand.__repr_info__ + _APIApplicationCommandMixin.__repr_info__
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
+        *MessageCommand.__repr_attributes__,
+        *_APIApplicationCommandMixin.__repr_attributes__,
+    )
 
     @classmethod
     def from_dict(cls, data: ApplicationCommandPayload) -> Self:
@@ -798,9 +983,18 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
 
         self = cls(
             name=Localized(data["name"], data=data.get("name_localizations")),
-            dm_permission=data.get("dm_permission") is not False,
             default_member_permissions=_get_as_snowflake(data, "default_member_permissions"),
             nsfw=data.get("nsfw"),
+            install_types=(
+                ApplicationInstallTypes._from_values(install_types)
+                if (install_types := data.get("integration_types")) is not None
+                else None
+            ),
+            contexts=(
+                InteractionContextTypes._from_values(contexts)
+                if (contexts := data.get("contexts")) is not None
+                else None
+            ),
         )
         self._update_common(data)
         return self
@@ -825,28 +1019,33 @@ class SlashCommand(ApplicationCommand):
 
         .. versionadded:: 2.5
 
-    dm_permission: :class:`bool`
-        Whether this command can be used in DMs.
-        Defaults to ``True``.
-
-        .. versionadded:: 2.5
-
     nsfw: :class:`bool`
         Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
         Defaults to ``False``.
 
         .. versionadded:: 2.8
 
+    install_types: Optional[:class:`ApplicationInstallTypes`]
+        The installation types where the command is available.
+        Defaults to :attr:`ApplicationInstallTypes.guild` only.
+        Only available for global commands.
+
+        .. versionadded:: 2.10
+
+    contexts: Optional[:class:`InteractionContextTypes`]
+        The interaction contexts where the command can be used.
+        Only available for global commands.
+
+        .. versionadded:: 2.10
+
     options: List[:class:`Option`]
         The list of options the slash command has.
     """
 
-    __repr_info__ = (
-        "name",
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
+        *tuple(n for n in ApplicationCommand.__repr_attributes__ if n != "type"),
         "description",
         "options",
-        "dm_permission",
-        "default_member_permissions",
     )
 
     def __init__(
@@ -854,9 +1053,11 @@ class SlashCommand(ApplicationCommand):
         name: LocalizedRequired,
         description: LocalizedRequired,
         options: Optional[List[Option]] = None,
-        dm_permission: Optional[bool] = None,
+        dm_permission: Optional[bool] = None,  # deprecated
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         nsfw: Optional[bool] = None,
+        install_types: Optional[ApplicationInstallTypes] = None,
+        contexts: Optional[InteractionContextTypes] = None,
     ) -> None:
         super().__init__(
             type=ApplicationCommandType.chat_input,
@@ -864,6 +1065,8 @@ class SlashCommand(ApplicationCommand):
             dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
             nsfw=nsfw,
+            install_types=install_types,
+            contexts=contexts,
         )
         _validate_name(self.name)
 
@@ -957,15 +1160,23 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
 
         .. versionadded:: 2.5
 
-    dm_permission: :class:`bool`
-        Whether this command can be used in DMs.
-
-        .. versionadded:: 2.5
-
     nsfw: :class:`bool`
         Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
 
         .. versionadded:: 2.8
+
+    install_types: Optional[:class:`ApplicationInstallTypes`]
+        The installation types where the command is available.
+        Defaults to :attr:`ApplicationInstallTypes.guild` only.
+        Only available for global commands.
+
+        .. versionadded:: 2.10
+
+    contexts: Optional[:class:`InteractionContextTypes`]
+        The interaction contexts where the command can be used.
+        Only available for global commands.
+
+        .. versionadded:: 2.10
 
     id: :class:`int`
         The slash command's ID.
@@ -979,7 +1190,10 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
         Autoincrementing version identifier updated during substantial record changes.
     """
 
-    __repr_info__ = SlashCommand.__repr_info__ + _APIApplicationCommandMixin.__repr_info__
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
+        *SlashCommand.__repr_attributes__,
+        *_APIApplicationCommandMixin.__repr_attributes__,
+    )
 
     @classmethod
     def from_dict(cls, data: ApplicationCommandPayload) -> Self:
@@ -993,9 +1207,18 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
             options=_maybe_cast(
                 data.get("options", MISSING), lambda x: list(map(Option.from_dict, x))
             ),
-            dm_permission=data.get("dm_permission") is not False,
             default_member_permissions=_get_as_snowflake(data, "default_member_permissions"),
             nsfw=data.get("nsfw"),
+            install_types=(
+                ApplicationInstallTypes._from_values(install_types)
+                if (install_types := data.get("integration_types")) is not None
+                else None
+            ),
+            contexts=(
+                InteractionContextTypes._from_values(contexts)
+                if (contexts := data.get("contexts")) is not None
+                else None
+            ),
         )
         self._update_common(data)
         return self

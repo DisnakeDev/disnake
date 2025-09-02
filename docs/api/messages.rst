@@ -51,7 +51,15 @@ InteractionReference
 
 .. attributetable:: InteractionReference
 
-.. autoclass:: InteractionReference
+.. autoclass:: InteractionReference()
+    :members:
+
+InteractionMetadata
+~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: InteractionMetadata
+
+.. autoclass:: InteractionMetadata()
     :members:
 
 RoleSubscriptionData
@@ -59,7 +67,7 @@ RoleSubscriptionData
 
 .. attributetable:: RoleSubscriptionData
 
-.. autoclass:: RoleSubscriptionData
+.. autoclass:: RoleSubscriptionData()
     :members:
 
 RawTypingEvent
@@ -92,6 +100,14 @@ RawMessageUpdateEvent
 .. attributetable:: RawMessageUpdateEvent
 
 .. autoclass:: RawMessageUpdateEvent()
+    :members:
+
+RawPollVoteActionEvent
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: RawPollVoteActionEvent
+
+.. autoclass:: RawPollVoteActionEvent()
     :members:
 
 RawReactionActionEvent
@@ -177,197 +193,58 @@ PartialMessage
 .. autoclass:: PartialMessage
     :members:
 
+Poll
+~~~~
+
+.. attributetable:: Poll
+
+.. autoclass:: Poll
+    :members:
+
+PollAnswer
+~~~~~~~~~~
+
+.. attributetable:: PollAnswer
+
+.. autoclass:: PollAnswer
+    :members:
+
+PollMedia
+~~~~~~~~~
+
+.. attributetable:: PollMedia
+
+.. autoclass:: PollMedia
+    :members:
+
+ForwardedMessage
+~~~~~~~~~~~~~~~~
+
+.. attributetable:: ForwardedMessage
+
+.. autoclass:: ForwardedMessage
+    :members:
+
 Enumerations
 ------------
 
 MessageType
 ~~~~~~~~~~~
 
-.. class:: MessageType
+.. autoclass:: MessageType()
+    :members:
 
-    Specifies the type of :class:`Message`. This is used to denote if a message
-    is to be interpreted as a system message or a regular message.
+PollLayoutType
+~~~~~~~~~~~~~~
 
-    .. collapse:: operations
+.. autoclass:: PollLayoutType()
+    :members:
 
-        .. describe:: x == y
+MessageReferenceType
+~~~~~~~~~~~~~~~~~~~~
 
-            Checks if two messages are equal.
-        .. describe:: x != y
-
-            Checks if two messages are not equal.
-
-    .. attribute:: default
-
-        The default message type. This is the same as regular messages.
-    .. attribute:: recipient_add
-
-        The system message when a user is added to a group private
-        message or a thread.
-    .. attribute:: recipient_remove
-
-        The system message when a user is removed from a group private
-        message or a thread.
-    .. attribute:: call
-
-        The system message denoting call state, e.g. missed call, started call,
-        etc.
-    .. attribute:: channel_name_change
-
-        The system message denoting that a channel's name has been changed.
-    .. attribute:: channel_icon_change
-
-        The system message denoting that a channel's icon has been changed.
-    .. attribute:: pins_add
-
-        The system message denoting that a pinned message has been added to a channel.
-    .. attribute:: new_member
-
-        The system message denoting that a new member has joined a Guild.
-
-    .. attribute:: premium_guild_subscription
-
-        The system message denoting that a member has "nitro boosted" a guild.
-    .. attribute:: premium_guild_tier_1
-
-        The system message denoting that a member has "nitro boosted" a guild
-        and it achieved level 1.
-    .. attribute:: premium_guild_tier_2
-
-        The system message denoting that a member has "nitro boosted" a guild
-        and it achieved level 2.
-    .. attribute:: premium_guild_tier_3
-
-        The system message denoting that a member has "nitro boosted" a guild
-        and it achieved level 3.
-    .. attribute:: channel_follow_add
-
-        The system message denoting that an announcement channel has been followed.
-
-        .. versionadded:: 1.3
-    .. attribute:: guild_stream
-
-        The system message denoting that a member is streaming in the guild.
-
-        .. versionadded:: 1.7
-    .. attribute:: guild_discovery_disqualified
-
-        The system message denoting that the guild is no longer eligible for Server
-        Discovery.
-
-        .. versionadded:: 1.7
-    .. attribute:: guild_discovery_requalified
-
-        The system message denoting that the guild has become eligible again for Server
-        Discovery.
-
-        .. versionadded:: 1.7
-    .. attribute:: guild_discovery_grace_period_initial_warning
-
-        The system message denoting that the guild has failed to meet the Server
-        Discovery requirements for one week.
-
-        .. versionadded:: 1.7
-    .. attribute:: guild_discovery_grace_period_final_warning
-
-        The system message denoting that the guild has failed to meet the Server
-        Discovery requirements for 3 weeks in a row.
-
-        .. versionadded:: 1.7
-    .. attribute:: thread_created
-
-        The system message denoting that a thread has been created. This is only
-        sent if the thread has been created from an older message. The period of time
-        required for a message to be considered old cannot be relied upon and is up to
-        Discord.
-
-        .. versionadded:: 2.0
-    .. attribute:: reply
-
-        The system message denoting that the author is replying to a message.
-
-        .. versionadded:: 2.0
-    .. attribute:: application_command
-
-        The system message denoting that an application (or "slash") command was executed.
-
-        .. versionadded:: 2.0
-    .. attribute:: guild_invite_reminder
-
-        The system message sent as a reminder to invite people to the guild.
-
-        .. versionadded:: 2.0
-    .. attribute:: thread_starter_message
-
-        The system message denoting the message in the thread that is the one that started the
-        thread's conversation topic.
-
-        .. versionadded:: 2.0
-    .. attribute:: context_menu_command
-
-        The system message denoting that a context menu command was executed.
-
-        .. versionadded:: 2.3
-    .. attribute:: auto_moderation_action
-
-        The system message denoting that an auto moderation action was executed.
-
-        .. versionadded:: 2.5
-    .. attribute:: role_subscription_purchase
-
-        The system message denoting that a role subscription was purchased.
-
-        .. versionadded:: 2.9
-    .. attribute:: interaction_premium_upsell
-
-        The system message for an application premium subscription upsell.
-
-        .. versionadded:: 2.8
-    .. attribute:: stage_start
-
-        The system message denoting the stage has been started.
-
-        .. versionadded:: 2.9
-    .. attribute:: stage_end
-
-        The system message denoting the stage has ended.
-
-        .. versionadded:: 2.9
-    .. attribute:: stage_speaker
-
-        The system message denoting a user has become a speaker.
-
-        .. versionadded:: 2.9
-    .. attribute:: stage_topic
-
-        The system message denoting the stage topic has been changed.
-
-        .. versionadded:: 2.9
-    .. attribute:: guild_application_premium_subscription
-
-        The system message denoting that a guild member has subscribed to an application.
-
-        .. versionadded:: 2.8
-    .. attribute:: guild_incident_alert_mode_enabled
-
-        The system message denoting that an admin enabled security actions.
-
-        .. versionadded:: 2.10
-    .. attribute:: guild_incident_alert_mode_disabled
-
-        The system message denoting that an admin disabled security actions.
-
-        .. versionadded:: 2.10
-    .. attribute:: guild_incident_report_raid
-
-        The system message denoting that an admin reported a raid.
-
-        .. versionadded:: 2.10
-    .. attribute:: guild_incident_report_false_alarm
-
-        The system message denoting that a raid report was a false alarm.
-
-        .. versionadded:: 2.10
+.. autoclass:: MessageReferenceType()
+    :members:
 
 Events
 ------
@@ -376,10 +253,14 @@ Events
 - :func:`on_message_edit(before, after) <disnake.on_message_edit>`
 - :func:`on_message_delete(message) <disnake.on_message_delete>`
 - :func:`on_bulk_message_delete(messages) <disnake.on_bulk_message_delete>`
+- :func:`on_poll_vote_add(member, answer) <disnake.on_poll_vote_add>`
+- :func:`on_poll_vote_removed(member, answer) <disnake.on_poll_vote_remove>`
 
 - :func:`on_raw_message_edit(payload) <disnake.on_raw_message_edit>`
 - :func:`on_raw_message_delete(payload) <disnake.on_raw_message_delete>`
 - :func:`on_raw_bulk_message_delete(payload) <disnake.on_raw_bulk_message_delete>`
+- :func:`on_raw_poll_vote_add(payload) <disnake.on_raw_poll_vote_add>`
+- :func:`on_raw_poll_vote_remove(payload) <disnake.on_raw_poll_vote_remove>`
 
 - :func:`on_reaction_add(reaction, user) <disnake.on_reaction_add>`
 - :func:`on_reaction_remove(reaction, user) <disnake.on_reaction_remove>`
