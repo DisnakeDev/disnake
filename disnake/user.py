@@ -522,10 +522,7 @@ class User(BaseUser, disnake.abc.Messageable):
         Specifies if the user is a system user (i.e. represents Discord officially).
     """
 
-    __slots__ = (
-        "__weakref__",
-        "_primary_guild",
-    )
+    __slots__ = ("__weakref__",)
 
     def __repr__(self) -> str:
         return (
@@ -587,7 +584,7 @@ class PrimaryGuild:
 
     Attributes
     ----------
-    identity_guild_id: Optional[:class:`int`]
+    guild_id: Optional[:class:`int`]
         The ID of the user's primary guild.
     identity_enabled: Optional[:class:`bool`]
         Whether the user is displaying the primary guild's server tag. This can be ``None``
@@ -598,7 +595,7 @@ class PrimaryGuild:
     """
 
     __slots__ = (
-        "identity_guild_id",
+        "guild_id",
         "identity_enabled",
         "tag",
         "_state",
@@ -607,7 +604,7 @@ class PrimaryGuild:
 
     def __init__(self, *, state: ConnectionState, data: UserPrimaryGuildPayload) -> None:
         self._state = state
-        self.identity_guild_id: Optional[int] = _get_as_snowflake(data, "identity_guild_id")
+        self.guild_id: Optional[int] = _get_as_snowflake(data, "identity_guild_id")
         self.identity_enabled: Optional[bool] = data.get("identity_enabled")
         self.tag: Optional[str] = data.get("tag")
         self._badge: Optional[str] = data.get("badge")
