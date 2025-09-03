@@ -25,7 +25,6 @@ defaults:
 
 env:
   # https://docs.astral.sh/uv/reference/environment/
-  UV_RESOLUTION: "highest"
   UV_LOCKED: 1
   UV_NO_SYNC: 1
 
@@ -37,6 +36,8 @@ jobs:
     # while still not needing to commit a lockfile to the repo, which is discouraged for libraries as per
     # https://pdm-project.org/en/latest/usage/lockfile/
     runs-on: ubuntu-latest
+    env:
+      UV_RESOLUTION: highest
     steps:
       - uses: actions/checkout@v4
 

@@ -11,6 +11,10 @@ inputs:
     description: Whether to download the uv lock cache.
     required: false
     default: 'true'
+  uv-resolution-strategy:
+    description: The uv resolution strategy to use. See https://docs.astral.sh/uv/reference/environment/#uv_resolution for details.
+    required: false
+    default: 'highest'
 outputs:
   python-version:
     description: The python version that was installed.
@@ -24,7 +28,7 @@ runs:
       if: ${{ inputs.use-cached-uv-lock != 'false' }}
       id: restore-uv-lock
       with:
-        key: uv-lock-resolved-${{ env.UV_RESOLUTION }}
+        key: uv-lock-resolved-${{ inputs.uv-resolution-strategy }}
         path: uv.lock
         restore-keys: |
           uv-lock-resolved-${{ env.UV_RESOLUTION }}
