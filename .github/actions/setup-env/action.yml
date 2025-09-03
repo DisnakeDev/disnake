@@ -11,6 +11,10 @@ inputs:
     description: Whether to download the uv lock cache.
     required: false
     default: 'true'
+  update-uv-lock:
+    description: Whether to update the uv lock file. Allows the cache to fail.
+    required: false
+    default: 'false'
   uv-resolution-strategy:
     description: The uv resolution strategy to use. See https://docs.astral.sh/uv/reference/environment/#uv_resolution for details.
     required: false
@@ -33,7 +37,7 @@ runs:
         restore-keys: |
           uv-lock-resolved-${{ env.UV_RESOLUTION }}
         enableCrossOsArchive: true
-        fail-on-cache-miss: true
+        fail-on-cache-miss: ${{ inputs.update-uv-lock != 'true' }}
 
     - name: Set up uv with python ${{ inputs.python-version }}
       id: setup-python
@@ -42,6 +46,14 @@ runs:
         python-version: ${{ inputs.python-version }}
         version: '0.8.14'
         enable-cache: true
+
+    - name: Lock dependencies
+      id: lock-uv-deps
+      if: ${{ inputs.update-uv-lock }}
+      shell: bash
+      env:
+        UV_LOCKED: 0
+      run: uv lock --refresh
 
     - name: Set python version
       id: python-version
