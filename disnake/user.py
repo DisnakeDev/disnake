@@ -608,9 +608,9 @@ class UserPrimaryGuild:
     def __init__(self, *, state: ConnectionState, data: UserPrimaryGuildPayload) -> None:
         self._state = state
         self.identity_guild_id: Optional[int] = _get_as_snowflake(data, "identity_guild_id")
-        self.identity_enabled: Optional[bool] = data["identity_enabled"]
-        self.tag: Optional[str] = data["tag"]
-        self._badge: Optional[str] = data["badge"]
+        self.identity_enabled: Optional[bool] = data.get("identity_enabled")
+        self.tag: Optional[str] = data.get("tag")
+        self._badge: Optional[str] = data.get("badge")
 
     def __repr__(self) -> str:
         return f"<UserPrimaryGuild identity_guild_id={self.identity_guild_id} identity_enabled={self.identity_enabled} tag={self.tag}>"
