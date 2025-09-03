@@ -57,6 +57,9 @@ except ModuleNotFoundError:
 else:
     HAS_ORJSON = True
 
+if TYPE_CHECKING:
+    from typing_extensions import Self
+
 
 __all__ = (
     "oauth_url",
@@ -689,7 +692,7 @@ class SnowflakeList(array.array):
 
         def __init__(self, data: Iterable[int], *, is_sorted: bool = False) -> None: ...
 
-    def __new__(cls, data: Iterable[int], *, is_sorted: bool = False):  # noqa: ANN204
+    def __new__(cls, data: Iterable[int], *, is_sorted: bool = False) -> Self:
         return array.array.__new__(cls, "Q", data if is_sorted else sorted(data))  # type: ignore
 
     def add(self, element: int) -> None:
