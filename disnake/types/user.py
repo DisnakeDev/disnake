@@ -54,7 +54,7 @@ class PartialUser(TypedDict):
     global_name: NotRequired[Optional[str]]
     avatar: Optional[str]
     collectibles: NotRequired[Optional[Collectibles]]
-    primary_guild: Optional[UserPrimaryGuild]
+    primary_guild: NotRequired[Optional[UserPrimaryGuild]]
 
 
 PremiumType = Literal[0, 1, 2]
