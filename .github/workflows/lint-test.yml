@@ -94,7 +94,7 @@ jobs:
       - name: Determine Python versions to check pyright
         id: set-matrix
         run: |
-          echo pyright-sessions=$(nox -s pyright -l --json | jq -c '[.[] | [.python, .session, .call_spec.pyright_group.directories]]') | tee --append $GITHUB_OUTPUT
+          echo pyright-sessions=$(nox -s pyright -l --json | jq -c '[.[] | [.python, .session, .call_spec.pyright_group.directories, .call_spec.pyright_group.experimental]]') | tee --append $GITHUB_OUTPUT
 
   pyright:
     runs-on: ubuntu-latest
@@ -108,7 +108,7 @@ jobs:
         include:
           - experimental: false
       fail-fast: false
-    continue-on-error: ${{ matrix.experimental }}
+    continue-on-error: ${{ matrix.session[3] || matrix.experimental }}
 
     steps:
       - uses: actions/checkout@v4
