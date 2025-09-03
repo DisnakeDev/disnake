@@ -56,6 +56,7 @@ class BaseUser(_UserTag):
         "_accent_colour",
         "_public_flags",
         "_state",
+        "_primary_guild",
     )
 
     if TYPE_CHECKING:
@@ -71,6 +72,7 @@ class BaseUser(_UserTag):
         _avatar_decoration_data: Optional[AvatarDecorationDataPayload]
         _accent_colour: Optional[int]
         _public_flags: int
+        _primary_guild: Optional[UserPrimaryGuildPayload]
 
     def __init__(
         self, *, state: ConnectionState, data: Union[UserPayload, PartialUserPayload]
@@ -112,6 +114,7 @@ class BaseUser(_UserTag):
         self._public_flags = data.get("public_flags", 0)
         self.bot = data.get("bot", False)
         self.system = data.get("system", False)
+        self._primary_guild = data.get("primary_guild")
 
     @classmethod
     def _copy(cls, user: BaseUser) -> Self:
@@ -289,6 +292,19 @@ class BaseUser(_UserTag):
             Added :attr:`.global_name`.
         """
         return self.global_name or self.name
+
+    @property
+    def primary_guild(self) -> Optional[PrimaryGuild]:
+        """Optional[:class:`PrimaryGuild`]: Returns the user's primary guild, if any.
+
+        .. versionadded:: 2.11
+        """
+        if self._primary_guild is not None:
+            return PrimaryGuild(
+                state=self._state,
+                data=self._primary_guild,
+            )
+        return None
 
     def mentioned_in(self, message: Message) -> bool:
         """Checks if the user is mentioned in the specified message.
@@ -516,26 +532,9 @@ class User(BaseUser, disnake.abc.Messageable):
             f" discriminator={self.discriminator!r} bot={self.bot}>"
         )
 
-    def _update(self, data: UserPayload) -> None:
-        super()._update(data)
-        self._primary_guild = data.get("primary_guild")
-
     async def _get_channel(self) -> DMChannel:
         ch = await self.create_dm()
         return ch
-
-    @property
-    def primary_guild(self) -> Optional[UserPrimaryGuild]:
-        """Optional[:class:`UserPrimaryGuild`]: Returns the user's primary guild, if any.
-
-        .. versionadded:: 2.11
-        """
-        if self._primary_guild is not None:
-            return UserPrimaryGuild(
-                state=self._state,
-                data=self._primary_guild,
-            )
-        return None
 
     @property
     def dm_channel(self) -> Optional[DMChannel]:
@@ -580,7 +579,7 @@ class User(BaseUser, disnake.abc.Messageable):
         return state.add_dm_channel(data)
 
 
-class UserPrimaryGuild:
+class PrimaryGuild:
     """Represents a user's primary guild.
 
     .. versionadded:: 2.11
