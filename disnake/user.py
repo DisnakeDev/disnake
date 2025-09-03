@@ -587,13 +587,13 @@ class UserPrimaryGuild:
 
     Attributes
     ----------
-    identity_guild_id: Optional[int]
+    identity_guild_id: Optional[:class:`int`]
         The ID of the user's primary guild.
-    identity_enabled: Optional[bool]
+    identity_enabled: Optional[:class:`bool`]
         Whether the user is displaying the primary guild's server tag. This can be ``None``
         if the system clears the identity, e.g. the server no longer supports tags. This will be ``False``
         if the user manually removes their tag.
-    tag: Optional[str]
+    tag: Optional[:class:`str`]
         The text of the user's server tag, up to 4 characters.
     """
 
