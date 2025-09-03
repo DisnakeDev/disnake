@@ -716,12 +716,12 @@ class PrimaryGuild:
         self._badge: Optional[str] = data.get("badge")
 
     def __repr__(self) -> str:
-        return f"<UserPrimaryGuild identity_guild_id={self.identity_guild_id} identity_enabled={self.identity_enabled} tag={self.tag}>"
+        return f"<UserPrimaryGuild identity_guild_id={self.guild_id} identity_enabled={self.identity_enabled} tag={self.tag}>"
 
     @property
     def badge(self) -> Optional[Asset]:
         """Optional[:class:`Asset`]: Returns the server tag badge, if any."""
         # if badge is not None identity_guild_id won't be None either
-        if self._badge is not None and self.identity_guild_id is not None:
-            return Asset._from_guild_tag_badge(self._state, self.identity_guild_id, self._badge)
+        if self._badge is not None and self.guild_id is not None:
+            return Asset._from_guild_tag_badge(self._state, self.guild_id, self._badge)
         return None
