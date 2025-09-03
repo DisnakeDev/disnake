@@ -79,13 +79,19 @@ jobs:
           path: uv.lock
           enableCrossOsArchive: true
 
-  # used for pyright and tests
-  determine-python-versions:
+  # used to determine which python versions to test against
+  # noxfile.py is the source of truth.
+  # except noxfile.py actually draws from pyproject.toml
+  # pyproject.toml's `project.requires-python` and `project.classifers`
+  # are our actual sources of truth.
+  python-versions:
     runs-on: ubuntu-latest
     outputs:
-      test-python-versions: ${{ steps.set-matrix.outputs.test-python-versions }}
-      libcst-python-version: ${{ steps.set-matrix.outputs.libcst-python-version }}
-      misc-checks-python-version: ${{ steps.set-matrix.outputs.misc-checks-python-version }}
+      docs: ${{ steps.set-matrix.outputs.docs }}
+      libcst: ${{ steps.set-matrix.outputs.libcst }}
+      min-python: ${{ steps.set-matrix.outputs.min-python }}
+      pyright: ${{ steps.set-matrix.outputs.tests }}
+      tests: ${{ steps.set-matrix.outputs.tests }}
     steps:
       - uses: actions/checkout@v4
       - name: Set up environment
@@ -97,9 +103,10 @@ jobs:
       - name: Determine Python versions to test and lint against
         id: set-matrix
         run: |
-          echo test-python-versions=$(uv run noxfile.py -s test --list --json | jq -c '[.[].python]') | tee --append $GITHUB_OUTPUT
-          echo libcst-python-version=$(uv run noxfile.py -s codemod --list --json | jq -rc '[.[].python].[0]') | tee --append $GITHUB_OUTPUT
-          echo misc-checks-python-version=$(uv run noxfile.py -s test --list --json | jq -rc '[.[].python].[0]') | tee --append $GITHUB_OUTPUT
+          echo min-python=$(uv run noxfile.py -s test --list --json | jq -rc '[.[].python].[0]') | tee --append $GITHUB_OUTPUT
+          echo docs=$(uv run noxfile.py -s docs --list --json | jq -rc '.[].python') | tee --append $GITHUB_OUTPUT
+          echo libcst=$(uv run noxfile.py -s codemod --list --json | jq -rc '[.[].python].[0]') | tee --append $GITHUB_OUTPUT
+          echo tests=$(uv run noxfile.py -s test --list --json | jq -c '[.[].python]') | tee --append $GITHUB_OUTPUT
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -122,12 +129,15 @@ jobs:
     needs:
       - lock-dependencies
       - lint
+      - python-versions
     steps:
       - uses: actions/checkout@v4
 
       - name: Set up environment
         id: setup-env
         uses: ./.github/actions/setup-env
+        with:
+          python-version: ${{ needs.python-versions.outputs.docs }}
 
       - name: Run sphinx-build
         run: uv run noxfile.py --force-python ${{ steps.setup-env.outputs.python-version }} -s docs -- --keep-going -W -w $GITHUB_STEP_SUMMARY
@@ -136,11 +146,11 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - lock-dependencies
-      - determine-python-versions
+      - python-versions
       - lint
     strategy:
       matrix:
-        python-version: ${{ fromJson(needs.determine-python-versions.outputs.test-python-versions) }}
+        python-version: ${{ fromJson(needs.python-versions.outputs.tests) }}
         experimental: [false]
       fail-fast: false
     continue-on-error: ${{ matrix.experimental }}
@@ -173,7 +183,7 @@ jobs:
           version: ${{ steps.pyright-version.outputs.pyright_version }}
           python-version: ${{ steps.setup-env.outputs.python-version }}
           python-platform: "Linux"
-          annotate: ${{ matrix.python-version == '3.8' }} # only add comments for one version
+          annotate: ${{ matrix.python-version == needs.python-versions.outputs.min-python }} # only add comments for one version
           warnings: true
 
       - name: Run pyright (Windows)
@@ -189,7 +199,7 @@ jobs:
   misc:
     runs-on: ubuntu-latest
     needs:
-      - determine-python-versions
+      - python-versions
       - lock-dependencies
       - lint
     steps:
@@ -199,7 +209,7 @@ jobs:
         id: setup
         uses: ./.github/actions/setup-env
         with:
-          python-version: ${{ needs.determine-python-versions.outputs.misc-checks-python-version }}
+          python-version: ${{ needs.python-versions.outputs.min-python }}
 
       - name: Run slotscheck
         if: (success() || failure()) && steps.setup.outcome == 'success'
@@ -218,7 +228,7 @@ jobs:
   codemod:
     runs-on: ubuntu-latest
     needs:
-      - determine-python-versions
+      - python-versions
       - lock-dependencies
       - lint
     steps:
@@ -228,7 +238,7 @@ jobs:
         id: setup
         uses: ./.github/actions/setup-env
         with:
-          python-version: ${{ needs.determine-python-versions.outputs.libcst-python-version }}
+          python-version: ${{ needs.python-versions.outputs.libcst }}
       # run the libcst parsers and check for changes
       - name: libcst codemod
         run: |
@@ -246,13 +256,13 @@ jobs:
   pytest:
     runs-on: ${{ matrix.os }}
     needs:
-      - determine-python-versions
+      - python-versions
       - lock-dependencies
       - lint
     strategy:
       matrix:
         os: ["windows-latest", "ubuntu-latest", "macos-latest"]
-        python-version: ${{ fromJson(needs.determine-python-versions.outputs.test-python-versions) }}
+        python-version: ${{ fromJson(needs.python-versions.outputs.tests) }}
         experimental: [false]
       fail-fast: true
     continue-on-error: ${{ matrix.experimental }}
