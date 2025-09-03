@@ -54,6 +54,8 @@ if TYPE_CHECKING:
     import datetime
     from types import TracebackType
 
+    from typing_extensions import Self
+
     from ..abc import Snowflake
     from ..asset import AssetBytes
     from ..channel import ForumChannel, MediaChannel, StageChannel, TextChannel, VoiceChannel
@@ -79,7 +81,7 @@ class AsyncDeferredLock:
         self.lock = lock
         self.delta: Optional[float] = None
 
-    async def __aenter__(self):
+    async def __aenter__(self) -> Self:
         await self.lock.acquire()
         return self
 
@@ -773,7 +775,7 @@ class _WebhookState(Generic[WebhookT]):
         # however, using it should result in a late-binding error.
         return _FriendlyHttpAttributeErrorHelper()  # type: ignore
 
-    def __getattr__(self, attr):
+    def __getattr__(self, attr) -> Any:
         if self._parent is not None:
             return getattr(self._parent, attr)
 

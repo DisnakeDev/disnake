@@ -177,16 +177,16 @@ class EnumMeta(type):
     def __members__(cls):
         return types.MappingProxyType(cls._enum_member_map_)
 
-    def __call__(cls, value):
+    def __call__(cls, value: Any) -> Any:
         try:
             return cls._enum_value_map_[value]
         except (KeyError, TypeError):
             raise ValueError(f"{value!r} is not a valid {cls.__name__}") from None
 
-    def __getitem__(cls, key):
+    def __getitem__(cls, key: str) -> Any:
         return cls._enum_member_map_[key]
 
-    def __setattr__(cls, name: str, value) -> NoReturn:
+    def __setattr__(cls, name: str, value: Any) -> NoReturn:
         raise TypeError("Enums are immutable.")
 
     def __delattr__(cls, attr) -> NoReturn:
@@ -207,7 +207,7 @@ else:
 
     class Enum(metaclass=EnumMeta):
         @classmethod
-        def try_value(cls, value):
+        def try_value(cls: Self, value: str):  # noqa: ANN206 # this is never typechecked
             try:
                 return cls._enum_value_map_[value]
             except (KeyError, TypeError):

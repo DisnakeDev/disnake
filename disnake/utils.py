@@ -836,7 +836,7 @@ def remove_markdown(text: str, *, ignore_links: bool = True) -> str:
         The text with the markdown special characters removed.
     """
 
-    def replacement(match):
+    def replacement(match: re.Match) -> str:
         groupdict = match.groupdict()
         return groupdict.get("url", "")
 
@@ -872,7 +872,7 @@ def escape_markdown(text: str, *, as_needed: bool = False, ignore_links: bool = 
     """
     if not as_needed:
 
-        def replacement(match):
+        def replacement(match: re.Match) -> str:
             groupdict = match.groupdict()
             is_url = groupdict.get("url")
             if is_url:

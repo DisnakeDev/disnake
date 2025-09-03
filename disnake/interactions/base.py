@@ -82,6 +82,7 @@ if TYPE_CHECKING:
         InteractionDataResolved as InteractionDataResolvedPayload,
     )
     from ..types.snowflake import Snowflake
+    from ..types.user import User as UserPayload
     from ..ui._types import MessageComponents, ModalComponents
     from ..ui.modal import Modal
     from ..ui.view import View
@@ -1615,17 +1616,17 @@ class _InteractionMessageState:
     def _get_guild(self, guild_id) -> Optional[Guild]:
         return self._parent._get_guild(guild_id)
 
-    def store_user(self, data) -> User:
+    def store_user(self, data: UserPayload) -> User:
         return self._parent.store_user(data)
 
-    def create_user(self, data) -> User:
+    def create_user(self, data: UserPayload) -> User:
         return self._parent.create_user(data)
 
     @property
     def http(self) -> HTTPClient:
         return self._parent.http
 
-    def __getattr__(self, attr):
+    def __getattr__(self, attr: str) -> Any:
         return getattr(self._parent, attr)
 
 

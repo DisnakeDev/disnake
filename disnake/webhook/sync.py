@@ -47,6 +47,8 @@ _log = logging.getLogger(__name__)
 if TYPE_CHECKING:
     from types import TracebackType
 
+    from typing_extensions import Self
+
     from ..abc import Snowflake
     from ..embeds import Embed
     from ..file import File
@@ -68,7 +70,7 @@ class DeferredLock:
         self.lock = lock
         self.delta: Optional[float] = None
 
-    def __enter__(self):
+    def __enter__(self) -> Self:
         self.lock.acquire()
         return self
 

@@ -306,7 +306,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         )
         self._fill_overwrites(data)
 
-    async def _get_channel(self):
+    async def _get_channel(self) -> Self:
         return self
 
     @property
@@ -1392,7 +1392,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         self.slowmode_delay: int = data.get("rate_limit_per_user", 0)
         self.last_message_id: Optional[int] = utils._get_as_snowflake(data, "last_message_id")
 
-    async def _get_channel(self):
+    async def _get_channel(self: Self) -> Self:
         return self
 
     @property
@@ -2079,7 +2079,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         self.slowmode_delay: int = data.get("rate_limit_per_user", 0)
         self.last_message_id: Optional[int] = utils._get_as_snowflake(data, "last_message_id")
 
-    async def _get_channel(self):
+    async def _get_channel(self) -> Self:
         return self
 
     @property
@@ -3108,7 +3108,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         if isinstance(self.guild, Object):
             return []
 
-        def comparator(channel):
+        def comparator(channel: GuildChannelType) -> Tuple[bool, int]:
             return (
                 not isinstance(channel, (TextChannel, ThreadOnlyGuildChannel)),
                 channel.position,
@@ -4789,7 +4789,7 @@ class DMChannel(disnake.abc.Messageable, Hashable):
         )
         self._flags: int = data.get("flags", 0)
 
-    async def _get_channel(self):
+    async def _get_channel(self) -> Self:
         return self
 
     def __str__(self) -> str:
@@ -4962,7 +4962,7 @@ class GroupChannel(disnake.abc.Messageable, Hashable):
         else:
             self.owner = utils.find(lambda u: u.id == self.owner_id, self.recipients)
 
-    async def _get_channel(self):
+    async def _get_channel(self) -> Self:
         return self
 
     def __str__(self) -> str:

@@ -17,6 +17,7 @@ from typing import (
     List,
     Optional,
     Tuple,
+    Type,
     Union,
     cast,
     overload,
@@ -960,7 +961,7 @@ class RoleSubscriptionData:
         self.is_renewal: bool = data["is_renewal"]
 
 
-def flatten_handlers(cls):
+def flatten_handlers(cls: Type[Message]) -> Type[Message]:
     prefix = len("_handle_")
     handlers = [
         (key[prefix:], value)

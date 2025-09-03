@@ -345,7 +345,7 @@ class UserConverter(IDConverter[disnake.User]):
 
             if isinstance(result, disnake.Member):
                 return result._user
-            return result
+            return result  # type: ignore
 
         username, _, discriminator = argument.rpartition("#")
         # n.b. there's no builtin method that only matches arabic digits, `isdecimal` is the closest one.

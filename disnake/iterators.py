@@ -360,7 +360,7 @@ class HistoryIterator(_AsyncIterator["Message"]):
         """Retrieve messages and update next parameters."""
         raise NotImplementedError
 
-    async def _retrieve_messages_before_strategy(self, retrieve):
+    async def _retrieve_messages_before_strategy(self, retrieve: int) -> List[MessagePayload]:
         """Retrieve messages using before parameter."""
         before = self.before.id if self.before else None
         data: List[MessagePayload] = await self.logs_from(self.channel.id, retrieve, before=before)
@@ -370,7 +370,7 @@ class HistoryIterator(_AsyncIterator["Message"]):
             self.before = Object(id=int(data[-1]["id"]))
         return data
 
-    async def _retrieve_messages_after_strategy(self, retrieve):
+    async def _retrieve_messages_after_strategy(self, retrieve: int) -> List[MessagePayload]:
         """Retrieve messages using after parameter."""
         after = self.after.id if self.after else None
         data: List[MessagePayload] = await self.logs_from(self.channel.id, retrieve, after=after)
@@ -380,7 +380,7 @@ class HistoryIterator(_AsyncIterator["Message"]):
             self.after = Object(id=int(data[0]["id"]))
         return data
 
-    async def _retrieve_messages_around_strategy(self, retrieve):
+    async def _retrieve_messages_around_strategy(self, retrieve: int) -> List[MessagePayload]:
         """Retrieve messages using around parameter."""
         if self.around:
             around = self.around.id if self.around else None
