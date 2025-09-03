@@ -207,7 +207,7 @@ else:
 
     class Enum(metaclass=EnumMeta):
         @classmethod
-        def try_value(cls: Self, value: str):  # noqa: ANN206 # this is never typechecked
+        def try_value(cls, value: Any) -> Self:
             try:
                 return cls._enum_value_map_[value]
             except (KeyError, TypeError):
