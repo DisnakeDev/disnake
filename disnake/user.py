@@ -144,6 +144,7 @@ class BaseUser(_UserTag):
             "bot": self.bot,
             "public_flags": self._public_flags,
             "avatar_decoration_data": self._avatar_decoration_data,
+            "primary_guild": self._primary_guild,
         }
 
     @property
