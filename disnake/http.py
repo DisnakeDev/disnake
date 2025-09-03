@@ -876,7 +876,7 @@ class HTTPClient:
     ) -> Response[None]:
         r = Route(
             "PUT",
-            "/channels/{channel_id}/pins/{message_id}",
+            "/channels/{channel_id}/messages/pins/{message_id}",
             channel_id=channel_id,
             message_id=message_id,
         )
@@ -887,14 +887,29 @@ class HTTPClient:
     ) -> Response[None]:
         r = Route(
             "DELETE",
-            "/channels/{channel_id}/pins/{message_id}",
+            "/channels/{channel_id}/messages/pins/{message_id}",
             channel_id=channel_id,
             message_id=message_id,
         )
         return self.request(r, reason=reason)
 
-    def pins_from(self, channel_id: Snowflake) -> Response[List[message.Message]]:
-        return self.request(Route("GET", "/channels/{channel_id}/pins", channel_id=channel_id))
+    def get_pins(
+        self,
+        channel_id: Snowflake,
+        limit: int,
+        before: Optional[Snowflake] = None,
+    ) -> Response[channel.ChannelPins]:
+        r = Route(
+            "GET",
+            "/channels/{channel_id}/messages/pins",
+            channel_id=channel_id,
+        )
+        params: Dict[str, Any] = {"limit": limit}
+
+        if before is not None:
+            params["before"] = before
+
+        return self.request(r, params=params)
 
     # Member management
 
