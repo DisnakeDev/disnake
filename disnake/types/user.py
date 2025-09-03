@@ -37,7 +37,10 @@ class Collectibles(TypedDict, total=False):
     nameplate: Nameplate
 
 
-class UserPrimaryGuild(TypedDict):
+# note: this is documented as not optional (always present)
+# but we made it optional because on certain circumstances the API
+# is not sending it (not sure if it's a bug, better safe than sorry)
+class UserPrimaryGuild(TypedDict, total=False):
     identity_guild_id: Optional[Snowflake]
     identity_enabled: Optional[bool]
     tag: Optional[str]
