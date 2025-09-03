@@ -18,7 +18,7 @@ from typing import TYPE_CHECKING, Callable, Dict, List, Tuple, TypedDict, TypeVa
 import nox
 
 if TYPE_CHECKING:
-    from typing_extensions import Concatenate, ParamSpec
+    from typing_extensions import Concatenate, NotRequired, ParamSpec
 
     P = ParamSpec("P")
     T = TypeVar("T")
@@ -48,9 +48,10 @@ nox.options.sessions = [
 class PyrightGroup(TypedDict):
     python: str
     directories: Tuple[str, ...]
-    extras: Tuple[str, ...]
-    groups: Tuple[str, ...]
-    dependencies: Tuple[str, ...]
+    extras: NotRequired[Tuple[str, ...]]
+    groups: NotRequired[Tuple[str, ...]]
+    dependencies: NotRequired[Tuple[str, ...]]
+    experimental: NotRequired[bool]
 
 
 pyright_groups: List[PyrightGroup] = [
@@ -59,48 +60,48 @@ pyright_groups: List[PyrightGroup] = [
         directories=("disnake", "tests", "examples"),
         extras=("speed", "voice"),
         groups=("test",),
-        dependencies=(),
     ),
     PyrightGroup(
         python="3.9",
         directories=("disnake", "tests", "examples"),
         extras=("speed", "voice"),
         groups=("test",),
-        dependencies=(),
     ),
     PyrightGroup(
         python="3.10",
         directories=("disnake", "tests", "examples"),
         extras=("speed", "voice"),
         groups=("test",),
-        dependencies=(),
     ),
     PyrightGroup(
         python="3.11",
         directories=("disnake", "tests", "examples"),
         extras=("speed", "voice"),
         groups=("test",),
-        dependencies=(),
     ),
     PyrightGroup(
-        python="3.11", directories=("docs",), extras=("docs",), groups=(), dependencies=()
+        python="3.11",
+        directories=("docs",),
+        extras=("docs",),
+        experimental=True,
     ),
     PyrightGroup(
-        python="3.11", directories=("scripts",), extras=(), groups=("codemod",), dependencies=()
+        python="3.11",
+        directories=("scripts",),
+        groups=("codemod",),
+        experimental=True,
     ),
     PyrightGroup(
         python="3.12",
         directories=("disnake", "tests", "examples"),
         extras=("speed", "voice"),
         groups=("test",),
-        dependencies=(),
     ),
     PyrightGroup(
         python="3.13",
         directories=("disnake", "tests", "examples"),
         extras=("speed", "voice"),
         groups=("test",),
-        dependencies=(),
     ),
 ]
 
@@ -264,13 +265,13 @@ def codemod(session: nox.Session) -> None:
 def pyright(session: nox.Session, pyright_group: PyrightGroup) -> None:
     """Run pyright."""
     cmd = ["pdm", "install"]
-    for extra in pyright_group["extras"]:
+    for extra in pyright_group.get("extras", ()):
         cmd += ["-G", extra]
-    for group in pyright_group["groups"]:
+    for group in pyright_group.get("groups", ()):
         cmd += ["-dG", group]
-    if "typing" not in pyright_group["groups"]:
+    if "typing" not in pyright_group.get("groups", ()):
         cmd += ["-dG", "typing"]
-    if pyright_group["dependencies"]:
+    if pyright_group.get("dependencies"):
         session.error("Cannot specify dependencies for pyright groups yet.")
     session.run_install(*cmd, external=True)
 
