@@ -168,7 +168,7 @@ def autotyping(session: nox.Session) -> None:
         )
 
 
-@nox.session(name="codemod")
+@nox.session(name="codemod", python="3.8")
 def codemod(session: nox.Session) -> None:
     """Run libcst codemods."""
     session.run_always("pdm", "install", "-dG", "codemod", external=True)
