@@ -116,7 +116,6 @@ def autotyping(session: nox.Session) -> None:
             "disnake",
             "scripts",
             "tests",
-            "test_bot",
             "noxfile.py",
         ): ("--aggressive",),
         ("examples",): (
