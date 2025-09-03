@@ -28,14 +28,13 @@ jobs:
           fetch-depth: '0'
 
       - name: Set up environment
-        uses: astral-sh/setup-uv@v6
+        id: setup-env
+        uses: ./.github/actions/setup-env
         with:
-          version: "0.8.14"
-          enable-cache: true
-          python-version: 3.8
+          use-cached-uv-lock: 'false'
 
       - name: Install dependencies
-        run: uv sync --no-default-groups --group changelog
+        run: uv sync --only-group changelog
 
       - name: Check for presence of a Change Log fragment (only pull requests)
         # NOTE: The pull request' base branch needs to be fetched so towncrier

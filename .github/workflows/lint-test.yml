@@ -24,7 +24,7 @@ defaults:
     shell: bash
 
 env:
-  USE_UV_VERSION: "0.8.14"
+  # https://docs.astral.sh/uv/reference/environment/
   UV_RESOLUTION: "highest"
   UV_LOCKED: 1
   UV_NO_SYNC: 1
@@ -40,12 +40,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up uv to lock dependencies
-        id: setup-python
-        uses: astral-sh/setup-uv@v6
+      - name: Set up environment
+        id: setup-env
+        uses: ./.github/actions/setup-env
         with:
-          version: ${{ env.USE_UV_VERSION }}
-          enable-cache: true
+          use-cached-uv-lock: 'false' # we don't need the lock here, we will automatically download it below
 
       - name: Restore uv lock
         uses: actions/cache/restore@v4
@@ -72,10 +71,10 @@ jobs:
         run: uv lock --refresh
 
       - uses: actions/cache/save@v4
-        if: steps.lock-uv-deps.outcome == 'success'  && steps.uv-lock-changed.outcome == 'failure'
+        if: steps.lock-uv-deps.outcome == 'success' && steps.uv-lock-changed.outcome == 'failure'
         name: upload-uv-lock
         with:
-          key: uv-lock-resolved-${{ env.UV_RESOLUTION}}-${{hashFiles('uv.lock')}}
+          key: uv-lock-resolved-${{ env.UV_RESOLUTION}}-${{hashFiles('uv.lock') }}
           path: uv.lock
           enableCrossOsArchive: true
 
@@ -88,12 +87,11 @@ jobs:
       misc-checks-python-version: ${{ steps.set-matrix.outputs.misc-checks-python-version }}
     steps:
       - uses: actions/checkout@v4
-      - name: Install uv
-        uses: astral-sh/setup-uv@v6
+      - name: Set up environment
+        id: setup-env
+        uses: ./.github/actions/setup-env
         with:
-          version: ${{ env.USE_UV_VERSION }}
-          enable-cache: true
-          python-version: 3.8
+          use-cached-uv-lock: 'false' # we don't need the lock here
 
       - name: Determine Python versions to test and lint against
         id: set-matrix
@@ -129,9 +127,6 @@ jobs:
       - name: Set up environment
         id: setup-env
         uses: ./.github/actions/setup-env
-        with:
-          python-version: 3.8
-          uv-version: ${{ env.USE_UV_VERSION }}
 
       - name: Run sphinx-build
         run: uv run noxfile.py --force-python ${{ steps.setup-env.outputs.python-version }} -s docs -- --keep-going -W -w $GITHUB_STEP_SUMMARY
@@ -157,7 +152,6 @@ jobs:
         uses: ./.github/actions/setup-env
         with:
           python-version: ${{ matrix.python-version }}
-          uv-version: ${{ env.USE_UV_VERSION }}
 
       - name: Install dependencies
         run: uv run noxfile.py -s pyright --no-venv --install-only --force-python ${{ steps.setup-env.outputs.python-version }}
@@ -205,7 +199,6 @@ jobs:
         uses: ./.github/actions/setup-env
         with:
           python-version: ${{ needs.determine-python-versions.outputs.misc-checks-python-version }}
-          uv-version: ${{ env.USE_UV_VERSION }}
 
       - name: Run slotscheck
         if: (success() || failure()) && steps.setup.outcome == 'success'
@@ -235,7 +228,6 @@ jobs:
         uses: ./.github/actions/setup-env
         with:
           python-version: ${{ needs.determine-python-versions.outputs.libcst-python-version }}
-          uv-version: ${{ env.USE_UV_VERSION }}
       # run the libcst parsers and check for changes
       - name: libcst codemod
         run: |
@@ -275,7 +267,6 @@ jobs:
         id: setup-env
         uses: ./.github/actions/setup-env
         with:
-          uv-version: ${{ env.USE_UV_VERSION }}
           python-version: ${{ matrix.python-version }}
 
       - name: Install nox environment
@@ -297,7 +288,7 @@ jobs:
           UV_NO_SYNC: 0
         run: |
           echo "$GITHUB_STEP_SUMMARY_HEADER" | sed "s/#name#/Coverage Summary/" >> $GITHUB_STEP_SUMMARY
-          uv run --no-default-groups --group test coverage report | tee -a $GITHUB_STEP_SUMMARY
+          uv run --only-group test coverage report | tee -a $GITHUB_STEP_SUMMARY
           echo "$GITHUB_STEP_SUMMARY_FOOTER" >> $GITHUB_STEP_SUMMARY
 
   # thanks to aiohttp for this part of the workflow

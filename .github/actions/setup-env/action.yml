@@ -5,10 +5,12 @@ description: .
 inputs:
   python-version:
     description: The python version to install
-    required: true
-  uv-version:
-    description: The uv version to install
-    required: true
+    required: false
+    default: '3.8'
+  use-cached-uv-lock:
+    description: Whether to download the uv lock cache.
+    required: false
+    default: 'true'
 outputs:
   python-version:
     description: The python version that was installed.
@@ -19,6 +21,7 @@ runs:
   steps:
     - name: Download uv lock
       uses: actions/cache/restore@v4
+      if: ${{ inputs.use-cached-uv-lock != 'false' }}
       id: restore-uv-lock
       with:
         key: uv-lock-resolved-${{ env.UV_RESOLUTION }}
@@ -33,7 +36,7 @@ runs:
       uses: astral-sh/setup-uv@v6
       with:
         python-version: ${{ inputs.python-version }}
-        version: ${{ inputs.uv-version }}
+        version: '0.8.14'
         enable-cache: true
 
     - name: Set python version
