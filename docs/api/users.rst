@@ -48,9 +48,9 @@ MemberFlags
 UserPrimaryGuild
 ~~~~~~~~~~~~~~~~
 
-.. attributetable:: UserPrimaryGuild
+.. attributetable:: PrimaryGuild
 
-.. autoclass:: UserPrimaryGuild()
+.. autoclass:: PrimaryGuild()
     :members:
 
 Enumerations
