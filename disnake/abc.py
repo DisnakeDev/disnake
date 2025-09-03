@@ -1878,8 +1878,8 @@ class Messageable:
 
         .. versionchanged:: 2.11
             Now returns an :class:`.AsyncIterator` to support changes in Discord's API.
-            ``await``\\ing the result of this method remains supported, but is deprecated
-            in favor of ``async for msg in channel.pins()``.
+            ``await``\\ing the result of this method remains supported, but only returns the
+            last 50 pins and is deprecated in favor of ``async for msg in channel.pins()``.
 
         Examples
         --------
