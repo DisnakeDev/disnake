@@ -140,7 +140,7 @@ ContainerChildComponent = Union[
 # valid `Label.component` types
 LabelChildComponent = Union[
     "TextInput",
-    "StringSelectMenu",
+    "AnySelectMenu",
 ]
 
 # valid `Message.components` item types (v1/v2)
