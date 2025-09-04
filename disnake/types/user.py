@@ -53,7 +53,7 @@ class PartialUser(TypedDict):
     discriminator: str  # may be removed in future API versions
     global_name: NotRequired[Optional[str]]
     avatar: Optional[str]
-    avatar_decoration_data: Optional[AvatarDecorationData]
+    avatar_decoration_data: NotRequired[Optional[AvatarDecorationData]]
     collectibles: NotRequired[Optional[Collectibles]]
     primary_guild: NotRequired[Optional[UserPrimaryGuild]]
 
