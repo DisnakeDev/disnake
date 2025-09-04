@@ -326,6 +326,7 @@ include = [
     "disnake",
     "docs",
     "examples",
+    "scripts",
     "tests",
     "*.py",
 ]
