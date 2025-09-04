@@ -67,12 +67,11 @@ docs = [
 
 [dependency-groups]
 nox = [
-    "nox==2022.11.21",
+    "nox==2025.5.1",
 ]
 tools = [
     "pre-commit~=3.0",
     "slotscheck~=0.16.4",
-    "python-dotenv~=1.0.0",
     "check-manifest==0.49",
     "ruff==0.12.11",
 ]
@@ -105,6 +104,8 @@ build = [
     "twine~=5.1.1",
 ]
 
+[tool.nox]
+script-venv-backend = "uv|virtualenv"
 
 [tool.pdm]
 # Ignore `requires-python` warnings when locking, the latest versions of some
@@ -237,11 +238,6 @@ ignore = [
     "F401", # unused imports. Excluded because there is a bug with ruff.
 ]
 "disnake/**.py" = ["PT"] # this is not a module of pytest tests
-"test_bot/*.py" = [
-    "B008", # do not perform function calls in argument defaults
-    "T201", # print found, printing is currently accepted in the test bot
-    "PT",   # this is not a module of pytest tests
-]
 "tests/*.py" = ["S101"] # use of assert is okay in test files
 "scripts/*.py" = ["S101"] # use of assert is okay in scripts
 # we are not using noqa in the example files themselves
@@ -330,7 +326,7 @@ include = [
     "disnake",
     "docs",
     "examples",
-    "test_bot",
+    "scripts",
     "tests",
     "*.py",
 ]
@@ -410,7 +406,6 @@ ignore = [
     "docs/**",
     "examples/**",
     # tests
-    "test_bot/**",
     "tests/**",
     "scripts/**",
 ]
