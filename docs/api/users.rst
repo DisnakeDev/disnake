@@ -61,8 +61,8 @@ MemberFlags
 .. autoclass:: MemberFlags()
     :members:
 
-UserPrimaryGuild
-~~~~~~~~~~~~~~~~
+PrimaryGuild
+~~~~~~~~~~~~
 
 .. attributetable:: PrimaryGuild
 
