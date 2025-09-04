@@ -10,6 +10,7 @@ import disnake
 from disnake.ui import (
     ActionRow,
     Button,
+    Label,
     Separator,
     StringSelect,
     TextInput,
@@ -24,6 +25,8 @@ button3 = Button()
 select = StringSelect()
 text_input = TextInput(label="a", custom_id="b")
 separator = Separator()
+label__text = Label("a", text_input)
+label__select = Label("a", select)
 
 
 class TestActionRow:
@@ -270,6 +273,22 @@ def test_normalize_components__actionrow(value, expected) -> None:
 )
 def test_normalize_components__v2(value, expected) -> None:
     result = normalize_components(value)
+    assert [(list(c.children) if isinstance(c, ActionRow) else c) for c in result] == expected
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [
+        ([text_input], [[text_input]]),
+        ([select], [select]),  # should not wrap select in action row
+        (
+            [label__text, text_input, select, label__select, text_input],
+            [label__text, [text_input], select, label__select, [text_input]],
+        ),
+    ],
+)
+def test_normalize_components__modal(value, expected) -> None:
+    result = normalize_components(value, modal=True)
     assert [(list(c.children) if isinstance(c, ActionRow) else c) for c in result] == expected
 
 
