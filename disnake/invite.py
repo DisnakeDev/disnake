@@ -281,15 +281,20 @@ class Invite(Hashable):
     +------------------------------------+---------------------------------------------------------------------+
     |             Attribute              |                          Method                                     |
     +====================================+=====================================================================+
-    | :attr:`max_age`                    | :meth:`abc.GuildChannel.invites`\\, :meth:`Guild.invites`            |
+    | :attr:`max_age`                    | :meth:`Guild.invites` with :attr:`~Permissions.manage_guild`        |
+    |                                    | permissions, :meth:`abc.GuildChannel.invites`                       |
     +------------------------------------+---------------------------------------------------------------------+
-    | :attr:`max_uses`                   | :meth:`abc.GuildChannel.invites`\\, :meth:`Guild.invites`            |
+    | :attr:`max_uses`                   | :meth:`Guild.invites` with :attr:`~Permissions.manage_guild`        |
+    |                                    | permissions, :meth:`abc.GuildChannel.invites`                       |
     +------------------------------------+---------------------------------------------------------------------+
-    | :attr:`created_at`                 | :meth:`abc.GuildChannel.invites`\\, :meth:`Guild.invites`            |
+    | :attr:`created_at`                 | :meth:`Guild.invites` with :attr:`~Permissions.manage_guild`        |
+    |                                    | permissions, :meth:`abc.GuildChannel.invites`                       |
     +------------------------------------+---------------------------------------------------------------------+
-    | :attr:`temporary`                  | :meth:`abc.GuildChannel.invites`\\, :meth:`Guild.invites`            |
+    | :attr:`temporary`                  | :meth:`Guild.invites` with :attr:`~Permissions.manage_guild`        |
+    |                                    | permissions, :meth:`abc.GuildChannel.invites`                       |
     +------------------------------------+---------------------------------------------------------------------+
-    | :attr:`uses`                       | :meth:`abc.GuildChannel.invites`\\, :meth:`Guild.invites`            |
+    | :attr:`uses`                       | :meth:`Guild.invites` with :attr:`~Permissions.manage_guild`        |
+    |                                    | permissions, :meth:`abc.GuildChannel.invites`                       |
     +------------------------------------+---------------------------------------------------------------------+
     | :attr:`approximate_member_count`   | :meth:`Client.fetch_invite` with ``with_counts`` enabled            |
     +------------------------------------+---------------------------------------------------------------------+
