@@ -67,7 +67,7 @@ docs = [
 
 [dependency-groups]
 nox = [
-    "nox==2022.11.21",
+    "nox==2025.5.1",
 ]
 tools = [
     "pre-commit~=3.0",
@@ -104,6 +104,8 @@ build = [
     "twine~=5.1.1",
 ]
 
+[tool.nox]
+script-venv-backend = "uv|virtualenv"
 
 [tool.pdm]
 # Ignore `requires-python` warnings when locking, the latest versions of some
