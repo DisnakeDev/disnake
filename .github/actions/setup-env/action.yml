@@ -5,7 +5,16 @@ description: .
 inputs:
   python-version:
     description: The python version to install
-    required: true
+    required: false
+    default: '3.8'
+  use-cached-pdm-lock:
+    description: Whether to download the pdm lock cache.
+    required: false
+    default: 'true'
+  update-pdm-lock:
+    description: Whether to update the pdm lock file. Allows the cache to fail.
+    required: false
+    default: 'false'
 outputs:
   python-version:
     description: The python version that was installed.
@@ -14,6 +23,27 @@ outputs:
 runs:
   using: composite
   steps:
+    - name: Download pdm lock
+      uses: actions/cache/restore@v4
+      if: ${{ inputs.use-cached-pdm-lock != 'false' }}
+      id: restore-pdm-lock
+      with:
+        key: pdm-lock-
+        path: pdm.lock
+        restore-keys: |
+          pdm-lock-
+        enableCrossOsArchive: true
+        fail-on-cache-miss: ${{ inputs.update-pdm-lock != 'true' }}
+
+    - name: Cache pdm cache directory
+      uses: actions/cache@v4
+      id: pdm-cache
+      with:
+        key: pdm-cache|${{ hashFiles('pyproject.toml') }}
+        path: ~/.cache/pdm
+        enableCrossOsArchive: true
+        fail-on-cache-miss: false
+
     - name: Set up pdm with python ${{ inputs.python-version }}
       id: setup-python
       uses: pdm-project/setup-pdm@v4
@@ -31,6 +61,7 @@ runs:
       shell: bash
       run: |
         echo "PDM_IGNORE_SAVED_PYTHON=1" >> $GITHUB_ENV
+        pdm venv create ${{ steps.setup-python.outputs.python-version }}
 
     - name: Update pip, wheel, setuptools
       shell: bash
@@ -40,10 +71,14 @@ runs:
       shell: bash
       run: pip install nox
 
+    - name: Lock dependencies
+      id: lock-pdm-deps
+      if: ${{ inputs.update-pdm-lock == 'true' }} || (${{ steps.restore-pdm-lock.outputs.cache-hit != 'true' }} && ${{ inputs.use-cached-pdm-lock != 'false' }})
+      shell: bash
+      run: pdm lock -dG:all -G:all
+
     - name: Set python version
       id: python-version
       shell: bash
-      run: echo "python-version=$(python -c 'import sys; print(".".join(map(str,sys.version_info[:2])))')" >> $GITHUB_OUTPUT
-
-    - name: Configure cache
-      uses: ./.github/actions/cache-pdm
+      run: |
+        echo "python-version=$(python -c 'import sys; print(".".join(map(str,sys.version_info[:2])))')" >> $GITHUB_OUTPUT

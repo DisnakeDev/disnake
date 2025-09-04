@@ -34,12 +34,41 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-    # Instead of setup-env, we call the cache-pdm action here directly.
-    # This avoids having to install PDM, only to find out the cache is already up to date sometimes.
-      - name: Configure cache
-        uses: ./.github/actions/cache-pdm
+      - name: Set up environment
+        id: setup-env
+        uses: ./.github/actions/setup-env
         with:
-          env-already-initialized: false
+          use-cached-pdm-lock: 'false' # we don't need the lock here, we will automatically download it below
+
+      - name: Restore pdm lock
+        uses: actions/cache/restore@v4
+        id: cache-pdm-lock
+        with:
+          key: pdm-lock-
+          restore-keys: |
+            pdm-lock-
+          path: pdm.lock
+          enableCrossOsArchive: true
+
+      - name: Check if pdm.lock changed
+        id: pdm-lock-changed
+        continue-on-error: true
+        if: steps.cache-pdm-lock.outputs.cache-hit == 'true' || steps.cache-pdm-lock.outputs.cache-hit == 'false'
+        run: |
+          pdm lock -dG:all -G:all --check
+
+      - name: Lock dependencies
+        if: steps.pdm-lock-changed.outcome == 'failure' || steps.pdm-lock-changed.outcome == 'skipped'
+        id: lock-pdm-deps
+        run: pdm lock -dG:all -G:all --python=">=3.8"
+
+      - uses: actions/cache/save@v4
+        if: steps.lock-pdm-deps.outcome == 'success'
+        name: upload-pdm-lock
+        with:
+          key: pdm-lock-${{hashFiles('pdm.lock') }}
+          path: pdm.lock
+          enableCrossOsArchive: true
 
   lint:
     runs-on: ubuntu-latest
@@ -89,7 +118,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install dependencies
-        run: pdm install -d -Gspeed -Gdocs -Gvoice
+        run: pdm sync -d -Gspeed -Gdocs -Gvoice
 
       - name: Add .venv/bin to PATH
         run: dirname "$(pdm info --python)" >> $GITHUB_PATH
@@ -142,7 +171,7 @@ jobs:
     # This only runs if the previous steps were successful, no point in running it otherwise
       - name: Try building package
         run: |
-          pdm install -dG build
+          pdm sync -dG build
 
           pdm run python -m build
           ls -la dist/
@@ -188,7 +217,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install dependencies
-        run: pdm install -dG test # needed for coverage
+        run: pdm sync -dG test # needed for coverage
 
       - name: Test package install
         run: |
