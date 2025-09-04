@@ -17,8 +17,6 @@ from typing import (
     Pattern,
     Set,
     Tuple,
-    Type,
-    TypeVar,
     Union,
     get_args,
     get_origin,
@@ -47,8 +45,6 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from .context import Context
-
-FlagsMetaT = TypeVar("FlagsMetaT", bound="Type[FlagsMeta]")
 
 
 @dataclass

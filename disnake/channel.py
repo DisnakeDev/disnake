@@ -5172,7 +5172,7 @@ def _channel_factory(
 def _threaded_channel_factory(
     channel_type: int,
 ) -> Tuple[
-    Union[Type[GuildChannelType], Type[DMChannel], Type[GroupChannel], Type[Thread], None],
+    Optional[Union[Type[GuildChannelType], Type[DMChannel], Type[GroupChannel], Type[Thread]]],
     ChannelType,
 ]:
     cls, value = _channel_factory(channel_type)
@@ -5183,7 +5183,7 @@ def _threaded_channel_factory(
 
 def _threaded_guild_channel_factory(
     channel_type: int,
-) -> Tuple[Union[Type[GuildChannelType], Type[Thread], None], ChannelType]:
+) -> Tuple[Optional[Union[Type[GuildChannelType], Type[Thread]]], ChannelType]:
     cls, value = _guild_channel_factory(channel_type)
     if value in (ChannelType.private_thread, ChannelType.public_thread, ChannelType.news_thread):
         return Thread, value
