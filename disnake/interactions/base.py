@@ -1542,7 +1542,7 @@ class InteractionResponse:
         if modal is not None:
             modal_data = modal.to_components()
         elif title and components and custom_id:
-            items: Sequence[ModalTopLevelComponent] = normalize_components(components)
+            items: Sequence[ModalTopLevelComponent] = normalize_components(components, modal=True)
             if len(items) > 5:
                 raise ValueError("Maximum number of components exceeded.")
 

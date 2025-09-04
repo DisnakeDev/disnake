@@ -984,23 +984,28 @@ MessageActionRow = ActionRow[ActionRowMessageComponent]
 ModalActionRow = ActionRow[ActionRowModalComponent]
 
 
+# n.b. the typings with `modal = True` are technically slightly off here,
+# however this is only used internally and does not affect public typings
 @overload
 def normalize_components(
-    components: ComponentInput[NoReturn, NonActionRowChildT], /
+    components: ComponentInput[NoReturn, NonActionRowChildT], /, modal: bool = False
 ) -> Sequence[NonActionRowChildT]: ...
 
 
 @overload
 def normalize_components(
-    components: ComponentInput[ActionRowChildT, NonActionRowChildT], /
+    components: ComponentInput[ActionRowChildT, NonActionRowChildT], /, modal: bool = False
 ) -> Sequence[Union[ActionRow[ActionRowChildT], NonActionRowChildT]]: ...
 
 
 def normalize_components(
-    components: ComponentInput[ActionRowChildT, NonActionRowChildT], /
+    components: ComponentInput[ActionRowChildT, NonActionRowChildT], /, modal: bool = False
 ) -> Sequence[Union[ActionRow[ActionRowChildT], NonActionRowChildT]]:
     """Wraps consecutive actionrow-compatible components or lists in `ActionRow`s,
     while respecting the width limit. Other components are returned as-is.
+
+    If `modal` is `True`, only wraps `TextInput`s in action rows, and returns other (otherwise
+    actionrow-compatible) components as-is.
     """
     if not isinstance(components, Sequence):
         components = [components]
@@ -1008,8 +1013,10 @@ def normalize_components(
     result: List[Union[ActionRow[ActionRowChildT], NonActionRowChildT]] = []
     auto_row: ActionRow[ActionRowChildT] = ActionRow[ActionRowChildT]()
 
+    wrap_types = TextInput if modal else WrappedComponent
+
     for component in components:
-        if isinstance(component, WrappedComponent):
+        if isinstance(component, wrap_types):
             # action row child component, try to insert into current row, otherwise create new row
             try:
                 auto_row.append_item(component)
@@ -1023,7 +1030,8 @@ def normalize_components(
                 auto_row = ActionRow[ActionRowChildT]()
 
             if isinstance(component, UIComponent):
-                # append non-actionrow-child components (action rows or v2 components) as-is
+                # append non-actionrow-child components as-is
+                # (action rows, v2 components, or actionrow-child components in modals)
                 result.append(component)
 
             elif isinstance(component, Sequence):
