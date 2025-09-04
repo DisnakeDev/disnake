@@ -63,7 +63,7 @@ if TYPE_CHECKING:
         GuildVoiceState as GuildVoiceStatePayload,
         VoiceState as VoiceStatePayload,
     )
-    from .user import Collectibles
+    from .user import Collectibles, PrimaryGuild
 
     VocalGuildChannel = Union[VoiceChannel, StageChannel]
 
@@ -297,6 +297,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         accent_color: Optional[Colour]
         accent_colour: Optional[Colour]
         collectibles: Collectibles
+        primary_guild: Optional[PrimaryGuild]
 
     @overload
     def __init__(
