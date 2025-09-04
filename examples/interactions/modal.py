@@ -26,28 +26,33 @@ bot = commands.Bot(command_prefix=commands.when_mentioned)
 class MyModal(disnake.ui.Modal):
     def __init__(self) -> None:
         components = [
-            disnake.ui.TextInput(
-                label="Name",
-                placeholder="The name of the tag",
-                custom_id="name",
-                style=disnake.TextInputStyle.short,
-                min_length=5,
-                max_length=50,
+            disnake.ui.Label(
+                "Name",
+                description="The name of the tag",
+                component=disnake.ui.TextInput(
+                    custom_id="name",
+                    style=disnake.TextInputStyle.short,
+                    min_length=5,
+                    max_length=50,
+                ),
             ),
-            disnake.ui.TextInput(
-                label="Content",
-                placeholder="The content of the tag",
-                custom_id="content",
-                style=disnake.TextInputStyle.paragraph,
-                min_length=5,
-                max_length=1024,
+            disnake.ui.Label(
+                "Content",
+                description="The content of the tag",
+                component=disnake.ui.TextInput(
+                    placeholder="(optional)",
+                    custom_id="content",
+                    style=disnake.TextInputStyle.paragraph,
+                    max_length=1000,
+                    required=False,
+                ),
             ),
         ]
         super().__init__(title="Create Tag", components=components)
 
     async def callback(self, inter: disnake.ModalInteraction) -> None:
-        tag_name = inter.text_values["name"]
-        tag_content = inter.text_values["content"]
+        tag_name = inter.values["name"]
+        tag_content = inter.values["content"]
 
         embed = disnake.Embed(title=f"Tag created: `{tag_name}`")
         embed.add_field(name="Content", value=tag_content)
@@ -80,21 +85,26 @@ async def create_tag_low(inter: disnake.CommandInteraction):
         title="Create Tag",
         custom_id="create_tag_low",
         components=[
-            disnake.ui.TextInput(
-                label="Name",
-                placeholder="The name of the tag",
-                custom_id="name",
-                style=disnake.TextInputStyle.short,
-                min_length=5,
-                max_length=50,
+            disnake.ui.Label(
+                "Name",
+                description="The name of the tag",
+                component=disnake.ui.TextInput(
+                    custom_id="name",
+                    style=disnake.TextInputStyle.short,
+                    min_length=5,
+                    max_length=50,
+                ),
             ),
-            disnake.ui.TextInput(
-                label="Content",
-                placeholder="The content of the tag",
-                custom_id="content",
-                style=disnake.TextInputStyle.paragraph,
-                min_length=5,
-                max_length=1024,
+            disnake.ui.Label(
+                "Content",
+                description="The content of the tag",
+                component=disnake.ui.TextInput(
+                    placeholder="(optional)",
+                    custom_id="content",
+                    style=disnake.TextInputStyle.paragraph,
+                    max_length=1000,
+                    required=False,
+                ),
             ),
         ],
     )
@@ -111,8 +121,8 @@ async def create_tag_low(inter: disnake.CommandInteraction):
         # This is done since Discord doesn't dispatch any event for when a modal is closed/dismissed.
         return
 
-    tag_name = modal_inter.text_values["name"]
-    tag_content = modal_inter.text_values["content"]
+    tag_name = modal_inter.values["name"]
+    tag_content = modal_inter.values["content"]
 
     embed = disnake.Embed(title=f"Tag created: `{tag_name}`")
     embed.add_field(name="Content", value=tag_content)
