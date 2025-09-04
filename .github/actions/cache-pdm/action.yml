@@ -1,0 +1,42 @@
+# SPDX-License-Identifier: MIT
+
+name: Configure PDM cache
+description: .
+inputs:
+  env-already-initialized:
+    description: Whether Python/PDM is already configured
+    required: false
+    default: 'true'
+
+runs:
+  using: composite
+  steps:
+    - name: Get metadata for cache
+      id: get-cache-meta
+      shell: bash
+      run: |
+        echo "date=$(date -u "+%Y%m%d")" >> $GITHUB_OUTPUT
+
+    - name: Setup/Restore cache
+      id: cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          pdm.lock
+        # cache lockfile for the current day, roughly
+        key: pdm-${{ steps.get-cache-meta.outputs.date }}-${{ hashFiles('pyproject.toml') }}
+        # pdm lockfiles should be platform-agnostic
+        enableCrossOsArchive: true
+
+    - if: ${{ steps.cache.outputs.cache-hit != 'true' && inputs.env-already-initialized != 'true' }}
+      name: Set up PDM
+      uses: pdm-project/setup-pdm@v4
+      with:
+        python-version: 3.8
+        version: "2.20.1"
+
+    - if: ${{ steps.cache.outputs.cache-hit != 'true' }}
+      name: Lock all dependencies
+      shell: bash
+      run: |
+        pdm lock -G:all  # create pdm.lock
