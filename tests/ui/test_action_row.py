@@ -95,7 +95,7 @@ class TestActionRow:
         if TYPE_CHECKING:
             _ = ActionRow().add_string_select
             _ = ActionRow.with_message_components().add_string_select
-            # should not work  # TODO: revert when modal select support is added.
+            # should not work
             _ = ActionRow.with_modal_components().add_select  # type: ignore
 
     def test_add_text_input(self) -> None:
@@ -213,16 +213,6 @@ class TestActionRow:
 
         assert_type(ActionRow(button1, select), ActionRow[ActionRowMessageComponent])
         assert_type(ActionRow(select, button1), ActionRow[ActionRowMessageComponent])
-
-        # FIXME: no longer works since the overload changed for normalize_components. may revisit this.
-        # # these should fail to type-check - if they pass, there will be an error
-        # # because of the unnecessary ignore comment
-        # ActionRow(button1, text_input)
-        # ActionRow(text_input, button1)
-
-        # TODO: revert when modal select support is added.
-        assert_type(ActionRow(select, text_input), ActionRow[ActionRowModalComponent])  # type: ignore
-        assert_type(ActionRow(text_input, select), ActionRow[ActionRowModalComponent])  # type: ignore
 
 
 @pytest.mark.parametrize(
