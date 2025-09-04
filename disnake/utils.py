@@ -57,9 +57,6 @@ except ModuleNotFoundError:
 else:
     HAS_ORJSON = True
 
-if TYPE_CHECKING:
-    from typing_extensions import Self
-
 
 __all__ = (
     "oauth_url",
