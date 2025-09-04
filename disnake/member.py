@@ -471,32 +471,35 @@ class Member(disnake.abc.Messageable, _UserTag):
         u = self._user
         original = (
             u.name,
-            u._avatar,
             u.discriminator,
             u.global_name,
-            u._public_flags,
+            u._avatar,
             u._avatar_decoration_data,
+            u._public_flags,
+            u._collectibles,
             u._primary_guild,
         )
         # These keys seem to always be available
         modified = (
             user["username"],
-            user["avatar"],
             user["discriminator"],
             user.get("global_name"),
+            user["avatar"],
+            user.get("avatar_decoration_data"),
             user.get("public_flags", 0),
-            user.get("avatar_decoration_data", None),
+            user.get("collectibles"),
             user.get("primary_guild"),
         )
         if original != modified:
             to_return = User._copy(self._user)
             (
                 u.name,
-                u._avatar,
                 u.discriminator,
                 u.global_name,
-                u._public_flags,
+                u._avatar,
                 u._avatar_decoration_data,
+                u._public_flags,
+                u._collectibles,
                 u._primary_guild,
             ) = modified
             # Signal to dispatch on_user_update
