@@ -3,4 +3,3 @@ Add support for new components in :class:`~ui.Modal`\s.
 - :class:`ui.StringSelect` can now be used in modals when placed inside a :class:`ui.Label`.
 - The new modal-specific :attr:`ui.StringSelect.required` field can be used to make a select menu optional.
 - The values provided by users on modal submit are available in :attr:`ModalInteraction.values`.
-- Using :class:`~ui.ActionRow`\s (or plain :class:`~ui.TextInput`\s, which implicitly get wrapped in action rows) in modals is now deprecated in favor of :class:`ui.Label`.
