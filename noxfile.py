@@ -1,3 +1,4 @@
+#!/usr/bin/env -S pdm run
 # /// script
 # requires-python = ">=3.10"
 # dependencies = [
