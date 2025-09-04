@@ -61,8 +61,8 @@ class BaseUser(_UserTag):
         "_collectibles",
         "_accent_colour",
         "_public_flags",
-        "_state",
         "_primary_guild",
+        "_state",
     )
 
     if TYPE_CHECKING:
@@ -120,14 +120,15 @@ class BaseUser(_UserTag):
         self._collectibles = data.get("collectibles")
         self._accent_colour = data.get("accent_color", None)
         self._public_flags = data.get("public_flags", 0)
+        self._primary_guild = data.get("primary_guild")
         self.bot = data.get("bot", False)
         self.system = data.get("system", False)
-        self._primary_guild = data.get("primary_guild")
 
     @classmethod
     def _copy(cls, user: BaseUser) -> Self:
         self = cls.__new__(cls)  # bypass __init__
 
+        self._state = user._state
         self.name = user.name
         self.id = user.id
         self.discriminator = user.discriminator
@@ -135,10 +136,12 @@ class BaseUser(_UserTag):
         self._avatar = user._avatar
         self._banner = user._banner
         self._avatar_decoration_data = user._avatar_decoration_data
+        self._collectibles = user._collectibles
         self._accent_colour = user._accent_colour
-        self.bot = user.bot
-        self._state = user._state
         self._public_flags = user._public_flags
+        self._primary_guild = user._primary_guild
+        self.bot = user.bot
+        self.system = user.system
 
         return self
 
