@@ -65,26 +65,10 @@ class BaseUser(_UserTag):
         "_state",
     )
 
-    if TYPE_CHECKING:
-        name: str
-        id: int
-        discriminator: str
-        global_name: Optional[str]
-        bot: bool
-        system: bool
-        _state: ConnectionState
-        _avatar: Optional[str]
-        _banner: Optional[str]
-        _avatar_decoration_data: Optional[AvatarDecorationDataPayload]
-        _collectibles: Optional[CollectiblesPayload]
-        _accent_colour: Optional[int]
-        _public_flags: int
-        _primary_guild: Optional[UserPrimaryGuildPayload]
-
     def __init__(
         self, *, state: ConnectionState, data: Union[UserPayload, PartialUserPayload]
     ) -> None:
-        self._state = state
+        self._state: ConnectionState = state
         self._update(data)
 
     def __repr__(self) -> str:
@@ -110,19 +94,21 @@ class BaseUser(_UserTag):
         return self.id >> 22
 
     def _update(self, data: Union[UserPayload, PartialUserPayload]) -> None:
-        self.name = data["username"]
-        self.id = int(data["id"])
-        self.discriminator = data["discriminator"]
-        self.global_name = data.get("global_name")
-        self._avatar = data["avatar"]
-        self._banner = data.get("banner", None)
-        self._avatar_decoration_data = data.get("avatar_decoration_data", None)
-        self._collectibles = data.get("collectibles")
-        self._accent_colour = data.get("accent_color", None)
-        self._public_flags = data.get("public_flags", 0)
-        self._primary_guild = data.get("primary_guild")
-        self.bot = data.get("bot", False)
-        self.system = data.get("system", False)
+        self.name: str = data["username"]
+        self.id: int = int(data["id"])
+        self.discriminator: str = data["discriminator"]
+        self.global_name: Optional[str] = data.get("global_name")
+        self._avatar: Optional[str] = data["avatar"]
+        self._banner: Optional[str] = data.get("banner")
+        self._avatar_decoration_data: Optional[AvatarDecorationDataPayload] = data.get(
+            "avatar_decoration_data"
+        )
+        self._collectibles: Optional[CollectiblesPayload] = data.get("collectibles")
+        self._accent_colour: Optional[int] = data.get("accent_color")
+        self._public_flags: int = data.get("public_flags", 0)
+        self._primary_guild: Optional[UserPrimaryGuildPayload] = data.get("primary_guild")
+        self.bot: bool = data.get("bot", False)
+        self.system: bool = data.get("system", False)
 
     @classmethod
     def _copy(cls, user: BaseUser) -> Self:
