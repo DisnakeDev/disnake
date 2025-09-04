@@ -1,0 +1,1 @@
+Bump pytest and the rest of the test suite to the latest supported versions on Python 3.8.

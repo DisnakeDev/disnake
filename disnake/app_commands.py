@@ -149,8 +149,8 @@ class OptionChoice:
         return payload
 
     @classmethod
-    def from_dict(cls, data: ApplicationCommandOptionChoicePayload):
-        return OptionChoice(
+    def from_dict(cls, data: ApplicationCommandOptionChoicePayload) -> Self:
+        return cls(
             name=Localized(data["name"], data=data.get("name_localizations")),
             value=data["value"],
         )
@@ -347,8 +347,8 @@ class Option:
         )
 
     @classmethod
-    def from_dict(cls, data: ApplicationCommandOptionPayload) -> Option:
-        return Option(
+    def from_dict(cls, data: ApplicationCommandOptionPayload) -> Self:
+        return cls(
             name=Localized(data["name"], data=data.get("name_localizations")),
             description=Localized(
                 data.get("description"), data=data.get("description_localizations")
