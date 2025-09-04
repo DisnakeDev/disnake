@@ -33,5 +33,3 @@ coverage.xml
 __pypackages__/
 .python-version
 uv.lock
-
-!test_bot/locale/*.json
