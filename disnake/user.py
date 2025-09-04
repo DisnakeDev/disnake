@@ -58,9 +58,9 @@ class BaseUser(_UserTag):
         "_avatar",
         "_banner",
         "_avatar_decoration_data",
-        "_collectibles",
         "_accent_colour",
         "_public_flags",
+        "_collectibles",
         "_primary_guild",
         "_state",
     )
@@ -103,9 +103,9 @@ class BaseUser(_UserTag):
         self._avatar_decoration_data: Optional[AvatarDecorationDataPayload] = data.get(
             "avatar_decoration_data"
         )
-        self._collectibles: Optional[CollectiblesPayload] = data.get("collectibles")
         self._accent_colour: Optional[int] = data.get("accent_color")
         self._public_flags: int = data.get("public_flags", 0)
+        self._collectibles: Optional[CollectiblesPayload] = data.get("collectibles")
         self._primary_guild: Optional[UserPrimaryGuildPayload] = data.get("primary_guild")
         self.bot: bool = data.get("bot", False)
         self.system: bool = data.get("system", False)
@@ -122,9 +122,9 @@ class BaseUser(_UserTag):
         self._avatar = user._avatar
         self._banner = user._banner
         self._avatar_decoration_data = user._avatar_decoration_data
-        self._collectibles = user._collectibles
         self._accent_colour = user._accent_colour
         self._public_flags = user._public_flags
+        self._collectibles = user._collectibles
         self._primary_guild = user._primary_guild
         self.bot = user.bot
         self.system = user.system
