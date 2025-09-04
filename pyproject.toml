@@ -86,7 +86,7 @@ codemod = [
 ]
 typing = [
     # this is not pyright itself, but the python wrapper
-    "pyright==1.1.404",
+    "pyright==1.1.405",
     "typing-extensions~=4.12.0",
     # only used for type-checking, version does not matter
     "pytz",
@@ -364,6 +364,7 @@ reportUnknownArgumentType = false
 reportMissingParameterType = false
 reportUnknownVariableType = false
 reportMissingTypeArgument = false
+
 
 
 [tool.pytest.ini_options]
