@@ -292,7 +292,7 @@ def pyright(session: nox.Session) -> None:
 )
 def test(session: nox.Session, extras: List[str]) -> None:
     """Run tests."""
-    install_deps(session, project=True, extras=extras, groups=["test", "typing"])
+    install_deps(session, project=True, extras=extras, groups=["test"])
 
     pytest_args = ["--cov", "--cov-context=test"]
     global reset_coverage  # noqa: PLW0603
