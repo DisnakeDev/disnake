@@ -126,7 +126,7 @@ else:
 def wrap_callback(coro: Callable[..., Coro[T]]) -> Callable[..., Coro[T | None]]:
     # there's no way to type it nicely without causing issues down the line
     @functools.wraps(coro)
-    async def wrapped(*args: Any, **kwargs: Any):
+    async def wrapped(*args: Any, **kwargs: Any):  # noqa: ANN202
         try:
             ret = await coro(*args, **kwargs)
         except CommandError:
@@ -995,7 +995,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         if not params:
             return ""
 
-        result = []
+        result: List[str] = []
         for name, param in params.items():
             greedy = isinstance(param.annotation, Greedy)
             optional = False  # postpone evaluation of if it's an optional argument

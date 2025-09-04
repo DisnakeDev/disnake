@@ -170,7 +170,7 @@ class Thread(Messageable, Hashable):
         self._members: Dict[int, ThreadMember] = {}
         self._from_data(data)
 
-    async def _get_channel(self):
+    async def _get_channel(self) -> Self:
         return self
 
     def __repr__(self) -> str:

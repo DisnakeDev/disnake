@@ -835,7 +835,7 @@ def remove_markdown(text: str, *, ignore_links: bool = True) -> str:
         The text with the markdown special characters removed.
     """
 
-    def replacement(match):
+    def replacement(match: re.Match) -> str:
         groupdict = match.groupdict()
         return groupdict.get("url", "")
 
@@ -871,7 +871,7 @@ def escape_markdown(text: str, *, as_needed: bool = False, ignore_links: bool = 
     """
     if not as_needed:
 
-        def replacement(match):
+        def replacement(match: re.Match) -> str:
             groupdict = match.groupdict()
             is_url = groupdict.get("url")
             if is_url:
@@ -1142,7 +1142,7 @@ def normalise_optional_params(parameters: Iterable[Any]) -> Tuple[Any, ...]:
 
 def _resolve_typealiastype(
     tp: Any, globals: Dict[str, Any], locals: Dict[str, Any], cache: Dict[str, Any]
-):
+) -> Any:
     # Use __module__ to get the (global) namespace in which the type alias was defined.
     if mod := sys.modules.get(tp.__module__):
         mod_globals = mod.__dict__
@@ -1165,7 +1165,7 @@ def evaluate_annotation(
     cache: Dict[str, Any],
     *,
     implicit_str: bool = True,
-):
+) -> Any:
     if isinstance(tp, ForwardRef):
         tp = tp.__forward_arg__
         # ForwardRefs always evaluate their internals

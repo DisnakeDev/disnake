@@ -679,7 +679,7 @@ class ConnectionState:
         user_ids: Optional[List[int]],
         cache: bool,
         presences: bool,
-    ):
+    ) -> List[Member]:
         guild_id = guild.id
         ws = self._get_websocket(guild_id)
 
@@ -1476,7 +1476,7 @@ class ConnectionState:
             return await request.wait()
         return request.get_future()
 
-    async def _chunk_and_dispatch(self, guild, unavailable) -> None:
+    async def _chunk_and_dispatch(self, guild: Guild, unavailable: Optional[bool]) -> None:
         try:
             await asyncio.wait_for(self.chunk_guild(guild), timeout=60.0)
         except asyncio.TimeoutError:

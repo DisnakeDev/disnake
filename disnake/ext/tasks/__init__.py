@@ -138,7 +138,7 @@ class Loop(Generic[LF]):
         else:
             await coro(*args, **kwargs)
 
-    def _try_sleep_until(self, dt: datetime.datetime):
+    def _try_sleep_until(self, dt: datetime.datetime) -> asyncio.Future[bool]:
         self._handle = SleepHandle(dt=dt, loop=self.loop)
         return self._handle.wait()
 

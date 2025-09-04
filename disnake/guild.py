@@ -100,7 +100,10 @@ if TYPE_CHECKING:
     from .state import ConnectionState
     from .template import Template
     from .threads import AnyThreadArchiveDuration, ForumTag
-    from .types.channel import PermissionOverwrite as PermissionOverwritePayload
+    from .types.channel import (
+        GuildChannel as GuildChannelPayload,
+        PermissionOverwrite as PermissionOverwritePayload,
+    )
     from .types.guild import (
         Ban as BanPayload,
         CreateGuildPlaceholderChannel,
@@ -109,7 +112,7 @@ if TYPE_CHECKING:
         GuildFeature,
         MFALevel,
     )
-    from .types.integration import IntegrationType
+    from .types.integration import Integration as IntegrationPayload, IntegrationType
     from .types.role import CreateRole as CreateRolePayload
     from .types.sticker import CreateGuildSticker as CreateStickerPayload
     from .types.threads import Thread as ThreadPayload, ThreadArchiveDurationLiteral
@@ -2382,12 +2385,16 @@ class Guild(Hashable):
         """
         data = await self._state.http.get_all_guild_channels(self.id)
 
-        def convert(d):
+        def convert(d: GuildChannelPayload) -> GuildChannel:
             factory, _ = _guild_channel_factory(d["type"])
             if factory is None:
                 raise InvalidData("Unknown channel type {type} for channel ID {id}.".format_map(d))
 
-            channel = factory(guild=self, state=self._state, data=d)
+            channel = factory(
+                guild=self,
+                state=self._state,
+                data=d,  # type: ignore
+            )
             return channel
 
         return [convert(d) for d in data]
@@ -3180,8 +3187,10 @@ class Guild(Hashable):
 
         Returns a list of all active instant invites from the guild.
 
-        You must have :attr:`~Permissions.manage_guild` permission to
-        use this.
+        You must have :attr:`~Permissions.manage_guild` or :attr:`~Permissions.view_audit_log`
+        permission to use this.
+        Some attributes (see :ref:`table <invite_attr_table>`) are only available with
+        :attr:`~Permissions.manage_guild` permissions.
 
         .. note::
 
@@ -3201,7 +3210,7 @@ class Guild(Hashable):
             The list of invites that are currently active.
         """
         data = await self._state.http.invites_from(self.id)
-        result = []
+        result: List[Invite] = []
         for invite in data:
             if channel_data := invite.get("channel"):
                 channel = self.get_channel(int(channel_data["id"]))
@@ -3298,7 +3307,7 @@ class Guild(Hashable):
         """
         data = await self._state.http.get_all_integrations(self.id)
 
-        def convert(d):
+        def convert(d: IntegrationPayload) -> Integration:
             factory, _ = _integration_factory(d["type"])
             return factory(guild=self, data=d)
 
@@ -4538,7 +4547,7 @@ class Guild(Hashable):
         *,
         limit: int = 1,
         cache: bool = True,
-    ):
+    ) -> List[Member]:
         """|coro|
 
         Retrieves members that belong to this guild whose name starts with
@@ -4577,7 +4586,7 @@ class Guild(Hashable):
             raise ValueError("limit must be at least 1")
         limit = min(1000, limit)
         members = await self._state.http.search_guild_members(self.id, query=query, limit=limit)
-        resp = []
+        resp: List[Member] = []
         for member in members:
             member = Member(state=self._state, data=member, guild=self)
             if cache and member.id not in self._members:

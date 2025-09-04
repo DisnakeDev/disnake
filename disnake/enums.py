@@ -17,6 +17,9 @@ from typing import (
     TypeVar,
 )
 
+if TYPE_CHECKING:
+    from typing_extensions import Self
+
 __all__ = (
     "Enum",
     "ChannelType",
@@ -78,6 +81,8 @@ __all__ = (
     "NameplatePalette",
 )
 
+EnumMetaT = TypeVar("EnumMetaT", bound="Type[EnumMeta]")
+
 
 class _EnumValueBase(NamedTuple):
     if TYPE_CHECKING:
@@ -107,7 +112,7 @@ def _create_value_cls(name: str, comparable: bool) -> Type[_EnumValueBase]:
     return type(f"{parent.__name__}_{name}", (parent,), {"_cls_name": name})  # type: ignore
 
 
-def _is_descriptor(obj):
+def _is_descriptor(obj) -> bool:
     return hasattr(obj, "__get__") or hasattr(obj, "__set__") or hasattr(obj, "__delete__")
 
 
@@ -122,7 +127,7 @@ class EnumMeta(type):
         _enum_value_map_: ClassVar[Dict[Any, Any]]
         _enum_value_cls_: ClassVar[Type[_EnumValueBase]]
 
-    def __new__(cls, name: str, bases, attrs, *, comparable: bool = False):
+    def __new__(cls: EnumMetaT, name: str, bases, attrs, *, comparable: bool = False) -> EnumMetaT:
         value_mapping = {}
         member_mapping = {}
         member_names = []
@@ -176,16 +181,16 @@ class EnumMeta(type):
     def __members__(cls):
         return types.MappingProxyType(cls._enum_member_map_)
 
-    def __call__(cls, value):
+    def __call__(cls, value: Any) -> Any:
         try:
             return cls._enum_value_map_[value]
         except (KeyError, TypeError):
             raise ValueError(f"{value!r} is not a valid {cls.__name__}") from None
 
-    def __getitem__(cls, key):
+    def __getitem__(cls, key: str) -> Any:
         return cls._enum_member_map_[key]
 
-    def __setattr__(cls, name: str, value) -> NoReturn:
+    def __setattr__(cls, name: str, value: Any) -> NoReturn:
         raise TypeError("Enums are immutable.")
 
     def __delattr__(cls, attr) -> NoReturn:
@@ -206,7 +211,7 @@ else:
 
     class Enum(metaclass=EnumMeta):
         @classmethod
-        def try_value(cls, value):
+        def try_value(cls, value: Any) -> Self:
             try:
                 return cls._enum_value_map_[value]
             except (KeyError, TypeError):

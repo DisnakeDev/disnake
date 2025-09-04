@@ -17,6 +17,7 @@ from typing import (
     List,
     Optional,
     Tuple,
+    Type,
     Union,
     cast,
     overload,
@@ -960,7 +961,7 @@ class RoleSubscriptionData:
         self.is_renewal: bool = data["is_renewal"]
 
 
-def flatten_handlers(cls):
+def flatten_handlers(cls: Type[Message]) -> Type[Message]:
     prefix = len("_handle_")
     handlers = [
         (key[prefix:], value)
@@ -1105,7 +1106,7 @@ class Message(Hashable):
 
         .. versionadded:: 2.0
 
-    message_snapshots: list[:class:`ForwardedMessage`]
+    message_snapshots: List[:class:`ForwardedMessage`]
         A list of forwarded messages.
 
         .. versionadded:: 2.10
@@ -1157,6 +1158,7 @@ class Message(Hashable):
         "poll",
         "_edited_timestamp",
         "_role_subscription_data",
+        "_pinned_at",
     )
 
     if TYPE_CHECKING:
@@ -1197,6 +1199,7 @@ class Message(Hashable):
         )
         self.type: MessageType = try_enum(MessageType, data["type"])
         self.pinned: bool = data["pinned"]
+        self._pinned_at: Optional[datetime.datetime] = None
         self.flags: MessageFlags = MessageFlags._from_value(data.get("flags", 0))
         self.mention_everyone: bool = data["mention_everyone"]
         self.tts: bool = data["tts"]
@@ -1534,7 +1537,7 @@ class Message(Hashable):
             }
             transformations.update(role_transforms)
 
-        def repl(obj):
+        def repl(obj) -> str:
             return transformations.get(re.escape(obj.group(0)), "")
 
         pattern = re.compile("|".join(transformations.keys()))
@@ -1550,6 +1553,17 @@ class Message(Hashable):
     def edited_at(self) -> Optional[datetime.datetime]:
         """Optional[:class:`datetime.datetime`]: An aware UTC datetime object containing the edited time of the message."""
         return self._edited_timestamp
+
+    @property
+    def pinned_at(self) -> Optional[datetime.datetime]:
+        """Optional[:class:`datetime.datetime`]: An aware UTC datetime object containing the pin time of the message.
+
+        .. note::
+            This is only set on messages retrieved using :meth:`abc.Messageable.pins`.
+
+        .. versionadded:: 2.11
+        """
+        return self._pinned_at
 
     @property
     def jump_url(self) -> str:
@@ -2132,7 +2146,7 @@ class Message(Hashable):
 
         Pins the message.
 
-        You must have the :attr:`~Permissions.manage_messages` permission to do
+        You must have the :attr:`~Permissions.pin_messages` permission to do
         this in a non-private channel context.
 
         This does not work with messages sent in a :class:`VoiceChannel` or :class:`StageChannel`.
@@ -2162,7 +2176,7 @@ class Message(Hashable):
 
         Unpins the message.
 
-        You must have the :attr:`~Permissions.manage_messages` permission to do
+        You must have the :attr:`~Permissions.pin_messages` permission to do
         this in a non-private channel context.
 
         Parameters
