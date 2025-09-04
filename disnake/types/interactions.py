@@ -274,7 +274,6 @@ class ModalInteractionActionRowData(_BaseComponentInteractionData):
 ModalInteractionLabelChildData = Union[
     ModalInteractionStringSelectData,
     ModalInteractionTextInputData,
-    # TODO: phase 2 selects (5, 6, 7, 8)
 ]
 
 
@@ -293,7 +292,6 @@ ModalInteractionInnerComponentData = Union[
 ModalInteractionComponentData = Union[
     ModalInteractionActionRowData,
     ModalInteractionLabelData,
-    # TODO: textdisplay
 ]
 
 

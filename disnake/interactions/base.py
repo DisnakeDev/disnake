@@ -1508,7 +1508,7 @@ class InteractionResponse:
 
             This cannot be mixed with the ``modal`` parameter.
 
-            .. deprecated:: 2.11
+            .. versionchanged:: 2.11
                 Using action rows in modals or passing :class:`.ui.TextInput` directly
                 (which implicitly wraps it in an action row) is deprecated.
                 Use :class:`.ui.TextInput` inside a :class:`.ui.Label` instead.

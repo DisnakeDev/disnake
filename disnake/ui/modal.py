@@ -49,7 +49,7 @@ class Modal:
         Currently only supports :class:`.ui.TextInput` and
         :class:`.ui.StringSelect`, wrapped in :class:`.ui.Label`\\s.
 
-        .. deprecated:: 2.11
+        .. versionchanged:: 2.11
             Using action rows in modals or passing :class:`.ui.TextInput` directly
             (which implicitly wraps it in an action row) is deprecated.
             Use :class:`.ui.TextInput` inside a :class:`.ui.Label` instead.
@@ -127,7 +127,7 @@ class Modal:
             Currently only supports :class:`.ui.TextInput` and
             :class:`.ui.StringSelect`, wrapped in :class:`.ui.Label`\\s.
 
-            .. deprecated:: 2.11
+            .. versionchanged:: 2.11
                 Using action rows in modals or passing :class:`.ui.TextInput` directly
                 (which implicitly wraps it in an action row) is deprecated.
                 Use :class:`.ui.TextInput` inside a :class:`.ui.Label` instead.
