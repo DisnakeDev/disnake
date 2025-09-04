@@ -1,1 +1,1 @@
-Add :class:`UserPrimaryGuild` and :meth:`User.primary_guild`.
+Add :class:`PrimaryGuild` and :meth:`User.primary_guild`.
