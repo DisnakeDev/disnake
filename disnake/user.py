@@ -716,7 +716,7 @@ class PrimaryGuild:
         self._badge: Optional[str] = data.get("badge")
 
     def __repr__(self) -> str:
-        return f"<UserPrimaryGuild identity_guild_id={self.guild_id} identity_enabled={self.identity_enabled} tag={self.tag}>"
+        return f"<PrimaryGuild guild_id={self.guild_id} identity_enabled={self.identity_enabled} tag={self.tag}>"
 
     @property
     def badge(self) -> Optional[Asset]:
