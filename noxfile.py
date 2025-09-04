@@ -10,41 +10,13 @@
 
 from __future__ import annotations
 
-import os
 import pathlib
-import sys
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Sequence, Tuple, TypeVar
+from typing import Any, Dict, List, Sequence, Tuple
 
 import nox
 
-if TYPE_CHECKING:
-    from typing_extensions import Concatenate, ParamSpec
-
-    P = ParamSpec("P")
-    T = TypeVar("T")
-
-    NoxSessionFunc = Callable[Concatenate[nox.Session, P], T]
-
 nox.needs_version = ">=2025.5.1"
 
-# see https://pdm-project.org/latest/usage/advanced/#use-nox-as-the-runner
-os.environ.update(
-    {
-        "PDM_IGNORE_SAVED_PYTHON": "1",
-    },
-)
-nox.needs_version = ">=2025.5.1"
-
-PYPROJECT = nox.project.load_toml()
-
-
-def use_min_python_of(python: str, *, preferred: Optional[str] = None) -> str | None:
-    """Use the minimum necessary python for this run, but if the environment is a specific venv, then use that one."""
-    major, minor = python.split(".")
-    if sys.version_info < (int(major), int(minor)):
-        # If the current Python version is less than the required version, use the required version
-        return preferred or python
-    return None
 
 nox.options.error_on_external_run = True
 nox.options.reuse_venv = "yes"
@@ -66,17 +38,13 @@ def install_deps(
     *,
     extras: Sequence[str] = (),
     groups: Sequence[str] = (),
-    dependencies: Sequence[str] = (),  # a parameter itself for pip
     project: bool = True,
 ) -> None:
-    """Helper to install dependencies from a group, using uv if venv_backend is uv."""
+    """Helper to install dependencies from a group."""
     if not project and extras:
         raise TypeError("Cannot install extras without also installing the project")
 
-    command: List[str] = []
-
-    # install with UV
-    command = [
+    command: List[str] = [
         "pdm",
         "sync",
         "--fail-fast",
@@ -88,16 +56,14 @@ def install_deps(
         "PDM_IGNORE_SAVED_PYTHON": "1",
     }
 
-    if extras:
-        for e in extras:
-            command.append("-G")
-            command.append(e)
-    if groups:
-        for g in groups:
-            command.append("-G")
-            command.append(g)
-    else:
+    for g in (*extras, *groups):
+        command.append("-G")
+        command.append(g)
+
+    if not groups:
+        # if no dev groups requested, make sure we don't install any
         command.append("--prod")
+
     if not project:
         command.append("--no-self")
 
@@ -106,9 +72,6 @@ def install_deps(
         env=env,
         external=True,
     )
-
-    if dependencies:
-        session.install(*dependencies)
 
 
 @nox.session
@@ -232,7 +195,7 @@ def autotyping(session: nox.Session) -> None:
 @nox.session(name="codemod")
 def codemod(session: nox.Session) -> None:
     """Run libcst codemods."""
-    install_deps(session, groups=["codemod"])
+    install_deps(session, project=True, groups=["codemod"])
 
     base_command = ["python", "-m", "libcst.tool"]
     base_command_codemod = [*base_command, "codemod"]
@@ -314,7 +277,7 @@ def test(session: nox.Session, extras: List[str]) -> None:
 @nox.session
 def coverage(session: nox.Session) -> None:
     """Display coverage information from the tests."""
-    install_deps(session, project=True, groups=["test"])
+    install_deps(session, project=False, groups=["test"])
     if "html" in session.posargs or "serve" in session.posargs:
         session.run("coverage", "html", "--show-contexts")
     if "serve" in session.posargs:
