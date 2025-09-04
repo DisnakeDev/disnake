@@ -12,10 +12,10 @@ from .item import UIComponent, ensure_ui_component
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from .select.string import StringSelect
+    from ._types import AnySelect
     from .text_input import TextInput
 
-    LabelChildUIComponent = Union[TextInput, StringSelect[Any]]
+    LabelChildUIComponent = Union[TextInput, AnySelect[Any]]
 
 __all__ = ("Label",)
 
