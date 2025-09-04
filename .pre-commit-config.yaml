@@ -17,7 +17,7 @@ repos:
     rev: v2.15.0
     hooks:
       - id: pretty-format-yaml
-        args: [--autofix, --indent, '2', --offset, '2']
+        args: [--autofix, --indent, '2', --offset, '2', '--preserve-quotes']
 
   - repo: local
     hooks:
