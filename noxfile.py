@@ -44,12 +44,14 @@ nox.options.sessions = [
     "test",
 ]
 
+PYPROJECT = nox.project.load_toml()
+
 
 # used to reset cached coverage data once for the first test run only
 reset_coverage = True
 
 
-@nox.session
+@nox.session(python="3.8")
 def docs(session: nox.Session) -> None:
     """Build and generate the documentation.
 
@@ -208,7 +210,7 @@ def pyright(session: nox.Session) -> None:
         pass
 
 
-@nox.session(python=["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"])
+@nox.session(python=nox.project.python_versions(PYPROJECT))
 @nox.parametrize(
     "extras",
     [
