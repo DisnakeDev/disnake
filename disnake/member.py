@@ -296,6 +296,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         banner: Optional[Asset]
         accent_color: Optional[Colour]
         accent_colour: Optional[Colour]
+        avatar_decoration: Optional[Asset]
         collectibles: Collectibles
         primary_guild: Optional[PrimaryGuild]
 
