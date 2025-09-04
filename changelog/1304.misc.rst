@@ -1,1 +1,1 @@
-Remove bad code snippet that can cause bugs using yt_dlp lib.
+Remove bad example code snippet that can cause bugs using yt_dlp lib.
