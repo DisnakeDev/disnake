@@ -35,7 +35,7 @@ runs:
         key: uv-lock-resolved-${{ inputs.uv-resolution-strategy }}
         path: uv.lock
         restore-keys: |
-          uv-lock-resolved-${{ env.UV_RESOLUTION }}
+          uv-lock-resolved-${{ inputs.uv-resolution-strategy }}
         enableCrossOsArchive: true
         fail-on-cache-miss: ${{ inputs.update-uv-lock != 'true' }}
 
