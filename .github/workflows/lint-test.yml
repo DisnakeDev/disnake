@@ -56,7 +56,9 @@ jobs:
     # unlike the other workflows, we explicitly use the same version as
     # readthedocs (see .readthedocs.yml) here for consistency
     runs-on: ubuntu-24.04
-    needs: lock-dependencies
+    needs:
+      - lock-dependencies
+      - lint
     steps:
       - uses: actions/checkout@v4
 
@@ -70,7 +72,9 @@ jobs:
 
   pyright:
     runs-on: ubuntu-latest
-    needs: lock-dependencies
+    needs:
+      - lock-dependencies
+      - lint
     strategy:
       matrix:
         python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
@@ -123,7 +127,9 @@ jobs:
 
   misc:
     runs-on: ubuntu-latest
-    needs: lock-dependencies
+    needs:
+      - lock-dependencies
+      - lint
     steps:
       - uses: actions/checkout@v4
 
@@ -157,6 +163,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - lock-dependencies
+      - lint
     steps:
       - uses: actions/checkout@v4
 
@@ -181,7 +188,9 @@ jobs:
 
   pytest:
     runs-on: ${{ matrix.os }}
-    needs: lock-dependencies
+    needs:
+      - lock-dependencies
+      - lint
     strategy:
       matrix:
         python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
