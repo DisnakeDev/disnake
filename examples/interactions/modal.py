@@ -47,16 +47,24 @@ class MyModal(disnake.ui.Modal):
                     required=False,
                 ),
             ),
+            disnake.ui.Label(
+                "Send ephemerally?",
+                component=disnake.ui.StringSelect(
+                    custom_id="send_ephemeral",
+                    options=["yes", "no"],
+                ),
+            ),
         ]
         super().__init__(title="Create Tag", components=components)
 
     async def callback(self, inter: disnake.ModalInteraction) -> None:
         tag_name = inter.values["name"]
         tag_content = inter.values["content"]
+        send_ephemeral = inter.values["send_ephemeral"] == ["yes"]
 
         embed = disnake.Embed(title=f"Tag created: `{tag_name}`")
         embed.add_field(name="Content", value=tag_content)
-        await inter.response.send_message(embed=embed)
+        await inter.response.send_message(embed=embed, ephemeral=send_ephemeral)
 
     async def on_error(self, error: Exception, inter: disnake.ModalInteraction) -> None:
         await inter.response.send_message("Oops, something went wrong.", ephemeral=True)
@@ -106,6 +114,13 @@ async def create_tag_low(inter: disnake.CommandInteraction):
                     required=False,
                 ),
             ),
+            disnake.ui.Label(
+                "Send ephemerally?",
+                component=disnake.ui.StringSelect(
+                    custom_id="send_ephemeral",
+                    options=["yes", "no"],
+                ),
+            ),
         ],
     )
 
@@ -123,10 +138,11 @@ async def create_tag_low(inter: disnake.CommandInteraction):
 
     tag_name = modal_inter.values["name"]
     tag_content = modal_inter.values["content"]
+    send_ephemeral = modal_inter.values["send_ephemeral"] == ["yes"]
 
     embed = disnake.Embed(title=f"Tag created: `{tag_name}`")
     embed.add_field(name="Content", value=tag_content)
-    await modal_inter.response.send_message(embed=embed)
+    await modal_inter.response.send_message(embed=embed, ephemeral=send_ephemeral)
 
 
 @bot.event
