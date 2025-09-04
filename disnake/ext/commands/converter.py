@@ -345,7 +345,7 @@ class UserConverter(IDConverter[disnake.User]):
 
             if isinstance(result, disnake.Member):
                 return result._user
-            return result
+            return result  # type: ignore
 
         username, _, discriminator = argument.rpartition("#")
         # n.b. there's no builtin method that only matches arabic digits, `isdecimal` is the closest one.
@@ -1297,7 +1297,12 @@ async def _actual_conversion(
         raise BadArgument(f'Converting to "{name}" failed for parameter "{param.name}".') from exc
 
 
-async def run_converters(ctx: Context, converter, argument: str, param: inspect.Parameter):
+async def run_converters(
+    ctx: Context,
+    converter: Any,
+    argument: str,
+    param: inspect.Parameter,
+) -> Any:
     """|coro|
 
     Runs converters for a given converter, argument, and parameter.
@@ -1330,7 +1335,7 @@ async def run_converters(ctx: Context, converter, argument: str, param: inspect.
     origin = getattr(converter, "__origin__", None)
 
     if origin is Union:
-        errors = []
+        errors: List[CommandError] = []
         _NoneType = type(None)
         union_args = converter.__args__
         for conv in union_args:
@@ -1352,7 +1357,7 @@ async def run_converters(ctx: Context, converter, argument: str, param: inspect.
         raise BadUnionArgument(param, union_args, errors)
 
     if origin is Literal:
-        errors = []
+        errors: List[CommandError] = []
         conversions = {}
         literal_args = converter.__args__
         for literal in literal_args:
