@@ -420,6 +420,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         self._banner = member._banner
         self._communication_disabled_until = member.current_timeout
         self._flags = member._flags
+        self._avatar_decoration_data = member._avatar_decoration_data
 
         # Reference will not be copied unless necessary by PRESENCE_UPDATE
         # See below
