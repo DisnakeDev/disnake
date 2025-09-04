@@ -116,7 +116,7 @@ class PermissionTypings(BaseCodemodCommand):
         is_overload = False
         previously_generated = False
         for deco in node.decorators:
-            if isinstance(deco.decorator, cst.Call):
+            if not isinstance(deco.decorator, cst.Name):
                 continue
             name = deco.decorator.value
             if name == "_overload_with_permissions":

@@ -3191,8 +3191,10 @@ class Guild(Hashable):
 
         Returns a list of all active instant invites from the guild.
 
-        You must have :attr:`~Permissions.manage_guild` permission to
-        use this.
+        You must have :attr:`~Permissions.manage_guild` or :attr:`~Permissions.view_audit_log`
+        permission to use this.
+        Some attributes (see :ref:`table <invite_attr_table>`) are only available with
+        :attr:`~Permissions.manage_guild` permissions.
 
         .. note::
 

@@ -78,6 +78,7 @@ __all__ = (
     "VoiceChannelEffectAnimationType",
     "MessageReferenceType",
     "SeparatorSpacing",
+    "NameplatePalette",
 )
 
 EnumMetaT = TypeVar("EnumMetaT", bound="Type[EnumMeta]")
@@ -2388,6 +2389,36 @@ class SeparatorSpacing(Enum):
     """Small spacing."""
     large = 2
     """Large spacing."""
+
+
+class NameplatePalette(Enum):
+    """Specifies the palette of a :class:`Nameplate`.
+
+    .. versionadded:: 2.11
+    """
+
+    crimson = "crimson"
+    """Crimson color palette."""
+    berry = "berry"
+    """Berry color palette."""
+    sky = "sky"
+    """Sky color palette."""
+    teal = "teal"
+    """Teal color palette."""
+    forest = "forest"
+    """Forest color palette."""
+    bubble_gum = "bubble_gum"
+    """Bubble gum color palette."""
+    violet = "violet"
+    """Violet color palette."""
+    cobalt = "cobalt"
+    """Cobalt color palette."""
+    clover = "clover"
+    """Clover color palette."""
+    lemon = "lemon"
+    """Lemon color palette."""
+    white = "white"
+    """White color palette."""
 
 
 T = TypeVar("T")

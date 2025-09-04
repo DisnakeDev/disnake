@@ -11,6 +11,7 @@ from typing import (
     Awaitable,
     Callable,
     Dict,
+    Generator,
     List,
     Optional,
     TypeVar,
@@ -29,7 +30,7 @@ from .integrations import PartialIntegration
 from .object import Object
 from .subscription import Subscription
 from .threads import Thread
-from .utils import maybe_coroutine, snowflake_time, time_snowflake
+from .utils import deprecated, maybe_coroutine, parse_time, snowflake_time, time_snowflake
 
 __all__ = (
     "ReactionIterator",
@@ -1309,3 +1310,76 @@ class PollAnswerIterator(_AsyncIterator[Union["User", "Member"]]):
                 if not (self.guild is None or isinstance(self.guild, Object)):
                     member = self.guild.get_member(int(element["id"]))
                 await self.users.put(member or self.state.create_user(data=element))
+
+
+class ChannelPinsIterator(_AsyncIterator["Message"]):
+    def __init__(
+        self,
+        messageable: Messageable,
+        *,
+        limit: Optional[int],
+        before: Optional[Union[Snowflake, datetime.datetime]] = None,
+    ) -> None:
+        before_ = None
+        if before is not None:
+            if isinstance(before, datetime.datetime):
+                before_ = before.isoformat()
+            elif isinstance(before, Object):
+                before_ = snowflake_time(before.id).isoformat()
+            else:
+                raise TypeError(
+                    f"Expected either `disnake.Snowflake` or `datetime.datetime` for `before`. Got `{before.__class__.__name__!r}`."
+                )
+
+        self.messageable = messageable
+        self._state = messageable._state
+        self.limit = limit
+        self.before: Optional[str] = before_
+
+        self.getter = self._state.http.get_pins
+        self.messages: asyncio.Queue[Message] = asyncio.Queue()
+
+    # defined to maintain backward compatibility with the old `pins` method
+    @deprecated("async for msg in channel.pins()")
+    def __await__(self) -> Generator[None, None, List[Message]]:
+        return self.flatten().__await__()
+
+    async def next(self) -> Message:
+        if self.messages.empty():
+            await self.fill_messages()
+
+        try:
+            return self.messages.get_nowait()
+        except asyncio.QueueEmpty:
+            raise NoMoreItems from None
+
+    def _get_retrieve(self) -> bool:
+        self.retrieve = min(self.limit, 50) if self.limit is not None else 50
+        return self.retrieve > 0
+
+    async def fill_messages(self) -> None:
+        if not hasattr(self, "channel"):
+            channel = await self.messageable._get_channel()
+            self.channel = channel
+
+        if self._get_retrieve():
+            data = await self.getter(
+                channel_id=self.channel.id,
+                before=self.before,
+                limit=self.retrieve,
+            )
+
+            if len(data):
+                if self.limit is not None:
+                    self.limit -= self.retrieve
+
+                if data["items"]:
+                    self.before = data["items"][-1]["pinned_at"]
+
+            if not data["has_more"]:
+                self.limit = 0  # terminate loop
+
+            for element in data["items"]:
+                message = self._state.create_message(channel=self.channel, data=element["message"])
+                message._pinned_at = parse_time(element["pinned_at"])
+                await self.messages.put(message)

@@ -1158,6 +1158,7 @@ class Message(Hashable):
         "poll",
         "_edited_timestamp",
         "_role_subscription_data",
+        "_pinned_at",
     )
 
     if TYPE_CHECKING:
@@ -1198,6 +1199,7 @@ class Message(Hashable):
         )
         self.type: MessageType = try_enum(MessageType, data["type"])
         self.pinned: bool = data["pinned"]
+        self._pinned_at: Optional[datetime.datetime] = None
         self.flags: MessageFlags = MessageFlags._from_value(data.get("flags", 0))
         self.mention_everyone: bool = data["mention_everyone"]
         self.tts: bool = data["tts"]
@@ -1281,7 +1283,8 @@ class Message(Hashable):
 
     def __repr__(self) -> str:
         name = self.__class__.__name__
-        return f"<{name} id={self.id} channel={self.channel!r} type={self.type!r} author={self.author!r} flags={self.flags!r}>"
+        content = (self.content[:22] + "...") if len(self.content) > 25 else self.content
+        return f"<{name} id={self.id} content={content!r} channel={self.channel!r} type={self.type!r} author={self.author!r} flags={self.flags!r}>"
 
     def _try_patch(self, data, key, transform=None) -> None:
         try:
@@ -1555,6 +1558,17 @@ class Message(Hashable):
     def edited_at(self) -> Optional[datetime.datetime]:
         """Optional[:class:`datetime.datetime`]: An aware UTC datetime object containing the edited time of the message."""
         return self._edited_timestamp
+
+    @property
+    def pinned_at(self) -> Optional[datetime.datetime]:
+        """Optional[:class:`datetime.datetime`]: An aware UTC datetime object containing the pin time of the message.
+
+        .. note::
+            This is only set on messages retrieved using :meth:`abc.Messageable.pins`.
+
+        .. versionadded:: 2.11
+        """
+        return self._pinned_at
 
     @property
     def jump_url(self) -> str:
@@ -2137,7 +2151,7 @@ class Message(Hashable):
 
         Pins the message.
 
-        You must have the :attr:`~Permissions.manage_messages` permission to do
+        You must have the :attr:`~Permissions.pin_messages` permission to do
         this in a non-private channel context.
 
         This does not work with messages sent in a :class:`VoiceChannel` or :class:`StageChannel`.
@@ -2167,7 +2181,7 @@ class Message(Hashable):
 
         Unpins the message.
 
-        You must have the :attr:`~Permissions.manage_messages` permission to do
+        You must have the :attr:`~Permissions.pin_messages` permission to do
         this in a non-private channel context.
 
         Parameters

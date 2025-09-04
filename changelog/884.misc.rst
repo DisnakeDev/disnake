@@ -1,0 +1,1 @@
+Add the first 25 characters of :attr:`Message.content` to the repr of ``Message``.

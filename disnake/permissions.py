@@ -191,6 +191,7 @@ class Permissions(BaseFlags):
         moderate_members: bool = ...,
         move_members: bool = ...,
         mute_members: bool = ...,
+        pin_messages: bool = ...,
         priority_speaker: bool = ...,
         read_message_history: bool = ...,
         read_messages: bool = ...,
@@ -410,6 +411,9 @@ class Permissions(BaseFlags):
 
         .. versionchanged:: 2.10
             Moved :attr:`use_application_commands` permission to :attr:`apps`.
+
+        .. versionchanged:: 2.11
+            Added :attr:`pin_messages` permission.
         """
         return cls(
             send_messages=True,
@@ -427,6 +431,7 @@ class Permissions(BaseFlags):
             read_message_history=True,
             send_tts_messages=True,
             send_voice_messages=True,
+            pin_messages=True,
             send_polls=True,
         )
 
@@ -593,6 +598,7 @@ class Permissions(BaseFlags):
         moderate_members: bool = ...,
         move_members: bool = ...,
         mute_members: bool = ...,
+        pin_messages: bool = ...,
         priority_speaker: bool = ...,
         read_message_history: bool = ...,
         read_messages: bool = ...,
@@ -754,7 +760,7 @@ class Permissions(BaseFlags):
 
     @flag_value
     def manage_messages(self) -> int:
-        """:class:`bool`: Returns ``True`` if a user can delete or pin messages in a text channel.
+        """:class:`bool`: Returns ``True`` if a user can delete messages in a text channel.
 
         .. note::
 
@@ -1077,6 +1083,14 @@ class Permissions(BaseFlags):
         """
         return 1 << 50
 
+    @flag_value
+    def pin_messages(self) -> int:
+        """:class:`bool`: Returns ``True`` if a user can pin and unpin messages.
+
+        .. versionadded:: 2.11
+        """
+        return 1 << 51
+
 
 def _augment_from_permissions(cls):
     cls.VALID_NAMES = set(Permissions.VALID_FLAGS)
@@ -1176,6 +1190,7 @@ class PermissionOverwrite:
         moderate_members: Optional[bool]
         move_members: Optional[bool]
         mute_members: Optional[bool]
+        pin_messages: Optional[bool]
         priority_speaker: Optional[bool]
         read_message_history: Optional[bool]
         read_messages: Optional[bool]
@@ -1244,6 +1259,7 @@ class PermissionOverwrite:
         moderate_members: Optional[bool] = ...,
         move_members: Optional[bool] = ...,
         mute_members: Optional[bool] = ...,
+        pin_messages: Optional[bool] = ...,
         priority_speaker: Optional[bool] = ...,
         read_message_history: Optional[bool] = ...,
         read_messages: Optional[bool] = ...,
@@ -1377,6 +1393,7 @@ class PermissionOverwrite:
         moderate_members: Optional[bool] = ...,
         move_members: Optional[bool] = ...,
         mute_members: Optional[bool] = ...,
+        pin_messages: Optional[bool] = ...,
         priority_speaker: Optional[bool] = ...,
         read_message_history: Optional[bool] = ...,
         read_messages: Optional[bool] = ...,
