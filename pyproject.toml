@@ -123,7 +123,6 @@ test = { cmd = "nox -Rs test --", help = "Run pytest" }
 
 [tool.ruff]
 line-length = 100
-target-version = "py38"
 
 [tool.ruff.lint]
 select = ["ALL"]
