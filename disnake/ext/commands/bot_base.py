@@ -84,7 +84,7 @@ def when_mentioned_or(*prefixes: str) -> Callable[[BotBase, Message], List[str]]
     :func:`.when_mentioned`
     """
 
-    def inner(bot, msg):
+    def inner(bot: BotBase, msg: Message) -> List[str]:
         r = list(prefixes)
         r = when_mentioned(bot, msg) + r
         return r
@@ -136,8 +136,7 @@ class BotBase(CommonBotBase, GroupMixin):
         elif (
             # note: no need to check for empty iterables,
             # as they won't be allowed by `get_prefix`
-            command_prefix is not when_mentioned
-            and not self.intents.message_content
+            command_prefix is not when_mentioned and not self.intents.message_content
         ):
             warnings.warn(
                 "Message Content intent is not enabled and a prefix is configured. "

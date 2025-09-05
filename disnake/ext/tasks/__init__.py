@@ -138,7 +138,7 @@ class Loop(Generic[LF]):
         else:
             await coro(*args, **kwargs)
 
-    def _try_sleep_until(self, dt: datetime.datetime):
+    def _try_sleep_until(self, dt: datetime.datetime) -> asyncio.Future[bool]:
         self._handle = SleepHandle(dt=dt, loop=self.loop)
         return self._handle.wait()
 
@@ -689,7 +689,9 @@ class Loop(Generic[LF]):
             self._time = self._get_time_parameter(time)
             self._sleep = self._seconds = self._minutes = self._hours = MISSING
 
-        if self.is_running():
+        # `_last_iteration` can be missing if `change_interval` gets called in `before_loop` or
+        # before the event loop ticks after `start()`
+        if self.is_running() and self._last_iteration is not MISSING:
             if self._time is not MISSING:
                 # prepare the next time index starting from after the last iteration
                 self._prepare_time_index(now=self._last_iteration)
@@ -705,11 +707,9 @@ L_co = TypeVar("L_co", bound=Loop, covariant=True)
 
 
 class Object(Protocol[T_co, P]):
-    def __new__(cls) -> T_co:
-        ...
+    def __new__(cls) -> T_co: ...
 
-    def __init__(self, *args: P.args, **kwargs: P.kwargs) -> None:
-        ...
+    def __init__(self, *args: P.args, **kwargs: P.kwargs) -> None: ...
 
 
 @overload
@@ -722,15 +722,13 @@ def loop(
     count: Optional[int] = None,
     reconnect: bool = True,
     loop: asyncio.AbstractEventLoop = ...,
-) -> Callable[[LF], Loop[LF]]:
-    ...
+) -> Callable[[LF], Loop[LF]]: ...
 
 
 @overload
 def loop(
     cls: Type[Object[L_co, Concatenate[LF, P]]], *_: P.args, **kwargs: P.kwargs
-) -> Callable[[LF], L_co]:
-    ...
+) -> Callable[[LF], L_co]: ...
 
 
 def loop(

@@ -20,7 +20,7 @@ class DecoratorMeta:
 
 
 @pytest.fixture(params=["slash", "user", "message"])
-def meta(request):
+def meta(request) -> DecoratorMeta:
     return DecoratorMeta(request.param)
 
 
@@ -28,18 +28,15 @@ class TestDefaultPermissions:
     def test_decorator(self, meta: DecoratorMeta) -> None:
         class Cog(commands.Cog):
             @meta.decorator(default_member_permissions=64)
-            async def cmd(self, _) -> None:
-                ...
+            async def cmd(self, _) -> None: ...
 
             @commands.default_member_permissions(64)
             @meta.decorator()
-            async def above(self, _) -> None:
-                ...
+            async def above(self, _) -> None: ...
 
             @meta.decorator()
             @commands.default_member_permissions(64)
-            async def below(self, _) -> None:
-                ...
+            async def below(self, _) -> None: ...
 
         for c in (Cog, Cog()):
             assert c.cmd.default_member_permissions == Permissions(64)
@@ -53,8 +50,7 @@ class TestDefaultPermissions:
             class Cog(commands.Cog):
                 @commands.default_member_permissions(32)
                 @meta.decorator(default_member_permissions=64)
-                async def above(self, _) -> None:
-                    ...
+                async def above(self, _) -> None: ...
 
         # putting the decorator below shouldn't fail, for now
         # FIXME: (this is a side effect of how command copying works,
@@ -63,8 +59,7 @@ class TestDefaultPermissions:
         class Cog2(commands.Cog):
             @meta.decorator(default_member_permissions=64)
             @commands.default_member_permissions(32)
-            async def below(self, _) -> None:
-                ...
+            async def below(self, _) -> None: ...
 
         for c in (Cog2, Cog2()):
             assert c.below.default_member_permissions == Permissions(32)
@@ -74,22 +69,18 @@ class TestDefaultPermissions:
 
         class Cog(commands.Cog, **kwargs):
             @meta.decorator()
-            async def no_overwrite(self, _) -> None:
-                ...
+            async def no_overwrite(self, _) -> None: ...
 
             @meta.decorator(default_member_permissions=64)
-            async def overwrite(self, _) -> None:
-                ...
+            async def overwrite(self, _) -> None: ...
 
             @commands.default_member_permissions(64)
             @meta.decorator()
-            async def overwrite_decorator_above(self, _) -> None:
-                ...
+            async def overwrite_decorator_above(self, _) -> None: ...
 
             @meta.decorator()
             @commands.default_member_permissions(64)
-            async def overwrite_decorator_below(self, _) -> None:
-                ...
+            async def overwrite_decorator_below(self, _) -> None: ...
 
         assert Cog.no_overwrite.default_member_permissions is None
         assert Cog().no_overwrite.default_member_permissions == Permissions(32)
@@ -112,8 +103,7 @@ def test_contexts_guildcommandinteraction(meta: DecoratorMeta) -> None:
         @commands.install_types(user=True)
         # this is a legacy parameter, essentially the same as using `GuildCommandInteraction`
         @meta.decorator(guild_only=True)
-        async def cmd(self, _) -> None:
-            ...
+        async def cmd(self, _) -> None: ...
 
     for c in (Cog, Cog()):
         assert c.cmd.contexts == disnake.InteractionContextTypes(guild=True)
@@ -129,8 +119,7 @@ class TestDefaultContexts:
 
     def test_default(self, bot: commands.InteractionBot) -> None:
         @bot.slash_command()
-        async def c(inter) -> None:
-            ...
+        async def c(inter) -> None: ...
 
         assert c.body.to_dict().get("contexts") == [1]
         assert "dm_permission" not in c.body.to_dict()
@@ -138,15 +127,13 @@ class TestDefaultContexts:
     def test_decorator_override(self, bot: commands.InteractionBot) -> None:
         @commands.contexts(private_channel=True)
         @bot.slash_command()
-        async def c(inter) -> None:
-            ...
+        async def c(inter) -> None: ...
 
         assert c.body.to_dict().get("contexts") == [2]
 
     def test_annotation_override(self, bot: commands.InteractionBot) -> None:
         @bot.slash_command()
-        async def c(inter: disnake.GuildCommandInteraction) -> None:
-            ...
+        async def c(inter: disnake.GuildCommandInteraction) -> None: ...
 
         assert c.body.to_dict().get("contexts") == [0]
 
@@ -154,8 +141,7 @@ class TestDefaultContexts:
         with warnings.catch_warnings(record=True):
 
             @bot.slash_command(dm_permission=False)
-            async def c(inter) -> None:
-                ...
+            async def c(inter) -> None: ...
 
         # if dm_permission was set, the `contexts` default shouldn't apply
         assert c.body.to_dict().get("contexts") is None
@@ -169,8 +155,7 @@ def test_localization_copy() -> None:
             self,
             inter,
             param: int = commands.Param(name=disnake.Localized("param", key="PARAM")),
-        ) -> None:
-            ...
+        ) -> None: ...
 
     # Ensure the command copy that happens on cog init doesn't raise a LocalizationWarning for the options.
     cog = Cog()

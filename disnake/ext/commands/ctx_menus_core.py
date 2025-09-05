@@ -136,7 +136,7 @@ class InvokableUserCommand(InvokableApplicationCommand):
         **kwargs: Any,
     ) -> None:
         # the target may just not be passed in
-        args = (target or interaction.target,) + args
+        args = (target or interaction.target, *args)
         if self.cog is not None:
             await safe_call(self.callback, self.cog, interaction, *args, **kwargs)
         else:
@@ -248,7 +248,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         **kwargs: Any,
     ) -> None:
         # the target may just not be passed in
-        args = (target or interaction.target,) + args
+        args = (target or interaction.target, *args)
         if self.cog is not None:
             await safe_call(self.callback, self.cog, interaction, *args, **kwargs)
         else:
@@ -335,7 +335,7 @@ def user_command(
     """
 
     def decorator(
-        func: InteractionCommandCallback[CogT, UserCommandInteraction, P]
+        func: InteractionCommandCallback[CogT, UserCommandInteraction, P],
     ) -> InvokableUserCommand:
         if not asyncio.iscoroutinefunction(func):
             raise TypeError(f"<{func.__qualname__}> must be a coroutine function")
@@ -443,7 +443,7 @@ def message_command(
     """
 
     def decorator(
-        func: InteractionCommandCallback[CogT, MessageCommandInteraction, P]
+        func: InteractionCommandCallback[CogT, MessageCommandInteraction, P],
     ) -> InvokableMessageCommand:
         if not asyncio.iscoroutinefunction(func):
             raise TypeError(f"<{func.__qualname__}> must be a coroutine function")

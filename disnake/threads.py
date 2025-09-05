@@ -11,6 +11,7 @@ from .enums import ChannelType, ThreadArchiveDuration, try_enum, try_enum_to_int
 from .errors import ClientException
 from .flags import ChannelFlags
 from .mixins import Hashable
+from .object import Object
 from .partial_emoji import PartialEmoji, _EmojiTag
 from .permissions import Permissions
 from .utils import MISSING, _get_as_snowflake, _unique, parse_time, snowflake_time
@@ -169,7 +170,7 @@ class Thread(Messageable, Hashable):
         self._members: Dict[int, ThreadMember] = {}
         self._from_data(data)
 
-    async def _get_channel(self):
+    async def _get_channel(self) -> Self:
         return self
 
     def __repr__(self) -> str:
@@ -244,12 +245,14 @@ class Thread(Messageable, Hashable):
     @property
     def parent(self) -> Optional[Union[TextChannel, ForumChannel, MediaChannel]]:
         """Optional[Union[:class:`TextChannel`, :class:`ForumChannel`, :class:`MediaChannel`]]: The parent channel this thread belongs to."""
+        if isinstance(self.guild, Object):
+            return None
         return self.guild.get_channel(self.parent_id)  # type: ignore
 
     @property
     def owner(self) -> Optional[Member]:
         """Optional[:class:`Member`]: The member this thread belongs to."""
-        if self.owner_id is None:
+        if self.owner_id is None or isinstance(self.guild, Object):
             return None
         return self.guild.get_member(self.owner_id)
 
@@ -428,6 +431,13 @@ class Thread(Messageable, Hashable):
         so this method has different behavior than calling the parent's
         :attr:`GuildChannel.permissions_for <.abc.GuildChannel.permissions_for>`
         method directly.
+
+        .. note::
+            If the thread originated from an :class:`.Interaction` and
+            the :attr:`.guild` attribute is unavailable, such as with
+            user-installed applications in guilds, this method will not work
+            due to an API limitation.
+            Consider using :attr:`.Interaction.permissions` or :attr:`~.Interaction.app_permissions` instead.
 
         .. versionchanged:: 2.9
             Properly takes :attr:`Permissions.send_messages_in_threads`

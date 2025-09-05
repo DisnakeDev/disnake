@@ -281,21 +281,24 @@ class Invite(Hashable):
     +------------------------------------+---------------------------------------------------------------------+
     |             Attribute              |                          Method                                     |
     +====================================+=====================================================================+
-    | :attr:`max_age`                    | :meth:`abc.GuildChannel.invites`\\, :meth:`Guild.invites`            |
+    | :attr:`max_age`                    | :meth:`Guild.invites` with :attr:`~Permissions.manage_guild`        |
+    |                                    | permissions, :meth:`abc.GuildChannel.invites`                       |
     +------------------------------------+---------------------------------------------------------------------+
-    | :attr:`max_uses`                   | :meth:`abc.GuildChannel.invites`\\, :meth:`Guild.invites`            |
+    | :attr:`max_uses`                   | :meth:`Guild.invites` with :attr:`~Permissions.manage_guild`        |
+    |                                    | permissions, :meth:`abc.GuildChannel.invites`                       |
     +------------------------------------+---------------------------------------------------------------------+
-    | :attr:`created_at`                 | :meth:`abc.GuildChannel.invites`\\, :meth:`Guild.invites`            |
+    | :attr:`created_at`                 | :meth:`Guild.invites` with :attr:`~Permissions.manage_guild`        |
+    |                                    | permissions, :meth:`abc.GuildChannel.invites`                       |
     +------------------------------------+---------------------------------------------------------------------+
-    | :attr:`temporary`                  | :meth:`abc.GuildChannel.invites`\\, :meth:`Guild.invites`            |
+    | :attr:`temporary`                  | :meth:`Guild.invites` with :attr:`~Permissions.manage_guild`        |
+    |                                    | permissions, :meth:`abc.GuildChannel.invites`                       |
     +------------------------------------+---------------------------------------------------------------------+
-    | :attr:`uses`                       | :meth:`abc.GuildChannel.invites`\\, :meth:`Guild.invites`            |
+    | :attr:`uses`                       | :meth:`Guild.invites` with :attr:`~Permissions.manage_guild`        |
+    |                                    | permissions, :meth:`abc.GuildChannel.invites`                       |
     +------------------------------------+---------------------------------------------------------------------+
     | :attr:`approximate_member_count`   | :meth:`Client.fetch_invite` with ``with_counts`` enabled            |
     +------------------------------------+---------------------------------------------------------------------+
     | :attr:`approximate_presence_count` | :meth:`Client.fetch_invite` with ``with_counts`` enabled            |
-    +------------------------------------+---------------------------------------------------------------------+
-    | :attr:`expires_at`                 | :meth:`Client.fetch_invite` with ``with_expiration`` enabled        |
     +------------------------------------+---------------------------------------------------------------------+
     | :attr:`guild_scheduled_event`      | :meth:`Client.fetch_invite` with valid ``guild_scheduled_event_id`` |
     |                                    | or valid event ID in URL or invite object                           |
@@ -347,8 +350,7 @@ class Invite(Hashable):
 
         Optional according to the :ref:`table <invite_attr_table>` above.
     expires_at: Optional[:class:`datetime.datetime`]
-        The expiration date of the invite. If the value is ``None`` when received through
-        :meth:`Client.fetch_invite` with ``with_expiration`` enabled, the invite will never expire.
+        The expiration date of the invite. If the value is ``None`` the invite will never expire.
 
         .. versionadded:: 2.0
 
@@ -435,7 +437,9 @@ class Invite(Hashable):
         )
 
         inviter_data = data.get("inviter")
-        self.inviter: Optional[User] = None if inviter_data is None else self._state.create_user(inviter_data)  # type: ignore
+        self.inviter: Optional[User] = (
+            None if inviter_data is None else self._state.create_user(inviter_data)  # type: ignore
+        )
 
         self.channel: Optional[InviteChannelType] = self._resolve_channel(
             data.get("channel"), channel
@@ -457,7 +461,9 @@ class Invite(Hashable):
             self.guild_welcome_screen: Optional[WelcomeScreen] = None
 
         target_user_data = data.get("target_user")
-        self.target_user: Optional[User] = None if target_user_data is None else self._state.create_user(target_user_data)  # type: ignore
+        self.target_user: Optional[User] = (
+            None if target_user_data is None else self._state.create_user(target_user_data)  # type: ignore
+        )
 
         self.target_type: InviteTarget = try_enum(InviteTarget, data.get("target_type", 0))
 

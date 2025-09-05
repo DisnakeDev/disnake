@@ -100,13 +100,11 @@ class CommandSyncFlags(BaseFlags):
         sync_global_commands: bool = ...,
         sync_guild_commands: bool = ...,
         sync_on_cog_actions: bool = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     @_generated
-    def __init__(self: NoReturn) -> None:
-        ...
+    def __init__(self: NoReturn) -> None: ...
 
     def __init__(self, **kwargs: bool) -> None:
         self.value = all_flags_value(self.VALID_FLAGS)
@@ -140,11 +138,11 @@ class CommandSyncFlags(BaseFlags):
         return self
 
     @property
-    def _sync_enabled(self):
+    def _sync_enabled(self) -> bool:
         return self.sync_global_commands or self.sync_guild_commands
 
     @alias_flag_value
-    def sync_commands(self):
+    def sync_commands(self) -> int:
         """:class:`bool`: Whether to sync global and guild app commands.
 
         This controls the :attr:`sync_global_commands` and :attr:`sync_guild_commands` attributes.
@@ -154,17 +152,17 @@ class CommandSyncFlags(BaseFlags):
         return 1 << 3 | 1 << 4
 
     @flag_value
-    def sync_commands_debug(self):
+    def sync_commands_debug(self) -> int:
         """:class:`bool`: Whether or not to show app command sync debug messages."""
         return 1 << 0
 
     @flag_value
-    def sync_on_cog_actions(self):
+    def sync_on_cog_actions(self) -> int:
         """:class:`bool`: Whether or not to sync app commands on cog load, unload, or reload."""
         return 1 << 1
 
     @flag_value
-    def allow_command_deletion(self):
+    def allow_command_deletion(self) -> int:
         """:class:`bool`: Whether to allow commands to be deleted by automatic command sync.
 
         Current implementation of commands sync of renamed commands means that a rename of a command *will* result
@@ -173,11 +171,11 @@ class CommandSyncFlags(BaseFlags):
         return 1 << 2
 
     @flag_value
-    def sync_global_commands(self):
+    def sync_global_commands(self) -> int:
         """:class:`bool`: Whether to sync global commands."""
         return 1 << 3
 
     @flag_value
-    def sync_guild_commands(self):
+    def sync_guild_commands(self) -> int:
         """:class:`bool`: Whether to sync per-guild commands."""
         return 1 << 4

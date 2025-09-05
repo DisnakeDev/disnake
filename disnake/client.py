@@ -677,12 +677,10 @@ class Client:
     @overload
     async def get_or_fetch_user(
         self, user_id: int, *, strict: Literal[False] = ...
-    ) -> Optional[User]:
-        ...
+    ) -> Optional[User]: ...
 
     @overload
-    async def get_or_fetch_user(self, user_id: int, *, strict: Literal[True]) -> User:
-        ...
+    async def get_or_fetch_user(self, user_id: int, *, strict: Literal[True]) -> User: ...
 
     async def get_or_fetch_user(self, user_id: int, *, strict: bool = False) -> Optional[User]:
         """|coro|
@@ -1349,7 +1347,7 @@ class Client:
             raise TypeError("activity must derive from BaseActivity.")
 
     @property
-    def status(self):
+    def status(self) -> Status:
         """:class:`.Status`: The status being used upon logging on to Discord.
 
         .. versionadded:: 2.0
@@ -2236,8 +2234,8 @@ class Client:
         url: Union[Invite, str],
         *,
         with_counts: bool = True,
-        with_expiration: bool = True,
         guild_scheduled_event_id: Optional[int] = None,
+        with_expiration: bool = False,
     ) -> Invite:
         """|coro|
 
@@ -2257,12 +2255,6 @@ class Client:
             Whether to include count information in the invite. This fills the
             :attr:`.Invite.approximate_member_count` and :attr:`.Invite.approximate_presence_count`
             fields.
-        with_expiration: :class:`bool`
-            Whether to include the expiration date of the invite. This fills the
-            :attr:`.Invite.expires_at` field.
-
-            .. versionadded:: 2.0
-
         guild_scheduled_event_id: :class:`int`
             The ID of the scheduled event to include in the invite.
             If not provided, defaults to the ``event`` parameter in the URL if it exists,
@@ -2282,6 +2274,14 @@ class Client:
         :class:`.Invite`
             The invite from the URL/ID.
         """
+        if with_expiration:
+            utils.warn_deprecated(
+                "Using the `with_expiration` argument is deprecated and will "
+                "result in an error in future versions. "
+                "The `expires_at` field is always included now.",
+                stacklevel=2,
+            )
+
         invite_id, params = utils.resolve_invite(url, with_params=True)
 
         if not guild_scheduled_event_id:
@@ -2294,7 +2294,6 @@ class Client:
         data = await self.http.get_invite(
             invite_id,
             with_counts=with_counts,
-            with_expiration=with_expiration,
             guild_scheduled_event_id=guild_scheduled_event_id,
         )
         return Invite.from_incomplete(state=self._connection, data=data)
@@ -2738,22 +2737,20 @@ class Client:
         return await self._connection.fetch_global_command(command_id)
 
     @overload
-    async def create_global_command(self, application_command: SlashCommand) -> APISlashCommand:
-        ...
+    async def create_global_command(self, application_command: SlashCommand) -> APISlashCommand: ...
 
     @overload
-    async def create_global_command(self, application_command: UserCommand) -> APIUserCommand:
-        ...
+    async def create_global_command(self, application_command: UserCommand) -> APIUserCommand: ...
 
     @overload
-    async def create_global_command(self, application_command: MessageCommand) -> APIMessageCommand:
-        ...
+    async def create_global_command(
+        self, application_command: MessageCommand
+    ) -> APIMessageCommand: ...
 
     @overload
     async def create_global_command(
         self, application_command: ApplicationCommand
-    ) -> APIApplicationCommand:
-        ...
+    ) -> APIApplicationCommand: ...
 
     async def create_global_command(
         self, application_command: ApplicationCommand
@@ -2780,26 +2777,22 @@ class Client:
     @overload
     async def edit_global_command(
         self, command_id: int, new_command: SlashCommand
-    ) -> APISlashCommand:
-        ...
+    ) -> APISlashCommand: ...
 
     @overload
     async def edit_global_command(
         self, command_id: int, new_command: UserCommand
-    ) -> APIUserCommand:
-        ...
+    ) -> APIUserCommand: ...
 
     @overload
     async def edit_global_command(
         self, command_id: int, new_command: MessageCommand
-    ) -> APIMessageCommand:
-        ...
+    ) -> APIMessageCommand: ...
 
     @overload
     async def edit_global_command(
         self, command_id: int, new_command: ApplicationCommand
-    ) -> APIApplicationCommand:
-        ...
+    ) -> APIApplicationCommand: ...
 
     async def edit_global_command(
         self, command_id: int, new_command: ApplicationCommand
@@ -2918,26 +2911,22 @@ class Client:
     @overload
     async def create_guild_command(
         self, guild_id: int, application_command: SlashCommand
-    ) -> APISlashCommand:
-        ...
+    ) -> APISlashCommand: ...
 
     @overload
     async def create_guild_command(
         self, guild_id: int, application_command: UserCommand
-    ) -> APIUserCommand:
-        ...
+    ) -> APIUserCommand: ...
 
     @overload
     async def create_guild_command(
         self, guild_id: int, application_command: MessageCommand
-    ) -> APIMessageCommand:
-        ...
+    ) -> APIMessageCommand: ...
 
     @overload
     async def create_guild_command(
         self, guild_id: int, application_command: ApplicationCommand
-    ) -> APIApplicationCommand:
-        ...
+    ) -> APIApplicationCommand: ...
 
     async def create_guild_command(
         self, guild_id: int, application_command: ApplicationCommand
@@ -2966,26 +2955,22 @@ class Client:
     @overload
     async def edit_guild_command(
         self, guild_id: int, command_id: int, new_command: SlashCommand
-    ) -> APISlashCommand:
-        ...
+    ) -> APISlashCommand: ...
 
     @overload
     async def edit_guild_command(
         self, guild_id: int, command_id: int, new_command: UserCommand
-    ) -> APIUserCommand:
-        ...
+    ) -> APIUserCommand: ...
 
     @overload
     async def edit_guild_command(
         self, guild_id: int, command_id: int, new_command: MessageCommand
-    ) -> APIMessageCommand:
-        ...
+    ) -> APIMessageCommand: ...
 
     @overload
     async def edit_guild_command(
         self, guild_id: int, command_id: int, new_command: ApplicationCommand
-    ) -> APIApplicationCommand:
-        ...
+    ) -> APIApplicationCommand: ...
 
     async def edit_guild_command(
         self, guild_id: int, command_id: int, new_command: ApplicationCommand
@@ -3297,6 +3282,10 @@ class Client:
         """|coro|
 
         Creates a new test :class:`.Entitlement` for the given user or guild, with no expiry.
+
+        .. note::
+            This is only meant to be used with subscription SKUs. To test one-time purchases,
+            use Application Test Mode.
 
         Parameters
         ----------

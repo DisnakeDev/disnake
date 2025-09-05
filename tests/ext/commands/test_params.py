@@ -118,7 +118,7 @@ class TestBaseRange:
     def test_backwards_compatible(self, create: Any, expected) -> None:
         with pytest.warns(DeprecationWarning, match=r"without an explicit type argument"):
             value = create()
-            assert (value.underlying_type, value.min_value, value.max_value) == expected
+        assert (value.underlying_type, value.min_value, value.max_value) == expected
 
 
 class TestRange:
@@ -216,8 +216,7 @@ class TestRangeStringParam:
 
 class TestIsolateSelf:
     def test_function_simple(self) -> None:
-        def func(a: int) -> None:
-            ...
+        def func(a: int) -> None: ...
 
         (cog, inter), params = commands.params.isolate_self(func)
         assert cog is None
@@ -225,8 +224,7 @@ class TestIsolateSelf:
         assert params.keys() == {"a"}
 
     def test_function_inter(self) -> None:
-        def func(inter: disnake.ApplicationCommandInteraction, a: int) -> None:
-            ...
+        def func(inter: disnake.ApplicationCommandInteraction, a: int) -> None: ...
 
         (cog, inter), params = commands.params.isolate_self(func)
         assert cog is None  # should not be set
@@ -235,8 +233,7 @@ class TestIsolateSelf:
 
     def test_unbound_method(self) -> None:
         class Cog(commands.Cog):
-            def func(self, inter: disnake.ApplicationCommandInteraction, a: int) -> None:
-                ...
+            def func(self, inter: disnake.ApplicationCommandInteraction, a: int) -> None: ...
 
         (cog, inter), params = commands.params.isolate_self(Cog.func)
         assert cog is not None  # *should* be set here
@@ -246,8 +243,7 @@ class TestIsolateSelf:
     # I don't think the param parsing logic ever handles bound methods, but testing for regressions anyway
     def test_bound_method(self) -> None:
         class Cog(commands.Cog):
-            def func(self, inter: disnake.ApplicationCommandInteraction, a: int) -> None:
-                ...
+            def func(self, inter: disnake.ApplicationCommandInteraction, a: int) -> None: ...
 
         (cog, inter), params = commands.params.isolate_self(Cog().func)
         assert cog is None  # should not be set here, since method is already bound
@@ -255,8 +251,7 @@ class TestIsolateSelf:
         assert params.keys() == {"a"}
 
     def test_generic(self) -> None:
-        def func(inter: disnake.ApplicationCommandInteraction[commands.Bot], a: int) -> None:
-            ...
+        def func(inter: disnake.ApplicationCommandInteraction[commands.Bot], a: int) -> None: ...
 
         (cog, inter), params = commands.params.isolate_self(func)
         assert cog is None
@@ -267,8 +262,7 @@ class TestIsolateSelf:
         def func(
             inter: Union[commands.Context, disnake.ApplicationCommandInteraction[commands.Bot]],
             a: int,
-        ) -> None:
-            ...
+        ) -> None: ...
 
         (cog, inter), params = commands.params.isolate_self(func)
         assert cog is None

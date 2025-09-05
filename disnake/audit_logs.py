@@ -118,8 +118,8 @@ def _transform_guild_id(entry: AuditLogEntry, data: Optional[Snowflake]) -> Opti
 
 def _transform_overwrites(
     entry: AuditLogEntry, data: List[PermissionOverwritePayload]
-) -> List[Tuple[Object, PermissionOverwrite]]:
-    overwrites = []
+) -> List[Tuple[Union[Object, Member, Role, User], PermissionOverwrite]]:
+    overwrites: List[Tuple[Union[Object, Member, Role, User], PermissionOverwrite]] = []
     for elem in data:
         allow = Permissions(int(elem["allow"]))
         deny = Permissions(int(elem["deny"]))
@@ -216,7 +216,7 @@ def _flags_transformer(
 
 
 def _list_transformer(
-    func: Callable[[AuditLogEntry, Any], T]
+    func: Callable[[AuditLogEntry, Any], T],
 ) -> Callable[[AuditLogEntry, Any], List[T]]:
     def _transform(entry: AuditLogEntry, data: Any) -> List[T]:
         if not data:
@@ -303,11 +303,9 @@ class AuditLogDiff:
 
     if TYPE_CHECKING:
 
-        def __getattr__(self, item: str) -> Any:
-            ...
+        def __getattr__(self, item: str) -> Any: ...
 
-        def __setattr__(self, key: str, value: Any) -> Any:
-            ...
+        def __setattr__(self, key: str, value: Any) -> Any: ...
 
 
 Transformer = Callable[["AuditLogEntry", Any], Any]
@@ -672,6 +670,7 @@ class AuditLogEntry(Hashable):
                 enums.AuditLogAction.automod_block_message,
                 enums.AuditLogAction.automod_send_alert_message,
                 enums.AuditLogAction.automod_timeout,
+                enums.AuditLogAction.automod_quarantine_user,
             ):
                 elems = {
                     "channel": (
@@ -828,6 +827,7 @@ class AuditLogEntry(Hashable):
             "uses": changeset.uses,
             "type": 0,
             "channel": None,
+            "expires_at": None,
         }
 
         obj = Invite(

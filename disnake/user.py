@@ -8,9 +8,9 @@ import disnake.abc
 
 from .asset import Asset
 from .colour import Colour
-from .enums import Locale, try_enum
+from .enums import Locale, NameplatePalette, try_enum
 from .flags import PublicUserFlags
-from .utils import MISSING, _assetbytes_to_base64_data, snowflake_time
+from .utils import MISSING, _assetbytes_to_base64_data, _get_as_snowflake, snowflake_time
 
 if TYPE_CHECKING:
     from datetime import datetime
@@ -25,14 +25,20 @@ if TYPE_CHECKING:
     from .types.channel import DMChannel as DMChannelPayload
     from .types.user import (
         AvatarDecorationData as AvatarDecorationDataPayload,
+        Collectibles as CollectiblesPayload,
+        Nameplate as NameplatePayload,
         PartialUser as PartialUserPayload,
         User as UserPayload,
+        UserPrimaryGuild as UserPrimaryGuildPayload,
     )
 
 
 __all__ = (
     "User",
     "ClientUser",
+    "Nameplate",
+    "Collectibles",
+    "PrimaryGuild",
 )
 
 
@@ -52,9 +58,11 @@ class BaseUser(_UserTag):
         "_avatar",
         "_banner",
         "_avatar_decoration_data",
+        "_collectibles",
         "_accent_colour",
         "_public_flags",
         "_state",
+        "_primary_guild",
     )
 
     if TYPE_CHECKING:
@@ -68,8 +76,10 @@ class BaseUser(_UserTag):
         _avatar: Optional[str]
         _banner: Optional[str]
         _avatar_decoration_data: Optional[AvatarDecorationDataPayload]
+        _collectibles: Optional[CollectiblesPayload]
         _accent_colour: Optional[int]
         _public_flags: int
+        _primary_guild: Optional[UserPrimaryGuildPayload]
 
     def __init__(
         self, *, state: ConnectionState, data: Union[UserPayload, PartialUserPayload]
@@ -107,10 +117,12 @@ class BaseUser(_UserTag):
         self._avatar = data["avatar"]
         self._banner = data.get("banner", None)
         self._avatar_decoration_data = data.get("avatar_decoration_data", None)
+        self._collectibles = data.get("collectibles")
         self._accent_colour = data.get("accent_color", None)
         self._public_flags = data.get("public_flags", 0)
         self.bot = data.get("bot", False)
         self.system = data.get("system", False)
+        self._primary_guild = data.get("primary_guild")
 
     @classmethod
     def _copy(cls, user: BaseUser) -> Self:
@@ -140,6 +152,8 @@ class BaseUser(_UserTag):
             "bot": self.bot,
             "public_flags": self._public_flags,
             "avatar_decoration_data": self._avatar_decoration_data,
+            "collectibles": self._collectibles,
+            "primary_guild": self._primary_guild,
         }
 
     @property
@@ -217,6 +231,16 @@ class BaseUser(_UserTag):
         return Asset._from_avatar_decoration(self._state, self._avatar_decoration_data["asset"])
 
     @property
+    def collectibles(self) -> Collectibles:
+        """:class:`Collectibles`: Returns the user's collectibles.
+
+        .. versionadded:: 2.11
+        """
+        return Collectibles(
+            state=self._state, data=(self._collectibles if self._collectibles else {})
+        )
+
+    @property
     def accent_colour(self) -> Optional[Colour]:
         """Optional[:class:`Colour`]: Returns the user's accent colour, if applicable.
 
@@ -288,6 +312,19 @@ class BaseUser(_UserTag):
             Added :attr:`.global_name`.
         """
         return self.global_name or self.name
+
+    @property
+    def primary_guild(self) -> Optional[PrimaryGuild]:
+        """Optional[:class:`PrimaryGuild`]: Returns the user's primary guild, if any.
+
+        .. versionadded:: 2.11
+        """
+        if self._primary_guild is not None:
+            return PrimaryGuild(
+                state=self._state,
+                data=self._primary_guild,
+            )
+        return None
 
     def mentioned_in(self, message: Message) -> bool:
         """Checks if the user is mentioned in the specified message.
@@ -456,6 +493,93 @@ class ClientUser(BaseUser):
         return ClientUser(state=self._state, data=data)
 
 
+class Nameplate:
+    """
+    Represents the decoration behind the name of a user that appears
+    in the server, DM and DM group members list.
+
+    .. versionadded:: 2.11
+
+    Attributes
+    ----------
+    sku_id: :class:`int`
+        The ID of the nameplate SKU.
+    label: :class:`str`
+        The label of this nameplate.
+    palette: :class:`NameplatePalette`
+        The background color of the nameplate.
+    """
+
+    __slots__ = (
+        "sku_id",
+        "label",
+        "palette",
+        "_state",
+        "_asset",
+    )
+
+    def __init__(self, *, state: ConnectionState, data: NameplatePayload) -> None:
+        self._state: ConnectionState = state
+        self.sku_id: int = int(data["sku_id"])
+        self._asset: str = data["asset"]
+        self.label: str = data["label"]
+        self.palette = try_enum(NameplatePalette, data["palette"])
+
+    def __repr__(self) -> str:
+        return f"<Nameplate sku_id={self.sku_id} label={self.label!r} palette={self.palette}>"
+
+    @property
+    def animated_asset(self) -> Asset:
+        """:class:`Asset`: Returns the animated nameplate for the user.
+
+        .. versionadded:: 2.11
+
+        .. note::
+
+             Since Discord always sends a WEBM for animated nameplates,
+             the following methods will not work as expected:
+
+             - :meth:`Asset.replace`
+             - :meth:`Asset.with_size`
+             - :meth:`Asset.with_format`
+             - :meth:`Asset.with_static_format`
+        """
+        return Asset._from_nameplate(self._state, self._asset)
+
+    @property
+    def static_asset(self) -> Asset:
+        """:class:`Asset`: Returns the static nameplate for the user.
+
+        .. versionadded:: 2.11
+        """
+        return Asset._from_nameplate(self._state, self._asset, animated=False)
+
+
+class Collectibles:
+    """
+    Represents the collectibles the user has, excluding Avatar Decorations and Profile Effects.
+
+    .. versionadded:: 2.11
+
+    Attributes
+    ----------
+    nameplate: Optional[:class:`Nameplate`]
+        The nameplate of the user, if available.
+    """
+
+    __slots__ = ("nameplate",)
+
+    def __init__(self, state: ConnectionState, data: CollectiblesPayload) -> None:
+        self.nameplate: Optional[Nameplate] = (
+            Nameplate(state=state, data=nameplate_data)
+            if (nameplate_data := data.get("nameplate"))
+            else None
+        )
+
+    def __repr__(self) -> str:
+        return f"<Collectibles nameplate={self.nameplate}>"
+
+
 class User(BaseUser, disnake.abc.Messageable):
     """Represents a Discord user.
 
@@ -557,3 +681,47 @@ class User(BaseUser, disnake.abc.Messageable):
         state = self._state
         data: DMChannelPayload = await state.http.start_private_message(self.id)
         return state.add_dm_channel(data)
+
+
+class PrimaryGuild:
+    """Represents a user's primary guild.
+
+    .. versionadded:: 2.11
+
+    Attributes
+    ----------
+    guild_id: Optional[:class:`int`]
+        The ID of the user's primary guild.
+    identity_enabled: Optional[:class:`bool`]
+        Whether the user is displaying the primary guild's server tag. This can be ``None``
+        if the system clears the identity, e.g. the server no longer supports tags. This will be ``False``
+        if the user manually removes their tag.
+    tag: Optional[:class:`str`]
+        The text of the user's server tag, up to 4 characters.
+    """
+
+    __slots__ = (
+        "guild_id",
+        "identity_enabled",
+        "tag",
+        "_state",
+        "_badge",
+    )
+
+    def __init__(self, *, state: ConnectionState, data: UserPrimaryGuildPayload) -> None:
+        self._state = state
+        self.guild_id: Optional[int] = _get_as_snowflake(data, "identity_guild_id")
+        self.identity_enabled: Optional[bool] = data.get("identity_enabled")
+        self.tag: Optional[str] = data.get("tag")
+        self._badge: Optional[str] = data.get("badge")
+
+    def __repr__(self) -> str:
+        return f"<PrimaryGuild guild_id={self.guild_id} identity_enabled={self.identity_enabled} tag={self.tag}>"
+
+    @property
+    def badge(self) -> Optional[Asset]:
+        """Optional[:class:`Asset`]: Returns the server tag badge, if any."""
+        # if badge is not None identity_guild_id won't be None either
+        if self._badge is not None and self.guild_id is not None:
+            return Asset._from_guild_tag_badge(self._state, self.guild_id, self._badge)
+        return None

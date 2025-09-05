@@ -13,7 +13,10 @@ if TYPE_CHECKING:
 
     from .abc import Snowflake
     from .message import Message
-    from .types.message import AllowedMentions as AllowedMentionsPayload
+    from .types.message import (
+        AllowedMentions as AllowedMentionsPayload,
+        AllowedMentionType as AllowedMentionTypePayload,
+    )
 
 
 class _FakeBool:
@@ -116,8 +119,8 @@ class AllowedMentions:
         )
 
     def to_dict(self) -> AllowedMentionsPayload:
-        parse = []
-        data = {}
+        parse: List[AllowedMentionTypePayload] = []
+        data: AllowedMentionsPayload = {}  # type: ignore
 
         if self.everyone:
             parse.append("everyone")
@@ -136,7 +139,7 @@ class AllowedMentions:
             data["replied_user"] = True
 
         data["parse"] = parse
-        return data  # type: ignore
+        return data
 
     def merge(self, other: AllowedMentions) -> AllowedMentions:
         # Creates a new AllowedMentions by merging from another one.

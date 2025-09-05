@@ -87,6 +87,7 @@ from .role import Role
 from .soundboard import GuildSoundboardSound
 from .stage_instance import StageInstance
 from .sticker import GuildSticker
+from .subscription import Subscription
 from .threads import Thread, ThreadMember
 from .ui.modal import Modal, ModalStore
 from .ui.view import View, ViewStore
@@ -673,7 +674,7 @@ class ConnectionState:
         user_ids: Optional[List[int]],
         cache: bool,
         presences: bool,
-    ):
+    ) -> List[Member]:
         guild_id = guild.id
         ws = self._get_websocket(guild_id)
 
@@ -1447,14 +1448,12 @@ class ConnectionState:
     @overload
     async def chunk_guild(
         self, guild: Guild, *, wait: Literal[False], cache: Optional[bool] = None
-    ) -> asyncio.Future[List[Member]]:
-        ...
+    ) -> asyncio.Future[List[Member]]: ...
 
     @overload
     async def chunk_guild(
         self, guild: Guild, *, wait: Literal[True] = True, cache: Optional[bool] = None
-    ) -> List[Member]:
-        ...
+    ) -> List[Member]: ...
 
     async def chunk_guild(
         self, guild: Guild, *, wait: bool = True, cache: Optional[bool] = None
@@ -1471,7 +1470,7 @@ class ConnectionState:
             return await request.wait()
         return request.get_future()
 
-    async def _chunk_and_dispatch(self, guild, unavailable) -> None:
+    async def _chunk_and_dispatch(self, guild: Guild, unavailable: Optional[bool]) -> None:
         try:
             await asyncio.wait_for(self.chunk_guild(guild), timeout=60.0)
         except asyncio.TimeoutError:
@@ -2007,6 +2006,18 @@ class ConnectionState:
         entitlement = Entitlement(data=data, state=self)
         self.dispatch("entitlement_delete", entitlement)
 
+    def parse_subscription_create(self, data: gateway.SubscriptionCreate) -> None:
+        subscription = Subscription(data=data, state=self)
+        self.dispatch("subscription_create", subscription)
+
+    def parse_subscription_update(self, data: gateway.SubscriptionUpdate) -> None:
+        subscription = Subscription(data=data, state=self)
+        self.dispatch("subscription_update", subscription)
+
+    def parse_subscription_delete(self, data: gateway.SubscriptionDelete) -> None:
+        subscription = Subscription(data=data, state=self)
+        self.dispatch("subscription_delete", subscription)
+
     def parse_guild_soundboard_sound_create(self, data: gateway.GuildSoundboardSoundCreate) -> None:
         guild_id = utils._get_as_snowflake(data, "guild_id")
         guild = self._get_guild(guild_id)
@@ -2024,7 +2035,7 @@ class ConnectionState:
         self._handle_soundboard_update(
             guild,
             # append new sound
-            guild.soundboard_sounds + (sound,),
+            (*guild.soundboard_sounds, sound),
         )
 
     def parse_guild_soundboard_sound_update(self, data: gateway.GuildSoundboardSoundUpdate) -> None:
@@ -2192,8 +2203,7 @@ class ConnectionState:
         guild: Optional[Union[Guild, Object]],
         *,
         return_messageable: Literal[False] = False,
-    ) -> AnyChannel:
-        ...
+    ) -> AnyChannel: ...
 
     @overload
     def _get_partial_interaction_channel(
@@ -2202,8 +2212,7 @@ class ConnectionState:
         guild: Optional[Union[Guild, Object]],
         *,
         return_messageable: Literal[True],
-    ) -> MessageableChannel:
-        ...
+    ) -> MessageableChannel: ...
 
     # note: this resolves unknown types to `PartialMessageable`
     def _get_partial_interaction_channel(
@@ -2273,7 +2282,10 @@ class ConnectionState:
         *,
         with_localizations: bool = True,
     ) -> List[APIApplicationCommand]:
-        results = await self.http.get_global_commands(self.application_id, with_localizations=with_localizations)  # type: ignore
+        results = await self.http.get_global_commands(
+            self.application_id,  # type: ignore
+            with_localizations=with_localizations,
+        )
         return [application_command_factory(data) for data in results]
 
     async def fetch_global_command(self, command_id: int) -> APIApplicationCommand:
@@ -2284,7 +2296,8 @@ class ConnectionState:
         self, application_command: ApplicationCommand
     ) -> APIApplicationCommand:
         result = await self.http.upsert_global_command(
-            self.application_id, application_command.to_dict()  # type: ignore
+            self.application_id,  # type: ignore
+            application_command.to_dict(),
         )
         cmd = application_command_factory(result)
         self._add_global_application_command(cmd)
@@ -2294,7 +2307,9 @@ class ConnectionState:
         self, command_id: int, new_command: ApplicationCommand
     ) -> APIApplicationCommand:
         result = await self.http.edit_global_command(
-            self.application_id, command_id, new_command.to_dict()  # type: ignore
+            self.application_id,  # type: ignore
+            command_id,
+            new_command.to_dict(),
         )
         cmd = application_command_factory(result)
         self._add_global_application_command(cmd)
@@ -2321,7 +2336,11 @@ class ConnectionState:
         *,
         with_localizations: bool = True,
     ) -> List[APIApplicationCommand]:
-        results = await self.http.get_guild_commands(self.application_id, guild_id, with_localizations=with_localizations)  # type: ignore
+        results = await self.http.get_guild_commands(
+            self.application_id,  # type: ignore
+            guild_id,
+            with_localizations=with_localizations,
+        )
         return [application_command_factory(data) for data in results]
 
     async def fetch_guild_command(self, guild_id: int, command_id: int) -> APIApplicationCommand:
@@ -2332,7 +2351,9 @@ class ConnectionState:
         self, guild_id: int, application_command: ApplicationCommand
     ) -> APIApplicationCommand:
         result = await self.http.upsert_guild_command(
-            self.application_id, guild_id, application_command.to_dict()  # type: ignore
+            self.application_id,  # type: ignore
+            guild_id,
+            application_command.to_dict(),
         )
         cmd = application_command_factory(result)
         self._add_guild_application_command(guild_id, cmd)
@@ -2342,7 +2363,10 @@ class ConnectionState:
         self, guild_id: int, command_id: int, new_command: ApplicationCommand
     ) -> APIApplicationCommand:
         result = await self.http.edit_guild_command(
-            self.application_id, guild_id, command_id, new_command.to_dict()  # type: ignore
+            self.application_id,  # type: ignore
+            guild_id,
+            command_id,
+            new_command.to_dict(),
         )
         cmd = application_command_factory(result)
         self._add_guild_application_command(guild_id, cmd)
@@ -2350,7 +2374,9 @@ class ConnectionState:
 
     async def delete_guild_command(self, guild_id: int, command_id: int) -> None:
         await self.http.delete_guild_command(
-            self.application_id, guild_id, command_id  # type: ignore
+            self.application_id,  # type: ignore
+            guild_id,
+            command_id,
         )
         self._remove_guild_application_command(guild_id, command_id)
 
@@ -2359,7 +2385,9 @@ class ConnectionState:
     ) -> List[APIApplicationCommand]:
         payload = [cmd.to_dict() for cmd in application_commands]
         results = await self.http.bulk_upsert_guild_commands(
-            self.application_id, guild_id, payload  # type: ignore
+            self.application_id,  # type: ignore
+            guild_id,
+            payload,
         )
         commands = [application_command_factory(data) for data in results]
         self._guild_application_commands[guild_id] = {cmd.id: cmd for cmd in commands}
@@ -2371,7 +2399,8 @@ class ConnectionState:
         self, guild_id: int
     ) -> List[GuildApplicationCommandPermissions]:
         array = await self.http.get_guild_application_command_permissions(
-            self.application_id, guild_id  # type: ignore
+            self.application_id,  # type: ignore
+            guild_id,
         )
         return [GuildApplicationCommandPermissions(state=self, data=obj) for obj in array]
 
@@ -2379,7 +2408,9 @@ class ConnectionState:
         self, guild_id: int, command_id: int
     ) -> GuildApplicationCommandPermissions:
         data = await self.http.get_application_command_permissions(
-            self.application_id, guild_id, command_id  # type: ignore
+            self.application_id,  # type: ignore
+            guild_id,
+            command_id,
         )
         return GuildApplicationCommandPermissions(state=self, data=data)
 

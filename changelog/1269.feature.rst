@@ -1,0 +1,1 @@
+|commands| Allow passing autocompleters that take a :class:`~ext.commands.Cog` as first argument to :class:`~ext.commands.Param`.

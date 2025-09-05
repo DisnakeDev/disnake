@@ -1,3 +1,11 @@
+#!/usr/bin/env -S pdm run
+# /// script
+# requires-python = ">=3.10"
+# dependencies = [
+#     "nox==2025.5.1",
+# ]
+# ///
+
 # SPDX-License-Identifier: MIT
 
 from __future__ import annotations
@@ -17,14 +25,14 @@ if TYPE_CHECKING:
 
     NoxSessionFunc = Callable[Concatenate[nox.Session, P], T]
 
+nox.needs_version = ">=2025.5.1"
 
-# see https://pdm.fming.dev/latest/usage/advanced/#use-nox-as-the-runner
+# see https://pdm-project.org/latest/usage/advanced/#use-nox-as-the-runner
 os.environ.update(
     {
         "PDM_IGNORE_SAVED_PYTHON": "1",
     },
 )
-
 
 nox.options.error_on_external_run = True
 nox.options.reuse_existing_virtualenvs = True
@@ -35,7 +43,6 @@ nox.options.sessions = [
     "pyright",
     "test",
 ]
-nox.needs_version = ">=2022.1.7"
 
 
 # used to reset cached coverage data once for the first test run only
@@ -116,7 +123,6 @@ def autotyping(session: nox.Session) -> None:
             "disnake",
             "scripts",
             "tests",
-            "test_bot",
             "noxfile.py",
         ): ("--aggressive",),
         ("examples",): (
@@ -168,7 +174,7 @@ def codemod(session: nox.Session) -> None:
     session.run_always("pdm", "install", "-dG", "codemod", external=True)
 
     base_command = ["python", "-m", "libcst.tool"]
-    base_command_codemod = base_command + ["codemod"]
+    base_command_codemod = [*base_command, "codemod"]
     if not session.interactive:
         base_command_codemod += ["--hide-progress"]
 
@@ -248,3 +254,7 @@ def coverage(session: nox.Session) -> None:
         )
     if "erase" in session.posargs:
         session.run("coverage", "erase")
+
+
+if __name__ == "__main__":
+    nox.main()

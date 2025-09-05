@@ -208,7 +208,7 @@ class InvokableApplicationCommand(ABC):
             other._buckets = self._buckets.copy()
         if self._max_concurrency != other._max_concurrency:
             # _max_concurrency won't be None at this point
-            other._max_concurrency = cast(MaxConcurrency, self._max_concurrency).copy()
+            other._max_concurrency = cast("MaxConcurrency", self._max_concurrency).copy()
 
         if (
             # see https://github.com/DisnakeDev/disnake/pull/678#discussion_r938113624:
@@ -728,6 +728,7 @@ def default_member_permissions(
     moderate_members: bool = ...,
     move_members: bool = ...,
     mute_members: bool = ...,
+    pin_messages: bool = ...,
     priority_speaker: bool = ...,
     read_message_history: bool = ...,
     read_messages: bool = ...,
@@ -753,16 +754,14 @@ def default_member_permissions(
     view_channel: bool = ...,
     view_creator_monetization_analytics: bool = ...,
     view_guild_insights: bool = ...,
-) -> Callable[[T], T]:
-    ...
+) -> Callable[[T], T]: ...
 
 
 @overload
 @_generated
 def default_member_permissions(
     value: int = 0,
-) -> Callable[[T], T]:
-    ...
+) -> Callable[[T], T]: ...
 
 
 @_overload_with_permissions

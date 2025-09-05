@@ -14,6 +14,7 @@
 - When that's all done, we receive opcode 4 from the vWS.
 - Finally we can transmit data to endpoint:port.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -282,7 +283,7 @@ class VoiceClient(VoiceProtocol):
             )
             return
 
-        self.endpoint, _, _ = endpoint.rpartition(":")
+        self.endpoint = endpoint
         if self.endpoint.startswith("wss://"):
             # Just in case, strip it off since we're going to add it later
             self.endpoint = self.endpoint[6:]
@@ -504,7 +505,7 @@ class VoiceClient(VoiceProtocol):
 
     # audio related
 
-    def _get_voice_packet(self, data):
+    def _get_voice_packet(self, data: bytes) -> bytes:
         header = bytearray(12)
 
         # Formulate rtp header
@@ -517,7 +518,7 @@ class VoiceClient(VoiceProtocol):
         encrypt_packet = getattr(self, f"_encrypt_{self.mode}")
         return encrypt_packet(header, data)
 
-    def _get_nonce(self, pad: int):
+    def _get_nonce(self, pad: int) -> Tuple[bytes, bytes]:
         # returns (nonce, padded_nonce).
         # n.b. all currently implemented modes use the same nonce size (192 bits / 24 bytes)
         nonce = struct.pack(">I", self._lite_nonce)

@@ -44,6 +44,7 @@ from .file import File
 from .flags import ChannelFlags, MessageFlags
 from .iterators import ArchivedThreadIterator
 from .mixins import Hashable
+from .object import Object
 from .partial_emoji import PartialEmoji
 from .permissions import PermissionOverwrite, Permissions
 from .soundboard import GuildSoundboardSound, PartialSoundboardSound, SoundboardSound
@@ -95,7 +96,7 @@ if TYPE_CHECKING:
     from .types.soundboard import PartialSoundboardSound as PartialSoundboardSoundPayload
     from .types.threads import ThreadArchiveDurationLiteral
     from .types.voice import VoiceChannelEffect as VoiceChannelEffectPayload
-    from .ui.action_row import Components, MessageUIComponent
+    from .ui._types import MessageComponents
     from .ui.view import View
     from .user import BaseUser, ClientUser, User
     from .voice_region import VoiceRegion
@@ -305,7 +306,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         )
         self._fill_overwrites(data)
 
-    async def _get_channel(self):
+    async def _get_channel(self) -> Self:
         return self
 
     @property
@@ -341,6 +342,8 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
     @property
     def members(self) -> List[Member]:
         """List[:class:`Member`]: Returns all members that can see this channel."""
+        if isinstance(self.guild, Object):
+            return []
         return [m for m in self.guild.members if self.permissions_for(m).view_channel]
 
     @property
@@ -349,6 +352,8 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
         .. versionadded:: 2.0
         """
+        if isinstance(self.guild, Object):
+            return []
         return [thread for thread in self.guild._threads.values() if thread.parent_id == self.id]
 
     def is_nsfw(self) -> bool:
@@ -395,8 +400,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         category: Optional[Snowflake] = ...,
         sync_permissions: bool = ...,
         reason: Optional[str] = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     # only passing `sync_permissions` may or may not return a channel,
     # depending on whether the channel is in a category
@@ -406,8 +410,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         *,
         sync_permissions: bool,
         reason: Optional[str] = ...,
-    ) -> Optional[TextChannel]:
-        ...
+    ) -> Optional[TextChannel]: ...
 
     @overload
     async def edit(
@@ -426,8 +429,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = ...,
         flags: ChannelFlags = ...,
         reason: Optional[str] = ...,
-    ) -> TextChannel:
-        ...
+    ) -> TextChannel: ...
 
     async def edit(
         self,
@@ -981,6 +983,8 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         Optional[:class:`Thread`]
             The returned thread or ``None`` if not found.
         """
+        if isinstance(self.guild, Object):
+            return None
         return self.guild.get_thread(thread_id)
 
     @overload
@@ -992,8 +996,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         auto_archive_duration: Optional[AnyThreadArchiveDuration] = None,
         slowmode_delay: Optional[int] = None,
         reason: Optional[str] = None,
-    ) -> Thread:
-        ...
+    ) -> Thread: ...
 
     @overload
     async def create_thread(
@@ -1005,8 +1008,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         invitable: Optional[bool] = None,
         slowmode_delay: Optional[int] = None,
         reason: Optional[str] = None,
-    ) -> Thread:
-        ...
+    ) -> Thread: ...
 
     async def create_thread(
         self,
@@ -1222,7 +1224,10 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
     @property
     def members(self) -> List[Member]:
         """List[:class:`Member`]: Returns all members that are currently inside this voice channel."""
-        ret = []
+        if isinstance(self.guild, Object):
+            return []
+
+        ret: List[Member] = []
         for user_id, state in self.guild._voice_states.items():
             if state.channel and state.channel.id == self.id:
                 member = self.guild.get_member(user_id)
@@ -1246,6 +1251,9 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
         Mapping[:class:`int`, :class:`VoiceState`]
             The mapping of member ID to a voice state.
         """
+        if isinstance(self.guild, Object):
+            return {}
+
         return {
             key: value
             for key, value in self.guild._voice_states.items()
@@ -1384,7 +1392,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         self.slowmode_delay: int = data.get("rate_limit_per_user", 0)
         self.last_message_id: Optional[int] = utils._get_as_snowflake(data, "last_message_id")
 
-    async def _get_channel(self):
+    async def _get_channel(self: Self) -> Self:
         return self
 
     @property
@@ -1550,8 +1558,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         category: Optional[Snowflake] = ...,
         sync_permissions: bool = ...,
         reason: Optional[str] = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     # only passing `sync_permissions` may or may not return a channel,
     # depending on whether the channel is in a category
@@ -1561,8 +1568,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         *,
         sync_permissions: bool,
         reason: Optional[str] = ...,
-    ) -> Optional[VoiceChannel]:
-        ...
+    ) -> Optional[VoiceChannel]: ...
 
     @overload
     async def edit(
@@ -1581,8 +1587,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         slowmode_delay: Optional[int] = ...,
         flags: ChannelFlags = ...,
         reason: Optional[str] = ...,
-    ) -> VoiceChannel:
-        ...
+    ) -> VoiceChannel: ...
 
     async def edit(
         self,
@@ -2074,7 +2079,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         self.slowmode_delay: int = data.get("rate_limit_per_user", 0)
         self.last_message_id: Optional[int] = utils._get_as_snowflake(data, "last_message_id")
 
-    async def _get_channel(self):
+    async def _get_channel(self) -> Self:
         return self
 
     @property
@@ -2285,6 +2290,8 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         .. versionadded:: 2.0
         """
+        if isinstance(self.guild, Object):
+            return None
         return utils.get(self.guild.stage_instances, channel_id=self.id)
 
     async def create_instance(
@@ -2398,8 +2405,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         category: Optional[Snowflake] = ...,
         sync_permissions: bool = ...,
         reason: Optional[str] = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     # only passing `sync_permissions` may or may not return a channel,
     # depending on whether the channel is in a category
@@ -2409,8 +2415,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         *,
         sync_permissions: bool,
         reason: Optional[str] = ...,
-    ) -> Optional[StageChannel]:
-        ...
+    ) -> Optional[StageChannel]: ...
 
     @overload
     async def edit(
@@ -2429,8 +2434,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         slowmode_delay: Optional[int] = ...,
         flags: ChannelFlags = ...,
         reason: Optional[str] = ...,
-    ) -> StageChannel:
-        ...
+    ) -> StageChannel: ...
 
     async def edit(
         self,
@@ -2960,8 +2964,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         *,
         position: int,
         reason: Optional[str] = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     async def edit(
@@ -2973,8 +2976,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = ...,
         flags: ChannelFlags = ...,
         reason: Optional[str] = ...,
-    ) -> CategoryChannel:
-        ...
+    ) -> CategoryChannel: ...
 
     async def edit(
         self,
@@ -3060,8 +3062,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         offset: int = ...,
         sync_permissions: bool = ...,
         reason: Optional[str] = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     async def move(
@@ -3071,8 +3072,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         offset: int = ...,
         sync_permissions: bool = ...,
         reason: Optional[str] = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     async def move(
@@ -3082,8 +3082,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         offset: int = ...,
         sync_permissions: bool = ...,
         reason: Optional[str] = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     async def move(
@@ -3093,8 +3092,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         offset: int = ...,
         sync_permissions: bool = ...,
         reason: Optional[str] = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @utils.copy_doc(disnake.abc.GuildChannel.move)
     async def move(self, **kwargs: Any) -> None:
@@ -3107,8 +3105,10 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
 
         These are sorted by the official Discord UI, which places voice channels below the text channels.
         """
+        if isinstance(self.guild, Object):
+            return []
 
-        def comparator(channel):
+        def comparator(channel: GuildChannelType) -> Tuple[bool, int]:
             return (
                 not isinstance(channel, (TextChannel, ThreadOnlyGuildChannel)),
                 channel.position,
@@ -3121,6 +3121,9 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
     @property
     def text_channels(self) -> List[TextChannel]:
         """List[:class:`TextChannel`]: Returns the text channels that are under this category."""
+        if isinstance(self.guild, Object):
+            return []
+
         ret = [
             c
             for c in self.guild.channels
@@ -3132,6 +3135,9 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
     @property
     def voice_channels(self) -> List[VoiceChannel]:
         """List[:class:`VoiceChannel`]: Returns the voice channels that are under this category."""
+        if isinstance(self.guild, Object):
+            return []
+
         ret = [
             c
             for c in self.guild.channels
@@ -3146,6 +3152,9 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
 
         .. versionadded:: 1.7
         """
+        if isinstance(self.guild, Object):
+            return []
+
         ret = [
             c
             for c in self.guild.channels
@@ -3160,6 +3169,9 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
 
         .. versionadded:: 2.5
         """
+        if isinstance(self.guild, Object):
+            return []
+
         ret = [
             c
             for c in self.guild.channels
@@ -3174,6 +3186,9 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
 
         .. versionadded:: 2.10
         """
+        if isinstance(self.guild, Object):
+            return []
+
         ret = [
             c
             for c in self.guild.channels
@@ -3385,11 +3400,15 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
     @property
     def members(self) -> List[Member]:
         """List[:class:`Member`]: Returns all members that can see this channel."""
+        if isinstance(self.guild, Object):
+            return []
         return [m for m in self.guild.members if self.permissions_for(m).view_channel]
 
     @property
     def threads(self) -> List[Thread]:
         """List[:class:`Thread`]: Returns all the threads that you can see."""
+        if isinstance(self.guild, Object):
+            return []
         return [thread for thread in self.guild._threads.values() if thread.parent_id == self.id]
 
     def is_nsfw(self) -> bool:
@@ -3483,6 +3502,8 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         Optional[:class:`Thread`]
             The returned thread of ``None`` if not found.
         """
+        if isinstance(self.guild, Object):
+            return None
         return self.guild.get_thread(thread_id)
 
     @overload
@@ -3501,10 +3522,9 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
         allowed_mentions: AllowedMentions = ...,
         view: View = ...,
-        components: Components = ...,
+        components: MessageComponents = ...,
         reason: Optional[str] = None,
-    ) -> ThreadWithMessage:
-        ...
+    ) -> ThreadWithMessage: ...
 
     @overload
     async def create_thread(
@@ -3522,10 +3542,9 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
         allowed_mentions: AllowedMentions = ...,
         view: View = ...,
-        components: Components = ...,
+        components: MessageComponents = ...,
         reason: Optional[str] = None,
-    ) -> ThreadWithMessage:
-        ...
+    ) -> ThreadWithMessage: ...
 
     @overload
     async def create_thread(
@@ -3543,10 +3562,9 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
         allowed_mentions: AllowedMentions = ...,
         view: View = ...,
-        components: Components = ...,
+        components: MessageComponents = ...,
         reason: Optional[str] = None,
-    ) -> ThreadWithMessage:
-        ...
+    ) -> ThreadWithMessage: ...
 
     @overload
     async def create_thread(
@@ -3564,10 +3582,9 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
         allowed_mentions: AllowedMentions = ...,
         view: View = ...,
-        components: Components = ...,
+        components: MessageComponents = ...,
         reason: Optional[str] = None,
-    ) -> ThreadWithMessage:
-        ...
+    ) -> ThreadWithMessage: ...
 
     async def create_thread(
         self,
@@ -3586,7 +3603,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         view: View = MISSING,
-        components: Components[MessageUIComponent] = MISSING,
+        components: MessageComponents = MISSING,
         reason: Optional[str] = None,
     ) -> ThreadWithMessage:
         """|coro|
@@ -3639,16 +3656,17 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
             all the embeds from the UI if set to ``True``.
         flags: :class:`MessageFlags`
             The flags to set for this message.
-            Only :attr:`~MessageFlags.suppress_embeds` is supported.
+            Only :attr:`~MessageFlags.suppress_embeds` and :attr:`~MessageFlags.is_components_v2`
+            are supported.
 
             If parameter ``suppress_embeds`` is provided,
             that will override the setting of :attr:`MessageFlags.suppress_embeds`.
 
             .. versionadded:: 2.9
 
-        file: :class:`.File`
+        file: :class:`~disnake.File`
             The file to upload. This cannot be mixed with the ``files`` parameter.
-        files: List[:class:`.File`]
+        files: List[:class:`~disnake.File`]
             A list of files to upload. Must be a maximum of 10.
             This cannot be mixed with the ``file`` parameter.
         stickers: Sequence[Union[:class:`.GuildSticker`, :class:`.StandardSticker`, :class:`.StickerItem`]]
@@ -3664,6 +3682,12 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
             A Discord UI View to add to the message. This cannot be mixed with ``components``.
         components: |components_type|
             A list of components to include in the message. This cannot be mixed with ``view``.
+
+            .. note::
+                Passing v2 components here automatically sets the :attr:`~MessageFlags.is_components_v2` flag.
+                Setting this flag cannot be reverted. Note that this also disables the
+                ``content``, ``embeds``, and ``stickers`` fields.
+
         reason: Optional[:class:`str`]
             The reason for creating the thread. Shows up on the audit log.
 
@@ -3676,11 +3700,11 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         TypeError
             Specified both ``file`` and ``files``,
             or you specified both ``embed`` and ``embeds``,
-            or you specified both ``view`` and ``components``.
+            or you specified both ``view`` and ``components``,
             or you have passed an object that is not :class:`File` to ``file`` or ``files``.
         ValueError
-            Specified more than 10 embeds,
-            or more than 10 files.
+            Specified more than 10 embeds, or more than 10 files, or
+            you tried to send v2 components together with ``content``, ``embeds``, or ``stickers``.
 
         Returns
         -------
@@ -4000,8 +4024,7 @@ class ForumChannel(ThreadOnlyGuildChannel):
         category: Optional[Snowflake] = ...,
         sync_permissions: bool = ...,
         reason: Optional[str] = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     # only passing `sync_permissions` may or may not return a channel,
     # depending on whether the channel is in a category
@@ -4011,8 +4034,7 @@ class ForumChannel(ThreadOnlyGuildChannel):
         *,
         sync_permissions: bool,
         reason: Optional[str] = ...,
-    ) -> Optional[ForumChannel]:
-        ...
+    ) -> Optional[ForumChannel]: ...
 
     @overload
     async def edit(
@@ -4035,8 +4057,7 @@ class ForumChannel(ThreadOnlyGuildChannel):
         default_sort_order: Optional[ThreadSortOrder] = ...,
         default_layout: ThreadLayout = ...,
         reason: Optional[str] = ...,
-    ) -> ForumChannel:
-        ...
+    ) -> ForumChannel: ...
 
     async def edit(
         self,
@@ -4430,8 +4451,7 @@ class MediaChannel(ThreadOnlyGuildChannel):
         category: Optional[Snowflake] = ...,
         sync_permissions: bool = ...,
         reason: Optional[str] = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     # only passing `sync_permissions` may or may not return a channel,
     # depending on whether the channel is in a category
@@ -4441,8 +4461,7 @@ class MediaChannel(ThreadOnlyGuildChannel):
         *,
         sync_permissions: bool,
         reason: Optional[str] = ...,
-    ) -> Optional[MediaChannel]:
-        ...
+    ) -> Optional[MediaChannel]: ...
 
     @overload
     async def edit(
@@ -4464,8 +4483,7 @@ class MediaChannel(ThreadOnlyGuildChannel):
         default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = ...,
         default_sort_order: Optional[ThreadSortOrder] = ...,
         reason: Optional[str] = ...,
-    ) -> MediaChannel:
-        ...
+    ) -> MediaChannel: ...
 
     async def edit(
         self,
@@ -4771,7 +4789,7 @@ class DMChannel(disnake.abc.Messageable, Hashable):
         )
         self._flags: int = data.get("flags", 0)
 
-    async def _get_channel(self):
+    async def _get_channel(self) -> Self:
         return self
 
     def __str__(self) -> str:
@@ -4944,7 +4962,7 @@ class GroupChannel(disnake.abc.Messageable, Hashable):
         else:
             self.owner = utils.find(lambda u: u.id == self.owner_id, self.recipients)
 
-    async def _get_channel(self):
+    async def _get_channel(self) -> Self:
         return self
 
     def __str__(self) -> str:
@@ -5115,7 +5133,9 @@ class PartialMessageable(disnake.abc.Messageable, Hashable):
         return PartialMessage(channel=self, id=message_id)
 
 
-def _guild_channel_factory(channel_type: int):
+def _guild_channel_factory(
+    channel_type: int,
+) -> Tuple[Optional[Type[GuildChannelType]], ChannelType]:
     value = try_enum(ChannelType, channel_type)
     if value is ChannelType.text:
         return TextChannel, value
@@ -5135,7 +5155,11 @@ def _guild_channel_factory(channel_type: int):
         return None, value
 
 
-def _channel_factory(channel_type: int):
+def _channel_factory(
+    channel_type: int,
+) -> Tuple[
+    Optional[Union[Type[GuildChannelType], Type[DMChannel], Type[GroupChannel]]], ChannelType
+]:
     cls, value = _guild_channel_factory(channel_type)
     if value is ChannelType.private:
         return DMChannel, value
@@ -5145,14 +5169,21 @@ def _channel_factory(channel_type: int):
         return cls, value
 
 
-def _threaded_channel_factory(channel_type: int):
+def _threaded_channel_factory(
+    channel_type: int,
+) -> Tuple[
+    Optional[Union[Type[GuildChannelType], Type[DMChannel], Type[GroupChannel], Type[Thread]]],
+    ChannelType,
+]:
     cls, value = _channel_factory(channel_type)
     if value in (ChannelType.private_thread, ChannelType.public_thread, ChannelType.news_thread):
         return Thread, value
     return cls, value
 
 
-def _threaded_guild_channel_factory(channel_type: int):
+def _threaded_guild_channel_factory(
+    channel_type: int,
+) -> Tuple[Optional[Union[Type[GuildChannelType], Type[Thread]]], ChannelType]:
     cls, value = _guild_channel_factory(channel_type)
     if value in (ChannelType.private_thread, ChannelType.public_thread, ChannelType.news_thread):
         return Thread, value
@@ -5160,7 +5191,7 @@ def _threaded_guild_channel_factory(channel_type: int):
 
 
 def _channel_type_factory(
-    cls: Union[Type[disnake.abc.GuildChannel], Type[Thread]]
+    cls: Union[Type[disnake.abc.GuildChannel], Type[Thread]],
 ) -> List[ChannelType]:
     return {
         # FIXME: this includes private channels; improve this once there's a common base type for all channels
