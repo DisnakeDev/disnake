@@ -56,8 +56,7 @@ def install_deps(
         "PDM_IGNORE_SAVED_PYTHON": "1",
     }
 
-    for g in (*extras, *groups):
-        command.extend(("-G", g))
+    command.extend([f"-G={g}" for g in (*extras, *groups)])
 
     if not groups:
         # if no dev groups requested, make sure we don't install any
