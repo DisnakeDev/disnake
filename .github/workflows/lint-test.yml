@@ -5,10 +5,11 @@ name: Lint & Test
 on:
   push:
     branches:
-      - 'master'
-      - 'v[0-9]+.[0-9]+.x'  # matches to backport branches, e.g. v3.6.x
-      - 'run-ci/*'
+      - "master"
+      - "v[0-9]+.[0-9]+.x"  # matches to backport branches, e.g. v3.6.x
+      - "run-ci/**"
     tags:
+      - "*"
   pull_request:
   merge_group:
     types: [checks_requested]
@@ -145,7 +146,7 @@ jobs:
         if: (success() || failure()) && steps.setup.outcome == 'success'
         run: nox -s check-manifest
 
-    # This only runs if the previous steps were successful, no point in running it otherwise
+      # This only runs if the previous steps were successful, no point in running it otherwise
       - name: Try building package
         run: |
           pdm install -dG build
@@ -169,7 +170,7 @@ jobs:
         with:
           python-version: 3.8
 
-    # run the libcst parsers and check for changes
+      # run the libcst parsers and check for changes
       - name: libcst codemod
         run: |
           nox -s codemod -- run-all
@@ -217,7 +218,7 @@ jobs:
 
       - name: Run pytest
         id: run_tests
-      # use non-utc timezone, to test time/date-dependent features properly
+        # use non-utc timezone, to test time/date-dependent features properly
         env:
           TZ: "America/New_York"
         run: |
