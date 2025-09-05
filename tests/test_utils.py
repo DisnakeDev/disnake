@@ -33,12 +33,16 @@ from . import helpers, utils_helper_module
 
 if TYPE_CHECKING:
     from typing_extensions import TypeAliasType
+
+    T = TypeVar("T")
+    CoolList = TypeAliasType("CoolList", List[T], type_params=(T,))
+
 elif sys.version_info >= (3, 12):
     # non-3.12 tests shouldn't be using this
     from typing import TypeAliasType
 
-T = TypeVar("T")
-CoolList = TypeAliasType("CoolList", List[T], type_params=(T,))
+    T = TypeVar("T")
+    CoolList = TypeAliasType("CoolList", List[T], type_params=(T,))
 
 
 def test_missing() -> None:
