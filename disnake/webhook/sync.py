@@ -32,10 +32,18 @@ from .. import utils
 from ..channel import PartialMessageable
 from ..errors import DiscordServerError, Forbidden, HTTPException, NotFound, WebhookTokenMissing
 from ..flags import MessageFlags
-from ..http import Route
+from ..http import USER_AGENT, Route
 from ..message import Message
 from ..object import Object
 from .async_ import BaseWebhook, _WebhookState, handle_message_parameters
+
+try:
+    from requests import Session
+
+    DEFAULT_USER_AGENT = Session().headers.get("User-Agent")
+except Exception:
+    DEFAULT_USER_AGENT = None
+
 
 __all__ = (
     "SyncWebhook",
@@ -58,7 +66,7 @@ if TYPE_CHECKING:
     from ..types.webhook import Webhook as WebhookPayload
 
     try:
-        from requests import Response, Session
+        from requests import Response
     except ModuleNotFoundError:
         pass
 
@@ -113,6 +121,9 @@ class WebhookAdapter:
             lock = self._locks[bucket]
         except KeyError:
             self._locks[bucket] = lock = threading.Lock()
+
+        if session.headers.get("User-Agent") == DEFAULT_USER_AGENT:
+            headers["User-Agent"] = USER_AGENT
 
         if payload is not None:
             headers["Content-Type"] = "application/json"
