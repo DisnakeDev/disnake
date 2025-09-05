@@ -16,7 +16,6 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    ClassVar,
     Deque,
     Dict,
     Final,
@@ -37,7 +36,7 @@ from .enums import SpeakingState
 from .errors import ConnectionClosed
 
 if TYPE_CHECKING:
-    from typing_extensions import ReadOnly, Self
+    from typing_extensions import Self
 
     from .client import Client
     from .state import ConnectionState
@@ -271,7 +270,7 @@ class DiscordClientWebSocketResponse(aiohttp.ClientWebSocketResponse):
 
 
 class HeartbeatWebSocket(Protocol):
-    HEARTBEAT: ClassVar[ReadOnly[Literal[1, 3]]]
+    HEARTBEAT: Final[Literal[1, 3]]
 
     thread_id: int
     loop: asyncio.AbstractEventLoop
@@ -324,8 +323,8 @@ class DiscordWebSocket:
         The authentication token for discord.
     """
 
-    HEARTBEAT: ClassVar[ReadOnly[Literal[1, 3]]] = 1
     DISPATCH: Final[Literal[0]] = 0
+    HEARTBEAT: Final[Literal[1]] = 1
     IDENTIFY: Final[Literal[2]] = 2
     PRESENCE: Final[Literal[3]] = 3
     VOICE_STATE: Final[Literal[4]] = 4
@@ -887,7 +886,7 @@ class DiscordVoiceWebSocket:
     IDENTIFY: Final[Literal[0]] = 0
     SELECT_PROTOCOL: Final[Literal[1]] = 1
     READY: Final[Literal[2]] = 2
-    HEARTBEAT: ClassVar[ReadOnly[Literal[1, 3]]] = 3
+    HEARTBEAT: Final[Literal[3]] = 3
     SESSION_DESCRIPTION: Final[Literal[4]] = 4
     SPEAKING: Final[Literal[5]] = 5
     HEARTBEAT_ACK: Final[Literal[6]] = 6
