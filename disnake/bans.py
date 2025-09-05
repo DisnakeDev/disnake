@@ -10,8 +10,6 @@ if TYPE_CHECKING:
     from .abc import Snowflake
     from .user import User
 
-
-class BanEntry(NamedTuple):
     reason: Optional[str]
     user: "User"
 
