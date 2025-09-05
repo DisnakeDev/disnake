@@ -5,10 +5,11 @@ name: Lint & Test
 on:
   push:
     branches:
-      - 'master'
-      - 'v[0-9]+.[0-9]+.x'  # matches to backport branches, e.g. v3.6.x
-      - 'run-ci/*'
+      - "master"
+      - "v[0-9]+.[0-9]+.x"  # matches to backport branches, e.g. v3.6.x
+      - "run-ci/**"
     tags:
+      - "*"
   pull_request:
   merge_group:
     types: [checks_requested]
@@ -22,6 +23,10 @@ concurrency:
 defaults:
   run:
     shell: bash
+
+env:
+  GITHUB_STEP_SUMMARY_HEADER: "<details><summary>#name#</summary>\n<pre>"
+  GITHUB_STEP_SUMMARY_FOOTER: "</pre></details>\n"
 
 jobs:
   lock-dependencies:
@@ -49,12 +54,16 @@ jobs:
       - name: Run pre-commit
         id: pre-commit
         uses: pre-commit/action@v3.0.1
+        env:
+          RUFF_OUTPUT_FORMAT: github
 
   docs:
     # unlike the other workflows, we explicitly use the same version as
     # readthedocs (see .readthedocs.yml) here for consistency
     runs-on: ubuntu-24.04
-    needs: lock-dependencies
+    needs:
+      - lock-dependencies
+      - lint
     steps:
       - uses: actions/checkout@v4
 
@@ -68,7 +77,9 @@ jobs:
 
   pyright:
     runs-on: ubuntu-latest
-    needs: lock-dependencies
+    needs:
+      - lock-dependencies
+      - lint
     strategy:
       matrix:
         python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
@@ -121,7 +132,9 @@ jobs:
 
   misc:
     runs-on: ubuntu-latest
-    needs: lock-dependencies
+    needs:
+      - lock-dependencies
+      - lint
     steps:
       - uses: actions/checkout@v4
 
@@ -139,7 +152,7 @@ jobs:
         if: (success() || failure()) && steps.setup.outcome == 'success'
         run: nox -s check-manifest
 
-    # This only runs if the previous steps were successful, no point in running it otherwise
+      # This only runs if the previous steps were successful, no point in running it otherwise
       - name: Try building package
         run: |
           pdm install -dG build
@@ -147,17 +160,38 @@ jobs:
           pdm run python -m build
           ls -la dist/
 
+      - name: Check README.md renders properly on PyPI
+        run: |
           pdm run twine check --strict dist/*
 
-    # run the libcst parsers and check for changes
+  codemod:
+    runs-on: ubuntu-latest
+    needs:
+      - lock-dependencies
+      - lint
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up environment
+        uses: ./.github/actions/setup-env
+        with:
+          python-version: 3.8
+
+      # run the libcst parsers and check for changes
       - name: libcst codemod
         run: |
           nox -s codemod -- run-all
+
+      - name: Check for changes made by libcst codemod
+        run: |
           if [ -n "$(git status --porcelain)" ]; then
             echo "::error::Please run 'nox -s codemod -- run-all' locally and commit the changes." >&2;
+            echo "$GITHUB_STEP_SUMMARY_HEADER" | sed "s/#name#/LibCST Codemod/" >> $GITHUB_STEP_SUMMARY
+            echo "The libcst codemod made changes to the codebase. Please run 'nox -s codemod -- run-all' locally and commit the changes." >> $GITHUB_STEP_SUMMARY
             echo "::group::git diff"
-            git diff
+            git diff |& tee -a $GITHUB_STEP_SUMMARY
             echo "::endgroup::"
+            echo "$GITHUB_STEP_SUMMARY_FOOTER" >> $GITHUB_STEP_SUMMARY
             exit 1;
           else
             exit 0;
@@ -165,7 +199,9 @@ jobs:
 
   pytest:
     runs-on: ${{ matrix.os }}
-    needs: lock-dependencies
+    needs:
+      - lock-dependencies
+      - lint
     strategy:
       matrix:
         python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
@@ -173,11 +209,6 @@ jobs:
         experimental: [false]
       fail-fast: true
     continue-on-error: ${{ matrix.experimental }}
-
-    env:
-      GITHUB_STEP_SUMMARY_HEADER: "<details><summary>#name#</summary>\n<pre>"
-      GITHUB_STEP_SUMMARY_FOOTER: "</pre></details>\n"
-
     steps:
       - uses: actions/checkout@v4
 
@@ -196,7 +227,7 @@ jobs:
 
       - name: Run pytest
         id: run_tests
-      # use non-utc timezone, to test time/date-dependent features properly
+        # use non-utc timezone, to test time/date-dependent features properly
         env:
           TZ: "America/New_York"
         run: |
@@ -219,6 +250,7 @@ jobs:
       - docs
       - pyright
       - misc
+      - codemod
       - pytest
 
     runs-on: ubuntu-latest
