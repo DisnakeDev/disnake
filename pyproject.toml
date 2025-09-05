@@ -88,6 +88,8 @@ typing = [
     # this is not pyright itself, but the python wrapper
     "pyright==1.1.336",
     "typing-extensions~=4.12.0",
+    # used in the disnake/webhook/sync.py module
+    "requests",
     # only used for type-checking, version does not matter
     "pytz",
 ]

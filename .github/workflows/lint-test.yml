@@ -75,17 +75,40 @@ jobs:
       - name: Run sphinx-build
         run: nox -s docs -- --keep-going -W -w $GITHUB_STEP_SUMMARY
 
+  pyright_groups:
+    runs-on: ubuntu-latest
+    outputs:
+      pyright-sessions: ${{ steps.set-matrix.outputs.pyright-sessions }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up environment
+        id: setup-env
+        uses: ./.github/actions/setup-env
+        env:
+          PDM_USE_VENV: true
+          PDM_VENV_IN_PROJECT: true
+        with:
+          python-version: 3.12
+
+      - name: Determine Python versions to check pyright
+        id: set-matrix
+        run: |
+          echo pyright-sessions=$(nox -s pyright -l --json | jq -c '[.[] | [.python, .session, .call_spec.pyright_group.directories, .call_spec.pyright_group.experimental]]') | tee --append $GITHUB_OUTPUT
+
   pyright:
     runs-on: ubuntu-latest
     needs:
+      - pyright_groups
       - lock-dependencies
       - lint
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
-        experimental: [false]
+        session: ${{ fromJson(needs.pyright_groups.outputs.pyright-sessions) }}
+        include:
+          - experimental: false
       fail-fast: false
-    continue-on-error: ${{ matrix.experimental }}
+    continue-on-error: ${{ matrix.session[3] || matrix.experimental }}
 
     steps:
       - uses: actions/checkout@v4
@@ -97,38 +120,40 @@ jobs:
           PDM_USE_VENV: true
           PDM_VENV_IN_PROJECT: true
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: ${{ matrix.session[0] }}
 
-      - name: Install dependencies
-        run: pdm install -d -Gspeed -Gdocs -Gvoice
+      - name: Install dependencies with nox
+        run: nox -s '${{ matrix.session[1] }}' --install-only -fb none
 
       - name: Add .venv/bin to PATH
         run: dirname "$(pdm info --python)" >> $GITHUB_PATH
 
       - name: Set pyright version
+        id: pyright-version
         run: |
-          PYRIGHT_VERSION="$(pdm run python -c 'import pyright; print(pyright.__pyright_version__)')"
-          echo "PYRIGHT_VERSION=$PYRIGHT_VERSION" >> $GITHUB_ENV
+          echo "pyright_version=$(pdm run python -c 'import pyright; print(pyright.__pyright_version__)')" >> $GITHUB_OUTPUT
 
       - name: Run pyright (Linux)
         uses: jakebailey/pyright-action@v2.2.1
         id: pyright-linux
         with:
-          version: ${{ env.PYRIGHT_VERSION }}
+          version: ${{ steps.pyright-version.outputs.pyright_version }}
           python-version: ${{ steps.setup-env.outputs.python-version }}
           python-platform: "Linux"
-          annotate: ${{ matrix.python-version == '3.8' }} # only add comments for one version
+          annotate: ${{ matrix.session[0] == '3.8' }} # only add comments for one version
           warnings: true
+          extra-args: ${{join(matrix.session[2], ' ')}}
 
       - name: Run pyright (Windows)
         uses: jakebailey/pyright-action@v2.2.1
         if: always() && (steps.pyright-linux.outcome == 'success' || steps.pyright-linux.outcome == 'failure')
         with:
-          version: ${{ env.PYRIGHT_VERSION }}
+          version: ${{ steps.pyright-version.outputs.pyright_version }}
           python-version: ${{ steps.setup-env.outputs.python-version }}
           python-platform: "Windows"
           annotate: false # only add comments for one platform (see above)
           warnings: true
+          extra-args: ${{join(matrix.session[2], ' ')}}
 
   misc:
     runs-on: ubuntu-latest

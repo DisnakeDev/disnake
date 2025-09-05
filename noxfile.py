@@ -13,12 +13,12 @@ from __future__ import annotations
 import os
 import pathlib
 from itertools import chain
-from typing import TYPE_CHECKING, Callable, Dict, List, Tuple, TypeVar
+from typing import TYPE_CHECKING, Callable, Dict, List, Tuple, TypedDict, TypeVar
 
 import nox
 
 if TYPE_CHECKING:
-    from typing_extensions import Concatenate, ParamSpec
+    from typing_extensions import Concatenate, NotRequired, ParamSpec
 
     P = ParamSpec("P")
     T = TypeVar("T")
@@ -42,6 +42,67 @@ nox.options.sessions = [
     "slotscheck",
     "pyright",
     "test",
+]
+
+
+class PyrightGroup(TypedDict):
+    python: str
+    directories: Tuple[str, ...]
+    extras: NotRequired[Tuple[str, ...]]
+    groups: NotRequired[Tuple[str, ...]]
+    dependencies: NotRequired[Tuple[str, ...]]
+    experimental: NotRequired[bool]
+
+
+pyright_groups: List[PyrightGroup] = [
+    PyrightGroup(
+        python="3.8",
+        directories=("disnake", "tests", "examples"),
+        extras=("speed", "voice"),
+        groups=("test",),
+    ),
+    PyrightGroup(
+        python="3.9",
+        directories=("disnake", "tests", "examples"),
+        extras=("speed", "voice"),
+        groups=("test",),
+    ),
+    PyrightGroup(
+        python="3.10",
+        directories=("disnake", "tests", "examples"),
+        extras=("speed", "voice"),
+        groups=("test",),
+    ),
+    PyrightGroup(
+        python="3.11",
+        directories=("disnake", "tests", "examples"),
+        extras=("speed", "voice"),
+        groups=("test",),
+    ),
+    PyrightGroup(
+        python="3.11",
+        directories=("docs",),
+        extras=("docs",),
+        experimental=True,
+    ),
+    PyrightGroup(
+        python="3.11",
+        directories=("scripts",),
+        groups=("codemod",),
+        experimental=True,
+    ),
+    PyrightGroup(
+        python="3.12",
+        directories=("disnake", "tests", "examples"),
+        extras=("speed", "voice"),
+        groups=("test",),
+    ),
+    PyrightGroup(
+        python="3.13",
+        directories=("disnake", "tests", "examples"),
+        extras=("speed", "voice"),
+        groups=("test",),
+    ),
 ]
 
 
@@ -195,17 +256,39 @@ def codemod(session: nox.Session) -> None:
     session.notify("autotyping", posargs=[])
 
 
+@nox.parametrize(
+    "python,pyright_group",
+    [(group["python"], group) for group in pyright_groups],
+    ids=[group["python"] + "-" + group["directories"][0] for group in pyright_groups],
+)
 @nox.session()
-def pyright(session: nox.Session) -> None:
+def pyright(session: nox.Session, pyright_group: PyrightGroup) -> None:
     """Run pyright."""
-    session.run_always("pdm", "install", "-d", "-Gspeed", "-Gdocs", "-Gvoice", external=True)
+    cmd = ["pdm", "install"]
+    for extra in pyright_group.get("extras", ()):
+        cmd += ["-G", extra]
+    for group in pyright_group.get("groups", ()):
+        cmd += ["-dG", group]
+    if "typing" not in pyright_group.get("groups", ()):
+        cmd += ["-dG", "typing"]
+    if pyright_group.get("dependencies"):
+        session.error("Cannot specify dependencies for pyright groups yet.")
+    session.run_install(*cmd, external=True)
+
     env = {
         "PYRIGHT_PYTHON_IGNORE_WARNINGS": "1",
     }
     try:
-        session.run("python", "-m", "pyright", *session.posargs, env=env)
+        session.run(
+            "python",
+            "-m",
+            "pyright",
+            *pyright_group["directories"],
+            *session.posargs,
+            env=env,
+        )
     except KeyboardInterrupt:
-        pass
+        session.error("Quit pyright")
 
 
 @nox.session(python=["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"])
