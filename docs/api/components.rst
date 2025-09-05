@@ -204,6 +204,16 @@ Container
     :members:
     :inherited-members:
 
+Label
+~~~~~
+
+.. attributetable:: Label
+
+.. autoclass:: Label()
+    :members:
+    :inherited-members:
+
+
 Enumerations
 ------------
 

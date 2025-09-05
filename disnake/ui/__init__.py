@@ -15,6 +15,7 @@ from .button import *
 from .container import *
 from .file import *
 from .item import *
+from .label import *
 from .media_gallery import *
 from .modal import *
 from .section import *

@@ -69,6 +69,11 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, R
         Note that unlike other select menu types, this does not support :class:`.Object`\\s due to ambiguities.
 
         .. versionadded:: 2.10
+    required: :class:`bool`
+        Whether the select menu is required. Only applies to components in modals.
+        Defaults to ``True``.
+
+        .. versionadded:: 2.11
     id: :class:`int`
         The numeric identifier for the component. Must be unique within the message.
         If set to ``0`` (the default) when sending a component, the API will assign
@@ -107,6 +112,7 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, R
         default_values: Optional[
             Sequence[SelectDefaultValueMultiInputType[Union[User, Member, Role]]]
         ] = None,
+        required: bool = True,
         id: int = 0,
         row: Optional[int] = None,
     ) -> None: ...
@@ -123,6 +129,7 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, R
         default_values: Optional[
             Sequence[SelectDefaultValueMultiInputType[Union[User, Member, Role]]]
         ] = None,
+        required: bool = True,
         id: int = 0,
         row: Optional[int] = None,
     ) -> None: ...
@@ -138,6 +145,7 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, R
         default_values: Optional[
             Sequence[SelectDefaultValueMultiInputType[Union[User, Member, Role]]]
         ] = None,
+        required: bool = True,
         id: int = 0,
         row: Optional[int] = None,
     ) -> None:
@@ -150,6 +158,7 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, R
             max_values=max_values,
             disabled=disabled,
             default_values=default_values,
+            required=required,
             id=id,
             row=row,
         )
@@ -163,6 +172,7 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, R
             max_values=component.max_values,
             disabled=component.disabled,
             default_values=component.default_values,
+            required=component.required,
             id=component.id,
             row=None,
         )
