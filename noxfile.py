@@ -49,7 +49,7 @@ nox.options.sessions = [
 reset_coverage = True
 
 
-@nox.session
+@nox.session(python="3.11")
 def docs(session: nox.Session) -> None:
     """Build and generate the documentation.
 
