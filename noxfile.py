@@ -48,7 +48,7 @@ def install_deps(
         "pdm",
         "sync",
         "--fail-fast",
-        "--only-keep",
+        "--clean-unselected",
     ]
 
     # see https://pdm-project.org/latest/usage/advanced/#use-nox-as-the-runner
@@ -57,8 +57,7 @@ def install_deps(
     }
 
     for g in (*extras, *groups):
-        command.append("-G")
-        command.append(g)
+        command.extend(("-G", g))
 
     if not groups:
         # if no dev groups requested, make sure we don't install any
@@ -81,7 +80,7 @@ def docs(session: nox.Session) -> None:
     If running locally, will build automatic reloading docs.
     If running in CI, will build a production version of the documentation.
     """
-    install_deps(session, groups=["docs"])
+    install_deps(session, extras=["docs"])
     with session.chdir("docs"):
         args = ["-b", "html", "-n", ".", "_build/html", *session.posargs]
         if session.interactive:
@@ -125,7 +124,7 @@ def check_manifest(session: nox.Session) -> None:
 @nox.session
 def slotscheck(session: nox.Session) -> None:
     """Run slotscheck."""
-    install_deps(session, project=False, groups=["tools"])
+    install_deps(session, project=True, groups=["tools"])
     session.run("python", "-m", "slotscheck", "--verbose", "-m", "disnake")
 
 
@@ -136,7 +135,7 @@ def autotyping(session: nox.Session) -> None:
     Because of the nature of changes that autotyping makes, and the goal design of examples,
     this runs on each folder in the repository with specific settings.
     """
-    install_deps(session, project=False, groups=["codemod"])
+    install_deps(session, project=True, groups=["codemod"])
 
     base_command = ["python", "-m", "libcst.tool", "codemod", "autotyping.AutotypeCommand"]
     if not session.interactive:
