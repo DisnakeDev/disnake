@@ -54,13 +54,15 @@ if TYPE_CHECKING:
     import datetime
     from types import TracebackType
 
+    from typing_extensions import Self
+
     from ..abc import Snowflake
     from ..asset import AssetBytes
     from ..channel import ForumChannel, MediaChannel, StageChannel, TextChannel, VoiceChannel
     from ..embeds import Embed
     from ..file import File
     from ..guild import Guild
-    from ..http import Response
+    from ..http import HTTPClient, Response
     from ..mentions import AllowedMentions
     from ..message import Attachment
     from ..poll import Poll
@@ -79,7 +81,7 @@ class AsyncDeferredLock:
         self.lock = lock
         self.delta: Optional[float] = None
 
-    async def __aenter__(self):
+    async def __aenter__(self) -> Self:
         await self.lock.acquire()
         return self
 
@@ -340,7 +342,7 @@ class AsyncWebhookAdapter:
         multipart: Optional[List[Dict[str, Any]]] = None,
         files: Optional[List[File]] = None,
         thread_id: Optional[int] = None,
-    ) -> Response[Message]:
+    ) -> Response[MessagePayload]:
         params: Dict[str, Any] = {}
         if thread_id is not None:
             params["thread_id"] = thread_id
@@ -749,31 +751,31 @@ class _WebhookState(Generic[WebhookT]):
 
         self._thread: Optional[Snowflake] = thread
 
-    def _get_guild(self, guild_id):
+    def _get_guild(self, guild_id: Optional[int]) -> Optional[Guild]:
         if self._parent is not None:
             return self._parent._get_guild(guild_id)
         return None
 
-    def store_user(self, data):
+    def store_user(self, data) -> Union[BaseUser, User]:
         if self._parent is not None:
             return self._parent.store_user(data)
         # state parameter is artificial
         return BaseUser(state=self, data=data)  # type: ignore
 
-    def create_user(self, data):
+    def create_user(self, data) -> BaseUser:
         # state parameter is artificial
         return BaseUser(state=self, data=data)  # type: ignore
 
     @property
-    def http(self):
+    def http(self) -> HTTPClient:
         if self._parent is not None:
             return self._parent.http
 
         # Some data classes assign state.http and that should be kosher
         # however, using it should result in a late-binding error.
-        return _FriendlyHttpAttributeErrorHelper()
+        return _FriendlyHttpAttributeErrorHelper()  # type: ignore
 
-    def __getattr__(self, attr):
+    def __getattr__(self, attr) -> Any:
         if self._parent is not None:
             return getattr(self._parent, attr)
 
@@ -1452,7 +1454,7 @@ class Webhook(BaseWebhook):
         if self.token is None and self.auth_token is None:
             raise WebhookTokenMissing("This webhook does not have a token associated with it")
 
-        payload = {}
+        payload: Dict[str, Any] = {}
         if name is not MISSING:
             payload["name"] = str(name) if name is not None else None
 
@@ -1487,8 +1489,12 @@ class Webhook(BaseWebhook):
         return Webhook(data=data, session=self.session, token=self.auth_token, state=self._state)
 
     def _create_message(
-        self, data, *, thread: Optional[Snowflake] = None, thread_name: Optional[str] = None
-    ):
+        self,
+        data: MessagePayload,
+        *,
+        thread: Optional[Snowflake] = None,
+        thread_name: Optional[str] = None,
+    ) -> WebhookMessage:
         channel_id = int(data["channel_id"])
 
         # If channel IDs don't match, a new thread was most likely created;
@@ -1825,7 +1831,11 @@ class Webhook(BaseWebhook):
 
         msg = None
         if wait:
-            msg = self._create_message(data, thread=thread, thread_name=thread_name)
+            msg = self._create_message(
+                data,  # type: ignore
+                thread=thread,
+                thread_name=thread_name,
+            )
             if delete_after is not MISSING:
                 await msg.delete(delay=delete_after)
 

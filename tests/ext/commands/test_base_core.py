@@ -20,7 +20,7 @@ class DecoratorMeta:
 
 
 @pytest.fixture(params=["slash", "user", "message"])
-def meta(request):
+def meta(request) -> DecoratorMeta:
     return DecoratorMeta(request.param)
 
 
