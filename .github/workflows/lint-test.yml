@@ -255,17 +255,21 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install nox environment
+        # `--no-venv` to install in the main pdm venv instead of nox's pyright-specific one
+        # because nox uses pdm internally to install, this means that the venv that is used is
+        # the one that pdm would create in project: `.venv`
         run: |
-          nox -s test --no-venv --install-only --force-python ${{ steps.setup-env.outputs.python-version }}
+          pdm run noxfile.py -s test --no-venv --install-only --force-python ${{ steps.setup-env.outputs.python-version }}
 
       - name: Run pytest
         id: run_tests
         # use non-utc timezone, to test time/date-dependent features properly
         env:
           TZ: "America/New_York"
+        # to use the pdm venv, we need to use `pdm run` to activate the pdm venv.
         run: |
           echo "$GITHUB_STEP_SUMMARY_HEADER" | sed "s/#name#/Test Summary/" >> $GITHUB_STEP_SUMMARY
-          pdm run nox --no-venv -s test -- --color=no --cov-report= | tee -a $GITHUB_STEP_SUMMARY
+          pdm run noxfile.py --no-venv --force-python ${{ steps.setup-env.outputs.python-version }} -s test -- --color=no --cov-report= | tee -a $GITHUB_STEP_SUMMARY
           echo "$GITHUB_STEP_SUMMARY_FOOTER" >> $GITHUB_STEP_SUMMARY
 
       - name: Print Coverage Output
