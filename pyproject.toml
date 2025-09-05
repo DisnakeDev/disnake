@@ -353,32 +353,43 @@ ignore = [
 # this is one of the diagnostics that aren't enabled by default, even in strict mode
 reportUnnecessaryTypeIgnoreComment = true
 
+# these diagnostics are not enabled by default even with strict
+reportCallInDefaultInitializer = true
+reportImplicitOverride = false
+reportImplicitStringConcatenation = true
+reportImportCycles = true
+reportMissingSuperCall = false
+reportPropertyTypeMismatch = true
+reportShadowedImports = true
+reportUninitializedInstanceVariable = false
+reportUnreachable = false
+reportUnusedCallResult = false
+
 # it's unlikely that these will ever be enabled
-reportOverlappingOverload = false
-reportPrivateUsage = false
-reportUnnecessaryIsInstance = false
-reportFunctionMemberAccess = false
-reportMissingTypeStubs = false
-reportUnusedFunction = false
-reportUnusedClass = false
-reportConstantRedefinition = false
-reportImportCycles = false
+reportConstantRedefinition = true
+reportFunctionMemberAccess = true
 reportIncompatibleMethodOverride = false
 reportIncompatibleVariableOverride = false
+reportMissingTypeStubs = true
+reportOverlappingOverload = true
+reportPrivateUsage = false
+reportUnnecessaryIsInstance = false
+reportUnusedClass = true
+reportUnusedFunction = true
 
-# TODO: re-enable
 # these were added in the upgrade from pyright 1.1.336 to 1.1.405
+# TODO: re-enable
 reportInconsistentOverload = false
 reportInvalidTypeVarUse = false
 reportInvalidTypeForm = false
 
 # these are largely due to missing type hints, and make up most of the error count
+reportMissingParameterType = false
+reportMissingTypeArgument = false
+reportUnknownArgumentType = false
 reportUnknownMemberType = false
 reportUnknownParameterType = false
-reportUnknownArgumentType = false
-reportMissingParameterType = false
 reportUnknownVariableType = false
-reportMissingTypeArgument = false
 
 
 [tool.pytest.ini_options]
