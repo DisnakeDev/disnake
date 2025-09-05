@@ -13,6 +13,7 @@ class Role(TypedDict):
     id: Snowflake
     name: str
     color: int
+    colors: RoleColors
     hoist: bool
     icon: NotRequired[Optional[str]]
     unicode_emoji: NotRequired[Optional[str]]
@@ -33,10 +34,16 @@ class RoleTags(TypedDict, total=False):
     available_for_purchase: None
 
 
+class RoleColors(TypedDict):
+    primary_color: int
+    secondary_color: Optional[int]
+    tertiary_color: Optional[int]
+
+
 class CreateRole(TypedDict, total=False):
     name: str
     permissions: str
-    color: int
+    colors: RoleColors
     hoist: bool
     icon: Optional[str]
     unicode_emoji: Optional[str]
