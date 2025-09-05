@@ -190,7 +190,7 @@ class BotBase(CommonBotBase, GroupMixin):
         if cog and cog.has_error_handler():
             return
 
-        print(f"Ignoring exception in command {context.command}:", file=sys.stderr)
+        print(f"Ignoring exception in command {context.command}:", file=sys.stderr)  # noqa: T201
         traceback.print_exception(
             type(exception), exception, exception.__traceback__, file=sys.stderr
         )

@@ -275,7 +275,7 @@ def class_results_to_node(key: str, elements: List[TableElement]) -> attributeta
             internal=True,
             refuri="#" + element.fullname,
             anchorname="",
-            *[nodes.Text(element.label)],
+            *[nodes.Text(element.label)],  # noqa: B026
         )
         para = addnodes.compact_paragraph("", "", ref)
         if element.badge is not None:
