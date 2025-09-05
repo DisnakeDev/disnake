@@ -46,7 +46,6 @@ nox.options.sessions = [
 
 PYPROJECT = nox.project.load_toml()
 
-
 # used to reset cached coverage data once for the first test run only
 reset_coverage = True
 
