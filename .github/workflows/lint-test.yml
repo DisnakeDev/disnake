@@ -169,11 +169,20 @@ jobs:
       - name: libcst codemod
         run: |
           nox -s codemod -- run-all
+
+      - name: Check for changes made by libcst codemod
+        env:
+          GITHUB_STEP_SUMMARY_HEADER: "<details><summary>#name#</summary>\n<pre>"
+          GITHUB_STEP_SUMMARY_FOOTER: "</pre></details>\n"
+        run: |
           if [ -n "$(git status --porcelain)" ]; then
             echo "::error::Please run 'nox -s codemod -- run-all' locally and commit the changes." >&2;
+            echo "$GITHUB_STEP_SUMMARY_HEADER" | sed "s/#name#/LibCST Codemod/" >> $GITHUB_STEP_SUMMARY
+            echo "The libcst codemod made changes to the codebase. Please run 'nox -s codemod -- run-all' locally and commit the changes." >> $GITHUB_STEP_SUMMARY
             echo "::group::git diff"
-            git diff
+            git diff |& tee -a $GITHUB_STEP_SUMMARY
             echo "::endgroup::"
+            echo "$GITHUB_STEP_SUMMARY_FOOTER" >> $GITHUB_STEP_SUMMARY
             exit 1;
           else
             exit 0;
