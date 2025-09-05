@@ -17,6 +17,8 @@ from typing import (
     Pattern,
     Set,
     Tuple,
+    Type,
+    TypeVar,
     Union,
     get_args,
     get_origin,
@@ -45,6 +47,8 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from .context import Context
+
+FlagsMetaT = TypeVar("FlagsMetaT", bound="Type[FlagsMeta]")
 
 
 @dataclass
@@ -253,7 +257,7 @@ class FlagsMeta(type):
         __commands_flag_prefix__: str
 
     def __new__(
-        cls,
+        cls: FlagsMetaT,
         name: str,
         bases: Tuple[type, ...],
         attrs: Dict[str, Any],
@@ -261,7 +265,7 @@ class FlagsMeta(type):
         case_insensitive: bool = MISSING,
         delimiter: str = MISSING,
         prefix: str = MISSING,
-    ) -> Self:
+    ) -> FlagsMetaT:
         attrs["__commands_is_flag__"] = True
 
         try:

@@ -1023,7 +1023,7 @@ class PermissionsConverter(Converter[disnake.Permissions]):
             raise BadArgument(f"Invalid Permissions: {name!r}")
 
         if callable(attr):
-            return attr()
+            return attr()  # pyright: ignore[reportReturnType]
         else:
             return disnake.Permissions(**{name: True})
 
