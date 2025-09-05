@@ -23,6 +23,10 @@ defaults:
   run:
     shell: bash
 
+env:
+  GITHUB_STEP_SUMMARY_HEADER: "<details><summary>#name#</summary>\n<pre>"
+  GITHUB_STEP_SUMMARY_FOOTER: "</pre></details>\n"
+
 jobs:
   lock-dependencies:
     # The only purpose of this is to create a lockfile, which will be cached
@@ -171,9 +175,6 @@ jobs:
           nox -s codemod -- run-all
 
       - name: Check for changes made by libcst codemod
-        env:
-          GITHUB_STEP_SUMMARY_HEADER: "<details><summary>#name#</summary>\n<pre>"
-          GITHUB_STEP_SUMMARY_FOOTER: "</pre></details>\n"
         run: |
           if [ -n "$(git status --porcelain)" ]; then
             echo "::error::Please run 'nox -s codemod -- run-all' locally and commit the changes." >&2;
@@ -198,11 +199,6 @@ jobs:
         experimental: [false]
       fail-fast: true
     continue-on-error: ${{ matrix.experimental }}
-
-    env:
-      GITHUB_STEP_SUMMARY_HEADER: "<details><summary>#name#</summary>\n<pre>"
-      GITHUB_STEP_SUMMARY_FOOTER: "</pre></details>\n"
-
     steps:
       - uses: actions/checkout@v4
 
