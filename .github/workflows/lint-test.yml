@@ -148,7 +148,8 @@ jobs:
 
           pdm run python -m build
           ls -la dist/
-      - name: Check readme renders properly on PyPI
+
+      - name: Check README.md renders properly on PyPI
         run: |
           pdm run twine check --strict dist/*
 
