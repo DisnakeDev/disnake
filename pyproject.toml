@@ -117,8 +117,7 @@ ignore_package_warnings = ["*"]
 docs = { cmd = "nox -Rs docs --", help = "Build the documentation for development" }
 lint = { cmd = "nox -Rs lint --", help = "Check all files for linting errors" }
 pyright = { cmd = "nox -Rs pyright --", help = "Run pyright" }
-setup_env = { cmd = "{pdm} install -G:all", help = "Set up the local environment and all dependencies" }
-post_setup_env = { composite = ["python -m ensurepip --default-pip", "pre-commit install --install-hooks"] }
+setup_env = { cmd = "nox -s dev", help = "Set up the local environment and all dependencies" }
 test = { cmd = "nox -Rs test --", help = "Run pytest" }
 
 [tool.ruff]
