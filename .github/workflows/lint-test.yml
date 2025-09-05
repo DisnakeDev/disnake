@@ -272,7 +272,7 @@ jobs:
         if: always() && (steps.run_tests.outcome == 'success' || steps.run_tests.outcome == 'failure')
         run: |
           echo "$GITHUB_STEP_SUMMARY_HEADER" | sed "s/#name#/Coverage Summary/" >> $GITHUB_STEP_SUMMARY
-          pdm run coverage report | tee -a $GITHUB_STEP_SUMMARY
+          pdm run nox --no-venv -s coverage -- report | tee -a $GITHUB_STEP_SUMMARY
           echo "$GITHUB_STEP_SUMMARY_FOOTER" >> $GITHUB_STEP_SUMMARY
 
   # thanks to aiohttp for this part of the workflow
