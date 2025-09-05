@@ -326,7 +326,7 @@ class Widget:
                 connected_channel = WidgetChannel(id=connected_channel, name="", position=0)
 
             self.members.append(
-                WidgetMember(state=self._state, data=member, connected_channel=connected_channel)  # type: ignore
+                WidgetMember(state=self._state, data=member, connected_channel=connected_channel)
             )
 
     def __str__(self) -> str:

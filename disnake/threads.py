@@ -201,9 +201,8 @@ class Thread(Messageable, Hashable):
         self._applied_tags: List[int] = list(map(int, data.get("applied_tags", [])))
         self._unroll_metadata(data["thread_metadata"])
 
-        try:
-            member = data["member"]
-        except KeyError:
+        member = data.get("member")
+        if member is None:
             self.me = None
         else:
             self.me = ThreadMember(self, member)

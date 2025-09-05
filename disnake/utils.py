@@ -48,6 +48,8 @@ from typing import (
 )
 from urllib.parse import parse_qs, urlencode
 
+from typing_extensions import Self
+
 from .enums import Locale
 
 try:
@@ -240,7 +242,7 @@ def isoformat_utc(dt: Optional[datetime.datetime]) -> Optional[str]:
     return None
 
 
-def copy_doc(original: Union[Callable, property]) -> Callable[[T], T]:
+def copy_doc(original: Union[Callable[..., Any], property]) -> Callable[[T], T]:
     def decorator(overridden: T) -> T:
         overridden.__doc__ = original.__doc__
         if callable(original):
@@ -590,7 +592,7 @@ async def maybe_coroutine(
     if _isawaitable(value):
         return await value
     else:
-        return value  # type: ignore  # typeguard doesn't narrow in the negative case
+        return value
 
 
 async def async_all(gen: Iterable[Union[Awaitable[bool], bool]]) -> bool:
@@ -1027,7 +1029,7 @@ def _get_option_desc(lines: List[str]) -> Dict[str, _DocstringParam]:
     return options
 
 
-def parse_docstring(func: Callable) -> _ParsedDocstring:
+def parse_docstring(func: Callable[..., Any]) -> _ParsedDocstring:
     doc = _getdoc(func)
     if doc is None:
         return {
@@ -1185,7 +1187,7 @@ def evaluate_annotation(
     if hasattr(tp, "__args__"):
         if not hasattr(tp, "__origin__"):
             if tp.__class__ is UnionType:
-                converted = Union[tp.__args__]  # type: ignore
+                converted = Union[tp.__args__]
                 return evaluate_annotation(converted, globals, locals, cache)
 
             return tp

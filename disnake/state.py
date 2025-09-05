@@ -96,6 +96,8 @@ from .utils import MISSING
 from .webhook import Webhook
 
 if TYPE_CHECKING:
+    from typing_extensions import Concatenate
+
     from .abc import AnyChannel, MessageableChannel, PrivateChannel
     from .app_commands import APIApplicationCommand, ApplicationCommand
     from .client import Client
@@ -117,6 +119,8 @@ if TYPE_CHECKING:
 
     Channel = Union[GuildChannel, VocalGuildChannel, PrivateChannel]
     PartialChannel = Union[Channel, PartialMessageable]
+else:
+    Concatenate = Tuple  # for the use-case of T[type, ...] Tuple works perfectly
 
 T = TypeVar("T")
 
@@ -207,9 +211,9 @@ class ConnectionState:
     def __init__(
         self,
         *,
-        dispatch: Callable,
-        handlers: Dict[str, Callable],
-        hooks: Dict[str, Callable],
+        dispatch: Callable[Concatenate[str, ...], Any],
+        handlers: Dict[str, Callable[..., Any]],
+        hooks: Dict[str, Callable[..., Any]],
         http: HTTPClient,
         loop: asyncio.AbstractEventLoop,
         max_messages: Optional[int] = 1000,
@@ -229,9 +233,9 @@ class ConnectionState:
         if self.max_messages is not None and self.max_messages <= 0:
             self.max_messages = 1000
 
-        self.dispatch: Callable = dispatch
-        self.handlers: Dict[str, Callable] = handlers
-        self.hooks: Dict[str, Callable] = hooks
+        self.dispatch: Callable[Concatenate[str, ...], Any] = dispatch
+        self.handlers: Dict[str, Callable[..., Any]] = handlers
+        self.hooks: Dict[str, Callable[..., Any]] = hooks
         self.shard_count: Optional[int] = None
         self._ready_task: Optional[asyncio.Task] = None
         self.application_id: Optional[int] = None if application_id is None else int(application_id)
@@ -633,9 +637,9 @@ class ConnectionState:
         data: Union[MessagePayload, gateway.TypingStartEvent],
     ) -> Tuple[Union[PartialChannel, Thread], Optional[Guild]]:
         channel_id = int(data["channel_id"])
-        try:
-            guild = self._get_guild(int(data["guild_id"]))
-        except KeyError:
+        guild_id = int(g_id) if (g_id := data.get("guild_id")) else None
+
+        if guild_id is None:
             # if we're here, this is a DM channel or an ephemeral message in a guild
             channel = self.get_channel(channel_id)
             if channel is None:
@@ -648,6 +652,7 @@ class ConnectionState:
                 channel = DMChannel._from_message(self, channel_id, user_id)
             guild = None
         else:
+            guild = self._get_guild(guild_id)
             channel = guild and guild._resolve_channel(channel_id)
 
         return channel or PartialMessageable(state=self, id=channel_id), guild
@@ -1147,12 +1152,13 @@ class ConnectionState:
 
     def parse_channel_pins_update(self, data: gateway.ChannelPinsUpdateEvent) -> None:
         channel_id = int(data["channel_id"])
-        try:
-            guild = self._get_guild(int(data["guild_id"]))
-        except KeyError:
+        guild_id = int(g_id) if (g_id := data.get("guild_id")) else None
+
+        if guild_id is None:
             guild = None
             channel = self._get_private_channel(channel_id)
         else:
+            guild = self._get_guild(guild_id)
             channel = guild and guild._resolve_channel(channel_id)
 
         if channel is None:
@@ -1235,14 +1241,14 @@ class ConnectionState:
             _log.debug("THREAD_LIST_SYNC referencing an unknown guild ID: %s. Discarding", guild_id)
             return
 
-        try:
-            channel_ids = set(map(int, data["channel_ids"]))
-        except KeyError:
+        channel_ids = data.get("channel_ids")
+        if channel_ids is None:
             # If not provided, then the entire guild is being synced
             # So all previous thread data should be overwritten
             previous_threads = guild._threads.copy()
             guild._clear_threads()
         else:
+            channel_ids = set(map(int, channel_ids))
             previous_threads = guild._filter_threads(channel_ids)
 
         threads = {d["id"]: guild._store_thread(d) for d in data.get("threads", [])}

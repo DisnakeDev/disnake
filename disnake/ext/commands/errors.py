@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable, List, Optional, Tuple, Type, Union
+from typing import TYPE_CHECKING, Any, Callable, List, Optional, Tuple, Union
 
 from disnake.errors import ClientException, DiscordException
 from disnake.utils import humanize_list
@@ -821,10 +821,10 @@ class BadUnionArgument(UserInputError):
     """
 
     def __init__(
-        self, param: Parameter, converters: Tuple[Type, ...], errors: List[CommandError]
+        self, param: Parameter, converters: Tuple[type, ...], errors: List[CommandError]
     ) -> None:
         self.param: Parameter = param
-        self.converters: Tuple[Type, ...] = converters
+        self.converters: Tuple[type, ...] = converters
         self.errors: List[CommandError] = errors
 
         def _get_name(x):

@@ -46,7 +46,7 @@ has_nacl: bool
 
 try:
     import nacl.secret
-    import nacl.utils
+    import nacl.utils  # type: ignore[reportUnusedImport]
 
     has_nacl = True
 except ImportError:
@@ -530,8 +530,8 @@ class VoiceClient(VoiceProtocol):
         return (nonce, nonce.ljust(pad, b"\0"))
 
     def _encrypt_aead_xchacha20_poly1305_rtpsize(self, header: bytes, data) -> bytes:
-        box = nacl.secret.Aead(bytes(self.secret_key))
-        nonce, padded_nonce = self._get_nonce(nacl.secret.Aead.NONCE_SIZE)
+        box = nacl.secret.Aead(bytes(self.secret_key))  # type: ignore[reportPossiblyUnboundVariable]
+        nonce, padded_nonce = self._get_nonce(nacl.secret.Aead.NONCE_SIZE)  # type: ignore[reportPossiblyUnboundVariable]
 
         return (
             header
