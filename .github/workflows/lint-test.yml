@@ -96,8 +96,9 @@ jobs:
     # readthedocs (see .readthedocs.yml) here for consistency
     runs-on: ubuntu-24.04
     needs:
-      - lock-dependencies
       - python-versions
+      - lock-dependencies
+      - lint
     steps:
       - uses: actions/checkout@v4
 
@@ -113,8 +114,9 @@ jobs:
   pyright:
     runs-on: ubuntu-latest
     needs:
-      - lock-dependencies
       - python-versions
+      - lock-dependencies
+      - lint
     strategy:
       matrix:
         python-version: ${{ fromJson(needs.python-versions.outputs.tests) }}
@@ -170,6 +172,7 @@ jobs:
     needs:
       - python-versions
       - lock-dependencies
+      - lint
     steps:
       - uses: actions/checkout@v4
 
@@ -204,6 +207,7 @@ jobs:
     needs:
       - python-versions
       - lock-dependencies
+      - lint
     steps:
       - uses: actions/checkout@v4
 
@@ -238,6 +242,7 @@ jobs:
     needs:
       - python-versions
       - lock-dependencies
+      - lint
     strategy:
       matrix:
         os: ["windows-latest", "ubuntu-latest", "macos-latest"]
