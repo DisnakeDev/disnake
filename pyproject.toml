@@ -54,20 +54,12 @@ voice = [
     "PyNaCl>=1.5.0,<1.6",
     'audioop-lts==0.2.1; python_version >= "3.13"'
 ]
-docs = [
-    "sphinx==7.0.1",
-    "sphinxcontrib-trio~=1.1.2",
-    "sphinx-hoverxref==1.3.0",
-    "sphinx-autobuild~=2021.3",
-    "sphinxcontrib-towncrier==0.3.2a0",
-    "towncrier==23.6.0",
-    "sphinx-notfound-page==0.8.3",
-    "sphinxext-opengraph==0.9.1",
-]
 
 [dependency-groups]
 nox = [
-    "nox==2025.5.1",
+    # note: nox should be synced with nox.needs_version in noxfile.py
+    # and the pinned nox version in noxfile.py must be within these bounds
+    "nox>=2025.5.1",
 ]
 tools = [
     "pre-commit~=3.0",
@@ -98,32 +90,25 @@ test = [
     "looptime~=0.2.0",
     "coverage[toml]~=7.6.0",
 ]
-build = [
-    "wheel~=0.40.0",
-    "build~=0.10.0",
-    "twine~=5.1.1",
+docs = [
+    "sphinx==7.0.1",
+    "sphinxcontrib-trio~=1.1.2",
+    "sphinx-hoverxref==1.3.0",
+    "sphinx-autobuild~=2021.3",
+    "sphinxcontrib-towncrier==0.3.2a0",
+    "towncrier==23.6.0",
+    "sphinx-notfound-page==0.8.3",
+    "sphinxext-opengraph==0.9.1",
 ]
+
+[tool.uv]
+required-version = ">=0.8.4"
 
 [tool.nox]
 script-venv-backend = "uv|virtualenv"
 
-[tool.pdm]
-# Ignore `requires-python` warnings when locking, the latest versions of some
-# dependencies already require >=3.9
-# See also https://pdm-project.org/en/latest/usage/config/#ignore-package-warnings
-ignore_package_warnings = ["*"]
-
-[tool.pdm.scripts]
-docs = { cmd = "nox -Rs docs --", help = "Build the documentation for development" }
-lint = { cmd = "nox -Rs lint --", help = "Check all files for linting errors" }
-pyright = { cmd = "nox -Rs pyright --", help = "Run pyright" }
-setup_env = { cmd = "{pdm} install -G:all", help = "Set up the local environment and all dependencies" }
-post_setup_env = { composite = ["python -m ensurepip --default-pip", "pre-commit install --install-hooks"] }
-test = { cmd = "nox -Rs test --", help = "Run pytest" }
-
 [tool.ruff]
 line-length = 100
-target-version = "py38"
 
 [tool.ruff.lint]
 select = [
@@ -401,6 +386,7 @@ ignore = [
     ".readthedocs.yml",
     ".libcst.codemod.yaml",
     "noxfile.py",
+    "noxfile.py.lock",
     # docs
     "CONTRIBUTING.md",
     "RELEASE.md",
