@@ -10,16 +10,7 @@ import time
 import traceback
 from functools import partial
 from itertools import groupby
-from typing import (
-    TYPE_CHECKING,
-    Callable,
-    ClassVar,
-    Dict,
-    List,
-    Optional,
-    Sequence,
-    Tuple,
-)
+from typing import TYPE_CHECKING, Callable, ClassVar, Dict, List, Optional, Sequence, Tuple
 
 from ..components import (
     VALID_ACTION_ROW_MESSAGE_COMPONENT_TYPES,
@@ -42,10 +33,7 @@ if TYPE_CHECKING:
     from ..interactions import MessageInteraction
     from ..message import Message
     from ..state import ConnectionState
-    from ..types.components import (
-        ActionRow as ActionRowPayload,
-        Component as ComponentPayload,
-    )
+    from ..types.components import ActionRow as ActionRowPayload, Component as ComponentPayload
     from .item import ItemCallbackType
 
 

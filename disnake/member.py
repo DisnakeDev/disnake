@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 import datetime
 import itertools
 import sys
@@ -189,7 +188,7 @@ def flatten_user(cls: Type[Member]) -> Type[Member]:
             # probably a member function by now
             def generate_function(x: str) -> Callable[..., Any]:
                 # We want sphinx to properly show coroutine functions as coroutines
-                if asyncio.iscoroutinefunction(value):  # noqa: B023
+                if utils.iscoroutinefunction(value):  # noqa: B023
 
                     async def general(self, *args, **kwargs):  # type: ignore
                         return await getattr(self._user, x)(*args, **kwargs)

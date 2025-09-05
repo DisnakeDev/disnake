@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: MIT
 
+
 __all__ = (
     "EqualityComparable",
     "Hashable",

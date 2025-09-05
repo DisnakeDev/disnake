@@ -24,7 +24,13 @@ from disnake.app_commands import ApplicationCommand
 from disnake.enums import ApplicationCommandType
 from disnake.flags import ApplicationInstallTypes, InteractionContextTypes
 from disnake.permissions import Permissions
-from disnake.utils import _generated, _overload_with_permissions, async_all, maybe_coroutine
+from disnake.utils import (
+    _generated,
+    _overload_with_permissions,
+    async_all,
+    iscoroutinefunction,
+    maybe_coroutine,
+)
 
 from .cooldowns import BucketType, CooldownMapping, MaxConcurrency
 from .errors import CheckFailure, CommandError, CommandInvokeError, CommandOnCooldown
@@ -481,7 +487,7 @@ class InvokableApplicationCommand(ABC):
         TypeError
             The coroutine passed is not actually a coroutine.
         """
-        if not asyncio.iscoroutinefunction(coro):
+        if not iscoroutinefunction(coro):
             raise TypeError("The error handler must be a coroutine.")
 
         self.on_error: Error = coro
@@ -597,7 +603,7 @@ class InvokableApplicationCommand(ABC):
         TypeError
             The coroutine passed is not actually a coroutine.
         """
-        if not asyncio.iscoroutinefunction(coro):
+        if not iscoroutinefunction(coro):
             raise TypeError("The pre-invoke hook must be a coroutine.")
 
         self._before_invoke = coro
@@ -620,7 +626,7 @@ class InvokableApplicationCommand(ABC):
         TypeError
             The coroutine passed is not actually a coroutine.
         """
-        if not asyncio.iscoroutinefunction(coro):
+        if not iscoroutinefunction(coro):
             raise TypeError("The post-invoke hook must be a coroutine.")
 
         self._after_invoke = coro

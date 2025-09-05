@@ -25,10 +25,7 @@ from typing import (
 
 from . import utils
 from .channel import PartialMessageable
-from .components import (
-    MessageTopLevelComponent,
-    _message_component_factory,
-)
+from .components import MessageTopLevelComponent, _message_component_factory
 from .embeds import Embed
 from .emoji import Emoji
 from .enums import (
@@ -63,9 +60,7 @@ if TYPE_CHECKING:
     from .role import Role
     from .state import ConnectionState
     from .threads import AnyThreadArchiveDuration
-    from .types.components import (
-        MessageTopLevelComponent as MessageTopLevelComponentPayload,
-    )
+    from .types.components import MessageTopLevelComponent as MessageTopLevelComponentPayload
     from .types.embed import Embed as EmbedPayload
     from .types.gateway import (
         MessageReactionAddEvent,
