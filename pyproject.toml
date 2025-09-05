@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
 
 [build-system]
-requires = ["hatchling", "hatch-vcs"]
+requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
@@ -128,8 +128,8 @@ include = [
 ]
 
 [tool.hatch.version]
-source = "vcs"
-fallback-version = "0.0.0"
+path = "disnake/__init__.py"
+pattern = '__version__ = "(?P<version>.+)"'
 
 [tool.ruff]
 line-length = 100
