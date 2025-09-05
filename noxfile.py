@@ -277,14 +277,19 @@ def test(session: nox.Session, extras: List[str]) -> None:
 def coverage(session: nox.Session) -> None:
     """Display coverage information from the tests."""
     install_deps(session, project=False, groups=["test"])
-    if "html" in session.posargs or "serve" in session.posargs:
+
+    posargs = session.posargs
+    # special-case serve
+    if "serve" in posargs:
+        if len(posargs) != 1:
+            session.error("serve cannot be used with any other arguments.")
         session.run("coverage", "html", "--show-contexts")
-    if "serve" in session.posargs:
         session.run(
             "python", "-m", "http.server", "8012", "--directory", "htmlcov", "--bind", "127.0.0.1"
         )
-    if "erase" in session.posargs:
-        session.run("coverage", "erase")
+        return
+
+    session.run("coverage", *posargs)
 
 
 if __name__ == "__main__":
