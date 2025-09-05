@@ -258,7 +258,7 @@ class HTTPClient:
 
     async def ws_connect(self, url: str, *, compress: int = 0) -> aiohttp.ClientWebSocketResponse:
         if hasattr(aiohttp, "ClientWSTimeout"):
-            timeout = aiohttp.ClientWSTimeout(ws_close=30.0)  # pyright: ignore[reportGeneralTypeIssues]
+            timeout = aiohttp.ClientWSTimeout(ws_close=30.0)  # pyright: ignore
         else:
             timeout = 30.0
         return await self.__session.ws_connect(
@@ -1256,7 +1256,7 @@ class HTTPClient:
             "GET", "/channels/{channel_id}/threads/archived/private", channel_id=channel_id
         )
 
-        params = {}
+        params: Dict[str, Any] = {}
         if before:
             params["before"] = before
         params["limit"] = limit
@@ -1270,7 +1270,7 @@ class HTTPClient:
             "/channels/{channel_id}/users/@me/threads/archived/private",
             channel_id=channel_id,
         )
-        params = {}
+        params: Dict[str, Any] = {}
         if before:
             params["before"] = before
         params["limit"] = limit

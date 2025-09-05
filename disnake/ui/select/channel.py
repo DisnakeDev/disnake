@@ -195,7 +195,7 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
         return self._underlying.channel_types
 
     @channel_types.setter
-    def channel_types(self, value: Optional[List[ChannelType]]):
+    def channel_types(self, value: Optional[List[ChannelType]]) -> None:
         if value is not None:
             if not isinstance(value, list):
                 raise TypeError("channel_types must be a list of ChannelType")
