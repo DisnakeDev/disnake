@@ -191,7 +191,7 @@ jobs:
           pdm run python -m build
           ls -la dist/
 
-      - name: Check the built package
+      - name: Check README.md renders properly on PyPI
         run: |
           pdm run twine check --strict dist/*
 
@@ -208,6 +208,7 @@ jobs:
         uses: ./.github/actions/setup-env
         with:
           python-version: ${{ needs.python-versions.outputs.libcst }}
+
       # run the libcst parsers and check for changes
       - name: libcst codemod
         run: |
