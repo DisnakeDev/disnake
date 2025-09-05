@@ -25,7 +25,7 @@ __all__ = (
     "Item",
 )
 
-I = TypeVar("I", bound="Item[Any]")
+I = TypeVar("I", bound="Item[Any]")  # noqa: E741
 V_co = TypeVar("V_co", bound="Optional[View]", covariant=True)
 
 if TYPE_CHECKING:

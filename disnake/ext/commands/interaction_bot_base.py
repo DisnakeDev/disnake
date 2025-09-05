@@ -958,7 +958,7 @@ class InteractionBotBase(CommonBotBase):
                 _log.info(text)
             else:
                 # if not, nothing would be logged, so just print instead
-                print(text)
+                print(text)  # noqa: T201
         else:
             # if debugging is not explicitly enabled, always use the debug log level
             _log.debug(text)
@@ -1029,7 +1029,7 @@ class InteractionBotBase(CommonBotBase):
         if cog and cog.has_slash_error_handler():
             return
 
-        print(f"Ignoring exception in slash command {command.name!r}:", file=sys.stderr)
+        print(f"Ignoring exception in slash command {command.name!r}:", file=sys.stderr)  # noqa: T201
         traceback.print_exception(
             type(exception), exception, exception.__traceback__, file=sys.stderr
         )
@@ -1049,7 +1049,7 @@ class InteractionBotBase(CommonBotBase):
         cog = command.cog
         if cog and cog.has_user_error_handler():
             return
-        print(f"Ignoring exception in user command {command.name!r}:", file=sys.stderr)
+        print(f"Ignoring exception in user command {command.name!r}:", file=sys.stderr)  # noqa: T201
         traceback.print_exception(
             type(exception), exception, exception.__traceback__, file=sys.stderr
         )
@@ -1069,7 +1069,7 @@ class InteractionBotBase(CommonBotBase):
         cog = command.cog
         if cog and cog.has_message_error_handler():
             return
-        print(f"Ignoring exception in message command {command.name!r}:", file=sys.stderr)
+        print(f"Ignoring exception in message command {command.name!r}:", file=sys.stderr)  # noqa: T201
         traceback.print_exception(
             type(exception), exception, exception.__traceback__, file=sys.stderr
         )

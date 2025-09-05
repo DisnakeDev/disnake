@@ -33,7 +33,7 @@ def show_version() -> None:
     entries.append(f"- aiohttp v{aiohttp.__version__}")
     uname = platform.uname()
     entries.append(f"- system info: {uname.system} {uname.release} {uname.version} {uname.machine}")
-    print("\n".join(entries))
+    print("\n".join(entries))  # noqa: T201
 
 
 def core(parser: argparse.ArgumentParser, args) -> None:
@@ -287,7 +287,7 @@ def newbot(parser, args) -> None:
         init = cogs / "__init__.py"
         init.touch()
     except OSError as exc:
-        print(f"warning: could not create cogs directory ({exc})")
+        print(f"warning: could not create cogs directory ({exc})")  # noqa: T201
 
     try:
         with open(str(new_directory / "config.py"), "w", encoding="utf-8") as fp:
@@ -312,9 +312,9 @@ def newbot(parser, args) -> None:
             with open(str(new_directory / ".gitignore"), "w", encoding="utf-8") as fp:
                 fp.write(_gitignore_template)
         except OSError as exc:
-            print(f"warning: could not create .gitignore file ({exc})")
+            print(f"warning: could not create .gitignore file ({exc})")  # noqa: T201
 
-    print("successfully made bot at", new_directory)
+    print("successfully made bot at", new_directory)  # noqa: T201
 
 
 def newcog(parser, args) -> None:
@@ -322,7 +322,7 @@ def newcog(parser, args) -> None:
     try:
         cog_dir.mkdir(exist_ok=True)
     except OSError as exc:
-        print(f"warning: could not create cogs directory ({exc})")
+        print(f"warning: could not create cogs directory ({exc})")  # noqa: T201
 
     directory = cog_dir / to_path(parser, args.name)
     directory = directory.with_suffix(".py")
@@ -348,7 +348,7 @@ def newcog(parser, args) -> None:
     except OSError as exc:
         parser.error(f"could not create cog file ({exc})")
     else:
-        print("successfully made cog at", directory)
+        print("successfully made cog at", directory)  # noqa: T201
 
 
 def add_newbot_args(subparser) -> None:

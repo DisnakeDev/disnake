@@ -358,7 +358,7 @@ class View:
         interaction: :class:`.MessageInteraction`
             The interaction that led to the failure.
         """
-        print(f"Ignoring exception in view {self} for item {item}:", file=sys.stderr)
+        print(f"Ignoring exception in view {self} for item {item}:", file=sys.stderr)  # noqa: T201
         traceback.print_exception(error.__class__, error, error.__traceback__, file=sys.stderr)
 
     async def _scheduled_task(self, item: Item, interaction: MessageInteraction) -> None:
