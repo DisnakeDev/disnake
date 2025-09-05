@@ -817,6 +817,8 @@ class MemberIterator(_AsyncIterator["Member"]):
                 # no data, terminate
                 return
 
+            if self.limit is not None:
+                self.limit -= self.retrieve
             if len(data) < 1000:
                 self.limit = 0  # terminate loop
 
@@ -899,11 +901,16 @@ class ArchivedThreadIterator(_AsyncIterator["Thread"]):
         if not self.has_more:
             raise NoMoreItems
 
-        limit = 50 if self.limit is None else max(self.limit, 50)
-        data = await self.endpoint(self.channel_id, before=self.before, limit=limit)
+        limit = 100 if self.limit is None else min(self.limit, 100)
+        # endpoint requires at least 2, for unknown reasons
+        data = await self.endpoint(self.channel_id, before=self.before, limit=max(2, limit))
 
-        # This stuff is obviously WIP because 'members' is always empty
         threads: List[ThreadPayload] = data.get("threads", [])
+        # special case: since the minimum limit the endpoint accepts is 2,
+        # we request 2 threads when only needing 1, so slice the list before yielding
+        if limit == 1:
+            threads = threads[:1]
+
         for d in reversed(threads):
             self.queue.put_nowait(self.create_thread(d))
 
