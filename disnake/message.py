@@ -17,6 +17,7 @@ from typing import (
     List,
     Optional,
     Tuple,
+    Type,
     Union,
     cast,
     overload,
@@ -960,7 +961,7 @@ class RoleSubscriptionData:
         self.is_renewal: bool = data["is_renewal"]
 
 
-def flatten_handlers(cls):
+def flatten_handlers(cls: Type[Message]) -> Type[Message]:
     prefix = len("_handle_")
     handlers = [
         (key[prefix:], value)
@@ -1105,7 +1106,7 @@ class Message(Hashable):
 
         .. versionadded:: 2.0
 
-    message_snapshots: list[:class:`ForwardedMessage`]
+    message_snapshots: List[:class:`ForwardedMessage`]
         A list of forwarded messages.
 
         .. versionadded:: 2.10
@@ -1541,7 +1542,7 @@ class Message(Hashable):
             }
             transformations.update(role_transforms)
 
-        def repl(obj):
+        def repl(obj) -> str:
             return transformations.get(re.escape(obj.group(0)), "")
 
         pattern = re.compile("|".join(transformations.keys()))

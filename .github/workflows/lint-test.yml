@@ -6,9 +6,10 @@ on:
   push:
     branches:
       - "master"
-      - "v[0-9]+.[0-9]+.x" # matches to backport branches, e.g. v3.6.x
-      - "run-ci/*"
+      - "v[0-9]+.[0-9]+.x"  # matches to backport branches, e.g. v3.6.x
+      - "run-ci/**"
     tags:
+      - "*"
   pull_request:
   merge_group:
     types: [checks_requested]
@@ -27,6 +28,8 @@ env:
   # https://docs.astral.sh/uv/reference/environment/
   UV_LOCKED: 1
   UV_NO_SYNC: 1
+  GITHUB_STEP_SUMMARY_HEADER: "<details><summary>#name#</summary>\n<pre>"
+  GITHUB_STEP_SUMMARY_FOOTER: "</pre></details>\n"
 
 jobs:
   lock-dependencies:
@@ -266,11 +269,6 @@ jobs:
         experimental: [false]
       fail-fast: true
     continue-on-error: ${{ matrix.experimental }}
-
-    env:
-      GITHUB_STEP_SUMMARY_HEADER: "<details><summary>#name#</summary>\n<pre>"
-      GITHUB_STEP_SUMMARY_FOOTER: "</pre></details>\n"
-
     steps:
       - uses: actions/checkout@v4
 

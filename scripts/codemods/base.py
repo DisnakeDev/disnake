@@ -3,7 +3,7 @@
 from abc import ABC
 from contextlib import contextmanager
 from contextvars import ContextVar
-from typing import TYPE_CHECKING, ClassVar, Optional
+from typing import TYPE_CHECKING, ClassVar, Generator, Optional
 
 import libcst as cst
 import libcst.codemod as codemod
@@ -21,7 +21,7 @@ class NoMetadataWrapperMixin(base_type):
     # deepcopying the entire module on initialization
 
     @contextmanager
-    def _handle_metadata_reference(self, tree: cst.Module):
+    def _handle_metadata_reference(self, tree: cst.Module) -> Generator[cst.Module, None, None]:
         ctx_unsafe_skip_copy.set(True)
         with super()._handle_metadata_reference(tree) as res:
             ctx_unsafe_skip_copy.set(False)

@@ -61,6 +61,14 @@ MemberFlags
 .. autoclass:: MemberFlags()
     :members:
 
+PrimaryGuild
+~~~~~~~~~~~~
+
+.. attributetable:: PrimaryGuild
+
+.. autoclass:: PrimaryGuild()
+    :members:
+
 Enumerations
 ------------
 
