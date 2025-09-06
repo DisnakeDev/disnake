@@ -307,7 +307,7 @@ ModalInteractionComponentData = Union[
 class ModalInteractionData(TypedDict):
     custom_id: str
     components: List[ModalInteractionComponentData]
-    resolved: NotRequired[InteractionDataResolved]
+    # resolved: NotRequired[InteractionDataResolved]  # undocumented
 
 
 ## Interactions
