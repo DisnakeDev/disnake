@@ -28,6 +28,7 @@ nox.options.sessions = [
     "test",
 ]
 
+PYPROJECT = nox.project.load_toml()
 
 # used to reset cached coverage data once for the first test run only
 reset_coverage = True
@@ -72,7 +73,7 @@ def install_deps(
     )
 
 
-@nox.session
+@nox.session(python="3.8")
 def docs(session: nox.Session) -> None:
     """Build and generate the documentation.
 
@@ -190,7 +191,7 @@ def autotyping(session: nox.Session) -> None:
         )
 
 
-@nox.session(name="codemod")
+@nox.session(name="codemod", python="3.8")
 def codemod(session: nox.Session) -> None:
     """Run libcst codemods."""
     install_deps(session, project=True, groups=["codemod"])
@@ -241,7 +242,7 @@ def pyright(session: nox.Session) -> None:
         pass
 
 
-@nox.session(python=["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"])
+@nox.session(python=nox.project.python_versions(PYPROJECT))
 @nox.parametrize(
     "extras",
     [
