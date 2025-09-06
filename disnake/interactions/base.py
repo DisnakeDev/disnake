@@ -1505,8 +1505,8 @@ class InteractionResponse:
             This cannot be mixed with the ``modal`` parameter.
         components: |modal_components_type|
             The components to display in the modal. A maximum of 5.
-            Currently only supports :class:`.ui.TextInput` and
-            :class:`.ui.StringSelect`, wrapped in :class:`.ui.Label`\\s.
+
+            See :class:`Modal.components <.ui.Modal>` for supported components.
 
             This cannot be mixed with the ``modal`` parameter.
 

@@ -67,7 +67,7 @@ BaseSelect
 
 .. attributetable:: BaseSelect
 
-.. autoclass:: BaseSelect
+.. autoclass:: BaseSelect()
     :members:
     :inherited-members:
 
