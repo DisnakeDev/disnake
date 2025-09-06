@@ -4,9 +4,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional, Sequence, Union
 
+from ..components import _SELECT_COMPONENT_TYPE_VALUES
 from ..enums import ComponentType
 from ..message import Message
-from ..utils import assert_never, cached_slot_property
+from ..utils import cached_slot_property
 from .base import ClientT, Interaction
 
 if TYPE_CHECKING:
@@ -142,6 +143,8 @@ class ModalInteraction(Interaction[ClientT]):
                 yield from self._walk_components(component["components"])
             elif component["type"] == ComponentType.label.value:
                 yield from self._walk_components([component["component"]])
+            elif component["type"] == ComponentType.text_display.value:
+                continue
             else:
                 yield component
 
@@ -166,17 +169,19 @@ class ModalInteraction(Interaction[ClientT]):
         This is a dict of the form ``{custom_id: value}``.
 
         For select menus, the corresponding dict value is a list of the values the user has selected.
+        For select menus of type :attr:`~ComponentType.string_select`,
+        these are just the string values the user selected;
+        for other select menu types, these are the IDs of the selected entities.
 
         .. versionadded:: 2.11
         """
-        values: Dict[str, Any] = {}
+        values: Dict[str, Union[str, Sequence[str]]] = {}
         for component in self.walk_raw_components():
             if component["type"] == ComponentType.text_input.value:
                 value = component.get("value")
-            elif component["type"] == ComponentType.string_select.value:
-                value = component.get("values")
+            elif component["type"] in _SELECT_COMPONENT_TYPE_VALUES:
+                value = [str(v) for v in component.get("values") or []]
             else:
-                assert_never(component)
                 continue
             values[component["custom_id"]] = value
         return values
@@ -220,7 +225,7 @@ class ModalInteractionData(Dict[str, Any]):
     def __init__(self, *, data: ModalInteractionDataPayload) -> None:
         super().__init__(data)
         self.custom_id: str = data["custom_id"]
-        # This uses a stripped-down action row TypedDict, as we only receive
+        # This uses stripped-down component dicts, as we only receive
         # partial data from the API, generally only containing `type`, `custom_id`, `id`,
         # and relevant fields like a select's `values`.
         self.components: List[ModalInteractionComponentDataPayload] = data["components"]

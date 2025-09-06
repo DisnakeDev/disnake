@@ -156,6 +156,28 @@ MessageTopLevelComponentV2 = Union[
 MessageTopLevelComponent = Union[MessageTopLevelComponentV1, MessageTopLevelComponentV2]
 
 
+_SELECT_COMPONENT_TYPES = frozenset(
+    (
+        ComponentType.string_select,
+        ComponentType.user_select,
+        ComponentType.role_select,
+        ComponentType.mentionable_select,
+        ComponentType.channel_select,
+    )
+)
+
+# not using `_SELECT_COMPONENT_TYPES` since pyright wouldn't infer the literal properly
+_SELECT_COMPONENT_TYPE_VALUES = frozenset(
+    (
+        ComponentType.string_select.value,
+        ComponentType.user_select.value,
+        ComponentType.role_select.value,
+        ComponentType.mentionable_select.value,
+        ComponentType.channel_select.value,
+    )
+)
+
+
 class Component:
     """Represents the base component that all other components inherit from.
 
