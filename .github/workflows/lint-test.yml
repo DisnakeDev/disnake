@@ -75,7 +75,7 @@ jobs:
         run: uv lock --refresh
 
       - uses: actions/cache/save@v4
-        if: steps.lock-uv-deps.outcome == 'success' && steps.uv-lock-changed.outcome == 'failure'
+        if: steps.lock-uv-deps.outcome == 'success'
         name: upload-uv-lock
         with:
           key: uv-lock-resolved-${{ env.UV_RESOLUTION}}-${{hashFiles('uv.lock') }}
