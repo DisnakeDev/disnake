@@ -4,7 +4,7 @@
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+    rev: v5.0.0
     hooks:
       - id: check-case-conflict
       - id: check-toml
@@ -44,7 +44,7 @@ repos:
         exclude: 'changelog/|py.typed|disnake/bin/COPYING|.github/PULL_REQUEST_TEMPLATE.md|.github/CODEOWNERS|LICENSE|MANIFEST.in|.gitattributes'
 
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.12.11
+    rev: v0.12.12
     hooks:
       - id: ruff-format
       - id: ruff-check
