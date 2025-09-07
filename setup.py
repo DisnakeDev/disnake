@@ -31,21 +31,6 @@ if version.endswith(("a", "b", "rc")):
     except Exception:
         pass
 
-packages = [
-    "disnake",
-    "disnake.bin",
-    "disnake.types",
-    "disnake.ui",
-    "disnake.ui.select",
-    "disnake.webhook",
-    "disnake.interactions",
-    "disnake.ext.commands",
-    "disnake.ext.tasks",
-    "disnake.ext.mypy_plugin",
-]
-
 setup(
     version=version,
-    packages=packages,
-    include_package_data=True,
 )

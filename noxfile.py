@@ -44,12 +44,13 @@ nox.options.sessions = [
     "test",
 ]
 
+PYPROJECT = nox.project.load_toml()
 
 # used to reset cached coverage data once for the first test run only
 reset_coverage = True
 
 
-@nox.session
+@nox.session(python="3.8")
 def docs(session: nox.Session) -> None:
     """Build and generate the documentation.
 
@@ -168,7 +169,7 @@ def autotyping(session: nox.Session) -> None:
         )
 
 
-@nox.session(name="codemod")
+@nox.session(name="codemod", python="3.8")
 def codemod(session: nox.Session) -> None:
     """Run libcst codemods."""
     session.run_always("pdm", "install", "-dG", "codemod", external=True)
@@ -208,7 +209,7 @@ def pyright(session: nox.Session) -> None:
         pass
 
 
-@nox.session(python=["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"])
+@nox.session(python=nox.project.python_versions(PYPROJECT))
 @nox.parametrize(
     "extras",
     [
@@ -246,14 +247,18 @@ def test(session: nox.Session, extras: List[str]) -> None:
 def coverage(session: nox.Session) -> None:
     """Display coverage information from the tests."""
     session.run_always("pdm", "install", "-dG", "test", external=True)
-    if "html" in session.posargs or "serve" in session.posargs:
+    posargs = session.posargs
+    # special-case serve
+    if "serve" in posargs:
+        if len(posargs) != 1:
+            session.error("serve cannot be used with any other arguments.")
         session.run("coverage", "html", "--show-contexts")
-    if "serve" in session.posargs:
         session.run(
             "python", "-m", "http.server", "8012", "--directory", "htmlcov", "--bind", "127.0.0.1"
         )
-    if "erase" in session.posargs:
-        session.run("coverage", "erase")
+        return
+
+    session.run("coverage", *posargs)
 
 
 if __name__ == "__main__":
