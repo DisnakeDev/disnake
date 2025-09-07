@@ -42,6 +42,7 @@ nox.options.sessions = [
     "test",
 ]
 
+PYPROJECT = nox.project.load_toml()
 
 # used to reset cached coverage data once for the first test run only
 reset_coverage = True
@@ -112,7 +113,7 @@ def install_deps(
             session.install(*dependencies)
 
 
-@nox.session(reuse_venv=True, python="3.8")
+@nox.session(python="3.8")
 def docs(session: nox.Session) -> None:
     """Build and generate the documentation.
 
@@ -249,7 +250,7 @@ def autotyping(session: nox.Session) -> None:
         )
 
 
-@nox.session(name="codemod", python=use_min_python_of("3.11", preferred="3.13"))
+@nox.session(name="codemod", python="3.8")
 def codemod(session: nox.Session) -> None:
     """Run libcst codemods."""
     install_deps(
@@ -341,14 +342,19 @@ def test(session: nox.Session, extras: List[str]) -> None:
 def coverage(session: nox.Session) -> None:
     """Display coverage information from the tests."""
     install_deps(session, project=True, groups=["test"])
-    if "html" in session.posargs or "serve" in session.posargs:
+
+    posargs = session.posargs
+    # special-case serve
+    if "serve" in posargs:
+        if len(posargs) != 1:
+            session.error("serve cannot be used with any other arguments.")
         session.run("coverage", "html", "--show-contexts")
-    if "serve" in session.posargs:
         session.run(
             "python", "-m", "http.server", "8012", "--directory", "htmlcov", "--bind", "127.0.0.1"
         )
-    if "erase" in session.posargs:
-        session.run("coverage", "erase")
+        return
+
+    session.run("coverage", *posargs)
 
 
 @nox.session(default=False, python=False)
