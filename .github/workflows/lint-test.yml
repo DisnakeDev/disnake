@@ -98,15 +98,15 @@ jobs:
       - name: Set up environment
         uses: ./.github/actions/setup-env
         with:
-          python-version: 3.8
+          use-cached-uv-lock: 'false' # we don't need the lock here
 
       - name: Determine Python versions to test and lint against
         id: set-matrix
         run: |
-          echo min-python=$(nox -s test --list --json | jq -rc '[.[].python][0]') | tee --append $GITHUB_OUTPUT
-          echo docs=$(nox -s docs --list --json | jq -rc '.[].python') | tee --append $GITHUB_OUTPUT
-          echo libcst=$(nox -s codemod --list --json | jq -rc '[.[].python][0]') | tee --append $GITHUB_OUTPUT
-          echo tests=$(nox -s test --list --json | jq -c '[.[].python]') | tee --append $GITHUB_OUTPUT
+          echo min-python=$(uv run noxfile.py -s test --list --json | jq -rc '[.[].python][0]') | tee --append $GITHUB_OUTPUT
+          echo docs=$(uv run noxfile.py -s docs --list --json | jq -rc '.[].python') | tee --append $GITHUB_OUTPUT
+          echo libcst=$(uv run noxfile.py -s codemod --list --json | jq -rc '[.[].python][0]') | tee --append $GITHUB_OUTPUT
+          echo tests=$(uv run noxfile.py -s test --list --json | jq -c '[.[].python]') | tee --append $GITHUB_OUTPUT
 
   lint:
     runs-on: ubuntu-latest
