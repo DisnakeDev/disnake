@@ -46,6 +46,31 @@ jobs:
         with:
           env-already-initialized: false
 
+  # Used to determine which python versions to test against.
+  # noxfile.py is the source of truth, which in turn draws from
+  # pyproject.toml's `project.requires-python` and `project.classifers`.
+  python-versions:
+    runs-on: ubuntu-latest
+    outputs:
+      min-python: ${{ steps.set-matrix.outputs.min-python }}
+      docs: ${{ steps.set-matrix.outputs.docs }}
+      libcst: ${{ steps.set-matrix.outputs.libcst }}
+      pyright: ${{ steps.set-matrix.outputs.tests }}
+      tests: ${{ steps.set-matrix.outputs.tests }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up environment
+        uses: ./.github/actions/setup-env
+        with:
+          python-version: 3.8
+
+      - name: Determine Python versions to test and lint against
+        id: set-matrix
+        run: |
+          echo min-python=$(nox -s test --list --json | jq -rc '[.[].python][0]') | tee --append $GITHUB_OUTPUT
+          echo docs=$(nox -s docs --list --json | jq -rc '.[].python') | tee --append $GITHUB_OUTPUT
+          echo libcst=$(nox -s codemod --list --json | jq -rc '[.[].python][0]') | tee --append $GITHUB_OUTPUT
+          echo tests=$(nox -s test --list --json | jq -c '[.[].python]') | tee --append $GITHUB_OUTPUT
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -61,24 +86,31 @@ jobs:
     # unlike the other workflows, we explicitly use the same version as
     # readthedocs (see .readthedocs.yml) here for consistency
     runs-on: ubuntu-24.04
-    needs: lock-dependencies
+    needs:
+      - python-versions
+      - lock-dependencies
+      - lint
     steps:
       - uses: actions/checkout@v4
 
       - name: Set up environment
+        id: setup-env
         uses: ./.github/actions/setup-env
         with:
-          python-version: 3.8
+          python-version: ${{ needs.python-versions.outputs.docs }}
 
       - name: Run sphinx-build
-        run: nox -s docs -- --keep-going -W -w $GITHUB_STEP_SUMMARY
+        run: nox --force-python ${{ steps.setup-env.outputs.python-version }} -s docs -- --keep-going -W -w $GITHUB_STEP_SUMMARY
 
   pyright:
     runs-on: ubuntu-latest
-    needs: lock-dependencies
+    needs:
+      - python-versions
+      - lock-dependencies
+      - lint
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        python-version: ${{ fromJson(needs.python-versions.outputs.pyright) }}
         experimental: [false]
       fail-fast: false
     continue-on-error: ${{ matrix.experimental }}
@@ -96,31 +128,35 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install dependencies
-        run: pdm install -d -Gspeed -Gdocs -Gvoice
+        # `--no-venv` to install in the main pdm venv instead of nox's pyright-specific one
+        # because nox uses pdm internally to install, this means that the venv that is used is
+        # the one that pdm would create in project: `.venv`
+        run: |
+          nox -s pyright --no-venv --install-only --force-python ${{ steps.setup-env.outputs.python-version }}
 
       - name: Add .venv/bin to PATH
         run: dirname "$(pdm info --python)" >> $GITHUB_PATH
 
       - name: Set pyright version
+        id: pyright-version
         run: |
-          PYRIGHT_VERSION="$(pdm run python -c 'import pyright; print(pyright.__pyright_version__)')"
-          echo "PYRIGHT_VERSION=$PYRIGHT_VERSION" >> $GITHUB_ENV
+          echo "pyright-version=$(pdm run python -c 'import pyright; print(pyright.__pyright_version__)')" >> $GITHUB_OUTPUT
 
       - name: Run pyright (Linux)
         uses: jakebailey/pyright-action@v2.2.1
         id: pyright-linux
         with:
-          version: ${{ env.PYRIGHT_VERSION }}
+          version: ${{ steps.pyright-version.outputs.pyright-version }}
           python-version: ${{ steps.setup-env.outputs.python-version }}
           python-platform: "Linux"
-          annotate: ${{ matrix.python-version == '3.8' }} # only add comments for one version
+          annotate: ${{ matrix.python-version == needs.python-versions.outputs.min-python }} # only add comments for one version
           warnings: true
 
       - name: Run pyright (Windows)
         uses: jakebailey/pyright-action@v2.2.1
         if: always() && (steps.pyright-linux.outcome == 'success' || steps.pyright-linux.outcome == 'failure')
         with:
-          version: ${{ env.PYRIGHT_VERSION }}
+          version: ${{ steps.pyright-version.outputs.pyright-version }}
           python-version: ${{ steps.setup-env.outputs.python-version }}
           python-platform: "Windows"
           annotate: false # only add comments for one platform (see above)
@@ -128,7 +164,10 @@ jobs:
 
   misc:
     runs-on: ubuntu-latest
-    needs: lock-dependencies
+    needs:
+      - python-versions
+      - lock-dependencies
+      - lint
     steps:
       - uses: actions/checkout@v4
 
@@ -136,7 +175,7 @@ jobs:
         id: setup
         uses: ./.github/actions/setup-env
         with:
-          python-version: 3.8
+          python-version: ${{ needs.python-versions.outputs.min-python }}
 
       - name: Run slotscheck
         if: (success() || failure()) && steps.setup.outcome == 'success'
@@ -161,14 +200,17 @@ jobs:
   codemod:
     runs-on: ubuntu-latest
     needs:
+      - python-versions
       - lock-dependencies
+      - lint
     steps:
       - uses: actions/checkout@v4
 
       - name: Set up environment
+        id: setup
         uses: ./.github/actions/setup-env
         with:
-          python-version: 3.8
+          python-version: ${{ needs.python-versions.outputs.libcst }}
 
       # run the libcst parsers and check for changes
       - name: libcst codemod
@@ -192,11 +234,14 @@ jobs:
 
   pytest:
     runs-on: ${{ matrix.os }}
-    needs: lock-dependencies
+    needs:
+      - python-versions
+      - lock-dependencies
+      - lint
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
         os: ["windows-latest", "ubuntu-latest", "macos-latest"]
+        python-version: ${{ fromJson(needs.python-versions.outputs.tests) }}
         experimental: [false]
       fail-fast: true
     continue-on-error: ${{ matrix.experimental }}
@@ -209,12 +254,9 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install dependencies
-        run: pdm install -dG test # needed for coverage
-
-      - name: Test package install
+      - name: Install nox environment
         run: |
-          python -m pip install .
+          nox -s test --no-venv --install-only --force-python ${{ steps.setup-env.outputs.python-version }}
 
       - name: Run pytest
         id: run_tests
@@ -223,14 +265,14 @@ jobs:
           TZ: "America/New_York"
         run: |
           echo "$GITHUB_STEP_SUMMARY_HEADER" | sed "s/#name#/Test Summary/" >> $GITHUB_STEP_SUMMARY
-          nox --force-python ${{ steps.setup-env.outputs.python-version }} -s test -- --color=no --cov-report= | tee -a $GITHUB_STEP_SUMMARY
+          pdm run nox --no-venv -s test -- --color=no --cov-report= | tee -a $GITHUB_STEP_SUMMARY
           echo "$GITHUB_STEP_SUMMARY_FOOTER" >> $GITHUB_STEP_SUMMARY
 
       - name: Print Coverage Output
         if: always() && (steps.run_tests.outcome == 'success' || steps.run_tests.outcome == 'failure')
         run: |
           echo "$GITHUB_STEP_SUMMARY_HEADER" | sed "s/#name#/Coverage Summary/" >> $GITHUB_STEP_SUMMARY
-          pdm run coverage report | tee -a $GITHUB_STEP_SUMMARY
+          pdm run nox --no-venv -s coverage -- report | tee -a $GITHUB_STEP_SUMMARY
           echo "$GITHUB_STEP_SUMMARY_FOOTER" >> $GITHUB_STEP_SUMMARY
 
   # thanks to aiohttp for this part of the workflow
