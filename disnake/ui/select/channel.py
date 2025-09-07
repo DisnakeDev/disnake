@@ -23,7 +23,7 @@ from ...components import ChannelSelectMenu
 from ...enums import ChannelType, ComponentType, SelectDefaultValueType
 from ...object import Object
 from ...threads import Thread
-from ...utils import MISSING, iscoroutine, iscoroutinefunction
+from ...utils import MISSING
 from .base import BaseSelect, P, SelectDefaultValueInputType, V_co, _create_decorator
 
 if TYPE_CHECKING:

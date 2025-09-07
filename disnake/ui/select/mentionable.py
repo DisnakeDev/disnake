@@ -23,7 +23,7 @@ from ...enums import ComponentType, SelectDefaultValueType
 from ...member import Member
 from ...role import Role
 from ...user import ClientUser, User
-from ...utils import MISSING, iscoroutine, iscoroutinefunction
+from ...utils import MISSING
 from .base import BaseSelect, P, SelectDefaultValueMultiInputType, V_co, _create_decorator
 
 if TYPE_CHECKING:
