@@ -70,7 +70,7 @@ if TYPE_CHECKING:
     from .enums import InviteTarget
     from .guild import Guild, GuildChannel as AnyGuildChannel, GuildMessageable
     from .guild_scheduled_event import GuildScheduledEvent
-    from .iterators import HistoryIterator
+    from .iterators import ChannelPinsIterator, HistoryIterator
     from .member import Member
     from .message import Message, MessageReference, PartialMessage
     from .poll import Poll
@@ -83,6 +83,7 @@ if TYPE_CHECKING:
         OverwriteType,
         PermissionOverwrite as PermissionOverwritePayload,
     )
+    from .types.guild import ChannelPositionUpdate as ChannelPositionUpdatePayload
     from .types.threads import PartialForumTag as PartialForumTagPayload
     from .ui._types import MessageComponents
     from .ui.view import View
@@ -295,7 +296,7 @@ class GuildChannel(ABC):
         http = self._state.http
         bucket = self._sorting_bucket
         channels = [c for c in self.guild.channels if c._sorting_bucket == bucket]
-        channels = cast(List[GuildChannel], channels)
+        channels = cast("List[GuildChannel]", channels)
 
         channels.sort(key=lambda c: c.position)
 
@@ -312,9 +313,9 @@ class GuildChannel(ABC):
             # add ourselves at our designated position
             channels.insert(index, self)
 
-        payload = []
+        payload: List[ChannelPositionUpdatePayload] = []
         for index, c in enumerate(channels):
-            d: Dict[str, Any] = {"id": c.id, "position": index}
+            d: ChannelPositionUpdatePayload = {"id": c.id, "position": index}
             if parent_id is not MISSING and c.id == self.id:
                 d.update(parent_id=parent_id, lock_permissions=lock_permissions)
             payload.append(d)
@@ -508,7 +509,7 @@ class GuildChannel(ABC):
         """List[:class:`.Role`]: Returns a list of roles that have been overridden from
         their default values in the :attr:`.Guild.roles` attribute.
         """
-        ret = []
+        ret: List[Role] = []
         g = self.guild
         for overwrite in filter(lambda o: o.is_role(), self._overwrites):
             role = g.get_role(overwrite.id)
@@ -893,6 +894,7 @@ class GuildChannel(ABC):
         moderate_members: Optional[bool] = ...,
         move_members: Optional[bool] = ...,
         mute_members: Optional[bool] = ...,
+        pin_messages: Optional[bool] = ...,
         priority_speaker: Optional[bool] = ...,
         read_message_history: Optional[bool] = ...,
         read_messages: Optional[bool] = ...,
@@ -1248,7 +1250,7 @@ class GuildChannel(ABC):
             ]
 
         channels.sort(key=lambda c: (c.position, c.id))
-        channels = cast(List[GuildChannel], channels)
+        channels = cast("List[GuildChannel]", channels)
 
         try:
             # Try to remove ourselves from the channel list
@@ -1271,11 +1273,11 @@ class GuildChannel(ABC):
             raise ValueError("Could not resolve appropriate move position")
 
         channels.insert(max((index + offset), 0), self)
-        payload = []
+        payload: List[ChannelPositionUpdatePayload] = []
         lock_permissions = kwargs.get("sync_permissions", False)
         reason = kwargs.get("reason")
         for index, channel in enumerate(channels):
-            d = {"id": channel.id, "position": index}
+            d: ChannelPositionUpdatePayload = {"id": channel.id, "position": index}
             if parent_id is not MISSING and channel.id == self.id:
                 d.update(parent_id=parent_id, lock_permissions=lock_permissions)
             payload.append(d)
@@ -1862,10 +1864,12 @@ class Messageable:
         data = await self._state.http.get_message(channel.id, id)
         return self._state.create_message(channel=channel, data=data)
 
-    async def pins(self) -> List[Message]:
-        """|coro|
+    def pins(
+        self, *, limit: Optional[int] = 50, before: Optional[SnowflakeTime] = None
+    ) -> ChannelPinsIterator:
+        """Returns an :class:`.AsyncIterator` that enables receiving the destination's pinned messages.
 
-        Retrieves all messages that are currently pinned in the channel.
+        You must have the :attr:`.Permissions.read_message_history` and :attr:`.Permissions.view_channel` permissions to use this.
 
         .. note::
 
@@ -1873,20 +1877,51 @@ class Messageable:
             objects returned by this method do not contain complete
             :attr:`.Message.reactions` data.
 
+        .. versionchanged:: 2.11
+            Now returns an :class:`.AsyncIterator` to support changes in Discord's API.
+            ``await``\\ing the result of this method remains supported, but only returns the
+            last 50 pins and is deprecated in favor of ``async for msg in channel.pins()``.
+
+        Examples
+        --------
+        Usage ::
+
+            counter = 0
+            async for message in channel.pins(limit=100):
+                if message.author == client.user:
+                    counter += 1
+
+        Flattening to a list ::
+
+            pinned_messages = await channel.pins(limit=100).flatten()
+            # pinned_messages is now a list of Message...
+
+        All parameters are optional.
+
+        Parameters
+        ----------
+        limit: Optional[:class:`int`]
+            The number of pinned messages to retrieve.
+            If ``None``, retrieves every pinned message in the channel. Note, however,
+            that this would make it a slow operation.
+        before: Optional[Union[:class:`.abc.Snowflake`, :class:`datetime.datetime`]]
+            Retrieve messages pinned before this date or message.
+            If a datetime is provided, it is recommended to use a UTC aware datetime.
+            If the datetime is naive, it is assumed to be local time.
+
         Raises
         ------
         HTTPException
             Retrieving the pinned messages failed.
 
-        Returns
-        -------
-        List[:class:`.Message`]
-            The messages that are currently pinned.
+        Yields
+        ------
+        :class:`.Message`
+            The pinned message from the parsed message data.
         """
-        channel = await self._get_channel()
-        state = self._state
-        data = await state.http.pins_from(channel.id)
-        return [state.create_message(channel=channel, data=m) for m in data]
+        from .iterators import ChannelPinsIterator  # due to cyclic imports
+
+        return ChannelPinsIterator(self, limit=limit, before=before)
 
     def history(
         self,

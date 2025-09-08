@@ -90,7 +90,8 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
         A list of channels that have been selected by the user.
     """
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = BaseSelect.__repr_attributes__ + (
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
+        *BaseSelect.__repr_attributes__,
         "channel_types",
     )
 
@@ -184,7 +185,7 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
         return self._underlying.channel_types
 
     @channel_types.setter
-    def channel_types(self, value: Optional[List[ChannelType]]):
+    def channel_types(self, value: Optional[List[ChannelType]]) -> None:
         if value is not None:
             if not isinstance(value, list):
                 raise TypeError("channel_types must be a list of ChannelType")

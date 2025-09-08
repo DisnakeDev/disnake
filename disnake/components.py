@@ -185,7 +185,7 @@ class Component:
 
     __slots__: Tuple[str, ...] = ("type", "id")
 
-    __repr_info__: ClassVar[Tuple[str, ...]]
+    __repr_attributes__: ClassVar[Tuple[str, ...]]
 
     # subclasses are expected to overwrite this if they're only usable with `MessageFlags.is_components_v2`
     is_v2: ClassVar[bool] = False
@@ -194,7 +194,7 @@ class Component:
     id: int
 
     def __repr__(self) -> str:
-        attrs = " ".join(f"{key}={getattr(self, key)!r}" for key in self.__repr_info__)
+        attrs = " ".join(f"{key}={getattr(self, key)!r}" for key in self.__repr_attributes__)
         return f"<{self.__class__.__name__} {attrs}>"
 
     @classmethod
@@ -236,7 +236,7 @@ class ActionRow(Component, Generic[ActionRowChildComponentT]):
 
     __slots__: Tuple[str, ...] = ("children",)
 
-    __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = __slots__
 
     def __init__(self, data: ActionRowPayload) -> None:
         self.type: Literal[ComponentType.action_row] = ComponentType.action_row
@@ -303,7 +303,7 @@ class Button(Component):
         "sku_id",
     )
 
-    __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = __slots__
 
     def __init__(self, data: ButtonComponentPayload) -> None:
         self.type: Literal[ComponentType.button] = ComponentType.button
@@ -404,7 +404,9 @@ class BaseSelectMenu(Component):
     )
 
     # FIXME: this isn't pretty; we should decouple __repr__ from slots
-    __repr_info__: ClassVar[Tuple[str, ...]] = tuple(s for s in __slots__ if s != "default_values")
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = tuple(
+        s for s in __slots__ if s != "default_values"
+    )
 
     # n.b: ideally this would be `BaseSelectMenuPayload`,
     # but pyright made TypedDict keys invariant and doesn't
@@ -480,7 +482,10 @@ class StringSelectMenu(BaseSelectMenu):
 
     __slots__: Tuple[str, ...] = ("options",)
 
-    __repr_info__: ClassVar[Tuple[str, ...]] = BaseSelectMenu.__repr_info__ + __slots__
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
+        *BaseSelectMenu.__repr_attributes__,
+        *__slots__,
+    )
     type: Literal[ComponentType.string_select]
 
     def __init__(self, data: StringSelectMenuPayload) -> None:
@@ -677,7 +682,10 @@ class ChannelSelectMenu(BaseSelectMenu):
 
     __slots__: Tuple[str, ...] = ("channel_types",)
 
-    __repr_info__: ClassVar[Tuple[str, ...]] = BaseSelectMenu.__repr_info__ + __slots__
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
+        *BaseSelectMenu.__repr_attributes__,
+        *__slots__,
+    )
     type: Literal[ComponentType.channel_select]
 
     def __init__(self, data: ChannelSelectMenuPayload) -> None:
@@ -884,7 +892,7 @@ class TextInput(Component):
         "min_length",
     )
 
-    __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = __slots__
 
     def __init__(self, data: TextInputPayload) -> None:
         self.type: Literal[ComponentType.text_input] = ComponentType.text_input
@@ -906,7 +914,7 @@ class TextInput(Component):
             "type": self.type.value,
             "id": self.id,
             "style": self.style.value,
-            "label": cast(str, self.label),
+            "label": cast("str", self.label),
             "custom_id": self.custom_id,
             "required": self.required,
         }
@@ -953,7 +961,7 @@ class Section(Component):
 
     __slots__: Tuple[str, ...] = ("children", "accessory")
 
-    __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = __slots__
 
     is_v2 = True
 
@@ -1000,7 +1008,7 @@ class TextDisplay(Component):
 
     __slots__: Tuple[str, ...] = ("content",)
 
-    __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = __slots__
 
     is_v2 = True
 
@@ -1112,7 +1120,7 @@ class Thumbnail(Component):
         "spoiler",
     )
 
-    __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = __slots__
 
     is_v2 = True
 
@@ -1163,7 +1171,7 @@ class MediaGallery(Component):
 
     __slots__: Tuple[str, ...] = ("items",)
 
-    __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = __slots__
 
     is_v2 = True
 
@@ -1271,7 +1279,7 @@ class FileComponent(Component):
 
     __slots__: Tuple[str, ...] = ("file", "spoiler", "name", "size")
 
-    __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = __slots__
 
     is_v2 = True
 
@@ -1322,7 +1330,7 @@ class Separator(Component):
 
     __slots__: Tuple[str, ...] = ("divider", "spacing")
 
-    __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = __slots__
 
     is_v2 = True
 
@@ -1375,7 +1383,7 @@ class Container(Component):
         "spoiler",
     )
 
-    __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = __slots__
 
     is_v2 = True
 

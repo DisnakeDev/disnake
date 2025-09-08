@@ -292,7 +292,7 @@ class _BaseRange(ABC):
             )
 
             # infer type from min/max values
-            params = (cls._infer_type(params),) + params
+            params = (cls._infer_type(params), *params)
 
         if len(params) != 3:
             raise TypeError(
@@ -377,7 +377,7 @@ else:
 
         _allowed_types = (int, float)
 
-        def __post_init__(self):
+        def __post_init__(self) -> None:
             for value in (self.min_value, self.max_value):
                 if value is None:
                     continue
@@ -406,7 +406,7 @@ else:
 
         _allowed_types = (str,)
 
-        def __post_init__(self):
+        def __post_init__(self) -> None:
             for value in (self.min_value, self.max_value):
                 if value is None:
                     continue

@@ -4,6 +4,7 @@ from typing import List, Literal, Optional, TypedDict, Union
 
 from typing_extensions import NotRequired
 
+from .message import MessagePin
 from .snowflake import Snowflake
 from .threads import ForumTag, ThreadArchiveDurationLiteral, ThreadMember, ThreadMetadata
 from .user import PartialUser
@@ -196,3 +197,8 @@ class CreateGuildChannel(TypedDict):
     rtc_region: NotRequired[Optional[str]]
     video_quality_mode: NotRequired[Optional[VideoQualityMode]]
     default_auto_archive_duration: NotRequired[Optional[ThreadArchiveDurationLiteral]]
+
+
+class ChannelPins(TypedDict):
+    items: List[MessagePin]
+    has_more: bool

@@ -43,6 +43,7 @@ from ..errors import (
 )
 from ..flags import InteractionContextTypes, MessageFlags
 from ..guild import Guild
+from ..http import HTTPClient
 from ..i18n import Localized
 from ..member import Member
 from ..message import Attachment, AuthorizingIntegrationOwners, Message
@@ -81,6 +82,7 @@ if TYPE_CHECKING:
         InteractionDataResolved as InteractionDataResolvedPayload,
     )
     from ..types.snowflake import Snowflake
+    from ..types.user import User as UserPayload
     from ..ui._types import MessageComponents, ModalComponents
     from ..ui.modal import Modal
     from ..ui.view import View
@@ -184,6 +186,14 @@ class Interaction(Generic[ClientT]):
         context, you can use ``if interaction.context.guild:``.
 
         .. versionadded:: 2.10
+
+    attachment_size_limit: :class:`int`
+        The maximum number of bytes files can have in responses to this interaction.
+
+        This may be higher than the default limit, depending on the guild's boost
+        status or the invoking user's nitro status.
+
+        .. versionadded:: 2.11
     """
 
     __slots__: Tuple[str, ...] = (
@@ -202,6 +212,7 @@ class Interaction(Generic[ClientT]):
         "entitlements",
         "authorizing_integration_owners",
         "context",
+        "attachment_size_limit",
         "_app_permissions",
         "_permissions",
         "_state",
@@ -218,7 +229,7 @@ class Interaction(Generic[ClientT]):
         self._state: ConnectionState = state
         # TODO: Maybe use a unique session
         self._session: ClientSession = state.http._HTTPClient__session  # type: ignore
-        self.client: ClientT = cast(ClientT, state._get_client())
+        self.client: ClientT = cast("ClientT", state._get_client())
         self._original_response: Optional[InteractionMessage] = None
 
         self.id: int = int(data["id"])
@@ -275,6 +286,8 @@ class Interaction(Generic[ClientT]):
         self.context: InteractionContextTypes = InteractionContextTypes._from_values(
             [context] if (context := data.get("context")) is not None else []
         )
+
+        self.attachment_size_limit: int = data["attachment_size_limit"]
 
     @property
     def bot(self) -> ClientT:
@@ -1600,20 +1613,20 @@ class _InteractionMessageState:
         self._interaction: Interaction = interaction
         self._parent: ConnectionState = parent
 
-    def _get_guild(self, guild_id):
+    def _get_guild(self, guild_id) -> Optional[Guild]:
         return self._parent._get_guild(guild_id)
 
-    def store_user(self, data):
+    def store_user(self, data: UserPayload) -> User:
         return self._parent.store_user(data)
 
-    def create_user(self, data):
+    def create_user(self, data: UserPayload) -> User:
         return self._parent.create_user(data)
 
     @property
-    def http(self):
+    def http(self) -> HTTPClient:
         return self._parent.http
 
-    def __getattr__(self, attr):
+    def __getattr__(self, attr: str) -> Any:
         return getattr(self._parent, attr)
 
 
