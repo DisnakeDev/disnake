@@ -182,7 +182,7 @@ def build(session: nox.Session) -> None:
     session.run("python", "-m", "build", "--outdir", "dist")
 
 
-@nox.session(python=use_min_python_of("3.11", preferred="3.13"))
+@nox.session(python="3.8")
 def autotyping(session: nox.Session) -> None:
     """Run autotyping.
 
