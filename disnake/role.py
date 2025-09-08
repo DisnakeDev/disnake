@@ -607,7 +607,11 @@ class Role(Hashable):
 
         payload: Dict[str, Any] = {}
 
-        colors: Dict[str, Any] = {}
+        colors: Dict[str, Any] = {
+            "primary_color": self._primary_color,
+            "secondary_color": self._secondary_color,
+            "tertiary_color": self._tertiary_color,
+        }
         if color is not MISSING:
             primary_colour = color
         elif colour is not MISSING:
@@ -640,7 +644,8 @@ class Role(Hashable):
             else:
                 colors["tertiary_color"] = tertiary_colour
 
-        payload["colors"] = colors
+        if colors:
+            payload["colors"] = colors
 
         if name is not MISSING:
             payload["name"] = name
