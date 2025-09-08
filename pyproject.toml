@@ -104,6 +104,10 @@ build = [
     "twine~=5.1.1",
 ]
 
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["disnake*"]
+
 [tool.nox]
 script-venv-backend = "uv|virtualenv"
 
