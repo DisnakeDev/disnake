@@ -25,6 +25,10 @@ defaults:
     shell: bash
 
 env:
+  # https://docs.astral.sh/uv/reference/environment/
+  UV_LOCKED: 1
+  UV_NO_SYNC: 1
+  UV_PYTHON_DOWNLOADS: never
   GITHUB_STEP_SUMMARY_HEADER: "<details><summary>#name#</summary>\n<pre>"
   GITHUB_STEP_SUMMARY_FOOTER: "</pre></details>\n"
 
@@ -36,15 +40,48 @@ jobs:
     # while still not needing to commit a lockfile to the repo, which is discouraged for libraries as per
     # https://pdm-project.org/en/latest/usage/lockfile/
     runs-on: ubuntu-latest
+    env:
+      UV_RESOLUTION: highest
     steps:
       - uses: actions/checkout@v4
 
-    # Instead of setup-env, we call the cache-pdm action here directly.
-    # This avoids having to install PDM, only to find out the cache is already up to date sometimes.
-      - name: Configure cache
-        uses: ./.github/actions/cache-pdm
+      - name: Set up environment
+        id: setup-env
+        uses: ./.github/actions/setup-env
         with:
-          env-already-initialized: false
+          use-cached-uv-lock: 'false' # we don't need the lock here, we will automatically download it below
+
+      - name: Restore uv lock
+        uses: actions/cache/restore@v4
+        id: cache-uv-lock
+        with:
+          key: uv-lock-resolved-${{ env.UV_RESOLUTION }}
+          restore-keys: |
+            uv-lock-resolved-${{ env.UV_RESOLUTION }}
+          path: uv.lock
+          enableCrossOsArchive: true
+
+      - name: Check if uv.lock changed
+        id: uv-lock-changed
+        continue-on-error: true
+        if: steps.cache-uv-lock.outputs.cache-hit == 'true' || steps.cache-uv-lock.outputs.cache-hit == 'false'
+        run: |
+          uv lock --check
+
+      - name: Lock dependencies
+        if: steps.uv-lock-changed.outcome == 'failure' || steps.cache-uv-lock.outputs.cache-hit != 'true' && steps.cache-uv-lock.outputs.cache-hit != 'false'
+        id: lock-uv-deps
+        env:
+          UV_LOCKED: 0
+        run: uv lock --refresh
+
+      - uses: actions/cache/save@v4
+        if: steps.lock-uv-deps.outcome == 'success'
+        name: upload-uv-lock
+        with:
+          key: uv-lock-resolved-${{ env.UV_RESOLUTION}}-${{hashFiles('uv.lock') }}
+          path: uv.lock
+          enableCrossOsArchive: true
 
   # Used to determine which python versions to test against.
   # noxfile.py is the source of truth, which in turn draws from
@@ -62,7 +99,7 @@ jobs:
       - name: Set up environment
         uses: ./.github/actions/setup-env
         with:
-          python-version: 3.8
+          use-cached-uv-lock: 'false' # we don't need the lock here
 
       - name: Determine Python versions to test and lint against
         id: set-matrix
@@ -71,10 +108,17 @@ jobs:
           echo docs=$(nox -s docs --list --json | jq -rc '.[].python') | tee --append $GITHUB_OUTPUT
           echo libcst=$(nox -s codemod --list --json | jq -rc '[.[].python][0]') | tee --append $GITHUB_OUTPUT
           echo tests=$(nox -s test --list --json | jq -c '[.[].python]') | tee --append $GITHUB_OUTPUT
+
   lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Cache pre-commit
+        uses: actions/cache@v4
+        with:
+          key: pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}
+          path: ~/.cache/pip
 
       - name: Run pre-commit
         id: pre-commit
@@ -90,6 +134,8 @@ jobs:
       - python-versions
       - lock-dependencies
       - lint
+    env:
+      NOXSESSION: docs
     steps:
       - uses: actions/checkout@v4
 
@@ -100,7 +146,7 @@ jobs:
           python-version: ${{ needs.python-versions.outputs.docs }}
 
       - name: Run sphinx-build
-        run: nox --force-python ${{ steps.setup-env.outputs.python-version }} -s docs -- --keep-going -W -w $GITHUB_STEP_SUMMARY
+        run: nox -- --keep-going -W -w $GITHUB_STEP_SUMMARY
 
   pyright:
     runs-on: ubuntu-latest
@@ -115,33 +161,29 @@ jobs:
         experimental: [false]
       fail-fast: false
     continue-on-error: ${{ matrix.experimental }}
-
+    env:
+      NOXSESSION: pyright
+      NOXFORCEPYTHON: ${{ matrix.python-version }}
     steps:
       - uses: actions/checkout@v4
 
       - name: Set up environment
         id: setup-env
         uses: ./.github/actions/setup-env
-        env:
-          PDM_USE_VENV: true
-          PDM_VENV_IN_PROJECT: true
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install dependencies
-        # `--no-venv` to install in the main pdm venv instead of nox's pyright-specific one
-        # because nox uses pdm internally to install, this means that the venv that is used is
-        # the one that pdm would create in project: `.venv`
-        run: |
-          nox -s pyright --no-venv --install-only --force-python ${{ steps.setup-env.outputs.python-version }}
-
       - name: Add .venv/bin to PATH
-        run: dirname "$(pdm info --python)" >> $GITHUB_PATH
+        run: dirname "$(uv python find)" >> $GITHUB_PATH
+
+      - name: Install dependencies
+        run: |
+          nox --install-only --no-venv
 
       - name: Set pyright version
         id: pyright-version
         run: |
-          echo "pyright-version=$(pdm run python -c 'import pyright; print(pyright.__pyright_version__)')" >> $GITHUB_OUTPUT
+          echo "pyright-version=$(uv run python -c 'import pyright; print(pyright.__pyright_version__)')" >> $GITHUB_OUTPUT
 
       - name: Run pyright (Linux)
         uses: jakebailey/pyright-action@v2.2.1
@@ -180,23 +222,21 @@ jobs:
 
       - name: Run slotscheck
         if: (success() || failure()) && steps.setup.outcome == 'success'
-        run: nox -s slotscheck
+        env:
+          NOXSESSION: slotscheck
+        run: nox
 
-      - name: Run check-manifest
-        if: (success() || failure()) && steps.setup.outcome == 'success'
-        run: nox -s check-manifest
-
-      # This only runs if the previous steps were successful, no point in running it otherwise
       - name: Try building package
+        if: (success() || failure()) && steps.setup.outcome == 'success'
+        env:
+          NOXSESSION: build
         run: |
-          pdm install -dG build
-
-          pdm run python -m build
+          nox
           ls -la dist/
 
       - name: Check README.md renders properly on PyPI
         run: |
-          pdm run twine check --strict dist/*
+          uvx twine~=6.1 check --strict dist/*
 
   codemod:
     runs-on: ubuntu-latest
@@ -215,15 +255,17 @@ jobs:
 
       # run the libcst parsers and check for changes
       - name: libcst codemod
+        env:
+          NOXSESSION: codemod
         run: |
-          nox -s codemod -- run-all
+          nox -- run-all
 
-      - name: Check for changes made by libcst codemod
+      - name: Check for changes by libcst
         run: |
           if [ -n "$(git status --porcelain)" ]; then
             echo "::error::Please run 'nox -s codemod -- run-all' locally and commit the changes." >&2;
             echo "$GITHUB_STEP_SUMMARY_HEADER" | sed "s/#name#/LibCST Codemod/" >> $GITHUB_STEP_SUMMARY
-            echo "The libcst codemod made changes to the codebase. Please run 'nox -s codemod -- run-all' locally and commit the changes." >> $GITHUB_STEP_SUMMARY
+            echo "The libcst codemod made changes to the codebase. Please run 'uv run nox -s codemod -- run-all' locally and commit the changes." >> $GITHUB_STEP_SUMMARY
             echo "::group::git diff"
             git diff |& tee -a $GITHUB_STEP_SUMMARY
             echo "::endgroup::"
@@ -247,6 +289,9 @@ jobs:
         experimental: [false]
       fail-fast: true
     continue-on-error: ${{ matrix.experimental }}
+    env:
+      NOXSESSION: test
+      NOXFORCEPYTHON: python
     steps:
       - uses: actions/checkout@v4
 
@@ -258,7 +303,7 @@ jobs:
 
       - name: Install nox environment
         run: |
-          nox -s test --no-venv --install-only --force-python ${{ steps.setup-env.outputs.python-version }}
+          nox --install-only
 
       - name: Run pytest
         id: run_tests
@@ -267,14 +312,17 @@ jobs:
           TZ: "America/New_York"
         run: |
           echo "$GITHUB_STEP_SUMMARY_HEADER" | sed "s/#name#/Test Summary/" >> $GITHUB_STEP_SUMMARY
-          pdm run nox --no-venv -s test -- --color=no --cov-report= | tee -a $GITHUB_STEP_SUMMARY
+          nox --no-install -- --color=no --cov-report= | tee -a $GITHUB_STEP_SUMMARY
           echo "$GITHUB_STEP_SUMMARY_FOOTER" >> $GITHUB_STEP_SUMMARY
 
       - name: Print Coverage Output
         if: always() && (steps.run_tests.outcome == 'success' || steps.run_tests.outcome == 'failure')
+        env:
+          UV_NO_SYNC: 0
+          NOXSESSION: coverage
         run: |
           echo "$GITHUB_STEP_SUMMARY_HEADER" | sed "s/#name#/Coverage Summary/" >> $GITHUB_STEP_SUMMARY
-          pdm run nox --no-venv -s coverage -- report | tee -a $GITHUB_STEP_SUMMARY
+          nox --no-install -- report | tee -a $GITHUB_STEP_SUMMARY
           echo "$GITHUB_STEP_SUMMARY_FOOTER" >> $GITHUB_STEP_SUMMARY
 
   # thanks to aiohttp for this part of the workflow
