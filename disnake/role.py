@@ -644,7 +644,13 @@ class Role(Hashable):
             else:
                 colors["tertiary_color"] = tertiary_colour
 
-        if colors:
+        if any(
+            [
+                colors["primary_color"] != self._primary_color,
+                colors["secondary_color"] != self._secondary_color,
+                colors["tertiary_color"] != self._tertiary_color,
+            ]
+        ):
             payload["colors"] = colors
 
         if name is not MISSING:
