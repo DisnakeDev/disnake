@@ -30,7 +30,7 @@ class Label(UIComponent):
 
     Parameters
     ----------
-    text: :class:`str`
+    label: :class:`str`
         The label text.
     component: Union[:class:`TextInput`, :class:`StringSelect`]
         The component within the label.
@@ -43,7 +43,7 @@ class Label(UIComponent):
 
     Attributes
     ----------
-    text: :class:`str`
+    label: :class:`str`
         The label text.
     component: Union[:class:`TextInput`, :class:`StringSelect`]
         The component within the label.
@@ -52,14 +52,14 @@ class Label(UIComponent):
     """
 
     __repr_attributes__: ClassVar[Tuple[str, ...]] = (
-        "text",
+        "label",
         "description",
         "component",
     )
 
     def __init__(
         self,
-        text: str,
+        label: str,
         component: LabelChildUIComponent,
         *,
         description: Optional[str] = None,
@@ -67,7 +67,7 @@ class Label(UIComponent):
     ) -> None:
         self._id: int = id
 
-        self.text: str = text
+        self.label: str = label
         self.description: Optional[str] = description
         self.component: LabelChildUIComponent = ensure_ui_component(component)
 
@@ -87,7 +87,7 @@ class Label(UIComponent):
         return LabelComponent._raw_construct(
             type=ComponentType.label,
             id=self._id,
-            text=self.text,
+            label=self.label,
             description=self.description,
             component=self.component._underlying,
         )
@@ -97,7 +97,7 @@ class Label(UIComponent):
         from .action_row import _to_ui_component
 
         return cls(
-            text=label.text,
+            label=label.label,
             description=label.description,
             component=cast("LabelChildUIComponent", _to_ui_component(label.component)),
             id=label.id,

@@ -1481,7 +1481,7 @@ class Label(Component):
 
     Attributes
     ----------
-    text: :class:`str`
+    label: :class:`str`
         The label text.
     description: Optional[:class:`str`]
         The description text for the label.
@@ -1494,7 +1494,7 @@ class Label(Component):
     """
 
     __slots__: Tuple[str, ...] = (
-        "text",
+        "label",
         "description",
         "component",
     )
@@ -1505,7 +1505,7 @@ class Label(Component):
         self.type: Literal[ComponentType.label] = ComponentType.label
         self.id = data.get("id", 0)
 
-        self.text: str = data["label"]
+        self.label: str = data["label"]
         self.description: Optional[str] = data.get("description")
 
         component = _component_factory(data["component"])
@@ -1515,7 +1515,7 @@ class Label(Component):
         payload: LabelComponentPayload = {
             "type": self.type.value,
             "id": self.id,
-            "label": self.text,
+            "label": self.label,
             "component": self.component.to_dict(),
         }
 
