@@ -405,7 +405,7 @@ class Role(Hashable):
 
     @property
     def secondary_colour(self) -> Optional[Colour]:
-        """Optional[:class:`Colour]`: Returns the secondary colour for the role, if any. An alias exists under ``secondary_color``."""
+        """Optional[:class:`Colour`]: Returns the secondary colour for the role, if any. An alias exists under ``secondary_color``."""
         if self._secondary_color:
             return Colour(self._secondary_color)
         return None
