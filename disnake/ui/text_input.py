@@ -108,7 +108,7 @@ class TextInput(WrappedComponent):
         self._underlying.style = value
 
     @property
-    @deprecated('ui.Label("<label>", ui.TextInput(...))')
+    @deprecated('ui.Label("text", ui.TextInput(...))')
     def label(self) -> Optional[str]:
         """:class:`str`: The label of the text input.
 
@@ -118,7 +118,7 @@ class TextInput(WrappedComponent):
         return self._underlying.label
 
     @label.setter
-    @deprecated('ui.Label("<label>", ui.TextInput(...))')
+    @deprecated('ui.Label("text", ui.TextInput(...))')
     def label(self, value: str) -> None:
         self._underlying.label = value
 

@@ -701,7 +701,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         )
         return self
 
-    @deprecated('ui.Label("<label>", ui.TextInput(...))')
+    @deprecated()
     def add_text_input(
         self: TextInputCompatibleActionRowT,
         *,
@@ -726,8 +726,8 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         .. versionadded:: 2.4
 
         .. deprecated:: 2.11
-            Use of action rows in modals is deprecated, use
-            ``Label("<label>", TextInput(...))`` directly instead.
+            Use of action rows in modals is deprecated, use ``Label("...", TextInput(...))``
+            directly instead.
 
         Parameters
         ----------
