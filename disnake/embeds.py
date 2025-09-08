@@ -384,8 +384,8 @@ class Embed:
             )
 
     @property
-    def flags(self) -> Optional[EmbedFlags]:
-        """Optional[:class:`EmbedFlags`]: Returns the embed's flags.
+    def flags(self) -> EmbedFlags:
+        """:class:`EmbedFlags`: Returns the embed's flags.
 
         .. versionadded:: 2.11
         """
