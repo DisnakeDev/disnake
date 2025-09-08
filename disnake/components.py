@@ -49,6 +49,7 @@ if TYPE_CHECKING:
         ComponentType as ComponentTypeLiteral,
         ContainerComponent as ContainerComponentPayload,
         FileComponent as FileComponentPayload,
+        LabelComponent as LabelComponentPayload,
         MediaGalleryComponent as MediaGalleryComponentPayload,
         MediaGalleryItem as MediaGalleryItemPayload,
         MentionableSelectMenu as MentionableSelectMenuPayload,
@@ -89,6 +90,7 @@ __all__ = (
     "FileComponent",
     "Separator",
     "Container",
+    "Label",
 )
 
 # miscellaneous components-related type aliases
@@ -135,6 +137,12 @@ ContainerChildComponent = Union[
     "Separator",
 ]
 
+# valid `Label.component` types
+LabelChildComponent = Union[
+    "TextInput",
+    "StringSelectMenu",
+]
+
 # valid `Message.components` item types (v1/v2)
 MessageTopLevelComponentV1: TypeAlias = "ActionRow[ActionRowMessageComponent]"
 MessageTopLevelComponentV2 = Union[
@@ -164,6 +172,7 @@ class Component:
     - :class:`FileComponent`
     - :class:`Separator`
     - :class:`Container`
+    - :class:`Label`
 
     This class is abstract and cannot be instantiated.
 
@@ -384,6 +393,11 @@ class BaseSelectMenu(Component):
         Only available for auto-populated select menus.
 
         .. versionadded:: 2.10
+    required: :class:`bool`
+        Whether the select menu is required. Only applies to components in modals.
+        Defaults to ``True``.
+
+        .. versionadded:: 2.11
     id: :class:`int`
         The numeric identifier for the component.
         This is always present in components received from the API,
@@ -399,6 +413,7 @@ class BaseSelectMenu(Component):
         "max_values",
         "disabled",
         "default_values",
+        "required",
     )
 
     # FIXME: this isn't pretty; we should decouple __repr__ from slots
@@ -422,6 +437,7 @@ class BaseSelectMenu(Component):
         self.default_values: List[SelectDefaultValue] = [
             SelectDefaultValue._from_dict(d) for d in (data.get("default_values") or [])
         ]
+        self.required: bool = data.get("required", True)
 
     def to_dict(self) -> BaseSelectMenuPayload:
         payload: BaseSelectMenuPayload = {
@@ -431,6 +447,7 @@ class BaseSelectMenu(Component):
             "min_values": self.min_values,
             "max_values": self.max_values,
             "disabled": self.disabled,
+            "required": self.required,
         }
 
         if self.placeholder:
@@ -470,6 +487,11 @@ class StringSelectMenu(BaseSelectMenu):
         Whether the select menu is disabled or not.
     options: List[:class:`SelectOption`]
         A list of options that can be selected in this select menu.
+    required: :class:`bool`
+        Whether the select menu is required. Only applies to components in modals.
+        Defaults to ``True``.
+
+        .. versionadded:: 2.11
     id: :class:`int`
         The numeric identifier for the component.
         This is always present in components received from the API,
@@ -529,6 +551,11 @@ class UserSelectMenu(BaseSelectMenu):
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
         .. versionadded:: 2.10
+    required: :class:`bool`
+        Whether the select menu is required. Only applies to components in modals.
+        Defaults to ``True``.
+
+        .. versionadded:: 2.11
     id: :class:`int`
         The numeric identifier for the component.
         This is always present in components received from the API,
@@ -575,6 +602,11 @@ class RoleSelectMenu(BaseSelectMenu):
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
         .. versionadded:: 2.10
+    required: :class:`bool`
+        Whether the select menu is required. Only applies to components in modals.
+        Defaults to ``True``.
+
+        .. versionadded:: 2.11
     id: :class:`int`
         The numeric identifier for the component.
         This is always present in components received from the API,
@@ -621,6 +653,11 @@ class MentionableSelectMenu(BaseSelectMenu):
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
         .. versionadded:: 2.10
+    required: :class:`bool`
+        Whether the select menu is required. Only applies to components in modals.
+        Defaults to ``True``.
+
+        .. versionadded:: 2.11
     id: :class:`int`
         The numeric identifier for the component.
         This is always present in components received from the API,
@@ -670,6 +707,11 @@ class ChannelSelectMenu(BaseSelectMenu):
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
         .. versionadded:: 2.10
+    required: :class:`bool`
+        Whether the select menu is required. Only applies to components in modals.
+        Defaults to ``True``.
+
+        .. versionadded:: 2.11
     id: :class:`int`
         The numeric identifier for the component.
         This is always present in components received from the API,
@@ -858,6 +900,10 @@ class TextInput(Component):
         The style of the text input.
     label: Optional[:class:`str`]
         The label of the text input.
+
+        .. deprecated:: 2.11
+            Deprecated in favor of :class:`Label`.
+
     custom_id: :class:`str`
         The ID of the text input that gets received during an interaction.
     placeholder: Optional[:class:`str`]
@@ -899,7 +945,7 @@ class TextInput(Component):
         self.style: TextInputStyle = try_enum(
             TextInputStyle, data.get("style", TextInputStyle.short.value)
         )
-        self.label: Optional[str] = data.get("label")
+        self.label: Optional[str] = data.get("label")  # deprecated
         self.placeholder: Optional[str] = data.get("placeholder")
         self.value: Optional[str] = data.get("value")
         self.required: bool = data.get("required", True)
@@ -911,7 +957,7 @@ class TextInput(Component):
             "type": self.type.value,
             "id": self.id,
             "style": self.style.value,
-            "label": cast("str", self.label),
+            "label": self.label,
             "custom_id": self.custom_id,
             "required": self.required,
         }
@@ -1417,6 +1463,65 @@ class Container(Component):
         return self.accent_colour
 
 
+class Label(Component):
+    """Represents a label from the Discord Bot UI Kit.
+
+    This wraps other components with a label and an optional description,
+    and can only be used in modals.
+
+    .. versionadded:: 2.11
+
+    .. note::
+
+        The user constructible and usable type to create a label is
+        :class:`disnake.ui.Label`, not this one.
+
+    Attributes
+    ----------
+    text: :class:`str`
+        The label text.
+    description: Optional[:class:`str`]
+        The description text for the label.
+    component: Union[:class:`TextInput`, :class:`StringSelectMenu`]
+        The component within the label.
+    id: :class:`int`
+        The numeric identifier for the component.
+        This is always present in components received from the API,
+        and unique within a message.
+    """
+
+    __slots__: Tuple[str, ...] = (
+        "text",
+        "description",
+        "component",
+    )
+
+    __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
+
+    def __init__(self, data: LabelComponentPayload) -> None:
+        self.type: Literal[ComponentType.label] = ComponentType.label
+        self.id = data.get("id", 0)
+
+        self.text: str = data["label"]
+        self.description: Optional[str] = data.get("description")
+
+        component = _component_factory(data["component"])
+        self.component: LabelChildComponent = component  # type: ignore
+
+    def to_dict(self) -> LabelComponentPayload:
+        payload: LabelComponentPayload = {
+            "type": self.type.value,
+            "id": self.id,
+            "label": self.text,
+            "component": self.component.to_dict(),
+        }
+
+        if self.description is not None:
+            payload["description"] = self.description
+
+        return payload
+
+
 # types of components that are allowed in a message's action rows;
 # see also `ActionRowMessageComponent` type alias
 VALID_ACTION_ROW_MESSAGE_COMPONENT_TYPES: Final = (
@@ -1464,6 +1569,7 @@ COMPONENT_LOOKUP: Mapping[ComponentTypeLiteral, Type[Component]] = {
     ComponentType.file.value: FileComponent,
     ComponentType.separator.value: Separator,
     ComponentType.container.value: Container,
+    ComponentType.label.value: Label,
 }
 
 

@@ -1270,6 +1270,11 @@ class ComponentType(Enum):
 
     .. versionadded:: 2.11
     """
+    label = 18
+    """Represents a label component.
+
+    .. versionadded:: 2.11
+    """
 
     def __int__(self) -> int:
         return self.value
