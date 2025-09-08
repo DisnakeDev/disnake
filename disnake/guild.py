@@ -5492,9 +5492,9 @@ class GuildBuilder:
 
         actual_colour = colour or color or Colour.default()
         if isinstance(actual_colour, int):
-            data["color"] = actual_colour
+            data["color"] = actual_colour  # type: ignore
         else:
-            data["color"] = actual_colour.value
+            data["color"] = actual_colour.value  # type: ignore
 
         if hoist is not MISSING:
             data["hoist"] = hoist
