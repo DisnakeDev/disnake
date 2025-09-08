@@ -10,6 +10,7 @@ import disnake
 from disnake.ui import (
     ActionRow,
     Button,
+    Label,
     Separator,
     StringSelect,
     TextInput,
@@ -24,6 +25,8 @@ button3 = Button()
 select = StringSelect()
 text_input = TextInput(label="a", custom_id="b")
 separator = Separator()
+label__text = Label("a", text_input)
+label__select = Label("a", select)
 
 
 class TestActionRow:
@@ -92,12 +95,14 @@ class TestActionRow:
         if TYPE_CHECKING:
             _ = ActionRow().add_string_select
             _ = ActionRow.with_message_components().add_string_select
-            # should not work  # TODO: revert when modal select support is added.
+            # should not work
             _ = ActionRow.with_modal_components().add_select  # type: ignore
 
     def test_add_text_input(self) -> None:
-        r = ActionRow.with_modal_components()
-        r.add_text_input(label="a", custom_id="asdf")
+        with pytest.warns(DeprecationWarning):
+            r = ActionRow.with_modal_components()
+        with pytest.warns(DeprecationWarning):
+            r.add_text_input(label="a", custom_id="asdf")
 
         (c,) = r.children
         assert isinstance(c, TextInput)
@@ -132,7 +137,8 @@ class TestActionRow:
         assert list(r.children) == [button2]
 
     def test_with_components(self) -> None:
-        row_modal = ActionRow.with_modal_components()
+        with pytest.warns(DeprecationWarning):
+            row_modal = ActionRow.with_modal_components()
         assert list(row_modal.children) == []
         row_msg = ActionRow.with_message_components()
         assert list(row_msg.children) == []
@@ -208,16 +214,6 @@ class TestActionRow:
         assert_type(ActionRow(button1, select), ActionRow[ActionRowMessageComponent])
         assert_type(ActionRow(select, button1), ActionRow[ActionRowMessageComponent])
 
-        # FIXME: no longer works since the overload changed for normalize_components. may revisit this.
-        # # these should fail to type-check - if they pass, there will be an error
-        # # because of the unnecessary ignore comment
-        # ActionRow(button1, text_input)
-        # ActionRow(text_input, button1)
-
-        # TODO: revert when modal select support is added.
-        assert_type(ActionRow(select, text_input), ActionRow[ActionRowModalComponent])  # type: ignore
-        assert_type(ActionRow(text_input, select), ActionRow[ActionRowModalComponent])  # type: ignore
-
 
 @pytest.mark.parametrize(
     ("value", "expected"),
@@ -267,6 +263,22 @@ def test_normalize_components__actionrow(value, expected) -> None:
 )
 def test_normalize_components__v2(value, expected) -> None:
     result = normalize_components(value)
+    assert [(list(c.children) if isinstance(c, ActionRow) else c) for c in result] == expected
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [
+        ([text_input], [[text_input]]),
+        ([select], [select]),  # should not wrap select in action row
+        (
+            [label__text, text_input, select, label__select, text_input],
+            [label__text, [text_input], select, label__select, [text_input]],
+        ),
+    ],
+)
+def test_normalize_components__modal(value, expected) -> None:
+    result = normalize_components(value, modal=True)
     assert [(list(c.children) if isinstance(c, ActionRow) else c) for c in result] == expected
 
 
