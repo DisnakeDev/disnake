@@ -3804,6 +3804,10 @@ class Guild(Hashable):
             The tertiary_colour for the role. Defaults to ``None``.
             This is aliased to ``tertiary_color`` as well.
 
+            .. note::
+                When passing this the only permitted values are the ones returned by
+                :meth:`Colour.holographic_style`, any other color value will get rejected.
+
             .. versionadded:: 2.11
         hoist: :class:`bool`
             Whether the role should be shown separately in the member list.

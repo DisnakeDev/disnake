@@ -564,6 +564,10 @@ class Role(Hashable):
         tertiary_colour: Optional[Union[:class:`Colour`, :class:`int`]]
             The new tertiary_colour to change to. (aliased to ``tertiary_color`` as well)
 
+            .. note::
+                When passing this the only permitted values are the ones returned by
+                :meth:`Colour.holographic_style`, any other color value will get rejected.
+
             .. versionadded:: 2.11
         hoist: :class:`bool`
             Indicates if the role should be shown separately in the member list.
