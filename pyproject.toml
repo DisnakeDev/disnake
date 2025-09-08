@@ -67,7 +67,9 @@ docs = [
 
 [dependency-groups]
 nox = [
-    "nox==2025.5.1",
+    # note: nox should be synced with nox.needs_version in noxfile.py
+    # and the pinned nox version in noxfile.py must be within these bounds
+    "nox>=2025.5.1",
 ]
 tools = [
     "pre-commit~=3.0",
@@ -98,36 +100,19 @@ test = [
     "looptime~=0.2.0",
     "coverage[toml]~=7.6.0",
 ]
-build = [
-    "wheel~=0.40.0",
-    "build~=0.10.0",
-    "twine~=5.1.1",
-]
 
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["disnake*"]
 
+[tool.uv]
+required-version = ">=0.8.4"
+
 [tool.nox]
 script-venv-backend = "uv|virtualenv"
 
-[tool.pdm]
-# Ignore `requires-python` warnings when locking, the latest versions of some
-# dependencies already require >=3.9
-# See also https://pdm-project.org/en/latest/usage/config/#ignore-package-warnings
-ignore_package_warnings = ["*"]
-
-[tool.pdm.scripts]
-docs = { cmd = "nox -Rs docs --", help = "Build the documentation for development" }
-lint = { cmd = "nox -Rs lint --", help = "Check all files for linting errors" }
-pyright = { cmd = "nox -Rs pyright --", help = "Run pyright" }
-setup_env = { cmd = "{pdm} install -G:all", help = "Set up the local environment and all dependencies" }
-post_setup_env = { composite = ["python -m ensurepip --default-pip", "pre-commit install --install-hooks"] }
-test = { cmd = "nox -Rs test --", help = "Run pytest" }
-
 [tool.ruff]
 line-length = 100
-target-version = "py38"
 
 [tool.ruff.lint]
 select = [
