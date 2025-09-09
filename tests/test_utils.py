@@ -502,7 +502,7 @@ def test_resolve_template(url, expected) -> None:
         ),
         (
             "aaaaa\n> h\n>> abc \n>>> nay*ern_",
-            "aaaaa\nh\n>> abc \ntest",
+            "aaaaa\nh\n>> abc \nnayern",
             "aaaaa\n\\> h\n>> abc \n\\>>> nay\\*ern\\_",
         ),
         (
