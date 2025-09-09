@@ -1347,7 +1347,7 @@ class Client:
             raise TypeError("activity must derive from BaseActivity.")
 
     @property
-    def status(self):
+    def status(self) -> Status:
         """:class:`.Status`: The status being used upon logging on to Discord.
 
         .. versionadded:: 2.0
@@ -3008,7 +3008,7 @@ class Client:
         Parameters
         ----------
         guild_id: :class:`int`
-            The ID of the guild where the applcation command should be deleted.
+            The ID of the guild where the application command should be deleted.
         command_id: :class:`int`
             The ID of the application command to delete.
         """

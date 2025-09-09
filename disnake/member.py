@@ -10,12 +10,14 @@ from operator import attrgetter
 from typing import (
     TYPE_CHECKING,
     Any,
+    Callable,
     Dict,
     List,
     Literal,
     Optional,
     Sequence,
     Tuple,
+    Type,
     Union,
     cast,
     overload,
@@ -63,7 +65,7 @@ if TYPE_CHECKING:
         GuildVoiceState as GuildVoiceStatePayload,
         VoiceState as VoiceStatePayload,
     )
-    from .user import Collectibles
+    from .user import Collectibles, PrimaryGuild
 
     VocalGuildChannel = Union[VoiceChannel, StageChannel]
 
@@ -165,7 +167,7 @@ class VoiceState:
         return f"<{self.__class__.__name__} {inner}>"
 
 
-def flatten_user(cls):
+def flatten_user(cls: Type[Member]) -> Type[Member]:
     for attr, value in itertools.chain(BaseUser.__dict__.items(), User.__dict__.items()):
         # ignore private/special methods
         if attr.startswith("_"):
@@ -185,7 +187,7 @@ def flatten_user(cls):
             # However I'm not sure how I feel about "functions" returning properties
             # It probably breaks something in Sphinx.
             # probably a member function by now
-            def generate_function(x):
+            def generate_function(x: str) -> Callable[..., Any]:
                 # We want sphinx to properly show coroutine functions as coroutines
                 if asyncio.iscoroutinefunction(value):  # noqa: B023
 
@@ -296,7 +298,9 @@ class Member(disnake.abc.Messageable, _UserTag):
         banner: Optional[Asset]
         accent_color: Optional[Colour]
         accent_colour: Optional[Colour]
+        avatar_decoration: Optional[Asset]
         collectibles: Collectibles
+        primary_guild: Optional[PrimaryGuild]
 
     @overload
     def __init__(
@@ -418,13 +422,14 @@ class Member(disnake.abc.Messageable, _UserTag):
         self._banner = member._banner
         self._communication_disabled_until = member.current_timeout
         self._flags = member._flags
+        self._avatar_decoration_data = member._avatar_decoration_data
 
         # Reference will not be copied unless necessary by PRESENCE_UPDATE
         # See below
         self._user = member._user
         return self
 
-    async def _get_channel(self):
+    async def _get_channel(self) -> DMChannel:
         ch = await self.create_dm()
         return ch
 
@@ -468,30 +473,36 @@ class Member(disnake.abc.Messageable, _UserTag):
         u = self._user
         original = (
             u.name,
-            u._avatar,
             u.discriminator,
             u.global_name,
-            u._public_flags,
+            u._avatar,
             u._avatar_decoration_data,
+            u._public_flags,
+            u._collectibles,
+            u._primary_guild,
         )
         # These keys seem to always be available
         modified = (
             user["username"],
-            user["avatar"],
             user["discriminator"],
             user.get("global_name"),
+            user["avatar"],
+            user.get("avatar_decoration_data"),
             user.get("public_flags", 0),
-            user.get("avatar_decoration_data", None),
+            user.get("collectibles"),
+            user.get("primary_guild"),
         )
         if original != modified:
             to_return = User._copy(self._user)
             (
                 u.name,
-                u._avatar,
                 u.discriminator,
                 u.global_name,
-                u._public_flags,
+                u._avatar,
                 u._avatar_decoration_data,
+                u._public_flags,
+                u._collectibles,
+                u._primary_guild,
             ) = modified
             # Signal to dispatch on_user_update
             return to_return, u
@@ -577,7 +588,7 @@ class Member(disnake.abc.Messageable, _UserTag):
 
         These roles are sorted by their position in the role hierarchy.
         """
-        result = []
+        result: List[Role] = []
         g = self.guild
         for role_id in self._roles:
             role = g.get_role(role_id)

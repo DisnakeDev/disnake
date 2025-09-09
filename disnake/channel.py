@@ -306,7 +306,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         )
         self._fill_overwrites(data)
 
-    async def _get_channel(self):
+    async def _get_channel(self) -> Self:
         return self
 
     @property
@@ -1227,7 +1227,7 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
         if isinstance(self.guild, Object):
             return []
 
-        ret = []
+        ret: List[Member] = []
         for user_id, state in self.guild._voice_states.items():
             if state.channel and state.channel.id == self.id:
                 member = self.guild.get_member(user_id)
@@ -1392,7 +1392,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         self.slowmode_delay: int = data.get("rate_limit_per_user", 0)
         self.last_message_id: Optional[int] = utils._get_as_snowflake(data, "last_message_id")
 
-    async def _get_channel(self):
+    async def _get_channel(self: Self) -> Self:
         return self
 
     @property
@@ -2079,7 +2079,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         self.slowmode_delay: int = data.get("rate_limit_per_user", 0)
         self.last_message_id: Optional[int] = utils._get_as_snowflake(data, "last_message_id")
 
-    async def _get_channel(self):
+    async def _get_channel(self) -> Self:
         return self
 
     @property
@@ -3108,7 +3108,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         if isinstance(self.guild, Object):
             return []
 
-        def comparator(channel):
+        def comparator(channel: GuildChannelType) -> Tuple[bool, int]:
             return (
                 not isinstance(channel, (TextChannel, ThreadOnlyGuildChannel)),
                 channel.position,
@@ -3478,7 +3478,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
     async def trigger_typing(self) -> None:
         """|coro|
 
-        Triggers a *typing* indicator to the desination.
+        Triggers a *typing* indicator to the destination.
 
         *Typing* indicator will go away after 10 seconds.
         """
@@ -4789,7 +4789,7 @@ class DMChannel(disnake.abc.Messageable, Hashable):
         )
         self._flags: int = data.get("flags", 0)
 
-    async def _get_channel(self):
+    async def _get_channel(self) -> Self:
         return self
 
     def __str__(self) -> str:
@@ -4962,7 +4962,7 @@ class GroupChannel(disnake.abc.Messageable, Hashable):
         else:
             self.owner = utils.find(lambda u: u.id == self.owner_id, self.recipients)
 
-    async def _get_channel(self):
+    async def _get_channel(self) -> Self:
         return self
 
     def __str__(self) -> str:
@@ -5133,7 +5133,9 @@ class PartialMessageable(disnake.abc.Messageable, Hashable):
         return PartialMessage(channel=self, id=message_id)
 
 
-def _guild_channel_factory(channel_type: int):
+def _guild_channel_factory(
+    channel_type: int,
+) -> Tuple[Optional[Type[GuildChannelType]], ChannelType]:
     value = try_enum(ChannelType, channel_type)
     if value is ChannelType.text:
         return TextChannel, value
@@ -5153,7 +5155,11 @@ def _guild_channel_factory(channel_type: int):
         return None, value
 
 
-def _channel_factory(channel_type: int):
+def _channel_factory(
+    channel_type: int,
+) -> Tuple[
+    Optional[Union[Type[GuildChannelType], Type[DMChannel], Type[GroupChannel]]], ChannelType
+]:
     cls, value = _guild_channel_factory(channel_type)
     if value is ChannelType.private:
         return DMChannel, value
@@ -5163,14 +5169,21 @@ def _channel_factory(channel_type: int):
         return cls, value
 
 
-def _threaded_channel_factory(channel_type: int):
+def _threaded_channel_factory(
+    channel_type: int,
+) -> Tuple[
+    Optional[Union[Type[GuildChannelType], Type[DMChannel], Type[GroupChannel], Type[Thread]]],
+    ChannelType,
+]:
     cls, value = _channel_factory(channel_type)
     if value in (ChannelType.private_thread, ChannelType.public_thread, ChannelType.news_thread):
         return Thread, value
     return cls, value
 
 
-def _threaded_guild_channel_factory(channel_type: int):
+def _threaded_guild_channel_factory(
+    channel_type: int,
+) -> Tuple[Optional[Union[Type[GuildChannelType], Type[Thread]]], ChannelType]:
     cls, value = _guild_channel_factory(channel_type)
     if value in (ChannelType.private_thread, ChannelType.public_thread, ChannelType.news_thread):
         return Thread, value

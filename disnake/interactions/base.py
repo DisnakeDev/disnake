@@ -12,6 +12,7 @@ from typing import (
     List,
     Mapping,
     Optional,
+    Sequence,
     Tuple,
     TypeVar,
     Union,
@@ -43,6 +44,7 @@ from ..errors import (
 )
 from ..flags import InteractionContextTypes, MessageFlags
 from ..guild import Guild
+from ..http import HTTPClient
 from ..i18n import Localized
 from ..member import Member
 from ..message import Attachment, AuthorizingIntegrationOwners, Message
@@ -74,14 +76,18 @@ if TYPE_CHECKING:
     from ..mentions import AllowedMentions
     from ..poll import Poll
     from ..state import ConnectionState
-    from ..types.components import Modal as ModalPayload
+    from ..types.components import (
+        Modal as ModalPayload,
+        ModalTopLevelComponent as ModalTopLevelComponentPayload,
+    )
     from ..types.interactions import (
         ApplicationCommandOptionChoice as ApplicationCommandOptionChoicePayload,
         Interaction as InteractionPayload,
         InteractionDataResolved as InteractionDataResolvedPayload,
     )
     from ..types.snowflake import Snowflake
-    from ..ui._types import MessageComponents, ModalComponents
+    from ..types.user import User as UserPayload
+    from ..ui._types import MessageComponents, ModalComponents, ModalTopLevelComponent
     from ..ui.modal import Modal
     from ..ui.view import View
     from .message import MessageInteraction
@@ -1497,10 +1503,17 @@ class InteractionResponse:
         custom_id: :class:`str`
             The ID of the modal that gets received during an interaction.
             This cannot be mixed with the ``modal`` parameter.
-        components: |components_type|
+        components: |modal_components_type|
             The components to display in the modal. A maximum of 5.
-            Currently only supports :class:`ui.TextInput` (optionally inside :class:`ui.ActionRow`).
+            Currently only supports :class:`.ui.TextInput` and
+            :class:`.ui.StringSelect`, wrapped in :class:`.ui.Label`\\s.
+
             This cannot be mixed with the ``modal`` parameter.
+
+            .. versionchanged:: 2.11
+                Using action rows in modals or passing :class:`.ui.TextInput` directly
+                (which implicitly wraps it in an action row) is deprecated.
+                Use :class:`.ui.TextInput` inside a :class:`.ui.Label` instead.
 
         Raises
         ------
@@ -1531,14 +1544,17 @@ class InteractionResponse:
         if modal is not None:
             modal_data = modal.to_components()
         elif title and components and custom_id:
-            rows = normalize_components(components)
-            if len(rows) > 5:
+            items: Sequence[ModalTopLevelComponent] = normalize_components(components, modal=True)
+            if len(items) > 5:
                 raise ValueError("Maximum number of components exceeded.")
 
             modal_data = {
                 "title": title,
                 "custom_id": custom_id,
-                "components": [component.to_component_dict() for component in rows],
+                "components": cast(
+                    "List[ModalTopLevelComponentPayload]",
+                    [component.to_component_dict() for component in items],
+                ),
             }
         else:
             raise TypeError("Either modal or title, custom_id, components must be provided")
@@ -1611,20 +1627,20 @@ class _InteractionMessageState:
         self._interaction: Interaction = interaction
         self._parent: ConnectionState = parent
 
-    def _get_guild(self, guild_id):
+    def _get_guild(self, guild_id) -> Optional[Guild]:
         return self._parent._get_guild(guild_id)
 
-    def store_user(self, data):
+    def store_user(self, data: UserPayload) -> User:
         return self._parent.store_user(data)
 
-    def create_user(self, data):
+    def create_user(self, data: UserPayload) -> User:
         return self._parent.create_user(data)
 
     @property
-    def http(self):
+    def http(self) -> HTTPClient:
         return self._parent.http
 
-    def __getattr__(self, attr):
+    def __getattr__(self, attr: str) -> Any:
         return getattr(self._parent, attr)
 
 

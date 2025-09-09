@@ -172,8 +172,8 @@ class GuildPrune(TypedDict):
 class ChannelPositionUpdate(TypedDict):
     id: Snowflake
     position: Optional[int]
-    lock_permissions: Optional[bool]
-    parent_id: Optional[Snowflake]
+    lock_permissions: NotRequired[Optional[bool]]
+    parent_id: NotRequired[Optional[Snowflake]]
 
 
 class RolePositionUpdate(TypedDict):

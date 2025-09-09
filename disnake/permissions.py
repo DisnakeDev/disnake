@@ -760,7 +760,7 @@ class Permissions(BaseFlags):
 
     @flag_value
     def manage_messages(self) -> int:
-        """:class:`bool`: Returns ``True`` if a user can delete or pin messages in a text channel.
+        """:class:`bool`: Returns ``True`` if a user can delete messages in a text channel.
 
         .. note::
 
@@ -1107,10 +1107,10 @@ def _augment_from_permissions(cls):
             continue
 
         # god bless Python
-        def getter(self, x=key):
+        def getter(self, x: str = key) -> Optional[bool]:
             return self._values.get(x)
 
-        def setter(self, value, x=key) -> None:
+        def setter(self, value: Optional[bool], x: str = key) -> None:
             self._set(x, value)
 
         prop = property(getter, setter)
@@ -1155,7 +1155,7 @@ class PermissionOverwrite:
 
     __slots__ = ("_values",)
 
-    # n. b. this typechecking block must be first and seperate from the secondary one, due to codemodding
+    # n. b. this typechecking block must be first and separate from the secondary one, due to codemodding
     if TYPE_CHECKING:
         add_reactions: Optional[bool]
         administrator: Optional[bool]

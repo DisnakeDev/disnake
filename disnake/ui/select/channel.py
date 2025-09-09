@@ -71,6 +71,11 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
         .. versionadded:: 2.10
+    required: :class:`bool`
+        Whether the select menu is required. Only applies to components in modals.
+        Defaults to ``True``.
+
+        .. versionadded:: 2.11
     id: :class:`int`
         The numeric identifier for the component. Must be unique within the message.
         If set to ``0`` (the default) when sending a component, the API will assign
@@ -119,6 +124,7 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
         disabled: bool = False,
         channel_types: Optional[List[ChannelType]] = None,
         default_values: Optional[Sequence[SelectDefaultValueInputType[AnyChannel]]] = None,
+        required: bool = True,
         id: int = 0,
         row: Optional[int] = None,
     ) -> None: ...
@@ -134,6 +140,7 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
         disabled: bool = False,
         channel_types: Optional[List[ChannelType]] = None,
         default_values: Optional[Sequence[SelectDefaultValueInputType[AnyChannel]]] = None,
+        required: bool = True,
         id: int = 0,
         row: Optional[int] = None,
     ) -> None: ...
@@ -148,6 +155,7 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
         disabled: bool = False,
         channel_types: Optional[List[ChannelType]] = None,
         default_values: Optional[Sequence[SelectDefaultValueInputType[AnyChannel]]] = None,
+        required: bool = True,
         id: int = 0,
         row: Optional[int] = None,
     ) -> None:
@@ -160,6 +168,7 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
             max_values=max_values,
             disabled=disabled,
             default_values=default_values,
+            required=required,
             id=id,
             row=row,
         )
@@ -175,6 +184,7 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
             disabled=component.disabled,
             channel_types=component.channel_types,
             default_values=component.default_values,
+            required=component.required,
             id=component.id,
             row=None,
         )
@@ -185,7 +195,7 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
         return self._underlying.channel_types
 
     @channel_types.setter
-    def channel_types(self, value: Optional[List[ChannelType]]):
+    def channel_types(self, value: Optional[List[ChannelType]]) -> None:
         if value is not None:
             if not isinstance(value, list):
                 raise TypeError("channel_types must be a list of ChannelType")
