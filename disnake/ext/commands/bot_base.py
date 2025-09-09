@@ -355,7 +355,7 @@ class BotBase(CommonBotBase, GroupMixin):
         TypeError
             The coroutine passed is not actually a coroutine.
         """
-        if not disnake.utils.iscoroutinefunction(coro):
+        if not iscoroutinefunction(coro):
             raise TypeError("The pre-invoke hook must be a coroutine.")
 
         self._before_invoke = coro
