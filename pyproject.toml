@@ -127,8 +127,6 @@ where = [ "." ]
 include = [ "disnake*" ]
 
 [tool.ruff]
-target-version = "py38"
-
 line-length = 100
 lint.select = [
     "ANN2", # flake8-annotations
