@@ -88,15 +88,13 @@ changelog = [
 ]
 codemod = [
     "autotyping==23.2.0",
-    # run codemods on the respository (mostly automated typing)
     "libcst~=1.1.0",
     "ruff==0.12.12",
 ]
 typing = [
     # this is not pyright itself, but the python wrapper
     "pyright==1.1.336",
-    # only used for type-checking, version does not matter
-    "pytz",
+    "pytz",                      # only used for type-checking, version does not matter
     "typing-extensions~=4.12.0",
 ]
 build = [
@@ -128,6 +126,7 @@ include = [ "disnake*" ]
 
 [tool.ruff]
 line-length = 100
+# commented out codes are intended to be enabled in future prs
 lint.select = [
     "ANN2", # flake8-annotations
     "B",    # flake8-bugbear
@@ -136,10 +135,9 @@ lint.select = [
     "D2",  # pydocstyle, docstring formatting
     "D4",  # pydocstyle, docstring structure/content
     "DTZ", # flake8-datetimez
-    "E",
-    # commented out codes are intended to be enabled in future prs
-    "F", # pyflakes
+    "E",   # pyflakes
     # "EM", # flake8-errmsg
+    "F",   # pyflakes
     "G",   # flake8-logging-format
     "I",   # isort
     "PGH", # pygrep-hooks
@@ -149,13 +147,13 @@ lint.select = [
     "PLW", # pylint warnings
     "PT",  # flake8-pytest-style
     "Q",   # flake8-quotes
+    # "RET", # flake8-return
     "RSE", # flake8-raise
     "RUF", # ruff specific exceptions
     "S",   # flake8-bandit
-    "T20", # flake8-print
-    "TC",  # flake8-type-checking
-    # "RET", # flake8-return
     # "SIM", # flake8-simplify
+    "T20",    # flake8-print
+    "TC",     # flake8-type-checking
     "TID251", # flake8-tidy-imports, replaces S404
     "TRY002",
     "TRY004",
@@ -165,17 +163,16 @@ lint.select = [
 lint.ignore = [
     "B026", # backwards star-arg unpacking
     "B904", # within an except clause raise from error or from none
-    # pydocstyle
+    ## pydocstyle
     "D203", # incompat with D211
-    # temporary disables, to fix later
     "D205", # blank line required between summary and description
     "D213", # multiline docstring should start on second line, incompatiable with D212
     "D400", # first line ends in period, does not work with `|coro|` etc.
     "D401", # first line of docstring should be in imperative mood
     "D415", # same thing but punctuation in general
     "D416", # section name should end with a colon, incompatible with D406
-
     "D417", # missing argument description in docstring
+
     "E501", # line too long
     "E731", # assigning lambdas to variables
     "E741", # ambiguous variable names
@@ -195,7 +192,8 @@ lint.ignore = [
     # ignore non-to-level imports
     "PLC0415",
 
-    "PLE0237", # pyright seems to catch this already
+    # pyright seems to catch this already
+    "PLE0237",
 
     # object does not implement hashing
     "PLW1641",
@@ -224,7 +222,9 @@ lint.ignore = [
     # partial executable paths (i.e. "git" instead of "/usr/bin/git") are fine
     "S607",
 
-    "T201", # print statements
+    # temporary disabled, to fix later
+    "T201",
+
     # ignore imports that could be moved into type-checking blocks
     # (no real advantage other than possibly avoiding cycles,
     # but can be dangerous in places where we need to parse signatures)
