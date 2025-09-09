@@ -55,7 +55,7 @@ jobs:
       min-python: ${{ steps.set-matrix.outputs.min-python }}
       docs: ${{ steps.set-matrix.outputs.docs }}
       libcst: ${{ steps.set-matrix.outputs.libcst }}
-      pyright: ${{ steps.set-matrix.outputs.tests }}
+      pyright-sessions: ${{ steps.set-matrix.outputs.pyright-sessions }}
       tests: ${{ steps.set-matrix.outputs.tests }}
     steps:
       - uses: actions/checkout@v4
@@ -71,6 +71,7 @@ jobs:
           echo docs=$(nox -s docs --list --json | jq -rc '.[].python') | tee --append $GITHUB_OUTPUT
           echo libcst=$(nox -s codemod --list --json | jq -rc '[.[].python][0]') | tee --append $GITHUB_OUTPUT
           echo tests=$(nox -s test --list --json | jq -c '[.[].python]') | tee --append $GITHUB_OUTPUT
+          echo pyright-sessions=$(nox -s pyright -l --json | jq -c '[.[] | [.python, .session, .call_spec.pyright_group.directories, .call_spec.pyright_group.experimental]]') | tee --append $GITHUB_OUTPUT
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -111,10 +112,10 @@ jobs:
     strategy:
       matrix:
         # TODO: add 3.14 once we switch to uv
-        python-version: ${{ fromJson(needs.python-versions.outputs.pyright) }}
+        session: ${{ fromJson(needs.python-versions.outputs.pyright-sessions) }}
         experimental: [false]
       fail-fast: false
-    continue-on-error: ${{ matrix.experimental }}
+    continue-on-error: ${{ matrix.session[3] || matrix.experimental }}
 
     steps:
       - uses: actions/checkout@v4
@@ -126,14 +127,15 @@ jobs:
           PDM_USE_VENV: true
           PDM_VENV_IN_PROJECT: true
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: ${{ matrix.session[0] }}
 
       - name: Install dependencies
         # `--no-venv` to install in the main pdm venv instead of nox's pyright-specific one
         # because nox uses pdm internally to install, this means that the venv that is used is
         # the one that pdm would create in project: `.venv`
+        # python is NOT forced here because the session name is explicit
         run: |
-          nox -s pyright --no-venv --install-only --force-python ${{ steps.setup-env.outputs.python-version }}
+          nox -s '${{ matrix.session[1] }}' --no-venv --install-only
 
       - name: Add .venv/bin to PATH
         run: dirname "$(pdm info --python)" >> $GITHUB_PATH
@@ -150,8 +152,9 @@ jobs:
           version: ${{ steps.pyright-version.outputs.pyright-version }}
           python-version: ${{ steps.setup-env.outputs.python-version }}
           python-platform: "Linux"
-          annotate: ${{ matrix.python-version == needs.python-versions.outputs.min-python }} # only add comments for one version
+          annotate: ${{ matrix.session[0] == needs.python-versions.outputs.min-python }} # only add comments for one version
           warnings: true
+          extra-args: ${{join(matrix.session[2], ' ')}}
 
       - name: Run pyright (Windows)
         uses: jakebailey/pyright-action@v2.2.1
@@ -162,6 +165,7 @@ jobs:
           python-platform: "Windows"
           annotate: false # only add comments for one platform (see above)
           warnings: true
+          extra-args: ${{join(matrix.session[2], ' ')}}
 
   misc:
     runs-on: ubuntu-latest

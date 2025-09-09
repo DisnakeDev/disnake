@@ -88,8 +88,10 @@ codemod = [
 typing = [
     # this is not pyright itself, but the python wrapper
     "pyright==1.1.405",
+    # used in the disnake/webhook/sync.py module
+    "requests",
     # only used for type-checking, version does not matter
-    "pytz",
+    "pytz>=2022",
 ]
 test = [
     "pytest~=8.3.2",
