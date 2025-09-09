@@ -75,6 +75,8 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
     max_values: :class:`int`
         The maximum number of items that must be chosen for this select menu.
         Defaults to 1 and must be between 1 and 25.
+    disabled: :class:`bool`
+        Whether the select is disabled.
     options: Union[List[:class:`disnake.SelectOption`], List[:class:`str`], Dict[:class:`str`, :class:`str`]]
         A list of options that can be selected in this menu. Use explicit :class:`.SelectOption`\\s
         for fine-grained control over the options. Alternatively, a list of strings will be treated
@@ -84,8 +86,11 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
             Now also accepts a list of str or a dict of str to str, which are then appropriately parsed as
             :class:`.SelectOption` labels and values.
 
-    disabled: :class:`bool`
-        Whether the select is disabled.
+    required: :class:`bool`
+        Whether the select menu is required. Only applies to components in modals.
+        Defaults to ``True``.
+
+        .. versionadded:: 2.11
     id: :class:`int`
         The numeric identifier for the component. Must be unique within the message.
         If set to ``0`` (the default) when sending a component, the API will assign
@@ -120,8 +125,9 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
         placeholder: Optional[str] = None,
         min_values: int = 1,
         max_values: int = 1,
-        options: SelectOptionInput = ...,
         disabled: bool = False,
+        options: SelectOptionInput = ...,
+        required: bool = True,
         id: int = 0,
         row: Optional[int] = None,
     ) -> None: ...
@@ -134,8 +140,9 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
         placeholder: Optional[str] = None,
         min_values: int = 1,
         max_values: int = 1,
-        options: SelectOptionInput = ...,
         disabled: bool = False,
+        options: SelectOptionInput = ...,
+        required: bool = True,
         id: int = 0,
         row: Optional[int] = None,
     ) -> None: ...
@@ -147,8 +154,9 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
         placeholder: Optional[str] = None,
         min_values: int = 1,
         max_values: int = 1,
-        options: SelectOptionInput = MISSING,
         disabled: bool = False,
+        options: SelectOptionInput = MISSING,
+        required: bool = True,
         id: int = 0,
         row: Optional[int] = None,
     ) -> None:
@@ -161,6 +169,7 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
             max_values=max_values,
             disabled=disabled,
             default_values=None,
+            required=required,
             id=id,
             row=row,
         )
@@ -173,8 +182,9 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
             placeholder=component.placeholder,
             min_values=component.min_values,
             max_values=component.max_values,
-            options=component.options,
             disabled=component.disabled,
+            options=component.options,
+            required=component.required,
             id=component.id,
             row=None,
         )
