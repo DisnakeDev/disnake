@@ -150,7 +150,7 @@ class IncidentsData:
 
             Checks if two ``IncidentsData`` instances are not equal.
 
-    .. versionadded:: 2.10
+    .. versionadded:: 2.11
 
     Attributes
     ----------
@@ -416,7 +416,7 @@ class Guild(Hashable):
     incidents_data: Optional[:class:`IncidentsData`]
         Data about various security incidents/actions in this guild, like disabled invites/DMs.
 
-        .. versionadded:: 2.10
+        .. versionadded:: 2.11
     """
 
     __slots__ = (
@@ -2246,7 +2246,7 @@ class Guild(Hashable):
             This is only available to guilds that contain ``COMMUNITY``
             in :attr:`Guild.features`.
 
-            .. versionadded:: 2.10
+            .. versionadded:: 2.11
 
         dms_disabled_until: Union[:class:`datetime.datetime`, :class:`datetime.timedelta`]
             The time until/for which DMs between guild members are disabled, up to 24 hours in the future.
@@ -2258,7 +2258,7 @@ class Guild(Hashable):
             This is only available to guilds that contain ``COMMUNITY``
             in :attr:`Guild.features`.
 
-            .. versionadded:: 2.10
+            .. versionadded:: 2.11
 
         raid_alerts_disabled: :class:`bool`
             Whether the guild has disabled join raid alerts.
