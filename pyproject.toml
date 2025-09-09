@@ -130,8 +130,7 @@ line-length = 100
 target-version = "py38"
 
 [tool.codespell]
-skip = '*.po,*.ts,./docs/_static'
-# quiet-level = 3
+skip = ['docs/_static/**', '*.po']
 ignore-words-list = ['GroupT', "OT",]
 
 [tool.ruff.lint]
