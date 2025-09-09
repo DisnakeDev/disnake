@@ -197,8 +197,12 @@ class KeepAliveHandler(threading.Thread):
 
                 try:
                     f.result()
-                except BaseException:
+                except Exception:
                     _log.exception("An error occurred while stopping the gateway. Ignoring.")
+                except BaseException:
+                    # Since the thread is at the end of its lifecycle here anyway,
+                    # simply suppress any BaseException that might occur while closing the ws.
+                    pass
                 self.stop()
                 return
 
