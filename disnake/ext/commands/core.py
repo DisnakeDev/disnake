@@ -508,10 +508,9 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
                     wrapped = wrap_callback(local)
                     stop_propagation = await wrapped(ctx, error)
                     # User has an option to cancel the global error handler by returning True
-        except Exception:
-            if stop_propagation:
-                return
-            ctx.bot.dispatch("command_error", ctx, error)
+        finally:
+            if not stop_propagation:
+                ctx.bot.dispatch("command_error", ctx, error)
 
     async def transform(self, ctx: Context, param: inspect.Parameter) -> Any:
         required = param.default is param.empty

@@ -123,10 +123,9 @@ class InvokableUserCommand(InvokableApplicationCommand):
                 if local is not None:
                     stop_propagation = await local(inter, error)
                     # User has an option to cancel the global error handler by returning True
-        except Exception:
-            if stop_propagation:
-                return
-            inter.bot.dispatch("user_command_error", inter, error)
+        finally:
+            if not stop_propagation:
+                inter.bot.dispatch("user_command_error", inter, error)
 
     async def __call__(
         self,
@@ -235,10 +234,9 @@ class InvokableMessageCommand(InvokableApplicationCommand):
                 if local is not None:
                     stop_propagation = await local(inter, error)
                     # User has an option to cancel the global error handler by returning True
-        except Exception:
-            if stop_propagation:
-                return
-            inter.bot.dispatch("message_command_error", inter, error)
+        finally:
+            if not stop_propagation:
+                inter.bot.dispatch("message_command_error", inter, error)
 
     async def __call__(
         self,
