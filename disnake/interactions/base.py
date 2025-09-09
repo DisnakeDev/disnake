@@ -48,7 +48,6 @@ from ..http import HTTPClient
 from ..i18n import Localized
 from ..member import Member
 from ..message import Attachment, AuthorizingIntegrationOwners, Message
-from ..object import Object
 from ..permissions import Permissions
 from ..role import Role
 from ..ui.action_row import normalize_components, normalize_components_to_dict
@@ -258,14 +257,25 @@ class Interaction(Generic[ClientT]):
         self.author: Union[User, Member] = MISSING
 
         guild_fallback: Optional[Guild] = None
+        if self.guild_id is not None:
+            guild_fallback = self._state._get_guild(self.guild_id) or self._fallback_guild
 
-        if self.guild_id and (guild_fallback := self.guild) and (member := data.get("member")):
-            self.author = guild_fallback.get_member(int(member["user"]["id"])) or Member(
-                state=self._state,
-                guild=guild_fallback,
-                data=member,
-            )
-
+        if guild_fallback and (member := data.get("member")):
+            if isinstance(guild_fallback, PartialInteractionGuild):
+                author = Member(
+                    state=self._state,
+                    guild=guild_fallback,
+                    data=member,
+                )
+                guild_fallback._add_member(author)
+            else:
+                author = guild_fallback.get_member(int(member["user"]["id"])) or Member(
+                    state=self._state,
+                    guild=guild_fallback,
+                    data=member,
+                )
+            self._permissions = int(member.get("permissions", 0))
+            self.author = author
             self._permissions = int(member.get("permissions", 0))
         elif user := data.get("user"):
             self.author = self._state.store_user(user)
@@ -333,17 +343,7 @@ class Interaction(Generic[ClientT]):
         if self.guild_id is None:
             return None
 
-        guild = self._state._get_guild(self.guild_id)
-        if guild:
-            return guild
-        if self._guild is None:
-            return None
-
-        # create a guild mash
-        # honestly we should cache this for the duration of the interaction
-        # but not if we fetch it from the cache, just the result of this creation
-        guild = PartialInteractionGuild(data=self._guild, state=self._state, interaction=self)
-        return guild
+        return self._state._get_guild(self.guild_id) or self._fallback_guild
 
     @utils.cached_slot_property("_cs_me")
     def me(self) -> Union[Member, ClientUser]:
@@ -413,6 +413,12 @@ class Interaction(Generic[ClientT]):
         .. versionadded:: 2.5
         """
         return self.created_at + timedelta(minutes=15)
+
+    @utils.cached_slot_property("_cs_fallback_guild")
+    def _fallback_guild(self) -> Optional[PartialInteractionGuild]:
+        if self._guild is None:
+            return None
+        return PartialInteractionGuild(data=self._guild, state=self._state, interaction=self)
 
     def is_expired(self) -> bool:
         """Whether the interaction can still be used to make requests to Discord.
@@ -2060,10 +2066,8 @@ class InteractionDataResolved(Dict[str, Any]):
         guild: Optional[Guild] = None
         # `guild_fallback` is only used in guild contexts, so this `MISSING` value should never be used.
         # We need to define it anyway to satisfy the typechecker.
-        guild_fallback: Union[Guild, Object] = MISSING
         if guild_id is not None:
-            guild = state._get_guild(guild_id)
-            guild_fallback = guild or Object(id=guild_id)
+            guild = parent.guild
 
         for str_id, user in users.items():
             user_id = int(str_id)
@@ -2072,7 +2076,7 @@ class InteractionDataResolved(Dict[str, Any]):
                 self.members[user_id] = (guild and guild.get_member(user_id)) or Member(
                     data=member,
                     user_data=user,
-                    guild=guild_fallback,  # type: ignore
+                    guild=guild,  # type: ignore
                     state=state,
                 )
             else:
@@ -2080,14 +2084,15 @@ class InteractionDataResolved(Dict[str, Any]):
 
         for str_id, role in roles.items():
             self.roles[int(str_id)] = Role(
-                guild=guild_fallback,  # type: ignore
+                guild=guild,  # type: ignore
                 state=state,
                 data=role,
             )
 
         for str_id, channel_data in channels.items():
             self.channels[int(str_id)] = state._get_partial_interaction_channel(
-                channel_data, guild_fallback
+                channel_data,
+                guild,
             )
 
         for str_id, message in messages.items():

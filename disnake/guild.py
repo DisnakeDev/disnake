@@ -5233,7 +5233,6 @@ class PartialInteractionGuild(Guild):
             )
         )
         self._add_channel(interaction.channel)  # type: ignore
-        # honestly we cannot set me, because we do not necessarily have a user in the guild
 
     @property
     def me(self) -> Any:
