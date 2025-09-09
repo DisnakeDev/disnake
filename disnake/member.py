@@ -27,14 +27,14 @@ import disnake.abc
 
 from . import utils
 from .activity import ActivityTypes, create_activity
-from .asset import Asset
+from .asset import Asset, AssetBytes
 from .colour import Colour
 from .enums import Status, try_enum
 from .flags import MemberFlags
 from .object import Object
 from .permissions import Permissions
 from .user import BaseUser, User, _UserTag
-from .utils import MISSING
+from .utils import MISSING, _assetbytes_to_base64_data
 
 __all__ = (
     "VoiceState",
@@ -864,6 +864,32 @@ class Member(disnake.abc.Messageable, _UserTag):
         """
         await self.guild.kick(self, reason=reason)
 
+    async def _edit_self(
+        self,
+        *,
+        nick: Optional[str] = MISSING,
+        bio: Optional[str] = MISSING,
+        avatar: Optional[AssetBytes] = MISSING,
+        banner: Optional[AssetBytes] = MISSING,
+        reason: Optional[str] = None,
+    ) -> Optional[Member]:
+        payload: Dict[str, Any] = {}
+
+        if nick is not MISSING:
+            payload["nick"] = nick or ""
+
+        if bio is not MISSING:
+            payload["bio"] = bio
+
+        if avatar is not MISSING:
+            payload["avatar"] = await _assetbytes_to_base64_data(avatar)
+
+        if banner is not MISSING:
+            payload["banner"] = await _assetbytes_to_base64_data(banner)
+
+        data = await self._state.http.edit_my_member(self.guild.id, reason=reason, **payload)
+        return Member(data=data, guild=self.guild, state=self._state)
+
     async def edit(
         self,
         *,
@@ -876,6 +902,9 @@ class Member(disnake.abc.Messageable, _UserTag):
         timeout: Optional[Union[float, datetime.timedelta, datetime.datetime]] = MISSING,
         flags: MemberFlags = MISSING,
         bypasses_verification: bool = MISSING,
+        bio: Optional[str] = MISSING,
+        avatar: Optional[AssetBytes] = MISSING,
+        banner: Optional[AssetBytes] = MISSING,
         reason: Optional[str] = None,
     ) -> Optional[Member]:
         """|coro|
@@ -973,14 +1002,19 @@ class Member(disnake.abc.Messageable, _UserTag):
         http = self._state.http
         guild_id = self.guild.id
         me = self._state.self_id == self.id
+
+        member: Optional[Member] = None  # return value
         payload: Dict[str, Any] = {}
 
+        if me and any(v is not MISSING for v in (nick, bio, avatar, banner)):
+            member = await self._edit_self(
+                nick=nick, bio=bio, avatar=avatar, banner=banner, reason=reason
+            )
+            # clear used fields, avoid attempting to edit them again below
+            nick = MISSING
+
         if nick is not MISSING:
-            nick = nick or ""
-            if me:
-                await http.edit_my_member(guild_id, nick=nick, reason=reason)
-            else:
-                payload["nick"] = nick
+            payload["nick"] = nick or ""
 
         if deafen is not MISSING:
             payload["deaf"] = deafen
@@ -1035,7 +1069,8 @@ class Member(disnake.abc.Messageable, _UserTag):
 
         if payload:
             data = await http.edit_member(guild_id, self.id, reason=reason, **payload)
-            return Member(data=data, guild=self.guild, state=self._state)
+            member = Member(data=data, guild=self.guild, state=self._state)
+        return member
 
     async def request_to_speak(self) -> None:
         """|coro|
