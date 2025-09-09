@@ -2,15 +2,29 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional, Sequence, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    Generator,
+    List,
+    Optional,
+    Sequence,
+    TypeVar,
+    Union,
+)
 
 from ..components import _SELECT_COMPONENT_TYPE_VALUES
 from ..enums import ComponentType
 from ..message import Message
 from ..utils import cached_slot_property
-from .base import ClientT, Interaction
+from .base import ClientT, Interaction, InteractionDataResolved
 
 if TYPE_CHECKING:
+    from ..abc import AnyChannel
+    from ..member import Member
+    from ..role import Role
     from ..state import ConnectionState
     from ..types.interactions import (
         ModalInteraction as ModalInteractionPayload,
@@ -18,8 +32,13 @@ if TYPE_CHECKING:
         ModalInteractionData as ModalInteractionDataPayload,
         ModalInteractionInnerComponentData as ModalInteractionInnerComponentDataPayload,
     )
+    from ..types.snowflake import Snowflake
+    from ..user import User
 
 __all__ = ("ModalInteraction", "ModalInteractionData")
+
+
+T = TypeVar("T")
 
 
 class ModalInteraction(Interaction[ClientT]):
@@ -120,11 +139,11 @@ class ModalInteraction(Interaction[ClientT]):
         .. versionadded:: 2.5
     """
 
-    __slots__ = ("message", "_cs_values", "_cs_text_values")
+    __slots__ = ("message", "_cs_values", "_cs_resolved_values", "_cs_text_values")
 
     def __init__(self, *, data: ModalInteractionPayload, state: ConnectionState) -> None:
         super().__init__(data=data, state=state)
-        self.data: ModalInteractionData = ModalInteractionData(data=data["data"])
+        self.data: ModalInteractionData = ModalInteractionData(data=data["data"], parent=self)
 
         if message_data := data.get("message"):
             message = Message(state=self._state, channel=self.channel, data=message_data)
@@ -163,6 +182,24 @@ class ModalInteraction(Interaction[ClientT]):
         """
         yield from self._walk_components(self.data.components)
 
+    def _resolve_values(
+        self, resolve: Callable[[Snowflake, ComponentType], T]
+    ) -> Dict[str, Union[str, Sequence[Union[str, T]]]]:
+        values: Dict[str, Union[str, Sequence[Union[str, T]]]] = {}
+        for component in self.walk_raw_components():
+            if component["type"] == ComponentType.text_input.value:
+                value = component.get("value")
+            elif component["type"] == ComponentType.string_select.value:
+                value = component.get("values")
+            elif component["type"] in _SELECT_COMPONENT_TYPE_VALUES:
+                # auto-populated selects
+                component_type = ComponentType(component["type"])
+                value = [resolve(v, component_type) for v in component.get("values") or []]
+            else:
+                continue
+            values[component["custom_id"]] = value
+        return values
+
     @cached_slot_property("_cs_values")
     def values(self) -> Dict[str, Union[str, Sequence[str]]]:
         """Dict[:class:`str`, Union[:class:`str`, Sequence[:class:`str`]]]: Returns all raw values the user has entered in the modal.
@@ -173,18 +210,29 @@ class ModalInteraction(Interaction[ClientT]):
         these are just the string values the user selected;
         for other select menu types, these are the IDs of the selected entities.
 
+        See also :attr:`resolved_values`.
+
         .. versionadded:: 2.11
         """
-        values: Dict[str, Union[str, Sequence[str]]] = {}
-        for component in self.walk_raw_components():
-            if component["type"] == ComponentType.text_input.value:
-                value = component.get("value")
-            elif component["type"] in _SELECT_COMPONENT_TYPE_VALUES:
-                value = [str(v) for v in component.get("values") or []]
-            else:
-                continue
-            values[component["custom_id"]] = value
-        return values
+        return self._resolve_values(lambda id, type: str(id))
+
+    @cached_slot_property("_cs_resolved_values")
+    def resolved_values(
+        self,
+    ) -> Dict[str, Union[str, Sequence[Union[str, Member, User, Role, AnyChannel]]]]:
+        """Dict[:class:`str`, Union[:class:`str`, Sequence[:class:`str`, :class:`Member`, :class:`User`, :class:`Role`, Union[:class:`abc.GuildChannel`, :class:`Thread`, :class:`PartialMessageable`]]]]: The (resolved) values the user entered in the modal.
+        This is a dict of the form ``{custom_id: value}``.
+
+        For select menus, the corresponding dict value is a list of the values the user has selected.
+        For select menus of type :attr:`~ComponentType.string_select`,
+        this is equivalent to :attr:`values`;
+        for other select menu types, these are full objects corresponding to the selected entities.
+
+        .. versionadded:: 2.11
+        """
+        resolved_data = self.data.resolved
+        # we expect the api to only provide valid values; there won't be any messages/attachments here.
+        return self._resolve_values(lambda id, type: resolved_data.get_with_type(id, type, id))  # pyright: ignore[reportReturnType]
 
     @cached_slot_property("_cs_text_values")
     def text_values(self) -> Dict[str, str]:
@@ -218,17 +266,29 @@ class ModalInteractionData(Dict[str, Any]):
         This does not contain all fields of the components due to API limitations.
 
         .. versionadded:: 2.6
+    resolved: :class:`InteractionDataResolved`
+        All resolved objects related to this interaction.
+
+        .. versionadded:: 2.11
     """
 
-    __slots__ = ("custom_id", "components")
+    __slots__ = ("custom_id", "components", "resolved")
 
-    def __init__(self, *, data: ModalInteractionDataPayload) -> None:
+    def __init__(
+        self,
+        *,
+        data: ModalInteractionDataPayload,
+        parent: ModalInteraction[ClientT],
+    ) -> None:
         super().__init__(data)
         self.custom_id: str = data["custom_id"]
         # This uses stripped-down component dicts, as we only receive
         # partial data from the API, generally only containing `type`, `custom_id`, `id`,
         # and relevant fields like a select's `values`.
         self.components: List[ModalInteractionComponentDataPayload] = data["components"]
+        self.resolved: InteractionDataResolved = InteractionDataResolved(
+            data=data.get("resolved", {}), parent=parent
+        )
 
     def __repr__(self) -> str:
         return f"<ModalInteractionData custom_id={self.custom_id!r} components={self.components!r}>"

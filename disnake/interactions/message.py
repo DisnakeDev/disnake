@@ -128,6 +128,8 @@ class MessageInteraction(Interaction[ClientT]):
         The message that this interaction's component is attached to.
     """
 
+    # FIXME(3.0): slots
+
     def __init__(self, *, data: MessageInteractionPayload, state: ConnectionState) -> None:
         super().__init__(data=data, state=state)
         self.data: MessageInteractionData = MessageInteractionData(data=data["data"], parent=self)
@@ -222,7 +224,9 @@ class MessageInteractionData(Dict[str, Any]):
             list(map(str, values)) if (values := data.get("values")) else None
         )
 
-        self.resolved = InteractionDataResolved(data=data.get("resolved", {}), parent=parent)
+        self.resolved: InteractionDataResolved = InteractionDataResolved(
+            data=data.get("resolved", {}), parent=parent
+        )
 
     def __repr__(self) -> str:
         return (
