@@ -46,7 +46,7 @@ if TYPE_CHECKING:
 GROUPED_SECTIONS = {"api/": "api/index", "ext/commands/api/": "ext/commands/api/index"}
 
 
-def html_page_context(app: Sphinx, docname: str, templatename, context, doctree):
+def html_page_context(app: Sphinx, docname: str, templatename, context, doctree) -> None:
     """Event handler for the html-page-context signal.
 
     Modifies the context directly, if `docname` matches one of the items in `GROUPED_SECTIONS`.
@@ -85,7 +85,7 @@ def html_page_context(app: Sphinx, docname: str, templatename, context, doctree)
     context["parent_index"] = index
 
 
-def get_rendered_toctree(builder: StandaloneHTMLBuilder, docname: str, index: str, **kwargs):
+def get_rendered_toctree(builder: StandaloneHTMLBuilder, docname: str, index: str, **kwargs) -> str:
     """Build the toctree relative to the named document,
     with the given parameters, and then return the rendered
     HTML fragment.
@@ -100,7 +100,9 @@ def get_rendered_toctree(builder: StandaloneHTMLBuilder, docname: str, index: st
     return rendered_toc
 
 
-def build_full_toctree(builder: StandaloneHTMLBuilder, docname: str, index: str, **kwargs):
+def build_full_toctree(
+    builder: StandaloneHTMLBuilder, docname: str, index: str, **kwargs
+) -> nodes.bullet_list:
     """Return a single toctree starting from docname containing all
     sub-document doctrees.
 
@@ -119,7 +121,7 @@ def build_full_toctree(builder: StandaloneHTMLBuilder, docname: str, index: str,
             **kwargs,
         )
         if toctree is not None:
-            toctrees.append(cast(nodes.Element, toctree))
+            toctrees.append(cast("nodes.Element", toctree))
 
     if not toctrees:
         raise RuntimeError("Expected at least one toctree")

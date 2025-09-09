@@ -118,8 +118,8 @@ def _transform_guild_id(entry: AuditLogEntry, data: Optional[Snowflake]) -> Opti
 
 def _transform_overwrites(
     entry: AuditLogEntry, data: List[PermissionOverwritePayload]
-) -> List[Tuple[Object, PermissionOverwrite]]:
-    overwrites = []
+) -> List[Tuple[Union[Object, Member, Role, User], PermissionOverwrite]]:
+    overwrites: List[Tuple[Union[Object, Member, Role, User], PermissionOverwrite]] = []
     for elem in data:
         allow = Permissions(int(elem["allow"]))
         deny = Permissions(int(elem["deny"]))
@@ -670,6 +670,7 @@ class AuditLogEntry(Hashable):
                 enums.AuditLogAction.automod_block_message,
                 enums.AuditLogAction.automod_send_alert_message,
                 enums.AuditLogAction.automod_timeout,
+                enums.AuditLogAction.automod_quarantine_user,
             ):
                 elems = {
                     "channel": (
@@ -826,6 +827,7 @@ class AuditLogEntry(Hashable):
             "uses": changeset.uses,
             "type": 0,
             "channel": None,
+            "expires_at": None,
         }
 
         obj = Invite(

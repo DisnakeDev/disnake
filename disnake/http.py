@@ -257,12 +257,16 @@ class HTTPClient:
             )
 
     async def ws_connect(self, url: str, *, compress: int = 0) -> aiohttp.ClientWebSocketResponse:
+        if hasattr(aiohttp, "ClientWSTimeout"):
+            timeout = aiohttp.ClientWSTimeout(ws_close=30.0)  # pyright: ignore
+        else:
+            timeout = 30.0
         return await self.__session.ws_connect(
             url,
             proxy_auth=self.proxy_auth,
             proxy=self.proxy,
             max_msg_size=0,
-            timeout=30.0,
+            timeout=timeout,
             autoclose=False,
             headers={
                 "User-Agent": self.user_agent,
@@ -872,7 +876,7 @@ class HTTPClient:
     ) -> Response[None]:
         r = Route(
             "PUT",
-            "/channels/{channel_id}/pins/{message_id}",
+            "/channels/{channel_id}/messages/pins/{message_id}",
             channel_id=channel_id,
             message_id=message_id,
         )
@@ -883,14 +887,29 @@ class HTTPClient:
     ) -> Response[None]:
         r = Route(
             "DELETE",
-            "/channels/{channel_id}/pins/{message_id}",
+            "/channels/{channel_id}/messages/pins/{message_id}",
             channel_id=channel_id,
             message_id=message_id,
         )
         return self.request(r, reason=reason)
 
-    def pins_from(self, channel_id: Snowflake) -> Response[List[message.Message]]:
-        return self.request(Route("GET", "/channels/{channel_id}/pins", channel_id=channel_id))
+    def get_pins(
+        self,
+        channel_id: Snowflake,
+        limit: int,
+        before: Optional[Snowflake] = None,
+    ) -> Response[channel.ChannelPins]:
+        r = Route(
+            "GET",
+            "/channels/{channel_id}/messages/pins",
+            channel_id=channel_id,
+        )
+        params: Dict[str, Any] = {"limit": limit}
+
+        if before is not None:
+            params["before"] = before
+
+        return self.request(r, params=params)
 
     # Member management
 
@@ -1237,7 +1256,7 @@ class HTTPClient:
             "GET", "/channels/{channel_id}/threads/archived/private", channel_id=channel_id
         )
 
-        params = {}
+        params: Dict[str, Any] = {}
         if before:
             params["before"] = before
         params["limit"] = limit
@@ -1251,7 +1270,7 @@ class HTTPClient:
             "/channels/{channel_id}/users/@me/threads/archived/private",
             channel_id=channel_id,
         )
-        params = {}
+        params: Dict[str, Any] = {}
         if before:
             params["before"] = before
         params["limit"] = limit
@@ -1961,12 +1980,10 @@ class HTTPClient:
         invite_id: str,
         *,
         with_counts: bool = True,
-        with_expiration: bool = True,
         guild_scheduled_event_id: Optional[int] = None,
     ) -> Response[invite.Invite]:
         params = {
             "with_counts": int(with_counts),
-            "with_expiration": int(with_expiration),
         }
         if guild_scheduled_event_id:
             params["guild_scheduled_event_id"] = guild_scheduled_event_id
@@ -2009,6 +2026,7 @@ class HTTPClient:
             "name",
             "permissions",
             "color",
+            "colors",
             "hoist",
             "mentionable",
             "icon",

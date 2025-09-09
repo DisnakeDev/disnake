@@ -80,7 +80,7 @@ class _Diff(TypedDict):
     delete_ignored: NotRequired[List[ApplicationCommand]]
 
 
-def _get_to_send_from_diff(diff: _Diff):
+def _get_to_send_from_diff(diff: _Diff) -> List[ApplicationCommand]:
     return diff["no_changes"] + diff["upsert"] + diff["edit"] + diff.get("delete_ignored", [])
 
 
@@ -821,8 +821,8 @@ class InteractionBotBase(CommonBotBase):
     def _ordered_unsynced_commands(
         self, test_guilds: Optional[Sequence[int]] = None
     ) -> Tuple[List[ApplicationCommand], Dict[int, List[ApplicationCommand]]]:
-        global_cmds = []
-        guilds = {}
+        global_cmds: List[ApplicationCommand] = []
+        guilds: Dict[int, List[ApplicationCommand]] = {}
 
         for cmd in self.application_commands_iterator():
             if not cmd.auto_sync:

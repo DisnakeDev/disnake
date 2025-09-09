@@ -4,11 +4,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Dict, List, Literal, Optional, TypedDict, Union
 
-from typing_extensions import NotRequired
-
 from .appinfo import ApplicationIntegrationType
 from .channel import ChannelType
-from .components import Component, Modal
+from .components import MessageTopLevelComponent, Modal
 from .embed import Embed
 from .entitlement import Entitlement
 from .i18n import LocalizationDict
@@ -19,6 +17,8 @@ from .threads import ThreadMetadata
 from .user import User
 
 if TYPE_CHECKING:
+    from typing_extensions import NotRequired, TypeAlias
+
     from .message import AllowedMentions, Attachment, Message
 
 
@@ -176,39 +176,45 @@ class ApplicationCommandInteractionData(TypedDict):
 
 
 class _BaseComponentInteractionData(TypedDict):
+    id: int
+
+
+class _BaseCustomIdComponentInteractionData(_BaseComponentInteractionData):
     custom_id: str
-
-
-class _BaseSnowflakeComponentInteractionData(_BaseComponentInteractionData):
-    values: List[Snowflake]
-    resolved: NotRequired[InteractionDataResolved]
 
 
 ### Message interaction components
 
 
-class MessageComponentInteractionButtonData(_BaseComponentInteractionData):
+class _BaseSnowflakeMessageComponentInteractionData(_BaseCustomIdComponentInteractionData):
+    values: List[Snowflake]
+    resolved: NotRequired[InteractionDataResolved]
+
+
+class MessageComponentInteractionButtonData(_BaseCustomIdComponentInteractionData):
     component_type: Literal[2]
 
 
-class MessageComponentInteractionStringSelectData(_BaseComponentInteractionData):
+class MessageComponentInteractionStringSelectData(_BaseCustomIdComponentInteractionData):
     component_type: Literal[3]
     values: List[str]
 
 
-class MessageComponentInteractionUserSelectData(_BaseSnowflakeComponentInteractionData):
+class MessageComponentInteractionUserSelectData(_BaseSnowflakeMessageComponentInteractionData):
     component_type: Literal[5]
 
 
-class MessageComponentInteractionRoleSelectData(_BaseSnowflakeComponentInteractionData):
+class MessageComponentInteractionRoleSelectData(_BaseSnowflakeMessageComponentInteractionData):
     component_type: Literal[6]
 
 
-class MessageComponentInteractionMentionableSelectData(_BaseSnowflakeComponentInteractionData):
+class MessageComponentInteractionMentionableSelectData(
+    _BaseSnowflakeMessageComponentInteractionData
+):
     component_type: Literal[7]
 
 
-class MessageComponentInteractionChannelSelectData(_BaseSnowflakeComponentInteractionData):
+class MessageComponentInteractionChannelSelectData(_BaseSnowflakeMessageComponentInteractionData):
     component_type: Literal[8]
 
 
@@ -225,31 +231,74 @@ MessageComponentInteractionData = Union[
 ### Modal interaction components
 
 
-# TODO: add other select types
-class ModalInteractionStringSelectData(_BaseComponentInteractionData):
+class _BaseSnowflakeModalComponentInteractionData(_BaseCustomIdComponentInteractionData):
+    values: List[Snowflake]
+
+
+class ModalInteractionStringSelectData(_BaseCustomIdComponentInteractionData):
     type: Literal[3]
     values: List[str]
 
 
-class ModalInteractionTextInputData(_BaseComponentInteractionData):
+class ModalInteractionTextInputData(_BaseCustomIdComponentInteractionData):
     type: Literal[4]
     value: str
 
 
-ModalInteractionComponentData = Union[
+class ModalInteractionUserSelectData(_BaseSnowflakeModalComponentInteractionData):
+    type: Literal[5]
+
+
+class ModalInteractionRoleSelectData(_BaseSnowflakeModalComponentInteractionData):
+    type: Literal[6]
+
+
+class ModalInteractionMentionableSelectData(_BaseSnowflakeModalComponentInteractionData):
+    type: Literal[7]
+
+
+class ModalInteractionChannelSelectData(_BaseSnowflakeModalComponentInteractionData):
+    type: Literal[8]
+
+
+# top-level modal component data
+
+ModalInteractionActionRowChildData: TypeAlias = ModalInteractionTextInputData
+
+
+class ModalInteractionActionRowData(_BaseComponentInteractionData):
+    type: Literal[1]
+    components: List[ModalInteractionActionRowChildData]
+
+
+ModalInteractionLabelChildData = Union[
     ModalInteractionStringSelectData,
     ModalInteractionTextInputData,
 ]
 
 
-class ModalInteractionActionRow(TypedDict):
-    type: Literal[1]
-    components: List[ModalInteractionComponentData]
+class ModalInteractionLabelData(_BaseComponentInteractionData):
+    type: Literal[18]
+    component: ModalInteractionLabelChildData
+
+
+# innermost (non-layout) components, i.e. those containing user input
+ModalInteractionInnerComponentData = Union[
+    ModalInteractionActionRowChildData,
+    ModalInteractionLabelChildData,
+]
+
+# top-level components
+ModalInteractionComponentData = Union[
+    ModalInteractionActionRowData,
+    ModalInteractionLabelData,
+]
 
 
 class ModalInteractionData(TypedDict):
     custom_id: str
-    components: List[ModalInteractionActionRow]
+    components: List[ModalInteractionComponentData]
+    # resolved: NotRequired[InteractionDataResolved]  # undocumented
 
 
 ## Interactions
@@ -266,6 +315,7 @@ class _BaseInteraction(TypedDict):
     token: str
     version: Literal[1]
     app_permissions: str
+    attachment_size_limit: int
 
 
 # common properties in non-ping interactions
@@ -321,7 +371,7 @@ class InteractionApplicationCommandCallbackData(TypedDict, total=False):
     embeds: List[Embed]
     allowed_mentions: AllowedMentions
     flags: int
-    components: List[Component]
+    components: List[MessageTopLevelComponent]
     attachments: List[Attachment]
 
 

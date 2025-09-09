@@ -172,8 +172,13 @@ class SubCommandGroup(InvokableApplicationCommand):
         super().__init__(func, name=name_loc.string, **kwargs)
         self.parent: InvokableSlashCommand = parent
         self.children: Dict[str, SubCommand] = {}
+
+        # while subcommand groups don't have a description, parse the docstring regardless to
+        # retrieve the localization key, if any
+        docstring = utils.parse_docstring(func)
+
         self.option = Option(
-            name=name_loc._upgrade(self.name),
+            name=name_loc._upgrade(self.name, key=docstring["localization_key_name"]),
             description="-",
             type=OptionType.sub_command_group,
             options=[],
