@@ -943,12 +943,15 @@ class Member(disnake.abc.Messageable, _UserTag):
             Can now pass ``None`` to ``voice_channel`` to kick a member from voice.
 
         .. versionchanged:: 2.0
-            The newly member is now optionally returned, if applicable.
+            The newly edited member is now optionally returned, if applicable.
 
         Parameters
         ----------
         nick: Optional[:class:`str`]
             The member's new nickname. Use ``None`` to remove the nickname.
+
+            To change your own nickname, :attr:`~Permissions.change_nickname`
+            permission is sufficient.
         mute: :class:`bool`
             Whether the member should be guild muted or un-muted.
         deafen: :class:`bool`
@@ -983,15 +986,39 @@ class Member(disnake.abc.Messageable, _UserTag):
 
             .. versionadded:: 2.8
 
+        bio: Optional[:class:`str`]
+            The member's new guild bio.
+            Can only be used on your own guild member, not other members.
+
+            .. versionadded:: 2.11
+
+        avatar: Optional[|resource_type|]
+            The member's new guild avatar.
+            Use ``None`` to remove the avatar and revert back to the member's global avatar.
+            Can only be used on your own guild member, not other members.
+
+            .. versionadded:: 2.11
+
+        banner: Optional[|resource_type|]
+            The member's new guild banner.
+            Use ``None`` to remove the banner and revert back to the member's global banner.
+            Can only be used on your own guild member, not other members.
+
+            .. versionadded:: 2.11
+
         reason: Optional[:class:`str`]
             The reason for editing this member. Shows up on the audit log.
 
         Raises
         ------
+        NotFound
+            The ``avatar`` or ``banner`` asset couldn't be found.
         Forbidden
             You do not have the proper permissions to the action requested.
         HTTPException
             The operation failed.
+        ValueError
+            Wrong image format passed for ``avatar`` or ``banner``.
 
         Returns
         -------
