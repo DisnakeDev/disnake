@@ -128,30 +128,25 @@ include = [ "disnake*" ]
 line-length = 100
 # commented out codes are intended to be enabled in future prs
 lint.select = [
-    "ANN2", # flake8-annotations
-    "B",    # flake8-bugbear
-    "C4",   # flake8-comprehensions
-    # "D", # pydocstyle
-    "D2",  # pydocstyle, docstring formatting
-    "D4",  # pydocstyle, docstring structure/content
-    "DTZ", # flake8-datetimez
-    "E",   # pyflakes
-    # "EM", # flake8-errmsg
-    "F",   # pyflakes
-    "G",   # flake8-logging-format
-    "I",   # isort
-    "PGH", # pygrep-hooks
-    "PLC", # pylint convention
-    "PLE", # pylint error
-    # "PLR",    # pylint refactor
-    "PLW", # pylint warnings
-    "PT",  # flake8-pytest-style
-    "Q",   # flake8-quotes
-    # "RET", # flake8-return
-    "RSE", # flake8-raise
-    "RUF", # ruff specific exceptions
-    "S",   # flake8-bandit
-    # "SIM", # flake8-simplify
+    "ANN2",   # flake8-annotations
+    "B",      # flake8-bugbear
+    "C4",     # flake8-comprehensions
+    "D2",     # pydocstyle, docstring formatting
+    "D4",     # pydocstyle, docstring structure/content
+    "DTZ",    # flake8-datetimez
+    "E",      # pyflakes
+    "F",      # pyflakes
+    "G",      # flake8-logging-format
+    "I",      # isort
+    "PGH",    # pygrep-hooks
+    "PLC",    # pylint convention
+    "PLE",    # pylint error
+    "PLW",    # pylint warnings
+    "PT",     # flake8-pytest-style
+    "Q",      # flake8-quotes
+    "RSE",    # flake8-raise
+    "RUF",    # ruff specific exceptions
+    "S",      # flake8-bandit
     "T20",    # flake8-print
     "TC",     # flake8-type-checking
     "TID251", # flake8-tidy-imports, replaces S404
