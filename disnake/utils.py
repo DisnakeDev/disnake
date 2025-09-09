@@ -51,7 +51,7 @@ from urllib.parse import parse_qs, urlencode
 from .enums import Locale
 
 if sys.version_info >= (3, 11):
-    from inspect import iscoroutine as iscoroutine, iscoroutinefunction as iscoroutinefunction
+    from inspect import iscoroutinefunction as iscoroutinefunction
 
     def get_event_loop():
         try:
@@ -61,7 +61,6 @@ if sys.version_info >= (3, 11):
 else:
     from asyncio import (
         get_event_loop as get_event_loop,
-        iscoroutine as iscoroutine,
         iscoroutinefunction as iscoroutinefunction,
     )
 
