@@ -988,21 +988,21 @@ class Member(disnake.abc.Messageable, _UserTag):
 
         bio: Optional[:class:`str`]
             The member's new guild bio.
-            Can only be used on your own guild member, not other members.
+            Can only be used on the bot's guild member, not other members.
 
             .. versionadded:: 2.11
 
         avatar: Optional[|resource_type|]
             The member's new guild avatar.
             Use ``None`` to remove the avatar and revert back to the member's global avatar.
-            Can only be used on your own guild member, not other members.
+            Can only be used on the bot's guild member, not other members.
 
             .. versionadded:: 2.11
 
         banner: Optional[|resource_type|]
             The member's new guild banner.
             Use ``None`` to remove the banner and revert back to the member's global banner.
-            Can only be used on your own guild member, not other members.
+            Can only be used on the bot's guild member, not other members.
 
             .. versionadded:: 2.11
 
