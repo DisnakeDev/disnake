@@ -473,7 +473,7 @@ class Loop(Generic[LF]):
 
     async def _error(self, *args: Any) -> None:
         exception: Exception = args[-1]
-        print(
+        print(  # noqa: T201
             f"Unhandled exception in internal background task {self.coro.__name__!r}.",
             file=sys.stderr,
         )

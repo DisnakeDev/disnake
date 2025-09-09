@@ -234,7 +234,7 @@ def _transform_type(
         return enums.try_enum(enums.StickerType, data)
     elif action_name.startswith("webhook_"):
         return enums.try_enum(enums.WebhookType, data)
-    elif action_name.startswith("integration_") or action_name.startswith("overwrite_"):
+    elif action_name.startswith(("integration_", "overwrite_")):
         # integration: str, overwrite: int
         return data
     else:
