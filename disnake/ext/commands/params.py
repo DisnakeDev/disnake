@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-"""Repsonsible for handling Params for slash commands"""
+"""Responsible for handling Params for slash commands"""
 
 from __future__ import annotations
 

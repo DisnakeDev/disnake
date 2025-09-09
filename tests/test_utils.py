@@ -501,9 +501,9 @@ def test_resolve_template(url, expected) -> None:
             r"\*hi\* \~\~a\~ \|aaa\~\*\\\`\`" "\n" r"\`py x\`\`\` \_\_uwu\_\_ y",
         ),
         (
-            "aaaaa\n> h\n>> abc \n>>> te*st_",
+            "aaaaa\n> h\n>> abc \n>>> te*st_",  # codespell:ignore te
             "aaaaa\nh\n>> abc \ntest",
-            "aaaaa\n\\> h\n>> abc \n\\>>> te\\*st\\_",
+            "aaaaa\n\\> h\n>> abc \n\\>>> te\\*st\\_",  # codespell:ignore te
         ),
         (
             "*h*\n> [li|nk](~~url~~) xyz **https://google.com/stuff?uwu=owo",
