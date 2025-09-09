@@ -276,6 +276,12 @@ extend-immutable-calls = [
 [tool.ruff.lint.flake8-annotations]
 ignore-fully-untyped = true
 
+[tool.pyproject-fmt]
+column_width = 40
+indent = 4
+keep_full_version = true
+max_supported_python = "3.13"
+
 [tool.towncrier]
 template = "changelog/_template.rst.jinja"
 package = "disnake"

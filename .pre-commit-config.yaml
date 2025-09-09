@@ -19,6 +19,11 @@ repos:
       - id: pretty-format-yaml
         args: [--autofix, --indent, '2', --offset, '2', '--preserve-quotes']
 
+  - repo: https://github.com/tox-dev/pyproject-fmt
+    rev: "v2.6.0"
+    hooks:
+      - id: pyproject-fmt
+
   - repo: local
     hooks:
       - id: no-symlinks
