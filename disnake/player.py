@@ -567,7 +567,7 @@ class FFmpegOpusAudio(FFmpegAudio):
         except Exception:
             if not fallback:
                 _log.exception("Probe '%s' using '%s' failed", method, executable)
-                return  # type: ignore
+                return None, None
 
             _log.exception("Probe '%s' using '%s' failed, trying fallback", method, executable)
             try:
@@ -578,7 +578,8 @@ class FFmpegOpusAudio(FFmpegAudio):
                 _log.exception("Fallback probe using '%s' failed", executable)
             else:
                 _log.info("Fallback probe found codec=%s, bitrate=%s", codec, bitrate)
-        _log.info("Probe found codec=%s, bitrate=%s", codec, bitrate)
+        else:
+            _log.info("Probe found codec=%s, bitrate=%s", codec, bitrate)
         return codec, bitrate
 
     @staticmethod
