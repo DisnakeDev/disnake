@@ -165,7 +165,7 @@ class _CaseInsensitiveDict(dict):
     def __contains__(self, k) -> bool:
         return super().__contains__(k.casefold())
 
-    def __delitem__(self, k):
+    def __delitem__(self, k) -> None:
         return super().__delitem__(k.casefold())
 
     def __getitem__(self, k):
@@ -989,7 +989,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         if not params:
             return ""
 
-        result = []
+        result: List[str] = []
         for name, param in params.items():
             greedy = isinstance(param.annotation, Greedy)
             optional = False  # postpone evaluation of if it's an optional argument
@@ -2014,6 +2014,7 @@ def has_permissions(
     moderate_members: bool = ...,
     move_members: bool = ...,
     mute_members: bool = ...,
+    pin_messages: bool = ...,
     priority_speaker: bool = ...,
     read_message_history: bool = ...,
     read_messages: bool = ...,
@@ -2138,6 +2139,7 @@ def bot_has_permissions(
     moderate_members: bool = ...,
     move_members: bool = ...,
     mute_members: bool = ...,
+    pin_messages: bool = ...,
     priority_speaker: bool = ...,
     read_message_history: bool = ...,
     read_messages: bool = ...,
@@ -2240,6 +2242,7 @@ def has_guild_permissions(
     moderate_members: bool = ...,
     move_members: bool = ...,
     mute_members: bool = ...,
+    pin_messages: bool = ...,
     priority_speaker: bool = ...,
     read_message_history: bool = ...,
     read_messages: bool = ...,
@@ -2339,6 +2342,7 @@ def bot_has_guild_permissions(
     moderate_members: bool = ...,
     move_members: bool = ...,
     mute_members: bool = ...,
+    pin_messages: bool = ...,
     priority_speaker: bool = ...,
     read_message_history: bool = ...,
     read_messages: bool = ...,

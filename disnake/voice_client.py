@@ -505,7 +505,7 @@ class VoiceClient(VoiceProtocol):
 
     # audio related
 
-    def _get_voice_packet(self, data):
+    def _get_voice_packet(self, data: bytes) -> bytes:
         header = bytearray(12)
 
         # Formulate rtp header
@@ -518,7 +518,7 @@ class VoiceClient(VoiceProtocol):
         encrypt_packet = getattr(self, f"_encrypt_{self.mode}")
         return encrypt_packet(header, data)
 
-    def _get_nonce(self, pad: int):
+    def _get_nonce(self, pad: int) -> Tuple[bytes, bytes]:
         # returns (nonce, padded_nonce).
         # n.b. all currently implemented modes use the same nonce size (192 bits / 24 bytes)
         nonce = struct.pack(">I", self._lite_nonce)

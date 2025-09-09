@@ -340,6 +340,26 @@ class Asset(AssetMixin):
             animated=animated,
         )
 
+    @classmethod
+    def _from_nameplate(cls, state: AnyState, nameplate_asset: str, animated: bool = True) -> Self:
+        suffix = "asset.webm" if animated else "static.png"
+        return cls(
+            state,
+            # nameplate_asset already includes an ending /
+            url=f"{cls.BASE}/assets/collectibles/{nameplate_asset}{suffix}",
+            key=nameplate_asset,
+            animated=animated,
+        )
+
+    @classmethod
+    def _from_guild_tag_badge(cls, state: AnyState, primary_guild_id: int, badge_hash: str) -> Self:
+        return cls(
+            state,
+            url=f"{cls.BASE}/guild-tag-badges/{primary_guild_id}/{badge_hash}.png?size=16",
+            key=badge_hash,
+            animated=False,
+        )
+
     def __str__(self) -> str:
         return self._url
 
