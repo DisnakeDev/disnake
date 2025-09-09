@@ -1,5 +1,3 @@
-include README.md
-include LICENSE
 include disnake/bin/*
 include disnake/py.typed
 include disnake/ext/commands/py.typed
