@@ -395,36 +395,54 @@ class Role(Hashable):
 
     @property
     def primary_colour(self) -> Colour:
-        """:class:`Colour`: Returns the primary colour for the role. An alias exists under ``primary_color``."""
+        """:class:`Colour`: Returns the primary colour for the role. An alias exists under ``primary_color``.
+
+        .. versionadded:: 2.11
+        """
         return Colour(self._primary_color)
 
     @property
     def primary_color(self) -> Colour:
-        """:class:`Colour`: Returns the primary color for the role. An alias exists under ``primary_colour``."""
+        """:class:`Colour`: Returns the primary color for the role. An alias exists under ``primary_colour``.
+
+        .. versionadded:: 2.11
+        """
         return self.primary_colour
 
     @property
     def secondary_colour(self) -> Optional[Colour]:
-        """Optional[:class:`Colour`]: Returns the secondary colour for the role, if any. An alias exists under ``secondary_color``."""
+        """Optional[:class:`Colour`]: Returns the secondary colour for the role, if any. An alias exists under ``secondary_color``.
+
+        .. versionadded:: 2.11
+        """
         if self._secondary_color:
             return Colour(self._secondary_color)
         return None
 
     @property
     def secondary_color(self) -> Optional[Colour]:
-        """Optional[:class:`Colour`]: Returns the secondary color for the role, if any. An alias exists under ``secondary_colour``."""
+        """Optional[:class:`Colour`]: Returns the secondary color for the role, if any. An alias exists under ``secondary_colour``.
+
+        .. versionadded:: 2.11
+        """
         return self.secondary_colour
 
     @property
     def tertiary_colour(self) -> Optional[Colour]:
-        """Optional[:class:`Colour`]: Returns the tertiary colour for the role, if any. An alias exists under ``tertiary_color``."""
+        """Optional[:class:`Colour`]: Returns the tertiary colour for the role, if any. An alias exists under ``tertiary_color``.
+
+        .. versionadded:: 2.11
+        """
         if self._tertiary_color:
             return Colour(self._tertiary_color)
         return None
 
     @property
     def tertiary_color(self) -> Optional[Colour]:
-        """Optional[:class:`Colour`]: Returns the tertiary color for the role, if any. An alias exists under ``tertiary_colour``."""
+        """Optional[:class:`Colour`]: Returns the tertiary color for the role, if any. An alias exists under ``tertiary_colour``.
+
+        .. versionadded:: 2.11
+        """
         return self.tertiary_colour
 
     @property
