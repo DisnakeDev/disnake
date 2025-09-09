@@ -43,7 +43,7 @@ from ..errors import (
     NotFound,
 )
 from ..flags import InteractionContextTypes, MessageFlags
-from ..guild import Guild
+from ..guild import Guild, PartialInteractionGuild
 from ..http import HTTPClient
 from ..i18n import Localized
 from ..member import Member
@@ -80,6 +80,7 @@ if TYPE_CHECKING:
         Modal as ModalPayload,
         ModalTopLevelComponent as ModalTopLevelComponentPayload,
     )
+    from ..types.guild import PartialGuild as PartialGuildPayload
     from ..types.interactions import (
         ApplicationCommandOptionChoice as ApplicationCommandOptionChoicePayload,
         Interaction as InteractionPayload,
@@ -222,6 +223,7 @@ class Interaction(Generic[ClientT]):
         "_state",
         "_session",
         "_original_response",
+        "_guild",
         "_cs_response",
         "_cs_followup",
         "_cs_me",
@@ -242,6 +244,7 @@ class Interaction(Generic[ClientT]):
         self.version: int = data["version"]
         self.application_id: int = int(data["application_id"])
         self.guild_id: Optional[int] = utils._get_as_snowflake(data, "guild_id")
+        self._guild: Optional[PartialGuildPayload] = data.get("guild")
 
         self.locale: Locale = try_enum(Locale, data["locale"])
         guild_locale = data.get("guild_locale")
@@ -254,19 +257,15 @@ class Interaction(Generic[ClientT]):
         # one of user and member will always exist
         self.author: Union[User, Member] = MISSING
 
-        guild_fallback: Optional[Union[Guild, Object]] = None
-        if self.guild_id:
-            guild_fallback = self.guild or Object(self.guild_id)
+        guild_fallback: Optional[Guild] = None
 
-        if guild_fallback and (member := data.get("member")):
-            self.author = (
-                isinstance(guild_fallback, Guild)
-                and guild_fallback.get_member(int(member["user"]["id"]))
-            ) or Member(
+        if self.guild_id and (guild_fallback := self.guild) and (member := data.get("member")):
+            self.author = guild_fallback.get_member(int(member["user"]["id"])) or Member(
                 state=self._state,
-                guild=guild_fallback,  # type: ignore  # may be `Object`
+                guild=guild_fallback,
                 data=member,
             )
+
             self._permissions = int(member.get("permissions", 0))
         elif user := data.get("user"):
             self.author = self._state.store_user(user)
@@ -322,8 +321,29 @@ class Interaction(Generic[ClientT]):
 
             To check whether an interaction was sent from a guild, consider using
             :attr:`guild_id` or :attr:`context` instead.
+
+        .. versionchanged:: 2.12
+            Returns a :class:`Guild` object when the guild could not be resolved from cache.
+            This object is created from the data provided by Discord, but it is not complete.
+            The only populated attributes are:
+                - :attr:`Guild.id`
+                - :attr:`Guild.preferred_locale`
+                - :attr:`Guild.features`
         """
-        return self._state._get_guild(self.guild_id)
+        if self.guild_id is None:
+            return None
+
+        guild = self._state._get_guild(self.guild_id)
+        if guild:
+            return guild
+        if self._guild is None:
+            return None
+
+        # create a guild mash
+        # honestly we should cache this for the duration of the interaction
+        # but not if we fetch it from the cache, just the result of this creation
+        guild = PartialInteractionGuild(data=self._guild, state=self._state, interaction=self)
+        return guild
 
     @utils.cached_slot_property("_cs_me")
     def me(self) -> Union[Member, ClientUser]:
