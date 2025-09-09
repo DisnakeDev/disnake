@@ -232,7 +232,7 @@ class ModalInteraction(Interaction[ClientT]):
         """
         resolved_data = self.data.resolved
         # we expect the api to only provide valid values; there won't be any messages/attachments here.
-        return self._resolve_values(lambda id, type: resolved_data.get_with_type(id, type, id))  # pyright: ignore[reportReturnType]
+        return self._resolve_values(lambda id, type: resolved_data.get_with_type(id, type, str(id)))  # type: ignore
 
     @cached_slot_property("_cs_text_values")
     def text_values(self) -> Dict[str, str]:
