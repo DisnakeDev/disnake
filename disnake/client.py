@@ -3008,7 +3008,7 @@ class Client:
         Parameters
         ----------
         guild_id: :class:`int`
-            The ID of the guild where the applcation command should be deleted.
+            The ID of the guild where the application command should be deleted.
         command_id: :class:`int`
             The ID of the application command to delete.
         """

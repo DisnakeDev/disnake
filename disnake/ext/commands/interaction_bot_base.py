@@ -881,7 +881,7 @@ class InteractionBotBase(CommonBotBase):
             return
 
         # We assume that all commands are already cached.
-        # Sort all invokable commands between guild IDs:
+        # Sort all invocable commands between guild IDs:
         global_cmds, guild_cmds = self._ordered_unsynced_commands(self._test_guilds)
 
         if self._command_sync_flags.sync_global_commands:
@@ -1416,7 +1416,7 @@ class InteractionBotBase(CommonBotBase):
                     # either malformed API request, or some other error
                     # in theory this will never error: if a command exists the bot has authorisation
                     # in practice this is not the case, the API could change valid requests at any time
-                    message = "This command could not be processed. Additionally, an error occured when trying to sync commands."
+                    message = "This command could not be processed. Additionally, an error occurred when trying to sync commands."
                 else:
                     message = "This command has just been synced."
             else:
@@ -1455,7 +1455,7 @@ class InteractionBotBase(CommonBotBase):
             event_name = "message_command"
 
         if event_name is None or app_command is None:
-            # If we are here, the command being invoked is either unknown or has an unknonw type.
+            # If we are here, the command being invoked is either unknown or has an unknown type.
             # This usually happens if the auto sync is disabled, so let's just ignore this.
             return
 

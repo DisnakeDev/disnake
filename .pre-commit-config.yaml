@@ -19,6 +19,14 @@ repos:
       - id: pretty-format-yaml
         args: [--autofix, --indent, '2', --offset, '2', '--preserve-quotes']
 
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.4.1
+    hooks:
+      - id: codespell
+        args: ['--write']
+        additional_dependencies:
+          - tomli
+
   - repo: local
     hooks:
       - id: no-symlinks

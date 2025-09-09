@@ -1155,7 +1155,7 @@ class PermissionOverwrite:
 
     __slots__ = ("_values",)
 
-    # n. b. this typechecking block must be first and seperate from the secondary one, due to codemodding
+    # n. b. this typechecking block must be first and separate from the secondary one, due to codemodding
     if TYPE_CHECKING:
         add_reactions: Optional[bool]
         administrator: Optional[bool]
