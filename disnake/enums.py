@@ -430,6 +430,11 @@ class MessageType(Enum):
 
     .. versionadded:: 2.10
     """
+    emoji_added = 63
+    """The system message denoting that an emoji was added to the server.
+
+    .. versionadded: 2.11
+    """
 
 
 class PartyType(Enum):
