@@ -51,6 +51,11 @@ repos:
         exclude_types: [json, pofile]
         exclude: 'changelog/|py.typed|disnake/bin/COPYING|.github/PULL_REQUEST_TEMPLATE.md|.github/CODEOWNERS|LICENSE|MANIFEST.in|.gitattributes'
 
+  - repo: https://github.com/tox-dev/pyproject-fmt
+    rev: v2.6.0
+    hooks:
+      - id: pyproject-fmt
+
   - repo: https://github.com/charliermarsh/ruff-pre-commit
     rev: v0.12.12
     hooks:
