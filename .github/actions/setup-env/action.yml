@@ -21,6 +21,9 @@ runs:
         python-version: ${{ inputs.python-version }}
         version: "2.20.1"  # last version to support python 3.8
         cache: false
+      env:
+        # FIXME: temporary hotfix for pdm on Python 3.14+
+        PDM_DEPS: 'httpcore==1.0.8'
 
     - name: Disable PDM version check
       shell: bash
