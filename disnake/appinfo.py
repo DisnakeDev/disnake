@@ -213,7 +213,7 @@ class AppInfo:
         The approximate number of users that have authorized the app with OAuth2.
 
         .. versionadded:: 2.11
-    redirect_uris: List[:class:`str`]
+    redirect_uris: Optional[List[:class:`str`]]
         The application's OAuth2 redirect URIs.
 
         .. versionadded:: 2.11
@@ -233,7 +233,7 @@ class AppInfo:
 
         .. versionadded:: 2.11
 
-    event_webhooks_types: List[:class:`str`]
+    event_webhooks_types: Optional[List[:class:`str`]]
         The application's event webhook types, if any.
 
         .. versionadded:: 2.11
