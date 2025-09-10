@@ -37,11 +37,13 @@ class ApplicationIntegrationTypeConfiguration(TypedDict, total=False):
 
 
 class AppInfo(BaseAppInfo):
-    rpc_origins: List[str]
+    rpc_origins: NotRequired[List[str]]
     bot_public: bool
     bot_require_code_grant: bool
+    bot: NotRequired[User]
     owner: User
     team: NotRequired[Team]
+    flags: NotRequired[int]
     guild_id: NotRequired[Snowflake]
     primary_sku_id: NotRequired[Snowflake]
     slug: NotRequired[str]
@@ -52,6 +54,11 @@ class AppInfo(BaseAppInfo):
     approximate_guild_count: NotRequired[int]
     approximate_user_install_count: NotRequired[int]
     approximate_user_authorization_count: NotRequired[int]
+    redirect_uris: NotRequired[List[str]]
+    interactions_endpoint_url: NotRequired[Optional[str]]
+    event_webhooks_url: NotRequired[Optional[str]]
+    event_webhooks_status: NotRequired[str]
+    event_webhooks_type: NotRequired[List[str]]
     # values in this dict generally shouldn't be null, but they can be empty dicts
     integration_types_config: NotRequired[Dict[str, ApplicationIntegrationTypeConfiguration]]
 
