@@ -421,7 +421,7 @@ class AppInfo:
         install_params: Optional[InstallParams] = MISSING,
         role_connections_verification_url: Optional[str] = MISSING,
         interactions_endpoint_url: Optional[str] = MISSING,
-        tags: Optional[List[str]] = MISSING,
+        tags: List[str] = MISSING,
     ) -> AppInfo:
         """|coro|
 
@@ -439,7 +439,7 @@ class AppInfo:
             The application's public flags.
 
             This is restricted to setting only the flags that correspond to intents.
-        tags: Optional[List[:class:`str`]]
+        tags: List[:class:`str`]
             The application's tags.
         install_params: Optional[:class:`InstallParams`]
             The installation parameters for this application.
@@ -451,9 +451,9 @@ class AppInfo:
             in the guild role verification configuration.
         interactions_endpoint_url: Optional[:class:`str`]
             The application's interactions endpoint URL.
-        icon: |resource_type|
+        icon: Optional[|resource_type|]
             Update the application's icon asset, if any.
-        cover_image: |resource_type|
+        cover_image: Optional[|resource_type|]
             Update the cover_image for rich presence integrations.
 
         Raises
