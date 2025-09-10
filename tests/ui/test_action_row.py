@@ -203,7 +203,7 @@ class TestActionRow:
             assert act_row is exp_row
             assert act_cmp is exp_cmp
 
-    # theis method is mainly for pyright to check, the asserts wouldn't do anything at runtime
+    # this method is mainly for pyright to check, the asserts wouldn't do anything at runtime
     def _test_typing_init(self) -> None:  # pragma: no cover
         assert_type(ActionRow(), ActionRow[WrappedComponent])
 

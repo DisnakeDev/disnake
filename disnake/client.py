@@ -2417,8 +2417,6 @@ class Client:
             The bot's application information.
         """
         data = await self.http.application_info()
-        if "rpc_origins" not in data:
-            data["rpc_origins"] = None
         return AppInfo(self._connection, data)
 
     async def fetch_user(self, user_id: int, /) -> User:
@@ -3008,7 +3006,7 @@ class Client:
         Parameters
         ----------
         guild_id: :class:`int`
-            The ID of the guild where the applcation command should be deleted.
+            The ID of the guild where the application command should be deleted.
         command_id: :class:`int`
             The ID of the application command to delete.
         """

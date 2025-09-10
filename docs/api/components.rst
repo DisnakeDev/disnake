@@ -13,7 +13,7 @@ which allows bot developers to create their own component-based UIs right inside
 
 .. warning::
 
-    Classes listed below are not meant to be created by user and are only recieved from the API.
+    Classes listed below are not meant to be created by user and are only received from the API.
     For constructible versions, see :ref:`Bot UI Kit <disnake_api_ui>`.
 
 Discord Models

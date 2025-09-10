@@ -217,7 +217,7 @@ class Modal:
 
         The callback associated with this modal.
 
-        This can be overriden by subclasses.
+        This can be overridden by subclasses.
 
         Parameters
         ----------

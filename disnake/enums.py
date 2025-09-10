@@ -70,6 +70,7 @@ __all__ = (
     "ThreadLayout",
     "Event",
     "ApplicationRoleConnectionMetadataType",
+    "ApplicationEventWebhookStatus",
     "OnboardingPromptType",
     "SKUType",
     "EntitlementType",
@@ -429,6 +430,11 @@ class MessageType(Enum):
     """The system message denoting that a poll expired, announcing the most voted answer.
 
     .. versionadded:: 2.10
+    """
+    emoji_added = 63
+    """The system message denoting that an emoji was added to the server.
+
+    .. versionadded: 2.11
     """
 
 
@@ -2281,6 +2287,20 @@ class ApplicationRoleConnectionMetadataType(Enum):
     """The metadata value (``integer``) is equal to the guild's configured value."""
     boolean_not_equal = 8
     """The metadata value (``integer``) is not equal to the guild's configured value."""
+
+
+class ApplicationEventWebhookStatus(Enum):
+    """Represents the status of an application event webhook.
+
+    .. versionadded:: 2.11
+    """
+
+    disabled = 1
+    """Webhook events are disabled by developer."""
+    enabled = 2
+    """Webhook events are enabled by developer."""
+    disabled_by_discord = 3
+    """Webhook events are disabled by Discord, usually due to inactivity."""
 
 
 class OnboardingPromptType(Enum):
