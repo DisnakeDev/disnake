@@ -215,12 +215,28 @@ class AppInfo:
         .. versionadded:: 2.11
     redirect_uris: Optional[List[:class:`str`]]
         The application's OAuth2 redirect URIs, if any.
+
+        .. versionadded:: 2.11
+
     interactions_endpoint_url: Optional[:class:`str`]
         The application's interactions endpoint URL, if any.
+
+        .. versionadded:: 2.11
+
     event_webhooks_url: Optional[:class:`str`]
         The application's event webhooks URL, if any.
+
+        .. versionadded:: 2.11
+
     event_webhooks_status: :class:`ApplicationEventWebhookStatus`
         The application's event webhooks status.
+
+        .. versionadded:: 2.11
+
+    event_webhooks_types: Optional[List[:class:`str`]]
+        The application's event webhook types, if any.
+
+        .. versionadded:: 2.11
     """
 
     __slots__ = (
@@ -251,6 +267,7 @@ class AppInfo:
         "role_connections_verification_url",
         "event_webhooks_url",
         "event_webhooks_status",
+        "event_webhooks_types",
         "approximate_guild_count",
         "approximate_user_install_count",
         "approximate_user_authorization_count",
@@ -293,8 +310,7 @@ class AppInfo:
             InstallParams(data["install_params"], parent=self) if "install_params" in data else None
         )
         self.custom_install_url: Optional[str] = data.get("custom_install_url")
-        redirect_uris: Optional[List[str]] = data.get("redirect_uris")
-        self.redirect_uris: Optional[List[str]] = redirect_uris if redirect_uris else None
+        self.redirect_uris: Optional[List[str]] = data.get("redirect_uris", None)
         self.interactions_endpoint_url: Optional[str] = data.get("interactions_endpoint_url")
         self.role_connections_verification_url: Optional[str] = data.get(
             "role_connections_verification_url"
@@ -303,6 +319,7 @@ class AppInfo:
         self.event_webhooks_status: ApplicationEventWebhookStatus = try_enum(
             ApplicationEventWebhookStatus, data.get("event_webhooks_status", 1)
         )
+        self.event_webhooks_types: Optional[List[str]] = data.get("event_webhooks_types")
         self.approximate_guild_count: int = data.get("approximate_guild_count", 0)
         self.approximate_user_install_count: int = data.get("approximate_user_install_count", 0)
         self.approximate_user_authorization_count: int = data.get(
