@@ -405,6 +405,8 @@ class AppInfo:
             The application's description.
         flags: Optional[:class:`ApplicationFlags`]
             The application's public flags.
+
+            This is restricted to setting only the flags that correspond to intents.
         tags: Optional[List[:class:`str`]]
             The application's tags.
         install_params: Optional[:class:`InstallParams`]
@@ -420,17 +422,17 @@ class AppInfo:
         icon: |resource_type|
             Update the application's icon asset, if any.
         cover_image: |resource_type|
-            Retrieves the cover image on a store embed, if any.
+            Update the cover_image for rich presence integrations.
 
         Raises
         ------
         HTTPException
-            Editing the information failed somehow.
+            Editing the application information failed.
 
         Returns
         -------
         :class:`.AppInfo`
-            The bot's new application information.
+            The new application information.
         """
         fields: Dict[str, Any] = {}
 
