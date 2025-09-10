@@ -104,7 +104,7 @@ Enumerations
 ------------
 
 ApplicationEventWebhookStatus
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. autoclass:: ApplicationEventWebhookStatus
     :members:

@@ -40,8 +40,8 @@ class AppInfo(BaseAppInfo):
     rpc_origins: NotRequired[List[str]]
     bot_public: bool
     bot_require_code_grant: bool
-    bot: NotRequired[bool]
-    owner: NotRequired[User]
+    bot: NotRequired[User]
+    owner: User
     team: NotRequired[Team]
     flags: NotRequired[int]
     guild_id: NotRequired[Snowflake]
@@ -55,7 +55,7 @@ class AppInfo(BaseAppInfo):
     approximate_user_install_count: NotRequired[int]
     approximate_user_authorization_count: NotRequired[int]
     redirect_uris: NotRequired[List[str]]
-    interactions_endpoint_url: NotRequired[str]
+    interactions_endpoint_url: NotRequired[Optional[str]]
     event_webhooks_url: NotRequired[Optional[str]]
     event_webhooks_status: NotRequired[str]
     event_webhooks_type: NotRequired[List[str]]

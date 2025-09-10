@@ -213,18 +213,18 @@ class AppInfo:
         The approximate number of users that have authorized the app with OAuth2.
 
         .. versionadded:: 2.11
-    redirect_uris: Optional[List[:class:`str`]]
-        The application's OAuth2 redirect URIs, if any.
+    redirect_uris: List[:class:`str`]
+        The application's OAuth2 redirect URIs.
 
         .. versionadded:: 2.11
 
     interactions_endpoint_url: Optional[:class:`str`]
-        The application's interactions endpoint URL, if any.
+        The application's interactions endpoint URL.
 
         .. versionadded:: 2.11
 
     event_webhooks_url: Optional[:class:`str`]
-        The application's event webhooks URL, if any.
+        The application's event webhooks URL.
 
         .. versionadded:: 2.11
 
@@ -233,7 +233,7 @@ class AppInfo:
 
         .. versionadded:: 2.11
 
-    event_webhooks_types: Optional[List[:class:`str`]]
+    event_webhooks_types: List[:class:`str`]
         The application's event webhook types, if any.
 
         .. versionadded:: 2.11
@@ -282,7 +282,7 @@ class AppInfo:
         self.name: str = data["name"]
         self.description: str = data["description"]
         self._icon: Optional[str] = data["icon"]
-        self.rpc_origins: List[str] = data["rpc_origins"]
+        self.rpc_origins: List[str] = data.get("rpc_origins") or []
         self.bot_public: bool = data["bot_public"]
         self.bot_require_code_grant: bool = data["bot_require_code_grant"]
         self.owner: User = state.create_user(data["owner"])
@@ -310,7 +310,7 @@ class AppInfo:
             InstallParams(data["install_params"], parent=self) if "install_params" in data else None
         )
         self.custom_install_url: Optional[str] = data.get("custom_install_url")
-        self.redirect_uris: Optional[List[str]] = data.get("redirect_uris", None)
+        self.redirect_uris: Optional[List[str]] = data.get("redirect_uris")
         self.interactions_endpoint_url: Optional[str] = data.get("interactions_endpoint_url")
         self.role_connections_verification_url: Optional[str] = data.get(
             "role_connections_verification_url"
