@@ -110,13 +110,11 @@ jobs:
       - lint
     strategy:
       matrix:
+        # TODO: add 3.14 once we switch to uv
         python-version: ${{ fromJson(needs.python-versions.outputs.pyright) }}
         experimental: [false]
-        include:
-          - python-version: '3.14.0-alpha - 3.14'
-            experimental: true
       fail-fast: false
-    continue-on-error: ${{ matrix.experimental || false }}
+    continue-on-error: ${{ matrix.experimental }}
 
     steps:
       - uses: actions/checkout@v4
@@ -243,18 +241,12 @@ jobs:
       - lint
     strategy:
       matrix:
-        python-version: ${{ fromJson(needs.python-versions.outputs.tests) }}
         os: ["windows-latest", "ubuntu-latest", "macos-latest"]
-        include:
-          - python-version: '3.14.0-alpha - 3.14'
-            experimental: true
+        # TODO: add 3.14 once we switch to uv
+        python-version: ${{ fromJson(needs.python-versions.outputs.tests) }}
+        experimental: [false]
       fail-fast: true
-    continue-on-error: ${{ matrix.experimental || false }}
-
-    env:
-      GITHUB_STEP_SUMMARY_HEADER: "<details><summary>#name#</summary>\n<pre>"
-      GITHUB_STEP_SUMMARY_FOOTER: "</pre></details>\n"
-
+    continue-on-error: ${{ matrix.experimental }}
     steps:
       - uses: actions/checkout@v4
 
