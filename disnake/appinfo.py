@@ -395,8 +395,6 @@ class AppInfo:
 
         All parameters are optional.
 
-        Returns a new :class:`AppInfo` with the updated information.
-
         .. versionadded:: 2.11
 
         Parameters
