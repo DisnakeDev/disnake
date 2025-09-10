@@ -84,6 +84,12 @@ class InstallParams:
             ),
         )
 
+    def to_dict(self) -> InstallParamsPayload:
+        return {
+            "scopes": self.scopes,
+            "permissions": str(self.permissions.value),
+        }
+
 
 class InstallTypeConfiguration:
     """Represents the configuration for a particular application installation type.
@@ -110,12 +116,6 @@ class InstallTypeConfiguration:
             if (install_params := data.get("oauth2_install_params"))
             else None
         )
-
-    def to_dict(self) -> Dict[str, Any]:
-        return {
-            "scopes": self.scopes,
-            "permissions": self.permissions.value,
-        }
 
 
 class AppInfo:
