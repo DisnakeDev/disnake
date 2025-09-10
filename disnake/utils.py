@@ -50,19 +50,29 @@ from urllib.parse import parse_qs, urlencode
 
 from .enums import Locale
 
-if sys.version_info >= (3, 11):
+if sys.version_info >= (3, 14):
+    import threading
     from inspect import iscoroutinefunction as iscoroutinefunction
 
     def get_event_loop():
         try:
-            return asyncio.get_running_loop()
+            # If there is no event loop, this will raise a RuntimeError starting with Python 3.14+.
+            # In that case, we create and set a new loop below.
+            # This is more of a bandaid fix, we should really use asyncio.run in the long term.
+            return asyncio.get_event_loop()
         except RuntimeError:
-            return asyncio.new_event_loop()
+            if threading.current_thread() is not threading.main_thread():
+                raise
+            asyncio.set_event_loop(loop := asyncio.new_event_loop())
+            return loop
 else:
-    from asyncio import (
-        get_event_loop as get_event_loop,
-        iscoroutinefunction as iscoroutinefunction,
-    )
+    from asyncio import iscoroutinefunction as iscoroutinefunction
+
+    def get_event_loop():
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", DeprecationWarning)
+            # get_event_loop emits deprecation warnings in 3.10-3.13
+            return asyncio.get_event_loop()
 
 
 try:
