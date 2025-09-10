@@ -228,6 +228,7 @@ lint.ignore = [
     "TC003",
 
 ]
+
 lint.per-file-ignores."disnake/**.py" = [
     "PT",
 ] # this is not a module of pytest tests
@@ -249,23 +250,29 @@ lint.per-file-ignores."examples/*.py" = [
     "T201", # print found, printing is okay in examples
 ]
 lint.per-file-ignores."examples/basic_voice.py" = [
-    "S104",
-] # possible binding to all interfaces
+    "S104", # possible binding to all interfaces
+]
 lint.per-file-ignores."scripts/*.py" = [
-    "S101",
-] # use of assert is okay in scripts
+    "S101", # use of assert is okay in scripts
+]
 lint.per-file-ignores."tests/*.py" = [
-    "S101",
-] # use of assert is okay in test files
+    "S101", # use of assert is okay in test files
+]
+
 lint.flake8-annotations.ignore-fully-untyped = true
+
 lint.flake8-bugbear.extend-immutable-calls = [
     # this is immutable, except for storing locks, which are fine to share across contexts
     "disnake.webhook.async_.AsyncWebhookAdapter",
 ]
+
 lint.flake8-pytest-style.fixture-parentheses = false
 lint.flake8-pytest-style.mark-parentheses = false
+
 lint.flake8-tidy-imports.banned-api."subprocess".msg = "Consider possible security implications associated with the subprocess module." # replaces S404
+
 lint.isort.combine-as-imports = true
+
 lint.pydocstyle.convention = "numpy"
 
 [tool.codespell]
@@ -275,9 +282,9 @@ ignore-words-list = [ 'GroupT', "OT" ]
 [tool.check-manifest]
 ignore = [
     # CI
+    ".libcst.codemod.yaml",
     ".pre-commit-config.yaml",
     ".readthedocs.yml",
-    ".libcst.codemod.yaml",
     "noxfile.py",
     # docs
     "CONTRIBUTING.md",
@@ -287,8 +294,8 @@ ignore = [
     "docs/**",
     "examples/**",
     # tests
-    "tests/**",
     "scripts/**",
+    "tests/**",
 ]
 
 [tool.pyproject-fmt]
@@ -299,11 +306,14 @@ max_supported_python = "3.13"
 
 [tool.pytest.ini_options]
 minversion = "8.2"
-pythonpath = "."                        # legacy configuration, new pytest versions don't add the rootdir to path
+pythonpath = "."   # legacy configuration, new pytest versions don't add the rootdir to path
+
 testpaths = "tests"
 addopts = "--strict-markers -Werror -s"
 xfail_strict = true
+
 asyncio_mode = "strict"
+asyncio_default_fixture_loop_scope = "function"
 
 [tool.coverage.run]
 branch = true
@@ -312,9 +322,9 @@ include = [
     "tests/*",
 ]
 omit = [
-    "disnake/ext/mypy_plugin/*",
-    "disnake/types/*",
     "disnake/__main__.py",
+    "disnake/types/*",
+    "disnake/ext/mypy_plugin/*",
 ]
 
 [tool.coverage.report]
@@ -337,35 +347,14 @@ title_format = false
 underlines = "-~"
 issue_format = ":issue:`{issue}`"
 
-[[tool.towncrier.type]]
-directory = "breaking"
-name = "Breaking Changes"
-showcontent = true
-
-[[tool.towncrier.type]]
-directory = "deprecate"
-name = "Deprecations"
-showcontent = true
-
-[[tool.towncrier.type]]
-directory = "feature"
-name = "New Features"
-showcontent = true
-
-[[tool.towncrier.type]]
-directory = "bugfix"
-name = "Bug Fixes"
-showcontent = true
-
-[[tool.towncrier.type]]
-directory = "doc"
-name = "Documentation"
-showcontent = true
-
-[[tool.towncrier.type]]
-directory = "misc"
-name = "Miscellaneous"
-showcontent = true
+type = [
+    { directory = "breaking", name = "Breaking Changes", showcontent = true },
+    { directory = "bugfix", name = "Bug Fixes", showcontent = true },
+    { directory = "deprecate", name = "Deprecations", showcontent = true },
+    { directory = "doc", name = "Documentation", showcontent = true },
+    { directory = "feature", name = "New Features", showcontent = true },
+    { directory = "misc", name = "Miscellaneous", showcontent = true },
+]
 
 [tool.pyright]
 typeCheckingMode = "strict"
@@ -385,28 +374,25 @@ ignore = [
 reportUnnecessaryTypeIgnoreComment = true
 
 # it's unlikely that these will ever be enabled
-reportOverlappingOverload = false
-reportPrivateUsage = false
-reportUnnecessaryIsInstance = false
-reportFunctionMemberAccess = false
-reportMissingTypeStubs = false
-reportUnusedFunction = false
-reportUnusedClass = false
 reportConstantRedefinition = false
+reportFunctionMemberAccess = false
 reportImportCycles = false
 reportIncompatibleMethodOverride = false
 reportIncompatibleVariableOverride = false
+reportMissingTypeStubs = false
+reportOverlappingOverload = false
+reportPrivateUsage = false
+reportUnnecessaryIsInstance = false
+reportUnusedClass = false
+reportUnusedFunction = false
 
 # these are largely due to missing type hints, and make up most of the error count
+reportMissingParameterType = false
+reportMissingTypeArgument = false
+reportUnknownArgumentType = false
 reportUnknownMemberType = false
 reportUnknownParameterType = false
-reportUnknownArgumentType = false
-reportMissingParameterType = false
 reportUnknownVariableType = false
-reportMissingTypeArgument = false
-
-[tool.nox]
-script-venv-backend = "uv|virtualenv"
 
 [tool.slotscheck]
 strict-imports = true
