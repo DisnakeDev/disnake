@@ -415,6 +415,8 @@ class AppInfo:
             The application's role connection verification entry point,
             which when configured will render the app as a verification method
             in the guild role verification configuration.
+        interactions_endpoint_url: Optional[:class:`str`]
+            The application's interactions endpoint URL.
         icon: |resource_type|
             Update the application's icon asset, if any.
         cover_image: |resource_type|
