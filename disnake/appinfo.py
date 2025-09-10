@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Dict, List, Optional, cast
 
 from . import utils
 from .asset import Asset
+from .enums import ApplicationEventWebhookStatus, try_enum
 from .flags import ApplicationFlags
 from .permissions import Permissions
 
@@ -212,6 +213,14 @@ class AppInfo:
         The approximate number of users that have authorized the app with OAuth2.
 
         .. versionadded:: 2.11
+    redirect_uris: Optional[List[:class:`str`]]
+        The application's OAuth2 redirect URIs, if any.
+    interactions_endpoint_url: Optional[:class:`str`]
+        The application's interactions endpoint URL, if any.
+    event_webhooks_url: Optional[:class:`str`]
+        The application's event webhooks URL, if any.
+    event_webhooks_status: :class:`ApplicationEventWebhookStatus`
+        The application's event webhooks status.
     """
 
     __slots__ = (
@@ -236,8 +245,12 @@ class AppInfo:
         "flags",
         "tags",
         "install_params",
+        "redirect_uris",
         "custom_install_url",
+        "interactions_endpoint_url",
         "role_connections_verification_url",
+        "event_webhooks_url",
+        "event_webhooks_status",
         "approximate_guild_count",
         "approximate_user_install_count",
         "approximate_user_authorization_count",
@@ -280,8 +293,15 @@ class AppInfo:
             InstallParams(data["install_params"], parent=self) if "install_params" in data else None
         )
         self.custom_install_url: Optional[str] = data.get("custom_install_url")
+        redirect_uris: Optional[List[str]] = data.get("redirect_uris")
+        self.redirect_uris: Optional[List[str]] = redirect_uris if redirect_uris else None
+        self.interactions_endpoint_url: Optional[str] = data.get("interactions_endpoint_url")
         self.role_connections_verification_url: Optional[str] = data.get(
             "role_connections_verification_url"
+        )
+        self.event_webhooks_url: Optional[str] = data.get("event_webhooks_url")
+        self.event_webhooks_status: ApplicationEventWebhookStatus = try_enum(
+            ApplicationEventWebhookStatus, data.get("event_webhooks_status", 1)
         )
         self.approximate_guild_count: int = data.get("approximate_guild_count", 0)
         self.approximate_user_install_count: int = data.get("approximate_user_install_count", 0)
@@ -317,10 +337,7 @@ class AppInfo:
 
     @property
     def cover_image(self) -> Optional[Asset]:
-        """Optional[:class:`.Asset`]: Retrieves the cover image on a store embed, if any.
-
-        This is only available if the application is a game sold on Discord.
-        """
+        """Optional[:class:`.Asset`]: Retrieves the rich presence cover image asset, if any."""
         if self._cover_image is None:
             return None
         return Asset._from_cover_image(self._state, self.id, self._cover_image)
