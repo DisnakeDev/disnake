@@ -496,9 +496,6 @@ class AppInfo:
             fields["tags"] = tags
 
         data = await self._state.http.edit_application_info(**fields)
-
-        if "rpc_origins" not in data:
-            data["rpc_origins"] = None
         return AppInfo(self._state, data)
 
 
