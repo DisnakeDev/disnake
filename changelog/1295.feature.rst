@@ -1,0 +1,1 @@
+Added support for recurrence rules to ``GuildScheduledEvent`` via the ``recurrence_rule`` parameter.
