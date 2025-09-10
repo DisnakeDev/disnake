@@ -1,1 +1,3 @@
-Added new message type :attr:`disnake.MessageType.emoji_added` for when an emoji is added to a guild.
+Added support for emoji added system messages.
+- new message type :attr:`.MessageType.emoji_added`
+- new system channel flag attr :attr:`.SystemChannelFlags.emoji_added_notifications`
