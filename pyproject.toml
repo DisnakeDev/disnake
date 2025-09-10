@@ -161,7 +161,7 @@ lint.ignore = [
     ## pydocstyle
     "D203", # incompat with D211
     "D205", # blank line required between summary and description
-    "D213", # multiline docstring should start on second line, incompatiable with D212
+    "D213", # multiline docstring should start on second line, incompatible with D212
     "D400", # first line ends in period, does not work with `|coro|` etc.
     "D401", # first line of docstring should be in imperative mood
     "D415", # same thing but punctuation in general
@@ -267,6 +267,10 @@ lint.flake8-pytest-style.mark-parentheses = false
 lint.flake8-tidy-imports.banned-api."subprocess".msg = "Consider possible security implications associated with the subprocess module." # replaces S404
 lint.isort.combine-as-imports = true
 lint.pydocstyle.convention = "numpy"
+
+[tool.codespell]
+skip = [ 'docs/_static/**', '*.po' ]
+ignore-words-list = [ 'GroupT', "OT" ]
 
 [tool.check-manifest]
 ignore = [

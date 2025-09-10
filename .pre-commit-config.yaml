@@ -19,10 +19,13 @@ repos:
       - id: pretty-format-yaml
         args: [--autofix, --indent, '2', --offset, '2', '--preserve-quotes']
 
-  - repo: https://github.com/tox-dev/pyproject-fmt
-    rev: "v2.6.0"
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.4.1
     hooks:
-      - id: pyproject-fmt
+      - id: codespell
+        args: ['--write']
+        additional_dependencies:
+          - tomli
 
   - repo: local
     hooks:
@@ -47,6 +50,11 @@ repos:
         types: [text]
         exclude_types: [json, pofile]
         exclude: 'changelog/|py.typed|disnake/bin/COPYING|.github/PULL_REQUEST_TEMPLATE.md|.github/CODEOWNERS|LICENSE|MANIFEST.in|.gitattributes'
+
+  - repo: https://github.com/tox-dev/pyproject-fmt
+    rev: v2.6.0
+    hooks:
+      - id: pyproject-fmt
 
   - repo: https://github.com/charliermarsh/ruff-pre-commit
     rev: v0.12.12
