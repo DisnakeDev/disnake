@@ -1824,6 +1824,8 @@ class Message(Hashable):
             else:
                 msg += "\n\nThere was no winner."
             return msg
+        if self.type is MessageType.emoji_added:
+            return f"{self.author.name} added a new emoji."
 
         # in the event of an unknown or unsupported message type, we return nothing
         return None

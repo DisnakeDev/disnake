@@ -656,7 +656,7 @@ class MediaChannelConverter(IDConverter[disnake.MediaChannel]):
 
 
 class ThreadConverter(IDConverter[disnake.Thread]):
-    """Coverts to a :class:`~disnake.Thread`.
+    """Converts to a :class:`~disnake.Thread`.
 
     All lookups are via the local guild.
 
