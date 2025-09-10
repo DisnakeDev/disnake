@@ -188,7 +188,7 @@ Miscellaneous
 v2.9.3
 ------
 
-This is a maintainance release with several minor bugfixes.
+This is a maintenance release with several minor bugfixes.
 Notably, this includes support for a newer voice encryption mode;
 all modes supported in previous versions are scheduled to be :ddocs:`discontinued <change-log#voice-encryption-modes>` on 18th November 2024,
 and voice connections using the builtin :class:`VoiceClient` will fail to connect.
@@ -380,7 +380,7 @@ Miscellaneous
 v2.8.2
 ------
 
-This maintainence release contains backports from v2.9.0.
+This maintenance release contains backports from v2.9.0.
 
 Bug Fixes
 ~~~~~~~~~
@@ -572,7 +572,7 @@ Miscellaneous
 v2.6.3
 ------
 
-This maintainence release contains backports from v2.8.0.
+This maintenance release contains backports from v2.8.0.
 
 Bug Fixes
 ~~~~~~~~~
@@ -586,7 +586,7 @@ Bug Fixes
 v2.6.2
 ------
 
-This maintainence release contains backports from v2.7.0.
+This maintenance release contains backports from v2.7.0.
 
 Bug Fixes
 ~~~~~~~~~
@@ -599,7 +599,7 @@ Bug Fixes
 v2.6.1
 ------
 
-This maintainence release contains backports from v2.7.0.
+This maintenance release contains backports from v2.7.0.
 
 Bug Fixes
 ~~~~~~~~~
@@ -699,7 +699,7 @@ New Features
 - Add :attr:`.AllowedMentions.from_message` for constructing an allowed mentions object from a :class:`Message`. (:issue:`603`)
 - Add support of more operators to all ``Flag`` classes. This list includes :class:`Intents` and :class:`Permissions`. (:issue:`605`, :issue:`615`, :issue:`616`)
     - ``&``, ``|``, ``^``, and ``~`` bitwise operator support.
-    - ``<``, ``<=``, ``>``, and ``>=`` comparsion operator support.
+    - ``<``, ``<=``, ``>``, and ``>=`` comparison operator support.
     - Support ``|`` operators between flag instances and flag values.
     - Support ``~`` operator on flag values, which create a flag instance with all except this specific flag enabled.
     - Support ``|`` operators between flag values which create a flag instance with both flag values enabled.
@@ -786,7 +786,7 @@ Bug Fixes
 - Don't count initial message in forum threads towards :attr:`Thread.message_count` and :attr:`Thread.total_message_sent`. (:issue:`747`)
 - |commands| Handle :class:`.VoiceChannel` in :func:`commands.is_nsfw`. (:issue:`536`)
 - |commands| Handle ``Union[User, Member]`` annotations on slash commands arguments when using the decorator interface. (:issue:`584`)
-- |commands| Change :func:`has_permissions <ext.commands.has_permissions>` and :func:`bot_has_permissions <ext.commands.bot_has_permissions>` checks to work with interations in guilds that only added the ``applications.commands`` scope, and in DMs. (:issue:`673`)
+- |commands| Change :func:`has_permissions <ext.commands.has_permissions>` and :func:`bot_has_permissions <ext.commands.bot_has_permissions>` checks to work with interactions in guilds that only added the ``applications.commands`` scope, and in DMs. (:issue:`673`)
 - |commands| Fix edge case with parsing command annotations that contain a union of non-type objects, like ``Optional[Literal[1, 2, 3]]``. (:issue:`770`)
 
 Documentation
@@ -831,7 +831,7 @@ Miscellaneous
 - Add ``flake8`` as our linter. (:issue:`557`)
 - Update pyright to 1.1.254. (:issue:`559`)
 - Add generic parameters to user/message command decorators. (:issue:`563`)
-    - Update default parameter type to improve compatibilty with callable/dynamic defaults.
+    - Update default parameter type to improve compatibility with callable/dynamic defaults.
 - Run docs creation in GitHub actions to test for warnings before a pull is merged. (:issue:`564`)
 - Add more typing overrides to :class:`GuildCommandInteraction`. (:issue:`580`)
 - Rework internal typings for interaction payloads. (:issue:`588`)
@@ -843,7 +843,7 @@ Miscellaneous
 - Add flake8-comprehensions for catching inefficient comphrehensions. (:issue:`602`)
 - Resolve minor flake8 issues. (:issue:`606`)
     - Don't use star imports except in ``__init__.py`` files.
-    - Don't use ambigious variable names.
+    - Don't use ambiguous variable names.
     - Don't use setattr and getattr with constant variable names.
 - Add ``flake8-pytest-style`` for linting pytest specific features with flake8. (:issue:`608`)
 - Replace all :class:`TypeVar` instances with ``typing_extensions.Self`` across the entire library where possible. (:issue:`610`)
@@ -1080,7 +1080,7 @@ Bug Fixes
 - Update some types/parameters of roles, scheduled events and voice states (:issue:`407`)
 - Allow ``content`` parameters in send/edit methods to be positional (:issue:`411`)
 - Fix gateway ratelimiter being too strict (:issue:`413`)
-- Fix caching of stage instances andd scheduled events (:issue:`416`)
+- Fix caching of stage instances and scheduled events (:issue:`416`)
 - Fix memory leaks on shard reconnect (:issue:`424`, :issue:`425`)
 - Improve :class:`PartialMessageable` channel handling (:issue:`426`)
 - Use :func:`asyncio.iscoroutinefunction` instead of :func:`inspect.iscoroutinefunction` (:issue:`427`)
@@ -1145,7 +1145,7 @@ Bug Fixes
 - Update some types/parameters of roles, scheduled events and voice states (:issue:`407`)
 - Allow ``content`` parameters in send/edit methods to be positional (:issue:`411`)
 - Fix gateway ratelimiter being too strict (:issue:`413`)
-- Fix caching of stage instances andd scheduled events (:issue:`416`)
+- Fix caching of stage instances and scheduled events (:issue:`416`)
 - Fix memory leaks on shard reconnect (:issue:`424`, :issue:`425`)
 - Improve :class:`PartialMessageable` channel handling (:issue:`426`)
 - Fix :func:`~PartialEmoji.read` for activity emojis (:issue:`430`)
@@ -1635,7 +1635,7 @@ New Features
 - Add :attr:`Client.global_user_commands`
 - Add :attr:`Client.global_message_commands`
 - |commands| Support for slash commands and context menus.
-- |commands| Add :class:`InvokableApplicationCommand <ext.commands.InvokableApplicationCommand>` - the base class for invokable slash commands and context menus.
+- |commands| Add :class:`InvokableApplicationCommand <ext.commands.InvokableApplicationCommand>` - the base class for invocable slash commands and context menus.
 - |commands| Add :class:`InvokableSlashCommand <ext.commands.InvokableSlashCommand>` for slash command management.
 - |commands| Add :class:`SubCommand <ext.commands.SubCommand>` for slash sub-command management.
 - |commands| Add :class:`SubCommandGroup <ext.commands.SubCommandGroup>` for slash sub-command group management.
