@@ -19,11 +19,9 @@ runs:
       uses: pdm-project/setup-pdm@v4
       with:
         python-version: ${{ inputs.python-version }}
-        version: "2.20.1"  # last version to support python 3.8
+        # FIXME: temporarily using newer version of pdm for bugfixes required for Python 3.14+
+        version: ${{ startsWith(inputs.python-version, '3.14') && '2.24.2' || '2.20.1' }}  # 2.20.1 is the last version to support python 3.8
         cache: false
-      env:
-        # FIXME: temporary hotfix for pdm on Python 3.14+
-        PDM_NO_FROZEN_DEPS: "1"
 
     - name: Disable PDM version check
       shell: bash
