@@ -1,0 +1,1 @@
+Add :meth:`Role.primary_colour`, :meth:`Role.secondary_colour`, :meth:`Role.tertiary_colour`, :meth:`Colour.holographic_style`, and aliases, as well as ``primary_colour``, ``secondary_colour``, ``tertiary_colour`` arguments, and aliases, to :meth:`Role.edit` and :meth:`Guild.create_role`.

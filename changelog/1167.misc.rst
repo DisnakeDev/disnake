@@ -1,1 +1,0 @@
-Reduce the amount of unknown (unresolved) types in public-facing APIs.

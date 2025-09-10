@@ -18,7 +18,12 @@ if TYPE_CHECKING:
     from disnake.activity import BaseActivity
     from disnake.client import GatewayParams
     from disnake.enums import Status
-    from disnake.flags import Intents, MemberCacheFlags
+    from disnake.flags import (
+        ApplicationInstallTypes,
+        Intents,
+        InteractionContextTypes,
+        MemberCacheFlags,
+    )
     from disnake.i18n import LocalizationProtocol
     from disnake.mentions import AllowedMentions
     from disnake.message import Message
@@ -116,6 +121,28 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
         Defaults to ``False``.
 
         .. versionadded:: 2.5
+
+    default_install_types: Optional[:class:`.ApplicationInstallTypes`]
+        The default installation types where application commands will be available.
+        This applies to all commands added either through the respective decorators
+        or directly using :meth:`.add_slash_command` (etc.).
+
+        Any value set directly on the command, e.g. using the :func:`.install_types` decorator,
+        the ``install_types`` parameter, ``slash_command_attrs`` (etc.) at the cog-level, or from
+        the :class:`.GuildCommandInteraction` annotation, takes precedence over this default.
+
+        .. versionadded:: 2.10
+
+    default_contexts: Optional[:class:`.InteractionContextTypes`]
+        The default contexts where application commands will be usable.
+        This applies to all commands added either through the respective decorators
+        or directly using :meth:`.add_slash_command` (etc.).
+
+        Any value set directly on the command, e.g. using the :func:`.contexts` decorator,
+        the ``contexts`` parameter, ``slash_command_attrs`` (etc.) at the cog-level, or from
+        the :class:`.GuildCommandInteraction` annotation, takes precedence over this default.
+
+        .. versionadded:: 2.10
 
     Attributes
     ----------
@@ -233,10 +260,12 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
             reload: bool = False,
             case_insensitive: bool = False,
             command_sync_flags: CommandSyncFlags = ...,
-            test_guilds: Optional[Sequence[int]] = None,
             sync_commands: bool = ...,
             sync_commands_debug: bool = ...,
             sync_commands_on_cog_unload: bool = ...,
+            test_guilds: Optional[Sequence[int]] = None,
+            default_install_types: Optional[ApplicationInstallTypes] = None,
+            default_contexts: Optional[InteractionContextTypes] = None,
             asyncio_debug: bool = False,
             loop: Optional[asyncio.AbstractEventLoop] = None,
             shard_id: Optional[int] = None,
@@ -260,8 +289,7 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
             member_cache_flags: Optional[MemberCacheFlags] = None,
             localization_provider: Optional[LocalizationProtocol] = None,
             strict_localization: bool = False,
-        ) -> None:
-            ...
+        ) -> None: ...
 
 
 class AutoShardedBot(BotBase, InteractionBotBase, disnake.AutoShardedClient):
@@ -285,10 +313,12 @@ class AutoShardedBot(BotBase, InteractionBotBase, disnake.AutoShardedClient):
             reload: bool = False,
             case_insensitive: bool = False,
             command_sync_flags: CommandSyncFlags = ...,
-            test_guilds: Optional[Sequence[int]] = None,
             sync_commands: bool = ...,
             sync_commands_debug: bool = ...,
             sync_commands_on_cog_unload: bool = ...,
+            test_guilds: Optional[Sequence[int]] = None,
+            default_install_types: Optional[ApplicationInstallTypes] = None,
+            default_contexts: Optional[InteractionContextTypes] = None,
             asyncio_debug: bool = False,
             loop: Optional[asyncio.AbstractEventLoop] = None,
             shard_ids: Optional[List[int]] = None,  # instead of shard_id
@@ -312,8 +342,7 @@ class AutoShardedBot(BotBase, InteractionBotBase, disnake.AutoShardedClient):
             member_cache_flags: Optional[MemberCacheFlags] = None,
             localization_provider: Optional[LocalizationProtocol] = None,
             strict_localization: bool = False,
-        ) -> None:
-            ...
+        ) -> None: ...
 
 
 class InteractionBot(InteractionBotBase, disnake.Client):
@@ -391,6 +420,28 @@ class InteractionBot(InteractionBotBase, disnake.Client):
 
         .. versionadded:: 2.5
 
+    default_install_types: Optional[:class:`.ApplicationInstallTypes`]
+        The default installation types where application commands will be available.
+        This applies to all commands added either through the respective decorators
+        or directly using :meth:`.add_slash_command` (etc.).
+
+        Any value set directly on the command, e.g. using the :func:`.install_types` decorator,
+        the ``install_types`` parameter, ``slash_command_attrs`` (etc.) at the cog-level, or from
+        the :class:`.GuildCommandInteraction` annotation, takes precedence over this default.
+
+        .. versionadded:: 2.10
+
+    default_contexts: Optional[:class:`.InteractionContextTypes`]
+        The default contexts where application commands will be usable.
+        This applies to all commands added either through the respective decorators
+        or directly using :meth:`.add_slash_command` (etc.).
+
+        Any value set directly on the command, e.g. using the :func:`.contexts` decorator,
+        the ``contexts`` parameter, ``slash_command_attrs`` (etc.) at the cog-level, or from
+        the :class:`.GuildCommandInteraction` annotation, takes precedence over this default.
+
+        .. versionadded:: 2.10
+
     Attributes
     ----------
     owner_id: Optional[:class:`int`]
@@ -434,10 +485,12 @@ class InteractionBot(InteractionBotBase, disnake.Client):
             owner_ids: Optional[Set[int]] = None,
             reload: bool = False,
             command_sync_flags: CommandSyncFlags = ...,
-            test_guilds: Optional[Sequence[int]] = None,
             sync_commands: bool = ...,
             sync_commands_debug: bool = ...,
             sync_commands_on_cog_unload: bool = ...,
+            test_guilds: Optional[Sequence[int]] = None,
+            default_install_types: Optional[ApplicationInstallTypes] = None,
+            default_contexts: Optional[InteractionContextTypes] = None,
             asyncio_debug: bool = False,
             loop: Optional[asyncio.AbstractEventLoop] = None,
             shard_id: Optional[int] = None,
@@ -461,8 +514,7 @@ class InteractionBot(InteractionBotBase, disnake.Client):
             member_cache_flags: Optional[MemberCacheFlags] = None,
             localization_provider: Optional[LocalizationProtocol] = None,
             strict_localization: bool = False,
-        ) -> None:
-            ...
+        ) -> None: ...
 
 
 class AutoShardedInteractionBot(InteractionBotBase, disnake.AutoShardedClient):
@@ -479,10 +531,12 @@ class AutoShardedInteractionBot(InteractionBotBase, disnake.AutoShardedClient):
             owner_ids: Optional[Set[int]] = None,
             reload: bool = False,
             command_sync_flags: CommandSyncFlags = ...,
-            test_guilds: Optional[Sequence[int]] = None,
             sync_commands: bool = ...,
             sync_commands_debug: bool = ...,
             sync_commands_on_cog_unload: bool = ...,
+            test_guilds: Optional[Sequence[int]] = None,
+            default_install_types: Optional[ApplicationInstallTypes] = None,
+            default_contexts: Optional[InteractionContextTypes] = None,
             asyncio_debug: bool = False,
             loop: Optional[asyncio.AbstractEventLoop] = None,
             shard_ids: Optional[List[int]] = None,  # instead of shard_id
@@ -506,5 +560,4 @@ class AutoShardedInteractionBot(InteractionBotBase, disnake.AutoShardedClient):
             member_cache_flags: Optional[MemberCacheFlags] = None,
             localization_provider: Optional[LocalizationProtocol] = None,
             strict_localization: bool = False,
-        ) -> None:
-            ...
+        ) -> None: ...

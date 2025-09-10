@@ -165,7 +165,7 @@ class _CaseInsensitiveDict(dict):
     def __contains__(self, k) -> bool:
         return super().__contains__(k.casefold())
 
-    def __delitem__(self, k):
+    def __delitem__(self, k) -> None:
         return super().__delitem__(k.casefold())
 
     def __getitem__(self, k):
@@ -975,7 +975,9 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         return ""
 
     def _is_typing_optional(self, annotation: Union[T, Optional[T]]) -> TypeGuard[Optional[T]]:
-        return getattr(annotation, "__origin__", None) is Union and type(None) in annotation.__args__  # type: ignore
+        return (
+            getattr(annotation, "__origin__", None) is Union and type(None) in annotation.__args__  # type: ignore
+        )
 
     @property
     def signature(self) -> str:
@@ -987,7 +989,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         if not params:
             return ""
 
-        result = []
+        result: List[str] = []
         for name, param in params.items():
             greedy = isinstance(param.annotation, Greedy)
             optional = False  # postpone evaluation of if it's an optional argument
@@ -1263,8 +1265,7 @@ class GroupMixin(Generic[CogT]):
         cls: Type[CommandT],
         *args: Any,
         **kwargs: Any,
-    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], CommandT]:
-        ...
+    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], CommandT]: ...
 
     @overload
     def command(
@@ -1273,8 +1274,7 @@ class GroupMixin(Generic[CogT]):
         *args: Any,
         cls: Type[CommandT],
         **kwargs: Any,
-    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], CommandT]:
-        ...
+    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], CommandT]: ...
 
     @overload
     def command(
@@ -1282,8 +1282,7 @@ class GroupMixin(Generic[CogT]):
         name: str = ...,
         *args: Any,
         **kwargs: Any,
-    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], Command[CogT, P, T]]:
-        ...
+    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], Command[CogT, P, T]]: ...
 
     def command(
         self,
@@ -1316,8 +1315,7 @@ class GroupMixin(Generic[CogT]):
         cls: Type[GroupT],
         *args: Any,
         **kwargs: Any,
-    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], GroupT]:
-        ...
+    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], GroupT]: ...
 
     @overload
     def group(
@@ -1326,8 +1324,7 @@ class GroupMixin(Generic[CogT]):
         *args: Any,
         cls: Type[GroupT],
         **kwargs: Any,
-    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], GroupT]:
-        ...
+    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], GroupT]: ...
 
     @overload
     def group(
@@ -1335,8 +1332,7 @@ class GroupMixin(Generic[CogT]):
         name: str = ...,
         *args: Any,
         **kwargs: Any,
-    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], Group[CogT, P, T]]:
-        ...
+    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], Group[CogT, P, T]]: ...
 
     def group(
         self,
@@ -1483,25 +1479,23 @@ if TYPE_CHECKING:
         @overload
         def __call__(
             self, func: Callable[Concatenate[ContextT, P], Coro[T]]
-        ) -> Command[None, P, T]:
-            ...
+        ) -> Command[None, P, T]: ...
 
         @overload
         def __call__(
             self, func: Callable[Concatenate[CogT, ContextT, P], Coro[T]]
-        ) -> Command[CogT, P, T]:
-            ...
+        ) -> Command[CogT, P, T]: ...
 
     class GroupDecorator(Protocol):
         @overload
-        def __call__(self, func: Callable[Concatenate[ContextT, P], Coro[T]]) -> Group[None, P, T]:
-            ...
+        def __call__(
+            self, func: Callable[Concatenate[ContextT, P], Coro[T]]
+        ) -> Group[None, P, T]: ...
 
         @overload
         def __call__(
             self, func: Callable[Concatenate[CogT, ContextT, P], Coro[T]]
-        ) -> Group[CogT, P, T]:
-            ...
+        ) -> Group[CogT, P, T]: ...
 
 
 # Small explanation regarding these overloads:
@@ -1518,8 +1512,7 @@ def command(
     name: str,
     cls: Type[CommandT],
     **attrs: Any,
-) -> Callable[[CommandCallback[CogT, ContextT, P, T]], CommandT]:
-    ...
+) -> Callable[[CommandCallback[CogT, ContextT, P, T]], CommandT]: ...
 
 
 @overload
@@ -1528,16 +1521,14 @@ def command(
     *,
     cls: Type[CommandT],
     **attrs: Any,
-) -> Callable[[CommandCallback[CogT, ContextT, P, T]], CommandT]:
-    ...
+) -> Callable[[CommandCallback[CogT, ContextT, P, T]], CommandT]: ...
 
 
 @overload
 def command(
     name: str = ...,
     **attrs: Any,
-) -> CommandDecorator:
-    ...
+) -> CommandDecorator: ...
 
 
 def command(
@@ -1590,8 +1581,7 @@ def group(
     name: str,
     cls: Type[GroupT],
     **attrs: Any,
-) -> Callable[[CommandCallback[CogT, ContextT, P, T]], GroupT]:
-    ...
+) -> Callable[[CommandCallback[CogT, ContextT, P, T]], GroupT]: ...
 
 
 @overload
@@ -1600,16 +1590,14 @@ def group(
     *,
     cls: Type[GroupT],
     **attrs: Any,
-) -> Callable[[CommandCallback[CogT, ContextT, P, T]], GroupT]:
-    ...
+) -> Callable[[CommandCallback[CogT, ContextT, P, T]], GroupT]: ...
 
 
 @overload
 def group(
     name: str = ...,
     **attrs: Any,
-) -> GroupDecorator:
-    ...
+) -> GroupDecorator: ...
 
 
 def group(
@@ -1947,7 +1935,7 @@ def bot_has_role(item: int) -> Callable[[T], T]:
         if ctx.guild is None:
             raise NoPrivateMessage
 
-        me = cast(disnake.Member, ctx.me)
+        me = cast("disnake.Member", ctx.me)
         if isinstance(item, int):
             role = disnake.utils.get(me.roles, id=item)
         else:
@@ -1977,7 +1965,7 @@ def bot_has_any_role(*items: int) -> Callable[[T], T]:
         if ctx.guild is None:
             raise NoPrivateMessage
 
-        me = cast(disnake.Member, ctx.me)
+        me = cast("disnake.Member", ctx.me)
         getter = functools.partial(disnake.utils.get, me.roles)
         if any(
             getter(id=item) is not None if isinstance(item, int) else getter(name=item) is not None
@@ -2026,6 +2014,7 @@ def has_permissions(
     moderate_members: bool = ...,
     move_members: bool = ...,
     mute_members: bool = ...,
+    pin_messages: bool = ...,
     priority_speaker: bool = ...,
     read_message_history: bool = ...,
     read_messages: bool = ...,
@@ -2051,14 +2040,12 @@ def has_permissions(
     view_channel: bool = ...,
     view_creator_monetization_analytics: bool = ...,
     view_guild_insights: bool = ...,
-) -> Callable[[T], T]:
-    ...
+) -> Callable[[T], T]: ...
 
 
 @overload
 @_generated
-def has_permissions() -> Callable[[T], T]:
-    ...
+def has_permissions() -> Callable[[T], T]: ...
 
 
 @_overload_with_permissions
@@ -2152,6 +2139,7 @@ def bot_has_permissions(
     moderate_members: bool = ...,
     move_members: bool = ...,
     mute_members: bool = ...,
+    pin_messages: bool = ...,
     priority_speaker: bool = ...,
     read_message_history: bool = ...,
     read_messages: bool = ...,
@@ -2177,14 +2165,12 @@ def bot_has_permissions(
     view_channel: bool = ...,
     view_creator_monetization_analytics: bool = ...,
     view_guild_insights: bool = ...,
-) -> Callable[[T], T]:
-    ...
+) -> Callable[[T], T]: ...
 
 
 @overload
 @_generated
-def bot_has_permissions() -> Callable[[T], T]:
-    ...
+def bot_has_permissions() -> Callable[[T], T]: ...
 
 
 @_overload_with_permissions
@@ -2256,6 +2242,7 @@ def has_guild_permissions(
     moderate_members: bool = ...,
     move_members: bool = ...,
     mute_members: bool = ...,
+    pin_messages: bool = ...,
     priority_speaker: bool = ...,
     read_message_history: bool = ...,
     read_messages: bool = ...,
@@ -2281,14 +2268,12 @@ def has_guild_permissions(
     view_channel: bool = ...,
     view_creator_monetization_analytics: bool = ...,
     view_guild_insights: bool = ...,
-) -> Callable[[T], T]:
-    ...
+) -> Callable[[T], T]: ...
 
 
 @overload
 @_generated
-def has_guild_permissions() -> Callable[[T], T]:
-    ...
+def has_guild_permissions() -> Callable[[T], T]: ...
 
 
 @_overload_with_permissions
@@ -2357,6 +2342,7 @@ def bot_has_guild_permissions(
     moderate_members: bool = ...,
     move_members: bool = ...,
     mute_members: bool = ...,
+    pin_messages: bool = ...,
     priority_speaker: bool = ...,
     read_message_history: bool = ...,
     read_messages: bool = ...,
@@ -2382,14 +2368,12 @@ def bot_has_guild_permissions(
     view_channel: bool = ...,
     view_creator_monetization_analytics: bool = ...,
     view_guild_insights: bool = ...,
-) -> Callable[[T], T]:
-    ...
+) -> Callable[[T], T]: ...
 
 
 @overload
 @_generated
-def bot_has_guild_permissions() -> Callable[[T], T]:
-    ...
+def bot_has_guild_permissions() -> Callable[[T], T]: ...
 
 
 @_overload_with_permissions
@@ -2426,11 +2410,14 @@ def dm_only() -> Callable[[T], T]:
     This check raises a special exception, :exc:`.PrivateMessageOnly`
     that is inherited from :exc:`.CheckFailure`.
 
+    .. note::
+        For application commands, consider setting the allowed :ref:`contexts <app_command_contexts>` instead.
+
     .. versionadded:: 1.1
     """
 
     def predicate(ctx: AnyContext) -> bool:
-        if ctx.guild is not None:
+        if (ctx.guild if isinstance(ctx, Context) else ctx.guild_id) is not None:
             raise PrivateMessageOnly
         return True
 
@@ -2444,10 +2431,13 @@ def guild_only() -> Callable[[T], T]:
 
     This check raises a special exception, :exc:`.NoPrivateMessage`
     that is inherited from :exc:`.CheckFailure`.
+
+    .. note::
+        For application commands, consider setting the allowed :ref:`contexts <app_command_contexts>` instead.
     """
 
     def predicate(ctx: AnyContext) -> bool:
-        if ctx.guild is None:
+        if (ctx.guild if isinstance(ctx, Context) else ctx.guild_id) is None:
             raise NoPrivateMessage
         return True
 

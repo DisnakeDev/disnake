@@ -1,1 +1,0 @@
-Fix base URL for stickers with :attr:`StickerFormatType.gif`.

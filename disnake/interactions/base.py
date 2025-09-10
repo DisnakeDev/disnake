@@ -12,6 +12,7 @@ from typing import (
     List,
     Mapping,
     Optional,
+    Sequence,
     Tuple,
     TypeVar,
     Union,
@@ -41,15 +42,16 @@ from ..errors import (
     ModalChainNotSupported,
     NotFound,
 )
-from ..flags import MessageFlags
+from ..flags import InteractionContextTypes, MessageFlags
 from ..guild import Guild
+from ..http import HTTPClient
 from ..i18n import Localized
 from ..member import Member
-from ..message import Attachment, Message
+from ..message import Attachment, AuthorizingIntegrationOwners, Message
 from ..object import Object
 from ..permissions import Permissions
 from ..role import Role
-from ..ui.action_row import components_to_dict
+from ..ui.action_row import normalize_components, normalize_components_to_dict
 from ..user import ClientUser, User
 from ..webhook.async_ import Webhook, async_context, handle_message_parameters
 
@@ -74,14 +76,18 @@ if TYPE_CHECKING:
     from ..mentions import AllowedMentions
     from ..poll import Poll
     from ..state import ConnectionState
-    from ..types.components import Modal as ModalPayload
+    from ..types.components import (
+        Modal as ModalPayload,
+        ModalTopLevelComponent as ModalTopLevelComponentPayload,
+    )
     from ..types.interactions import (
         ApplicationCommandOptionChoice as ApplicationCommandOptionChoicePayload,
         Interaction as InteractionPayload,
         InteractionDataResolved as InteractionDataResolvedPayload,
     )
     from ..types.snowflake import Snowflake
-    from ..ui.action_row import Components, MessageUIComponent, ModalUIComponent
+    from ..types.user import User as UserPayload
+    from ..ui._types import MessageComponents, ModalComponents, ModalTopLevelComponent
     from ..ui.modal import Modal
     from ..ui.view import View
     from .message import MessageInteraction
@@ -145,6 +151,13 @@ class Interaction(Generic[ClientT]):
 
     author: Union[:class:`User`, :class:`Member`]
         The user or member that sent the interaction.
+
+        .. note::
+            In scenarios where an interaction occurs in a guild but :attr:`.guild` is unavailable,
+            such as with user-installed applications in guilds, some attributes of :class:`Member`\\s
+            that depend on the guild/role cache will not work due to an API limitation.
+            This includes :attr:`~Member.roles`, :attr:`~Member.top_role`, :attr:`~Member.role_icon`,
+            and :attr:`~Member.guild_permissions`.
     locale: :class:`Locale`
         The selected language of the interaction's author.
 
@@ -162,6 +175,29 @@ class Interaction(Generic[ClientT]):
         representing access to an application subscription.
 
         .. versionadded:: 2.10
+
+    authorizing_integration_owners: :class:`AuthorizingIntegrationOwners`
+        Details about the authorizing user/guild for the application installation
+        related to the interaction.
+
+        .. versionadded:: 2.10
+
+    context: :class:`InteractionContextTypes`
+        The context where the interaction was triggered from.
+
+        This is a flag object, with exactly one of the flags set to ``True``.
+        To check whether an interaction originated from e.g. a :attr:`~InteractionContextTypes.guild`
+        context, you can use ``if interaction.context.guild:``.
+
+        .. versionadded:: 2.10
+
+    attachment_size_limit: :class:`int`
+        The maximum number of bytes files can have in responses to this interaction.
+
+        This may be higher than the default limit, depending on the guild's boost
+        status or the invoking user's nitro status.
+
+        .. versionadded:: 2.11
     """
 
     __slots__: Tuple[str, ...] = (
@@ -178,6 +214,9 @@ class Interaction(Generic[ClientT]):
         "guild_locale",
         "client",
         "entitlements",
+        "authorizing_integration_owners",
+        "context",
+        "attachment_size_limit",
         "_app_permissions",
         "_permissions",
         "_state",
@@ -194,7 +233,7 @@ class Interaction(Generic[ClientT]):
         self._state: ConnectionState = state
         # TODO: Maybe use a unique session
         self._session: ClientSession = state.http._HTTPClient__session  # type: ignore
-        self.client: ClientT = cast(ClientT, state._get_client())
+        self.client: ClientT = cast("ClientT", state._get_client())
         self._original_response: Optional[InteractionMessage] = None
 
         self.id: int = int(data["id"])
@@ -223,11 +262,10 @@ class Interaction(Generic[ClientT]):
             self.author = (
                 isinstance(guild_fallback, Guild)
                 and guild_fallback.get_member(int(member["user"]["id"]))
-                or Member(
-                    state=self._state,
-                    guild=guild_fallback,  # type: ignore  # may be `Object`
-                    data=member,
-                )
+            ) or Member(
+                state=self._state,
+                guild=guild_fallback,  # type: ignore  # may be `Object`
+                data=member,
             )
             self._permissions = int(member.get("permissions", 0))
         elif user := data.get("user"):
@@ -243,6 +281,17 @@ class Interaction(Generic[ClientT]):
             if (entitlements_data := data.get("entitlements"))
             else []
         )
+
+        self.authorizing_integration_owners: AuthorizingIntegrationOwners = (
+            AuthorizingIntegrationOwners(data.get("authorizing_integration_owners") or {})
+        )
+
+        # this *should* always exist, but fall back to an empty flag object if it somehow doesn't
+        self.context: InteractionContextTypes = InteractionContextTypes._from_values(
+            [context] if (context := data.get("context")) is not None else []
+        )
+
+        self.attachment_size_limit: int = data["attachment_size_limit"]
 
     @property
     def bot(self) -> ClientT:
@@ -263,17 +312,27 @@ class Interaction(Generic[ClientT]):
 
     @property
     def guild(self) -> Optional[Guild]:
-        """Optional[:class:`Guild`]: The guild the interaction was sent from."""
+        """Optional[:class:`Guild`]: The guild the interaction was sent from.
+
+        .. note::
+            In some scenarios, e.g. for user-installed applications, this will usually be
+            ``None``, despite the interaction originating from a guild.
+            This will only return a full :class:`Guild` for cached guilds,
+            i.e. those the bot is already a member of.
+
+            To check whether an interaction was sent from a guild, consider using
+            :attr:`guild_id` or :attr:`context` instead.
+        """
         return self._state._get_guild(self.guild_id)
 
     @utils.cached_slot_property("_cs_me")
     def me(self) -> Union[Member, ClientUser]:
-        """Union[:class:`.Member`, :class:`.ClientUser`]:
-        Similar to :attr:`.Guild.me` except it may return the :class:`.ClientUser` in private message contexts.
+        """Union[:class:`.Member`, :class:`.ClientUser`]: Similar to :attr:`.Guild.me`,
+        except it may return the :class:`.ClientUser` in private message contexts or
+        when the bot is not a member of the guild (e.g. in the case of user-installed applications).
         """
-        if self.guild is None:
-            return None if self.bot is None else self.bot.user  # type: ignore
-        return self.guild.me
+        # NOTE: guild.me will return None if we start using the partial guild from the interaction
+        return self.guild.me if self.guild is not None else self.client.user
 
     @property
     def channel_id(self) -> int:
@@ -299,15 +358,12 @@ class Interaction(Generic[ClientT]):
     def app_permissions(self) -> Permissions:
         """:class:`Permissions`: The resolved permissions of the bot in the channel, including overwrites.
 
-        In a guild context, this is provided directly by Discord.
-
-        In a non-guild context this will be an instance of :meth:`Permissions.private_channel`.
-
         .. versionadded:: 2.6
+
+        .. versionchanged:: 2.10
+            This is now always provided by Discord.
         """
-        if self.guild_id:
-            return Permissions(self._app_permissions)
-        return Permissions.private_channel()
+        return Permissions(self._app_permissions)
 
     @utils.cached_slot_property("_cs_response")
     def response(self) -> InteractionResponse:
@@ -394,7 +450,7 @@ class Interaction(Generic[ClientT]):
         files: List[File] = MISSING,
         attachments: Optional[List[Attachment]] = MISSING,
         view: Optional[View] = MISSING,
-        components: Optional[Components[MessageUIComponent]] = MISSING,
+        components: Optional[MessageComponents] = MISSING,
         poll: Poll = MISSING,
         suppress_embeds: bool = MISSING,
         flags: MessageFlags = MISSING,
@@ -460,6 +516,12 @@ class Interaction(Generic[ClientT]):
 
             .. versionadded:: 2.4
 
+            .. note::
+                Passing v2 components here automatically sets the :attr:`~MessageFlags.is_components_v2` flag.
+                Setting this flag cannot be reverted. Note that this also disables the
+                ``content`` and ``embeds`` fields.
+                If the message previously had any of these fields set, you must set them to ``None``.
+
         poll: :class:`Poll`
             A poll. This can only be sent after a defer. If not used after a defer the
             discord API ignore the field.
@@ -480,7 +542,8 @@ class Interaction(Generic[ClientT]):
 
         flags: :class:`MessageFlags`
             The new flags to set for this message. Overrides existing flags.
-            Only :attr:`~MessageFlags.suppress_embeds` is supported.
+            Only :attr:`~MessageFlags.suppress_embeds` and :attr:`~MessageFlags.is_components_v2`
+            are supported.
 
             If parameter ``suppress_embeds`` is provided,
             that will override the setting of :attr:`.MessageFlags.suppress_embeds`.
@@ -504,9 +567,10 @@ class Interaction(Generic[ClientT]):
         Forbidden
             Edited a message that is not yours.
         TypeError
-            You specified both ``embed`` and ``embeds`` or ``file`` and ``files``
+            You specified both ``embed`` and ``embeds`` or ``file`` and ``files``.
         ValueError
-            The length of ``embeds`` was invalid.
+            The length of ``embeds`` was invalid, or
+            you tried to send v2 components together with ``content`` or ``embeds``.
 
         Returns
         -------
@@ -621,7 +685,7 @@ class Interaction(Generic[ClientT]):
             raise
 
     # legacy namings
-    # these MAY begin a deprecation warning in 2.7 but SHOULD have a deprecation version in 2.8
+    # TODO: these should have a deprecation warning before 3.0
     original_message = original_response
     edit_original_message = edit_original_response
     delete_original_message = delete_original_response
@@ -636,7 +700,7 @@ class Interaction(Generic[ClientT]):
         files: List[File] = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         view: View = MISSING,
-        components: Components[MessageUIComponent] = MISSING,
+        components: MessageComponents = MISSING,
         tts: bool = False,
         ephemeral: bool = MISSING,
         suppress_embeds: bool = MISSING,
@@ -688,6 +752,11 @@ class Interaction(Generic[ClientT]):
 
             .. versionadded:: 2.4
 
+            .. note::
+                Passing v2 components here automatically sets the :attr:`~MessageFlags.is_components_v2` flag.
+                Setting this flag cannot be reverted. Note that this also disables the
+                ``content``, ``embeds``, and ``poll`` fields.
+
         ephemeral: :class:`bool`
             Whether the message should only be visible to the user who started the interaction.
             If a view is sent with an ephemeral message and it has no timeout set then the timeout
@@ -700,8 +769,9 @@ class Interaction(Generic[ClientT]):
 
         flags: :class:`MessageFlags`
             The flags to set for this message.
-            Only :attr:`~MessageFlags.suppress_embeds`, :attr:`~MessageFlags.ephemeral`
-            and :attr:`~MessageFlags.suppress_notifications` are supported.
+            Only :attr:`~MessageFlags.suppress_embeds`, :attr:`~MessageFlags.ephemeral`,
+            :attr:`~MessageFlags.suppress_notifications`, and :attr:`~MessageFlags.is_components_v2`
+            are supported.
 
             If parameters ``suppress_embeds`` or ``ephemeral`` are provided,
             they will override the corresponding setting of this ``flags`` parameter.
@@ -731,7 +801,8 @@ class Interaction(Generic[ClientT]):
         TypeError
             You specified both ``embed`` and ``embeds``.
         ValueError
-            The length of ``embeds`` was invalid.
+            The length of ``embeds`` was invalid, or
+            you tried to send v2 components together with ``content``, ``embeds``, or ``poll``.
         """
         if self.response._response_type is not None:
             sender = self.followup.send
@@ -920,7 +991,7 @@ class InteractionResponse:
         files: List[File] = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         view: View = MISSING,
-        components: Components[MessageUIComponent] = MISSING,
+        components: MessageComponents = MISSING,
         tts: bool = False,
         ephemeral: bool = MISSING,
         suppress_embeds: bool = MISSING,
@@ -956,6 +1027,11 @@ class InteractionResponse:
 
             .. versionadded:: 2.4
 
+            .. note::
+                Passing v2 components here automatically sets the :attr:`~MessageFlags.is_components_v2` flag.
+                Setting this flag cannot be reverted. Note that this also disables the
+                ``content``, ``embeds``, and ``poll`` fields.
+
         tts: :class:`bool`
             Whether the message should be sent using text-to-speech.
         ephemeral: :class:`bool`
@@ -981,8 +1057,9 @@ class InteractionResponse:
 
         flags: :class:`MessageFlags`
             The flags to set for this message.
-            Only :attr:`~MessageFlags.suppress_embeds`, :attr:`~MessageFlags.ephemeral`
-            and :attr:`~MessageFlags.suppress_notifications` are supported.
+            Only :attr:`~MessageFlags.suppress_embeds`, :attr:`~MessageFlags.ephemeral`,
+            :attr:`~MessageFlags.suppress_notifications`, and :attr:`~MessageFlags.is_components_v2`
+            are supported.
 
             If parameters ``suppress_embeds`` or ``ephemeral`` are provided,
             they will override the corresponding setting of this ``flags`` parameter.
@@ -1002,7 +1079,8 @@ class InteractionResponse:
         TypeError
             You specified both ``embed`` and ``embeds``.
         ValueError
-            The length of ``embeds`` was invalid.
+            The length of ``embeds`` was invalid, or
+            you tried to send v2 components together with ``content``, ``embeds``, or ``poll``.
         InteractionResponded
             This interaction has already been responded to before.
         """
@@ -1054,6 +1132,23 @@ class InteractionResponse:
         if content is not None:
             payload["content"] = str(content)
 
+        is_v2 = False
+        if view is not MISSING:
+            payload["components"] = view.to_components()
+        elif components is not MISSING:
+            payload["components"], is_v2 = normalize_components_to_dict(components)
+
+        # set cv2 flag automatically
+        if is_v2:
+            flags = MessageFlags._from_value(0 if flags is MISSING else flags.value)
+            flags.is_components_v2 = True
+        # components v2 cannot be used with other content fields
+        if flags and flags.is_components_v2 and (content or embeds or poll):
+            raise ValueError("Cannot use v2 components with content, embeds, or polls")
+
+        if poll is not MISSING:
+            payload["poll"] = poll._to_dict()
+
         if suppress_embeds is not MISSING or ephemeral is not MISSING:
             flags = MessageFlags._from_value(0 if flags is MISSING else flags.value)
             if suppress_embeds is not MISSING:
@@ -1062,14 +1157,6 @@ class InteractionResponse:
                 flags.ephemeral = ephemeral
         if flags is not MISSING:
             payload["flags"] = flags.value
-
-        if view is not MISSING:
-            payload["components"] = view.to_components()
-
-        if components is not MISSING:
-            payload["components"] = components_to_dict(components)
-        if poll is not MISSING:
-            payload["poll"] = poll._to_dict()
 
         parent = self._parent
         adapter = async_context.get()
@@ -1112,9 +1199,10 @@ class InteractionResponse:
         file: File = MISSING,
         files: List[File] = MISSING,
         attachments: Optional[List[Attachment]] = MISSING,
-        allowed_mentions: AllowedMentions = MISSING,
         view: Optional[View] = MISSING,
-        components: Optional[Components[MessageUIComponent]] = MISSING,
+        components: Optional[MessageComponents] = MISSING,
+        flags: MessageFlags = MISSING,
+        allowed_mentions: AllowedMentions = MISSING,
         delete_after: Optional[float] = None,
     ) -> None:
         """|coro|
@@ -1167,8 +1255,6 @@ class InteractionResponse:
             .. versionchanged:: 2.5
                 Supports passing ``None`` to clear attachments.
 
-        allowed_mentions: :class:`AllowedMentions`
-            Controls the mentions being processed in this message.
         view: Optional[:class:`~disnake.ui.View`]
             The updated view to update this message with. This cannot be mixed with ``components``.
             If ``None`` is passed then the view is removed.
@@ -1177,6 +1263,22 @@ class InteractionResponse:
             If ``None`` is passed then the components are removed.
 
             .. versionadded:: 2.4
+
+            .. note::
+                Passing v2 components here automatically sets the :attr:`~MessageFlags.is_components_v2` flag.
+                Setting this flag cannot be reverted. Note that this also disables the
+                ``content`` and ``embeds`` fields.
+                If the message previously had any of these fields set, you must set them to ``None``.
+
+        flags: :class:`MessageFlags`
+            The new flags to set for this message. Overrides existing flags.
+            Only :attr:`~MessageFlags.suppress_embeds` and :attr:`~MessageFlags.is_components_v2`
+            are supported.
+
+            .. versionadded:: 2.11
+
+        allowed_mentions: :class:`AllowedMentions`
+            Controls the mentions being processed in this message.
 
         delete_after: Optional[:class:`float`]
             If provided, the number of seconds to wait in the background
@@ -1194,6 +1296,8 @@ class InteractionResponse:
             Editing the message failed.
         TypeError
             You specified both ``embed`` and ``embeds``.
+        ValueError
+            You tried to send v2 components together with ``content`` or ``embeds``.
         InteractionResponded
             This interaction has already been responded to before.
         """
@@ -1259,12 +1363,26 @@ class InteractionResponse:
         if view is not MISSING and components is not MISSING:
             raise TypeError("cannot mix view and components keyword arguments")
 
+        is_v2 = False
         if view is not MISSING:
             state.prevent_view_updates_for(message.id)
             payload["components"] = [] if view is None else view.to_components()
+        elif components is not MISSING:
+            if components:
+                payload["components"], is_v2 = normalize_components_to_dict(components)
+            else:
+                payload["components"] = []
 
-        if components is not MISSING:
-            payload["components"] = [] if components is None else components_to_dict(components)
+        # set cv2 flag automatically
+        if is_v2:
+            flags = MessageFlags._from_value(0 if flags is MISSING else flags.value)
+            flags.is_components_v2 = True
+        # components v2 cannot be used with other content fields
+        if flags and flags.is_components_v2 and (content or embeds):
+            raise ValueError("Cannot use v2 components with content or embeds")
+
+        if flags is not MISSING:
+            payload["flags"] = flags.value
 
         adapter = async_context.get()
         response_type = InteractionResponseType.message_update
@@ -1346,8 +1464,7 @@ class InteractionResponse:
         self._response_type = response_type
 
     @overload
-    async def send_modal(self, modal: Modal) -> None:
-        ...
+    async def send_modal(self, modal: Modal) -> None: ...
 
     @overload
     async def send_modal(
@@ -1355,9 +1472,8 @@ class InteractionResponse:
         *,
         title: str,
         custom_id: str,
-        components: Components[ModalUIComponent],
-    ) -> None:
-        ...
+        components: ModalComponents,
+    ) -> None: ...
 
     async def send_modal(
         self,
@@ -1365,7 +1481,7 @@ class InteractionResponse:
         *,
         title: Optional[str] = None,
         custom_id: Optional[str] = None,
-        components: Optional[Components[ModalUIComponent]] = None,
+        components: Optional[ModalComponents] = None,
     ) -> None:
         """|coro|
 
@@ -1387,9 +1503,17 @@ class InteractionResponse:
         custom_id: :class:`str`
             The ID of the modal that gets received during an interaction.
             This cannot be mixed with the ``modal`` parameter.
-        components: |components_type|
+        components: |modal_components_type|
             The components to display in the modal. A maximum of 5.
+            Currently only supports :class:`.ui.TextInput` and
+            :class:`.ui.StringSelect`, wrapped in :class:`.ui.Label`\\s.
+
             This cannot be mixed with the ``modal`` parameter.
+
+            .. versionchanged:: 2.11
+                Using action rows in modals or passing :class:`.ui.TextInput` directly
+                (which implicitly wraps it in an action row) is deprecated.
+                Use :class:`.ui.TextInput` inside a :class:`.ui.Label` instead.
 
         Raises
         ------
@@ -1420,14 +1544,17 @@ class InteractionResponse:
         if modal is not None:
             modal_data = modal.to_components()
         elif title and components and custom_id:
-            rows = components_to_dict(components)
-            if len(rows) > 5:
+            items: Sequence[ModalTopLevelComponent] = normalize_components(components, modal=True)
+            if len(items) > 5:
                 raise ValueError("Maximum number of components exceeded.")
 
             modal_data = {
                 "title": title,
                 "custom_id": custom_id,
-                "components": rows,
+                "components": cast(
+                    "List[ModalTopLevelComponentPayload]",
+                    [component.to_component_dict() for component in items],
+                ),
             }
         else:
             raise TypeError("Either modal or title, custom_id, components must be provided")
@@ -1446,6 +1573,7 @@ class InteractionResponse:
         if modal is not None:
             parent._state.store_modal(parent.author.id, modal)
 
+    @utils.deprecated("premium buttons")
     async def require_premium(self) -> None:
         """|coro|
 
@@ -1454,6 +1582,9 @@ class InteractionResponse:
         Only available for applications with monetization enabled.
 
         .. versionadded:: 2.10
+
+        .. deprecated:: 2.11
+            Use premium buttons (:class:`ui.Button` with :attr:`~ui.Button.sku_id`) instead.
 
         Example
         -------
@@ -1496,20 +1627,20 @@ class _InteractionMessageState:
         self._interaction: Interaction = interaction
         self._parent: ConnectionState = parent
 
-    def _get_guild(self, guild_id):
+    def _get_guild(self, guild_id) -> Optional[Guild]:
         return self._parent._get_guild(guild_id)
 
-    def store_user(self, data):
+    def store_user(self, data: UserPayload) -> User:
         return self._parent.store_user(data)
 
-    def create_user(self, data):
+    def create_user(self, data: UserPayload) -> User:
         return self._parent.create_user(data)
 
     @property
-    def http(self):
+    def http(self) -> HTTPClient:
         return self._parent.http
 
-    def __getattr__(self, attr):
+    def __getattr__(self, attr: str) -> Any:
         return getattr(self._parent, attr)
 
 
@@ -1540,11 +1671,10 @@ class InteractionMessage(Message):
         Could be a :class:`DMChannel` or :class:`GroupChannel` if it's a private message.
     reference: Optional[:class:`~disnake.MessageReference`]
         The message that this message references. This is only applicable to message replies.
-    interaction: Optional[:class:`~disnake.InteractionReference`]
-        The interaction that this message references.
-        This exists only when the message is a response to an interaction without an existing message.
+    interaction_metadata: Optional[:class:`InteractionMetadata`]
+        The metadata about the interaction that caused this message, if any.
 
-        .. versionadded:: 2.1
+        .. versionadded:: 2.10
 
     mention_everyone: :class:`bool`
         Specifies if the message mentions everyone.
@@ -1604,10 +1734,9 @@ class InteractionMessage(Message):
         flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components[MessageUIComponent]] = ...,
+        components: Optional[MessageComponents] = ...,
         delete_after: Optional[float] = ...,
-    ) -> InteractionMessage:
-        ...
+    ) -> InteractionMessage: ...
 
     @overload
     async def edit(
@@ -1621,10 +1750,9 @@ class InteractionMessage(Message):
         flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components[MessageUIComponent]] = ...,
+        components: Optional[MessageComponents] = ...,
         delete_after: Optional[float] = ...,
-    ) -> InteractionMessage:
-        ...
+    ) -> InteractionMessage: ...
 
     @overload
     async def edit(
@@ -1638,10 +1766,9 @@ class InteractionMessage(Message):
         flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components[MessageUIComponent]] = ...,
+        components: Optional[MessageComponents] = ...,
         delete_after: Optional[float] = ...,
-    ) -> InteractionMessage:
-        ...
+    ) -> InteractionMessage: ...
 
     @overload
     async def edit(
@@ -1655,10 +1782,9 @@ class InteractionMessage(Message):
         flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components[MessageUIComponent]] = ...,
+        components: Optional[MessageComponents] = ...,
         delete_after: Optional[float] = ...,
-    ) -> InteractionMessage:
-        ...
+    ) -> InteractionMessage: ...
 
     async def edit(
         self,
@@ -1673,7 +1799,7 @@ class InteractionMessage(Message):
         flags: MessageFlags = MISSING,
         allowed_mentions: Optional[AllowedMentions] = MISSING,
         view: Optional[View] = MISSING,
-        components: Optional[Components[MessageUIComponent]] = MISSING,
+        components: Optional[MessageComponents] = MISSING,
         delete_after: Optional[float] = None,
     ) -> Message:
         """|coro|
@@ -1725,6 +1851,12 @@ class InteractionMessage(Message):
 
             .. versionadded:: 2.4
 
+            .. note::
+                Passing v2 components here automatically sets the :attr:`~MessageFlags.is_components_v2` flag.
+                Setting this flag cannot be reverted. Note that this also disables the
+                ``content`` and ``embeds`` fields.
+                If the message previously had any of these fields set, you must set them to ``None``.
+
         suppress_embeds: :class:`bool`
             Whether to suppress embeds for the message. This hides
             all the embeds from the UI if set to ``True``. If set
@@ -1735,7 +1867,8 @@ class InteractionMessage(Message):
 
         flags: :class:`MessageFlags`
             The new flags to set for this message. Overrides existing flags.
-            Only :attr:`~MessageFlags.suppress_embeds` is supported.
+            Only :attr:`~MessageFlags.suppress_embeds` and :attr:`~MessageFlags.is_components_v2`
+            are supported.
 
             If parameter ``suppress_embeds`` is provided,
             that will override the setting of :attr:`.MessageFlags.suppress_embeds`.
@@ -1762,9 +1895,10 @@ class InteractionMessage(Message):
         Forbidden
             Edited a message that is not yours.
         TypeError
-            You specified both ``embed`` and ``embeds`` or ``file`` and ``files``
+            You specified both ``embed`` and ``embeds`` or ``file`` and ``files``.
         ValueError
-            The length of ``embeds`` was invalid.
+            The length of ``embeds`` was invalid, or
+            you tried to send v2 components together with ``content`` or ``embeds``.
 
         Returns
         -------
@@ -1915,15 +2049,11 @@ class InteractionDataResolved(Dict[str, Any]):
             user_id = int(str_id)
             member = members.get(str_id)
             if member is not None:
-                self.members[user_id] = (
-                    guild
-                    and guild.get_member(user_id)
-                    or Member(
-                        data=member,
-                        user_data=user,
-                        guild=guild_fallback,  # type: ignore
-                        state=state,
-                    )
+                self.members[user_id] = (guild and guild.get_member(user_id)) or Member(
+                    data=member,
+                    user_data=user,
+                    guild=guild_fallback,  # type: ignore
+                    state=state,
                 )
             else:
                 self.users[user_id] = User(state=state, data=user)
@@ -1973,14 +2103,12 @@ class InteractionDataResolved(Dict[str, Any]):
     @overload
     def get_with_type(
         self, key: Snowflake, data_type: Union[OptionType, ComponentType]
-    ) -> Union[Member, User, Role, AnyChannel, Message, Attachment, None]:
-        ...
+    ) -> Union[Member, User, Role, AnyChannel, Message, Attachment, None]: ...
 
     @overload
     def get_with_type(
         self, key: Snowflake, data_type: Union[OptionType, ComponentType], default: T
-    ) -> Union[Member, User, Role, AnyChannel, Message, Attachment, T]:
-        ...
+    ) -> Union[Member, User, Role, AnyChannel, Message, Attachment, T]: ...
 
     def get_with_type(
         self, key: Snowflake, data_type: Union[OptionType, ComponentType], default: T = None

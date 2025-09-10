@@ -40,6 +40,7 @@ from .errors import (
     EmojiNotFound,
     GuildNotFound,
     GuildScheduledEventNotFound,
+    GuildSoundboardSoundNotFound,
     GuildStickerNotFound,
     MemberNotFound,
     MessageNotFound,
@@ -82,6 +83,7 @@ __all__ = (
     "EmojiConverter",
     "PartialEmojiConverter",
     "GuildStickerConverter",
+    "GuildSoundboardSoundConverter",
     "PermissionsConverter",
     "GuildScheduledEventConverter",
     "clean_content",
@@ -343,7 +345,7 @@ class UserConverter(IDConverter[disnake.User]):
 
             if isinstance(result, disnake.Member):
                 return result._user
-            return result
+            return result  # type: ignore
 
         username, _, discriminator = argument.rpartition("#")
         # n.b. there's no builtin method that only matches arabic digits, `isdecimal` is the closest one.
@@ -654,7 +656,7 @@ class MediaChannelConverter(IDConverter[disnake.MediaChannel]):
 
 
 class ThreadConverter(IDConverter[disnake.Thread]):
-    """Coverts to a :class:`~disnake.Thread`.
+    """Converts to a :class:`~disnake.Thread`.
 
     All lookups are via the local guild.
 
@@ -944,6 +946,43 @@ class GuildStickerConverter(IDConverter[disnake.GuildSticker]):
         return result
 
 
+class GuildSoundboardSoundConverter(IDConverter[disnake.GuildSoundboardSound]):
+    """Converts to a :class:`~disnake.GuildSoundboardSound`.
+
+    All lookups are done for the local guild first, if available. If that lookup
+    fails, then it checks the client's global cache.
+
+    The lookup strategy is as follows (in order):
+
+    1. Lookup by ID
+    2. Lookup by name
+
+    .. versionadded:: 2.10
+    """
+
+    async def convert(self, ctx: AnyContext, argument: str) -> disnake.GuildSoundboardSound:
+        match = self._get_id_match(argument)
+        result = None
+        bot: disnake.Client = ctx.bot
+        guild = ctx.guild
+
+        if match is None:
+            # Try to get the sound by name. Try local guild first.
+            if guild:
+                result = _utils_get(guild.soundboard_sounds, name=argument)
+
+            if result is None:
+                result = _utils_get(bot.soundboard_sounds, name=argument)
+        else:
+            # Try to look up sound by id.
+            result = bot.get_soundboard_sound(int(match.group(1)))
+
+        if result is None:
+            raise GuildSoundboardSoundNotFound(argument)
+
+        return result
+
+
 class PermissionsConverter(Converter[disnake.Permissions]):
     """Converts to a :class:`~disnake.Permissions`.
 
@@ -1187,7 +1226,7 @@ _GenericAlias = type(List[Any])
 
 
 def is_generic_type(tp: Any, *, _GenericAlias: Type = _GenericAlias) -> bool:
-    return isinstance(tp, type) and issubclass(tp, Generic) or isinstance(tp, _GenericAlias)
+    return (isinstance(tp, type) and issubclass(tp, Generic)) or isinstance(tp, _GenericAlias)
 
 
 CONVERTER_MAPPING: Dict[Type[Any], Type[Converter]] = {
@@ -1212,6 +1251,7 @@ CONVERTER_MAPPING: Dict[Type[Any], Type[Converter]] = {
     disnake.Thread: ThreadConverter,
     disnake.abc.GuildChannel: GuildChannelConverter,
     disnake.GuildSticker: GuildStickerConverter,
+    disnake.GuildSoundboardSound: GuildSoundboardSoundConverter,
     disnake.Permissions: PermissionsConverter,
     disnake.GuildScheduledEvent: GuildScheduledEventConverter,
 }
@@ -1257,7 +1297,12 @@ async def _actual_conversion(
         raise BadArgument(f'Converting to "{name}" failed for parameter "{param.name}".') from exc
 
 
-async def run_converters(ctx: Context, converter, argument: str, param: inspect.Parameter):
+async def run_converters(
+    ctx: Context,
+    converter: Any,
+    argument: str,
+    param: inspect.Parameter,
+) -> Any:
     """|coro|
 
     Runs converters for a given converter, argument, and parameter.
@@ -1290,7 +1335,7 @@ async def run_converters(ctx: Context, converter, argument: str, param: inspect.
     origin = getattr(converter, "__origin__", None)
 
     if origin is Union:
-        errors = []
+        errors: List[CommandError] = []
         _NoneType = type(None)
         union_args = converter.__args__
         for conv in union_args:
@@ -1312,7 +1357,7 @@ async def run_converters(ctx: Context, converter, argument: str, param: inspect.
         raise BadUnionArgument(param, union_args, errors)
 
     if origin is Literal:
-        errors = []
+        errors: List[CommandError] = []
         conversions = {}
         literal_args = converter.__args__
         for literal in literal_args:

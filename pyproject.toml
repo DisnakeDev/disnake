@@ -28,6 +28,7 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Internet",
     "Topic :: Software Development :: Libraries",
     "Topic :: Software Development :: Libraries :: Python Modules",
@@ -50,7 +51,8 @@ speed = [
     'cchardet; python_version < "3.10"',
 ]
 voice = [
-    "PyNaCl>=1.3.0,<1.6",
+    "PyNaCl>=1.5.0,<1.6",
+    'audioop-lts==0.2.1; python_version >= "3.13"'
 ]
 docs = [
     "sphinx==7.0.1",
@@ -60,41 +62,41 @@ docs = [
     "sphinxcontrib-towncrier==0.3.2a0",
     "towncrier==23.6.0",
     "sphinx-notfound-page==0.8.3",
+    "sphinxext-opengraph==0.9.1",
 ]
 
-[tool.pdm.dev-dependencies]
+[dependency-groups]
 nox = [
-    "nox==2022.11.21",
+    "nox==2025.5.1",
 ]
 tools = [
     "pre-commit~=3.0",
     "slotscheck~=0.16.4",
-    "python-dotenv~=1.0.0",
     "check-manifest==0.49",
-    "ruff==0.3.4",
+    "ruff==0.12.12",
 ]
 changelog = [
     "towncrier==23.6.0",
 ]
 codemod = [
-    # run codemods on the respository (mostly automated typing)
+    # run codemods on the repository (mostly automated typing)
     "libcst~=1.1.0",
-    "black==23.9.1",
+    "ruff==0.12.12",
     "autotyping==23.2.0",
 ]
 typing = [
     # this is not pyright itself, but the python wrapper
     "pyright==1.1.336",
-    "typing-extensions~=4.8.0",
+    "typing-extensions~=4.12.0",
     # only used for type-checking, version does not matter
     "pytz",
 ]
 test = [
-    "pytest~=7.4.2",
+    "pytest~=8.3.2",
     "pytest-cov~=4.0.0",
-    "pytest-asyncio~=0.20.3",
-    "looptime~=0.2",
-    "coverage[toml]~=6.5.0",
+    "pytest-asyncio~=0.24.0",
+    "looptime~=0.2.0",
+    "coverage[toml]~=7.6.0",
 ]
 build = [
     "wheel~=0.40.0",
@@ -102,34 +104,34 @@ build = [
     "twine~=5.1.1",
 ]
 
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["disnake*"]
+
+[tool.nox]
+script-venv-backend = "uv|virtualenv"
+
+[tool.pdm]
+# Ignore `requires-python` warnings when locking, the latest versions of some
+# dependencies already require >=3.9
+# See also https://pdm-project.org/en/latest/usage/config/#ignore-package-warnings
+ignore_package_warnings = ["*"]
+
 [tool.pdm.scripts]
-black = { composite = ["lint black"], help = "Run black" }
 docs = { cmd = "nox -Rs docs --", help = "Build the documentation for development" }
 lint = { cmd = "nox -Rs lint --", help = "Check all files for linting errors" }
 pyright = { cmd = "nox -Rs pyright --", help = "Run pyright" }
-setup_env = { cmd = "pdm install -d -G speed -G docs -G voice", help = "Set up the local environment and all dependencies" }
+setup_env = { cmd = "{pdm} install -G:all", help = "Set up the local environment and all dependencies" }
 post_setup_env = { composite = ["python -m ensurepip --default-pip", "pre-commit install --install-hooks"] }
 test = { cmd = "nox -Rs test --", help = "Run pytest" }
-
-# legacy tasks for those who still type `task`
-[tool.taskipy.tasks]
-black = { cmd = "black", help = "Run black" }
-docs = { cmd = "docs", help = "Build the documentation for development" }
-lint = { cmd = "lint", help = "Check all files for linting errors" }
-pyright = { cmd = "pyright", help = "Run pyright" }
-setup_env = { cmd = "setup_env", help = "Setup the local environment and set up all dependencies" }
-test = { cmd = "test", help = "Run pytest" }
-
-[tool.taskipy.settings]
-runner = "pdm run"
-
-[tool.black]
-line-length = 100
-target-version = ["py38", "py39", "py310", "py311", "py312"]
 
 [tool.ruff]
 line-length = 100
 target-version = "py38"
+
+[tool.codespell]
+skip = ['docs/_static/**', '*.po']
+ignore-words-list = ['GroupT', "OT",]
 
 [tool.ruff.lint]
 select = [
@@ -139,7 +141,7 @@ select = [
     # "D", # pydocstyle
     "D2",  # pydocstyle, docstring formatting
     "D4",  # pydocstyle, docstring structure/content
-    # "ANN", # flake8-annotations
+    "ANN2", # flake8-annotations
     "S", # flake8-bandit
     "B", # flake8-bugbear
     "C4", # flake8-comprehensions
@@ -149,7 +151,7 @@ select = [
     # "RET", # flake8-return
     # "SIM", # flake8-simplify
     "TID251", # flake8-tidy-imports, replaces S404
-    "TCH",    # flake8-type-checking
+    "TC",     # flake8-type-checking
     "RUF",    # ruff specific exceptions
     "PT",     # flake8-pytest-style
     "Q",      # flake8-quotes
@@ -169,14 +171,17 @@ ignore = [
 
     # pydocstyle
     "D203", # incompat with D211
-    "D213", # multiline docstring should start on second line, incompatiable with D212
+    "D213", # multiline docstring should start on second line, incompatible with D212
     "D400", # first line ends in period, does not work with `|coro|` etc.
     "D415", # same thing but punctuation in general
     "D416", # section name should end with a colon, incompatible with D406
 
     # unknown if this is actually an issue
-    "RUF005", # might not be actually faster
     "RUF006", # might not be an issue/very extreme cases
+
+    # we keep __all__ and __slots__ (roughly) sorted by source, not alphabetically
+    "RUF022",
+    "RUF023",
 
     # calling subprocess with dynamic arguments is generally fine, the only way to avoid this is ignoring it
     "S603",
@@ -199,15 +204,27 @@ ignore = [
     # outer loop variables are overwritten by inner assignment target, these are mostly intentional
     "PLW2901",
 
+    # TODO:
+    # pytest.warns() without a match variable is too broad
+    "PT030",
+
+    # object does not implement hashing
+    "PLW1641",
+
+    # ignore non-to-level imports
+    "PLC0415",
+
     # ignore imports that could be moved into type-checking blocks
     # (no real advantage other than possibly avoiding cycles,
     # but can be dangerous in places where we need to parse signatures)
-    "TCH001",
-    "TCH002",
-    "TCH003",
+    "TC001",
+    "TC002",
+    "TC003",
 
     "S311",    # insecure RNG usage, we don't use these for security-related things
     "PLE0237", # pyright seems to catch this already
+
+    "E741",  # ambiguous variable names
 
     # temporary disables, to fix later
     "D205",   # blank line required between summary and description
@@ -229,11 +246,6 @@ ignore = [
     "F401", # unused imports. Excluded because there is a bug with ruff.
 ]
 "disnake/**.py" = ["PT"] # this is not a module of pytest tests
-"test_bot/*.py" = [
-    "B008", # do not perform function calls in argument defaults
-    "T201", # print found, printing is currently accepted in the test bot
-    "PT",   # this is not a module of pytest tests
-]
 "tests/*.py" = ["S101"] # use of assert is okay in test files
 "scripts/*.py" = ["S101"] # use of assert is okay in scripts
 # we are not using noqa in the example files themselves
@@ -242,9 +254,9 @@ ignore = [
     "PT",   # this is not a module of pytest tests
     "S311", # pseudo-random generators aren't suitable for cryptographic purposes
     "T201", # print found, printing is okay in examples
+    "ANN", # missing type annotations in examples is fine
 ]
 "examples/basic_voice.py" = ["S104"] # possible binding to all interfaces
-"examples/views/tic_tac_toe.py" = ["E741"] # ambigious variable name: `O`
 
 [tool.ruff.lint.isort]
 combine-as-imports = true
@@ -258,6 +270,15 @@ mark-parentheses = false
 
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
 "subprocess".msg = "Consider possible security implications associated with the subprocess module." # replaces S404
+
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = [
+    # this is immutable, except for storing locks, which are fine to share across contexts
+    "disnake.webhook.async_.AsyncWebhookAdapter",
+]
+
+[tool.ruff.lint.flake8-annotations]
+ignore-fully-untyped = true
 
 [tool.towncrier]
 template = "changelog/_template.rst.jinja"
@@ -316,7 +337,7 @@ include = [
     "disnake",
     "docs",
     "examples",
-    "test_bot",
+    "scripts",
     "tests",
     "*.py",
 ]
@@ -350,6 +371,8 @@ reportMissingTypeArgument = false
 
 
 [tool.pytest.ini_options]
+minversion = "8.2"
+pythonpath = "." # legacy configuration, new pytest versions don't add the rootdir to path
 testpaths = "tests"
 addopts = "--strict-markers -Werror -s"
 xfail_strict = true
@@ -394,7 +417,6 @@ ignore = [
     "docs/**",
     "examples/**",
     # tests
-    "test_bot/**",
     "tests/**",
     "scripts/**",
 ]

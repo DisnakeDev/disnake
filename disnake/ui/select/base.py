@@ -7,27 +7,31 @@ import os
 from abc import ABC, abstractmethod
 from typing import (
     TYPE_CHECKING,
-    Any,
     Callable,
+    ClassVar,
     Generic,
     List,
+    Mapping,
     Optional,
+    Sequence,
     Tuple,
     Type,
     TypeVar,
-    get_origin,
+    Union,
 )
 
-from ...components import AnySelectMenu
-from ...enums import ComponentType
-from ...utils import MISSING
-from ..item import DecoratedItem, Item, Object
+from ...components import AnySelectMenu, SelectDefaultValue
+from ...enums import ComponentType, SelectDefaultValueType
+from ...object import Object
+from ...utils import MISSING, humanize_list
+from ..item import DecoratedItem, Item
 
 __all__ = ("BaseSelect",)
 
 if TYPE_CHECKING:
     from typing_extensions import ParamSpec, Self
 
+    from ...abc import Snowflake
     from ...interactions import MessageInteraction
     from ..item import ItemCallbackType
     from ..view import View
@@ -41,6 +45,10 @@ V_co = TypeVar("V_co", bound="Optional[View]", covariant=True)
 SelectMenuT = TypeVar("SelectMenuT", bound=AnySelectMenu)
 SelectValueT = TypeVar("SelectValueT")
 P = ParamSpec("P")
+
+SelectDefaultValueMultiInputType = Union[SelectValueT, SelectDefaultValue]
+# almost the same as above, but with `Object`; used for selects where the type isn't ambiguous (i.e. all except mentionable select)
+SelectDefaultValueInputType = Union[SelectDefaultValueMultiInputType[SelectValueT], Object]
 
 
 class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
@@ -59,14 +67,18 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
     .. versionadded:: 2.7
     """
 
-    __repr_attributes__: Tuple[str, ...] = (
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
         "placeholder",
         "min_values",
         "max_values",
         "disabled",
+        "required",
     )
-    # We have to set this to MISSING in order to overwrite the abstract property from WrappedComponent
+    # We have to set this to MISSING in order to overwrite the abstract property from UIComponent
     _underlying: SelectMenuT = MISSING
+
+    # Subclasses are expected to set this
+    _default_value_type_map: ClassVar[Mapping[SelectDefaultValueType, Tuple[Type[Snowflake], ...]]]
 
     def __init__(
         self,
@@ -78,6 +90,9 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
         min_values: int,
         max_values: int,
         disabled: bool,
+        default_values: Optional[Sequence[SelectDefaultValueInputType[SelectValueT]]],
+        required: bool,
+        id: int,
         row: Optional[int],
     ) -> None:
         super().__init__()
@@ -85,12 +100,15 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
         self._provided_custom_id = custom_id is not MISSING
         custom_id = os.urandom(16).hex() if custom_id is MISSING else custom_id
         self._underlying = underlying_type._raw_construct(
-            custom_id=custom_id,
             type=component_type,
+            id=id,
+            custom_id=custom_id,
             placeholder=placeholder,
             min_values=min_values,
             max_values=max_values,
             disabled=disabled,
+            default_values=self._transform_default_values(default_values) if default_values else [],
+            required=required,
         )
         self.row = row
 
@@ -146,6 +164,32 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
         self._underlying.disabled = bool(value)
 
     @property
+    def default_values(self) -> List[SelectDefaultValue]:
+        """List[:class:`.SelectDefaultValue`]: The list of values that are selected by default.
+        Only available for auto-populated select menus.
+        """
+        return self._underlying.default_values
+
+    @default_values.setter
+    def default_values(
+        self, value: Optional[Sequence[SelectDefaultValueInputType[SelectValueT]]]
+    ) -> None:
+        self._underlying.default_values = self._transform_default_values(value) if value else []
+
+    @property
+    def required(self) -> bool:
+        """:class:`bool`: Whether the select menu is required.
+        Only applies to components in modals.
+
+        .. versionadded:: 2.11
+        """
+        return self._underlying.required
+
+    @required.setter
+    def required(self, value: bool) -> None:
+        self._underlying.required = bool(value)
+
+    @property
     def values(self) -> List[SelectValueT]:
         return self._selected_values
 
@@ -171,26 +215,60 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
         """
         return True
 
+    @classmethod
+    def _transform_default_values(
+        cls, values: Sequence[SelectDefaultValueInputType[SelectValueT]]
+    ) -> List[SelectDefaultValue]:
+        result: List[SelectDefaultValue] = []
+
+        for value in values:
+            # If we have a SelectDefaultValue, just use it as-is
+            if isinstance(value, SelectDefaultValue):
+                if value.type not in cls._default_value_type_map:
+                    allowed_types = [str(t) for t in cls._default_value_type_map]
+                    raise ValueError(
+                        f"SelectDefaultValue.type should be {humanize_list(allowed_types, 'or')}, not {value.type}"
+                    )
+                result.append(value)
+                continue
+
+            # Otherwise, look through the list of allowed input types and
+            # get the associated SelectDefaultValueType
+            for (
+                value_type,  # noqa: B007  # we use value_type outside of the loop
+                types,
+            ) in cls._default_value_type_map.items():
+                if isinstance(value, types):
+                    break
+            else:
+                allowed_types = [
+                    t.__name__ for ts in cls._default_value_type_map.values() for t in ts
+                ]
+                allowed_types.append(SelectDefaultValue.__name__)
+                raise TypeError(
+                    f"Expected type of default value to be {humanize_list(allowed_types, 'or')}, not {type(value)!r}"
+                )
+
+            result.append(SelectDefaultValue(value.id, value_type))
+
+        return result
+
 
 def _create_decorator(
-    cls: Type[Object[S_co, P]],
-    # only for input validation
-    base_cls: Type[BaseSelect[Any, Any, Any]],
+    # FIXME(3.0): rename `cls` parameter to more closely represent any callable argument type
+    cls: Callable[P, S_co],
     /,
     *args: P.args,
     **kwargs: P.kwargs,
-) -> Callable[[ItemCallbackType[S_co]], DecoratedItem[S_co]]:
+) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]:
     if args:
         # the `*args` def above is just to satisfy the typechecker
         raise RuntimeError("expected no *args")
 
-    if (origin := get_origin(cls)) is not None:
-        cls = origin
+    if not callable(cls):
+        raise TypeError("cls argument must be callable")
 
-    if not isinstance(cls, type) or not issubclass(cls, base_cls):
-        raise TypeError(f"cls argument must be a subclass of {base_cls.__name__}, got {cls!r}")
-
-    def decorator(func: ItemCallbackType[S_co]) -> DecoratedItem[S_co]:
+    def decorator(func: ItemCallbackType[V_co, S_co]) -> DecoratedItem[S_co]:
         if not asyncio.iscoroutinefunction(func):
             raise TypeError("select function must be a coroutine function")
 

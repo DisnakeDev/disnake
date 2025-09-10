@@ -11,6 +11,7 @@ from .guild_scheduled_event import GuildScheduledEvent
 from .member import Member
 from .role import CreateRole, Role
 from .snowflake import Snowflake
+from .soundboard import GuildSoundboardSound
 from .sticker import GuildSticker
 from .threads import Thread
 from .user import User
@@ -61,6 +62,7 @@ GuildFeature = Literal[
     "MEMBER_PROFILES",  # not sure what this does, if anything
     "MEMBER_VERIFICATION_GATE_ENABLED",
     "MORE_EMOJI",
+    "MORE_SOUNDBOARD",
     "MORE_STICKERS",
     "NEWS",
     "NEW_THREAD_PERMISSIONS",  # deprecated
@@ -73,6 +75,7 @@ GuildFeature = Literal[
     "ROLE_SUBSCRIPTIONS_AVAILABLE_FOR_PURCHASE",
     "ROLE_SUBSCRIPTIONS_ENABLED",
     "SEVEN_DAY_THREAD_ARCHIVE",  # deprecated
+    "SOUNDBOARD",
     "TEXT_IN_VOICE_ENABLED",  # deprecated
     "THREADS_ENABLED",  # deprecated
     "THREE_DAY_THREAD_ARCHIVE",  # deprecated
@@ -82,6 +85,13 @@ GuildFeature = Literal[
     "VIP_REGIONS",
     "WELCOME_SCREEN_ENABLED",
 ]
+
+
+class IncidentsData(TypedDict, total=False):
+    invites_disabled_until: Optional[str]
+    dms_disabled_until: Optional[str]
+    dm_spam_detected_at: Optional[str]
+    raid_detected_at: Optional[str]
 
 
 class _BaseGuildPreview(UnavailableGuild):
@@ -135,6 +145,7 @@ class Guild(_BaseGuildPreview):
     stickers: NotRequired[List[GuildSticker]]
     premium_progress_bar_enabled: bool
     safety_alerts_channel_id: Optional[Snowflake]
+    incidents_data: Optional[IncidentsData]
 
     # specific to GUILD_CREATE event
     joined_at: NotRequired[Optional[str]]
@@ -147,6 +158,7 @@ class Guild(_BaseGuildPreview):
     presences: NotRequired[List[PartialPresenceUpdate]]
     stage_instances: NotRequired[List[StageInstance]]
     guild_scheduled_events: NotRequired[List[GuildScheduledEvent]]
+    soundboard_sounds: NotRequired[List[GuildSoundboardSound]]
 
 
 class InviteGuild(Guild, total=False):
@@ -160,8 +172,8 @@ class GuildPrune(TypedDict):
 class ChannelPositionUpdate(TypedDict):
     id: Snowflake
     position: Optional[int]
-    lock_permissions: Optional[bool]
-    parent_id: Optional[Snowflake]
+    lock_permissions: NotRequired[Optional[bool]]
+    parent_id: NotRequired[Optional[Snowflake]]
 
 
 class RolePositionUpdate(TypedDict):
