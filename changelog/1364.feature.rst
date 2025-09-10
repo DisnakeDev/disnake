@@ -1,0 +1,1 @@
+Support setting a guild-specific nickname, avatar, and banner using :meth:`Member.edit`.
