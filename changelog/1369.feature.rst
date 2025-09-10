@@ -1,0 +1,1 @@
+Implement missing fields on :class:`AppInfo`: :attr:`~.AppInfo.event_webhooks_url`, :attr:`~.AppInfo.event_webhooks_status`, :attr:`~.AppInfo.event_webhooks_types`, :attr:`~.AppInfo.redirect_uris`
