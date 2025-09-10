@@ -23,7 +23,7 @@ runs:
         cache: false
       env:
         # FIXME: temporary hotfix for pdm on Python 3.14+
-        PDM_DEPS: 'httpcore==1.0.8'
+        PDM_NO_FROZEN_DEPS: "1"
 
     - name: Disable PDM version check
       shell: bash
