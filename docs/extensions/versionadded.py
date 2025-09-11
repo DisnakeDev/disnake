@@ -21,3 +21,8 @@ def setup(app: Sphinx) -> None:
     app.add_directive("versionchanged", VersionAddedNext, override=True)
     app.add_directive("deprecated", VersionAddedNext, override=True)
     app.add_directive("versionremoved", VersionAddedNext)
+
+    return {
+        "parallel_read_safe": True,
+        "parallel_write_safe": True,
+    }
