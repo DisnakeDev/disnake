@@ -47,11 +47,14 @@ _log = logging.getLogger(__name__)
 if TYPE_CHECKING:
     from types import TracebackType
 
+    from typing_extensions import Self
+
     from ..abc import Snowflake
     from ..embeds import Embed
     from ..file import File
     from ..mentions import AllowedMentions
     from ..message import Attachment
+    from ..types.message import Message as MessagePayload
     from ..types.webhook import Webhook as WebhookPayload
 
     try:
@@ -67,7 +70,7 @@ class DeferredLock:
         self.lock = lock
         self.delta: Optional[float] = None
 
-    def __enter__(self):
+    def __enter__(self) -> Self:
         self.lock.acquire()
         return self
 
@@ -166,7 +169,7 @@ class WebhookAdapter:
                         if remaining == "0" and response.status_code != 429:
                             delta = utils._parse_ratelimit_header(response)
                             _log.debug(
-                                "Webhook ID %s has been pre-emptively rate limited, waiting %.2f seconds",
+                                "Webhook ID %s has been preemptively rate limited, waiting %.2f seconds",
                                 webhook_id,
                                 delta,
                             )
@@ -220,7 +223,7 @@ class WebhookAdapter:
         token: Optional[str] = None,
         session: Session,
         reason: Optional[str] = None,
-    ):
+    ) -> None:
         route = Route("DELETE", "/webhooks/{webhook_id}", webhook_id=webhook_id)
         return self.request(route, session, reason=reason, auth_token=token)
 
@@ -231,7 +234,7 @@ class WebhookAdapter:
         *,
         session: Session,
         reason: Optional[str] = None,
-    ):
+    ) -> None:
         route = Route(
             "DELETE",
             "/webhooks/{webhook_id}/{webhook_token}",
@@ -248,7 +251,7 @@ class WebhookAdapter:
         *,
         session: Session,
         reason: Optional[str] = None,
-    ):
+    ) -> WebhookPayload:
         route = Route("PATCH", "/webhooks/{webhook_id}", webhook_id=webhook_id)
         return self.request(route, session, reason=reason, payload=payload, auth_token=token)
 
@@ -260,7 +263,7 @@ class WebhookAdapter:
         *,
         session: Session,
         reason: Optional[str] = None,
-    ):
+    ) -> WebhookPayload:
         route = Route(
             "PATCH",
             "/webhooks/{webhook_id}/{webhook_token}",
@@ -268,6 +271,34 @@ class WebhookAdapter:
             webhook_token=token,
         )
         return self.request(route, session, reason=reason, payload=payload)
+
+    @overload
+    def execute_webhook(
+        self,
+        webhook_id: int,
+        token: str,
+        *,
+        session: Session,
+        payload: Optional[Dict[str, Any]] = None,
+        multipart: Optional[List[Dict[str, Any]]] = None,
+        files: Optional[List[File]] = None,
+        thread_id: Optional[int] = None,
+        wait: bool = False,
+    ) -> MessagePayload: ...
+
+    @overload
+    def execute_webhook(
+        self,
+        webhook_id: int,
+        token: str,
+        *,
+        session: Session,
+        payload: Optional[Dict[str, Any]] = None,
+        multipart: Optional[List[Dict[str, Any]]] = None,
+        files: Optional[List[File]] = None,
+        thread_id: Optional[int] = None,
+        wait: bool = False,
+    ) -> None: ...
 
     def execute_webhook(
         self,
@@ -280,7 +311,7 @@ class WebhookAdapter:
         files: Optional[List[File]] = None,
         thread_id: Optional[int] = None,
         wait: bool = False,
-    ):
+    ) -> Optional[MessagePayload]:
         params = {"wait": int(wait)}
         if thread_id:
             params["thread_id"] = thread_id
@@ -303,7 +334,7 @@ class WebhookAdapter:
         *,
         session: Session,
         thread_id: Optional[int] = None,
-    ):
+    ) -> MessagePayload:
         params: Dict[str, Any] = {}
         if thread_id is not None:
             params["thread_id"] = thread_id
@@ -328,7 +359,7 @@ class WebhookAdapter:
         multipart: Optional[List[Dict[str, Any]]] = None,
         files: Optional[List[File]] = None,
         thread_id: Optional[int] = None,
-    ):
+    ) -> MessagePayload:
         params: Dict[str, Any] = {}
         if thread_id is not None:
             params["thread_id"] = thread_id
@@ -352,7 +383,7 @@ class WebhookAdapter:
         *,
         session: Session,
         thread_id: Optional[int] = None,
-    ):
+    ) -> None:
         params: Dict[str, Any] = {}
         if thread_id is not None:
             params["thread_id"] = thread_id
@@ -372,7 +403,7 @@ class WebhookAdapter:
         token: str,
         *,
         session: Session,
-    ):
+    ) -> WebhookPayload:
         route = Route("GET", "/webhooks/{webhook_id}", webhook_id=webhook_id)
         return self.request(route, session=session, auth_token=token)
 
@@ -382,7 +413,7 @@ class WebhookAdapter:
         token: str,
         *,
         session: Session,
-    ):
+    ) -> WebhookPayload:
         route = Route(
             "GET",
             "/webhooks/{webhook_id}/{webhook_token}",
@@ -841,7 +872,7 @@ class SyncWebhook(BaseWebhook):
         if self.token is None and self.auth_token is None:
             raise WebhookTokenMissing("This webhook does not have a token associated with it")
 
-        payload = {}
+        payload: Dict[str, Any] = {}
         if name is not MISSING:
             payload["name"] = str(name) if name is not None else None
 
@@ -879,7 +910,7 @@ class SyncWebhook(BaseWebhook):
 
     def _create_message(
         self, data, *, thread: Optional[Snowflake] = None, thread_name: Optional[str] = None
-    ):
+    ) -> SyncWebhookMessage:
         # see async webhook's _create_message for details
         channel_id = int(data["channel_id"])
         if self.channel_id != channel_id and thread_name:

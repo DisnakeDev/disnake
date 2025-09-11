@@ -1,0 +1,6 @@
+Add support for new components in :class:`~ui.Modal`\s.
+- The new top-level :class:`ui.Label` component wraps other components (currently :class:`~ui.TextInput` and select menus) in a modal with a label and description.
+- :class:`ui.TextDisplay` can now be used as a top-level component in modals.
+- :class:`ui.StringSelect` and auto-populated select menus such as :class:`ui.UserSelect` are now usable in modals when placed inside a :class:`ui.Label`.
+- The new modal-specific :attr:`~ui.StringSelect.required` field can be used to make a select menu optional.
+- The values provided by users on modal submit are available in :attr:`ModalInteraction.resolved_values` (raw values in :attr:`ModalInteraction.resolved_values`).

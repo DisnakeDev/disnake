@@ -70,6 +70,7 @@ __all__ = (
     "ThreadLayout",
     "Event",
     "ApplicationRoleConnectionMetadataType",
+    "ApplicationEventWebhookStatus",
     "OnboardingPromptType",
     "SKUType",
     "EntitlementType",
@@ -80,6 +81,8 @@ __all__ = (
     "SeparatorSpacing",
     "NameplatePalette",
 )
+
+EnumMetaT = TypeVar("EnumMetaT", bound="Type[EnumMeta]")
 
 
 class _EnumValueBase(NamedTuple):
@@ -110,7 +113,7 @@ def _create_value_cls(name: str, comparable: bool) -> Type[_EnumValueBase]:
     return type(f"{parent.__name__}_{name}", (parent,), {"_cls_name": name})  # type: ignore
 
 
-def _is_descriptor(obj):
+def _is_descriptor(obj) -> bool:
     return hasattr(obj, "__get__") or hasattr(obj, "__set__") or hasattr(obj, "__delete__")
 
 
@@ -122,7 +125,7 @@ class EnumMeta(type):
         _enum_value_map_: ClassVar[Dict[Any, Any]]
         _enum_value_cls_: ClassVar[Type[_EnumValueBase]]
 
-    def __new__(cls, name: str, bases, attrs, *, comparable: bool = False):
+    def __new__(cls: EnumMetaT, name: str, bases, attrs, *, comparable: bool = False) -> EnumMetaT:
         value_mapping = {}
         member_mapping = {}
         member_names = []
@@ -176,16 +179,16 @@ class EnumMeta(type):
     def __members__(cls):
         return types.MappingProxyType(cls._enum_member_map_)
 
-    def __call__(cls, value):
+    def __call__(cls, value: Any) -> Any:
         try:
             return cls._enum_value_map_[value]
         except (KeyError, TypeError):
             raise ValueError(f"{value!r} is not a valid {cls.__name__}") from None
 
-    def __getitem__(cls, key):
+    def __getitem__(cls, key: str) -> Any:
         return cls._enum_member_map_[key]
 
-    def __setattr__(cls, name: str, value) -> NoReturn:
+    def __setattr__(cls, name: str, value: Any) -> NoReturn:
         raise TypeError("Enums are immutable.")
 
     def __delattr__(cls, attr) -> NoReturn:
@@ -206,7 +209,7 @@ else:
 
     class Enum(metaclass=EnumMeta):
         @classmethod
-        def try_value(cls, value):
+        def try_value(cls, value: Any) -> Self:
             try:
                 return cls._enum_value_map_[value]
             except (KeyError, TypeError):
@@ -427,6 +430,11 @@ class MessageType(Enum):
     """The system message denoting that a poll expired, announcing the most voted answer.
 
     .. versionadded:: 2.10
+    """
+    emoji_added = 63
+    """The system message denoting that an emoji was added to the server.
+
+    .. versionadded: 2.11
     """
 
 
@@ -1262,6 +1270,11 @@ class ComponentType(Enum):
     """
     container = 17
     """Represents a Components V2 container component.
+
+    .. versionadded:: 2.11
+    """
+    label = 18
+    """Represents a label component.
 
     .. versionadded:: 2.11
     """
@@ -2274,6 +2287,20 @@ class ApplicationRoleConnectionMetadataType(Enum):
     """The metadata value (``integer``) is equal to the guild's configured value."""
     boolean_not_equal = 8
     """The metadata value (``integer``) is not equal to the guild's configured value."""
+
+
+class ApplicationEventWebhookStatus(Enum):
+    """Represents the status of an application event webhook.
+
+    .. versionadded:: 2.11
+    """
+
+    disabled = 1
+    """Webhook events are disabled by developer."""
+    enabled = 2
+    """Webhook events are enabled by developer."""
+    disabled_by_discord = 3
+    """Webhook events are disabled by Discord, usually due to inactivity."""
 
 
 class OnboardingPromptType(Enum):

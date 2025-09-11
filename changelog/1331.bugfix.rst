@@ -1,0 +1,1 @@
+Fix :meth:`Guild.fetch_members` and :meth:`TextChannel.archived_threads` iterators returning more elements than specified by ``limit`` under certain circumstances.

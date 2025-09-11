@@ -1,0 +1,1 @@
+Fix missing :attr:`~Member.avatar_decoration` on the old :class:`Member` in :func:`on_member_update` events.

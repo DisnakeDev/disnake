@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-"""Repsonsible for handling Params for slash commands"""
+"""Responsible for handling Params for slash commands"""
 
 from __future__ import annotations
 
@@ -377,7 +377,7 @@ else:
 
         _allowed_types = (int, float)
 
-        def __post_init__(self):
+        def __post_init__(self) -> None:
             for value in (self.min_value, self.max_value):
                 if value is None:
                     continue
@@ -406,7 +406,7 @@ else:
 
         _allowed_types = (str,)
 
-        def __post_init__(self):
+        def __post_init__(self) -> None:
             for value in (self.min_value, self.max_value):
                 if value is None:
                     continue
