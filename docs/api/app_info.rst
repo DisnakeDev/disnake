@@ -100,9 +100,6 @@ ApplicationRoleConnectionMetadataType
     :members:
 
 
-Enumerations
-------------
-
 ApplicationEventWebhookStatus
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
