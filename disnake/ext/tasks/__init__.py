@@ -772,7 +772,7 @@ def loop(
         one used in :meth:`disnake.Client.connect`.
     loop: :class:`asyncio.AbstractEventLoop`
         The loop to use to register the task, if not given
-        defaults to :func:`asyncio.get_running_loop` or creates a new loop
+        defaults to the current event loop or creates a new one
         if there is none.
 
     Raises

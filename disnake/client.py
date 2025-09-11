@@ -239,7 +239,7 @@ class Client:
             Allow disabling the message cache and change the default size to ``1000``.
     loop: Optional[:class:`asyncio.AbstractEventLoop`]
         The :class:`asyncio.AbstractEventLoop` to use for asynchronous operations.
-        Defaults to ``None``, in which case :func:`asyncio.get_running_loop()` is
+        Defaults to ``None``, in which case the current event loop is
         used, or a new loop is created if there is none.
     asyncio_debug: :class:`bool`
         Whether to enable asyncio debugging when the client starts.
