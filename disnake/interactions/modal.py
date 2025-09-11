@@ -40,6 +40,9 @@ __all__ = ("ModalInteraction", "ModalInteractionData")
 
 T = TypeVar("T")
 
+# {custom_id: text_input_value | select_values}
+ResolvedValues = Dict[str, Union[str, Sequence[T]]]
+
 
 class ModalInteraction(Interaction[ClientT]):
     """Represents an interaction with a modal.
@@ -184,8 +187,8 @@ class ModalInteraction(Interaction[ClientT]):
 
     def _resolve_values(
         self, resolve: Callable[[Snowflake, ComponentType], T]
-    ) -> Dict[str, Union[str, Sequence[Union[str, T]]]]:
-        values: Dict[str, Union[str, Sequence[Union[str, T]]]] = {}
+    ) -> ResolvedValues[Union[str, T]]:
+        values: ResolvedValues[Union[str, T]] = {}
         for component in self.walk_raw_components():
             if component["type"] == ComponentType.text_input.value:
                 value = component.get("value")
@@ -201,7 +204,7 @@ class ModalInteraction(Interaction[ClientT]):
         return values
 
     @cached_slot_property("_cs_values")
-    def values(self) -> Dict[str, Union[str, Sequence[str]]]:
+    def values(self) -> ResolvedValues[str]:
         """Dict[:class:`str`, Union[:class:`str`, Sequence[:class:`str`]]]: Returns all raw values the user has entered in the modal.
         This is a dict of the form ``{custom_id: value}``.
 
@@ -217,9 +220,7 @@ class ModalInteraction(Interaction[ClientT]):
         return self._resolve_values(lambda id, type: str(id))
 
     @cached_slot_property("_cs_resolved_values")
-    def resolved_values(
-        self,
-    ) -> Dict[str, Union[str, Sequence[Union[str, Member, User, Role, AnyChannel]]]]:
+    def resolved_values(self) -> ResolvedValues[Union[str, Member, User, Role, AnyChannel]]:
         """Dict[:class:`str`, Union[:class:`str`, Sequence[:class:`str`, :class:`Member`, :class:`User`, :class:`Role`, Union[:class:`abc.GuildChannel`, :class:`Thread`, :class:`PartialMessageable`]]]]: The (resolved) values the user entered in the modal.
         This is a dict of the form ``{custom_id: value}``.
 
