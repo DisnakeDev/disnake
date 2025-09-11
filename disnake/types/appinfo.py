@@ -85,7 +85,7 @@ class EditAppInfo(TypedDict, total=False):
     icon: Optional[str]
     cover_image: Optional[str]
     interactions_endpoint_url: Optional[str]
-    tags: List[str]
+    tags: Optional[List[str]]
     event_webhooks_url: Optional[str]
     event_webhooks_status: Literal[1, 2]
     event_webhooks_types: List[str]

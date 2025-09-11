@@ -39,6 +39,9 @@ class InstallParams:
 
     .. versionadded:: 2.5
 
+    .. versionchanged:: 2.11
+        This class can now be created by users.
+
     Attributes
     ----------
     scopes: List[:class:`str`]
@@ -56,15 +59,27 @@ class InstallParams:
 
     def __init__(
         self,
+        *,
+        scopes: List[str],
+        permissions: Permissions,
+    ) -> None:
+        self.scopes = scopes
+        self.permissions = permissions
+        self._app_id: int = 0
+        self._install_type: Optional[ApplicationIntegrationTypeLiteral] = None
+
+    @classmethod
+    def _from_data(
+        cls,
         data: InstallParamsPayload,
         parent: AppInfo,
         *,
         install_type: Optional[ApplicationIntegrationTypeLiteral] = None,
-    ) -> None:
-        self._app_id = parent.id
-        self._install_type: Optional[ApplicationIntegrationTypeLiteral] = install_type
-        self.scopes = data["scopes"]
-        self.permissions = Permissions(int(data["permissions"]))
+    ) -> InstallParams:
+        instance = cls(permissions=Permissions(int(data["permissions"])), scopes=data["scopes"])
+        instance._install_type = install_type
+        instance._app_id = parent.id
+        return instance
 
     def __repr__(self) -> str:
         return f"<InstallParams scopes={self.scopes!r} permissions={self.permissions!r}>"
@@ -72,11 +87,15 @@ class InstallParams:
     def to_url(self) -> str:
         """Returns a string that can be used to install this application.
 
+        .. note:: This method can only be used on InstallParams that have been created by :meth:`.Client.application_info`
+
         Returns
         -------
         :class:`str`
             The invite url.
         """
+        if not self._app_id:
+            raise ValueError("This InstallParams instance is not linked to an application.")
         return utils.oauth_url(
             self._app_id,
             scopes=self.scopes,
@@ -98,6 +117,10 @@ class InstallTypeConfiguration:
 
     .. versionadded:: 2.10
 
+    .. versionchanged:: 2.11
+
+        This class can now be created by users.
+
     Attributes
     ----------
     install_params: Optional[:class:`InstallParams`]
@@ -106,15 +129,21 @@ class InstallTypeConfiguration:
 
     __slots__ = ("install_params",)
 
-    def __init__(
-        self,
+    def __init__(self, *, install_params: Optional[InstallParams] = None) -> None:
+        self.install_params: Optional[InstallParams] = install_params
+
+    @classmethod
+    def _from_data(
+        cls,
         data: ApplicationIntegrationTypeConfigurationPayload,
         *,
         parent: AppInfo,
         install_type: ApplicationIntegrationTypeLiteral,
-    ) -> None:
-        self.install_params: Optional[InstallParams] = (
-            InstallParams(install_params, parent=parent, install_type=install_type)
+    ) -> InstallTypeConfiguration:
+        return cls(
+            install_params=InstallParams._from_data(
+                install_params, parent=parent, install_type=install_type
+            )
             if (install_params := data.get("oauth2_install_params"))
             else None
         )
@@ -322,7 +351,9 @@ class AppInfo:
         )
         self.tags: Optional[List[str]] = data.get("tags")
         self.install_params: Optional[InstallParams] = (
-            InstallParams(data["install_params"], parent=self) if "install_params" in data else None
+            InstallParams._from_data(data["install_params"], parent=self)
+            if "install_params" in data
+            else None
         )
         self.custom_install_url: Optional[str] = data.get("custom_install_url")
         self.redirect_uris: Optional[List[str]] = data.get("redirect_uris")
@@ -347,7 +378,7 @@ class AppInfo:
         ] = {}
         for type_str, config in (data.get("integration_types_config") or {}).items():
             install_type = cast("ApplicationIntegrationTypeLiteral", int(type_str))
-            self._install_types_config[install_type] = InstallTypeConfiguration(
+            self._install_types_config[install_type] = InstallTypeConfiguration._from_data(
                 config or {},
                 parent=self,
                 install_type=install_type,
@@ -434,6 +465,7 @@ class AppInfo:
         event_webhooks_url: Optional[str] = MISSING,
         event_webhooks_status: ApplicationEventWebhookStatus = MISSING,
         event_webhooks_types: Sequence[str] = MISSING,
+        **kwargs,
     ) -> AppInfo:
         """|coro|
 
@@ -450,8 +482,16 @@ class AppInfo:
         flags: Optional[:class:`ApplicationFlags`]
             The application's public flags.
 
-            This is restricted to setting only the flags that correspond to intents.
-        tags: List[:class:`str`]
+            This is restricted to only affecting the limited intent flags:
+            :attr:`~ApplicationFlags.gateway_guild_members_limited`,
+            :attr:`~ApplicationFlags.gateway_presence_limited`, and
+            :attr:`~ApplicationFlags.gateway_message_content_limited`.
+
+            .. warning::
+                Disabling an intent that you are currently requesting during your current session
+                will cause you to be disconnected from the gateway. Take caution when providing this parameter.
+
+        tags: Optional[List[:class:`str`]]
             The application's tags.
         install_params: Optional[:class:`InstallParams`]
             The installation parameters for this application.
@@ -548,7 +588,10 @@ class AppInfo:
             fields["event_webhooks_types"] = list(event_webhooks_types)
 
         if tags is not MISSING:
-            fields["tags"] = list(tags)
+            fields["tags"] = list(tags) if tags else None
+
+        if kwargs:
+            fields.update(**kwargs)  # type: ignore
 
         data = await self._state.http.edit_application_info(**fields)
         return AppInfo(self._state, data)
