@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 import inspect
 import logging
 from typing import (
@@ -193,7 +192,7 @@ class CogMeta(type):
                     if elem.startswith(("cog_", "bot_")):
                         raise TypeError(no_bot_cog.format(base, elem))
                     app_commands[elem] = value
-                elif asyncio.iscoroutinefunction(value):
+                elif disnake.utils.iscoroutinefunction(value):
                     if hasattr(value, "__cog_listener__"):
                         if elem.startswith(("cog_", "bot_")):
                             raise TypeError(no_bot_cog.format(base, elem))
@@ -419,7 +418,7 @@ class Cog(metaclass=CogMeta):
             actual = func
             if isinstance(actual, staticmethod):
                 actual = actual.__func__
-            if not asyncio.iscoroutinefunction(actual):
+            if not disnake.utils.iscoroutinefunction(actual):
                 raise TypeError("Listener function must be a coroutine function.")
             actual.__cog_listener__ = True
             to_assign = (

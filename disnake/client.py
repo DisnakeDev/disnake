@@ -8,7 +8,6 @@ import signal
 import sys
 import traceback
 import types
-import warnings
 from datetime import datetime, timedelta
 from errno import ECONNRESET
 from typing import (
@@ -240,8 +239,8 @@ class Client:
             Allow disabling the message cache and change the default size to ``1000``.
     loop: Optional[:class:`asyncio.AbstractEventLoop`]
         The :class:`asyncio.AbstractEventLoop` to use for asynchronous operations.
-        Defaults to ``None``, in which case the default event loop is used via
-        :func:`asyncio.get_event_loop()`.
+        Defaults to ``None``, in which case the current event loop is
+        used, or a new loop is created if there is none.
     asyncio_debug: :class:`bool`
         Whether to enable asyncio debugging when the client starts.
         Defaults to False.
@@ -407,9 +406,7 @@ class Client:
         self.ws: DiscordWebSocket = None  # type: ignore
 
         if loop is None:
-            with warnings.catch_warnings():
-                warnings.simplefilter("ignore", DeprecationWarning)
-                self.loop: asyncio.AbstractEventLoop = asyncio.get_event_loop()
+            self.loop: asyncio.AbstractEventLoop = utils.get_event_loop()
         else:
             self.loop: asyncio.AbstractEventLoop = loop
 
@@ -840,7 +837,7 @@ class Client:
             else (name if isinstance(name, str) else f"on_{name.value}")
         )
 
-        if not asyncio.iscoroutinefunction(func):
+        if not utils.iscoroutinefunction(func):
             raise TypeError("Listeners must be coroutines")
 
         if name_ in self.extra_events:
@@ -1866,7 +1863,7 @@ class Client:
         TypeError
             The coroutine passed is not actually a coroutine.
         """
-        if not asyncio.iscoroutinefunction(coro):
+        if not utils.iscoroutinefunction(coro):
             raise TypeError("event registered must be a coroutine function")
 
         setattr(self, coro.__name__, coro)
