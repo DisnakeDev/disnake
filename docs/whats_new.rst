@@ -22,6 +22,8 @@ in specific versions. Please see :ref:`version_guarantees` for more information.
 v2.10.2
 -------
 
+This is a maintainance release with several bugfixes.
+
 Bug Fixes
 ~~~~~~~~~
 - Fix missing/faulty :class:`Subscription`\-related gateway events. (:issue:`1275`)
