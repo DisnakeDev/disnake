@@ -465,7 +465,6 @@ class AppInfo:
         event_webhooks_url: Optional[str] = MISSING,
         event_webhooks_status: ApplicationEventWebhookStatus = MISSING,
         event_webhooks_types: Sequence[str] = MISSING,
-        **kwargs,
     ) -> AppInfo:
         """|coro|
 
@@ -589,9 +588,6 @@ class AppInfo:
 
         if tags is not MISSING:
             fields["tags"] = list(tags) if tags else None
-
-        if kwargs:
-            fields.update(**kwargs)  # type: ignore
 
         data = await self._state.http.edit_application_info(**fields)
         return AppInfo(self._state, data)
