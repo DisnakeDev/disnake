@@ -22,6 +22,11 @@ in specific versions. Please see :ref:`version_guarantees` for more information.
 v2.11.0
 -------
 
+This version adds the new `v2 components <https://discord.com/developers/docs/components/overview>`_
+to create fully component-driven messages, select menus in modals,
+support for setting a guild-specific avatar/banner/bio, user nameplates and tags,
+new message pin endpoints (now with up to 250 pins!), and includes many other improvements and several bugfixes.
+
 Deprecations
 ~~~~~~~~~~~~
 - :meth:`InteractionResponse.require_premium` is deprecated in favour of premium buttons (see :attr:`ui.Button.sku_id`). (:issue:`1276`)
