@@ -1,1 +1,1 @@
-Add new :meth:`Client.edit_application_info` and :meth:`AppInfo.edit` methods.
+Add support for modifying application info using :meth:`AppInfo.edit`.
