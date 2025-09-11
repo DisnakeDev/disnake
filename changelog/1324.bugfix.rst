@@ -1,1 +1,0 @@
-Properly support aiohttp 3.11 without deprecation warnings.
