@@ -12,10 +12,10 @@ from .item import UIComponent, ensure_ui_component
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from .select.string import StringSelect
+    from ._types import AnySelect
     from .text_input import TextInput
 
-    LabelChildUIComponent = Union[TextInput, StringSelect[Any]]
+    LabelChildUIComponent = Union[TextInput, AnySelect[Any]]
 
 __all__ = ("Label",)
 
@@ -32,8 +32,10 @@ class Label(UIComponent):
     ----------
     text: :class:`str`
         The label text.
-    component: Union[:class:`TextInput`, :class:`StringSelect`]
+    component: Union[:class:`TextInput`, :class:`BaseSelect`]
         The component within the label.
+        Currently supports :class:`.ui.TextInput` and
+        select menus (e.g. :class:`.ui.StringSelect`).
     description: Optional[:class:`str`]
         The description text for the label.
     id: :class:`int`
@@ -45,7 +47,7 @@ class Label(UIComponent):
     ----------
     text: :class:`str`
         The label text.
-    component: Union[:class:`TextInput`, :class:`StringSelect`]
+    component: Union[:class:`TextInput`, :class:`BaseSelect`]
         The component within the label.
     description: Optional[:class:`str`]
         The description text for the label.
