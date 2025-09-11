@@ -1,1 +1,0 @@
-Update required permissions for :meth:`Guild.invites` and in the invite attribute :ref:`table <invite_attr_table>`.

@@ -1,1 +1,0 @@
-Depend on typing_extensions explicitly, rather than through aiohttp.

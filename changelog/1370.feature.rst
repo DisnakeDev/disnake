@@ -1,3 +1,0 @@
-Added support for emoji added system messages.
-- New message type :attr:`.MessageType.emoji_added`
-- New system channel flag attr :attr:`.SystemChannelFlags.emoji_added_notifications`
