@@ -126,7 +126,7 @@ else:
 def wrap_callback(coro: Callable[..., Coro[T]]) -> Callable[..., Coro[Optional[T]]]:
     # there's no way to type it nicely without causing issues down the line
     @functools.wraps(coro)
-    async def wrapped(*args: Any, **kwargs: Any):  # noqa: ANN202
+    async def wrapped(*args: Any, **kwargs: Any) -> Optional[T]:
         try:
             ret = await coro(*args, **kwargs)
         except CommandError:
