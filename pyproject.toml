@@ -82,7 +82,7 @@ changelog = [
 codemod = [
     # run codemods on the repository (mostly automated typing)
     "libcst~=1.1.0",
-    "ruff==0.12.12",
+    "ruff==0.13.0",
     "autotyping==23.2.0",
 ]
 typing = [

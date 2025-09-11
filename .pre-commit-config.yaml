@@ -52,7 +52,7 @@ repos:
         exclude: 'changelog/|py.typed|disnake/bin/COPYING|.github/PULL_REQUEST_TEMPLATE.md|.github/CODEOWNERS|LICENSE|MANIFEST.in|.gitattributes'
 
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.12.12
+    rev: v0.13.0
     hooks:
       - id: ruff-format
       - id: ruff-check
