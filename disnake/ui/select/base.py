@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 import os
 from abc import ABC, abstractmethod
 from typing import (
@@ -23,7 +22,7 @@ from typing import (
 from ...components import AnySelectMenu, SelectDefaultValue
 from ...enums import ComponentType, SelectDefaultValueType
 from ...object import Object
-from ...utils import MISSING, humanize_list
+from ...utils import MISSING, humanize_list, iscoroutinefunction
 from ..item import DecoratedItem, Item
 
 __all__ = ("BaseSelect",)
@@ -269,7 +268,7 @@ def _create_decorator(
         raise TypeError("cls argument must be callable")
 
     def decorator(func: ItemCallbackType[V_co, S_co]) -> DecoratedItem[S_co]:
-        if not asyncio.iscoroutinefunction(func):
+        if not iscoroutinefunction(func):
             raise TypeError("select function must be a coroutine function")
 
         func.__discord_ui_model_type__ = cls
