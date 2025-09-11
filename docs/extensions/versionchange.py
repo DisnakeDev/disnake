@@ -1,7 +1,14 @@
 # SPDX-License-Identifier: MIT
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 import sphinx.domains.changeset
-from sphinx.application import Sphinx
+
+if TYPE_CHECKING:
+    from sphinx.application import Sphinx
+
+    from ._types import SphinxExtensionMeta
 
 
 class VersionAddedNext(sphinx.domains.changeset.VersionChange):
@@ -16,11 +23,10 @@ class VersionAddedNext(sphinx.domains.changeset.VersionChange):
         return super().run()
 
 
-def setup(app: Sphinx) -> None:
+def setup(app: Sphinx) -> SphinxExtensionMeta:
     app.add_directive("versionadded", VersionAddedNext, override=True)
     app.add_directive("versionchanged", VersionAddedNext, override=True)
     app.add_directive("deprecated", VersionAddedNext, override=True)
-    app.add_directive("versionremoved", VersionAddedNext)
 
     return {
         "parallel_read_safe": True,
