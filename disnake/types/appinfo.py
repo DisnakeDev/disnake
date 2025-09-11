@@ -73,3 +73,19 @@ class PartialAppInfo(BaseAppInfo, total=False):
 class PartialGatewayAppInfo(TypedDict):
     id: Snowflake
     flags: int
+
+
+class EditAppInfo(TypedDict, total=False):
+    custom_install_url: Optional[str]
+    description: str
+    role_connections_verification_url: Optional[str]
+    install_params: Optional[InstallParams]
+    integration_types_config: Dict[Literal[0, 1], ApplicationIntegrationTypeConfiguration]
+    flags: int
+    icon: Optional[str]
+    cover_image: Optional[str]
+    interactions_endpoint_url: Optional[str]
+    tags: List[str]
+    event_webhooks_url: Optional[str]
+    event_webhooks_status: Literal[1, 2]
+    event_webhooks_types: List[str]

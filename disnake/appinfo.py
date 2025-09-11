@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, cast
+from typing import TYPE_CHECKING, Dict, List, Optional, Sequence, cast
 
 from . import utils
 from .asset import Asset, AssetBytes
@@ -18,6 +18,7 @@ if TYPE_CHECKING:
         AppInfo as AppInfoPayload,
         ApplicationIntegrationType as ApplicationIntegrationTypeLiteral,
         ApplicationIntegrationTypeConfiguration as ApplicationIntegrationTypeConfigurationPayload,
+        EditAppInfo as EditAppInfoPayload,
         InstallParams as InstallParamsPayload,
         PartialAppInfo as PartialAppInfoPayload,
         Team as TeamPayload,
@@ -117,6 +118,12 @@ class InstallTypeConfiguration:
             if (install_params := data.get("oauth2_install_params"))
             else None
         )
+
+    def to_dict(self) -> ApplicationIntegrationTypeConfigurationPayload:
+        payload: ApplicationIntegrationTypeConfigurationPayload = {}
+        if self.install_params:
+            payload["oauth2_install_params"] = self.install_params.to_dict()
+        return payload
 
 
 class AppInfo:
@@ -413,15 +420,20 @@ class AppInfo:
     async def edit(
         self,
         *,
+        custom_install_url: Optional[str] = MISSING,
         description: Optional[str] = MISSING,
+        role_connections_verification_url: Optional[str] = MISSING,
+        install_params: Optional[InstallParams] = MISSING,
+        guild_install_type_config: InstallTypeConfiguration = MISSING,
+        user_install_type_config: InstallTypeConfiguration = MISSING,
         flags: ApplicationFlags = MISSING,
         icon: Optional[AssetBytes] = MISSING,
         cover_image: Optional[AssetBytes] = MISSING,
-        custom_install_url: Optional[str] = MISSING,
-        install_params: Optional[InstallParams] = MISSING,
-        role_connections_verification_url: Optional[str] = MISSING,
         interactions_endpoint_url: Optional[str] = MISSING,
-        tags: List[str] = MISSING,
+        tags: Sequence[str] = MISSING,
+        event_webhooks_url: Optional[str] = MISSING,
+        event_webhooks_status: ApplicationEventWebhookStatus = MISSING,
+        event_webhooks_types: Sequence[str] = MISSING,
     ) -> AppInfo:
         """|coro|
 
@@ -443,6 +455,8 @@ class AppInfo:
             The application's tags.
         install_params: Optional[:class:`InstallParams`]
             The installation parameters for this application.
+
+            Cannot be provided with ``custom_install_url``.
         custom_install_url: Optional[:class:`str`]
             The custom installation url for this application.
         role_connections_verification_url: Optional[:class:`str`]
@@ -455,6 +469,17 @@ class AppInfo:
             Update the application's icon asset, if any.
         cover_image: Optional[|resource_type|]
             Update the cover_image for rich presence integrations.
+        guild_install_type_config: Optional[:class:`InstallTypeConfiguration`]
+            The guild installation type configuration for this application.
+        user_install_type_config: Optional[:class:`InstallTypeConfiguration`]
+            The user installation type configuration for this application.
+        event_webhooks_url: Optional[:class:`str`]
+            The application's event webhooks URL.
+        event_webhooks_status: :class:`ApplicationEventWebhookStatus`
+            The application's event webhooks status.
+        event_webhook_types: Optional[List]
+            The application's event webhook types. See `webhook event types <https://discord.com/developers/docs/events/webhook-events#event-types>`_
+            for a list of valid events.
 
         Raises
         ------
@@ -466,10 +491,29 @@ class AppInfo:
         :class:`.AppInfo`
             The new application information.
         """
-        fields: Dict[str, Any] = {}
+        fields: EditAppInfoPayload = {}
 
         if install_params is not MISSING:
-            fields["install_params"] = None if install_params is None else install_params.to_dict()
+            fields["install_params"] = (
+                install_params.to_dict() if install_params is not None else None
+            )
+
+        if guild_install_type_config is not MISSING or user_install_type_config is not MISSING:
+            integration_types_config: Dict[
+                ApplicationIntegrationTypeLiteral, ApplicationIntegrationTypeConfigurationPayload
+            ] = {}
+
+            if guild_install_type_config is not MISSING:
+                integration_types_config[0] = guild_install_type_config.to_dict()
+            elif self.guild_install_type_config:
+                integration_types_config[0] = self.guild_install_type_config.to_dict()
+
+            if user_install_type_config is not MISSING:
+                integration_types_config[1] = user_install_type_config.to_dict()
+            elif self.user_install_type_config:
+                integration_types_config[1] = self.user_install_type_config.to_dict()
+
+            fields["integration_types_config"] = integration_types_config
 
         if icon is not MISSING:
             fields["icon"] = await utils._assetbytes_to_base64_data(icon)
@@ -481,7 +525,7 @@ class AppInfo:
             fields["flags"] = flags.value
 
         if description is not MISSING:
-            fields["description"] = description
+            fields["description"] = description or ""
 
         if custom_install_url is not MISSING:
             fields["custom_install_url"] = custom_install_url
@@ -492,8 +536,19 @@ class AppInfo:
         if interactions_endpoint_url is not MISSING:
             fields["interactions_endpoint_url"] = interactions_endpoint_url
 
+        if event_webhooks_url is not MISSING:
+            fields["event_webhooks_url"] = event_webhooks_url
+
+        if event_webhooks_status is not MISSING:
+            if event_webhooks_status is ApplicationEventWebhookStatus.disabled_by_discord:
+                raise TypeError(f"cannot set 'event_webhooks_status' to {event_webhooks_status!r}")
+            fields["event_webhooks_status"] = event_webhooks_status.value
+
+        if event_webhooks_types is not MISSING:
+            fields["event_webhooks_types"] = list(event_webhooks_types)
+
         if tags is not MISSING:
-            fields["tags"] = tags
+            fields["tags"] = list(tags)
 
         data = await self._state.http.edit_application_info(**fields)
         return AppInfo(self._state, data)
