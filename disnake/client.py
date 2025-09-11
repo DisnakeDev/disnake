@@ -1254,7 +1254,9 @@ class Client:
             reconnect=reconnect, ignore_session_start_limit=ignore_session_start_limit
         )
 
-    def run(self, *args: Any, **kwargs: Any) -> None:
+    def run(
+        self, token: str, *, reconnect: bool = True, ignore_session_start_limit: bool = False
+    ) -> None:
         """A blocking call that abstracts away the event loop
         initialisation from you.
 
@@ -1293,7 +1295,7 @@ class Client:
 
         async def runner() -> None:
             try:
-                await self.start(*args, **kwargs)
+                await self.start(token, reconnect, ignore_session_start_limit)
             finally:
                 if not self.is_closed():
                     await self.close()
