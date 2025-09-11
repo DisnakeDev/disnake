@@ -108,6 +108,28 @@ Miscellaneous
 - Rework the ``nox -s coverage`` session to allow providing arguments directly to coverage.py. (:issue:`1359`)
 
 
+.. _vp2p10p2:
+
+v2.10.2
+-------
+
+This is a maintenance release with several bugfixes.
+
+Bug Fixes
+~~~~~~~~~
+- Fix missing/faulty :class:`Subscription`\-related gateway events. (:issue:`1275`)
+- |commands| Fix extracting localization key for :meth:`~ext.commands.InvokableSlashCommand.sub_command_group`\s from docstring, to be more consistent with top-level slash commands and sub commands. (:issue:`1285`)
+- Improve checks for partial :class:`Guild`\s in guild-dependent attributes of channels and threads, which could previously raise errors with user-installed apps, as they don't always receive complete guild data. (:issue:`1287`)
+- |tasks| Correctly handle :meth:`Loop.change_interval <ext.tasks.Loop.change_interval>` when called from :meth:`~ext.tasks.Loop.before_loop` or through other means before initial loop run. (:issue:`1290`)
+- Avoid stripping port from voice websocket endpoints. (:issue:`1301`)
+- Properly support aiohttp 3.11 without deprecation warnings. (:issue:`1324`)
+
+Miscellaneous
+~~~~~~~~~~~~~
+- Decrease the default :attr:`Guild.filesize_limit` from 25MB to 10MB. (:issue:`1272`)
+- Remove bad example code snippet that can cause bugs using yt_dlp lib. (:issue:`1304`)
+
+
 .. _vp2p10p1:
 
 v2.10.1
