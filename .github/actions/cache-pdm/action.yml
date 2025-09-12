@@ -44,7 +44,7 @@ runs:
     - name: Install pdm with uv
       if: ${{ steps.cache.outputs.cache-hit != 'true' && inputs.env-already-initialized != 'true' }}
       shell: bash
-      run: uv tool install --python 3.12 pdm==2.20.1
+      run: uv tool install --python 3.12 pdm==2.25.9
 
     - if: ${{ steps.cache.outputs.cache-hit != 'true' }}
       name: Lock all dependencies
