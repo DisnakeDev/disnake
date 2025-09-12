@@ -882,7 +882,30 @@ class DiscordVoiceWebSocket:
     RESUMED
         Receive only. Tells you that your RESUME request has succeeded.
     CLIENT_DISCONNECT
-        Receive only.  Indicates a user has disconnected from voice.
+        Receive only. Indicates a user has disconnected from voice.
+
+    DAVE_PREPARE_TRANSITION
+        Receive only. Indicates that a DAVE protocol downgrade is upcoming.
+    DAVE_EXECUTE_TRANSITION
+        Receive only. Tells you to execute a previously announced transition.
+    DAVE_TRANSITION_READY
+        Sent only. Notifies the gateway that you're ready to execute an announced transition.
+    DAVE_MLS_PREPARE_EPOCH
+        Receive only. Indicates a protocol version change or group change is upcoming.
+    DAVE_MLS_EXTERNAL_SENDER
+        Receive only. Gives you credentials for MLS external sender.
+    DAVE_MLS_KEY_PACKAGE
+        Sent only. Provides your MLS key package to the gateway.
+    DAVE_MLS_PROPOSALS
+        Receive only. Gives you MLS proposals to be appended or revoked.
+    DAVE_MLS_COMMIT_WELCOME
+        Sent only.
+    DAVE_MLS_ANNOUNCE_COMMIT_TRANSITION
+        Receive only. Gives you an MLS commit to process for an upcoming transition.
+    DAVE_MLS_WELCOME
+        Receive only. Gives you an MLS welcome for an upcoming transition.
+    DAVE_MLS_INVALID_COMMIT_WELCOME
+        Sent only. Notifies the gateway of an invalid commit or welcome, requests being re-added.
     """
 
     IDENTIFY: Final[Literal[0]] = 0
@@ -896,6 +919,19 @@ class DiscordVoiceWebSocket:
     HELLO: Final[Literal[8]] = 8
     RESUMED: Final[Literal[9]] = 9
     CLIENT_DISCONNECT: Final[Literal[13]] = 13
+
+    # DAVE-specific opcodes
+    DAVE_PREPARE_TRANSITION: Final[Literal[21]] = 21
+    DAVE_EXECUTE_TRANSITION: Final[Literal[22]] = 22
+    DAVE_TRANSITION_READY: Final[Literal[23]] = 23
+    DAVE_MLS_PREPARE_EPOCH: Final[Literal[24]] = 24
+    DAVE_MLS_EXTERNAL_SENDER: Final[Literal[25]] = 25
+    DAVE_MLS_KEY_PACKAGE: Final[Literal[26]] = 26
+    DAVE_MLS_PROPOSALS: Final[Literal[27]] = 27
+    DAVE_MLS_COMMIT_WELCOME: Final[Literal[28]] = 28
+    DAVE_MLS_ANNOUNCE_COMMIT_TRANSITION: Final[Literal[29]] = 29
+    DAVE_MLS_WELCOME: Final[Literal[30]] = 30
+    DAVE_MLS_INVALID_COMMIT_WELCOME: Final[Literal[31]] = 31
 
     def __init__(
         self,
