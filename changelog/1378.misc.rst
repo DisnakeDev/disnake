@@ -1,0 +1,1 @@
+Increase upper bound on audioop-lts and allow v0.2.x
