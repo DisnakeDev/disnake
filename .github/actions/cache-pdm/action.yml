@@ -29,11 +29,22 @@ runs:
         enableCrossOsArchive: true
 
     - if: ${{ steps.cache.outputs.cache-hit != 'true' && inputs.env-already-initialized != 'true' }}
-      name: Set up PDM
-      uses: pdm-project/setup-pdm@v4
+      name: Install uv
+      uses: astral-sh/setup-uv@v6
       with:
-        python-version: 3.8
-        version: "2.20.1"
+        enable-cache: true
+
+    - name: Cache pdm installation directory
+      if: ${{ steps.cache.outputs.cache-hit != 'true' && inputs.env-already-initialized != 'true' }}
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pdm
+        key: ${{ runner.os }}-pdm-${{ inputs.python-version }}-${{ hashFiles('**/pyproject.toml') }}
+
+    - name: Install pdm with uv
+      if: ${{ steps.cache.outputs.cache-hit != 'true' && inputs.env-already-initialized != 'true' }}
+      shell: bash
+      run: uv tool install --python 3.12 pdm==2.20.1
 
     - if: ${{ steps.cache.outputs.cache-hit != 'true' }}
       name: Lock all dependencies

@@ -14,13 +14,25 @@ outputs:
 runs:
   using: composite
   steps:
-    - name: Set up pdm with python ${{ inputs.python-version }}
-      id: setup-python
-      uses: pdm-project/setup-pdm@v4
+    - name: Set up Python
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ inputs.python-version }}
-        version: "2.20.1"  # last version to support python 3.8
-        cache: false
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v6
+      with:
+        enable-cache: true
+
+    - name: Cache pdm installation directory
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pdm
+        key: ${{ runner.os }}-pdm-${{ inputs.python-version }}-${{ hashFiles('**/pyproject.toml') }}
+
+    - name: Install pdm with uv
+      shell: bash
+      run: uv tool install --python 3.12 pdm==2.20.1
 
     - name: Disable PDM version check
       shell: bash
@@ -34,7 +46,7 @@ runs:
 
     - name: Install nox
       shell: bash
-      run: pip install nox
+      run: uv tool install nox
 
     - name: Set python version
       id: python-version

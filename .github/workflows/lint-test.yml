@@ -27,6 +27,7 @@ defaults:
 env:
   GITHUB_STEP_SUMMARY_HEADER: "<details><summary>#name#</summary>\n<pre>"
   GITHUB_STEP_SUMMARY_FOOTER: "</pre></details>\n"
+  NOX_DEFAULT_VENV_BACKEND: uv
 
 jobs:
   lock-dependencies:
