@@ -10,6 +10,7 @@
 
 from __future__ import annotations
 
+import os
 import pathlib
 from typing import Any, Dict, List, Sequence, Tuple
 
@@ -45,7 +46,25 @@ def install_deps(
     if not project and extras:
         raise TypeError("Cannot install extras without also installing the project")
 
-    command: List[str] = [
+    command: List[str]
+
+    # If not using pdm, install with pip
+    if os.getenv("NO_PDM_INSTALL") is not None:
+        command = []
+        if project:
+            command.append("-e")
+            command.append(".")
+            if extras:
+                # project[extra1,extra2]
+                command[-1] += "[" + ",".join(extras) + "]"
+        if groups:
+            command.extend(nox.project.dependency_groups(PYPROJECT, *groups))
+        session.install(*command)
+        # install separately in case it conflicts with a just-installed dependency (for overriding a locked dep)
+        return None
+
+    # install with pdm
+    command = [
         "pdm",
         "sync",
         "--fail-fast",
