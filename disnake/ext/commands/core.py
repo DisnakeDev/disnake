@@ -772,7 +772,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
             raise CheckFailure(f"The check functions for command {self.qualified_name} failed.")
 
         if self._max_concurrency is not None:
-            await self._max_concurrency.acquire(ctx)
+            await self._max_concurrency.acquire(ctx)  # type: ignore
 
         try:
             if self.cooldown_after_parsing:
@@ -785,7 +785,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
             await self.call_before_hooks(ctx)
         except Exception:
             if self._max_concurrency is not None:
-                await self._max_concurrency.release(ctx)
+                await self._max_concurrency.release(ctx)  # type: ignore
             raise
 
     def is_on_cooldown(self, ctx: Context) -> bool:
