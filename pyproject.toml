@@ -53,7 +53,7 @@ speed = [
 ]
 voice = [
     "PyNaCl>=1.5.0,<1.6",
-    'audioop-lts==0.2.1; python_version >= "3.13"'
+    'audioop-lts>=0.2.1; python_version >= "3.13"'
 ]
 docs = [
     "sphinx==7.0.1",
