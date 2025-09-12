@@ -10,6 +10,7 @@
 
 from __future__ import annotations
 
+import os
 import pathlib
 from typing import Any, Dict, List, Sequence, Tuple
 
@@ -55,6 +56,8 @@ def install_deps(
     # see https://pdm-project.org/latest/usage/advanced/#use-nox-as-the-runner
     env: Dict[str, Any] = {
         "PDM_IGNORE_SAVED_PYTHON": "1",
+        "PDM_FROZEN_LOCKFILE": "1",
+        "VIRTUAL_ENV": session.virtualenv.location,
     }
 
     command.extend([f"-G={g}" for g in (*extras, *groups)])
@@ -296,50 +299,133 @@ def coverage(session: nox.Session) -> None:
 def dev(session: nox.Session) -> None:
     """Set up a development environment using pdm.
 
-    This will:
-    - create a virtual environment if it does not exist
-    - install all dependencies needed for development
-    - set up pre-commit hooks
-    - create nox environments
+    This will create a .venv/ directory if it does not exist, and install all dependencies
+    needed for development.
+
+    Arguments:
+    --python <version>  Specify the Python version to use for the virtual environment.
+                          If not provided, uses the current Python version if it meets the
+                          minimum requirement of Python 3.8, otherwise uses Python 3.8.
+    --resolution <mode> Set the dependency resolution mode for uv. Can be 'highest', 'lowest', or 'lowest-direct'.
+    --frozen            Skip updating the uv.lock file. Useful for CI environments to ensure
+                          dependencies are not changed.
+    --no-venv           Skip creating a virtual environment. Useful if you want to use
+                          an existing virtual environment.
+    --no-nox            Skip creating nox environments. Useful if you only want to set up the
+                          main virtual environment.
+    --no-upgrade        Skip upgrading dependencies in the uv.lock file.
+    --no-sync           Skip installing dependencies. Useful if you only want to set up the
+                          virtual environment and not install packages.
     """
-    # this is a lazy import because this session is only run once
-    # and is always manual
+    # lazy import because this session is only run once per dev environment
     import pathlib
 
-    python_version = nox.project.python_versions(PYPROJECT)[0]
-    if not pathlib.Path(".venv").exists():
-        # this will only run if the file is ran with nox or as a script directly
-        session.warn(
-            "Disnake supports Python 3.8 and above. To run tests locally, you will need a Python 3.8 interpreter."
+    env = {
+        "VIRTUAL_ENV": str(pathlib.Path(".venv").absolute()),
+    }
+
+    if "-h" in session.posargs or "--help" in session.posargs:
+        session.log(dev.__doc__)
+        return
+
+    python_version: str = ""
+    if "--python" in session.posargs:
+        python_version_index = session.posargs.index("--python") + 1
+        if python_version_index >= len(session.posargs):
+            session.error("No Python version specified after --python")
+        python_version = session.posargs[python_version_index]
+        session.posargs.pop(python_version_index)  # remove the version
+        session.posargs.pop(python_version_index - 1)  # remove the --python
+
+    # check that the python version matches the existing venv if no-venv is provided
+    if "--no-venv" in session.posargs and pathlib.Path(".venv").exists() and python_version:
+        version = session.run(
+            "pdm",
+            "info",
+            "--python",
+            external=True,
+            env=env,
+            silent=True,
         )
-        session.run("pdm", "venv", "create")
+        if version and version.strip().split(".", 2)[:2] != python_version.split(".", 2)[:2]:
+            session.error(
+                f"Python version mismatch: venv has {version.strip()}, but --python specifies {python_version}"
+            )
 
-    if not pathlib.Path("pdm.lock").exists():
-        session.debug("Creating a `pdm.lock` file...")
-        session.run("pdm", "lock", "-G:all", "-dG:all", f"--python=>={python_version}")
+    if python_version:
+        env["PDM_USE_PYTHON_VERSION"] = python_version
 
-    session.debug("Installing all dependencies...")
-    session.run("pdm", "sync", "-G:all")
+    if "--no-venv" in session.posargs:
+        session.debug("Skipping creating a venv")
+        session.posargs.remove("--no-venv")
+    else:
+        session.debug("Creating a new virtual environment with pdm...")
+        session.run("pdm", "create", "venv", ".venv", "--allow-existing", external=True, env=env)
 
-    # support the pre-commit hook already existing so the user can use a different pre-commit installation
-    # this persists the pre-commit cache when recreating the environment
+    lock_args = []
+    should_lock = True
+    if "--resolution" in session.posargs:
+        env["UV_RESOLUTION"] = session.posargs[session.posargs.index("--resolution") + 1]
+        session.posargs.pop(session.posargs.index("--resolution") + 1)
+        session.posargs.remove("--resolution")
+    elif "UV_RESOLUTION" not in os.environ:
+        env["UV_RESOLUTION"] = "highest"
+    if (
+        os.environ.get("PDM_FROZEN_LOCKFILE") in ("1", "true", "True")
+        or "--frozen" in session.posargs
+    ):
+        if "--frozen" in session.posargs:
+            should_lock = False
+            session.posargs.remove("--frozen")
+        should_lock = False
+    if "--no-upgrade" in session.posargs:
+        lock_args.remove("--upgrade")
+        session.posargs.append("--update-reuse")
+    if should_lock:
+        session.debug("Creating a `pdm.lock` file/updating it with the current dependencies...")
+        session.run("pdm", "lock", *lock_args, external=True, env=env)
+    else:
+        session.debug("Skipping locking dependencies.")
+
+    if "UV_NO_SYNC" not in os.environ and "--no-sync" not in session.posargs:
+        session.debug("Installing all dependencies...")
+        session.run("pdm", "sync", "-G:all", "-dG:all", external=True, env=env)
+    else:
+        session.debug("Skipping installing dependencies.")
+
     git_pre_commit_path = pathlib.Path(".git/hooks/pre-commit")
     if not git_pre_commit_path.exists() or not git_pre_commit_path.read_text().find(
         "# File generated by pre-commit: https://pre-commit.com"
     ):
         session.debug("Creating pre-commit hook...")
-        session.run("pdm", "run", "pre-commit", "install", "--install-hooks")
+        session.run(
+            "pdm",
+            "run",
+            "pre-commit",
+            "install",
+            "--install-hooks",
+            external=True,
+            env=env,
+        )
     else:
         session.warn("Pre-commit hook already exists, not modifying it.")
 
-    session.debug("Installing pre-commit hook environments...")
-    session.run("pdm", "run", "pre-commit", "install-hooks")
+    if "--no-nox" in session.posargs:
+        session.debug("Skipping creating nox environments.")
+        return
 
     session.debug("Creating all nox environments...")
+
+    # this creates every session's venv
+    # which we do to proactively download all dependencies
     session.run(
         "nox",
+        "-N",
         "--install-only",
         *session.posargs,
+        env=env,
+        external=False,  # force use ourselves
+        # silent=not session.posargs,  # only be quiet if there's no arguments
     )
 
 
