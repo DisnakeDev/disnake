@@ -48,7 +48,8 @@ from typing import (
 )
 from urllib.parse import parse_qs, urlencode
 
-from typing_extensions import Self
+if TYPE_CHECKING:
+    from typing_extensions import Self
 
 from .enums import Locale
 

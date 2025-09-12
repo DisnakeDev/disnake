@@ -201,11 +201,10 @@ class Thread(Messageable, Hashable):
         self._applied_tags: List[int] = list(map(int, data.get("applied_tags", [])))
         self._unroll_metadata(data["thread_metadata"])
 
-        member = data.get("member")
-        if member is None:
-            self.me = None
+        if "member" in data:
+            self.me = ThreadMember(self, data["member"])
         else:
-            self.me = ThreadMember(self, member)
+            self.me = None
 
     def _unroll_metadata(self, data: ThreadMetadata) -> None:
         self.archived: bool = data["archived"]

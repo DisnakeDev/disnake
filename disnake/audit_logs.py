@@ -405,16 +405,20 @@ class AuditLogChanges:
                 if key:
                     attr = key
 
-            before = elem.get("old_value")
-            if before and transformer:
-                before = transformer(entry, before)
-
+            if "old_value" in elem:
+                before = elem["old_value"]
+                if transformer:
+                    before = transformer(entry, before)
+            else:
+                before = None
             setattr(self.before, attr, before)
 
-            after = elem.get("new_value")
-            if after and transformer:
-                after = transformer(entry, after)
-
+            if "new_value" in elem:
+                after = elem["new_value"]
+                if transformer:
+                    after = transformer(entry, after)
+            else:
+                after = None
             setattr(self.after, attr, after)
 
         if has_emoji_fields:

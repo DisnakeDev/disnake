@@ -482,8 +482,8 @@ class Invite(Hashable):
     @classmethod
     def from_incomplete(cls, *, state: ConnectionState, data: InvitePayload) -> Self:
         guild: Optional[Union[Guild, PartialInviteGuild]]
-        guild_data = data.get("guild")
-        if guild_data:
+        if "guild" in data:
+            guild_data = data["guild"]
             guild_id = int(guild_data["id"])
             guild = state._get_guild(guild_id)
             if guild is None:

@@ -119,8 +119,6 @@ if TYPE_CHECKING:
 
     Channel = Union[GuildChannel, VocalGuildChannel, PrivateChannel]
     PartialChannel = Union[Channel, PartialMessageable]
-else:
-    Concatenate = Tuple  # for the use-case of T[type, ...] Tuple works perfectly
 
 T = TypeVar("T")
 
@@ -637,7 +635,7 @@ class ConnectionState:
         data: Union[MessagePayload, gateway.TypingStartEvent],
     ) -> Tuple[Union[PartialChannel, Thread], Optional[Guild]]:
         channel_id = int(data["channel_id"])
-        guild_id = int(g_id) if (g_id := data.get("guild_id")) else None
+        guild_id = utils._get_as_snowflake(data, "guild_id")
 
         if guild_id is None:
             # if we're here, this is a DM channel or an ephemeral message in a guild
@@ -1152,14 +1150,12 @@ class ConnectionState:
 
     def parse_channel_pins_update(self, data: gateway.ChannelPinsUpdateEvent) -> None:
         channel_id = int(data["channel_id"])
-        guild_id = int(g_id) if (g_id := data.get("guild_id")) else None
-
-        if guild_id is None:
+        if "guild_id" in data:
+            guild = self._get_guild(utils._get_as_snowflake(data, "guild_id"))
+            channel = guild and guild._resolve_channel(channel_id)
+        else:
             guild = None
             channel = self._get_private_channel(channel_id)
-        else:
-            guild = self._get_guild(guild_id)
-            channel = guild and guild._resolve_channel(channel_id)
 
         if channel is None:
             _log.debug(
@@ -1241,15 +1237,14 @@ class ConnectionState:
             _log.debug("THREAD_LIST_SYNC referencing an unknown guild ID: %s. Discarding", guild_id)
             return
 
-        channel_ids = data.get("channel_ids")
-        if channel_ids is None:
+        if "channel_ids" in data:
+            channel_ids = set(map(int, data["channel_ids"]))
+            previous_threads = guild._filter_threads(channel_ids)
+        else:
             # If not provided, then the entire guild is being synced
             # So all previous thread data should be overwritten
             previous_threads = guild._threads.copy()
             guild._clear_threads()
-        else:
-            channel_ids = set(map(int, channel_ids))
-            previous_threads = guild._filter_threads(channel_ids)
 
         threads = {d["id"]: guild._store_thread(d) for d in data.get("threads", [])}
 

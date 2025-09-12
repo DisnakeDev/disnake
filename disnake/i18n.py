@@ -17,6 +17,7 @@ from typing import (
     Literal,
     Optional,
     Set,
+    Type,
     TypeVar,
     Union,
     overload,
@@ -136,9 +137,11 @@ class Localized(Generic[StringT]):
     def _cast(cls, string: LocalizedRequired, required: Literal[True]) -> Localized[str]: ...
 
     @classmethod
-    def _cast(cls, string: Union[Optional[str], Localized[Any]], required: bool) -> Localized[Any]:
+    def _cast(
+        cls: Type[Localized[Any]], string: Union[Optional[str], Localized[Any]], required: bool
+    ) -> Localized[Any]:
         if not isinstance(string, Localized):
-            string = cls(string, data=None)  # type: ignore (this is checked below)
+            string = cls(string, data=None)
 
         # enforce the `StringT` type at runtime
         if required and string.string is None:

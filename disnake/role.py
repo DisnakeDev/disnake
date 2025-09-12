@@ -281,8 +281,8 @@ class Role(Hashable):
         self.mentionable: bool = data.get("mentionable", False)
 
         self.tags: Optional[RoleTags] = None
-        if tags_data := data.get("tags"):
-            self.tags = RoleTags(tags_data)
+        if "tags" in data:
+            self.tags = RoleTags(data["tags"])
 
         self._flags: int = data.get("flags", 0)
 

@@ -111,10 +111,10 @@ class _BaseActivity:
         .. versionchanged:: 2.6
             This attribute can now be ``None``.
         """
-        timestamp = self._timestamps.get("start")
-        if timestamp:
-            return datetime.datetime.fromtimestamp(timestamp / 1000, tz=datetime.timezone.utc)
-        return None
+        if "start" not in self._timestamps:
+            return None
+        timestamp = self._timestamps["start"] / 1000
+        return datetime.datetime.fromtimestamp(timestamp, tz=datetime.timezone.utc)
 
     @property
     def end(self) -> Optional[datetime.datetime]:
@@ -148,9 +148,8 @@ class _BaseActivity:
             Moved from :class:`Activity` to base type, making this available to all activity types.
             Additionally, supports dynamic asset urls using the ``mp:`` prefix now.
         """
-        large_image = self.assets.get("large_image")
-        if large_image:
-            return self._create_image_url(large_image)
+        if "large_image" in self.assets:
+            return self._create_image_url(self.assets["large_image"])
         return None
 
     @property
@@ -161,9 +160,8 @@ class _BaseActivity:
             Moved from :class:`Activity` to base type, making this available to all activity types.
             Additionally, supports dynamic asset urls using the ``mp:`` prefix now.
         """
-        small_image = self.assets.get("small_image")
-        if small_image:
-            return self._create_image_url(small_image)
+        if "small_image" in self.assets:
+            return self._create_image_url(self.assets["small_image"])
         return None
 
     @property
@@ -605,10 +603,10 @@ class Streaming(BaseActivity):
         This corresponds to the ``large_image`` key of the :attr:`Streaming.assets`
         dictionary if it starts with ``twitch:``. Typically set by the Discord client.
         """
-        name = self.assets.get("large_image")
-        if name:
-            return name[7:] if name[:7] == "twitch:" else None
-        return None
+        if "large_image" not in self.assets:
+            return None
+        name = self.assets["large_image"]
+        return name[7:] if name[:7] == "twitch:" else None
 
     def to_dict(self) -> Dict[str, Any]:
         ret: Dict[str, Any] = {

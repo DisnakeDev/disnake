@@ -1241,10 +1241,9 @@ class Message(Hashable):
             "role_subscription_data"
         )
 
-        self.reference = None
-        ref = data.get("message_reference")
-        if ref is not None:
-            self.reference = ref = MessageReference.with_state(state, ref)
+        self.reference: Optional[MessageReference] = None
+        if "message_reference" in data:
+            self.reference = ref = MessageReference.with_state(state, data["message_reference"])
 
             if "referenced_message" in data:
                 resolved = data["referenced_message"]
@@ -1272,9 +1271,8 @@ class Message(Hashable):
         ]
 
         for handler in ("author", "member", "mentions", "mention_roles"):
-            arg = data.get(handler)
-            if arg:
-                getattr(self, f"_handle_{handler}")(arg)
+            if handler in data:
+                getattr(self, f"_handle_{handler}")(data[handler])
 
     def __repr__(self) -> str:
         name = self.__class__.__name__

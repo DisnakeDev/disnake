@@ -270,6 +270,7 @@ class DiscordClientWebSocketResponse(aiohttp.ClientWebSocketResponse):
 
 
 class HeartbeatWebSocket(Protocol):
+    # assigning any value to make pyright infer this as a classvar
     HEARTBEAT: Final[Literal[1, 3]] = 1
 
     thread_id: int

@@ -471,9 +471,8 @@ class Guild(Hashable):
             self._voice_states[user_id] = after
 
         member = self.get_member(user_id)
-        if member is None:
-            if member_data := data.get("member"):
-                member = Member(data=member_data, state=self._state, guild=self)
+        if member is None and "member" in data:
+            member = Member(data=data["member"], state=self._state, guild=self)
 
         return member, before, after
 

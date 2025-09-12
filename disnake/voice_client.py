@@ -46,7 +46,6 @@ has_nacl: bool
 
 try:
     import nacl.secret
-    import nacl.utils  # type: ignore[reportUnusedImport]
 
     has_nacl = True
 except ImportError:

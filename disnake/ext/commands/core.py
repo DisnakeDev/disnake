@@ -102,7 +102,6 @@ __all__ = (
 MISSING: Any = disnake.utils.MISSING
 
 T = TypeVar("T")
-KT = TypeVar("KT")
 VT = TypeVar("VT")
 CogT = TypeVar("CogT", bound="Optional[Cog]")
 CommandT = TypeVar("CommandT", bound="Command")
@@ -159,7 +158,7 @@ def hooked_wrapped_callback(
             raise CommandInvokeError(exc) from exc
         finally:
             if command._max_concurrency is not None:
-                await command._max_concurrency.release(ctx.message)
+                await command._max_concurrency.release(ctx)
 
             await command.call_after_hooks(ctx)
         return ret
@@ -1698,8 +1697,8 @@ def check(predicate: Check) -> Callable[[T], T]:
     """
 
     def decorator(
-        func: Union[Command[CogT, P, T], CoroFunc],
-    ) -> Union[Command[CogT, P, T], CoroFunc]:
+        func: Union[Command[Any, ..., Any], CoroFunc],
+    ) -> Union[Command[Any, ..., Any], CoroFunc]:
         if hasattr(func, "__command_flag__"):
             func.checks.append(predicate)
         else:
