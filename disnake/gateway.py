@@ -19,10 +19,12 @@ from typing import (
     Literal,
     NamedTuple,
     Protocol,
+    Sequence,
     TypeVar,
 )
 
 import aiohttp
+import dave
 
 from . import utils
 from .activity import BaseActivity
@@ -951,6 +953,7 @@ class DiscordVoiceWebSocket:
 
         self._close_code: int | None = None
         self.thread_id: int = threading.get_ident()
+        self.dave: DaveState = DaveState(self)
         if hook:
             self._hook = hook
 
@@ -965,6 +968,10 @@ class DiscordVoiceWebSocket:
     async def send_as_json(self, data: Any) -> None:
         _log.debug("Sending voice websocket frame: %s.", data)
         await self.ws.send_str(utils._to_json(data))
+
+    async def send_as_bytes(self, data: bytes) -> None:
+        _log.debug("Sending voice websocket binary frame: %s.", data.hex())
+        await self.ws.send_bytes(data)
 
     send_heartbeat = send_as_json
 
@@ -993,6 +1000,7 @@ class DiscordVoiceWebSocket:
                 "user_id": str(state.user.id),
                 "session_id": state.session_id,
                 "token": state.token,
+                "max_dave_protocol_version": self.dave.max_version,
             },
         }
         await self.send_as_json(payload)
@@ -1050,6 +1058,10 @@ class DiscordVoiceWebSocket:
 
         await self.send_as_json(payload)
 
+    async def send_dave_mls_key_package(self, key_package: Sequence[int]) -> None:
+        data = struct.pack(">B", self.DAVE_MLS_KEY_PACKAGE) + bytes(key_package)
+        await self.send_as_bytes(data)
+
     async def received_message(self, msg: VoicePayload) -> None:
         _log.debug("Voice websocket frame received: %s", msg)
         op = msg["op"]
@@ -1071,6 +1083,8 @@ class DiscordVoiceWebSocket:
         elif op == self.SESSION_DESCRIPTION:
             self._connection.mode = data["mode"]
             await self.load_secret_key(data)
+            if (dave_version := data.get("dave_protocol_version")) is not None:
+                await self.dave.reset_state(dave_version)
             self._ready.set()
         elif op == self.HELLO:
             interval: float = data["heartbeat_interval"] / 1000.0
@@ -1078,6 +1092,17 @@ class DiscordVoiceWebSocket:
             self._keep_alive.start()
 
         await self._hook(self, msg)
+
+    async def received_message_binary(self, msg: bytes) -> None:
+        _log.debug("Voice websocket binary frame received: %s", msg.hex())
+        if len(msg) == 0:
+            return  # this should not happen.
+
+        op = msg[0]
+        if op == self.DAVE_MLS_EXTERNAL_SENDER:
+            _log.debug("received MLS external sender")
+            # TODO: improve the type casting here, requiring list[int] is clearly not right
+            self.dave.session.set_external_sender(list(msg[1:]))
 
     async def initial_connection(self, data: VoiceReadyPayload) -> None:
         state = self._connection
@@ -1137,6 +1162,13 @@ class DiscordVoiceWebSocket:
         msg = await asyncio.wait_for(self.ws.receive(), timeout=30.0)
         if msg.type is aiohttp.WSMsgType.TEXT:
             await self.received_message(utils._from_json(msg.data))
+        elif msg.type is aiohttp.WSMsgType.BINARY:
+            # TODO: improve exception handling, this obviously isn't a good solution
+            try:
+                await self.received_message_binary(msg.data)
+            except Exception:
+                _log.exception("Failed to process binary voice websocket frame:")
+                raise
         elif msg.type is aiohttp.WSMsgType.ERROR:
             _log.debug("Received %s", msg)
             raise ConnectionClosed(self.ws, shard_id=None, voice=True) from msg.data
@@ -1154,3 +1186,51 @@ class DiscordVoiceWebSocket:
 
         self._close_code = code
         await self.ws.close(code=code)
+
+
+class DaveState:
+    def __init__(self, ws: DiscordVoiceWebSocket) -> None:
+        self.max_version: Final[int] = dave.get_max_supported_protocol_version()
+        self.selected_version: int = dave.kDisabledVersion
+
+        self.ws: DiscordVoiceWebSocket = ws
+        self.session: dave.Session = dave.Session(
+            "",  # `context`, unused without persistent keys
+            "",  # auth_session_id, same thing
+            lambda source, reason: _log.error("MLS failure: %s - %s", source, reason),
+        )
+
+    async def reset_state(self, version: int) -> None:
+        if version > self.max_version:
+            raise RuntimeError(
+                f"Gateway selected DAVE version {version}, maximum supported version is {self.max_version}"
+            )
+
+        _log.debug("gateway selected DAVE version %d", version)
+        self.selected_version = version
+
+        if version > dave.kDisabledVersion:
+            await self.prepare_epoch(1)
+        else:
+            # TODO: prepare ratchets for 0 transition
+            # TODO: execute 0 transition
+            ...
+
+    async def prepare_epoch(self, epoch: int) -> None:
+        # epoch 1 indicates that a new MLS group is being created
+        if epoch == 1:
+            _log.info(
+                "re-initializing MLS session with protocol version %d and group ID %d",
+                self.selected_version,
+                self.ws._connection.channel.id,
+            )
+            self.session.init(
+                self.selected_version,
+                self.ws._connection.channel.id,
+                str(self.ws._connection.user.id),
+                # XXX: retain key between epoch resets?
+                None,
+            )
+
+            key_package = self.session.get_marshalled_key_package()
+            await self.ws.send_dave_mls_key_package(key_package)

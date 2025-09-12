@@ -192,6 +192,7 @@ class VoiceReadyPayload(TypedDict):
 class VoiceSessionDescriptionPayload(TypedDict):
     mode: SupportedModes
     secret_key: list[int]
+    dave_protocol_version: int
 
 
 # voice opcode 6
@@ -226,6 +227,7 @@ class VoiceIdentifyData(TypedDict):
     user_id: str
     session_id: str
     token: str
+    max_dave_protocol_version: NotRequired[int]
 
 
 class VoiceIdentifyCommand(TypedDict):
