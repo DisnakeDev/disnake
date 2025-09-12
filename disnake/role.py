@@ -284,12 +284,10 @@ class Role(Hashable):
         self._emoji: Optional[str] = data.get("unicode_emoji")
         self.managed: bool = data.get("managed", False)
         self.mentionable: bool = data.get("mentionable", False)
-        self.tags: Optional[RoleTags]
 
-        try:
+        self.tags: Optional[RoleTags] = None
+        if "tags" in data:
             self.tags = RoleTags(data["tags"])
-        except KeyError:
-            self.tags = None
 
         self._flags: int = data.get("flags", 0)
 

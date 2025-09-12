@@ -9,7 +9,18 @@ import sys
 import warnings
 from dataclasses import dataclass
 from datetime import timedelta, timezone
-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, TypeVar, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Literal,
+    Optional,
+    Tuple,
+    TypeVar,
+    Union,
+)
 from unittest import mock
 
 import pytest
@@ -22,9 +33,16 @@ from . import helpers, utils_helper_module
 
 if TYPE_CHECKING:
     from typing_extensions import TypeAliasType
+
+    T = TypeVar("T")
+    CoolList = TypeAliasType("CoolList", List[T], type_params=(T,))
+
 elif sys.version_info >= (3, 12):
     # non-3.12 tests shouldn't be using this
     from typing import TypeAliasType
+
+    T = TypeVar("T")
+    CoolList = TypeAliasType("CoolList", List[T], type_params=(T,))
 
 
 def test_missing() -> None:
@@ -805,29 +823,21 @@ def test_resolve_annotation_literal() -> None:
     with pytest.raises(
         TypeError, match=r"Literal arguments must be of type str, int, bool, or NoneType."
     ):
-        utils.resolve_annotation(Literal[timezone.utc, 3], globals(), locals(), {})  # type: ignore
+        utils.resolve_annotation(Literal[timezone.utc, 3], globals(), locals(), {})
 
 
 @pytest.mark.skipif(sys.version_info < (3, 12), reason="syntax requires py3.12")
 class TestResolveAnnotationTypeAliasType:
     def test_simple(self) -> None:
-        # this is equivalent to `type CoolList = List[int]`
-        CoolList = TypeAliasType("CoolList", List[int])
-        assert utils.resolve_annotation(CoolList, globals(), locals(), {}) == List[int]
+        assert utils.resolve_annotation(CoolList[int], globals(), locals(), {}) == List[int]
 
     def test_generic(self) -> None:
-        # this is equivalent to `type CoolList[T] = List[T]; CoolList[int]`
-        T = TypeVar("T")
-        CoolList = TypeAliasType("CoolList", List[T], type_params=(T,))
-
         annotation = CoolList[int]
         assert utils.resolve_annotation(annotation, globals(), locals(), {}) == List[int]
 
     # alias and arg in local scope
     def test_forwardref_local(self) -> None:
-        T = TypeVar("T")
         IntOrStr = Union[int, str]
-        CoolList = TypeAliasType("CoolList", List[T], type_params=(T,))
 
         annotation = CoolList["IntOrStr"]
         assert utils.resolve_annotation(annotation, globals(), locals(), {}) == List[IntOrStr]
@@ -999,12 +1009,12 @@ class _Clazz:
 
             return inner
 
-    rebind = _toplevel
+    rebind: Callable[["_Clazz"], Any] = lambda _: _toplevel()
 
     @decorator
     def decorated(self) -> None: ...
 
-    _lambda = lambda: None
+    _lambda: Callable[["_Clazz"], None] = lambda _: None
 
 
 @pytest.mark.parametrize(

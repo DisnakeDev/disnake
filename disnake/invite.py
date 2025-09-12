@@ -482,17 +482,16 @@ class Invite(Hashable):
     @classmethod
     def from_incomplete(cls, *, state: ConnectionState, data: InvitePayload) -> Self:
         guild: Optional[Union[Guild, PartialInviteGuild]]
-        try:
+        if "guild" in data:
             guild_data = data["guild"]
-        except KeyError:
-            # If we're here, then this is a group DM
-            guild = None
-        else:
             guild_id = int(guild_data["id"])
             guild = state._get_guild(guild_id)
             if guild is None:
                 # If it's not cached, then it has to be a partial guild
                 guild = PartialInviteGuild(state, guild_data, guild_id)
+        else:
+            # no guild_data means we're in a DM
+            guild = None
 
         channel: Optional[Union[PartialInviteChannel, GuildChannel]] = None
         if channel_data := data.get("channel"):

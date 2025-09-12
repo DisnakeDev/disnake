@@ -567,11 +567,8 @@ class Guild(Hashable):
             self._voice_states[user_id] = after
 
         member = self.get_member(user_id)
-        if member is None:
-            try:
-                member = Member(data=data["member"], state=self._state, guild=self)
-            except KeyError:
-                member = None
+        if member is None and "member" in data:
+            member = Member(data=data["member"], state=self._state, guild=self)
 
         return member, before, after
 
@@ -737,10 +734,8 @@ class Guild(Hashable):
 
     # TODO: refactor/remove?
     def _sync(self, data: GuildPayload) -> None:
-        try:
+        if "large" in data:
             self._large = data["large"]
-        except KeyError:
-            pass
 
         empty_tuple = ()
         for presence in data.get("presences", []):

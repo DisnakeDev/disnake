@@ -57,7 +57,7 @@ class TestDecorator:
     def test_cls(self, cls: Type[_CustomButton[ui.View]]) -> None:
         with create_callback(_CustomView, cls) as func:
             res = ui.button(cls=cls, param=1337)(func)
-            assert_type(res, ui.item.DecoratedItem[cls])
+            assert_type(res, ui.item.DecoratedItem[_CustomButton[ui.View]])
 
             assert func.__discord_ui_model_type__ is cls
             assert func.__discord_ui_model_kwargs__ == {"param": 1337}

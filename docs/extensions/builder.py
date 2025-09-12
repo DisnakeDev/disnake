@@ -82,7 +82,8 @@ def disable_mathjax(app: Sphinx, config: Config) -> None:
     # inspired by https://github.com/readthedocs/sphinx-hoverxref/blob/003b84fee48262f1a969c8143e63c177bd98aa26/hoverxref/extension.py#L151
 
     for listener in app.events.listeners.get("html-page-context", []):
-        module_name = inspect.getmodule(listener.handler).__name__
+        module = inspect.getmodule(listener.handler)
+        module_name = module.__name__ if module else ""
         if module_name == "sphinx.ext.mathjax":
             app.disconnect(listener.id)
 
