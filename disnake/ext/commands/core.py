@@ -159,7 +159,7 @@ def hooked_wrapped_callback(
             raise CommandInvokeError(exc) from exc
         finally:
             if command._max_concurrency is not None:
-                await command._max_concurrency.release(ctx)
+                await command._max_concurrency.release(ctx)  # type: ignore
 
             await command.call_after_hooks(ctx)
         return ret
@@ -772,8 +772,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
             raise CheckFailure(f"The check functions for command {self.qualified_name} failed.")
 
         if self._max_concurrency is not None:
-            # For this application, context can be duck-typed as a Message
-            await self._max_concurrency.acquire(ctx)  # type: ignore
+            await self._max_concurrency.acquire(ctx)
 
         try:
             if self.cooldown_after_parsing:
@@ -786,7 +785,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
             await self.call_before_hooks(ctx)
         except Exception:
             if self._max_concurrency is not None:
-                await self._max_concurrency.release(ctx)  # type: ignore
+                await self._max_concurrency.release(ctx)
             raise
 
     def is_on_cooldown(self, ctx: Context) -> bool:

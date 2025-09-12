@@ -1267,7 +1267,7 @@ class Message(Hashable):
 
         for handler in ("author", "member", "mentions", "mention_roles"):
             if handler in data:
-                getattr(self, f"_handle_{handler}")(data[handler])
+                getattr(self, f"_handle_{handler}")(data[handler])  # type: ignore
 
     def __repr__(self) -> str:
         name = self.__class__.__name__
