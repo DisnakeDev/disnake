@@ -3478,7 +3478,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
     async def trigger_typing(self) -> None:
         """|coro|
 
-        Triggers a *typing* indicator to the desination.
+        Triggers a *typing* indicator to the destination.
 
         *Typing* indicator will go away after 10 seconds.
         """

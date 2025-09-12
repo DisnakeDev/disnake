@@ -48,7 +48,7 @@ jobs:
 
   # Used to determine which python versions to test against.
   # noxfile.py is the source of truth, which in turn draws from
-  # pyproject.toml's `project.requires-python` and `project.classifers`.
+  # pyproject.toml's `project.requires-python` and `project.classifiers`.
   python-versions:
     runs-on: ubuntu-latest
     outputs:
@@ -110,6 +110,7 @@ jobs:
       - lint
     strategy:
       matrix:
+        # TODO: add 3.14 once we switch to uv
         python-version: ${{ fromJson(needs.python-versions.outputs.pyright) }}
         experimental: [false]
       fail-fast: false
@@ -241,6 +242,7 @@ jobs:
     strategy:
       matrix:
         os: ["windows-latest", "ubuntu-latest", "macos-latest"]
+        # TODO: add 3.14 once we switch to uv
         python-version: ${{ fromJson(needs.python-versions.outputs.tests) }}
         experimental: [false]
       fail-fast: true

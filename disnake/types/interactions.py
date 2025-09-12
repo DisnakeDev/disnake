@@ -271,9 +271,17 @@ class ModalInteractionActionRowData(_BaseComponentInteractionData):
     components: List[ModalInteractionActionRowChildData]
 
 
+class ModalInteractionTextDisplayData(_BaseComponentInteractionData):
+    type: Literal[10]
+
+
 ModalInteractionLabelChildData = Union[
     ModalInteractionStringSelectData,
     ModalInteractionTextInputData,
+    ModalInteractionUserSelectData,
+    ModalInteractionRoleSelectData,
+    ModalInteractionMentionableSelectData,
+    ModalInteractionChannelSelectData,
 ]
 
 
@@ -291,6 +299,7 @@ ModalInteractionInnerComponentData = Union[
 # top-level components
 ModalInteractionComponentData = Union[
     ModalInteractionActionRowData,
+    ModalInteractionTextDisplayData,
     ModalInteractionLabelData,
 ]
 

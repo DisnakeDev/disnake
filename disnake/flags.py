@@ -430,6 +430,7 @@ class SystemChannelFlags(BaseFlags, inverted=True):
         def __init__(
             self,
             *,
+            emoji_added_notifications: bool = ...,
             guild_reminder_notifications: bool = ...,
             join_notification_replies: bool = ...,
             join_notifications: bool = ...,
@@ -498,6 +499,15 @@ class SystemChannelFlags(BaseFlags, inverted=True):
         .. versionadded:: 2.9
         """
         return 1 << 5
+
+    @flag_value
+    def emoji_added_notifications(self) -> int:
+        """:class:`bool`: Returns ``True`` if the system channel shows emoji
+        added notifications for when an emoji is created.
+
+        .. versionadded:: 2.11
+        """
+        return 1 << 8
 
 
 class MessageFlags(BaseFlags):

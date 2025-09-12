@@ -121,3 +121,8 @@ We use [towncrier](https://github.com/twisted/towncrier) for managing our change
 ### Documentation
 We use Sphinx to build the project's documentation, which includes [automatically generating](https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html) the API Reference from docstrings using the [NumPy style](https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_numpy.html).  
 To build the documentation locally, use `pdm run docs` and visit http://127.0.0.1:8009/ once built.
+
+Changes should be marked with a [version directive](https://www.sphinx-doc.org/en/master/usage/restructuredtext/directives.html#describing-changes-between-versions) as documented on the Sphinx documentation.
+
+For the `version` argument, provide ``|vnext|`` as the argument.
+We have a custom role which replaces ``|vnext|`` with the next version of the library upon building the documentation.

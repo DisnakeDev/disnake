@@ -681,9 +681,8 @@ class InvokableSlashCommand(InvokableApplicationCommand):
                     stop_propagation = await local(inter, error)
                     # User has an option to cancel the global error handler by returning True
         finally:
-            if stop_propagation:
-                return  # noqa: B012
-            inter.bot.dispatch("slash_command_error", inter, error)
+            if not stop_propagation:
+                inter.bot.dispatch("slash_command_error", inter, error)
 
     async def _call_autocompleter(
         self, param: str, inter: ApplicationCommandInteraction, user_input: str
@@ -875,7 +874,7 @@ def slash_command(
     """
 
     def decorator(func: CommandCallback) -> InvokableSlashCommand:
-        if not asyncio.iscoroutinefunction(func):
+        if not utils.iscoroutinefunction(func):
             raise TypeError(f"<{func.__qualname__}> must be a coroutine function")
         if hasattr(func, "__command_flag__"):
             raise TypeError("Callback is already a command.")

@@ -16,6 +16,7 @@ keywords = ["disnake", "discord", "discord api"]
 license = { text = "MIT" }
 dependencies = [
     "aiohttp>=3.7.0,<4.0",
+    "typing-extensions>=4.1",
 ]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
@@ -79,7 +80,7 @@ changelog = [
     "towncrier==23.6.0",
 ]
 codemod = [
-    # run codemods on the respository (mostly automated typing)
+    # run codemods on the repository (mostly automated typing)
     "libcst~=1.1.0",
     "ruff==0.12.12",
     "autotyping==23.2.0",
@@ -87,7 +88,6 @@ codemod = [
 typing = [
     # this is not pyright itself, but the python wrapper
     "pyright==1.1.405",
-    "typing-extensions~=4.12.0",
     # only used for type-checking, version does not matter
     "pytz",
 ]
@@ -97,6 +97,7 @@ test = [
     "pytest-asyncio~=0.24.0",
     "looptime~=0.2.0",
     "coverage[toml]~=7.6.0",
+    "typing-extensions>=4.6",
 ]
 build = [
     "wheel~=0.40.0",
@@ -128,6 +129,10 @@ test = { cmd = "nox -Rs test --", help = "Run pytest" }
 [tool.ruff]
 line-length = 100
 target-version = "py38"
+
+[tool.codespell]
+skip = ['docs/_static/**', '*.po']
+ignore-words-list = ['GroupT', "OT",]
 
 [tool.ruff.lint]
 select = [
@@ -167,7 +172,7 @@ ignore = [
 
     # pydocstyle
     "D203", # incompat with D211
-    "D213", # multiline docstring should start on second line, incompatiable with D212
+    "D213", # multiline docstring should start on second line, incompatible with D212
     "D400", # first line ends in period, does not work with `|coro|` etc.
     "D415", # same thing but punctuation in general
     "D416", # section name should end with a colon, incompatible with D406

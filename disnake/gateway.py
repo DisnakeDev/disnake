@@ -199,9 +199,12 @@ class KeepAliveHandler(threading.Thread):
                     f.result()
                 except Exception:
                     _log.exception("An error occurred while stopping the gateway. Ignoring.")
-                finally:
-                    self.stop()
-                    return  # noqa: B012
+                except BaseException:
+                    # Since the thread is at the end of its lifecycle here anyway,
+                    # simply suppress any BaseException that might occur while closing the ws.
+                    pass
+                self.stop()
+                return
 
             data = self.get_payload()
             _log.debug(self.msg, self.shard_id, data["d"])
