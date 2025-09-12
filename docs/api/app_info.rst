@@ -98,3 +98,10 @@ ApplicationRoleConnectionMetadataType
 
 .. autoclass:: ApplicationRoleConnectionMetadataType()
     :members:
+
+
+ApplicationEventWebhookStatus
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: ApplicationEventWebhookStatus
+    :members:

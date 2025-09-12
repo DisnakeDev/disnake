@@ -155,7 +155,7 @@ class ApplicationCommandInteraction(Interaction[ClientT]):
 
     @property
     def target(self) -> Optional[Union[User, Member, Message]]:
-        """Optional[Union[:class:`abc.User`, :class:`Message`]]: The user or message targetted by a user or message command"""
+        """Optional[Union[:class:`abc.User`, :class:`Message`]]: The user or message targeted by a user or message command"""
         return self.data.target
 
     @property
@@ -231,9 +231,9 @@ class ApplicationCommandInteractionData(Dict[str, Any]):
     options: List[:class:`ApplicationCommandInteractionDataOption`]
         A list of options from the API.
     target_id: :class:`int`
-        ID of the user or message targetted by a user or message command
+        ID of the user or message targeted by a user or message command
     target: Union[:class:`User`, :class:`Member`, :class:`Message`]
-        The user or message targetted by a user or message command
+        The user or message targeted by a user or message command
     """
 
     __slots__ = (

@@ -1,1 +1,0 @@
-Add more typing to most modules, increasing type completeness.

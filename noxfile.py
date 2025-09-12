@@ -10,32 +10,16 @@
 
 from __future__ import annotations
 
-import os
 import pathlib
-from itertools import chain
-from typing import TYPE_CHECKING, Callable, Dict, List, Tuple, TypeVar
+from typing import Any, Dict, List, Sequence, Tuple
 
 import nox
 
-if TYPE_CHECKING:
-    from typing_extensions import Concatenate, ParamSpec
-
-    P = ParamSpec("P")
-    T = TypeVar("T")
-
-    NoxSessionFunc = Callable[Concatenate[nox.Session, P], T]
-
 nox.needs_version = ">=2025.5.1"
 
-# see https://pdm-project.org/latest/usage/advanced/#use-nox-as-the-runner
-os.environ.update(
-    {
-        "PDM_IGNORE_SAVED_PYTHON": "1",
-    },
-)
 
 nox.options.error_on_external_run = True
-nox.options.reuse_existing_virtualenvs = True
+nox.options.reuse_venv = "yes"
 nox.options.sessions = [
     "lint",
     "check-manifest",
@@ -50,6 +34,45 @@ PYPROJECT = nox.project.load_toml()
 reset_coverage = True
 
 
+def install_deps(
+    session: nox.Session,
+    *,
+    extras: Sequence[str] = (),
+    groups: Sequence[str] = (),
+    project: bool = True,
+) -> None:
+    """Helper to install dependencies from a group."""
+    if not project and extras:
+        raise TypeError("Cannot install extras without also installing the project")
+
+    command: List[str] = [
+        "pdm",
+        "sync",
+        "--fail-fast",
+        "--clean-unselected",
+    ]
+
+    # see https://pdm-project.org/latest/usage/advanced/#use-nox-as-the-runner
+    env: Dict[str, Any] = {
+        "PDM_IGNORE_SAVED_PYTHON": "1",
+    }
+
+    command.extend([f"-G={g}" for g in (*extras, *groups)])
+
+    if not groups:
+        # if no dev groups requested, make sure we don't install any
+        command.append("--prod")
+
+    if not project:
+        command.append("--no-self")
+
+    session.run_install(
+        *command,
+        env=env,
+        external=True,
+    )
+
+
 @nox.session(python="3.8")
 def docs(session: nox.Session) -> None:
     """Build and generate the documentation.
@@ -57,7 +80,7 @@ def docs(session: nox.Session) -> None:
     If running locally, will build automatic reloading docs.
     If running in CI, will build a production version of the documentation.
     """
-    session.run_always("pdm", "install", "--prod", "-G", "docs", external=True)
+    install_deps(session, extras=["docs"])
     with session.chdir("docs"):
         args = ["-b", "html", "-n", ".", "_build/html", *session.posargs]
         if session.interactive:
@@ -86,7 +109,7 @@ def docs(session: nox.Session) -> None:
 @nox.session
 def lint(session: nox.Session) -> None:
     """Check all files for linting errors"""
-    session.run_always("pdm", "install", "-G", "tools", external=True)
+    install_deps(session, project=False, groups=["tools"])
 
     session.run("pre-commit", "run", "--all-files", *session.posargs)
 
@@ -94,15 +117,14 @@ def lint(session: nox.Session) -> None:
 @nox.session(name="check-manifest")
 def check_manifest(session: nox.Session) -> None:
     """Run check-manifest."""
-    # --no-self is provided here because check-manifest builds disnake. There's no reason to build twice, so we don't.
-    session.run_always("pdm", "install", "--no-self", "-dG", "tools", external=True)
+    install_deps(session, project=False, groups=["tools"])
     session.run("check-manifest", "-v")
 
 
-@nox.session()
+@nox.session
 def slotscheck(session: nox.Session) -> None:
     """Run slotscheck."""
-    session.run_always("pdm", "install", "-dG", "tools", external=True)
+    install_deps(session, project=True, groups=["tools"])
     session.run("python", "-m", "slotscheck", "--verbose", "-m", "disnake")
 
 
@@ -113,7 +135,7 @@ def autotyping(session: nox.Session) -> None:
     Because of the nature of changes that autotyping makes, and the goal design of examples,
     this runs on each folder in the repository with specific settings.
     """
-    session.run_always("pdm", "install", "-dG", "codemod", external=True)
+    install_deps(session, project=True, groups=["codemod"])
 
     base_command = ["python", "-m", "libcst.tool", "codemod", "autotyping.AutotypeCommand"]
     if not session.interactive:
@@ -172,7 +194,7 @@ def autotyping(session: nox.Session) -> None:
 @nox.session(name="codemod", python="3.8")
 def codemod(session: nox.Session) -> None:
     """Run libcst codemods."""
-    session.run_always("pdm", "install", "-dG", "codemod", external=True)
+    install_deps(session, project=True, groups=["codemod"])
 
     base_command = ["python", "-m", "libcst.tool"]
     base_command_codemod = [*base_command, "codemod"]
@@ -196,10 +218,21 @@ def codemod(session: nox.Session) -> None:
     session.notify("autotyping", posargs=[])
 
 
-@nox.session()
+@nox.session
 def pyright(session: nox.Session) -> None:
     """Run pyright."""
-    session.run_always("pdm", "install", "-d", "-Gspeed", "-Gdocs", "-Gvoice", external=True)
+    install_deps(
+        session,
+        project=True,
+        extras=["speed", "voice"],
+        groups=[
+            "test",  # tests/
+            "nox",  # noxfile.py
+            "docs",  # docs/
+            "codemod",  # scripts/
+            "typing",  # pyright
+        ],
+    )
     env = {
         "PYRIGHT_PYTHON_IGNORE_WARNINGS": "1",
     }
@@ -221,10 +254,7 @@ def pyright(session: nox.Session) -> None:
 )
 def test(session: nox.Session, extras: List[str]) -> None:
     """Run tests."""
-    # shell splitting is not done by nox
-    extras = list(chain(*(["-G", extra] for extra in extras)))
-
-    session.run_always("pdm", "install", "-dG", "test", "-dG", "typing", *extras, external=True)
+    install_deps(session, project=True, extras=extras, groups=["test"])
 
     pytest_args = ["--cov", "--cov-context=test"]
     global reset_coverage  # noqa: PLW0603
@@ -243,10 +273,11 @@ def test(session: nox.Session, extras: List[str]) -> None:
     )
 
 
-@nox.session()
+@nox.session
 def coverage(session: nox.Session) -> None:
     """Display coverage information from the tests."""
-    session.run_always("pdm", "install", "-dG", "test", external=True)
+    install_deps(session, project=False, groups=["test"])
+
     posargs = session.posargs
     # special-case serve
     if "serve" in posargs:
