@@ -971,7 +971,7 @@ class DiscordVoiceWebSocket:
         await self.ws.send_str(utils._to_json(data))
 
     async def send_as_bytes(self, data: bytes) -> None:
-        _log.debug("Sending voice websocket binary frame: %s.", data.hex())
+        _log.debug("Sending voice websocket frame (binary): %s.", data.hex())
         await self.ws.send_bytes(data)
 
     send_heartbeat = send_as_json
@@ -1102,7 +1102,7 @@ class DiscordVoiceWebSocket:
         await self._hook(self, msg)
 
     async def received_message_binary(self, msg: bytes) -> None:
-        _log.debug("Voice websocket binary frame received: %s", msg.hex())
+        _log.debug("Voice websocket frame (binary) received: %s", msg.hex())
         if len(msg) == 0:
             return  # this should not happen.
 
@@ -1226,6 +1226,7 @@ class DaveState:
             ratchet = self.session.get_key_ratchet(str(user_id))
         else:
             ratchet = None
+        _log.debug("updating ratchet for user %d to %r", user_id, ratchet)
 
         if self.encryptor is None:
             # should never happen
@@ -1246,11 +1247,14 @@ class DaveState:
             await self.prepare_epoch(self.NEW_MLS_GROUP_EPOCH)
             # TODO: consider race conditions if encryptor is set up too late here
             self.encryptor = dave.Encryptor()
+            _log.debug("created new encryptor")
         else:
             await self.prepare_transition(self.INIT_TRANSITION_ID, dave.kDisabledVersion)
             # `INIT_TRANSITION_ID` is executed immediately, no need to `.execute_transition()` here
 
     async def prepare_epoch(self, epoch: int) -> None:
+        _log.debug("preparing epoch %d", epoch)
+
         # "When the epoch ID is equal to 1, this message indicates that a new MLS group is to be created for the given protocol version."
         if epoch == self.NEW_MLS_GROUP_EPOCH:
             _log.info(
@@ -1275,6 +1279,7 @@ class DaveState:
 
     async def prepare_transition(self, transition_id: int, version: int) -> None:
         # since we don't currently implement decryption, no need to reset ratchets for other members here
+        _log.debug("preparing transition to version %d, ID %d", version, transition_id)
 
         self._prepared_transitions[transition_id] = version
         if transition_id == self.INIT_TRANSITION_ID:
@@ -1293,6 +1298,7 @@ class DaveState:
                 transition_id,
             )
             return
+        _log.debug("executing transition to version %d, ID %d", version, transition_id)
 
         # https://daveprotocol.com/#downgrade-to-transport-only-encryption
         if version == dave.kDisabledVersion:
