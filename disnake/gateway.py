@@ -1074,6 +1074,10 @@ class DiscordVoiceWebSocket:
         }
         await self.send_as_json(payload)
 
+    async def send_dave_mls_commit_welcome(self, commit_welcome: Sequence[int]) -> None:
+        data = struct.pack(">B", self.DAVE_MLS_COMMIT_WELCOME) + bytes(commit_welcome)
+        await self.send_as_bytes(data)
+
     async def received_message(self, msg: VoicePayload) -> None:
         _log.debug("Voice websocket frame received: %s", msg)
         op = msg["op"]
@@ -1118,6 +1122,8 @@ class DiscordVoiceWebSocket:
         op = msg[0]
         if op == self.DAVE_MLS_EXTERNAL_SENDER:
             self.dave.handle_mls_external_sender(msg[1:])
+        elif op == self.DAVE_MLS_PROPOSALS:
+            await self.dave.handle_mls_proposals(msg[1:])
 
     async def initial_connection(self, data: VoiceReadyPayload) -> None:
         state = self._connection
@@ -1277,6 +1283,17 @@ class DaveState:
         _log.debug("received MLS external sender")
         # TODO: improve the type casting here, requiring list[int] is clearly not right
         self._session.set_external_sender(list(data))
+
+    async def handle_mls_proposals(self, data: bytes) -> None:
+        # TODO: "Clients must reject a proposal if it is not one of the allowed proposal types or is not sent by the expected external sender." (?)
+        # TODO: improve type casting
+        commit_welcome = self._session.process_proposals(
+            list(data),
+            {str(u) for u in self._get_recognized_users(with_self=True)},
+        )
+        if commit_welcome is not None:
+            _log.debug("sending commit + welcome message")
+            await self.ws.send_dave_mls_commit_welcome(commit_welcome)
 
     async def prepare_epoch(self, epoch: int) -> None:
         _log.debug("preparing epoch %d", epoch)
