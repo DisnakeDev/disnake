@@ -165,6 +165,9 @@ class VoicePayload(TypedDict):
     d: Any
 
 
+# voice opcode 2
+
+
 class VoiceReadyPayload(TypedDict):
     ssrc: int
     ip: str
@@ -172,10 +175,27 @@ class VoiceReadyPayload(TypedDict):
     modes: List[str]
 
 
+# voice opcode 4
+
+
 class VoiceSessionDescriptionPayload(TypedDict):
     mode: SupportedModes
     secret_key: List[int]
     dave_protocol_version: int
+
+
+# voice opcode 11
+
+
+class VoiceClientsConnectPayload(TypedDict):
+    user_ids: List[Snowflake]
+
+
+# voice opcode 13
+
+
+class VoiceClientDisconnectPayload(TypedDict):
+    user_id: Snowflake
 
 
 #####

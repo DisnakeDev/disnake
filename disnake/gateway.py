@@ -25,6 +25,7 @@ from typing import (
     Optional,
     Protocol,
     Sequence,
+    Set,
     TypeVar,
     Union,
 )
@@ -886,6 +887,8 @@ class DiscordVoiceWebSocket:
         Receive only. Tells you that your websocket connection was acknowledged.
     RESUMED
         Sent only. Tells you that your RESUME request has succeeded.
+    CLIENTS_CONNECT
+        Receive only. Indicates one or more users has connected to voice.
     CLIENT_DISCONNECT
         Receive only. Indicates a user has disconnected from voice.
 
@@ -923,6 +926,7 @@ class DiscordVoiceWebSocket:
     RESUME: Final[Literal[7]] = 7
     HELLO: Final[Literal[8]] = 8
     RESUMED: Final[Literal[9]] = 9
+    CLIENTS_CONNECT: Final[Literal[11]] = 11
     CLIENT_DISCONNECT: Final[Literal[13]] = 13
 
     # DAVE-specific opcodes
@@ -1083,6 +1087,11 @@ class DiscordVoiceWebSocket:
             interval: float = data["heartbeat_interval"] / 1000.0
             self._keep_alive = VoiceKeepAliveHandler(ws=self, interval=min(interval, 5.0))
             self._keep_alive.start()
+        elif op == self.CLIENTS_CONNECT:
+            for user_id in map(int, data["user_ids"]):
+                self.dave.add_recognized_user(user_id)
+        elif op == self.CLIENT_DISCONNECT:
+            self.dave.remove_recognized_user(int(data["user_id"]))
 
         await self._hook(self, msg)
 
@@ -1188,6 +1197,7 @@ class DaveState:
 
         self.selected_version: int = dave.kDisabledVersion
         self._prepared_transitions: Dict[int, int] = {}
+        self._recognized_users: Set[int] = set()
 
         self.ws: DiscordVoiceWebSocket = ws
         self._session: dave.Session = dave.Session(
@@ -1200,6 +1210,11 @@ class DaveState:
     @property
     def _self_id(self) -> int:
         return self.ws._connection.user.id
+
+    def _get_recognized_users(self, *, with_self: bool) -> Set[int]:
+        if with_self:
+            return self._recognized_users | {self._self_id}
+        return self._recognized_users
 
     def _setup_ratchet_for_user(self, user_id: int, version: int) -> None:
         if user_id != self._self_id:
@@ -1234,6 +1249,14 @@ class DaveState:
         else:
             await self.prepare_transition(self.INIT_TRANSITION_ID, dave.kDisabledVersion)
             # `INIT_TRANSITION_ID` is executed immediately, no need to `.execute_transition()` here
+
+    def add_recognized_user(self, user_id: int) -> None:
+        if user_id == self._self_id:
+            return  # in case the gateway ever messes up, ignore CLIENTS_CONNECT for our own user
+        self._recognized_users.add(user_id)
+
+    def remove_recognized_user(self, user_id: int) -> None:
+        self._recognized_users.discard(user_id)
 
     def handle_mls_external_sender(self, data: bytes) -> None:
         _log.debug("received MLS external sender")
