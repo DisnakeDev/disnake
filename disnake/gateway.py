@@ -1205,12 +1205,12 @@ class DaveState:
         self._prepared_transitions: Dict[int, int] = {}
 
         self.ws: DiscordVoiceWebSocket = ws
-        self.session: dave.Session = dave.Session(
+        self._session: dave.Session = dave.Session(
             "",  # `context`, unused without persistent keys
             "",  # auth_session_id, same thing
             lambda source, reason: _log.error("MLS failure: %s - %s", source, reason),
         )
-        self.encryptor: Optional[dave.Encryptor] = None
+        self._encryptor: Optional[dave.Encryptor] = None
 
     @property
     def _self_id(self) -> int:
@@ -1221,16 +1221,16 @@ class DaveState:
             return  # decryption is not implemented, ignore
 
         if version != dave.kDisabledVersion:
-            ratchet = self.session.get_key_ratchet(str(user_id))
+            ratchet = self._session.get_key_ratchet(str(user_id))
         else:
             ratchet = None
         _log.debug("updating ratchet for user %d to %r", user_id, ratchet)
 
-        if self.encryptor is None:
+        if self._encryptor is None:
             # should never happen
             _log.error("attempted to set new ratchet without encryptor")
             return
-        self.encryptor.set_key_ratchet(ratchet)
+        self._encryptor.set_key_ratchet(ratchet)
 
     async def reinit_state(self, version: int) -> None:
         if version > self.max_version:
@@ -1244,7 +1244,7 @@ class DaveState:
         if version > dave.kDisabledVersion:
             await self.prepare_epoch(self.NEW_MLS_GROUP_EPOCH)
             # TODO: consider race conditions if encryptor is set up too late here
-            self.encryptor = dave.Encryptor()
+            self._encryptor = dave.Encryptor()
             _log.debug("created new encryptor")
         else:
             await self.prepare_transition(self.INIT_TRANSITION_ID, dave.kDisabledVersion)
@@ -1253,7 +1253,7 @@ class DaveState:
     def handle_mls_external_sender(self, data: bytes) -> None:
         _log.debug("received MLS external sender")
         # TODO: improve the type casting here, requiring list[int] is clearly not right
-        self.session.set_external_sender(list(data))
+        self._session.set_external_sender(list(data))
 
     async def prepare_epoch(self, epoch: int) -> None:
         _log.debug("preparing epoch %d", epoch)
@@ -1264,7 +1264,7 @@ class DaveState:
                 "re-initializing MLS session, group ID %d",
                 self.ws._connection.channel.id,
             )
-            self.session.init(
+            self._session.init(
                 self.selected_version,
                 self.ws._connection.channel.id,
                 str(self._self_id),
@@ -1275,7 +1275,7 @@ class DaveState:
             # "The client must send a new key package after any of the following events:
             #  - The voice gateway sends a select_protocol_ack opcode (4) that includes a non-zero protocol version [in which case we call `prepare_epoch(1)`]
             #  - The voice gateway announces that a group is being created or re-created via the dave_protocol_prepare_epoch opcode (24) with epoch_id = 1"
-            key_package = self.session.get_marshalled_key_package()
+            key_package = self._session.get_marshalled_key_package()
             await self.ws.send_dave_mls_key_package(key_package)
 
             _log.debug("finished re-initializing MLS session")
@@ -1290,11 +1290,11 @@ class DaveState:
             # TODO: consider whether resetting the session for version = 0 is correct here,
             #       or if we should *only* clear the ratchet without resetting
             #       (see also https://daveprotocol.com/#sole-member-reset third paragraph)
-            await self.execute_transition(transition_id)
+            self.execute_transition(transition_id)
         else:
             await self.ws.send_dave_transition_ready(transition_id)
 
-    async def execute_transition(self, transition_id: int) -> None:
+    def execute_transition(self, transition_id: int) -> None:
         if (version := self._prepared_transitions.pop(transition_id, None)) is None:
             _log.error(
                 "transition ID %d was requested to be executed, but was not prepared?",
@@ -1305,6 +1305,6 @@ class DaveState:
 
         # https://daveprotocol.com/#downgrade-to-transport-only-encryption
         if version == dave.kDisabledVersion:
-            self.session.reset()
+            self._session.reset()
 
         self._setup_ratchet_for_user(self._self_id, version)
