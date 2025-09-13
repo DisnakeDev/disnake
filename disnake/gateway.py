@@ -1108,9 +1108,7 @@ class DiscordVoiceWebSocket:
 
         op = msg[0]
         if op == self.DAVE_MLS_EXTERNAL_SENDER:
-            _log.debug("received MLS external sender")
-            # TODO: improve the type casting here, requiring list[int] is clearly not right
-            self.dave.session.set_external_sender(list(msg[1:]))
+            self.dave.handle_mls_external_sender(msg[1:])
 
     async def initial_connection(self, data: VoiceReadyPayload) -> None:
         state = self._connection
@@ -1251,6 +1249,11 @@ class DaveState:
         else:
             await self.prepare_transition(self.INIT_TRANSITION_ID, dave.kDisabledVersion)
             # `INIT_TRANSITION_ID` is executed immediately, no need to `.execute_transition()` here
+
+    def handle_mls_external_sender(self, data: bytes) -> None:
+        _log.debug("received MLS external sender")
+        # TODO: improve the type casting here, requiring list[int] is clearly not right
+        self.session.set_external_sender(list(data))
 
     async def prepare_epoch(self, epoch: int) -> None:
         _log.debug("preparing epoch %d", epoch)
