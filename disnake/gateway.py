@@ -14,6 +14,7 @@ import zlib
 from collections import deque
 from typing import (
     TYPE_CHECKING,
+    AbstractSet,
     Any,
     Final,
     Literal,
@@ -1232,7 +1233,7 @@ class DaveState:
     def _self_id(self) -> int:
         return self.ws._connection.user.id
 
-    def _get_recognized_users(self, *, with_self: bool) -> Set[int]:
+    def _get_recognized_users(self, *, with_self: bool) -> AbstractSet[int]:
         if with_self:
             return self._recognized_users | {self._self_id}
         return self._recognized_users
