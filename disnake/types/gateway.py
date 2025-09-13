@@ -215,6 +215,20 @@ class VoiceHelloPayload(TypedDict):
 VoiceResumedPayload = None
 
 
+# voice opcode 11
+
+
+class VoiceClientsConnectPayload(TypedDict):
+    user_ids: List[Snowflake]
+
+
+# voice opcode 13
+
+
+class VoiceClientDisconnectPayload(TypedDict):
+    user_id: Snowflake
+
+
 #####
 # Voice payloads (send)
 #####
