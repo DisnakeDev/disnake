@@ -45,6 +45,7 @@ if TYPE_CHECKING:
         PresenceUpdateCommand,
         RequestMembersCommand,
         ResumeCommand,
+        VoiceDaveTransitionReadyCommand,
         VoiceHeartbeatData,
         VoiceIdentifyCommand,
         VoicePayload,
@@ -1062,6 +1063,13 @@ class DiscordVoiceWebSocket:
         data = struct.pack(">B", self.DAVE_MLS_KEY_PACKAGE) + bytes(key_package)
         await self.send_as_bytes(data)
 
+    async def send_dave_transition_ready(self, transition_id: int) -> None:
+        payload: VoiceDaveTransitionReadyCommand = {
+            "op": self.DAVE_TRANSITION_READY,
+            "d": {"transition_id": transition_id},
+        }
+        await self.send_as_json(payload)
+
     async def received_message(self, msg: VoicePayload) -> None:
         _log.debug("Voice websocket frame received: %s", msg)
         op = msg["op"]
@@ -1084,7 +1092,7 @@ class DiscordVoiceWebSocket:
             self._connection.mode = data["mode"]
             await self.load_secret_key(data)
             if (dave_version := data.get("dave_protocol_version")) is not None:
-                await self.dave.reset_state(dave_version)
+                await self.dave.reinit_state(dave_version)
             self._ready.set()
         elif op == self.HELLO:
             interval: float = data["heartbeat_interval"] / 1000.0
@@ -1189,9 +1197,14 @@ class DiscordVoiceWebSocket:
 
 
 class DaveState:
+    NEW_MLS_GROUP_EPOCH: Final[Literal[1]] = 1
+    INIT_TRANSITION_ID: Final[Literal[0]] = 0
+
     def __init__(self, ws: DiscordVoiceWebSocket) -> None:
         self.max_version: Final[int] = dave.get_max_supported_protocol_version()
+
         self.selected_version: int = dave.kDisabledVersion
+        self._prepared_transitions: Dict[int, int] = {}
 
         self.ws: DiscordVoiceWebSocket = ws
         self.session: dave.Session = dave.Session(
@@ -1199,8 +1212,28 @@ class DaveState:
             "",  # auth_session_id, same thing
             lambda source, reason: _log.error("MLS failure: %s - %s", source, reason),
         )
+        self.encryptor: Optional[dave.Encryptor] = None
 
-    async def reset_state(self, version: int) -> None:
+    @property
+    def _self_id(self) -> int:
+        return self.ws._connection.user.id
+
+    def _setup_ratchet_for_user(self, user_id: int, version: int) -> None:
+        if user_id != self._self_id:
+            return  # decryption is not implemented, ignore
+
+        if version != dave.kDisabledVersion:
+            ratchet = self.session.get_key_ratchet(str(user_id))
+        else:
+            ratchet = None
+
+        if self.encryptor is None:
+            # should never happen
+            _log.error("attempted to set new ratchet without encryptor")
+            return
+        self.encryptor.set_key_ratchet(ratchet)
+
+    async def reinit_state(self, version: int) -> None:
         if version > self.max_version:
             raise RuntimeError(
                 f"Gateway selected DAVE version {version}, maximum supported version is {self.max_version}"
@@ -1210,27 +1243,59 @@ class DaveState:
         self.selected_version = version
 
         if version > dave.kDisabledVersion:
-            await self.prepare_epoch(1)
+            await self.prepare_epoch(self.NEW_MLS_GROUP_EPOCH)
+            # TODO: consider race conditions if encryptor is set up too late here
+            self.encryptor = dave.Encryptor()
         else:
-            # TODO: prepare ratchets for 0 transition
-            # TODO: execute 0 transition
-            ...
+            await self.prepare_transition(self.INIT_TRANSITION_ID, dave.kDisabledVersion)
+            # `INIT_TRANSITION_ID` is executed immediately, no need to `.execute_transition()` here
 
     async def prepare_epoch(self, epoch: int) -> None:
-        # epoch 1 indicates that a new MLS group is being created
-        if epoch == 1:
+        # "When the epoch ID is equal to 1, this message indicates that a new MLS group is to be created for the given protocol version."
+        if epoch == self.NEW_MLS_GROUP_EPOCH:
             _log.info(
-                "re-initializing MLS session with protocol version %d and group ID %d",
-                self.selected_version,
+                "re-initializing MLS session, group ID %d",
                 self.ws._connection.channel.id,
             )
             self.session.init(
                 self.selected_version,
                 self.ws._connection.channel.id,
-                str(self.ws._connection.user.id),
-                # XXX: retain key between epoch resets?
+                str(self._self_id),
+                # XXX: retain key between resets?
                 None,
             )
 
+            # "The client must send a new key package after any of the following events:
+            #  - The voice gateway sends a select_protocol_ack opcode (4) that includes a non-zero protocol version [in which case we call `prepare_epoch(1)`]
+            #  - The voice gateway announces that a group is being created or re-created via the dave_protocol_prepare_epoch opcode (24) with epoch_id = 1"
             key_package = self.session.get_marshalled_key_package()
             await self.ws.send_dave_mls_key_package(key_package)
+
+            _log.debug("finished re-initializing MLS session")
+
+    async def prepare_transition(self, transition_id: int, version: int) -> None:
+        # since we don't currently implement decryption, no need to reset ratchets for other members here
+
+        self._prepared_transitions[transition_id] = version
+        if transition_id == self.INIT_TRANSITION_ID:
+            # "Upon receiving dave_protocol_prepare_transition opcode (21) with transition_id = 0, the client immediately executes the transition."
+            # TODO: consider whether resetting the session for version = 0 is correct here,
+            #       or if we should *only* clear the ratchet without resetting
+            #       (see also https://daveprotocol.com/#sole-member-reset third paragraph)
+            await self.execute_transition(transition_id)
+        else:
+            await self.ws.send_dave_transition_ready(transition_id)
+
+    async def execute_transition(self, transition_id: int) -> None:
+        if (version := self._prepared_transitions.pop(transition_id, None)) is None:
+            _log.error(
+                "transition ID %d was requested to be executed, but was not prepared?",
+                transition_id,
+            )
+            return
+
+        # https://daveprotocol.com/#downgrade-to-transport-only-encryption
+        if version == dave.kDisabledVersion:
+            self.session.reset()
+
+        self._setup_ratchet_for_user(self._self_id, version)

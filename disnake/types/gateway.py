@@ -296,6 +296,18 @@ class VoiceResumeCommand(TypedDict):
     d: VoiceResumeData
 
 
+# voice opcode 23
+
+
+class VoiceDaveTransitionReadyData(TypedDict):
+    transition_id: int
+
+
+class VoiceDaveTransitionReadyCommand(TypedDict):
+    op: Literal[23]
+    d: VoiceDaveTransitionReadyData
+
+
 #####
 # Gateway events
 #####
