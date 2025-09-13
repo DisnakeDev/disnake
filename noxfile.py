@@ -23,7 +23,6 @@ nox.options.error_on_external_run = True
 nox.options.reuse_venv = "yes"
 nox.options.sessions = [
     "lint",
-    "check-manifest",
     "slotscheck",
     "pyright",
     "test",
@@ -144,13 +143,6 @@ def lint(session: nox.Session) -> None:
     install_deps(session, project=False, groups=["tools"])
 
     session.run("pre-commit", "run", "--all-files", *session.posargs)
-
-
-@nox.session(name="check-manifest")
-def check_manifest(session: nox.Session) -> None:
-    """Run check-manifest."""
-    install_deps(session, project=False, groups=["tools"])
-    session.run("check-manifest", "-v")
 
 
 @nox.session
