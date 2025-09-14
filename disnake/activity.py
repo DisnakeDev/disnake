@@ -123,10 +123,10 @@ class _BaseActivity:
         .. versionchanged:: 2.6
             This attribute can now be ``None``.
         """
-        timestamp = self._timestamps.get("end")
-        if timestamp:
-            return datetime.datetime.fromtimestamp(timestamp / 1000, tz=datetime.timezone.utc)
-        return None
+        if "end" not in self._timestamps:
+            return None
+        timestamp = self._timestamps["end"] / 1000
+        return datetime.datetime.fromtimestamp(timestamp, tz=datetime.timezone.utc)
 
     def to_dict(self) -> ActivityPayload:
         raise NotImplementedError
