@@ -307,19 +307,6 @@ def dev(session: nox.Session) -> None:
     session.run("pdm", "sync", "--clean-unselected", "-dG:all", "-G:all")
     session.run("pdm", "run", "pre-commit", "install")
 
-    if "--no-nox" in session.posargs:
-        session.debug("Skipping creating nox environments due to the --no-nox flag")
-        return
-
-    session.debug("Creating all nox environments...")
-    session.run(
-        "nox",
-        "-N",
-        "--install-only",
-        *session.posargs,
-        external=False,
-    )
-
 
 if __name__ == "__main__":
     nox.main()

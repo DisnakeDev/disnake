@@ -83,8 +83,6 @@ This will:
 - create a venv at `.venv`
 - install all dependences to `.venv`
 - install pre-commit hooks at `.git/hooks/pre-commit`
-- install all nox environments (unless the `--no-nox` flag is set)
-
 
 Other tools used in this project include [ruff](https://docs.astral.sh/ruff) (formatter and linter), and [pyright](https://microsoft.github.io/pyright/#/) (type-checker). For the most part, these automatically run on every commit with no additional action required - see below for details.
 
