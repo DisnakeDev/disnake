@@ -117,18 +117,21 @@ jobs:
         session: ${{ fromJson(needs.python-versions.outputs.pyright-sessions) }}
       fail-fast: false
     continue-on-error: ${{ matrix.session.experimental }}
-
     steps:
       - uses: actions/checkout@v4
 
       - name: Set up environment
         id: setup-env
         uses: ./.github/actions/setup-env
-        env:
-          PDM_USE_VENV: true
-          PDM_VENV_IN_PROJECT: true
         with:
           python-version: ${{ matrix.session.python }}
+
+      - name: Add .venv/bin to PATH
+        id: venv-bin
+        run: |
+          pdm venv create
+          dirname "$(pdm info --python)" >> $GITHUB_PATH
+          echo python="$(pdm info --python)" >> $GITHUB_OUTPUT
 
       - name: Install dependencies
         # `--no-venv` to install in the main pdm venv instead of nox's pyright-specific one
@@ -137,17 +140,16 @@ jobs:
         # python is NOT forced here because the session name is explicit
         env:
           NOXSESSION: ${{ matrix.session.name }}
-          PIP_PYTHON: "./.venv/bin/python"
+          NOX_DEFAULT_VENV_BACKEND: "none"
+          ## needed to install specific dependencies
+          PIP_PYTHON: ${{ steps.venv-bin.outputs.python }}
         run: |
-          nox --no-venv --install-only
-
-      - name: Add .venv/bin to PATH
-        run: dirname "$(pdm info --python)" >> $GITHUB_PATH
+          nox --install-only
 
       - name: Set pyright version
         id: pyright-version
         run: |
-          echo "pyright-version=$(pdm run python -c 'import pyright; print(pyright.__pyright_version__)')" >> $GITHUB_OUTPUT
+          echo "pyright-version=$(${{steps.venv-bin.outputs.python}} -c 'import pyright; print(pyright.__pyright_version__)')" >> $GITHUB_OUTPUT
 
       - name: Run pyright (Linux)
         uses: jakebailey/pyright-action@v2.2.1
