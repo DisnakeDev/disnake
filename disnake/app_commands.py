@@ -5,7 +5,7 @@ from __future__ import annotations
 import math
 import re
 from abc import ABC
-from typing import TYPE_CHECKING, ClassVar, List, Mapping, Optional, Sequence, Tuple, Union
+from typing import TYPE_CHECKING, ClassVar, List, Mapping, Optional, Sequence, Tuple, Union, cast
 
 from .enums import (
     ApplicationCommandPermissionType,
@@ -33,8 +33,10 @@ if TYPE_CHECKING:
         ApplicationCommandOptionChoice as ApplicationCommandOptionChoicePayload,
         ApplicationCommandOptionChoiceValue,
         ApplicationCommandPermissions as ApplicationCommandPermissionsPayload,
+        ApplicationIntegrationType as ApplicationIntegrationTypePayload,
         EditApplicationCommand as EditApplicationCommandPayload,
         GuildApplicationCommandPermissions as GuildApplicationCommandPermissionsPayload,
+        InteractionContextType as InteractionContextTypePayload,
     )
 
     Choices = Union[
@@ -263,7 +265,7 @@ class Option:
         type: Optional[Union[OptionType, int]] = None,
         required: bool = False,
         choices: Optional[Choices] = None,
-        options: Optional[list] = None,
+        options: Optional[List[Option]] = None,
         channel_types: Optional[List[ChannelType]] = None,
         autocomplete: bool = False,
         min_value: Optional[float] = None,
@@ -393,7 +395,7 @@ class Option:
         type: Optional[OptionType] = None,
         required: bool = False,
         choices: Optional[Choices] = None,
-        options: Optional[list] = None,
+        options: Optional[List[Option]] = None,
         channel_types: Optional[List[ChannelType]] = None,
         autocomplete: bool = False,
         min_value: Optional[float] = None,
@@ -700,15 +702,17 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
             "nsfw": self.nsfw,
         }
 
-        install_types = (
-            self._install_types_with_default.values
+        install_types: Optional[List[ApplicationIntegrationTypePayload]] = (
+            cast("List[ApplicationIntegrationTypePayload]", self._install_types_with_default.values)
             if self._install_types_with_default is not None
             else None
         )
         data["integration_types"] = install_types
 
-        contexts = (
-            self._contexts_with_default.values if self._contexts_with_default is not None else None
+        contexts: Optional[List[InteractionContextTypePayload]] = (
+            cast("List[InteractionContextTypePayload]", self._contexts_with_default.values)
+            if self._contexts_with_default is not None
+            else None
         )
         data["contexts"] = contexts
 

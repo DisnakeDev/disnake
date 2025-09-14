@@ -691,7 +691,7 @@ class PCMVolumeTransformer(AudioSource, Generic[AT]):
 
     def read(self) -> bytes:
         ret = self.original.read()
-        return audioop.mul(ret, 2, min(self._volume, 2.0))
+        return audioop.mul(ret, 2, min(self._volume, 2.0))  # type: ignore[reportPossiblyUnboundVariable]
 
 
 class AudioPlayer(threading.Thread):
