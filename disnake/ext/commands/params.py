@@ -33,6 +33,7 @@ from typing import (
     Type,
     TypeVar,
     Union,
+    cast,
     get_origin,
 )
 
@@ -731,8 +732,8 @@ class ParamInfo:
             self.max_value = annotation.max_value
             annotation = annotation.underlying_type
         if isinstance(annotation, _String):
-            self.min_length = annotation.min_value
-            self.max_length = annotation.max_value
+            self.min_length = cast("Optional[int]", annotation.min_value)
+            self.max_length = cast("Optional[int]", annotation.max_value)
             annotation = annotation.underlying_type
         if issubclass_(annotation, LargeInt):
             self.large = True
