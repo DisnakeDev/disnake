@@ -27,7 +27,6 @@ defaults:
 env:
   GITHUB_STEP_SUMMARY_HEADER: "<details><summary>#name#</summary>\n<pre>"
   GITHUB_STEP_SUMMARY_FOOTER: "</pre></details>\n"
-  NOX_DEFAULT_VENV_BACKEND: uv
 
 jobs:
   lock-dependencies:
@@ -138,8 +137,6 @@ jobs:
         run: dirname "$(pdm info --python)" >> $GITHUB_PATH
 
       - name: Install dependencies
-        env:
-          NOX_DEFAULT_VENV_BACKEND: none
         run: |
           nox -s pyright --install-only
 
