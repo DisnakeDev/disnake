@@ -549,7 +549,7 @@ class InteractionBotBase(CommonBotBase):
         return self._emulate_old_app_command_remove(ApplicationCommandType.message, name)
 
     def get_slash_command(
-        self, name: str, guild_id: Optional[int] = MISSING
+        self, name: str, *, guild_id: Optional[int] = MISSING
     ) -> Optional[Union[InvokableSlashCommand, SubCommandGroup, SubCommand]]:
         """Works like ``Bot.get_command``, but for slash commands.
 
