@@ -132,7 +132,7 @@ target-version = "py38"
 
 [tool.codespell]
 skip = ['docs/_static/**', '*.po']
-ignore-words-list = ['GroupT', "OT",]
+ignore-words-list = ['GroupT', "OT", "nd"]
 
 [tool.ruff.lint]
 select = [
