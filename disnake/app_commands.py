@@ -5,7 +5,7 @@ from __future__ import annotations
 import math
 import re
 from abc import ABC
-from typing import TYPE_CHECKING, ClassVar, List, Mapping, Optional, Sequence, Tuple, Union
+from typing import TYPE_CHECKING, ClassVar, List, Mapping, Optional, Sequence, Tuple, Union, cast
 
 from .enums import (
     ApplicationCommandPermissionType,
@@ -703,15 +703,17 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
         }
 
         install_types: Optional[List[ApplicationIntegrationTypePayload]] = (
-            self._install_types_with_default.values
+            cast("List[ApplicationIntegrationTypePayload]", self._install_types_with_default.values)
             if self._install_types_with_default is not None
             else None
-        )  # pyright: ignore[reportAssignmentType]
+        )
         data["integration_types"] = install_types
 
         contexts: Optional[List[InteractionContextTypePayload]] = (
-            self._contexts_with_default.values if self._contexts_with_default is not None else None
-        )  # pyright: ignore[reportAssignmentType]
+            cast("List[InteractionContextTypePayload]", self._contexts_with_default.values)
+            if self._contexts_with_default is not None
+            else None
+        )
         data["contexts"] = contexts
 
         # don't set `dm_permission` if `contexts` is set

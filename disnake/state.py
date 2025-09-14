@@ -1141,11 +1141,12 @@ class ConnectionState:
     def parse_channel_pins_update(self, data: gateway.ChannelPinsUpdateEvent) -> None:
         channel_id = int(data["channel_id"])
         guild_id = utils._get_as_snowflake(data, "guild_id")
-        if guild_id is None:
-            channel = self._get_private_channel(channel_id)
-        else:
-            guild = self._get_guild("guild_id")
+        if guild_id is not None:
+            guild = self._get_guild(guild_id)
             channel = guild and guild._resolve_channel(channel_id)
+        else:
+            guild = None
+            channel = self._get_private_channel(channel_id)
 
         if channel is None:
             _log.debug(

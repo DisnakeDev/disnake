@@ -194,7 +194,7 @@ class Injection(Generic[P, T_]):
             for autocomp in autocompleters.values():
                 classify_autocompleter(autocomp)
 
-        self.function = function
+        self.function: InjectionCallback[Any, P, T_] = function
         self.autocompleters: Dict[str, Callable] = autocompleters or {}
         self._injected: Optional[Cog] = None
 

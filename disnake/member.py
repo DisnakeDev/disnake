@@ -398,7 +398,7 @@ class Member(disnake.abc.Messageable, _UserTag):
     ) -> Union[User, Self]:
         # A User object with a 'member' key
         if "member" in data:
-            member_data: BaseMemberPayload = data.pop("member")
+            member_data: BaseMemberPayload = data["member"]
             return cls(data=member_data, user_data=data, guild=guild, state=state)
         return state.create_user(data)
 
