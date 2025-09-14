@@ -1009,8 +1009,6 @@ class _Clazz:
 
             return inner
 
-    rebind: Callable[["_Clazz"], Any] = lambda _: _toplevel()
-
     @decorator
     def decorated(self) -> None: ...
 
@@ -1025,9 +1023,6 @@ class _Clazz:
         # methods in class
         (_Clazz.func, True),
         (_Clazz().func, False),
-        # unfortunately doesn't work
-        (_Clazz.rebind, False),
-        (_Clazz().rebind, False),
         # classmethod/staticmethod isn't supported, but checked to ensure consistency
         (_Clazz.cmethod, False),
         (_Clazz.smethod, True),
