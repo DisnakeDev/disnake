@@ -1211,11 +1211,16 @@ class DiscordVoiceWebSocket:
 
 
 class DaveState:
+    # this implementation currently only supports DAVE v1, even if the native component may be newer
+    MAX_SUPPORTED_VERSION: Final[int] = 1
+
     NEW_MLS_GROUP_EPOCH: Final[Literal[1]] = 1
     INIT_TRANSITION_ID: Final[Literal[0]] = 0
 
     def __init__(self, ws: DiscordVoiceWebSocket) -> None:
-        self.max_version: Final[int] = dave.get_max_supported_protocol_version()
+        self.max_version: Final[int] = min(
+            self.MAX_SUPPORTED_VERSION, dave.get_max_supported_protocol_version()
+        )
 
         self.selected_version: int = dave.kDisabledVersion
         self._prepared_transitions: Dict[int, int] = {}
