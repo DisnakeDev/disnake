@@ -444,6 +444,26 @@ class Role(Hashable):
         .. versionadded:: 2.11
         """
         return self.tertiary_colour
+    
+    @property
+    def is_gradient(self) -> bool:
+        """Whether the role is gradient.
+
+        .. versionadded:: 2.11
+
+        :return type: :class:`bool`
+        """
+        return self.secondary_color is not None and self.tertiary_color is None
+
+    @property
+    def is_holographic(self) -> bool:
+        """Whether the role is holographic.
+
+        .. versionadded:: 2.11
+
+        :return type: :class:`bool`
+        """
+        return self.tertiary_color is not None
 
     @property
     def icon(self) -> Optional[Asset]:
