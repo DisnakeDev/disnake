@@ -322,5 +322,21 @@ def coverage(session: nox.Session) -> None:
     session.run("coverage", *posargs)
 
 
+@nox.session(default=False, python=False)
+def dev(session: nox.Session) -> None:
+    """Set up a development environment using pdm.
+
+    This will:
+    - lock all dependencies with pdm
+    - create a .venv/ directory, overwriting the existing one,
+    - install all dependencies needed for development.
+    - install the pre-commit hook
+    """
+    session.run("pdm", "lock", "-dG:all", "-G:all", external=True)
+    session.run("pdm", "venv", "create", "--force", external=True)
+    session.run("pdm", "sync", "--clean-unselected", "-dG:all", "-G:all")
+    session.run("pdm", "run", "pre-commit", "install")
+
+
 if __name__ == "__main__":
     nox.main()
