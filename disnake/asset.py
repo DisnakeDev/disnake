@@ -154,7 +154,7 @@ class AssetMixin:
             # if the filename doesn't have an extension (e.g. widget member avatars),
             # try to infer it from the data
             if not os.path.splitext(filename)[1]:
-                ext = utils._get_extension_for_image(data)
+                ext = utils._get_extension_for_data(data)
                 if ext:
                     filename += ext
 
@@ -195,6 +195,9 @@ class Asset(AssetMixin):
 
     BASE = "https://cdn.discordapp.com"
 
+    # only used in special cases where Discord doesn't provide an asset on the CDN url
+    BASE_MEDIA = "https://media.discordapp.net"
+
     def __init__(self, state: AnyState, *, url: str, key: str, animated: bool = False) -> None:
         self._state: AnyState = state
         self._url: str = url
@@ -231,6 +234,19 @@ class Asset(AssetMixin):
             state,
             url=f"{cls.BASE}/guilds/{guild_id}/users/{member_id}/avatars/{avatar}.{format}?size=1024",
             key=avatar,
+            animated=animated,
+        )
+
+    @classmethod
+    def _from_guild_banner(
+        cls, state: AnyState, guild_id: int, member_id: int, banner: str
+    ) -> Self:
+        animated = banner.startswith("a_")
+        format = "gif" if animated else "png"
+        return cls(
+            state,
+            url=f"{cls.BASE}/guilds/{guild_id}/users/{member_id}/banners/{banner}.{format}?size=1024",
+            key=banner,
             animated=animated,
         )
 
@@ -311,6 +327,36 @@ class Asset(AssetMixin):
             state,
             url=f"{cls.BASE}/guild-events/{event_id}/{image_hash}.png?size=2048",
             key=image_hash,
+            animated=False,
+        )
+
+    @classmethod
+    def _from_avatar_decoration(cls, state: AnyState, avatar_decoration_asset: str) -> Self:
+        animated = avatar_decoration_asset.startswith("a_")
+        return cls(
+            state,
+            url=f"{cls.BASE}/avatar-decoration-presets/{avatar_decoration_asset}.png?size=1024",
+            key=avatar_decoration_asset,
+            animated=animated,
+        )
+
+    @classmethod
+    def _from_nameplate(cls, state: AnyState, nameplate_asset: str, animated: bool = True) -> Self:
+        suffix = "asset.webm" if animated else "static.png"
+        return cls(
+            state,
+            # nameplate_asset already includes an ending /
+            url=f"{cls.BASE}/assets/collectibles/{nameplate_asset}{suffix}",
+            key=nameplate_asset,
+            animated=animated,
+        )
+
+    @classmethod
+    def _from_guild_tag_badge(cls, state: AnyState, primary_guild_id: int, badge_hash: str) -> Self:
+        return cls(
+            state,
+            url=f"{cls.BASE}/guild-tag-badges/{primary_guild_id}/{badge_hash}.png?size=16",
+            key=badge_hash,
             animated=False,
         )
 

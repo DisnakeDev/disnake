@@ -120,6 +120,9 @@ Exceptions
 .. autoexception:: GuildStickerNotFound
     :members:
 
+.. autoexception:: GuildSoundboardSoundNotFound
+    :members:
+
 .. autoexception:: GuildScheduledEventNotFound
     :members:
 
@@ -216,6 +219,7 @@ Exception Hierarchy
                     - :exc:`EmojiNotFound`
                     - :exc:`PartialEmojiConversionFailure`
                     - :exc:`GuildStickerNotFound`
+                    - :exc:`GuildSoundboardSoundNotFound`
                     - :exc:`GuildScheduledEventNotFound`
                     - :exc:`BadBoolArgument`
                     - :exc:`LargeIntConversionFailure`

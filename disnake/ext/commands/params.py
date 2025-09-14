@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-"""Repsonsible for handling Params for slash commands"""
+"""Responsible for handling Params for slash commands"""
 
 from __future__ import annotations
 
@@ -62,6 +62,7 @@ if TYPE_CHECKING:
     from disnake.i18n import LocalizationValue, LocalizedOptional
     from disnake.types.interactions import ApplicationCommandOptionChoiceValue
 
+    from ._types import FuncT
     from .base_core import CogT
     from .cog import Cog
     from .slash_core import InvokableSlashCommand, SubCommand
@@ -92,7 +93,6 @@ else:
 
 T = TypeVar("T", bound=Any)
 TypeT = TypeVar("TypeT", bound=Type[Any])
-CallableT = TypeVar("CallableT", bound=Callable[..., Any])
 BotT = TypeVar("BotT", bound="disnake.Client", covariant=True)
 
 __all__ = (
@@ -229,7 +229,7 @@ class Injection(Generic[P, T_]):
         cls._registered[annotation] = self
         return self
 
-    def autocomplete(self, option_name: str) -> Callable[[CallableT], CallableT]:
+    def autocomplete(self, option_name: str) -> Callable[[FuncT], FuncT]:
         """A decorator that registers an autocomplete function for the specified option.
 
         .. versionadded:: 2.6
@@ -254,7 +254,7 @@ class Injection(Generic[P, T_]):
                 f"This injection already has an autocompleter set for option '{option_name}'"
             )
 
-        def decorator(func: CallableT) -> CallableT:
+        def decorator(func: FuncT) -> FuncT:
             classify_autocompleter(func)
             self.autocompleters[option_name] = func
             return func
@@ -292,7 +292,7 @@ class _BaseRange(ABC):
             )
 
             # infer type from min/max values
-            params = (cls._infer_type(params),) + params
+            params = (cls._infer_type(params), *params)
 
         if len(params) != 3:
             raise TypeError(
@@ -377,7 +377,7 @@ else:
 
         _allowed_types = (int, float)
 
-        def __post_init__(self):
+        def __post_init__(self) -> None:
             for value in (self.min_value, self.max_value):
                 if value is None:
                     continue
@@ -406,7 +406,7 @@ else:
 
         _allowed_types = (str,)
 
-        def __post_init__(self):
+        def __post_init__(self) -> None:
             for value in (self.min_value, self.max_value):
                 if value is None:
                     continue
@@ -478,7 +478,6 @@ class ParamInfo:
     """
 
     TYPES: ClassVar[Dict[type, int]] = {
-        # fmt: off
         str:                                               OptionType.string.value,
         int:                                               OptionType.integer.value,
         bool:                                              OptionType.boolean.value,
@@ -495,8 +494,7 @@ class ParamInfo:
         Union[disnake.User, disnake.Member, disnake.Role]: OptionType.mentionable.value,
         float:                                             OptionType.number.value,
         disnake.Attachment:                                OptionType.attachment.value,
-        # fmt: on
-    }
+    }  # fmt: skip
     _registered_converters: ClassVar[Dict[type, Callable]] = {}
 
     def __init__(
@@ -531,7 +529,11 @@ class ParamInfo:
         self.param_name: str = self.name
         self.converter = converter
         self.convert_default = convert_default
+
+        if autocomplete:
+            classify_autocompleter(autocomplete)
         self.autocomplete = autocomplete
+
         self.choices = choices or []
         self.type = type or str
         self.channel_types = channel_types or []
@@ -610,7 +612,7 @@ class ParamInfo:
         return self
 
     @classmethod
-    def register_converter(cls, annotation: Any, converter: CallableT) -> CallableT:
+    def register_converter(cls, annotation: Any, converter: FuncT) -> FuncT:
         cls._registered_converters[annotation] = converter
         return converter
 
@@ -675,7 +677,10 @@ class ParamInfo:
 
     def _parse_enum(self, annotation: Any) -> None:
         if isinstance(annotation, (EnumMeta, disnake.enums.EnumMeta)):
-            self.choices = [OptionChoice(name, value.value) for name, value in annotation.__members__.items()]  # type: ignore
+            self.choices = [
+                OptionChoice(name, value.value)  # type: ignore
+                for name, value in annotation.__members__.items()
+            ]
         else:
             self.choices = [OptionChoice(str(i), i) for i in annotation.__args__]
 
@@ -804,7 +809,7 @@ class ParamInfo:
         self.param_name = param.name
 
     def parse_doc(self, doc: disnake.utils._DocstringParam) -> None:
-        if self.type == str and doc["type"] is not None:
+        if self.type is str and doc["type"] is not None:
             self.parse_annotation(doc["type"])
 
         self.description = self.description or doc["description"]
@@ -1121,7 +1126,7 @@ def Param(
     choices: Optional[Choices] = None,
     converter: Optional[Callable[[ApplicationCommandInteraction[BotT], Any], Any]] = None,
     convert_defaults: bool = False,
-    autocomplete: Optional[Callable[[ApplicationCommandInteraction[BotT], str], Any]] = None,
+    autocomplete: Optional[AnyAutocompleter] = None,
     channel_types: Optional[List[ChannelType]] = None,
     lt: Optional[float] = None,
     le: Optional[float] = None,

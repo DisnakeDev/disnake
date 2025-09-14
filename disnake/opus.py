@@ -371,7 +371,7 @@ class Encoder(_OpusStruct):
     def set_bandwidth(self, req: BAND_CTL) -> None:
         if req not in band_ctl:
             raise KeyError(
-                f'{req!r} is not a valid bandwidth setting. Try one of: {",".join(band_ctl)}'
+                f"{req!r} is not a valid bandwidth setting. Try one of: {','.join(band_ctl)}"
             )
 
         k = band_ctl[req]
@@ -380,7 +380,7 @@ class Encoder(_OpusStruct):
     def set_signal_type(self, req: SIGNAL_CTL) -> None:
         if req not in signal_ctl:
             raise KeyError(
-                f'{req!r} is not a valid bandwidth setting. Try one of: {",".join(signal_ctl)}'
+                f"{req!r} is not a valid bandwidth setting. Try one of: {','.join(signal_ctl)}"
             )
 
         k = signal_ctl[req]
@@ -462,12 +462,10 @@ class Decoder(_OpusStruct):
         return ret.value
 
     @overload
-    def decode(self, data: bytes, *, fec: bool) -> bytes:
-        ...
+    def decode(self, data: bytes, *, fec: bool) -> bytes: ...
 
     @overload
-    def decode(self, data: Literal[None], *, fec: Literal[False]) -> bytes:
-        ...
+    def decode(self, data: Literal[None], *, fec: Literal[False]) -> bytes: ...
 
     def decode(self, data: Optional[bytes], *, fec: bool = False) -> bytes:
         if data is None and fec:

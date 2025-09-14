@@ -58,10 +58,32 @@ class ApplicationCommandInteraction(Interaction[ClientT]):
         The application ID that the interaction was for.
     guild_id: Optional[:class:`int`]
         The guild ID the interaction was sent from.
-    channel_id: :class:`int`
-        The channel ID the interaction was sent from.
+    channel: Union[:class:`abc.GuildChannel`, :class:`Thread`, :class:`abc.PrivateChannel`, :class:`PartialMessageable`]
+        The channel the interaction was sent from.
+
+        Note that due to a Discord limitation, DM channels
+        may not contain recipient information.
+        Unknown channel types will be :class:`PartialMessageable`.
+
+        .. versionchanged:: 2.10
+            If the interaction was sent from a thread and the bot cannot normally access the thread,
+            this is now a proper :class:`Thread` object.
+            Private channels are now proper :class:`DMChannel`/:class:`GroupChannel`
+            objects instead of :class:`PartialMessageable`.
+
+        .. note::
+            If you want to compute the interaction author's or bot's permissions in the channel,
+            consider using :attr:`permissions` or :attr:`app_permissions`.
+
     author: Union[:class:`User`, :class:`Member`]
         The user or member that sent the interaction.
+
+        .. note::
+            In scenarios where an interaction occurs in a guild but :attr:`.guild` is unavailable,
+            such as with user-installed applications in guilds, some attributes of :class:`Member`\\s
+            that depend on the guild/role cache will not work due to an API limitation.
+            This includes :attr:`~Member.roles`, :attr:`~Member.top_role`, :attr:`~Member.role_icon`,
+            and :attr:`~Member.guild_permissions`.
     locale: :class:`Locale`
         The selected language of the interaction's author.
 
@@ -82,10 +104,39 @@ class ApplicationCommandInteraction(Interaction[ClientT]):
 
     token: :class:`str`
         The token to continue the interaction. These are valid for 15 minutes.
-    data: :class:`ApplicationCommandInteractionData`
-        The wrapped interaction data.
     client: :class:`Client`
         The interaction client.
+    entitlements: List[:class:`Entitlement`]
+        The entitlements for the invoking user and guild,
+        representing access to an application subscription.
+
+        .. versionadded:: 2.10
+
+    authorizing_integration_owners: :class:`AuthorizingIntegrationOwners`
+        Details about the authorizing user/guild for the application installation
+        related to the interaction.
+
+        .. versionadded:: 2.10
+
+    context: :class:`InteractionContextTypes`
+        The context where the interaction was triggered from.
+
+        This is a flag object, with exactly one of the flags set to ``True``.
+        To check whether an interaction originated from e.g. a :attr:`~InteractionContextTypes.guild`
+        context, you can use ``if interaction.context.guild:``.
+
+        .. versionadded:: 2.10
+
+    attachment_size_limit: :class:`int`
+        The maximum number of bytes files can have in responses to this interaction.
+
+        This may be higher than the default limit, depending on the guild's boost
+        status or the invoking user's nitro status.
+
+        .. versionadded:: 2.11
+
+    data: :class:`ApplicationCommandInteractionData`
+        The wrapped interaction data.
     application_command: :class:`.InvokableApplicationCommand`
         The command invoked by the interaction.
     command_failed: :class:`bool`
@@ -97,14 +148,14 @@ class ApplicationCommandInteraction(Interaction[ClientT]):
     ) -> None:
         super().__init__(data=data, state=state)
         self.data: ApplicationCommandInteractionData = ApplicationCommandInteractionData(
-            data=data["data"], state=state, guild_id=self.guild_id
+            data=data["data"], parent=self
         )
         self.application_command: InvokableApplicationCommand = MISSING
         self.command_failed: bool = False
 
     @property
     def target(self) -> Optional[Union[User, Member, Message]]:
-        """Optional[Union[:class:`abc.User`, :class:`Message`]]: The user or message targetted by a user or message command"""
+        """Optional[Union[:class:`abc.User`, :class:`Message`]]: The user or message targeted by a user or message command"""
         return self.data.target
 
     @property
@@ -119,15 +170,18 @@ class ApplicationCommandInteraction(Interaction[ClientT]):
         return kwargs
 
 
+# TODO(3.0): consider making these classes @type_check_only and not affect runtime behavior, or even remove entirely
 class GuildCommandInteraction(ApplicationCommandInteraction[ClientT]):
     """An :class:`ApplicationCommandInteraction` subclass, primarily meant for annotations.
 
-    This prevents the command from being invoked in DMs by automatically setting
-    :attr:`ApplicationCommand.dm_permission` to ``False`` for user/message commands and top-level slash commands.
-
+    This restricts the command to only be usable in guilds and only as a guild-installed command,
+    by automatically setting :attr:`ApplicationCommand.contexts` to :attr:`~InteractionContextTypes.guild` only
+    and :attr:`ApplicationCommand.install_types` to :attr:`~ApplicationInstallTypes.guild` only.
     Note that this does not apply to slash subcommands, subcommand groups, or autocomplete callbacks.
 
-    Additionally, annotations of some attributes are modified to match the expected types in guilds.
+    Additionally, the type annotations of :attr:`~Interaction.author`, :attr:`~Interaction.guild`,
+    :attr:`~Interaction.guild_id`, :attr:`~Interaction.guild_locale`, and :attr:`~Interaction.me`
+    are modified to match the expected types in guilds.
     """
 
     author: Member
@@ -138,20 +192,22 @@ class GuildCommandInteraction(ApplicationCommandInteraction[ClientT]):
 
 
 class UserCommandInteraction(ApplicationCommandInteraction[ClientT]):
-    """An :class:`ApplicationCommandInteraction` subclass meant for annotations.
+    """An :class:`ApplicationCommandInteraction` subclass meant for annotations
+    in user context menu commands.
 
-    No runtime behavior is changed but annotations are modified
-    to seem like the interaction is specifically a user command.
+    No runtime behavior is changed, but the type annotations of :attr:`~ApplicationCommandInteraction.target`
+    are modified to match the expected type with user commands.
     """
 
     target: Union[User, Member]
 
 
 class MessageCommandInteraction(ApplicationCommandInteraction[ClientT]):
-    """An :class:`ApplicationCommandInteraction` subclass meant for annotations.
+    """An :class:`ApplicationCommandInteraction` subclass meant for annotations
+    in message context menu commands.
 
-    No runtime behavior is changed but annotations are modified
-    to seem like the interaction is specifically a message command.
+    No runtime behavior is changed, but the type annotations of :attr:`~ApplicationCommandInteraction.target`
+    are modified to match the expected type with message commands.
     """
 
     target: Message
@@ -199,17 +255,16 @@ class ApplicationCommandInteractionData(Dict[str, Any]):
         self,
         *,
         data: ApplicationCommandInteractionDataPayload,
-        state: ConnectionState,
-        guild_id: Optional[int],  # the ID of the guild where this command has been invoked
+        parent: ApplicationCommandInteraction[
+            ClientT
+        ],  # the ID of the guild where this command has been invoked
     ) -> None:
         super().__init__(data)
         self.id: int = int(data["id"])
         self.name: str = data["name"]
         self.type: ApplicationCommandType = try_enum(ApplicationCommandType, data["type"])
 
-        self.resolved = InteractionDataResolved(
-            data=data.get("resolved", {}), state=state, guild_id=guild_id
-        )
+        self.resolved = InteractionDataResolved(data=data.get("resolved", {}), parent=parent)
         self.guild_id: Optional[int] = utils._get_as_snowflake(data, "guild_id")
         self.target_id: Optional[int] = utils._get_as_snowflake(data, "target_id")
         target = self.resolved.get_by_id(self.target_id)
@@ -235,7 +290,7 @@ class ApplicationCommandInteractionData(Dict[str, Any]):
         for option in self.options:
             if option.value is None:
                 # Extend the chain and collect kwargs in the nesting
-                return option._get_chain_and_kwargs(chain + (option.name,))
+                return option._get_chain_and_kwargs((*chain, option.name))
             return chain, {o.name: o.value for o in self.options}
         return chain, {}
 
@@ -320,7 +375,7 @@ class ApplicationCommandInteractionDataOption(Dict[str, Any]):
         for option in self.options:
             if option.value is None:
                 # Extend the chain and collect kwargs in the nesting
-                return option._get_chain_and_kwargs(chain + (option.name,))
+                return option._get_chain_and_kwargs((*chain, option.name))
             return chain, {o.name: o.value for o in self.options}
         return chain, {}
 

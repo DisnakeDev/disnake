@@ -63,14 +63,14 @@ Specific development aspects are further explained below.
 
 ### Initial setup
 
-We use [`PDM`](https://pdm.fming.dev/) as our dependency manager. If it isn't already installed on your system, you can follow the installation steps [here](https://pdm.fming.dev/latest/#installation) to get started.
+We use [`PDM`](https://pdm-project.org/) as our dependency manager. If it isn't already installed on your system, you can follow the installation steps [here](https://pdm-project.org/latest/#installation) to get started.
 
 Once PDM is installed, use the following command to initialize a virtual environment, install the necessary development dependencies, and install the [`pre-commit`](#pre-commit) hooks.
 ```
 $ pdm run setup_env
 ```
 
-Other tools used in this project include [black](https://black.readthedocs.io/en/stable/) + [isort](https://pycqa.github.io/isort/) (formatters), [ruff](https://beta.ruff.rs/docs/) (linter), and [pyright](https://microsoft.github.io/pyright/#/) (type-checker). For the most part, these automatically run on every commit with no additional action required - see below for details.
+Other tools used in this project include [ruff](https://docs.astral.sh/ruff) (formatter and linter), and [pyright](https://microsoft.github.io/pyright/#/) (type-checker). For the most part, these automatically run on every commit with no additional action required - see below for details.
 
 All of the following checks also automatically run for every PR on GitHub, so don't worry if you're not sure whether you missed anything. A PR cannot be merged as long as there are any failing checks.
 
@@ -121,3 +121,8 @@ We use [towncrier](https://github.com/twisted/towncrier) for managing our change
 ### Documentation
 We use Sphinx to build the project's documentation, which includes [automatically generating](https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html) the API Reference from docstrings using the [NumPy style](https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_numpy.html).  
 To build the documentation locally, use `pdm run docs` and visit http://127.0.0.1:8009/ once built.
+
+Changes should be marked with a [version directive](https://www.sphinx-doc.org/en/master/usage/restructuredtext/directives.html#describing-changes-between-versions) as documented on the Sphinx documentation.
+
+For the `version` argument, provide ``|vnext|`` as the argument.
+We have a custom role which replaces ``|vnext|`` with the next version of the library upon building the documentation.

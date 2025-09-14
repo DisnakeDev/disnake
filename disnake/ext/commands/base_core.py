@@ -23,8 +23,15 @@ from typing import (
 
 from disnake.app_commands import ApplicationCommand
 from disnake.enums import ApplicationCommandType
+from disnake.flags import ApplicationInstallTypes, InteractionContextTypes
 from disnake.permissions import Permissions
-from disnake.utils import _generated, _overload_with_permissions, async_all, maybe_coroutine
+from disnake.utils import (
+    _generated,
+    _overload_with_permissions,
+    async_all,
+    iscoroutinefunction,
+    maybe_coroutine,
+)
 
 from .cooldowns import BucketType, CooldownMapping, MaxConcurrency
 from .errors import CheckFailure, CommandError, CommandInvokeError, CommandOnCooldown
@@ -36,6 +43,7 @@ if TYPE_CHECKING:
 
     from ._types import AppCheck, Coro, Error, Hook
     from .cog import Cog
+    from .interaction_bot_base import InteractionBotBase
 
     ApplicationCommandInteractionT = TypeVar(
         "ApplicationCommandInteractionT", bound=ApplicationCommandInteraction, covariant=True
@@ -50,7 +58,13 @@ if TYPE_CHECKING:
     ]
 
 
-__all__ = ("AppCmdIndex", "InvokableApplicationCommand", "default_member_permissions")
+__all__ = (
+    "AppCmdIndex",
+    "InvokableApplicationCommand",
+    "default_member_permissions",
+    "install_types",
+    "contexts",
+)
 
 
 T = TypeVar("T")
@@ -153,13 +167,13 @@ class InvokableApplicationCommand(ABC):
         self.__original_kwargs__ = {k: v for k, v in kwargs.items() if v is not None}
         return self
 
-    def __init__(self, func: CommandCallback, *, name: Optional[str] = None, **kwargs) -> None:
+    def __init__(self, func: CommandCallback, *, name: Optional[str] = None, **kwargs: Any) -> None:
         self.__command_flag__ = None
         self._callback: CommandCallback = func
         self.name: str = name or func.__name__
         self.qualified_name: str = self.name
         # Annotation parser needs this attribute because body doesn't exist at this moment.
-        # We will use this attribute later in order to set the dm_permission.
+        # We will use this attribute later in order to set the allowed contexts.
         self._guild_only: bool = kwargs.get("guild_only", False)
         self.extras: Dict[str, Any] = kwargs.get("extras") or {}
 
@@ -169,8 +183,15 @@ class InvokableApplicationCommand(ABC):
         if "default_permission" in kwargs:
             raise TypeError(
                 "`default_permission` is deprecated and will always be set to `True`. "
-                "See `default_member_permissions` and `dm_permission` instead."
+                "See `default_member_permissions` and `contexts` instead."
             )
+
+        # XXX: remove in next major/minor version
+        # the parameter was called `integration_types` in earlier stages of the user apps PR.
+        # since unknown kwargs unfortunately get silently ignored, at least try to warn users
+        # in this specific case
+        if "integration_types" in kwargs:
+            raise TypeError("`integration_types` has been renamed to `install_types`.")
 
         try:
             checks = func.__commands_checks__
@@ -207,6 +228,7 @@ class InvokableApplicationCommand(ABC):
         self._before_invoke: Optional[Hook] = None
         self._after_invoke: Optional[Hook] = None
 
+    # this should copy all attributes that can be changed after instantiation via decorators
     def _ensure_assignment_on_copy(self, other: AppCommandT) -> AppCommandT:
         other._before_invoke = self._before_invoke
         other._after_invoke = self._after_invoke
@@ -216,13 +238,30 @@ class InvokableApplicationCommand(ABC):
             other._buckets = self._buckets.copy()
         if self._max_concurrency != other._max_concurrency:
             # _max_concurrency won't be None at this point
-            other._max_concurrency = cast(MaxConcurrency, self._max_concurrency).copy()
+            other._max_concurrency = cast("MaxConcurrency", self._max_concurrency).copy()
 
-        if self.body._default_member_permissions != other.body._default_member_permissions and (
-            "default_member_permissions" not in other.__original_kwargs__
-            or self.body._default_member_permissions is not None
+        if (
+            # see https://github.com/DisnakeDev/disnake/pull/678#discussion_r938113624:
+            # if these are not equal, then either `self` had a decorator, or `other` got a
+            # value from `*_command_attrs`; we only want to copy in the former case
+            self.body._default_member_permissions != other.body._default_member_permissions
+            and self.body._default_member_permissions is not None
         ):
             other.body._default_member_permissions = self.body._default_member_permissions
+
+        if (
+            self.body.install_types != other.body.install_types
+            and self.body.install_types is not None  # see above
+        ):
+            other.body.install_types = ApplicationInstallTypes._from_value(
+                self.body.install_types.value
+            )
+
+        if (
+            self.body.contexts != other.body.contexts
+            and self.body.contexts is not None  # see above
+        ):
+            other.body.contexts = InteractionContextTypes._from_value(self.body.contexts.value)
 
         try:
             other.on_error = self.on_error
@@ -251,6 +290,19 @@ class InvokableApplicationCommand(ABC):
         else:
             return self.copy()
 
+    def _apply_guild_only(self) -> None:
+        # If we have a `GuildCommandInteraction` annotation, set `contexts` and `install_types` accordingly.
+        # This matches the old pre-user-apps behavior.
+        if self._guild_only:
+            # n.b. this overwrites any user-specified parameter
+            # FIXME(3.0): this should raise if these were set elsewhere (except `*_command_attrs`) already
+            self.body.contexts = InteractionContextTypes(guild=True)
+            self.body.install_types = ApplicationInstallTypes(guild=True)
+
+    def _apply_defaults(self, bot: InteractionBotBase) -> None:
+        self.body._default_install_types = bot._default_install_types
+        self.body._default_contexts = bot._default_contexts
+
     @property
     def dm_permission(self) -> bool:
         """:class:`bool`: Whether this command can be used in DMs."""
@@ -271,6 +323,24 @@ class InvokableApplicationCommand(ABC):
         .. versionadded:: 2.5
         """
         return self.body.default_member_permissions
+
+    @property
+    def install_types(self) -> Optional[ApplicationInstallTypes]:
+        """Optional[:class:`.ApplicationInstallTypes`]: The installation types
+        where the command is available. Only available for global commands.
+
+        .. versionadded:: 2.10
+        """
+        return self.body.install_types
+
+    @property
+    def contexts(self) -> Optional[InteractionContextTypes]:
+        """Optional[:class:`.InteractionContextTypes`]: The interaction contexts
+        where the command can be used. Only available for global commands.
+
+        .. versionadded:: 2.10
+        """
+        return self.body.contexts
 
     @property
     def callback(self) -> CommandCallback:
@@ -304,7 +374,9 @@ class InvokableApplicationCommand(ABC):
         except ValueError:
             pass
 
-    async def __call__(self, interaction: ApplicationCommandInteraction, *args, **kwargs) -> Any:
+    async def __call__(
+        self, interaction: ApplicationCommandInteraction, *args: Any, **kwargs: Any
+    ) -> Any:
         """|coro|
 
         Calls the internal callback that the application command holds.
@@ -404,7 +476,7 @@ class InvokableApplicationCommand(ABC):
         return 0.0
 
     # This method isn't really usable in this class, but it's usable in subclasses.
-    async def invoke(self, inter: ApplicationCommandInteraction, *args, **kwargs) -> None:
+    async def invoke(self, inter: ApplicationCommandInteraction, *args: Any, **kwargs: Any) -> None:
         await self.prepare(inter)
 
         try:
@@ -439,7 +511,7 @@ class InvokableApplicationCommand(ABC):
         TypeError
             The coroutine passed is not actually a coroutine.
         """
-        if not asyncio.iscoroutinefunction(coro):
+        if not iscoroutinefunction(coro):
             raise TypeError("The error handler must be a coroutine.")
 
         self.on_error: Error = coro
@@ -555,7 +627,7 @@ class InvokableApplicationCommand(ABC):
         TypeError
             The coroutine passed is not actually a coroutine.
         """
-        if not asyncio.iscoroutinefunction(coro):
+        if not iscoroutinefunction(coro):
             raise TypeError("The pre-invoke hook must be a coroutine.")
 
         self._before_invoke = coro
@@ -578,7 +650,7 @@ class InvokableApplicationCommand(ABC):
         TypeError
             The coroutine passed is not actually a coroutine.
         """
-        if not asyncio.iscoroutinefunction(coro):
+        if not iscoroutinefunction(coro):
             raise TypeError("The post-invoke hook must be a coroutine.")
 
         self._after_invoke = coro
@@ -686,12 +758,14 @@ def default_member_permissions(
     moderate_members: bool = ...,
     move_members: bool = ...,
     mute_members: bool = ...,
+    pin_messages: bool = ...,
     priority_speaker: bool = ...,
     read_message_history: bool = ...,
     read_messages: bool = ...,
     request_to_speak: bool = ...,
     send_messages: bool = ...,
     send_messages_in_threads: bool = ...,
+    send_polls: bool = ...,
     send_tts_messages: bool = ...,
     send_voice_messages: bool = ...,
     speak: bool = ...,
@@ -699,6 +773,7 @@ def default_member_permissions(
     stream: bool = ...,
     use_application_commands: bool = ...,
     use_embedded_activities: bool = ...,
+    use_external_apps: bool = ...,
     use_external_emojis: bool = ...,
     use_external_sounds: bool = ...,
     use_external_stickers: bool = ...,
@@ -709,21 +784,19 @@ def default_member_permissions(
     view_channel: bool = ...,
     view_creator_monetization_analytics: bool = ...,
     view_guild_insights: bool = ...,
-) -> Callable[[T], T]:
-    ...
+) -> Callable[[T], T]: ...
 
 
 @overload
 @_generated
 def default_member_permissions(
     value: int = 0,
-) -> Callable[[T], T]:
-    ...
+) -> Callable[[T], T]: ...
 
 
 @_overload_with_permissions
 def default_member_permissions(value: int = 0, **permissions: bool) -> Callable[[T], T]:
-    """A decorator that sets default required member permissions for the command.
+    """A decorator that sets default required member permissions for the application command.
     Unlike :func:`~.has_permissions`, this decorator does not add any checks.
     Instead, it prevents the command from being run by members without *all* required permissions,
     if not overridden by moderators on a guild-specific basis.
@@ -732,6 +805,8 @@ def default_member_permissions(value: int = 0, **permissions: bool) -> Callable[
 
     .. note::
         This does not work with slash subcommands/groups.
+
+    .. versionadded:: 2.5
 
     Example
     -------
@@ -777,6 +852,87 @@ def default_member_permissions(value: int = 0, **permissions: bool) -> Callable[
             func.body._default_member_permissions = perms_value
         else:
             func.__default_member_permissions__ = perms_value  # type: ignore
+        return func
+
+    return decorator
+
+
+def install_types(*, guild: bool = False, user: bool = False) -> Callable[[T], T]:
+    """A decorator that sets the installation types where the
+    application command is available.
+
+    See also the ``install_types`` parameter for application command decorators.
+
+    .. note::
+        This does not work with slash subcommands/groups.
+
+    .. versionadded:: 2.10
+
+    Parameters
+    ----------
+    **params: bool
+        The installation types; see :class:`.ApplicationInstallTypes`.
+        Setting a parameter to ``False`` does not affect the result.
+    """
+
+    def decorator(func: T) -> T:
+        from .slash_core import SubCommand, SubCommandGroup
+
+        install_types = ApplicationInstallTypes(guild=guild, user=user)
+        if isinstance(func, InvokableApplicationCommand):
+            if isinstance(func, (SubCommand, SubCommandGroup)):
+                raise TypeError("Cannot set `install_types` on subcommands or subcommand groups")
+            # special case - don't overwrite if `_guild_only` was set, since that takes priority
+            if not func._guild_only:
+                if func.body.install_types is not None:
+                    raise ValueError("Cannot set `install_types` in both parameter and decorator")
+                func.body.install_types = install_types
+        else:
+            func.__install_types__ = install_types  # type: ignore
+        return func
+
+    return decorator
+
+
+def contexts(
+    *, guild: bool = False, bot_dm: bool = False, private_channel: bool = False
+) -> Callable[[T], T]:
+    """A decorator that sets the interaction contexts where the application command can be used.
+
+    See also the ``contexts`` parameter for application command decorators.
+
+    .. note::
+        This does not work with slash subcommands/groups.
+
+    .. versionadded:: 2.10
+
+    Parameters
+    ----------
+    **params: bool
+        The interaction contexts; see :class:`.InteractionContextTypes`.
+        Setting a parameter to ``False`` does not affect the result.
+    """
+
+    def decorator(func: T) -> T:
+        from .slash_core import SubCommand, SubCommandGroup
+
+        contexts = InteractionContextTypes(
+            guild=guild, bot_dm=bot_dm, private_channel=private_channel
+        )
+        if isinstance(func, InvokableApplicationCommand):
+            if isinstance(func, (SubCommand, SubCommandGroup)):
+                raise TypeError("Cannot set `contexts` on subcommands or subcommand groups")
+            # special case - don't overwrite if `_guild_only` was set, since that takes priority
+            if not func._guild_only:
+                if func.body._dm_permission is not None:
+                    raise ValueError(
+                        "Cannot use both `dm_permission` and `contexts` at the same time"
+                    )
+                if func.body.contexts is not None:
+                    raise ValueError("Cannot set `contexts` in both parameter and decorator")
+                func.body.contexts = contexts
+        else:
+            func.__contexts__ = contexts  # type: ignore
         return func
 
     return decorator

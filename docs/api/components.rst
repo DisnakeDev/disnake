@@ -13,7 +13,7 @@ which allows bot developers to create their own component-based UIs right inside
 
 .. warning::
 
-    Classes listed below are not meant to be created by user and are only recieved from the API.
+    Classes listed below are not meant to be created by user and are only received from the API.
     For constructible versions, see :ref:`Bot UI Kit <disnake_api_ui>`.
 
 Discord Models
@@ -98,6 +98,22 @@ UserSelectMenu
     :members:
     :inherited-members:
 
+SelectOption
+~~~~~~~~~~~~
+
+.. attributetable:: SelectOption
+
+.. autoclass:: SelectOption
+    :members:
+
+SelectDefaultValue
+~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: SelectDefaultValue
+
+.. autoclass:: SelectDefaultValue
+    :members:
+
 TextInput
 ~~~~~~~~~
 
@@ -107,16 +123,96 @@ TextInput
     :members:
     :inherited-members:
 
-Data Classes
--------------
+Section
+~~~~~~~
 
-SelectOption
+.. attributetable:: Section
+
+.. autoclass:: Section()
+    :members:
+    :inherited-members:
+
+TextDisplay
+~~~~~~~~~~~
+
+.. attributetable:: TextDisplay
+
+.. autoclass:: TextDisplay()
+    :members:
+    :inherited-members:
+
+
+UnfurledMediaItem
+~~~~~~~~~~~~~~~~~
+
+.. attributetable:: UnfurledMediaItem
+
+.. autoclass:: UnfurledMediaItem()
+    :members:
+    :inherited-members:
+
+Thumbnail
+~~~~~~~~~
+
+.. attributetable:: Thumbnail
+
+.. autoclass:: Thumbnail()
+    :members:
+    :inherited-members:
+
+MediaGallery
 ~~~~~~~~~~~~
 
-.. attributetable:: SelectOption
+.. attributetable:: MediaGallery
 
-.. autoclass:: SelectOption
+.. autoclass:: MediaGallery()
     :members:
+    :inherited-members:
+
+MediaGalleryItem
+~~~~~~~~~~~~~~~~
+
+.. attributetable:: MediaGalleryItem
+
+.. autoclass:: MediaGalleryItem
+    :members:
+
+FileComponent
+~~~~~~~~~~~~~
+
+.. attributetable:: FileComponent
+
+.. autoclass:: FileComponent()
+    :members:
+    :inherited-members:
+
+Separator
+~~~~~~~~~
+
+.. attributetable:: Separator
+
+.. autoclass:: Separator()
+    :members:
+    :inherited-members:
+
+Container
+~~~~~~~~~
+
+.. attributetable:: Container
+
+.. autoclass:: Container()
+    :members:
+    :inherited-members:
+
+Label
+~~~~~
+
+.. attributetable:: Label
+
+.. autoclass:: Label()
+    :members:
+    :inherited-members:
+
 
 Enumerations
 ------------
@@ -124,116 +220,29 @@ Enumerations
 ComponentType
 ~~~~~~~~~~~~~
 
-.. class:: ComponentType
-
-    Represents the type of component.
-
-    .. versionadded:: 2.0
-
-    .. attribute:: action_row
-
-        Represents the group component which holds different components in a row.
-    .. attribute:: button
-
-        Represents a button component.
-    .. attribute:: string_select
-
-        Represents a string select component.
-
-        .. versionadded:: 2.7
-    .. attribute:: select
-
-        An alias of :attr:`string_select`.
-
-    .. attribute:: text_input
-
-        Represents a text input component.
-    .. attribute:: user_select
-
-        Represents a user select component.
-
-        .. versionadded:: 2.7
-    .. attribute:: role_select
-
-        Represents a role select component.
-
-        .. versionadded:: 2.7
-    .. attribute:: mentionable_select
-
-        Represents a mentionable (user/member/role) select component.
-
-        .. versionadded:: 2.7
-    .. attribute:: channel_select
-
-        Represents a channel select component.
-
-        .. versionadded:: 2.7
+.. autoclass:: ComponentType()
+    :members:
 
 ButtonStyle
 ~~~~~~~~~~~
 
-.. class:: ButtonStyle
-
-    Represents the style of the button component.
-
-    .. versionadded:: 2.0
-
-    .. attribute:: primary
-
-        Represents a blurple button for the primary action.
-    .. attribute:: secondary
-
-        Represents a grey button for the secondary action.
-    .. attribute:: success
-
-        Represents a green button for a successful action.
-    .. attribute:: danger
-
-        Represents a red button for a dangerous action.
-    .. attribute:: link
-
-        Represents a link button.
-
-    .. attribute:: blurple
-
-        An alias for :attr:`primary`.
-    .. attribute:: grey
-
-        An alias for :attr:`secondary`.
-    .. attribute:: gray
-
-        An alias for :attr:`secondary`.
-    .. attribute:: green
-
-        An alias for :attr:`success`.
-    .. attribute:: red
-
-        An alias for :attr:`danger`.
-    .. attribute:: url
-
-        An alias for :attr:`link`.
+.. autoclass:: ButtonStyle()
+    :members:
 
 TextInputStyle
 ~~~~~~~~~~~~~~
 
-.. class:: TextInputStyle
+.. autoclass:: TextInputStyle()
+    :members:
 
-    Represents a style of the text input component.
+SelectDefaultValueType
+~~~~~~~~~~~~~~~~~~~~~~
 
-    .. versionadded:: 2.4
+.. autoclass:: SelectDefaultValueType()
+    :members:
 
-    .. attribute:: short
+SeparatorSpacing
+~~~~~~~~~~~~~~~~
 
-        Represents a single-line text input component.
-    .. attribute:: paragraph
-
-        Represents a multi-line text input component.
-    .. attribute:: single_line
-
-        An alias for :attr:`short`.
-    .. attribute:: multi_line
-
-        An alias for :attr:`paragraph`.
-    .. attribute:: long
-
-        An alias for :attr:`paragraph`.
+.. autoclass:: SeparatorSpacing()
+    :members:
