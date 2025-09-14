@@ -303,7 +303,7 @@ def dev(session: nox.Session) -> None:
     - install the pre-commit hook
     """
     session.run("pdm", "lock", "-dG:all", "-G:all", external=True)
-    session.run("pdm", "venv", "create", ".venv", "--force", external=True)
+    session.run("pdm", "venv", "create", "--force", external=True)
     session.run("pdm", "sync", "--clean-unselected", "-dG:all", "-G:all")
     session.run("pdm", "run", "pre-commit", "install")
 

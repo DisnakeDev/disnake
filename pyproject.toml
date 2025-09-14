@@ -122,7 +122,7 @@ ignore_package_warnings = ["*"]
 docs = { cmd = "nox -Rs docs --", help = "Build the documentation for development" }
 lint = { cmd = "nox -Rs lint --", help = "Check all files for linting errors" }
 pyright = { cmd = "nox -Rs pyright --", help = "Run pyright" }
-setup_env = { cmd = "nox -s dev", help = "Set up the local environment and all dependencies" }
+setup_env = { cmd = "{pdm} run noxfile.py -s dev", help = "Set up the local environment and all dependencies" }
 test = { cmd = "nox -Rs test --", help = "Run pytest" }
 
 [tool.ruff]
