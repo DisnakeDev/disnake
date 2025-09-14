@@ -98,8 +98,6 @@ jobs:
       - python-versions
       - lock-dependencies
       - lint
-    env:
-      NOXSESSION: docs
     steps:
       - uses: actions/checkout@v4
 
@@ -110,7 +108,7 @@ jobs:
           python-version: ${{ needs.python-versions.outputs.docs }}
 
       - name: Run sphinx-build
-        run: nox -- --keep-going -W -w $GITHUB_STEP_SUMMARY
+        run: nox -s docs -- --keep-going -W -w $GITHUB_STEP_SUMMARY
 
   pyright:
     runs-on: ubuntu-latest
@@ -126,7 +124,6 @@ jobs:
       fail-fast: false
     continue-on-error: ${{ matrix.experimental }}
     env:
-      NOXSESSION: pyright
       NOXFORCEPYTHON: ${{ matrix.python-version }}
     steps:
       - uses: actions/checkout@v4
@@ -144,7 +141,7 @@ jobs:
         env:
           NOX_DEFAULT_VENV_BACKEND: none
         run: |
-          nox --install-only
+          nox -s pyright --install-only
 
       - name: Set pyright version
         id: pyright-version
@@ -188,10 +185,8 @@ jobs:
 
       - name: Run slotscheck
         if: (success() || failure()) && steps.setup.outcome == 'success'
-        env:
-          NOXSESSION: slotscheck
         run: |
-          nox
+          nox -s slotscheck
 
       - name: Run check-manifest
         if: (success() || failure()) && steps.setup.outcome == 'success'
@@ -226,10 +221,8 @@ jobs:
 
       # run the libcst parsers and check for changes
       - name: libcst codemod
-        env:
-          NOXSESSION: codemod
         run: |
-          nox -- run-all
+          nox -s codemod -- run-all
 
       - name: Check for changes by libcst
         run: |
