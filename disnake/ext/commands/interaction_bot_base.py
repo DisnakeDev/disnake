@@ -448,7 +448,8 @@ class InteractionBotBase(CommonBotBase):
             The name of the app command to remove.
         guild_id: Optional[:class:`int`]
             The ID of the guild from which this command should be removed,
-            or ``None`` if it's global.
+            or ``None`` if it's global. If ``test_guilds`` is specified in the bot constructor,
+            passing ``None`` here will remove the command from those guilds instead.
 
         Returns
         -------
