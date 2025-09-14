@@ -84,6 +84,8 @@ class AppCmdIndex(NamedTuple):
     """A named tuple used for indexation of :class:`InvokableApplicationCommand`
     objects stored in bot's cache.
 
+    .. versionadded:: 2.12
+
     Attributes
     ----------
     type: :class:`disnake.ApplicationCommandType`
