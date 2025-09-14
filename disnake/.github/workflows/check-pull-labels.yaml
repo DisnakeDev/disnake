@@ -1,0 +1,27 @@
+# SPDX-License-Identifier: MIT
+
+name: check-pull-labels
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, labeled, unlabeled, reopened]
+
+permissions:
+  pull-requests: read
+
+jobs:
+  check-pull-labels:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check for the do not merge label
+        if: "${{ contains(github.event.pull_request.labels.*.name, 'do not merge') == true }}"
+        run: exit 1
+
+      - name: Check for the blocked label
+        if: "${{ contains(github.event.pull_request.labels.*.name, 's: blocked') == true }}"
+        run: exit 1
+
+      - name: Check for the waiting for api/docs label
+        if: "${{ contains(github.event.pull_request.labels.*.name, 's: waiting for api/docs') == true }}"
+        run: exit 1

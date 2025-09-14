@@ -1,0 +1,339 @@
+# SPDX-License-Identifier: MIT
+
+from __future__ import annotations
+
+import asyncio
+import os
+import sys
+import traceback
+from functools import partial
+from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Tuple, TypeVar, Union, cast
+
+from ..enums import TextInputStyle
+from ..utils import MISSING
+from .action_row import ActionRow, normalize_components
+from .item import ensure_ui_component
+from .label import Label
+from .text_input import TextInput
+
+if TYPE_CHECKING:
+    from ..client import Client
+    from ..interactions.modal import ModalInteraction
+    from ..state import ConnectionState
+    from ..types.components import (
+        Modal as ModalPayload,
+        ModalTopLevelComponent as ModalTopLevelComponentPayload,
+    )
+    from ..ui._types import ModalComponents, ModalTopLevelComponent
+
+    # backwards compatibility, `TextInput` internally gets wrapped in an action row (deprecated)
+    ModalTopLevelComponentInput = Union[ModalTopLevelComponent, TextInput]
+
+
+__all__ = ("Modal",)
+
+ClientT = TypeVar("ClientT", bound="Client")
+
+
+class Modal:
+    """Represents a UI Modal.
+
+    .. versionadded:: 2.4
+
+    Parameters
+    ----------
+    title: :class:`str`
+        The title of the modal.
+    components: |modal_components_type|
+        The components to display in the modal. A maximum of 5.
+
+        Currently supports the following components:
+            - :class:`.ui.TextDisplay`
+            - :class:`.ui.TextInput`, in a :class:`.ui.Label`
+            - select menus (e.g. :class:`.ui.StringSelect`), in a :class:`.ui.Label`
+
+        .. versionchanged:: 2.11
+            Using action rows in modals or passing :class:`.ui.TextInput` directly
+            (which implicitly wraps it in an action row) is deprecated.
+            Use :class:`.ui.TextInput` inside a :class:`.ui.Label` instead.
+
+    custom_id: :class:`str`
+        The custom ID of the modal. This is usually not required.
+        If not given, then a unique one is generated for you.
+
+        .. note::
+            :class:`Modal`\\s are identified based on the user ID that triggered the
+            modal, and this ``custom_id``.
+            This can result in collisions when a user opens a modal with the same ``custom_id`` on
+            two separate devices, for example.
+
+            To avoid such issues, consider not specifying a ``custom_id`` to use an automatically generated one,
+            or include a unique value in the custom ID (e.g. the original interaction ID).
+
+    timeout: :class:`float`
+        The time to wait until the modal is removed from cache, if no interaction is made.
+        Modals without timeouts are not supported, since there's no event for when a modal is closed.
+        Defaults to 600 seconds.
+    """
+
+    __slots__ = (
+        "title",
+        "custom_id",
+        "components",
+        "timeout",
+        "__remove_callback",
+        "__timeout_handle",
+    )
+
+    def __init__(
+        self,
+        *,
+        title: str,
+        components: ModalComponents,
+        custom_id: str = MISSING,
+        timeout: float = 600,
+    ) -> None:
+        if timeout is None:  # pyright: ignore[reportUnnecessaryComparison]
+            raise ValueError("Timeout may not be None")
+
+        items = normalize_components(components)
+        if len(items) > 5:
+            raise ValueError("Maximum number of components exceeded.")
+
+        self.title: str = title
+        self.custom_id: str = os.urandom(16).hex() if custom_id is MISSING else custom_id
+        self.components: List[ModalTopLevelComponent] = list(items)
+        self.timeout: float = timeout
+
+        # function for the modal to remove itself from the store, if any
+        self.__remove_callback: Optional[Callable[[Modal], None]] = None
+        # timer handle for the scheduled timeout
+        self.__timeout_handle: Optional[asyncio.TimerHandle] = None
+
+    def __repr__(self) -> str:
+        return (
+            f"<Modal custom_id={self.custom_id!r} title={self.title!r} "
+            f"components={self.components!r}>"
+        )
+
+    def append_component(
+        self, component: Union[ModalTopLevelComponentInput, List[ModalTopLevelComponentInput]]
+    ) -> None:
+        """Adds one or multiple component(s) to the modal.
+
+        Parameters
+        ----------
+        component: |modal_components_type|
+            The component(s) to add to the modal.
+            This can be a single component or a list of components.
+
+            See :class:`Modal.components <Modal>` for supported components.
+
+            .. versionchanged:: 2.11
+                Using action rows in modals or passing :class:`.ui.TextInput` directly
+                (which implicitly wraps it in an action row) is deprecated.
+                Use :class:`.ui.TextInput` inside a :class:`.ui.Label` instead.
+
+        Raises
+        ------
+        ValueError
+            Maximum number of components (5) exceeded.
+        TypeError
+            An invalid component object was passed.
+        """
+        if not isinstance(component, list):
+            component = [component]
+
+        if len(self.components) + len(component) >= 5:
+            raise ValueError("Maximum number of components exceeded.")
+
+        for c in component:
+            c = ensure_ui_component(c)
+
+            # backwards compatibility, action rows in modals are deprecated.
+            if isinstance(c, TextInput):
+                c = ActionRow(c)
+
+            self.components.append(c)
+
+    def add_text_input(
+        self,
+        *,
+        label: str,
+        custom_id: str = MISSING,
+        style: TextInputStyle = TextInputStyle.short,
+        placeholder: Optional[str] = None,
+        value: Optional[str] = None,
+        required: bool = True,
+        min_length: Optional[int] = None,
+        max_length: Optional[int] = None,
+    ) -> None:
+        """Creates and adds a text input component to the modal.
+
+        To append an existing component instance, use :meth:`append_component`.
+
+        Parameters
+        ----------
+        label: :class:`str`
+            The label of the text input.
+        custom_id: :class:`str`
+            The ID of the text input that gets received during an interaction.
+            If not given then one is generated for you.
+        style: :class:`.TextInputStyle`
+            The style of the text input.
+        placeholder: Optional[:class:`str`]
+            The placeholder text that is shown if nothing is entered.
+        value: Optional[:class:`str`]
+            The pre-filled value of the text input.
+        required: :class:`bool`
+            Whether the text input is required. Defaults to ``True``.
+        min_length: Optional[:class:`int`]
+            The minimum length of the text input.
+        max_length: Optional[:class:`int`]
+            The maximum length of the text input.
+
+        Raises
+        ------
+        ValueError
+            Maximum number of components (5) exceeded.
+        """
+        self.append_component(
+            Label(
+                label,
+                TextInput(
+                    custom_id=custom_id,
+                    style=style,
+                    placeholder=placeholder,
+                    value=value,
+                    required=required,
+                    min_length=min_length,
+                    max_length=max_length,
+                ),
+            )
+        )
+
+    async def callback(self, interaction: ModalInteraction[ClientT], /) -> None:
+        """|coro|
+
+        The callback associated with this modal.
+
+        This can be overridden by subclasses.
+
+        Parameters
+        ----------
+        interaction: :class:`.ModalInteraction`
+            The interaction that triggered this modal.
+        """
+        pass
+
+    async def on_error(self, error: Exception, interaction: ModalInteraction[ClientT]) -> None:
+        """|coro|
+
+        A callback that is called when an error occurs.
+
+        The default implementation prints the traceback to stderr.
+
+        Parameters
+        ----------
+        error: :class:`Exception`
+            The exception that was raised.
+        interaction: :class:`.ModalInteraction`
+            The interaction that triggered this modal.
+        """
+        traceback.print_exception(error.__class__, error, error.__traceback__, file=sys.stderr)
+
+    async def on_timeout(self) -> None:
+        """|coro|
+
+        A callback that is called when the modal is removed from the cache
+        without an interaction being made.
+        """
+        pass
+
+    def to_components(self) -> ModalPayload:
+        return {
+            "title": self.title,
+            "custom_id": self.custom_id,
+            "components": cast(
+                "List[ModalTopLevelComponentPayload]",
+                [component.to_component_dict() for component in self.components],
+            ),
+        }
+
+    async def _scheduled_task(self, interaction: ModalInteraction) -> None:
+        try:
+            await self.callback(interaction)
+        except Exception as e:
+            await self.on_error(e, interaction)
+        finally:
+            if interaction.response._response_type is None:
+                # If the interaction was not successfully responded to, the modal didn't close for the user.
+                # Since the timeout was already stopped at this point, restart it.
+                self._start_listening(self.__remove_callback)
+            else:
+                # Otherwise, the modal closed for the user; remove it from the store.
+                self._stop_listening()
+
+    def _start_listening(self, remove_callback: Optional[Callable[[Modal], None]]) -> None:
+        self.__remove_callback = remove_callback
+
+        loop = asyncio.get_running_loop()
+        if self.__timeout_handle is not None:
+            # shouldn't get here, but handled just in case
+            self.__timeout_handle.cancel()
+
+        # start timeout
+        self.__timeout_handle = loop.call_later(self.timeout, self._dispatch_timeout)
+
+    def _stop_listening(self) -> None:
+        # cancel timeout
+        if self.__timeout_handle is not None:
+            self.__timeout_handle.cancel()
+            self.__timeout_handle = None
+
+        # remove modal from store
+        if self.__remove_callback is not None:
+            self.__remove_callback(self)
+            self.__remove_callback = None
+
+    def _dispatch_timeout(self) -> None:
+        self._stop_listening()
+        asyncio.create_task(self.on_timeout(), name=f"disnake-ui-modal-timeout-{self.custom_id}")
+
+    def dispatch(self, interaction: ModalInteraction) -> None:
+        # stop the timeout, but don't remove the modal from the store yet in case the
+        # response fails and the modal stays open
+        if self.__timeout_handle is not None:
+            self.__timeout_handle.cancel()
+
+        asyncio.create_task(
+            self._scheduled_task(interaction), name=f"disnake-ui-modal-dispatch-{self.custom_id}"
+        )
+
+
+class ModalStore:
+    def __init__(self, state: ConnectionState) -> None:
+        self._state = state
+        # (user_id, Modal.custom_id): Modal
+        self._modals: Dict[Tuple[int, str], Modal] = {}
+
+    def add_modal(self, user_id: int, modal: Modal) -> None:
+        key = (user_id, modal.custom_id)
+
+        # if another modal with the same user+custom_id already exists,
+        # stop its timeout to avoid overlaps/collisions
+        if (existing := self._modals.get(key)) is not None:
+            existing._stop_listening()
+
+        # start timeout, store modal
+        remove_callback = partial(self.remove_modal, user_id)
+        modal._start_listening(remove_callback)
+        self._modals[key] = modal
+
+    def remove_modal(self, user_id: int, modal: Modal) -> None:
+        self._modals.pop((user_id, modal.custom_id), None)
+
+    def dispatch(self, interaction: ModalInteraction) -> None:
+        key = (interaction.author.id, interaction.custom_id)
+        if (modal := self._modals.get(key)) is not None:
+            modal.dispatch(interaction)

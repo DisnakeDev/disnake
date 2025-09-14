@@ -1,0 +1,232 @@
+.. SPDX-License-Identifier: MIT
+
+.. currentmodule:: disnake.ui
+
+.. _disnake_api_ui:
+
+Bot UI Kit
+==========
+
+This section documents everything related to the Discord Bot UI Kit - a group of helper functions and classes that aid in making :ref:`component-based <disnake_api_components>` UIs.
+
+Classes
+-------
+
+View
+~~~~
+
+.. attributetable:: View
+
+.. autoclass:: View
+    :members:
+
+ActionRow
+~~~~~~~~~
+
+.. attributetable:: ActionRow
+
+.. autoclass:: ActionRow
+    :members:
+    :exclude-members: add_select
+
+Item
+~~~~
+
+.. attributetable:: Item
+
+.. autoclass:: Item
+    :members:
+
+WrappedComponent
+~~~~~~~~~~~~~~~~
+
+.. attributetable:: WrappedComponent
+
+.. autoclass:: WrappedComponent
+    :members:
+
+UIComponent
+~~~~~~~~~~~
+
+.. attributetable:: UIComponent
+
+.. autoclass:: UIComponent
+    :members:
+
+Button
+~~~~~~
+
+.. attributetable:: Button
+
+.. autoclass:: Button
+    :members:
+    :inherited-members:
+
+BaseSelect
+~~~~~~~~~~
+
+.. attributetable:: BaseSelect
+
+.. autoclass:: BaseSelect()
+    :members:
+    :inherited-members:
+
+StringSelect
+~~~~~~~~~~~~
+
+.. attributetable:: StringSelect
+
+.. autoclass:: StringSelect
+    :members:
+    :inherited-members:
+    :exclude-members: default_values
+
+ChannelSelect
+~~~~~~~~~~~~~
+
+.. attributetable:: ChannelSelect
+
+.. autoclass:: ChannelSelect
+    :members:
+    :inherited-members:
+
+MentionableSelect
+~~~~~~~~~~~~~~~~~
+
+.. attributetable:: MentionableSelect
+
+.. autoclass:: MentionableSelect
+    :members:
+    :inherited-members:
+
+RoleSelect
+~~~~~~~~~~
+
+.. attributetable:: RoleSelect
+
+.. autoclass:: RoleSelect
+    :members:
+    :inherited-members:
+
+UserSelect
+~~~~~~~~~~
+
+.. attributetable:: UserSelect
+
+.. autoclass:: UserSelect
+    :members:
+    :inherited-members:
+
+Modal
+~~~~~
+
+.. attributetable:: Modal
+
+.. autoclass:: Modal
+    :members:
+
+TextInput
+~~~~~~~~~
+
+.. attributetable:: TextInput
+
+.. autoclass:: TextInput
+    :members:
+
+Section
+~~~~~~~
+
+.. attributetable:: Section
+
+.. autoclass:: Section
+    :members:
+    :inherited-members:
+
+TextDisplay
+~~~~~~~~~~~
+
+.. attributetable:: TextDisplay
+
+.. autoclass:: TextDisplay
+    :members:
+    :inherited-members:
+
+Thumbnail
+~~~~~~~~~
+
+.. attributetable:: Thumbnail
+
+.. autoclass:: Thumbnail
+    :members:
+    :inherited-members:
+
+MediaGallery
+~~~~~~~~~~~~
+
+.. attributetable:: MediaGallery
+
+.. autoclass:: MediaGallery
+    :members:
+    :inherited-members:
+
+File
+~~~~
+
+.. attributetable:: File
+
+.. autoclass:: File
+    :members:
+    :inherited-members:
+
+Separator
+~~~~~~~~~
+
+.. attributetable:: Separator
+
+.. autoclass:: Separator
+    :members:
+    :inherited-members:
+
+Container
+~~~~~~~~~
+
+.. attributetable:: Container
+
+.. autoclass:: Container
+    :members:
+    :inherited-members:
+
+Label
+~~~~~
+
+.. attributetable:: Label
+
+.. autoclass:: Label
+    :members:
+    :inherited-members:
+
+
+Functions
+---------
+
+.. autofunction:: button(cls=Button, *, custom_id=..., style=ButtonStyle.secondary, label=None, disabled=False, url=None, emoji=None, row=None)
+    :decorator:
+
+.. autofunction:: string_select(cls=StringSelect, *, custom_id=..., placeholder=None, min_values=1, max_values=1, options=..., disabled=False, row=None)
+    :decorator:
+
+.. autofunction:: channel_select(cls=ChannelSelect, *, custom_id=..., placeholder=None, min_values=1, max_values=1, disabled=False, channel_types=None, default_values=None, row=None)
+    :decorator:
+
+.. autofunction:: mentionable_select(cls=MentionableSelect, *, custom_id=..., placeholder=None, min_values=1, max_values=1, disabled=False, default_values=None, row=None)
+    :decorator:
+
+.. autofunction:: role_select(cls=RoleSelect, *, custom_id=..., placeholder=None, min_values=1, max_values=1, disabled=False, default_values=None, row=None)
+    :decorator:
+
+.. autofunction:: user_select(cls=UserSelect, *, custom_id=..., placeholder=None, min_values=1, max_values=1, disabled=False, default_values=None, row=None)
+    :decorator:
+
+.. autofunction:: walk_components
+
+.. autofunction:: components_from_message
