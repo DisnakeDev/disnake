@@ -19,8 +19,8 @@ import nox
 if TYPE_CHECKING:
     from typing_extensions import NotRequired
 
-nox.needs_version = ">=2025.5.1"
 
+nox.needs_version = ">=2025.5.1"
 
 nox.options.error_on_external_run = True
 nox.options.reuse_venv = "yes"
@@ -34,13 +34,18 @@ nox.options.sessions = [
 
 PYPROJECT = nox.project.load_toml()
 
+SUPPORTED_PYTHONS = nox.project.python_versions(PYPROJECT)
+# todo(onerandomusername): add 3.14 once CI supports 3.14.
+EXPERIMENTAL_PYTHON_VERSIONS = ["3.14"]
+CI = bool(os.getenv("CI", ""))
+
 # used to reset cached coverage data once for the first test run only
 reset_coverage = True
 
 
 class PyrightGroup(TypedDict):
     python: str
-    directories: Tuple[str, ...]
+    paths: Tuple[str, ...]
     extras: NotRequired[Tuple[str, ...]]
     groups: NotRequired[Tuple[str, ...]]
     dependencies: NotRequired[Tuple[str, ...]]
@@ -48,53 +53,29 @@ class PyrightGroup(TypedDict):
 
 
 pyright_groups: List[PyrightGroup] = [
-    PyrightGroup(
-        python="3.8",
-        directories=("disnake", "tests", "examples"),
-        extras=("speed", "voice"),
-        groups=("test",),
-    ),
-    PyrightGroup(
-        python="3.9",
-        directories=("disnake", "tests", "examples"),
-        extras=("speed", "voice"),
-        groups=("test",),
-    ),
-    PyrightGroup(
-        python="3.10",
-        directories=("disnake", "tests", "examples"),
-        extras=("speed", "voice"),
-        groups=("test",),
+    *(
+        PyrightGroup(
+            python=python,
+            paths=("disnake", "tests", "examples", "noxfile.py", "setup.py"),
+            # orjson doesn't yet support python 3.14
+            extras=("speed", "voice") if python not in EXPERIMENTAL_PYTHON_VERSIONS else ("voice",),
+            groups=("test", "nox"),
+            experimental=python in EXPERIMENTAL_PYTHON_VERSIONS,
+            dependencies=("setuptools",),
+        )
+        for python in [*SUPPORTED_PYTHONS, *EXPERIMENTAL_PYTHON_VERSIONS]
     ),
     PyrightGroup(
         python="3.11",
-        directories=("disnake", "tests", "examples"),
-        extras=("speed", "voice"),
-        groups=("test",),
-    ),
-    PyrightGroup(
-        python="3.11",
-        directories=("docs",),
+        paths=("docs",),
         extras=("docs",),
         experimental=True,
     ),
     PyrightGroup(
         python="3.11",
-        directories=("scripts",),
+        paths=("scripts",),
         groups=("codemod",),
         experimental=True,
-    ),
-    PyrightGroup(
-        python="3.12",
-        directories=("disnake", "tests", "examples"),
-        extras=("speed", "voice"),
-        groups=("test",),
-    ),
-    PyrightGroup(
-        python="3.13",
-        directories=("disnake", "tests", "examples"),
-        extras=("speed", "voice"),
-        groups=("test",),
     ),
 ]
 
@@ -199,10 +180,10 @@ def docs(session: nox.Session) -> None:
 
 @nox.session
 def lint(session: nox.Session) -> None:
-    """Check all files for linting errors"""
+    """Check all paths for linting errors"""
     install_deps(session, project=False, groups=["tools"])
 
-    session.run("pre-commit", "run", "--all-files", *session.posargs)
+    session.run("pre-commit", "run", "--all-paths", *session.posargs)
 
 
 @nox.session(name="check-manifest")
@@ -311,12 +292,11 @@ def codemod(session: nox.Session) -> None:
 
 @nox.session()
 @nox.parametrize(
-    "python,pyright_group",
+    ("python", "pyright_group"),
     [(group["python"], group) for group in pyright_groups],
-    ids=[group["python"] + "-" + group["directories"][0] for group in pyright_groups],
+    ids=[group["python"] + "-" + group["paths"][0] for group in pyright_groups],
 )
 def pyright(session: nox.Session, pyright_group: PyrightGroup) -> None:
-    """Run pyright."""
     groups = set(pyright_group.get("groups", ()))
     if "typing" not in groups:
         groups.add("typing")
@@ -325,6 +305,7 @@ def pyright(session: nox.Session, pyright_group: PyrightGroup) -> None:
         project=True,
         extras=pyright_group.get("extras", ()),
         groups=groups,
+        dependencies=pyright_group.get("dependencies", ()),
     )
 
     env = {
@@ -335,15 +316,22 @@ def pyright(session: nox.Session, pyright_group: PyrightGroup) -> None:
             "python",
             "-m",
             "pyright",
-            *pyright_group["directories"],
+            *pyright_group["paths"],
             *session.posargs,
             env=env,
         )
     except KeyboardInterrupt:
         session.error("Quit pyright")
+    except Exception:
+        if not CI and pyright_group.get("experimental", False):
+            session.warn(
+                "Pyright failed but the session was marked as experimental, exiting with 0"
+            )
+        else:
+            raise
 
 
-@nox.session(python=nox.project.python_versions(PYPROJECT))
+@nox.session(python=SUPPORTED_PYTHONS)
 @nox.parametrize(
     "extras",
     [

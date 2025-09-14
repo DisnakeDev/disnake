@@ -66,12 +66,14 @@ jobs:
 
       - name: Determine Python versions to test and lint against
         id: set-matrix
+        # raw values (without a list) need the raw flag in order to not print quotes
+        # lists do not need the raw flag, as we parse them with fromJSON() later on
         run: |
           echo min-python=$(nox -s test --list --json | jq -rc '[.[].python][0]') | tee --append $GITHUB_OUTPUT
           echo docs=$(nox -s docs --list --json | jq -rc '.[].python') | tee --append $GITHUB_OUTPUT
           echo libcst=$(nox -s codemod --list --json | jq -rc '[.[].python][0]') | tee --append $GITHUB_OUTPUT
           echo tests=$(nox -s test --list --json | jq -c '[.[].python]') | tee --append $GITHUB_OUTPUT
-          echo pyright-sessions=$(nox -s pyright -l --json | jq -c '[.[] | {python: .python, name: .session, directories: .call_spec.pyright_group.directories, experimental: (.call_spec.pyright_group.experimental == true) }]') | tee --append $GITHUB_OUTPUT
+          echo pyright-sessions=$(nox -s pyright --list --json | jq -c '[.[] | {python: .python, name: .session, paths: .call_spec.pyright_group.paths, experimental: (.call_spec.pyright_group.experimental == true) }]') | tee --append $GITHUB_OUTPUT
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -113,9 +115,8 @@ jobs:
       matrix:
         # TODO: add 3.14 once we switch to uv
         session: ${{ fromJson(needs.python-versions.outputs.pyright-sessions) }}
-        experimental: [false]
       fail-fast: false
-    continue-on-error: ${{ matrix.session.experimental || matrix.experimental }}
+    continue-on-error: ${{ matrix.session.experimental }}
 
     steps:
       - uses: actions/checkout@v4
@@ -154,7 +155,7 @@ jobs:
           python-platform: "Linux"
           annotate: ${{ matrix.session.python == needs.python-versions.outputs.min-python }} # only add comments for one version
           warnings: true
-          extra-args: ${{join(matrix.session.directories, ' ')}}
+          extra-args: ${{join(matrix.session.paths, ' ')}}
 
       - name: Run pyright (Windows)
         uses: jakebailey/pyright-action@v2.2.1
@@ -165,7 +166,7 @@ jobs:
           python-platform: "Windows"
           annotate: false # only add comments for one platform (see above)
           warnings: true
-          extra-args: ${{join(matrix.session.directories, ' ')}}
+          extra-args: ${{join(matrix.session.paths, ' ')}}
 
   misc:
     runs-on: ubuntu-latest
