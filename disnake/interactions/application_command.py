@@ -176,6 +176,8 @@ class ApplicationCommandInteractionData(Dict[str, Any]):
         A list of options from the API.
     guild_id: Optional[:class:`int`]
         ID of the guild the command is registered to.
+
+        .. versionadded:: 2.10
     target_id: :class:`int`
         ID of the user or message targeted by a user or message command.
     target: Union[:class:`User`, :class:`Member`, :class:`Message`]
