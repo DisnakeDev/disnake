@@ -322,6 +322,18 @@ class VoiceDaveTransitionReadyCommand(TypedDict):
     d: VoiceDaveTransitionReadyData
 
 
+# voice opcode 31
+
+
+class VoiceDaveMlsInvalidCommitWelcomeData(TypedDict):
+    transition_id: int
+
+
+class VoiceDaveMlsInvalidCommitWelcomeCommand(TypedDict):
+    op: Literal[31]
+    d: VoiceDaveMlsInvalidCommitWelcomeData
+
+
 #####
 # Gateway events
 #####

@@ -47,6 +47,7 @@ if TYPE_CHECKING:
         PresenceUpdateCommand,
         RequestMembersCommand,
         ResumeCommand,
+        VoiceDaveMlsInvalidCommitWelcomeCommand,
         VoiceDaveTransitionReadyCommand,
         VoiceHeartbeatData,
         VoiceIdentifyCommand,
@@ -1079,6 +1080,13 @@ class DiscordVoiceWebSocket:
         data = struct.pack(">B", self.DAVE_MLS_COMMIT_WELCOME) + bytes(commit_welcome)
         await self.send_as_bytes(data)
 
+    async def send_dave_mls_invalid_commit_welcome(self, transition_id: int) -> None:
+        payload: VoiceDaveMlsInvalidCommitWelcomeCommand = {
+            "op": self.DAVE_MLS_INVALID_COMMIT_WELCOME,
+            "d": {"transition_id": transition_id},
+        }
+        await self.send_as_json(payload)
+
     async def received_message(self, msg: VoicePayload) -> None:
         _log.debug("Voice websocket frame received: %s", msg)
         op = msg["op"]
@@ -1121,10 +1129,15 @@ class DiscordVoiceWebSocket:
             return  # this should not happen.
 
         op = msg[0]
+        # TODO: consider memoryviews
         if op == self.DAVE_MLS_EXTERNAL_SENDER:
             self.dave.handle_mls_external_sender(msg[1:])
         elif op == self.DAVE_MLS_PROPOSALS:
             await self.dave.handle_mls_proposals(msg[1:])
+        elif op == self.DAVE_MLS_ANNOUNCE_COMMIT_TRANSITION:
+            # XXX: assuming big endian, this doesn't really seem to be documented
+            transition_id = int.from_bytes(msg[1:3], "big", signed=False)
+            await self.dave.handle_announce_commit_transition(transition_id, msg[3:])
 
     async def initial_connection(self, data: VoiceReadyPayload) -> None:
         state = self._connection
@@ -1300,6 +1313,24 @@ class DaveState:
         if commit_welcome is not None:
             _log.debug("sending commit + welcome message")
             await self.ws.send_dave_mls_commit_welcome(commit_welcome)
+
+    async def handle_announce_commit_transition(self, transition_id: int, data: bytes) -> None:
+        _log.debug("group participants are changing with transition ID %d", transition_id)
+        # TODO: for the love of god please fix the type casting already
+        processed = self._session.process_commit(list(data))
+
+        if processed is dave.RejectType.ignored:
+            _log.debug("ignored commit for unexpected group ID")
+            return
+        elif processed is dave.RejectType.failed:
+            # "If the client receives a welcome or commit they cannot process, they send the dave_mls_invalid_commit_welcome opcode (31) to the voice gateway to flag the invalid message."
+            # "The client receiving the invalid commit or welcome locally resets their MLS state and generates a new key package to be delivered to the voice gateway via dave_mls_key_package opcode (26)."
+            _log.error("failed to process commit")
+            await self.ws.send_dave_mls_invalid_commit_welcome(transition_id)
+            await self.reinit_state(self._session.get_protocol_version())
+        else:
+            # joined group
+            await self.prepare_transition(transition_id, self._session.get_protocol_version())
 
     async def prepare_epoch(self, epoch: int) -> None:
         _log.debug("preparing epoch %d", epoch)
