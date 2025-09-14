@@ -10,6 +10,7 @@
 
 from __future__ import annotations
 
+import os
 import pathlib
 from typing import Any, Dict, List, Sequence, Tuple
 
@@ -39,13 +40,36 @@ def install_deps(
     *,
     extras: Sequence[str] = (),
     groups: Sequence[str] = (),
+    dependencies: Sequence[str] = (),
     project: bool = True,
 ) -> None:
     """Helper to install dependencies from a group."""
     if not project and extras:
         raise TypeError("Cannot install extras without also installing the project")
 
-    command: List[str] = [
+    command: List[str]
+
+    # If not using pdm, install with pip
+    if os.getenv("NO_PDM_INSTALL") is not None:
+        command = []
+        if project:
+            command.append("-e")
+            command.append(".")
+            if extras:
+                # project[extra1,extra2]
+                command[-1] += "[" + ",".join(extras) + "]"
+        if groups:
+            command.extend(nox.project.dependency_groups(PYPROJECT, *groups))
+        session.install(*command)
+
+        # install separately in case it conflicts with a just-installed dependency (for overriding a locked dep)
+        if dependencies:
+            session.install(*dependencies)
+
+        return
+
+    # install with pdm
+    command = [
         "pdm",
         "sync",
         "--fail-fast",
@@ -71,6 +95,9 @@ def install_deps(
         env=env,
         external=True,
     )
+
+    if dependencies:
+        session.install(*dependencies, env=env)
 
 
 @nox.session(python="3.8")
@@ -224,11 +251,14 @@ def pyright(session: nox.Session) -> None:
     install_deps(
         session,
         project=True,
-        extras=["speed", "voice"],
+        extras=[
+            "speed",
+            "voice",
+            "docs",  # docs/
+        ],
         groups=[
             "test",  # tests/
             "nox",  # noxfile.py
-            "docs",  # docs/
             "codemod",  # scripts/
             "typing",  # pyright
         ],
