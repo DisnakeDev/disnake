@@ -611,7 +611,7 @@ class InteractionBotBase(CommonBotBase):
         return result
 
     def get_user_command(
-        self, name: str, guild_id: Optional[int] = MISSING
+        self, name: str, *, guild_id: Optional[int] = MISSING
     ) -> Optional[InvokableUserCommand]:
         """Gets an :class:`InvokableUserCommand` from the internal list
         of user commands.
@@ -658,7 +658,7 @@ class InteractionBotBase(CommonBotBase):
         return result
 
     def get_message_command(
-        self, name: str, guild_id: Optional[int] = MISSING
+        self, name: str, *, guild_id: Optional[int] = MISSING
     ) -> Optional[InvokableMessageCommand]:
         """Gets an :class:`InvokableMessageCommand` from the internal list
         of message commands.
