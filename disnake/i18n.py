@@ -17,6 +17,7 @@ from typing import (
     Literal,
     Optional,
     Set,
+    Type,
     TypeVar,
     Union,
     overload,
@@ -136,7 +137,9 @@ class Localized(Generic[StringT]):
     def _cast(cls, string: LocalizedRequired, required: Literal[True]) -> Localized[str]: ...
 
     @classmethod
-    def _cast(cls, string: Union[Optional[str], Localized[Any]], required: bool) -> Localized[Any]:
+    def _cast(
+        cls: Type[Localized[Any]], string: Union[Optional[str], Localized[Any]], required: bool
+    ) -> Localized[Any]:
         if not isinstance(string, Localized):
             string = cls(string, data=None)
 
@@ -283,7 +286,7 @@ class LocalizationProtocol(ABC):
         raise NotImplementedError
 
     # subtypes don't have to implement this
-    def load(self, path: Union[str, os.PathLike]) -> None:
+    def load(self, path: Union[str, os.PathLike[str]]) -> None:
         """Adds localizations from the provided path.
 
         Parameters
@@ -348,7 +351,7 @@ class LocalizationStore(LocalizationProtocol):
             raise LocalizationKeyError(key)
         return data
 
-    def load(self, path: Union[str, os.PathLike]) -> None:
+    def load(self, path: Union[str, os.PathLike[str]]) -> None:
         """Adds localizations from the provided path to the store.
         If the path points to a file, the file gets loaded.
         If it's a directory, all ``.json`` files in that directory get loaded (non-recursive).

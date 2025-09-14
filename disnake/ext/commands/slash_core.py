@@ -212,8 +212,8 @@ class SubCommandGroup(InvokableApplicationCommand):
         self,
         name: LocalizedOptional = None,
         description: LocalizedOptional = None,
-        options: Optional[list] = None,
-        connectors: Optional[dict] = None,
+        options: Optional[List[Option]] = None,
+        connectors: Optional[Dict[str, str]] = None,
         extras: Optional[Dict[str, Any]] = None,
         **kwargs: Any,
     ) -> Callable[[CommandCallback], SubCommand]:
@@ -292,7 +292,7 @@ class SubCommand(InvokableApplicationCommand):
         *,
         name: LocalizedOptional = None,
         description: LocalizedOptional = None,
-        options: Optional[list] = None,
+        options: Optional[List[Option]] = None,
         connectors: Optional[Dict[str, str]] = None,
         **kwargs: Any,
     ) -> None:
@@ -300,7 +300,9 @@ class SubCommand(InvokableApplicationCommand):
         super().__init__(func, name=name_loc.string, **kwargs)
         self.parent: Union[InvokableSlashCommand, SubCommandGroup] = parent
         self.connectors: Dict[str, str] = connectors or {}
-        self.autocompleters: Dict[str, Any] = kwargs.get("autocompleters", {})
+        self.autocompleters: Dict[str, Union[Choices, Callable[..., Optional[Choices]]]] = (
+            kwargs.get("autocompleters", {})
+        )
 
         if options is None:
             options = expand_params(self)
@@ -465,7 +467,9 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         self.children: Dict[str, Union[SubCommand, SubCommandGroup]] = {}
         self.auto_sync: bool = True if auto_sync is None else auto_sync
         self.guild_ids: Optional[Tuple[int, ...]] = None if guild_ids is None else tuple(guild_ids)
-        self.autocompleters: Dict[str, Any] = kwargs.get("autocompleters", {})
+        self.autocompleters: Dict[str, Union[Choices, Callable[..., Optional[Choices]]]] = (
+            kwargs.get("autocompleters", {})
+        )
 
         if options is None:
             options = expand_params(self)
@@ -549,8 +553,8 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         self,
         name: LocalizedOptional = None,
         description: LocalizedOptional = None,
-        options: Optional[list] = None,
-        connectors: Optional[dict] = None,
+        options: Optional[List[Option]] = None,
+        connectors: Optional[Dict[str, str]] = None,
         extras: Optional[Dict[str, Any]] = None,
         **kwargs: Any,
     ) -> Callable[[CommandCallback], SubCommand]:

@@ -87,7 +87,7 @@ codemod = [
 ]
 typing = [
     # this is not pyright itself, but the python wrapper
-    "pyright==1.1.336",
+    "pyright==1.1.405",
     # only used for type-checking, version does not matter
     "pytz",
 ]
@@ -361,6 +361,12 @@ reportConstantRedefinition = false
 reportImportCycles = false
 reportIncompatibleMethodOverride = false
 reportIncompatibleVariableOverride = false
+
+# TODO: re-enable
+# these were added in the upgrade from pyright 1.1.336 to 1.1.405
+reportInconsistentOverload = false
+reportInvalidTypeVarUse = false
+reportInvalidTypeForm = false
 
 # these are largely due to missing type hints, and make up most of the error count
 reportUnknownMemberType = false
