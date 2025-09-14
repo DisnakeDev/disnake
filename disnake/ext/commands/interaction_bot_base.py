@@ -363,12 +363,11 @@ class InteractionBotBase(CommonBotBase):
                     cmd_index.type, cmd_index.name, cmd_index.guild_id
                 )
 
-            # localization may be called multiple times for the same command but it's harmless
-            app_command.body.localize(self.i18n)
             # note that we're adding the same command object for each guild_id
             # this ensures that any changes that happen to app_command after add_app_command
             # (such as hook attachments or permission modifications) apply properly
             self._all_app_commands[cmd_index] = app_command
+        app_command.body.localize(self.i18n)
 
     @deprecated("add_app_command")
     def add_slash_command(self, slash_command: InvokableSlashCommand) -> None:
