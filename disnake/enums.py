@@ -70,6 +70,7 @@ __all__ = (
     "ThreadLayout",
     "Event",
     "ApplicationRoleConnectionMetadataType",
+    "ApplicationEventWebhookStatus",
     "OnboardingPromptType",
     "SKUType",
     "EntitlementType",
@@ -86,7 +87,7 @@ EnumMetaT = TypeVar("EnumMetaT", bound="Type[EnumMeta]")
 
 class _EnumValueBase(NamedTuple):
     if TYPE_CHECKING:
-        _cls_name: ClassVar[str]
+        _cls_name: ClassVar[str]  # type: ignore
 
     name: str
     value: Any
@@ -114,6 +115,9 @@ def _create_value_cls(name: str, comparable: bool) -> Type[_EnumValueBase]:
 
 def _is_descriptor(obj) -> bool:
     return hasattr(obj, "__get__") or hasattr(obj, "__set__") or hasattr(obj, "__delete__")
+
+
+EnumMetaT = TypeVar("EnumMetaT", bound="EnumMeta")
 
 
 class EnumMeta(type):
@@ -162,10 +166,10 @@ class EnumMeta(type):
         value_cls._actual_enum_cls_ = actual_cls  # type: ignore
         return actual_cls
 
-    def __iter__(cls) -> Iterator[Self]:
+    def __iter__(cls: EnumMetaT) -> Iterator[EnumMetaT]:
         return (cls._enum_member_map_[name] for name in cls._enum_member_names_)
 
-    def __reversed__(cls) -> Iterator[Self]:
+    def __reversed__(cls: EnumMetaT) -> Iterator[EnumMetaT]:
         return (cls._enum_member_map_[name] for name in reversed(cls._enum_member_names_))
 
     def __len__(cls) -> int:
@@ -429,6 +433,11 @@ class MessageType(Enum):
     """The system message denoting that a poll expired, announcing the most voted answer.
 
     .. versionadded:: 2.10
+    """
+    emoji_added = 63
+    """The system message denoting that an emoji was added to the server.
+
+    .. versionadded: 2.11
     """
 
 
@@ -2281,6 +2290,20 @@ class ApplicationRoleConnectionMetadataType(Enum):
     """The metadata value (``integer``) is equal to the guild's configured value."""
     boolean_not_equal = 8
     """The metadata value (``integer``) is not equal to the guild's configured value."""
+
+
+class ApplicationEventWebhookStatus(Enum):
+    """Represents the status of an application event webhook.
+
+    .. versionadded:: 2.11
+    """
+
+    disabled = 1
+    """Webhook events are disabled by developer."""
+    enabled = 2
+    """Webhook events are enabled by developer."""
+    disabled_by_discord = 3
+    """Webhook events are disabled by Discord, usually due to inactivity."""
 
 
 class OnboardingPromptType(Enum):

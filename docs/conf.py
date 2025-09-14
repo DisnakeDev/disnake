@@ -56,6 +56,7 @@ extensions = [
     "collapse",
     "enumattrs",
     "nitpick_file_ignorer",
+    "versionchange",
 ]
 
 autodoc_member_order = "bysource"

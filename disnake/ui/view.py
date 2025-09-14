@@ -10,16 +10,7 @@ import time
 import traceback
 from functools import partial
 from itertools import groupby
-from typing import (
-    TYPE_CHECKING,
-    Callable,
-    ClassVar,
-    Dict,
-    List,
-    Optional,
-    Sequence,
-    Tuple,
-)
+from typing import TYPE_CHECKING, Callable, ClassVar, Dict, List, Optional, Sequence, Tuple
 
 from ..components import (
     VALID_ACTION_ROW_MESSAGE_COMPONENT_TYPES,
@@ -42,10 +33,7 @@ if TYPE_CHECKING:
     from ..interactions import MessageInteraction
     from ..message import Message
     from ..state import ConnectionState
-    from ..types.components import (
-        ActionRow as ActionRowPayload,
-        Component as ComponentPayload,
-    )
+    from ..types.components import ActionRow as ActionRowPayload, Component as ComponentPayload
     from .item import ItemCallbackType
 
 
@@ -145,7 +133,7 @@ class View:
         self.children: List[Item[Self]] = []
         for func in self.__view_children_items__:
             item: Item[Self] = func.__discord_ui_model_type__(**func.__discord_ui_model_kwargs__)
-            item.callback = partial(func, self, item)
+            item.callback = partial(func, self, item)  # type: ignore
             item._view = self
             setattr(self, func.__name__, item)
             self.children.append(item)

@@ -50,7 +50,10 @@ MessageTopLevelComponentV2 = Union[
 MessageTopLevelComponent = Union[MessageTopLevelComponentV1, MessageTopLevelComponentV2]
 
 # valid modal component types (separate type with ActionRow until fully deprecated)
-ModalTopLevelComponent_: TypeAlias = "Label"
+ModalTopLevelComponent_ = Union[
+    "TextDisplay",
+    "Label",
+]
 ModalTopLevelComponent = Union[
     ModalTopLevelComponent_,
     "ActionRow[ActionRowModalComponent]",  # deprecated

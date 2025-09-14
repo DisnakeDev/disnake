@@ -140,7 +140,7 @@ ContainerChildComponent = Union[
 # valid `Label.component` types
 LabelChildComponent = Union[
     "TextInput",
-    "StringSelectMenu",
+    "AnySelectMenu",
 ]
 
 # valid `Message.components` item types (v1/v2)
@@ -154,6 +154,28 @@ MessageTopLevelComponentV2 = Union[
     "Container",
 ]
 MessageTopLevelComponent = Union[MessageTopLevelComponentV1, MessageTopLevelComponentV2]
+
+
+_SELECT_COMPONENT_TYPES = frozenset(
+    (
+        ComponentType.string_select,
+        ComponentType.user_select,
+        ComponentType.role_select,
+        ComponentType.mentionable_select,
+        ComponentType.channel_select,
+    )
+)
+
+# not using `_SELECT_COMPONENT_TYPES` since pyright wouldn't infer the literal properly
+_SELECT_COMPONENT_TYPE_VALUES = frozenset(
+    (
+        ComponentType.string_select.value,
+        ComponentType.user_select.value,
+        ComponentType.role_select.value,
+        ComponentType.mentionable_select.value,
+        ComponentType.channel_select.value,
+    )
+)
 
 
 class Component:
@@ -323,11 +345,9 @@ class Button(Component):
         self.url: Optional[str] = data.get("url")
         self.disabled: bool = data.get("disabled", False)
         self.label: Optional[str] = data.get("label")
-        self.emoji: Optional[PartialEmoji]
-        try:
-            self.emoji = PartialEmoji.from_dict(data["emoji"])
-        except KeyError:
-            self.emoji = None
+        self.emoji: Optional[PartialEmoji] = None
+        if emoji_data := data.get("emoji"):
+            self.emoji = PartialEmoji.from_dict(emoji_data)
 
         self.sku_id: Optional[int] = _get_as_snowflake(data, "sku_id")
 
@@ -822,10 +842,9 @@ class SelectOption:
 
     @classmethod
     def from_dict(cls, data: SelectOptionPayload) -> SelectOption:
-        try:
-            emoji = PartialEmoji.from_dict(data["emoji"])
-        except KeyError:
-            emoji = None
+        emoji = None
+        if emoji_data := data.get("emoji"):
+            emoji = PartialEmoji.from_dict(emoji_data)
 
         return cls(
             label=data["label"],

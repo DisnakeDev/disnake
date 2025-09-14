@@ -46,8 +46,11 @@ class Modal:
         The title of the modal.
     components: |modal_components_type|
         The components to display in the modal. A maximum of 5.
-        Currently only supports :class:`.ui.TextInput` and
-        :class:`.ui.StringSelect`, wrapped in :class:`.ui.Label`\\s.
+
+        Currently supports the following components:
+            - :class:`.ui.TextDisplay`
+            - :class:`.ui.TextInput`, in a :class:`.ui.Label`
+            - select menus (e.g. :class:`.ui.StringSelect`), in a :class:`.ui.Label`
 
         .. versionchanged:: 2.11
             Using action rows in modals or passing :class:`.ui.TextInput` directly
@@ -124,8 +127,7 @@ class Modal:
             The component(s) to add to the modal.
             This can be a single component or a list of components.
 
-            Currently only supports :class:`.ui.TextInput` and
-            :class:`.ui.StringSelect`, wrapped in :class:`.ui.Label`\\s.
+            See :class:`Modal.components <Modal>` for supported components.
 
             .. versionchanged:: 2.11
                 Using action rows in modals or passing :class:`.ui.TextInput` directly
@@ -215,7 +217,7 @@ class Modal:
 
         The callback associated with this modal.
 
-        This can be overriden by subclasses.
+        This can be overridden by subclasses.
 
         Parameters
         ----------

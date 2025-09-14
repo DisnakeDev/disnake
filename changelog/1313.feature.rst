@@ -1,1 +1,0 @@
-Add the :attr:`~Permissions.pin_messages` permission.

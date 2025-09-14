@@ -42,7 +42,10 @@ ActionRowChildComponent = Union[
     "TextInput",  # deprecated
 ]
 
-LabelChildComponent = Union["TextInput", "StringSelectMenu"]
+LabelChildComponent = Union[
+    "TextInput",
+    "AnySelectMenu",
+]
 
 # valid message component types (v1/v2)
 MessageTopLevelComponentV1: TypeAlias = "ActionRow"
@@ -60,6 +63,7 @@ MessageTopLevelComponent = Union[MessageTopLevelComponentV1, MessageTopLevelComp
 # valid modal component types
 ModalTopLevelComponent = Union[
     "ActionRow",  # deprecated
+    "TextDisplayComponent",
     "LabelComponent",
 ]
 
