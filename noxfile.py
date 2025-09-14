@@ -40,6 +40,7 @@ def install_deps(
     *,
     extras: Sequence[str] = (),
     groups: Sequence[str] = (),
+    dependencies: Sequence[str] = (),
     project: bool = True,
 ) -> None:
     """Helper to install dependencies from a group."""
@@ -60,7 +61,11 @@ def install_deps(
         if groups:
             command.extend(nox.project.dependency_groups(PYPROJECT, *groups))
         session.install(*command)
+
         # install separately in case it conflicts with a just-installed dependency (for overriding a locked dep)
+        if dependencies:
+            session.install(*dependencies)
+
         return None
 
     # install with pdm
@@ -90,6 +95,9 @@ def install_deps(
         env=env,
         external=True,
     )
+
+    if dependencies:
+        session.install(*dependencies, env=env)
 
 
 @nox.session(python="3.8")
@@ -243,11 +251,14 @@ def pyright(session: nox.Session) -> None:
     install_deps(
         session,
         project=True,
-        extras=["speed", "voice"],
+        extras=[
+            "speed",
+            "voice",
+            "docs",  # docs/
+        ],
         groups=[
             "test",  # tests/
             "nox",  # noxfile.py
-            "docs",  # docs/
             "codemod",  # scripts/
             "typing",  # pyright
         ],
