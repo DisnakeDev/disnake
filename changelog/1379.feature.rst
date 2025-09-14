@@ -1,0 +1,1 @@
+Adds Role.is_gradient and Role.is_holographic properties to check whether a role is gradient or holographic.
