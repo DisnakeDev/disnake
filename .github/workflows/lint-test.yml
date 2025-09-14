@@ -135,8 +135,11 @@ jobs:
         # because nox uses pdm internally to install, this means that the venv that is used is
         # the one that pdm would create in project: `.venv`
         # python is NOT forced here because the session name is explicit
+        env:
+          NOXSESSION: ${{ matrix.session.name }}
+          PIP_PYTHON: "./.venv/bin/python"
         run: |
-          nox -s '${{ matrix.session.name }}' --no-venv --install-only
+          nox --no-venv --install-only
 
       - name: Add .venv/bin to PATH
         run: dirname "$(pdm info --python)" >> $GITHUB_PATH

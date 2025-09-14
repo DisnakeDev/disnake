@@ -37,7 +37,7 @@ PYPROJECT = nox.project.load_toml()
 SUPPORTED_PYTHONS = nox.project.python_versions(PYPROJECT)
 # todo(onerandomusername): add 3.14 once CI supports 3.14.
 EXPERIMENTAL_PYTHON_VERSIONS = ["3.14"]
-CI = bool(os.getenv("CI", ""))
+CI = "CI" in os.environ
 
 # used to reset cached coverage data once for the first test run only
 reset_coverage = True
@@ -61,7 +61,7 @@ pyright_groups: List[PyrightGroup] = [
             extras=("speed", "voice") if python not in EXPERIMENTAL_PYTHON_VERSIONS else ("voice",),
             groups=("test", "nox"),
             experimental=python in EXPERIMENTAL_PYTHON_VERSIONS,
-            dependencies=("setuptools",),
+            dependencies=("setuptools", "pytz", "requests"),
         )
         for python in [*SUPPORTED_PYTHONS, *EXPERIMENTAL_PYTHON_VERSIONS]
     ),
@@ -142,7 +142,11 @@ def install_deps(
     )
 
     if dependencies:
-        session.install(*dependencies, env=env)
+        if session.venv_backend == "none" and CI:
+            # we are not in a venv but we're on CI so we probably intended to do this
+            session.run_install("pip", "install", *dependencies, env=env)
+        else:
+            session.install(*dependencies, env=env)
 
 
 @nox.session(python="3.8")
