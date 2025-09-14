@@ -1285,6 +1285,8 @@ class DaveState:
             await self.prepare_epoch(self.NEW_MLS_GROUP_EPOCH)
             # TODO: consider race conditions if encryptor is set up too late here
             self._encryptor = dave.Encryptor()
+            # FIXME: move this somewhere else(?)
+            self._encryptor.assign_ssrc_to_codec(self.ws._connection.ssrc, dave.Codec.opus)
             _log.debug("created new encryptor")
         else:
             await self.prepare_transition(self.INIT_TRANSITION_ID, dave.kDisabledVersion)

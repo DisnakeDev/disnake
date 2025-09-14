@@ -24,6 +24,8 @@ import struct
 import threading
 from typing import TYPE_CHECKING, Any
 
+import dave
+
 from . import opus, utils
 from .backoff import ExponentialBackoff
 from .errors import ClientException, ConnectionClosed
@@ -527,6 +529,14 @@ class VoiceClient(VoiceProtocol):
     # audio related
 
     def _get_voice_packet(self, data: bytes) -> bytes:
+        # TODO: very temporary test setup
+        if self.ws and (encryptor := self.ws.dave._encryptor) and encryptor.has_key_ratchet():
+            e2ee_data = encryptor.encrypt(dave.MediaType.audio, self.ssrc, data)
+            if e2ee_data is not None:
+                data = e2ee_data
+            else:
+                _log.error("failed to encrypt frame data")
+
         header = bytearray(12)
 
         # Formulate rtp header
