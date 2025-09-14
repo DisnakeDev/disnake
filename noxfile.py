@@ -55,8 +55,6 @@ def install_deps(
     # see https://pdm-project.org/latest/usage/advanced/#use-nox-as-the-runner
     env: Dict[str, Any] = {
         "PDM_IGNORE_SAVED_PYTHON": "1",
-        "PDM_FROZEN_LOCKFILE": "1",
-        "VIRTUAL_ENV": session.virtualenv.location,
     }
 
     command.extend([f"-G={g}" for g in (*extras, *groups)])
