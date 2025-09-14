@@ -66,7 +66,7 @@ def install_deps(
         if dependencies:
             session.install(*dependencies)
 
-        return None
+        return
 
     # install with pdm
     command = [
