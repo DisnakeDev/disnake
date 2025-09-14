@@ -30,6 +30,7 @@ nox.options.sessions = [
 ]
 
 PYPROJECT = nox.project.load_toml()
+CI = "CI" in os.environ
 
 # used to reset cached coverage data once for the first test run only
 reset_coverage = True
@@ -97,7 +98,11 @@ def install_deps(
     )
 
     if dependencies:
-        session.install(*dependencies, env=env)
+        if session.venv_backend == "none" and CI:
+            # we are not in a venv but we're on CI so we probably intended to do this
+            session.run_install("pip", "install", *dependencies, env=env)
+        else:
+            session.install(*dependencies, env=env)
 
 
 @nox.session(python="3.8")
@@ -262,6 +267,7 @@ def pyright(session: nox.Session) -> None:
             "codemod",  # scripts/
             "typing",  # pyright
         ],
+        dependencies=["setuptools"],
     )
     env = {
         "PYRIGHT_PYTHON_IGNORE_WARNINGS": "1",
