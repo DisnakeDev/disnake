@@ -31,6 +31,5 @@ venvs/
 .coverage*
 coverage.xml
 __pypackages__/
-.pdm.toml
-.pdm-python
-pdm.lock
+.python-version
+uv.lock

@@ -1,11 +1,10 @@
-#!/usr/bin/env -S pdm run
+#!/usr/bin/env -S uv run --script
 # /// script
-# requires-python = ">=3.10"
+# requires-python = ">=3.8"
 # dependencies = [
 #     "nox==2025.5.1",
 # ]
 # ///
-
 # SPDX-License-Identifier: MIT
 
 from __future__ import annotations
@@ -30,6 +29,7 @@ nox.needs_version = ">=2025.5.1"
 
 nox.options.error_on_external_run = True
 nox.options.reuse_venv = "yes"
+nox.options.default_venv_backend = "uv|virtualenv"
 
 PYPROJECT = nox.project.load_toml()
 
@@ -101,6 +101,11 @@ EXECUTION_GROUPS: List[ExecutionGroup] = [
         sessions=("lint", "slotscheck", "check-manifest"),
         groups=("tools",),
     ),
+    # build
+    ExecutionGroup(
+        sessions=("build",),
+        groups=("build",),
+    ),
     ## testing
     *(
         ExecutionGroup(
@@ -146,8 +151,8 @@ def install_deps(session: nox.Session, *, execution_group: Optional[ExecutionGro
 
     command: List[str]
 
-    # If not using pdm, install with pip
-    if os.getenv("NO_PDM_INSTALL") is not None:
+    # If not using uv, install with pip
+    if os.getenv("INSTALL_WITH_PIP") is not None:
         command = []
         if execution_group.project:
             command.append("-e")
@@ -165,38 +170,41 @@ def install_deps(session: nox.Session, *, execution_group: Optional[ExecutionGro
 
         return
 
-    # install with pdm
+    # install with uv
     command = [
-        "pdm",
+        "uv",
         "sync",
-        "--fail-fast",
-        "--clean-unselected",
+        "--no-default-groups",
     ]
+    env: Dict[str, Any] = {}
 
-    # see https://pdm-project.org/latest/usage/advanced/#use-nox-as-the-runner
-    env: Dict[str, Any] = {
-        "PDM_IGNORE_SAVED_PYTHON": "1",
-    }
+    if session.venv_backend != "none":
+        command.append(f"--python={session.virtualenv.location}")
+        env["UV_PROJECT_ENVIRONMENT"] = str(session.virtualenv.location)
+    elif CI and "VIRTUAL_ENV" in os.environ:
+        # we're in CI and using uv, so use the existing venv
+        command.append(f"--python={os.environ['VIRTUAL_ENV']}")
+        env["UV_PROJECT_ENVIRONMENT"] = os.environ["VIRTUAL_ENV"]
 
-    command.extend([f"-G={g}" for g in (*execution_group.extras, *execution_group.groups)])
-
-    if not execution_group.groups:
-        # if no dev groups requested, make sure we don't install any
-        command.append("--prod")
-
+    if execution_group.extras:
+        for e in execution_group.extras:
+            command.append(f"--extra={e}")
+    if execution_group.groups:
+        for g in execution_group.groups:
+            command.append(f"--group={g}")
     if not execution_group.project:
-        command.append("--no-self")
+        command.append("--no-install-project")
 
     session.run_install(
         *command,
         env=env,
-        external=True,
+        silent=True,
     )
 
     if execution_group.dependencies:
         if session.venv_backend == "none" and CI:
             # we are not in a venv but we're on CI so we probably intended to do this
-            session.run_install("pip", "install", *execution_group.dependencies, env=env)
+            session.run_install("uv", "pip", "install", *execution_group.dependencies, env=env)
         else:
             session.install(*execution_group.dependencies, env=env)
 
@@ -253,6 +261,20 @@ def slotscheck(session: nox.Session) -> None:
     """Run slotscheck."""
     install_deps(session)
     session.run("python", "-m", "slotscheck", "--verbose", "-m", "disnake")
+
+
+@nox.session(requires=["check-manifest"])
+def build(session: nox.Session) -> None:
+    """Build a dist."""
+    install_deps(session)
+    import pathlib
+
+    dist_path = pathlib.Path("dist")
+    if dist_path.exists():
+        import shutil
+
+        shutil.rmtree(dist_path)
+    session.run("python", "-m", "build", "--outdir", "dist")
 
 
 @nox.session(python=get_version_for_session("autotyping"))
@@ -424,7 +446,14 @@ def coverage(session: nox.Session) -> None:
             session.error("serve cannot be used with any other arguments.")
         session.run("coverage", "html", "--show-contexts")
         session.run(
-            "python", "-m", "http.server", "8012", "--directory", "htmlcov", "--bind", "127.0.0.1"
+            "python",
+            "-m",
+            "http.server",
+            "8012",
+            "--directory",
+            "htmlcov",
+            "--bind",
+            "127.0.0.1",
         )
         return
 
@@ -441,10 +470,10 @@ def dev(session: nox.Session) -> None:
     - install all dependencies needed for development.
     - install the pre-commit hook
     """
-    session.run("pdm", "lock", "-dG:all", "-G:all", external=True)
-    session.run("pdm", "venv", "create", "--force", external=True)
-    session.run("pdm", "sync", "--clean-unselected", "-dG:all", "-G:all")
-    session.run("pdm", "run", "pre-commit", "install")
+    session.run("uv", "lock", external=True)
+    session.run("uv", "venv", "--clear", external=True)
+    session.run("uv", "sync", "--all-extras", "--all-groups", external=True)
+    session.run("uv", "run", "pre-commit", "install", external=True)
 
 
 if __name__ == "__main__":
