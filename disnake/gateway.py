@@ -1120,6 +1120,12 @@ class DiscordVoiceWebSocket:
                 self.dave.add_recognized_user(user_id)
         elif op == self.CLIENT_DISCONNECT:
             self.dave.remove_recognized_user(int(data["user_id"]))
+        elif op == self.DAVE_PREPARE_TRANSITION:
+            await self.dave.prepare_transition(data["transition_id"], data["protocol_version"])
+        elif op == self.DAVE_EXECUTE_TRANSITION:
+            self.dave.execute_transition(data["transition_id"])
+        elif op == self.DAVE_MLS_PREPARE_EPOCH:
+            await self.dave.prepare_epoch(data["epoch"], data["protocol_version"])
 
         await self._hook(self, msg)
 
@@ -1287,7 +1293,7 @@ class DaveState:
         self.selected_version = version
 
         if version > dave.kDisabledVersion:
-            await self.prepare_epoch(self.NEW_MLS_GROUP_EPOCH)
+            await self.prepare_epoch(self.NEW_MLS_GROUP_EPOCH, version)
             # TODO: consider race conditions if encryptor is set up too late here
             self._encryptor = dave.Encryptor()
             # FIXME: move this somewhere else(?)
@@ -1357,17 +1363,18 @@ class DaveState:
             _log.debug("processed welcome, roster: %r", list(roster.keys()))
             await self.prepare_transition(transition_id, self._session.get_protocol_version())
 
-    async def prepare_epoch(self, epoch: int) -> None:
-        _log.debug("preparing epoch %d", epoch)
+    async def prepare_epoch(self, epoch: int, version: int) -> None:
+        _log.debug("preparing epoch %d, version %d", epoch, version)
 
         # "When the epoch ID is equal to 1, this message indicates that a new MLS group is to be created for the given protocol version."
         if epoch == self.NEW_MLS_GROUP_EPOCH:
             _log.info(
-                "re-initializing MLS session, group ID %d",
+                "re-initializing MLS session with version %d, group ID %d",
+                version,
                 self.ws._connection.channel.id,
             )
             self._session.init(
-                self.selected_version,
+                version,
                 self.ws._connection.channel.id,
                 str(self._self_id),
                 # XXX: retain key between resets?

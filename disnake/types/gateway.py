@@ -229,6 +229,29 @@ class VoiceClientDisconnectPayload(TypedDict):
     user_id: Snowflake
 
 
+# voice opcode 21
+
+
+class VoiceDavePrepareTransitionPayload(TypedDict):
+    transition_id: int
+    protocol_version: int
+
+
+# voice opcode 22
+
+
+class VoiceDaveExecuteTransitionPayload(TypedDict):
+    transition_id: int
+
+
+# voice opcode 24
+
+
+class VoiceDavePrepareEpochPayload(TypedDict):
+    epoch: int
+    protocol_version: int
+
+
 #####
 # Voice payloads (send)
 #####
