@@ -459,7 +459,7 @@ class Role(Hashable):
     def is_holographic(self) -> bool:
         """Whether the role is holographic.
 
-        .. versionadded:: 2.11.1
+        .. versionadded:: 2.12
 
         :return type: :class:`bool`
         """
