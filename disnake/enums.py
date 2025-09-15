@@ -79,7 +79,7 @@ __all__ = (
     "VoiceChannelEffectAnimationType",
     "MessageReferenceType",
     "SeparatorSpacing",
-    "NameplatePalette"
+    "NameplatePalette",
 )
 
 EnumMetaT = TypeVar("EnumMetaT", bound="Type[EnumMeta]")
