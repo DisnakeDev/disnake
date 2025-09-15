@@ -136,7 +136,7 @@ class View:
         self.children: List[Item[Self]] = []
         for func in self.__view_children_items__:
             item: Item[Self] = func.__discord_ui_model_type__(**func.__discord_ui_model_kwargs__)
-            item.callback = partial(func, self, item)  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
+            item.callback = partial(func, self, item)  # pyright: ignore[reportAttributeAccessIssue]
             item._view = self
             setattr(self, func.__name__, item)
             self.children.append(item)
@@ -396,7 +396,7 @@ class View:
     def refresh(self, components: List[ActionRowComponent[ActionRowMessageComponent]]) -> None:
         # TODO: this is pretty hacky at the moment, see https://github.com/DisnakeDev/disnake/commit/9384a72acb8c515b13a600592121357e165368da
         old_state: Dict[Tuple[int, str], Item] = {
-            (item.type.value, item.custom_id): item  # type: ignore # pyright: ignore[reportAttributeAccessIssue]
+            (item.type.value, item.custom_id): item  # pyright: ignore[reportAttributeAccessIssue]
             for item in self.children
             if item.is_dispatchable()
         }
@@ -405,7 +405,7 @@ class View:
         for component in (c for row in components for c in row.children):
             older: Optional[Item] = None
             try:
-                older = old_state[(component.type.value, component.custom_id)]  # pyright: ignore[reportArgumentType] # type: ignore
+                older = old_state[component.type.value, component.custom_id]  # pyright: ignore[reportArgumentType]
             except (KeyError, AttributeError):
                 # workaround for non-interactive buttons, since they're not part of `old_state`
                 if isinstance(component, ButtonComponent):
@@ -421,7 +421,7 @@ class View:
                             break
 
             if older:
-                older.refresh_component(component)  # pyright: ignore[reportArgumentType] # type: ignore  # this is fine, pyright is trying to be smart
+                older.refresh_component(component)  # pyright: ignore[reportArgumentType]  # this is fine, pyright is trying to be smart
                 children.append(older)
             else:
                 # fallback, should not happen as long as implementation covers all cases
@@ -514,7 +514,7 @@ class ViewStore:
         view._start_listening_from_store(self)
         for item in view.children:
             if item.is_dispatchable():
-                self._views[item.type.value, message_id, item.custom_id] = (view, item)  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
+                self._views[item.type.value, message_id, item.custom_id] = (view, item)  # pyright: ignore[reportAttributeAccessIssue]
 
         if message_id is not None:
             self._synced_message_views[message_id] = view
@@ -522,7 +522,10 @@ class ViewStore:
     def remove_view(self, view: View) -> None:
         for item in view.children:
             if item.is_dispatchable():
-                self._views.pop((item.type.value, item.custom_id), None)  # pyright: ignore[reportArgumentType, reportAttributeAccessIssue, reportCallIssue] # type: ignore
+                self._views.pop(  # pyright: ignore[reportCallIssue]
+                    (item.type.value, item.custom_id),  # pyright: ignore[reportArgumentType, reportAttributeAccessIssue]
+                    None,
+                )
 
         for key, value in self._synced_message_views.items():
             if value.id == view.id:

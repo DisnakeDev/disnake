@@ -97,7 +97,7 @@ class StageInstance(Hashable):
     def channel(self) -> Optional[StageChannel]:
         """:class:`StageChannel` | :data:`None`: The channel that stage instance is running in."""
         # the returned channel will always be a StageChannel or None
-        return self._state.get_channel(self.channel_id)  # pyright: ignore[reportReturnType] # type: ignore
+        return self._state.get_channel(self.channel_id)  # pyright: ignore[reportReturnType]
 
     @property
     def discoverable_disabled(self) -> bool:

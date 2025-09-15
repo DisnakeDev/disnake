@@ -20,6 +20,7 @@ from typing import (
     Type,
     TypeVar,
     Union,
+    cast,
     runtime_checkable,
 )
 
@@ -325,7 +326,7 @@ class UserConverter(IDConverter[disnake.User]):
     async def convert(self, ctx: AnyContext, argument: str) -> disnake.User:
         match = self._get_id_match(argument) or re.match(r"<@!?([0-9]{17,19})>$", argument)
         state = ctx._state
-        bot: disnake.Client = ctx.bot
+        bot: disnake.Client = cast("disnake.Client", ctx.bot)
         result: Optional[Union[disnake.User, disnake.Member]] = None
 
         if match is not None:
@@ -344,9 +345,10 @@ class UserConverter(IDConverter[disnake.User]):
                 except disnake.HTTPException:
                     raise UserNotFound(argument) from None
 
-            if isinstance(result, disnake.Member):
+            if not isinstance(result, disnake.User):
                 return result._user
-            return result  # pyright: ignore[reportReturnType] # type: ignore
+
+            return result
 
         username, _, discriminator = argument.rpartition("#")
         # n.b. there's no builtin method that only matches arabic digits, `isdecimal` is the closest one.
@@ -409,13 +411,13 @@ class PartialMessageConverter(Converter[disnake.PartialMessage]):
     def _resolve_channel(
         ctx: AnyContext, guild_id: Optional[int], channel_id: int
     ) -> Optional[MessageableChannel]:
-        bot: disnake.Client = ctx.bot
+        bot: disnake.Client = cast("disnake.Client", ctx.bot)
         if guild_id is None:
-            return bot.get_channel(channel_id) if channel_id else ctx.channel  # pyright: ignore[reportReturnType] # type: ignore
+            return bot.get_channel(channel_id) if channel_id else ctx.channel  # pyright: ignore[reportReturnType]
 
         guild = bot.get_guild(guild_id)
         if guild is not None:
-            return guild._resolve_channel(channel_id)  # pyright: ignore[reportReturnType] # type: ignore
+            return guild._resolve_channel(channel_id)  # pyright: ignore[reportReturnType]
         return None
 
     async def convert(self, ctx: AnyContext, argument: str) -> disnake.PartialMessage:
@@ -443,19 +445,19 @@ class MessageConverter(IDConverter[disnake.Message]):
 
     async def convert(self, ctx: AnyContext, argument: str) -> disnake.Message:
         guild_id, message_id, channel_id = PartialMessageConverter._get_id_matches(ctx, argument)
-        bot: disnake.Client = ctx.bot
+        bot: disnake.Client = cast("disnake.Client", ctx.bot)
         message = bot._connection._get_message(message_id)
-        if message:
+        if message is not None:
             return message
         channel = PartialMessageConverter._resolve_channel(ctx, guild_id, channel_id)
-        if not channel:
+        if channel is None:
             raise ChannelNotFound(str(channel_id))
         try:
             return await channel.fetch_message(message_id)
         except disnake.NotFound:
             raise MessageNotFound(argument) from None
         except disnake.Forbidden:
-            raise ChannelNotReadable(channel) from None  # pyright: ignore[reportArgumentType] # type: ignore
+            raise ChannelNotReadable(channel) from None  # pyright: ignore[reportArgumentType]
 
 
 class GuildChannelConverter(IDConverter[disnake.abc.GuildChannel]):
@@ -1270,7 +1272,7 @@ async def _actual_conversion(
     param: inspect.Parameter,
 ) -> T:
     if converter is bool:
-        return _convert_to_bool(argument)  # pyright: ignore[reportReturnType] # type: ignore
+        return _convert_to_bool(argument)  # pyright: ignore[reportReturnType]
 
     if isinstance(converter, type):
         module = converter.__module__
@@ -1291,7 +1293,7 @@ async def _actual_conversion(
         raise ConversionError(converter, exc) from exc
 
     try:
-        return converter(argument)  # pyright: ignore[reportReturnType, reportCallIssue] # type: ignore
+        return converter(argument)  # pyright: ignore[reportReturnType, reportCallIssue]
     except CommandError:
         raise
     except Exception as exc:

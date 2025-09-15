@@ -57,12 +57,14 @@ class BucketType(Enum):
         elif self is BucketType.member:
             return ((msg.guild and msg.guild.id), msg.author.id)
         elif self is BucketType.category:
-            return (msg.channel.category or msg.channel).id  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
+            return (msg.channel.category or msg.channel).id  # pyright: ignore[reportAttributeAccessIssue]
         elif self is BucketType.role:
             # if author is not a Member we are in a private-channel context; returning its id
             # yields the same result as for a guild with only the @everyone role
             return (
-                msg.author.top_role if msg.guild and isinstance(msg.author, Member) else msg.channel
+                msg.author.top_role
+                if msg.guild is not None and isinstance(msg.author, Member)
+                else msg.channel
             ).id
         return None
 
@@ -233,11 +235,13 @@ class CooldownMapping:
         return self._type is BucketType.default
 
     def create_bucket(self, message: Message) -> Cooldown:
-        return self._cooldown.copy()  # pyright: ignore[reportOptionalMemberAccess] # type: ignore
+        assert self._cooldown is not None
+        return self._cooldown.copy()
 
     def get_bucket(self, message: Message, current: Optional[float] = None) -> Cooldown:
         if self._is_default():
-            return self._cooldown  # pyright: ignore[reportReturnType] # type: ignore
+            assert self._cooldown is not None
+            return self._cooldown
 
         self._verify_cache_integrity(current)
         key = self._bucket_key(message)

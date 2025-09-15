@@ -188,7 +188,7 @@ class Thread(Messageable, Hashable):
         self.parent_id: int = int(data["parent_id"])
         self.owner_id: Optional[int] = _get_as_snowflake(data, "owner_id")
         self.name: str = data["name"]
-        self._type: ThreadType = try_enum(ChannelType, data["type"])  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
+        self._type: ThreadType = try_enum(ChannelType, data["type"])  # pyright: ignore[reportAttributeAccessIssue]
         self.last_message_id: Optional[int] = _get_as_snowflake(data, "last_message_id")
         self.slowmode_delay: int = data.get("rate_limit_per_user", 0)
         self.message_count: int = data.get("message_count") or 0
@@ -245,7 +245,7 @@ class Thread(Messageable, Hashable):
         """:class:`TextChannel` | :class:`ForumChannel` | :class:`MediaChannel` | :data:`None`: The parent channel this thread belongs to."""
         if isinstance(self.guild, Object):
             return None
-        return self.guild.get_channel(self.parent_id)  # pyright: ignore[reportReturnType] # type: ignore
+        return self.guild.get_channel(self.parent_id)  # pyright: ignore[reportReturnType]
 
     @property
     def owner(self) -> Optional[Member]:
@@ -780,7 +780,7 @@ class Thread(Messageable, Hashable):
 
         data = await self._state.http.edit_channel(self.id, **payload, reason=reason)
         # The data payload will always be a Thread payload
-        return Thread(data=data, state=self._state, guild=self.guild)  # pyright: ignore[reportArgumentType] # type: ignore
+        return Thread(data=data, state=self._state, guild=self.guild)  # pyright: ignore[reportArgumentType]
 
     async def join(self) -> None:
         """|coro|

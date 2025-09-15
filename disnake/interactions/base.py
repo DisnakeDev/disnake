@@ -87,6 +87,7 @@ if TYPE_CHECKING:
     )
     from ..types.snowflake import Snowflake
     from ..types.user import User as UserPayload
+    from ..types.webhook import Webhook as WebhookPayload
     from ..ui._types import MessageComponents, ModalComponents, ModalTopLevelComponent
     from ..ui.modal import Modal
     from ..ui.view import View
@@ -232,7 +233,7 @@ class Interaction(Generic[ClientT]):
         self.data: Mapping[str, Any] = data.get("data") or {}
         self._state: ConnectionState = state
         # TODO: Maybe use a unique session
-        self._session: ClientSession = state.http._HTTPClient__session  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
+        self._session: ClientSession = state.http._HTTPClient__session  # pyright: ignore[reportAttributeAccessIssue]
         self.client: ClientT = cast("ClientT", state._get_client())
         self._original_response: Optional[InteractionMessage] = None
 
@@ -264,7 +265,7 @@ class Interaction(Generic[ClientT]):
                 and guild_fallback.get_member(int(member["user"]["id"]))
             ) or Member(
                 state=self._state,
-                guild=guild_fallback,  # type: ignore  # may be `Object` # pyright: ignore[reportArgumentType]
+                guild=guild_fallback,  # pyright: ignore[reportArgumentType]  # may be `Object`
                 data=member,
             )
             self._permissions = int(member.get("permissions", 0))
@@ -377,7 +378,7 @@ class Interaction(Generic[ClientT]):
     @utils.cached_slot_property("_cs_followup")
     def followup(self) -> Webhook:
         """:class:`Webhook`: Returns the follow up webhook for follow up interactions."""
-        payload = {
+        payload: WebhookPayload = {
             "id": self.application_id,
             "type": WebhookType.application.value,
             "token": self.token,
@@ -436,7 +437,7 @@ class Interaction(Generic[ClientT]):
             session=self._session,
         )
         state = _InteractionMessageState(self, self._state)
-        message = InteractionMessage(state=state, channel=self.channel, data=data)  # pyright: ignore[reportArgumentType] # type: ignore
+        message = InteractionMessage(state=state, channel=self.channel, data=data)  # pyright: ignore[reportArgumentType]
         self._original_response = message
         return message
 
@@ -619,7 +620,7 @@ class Interaction(Generic[ClientT]):
 
         # The message channel types should always match
         state = _InteractionMessageState(self, self._state)
-        message = InteractionMessage(state=state, channel=self.channel, data=data)  # pyright: ignore[reportArgumentType] # type: ignore
+        message = InteractionMessage(state=state, channel=self.channel, data=data)  # pyright: ignore[reportArgumentType]
 
         if view and not view.is_finished():
             self._state.store_view(view, message.id)
@@ -1546,7 +1547,7 @@ class InteractionResponse:
         parent = self._parent
 
         if parent.type is InteractionType.modal_submit:
-            raise ModalChainNotSupported(parent)  # pyright: ignore[reportArgumentType] # type: ignore
+            raise ModalChainNotSupported(parent)  # pyright: ignore[reportArgumentType]
 
         if self._response_type is not None:
             raise InteractionResponded(parent)
@@ -1580,7 +1581,7 @@ class InteractionResponse:
             parent.token,
             session=parent._session,
             type=response_type.value,
-            data=modal_data,  # type: ignore # pyright: ignore[reportArgumentType]
+            data=modal_data,  # pyright: ignore[reportArgumentType]
         )
         self._response_type = response_type
 
@@ -2062,20 +2063,25 @@ class InteractionDataResolved(Dict[str, Any]):
 
         for str_id, user in users.items():
             user_id = int(str_id)
-            member = members.get(str_id)
-            if member is not None:
-                self.members[user_id] = (guild and guild.get_member(user_id)) or Member(
-                    data=member,
+            member_data = members.get(str_id)
+
+            if member_data is None:
+                self.users[user_id] = User(state=state, data=user)
+                continue
+
+            if guild is not None and (member := guild.get_member(user_id)):
+                self.members[user_id] = member
+            else:
+                self.members[user_id] = Member(
+                    data=member_data,
                     user_data=user,
-                    guild=guild_fallback,  # type: ignore # pyright: ignore[reportArgumentType]
+                    guild=guild_fallback,  # pyright: ignore[reportArgumentType]
                     state=state,
                 )
-            else:
-                self.users[user_id] = User(state=state, data=user)
 
         for str_id, role in roles.items():
             self.roles[int(str_id)] = Role(
-                guild=guild_fallback,  # type: ignore # pyright: ignore[reportArgumentType]
+                guild=guild_fallback,  # pyright: ignore[reportArgumentType]
                 state=state,
                 data=role,
             )

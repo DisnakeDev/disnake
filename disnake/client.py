@@ -2232,7 +2232,11 @@ class Client:
         """
         data = await self.http.get_stage_instance(channel_id)
         guild = self.get_guild(int(data["guild_id"]))
-        return StageInstance(guild=guild, state=self._connection, data=data)  # pyright: ignore[reportArgumentType]
+        return StageInstance(
+            guild=guild,  # pyright: ignore[reportArgumentType]
+            state=self._connection,
+            data=data,
+        )
 
     # Invite management
 
@@ -2586,13 +2590,21 @@ class Client:
 
         if ch_type in (ChannelType.group, ChannelType.private):
             # the factory will be a DMChannel or GroupChannel here
-            channel = factory(me=self.user, data=data, state=self._connection)  # pyright: ignore[reportArgumentType, reportCallIssue]
+            channel = factory(
+                me=self.user,  # pyright: ignore[reportCallIssue]
+                data=data,  # pyright: ignore[reportArgumentType]
+                state=self._connection,
+            )
         else:
             # the factory can't be a DMChannel or GroupChannel here
             guild_id = int(data["guild_id"])  # pyright: ignore[reportGeneralTypeIssues]
             guild = self.get_guild(guild_id) or Object(id=guild_id)
             # GuildChannels expect a Guild, we may be passing an Object
-            channel = factory(guild=guild, state=self._connection, data=data)  # pyright: ignore[reportArgumentType, reportCallIssue]
+            channel = factory(  # pyright: ignore[reportCallIssue]
+                guild=guild,  # pyright: ignore[reportArgumentType, reportCallIssue]
+                data=data,  # pyright: ignore[reportArgumentType]
+                state=self._connection,
+            )
 
         return channel
 

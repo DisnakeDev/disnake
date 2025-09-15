@@ -22,13 +22,13 @@ class TestDecorators:
 
         for cd in (commands.command(), base.command()):
             reveal_type(
-                cd(f1),  # type: ignore
+                cd(f1),  # pyright: ignore
                 expected_text="Command[None, (a: int, b: str), bool]",
             )
 
         for gd in (commands.group(), base.group()):
             reveal_type(
-                gd(f1),  # type: ignore
+                gd(f1),  # pyright: ignore
                 expected_text="Group[None, (a: int, b: str), bool]",
             )
 
@@ -39,13 +39,13 @@ class TestDecorators:
 
         for cd in (commands.command(), base.command()):
             reveal_type(
-                cd(f2),  # type: ignore
+                cd(f2),  # pyright: ignore
                 expected_text="Command[CustomCog, (a: int, b: str), bool]",
             )
 
         for gd in (commands.group(), base.group()):
             reveal_type(
-                gd(f2),  # type: ignore
+                gd(f2),  # pyright: ignore
                 expected_text="Group[CustomCog, (a: int, b: str), bool]",
             )
 

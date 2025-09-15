@@ -190,12 +190,12 @@ def flatten_user(cls: Type[Member]) -> Type[Member]:
                 # We want sphinx to properly show coroutine functions as coroutines
                 if utils.iscoroutinefunction(value):  # noqa: B023
 
-                    async def general(self, *args, **kwargs):  # pyright: ignore[reportRedeclaration] # type: ignore
+                    async def general(self, *args: Any, **kwargs: Any) -> Any:  # pyright: ignore[reportRedeclaration]
                         return await getattr(self._user, x)(*args, **kwargs)
 
                 else:
 
-                    def general(self, *args, **kwargs):
+                    def general(self, *args: Any, **kwargs: Any) -> Any:
                         return getattr(self._user, x)(*args, **kwargs)
 
                 general.__name__ = x
@@ -372,11 +372,12 @@ class Member(disnake.abc.Messageable, _UserTag):
 
     @classmethod
     def _from_message(cls, *, message: Message, data: MemberPayload) -> Self:
-        user_data = message.author._to_minimal_user_json()  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
+        user_data = message.author._to_minimal_user_json()  # pyright: ignore[reportAttributeAccessIssue]
+        assert message.guild is not None
         return cls(
             data=data,
             user_data=user_data,
-            guild=message.guild,  # type: ignore # pyright: ignore[reportArgumentType]
+            guild=message.guild,
             state=message._state,
         )
 
@@ -452,7 +453,7 @@ class Member(disnake.abc.Messageable, _UserTag):
     ) -> Optional[Tuple[User, User]]:
         self.activities = tuple(create_activity(a, state=self._state) for a in data["activities"])
         self._client_status = {
-            sys.intern(key): sys.intern(value)  # type: ignore # pyright: ignore[reportArgumentType]
+            sys.intern(key): sys.intern(value)  # pyright: ignore[reportArgumentType]
             for key, value in data.get("client_status", {}).items()
         }
         self._client_status[None] = sys.intern(data["status"])
@@ -836,12 +837,12 @@ class Member(disnake.abc.Messageable, _UserTag):
 
         Bans this member. Equivalent to :meth:`Guild.ban`.
         """
-        await self.guild.ban(  # type: ignore  # no matching overload
+        await self.guild.ban(
             self,
             reason=reason,
             clean_history_duration=clean_history_duration,
             delete_message_days=delete_message_days,
-        ) # pyright: ignore[reportCallIssue]
+        )  # pyright: ignore[reportCallIssue]  # no matching overload
 
     async def unban(self, *, reason: Optional[str] = None) -> None:
         """|coro|

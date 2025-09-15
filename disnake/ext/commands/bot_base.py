@@ -52,7 +52,7 @@ def when_mentioned(bot: BotBase, msg: Message) -> List[str]:
     These are meant to be passed into the :attr:`.Bot.command_prefix` attribute.
     """
     # bot.user will never be None when this is called
-    return [f"<@{bot.user.id}> ", f"<@!{bot.user.id}> "]  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
+    return [f"<@{bot.user.id}> ", f"<@!{bot.user.id}> "]  # pyright: ignore[reportAttributeAccessIssue]
 
 
 def when_mentioned_or(*prefixes: str) -> Callable[[BotBase, Message], List[str]]:
@@ -276,7 +276,7 @@ class BotBase(CommonBotBase, GroupMixin):
 
         """
         # T was used instead of Check to ensure the type matches on return
-        self.add_check(func)  # pyright: ignore[reportArgumentType] # type: ignore
+        self.add_check(func)  # pyright: ignore[reportArgumentType]
         return func
 
     def check_once(self, func: CFT) -> CFT:
@@ -325,7 +325,7 @@ class BotBase(CommonBotBase, GroupMixin):
             return True
 
         # type-checker doesn't distinguish between functions and methods
-        return await disnake.utils.async_all(f(ctx) for f in data)  # pyright: ignore[reportCallIssue] # type: ignore
+        return await disnake.utils.async_all(f(ctx) for f in data)  # pyright: ignore[reportCallIssue]
 
     def before_invoke(self, coro: CFT) -> CFT:
         """A decorator that registers a coroutine function as a pre-invoke hook.
@@ -508,7 +508,7 @@ class BotBase(CommonBotBase, GroupMixin):
         view = StringView(message.content)
         ctx = cls(prefix=None, view=view, bot=self, message=message)
 
-        if message.author.id == self.user.id:  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
+        if message.author.id == self.user.id:  # pyright: ignore[reportAttributeAccessIssue]
             return ctx
 
         prefix = await self.get_prefix(message)
@@ -554,7 +554,7 @@ class BotBase(CommonBotBase, GroupMixin):
         invoker = view.get_word()
         ctx.invoked_with = invoker
         # type-checker fails to narrow invoked_prefix type.
-        ctx.prefix = invoked_prefix  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
+        ctx.prefix = invoked_prefix  # pyright: ignore[reportAttributeAccessIssue]
         ctx.command = self.all_commands.get(invoker)
         return ctx
 

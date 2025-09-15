@@ -145,14 +145,16 @@ def _transform_icon(entry: AuditLogEntry, data: Optional[str]) -> Optional[Asset
     if data is None:
         return None
     if entry.action.name.startswith("role_"):
-        return Asset._from_role_icon(entry._state, entry._target_id, data)  # pyright: ignore[reportArgumentType]
+        assert entry._target_id is not None
+        return Asset._from_role_icon(entry._state, entry._target_id, data)
     return Asset._from_guild_icon(entry._state, entry.guild.id, data)
 
 
 def _transform_avatar(entry: AuditLogEntry, data: Optional[str]) -> Optional[Asset]:
     if data is None:
         return None
-    return Asset._from_avatar(entry._state, entry._target_id, data)  # pyright: ignore[reportArgumentType]
+    assert entry._target_id is not None
+    return Asset._from_avatar(entry._state, entry._target_id, data)
 
 
 def _guild_hash_transformer(path: str) -> Callable[[AuditLogEntry, Optional[str]], Optional[Asset]]:
@@ -260,7 +262,8 @@ def _transform_guild_scheduled_event_image(
 ) -> Optional[Asset]:
     if data is None:
         return None
-    return Asset._from_guild_scheduled_event_image(entry._state, entry._target_id, data)  # pyright: ignore[reportArgumentType]
+    assert entry._target_id is not None
+    return Asset._from_guild_scheduled_event_image(entry._state, entry._target_id, data)
 
 
 def _transform_automod_action(
@@ -378,10 +381,12 @@ class AuditLogChanges:
 
             # special cases for role add/remove
             if attr == "$add":
-                self._handle_role(self.before, self.after, entry, elem["new_value"])  # pyright: ignore[reportArgumentType, reportTypedDictNotRequiredAccess]
+                assert "new_value" in elem
+                self._handle_role(self.before, self.after, entry, elem["new_value"])  # pyright: ignore[reportArgumentType]
                 continue
             if attr == "$remove":
-                self._handle_role(self.after, self.before, entry, elem["new_value"])  # pyright: ignore[reportArgumentType, reportTypedDictNotRequiredAccess]
+                assert "new_value" in elem
+                self._handle_role(self.after, self.before, entry, elem["new_value"])  # pyright: ignore[reportArgumentType]
                 continue
 
             # special case for application command permissions update

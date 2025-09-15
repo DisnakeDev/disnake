@@ -140,6 +140,7 @@ ignore = [
     "ANN0",
     "ANN4",
     ## flake8-bandit
+    "S101", # use of assert is fine
     "S311", # use of random is fine in most cases
     "S603", # calling subprocess with dynamic arguments is generally fine, the only way to avoid this is ignoring it
     "S607", # partial executable paths (i.e. "git" instead of "/usr/bin/git") are fine

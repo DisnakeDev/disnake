@@ -87,7 +87,7 @@ class WelcomeScreenChannel:
         result: WelcomeScreenChannelPayload = {
             "channel_id": self.id,
             "description": self.description,
-        }  # pyright: ignore[reportAssignmentType] # type: ignore
+        }  # pyright: ignore[reportAssignmentType]
 
         if self.emoji is not None:
             if self.emoji.id:

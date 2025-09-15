@@ -202,7 +202,7 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
         self._underlying = component
 
     def refresh_state(self, interaction: MessageInteraction) -> None:
-        self._selected_values = interaction.resolved_values  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
+        self._selected_values = interaction.resolved_values  # pyright: ignore[reportAttributeAccessIssue]
 
     @classmethod
     @abstractmethod
@@ -276,6 +276,6 @@ def _create_decorator(
 
         func.__discord_ui_model_type__ = cls
         func.__discord_ui_model_kwargs__ = kwargs
-        return func  # pyright: ignore[reportReturnType] # type: ignore
+        return func  # pyright: ignore[reportReturnType]
 
     return decorator

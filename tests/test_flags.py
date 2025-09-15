@@ -120,16 +120,16 @@ class TestFlagValue:
         assert (ins | TestFlags.one).value == 1
 
         with pytest.raises(TypeError, match=re.escape("unsupported operand type(s) for |:")):
-            _ = TestFlags.four | 32  # pyright: ignore[reportOperatorIssue] # type: ignore
+            _ = TestFlags.four | 32  # pyright: ignore[reportOperatorIssue]
 
         with pytest.raises(TypeError, match=re.escape("unsupported operand type(s) for |:")):
-            _ = 32 | TestFlags.four  # pyright: ignore[reportOperatorIssue] # type: ignore
+            _ = 32 | TestFlags.four  # pyright: ignore[reportOperatorIssue]
 
         with pytest.raises(TypeError, match=re.escape("unsupported operand type(s) for |:")):
-            _ = TestFlags.four | OtherTestFlags.other_one  # pyright: ignore[reportOperatorIssue] # type: ignore
+            _ = TestFlags.four | OtherTestFlags.other_one  # pyright: ignore[reportOperatorIssue]
 
         with pytest.raises(TypeError, match=re.escape("unsupported operand type(s) for |:")):
-            _ = TestFlags.four | OtherTestFlags(other_one=True)  # pyright: ignore[reportOperatorIssue] # type: ignore
+            _ = TestFlags.four | OtherTestFlags(other_one=True)  # pyright: ignore[reportOperatorIssue]
 
     def test_flag_value_invert(self) -> None:
         ins = ~TestFlags.four
@@ -211,10 +211,10 @@ class TestBaseFlags:
         assert third.value == 0b010
 
         with pytest.raises(TypeError, match=re.escape("unsupported operand type(s) for &:")):
-            _ = ins & "44"  # pyright: ignore[reportOperatorIssue] # type: ignore
+            _ = ins & "44"  # pyright: ignore[reportOperatorIssue]
 
         with pytest.raises(TypeError, match=re.escape("unsupported operand type(s) for &:")):
-            _ = "44" & ins  # pyright: ignore[reportOperatorIssue] # type: ignore
+            _ = "44" & ins  # pyright: ignore[reportOperatorIssue]
 
     def test__iand__(self) -> None:
         ins = TestFlags(one=True, two=True)
@@ -232,7 +232,7 @@ class TestBaseFlags:
         assert ins.value == 0b001
 
         with pytest.raises(TypeError, match=re.escape("unsupported operand type(s) for &=:")):
-            ins &= 14  # pyright: ignore[reportOperatorIssue] # type: ignore
+            ins &= 14  # pyright: ignore[reportOperatorIssue]
 
     def test__or__(self) -> None:
         ins = TestFlags(one=True, two=False)
@@ -255,13 +255,13 @@ class TestBaseFlags:
         assert third.value == 0b10
 
         with pytest.raises(TypeError, match=re.escape("unsupported operand type(s) for |:")):
-            _ = ins | 28  # pyright: ignore[reportOperatorIssue] # type: ignore
+            _ = ins | 28  # pyright: ignore[reportOperatorIssue]
 
         with pytest.raises(TypeError, match=re.escape("unsupported operand type(s) for |:")):
-            _ = 28 | ins  # pyright: ignore[reportOperatorIssue] # type: ignore
+            _ = 28 | ins  # pyright: ignore[reportOperatorIssue]
 
         with pytest.raises(TypeError, match=re.escape("unsupported operand type(s) for |:")):
-            _ = ins | OtherTestFlags.other_one  # pyright: ignore[reportOperatorIssue] # type: ignore
+            _ = ins | OtherTestFlags.other_one  # pyright: ignore[reportOperatorIssue]
 
     def test__ior__(self) -> None:
         ins = TestFlags(one=True, two=False)
@@ -278,10 +278,10 @@ class TestBaseFlags:
         assert ins.value == 0b111
 
         with pytest.raises(TypeError, match=re.escape("unsupported operand type(s) for |=:")):
-            ins |= True  # pyright: ignore[reportOperatorIssue] # type: ignore
+            ins |= True  # pyright: ignore[reportOperatorIssue]
 
         with pytest.raises(TypeError, match=re.escape("unsupported operand type(s) for |=:")):
-            ins |= OtherTestFlags.other_one  # pyright: ignore[reportOperatorIssue] # type: ignore
+            ins |= OtherTestFlags.other_one  # pyright: ignore[reportOperatorIssue]
 
     def test__xor__(self) -> None:
         ins = TestFlags(one=True, two=False)
@@ -296,13 +296,13 @@ class TestBaseFlags:
         assert third.value == 0b010
 
         with pytest.raises(TypeError, match=re.escape("unsupported operand type(s) for ^:")):
-            _ = ins ^ "h"  # pyright: ignore[reportOperatorIssue] # type: ignore
+            _ = ins ^ "h"  # pyright: ignore[reportOperatorIssue]
 
         with pytest.raises(TypeError, match=re.escape("unsupported operand type(s) for ^:")):
-            _ = "h" ^ ins  # pyright: ignore[reportOperatorIssue] # type: ignore
+            _ = "h" ^ ins  # pyright: ignore[reportOperatorIssue]
 
         with pytest.raises(TypeError, match=re.escape("unsupported operand type(s) for ^:")):
-            _ = ins ^ OtherTestFlags.other_one  # pyright: ignore[reportOperatorIssue] # type: ignore
+            _ = ins ^ OtherTestFlags.other_one  # pyright: ignore[reportOperatorIssue]
 
     def test__ixor__(self) -> None:
         ins = TestFlags(one=True, two=False)
@@ -319,10 +319,10 @@ class TestBaseFlags:
         assert ins.value == 0b010
 
         with pytest.raises(TypeError, match=re.escape("unsupported operand type(s) for ^=:")):
-            ins ^= "stability"  # pyright: ignore[reportOperatorIssue] # type: ignore
+            ins ^= "stability"  # pyright: ignore[reportOperatorIssue]
 
         with pytest.raises(TypeError, match=re.escape("unsupported operand type(s) for ^=:")):
-            ins ^= OtherTestFlags.other_one  # pyright: ignore[reportOperatorIssue] # type: ignore
+            ins ^= OtherTestFlags.other_one  # pyright: ignore[reportOperatorIssue]
 
     def test__le__(self) -> None:
         ins = TestFlags(one=True, two=False)
@@ -335,7 +335,7 @@ class TestBaseFlags:
         with pytest.raises(
             TypeError, match="'<=' not supported between instances of 'TestFlags' and 'int'"
         ):
-            _ = ins <= 4  # pyright: ignore[reportOperatorIssue] # type: ignore
+            _ = ins <= 4  # pyright: ignore[reportOperatorIssue]
 
         other.value = ins.value
         assert ins <= other
@@ -351,7 +351,7 @@ class TestBaseFlags:
         with pytest.raises(
             TypeError, match="'>=' not supported between instances of 'TestFlags' and 'int'"
         ):
-            _ = ins >= 4  # pyright: ignore[reportOperatorIssue] # type: ignore
+            _ = ins >= 4  # pyright: ignore[reportOperatorIssue]
 
         other.value = ins.value
         assert ins >= other
@@ -367,7 +367,7 @@ class TestBaseFlags:
         with pytest.raises(
             TypeError, match="'<' not supported between instances of 'TestFlags' and 'int'"
         ):
-            _ = ins < 4  # pyright: ignore[reportOperatorIssue] # type: ignore
+            _ = ins < 4  # pyright: ignore[reportOperatorIssue]
 
         other.value = ins.value
         assert not ins < other
@@ -383,7 +383,7 @@ class TestBaseFlags:
         with pytest.raises(
             TypeError, match="'>' not supported between instances of 'TestFlags' and 'int'"
         ):
-            _ = ins > 4  # pyright: ignore[reportOperatorIssue] # type: ignore
+            _ = ins > 4  # pyright: ignore[reportOperatorIssue]
 
         other.value = ins.value
         assert not ins > other

@@ -20,7 +20,7 @@ class collapse(nodes.General, nodes.Element):
 
 def visit_collapse_node(self: HTMLTranslator, node: nodes.Element) -> None:
     attrs = {"open": ""} if node["open"] else {}
-    self.body.append(self.starttag(node, "details", **attrs))  # pyright: ignore[reportArgumentType] # type: ignore[reportArgumentType]
+    self.body.append(self.starttag(node, "details", **attrs))  # pyright: ignore[reportArgumentType]
     self.body.append("<summary></summary>")
 
 

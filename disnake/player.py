@@ -157,7 +157,8 @@ class FFmpegAudio(AudioSource):
         kwargs.update(subprocess_kwargs)
 
         self._process: subprocess.Popen[bytes] = self._spawn_process(args, **kwargs)
-        self._stdout: IO[bytes] = self._process.stdout  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
+        assert self._process.stdout is not None
+        self._stdout: IO[bytes] = self._process.stdout
         self._stdin: Optional[IO[bytes]] = None
         self._pipe_thread: Optional[threading.Thread] = None
 
@@ -171,7 +172,7 @@ class FFmpegAudio(AudioSource):
 
     def _spawn_process(self, args: Any, **subprocess_kwargs: Any) -> subprocess.Popen[bytes]:
         try:
-            return subprocess.Popen(args, creationflags=CREATE_NO_WINDOW, **subprocess_kwargs)  # pyright: ignore[reportReturnType] # type: ignore
+            return subprocess.Popen(args, creationflags=CREATE_NO_WINDOW, **subprocess_kwargs)  # pyright: ignore[reportReturnType]
         except FileNotFoundError:
             executable = args.partition(" ")[0] if isinstance(args, str) else args[0]
             msg = f"{executable} was not found."
@@ -213,7 +214,7 @@ class FFmpegAudio(AudioSource):
             )
 
     def _pipe_writer(self, source: io.BufferedIOBase) -> None:
-        assert self._stdin  # noqa: S101 # TODO: remove this ignore (didn't want to touch this)
+        assert self._stdin is not None
         while self._process:
             # arbitrarily large read size
             data = source.read(8192)
@@ -505,7 +506,8 @@ class FFmpegOpusAudio(FFmpegAudio):
         """
         executable = kwargs.get("executable")
         codec, bitrate = await cls.probe(source, method=method, executable=executable)
-        return cls(source, bitrate=bitrate, codec=codec, **kwargs)  # pyright: ignore[reportArgumentType] # type: ignore
+        assert bitrate is not None
+        return cls(source, bitrate=bitrate, codec=codec, **kwargs)
 
     @classmethod
     async def probe(
@@ -698,7 +700,7 @@ class PCMVolumeTransformer(AudioSource, Generic[AT]):
 
     def read(self) -> bytes:
         ret = self.original.read()
-        return audioop.mul(ret, 2, min(self._volume, 2.0))  # pyright: ignore[reportPossiblyUnboundVariable] # type: ignore[reportPossiblyUnboundVariable]
+        return audioop.mul(ret, 2, min(self._volume, 2.0))  # pyright: ignore[reportPossiblyUnboundVariable]
 
 
 class AudioPlayer(threading.Thread):

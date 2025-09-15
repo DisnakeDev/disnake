@@ -83,7 +83,7 @@ class PermissionTypings(BaseCodemodCommand):
             msg = "could not find TYPE_CHECKING block in PermissionOverwrite."
             raise RuntimeError(msg)
 
-        og_type_check: cst.If = b  # pyright: ignore[reportAssignmentType] # type: ignore
+        og_type_check: cst.If = b  # pyright: ignore[reportAssignmentType]
 
         body = [
             cst.SimpleStatementLine(

@@ -246,7 +246,7 @@ class StreamIntegration(Integration):
     @property
     def role(self) -> Optional[Role]:
         """:class:`Role` | :data:`None` The role which the integration uses for subscribers."""
-        return self.guild.get_role(self._role_id)  # pyright: ignore[reportArgumentType] # type: ignore
+        return self.guild.get_role(self._role_id)  # pyright: ignore[reportArgumentType]
 
     @deprecated()
     async def edit(

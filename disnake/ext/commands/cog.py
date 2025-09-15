@@ -256,12 +256,13 @@ class Cog(metaclass=CogMeta):
 
             cog_app_commands.append(c)
 
-        self.__cog_app_commands__ = tuple(cog_app_commands)  # pyright: ignore[reportAttributeAccessIssue] # type: ignore  # overriding ClassVar
+        # FIXME: __cog_app_commands__ is annotated as List, assigning tuple here?
+        self.__cog_app_commands__ = tuple(cog_app_commands)  # pyright: ignore[reportAttributeAccessIssue]  # overriding ClassVar
         # Replace the old command objects with the new copies
         for app_command in self.__cog_app_commands__:
             setattr(self, app_command.callback.__name__, app_command)
 
-        self.__cog_commands__ = tuple(c._update_copy(cmd_attrs) for c in cls.__cog_commands__)  # pyright: ignore[reportAttributeAccessIssue] # type: ignore  # overriding ClassVar
+        self.__cog_commands__ = tuple(c._update_copy(cmd_attrs) for c in cls.__cog_commands__)  # pyright: ignore[reportAttributeAccessIssue]  # overriding ClassVar
 
         lookup = {cmd.qualified_name: cmd for cmd in self.__cog_commands__}
         for command in self.__cog_commands__:
@@ -269,11 +270,11 @@ class Cog(metaclass=CogMeta):
             parent = command.parent
             if parent is not None:
                 # Get the latest parent reference
-                parent = lookup[parent.qualified_name]  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
+                parent = lookup[parent.qualified_name]  # pyright: ignore[reportAttributeAccessIssue]
 
                 # Update our parent's reference to our self
-                parent.remove_command(command.name)  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
-                parent.add_command(command)  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
+                parent.remove_command(command.name)  # pyright: ignore[reportAttributeAccessIssue]
+                parent.add_command(command)  # pyright: ignore[reportAttributeAccessIssue]
 
         return self
 
@@ -738,12 +739,12 @@ class Cog(metaclass=CogMeta):
             command.cog = self
             if command.parent is None:
                 try:
-                    bot.add_command(command)  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
+                    bot.add_command(command)  # pyright: ignore[reportAttributeAccessIssue]
                 except Exception:
                     # undo our additions
                     for to_undo in self.__cog_commands__[:index]:
                         if to_undo.parent is None:
-                            bot.remove_command(to_undo.name)  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
+                            bot.remove_command(to_undo.name)  # pyright: ignore[reportAttributeAccessIssue]
                     raise
 
         for index, command in enumerate(self.__cog_app_commands__):
@@ -835,7 +836,7 @@ class Cog(metaclass=CogMeta):
         try:
             for command in self.__cog_commands__:
                 if command.parent is None:
-                    bot.remove_command(command.name)  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
+                    bot.remove_command(command.name)  # pyright: ignore[reportAttributeAccessIssue]
 
             for app_command in self.__cog_app_commands__:
                 if isinstance(app_command, InvokableSlashCommand):
@@ -849,10 +850,10 @@ class Cog(metaclass=CogMeta):
                 bot.remove_listener(getattr(self, method_name), name)
 
             if cls.bot_check is not Cog.bot_check:
-                bot.remove_check(self.bot_check)  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
+                bot.remove_check(self.bot_check)  # pyright: ignore[reportAttributeAccessIssue]
 
             if cls.bot_check_once is not Cog.bot_check_once:
-                bot.remove_check(self.bot_check_once, call_once=True)  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
+                bot.remove_check(self.bot_check_once, call_once=True)  # pyright: ignore[reportAttributeAccessIssue]
 
             # Remove application command checks
             if cls.bot_slash_command_check is not Cog.bot_slash_command_check:

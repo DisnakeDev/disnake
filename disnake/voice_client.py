@@ -261,9 +261,10 @@ class VoiceClient(VoiceProtocol):
             if channel_id is None:
                 # We're being disconnected so cleanup
                 await self.disconnect()
+            elif self.guild is None:  # pyright: ignore[reportUnnecessaryComparison]
+                self.channel = None  # pyright: ignore[reportAttributeAccessIssue]
             else:
-                guild = self.guild
-                self.channel = channel_id and guild and guild.get_channel(int(channel_id))  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
+                self.channel = self.guild.get_channel(int(channel_id))  # pyright: ignore[reportAttributeAccessIssue]
         else:
             self._voice_state_complete.set()
 
@@ -528,8 +529,8 @@ class VoiceClient(VoiceProtocol):
         return (nonce, nonce.ljust(pad, b"\0"))
 
     def _encrypt_aead_xchacha20_poly1305_rtpsize(self, header: bytes, data) -> bytes:
-        box = nacl.secret.Aead(bytes(self.secret_key))  # pyright: ignore[reportPossiblyUnboundVariable] # type: ignore[reportPossiblyUnboundVariable]
-        nonce, padded_nonce = self._get_nonce(nacl.secret.Aead.NONCE_SIZE)  # pyright: ignore[reportPossiblyUnboundVariable] # type: ignore[reportPossiblyUnboundVariable]
+        box = nacl.secret.Aead(bytes(self.secret_key))  # pyright: ignore[reportPossiblyUnboundVariable]
+        nonce, padded_nonce = self._get_nonce(nacl.secret.Aead.NONCE_SIZE)  # pyright: ignore[reportPossiblyUnboundVariable]
 
         return (
             header
