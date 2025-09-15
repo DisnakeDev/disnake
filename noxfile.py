@@ -39,6 +39,7 @@ SUPPORTED_PYTHONS: Final[List[str]] = nox.project.python_versions(PYPROJECT)
 # TODO(onerandomusername): add 3.14 once CI supports 3.14.
 EXPERIMENTAL_PYTHON_VERSIONS: Final[List[str]] = []
 ALL_PYTHONS: Final[List[str]] = [*SUPPORTED_PYTHONS, *EXPERIMENTAL_PYTHON_VERSIONS]
+MIN_PYTHON: Final[str] = SUPPORTED_PYTHONS[0]
 CI: Final[bool] = "CI" in os.environ
 
 # used to reset cached coverage data once for the first test run only
@@ -64,6 +65,8 @@ class ExecutionGroup(ExecutionGroupType):
     def __post_init__(self) -> None:
         if self.pyright_paths and "pyright" not in self.sessions:
             self.sessions = (*self.sessions, "pyright")
+        if not self.python:
+            self.python = MIN_PYTHON
         if self.python in EXPERIMENTAL_PYTHON_VERSIONS:
             self.experimental = True
         for key in self.__dataclass_fields__.keys():
@@ -88,24 +91,19 @@ EXECUTION_GROUPS: List[ExecutionGroup] = [
     # docs and pyright
     ExecutionGroup(
         sessions=("docs",),
-        python="3.8",
         pyright_paths=("docs",),
-        project=True,
         extras=("docs",),
     ),
     # codemodding and pyright
     ExecutionGroup(
         sessions=("codemod", "autotyping"),
-        python="3.8",
         pyright_paths=("scripts",),
         groups=("codemod",),
     ),
     # the other sessions, they don't need pyright, but they need to run
     ExecutionGroup(
         sessions=("lint", "slotscheck", "check-manifest"),
-        python="3.8",
         groups=("tools",),
-        project=True,
     ),
     ## testing
     *(
@@ -119,7 +117,6 @@ EXECUTION_GROUPS: List[ExecutionGroup] = [
     # coverage
     ExecutionGroup(
         sessions=("coverage",),
-        python="3.8",
         project=False,
         groups=("test",),
     ),
