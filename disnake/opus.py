@@ -211,7 +211,7 @@ def libopus_loader(name: str) -> Any:
 
         try:
             if item[1]:
-                func.argtypes = item[1]  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
+                func.argtypes = item[1]  # pyright: ignore[reportAttributeAccessIssue]
 
             func.restype = item[2]
         except KeyError:
@@ -354,7 +354,7 @@ class Encoder(_OpusStruct):
         if hasattr(self, "_state"):
             _lib.opus_encoder_destroy(self._state)
             # This is a destructor, so it's okay to assign None
-            self._state = None  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
+            self._state = None  # pyright: ignore[reportAttributeAccessIssue]
 
     def _create_state(self) -> EncoderStruct:
         ret = ctypes.c_int()
@@ -395,7 +395,7 @@ class Encoder(_OpusStruct):
     def encode(self, pcm: bytes, frame_size: int) -> bytes:
         max_data_bytes = len(pcm)
         # bytes can be used to reference pointer
-        pcm_ptr = ctypes.cast(pcm, c_int16_ptr)  # pyright: ignore[reportArgumentType] # type: ignore
+        pcm_ptr = ctypes.cast(pcm, c_int16_ptr)  # pyright: ignore[reportArgumentType]
         data = (ctypes.c_char * max_data_bytes)()
 
         ret = _lib.opus_encode(self._state, pcm_ptr, frame_size, data, max_data_bytes)
@@ -413,7 +413,7 @@ class Decoder(_OpusStruct):
         if hasattr(self, "_state"):
             _lib.opus_decoder_destroy(self._state)
             # This is a destructor, so it's okay to assign None
-            self._state = None  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
+            self._state = None  # pyright: ignore[reportAttributeAccessIssue]
 
     def _create_state(self) -> DecoderStruct:
         ret = ctypes.c_int()

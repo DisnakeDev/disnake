@@ -82,7 +82,7 @@ class TestActionRow:
             _ = ActionRow().add_button
             _ = ActionRow.with_message_components().add_button
             # should not work
-            _ = ActionRow.with_modal_components().add_button  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
+            _ = ActionRow.with_modal_components().add_button  # pyright: ignore[reportAttributeAccessIssue]
 
     def test_add_select(self) -> None:
         r = ActionRow.with_message_components()
@@ -96,7 +96,7 @@ class TestActionRow:
             _ = ActionRow().add_string_select
             _ = ActionRow.with_message_components().add_string_select
             # should not work
-            _ = ActionRow.with_modal_components().add_select  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
+            _ = ActionRow.with_modal_components().add_select  # pyright: ignore[reportAttributeAccessIssue]
 
     def test_add_text_input(self) -> None:
         with pytest.warns(DeprecationWarning):
@@ -112,7 +112,7 @@ class TestActionRow:
             _ = ActionRow().add_text_input
             _ = ActionRow.with_modal_components().add_text_input
             # should not work
-            _ = ActionRow.with_message_components().add_text_input  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
+            _ = ActionRow.with_message_components().add_text_input  # pyright: ignore[reportAttributeAccessIssue]
 
     def test_clear_items(self) -> None:
         r = ActionRow(button1, button2)
@@ -285,10 +285,10 @@ def test_normalize_components__modal(value, expected) -> None:
 def test_normalize_components__invalid() -> None:
     for value in (42, [42], [ActionRow(), 42], iter([button1])):
         with pytest.raises(TypeError, match=r"`components` must be a"):
-            normalize_components(value)  # pyright: ignore[reportArgumentType, reportCallIssue] # type: ignore
+            normalize_components(value)  # pyright: ignore[reportArgumentType, reportCallIssue]
     for value in ([[[]]], [[[ActionRow()]]]):
         with pytest.raises(TypeError, match=r"components should be of type"):
-            normalize_components(value)  # pyright: ignore[reportArgumentType, reportCallIssue] # type: ignore
+            normalize_components(value)  # pyright: ignore[reportArgumentType, reportCallIssue]
 
 
 def test_normalize_components_to_dict() -> None:

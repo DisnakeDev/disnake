@@ -183,6 +183,9 @@ ignore = [
     "RUF022",
     "RUF023",
 
+    # use of assert is fine
+    "S101",
+
     # calling subprocess with dynamic arguments is generally fine, the only way to avoid this is ignoring it
     "S603",
 
@@ -246,8 +249,6 @@ ignore = [
     "F401", # unused imports. Excluded because there is a bug with ruff.
 ]
 "disnake/**.py" = ["PT"] # this is not a module of pytest tests
-"tests/*.py" = ["S101"] # use of assert is okay in test files
-"scripts/*.py" = ["S101"] # use of assert is okay in scripts
 # we are not using noqa in the example files themselves
 "examples/*.py" = [
     "B008", # do not perform function calls in argument defaults, this is how most commands work

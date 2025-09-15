@@ -159,7 +159,7 @@ def hooked_wrapped_callback(
             raise CommandInvokeError(exc) from exc
         finally:
             if command._max_concurrency is not None:
-                await command._max_concurrency.release(ctx)  # pyright: ignore[reportArgumentType] # type: ignore
+                await command._max_concurrency.release(ctx)  # pyright: ignore[reportArgumentType]
 
             await command.call_after_hooks(ctx)
         return ret
@@ -348,11 +348,11 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         self.require_var_positional: bool = kwargs.get("require_var_positional", False)
         self.ignore_extra: bool = kwargs.get("ignore_extra", True)
         self.cooldown_after_parsing: bool = kwargs.get("cooldown_after_parsing", False)
-        self.cog: CogT = None  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
+        self.cog: CogT = None  # pyright: ignore[reportAttributeAccessIssue]
 
         # bandaid for the fact that sometimes parent can be the bot instance
         parent = kwargs.get("parent")
-        self.parent: Optional[GroupMixin] = parent if isinstance(parent, _BaseCommand) else None  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
+        self.parent: Optional[GroupMixin] = parent if isinstance(parent, _BaseCommand) else None  # pyright: ignore[reportAttributeAccessIssue]
 
         self._before_invoke: Optional[Hook] = None
         try:
@@ -448,9 +448,9 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         .. versionadded:: 1.3
         """
         if self.cog is not None:
-            return await self.callback(self.cog, context, *args, **kwargs)  # pyright: ignore[reportCallIssue] # type: ignore
+            return await self.callback(self.cog, context, *args, **kwargs)  # pyright: ignore[reportCallIssue]
         else:
-            return await self.callback(context, *args, **kwargs)  # pyright: ignore[reportCallIssue] # type: ignore
+            return await self.callback(context, *args, **kwargs)  # pyright: ignore[reportCallIssue]
 
     def _ensure_assignment_on_copy(self, other: CommandT) -> CommandT:
         other._before_invoke = self._before_invoke
@@ -461,7 +461,8 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
             other._buckets = self._buckets.copy()
         if self._max_concurrency != other._max_concurrency:
             # _max_concurrency won't be None at this point
-            other._max_concurrency = self._max_concurrency.copy()  # pyright: ignore[reportOptionalMemberAccess] # type: ignore
+            assert self._max_concurrency is not None
+            other._max_concurrency = self._max_concurrency.copy()
 
         try:
             other.on_error = self.on_error
@@ -566,7 +567,8 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         view.previous = previous
 
         # type-checker fails to narrow argument
-        return await run_converters(ctx, converter, argument, param)  # pyright: ignore[reportArgumentType] # type: ignore
+        assert argument is not None
+        return await run_converters(ctx, converter, argument, param)
 
     async def _transform_greedy_pos(
         self, ctx: Context, param: inspect.Parameter, required: bool, converter: Any
@@ -580,7 +582,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
             view.skip_ws()
             try:
                 argument = view.get_quoted_word()
-                value = await run_converters(ctx, converter, argument, param)  # pyright: ignore[reportArgumentType] # type: ignore
+                value = await run_converters(ctx, converter, argument, param)  # pyright: ignore[reportArgumentType]
             except (CommandError, ArgumentParsingError):
                 view.index = previous
                 break
@@ -598,7 +600,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         previous = view.index
         try:
             argument = view.get_quoted_word()
-            value = await run_converters(ctx, converter, argument, param)  # pyright: ignore[reportArgumentType] # type: ignore
+            value = await run_converters(ctx, converter, argument, param)  # pyright: ignore[reportArgumentType]
         except (CommandError, ArgumentParsingError):
             view.index = previous
             raise RuntimeError from None  # break loop
@@ -621,11 +623,11 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         This the base command name required to execute it. For example,
         in ``?one two three`` the parent name would be ``one two``.
         """
-        entries = []
+        entries: list[str] = []
         command: Command[CogT, ..., Any] = self
         # command.parent is type-hinted as GroupMixin some attributes are resolved via MRO
         while command.parent is not None:
-            command = command.parent  # pyright: ignore[reportAssignmentType] # type: ignore
+            command = command.parent  # pyright: ignore[reportAssignmentType]
             entries.append(command.name)
 
         return " ".join(reversed(entries))
@@ -640,10 +642,10 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
 
         .. versionadded:: 1.1
         """
-        entries = []
-        command: Command[CogT, ..., Any] = self
+        entries: list[Group[CogT, ..., Any]] = []
+        command: Group[CogT, ..., Any] = self  # pyright: ignore[reportAssignmentType]
         while command.parent is not None:
-            command = command.parent  # pyright: ignore[reportAssignmentType] # type: ignore
+            command = command.parent  # pyright: ignore[reportAssignmentType]
             entries.append(command)
 
         return entries
@@ -721,9 +723,9 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
             # __self__ only exists for methods, not functions
             # however, if @command.before_invoke is used, it will be a function
             if instance:
-                await self._before_invoke(instance, ctx)  # pyright: ignore[reportCallIssue, reportArgumentType] # type: ignore
+                await self._before_invoke(instance, ctx)  # pyright: ignore[reportCallIssue, reportArgumentType]
             else:
-                await self._before_invoke(ctx)  # pyright: ignore[reportCallIssue] # type: ignore
+                await self._before_invoke(ctx)  # pyright: ignore[reportCallIssue]
 
         # call the cog local hook if applicable:
         if cog is not None:
@@ -741,9 +743,9 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         if self._after_invoke is not None:
             instance = getattr(self._after_invoke, "__self__", cog)
             if instance:
-                await self._after_invoke(instance, ctx)  # pyright: ignore[reportCallIssue, reportArgumentType] # type: ignore
+                await self._after_invoke(instance, ctx)  # pyright: ignore[reportCallIssue, reportArgumentType]
             else:
-                await self._after_invoke(ctx)  # pyright: ignore[reportCallIssue] # type: ignore
+                await self._after_invoke(ctx)  # pyright: ignore[reportCallIssue]
 
         # call the cog local hook if applicable:
         if cog is not None:
@@ -763,7 +765,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
             if bucket is not None:  # pyright: ignore[reportUnnecessaryComparison]
                 retry_after = bucket.update_rate_limit(current)
                 if retry_after:
-                    raise CommandOnCooldown(bucket, retry_after, self._buckets.type)  # pyright: ignore[reportArgumentType] # type: ignore
+                    raise CommandOnCooldown(bucket, retry_after, self._buckets.type)  # pyright: ignore[reportArgumentType]
 
     async def prepare(self, ctx: Context) -> None:
         ctx.command = self
@@ -773,7 +775,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
 
         if self._max_concurrency is not None:
             # For this application, context can be duck-typed as a Message
-            await self._max_concurrency.acquire(ctx)  # pyright: ignore[reportArgumentType] # type: ignore
+            await self._max_concurrency.acquire(ctx)  # pyright: ignore[reportArgumentType]
 
         try:
             if self.cooldown_after_parsing:
@@ -786,7 +788,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
             await self.call_before_hooks(ctx)
         except Exception:
             if self._max_concurrency is not None:
-                await self._max_concurrency.release(ctx)  # pyright: ignore[reportArgumentType] # type: ignore
+                await self._max_concurrency.release(ctx)  # pyright: ignore[reportArgumentType]
             raise
 
     def is_on_cooldown(self, ctx: Context) -> bool:
@@ -866,7 +868,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
 
         ctx.invoked_subcommand = None
         try:
-            await self.callback(*ctx.args, **ctx.kwargs)  # pyright: ignore[reportCallIssue] # type: ignore
+            await self.callback(*ctx.args, **ctx.kwargs)  # pyright: ignore[reportCallIssue]
         except Exception:
             ctx.command_failed = True
             raise
@@ -1096,7 +1098,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
                 # since we have no checks, then we just return True.
                 return True
 
-            return await disnake.utils.async_all(predicate(ctx) for predicate in predicates)  # pyright: ignore[reportCallIssue] # type: ignore
+            return await disnake.utils.async_all(predicate(ctx) for predicate in predicates)  # pyright: ignore[reportCallIssue]
         finally:
             ctx.command = original
 
@@ -1255,7 +1257,7 @@ class GroupMixin(Generic[CogT]):
 
         for name in names[1:]:
             try:
-                obj = obj.all_commands[name]  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
+                obj = obj.all_commands[name]  # pyright: ignore[reportAttributeAccessIssue]
             except (AttributeError, KeyError):
                 return None
 
@@ -1424,7 +1426,8 @@ class Group(GroupMixin[CogT], Command[CogT, P, T]):
             injected = hooked_wrapped_callback(self, ctx, self.callback)
             await injected(*ctx.args, **ctx.kwargs)
 
-        ctx.invoked_parents.append(ctx.invoked_with)  # pyright: ignore[reportArgumentType] # type: ignore
+        assert ctx.invoked_with is not None
+        ctx.invoked_parents.append(ctx.invoked_with)
 
         if trigger and ctx.invoked_subcommand:
             ctx.invoked_with = trigger
@@ -1456,7 +1459,7 @@ class Group(GroupMixin[CogT], Command[CogT, P, T]):
 
         if early_invoke:
             try:
-                await self.callback(*ctx.args, **ctx.kwargs)  # pyright: ignore[reportCallIssue] # type: ignore
+                await self.callback(*ctx.args, **ctx.kwargs)  # pyright: ignore[reportCallIssue]
             except Exception:
                 ctx.command_failed = True
                 raise
@@ -1464,7 +1467,8 @@ class Group(GroupMixin[CogT], Command[CogT, P, T]):
                 if call_hooks:
                     await self.call_after_hooks(ctx)
 
-        ctx.invoked_parents.append(ctx.invoked_with)  # pyright: ignore[reportArgumentType] # type: ignore
+        assert ctx.invoked_with is not None
+        ctx.invoked_parents.append(ctx.invoked_with)
 
         if trigger and ctx.invoked_subcommand:
             ctx.invoked_with = trigger
@@ -1703,9 +1707,9 @@ def check(predicate: Check) -> Callable[[T], T]:
             func.checks.append(predicate)
         else:
             if not hasattr(func, "__commands_checks__"):
-                func.__commands_checks__ = []  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
+                func.__commands_checks__ = []  # pyright: ignore[reportAttributeAccessIssue]
 
-            func.__commands_checks__.append(predicate)  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
+            func.__commands_checks__.append(predicate)  # pyright: ignore[reportAttributeAccessIssue]
 
         return func
 
@@ -1713,13 +1717,13 @@ def check(predicate: Check) -> Callable[[T], T]:
         decorator.predicate = predicate
     else:
 
-        @functools.wraps(predicate)  # pyright: ignore[reportArgumentType] # type: ignore
+        @functools.wraps(predicate)  # pyright: ignore[reportArgumentType]
         async def wrapper(ctx):
-            return predicate(ctx)  # pyright: ignore[reportCallIssue] # type: ignore
+            return predicate(ctx)  # pyright: ignore[reportCallIssue]
 
         decorator.predicate = wrapper
 
-    return decorator  # pyright: ignore[reportReturnType] # type: ignore
+    return decorator  # pyright: ignore[reportReturnType]
 
 
 def check_any(*checks: Check) -> Callable[[T], T]:
@@ -1802,7 +1806,7 @@ def app_check(predicate: AppCheck) -> Callable[[T], T]:
     predicate: Callable[[:class:`disnake.ApplicationCommandInteraction`], :class:`bool`]
         The predicate to check if the command should be invoked.
     """
-    return check(predicate)  # pyright: ignore[reportArgumentType] # type: ignore  # impl is the same, typings are different
+    return check(predicate)  # pyright: ignore[reportArgumentType]  # impl is the same, typings are different
 
 
 def app_check_any(*checks: AppCheck) -> Callable[[T], T]:
@@ -1826,7 +1830,7 @@ def app_check_any(*checks: AppCheck) -> Callable[[T], T]:
         decorator.
     """
     try:
-        return check_any(*checks)  # pyright: ignore[reportArgumentType] # type: ignore  # impl is the same, typings are different
+        return check_any(*checks)  # pyright: ignore[reportArgumentType]  # impl is the same, typings are different
     except TypeError as e:
         msg = str(e).replace("commands.check", "commands.app_check")  # fix err message
         raise TypeError(msg) from None
@@ -1864,10 +1868,12 @@ def has_role(item: Union[int, str]) -> Callable[[T], T]:
             raise NoPrivateMessage
 
         # ctx.guild is None doesn't narrow ctx.author to Member
+        assert isinstance(ctx.author, disnake.Member)
+
         if isinstance(item, int):
-            role = disnake.utils.get(ctx.author.roles, id=item)  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
+            role = disnake.utils.get(ctx.author.roles, id=item)
         else:
-            role = disnake.utils.get(ctx.author.roles, name=item)  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
+            role = disnake.utils.get(ctx.author.roles, name=item)
         if role is None:
             raise MissingRole(item)
         return True
@@ -1912,14 +1918,16 @@ def has_any_role(*items: Union[int, str]) -> Callable[[T], T]:
             raise NoPrivateMessage
 
         # ctx.guild is None doesn't narrow ctx.author to Member
-        getter = functools.partial(disnake.utils.get, ctx.author.roles)  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
+        assert isinstance(ctx.author, disnake.Member)
+
+        getter = functools.partial(disnake.utils.get, ctx.author.roles)
         if any(
             getter(id=item) is not None if isinstance(item, int) else getter(name=item) is not None
             for item in items
         ):
             return True
         # NOTE: variance problems
-        raise MissingAnyRole(list(items))  # pyright: ignore[reportArgumentType] # type: ignore
+        raise MissingAnyRole(list(items))  # pyright: ignore[reportArgumentType]
 
     return check(predicate)
 
@@ -2097,7 +2105,8 @@ def has_permissions(**perms: bool) -> Callable[[T], T]:
             permissions = ctx.permissions
         else:
             ch = ctx.channel
-            permissions = ch.permissions_for(ctx.author, ignore_timeout=False)  # pyright: ignore[reportArgumentType] # type: ignore
+            assert isinstance(ctx.author, disnake.Member)
+            permissions = ch.permissions_for(ctx.author, ignore_timeout=False)
 
         missing = [perm for perm, value in perms.items() if getattr(permissions, perm) != value]
 
@@ -2200,7 +2209,8 @@ def bot_has_permissions(**perms: bool) -> Callable[[T], T]:
             permissions = ctx.app_permissions
         else:
             ch = ctx.channel
-            permissions = ch.permissions_for(ctx.me, ignore_timeout=False)  # pyright: ignore[reportArgumentType] # type: ignore
+            assert isinstance(ctx.me, disnake.Member)
+            permissions = ch.permissions_for(ctx.me, ignore_timeout=False)
 
         missing = [perm for perm, value in perms.items() if getattr(permissions, perm) != value]
 
@@ -2301,7 +2311,8 @@ def has_guild_permissions(**perms: bool) -> Callable[[T], T]:
         if not ctx.guild:
             raise NoPrivateMessage
 
-        permissions = ctx.author.guild_permissions  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
+        assert isinstance(ctx.author, disnake.Member)
+        permissions = ctx.author.guild_permissions
         missing = [perm for perm, value in perms.items() if getattr(permissions, perm) != value]
 
         if not missing:
@@ -2398,7 +2409,8 @@ def bot_has_guild_permissions(**perms: bool) -> Callable[[T], T]:
         if not ctx.guild:
             raise NoPrivateMessage
 
-        permissions = ctx.me.guild_permissions  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
+        assert isinstance(ctx.me, disnake.Member)
+        permissions = ctx.me.guild_permissions
         missing = [perm for perm, value in perms.items() if getattr(permissions, perm) != value]
 
         if not missing:
@@ -2496,7 +2508,7 @@ def is_nsfw() -> Callable[[T], T]:
             and ch.is_nsfw()
         ):
             return True
-        raise NSFWChannelRequired(ch)  # pyright: ignore[reportArgumentType] # type: ignore
+        raise NSFWChannelRequired(ch)  # pyright: ignore[reportArgumentType]
 
     return check(pred)
 
@@ -2536,10 +2548,10 @@ def cooldown(
         if hasattr(func, "__command_flag__"):
             func._buckets = CooldownMapping(Cooldown(rate, per), type)
         else:
-            func.__commands_cooldown__ = CooldownMapping(Cooldown(rate, per), type)  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
+            func.__commands_cooldown__ = CooldownMapping(Cooldown(rate, per), type)  # pyright: ignore[reportAttributeAccessIssue]
         return func
 
-    return decorator  # pyright: ignore[reportReturnType] # type: ignore
+    return decorator  # pyright: ignore[reportReturnType]
 
 
 def dynamic_cooldown(
@@ -2582,10 +2594,10 @@ def dynamic_cooldown(
         if hasattr(func, "__command_flag__"):
             func._buckets = DynamicCooldownMapping(cooldown, type)
         else:
-            func.__commands_cooldown__ = DynamicCooldownMapping(cooldown, type)  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
+            func.__commands_cooldown__ = DynamicCooldownMapping(cooldown, type)  # pyright: ignore[reportAttributeAccessIssue]
         return func
 
-    return decorator  # pyright: ignore[reportReturnType] # type: ignore
+    return decorator  # pyright: ignore[reportReturnType]
 
 
 def max_concurrency(
@@ -2621,10 +2633,10 @@ def max_concurrency(
         if hasattr(func, "__command_flag__"):
             func._max_concurrency = value
         else:
-            func.__commands_max_concurrency__ = value  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
+            func.__commands_max_concurrency__ = value  # pyright: ignore[reportAttributeAccessIssue]
         return func
 
-    return decorator  # pyright: ignore[reportReturnType] # type: ignore
+    return decorator  # pyright: ignore[reportReturnType]
 
 
 def before_invoke(coro) -> Callable[[T], T]:
@@ -2671,10 +2683,10 @@ def before_invoke(coro) -> Callable[[T], T]:
         if hasattr(func, "__command_flag__"):
             func.before_invoke(coro)
         else:
-            func.__before_invoke__ = coro  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
+            func.__before_invoke__ = coro  # pyright: ignore[reportAttributeAccessIssue]
         return func
 
-    return decorator  # pyright: ignore[reportReturnType] # type: ignore
+    return decorator  # pyright: ignore[reportReturnType]
 
 
 def after_invoke(coro) -> Callable[[T], T]:
@@ -2692,7 +2704,7 @@ def after_invoke(coro) -> Callable[[T], T]:
         if hasattr(func, "__command_flag__"):
             func.after_invoke(coro)
         else:
-            func.__after_invoke__ = coro  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
+            func.__after_invoke__ = coro  # pyright: ignore[reportAttributeAccessIssue]
         return func
 
-    return decorator  # pyright: ignore[reportReturnType] # type: ignore
+    return decorator  # pyright: ignore[reportReturnType]

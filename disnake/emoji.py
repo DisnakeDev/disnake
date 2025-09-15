@@ -150,11 +150,10 @@ class Emoji(_EmojiTag, AssetMixin):
         Emojis with :attr:`subscription roles <RoleTags.integration_id>` are considered premium emojis,
         and count towards a separate limit of 25 emojis.
         """
-        guild = self.guild
-        if guild is None:  # pyright: ignore[reportUnnecessaryComparison]
+        if self.guild is None:  # pyright: ignore[reportUnnecessaryComparison]
             return []
 
-        return [role for role in guild.roles if self._roles.has(role.id)]
+        return [role for role in self.guild.roles if self._roles.has(role.id)]
 
     @property
     def guild(self) -> Guild:
