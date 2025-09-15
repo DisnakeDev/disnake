@@ -108,8 +108,8 @@ class AllowedMentions:
 
         return cls(
             everyone=message.mention_everyone,
-            users=message.mentions.copy(),  # type: ignore # mentions is a list of Snowflakes
-            roles=message.role_mentions.copy(),  # type: ignore # mentions is a list of Snowflakes
+            users=message.mentions.copy(),  # pyright: ignore[reportArgumentType]  # mentions is a list of Snowflakes
+            roles=message.role_mentions.copy(),  # pyright: ignore[reportArgumentType]  # mentions is a list of Snowflakes
             replied_user=bool(
                 message.type is MessageType.reply
                 and message.reference
@@ -120,25 +120,24 @@ class AllowedMentions:
 
     def to_dict(self) -> AllowedMentionsPayload:
         parse: List[AllowedMentionTypePayload] = []
-        data: AllowedMentionsPayload = {}  # type: ignore
+        data: AllowedMentionsPayload = {"parse": parse}  # pyright: ignore[reportAssignmentType]
 
         if self.everyone:
             parse.append("everyone")
 
-        if self.users == True:  # noqa: E712
+        if self.users is True:
             parse.append("users")
-        elif self.users != False:  # noqa: E712
+        elif self.users is not False:
             data["users"] = [x.id for x in self.users]
 
-        if self.roles == True:  # noqa: E712
+        if self.roles is True:
             parse.append("roles")
-        elif self.roles != False:  # noqa: E712
+        elif self.roles is not False:
             data["roles"] = [x.id for x in self.roles]
 
         if self.replied_user:
             data["replied_user"] = True
 
-        data["parse"] = parse
         return data
 
     def merge(self, other: AllowedMentions) -> AllowedMentions:
