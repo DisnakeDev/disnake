@@ -332,6 +332,12 @@ class InteractionBotBase(CommonBotBase):
 
         .. versionadded:: 2.12
 
+        .. note::
+            Any change to the ``app_command``'s ``name`` and ``guild_ids`` attributes
+            after the command was added to the client are not supported and may
+            result in undefined behaviour.
+
+
         Parameters
         ----------
         app_command: :class:`InvokableApplicationCommand`
