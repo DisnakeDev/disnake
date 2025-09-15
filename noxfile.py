@@ -35,8 +35,8 @@ nox.options.reuse_venv = "yes"
 PYPROJECT = nox.project.load_toml()
 
 SUPPORTED_PYTHONS = nox.project.python_versions(PYPROJECT)
-# todo(onerandomusername): add 3.14 once CI supports 3.14.
-EXPERIMENTAL_PYTHON_VERSIONS = ["3.14"]
+# TODO(onerandomusername): add 3.14 once CI supports 3.14.
+EXPERIMENTAL_PYTHON_VERSIONS = []
 CI = "CI" in os.environ
 
 # used to reset cached coverage data once for the first test run only
@@ -89,7 +89,7 @@ EXECUTION_GROUPS: List[ExecutionGroup] = [
         experimental=True,
         sessions=("codemod", "pyright", "autotyping"),
     ),
-    # the other sessions, they don't need pyright
+    # the other sessions, they don't need pyright, but they need to run
     ExecutionGroup(
         python="3.8",
         paths=("disnake",),
@@ -107,13 +107,6 @@ EXECUTION_GROUPS: List[ExecutionGroup] = [
             sessions=("test",),
         )
         for python in [*SUPPORTED_PYTHONS, *EXPERIMENTAL_PYTHON_VERSIONS]
-    ),
-    ExecutionGroup(
-        python="3.11",
-        paths=("disnake", "tests"),
-        extras=("speed", "voice"),
-        groups=("test",),
-        sessions=("test",),
     ),
 ]
 
