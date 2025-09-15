@@ -509,7 +509,7 @@ def test_resolve_template(url, expected) -> None:
             # it's just meant to test several combinations
             "*hi* ~~a~ |aaa~*\\``\n`py x``` __uwu__ y",
             "hi a aaa\npy x uwu y",
-            r"\*hi\* \~\~a\~ \|aaa\~\*\\\`\`" "\n" r"\`py x\`\`\` \_\_uwu\_\_ y",
+            r"\*hi\* \~\~a\~ \|aaa\~\*\\\`\`" + "\n" + r"\`py x\`\`\` \_\_uwu\_\_ y",
         ),
         (
             "aaaaa\n> h\n>> abc \n>>> nay*ern_",
@@ -520,7 +520,7 @@ def test_resolve_template(url, expected) -> None:
             "*h*\n> [li|nk](~~url~~) xyz **https://google.com/stuff?uwu=owo",
             "h\n xyz https://google.com/stuff?uwu=owo",
             # NOTE: currently doesn't escape inside `[x](y)`, should that be changed?
-            r"\*h\*" "\n" r"\> \[li|nk](~~url~~) xyz \*\*https://google.com/stuff?uwu=owo",
+            r"\*h\*" + "\n" + r"\> \[li|nk](~~url~~) xyz \*\*https://google.com/stuff?uwu=owo",
         ),
     ],
 )
