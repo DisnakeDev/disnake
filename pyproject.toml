@@ -148,7 +148,8 @@ ignore = [
     "BLE", # similar to S110, but also flags Exception
     ## flake8-boolean-trap
     "FBT", # at some point we should make booleans keyword only
-    "COM", # TODO: enable, in separate PR (has autofixes)
+    ## flake8-commas
+    "COM812", # mostly managed by the formatter
     ## flake8-errmsg
     "EM", # TODO: Enable; too noisy for this, but has autofixes
     ## flake8-fixme
