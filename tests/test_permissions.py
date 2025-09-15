@@ -47,7 +47,7 @@ class TestPermissions:
     def test_is_subset_only_permissions(self) -> None:
         perms = Permissions()
         with pytest.raises(TypeError, match="cannot compare Permissions with int"):
-            perms.is_subset(5)  # pyright: ignore[reportArgumentType] # type: ignore
+            perms.is_subset(5)  # pyright: ignore[reportArgumentType]
 
     @pytest.mark.parametrize(
         ("perms_int", "other_int", "expected"),
@@ -65,7 +65,7 @@ class TestPermissions:
     def test_is_superset_only_permissions(self) -> None:
         perms = Permissions()
         with pytest.raises(TypeError, match="cannot compare Permissions with int"):
-            perms.is_superset(5)  # pyright: ignore[reportArgumentType] # type: ignore
+            perms.is_superset(5)  # pyright: ignore[reportArgumentType]
 
     @pytest.mark.parametrize(
         ("perms_int", "other_int", "expected"),
@@ -152,7 +152,7 @@ class TestPermissions:
 
     def test_update_ignores(self) -> None:
         perms = Permissions()
-        perms.update(h=True)  # pyright: ignore[reportCallIssue] # type: ignore
+        perms.update(h=True)  # pyright: ignore[reportCallIssue]
 
     @pytest.mark.parametrize(
         ("initial", "allow", "deny", "expected"),
@@ -235,12 +235,12 @@ class TestPermissionOverwrite:
     def test_set_invalid_type(self) -> None:
         po = PermissionOverwrite()
         with pytest.raises(TypeError, match="Expected bool or NoneType, received str"):
-            po.connect = "h"  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
+            po.connect = "h"  # pyright: ignore[reportAttributeAccessIssue]
 
         with pytest.raises(
             AttributeError, match="'PermissionOverwrite' object has no attribute 'oh'"
         ):
-            po.oh = False  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
+            po.oh = False  # pyright: ignore[reportAttributeAccessIssue]
 
     @pytest.mark.parametrize(
         ("allow", "deny"),
@@ -317,7 +317,7 @@ class TestPermissionOverwrite:
         assert po.manage_emojis is None
 
         # invalid names are silently ignored
-        po.update(h=True)  # pyright: ignore[reportCallIssue] # type: ignore
+        po.update(h=True)  # pyright: ignore[reportCallIssue]
         assert not hasattr(po, "h")
 
     @pytest.mark.parametrize(
