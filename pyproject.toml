@@ -157,7 +157,7 @@ ignore = [
     ## flake8-no-pep420
     "INP001", # Ha.
     ## flake8-pie
-    "PIE790", # todo: removes pass or ... when there is a docstring
+    "PIE790", # TODO: removes pass or ... when there is a docstring
     ## flake8-print
     "T201", # TODO: disabled until the library configures logging
     ## flake8-pyi
