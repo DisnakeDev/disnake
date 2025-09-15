@@ -6,13 +6,13 @@ formats:
 build:
   os: ubuntu-24.04
   tools:
-    python: "3.8"
+    python: "3.11"
   jobs:
     create_environment:
       - asdf plugin add uv
       - asdf install uv latest
       - asdf global uv latest
-      - UV_PROJECT_ENVIRONMENT=$READTHEDOCS_VIRTUALENV_PATH uv sync --no-default-groups --extra docs
+      - UV_PROJECT_ENVIRONMENT=$READTHEDOCS_VIRTUALENV_PATH uv sync --no-default-groups --group docs
     install:
       - "true"
 

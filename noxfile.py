@@ -88,8 +88,9 @@ EXECUTION_GROUPS: List[ExecutionGroup] = [
     # docs and pyright
     ExecutionGroup(
         sessions=("docs", "pyright"),
+        python="3.11",
         pyright_paths=("docs",),
-        extras=("docs",),
+        groups=("docs",),
     ),
     # codemodding and pyright
     ExecutionGroup(
