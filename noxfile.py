@@ -14,6 +14,7 @@ import dataclasses
 import os
 import pathlib
 from typing import (
+    TYPE_CHECKING,
     Any,
     Dict,
     Iterable,
@@ -43,9 +44,14 @@ CI = "CI" in os.environ
 # used to reset cached coverage data once for the first test run only
 reset_coverage = True
 
+if TYPE_CHECKING:
+    ExecutionGroupType = object
+else:
+    ExecutionGroupType = Dict[str, Any]
+
 
 @dataclasses.dataclass
-class ExecutionGroup:
+class ExecutionGroup(ExecutionGroupType):
     paths: Tuple[str, ...] = ()
     python: Optional[str] = None
     project: Optional[bool] = None
@@ -55,8 +61,9 @@ class ExecutionGroup:
     experimental: bool = False
     sessions: Tuple[str, ...] = ()
 
-    def to_dict(self) -> Dict[str, Any]:
-        return dataclasses.asdict(self)
+    def __post_init__(self) -> None:
+        for key in self.__dataclass_fields__.keys():
+            self[key] = getattr(self, key)  # type: ignore
 
 
 EXECUTION_GROUPS: List[ExecutionGroup] = [
@@ -373,14 +380,13 @@ def codemod(session: nox.Session) -> None:
 
 @nox.session()
 @nox.parametrize(
-    ("python", "execution_group_dict"),
-    [(group.python, group.to_dict()) for group in get_groups_for_session("pyright")],
+    ("python", "execution_group"),
+    [(group.python, group) for group in get_groups_for_session("pyright")],
     ids=[
         (group.python or "") + "-" + group.paths[0] for group in get_groups_for_session("pyright")
     ],
 )
-def pyright(session: nox.Session, execution_group_dict: Dict[str, Any]) -> None:
-    execution_group = ExecutionGroup(**execution_group_dict)
+def pyright(session: nox.Session, execution_group: ExecutionGroup) -> None:
     groups = execution_group.groups
     if "typing" not in groups:
         execution_group.groups = (*groups, "typing")
@@ -411,8 +417,8 @@ def pyright(session: nox.Session, execution_group_dict: Dict[str, Any]) -> None:
 
 @nox.session()
 @nox.parametrize(
-    ("python", "execution_group_dict"),
-    [(group.python, group.to_dict()) for group in get_groups_for_session("test")],
+    ("python", "execution_group"),
+    [(group.python, group) for group in get_groups_for_session("test")],
     ids=[
         (group.python or "")
         + "-"
@@ -421,9 +427,8 @@ def pyright(session: nox.Session, execution_group_dict: Dict[str, Any]) -> None:
         for group in get_groups_for_session("test")
     ],
 )
-def test(session: nox.Session, execution_group_dict: Dict[str, Any]) -> None:
+def test(session: nox.Session, execution_group: ExecutionGroup) -> None:
     """Run tests."""
-    execution_group = ExecutionGroup(**execution_group_dict)
     install_deps(session, execution_group=execution_group)
 
     pytest_args = ["--cov", "--cov-context=test"]

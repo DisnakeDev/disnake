@@ -72,8 +72,8 @@ jobs:
           echo min-python=$(nox -s test --list --json | jq -rc '[.[].python][0]') | tee --append $GITHUB_OUTPUT
           echo docs=$(nox -s docs --list --json | jq -rc '.[].python') | tee --append $GITHUB_OUTPUT
           echo libcst=$(nox -s codemod --list --json | jq -rc '[.[].python][0]') | tee --append $GITHUB_OUTPUT
-          echo test-sessions=$(nox -s test --list --json | jq -c '[.[] | { python: .python, name: .session, extras: .call_spec.execution_group_dict.extras, experimental: (.call_spec.execution_group_dict.experimental == true) }]') | tee --append $GITHUB_OUTPUT
-          echo pyright-sessions=$(nox -s pyright --list --json | jq -c '[.[] | {python: .python, name: .session, paths: .call_spec.execution_group_dict.paths, experimental: (.call_spec.execution_group_dict.experimental == true) }]') | tee --append $GITHUB_OUTPUT
+          echo test-sessions=$(nox -s test --list --json | jq -c '[.[] | { python: .python, name: .session, extras: .call_spec.execution_group.extras, experimental: (.call_spec.execution_group.experimental == true) }]') | tee --append $GITHUB_OUTPUT
+          echo pyright-sessions=$(nox -s pyright --list --json | jq -c '[.[] | {python: .python, name: .session, paths: .call_spec.execution_group.paths, experimental: (.call_spec.execution_group.experimental == true) }]') | tee --append $GITHUB_OUTPUT
 
   lint:
     runs-on: ubuntu-latest
