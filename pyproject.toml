@@ -153,8 +153,6 @@ ignore = [
     "EM", # TODO: Enable; too noisy for this, but has autofixes
     ## flake8-fixme
     "FIX", # TODO: what the name says!
-    ## flake8-future-annotations
-    "FA", # TODO: stringify *every single annotation*
     ## flake8-no-pep420
     "INP001", # Ha.
     ## flake8-pie
