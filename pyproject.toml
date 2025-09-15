@@ -100,9 +100,8 @@ test = [
     "typing-extensions>=4.6",
 ]
 build = [
-    "wheel~=0.40.0",
-    "build~=0.10.0",
-    "twine~=5.1.1",
+    "build~=1.2",
+    "twine~=6.1",
 ]
 
 [tool.setuptools.packages.find]
