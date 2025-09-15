@@ -10,27 +10,27 @@
 
 from __future__ import annotations
 
+import dataclasses
 import os
 import pathlib
-from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Tuple, TypedDict
+from typing import (
+    Any,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Tuple,
+    Union,
+    overload,
+)
 
 import nox
 
-if TYPE_CHECKING:
-    from typing_extensions import NotRequired
-
-
 nox.needs_version = ">=2025.5.1"
+
 
 nox.options.error_on_external_run = True
 nox.options.reuse_venv = "yes"
-nox.options.sessions = [
-    "lint",
-    "check-manifest",
-    "slotscheck",
-    "pyright",
-    "test",
-]
 
 PYPROJECT = nox.project.load_toml()
 
@@ -43,52 +43,137 @@ CI = "CI" in os.environ
 reset_coverage = True
 
 
-class PyrightGroup(TypedDict):
-    python: str
-    paths: Tuple[str, ...]
-    extras: NotRequired[Tuple[str, ...]]
-    groups: NotRequired[Tuple[str, ...]]
-    dependencies: NotRequired[Tuple[str, ...]]
-    experimental: NotRequired[bool]
+@dataclasses.dataclass
+class ExecutionGroup:
+    paths: Tuple[str, ...] = ()
+    python: Optional[str] = None
+    project: Optional[bool] = None
+    extras: Tuple[str, ...] = ()
+    groups: Tuple[str, ...] = ()
+    dependencies: Tuple[str, ...] = ()
+    experimental: bool = False
+    sessions: Tuple[str, ...] = ()
+
+    def to_dict(self) -> Dict[str, Any]:
+        return dataclasses.asdict(self)
 
 
-pyright_groups: List[PyrightGroup] = [
+EXECUTION_GROUPS: List[ExecutionGroup] = [
+    ## pyright
     *(
-        PyrightGroup(
+        ExecutionGroup(
             python=python,
             paths=("disnake", "tests", "examples", "noxfile.py", "setup.py"),
             # orjson doesn't yet support python 3.14
             extras=("speed", "voice") if python not in EXPERIMENTAL_PYTHON_VERSIONS else ("voice",),
             groups=("test", "nox"),
             experimental=python in EXPERIMENTAL_PYTHON_VERSIONS,
-            dependencies=("setuptools", "pytz", "requests"),
+            dependencies=("setuptools", "pytz", "requests"),  # needed for type checking
+            sessions=("pyright",),
         )
         for python in [*SUPPORTED_PYTHONS, *EXPERIMENTAL_PYTHON_VERSIONS]
     ),
-    PyrightGroup(
-        python="3.11",
+    # docs and pyright
+    ExecutionGroup(
+        python="3.8",
         paths=("docs",),
         extras=("docs",),
         experimental=True,
+        sessions=("docs", "pyright"),
     ),
-    PyrightGroup(
-        python="3.11",
+    # codemodding and pyright
+    ExecutionGroup(
+        python="3.8",
         paths=("scripts",),
         groups=("codemod",),
         experimental=True,
+        sessions=("codemod", "pyright", "autotyping"),
+    ),
+    # the other sessions, they don't need pyright
+    ExecutionGroup(
+        python="3.8",
+        paths=("disnake",),
+        groups=("tools",),
+        project=True,
+        sessions=("lint", "slotscheck", "check-manifest"),
+    ),
+    ## testing
+    *(
+        ExecutionGroup(
+            python=python,
+            paths=("disnake", "tests"),
+            groups=("test",),
+            experimental=python in EXPERIMENTAL_PYTHON_VERSIONS,
+            sessions=("test",),
+        )
+        for python in [*SUPPORTED_PYTHONS, *EXPERIMENTAL_PYTHON_VERSIONS]
+    ),
+    ExecutionGroup(
+        python="3.11",
+        paths=("disnake", "tests"),
+        extras=("speed", "voice"),
+        groups=("test",),
+        sessions=("test",),
     ),
 ]
+
+
+def get_groups_for_session(name: str) -> List[ExecutionGroup]:
+    return [g for g in EXECUTION_GROUPS if name in g.sessions]
+
+
+def get_version_for_session(name: str, *, exactly_one: bool = True) -> Union[str, List[str]]:
+    possible_groups = get_groups_for_session(name)
+    if exactly_one and len(possible_groups) != 1:
+        raise TypeError(f"not the right number of groups for session {name}")
+    return [g.python for g in possible_groups if g.python]
+
+
+@overload
+def install_deps(session: nox.Session, *, execution_group: ExecutionGroup) -> None: ...
+
+
+@overload
+def install_deps(
+    session: nox.Session,
+    *,
+    extras: Iterable[str] = ...,
+    groups: Iterable[str] = ...,
+    dependencies: Iterable[str] = ...,
+    project: bool = ...,
+) -> None: ...
 
 
 def install_deps(
     session: nox.Session,
     *,
+    execution_group: Optional[ExecutionGroup] = None,
     extras: Iterable[str] = (),
     groups: Iterable[str] = (),
     dependencies: Iterable[str] = (),
-    project: bool = True,
+    project: Optional[bool] = None,
 ) -> None:
     """Helper to install dependencies from a group."""
+    if execution_group and any([extras, groups, dependencies, project is not None]):
+        raise TypeError(
+            "cannot provide execution_group and any of extras, groups, dependencies, or project"
+        )
+
+    if not execution_group and not any([extras, groups, dependencies, project is not None]):
+        results = get_groups_for_session(session.name)
+        if not results:
+            # try cutting the `-`
+            results = get_groups_for_session(session.name.split("-")[0])
+        if len(results) != 1:
+            raise TypeError(f"not a valid session name: {session.name}. results: {len(results)}")
+        execution_group = results[0]
+
+    if execution_group:
+        extras = execution_group.extras
+        groups = execution_group.groups
+        dependencies = execution_group.dependencies
+        project = execution_group.project if execution_group.project is not None else True
+
     if not project and extras:
         raise TypeError("Cannot install extras without also installing the project")
 
@@ -149,14 +234,14 @@ def install_deps(
             session.install(*dependencies, env=env)
 
 
-@nox.session(python="3.8")
+@nox.session(python=get_version_for_session("docs"), default=False)
 def docs(session: nox.Session) -> None:
     """Build and generate the documentation.
 
     If running locally, will build automatic reloading docs.
     If running in CI, will build a production version of the documentation.
     """
-    install_deps(session, extras=["docs"])
+    install_deps(session)
     with session.chdir("docs"):
         args = ["-b", "html", "-n", ".", "_build/html", *session.posargs]
         if session.interactive:
@@ -185,34 +270,32 @@ def docs(session: nox.Session) -> None:
 @nox.session
 def lint(session: nox.Session) -> None:
     """Check all paths for linting errors"""
-    install_deps(session, project=False, groups=["tools"])
-
-    session.run("pre-commit", "run", "--all-paths", *session.posargs)
+    install_deps(session)
+    session.run("pre-commit", "run", "--all-files", *session.posargs)
 
 
 @nox.session(name="check-manifest")
 def check_manifest(session: nox.Session) -> None:
     """Run check-manifest."""
-    install_deps(session, project=False, groups=["tools"])
+    install_deps(session)
     session.run("check-manifest", "-v")
 
 
-@nox.session
+@nox.session(python=get_version_for_session("slotscheck"))
 def slotscheck(session: nox.Session) -> None:
     """Run slotscheck."""
-    install_deps(session, project=True, groups=["tools"])
+    install_deps(session)
     session.run("python", "-m", "slotscheck", "--verbose", "-m", "disnake")
 
 
-@nox.session
+@nox.session(python=get_version_for_session("autotyping"))
 def autotyping(session: nox.Session) -> None:
     """Run autotyping.
 
     Because of the nature of changes that autotyping makes, and the goal design of examples,
     this runs on each folder in the repository with specific settings.
     """
-    install_deps(session, project=True, groups=["codemod"])
-
+    install_deps(session)
     base_command = ["python", "-m", "libcst.tool", "codemod", "autotyping.AutotypeCommand"]
     if not session.interactive:
         base_command += ["--hide-progress"]
@@ -267,10 +350,10 @@ def autotyping(session: nox.Session) -> None:
         )
 
 
-@nox.session(name="codemod", python="3.8")
+@nox.session(name="codemod", python=get_version_for_session("codemod"))
 def codemod(session: nox.Session) -> None:
     """Run libcst codemods."""
-    install_deps(session, project=True, groups=["codemod"])
+    install_deps(session)
 
     base_command = ["python", "-m", "libcst.tool"]
     base_command_codemod = [*base_command, "codemod"]
@@ -296,21 +379,18 @@ def codemod(session: nox.Session) -> None:
 
 @nox.session()
 @nox.parametrize(
-    ("python", "pyright_group"),
-    [(group["python"], group) for group in pyright_groups],
-    ids=[group["python"] + "-" + group["paths"][0] for group in pyright_groups],
+    ("python", "execution_group_dict"),
+    [(group.python, group.to_dict()) for group in get_groups_for_session("pyright")],
+    ids=[
+        (group.python or "") + "-" + group.paths[0] for group in get_groups_for_session("pyright")
+    ],
 )
-def pyright(session: nox.Session, pyright_group: PyrightGroup) -> None:
-    groups = set(pyright_group.get("groups", ()))
+def pyright(session: nox.Session, execution_group_dict: Dict[str, Any]) -> None:
+    execution_group = ExecutionGroup(**execution_group_dict)
+    groups = execution_group.groups
     if "typing" not in groups:
-        groups.add("typing")
-    install_deps(
-        session,
-        project=True,
-        extras=pyright_group.get("extras", ()),
-        groups=groups,
-        dependencies=pyright_group.get("dependencies", ()),
-    )
+        execution_group.groups = (*groups, "typing")
+    install_deps(session, execution_group=execution_group)
 
     env = {
         "PYRIGHT_PYTHON_IGNORE_WARNINGS": "1",
@@ -320,14 +400,14 @@ def pyright(session: nox.Session, pyright_group: PyrightGroup) -> None:
             "python",
             "-m",
             "pyright",
-            *pyright_group["paths"],
+            *execution_group.paths,
             *session.posargs,
             env=env,
         )
     except KeyboardInterrupt:
         session.error("Quit pyright")
     except Exception:
-        if not CI and pyright_group.get("experimental", False):
+        if not CI and execution_group.experimental:
             session.warn(
                 "Pyright failed but the session was marked as experimental, exiting with 0"
             )
@@ -335,19 +415,22 @@ def pyright(session: nox.Session, pyright_group: PyrightGroup) -> None:
             raise
 
 
-@nox.session(python=SUPPORTED_PYTHONS)
+@nox.session()
 @nox.parametrize(
-    "extras",
-    [
-        [],
-        # NOTE: disabled while there are no tests that would require these dependencies
-        # ["speed"],
-        # ["voice"],
+    ("python", "execution_group_dict"),
+    [(group.python, group.to_dict()) for group in get_groups_for_session("test")],
+    ids=[
+        (group.python or "")
+        + "-"
+        + group.paths[0]
+        + (f"({'-'.join(group.extras)})" if group.extras else "")
+        for group in get_groups_for_session("test")
     ],
 )
-def test(session: nox.Session, extras: List[str]) -> None:
+def test(session: nox.Session, execution_group_dict: Dict[str, Any]) -> None:
     """Run tests."""
-    install_deps(session, project=True, extras=extras, groups=["test"])
+    execution_group = ExecutionGroup(**execution_group_dict)
+    install_deps(session, execution_group=execution_group)
 
     pytest_args = ["--cov", "--cov-context=test"]
     global reset_coverage  # noqa: PLW0603

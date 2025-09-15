@@ -56,7 +56,7 @@ jobs:
       docs: ${{ steps.set-matrix.outputs.docs }}
       libcst: ${{ steps.set-matrix.outputs.libcst }}
       pyright-sessions: ${{ steps.set-matrix.outputs.pyright-sessions }}
-      tests: ${{ steps.set-matrix.outputs.tests }}
+      test-sessions: ${{ steps.set-matrix.outputs.test-sessions }}
     steps:
       - uses: actions/checkout@v4
       - name: Set up environment
@@ -72,8 +72,9 @@ jobs:
           echo min-python=$(nox -s test --list --json | jq -rc '[.[].python][0]') | tee --append $GITHUB_OUTPUT
           echo docs=$(nox -s docs --list --json | jq -rc '.[].python') | tee --append $GITHUB_OUTPUT
           echo libcst=$(nox -s codemod --list --json | jq -rc '[.[].python][0]') | tee --append $GITHUB_OUTPUT
-          echo tests=$(nox -s test --list --json | jq -c '[.[].python]') | tee --append $GITHUB_OUTPUT
-          echo pyright-sessions=$(nox -s pyright --list --json | jq -c '[.[] | {python: .python, name: .session, paths: .call_spec.pyright_group.paths, experimental: (.call_spec.pyright_group.experimental == true) }]') | tee --append $GITHUB_OUTPUT
+          echo test-sessions=$(nox -s test --list --json | jq -c '[.[] | { python: .python, name: .session, extras: .call_spec.execution_group_dict.extras, experimental: (.call_spec.execution_group_dict.experimental == true) }]') | tee --append $GITHUB_OUTPUT
+          echo pyright-sessions=$(nox -s pyright --list --json | jq -c '[.[] | {python: .python, name: .session, paths: .call_spec.execution_group_dict.paths, experimental: (.call_spec.execution_group_dict.experimental == true) }]') | tee --append $GITHUB_OUTPUT
+
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -253,10 +254,11 @@ jobs:
       matrix:
         os: ["windows-latest", "ubuntu-latest", "macos-latest"]
         # TODO: add 3.14 once we switch to uv
-        python-version: ${{ fromJson(needs.python-versions.outputs.tests) }}
-        experimental: [false]
-      fail-fast: true
-    continue-on-error: ${{ matrix.experimental }}
+        session: ${{ fromJson(needs.python-versions.outputs.test-sessions) }}
+      fail-fast: false
+    continue-on-error: ${{ matrix.session.experimental }}
+    env:
+      NOXSESSION: ${{ matrix.session.name }}
     steps:
       - uses: actions/checkout@v4
 
@@ -264,11 +266,11 @@ jobs:
         id: setup-env
         uses: ./.github/actions/setup-env
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: ${{ matrix.session.python }}
 
       - name: Install nox environment
         run: |
-          nox -s test --no-venv --install-only --force-python ${{ steps.setup-env.outputs.python-version }}
+          nox --no-venv --install-only
 
       - name: Run pytest
         id: run_tests
@@ -277,7 +279,7 @@ jobs:
           TZ: "America/New_York"
         run: |
           echo "$GITHUB_STEP_SUMMARY_HEADER" | sed "s/#name#/Test Summary/" >> $GITHUB_STEP_SUMMARY
-          pdm run nox --no-venv -s test -- --color=no --cov-report= | tee -a $GITHUB_STEP_SUMMARY
+          pdm run nox --no-venv -- --color=no --cov-report= | tee -a $GITHUB_STEP_SUMMARY
           echo "$GITHUB_STEP_SUMMARY_FOOTER" >> $GITHUB_STEP_SUMMARY
 
       - name: Print Coverage Output

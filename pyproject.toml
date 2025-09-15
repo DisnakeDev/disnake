@@ -88,7 +88,7 @@ codemod = [
 typing = [
     # this is not pyright itself, but the python wrapper
     "pyright==1.1.405",
-    # some type-check only dependencies are defined in noxfile.py.
+    # all type-check only dependencies are defined in noxfile.py.
 ]
 test = [
     "pytest~=8.3.2",
