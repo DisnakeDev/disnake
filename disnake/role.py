@@ -449,7 +449,7 @@ class Role(Hashable):
     def is_gradient(self) -> bool:
         """Whether the role is gradient.
 
-        .. versionadded:: 2.11.1
+        .. versionadded:: 2.12
 
         :return type: :class:`bool`
         """
