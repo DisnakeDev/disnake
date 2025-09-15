@@ -397,12 +397,10 @@ class Member(disnake.abc.Messageable, _UserTag):
         state: ConnectionState,
     ) -> Union[User, Self]:
         # A User object with a 'member' key
-        try:
-            member_data = data.pop("member")  # type: ignore
-        except KeyError:
-            return state.create_user(data)
-        else:
+        if "member" in data:
+            member_data: BaseMemberPayload = data["member"]
             return cls(data=member_data, user_data=data, guild=guild, state=state)
+        return state.create_user(data)
 
     @classmethod
     def _copy(cls, member: Member) -> Self:
@@ -435,15 +433,11 @@ class Member(disnake.abc.Messageable, _UserTag):
     def _update(self, data: GuildMemberUpdateEvent) -> None:
         # the nickname change is optional,
         # if it isn't in the payload then it didn't change
-        try:
+        if "nick" in data:
             self.nick = data["nick"]
-        except KeyError:
-            pass
 
-        try:
+        if "pending" in data:
             self.pending = data["pending"]
-        except KeyError:
-            pass
 
         self.premium_since = utils.parse_time(data.get("premium_since"))
         self._roles = utils.SnowflakeList(map(int, data["roles"]))

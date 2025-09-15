@@ -737,7 +737,7 @@ class _WebhookState(Generic[WebhookT]):
     def __init__(
         self,
         webhook: WebhookT,
-        parent: Optional[Union[ConnectionState, _WebhookState]],
+        parent: Optional[Union[ConnectionState, _WebhookState[Any]]],
         *,
         thread: Optional[Snowflake] = None,
     ) -> None:
@@ -985,7 +985,7 @@ class BaseWebhook(Hashable):
         state: Optional[ConnectionState] = None,
     ) -> None:
         self.auth_token: Optional[str] = token
-        self._state: Union[ConnectionState, _WebhookState] = state or _WebhookState(
+        self._state: Union[ConnectionState, _WebhookState[BaseWebhook]] = state or _WebhookState(
             self, parent=state
         )
         self._update(data)

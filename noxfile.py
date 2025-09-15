@@ -10,6 +10,7 @@
 
 from __future__ import annotations
 
+import os
 import pathlib
 from typing import Any, Dict, List, Sequence, Tuple
 
@@ -29,6 +30,7 @@ nox.options.sessions = [
 ]
 
 PYPROJECT = nox.project.load_toml()
+CI = "CI" in os.environ
 
 # used to reset cached coverage data once for the first test run only
 reset_coverage = True
@@ -39,13 +41,36 @@ def install_deps(
     *,
     extras: Sequence[str] = (),
     groups: Sequence[str] = (),
+    dependencies: Sequence[str] = (),
     project: bool = True,
 ) -> None:
     """Helper to install dependencies from a group."""
     if not project and extras:
         raise TypeError("Cannot install extras without also installing the project")
 
-    command: List[str] = [
+    command: List[str]
+
+    # If not using pdm, install with pip
+    if os.getenv("NO_PDM_INSTALL") is not None:
+        command = []
+        if project:
+            command.append("-e")
+            command.append(".")
+            if extras:
+                # project[extra1,extra2]
+                command[-1] += "[" + ",".join(extras) + "]"
+        if groups:
+            command.extend(nox.project.dependency_groups(PYPROJECT, *groups))
+        session.install(*command)
+
+        # install separately in case it conflicts with a just-installed dependency (for overriding a locked dep)
+        if dependencies:
+            session.install(*dependencies)
+
+        return
+
+    # install with pdm
+    command = [
         "pdm",
         "sync",
         "--fail-fast",
@@ -71,6 +96,13 @@ def install_deps(
         env=env,
         external=True,
     )
+
+    if dependencies:
+        if session.venv_backend == "none" and CI:
+            # we are not in a venv but we're on CI so we probably intended to do this
+            session.run_install("pip", "install", *dependencies, env=env)
+        else:
+            session.install(*dependencies, env=env)
 
 
 @nox.session(python="3.8")
@@ -224,14 +256,18 @@ def pyright(session: nox.Session) -> None:
     install_deps(
         session,
         project=True,
-        extras=["speed", "voice"],
+        extras=[
+            "speed",
+            "voice",
+            "docs",  # docs/
+        ],
         groups=[
             "test",  # tests/
             "nox",  # noxfile.py
-            "docs",  # docs/
             "codemod",  # scripts/
             "typing",  # pyright
         ],
+        dependencies=["setuptools"],
     )
     env = {
         "PYRIGHT_PYTHON_IGNORE_WARNINGS": "1",
@@ -290,6 +326,22 @@ def coverage(session: nox.Session) -> None:
         return
 
     session.run("coverage", *posargs)
+
+
+@nox.session(default=False, python=False)
+def dev(session: nox.Session) -> None:
+    """Set up a development environment using pdm.
+
+    This will:
+    - lock all dependencies with pdm
+    - create a .venv/ directory, overwriting the existing one,
+    - install all dependencies needed for development.
+    - install the pre-commit hook
+    """
+    session.run("pdm", "lock", "-dG:all", "-G:all", external=True)
+    session.run("pdm", "venv", "create", "--force", external=True)
+    session.run("pdm", "sync", "--clean-unselected", "-dG:all", "-G:all")
+    session.run("pdm", "run", "pre-commit", "install")
 
 
 if __name__ == "__main__":
