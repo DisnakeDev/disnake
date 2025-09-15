@@ -1399,6 +1399,7 @@ class DaveState:
             #       (see also https://daveprotocol.com/#sole-member-reset third paragraph)
             self.execute_transition(transition_id)
         else:
+            _log.debug("sending ready for transition ID %d", transition_id)
             await self.ws.send_dave_transition_ready(transition_id)
 
     def execute_transition(self, transition_id: int) -> None:
