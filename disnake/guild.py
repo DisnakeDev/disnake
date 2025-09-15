@@ -550,7 +550,7 @@ class Guild(Hashable):
         self, data: GuildVoiceState, channel_id: Optional[int]
     ) -> Tuple[Optional[Member], VoiceState, VoiceState]:
         user_id = int(data["user_id"])
-        channel: Optional[VocalGuildChannel] = self.get_channel(channel_id)  # type: ignore
+        channel: Optional[VocalGuildChannel] = self.get_channel(channel_id)  # pyright: ignore[reportAssignmentType, reportArgumentType] # type: ignore
         try:
             # check if we should remove the voice state from cache
             if channel is None:
@@ -717,7 +717,7 @@ class Guild(Hashable):
         self_id = self._state.self_id
         for mdata in guild.get("members", []):
             # NOTE: Are we sure it's fine to not have the user part here?
-            member = Member(data=mdata, guild=self, state=state)  # type: ignore
+            member = Member(data=mdata, guild=self, state=state)  # pyright: ignore[reportArgumentType] # type: ignore
             if cache_joined or member.id == self_id:
                 self._add_member(member)
 
@@ -726,7 +726,7 @@ class Guild(Hashable):
 
         self.owner_id: Optional[int] = utils._get_as_snowflake(guild, "owner_id")
         self.afk_channel: Optional[VocalGuildChannel] = self.get_channel(
-            utils._get_as_snowflake(guild, "afk_channel_id")  # type: ignore
+            utils._get_as_snowflake(guild, "afk_channel_id")  # pyright: ignore[reportAttributeAccessIssue, reportArgumentType]
         )
 
         for obj in guild.get("voice_states", []):
@@ -742,14 +742,14 @@ class Guild(Hashable):
             user_id = int(presence["user"]["id"])
             member = self.get_member(user_id)
             if member is not None:
-                member._presence_update(presence, empty_tuple)  # type: ignore
+                member._presence_update(presence, empty_tuple)  # pyright: ignore[reportArgumentType] # type: ignore
 
         if "channels" in data:
             channels = data["channels"]
             for c in channels:
                 factory, _ = _guild_channel_factory(c["type"])
                 if factory:
-                    self._add_channel(factory(guild=self, data=c, state=self._state))  # type: ignore
+                    self._add_channel(factory(guild=self, data=c, state=self._state))  # pyright: ignore[reportArgumentType] # type: ignore
 
         if "threads" in data:
             threads = data["threads"]
@@ -836,7 +836,7 @@ class Guild(Hashable):
         """
         self_id = self._state.user.id
         # The self member is *always* cached
-        return self.get_member(self_id)  # type: ignore
+        return self.get_member(self_id)  # pyright: ignore[reportReturnType] # type: ignore
 
     @property
     def voice_client(self) -> Optional[VoiceProtocol]:
@@ -892,7 +892,7 @@ class Guild(Hashable):
             return ((k.position, k.id) if k else (-1, -1), v)
 
         _get = self._channels.get
-        as_list: List[ByCategoryItem] = [(_get(k), v) for k, v in grouped.items()]  # type: ignore
+        as_list: List[ByCategoryItem] = [(_get(k), v) for k, v in grouped.items()]  # pyright: ignore[reportAssignmentType, reportArgumentType] # type: ignore
         as_list.sort(key=key)
         for _, channels in as_list:
             channels.sort(key=lambda c: (c._sorting_bucket, c.position, c.id))
@@ -964,7 +964,7 @@ class Guild(Hashable):
         If no channel is set, then this returns ``None``.
         """
         channel_id = self._system_channel_id
-        return channel_id and self._channels.get(channel_id)  # type: ignore
+        return channel_id and self._channels.get(channel_id)  # pyright: ignore[reportReturnType] # type: ignore
 
     @property
     def system_channel_flags(self) -> SystemChannelFlags:
@@ -981,7 +981,7 @@ class Guild(Hashable):
         .. versionadded:: 1.3
         """
         channel_id = self._rules_channel_id
-        return channel_id and self._channels.get(channel_id)  # type: ignore
+        return channel_id and self._channels.get(channel_id)  # pyright: ignore[reportReturnType] # type: ignore
 
     @property
     def public_updates_channel(self) -> Optional[TextChannel]:
@@ -994,7 +994,7 @@ class Guild(Hashable):
         .. versionadded:: 1.4
         """
         channel_id = self._public_updates_channel_id
-        return channel_id and self._channels.get(channel_id)  # type: ignore
+        return channel_id and self._channels.get(channel_id)  # pyright: ignore[reportReturnType] # type: ignore
 
     @property
     def safety_alerts_channel(self) -> Optional[TextChannel]:
@@ -1007,7 +1007,7 @@ class Guild(Hashable):
         .. versionadded:: 2.9
         """
         channel_id = self._safety_alerts_channel_id
-        return channel_id and self._channels.get(channel_id)  # type: ignore
+        return channel_id and self._channels.get(channel_id)  # pyright: ignore[reportReturnType] # type: ignore
 
     @property
     def emoji_limit(self) -> int:
@@ -1103,7 +1103,7 @@ class Guild(Hashable):
     def default_role(self) -> Role:
         """:class:`Role`: Gets the @everyone role that all members have by default."""
         # The @everyone role is *always* given
-        return self.get_role(self.id)  # type: ignore
+        return self.get_role(self.id)  # pyright: ignore[reportReturnType] # type: ignore
 
     @property
     def premium_subscriber_role(self) -> Optional[Role]:
@@ -1183,7 +1183,7 @@ class Guild(Hashable):
     @property
     def owner(self) -> Optional[Member]:
         """Optional[:class:`Member`]: Returns the member that owns the guild."""
-        return self.get_member(self.owner_id)  # type: ignore
+        return self.get_member(self.owner_id)  # pyright: ignore[reportArgumentType] # type: ignore
 
     @property
     def icon(self) -> Optional[Asset]:
@@ -2542,7 +2542,7 @@ class Guild(Hashable):
             channel = factory(
                 guild=self,
                 state=self._state,
-                data=d,  # type: ignore
+                data=d,  # type: ignore # pyright: ignore[reportArgumentType]
             )
             return channel
 
@@ -3099,11 +3099,11 @@ class Guild(Hashable):
         if ch_type in (ChannelType.group, ChannelType.private):
             raise InvalidData("Channel ID resolved to a private channel")
 
-        guild_id = int(data["guild_id"])  # type: ignore
+        guild_id = int(data["guild_id"])  # pyright: ignore[reportGeneralTypeIssues] # type: ignore
         if self.id != guild_id:
             raise InvalidData("Guild ID resolved to a different guild")
 
-        channel: GuildChannel = factory(guild=self, state=self._state, data=data)  # type: ignore
+        channel: GuildChannel = factory(guild=self, state=self._state, data=data)  # pyright: ignore[reportAssignmentType, reportArgumentType] # type: ignore
         return channel
 
     def bans(
@@ -4922,7 +4922,7 @@ class Guild(Hashable):
             data = await self._state.http.get_voice_state(self.id, member_id)
 
         channel_id = utils._get_as_snowflake(data, "channel_id")
-        channel: Optional[VocalGuildChannel] = self.get_channel(channel_id)  # type: ignore
+        channel: Optional[VocalGuildChannel] = self.get_channel(channel_id)  # pyright: ignore[reportAssignmentType, reportArgumentType] # type: ignore
         return VoiceState(data=data, channel=channel)
 
     async def change_voice_state(
@@ -5641,9 +5641,9 @@ class GuildBuilder:
 
         actual_colour = colour or color or Colour.default()
         if isinstance(actual_colour, int):
-            data["color"] = actual_colour  # type: ignore
+            data["color"] = actual_colour  # pyright: ignore[reportGeneralTypeIssues] # type: ignore
         else:
-            data["color"] = actual_colour.value  # type: ignore
+            data["color"] = actual_colour.value  # pyright: ignore[reportGeneralTypeIssues] # type: ignore
 
         if hoist is not MISSING:
             data["hoist"] = hoist

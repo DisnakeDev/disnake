@@ -260,7 +260,7 @@ class ApplicationCommandInteractionData(Dict[str, Any]):
         self.resolved = InteractionDataResolved(data=data.get("resolved", {}), parent=parent)
         self.target_id: Optional[int] = utils._get_as_snowflake(data, "target_id")
         target = self.resolved.get_by_id(self.target_id)
-        self.target: Optional[Union[User, Member, Message]] = target  # type: ignore
+        self.target: Optional[Union[User, Member, Message]] = target  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
 
         self.options: List[ApplicationCommandInteractionDataOption] = [
             ApplicationCommandInteractionDataOption(data=d, resolved=self.resolved)
@@ -302,7 +302,7 @@ class ApplicationCommandInteractionData(Dict[str, Any]):
     def focused_option(self) -> ApplicationCommandInteractionDataOption:
         """The focused option"""
         # don't annotate as None for user experience
-        return self._get_focused_option()  # type: ignore
+        return self._get_focused_option()  # pyright: ignore[reportReturnType] # type: ignore
 
 
 class ApplicationCommandInteractionDataOption(Dict[str, Any]):

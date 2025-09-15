@@ -37,7 +37,7 @@ def test_convert_emoji_reaction__custom(emoji) -> None:
 
 def _create_emoji(animated: bool) -> disnake.Emoji:
     return disnake.Emoji(
-        guild=disnake.Object(1),  # type: ignore
+        guild=disnake.Object(1),  # type: ignore # pyright: ignore[reportArgumentType]
         state=MISSING,
         data={"name": "test", "id": 1234, "animated": animated},
     )

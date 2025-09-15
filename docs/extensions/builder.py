@@ -56,7 +56,7 @@ def patch_genindex(*args: Any) -> None:
     # copying the entire method body while only changing one parameter (group_entries),
     # we just patch the method we want to change instead.
     new_create_index = functools.partialmethod(IndexEntries.create_index, group_entries=False)
-    IndexEntries.create_index = new_create_index  # type: ignore
+    IndexEntries.create_index = new_create_index  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
 
 
 def patch_opengraph(*args: Any) -> None:
