@@ -13,6 +13,7 @@ from typing import (
     NamedTuple,
     NoReturn,
     Optional,
+    Tuple,
     Type,
     TypeVar,
 )
@@ -82,12 +83,11 @@ __all__ = (
     "NameplatePalette",
 )
 
-EnumMetaT = TypeVar("EnumMetaT", bound="Type[EnumMeta]")
-
 
 class _EnumValueBase(NamedTuple):
     if TYPE_CHECKING:
-        _cls_name: ClassVar[str]  # type: ignore
+        _cls_name: ClassVar[str]  # pyright: ignore[reportGeneralTypeIssues]
+        _actual_enum_cls_: ClassVar["EnumMeta"]  # pyright: ignore[reportGeneralTypeIssues]
 
     name: str
     value: Any
@@ -110,7 +110,7 @@ class _EnumValueComparable(_EnumValueBase):
 
 def _create_value_cls(name: str, comparable: bool) -> Type[_EnumValueBase]:
     parent = _EnumValueComparable if comparable else _EnumValueBase
-    return type(f"{parent.__name__}_{name}", (parent,), {"_cls_name": name})  # type: ignore
+    return type(f"{parent.__name__}_{name}", (parent,), {"_cls_name": name})  # pyright: ignore[reportReturnType]
 
 
 def _is_descriptor(obj) -> bool:
@@ -125,7 +125,14 @@ class EnumMeta(type):
         _enum_value_map_: ClassVar[Dict[Any, Any]]
         _enum_value_cls_: ClassVar[Type[_EnumValueBase]]
 
-    def __new__(cls: EnumMetaT, name: str, bases, attrs, *, comparable: bool = False) -> EnumMetaT:
+    def __new__(
+        cls: Type[EnumMetaT],
+        name: str,
+        bases: Tuple[Type, ...],
+        attrs: Dict[str, Any],
+        *,
+        comparable: bool = False,
+    ) -> EnumMetaT:
         value_mapping = {}
         member_mapping = {}
         member_names = []
@@ -159,8 +166,7 @@ class EnumMeta(type):
         attrs["_enum_member_map_"] = member_mapping
         attrs["_enum_member_names_"] = member_names
         attrs["_enum_value_cls_"] = value_cls
-        actual_cls = super().__new__(cls, name, bases, attrs)
-        value_cls._actual_enum_cls_ = actual_cls  # type: ignore
+        value_cls._actual_enum_cls_ = actual_cls = super().__new__(cls, name, bases, attrs)
         return actual_cls
 
     def __iter__(cls) -> Iterator[EnumMetaT]:
@@ -193,15 +199,15 @@ class EnumMeta(type):
         msg = "Enums are immutable."
         raise TypeError(msg)
 
-    def __delattr__(cls, attr) -> NoReturn:
-        msg = "Enums are immutable"
+    def __delattr__(cls, attr: str) -> NoReturn:
+        msg = "Enums are immutable."
         raise TypeError(msg)
 
-    def __instancecheck__(self, instance) -> bool:
+    def __instancecheck__(self, instance: object) -> bool:
         # isinstance(x, Y)
         # -> __instancecheck__(Y, x)
         try:
-            return instance._actual_enum_cls_ is self
+            return instance._actual_enum_cls_ is self  # pyright: ignore[reportAttributeAccessIssue]
         except AttributeError:
             return False
 
@@ -623,7 +629,7 @@ class StatusDisplayType(Enum):
     .. versionadded:: 2.11
     """
 
-    name = 0  # type: ignore[reportAssignmentType]
+    name = 0  # pyright: ignore[reportAssignmentType]
     """The name of the activity is displayed, e.g: ``Listening to Spotify``."""
     state = 1
     """The state of the activity is displayed, e.g: ``Listening to Rick Astley``."""
@@ -2455,26 +2461,27 @@ class NameplatePalette(Enum):
 
 
 T = TypeVar("T")
+E = TypeVar("E", bound="Enum")
 
 
-def create_unknown_value(cls: Type[T], val: Any) -> T:
-    value_cls = cls._enum_value_cls_  # type: ignore
+def create_unknown_value(cls: Type[E], val: Any) -> E:
+    value_cls = cls._enum_value_cls_  # pyright: ignore[reportAttributeAccessIssue]
     name = f"unknown_{val}"
     return value_cls(name=name, value=val)
 
 
-def try_enum(cls: Type[T], val: Any) -> T:
+def try_enum(cls: Type[E], val: Any) -> E:
     """A function that tries to turn the value into enum ``cls``.
 
     If it fails it returns a proxy invalid value instead.
     """
     try:
-        return cls._enum_value_map_[val]  # type: ignore
+        return cls._enum_value_map_[val]  # pyright: ignore[reportAttributeAccessIssue]
     except (KeyError, TypeError, AttributeError):
         return create_unknown_value(cls, val)
 
 
-def enum_if_int(cls: Type[T], val: Any) -> T:
+def enum_if_int(cls: Type[E], val: Any) -> E:
     """A function that tries to turn the value into enum ``cls``.
 
     If it fails it returns a proxy invalid value instead.

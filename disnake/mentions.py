@@ -130,7 +130,7 @@ class AllowedMentions:
     def to_dict(self) -> AllowedMentionsPayload:
         # n.b. this runs nearly every time a message is sent
         parse: List[AllowedMentionTypePayload] = []
-        data: AllowedMentionsPayload = {}  # type: ignore
+        data: AllowedMentionsPayload = {}  # pyright: ignore[reportAssignmentType] # type: ignore
 
         if self.everyone:
             parse.append("everyone")

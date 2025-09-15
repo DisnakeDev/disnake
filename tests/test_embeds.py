@@ -246,7 +246,7 @@ def test_image_remove(file: File) -> None:
 def test_file_params(file: File) -> None:
     embed = Embed()
     with pytest.raises(TypeError):
-        embed.set_image("https://disnake.dev/assets/disnake-logo.png", file=file)  # type: ignore
+        embed.set_image("https://disnake.dev/assets/disnake-logo.png", file=file)  # pyright: ignore[reportCallIssue] # type: ignore
 
     assert embed._files == {}
     assert embed.to_dict() == _BASE
@@ -471,12 +471,12 @@ def test_copy_fields(embed: Embed) -> None:
 # backwards compatibility
 def test_emptyembed() -> None:
     with pytest.warns(DeprecationWarning):
-        assert embeds.EmptyEmbed is None  # type: ignore
+        assert embeds.EmptyEmbed is None  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
     with pytest.warns(DeprecationWarning):
-        assert Embed.Empty is None  # type: ignore
+        assert Embed.Empty is None  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
     with pytest.warns(DeprecationWarning):
-        assert Embed().Empty is None  # type: ignore
+        assert Embed().Empty is None  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
 
     # make sure unknown module attrs continue to raise
     with pytest.raises(AttributeError):
-        _ = embeds.this_does_not_exist  # type: ignore
+        _ = embeds.this_does_not_exist  # pyright: ignore[reportAttributeAccessIssue] # type: ignore

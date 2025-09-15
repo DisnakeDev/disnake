@@ -352,7 +352,7 @@ async def tuple_convert_all(
 ) -> Tuple[Any, ...]:
     view = StringView(argument)
     results = []
-    param: inspect.Parameter = ctx.current_parameter  # type: ignore
+    param: inspect.Parameter = ctx.current_parameter  # pyright: ignore[reportAssignmentType] # type: ignore
     while not view.eof:
         view.skip_ws()
         if view.eof:
@@ -379,7 +379,7 @@ async def tuple_convert_flag(
 ) -> Tuple[Any, ...]:
     view = StringView(argument)
     results = []
-    param: inspect.Parameter = ctx.current_parameter  # type: ignore
+    param: inspect.Parameter = ctx.current_parameter  # pyright: ignore[reportAssignmentType] # type: ignore
     for converter in converters:
         view.skip_ws()
         if view.eof:
@@ -405,7 +405,7 @@ async def tuple_convert_flag(
 
 
 async def convert_flag(ctx: Context, argument: str, flag: Flag, annotation: Any = None) -> Any:
-    param: inspect.Parameter = ctx.current_parameter  # type: ignore
+    param: inspect.Parameter = ctx.current_parameter  # pyright: ignore[reportAssignmentType] # type: ignore
     annotation = annotation or flag.annotation
     if origin := get_origin(annotation):
         args = get_args(annotation)

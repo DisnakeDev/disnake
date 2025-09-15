@@ -403,7 +403,7 @@ class Client:
         member_cache_flags: Optional[MemberCacheFlags] = None,
     ) -> None:
         # self.ws is set in the connect method
-        self.ws: DiscordWebSocket = None  # type: ignore
+        self.ws: DiscordWebSocket = None  # pyright: ignore[reportAttributeAccessIssue]
 
         if loop is None:
             self.loop: asyncio.AbstractEventLoop = utils.get_event_loop()
@@ -618,7 +618,7 @@ class Client:
 
         .. versionadded:: 2.0
         """
-        return self._connection.application_id  # type: ignore
+        return self._connection.application_id  # pyright: ignore[reportReturnType]
 
     @property
     def application_flags(self) -> ApplicationFlags:
@@ -1341,8 +1341,7 @@ class Client:
         if value is None:
             self._connection._activity = None
         elif isinstance(value, BaseActivity):
-            # ConnectionState._activity is typehinted as ActivityPayload, we're passing Dict[str, Any]
-            self._connection._activity = value.to_dict()  # type: ignore
+            self._connection._activity = value.to_dict()
         else:
             msg = "activity must derive from BaseActivity."
             raise TypeError(msg)
@@ -1937,7 +1936,7 @@ class Client:
                 continue
 
             # Member.activities is typehinted as Tuple[ActivityType, ...], we may be setting it as Tuple[BaseActivity, ...]
-            me.activities = activities  # type: ignore
+            me.activities = activities  # pyright: ignore[reportAttributeAccessIssue]
             me.status = status
 
     # Guild stuff
@@ -2233,7 +2232,7 @@ class Client:
         """
         data = await self.http.get_stage_instance(channel_id)
         guild = self.get_guild(int(data["guild_id"]))
-        return StageInstance(guild=guild, state=self._connection, data=data)  # type: ignore
+        return StageInstance(guild=guild, state=self._connection, data=data)  # pyright: ignore[reportArgumentType]
 
     # Invite management
 
@@ -2587,13 +2586,13 @@ class Client:
 
         if ch_type in (ChannelType.group, ChannelType.private):
             # the factory will be a DMChannel or GroupChannel here
-            channel = factory(me=self.user, data=data, state=self._connection)  # type: ignore
+            channel = factory(me=self.user, data=data, state=self._connection)  # pyright: ignore[reportArgumentType, reportCallIssue]
         else:
             # the factory can't be a DMChannel or GroupChannel here
-            guild_id = int(data["guild_id"])  # type: ignore
+            guild_id = int(data["guild_id"])  # pyright: ignore[reportGeneralTypeIssues]
             guild = self.get_guild(guild_id) or Object(id=guild_id)
             # GuildChannels expect a Guild, we may be passing an Object
-            channel = factory(guild=guild, state=self._connection, data=data)  # type: ignore
+            channel = factory(guild=guild, state=self._connection, data=data)  # pyright: ignore[reportArgumentType, reportCallIssue]
 
         return channel
 
@@ -2649,8 +2648,8 @@ class Client:
             The sticker you requested.
         """
         data = await self.http.get_sticker(sticker_id)
-        cls, _ = _sticker_factory(data["type"])  # type: ignore
-        return cls(state=self._connection, data=data)  # type: ignore
+        cls, _ = _sticker_factory(data["type"])  # pyright: ignore[reportGeneralTypeIssues]
+        return cls(state=self._connection, data=data)  # pyright: ignore[reportReturnType]
 
     async def fetch_sticker_pack(self, pack_id: int, /) -> StickerPack:
         """|coro|

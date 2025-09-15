@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     # as `assert_type` can't handle bound ParamSpecs
     reveal_type(
         42,  # type: ignore  # suppress "revealed type is ..." output
-        expected_text="str",  # type: ignore  # ensure the functionality we want still works as expected
+        expected_text="str",  # type: ignore  # ensure the functionality we want still works as expected # pyright: ignore[reportGeneralTypeIssues]
     )
 
 
@@ -67,11 +67,11 @@ class freeze_time(ContextManager):
                 with self:
                     return await func(*args, **kwargs)
 
-            return wrap_async  # type: ignore
+            return wrap_async  # pyright: ignore[reportReturnType] # type: ignore
 
         @functools.wraps(func)
         def wrap_sync(*args, **kwargs):
             with self:
                 return func(*args, **kwargs)
 
-        return wrap_sync  # type: ignore
+        return wrap_sync  # pyright: ignore[reportReturnType] # type: ignore

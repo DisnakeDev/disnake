@@ -382,7 +382,7 @@ class Poll:
     def _to_dict(self) -> PollCreatePayload:
         payload: PollCreatePayload = {
             "question": self.question._to_dict(),
-            "duration": (int(self.duration.total_seconds()) // 3600),  # type: ignore
+            "duration": int(self.duration.total_seconds()) // 3600 if self.duration is not None else 24,
             "allow_multiselect": self.allow_multiselect,
             "layout_type": self.layout_type.value,
             "answers": [answer._to_dict() for answer in self._answers.values()],

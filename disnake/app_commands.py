@@ -1270,7 +1270,7 @@ class ApplicationCommandPermissions:
         )
 
     def to_dict(self) -> ApplicationCommandPermissionsPayload:
-        return {"id": self.id, "type": int(self.type), "permission": self.permission}  # type: ignore
+        return {"id": self.id, "type": self.type.value, "permission": self.permission}
 
     def is_everyone(self) -> bool:
         """Whether this permission object is affecting the @everyone role.

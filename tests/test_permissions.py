@@ -25,11 +25,11 @@ class TestPermissions:
 
     def test_init_invalid_value(self) -> None:
         with pytest.raises(TypeError, match=r"Expected int parameter, received str instead."):
-            Permissions("h")  # type: ignore
+            Permissions("h")  # pyright: ignore[reportArgumentType, reportCallIssue] # type: ignore
 
     def test_init_invalid_perms(self) -> None:
         with pytest.raises(TypeError, match=r"'h' is not a valid permission name."):
-            Permissions(h=True)  # type: ignore
+            Permissions(h=True)  # pyright: ignore[reportCallIssue] # type: ignore
 
     @pytest.mark.parametrize(
         ("perms_int", "other_int", "expected"),
@@ -47,7 +47,7 @@ class TestPermissions:
     def test_is_subset_only_permissions(self) -> None:
         perms = Permissions()
         with pytest.raises(TypeError, match="cannot compare Permissions with int"):
-            perms.is_subset(5)  # type: ignore
+            perms.is_subset(5)  # pyright: ignore[reportArgumentType] # type: ignore
 
     @pytest.mark.parametrize(
         ("perms_int", "other_int", "expected"),
@@ -65,7 +65,7 @@ class TestPermissions:
     def test_is_superset_only_permissions(self) -> None:
         perms = Permissions()
         with pytest.raises(TypeError, match="cannot compare Permissions with int"):
-            perms.is_superset(5)  # type: ignore
+            perms.is_superset(5)  # pyright: ignore[reportArgumentType] # type: ignore
 
     @pytest.mark.parametrize(
         ("perms_int", "other_int", "expected"),
@@ -152,7 +152,7 @@ class TestPermissions:
 
     def test_update_ignores(self) -> None:
         perms = Permissions()
-        perms.update(h=True)  # type: ignore
+        perms.update(h=True)  # pyright: ignore[reportCallIssue] # type: ignore
 
     @pytest.mark.parametrize(
         ("initial", "allow", "deny", "expected"),
@@ -209,7 +209,7 @@ class TestPermissionOverwrite:
 
     def test_init_invalid_perms(self) -> None:
         with pytest.raises(ValueError, match=r"'h' is not a valid permission name."):
-            PermissionOverwrite(h=True)  # type: ignore
+            PermissionOverwrite(h=True)  # pyright: ignore[reportCallIssue] # type: ignore
 
     def test_equality(self) -> None:
         one = PermissionOverwrite()
@@ -235,12 +235,12 @@ class TestPermissionOverwrite:
     def test_set_invalid_type(self) -> None:
         po = PermissionOverwrite()
         with pytest.raises(TypeError, match="Expected bool or NoneType, received str"):
-            po.connect = "h"  # type: ignore
+            po.connect = "h"  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
 
         with pytest.raises(
             AttributeError, match="'PermissionOverwrite' object has no attribute 'oh'"
         ):
-            po.oh = False  # type: ignore
+            po.oh = False  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
 
     @pytest.mark.parametrize(
         ("allow", "deny"),
@@ -317,7 +317,7 @@ class TestPermissionOverwrite:
         assert po.manage_emojis is None
 
         # invalid names are silently ignored
-        po.update(h=True)  # type: ignore
+        po.update(h=True)  # pyright: ignore[reportCallIssue] # type: ignore
         assert not hasattr(po, "h")
 
     @pytest.mark.parametrize(

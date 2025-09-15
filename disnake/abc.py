@@ -606,7 +606,7 @@ class GuildChannel(ABC):
         """
         if isinstance(self.guild, Object):
             return None
-        return self.guild.get_channel(self.category_id)  # type: ignore
+        return self.guild.get_channel(self.category_id)  # pyright: ignore[reportArgumentType, reportReturnType]
 
     @property
     def permissions_synced(self) -> bool:
@@ -1091,7 +1091,7 @@ class GuildChannel(ABC):
         obj = cls(state=self._state, guild=self.guild, data=data)
 
         # temporarily add it to the cache
-        self.guild._channels[obj.id] = obj  # type: ignore
+        self.guild._channels[obj.id] = obj  # pyright: ignore[reportArgumentType]
         return obj
 
     async def clone(self, *, name: Optional[str] = None, reason: Optional[str] = None) -> Self:

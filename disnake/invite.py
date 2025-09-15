@@ -438,7 +438,7 @@ class Invite(Hashable):
 
         inviter_data = data.get("inviter")
         self.inviter: Optional[User] = (
-            None if inviter_data is None else self._state.create_user(inviter_data)  # type: ignore
+            None if inviter_data is None else self._state.create_user(inviter_data)  # type: ignore # pyright: ignore[reportArgumentType]
         )
 
         self.channel: Optional[InviteChannelType] = self._resolve_channel(
@@ -455,14 +455,14 @@ class Invite(Hashable):
             self.guild_welcome_screen: Optional[WelcomeScreen] = WelcomeScreen(
                 state=self._state,
                 data=guild_data["welcome_screen"],
-                guild=self.guild,  # type: ignore
+                guild=self.guild,  # type: ignore # pyright: ignore[reportArgumentType]
             )
         else:
             self.guild_welcome_screen: Optional[WelcomeScreen] = None
 
         target_user_data = data.get("target_user")
         self.target_user: Optional[User] = (
-            None if target_user_data is None else self._state.create_user(target_user_data)  # type: ignore
+            None if target_user_data is None else self._state.create_user(target_user_data)  # type: ignore # pyright: ignore[reportArgumentType]
         )
 
         self.target_type: InviteTarget = try_enum(InviteTarget, data.get("target_type", 0))
@@ -517,8 +517,8 @@ class Invite(Hashable):
             state=state,
             data=data,
             # objects may be partial due to missing cache
-            guild=guild,  # type: ignore
-            channel=channel,  # type: ignore
+            guild=guild,  # type: ignore # pyright: ignore[reportArgumentType]
+            channel=channel,  # type: ignore # pyright: ignore[reportArgumentType]
         )
 
     def _resolve_guild(

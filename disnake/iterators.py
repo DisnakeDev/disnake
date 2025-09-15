@@ -307,16 +307,16 @@ class HistoryIterator(_AsyncIterator["Message"]):
 
             self._retrieve_messages = self._retrieve_messages_around_strategy
             if self.before and self.after:
-                self._filter = lambda m: self.after.id < int(m["id"]) < self.before.id  # type: ignore
+                self._filter = lambda m: self.after.id < int(m["id"]) < self.before.id  # pyright: ignore[reportOptionalMemberAccess]
             elif self.before:
-                self._filter = lambda m: int(m["id"]) < self.before.id  # type: ignore
+                self._filter = lambda m: int(m["id"]) < self.before.id  # pyright: ignore[reportOptionalMemberAccess]
             elif self.after:
                 self._filter = lambda m: self.after.id < int(m["id"])
         else:
             if self.reverse:
                 self._retrieve_messages = self._retrieve_messages_after_strategy
                 if self.before:
-                    self._filter = lambda m: int(m["id"]) < self.before.id  # type: ignore
+                    self._filter = lambda m: int(m["id"]) < self.before.id  # pyright: ignore[reportOptionalMemberAccess]
             else:
                 self._retrieve_messages = self._retrieve_messages_before_strategy
                 if self.after and self.after != OLDEST_OBJECT:
@@ -530,7 +530,7 @@ class AuditLogIterator(_AsyncIterator["AuditLogEntry"]):
         if oldest_first:
             self._strategy = self._after_strategy
             if self.before:
-                self._filter = lambda m: int(m["id"]) < self.before.id  # type: ignore
+                self._filter = lambda m: int(m["id"]) < self.before.id  # pyright: ignore[reportOptionalMemberAccess] # type: ignore
         else:
             self._strategy = self._before_strategy
             if self.after and self.after != OLDEST_OBJECT:
@@ -710,7 +710,7 @@ class GuildIterator(_AsyncIterator["Guild"]):
             self.reverse = True
             self._retrieve_guilds = self._retrieve_guilds_before_strategy
             if self.after:
-                self._filter = lambda m: int(m["id"]) > self.after.id  # type: ignore
+                self._filter = lambda m: int(m["id"]) > self.after.id  # pyright: ignore[reportOptionalMemberAccess, reportUnknownLambdaType] # type: ignore
         else:
             self.reverse = False
             self._retrieve_guilds = self._retrieve_guilds_after_strategy
@@ -899,7 +899,7 @@ class ArchivedThreadIterator(_AsyncIterator["Thread"]):
 
     @staticmethod
     def get_thread_id(data: ThreadPayload) -> str:
-        return data["id"]  # type: ignore
+        return data["id"]  # pyright: ignore[reportReturnType] # type: ignore
 
     async def fill_queue(self) -> None:
         if not self.has_more:
@@ -1087,7 +1087,7 @@ class EntitlementIterator(_AsyncIterator["Entitlement"]):
         if oldest_first:
             self._strategy = self._after_strategy
             if self.before:
-                self._filter = lambda m: int(m["id"]) < self.before.id  # type: ignore
+                self._filter = lambda m: int(m["id"]) < self.before.id  # pyright: ignore[reportOptionalMemberAccess] # type: ignore
         else:
             self._strategy = self._before_strategy
             if self.after and self.after != OLDEST_OBJECT:

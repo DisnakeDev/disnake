@@ -326,8 +326,8 @@ class HelpCommand:
         # The keys can be safely copied as-is since they're 99.99% certain of being
         # string keys
         deepcopy = copy.deepcopy
-        self.__original_kwargs__ = {k: deepcopy(v) for k, v in kwargs.items()}  # type: ignore
-        self.__original_args__ = deepcopy(args)  # type: ignore
+        self.__original_kwargs__ = {k: deepcopy(v) for k, v in kwargs.items()}  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
+        self.__original_args__ = deepcopy(args)  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
         return self
 
     def __init__(self, **options: Any) -> None:
@@ -343,7 +343,7 @@ class HelpCommand:
         self._command_impl: _HelpCommandImpl = _HelpCommandImpl(self, **self.command_attrs)
 
     def copy(self) -> Self:
-        obj = self.__class__(*self.__original_args__, **self.__original_kwargs__)  # type: ignore
+        obj = self.__class__(*self.__original_args__, **self.__original_kwargs__)  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
         obj._command_impl = self._command_impl
         return obj
 
@@ -430,14 +430,14 @@ class HelpCommand:
         :class:`str`
             The signature for the command.
         """
-        parent: Optional[Group[Any, ..., Any]] = command.parent  # type: ignore
+        parent: Optional[Group[Any, ..., Any]] = command.parent  # pyright: ignore[reportAssignmentType] # type: ignore
         entries = []
         while parent is not None:
             if not parent.signature or parent.invoke_without_command:
                 entries.append(parent.name)
             else:
                 entries.append(f"{parent.name} {parent.signature}")
-            parent = parent.parent  # type: ignore
+            parent = parent.parent  # pyright: ignore[reportAssignmentType] # type: ignore
         parent_sig = " ".join(reversed(entries))
 
         if len(command.aliases) > 0:
@@ -879,7 +879,7 @@ class HelpCommand:
 
         for key in keys[1:]:
             try:
-                found = cmd.all_commands.get(key)  # type: ignore  # cmd may be a Group here
+                found = cmd.all_commands.get(key)  # pyright: ignore[reportAttributeAccessIssue] # type: ignore  # cmd may be a Group here
             except AttributeError:
                 string = await maybe_coro(self.subcommand_not_found, cmd, self.remove_mentions(key))
                 return await self.send_error_message(string)

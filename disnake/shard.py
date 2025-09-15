@@ -111,7 +111,7 @@ class Shard:
     @property
     def id(self) -> int:
         # DiscordWebSocket.shard_id is set in the from_client classmethod
-        return self.ws.shard_id  # type: ignore
+        return self.ws.shard_id  # pyright: ignore[reportReturnType] # type: ignore
 
     def launch(self) -> None:
         self._task = self.loop.create_task(self.worker())
@@ -399,7 +399,7 @@ class AutoShardedClient(Client):
     ) -> DiscordWebSocket:
         if shard_id is None:
             # guild_id won't be None if shard_id is None and shard_count won't be None here
-            shard_id = (guild_id >> 22) % self.shard_count  # type: ignore
+            shard_id = (guild_id >> 22) % self.shard_count  # pyright: ignore[reportOperatorIssue, reportOptionalOperand] # type: ignore
         return self.__shards[shard_id].ws
 
     def _get_state(self, **options: Any) -> AutoShardedConnectionState:
@@ -612,7 +612,7 @@ class AutoShardedClient(Client):
                 continue
 
             # Member.activities is typehinted as Tuple[ActivityType, ...], we may be setting it as Tuple[BaseActivity, ...]
-            me.activities = activities  # type: ignore
+            me.activities = activities  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
             me.status = status_enum
 
     def is_ws_ratelimited(self) -> bool:

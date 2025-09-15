@@ -20,7 +20,7 @@ class TestLoops:
 
         with pytest.raises(TypeError, match="must be a coroutine function"):
 
-            @loop()  # type: ignore
+            @loop()  # pyright: ignore[reportArgumentType] # type: ignore
             def task() -> None: ...
 
     def test_mixing_time(self) -> None:
@@ -70,5 +70,5 @@ class TestLoops:
 
         with pytest.raises(TypeError, match="subclass of Loop"):
 
-            @loop(cls=WhileTrueLoop)  # type: ignore
+            @loop(cls=WhileTrueLoop)  # pyright: ignore[reportUntypedFunctionDecorator, reportArgumentType] # type: ignore
             async def task() -> None: ...

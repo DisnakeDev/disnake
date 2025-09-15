@@ -68,7 +68,7 @@ def html_page_context(app: Sphinx, docname: str, templatename, context, doctree)
         return
 
     rendered_toc = get_rendered_toctree(
-        app.builder,  # type: ignore
+        app.builder,  # type: ignore # pyright: ignore[reportArgumentType]
         docname,
         index,
         # don't prune tree at a certain depth; always include all entries

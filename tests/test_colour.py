@@ -10,7 +10,7 @@ from disnake import Color, Colour
 
 def test_init() -> None:
     with pytest.raises(TypeError, match=r"Expected int parameter, received str instead."):
-        Colour("0")  # type: ignore
+        Colour("0")  # pyright: ignore[reportArgumentType] # type: ignore
 
 
 @pytest.mark.parametrize(

@@ -346,7 +346,7 @@ class UserConverter(IDConverter[disnake.User]):
 
             if isinstance(result, disnake.Member):
                 return result._user
-            return result  # type: ignore
+            return result  # pyright: ignore[reportReturnType] # type: ignore
 
         username, _, discriminator = argument.rpartition("#")
         # n.b. there's no builtin method that only matches arabic digits, `isdecimal` is the closest one.
@@ -411,11 +411,11 @@ class PartialMessageConverter(Converter[disnake.PartialMessage]):
     ) -> Optional[MessageableChannel]:
         bot: disnake.Client = ctx.bot
         if guild_id is None:
-            return bot.get_channel(channel_id) if channel_id else ctx.channel  # type: ignore
+            return bot.get_channel(channel_id) if channel_id else ctx.channel  # pyright: ignore[reportReturnType] # type: ignore
 
         guild = bot.get_guild(guild_id)
         if guild is not None:
-            return guild._resolve_channel(channel_id)  # type: ignore
+            return guild._resolve_channel(channel_id)  # pyright: ignore[reportReturnType] # type: ignore
         return None
 
     async def convert(self, ctx: AnyContext, argument: str) -> disnake.PartialMessage:
@@ -455,7 +455,7 @@ class MessageConverter(IDConverter[disnake.Message]):
         except disnake.NotFound:
             raise MessageNotFound(argument) from None
         except disnake.Forbidden:
-            raise ChannelNotReadable(channel) from None  # type: ignore
+            raise ChannelNotReadable(channel) from None  # pyright: ignore[reportArgumentType] # type: ignore
 
 
 class GuildChannelConverter(IDConverter[disnake.abc.GuildChannel]):
@@ -1270,7 +1270,7 @@ async def _actual_conversion(
     param: inspect.Parameter,
 ) -> T:
     if converter is bool:
-        return _convert_to_bool(argument)  # type: ignore
+        return _convert_to_bool(argument)  # pyright: ignore[reportReturnType] # type: ignore
 
     if isinstance(converter, type):
         module = converter.__module__
@@ -1291,7 +1291,7 @@ async def _actual_conversion(
         raise ConversionError(converter, exc) from exc
 
     try:
-        return converter(argument)  # type: ignore
+        return converter(argument)  # pyright: ignore[reportReturnType, reportCallIssue] # type: ignore
     except CommandError:
         raise
     except Exception as exc:
