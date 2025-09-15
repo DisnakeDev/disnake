@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: MIT
 
 [build-system]
-requires = ["setuptools>=61"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling", "versioningit>=3.3.0,<4.0", "packaging"]
+build-backend = "hatchling.build"
 
 [project]
 name = "disnake"
@@ -64,6 +64,7 @@ docs = [
     "towncrier==23.6.0",
     "sphinx-notfound-page==0.8.3",
     "sphinxext-opengraph==0.9.1",
+    "versioningit>=3.3.0",
 ]
 
 [dependency-groups]
@@ -73,7 +74,6 @@ nox = [
 tools = [
     "pre-commit~=3.0",
     "slotscheck~=0.16.4",
-    "check-manifest==0.49",
     "ruff==0.12.12",
 ]
 changelog = [
@@ -104,10 +104,6 @@ build = [
     "twine~=6.1",
 ]
 
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["disnake*"]
-
 [tool.nox]
 script-venv-backend = "uv|virtualenv"
 
@@ -123,6 +119,55 @@ lint = { cmd = "nox -Rs lint --", help = "Check all files for linting errors" }
 pyright = { cmd = "nox -Rs pyright --", help = "Run pyright" }
 setup_env = { cmd = "{pdm} run noxfile.py -s dev", help = "Set up the local environment and all dependencies" }
 test = { cmd = "nox -Rs test --", help = "Run pytest" }
+
+[tool.hatch.build]
+include = [
+    "disnake/",
+]
+artifacts = ["disnake/_version.py"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "scripts/versioning.py"
+]
+
+[tool.hatch.version]
+source = "versioningit"
+
+[tool.versioningit]
+default-version = "0.0.0"
+
+[tool.versioningit.vcs]
+method = "git-archive"
+describe-subst = "$Format:%(describe:tags,match=v*)$"
+
+[tool.versioningit.format]
+distance = "{base_version}+{distance}.{vcs}{rev}"
+dirty = "{base_version}+d{build_date:%Y%m%d}"
+distance-dirty = "{base_version}.a{distance}+{vcs}{rev}.d{build_date:%Y%m%d}"
+
+[tool.versioningit.template-fields]
+method = { module = "scripts.versioning", value = "template_fields"}
+
+[tool.versioningit.write]
+file = "disnake/_version.py"
+template = """
+# SPDX-License-Identifier: MIT
+
+from typing import Literal, NamedTuple
+
+__version__ = "{version}"
+
+
+class VersionInfo(NamedTuple):
+    major: int
+    minor: int
+    micro: int
+    releaselevel: Literal["alpha", "beta", "candidate", "final"]
+    serial: int
+
+version_info: VersionInfo = VersionInfo{version_tuple}
+"""
 
 [tool.ruff]
 line-length = 100
@@ -406,24 +451,4 @@ exclude_lines = [
     "^\\s*if TYPE_CHECKING",
     "^\\s*raise NotImplementedError$",
     "^\\s*\\.\\.\\.$",
-]
-
-
-[tool.check-manifest]
-ignore = [
-    # CI
-    ".pre-commit-config.yaml",
-    ".readthedocs.yml",
-    ".libcst.codemod.yaml",
-    "noxfile.py",
-    # docs
-    "CONTRIBUTING.md",
-    "RELEASE.md",
-    "assets/**",
-    "changelog/**",
-    "docs/**",
-    "examples/**",
-    # tests
-    "tests/**",
-    "scripts/**",
 ]

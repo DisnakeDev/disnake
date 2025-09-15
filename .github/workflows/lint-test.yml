@@ -99,6 +99,8 @@ jobs:
       - lint
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: '0'
 
       - name: Set up environment
         id: setup-env
@@ -176,6 +178,9 @@ jobs:
       - lint
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: '0'
+
 
       - name: Set up environment
         id: setup
@@ -187,10 +192,6 @@ jobs:
         if: (success() || failure()) && steps.setup.outcome == 'success'
         run: |
           nox -s slotscheck
-
-      - name: Run check-manifest
-        if: (success() || failure()) && steps.setup.outcome == 'success'
-        run: nox -s check-manifest
 
       # This only runs if the previous steps were successful, no point in running it otherwise
       - name: Try building package
