@@ -5,7 +5,7 @@ import importlib
 import inspect
 import re
 from collections import defaultdict
-from typing import TYPE_CHECKING, ClassVar, DefaultDict, Dict, List, NamedTuple, Optional, Tuple
+from typing import TYPE_CHECKING, ClassVar, NamedTuple, Optional
 
 from docutils import nodes
 from sphinx import addnodes
@@ -103,7 +103,7 @@ class PyAttributeTable(SphinxDirective):
     final_argument_whitespace = False
     option_spec: ClassVar[OptionSpec] = {}
 
-    def parse_name(self, content: str) -> Tuple[str, Optional[str]]:
+    def parse_name(self, content: str) -> tuple[str, Optional[str]]:
         match = _name_parser_regex.match(content)
         path, name = match.groups() if match else (None, None)
         if path:
@@ -117,7 +117,7 @@ class PyAttributeTable(SphinxDirective):
 
         return modulename, name
 
-    def run(self) -> List[nodes.Node]:
+    def run(self) -> list[nodes.Node]:
         """If you're curious on the HTML this is meant to generate:
 
         <div class="py-attribute-table">
@@ -154,10 +154,10 @@ class PyAttributeTable(SphinxDirective):
         return [node]
 
 
-def build_lookup_table(env: BuildEnvironment) -> Dict[str, List[str]]:
+def build_lookup_table(env: BuildEnvironment) -> dict[str, list[str]]:
     # Given an environment, load up a lookup table of
     # full-class-name: objects
-    result: DefaultDict[str, List[str]] = defaultdict(list)
+    result: defaultdict[str, list[str]] = defaultdict(list)
     domain = env.domains["py"]
 
     ignored = {
@@ -209,12 +209,12 @@ def process_attributetable(app: Sphinx, doctree: nodes.document, docname: str) -
 
 
 def get_class_results(
-    lookup: Dict[str, List[str]], modulename: str, name: str, fullname: str
-) -> Dict[str, List[TableElement]]:
+    lookup: dict[str, list[str]], modulename: str, name: str, fullname: str
+) -> dict[str, list[TableElement]]:
     module = importlib.import_module(modulename)
     cls = getattr(module, name)
 
-    groups: Dict[str, List[TableElement]] = {
+    groups: dict[str, list[TableElement]] = {
         _("Attributes"): [],
         _("Methods"): [],
     }
@@ -263,7 +263,7 @@ def get_class_results(
     return groups
 
 
-def class_results_to_node(key: str, elements: List[TableElement]) -> attributetablecolumn:
+def class_results_to_node(key: str, elements: list[TableElement]) -> attributetablecolumn:
     title = attributetabletitle(key, key)
     ul = nodes.bullet_list("")
     ul["classes"].append("py-attribute-table-list")

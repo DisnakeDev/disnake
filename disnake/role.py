@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Optional, Union
 
 from .asset import Asset
 from .colour import Colour
@@ -484,7 +484,7 @@ class Role(Hashable):
         return f"<@&{self.id}>"
 
     @property
-    def members(self) -> List[Member]:
+    def members(self) -> list[Member]:
         """List[:class:`Member`]: Returns all the members with this role."""
         all_members = self.guild.members
         if self.is_default():
@@ -515,7 +515,7 @@ class Role(Hashable):
         else:
             roles.append(self.id)
 
-        payload: List[RolePositionUpdate] = [
+        payload: list[RolePositionUpdate] = [
             {"id": z[0], "position": z[1]} for z in zip(roles, change_range)
         ]
         await http.move_role_position(self.guild.id, payload, reason=reason)
@@ -625,9 +625,9 @@ class Role(Hashable):
         if position is not MISSING:
             await self._move(position, reason=reason)
 
-        payload: Dict[str, Any] = {}
+        payload: dict[str, Any] = {}
 
-        colors: Dict[str, Any] = {
+        colors: dict[str, Any] = {
             "primary_color": self._primary_color,
             "secondary_color": self._secondary_color,
             "tertiary_color": self._tertiary_color,

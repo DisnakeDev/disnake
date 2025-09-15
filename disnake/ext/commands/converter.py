@@ -5,19 +5,15 @@ from __future__ import annotations
 import functools
 import inspect
 import re
+from collections.abc import Iterable
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    Dict,
     Generic,
-    Iterable,
-    List,
     Literal,
     Optional,
     Protocol,
-    Tuple,
-    Type,
     TypeVar,
     Union,
     runtime_checkable,
@@ -382,7 +378,7 @@ class PartialMessageConverter(Converter[disnake.PartialMessage]):
     """
 
     @staticmethod
-    def _get_id_matches(ctx: AnyContext, argument: str) -> Tuple[Optional[int], int, int]:
+    def _get_id_matches(ctx: AnyContext, argument: str) -> tuple[Optional[int], int, int]:
         id_regex = re.compile(r"(?:(?P<channel_id>[0-9]{17,19})-)?(?P<message_id>[0-9]{17,19})$")
         link_regex = re.compile(
             r"https?://(?:(ptb|canary|www)\.)?discord(?:app)?\.com/channels/"
@@ -476,7 +472,7 @@ class GuildChannelConverter(IDConverter[disnake.abc.GuildChannel]):
         return self._resolve_channel(ctx, argument, "channels", disnake.abc.GuildChannel)
 
     @staticmethod
-    def _resolve_channel(ctx: AnyContext, argument: str, attribute: str, type: Type[CT]) -> CT:
+    def _resolve_channel(ctx: AnyContext, argument: str, attribute: str, type: type[CT]) -> CT:
         bot: disnake.Client = ctx.bot
 
         match = IDConverter._get_id_match(argument) or re.match(r"<#([0-9]{17,19})>$", argument)
@@ -505,7 +501,7 @@ class GuildChannelConverter(IDConverter[disnake.abc.GuildChannel]):
         return result
 
     @staticmethod
-    def _resolve_thread(ctx: AnyContext, argument: str, attribute: str, type: Type[TT]) -> TT:
+    def _resolve_thread(ctx: AnyContext, argument: str, attribute: str, type: type[TT]) -> TT:
         match = IDConverter._get_id_match(argument) or re.match(r"<#([0-9]{17,19})>$", argument)
         result: Optional[disnake.Thread] = None
         guild = ctx.guild
@@ -1003,7 +999,7 @@ class PermissionsConverter(Converter[disnake.Permissions]):
         argument = argument.replace("server", "guild")
 
         # try multiple attributes, then a single one
-        perms: List[disnake.Permissions] = []
+        perms: list[disnake.Permissions] = []
         for name in argument.split():
             attr = getattr(disnake.Permissions, name, None)
             if attr is None:
@@ -1127,7 +1123,7 @@ class clean_content(Converter[str]):
 
             return f"<#{id}>"
 
-        transforms: Dict[str, Callable[[int], str]] = {
+        transforms: dict[str, Callable[[int], str]] = {
             "@": resolve_user,
             "@!": resolve_user,
             "#": resolve_channel,
@@ -1149,7 +1145,7 @@ class clean_content(Converter[str]):
         return disnake.utils.escape_mentions(result)
 
 
-class Greedy(List[T]):
+class Greedy(list[T]):
     """A special converter that greedily consumes arguments until it can't.
     As a consequence of this behaviour, most input errors are silently discarded,
     since it is used as an indicator of when to stop parsing.
@@ -1180,7 +1176,7 @@ class Greedy(List[T]):
         converter = getattr(self.converter, "__name__", repr(self.converter))
         return f"Greedy[{converter}]"
 
-    def __class_getitem__(cls, params: Union[Tuple[T], T]) -> Greedy[T]:
+    def __class_getitem__(cls, params: Union[tuple[T], T]) -> Greedy[T]:
         if not isinstance(params, tuple):
             params = (params,)
         if len(params) != 1:
@@ -1222,14 +1218,14 @@ def get_converter(param: inspect.Parameter) -> Any:
     return converter
 
 
-_GenericAlias = type(List[Any])
+_GenericAlias = type(list[Any])
 
 
-def is_generic_type(tp: Any, *, _GenericAlias: Type = _GenericAlias) -> bool:
+def is_generic_type(tp: Any, *, _GenericAlias: type = _GenericAlias) -> bool:
     return (isinstance(tp, type) and issubclass(tp, Generic)) or isinstance(tp, _GenericAlias)
 
 
-CONVERTER_MAPPING: Dict[Type[Any], Type[Converter]] = {
+CONVERTER_MAPPING: dict[type[Any], type[Converter]] = {
     disnake.Object: ObjectConverter,
     disnake.Member: MemberConverter,
     disnake.User: UserConverter,
@@ -1259,7 +1255,7 @@ CONVERTER_MAPPING: Dict[Type[Any], Type[Converter]] = {
 
 async def _actual_conversion(
     ctx: Context,
-    converter: Union[Type[T], Type[Converter[T]], Converter[T], Callable[[str], T]],
+    converter: Union[type[T], type[Converter[T]], Converter[T], Callable[[str], T]],
     argument: str,
     param: inspect.Parameter,
 ) -> T:
@@ -1335,7 +1331,7 @@ async def run_converters(
     origin = getattr(converter, "__origin__", None)
 
     if origin is Union:
-        errors: List[CommandError] = []
+        errors: list[CommandError] = []
         _NoneType = type(None)
         union_args = converter.__args__
         for conv in union_args:
@@ -1357,7 +1353,7 @@ async def run_converters(
         raise BadUnionArgument(param, union_args, errors)
 
     if origin is Literal:
-        errors: List[CommandError] = []
+        errors: list[CommandError] = []
         conversions = {}
         literal_args = converter.__args__
         for literal in literal_args:

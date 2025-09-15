@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, Tuple
+from typing import TYPE_CHECKING, ClassVar
 
 from ..components import Separator as SeparatorComponent
 from ..enums import ComponentType, SeparatorSpacing
@@ -34,7 +34,7 @@ class Separator(UIComponent):
         sequential identifiers to the components in the message.
     """
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (
         "divider",
         "spacing",
     )

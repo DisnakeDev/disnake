@@ -11,7 +11,8 @@ import os
 import sys
 import time
 import types
-from typing import TYPE_CHECKING, Any, Dict, Generic, List, Mapping, Optional, Set, TypeVar, Union
+from collections.abc import Mapping
+from typing import TYPE_CHECKING, Any, Generic, Optional, TypeVar, Union
 
 import disnake
 import disnake.utils
@@ -38,24 +39,24 @@ def _is_submodule(parent: str, child: str) -> bool:
 
 class CommonBotBase(Generic[CogT]):
     if TYPE_CHECKING:
-        extra_events: Dict[str, List[CoroFunc]]
+        extra_events: dict[str, list[CoroFunc]]
 
     def __init__(
         self,
         *args: Any,
         owner_id: Optional[int] = None,
-        owner_ids: Optional[Set[int]] = None,
+        owner_ids: Optional[set[int]] = None,
         reload: bool = False,
         **kwargs: Any,
     ) -> None:
-        self.__cogs: Dict[str, Cog] = {}
-        self.__extensions: Dict[str, types.ModuleType] = {}
+        self.__cogs: dict[str, Cog] = {}
+        self.__extensions: dict[str, types.ModuleType] = {}
         self._is_closed: bool = False
 
         self.owner_id: Optional[int] = owner_id
-        self.owner_ids: Set[int] = owner_ids or set()
+        self.owner_ids: set[int] = owner_ids or set()
         self.owner: Optional[disnake.User] = None
-        self.owners: Set[disnake.TeamMember] = set()
+        self.owners: set[disnake.TeamMember] = set()
 
         if self.owner_id and self.owner_ids:
             raise TypeError("Both owner_id and owner_ids are set.")
