@@ -1284,11 +1284,10 @@ class DaveState:
     async def reinit_state(self, version: int) -> None:
         if version > self.max_version:
             raise RuntimeError(
-                f"Gateway selected DAVE version {version}, maximum supported version is {self.max_version}"
+                f"DAVE version {version} requested, maximum supported version is {self.max_version}"
             )
 
-        # TODO: change this log and the error above, this method isn't only called from gw
-        _log.debug("gateway selected DAVE version %d", version)
+        _log.debug("re-initializing with DAVE version %d", version)
 
         if version > dave.kDisabledVersion:
             await self.prepare_epoch(self.NEW_MLS_GROUP_EPOCH, version)
@@ -1298,8 +1297,8 @@ class DaveState:
             self._encryptor.assign_ssrc_to_codec(self.ws._connection.ssrc, dave.Codec.opus)
             _log.debug("created new encryptor")
         else:
-            await self.prepare_transition(self.INIT_TRANSITION_ID, dave.kDisabledVersion)
             # `INIT_TRANSITION_ID` is executed immediately, no need to `.execute_transition()` here
+            await self.prepare_transition(self.INIT_TRANSITION_ID, dave.kDisabledVersion)
 
     def add_recognized_user(self, user_id: int) -> None:
         if user_id == self._self_id:
@@ -1315,7 +1314,6 @@ class DaveState:
         self._session.set_external_sender(list(data))
 
     async def handle_mls_proposals(self, data: bytes) -> None:
-        # TODO: "Clients must reject a proposal if it is not one of the allowed proposal types or is not sent by the expected external sender." (?)
         # TODO: improve type casting
         commit_welcome = self._session.process_proposals(
             list(data),
