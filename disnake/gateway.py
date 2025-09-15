@@ -1245,7 +1245,6 @@ class DaveState:
             self.MAX_SUPPORTED_VERSION, dave.get_max_supported_protocol_version()
         )
 
-        self.selected_version: int = dave.kDisabledVersion
         self._prepared_transitions: Dict[int, int] = {}
         self._recognized_users: Set[int] = set()
 
@@ -1290,7 +1289,6 @@ class DaveState:
 
         # TODO: change this log and the error above, this method isn't only called from gw
         _log.debug("gateway selected DAVE version %d", version)
-        self.selected_version = version
 
         if version > dave.kDisabledVersion:
             await self.prepare_epoch(self.NEW_MLS_GROUP_EPOCH, version)
