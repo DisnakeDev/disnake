@@ -137,18 +137,17 @@ ignore = [
     ## eradicate
     "ERA", # most of our commented-out code is excluded
     ## flake8-annotations
-    "ANN", # we are not ready for ruff to check annotations
+    "ANN0",
+    "ANN4",
     ## flake8-bandit
     "S311", # use of random is fine in most cases
     "S603", # calling subprocess with dynamic arguments is generally fine, the only way to avoid this is ignoring it
     "S607", # partial executable paths (i.e. "git" instead of "/usr/bin/git") are fine
     "S110", # ignore try-except-pass. Bare excepts are caught with E722
-    ## flake8-bugbear
-    "B904",
     ## flake8-blind-except
     "BLE", # similar to S110, but also flags Exception
     ## flake8-boolean-trap
-    "FBT", # TODO: enable
+    "FBT", # at some point we should make booleans keyword only
     "COM", # TODO: enable, in separate PR (has autofixes)
     ## flake8-errmsg
     "EM", # TODO: Enable; too noisy for this, but has autofixes
@@ -156,12 +155,10 @@ ignore = [
     "FIX", # TODO: what the name says!
     ## flake8-future-annotations
     "FA", # TODO: stringify *every single annotation*
-    ## flake8-implict-str-concat
-    "ISC002", # incompatible with the formatter.
     ## flake8-no-pep420
     "INP001", # Ha.
     ## flake8-pie
-    "PIE790", # removes pass or ... when there is a docstring
+    "PIE790", # todo: removes pass or ... when there is a docstring
     ## flake8-print
     "T201", # TODO: disabled until the library configures logging
     ## flake8-pyi
@@ -177,13 +174,13 @@ ignore = [
     ## flake8-todos
     "TD", # similar to flake8-fixme, though they may conflict
     ## flake8-typechecking
-    "TC", # todo: enable in typing PR
+    "TC", # TODO: enable in typing PR
     ## flake8-unused-arguments
     "ARG", # most unused arguments are intentional
     ## flake8-use-pathlib
-    "PTH", # todo: enable in separate PR
+    "PTH", # TODO: enable in separate PR
     ## mccabe
-    "C90", # todo: enable at some point
+    "C90",
     ## pep8-naming
     "N", # too specific for now
     ## Perflint
@@ -219,7 +216,6 @@ ignore = [
 "disnake/*.py" = [
     "F403", # Pyflakes: allow star imports
 ]
-"disnake/asset.py" = ["ASYNC230"] # FIXME: shouldn't have sync methods inside async
 "disnake/client.py" = ["T201"]
 ## examples
 "examples/*.py" = [
@@ -246,14 +242,10 @@ ignore = [
     "S101", # flake8-bandit: allow tests to use assertions
     "PT030", # to be enabled: allow pytest.warns without a match parameter
 ]
-"tests/test_utils.py" = [
-    # TODO: enable
-    "ISC001", # allow implicit string concatenation in tests
-]
 "noxfile.py" = ["EXE003"]
 
-
-
+[tool.ruff.lint.flake8-annotations]
+ignore-fully-untyped = true
 
 [tool.ruff.lint.flake8-bugbear]
 extend-immutable-calls = [
@@ -276,7 +268,6 @@ ignorelist = [
 
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
 "subprocess".msg = "Consider possible security implications associated with the subprocess module." # replaces S404
-
 
 [tool.ruff.lint.flake8-pytest-style]
 fixture-parentheses = false
