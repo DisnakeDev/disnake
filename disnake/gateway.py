@@ -1274,8 +1274,8 @@ class DaveState:
             ratchet = self._session.get_key_ratchet(str(user_id))
         else:
             ratchet = None
-        _log.debug("updating ratchet for user %d to %r", user_id, ratchet)
 
+        _log.debug("updating encryption ratchet to %r", ratchet)
         if self._encryptor is None:
             # should never happen
             _log.error("attempted to set new ratchet without encryptor")
@@ -1391,7 +1391,7 @@ class DaveState:
 
     async def prepare_transition(self, transition_id: int, version: int) -> None:
         # since we don't currently implement decryption, no need to reset ratchets for other members here
-        _log.debug("preparing transition to version %d, ID %d", version, transition_id)
+        _log.debug("preparing transition ID %d to version %d", transition_id, version)
 
         self._prepared_transitions[transition_id] = version
         if transition_id == self.INIT_TRANSITION_ID:
@@ -1410,7 +1410,7 @@ class DaveState:
                 transition_id,
             )
             return
-        _log.debug("executing transition to version %d, ID %d", version, transition_id)
+        _log.debug("executing transition ID %d to version %d", transition_id, version)
 
         # https://daveprotocol.com/#downgrade-to-transport-only-encryption
         if version == dave.kDisabledVersion:
