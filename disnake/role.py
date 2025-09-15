@@ -2,11 +2,10 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, Literal, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from .asset import Asset
 from .colour import Colour
-from .enums import RoleStyle
 from .flags import RoleFlags
 from .mixins import Hashable
 from .partial_emoji import PartialEmoji
@@ -367,6 +366,26 @@ class Role(Hashable):
             and (me.top_role > self or me.id == self.guild.owner_id)
         )
 
+    def has_gradient(self) -> bool:
+        """
+        Whether the role has any gradient (custom or holographic).
+
+        .. versionadded:: 2.12
+
+        :return type: :class:`bool`
+        """
+        return self.secondary_color is not None
+    
+    def is_holographic(self) -> bool:
+        """
+        Whether the role has a holographic gradient.
+
+        .. versionadded:: 2.12
+
+        :return type: :class:`bool`
+        """
+        return self.tertiary_color is not None
+
     @property
     def permissions(self) -> Permissions:
         """:class:`Permissions`: Returns the role's permissions."""
@@ -443,16 +462,6 @@ class Role(Hashable):
         .. versionadded:: 2.11
         """
         return self.tertiary_colour
-    
-    @property
-    def style(self) -> Literal[RoleStyle.none, RoleStyle.gradient, RoleStyle.holographic_gradient]:
-        """:class:`RoleStyle`: The role's style."""
-        if self.tertiary_color is not None:
-            return RoleStyle.holographic_gradient
-        elif self.secondary_color is not None and self.tertiary_color is None:
-            return RoleStyle.gradient
-        else:
-            return RoleStyle.none
 
     @property
     def icon(self) -> Optional[Asset]:

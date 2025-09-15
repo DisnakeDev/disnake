@@ -79,8 +79,7 @@ __all__ = (
     "VoiceChannelEffectAnimationType",
     "MessageReferenceType",
     "SeparatorSpacing",
-    "NameplatePalette",
-    "RoleStyle"
+    "NameplatePalette"
 )
 
 EnumMetaT = TypeVar("EnumMetaT", bound="Type[EnumMeta]")
@@ -2448,20 +2447,6 @@ class NameplatePalette(Enum):
     """Lemon color palette."""
     white = "white"
     """White color palette."""
-
-class RoleStyle(Enum):
-    """
-    Specifies the style of :class:`Role`.
-
-    .. versionadded:: 2.12
-    """
-
-    none = 0
-    """Role without any style."""
-    gradient = 1
-    """Role with custom gradient."""
-    holographic_gradient = 2
-    """Role with holographic gradient."""
 
 
 T = TypeVar("T")
