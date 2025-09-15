@@ -365,6 +365,24 @@ class Role(Hashable):
             and not self.managed
             and (me.top_role > self or me.id == self.guild.owner_id)
         )
+    
+    def has_gradient(self) -> bool:
+        """Whether the role has a gradient.
+
+        .. versionadded:: 2.12
+
+        :return type: :class:`bool`
+        """
+        return self.secondary_color is not None or self.is_holographic()
+
+    def is_holographic(self) -> bool:
+        """Whether the role has holographic gradient.
+
+        .. versionadded:: 2.12
+
+        :return type: :class:`bool`
+        """
+        return self.tertiary_color is not None
 
     @property
     def permissions(self) -> Permissions:
@@ -442,26 +460,6 @@ class Role(Hashable):
         .. versionadded:: 2.11
         """
         return self.tertiary_colour
-
-    @property
-    def has_gradient(self) -> bool:
-        """Whether the role has a gradient.
-
-        .. versionadded:: 2.12
-
-        :return type: :class:`bool`
-        """
-        return self.secondary_color is not None and not self.is_holographic
-
-    @property
-    def is_holographic(self) -> bool:
-        """Whether the role is holographic.
-
-        .. versionadded:: 2.12
-
-        :return type: :class:`bool`
-        """
-        return self.tertiary_color is not None
 
     @property
     def icon(self) -> Optional[Asset]:
