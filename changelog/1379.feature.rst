@@ -1,1 +1,1 @@
-Adds Role.is_gradient and Role.is_holographic properties to check whether a role is gradient or holographic.
+Add :attr:`Role.has_gradient` and :attr:`Role.is_holographic` properties to check whether a role has a gradient or is holographic.
