@@ -80,6 +80,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Cache pre-commit
+        uses: actions/cache@v4
+        with:
+          key: pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}
+          path: ~/.cache/pip
+
       - name: Run pre-commit
         id: pre-commit
         uses: pre-commit/action@v3.0.1
@@ -104,7 +110,7 @@ jobs:
           python-version: ${{ needs.python-versions.outputs.docs }}
 
       - name: Run sphinx-build
-        run: nox --force-python ${{ steps.setup-env.outputs.python-version }} -s docs -- --keep-going -W -w $GITHUB_STEP_SUMMARY
+        run: nox -s docs -- --keep-going -W -w $GITHUB_STEP_SUMMARY
 
   pyright:
     runs-on: ubuntu-latest
@@ -191,7 +197,8 @@ jobs:
 
       - name: Run slotscheck
         if: (success() || failure()) && steps.setup.outcome == 'success'
-        run: nox -s slotscheck
+        run: |
+          nox -s slotscheck
 
       - name: Run check-manifest
         if: (success() || failure()) && steps.setup.outcome == 'success'
@@ -229,7 +236,7 @@ jobs:
         run: |
           nox -s codemod -- run-all
 
-      - name: Check for changes made by libcst codemod
+      - name: Check for changes by libcst
         run: |
           if [ -n "$(git status --porcelain)" ]; then
             echo "::error::Please run 'nox -s codemod -- run-all' locally and commit the changes." >&2;
@@ -255,7 +262,7 @@ jobs:
         os: ["windows-latest", "ubuntu-latest", "macos-latest"]
         # TODO: add 3.14 once we switch to uv
         session: ${{ fromJson(needs.python-versions.outputs.test-sessions) }}
-      fail-fast: false
+      fail-fast: true
     continue-on-error: ${{ matrix.session.experimental }}
     env:
       NOXSESSION: ${{ matrix.session.name }}
@@ -270,7 +277,7 @@ jobs:
 
       - name: Install nox environment
         run: |
-          nox --no-venv --install-only
+          nox --install-only
 
       - name: Run pytest
         id: run_tests
@@ -279,14 +286,16 @@ jobs:
           TZ: "America/New_York"
         run: |
           echo "$GITHUB_STEP_SUMMARY_HEADER" | sed "s/#name#/Test Summary/" >> $GITHUB_STEP_SUMMARY
-          pdm run nox --no-venv -- --color=no --cov-report= | tee -a $GITHUB_STEP_SUMMARY
+          nox --no-install -- --color=no --cov-report= | tee -a $GITHUB_STEP_SUMMARY
           echo "$GITHUB_STEP_SUMMARY_FOOTER" >> $GITHUB_STEP_SUMMARY
 
       - name: Print Coverage Output
         if: always() && (steps.run_tests.outcome == 'success' || steps.run_tests.outcome == 'failure')
+        env:
+          NOXSESSION: coverage
         run: |
           echo "$GITHUB_STEP_SUMMARY_HEADER" | sed "s/#name#/Coverage Summary/" >> $GITHUB_STEP_SUMMARY
-          pdm run nox --no-venv -s coverage -- report | tee -a $GITHUB_STEP_SUMMARY
+          nox -- report | tee -a $GITHUB_STEP_SUMMARY
           echo "$GITHUB_STEP_SUMMARY_FOOTER" >> $GITHUB_STEP_SUMMARY
 
   # thanks to aiohttp for this part of the workflow

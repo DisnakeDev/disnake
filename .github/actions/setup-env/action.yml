@@ -33,10 +33,6 @@ runs:
       run: |
         echo "PDM_IGNORE_SAVED_PYTHON=1" >> $GITHUB_ENV
 
-    - name: Update pip, wheel, setuptools
-      shell: bash
-      run: python -m pip install -U pip wheel setuptools
-
     - name: Install nox
       shell: bash
       run: pip install nox

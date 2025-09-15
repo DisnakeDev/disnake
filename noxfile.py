@@ -33,6 +33,7 @@ nox.options.error_on_external_run = True
 nox.options.reuse_venv = "yes"
 
 PYPROJECT = nox.project.load_toml()
+CI = "CI" in os.environ
 
 SUPPORTED_PYTHONS = nox.project.python_versions(PYPROJECT)
 # TODO(onerandomusername): add 3.14 once CI supports 3.14.
