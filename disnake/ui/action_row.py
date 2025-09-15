@@ -209,7 +209,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
                 raise TypeError(
                     f"components should be of type WrappedComponent, got {type(component).__name__}."
                 )
-            self.append_item(component)  # type: ignore
+            self.append_item(component)  # pyright: ignore[reportArgumentType] # type: ignore
 
     def __len__(self) -> int:
         return len(self._children)
@@ -1086,10 +1086,10 @@ def _walk_internal(component: ComponentT, seen: Set[ComponentT]) -> Iterator[Com
     elif isinstance(component, (SectionComponent, Section)):
         yield from _walk_internal(component.accessory, seen)
         for item in component.children:
-            yield from _walk_internal(item, seen)  # type: ignore  # this is fine, pyright loses the conditional type when iterating
+            yield from _walk_internal(item, seen)  # pyright: ignore[reportArgumentType] # type: ignore  # this is fine, pyright loses the conditional type when iterating
     elif isinstance(component, (ContainerComponent, Container)):
         for item in component.children:
-            yield from _walk_internal(item, seen)  # type: ignore
+            yield from _walk_internal(item, seen)  # pyright: ignore[reportArgumentType] # type: ignore
     elif isinstance(component, (LabelComponent, Label)):
         yield from _walk_internal(component.component, seen)
 
@@ -1188,7 +1188,7 @@ def _message_component_to_item(
             ChannelSelectComponent,
         ),
     ):
-        return _to_ui_component(component)  # type: ignore
+        return _to_ui_component(component)  # pyright: ignore[reportReturnType] # type: ignore
 
     assert_never(component)
     return None

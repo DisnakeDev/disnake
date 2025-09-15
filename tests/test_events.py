@@ -36,7 +36,7 @@ def test_event(client_or_bot: disnake.Client) -> None:
     @client_or_bot.event
     async def on_message_edit(self, *args: Any) -> None: ...
 
-    assert client_or_bot.on_message_edit is on_message_edit  # type: ignore
+    assert client_or_bot.on_message_edit is on_message_edit  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
 
 
 # Client.wait_for

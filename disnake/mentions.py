@@ -108,8 +108,8 @@ class AllowedMentions:
 
         return cls(
             everyone=message.mention_everyone,
-            users=message.mentions.copy(),  # type: ignore # mentions is a list of Snowflakes
-            roles=message.role_mentions.copy(),  # type: ignore # mentions is a list of Snowflakes
+            users=message.mentions.copy(),  # type: ignore # mentions is a list of Snowflakes # pyright: ignore[reportArgumentType]
+            roles=message.role_mentions.copy(),  # type: ignore # mentions is a list of Snowflakes # pyright: ignore[reportArgumentType]
             replied_user=bool(
                 message.type is MessageType.reply
                 and message.reference
@@ -120,7 +120,7 @@ class AllowedMentions:
 
     def to_dict(self) -> AllowedMentionsPayload:
         parse: List[AllowedMentionTypePayload] = []
-        data: AllowedMentionsPayload = {}  # type: ignore
+        data: AllowedMentionsPayload = {}  # pyright: ignore[reportAssignmentType] # type: ignore
 
         if self.everyone:
             parse.append("everyone")

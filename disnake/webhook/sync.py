@@ -159,7 +159,7 @@ class WebhookAdapter:
                         )
                         response.encoding = "utf-8"
                         # Compatibility with aiohttp
-                        response.status = response.status_code  # type: ignore
+                        response.status = response.status_code  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
 
                         data = response.text or None
                         if data and response.headers["Content-Type"] == "application/json":
@@ -183,7 +183,7 @@ class WebhookAdapter:
                             if not response.headers.get("Via"):
                                 raise HTTPException(response, data)
 
-                            retry_after: float = data["retry_after"]  # type: ignore
+                            retry_after: float = data["retry_after"]  # pyright: ignore[reportAssignmentType, reportOptionalSubscript, reportArgumentType] # type: ignore
                             _log.warning(
                                 "Webhook ID %s is rate limited. Retrying in %.2f seconds",
                                 webhook_id,
@@ -683,7 +683,7 @@ class SyncWebhook(BaseWebhook):
             if not isinstance(session, requests.Session):
                 raise TypeError(f"expected requests.Session not {session.__class__!r}")
         else:
-            session = requests  # type: ignore
+            session = requests  # pyright: ignore[reportAssignmentType] # type: ignore
         return cls(data, session, token=bot_token)
 
     @classmethod
@@ -734,8 +734,8 @@ class SyncWebhook(BaseWebhook):
             if not isinstance(session, requests.Session):
                 raise TypeError(f"expected requests.Session not {session.__class__!r}")
         else:
-            session = requests  # type: ignore
-        return cls(data, session, token=bot_token)  # type: ignore
+            session = requests  # pyright: ignore[reportAssignmentType] # type: ignore
+        return cls(data, session, token=bot_token)  # pyright: ignore[reportArgumentType] # type: ignore
 
     def fetch(self, *, prefer_auth: bool = True) -> SyncWebhook:
         """Fetches the current webhook.
@@ -919,9 +919,9 @@ class SyncWebhook(BaseWebhook):
         state = _WebhookState(self, parent=self._state, thread=thread)
         channel = self.channel
         if not channel or self.channel_id != channel_id:
-            channel = PartialMessageable(state=self._state, id=channel_id)  # type: ignore
+            channel = PartialMessageable(state=self._state, id=channel_id)  # pyright: ignore[reportArgumentType] # type: ignore
         # state is artificial
-        return SyncWebhookMessage(data=data, state=state, channel=channel)  # type: ignore
+        return SyncWebhookMessage(data=data, state=state, channel=channel)  # pyright: ignore[reportArgumentType] # type: ignore
 
     @overload
     def send(

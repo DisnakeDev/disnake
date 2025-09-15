@@ -382,7 +382,7 @@ class SubCommand(InvokableApplicationCommand):
             raise CommandInvokeError(exc) from exc
         finally:
             if self._max_concurrency is not None:
-                await self._max_concurrency.release(inter)  # type: ignore
+                await self._max_concurrency.release(inter)  # pyright: ignore[reportArgumentType] # type: ignore
 
             await self.call_after_hooks(inter)
 
@@ -771,7 +771,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             raise CommandInvokeError(exc) from exc
         finally:
             if self._max_concurrency is not None:
-                await self._max_concurrency.release(inter)  # type: ignore
+                await self._max_concurrency.release(inter)  # pyright: ignore[reportArgumentType] # type: ignore
 
             await self.call_after_hooks(inter)
 
