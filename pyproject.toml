@@ -143,6 +143,8 @@ ignore = [
     "S603", # calling subprocess with dynamic arguments is generally fine, the only way to avoid this is ignoring it
     "S607", # partial executable paths (i.e. "git" instead of "/usr/bin/git") are fine
     "S110", # ignore try-except-pass. Bare excepts are caught with E722
+    ## flake8-bugbear
+    "B904",
     ## flake8-blind-except
     "BLE", # similar to S110, but also flags Exception
     ## flake8-boolean-trap
@@ -161,7 +163,7 @@ ignore = [
     ## flake8-pie
     "PIE790", # removes pass or ... when there is a docstring
     ## flake8-print
-    # "T20", # TODO: disabled until the library configures logging
+    "T201", # TODO: disabled until the library configures logging
     ## flake8-pyi
     "PYI", # TODO: enable, in separate PR (most have autofixes)
     ## flake8-return
@@ -204,9 +206,9 @@ ignore = [
     "PLW1641",
     "PLW2901",
     ## Ruff-specific rules
-    "RUF006", # TODO: enable
-    "RUF022", # TODO: enable (has autofixes)
-    "RUF023", # TODO: enable (has autofixes)
+    "RUF006", # not actually sure this is a bug at all...
+    "RUF022", # TODO: consider enabling
+    "RUF023", # TODO: consider enabling
     ## tryceratops
     "TRY003", # as of 0.12.11 still has some false positives
     "TRY301", # TODO: enable
