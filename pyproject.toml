@@ -166,7 +166,7 @@ ignore = [
     ## flake8-return
     "RET", # TODO: enable, most have autofixes.
     ## flake8-self
-    "SLF", # private member access, this is unliked to be enabled.
+    "SLF", # private member access, this is unlikely to be enabled.
     ## flake8-simplify
     "SIM", # TODO: enable, most have autofixes.
     ## flake8-tidy-imports
