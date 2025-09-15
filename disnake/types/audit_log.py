@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import datetime
-from typing import List, Literal, Optional, TypedDict, Union
+from typing import Literal, Optional, TypedDict, Union
 
 from typing_extensions import NotRequired
 
@@ -185,14 +185,14 @@ class _AuditLogChange_Int(TypedDict):
 
 class _AuditLogChange_ListSnowflake(TypedDict):
     key: Literal["exempt_roles", "exempt_channels"]
-    new_value: NotRequired[List[Snowflake]]
-    old_value: NotRequired[List[Snowflake]]
+    new_value: NotRequired[list[Snowflake]]
+    old_value: NotRequired[list[Snowflake]]
 
 
 class _AuditLogChange_ListRole(TypedDict):
     key: Literal["$add", "$remove"]
-    new_value: NotRequired[List[Role]]
-    old_value: NotRequired[List[Role]]
+    new_value: NotRequired[list[Role]]
+    old_value: NotRequired[list[Role]]
 
 
 class _AuditLogChange_MFALevel(TypedDict):
@@ -239,8 +239,8 @@ class _AuditLogChange_VideoQualityMode(TypedDict):
 
 class _AuditLogChange_Overwrites(TypedDict):
     key: Literal["permission_overwrites"]
-    new_value: NotRequired[List[PermissionOverwrite]]
-    old_value: NotRequired[List[PermissionOverwrite]]
+    new_value: NotRequired[list[PermissionOverwrite]]
+    old_value: NotRequired[list[PermissionOverwrite]]
 
 
 class _AuditLogChange_Datetime(TypedDict):
@@ -269,8 +269,8 @@ class _AuditLogChange_AutoModEventType(TypedDict):
 
 class _AuditLogChange_AutoModActions(TypedDict):
     key: Literal["actions"]
-    new_value: NotRequired[List[AutoModAction]]
-    old_value: NotRequired[List[AutoModAction]]
+    new_value: NotRequired[list[AutoModAction]]
+    old_value: NotRequired[list[AutoModAction]]
 
 
 class _AuditLogChange_AutoModTriggerMetadata(TypedDict):
@@ -323,7 +323,7 @@ class AuditEntryInfo(TypedDict):
 
 class AuditLogEntry(TypedDict):
     target_id: Optional[str]
-    changes: NotRequired[List[AuditLogChange]]
+    changes: NotRequired[list[AuditLogChange]]
     user_id: Optional[Snowflake]
     id: Snowflake
     action_type: AuditLogEvent
@@ -332,11 +332,11 @@ class AuditLogEntry(TypedDict):
 
 
 class AuditLog(TypedDict):
-    audit_log_entries: List[AuditLogEntry]
-    application_commands: List[ApplicationCommand]
-    auto_moderation_rules: List[AutoModRule]
-    guild_scheduled_events: List[GuildScheduledEvent]
-    integrations: List[PartialIntegration]
-    threads: List[Thread]
-    users: List[User]
-    webhooks: List[Webhook]
+    audit_log_entries: list[AuditLogEntry]
+    application_commands: list[ApplicationCommand]
+    auto_moderation_rules: list[AutoModRule]
+    guild_scheduled_events: list[GuildScheduledEvent]
+    integrations: list[PartialIntegration]
+    threads: list[Thread]
+    users: list[User]
+    webhooks: list[Webhook]

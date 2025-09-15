@@ -8,22 +8,16 @@ import signal
 import sys
 import traceback
 import types
+from collections.abc import Coroutine, Generator, Mapping, Sequence
 from datetime import datetime, timedelta
 from errno import ECONNRESET
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    Coroutine,
-    Dict,
-    Generator,
-    List,
     Literal,
-    Mapping,
     NamedTuple,
     Optional,
-    Sequence,
-    Tuple,
     TypedDict,
     TypeVar,
     Union,
@@ -170,7 +164,7 @@ class SessionStartLimit:
         The approximate time at which which the :attr:`.remaining` limit resets.
     """
 
-    __slots__: Tuple[str, ...] = (
+    __slots__: tuple[str, ...] = (
         "total",
         "remaining",
         "reset_after",
@@ -411,7 +405,7 @@ class Client:
             self.loop: asyncio.AbstractEventLoop = loop
 
         self.loop.set_debug(asyncio_debug)
-        self._listeners: Dict[str, List[Tuple[asyncio.Future, Callable[..., bool]]]] = {}
+        self._listeners: dict[str, list[tuple[asyncio.Future, Callable[..., bool]]]] = {}
         self.session_start_limit: Optional[SessionStartLimit] = None
 
         self.http: HTTPClient = HTTPClient(
@@ -422,12 +416,12 @@ class Client:
             loop=self.loop,
         )
 
-        self._handlers: Dict[str, Callable[..., Any]] = {
+        self._handlers: dict[str, Callable[..., Any]] = {
             "ready": self._handle_ready,
             "connect_internal": self._handle_first_connect,
         }
 
-        self._hooks: Dict[str, Callable[..., Any]] = {
+        self._hooks: dict[str, Callable[..., Any]] = {
             "before_identify": self._call_before_identify_hook
         }
 
@@ -476,7 +470,7 @@ class Client:
         if self.gateway_params.encoding != "json":
             raise ValueError("Gateway encodings other than `json` are currently not supported.")
 
-        self.extra_events: Dict[str, List[CoroFunc]] = {}
+        self.extra_events: dict[str, list[CoroFunc]] = {}
 
     # internals
 
@@ -554,17 +548,17 @@ class Client:
         return self._connection.user
 
     @property
-    def guilds(self) -> List[Guild]:
+    def guilds(self) -> list[Guild]:
         """List[:class:`.Guild`]: The guilds that the connected client is a member of."""
         return self._connection.guilds
 
     @property
-    def emojis(self) -> List[Emoji]:
+    def emojis(self) -> list[Emoji]:
         """List[:class:`.Emoji`]: The emojis that the connected client has."""
         return self._connection.emojis
 
     @property
-    def stickers(self) -> List[GuildSticker]:
+    def stickers(self) -> list[GuildSticker]:
         """List[:class:`.GuildSticker`]: The stickers that the connected client has.
 
         .. versionadded:: 2.0
@@ -572,7 +566,7 @@ class Client:
         return self._connection.stickers
 
     @property
-    def soundboard_sounds(self) -> List[GuildSoundboardSound]:
+    def soundboard_sounds(self) -> list[GuildSoundboardSound]:
         """List[:class:`.GuildSoundboardSound`]: The soundboard sounds that the connected client has.
 
         .. versionadded:: 2.10
@@ -588,7 +582,7 @@ class Client:
         return utils.SequenceProxy(self._connection._messages or [])
 
     @property
-    def private_channels(self) -> List[PrivateChannel]:
+    def private_channels(self) -> list[PrivateChannel]:
         """List[:class:`.abc.PrivateChannel`]: The private channels that the connected client is participating on.
 
         .. note::
@@ -599,7 +593,7 @@ class Client:
         return self._connection.private_channels
 
     @property
-    def voice_clients(self) -> List[VoiceProtocol]:
+    def voice_clients(self) -> list[VoiceProtocol]:
         """List[:class:`.VoiceProtocol`]: Represents a list of voice connections.
 
         These are usually :class:`.VoiceClient` instances.
@@ -627,12 +621,12 @@ class Client:
         return self._connection.application_flags
 
     @property
-    def global_application_commands(self) -> List[APIApplicationCommand]:
+    def global_application_commands(self) -> list[APIApplicationCommand]:
         """List[Union[:class:`.APIUserCommand`, :class:`.APIMessageCommand`, :class:`.APISlashCommand`]: The client's global application commands."""
         return list(self._connection._global_application_commands.values())
 
     @property
-    def global_slash_commands(self) -> List[APISlashCommand]:
+    def global_slash_commands(self) -> list[APISlashCommand]:
         """List[:class:`.APISlashCommand`]: The client's global slash commands."""
         return [
             cmd
@@ -641,7 +635,7 @@ class Client:
         ]
 
     @property
-    def global_user_commands(self) -> List[APIUserCommand]:
+    def global_user_commands(self) -> list[APIUserCommand]:
         """List[:class:`.APIUserCommand`]: The client's global user commands."""
         return [
             cmd
@@ -650,7 +644,7 @@ class Client:
         ]
 
     @property
-    def global_message_commands(self) -> List[APIMessageCommand]:
+    def global_message_commands(self) -> list[APIMessageCommand]:
         """List[:class:`.APIMessageCommand`]: The client's global message commands."""
         return [
             cmd
@@ -932,7 +926,7 @@ class Client:
 
         return decorator
 
-    def get_listeners(self) -> Mapping[str, List[CoroFunc]]:
+    def get_listeners(self) -> Mapping[str, list[CoroFunc]]:
         """Mapping[:class:`str`, List[Callable]]: A read-only mapping of event names to listeners.
 
         .. note::
@@ -1390,7 +1384,7 @@ class Client:
     # helpers/getters
 
     @property
-    def users(self) -> List[User]:
+    def users(self) -> list[User]:
         """List[:class:`~disnake.User`]: Returns a list of all the users the bot can see."""
         return list(self._connection._users.values())
 
@@ -1573,7 +1567,7 @@ class Client:
         for guild in self.guilds:
             yield from guild.members
 
-    def get_guild_application_commands(self, guild_id: int) -> List[APIApplicationCommand]:
+    def get_guild_application_commands(self, guild_id: int) -> list[APIApplicationCommand]:
         """Returns a list of all application commands in the guild with the given ID.
 
         Parameters
@@ -1589,7 +1583,7 @@ class Client:
         data = self._connection._guild_application_commands.get(guild_id, {})
         return list(data.values())
 
-    def get_guild_slash_commands(self, guild_id: int) -> List[APISlashCommand]:
+    def get_guild_slash_commands(self, guild_id: int) -> list[APISlashCommand]:
         """Returns a list of all slash commands in the guild with the given ID.
 
         Parameters
@@ -1605,7 +1599,7 @@ class Client:
         data = self._connection._guild_application_commands.get(guild_id, {})
         return [cmd for cmd in data.values() if isinstance(cmd, APISlashCommand)]
 
-    def get_guild_user_commands(self, guild_id: int) -> List[APIUserCommand]:
+    def get_guild_user_commands(self, guild_id: int) -> list[APIUserCommand]:
         """Returns a list of all user commands in the guild with the given ID.
 
         Parameters
@@ -1621,7 +1615,7 @@ class Client:
         data = self._connection._guild_application_commands.get(guild_id, {})
         return [cmd for cmd in data.values() if isinstance(cmd, APIUserCommand)]
 
-    def get_guild_message_commands(self, guild_id: int) -> List[APIMessageCommand]:
+    def get_guild_message_commands(self, guild_id: int) -> list[APIMessageCommand]:
         """Returns a list of all message commands in the guild with the given ID.
 
         Parameters
@@ -2324,7 +2318,7 @@ class Client:
 
     # Voice region stuff
 
-    async def fetch_voice_regions(self, guild_id: Optional[int] = None) -> List[VoiceRegion]:
+    async def fetch_voice_regions(self, guild_id: Optional[int] = None) -> list[VoiceRegion]:
         """Retrieves a list of :class:`.VoiceRegion`\\s.
 
         Retrieves voice regions for the user, or a guild if provided.
@@ -2380,7 +2374,7 @@ class Client:
         data = await self.http.get_widget(guild_id)
         return Widget(state=self._connection, data=data)
 
-    async def fetch_default_soundboard_sounds(self) -> List[SoundboardSound]:
+    async def fetch_default_soundboard_sounds(self) -> list[SoundboardSound]:
         """|coro|
 
         Retrieves the list of default :class:`.SoundboardSound`\\s provided by Discord.
@@ -2482,7 +2476,7 @@ class Client:
         data = await self.http.create_app_emoji(self.application_id, name, img)
         return Emoji(guild=None, state=self._connection, data=data)
 
-    async def fetch_application_emojis(self) -> List[Emoji]:
+    async def fetch_application_emojis(self) -> list[Emoji]:
         """|coro|
 
         Retrieves all the :class:`.Emoji` of the application.
@@ -2674,7 +2668,7 @@ class Client:
         data = await self.http.get_sticker_pack(pack_id)
         return StickerPack(state=self._connection, data=data)
 
-    async def fetch_sticker_packs(self) -> List[StickerPack]:
+    async def fetch_sticker_packs(self) -> list[StickerPack]:
         """|coro|
 
         Retrieves all available sticker packs.
@@ -2698,7 +2692,7 @@ class Client:
         return [StickerPack(state=self._connection, data=pack) for pack in data["sticker_packs"]]
 
     @deprecated("fetch_sticker_packs")
-    async def fetch_premium_sticker_packs(self) -> List[StickerPack]:
+    async def fetch_premium_sticker_packs(self) -> list[StickerPack]:
         """An alias of :meth:`fetch_sticker_packs`.
 
         .. deprecated:: 2.10
@@ -2782,7 +2776,7 @@ class Client:
         self,
         *,
         with_localizations: bool = True,
-    ) -> List[APIApplicationCommand]:
+    ) -> list[APIApplicationCommand]:
         """|coro|
 
         Retrieves a list of global application commands.
@@ -2919,8 +2913,8 @@ class Client:
         await self._connection.delete_global_command(command_id)
 
     async def bulk_overwrite_global_commands(
-        self, application_commands: List[ApplicationCommand]
-    ) -> List[APIApplicationCommand]:
+        self, application_commands: list[ApplicationCommand]
+    ) -> list[APIApplicationCommand]:
         """|coro|
 
         Overwrites several global application commands in one API request.
@@ -2948,7 +2942,7 @@ class Client:
         guild_id: int,
         *,
         with_localizations: bool = True,
-    ) -> List[APIApplicationCommand]:
+    ) -> list[APIApplicationCommand]:
         """|coro|
 
         Retrieves a list of guild application commands.
@@ -3101,8 +3095,8 @@ class Client:
         await self._connection.delete_guild_command(guild_id, command_id)
 
     async def bulk_overwrite_guild_commands(
-        self, guild_id: int, application_commands: List[ApplicationCommand]
-    ) -> List[APIApplicationCommand]:
+        self, guild_id: int, application_commands: list[ApplicationCommand]
+    ) -> list[APIApplicationCommand]:
         """|coro|
 
         Overwrites several guild application commands in one API request.
@@ -3129,7 +3123,7 @@ class Client:
 
     async def bulk_fetch_command_permissions(
         self, guild_id: int
-    ) -> List[GuildApplicationCommandPermissions]:
+    ) -> list[GuildApplicationCommandPermissions]:
         """|coro|
 
         Retrieves a list of :class:`.GuildApplicationCommandPermissions` configured for the guild with the given ID.
@@ -3169,7 +3163,7 @@ class Client:
         """
         return await self._connection.fetch_command_permissions(guild_id, command_id)
 
-    async def fetch_role_connection_metadata(self) -> List[ApplicationRoleConnectionMetadata]:
+    async def fetch_role_connection_metadata(self) -> list[ApplicationRoleConnectionMetadata]:
         """|coro|
 
         Retrieves the :class:`.ApplicationRoleConnectionMetadata` records for the application.
@@ -3191,7 +3185,7 @@ class Client:
 
     async def edit_role_connection_metadata(
         self, records: Sequence[ApplicationRoleConnectionMetadata]
-    ) -> List[ApplicationRoleConnectionMetadata]:
+    ) -> list[ApplicationRoleConnectionMetadata]:
         """|coro|
 
         Edits the :class:`.ApplicationRoleConnectionMetadata` records for the application.
@@ -3220,7 +3214,7 @@ class Client:
         List[:class:`.ApplicationRoleConnectionMetadata`]
             The list of newly edited metadata records.
         """
-        payload: List[ApplicationRoleConnectionMetadataPayload] = []
+        payload: list[ApplicationRoleConnectionMetadataPayload] = []
         for record in records:
             record._localize(self.i18n)
             payload.append(record.to_dict())
@@ -3230,7 +3224,7 @@ class Client:
         )
         return [ApplicationRoleConnectionMetadata._from_data(record) for record in data]
 
-    async def skus(self) -> List[SKU]:
+    async def skus(self) -> list[SKU]:
         """|coro|
 
         Retrieves the :class:`.SKU`\\s for the application.

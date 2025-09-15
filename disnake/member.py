@@ -5,18 +5,14 @@ from __future__ import annotations
 import datetime
 import itertools
 import sys
+from collections.abc import Sequence
 from operator import attrgetter
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    Dict,
-    List,
     Literal,
     Optional,
-    Sequence,
-    Tuple,
-    Type,
     Union,
     cast,
     overload,
@@ -166,7 +162,7 @@ class VoiceState:
         return f"<{self.__class__.__name__} {inner}>"
 
 
-def flatten_user(cls: Type[Member]) -> Type[Member]:
+def flatten_user(cls: type[Member]) -> type[Member]:
     for attr, value in itertools.chain(BaseUser.__dict__.items(), User.__dict__.items()):
         # ignore private/special methods
         if attr.startswith("_"):
@@ -292,7 +288,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         avatar: Optional[Asset]
         dm_channel: Optional[DMChannel]
         create_dm = User.create_dm
-        mutual_guilds: List[Guild]
+        mutual_guilds: list[Guild]
         public_flags: PublicUserFlags
         banner: Optional[Asset]
         accent_color: Optional[Colour]
@@ -339,8 +335,8 @@ class Member(disnake.abc.Messageable, _UserTag):
             data.get("premium_since")
         )
         self._roles: utils.SnowflakeList = utils.SnowflakeList(map(int, data["roles"]))
-        self._client_status: Dict[Optional[str], str] = {None: "offline"}
-        self.activities: Tuple[ActivityTypes, ...] = ()
+        self._client_status: dict[Optional[str], str] = {None: "offline"}
+        self.activities: tuple[ActivityTypes, ...] = ()
         self.nick: Optional[str] = data.get("nick")
         self.pending: bool = data.get("pending", False)
         self._avatar: Optional[str] = data.get("avatar")
@@ -450,7 +446,7 @@ class Member(disnake.abc.Messageable, _UserTag):
 
     def _presence_update(
         self, data: PresenceData, user: UserPayload
-    ) -> Optional[Tuple[User, User]]:
+    ) -> Optional[tuple[User, User]]:
         self.activities = tuple(create_activity(a, state=self._state) for a in data["activities"])
         self._client_status = {
             sys.intern(key): sys.intern(value)  # type: ignore
@@ -462,7 +458,7 @@ class Member(disnake.abc.Messageable, _UserTag):
             return self._update_inner_user(user)
         return None
 
-    def _update_inner_user(self, user: UserPayload) -> Optional[Tuple[User, User]]:
+    def _update_inner_user(self, user: UserPayload) -> Optional[tuple[User, User]]:
         u = self._user
         original = (
             u.name,
@@ -574,14 +570,14 @@ class Member(disnake.abc.Messageable, _UserTag):
         return self.colour
 
     @property
-    def roles(self) -> List[Role]:
+    def roles(self) -> list[Role]:
         """List[:class:`Role`]: A :class:`list` of :class:`Role` that the member belongs to. Note
         that the first element of this list is always the default '@everyone'
         role.
 
         These roles are sorted by their position in the role hierarchy.
         """
-        result: List[Role] = []
+        result: list[Role] = []
         g = self.guild
         for role_id in self._roles:
             role = g.get_role(role_id)
@@ -865,7 +861,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         banner: Optional[AssetBytes] = MISSING,
         reason: Optional[str] = None,
     ) -> Optional[Member]:
-        payload: Dict[str, Any] = {}
+        payload: dict[str, Any] = {}
 
         if nick is not MISSING:
             payload["nick"] = nick or ""
@@ -1023,7 +1019,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         me = self._state.self_id == self.id
 
         member: Optional[Member] = None  # return value
-        payload: Dict[str, Any] = {}
+        payload: dict[str, Any] = {}
 
         if me and any(v is not MISSING for v in (nick, bio, avatar, banner)):
             member = await self._edit_self(
@@ -1045,7 +1041,7 @@ class Member(disnake.abc.Messageable, _UserTag):
             if self.voice is None or self.voice.channel is None:
                 raise Exception("Cannot suppress a member which isn't in a vc")  # noqa: TRY002
 
-            voice_state_payload: Dict[str, Any] = {
+            voice_state_payload: dict[str, Any] = {
                 "channel_id": self.voice.channel.id,
                 "suppress": suppress,
             }

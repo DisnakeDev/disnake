@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
-from typing import List, Optional, TypedDict
+from typing import Optional, TypedDict
 
 from .snowflake import Snowflake
 
 
 class WelcomeScreen(TypedDict):
     description: Optional[str]
-    welcome_channels: List[WelcomeScreenChannel]
+    welcome_channels: list[WelcomeScreenChannel]
 
 
 class WelcomeScreenChannel(TypedDict):

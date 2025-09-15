@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-from typing import List, Literal, Optional, TypedDict, Union
+from typing import Literal, Optional, TypedDict, Union
 
 from typing_extensions import NotRequired
 
@@ -29,7 +29,7 @@ class _BaseChannel(TypedDict):
 class _BaseGuildChannel(_BaseChannel):
     guild_id: Snowflake
     position: int
-    permission_overwrites: List[PermissionOverwrite]
+    permission_overwrites: list[PermissionOverwrite]
     # In theory, this will never be None and will always be present. In practice...
     name: NotRequired[Optional[str]]
     nsfw: bool
@@ -47,7 +47,7 @@ class GroupInviteRecipient(TypedDict):
 
 class InviteChannel(PartialChannel, total=False):
     name: Optional[str]
-    recipients: List[GroupInviteRecipient]
+    recipients: list[GroupInviteRecipient]
     icon: Optional[str]
 
 
@@ -123,7 +123,7 @@ class _BaseThreadOnlyGuildChannel(_BaseGuildChannel):
     topic: NotRequired[Optional[str]]
     last_message_id: NotRequired[Optional[Snowflake]]
     default_auto_archive_duration: NotRequired[ThreadArchiveDurationLiteral]
-    available_tags: NotRequired[List[ForumTag]]
+    available_tags: NotRequired[list[ForumTag]]
     default_reaction_emoji: NotRequired[Optional[DefaultReaction]]
     default_thread_rate_limit_per_user: NotRequired[int]
     default_sort_order: NotRequired[Optional[ThreadSortOrder]]
@@ -153,7 +153,7 @@ GuildChannel = Union[
 class DMChannel(_BaseChannel):
     type: Literal[1]
     last_message_id: Optional[Snowflake]
-    recipients: List[PartialUser]
+    recipients: list[PartialUser]
 
 
 class GroupDMChannel(_BaseChannel):
@@ -191,7 +191,7 @@ class CreateGuildChannel(TypedDict):
     user_limit: NotRequired[Optional[int]]
     rate_limit_per_user: NotRequired[Optional[int]]
     position: NotRequired[Optional[int]]
-    permission_overwrites: NotRequired[List[PermissionOverwrite]]
+    permission_overwrites: NotRequired[list[PermissionOverwrite]]
     parent_id: NotRequired[Optional[Snowflake]]
     nsfw: NotRequired[Optional[bool]]
     rtc_region: NotRequired[Optional[str]]
@@ -200,5 +200,5 @@ class CreateGuildChannel(TypedDict):
 
 
 class ChannelPins(TypedDict):
-    items: List[MessagePin]
+    items: list[MessagePin]
     has_more: bool

@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: MIT
 
 import math
-from typing import Tuple
 
 import pytest
 
@@ -28,7 +27,7 @@ def test_compare() -> None:
     ("value", "parts"),
     [(0, (0, 0, 0)), (0xA00233, (0xA0, 0x02, 0x33)), (0x123456, (0x12, 0x34, 0x56))],
 )
-def test_to_rgb(value: int, parts: Tuple[int, int, int]) -> None:
+def test_to_rgb(value: int, parts: tuple[int, int, int]) -> None:
     c = Colour(value)
     assert c.to_rgb() == parts
     assert (c.r, c.g, c.b) == parts
@@ -38,7 +37,7 @@ def test_to_rgb(value: int, parts: Tuple[int, int, int]) -> None:
     ("value", "parts"),
     [(0, (0, 0, 0)), (0xA00233, (0xA0, 0x02, 0x33)), (0x123456, (0x12, 0x34, 0x56))],
 )
-def test_from_rgb(value: int, parts: Tuple[int, int, int]) -> None:
+def test_from_rgb(value: int, parts: tuple[int, int, int]) -> None:
     assert Colour.from_rgb(*parts).value == value
 
 
@@ -50,7 +49,7 @@ def test_from_rgb(value: int, parts: Tuple[int, int, int]) -> None:
         (0x5CCFF9, (196 / 360, 63 / 100, 98 / 100)),
     ],
 )
-def test_from_hsv(value: int, parts: Tuple[float, float, float]) -> None:
+def test_from_hsv(value: int, parts: tuple[float, float, float]) -> None:
     expected = Colour(value)
     col = Colour.from_hsv(*parts)
     assert all(math.isclose(a, b, abs_tol=1) for a, b in zip(expected.to_rgb(), col.to_rgb()))
