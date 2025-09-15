@@ -330,7 +330,7 @@ class InteractionBotBase(CommonBotBase):
         parameter ``test_guilds`` is specified in the bot constructor, in which case
         this command is registered to those guilds.
 
-        .. versionadded:: 2.10
+        .. versionadded:: 2.12
 
         Parameters
         ----------
