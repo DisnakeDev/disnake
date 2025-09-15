@@ -260,7 +260,7 @@ ignorelist = [
     "copyright",
     "format",
 
-    # todo: remove
+    # TODO: remove
     "globals",
     "locals",
 ]
