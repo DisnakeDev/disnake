@@ -10,10 +10,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    Dict,
-    List,
     Optional,
-    Tuple,
     TypeVar,
     Union,
     cast,
@@ -134,7 +131,7 @@ class InvokableApplicationCommand(ABC):
         .. versionadded:: 2.5
     """
 
-    __original_kwargs__: Dict[str, Any]
+    __original_kwargs__: dict[str, Any]
     body: ApplicationCommand
 
     def __new__(cls, *args: Any, **kwargs: Any) -> Self:
@@ -151,7 +148,7 @@ class InvokableApplicationCommand(ABC):
         # Annotation parser needs this attribute because body doesn't exist at this moment.
         # We will use this attribute later in order to set the allowed contexts.
         self._guild_only: bool = kwargs.get("guild_only", False)
-        self.extras: Dict[str, Any] = kwargs.get("extras") or {}
+        self.extras: dict[str, Any] = kwargs.get("extras") or {}
 
         if not isinstance(self.name, str):
             raise TypeError("Name of a command must be a string.")
@@ -175,7 +172,7 @@ class InvokableApplicationCommand(ABC):
         except AttributeError:
             checks = kwargs.get("checks", [])
 
-        self.checks: List[AppCheck] = checks
+        self.checks: list[AppCheck] = checks
 
         try:
             cooldown = func.__commands_cooldown__
@@ -198,7 +195,7 @@ class InvokableApplicationCommand(ABC):
         self._max_concurrency: Optional[MaxConcurrency] = max_concurrency
 
         self.cog: Optional[Cog] = None
-        self.guild_ids: Optional[Tuple[int, ...]] = None
+        self.guild_ids: Optional[tuple[int, ...]] = None
         self.auto_sync: bool = True
 
         self._before_invoke: Optional[Hook] = None
@@ -257,7 +254,7 @@ class InvokableApplicationCommand(ABC):
         copy = type(self)(self.callback, **self.__original_kwargs__)
         return self._ensure_assignment_on_copy(copy)
 
-    def _update_copy(self: AppCommandT, kwargs: Dict[str, Any]) -> AppCommandT:
+    def _update_copy(self: AppCommandT, kwargs: dict[str, Any]) -> AppCommandT:
         if kwargs:
             kw = kwargs.copy()
             kw.update(self.__original_kwargs__)

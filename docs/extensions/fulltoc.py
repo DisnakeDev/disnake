@@ -29,7 +29,7 @@ of a parent page.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, cast
+from typing import TYPE_CHECKING, cast
 
 from docutils import nodes
 from sphinx import addnodes
@@ -112,7 +112,7 @@ def build_full_toctree(
     """
     env: BuildEnvironment = builder.env
     doctree = env.get_doctree(index)
-    toctrees: List[nodes.Element] = []
+    toctrees: list[nodes.Element] = []
     for toctreenode in doctree.traverse(addnodes.toctree):
         toctree = env.resolve_toctree(
             docname,

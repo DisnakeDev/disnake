@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING
 
 from sphinx.application import Sphinx
 from sphinx.util.fileutil import copy_asset_file
@@ -14,10 +14,10 @@ if TYPE_CHECKING:
 SCRIPT_PATH = "_templates/api_redirect.js_t"
 
 
-def collect_redirects(app: Sphinx) -> Dict[str, str]:
+def collect_redirects(app: Sphinx) -> dict[str, str]:
     # mapping of html node id (i.e., thing after "#" in URLs) to the correct page name
     # e.g, api.html#disnake.Thread => api/channels.html
-    mapping: Dict[str, str] = {}
+    mapping: dict[str, str] = {}
 
     # see https://www.sphinx-doc.org/en/master/extdev/domainapi.html#sphinx.domains.Domain.get_objects
     domain = app.env.domains["py"]

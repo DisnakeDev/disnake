@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import List, Literal, Optional, TypedDict
+from typing import Literal, Optional, TypedDict
 
 from typing_extensions import NotRequired
 
@@ -61,8 +61,8 @@ class ForumThread(Thread):
 
 
 class ThreadPaginationPayload(TypedDict):
-    threads: List[Thread]
-    members: List[ThreadMember]
+    threads: list[Thread]
+    members: list[ThreadMember]
     has_more: bool
 
 

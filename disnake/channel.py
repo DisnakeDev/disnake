@@ -5,20 +5,14 @@ from __future__ import annotations
 import asyncio
 import datetime
 import time
+from collections.abc import Iterable, Mapping, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    Dict,
-    Iterable,
-    List,
     Literal,
-    Mapping,
     NamedTuple,
     Optional,
-    Sequence,
-    Tuple,
-    Type,
     Union,
     cast,
     overload,
@@ -340,14 +334,14 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         return base
 
     @property
-    def members(self) -> List[Member]:
+    def members(self) -> list[Member]:
         """List[:class:`Member`]: Returns all members that can see this channel."""
         if isinstance(self.guild, Object):
             return []
         return [m for m in self.guild.members if self.permissions_for(m).view_channel]
 
     @property
-    def threads(self) -> List[Thread]:
+    def threads(self) -> list[Thread]:
         """List[:class:`Thread`]: Returns all the threads that you can see.
 
         .. versionadded:: 2.0
@@ -716,7 +710,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         around: Optional[SnowflakeTime] = None,
         oldest_first: Optional[bool] = False,
         bulk: bool = True,
-    ) -> List[Message]:
+    ) -> list[Message]:
         """|coro|
 
         Purges a list of messages that meet the criteria given by the predicate
@@ -777,7 +771,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         iterator = self.history(
             limit=limit, before=before, after=after, oldest_first=oldest_first, around=around
         )
-        ret: List[Message] = []
+        ret: list[Message] = []
         count = 0
 
         minimum_time = int((time.time() - 14 * 24 * 60 * 60) * 1000.0 - 1420070400000) << 22
@@ -818,7 +812,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
         return ret
 
-    async def webhooks(self) -> List[Webhook]:
+    async def webhooks(self) -> list[Webhook]:
         """|coro|
 
         Retrieves the list of webhooks this channel has.
@@ -1194,10 +1188,10 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
         self.id: int = int(data["id"])
         self._update(guild, data)
 
-    def _get_voice_client_key(self) -> Tuple[int, str]:
+    def _get_voice_client_key(self) -> tuple[int, str]:
         return self.guild.id, "guild_id"
 
-    def _get_voice_state_pair(self) -> Tuple[int, int]:
+    def _get_voice_state_pair(self) -> tuple[int, int]:
         return self.guild.id, self.id
 
     def _update(self, guild: Guild, data: Union[VoiceChannelPayload, StageChannelPayload]) -> None:
@@ -1222,12 +1216,12 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
         return ChannelType.voice.value
 
     @property
-    def members(self) -> List[Member]:
+    def members(self) -> list[Member]:
         """List[:class:`Member`]: Returns all members that are currently inside this voice channel."""
         if isinstance(self.guild, Object):
             return []
 
-        ret: List[Member] = []
+        ret: list[Member] = []
         for user_id, state in self.guild._voice_states.items():
             if state.channel and state.channel.id == self.id:
                 member = self.guild.get_member(user_id)
@@ -1236,7 +1230,7 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
         return ret
 
     @property
-    def voice_states(self) -> Dict[int, VoiceState]:
+    def voice_states(self) -> dict[int, VoiceState]:
         """Returns a mapping of member IDs who have voice states in this channel.
 
         .. versionadded:: 1.3
@@ -1769,7 +1763,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         around: Optional[SnowflakeTime] = None,
         oldest_first: Optional[bool] = False,
         bulk: bool = True,
-    ) -> List[Message]:
+    ) -> list[Message]:
         """|coro|
 
         Purges a list of messages that meet the criteria given by the predicate
@@ -1826,7 +1820,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         iterator = self.history(
             limit=limit, before=before, after=after, oldest_first=oldest_first, around=around
         )
-        ret: List[Message] = []
+        ret: list[Message] = []
         count = 0
 
         minimum_time = int((time.time() - 14 * 24 * 60 * 60) * 1000.0 - 1420070400000) << 22
@@ -1867,7 +1861,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         return ret
 
-    async def webhooks(self) -> List[Webhook]:
+    async def webhooks(self) -> list[Webhook]:
         """|coro|
 
         Retrieves the list of webhooks this channel has.
@@ -2083,7 +2077,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         return self
 
     @property
-    def requesting_to_speak(self) -> List[Member]:
+    def requesting_to_speak(self) -> list[Member]:
         """List[:class:`Member`]: A list of members who are requesting to speak in the stage channel."""
         return [
             member
@@ -2092,7 +2086,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         ]
 
     @property
-    def speakers(self) -> List[Member]:
+    def speakers(self) -> list[Member]:
         """List[:class:`Member`]: A list of members who have been permitted to speak in the stage channel.
 
         .. versionadded:: 2.0
@@ -2106,7 +2100,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         ]
 
     @property
-    def listeners(self) -> List[Member]:
+    def listeners(self) -> list[Member]:
         """List[:class:`Member`]: A list of members who are listening in the stage channel.
 
         .. versionadded:: 2.0
@@ -2114,7 +2108,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         return [member for member in self.members if member.voice and member.voice.suppress]
 
     @property
-    def moderators(self) -> List[Member]:
+    def moderators(self) -> list[Member]:
         """List[:class:`Member`]: A list of members who are moderating the stage channel.
 
         .. versionadded:: 2.0
@@ -2351,7 +2345,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         :class:`StageInstance`
             The newly created stage instance.
         """
-        payload: Dict[str, Any] = {
+        payload: dict[str, Any] = {
             "channel_id": self.id,
             "topic": topic,
             "send_start_notification": notify_everyone,
@@ -2624,7 +2618,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         around: Optional[SnowflakeTime] = None,
         oldest_first: Optional[bool] = False,
         bulk: bool = True,
-    ) -> List[Message]:
+    ) -> list[Message]:
         """|coro|
 
         Purges a list of messages that meet the criteria given by the predicate
@@ -2681,7 +2675,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         iterator = self.history(
             limit=limit, before=before, after=after, oldest_first=oldest_first, around=around
         )
-        ret: List[Message] = []
+        ret: list[Message] = []
         count = 0
 
         minimum_time = int((time.time() - 14 * 24 * 60 * 60) * 1000.0 - 1420070400000) << 22
@@ -2722,7 +2716,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         return ret
 
-    async def webhooks(self) -> List[Webhook]:
+    async def webhooks(self) -> list[Webhook]:
         """|coro|
 
         Retrieves the list of webhooks this channel has.
@@ -3100,7 +3094,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         return await super().move(**kwargs)
 
     @property
-    def channels(self) -> List[GuildChannelType]:
+    def channels(self) -> list[GuildChannelType]:
         """List[:class:`abc.GuildChannel`]: Returns the channels that are under this category.
 
         These are sorted by the official Discord UI, which places voice channels below the text channels.
@@ -3108,7 +3102,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         if isinstance(self.guild, Object):
             return []
 
-        def comparator(channel: GuildChannelType) -> Tuple[bool, int]:
+        def comparator(channel: GuildChannelType) -> tuple[bool, int]:
             return (
                 not isinstance(channel, (TextChannel, ThreadOnlyGuildChannel)),
                 channel.position,
@@ -3119,7 +3113,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         return ret
 
     @property
-    def text_channels(self) -> List[TextChannel]:
+    def text_channels(self) -> list[TextChannel]:
         """List[:class:`TextChannel`]: Returns the text channels that are under this category."""
         if isinstance(self.guild, Object):
             return []
@@ -3133,7 +3127,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         return ret
 
     @property
-    def voice_channels(self) -> List[VoiceChannel]:
+    def voice_channels(self) -> list[VoiceChannel]:
         """List[:class:`VoiceChannel`]: Returns the voice channels that are under this category."""
         if isinstance(self.guild, Object):
             return []
@@ -3147,7 +3141,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         return ret
 
     @property
-    def stage_channels(self) -> List[StageChannel]:
+    def stage_channels(self) -> list[StageChannel]:
         """List[:class:`StageChannel`]: Returns the stage channels that are under this category.
 
         .. versionadded:: 1.7
@@ -3164,7 +3158,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         return ret
 
     @property
-    def forum_channels(self) -> List[ForumChannel]:
+    def forum_channels(self) -> list[ForumChannel]:
         """List[:class:`ForumChannel`]: Returns the forum channels that are under this category.
 
         .. versionadded:: 2.5
@@ -3181,7 +3175,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         return ret
 
     @property
-    def media_channels(self) -> List[MediaChannel]:
+    def media_channels(self) -> list[MediaChannel]:
         """List[:class:`MediaChannel`]: Returns the media channels that are under this category.
 
         .. versionadded:: 2.10
@@ -3357,7 +3351,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
             ForumTag._from_data(data=tag, state=self._state)
             for tag in data.get("available_tags", [])
         ]
-        self._available_tags: Dict[int, ForumTag] = {tag.id: tag for tag in tags}
+        self._available_tags: dict[int, ForumTag] = {tag.id: tag for tag in tags}
 
         default_reaction_emoji = data.get("default_reaction_emoji") or {}
         # emoji_id may be `0`, use `None` instead
@@ -3398,14 +3392,14 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         return base
 
     @property
-    def members(self) -> List[Member]:
+    def members(self) -> list[Member]:
         """List[:class:`Member`]: Returns all members that can see this channel."""
         if isinstance(self.guild, Object):
             return []
         return [m for m in self.guild.members if self.permissions_for(m).view_channel]
 
     @property
-    def threads(self) -> List[Thread]:
+    def threads(self) -> list[Thread]:
         """List[:class:`Thread`]: Returns all the threads that you can see."""
         if isinstance(self.guild, Object):
             return []
@@ -3465,7 +3459,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         return self._state.get_channel(self.last_thread_id) if self.last_thread_id else None  # type: ignore
 
     @property
-    def available_tags(self) -> List[ForumTag]:
+    def available_tags(self) -> list[ForumTag]:
         """List[:class:`ForumTag`]: The available tags for threads in this channel.
 
         To create/edit/delete tags, use :func:`edit`.
@@ -3536,7 +3530,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         applied_tags: Sequence[Snowflake] = ...,
         content: str = ...,
         embed: Embed = ...,
-        files: List[File] = ...,
+        files: list[File] = ...,
         suppress_embeds: bool = ...,
         flags: MessageFlags = ...,
         stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
@@ -3555,7 +3549,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         slowmode_delay: Optional[int] = ...,
         applied_tags: Sequence[Snowflake] = ...,
         content: str = ...,
-        embeds: List[Embed] = ...,
+        embeds: list[Embed] = ...,
         file: File = ...,
         suppress_embeds: bool = ...,
         flags: MessageFlags = ...,
@@ -3575,8 +3569,8 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         slowmode_delay: Optional[int] = ...,
         applied_tags: Sequence[Snowflake] = ...,
         content: str = ...,
-        embeds: List[Embed] = ...,
-        files: List[File] = ...,
+        embeds: list[Embed] = ...,
+        files: list[File] = ...,
         suppress_embeds: bool = ...,
         flags: MessageFlags = ...,
         stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
@@ -3595,9 +3589,9 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         applied_tags: Sequence[Snowflake] = MISSING,
         content: str = MISSING,
         embed: Embed = MISSING,
-        embeds: List[Embed] = MISSING,
+        embeds: list[Embed] = MISSING,
         file: File = MISSING,
-        files: List[File] = MISSING,
+        files: list[File] = MISSING,
         suppress_embeds: bool = MISSING,
         flags: MessageFlags = MISSING,
         stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = MISSING,
@@ -3805,7 +3799,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
             self.id, self.guild, limit=limit, joined=False, private=False, before=before
         )
 
-    async def webhooks(self) -> List[Webhook]:
+    async def webhooks(self) -> list[Webhook]:
         """|coro|
 
         Retrieves the list of webhooks this channel has.
@@ -4952,7 +4946,7 @@ class GroupChannel(disnake.abc.Messageable, Hashable):
         self.owner_id: Optional[int] = utils._get_as_snowflake(data, "owner_id")
         self._icon: Optional[str] = data.get("icon")
         self.name: Optional[str] = data.get("name")
-        self.recipients: List[User] = [
+        self.recipients: list[User] = [
             self._state.store_user(u) for u in data.get("recipients", [])
         ]
 
@@ -5135,7 +5129,7 @@ class PartialMessageable(disnake.abc.Messageable, Hashable):
 
 def _guild_channel_factory(
     channel_type: int,
-) -> Tuple[Optional[Type[GuildChannelType]], ChannelType]:
+) -> tuple[Optional[type[GuildChannelType]], ChannelType]:
     value = try_enum(ChannelType, channel_type)
     if value is ChannelType.text:
         return TextChannel, value
@@ -5157,8 +5151,8 @@ def _guild_channel_factory(
 
 def _channel_factory(
     channel_type: int,
-) -> Tuple[
-    Optional[Union[Type[GuildChannelType], Type[DMChannel], Type[GroupChannel]]], ChannelType
+) -> tuple[
+    Optional[Union[type[GuildChannelType], type[DMChannel], type[GroupChannel]]], ChannelType
 ]:
     cls, value = _guild_channel_factory(channel_type)
     if value is ChannelType.private:
@@ -5171,8 +5165,8 @@ def _channel_factory(
 
 def _threaded_channel_factory(
     channel_type: int,
-) -> Tuple[
-    Optional[Union[Type[GuildChannelType], Type[DMChannel], Type[GroupChannel], Type[Thread]]],
+) -> tuple[
+    Optional[Union[type[GuildChannelType], type[DMChannel], type[GroupChannel], type[Thread]]],
     ChannelType,
 ]:
     cls, value = _channel_factory(channel_type)
@@ -5183,7 +5177,7 @@ def _threaded_channel_factory(
 
 def _threaded_guild_channel_factory(
     channel_type: int,
-) -> Tuple[Optional[Union[Type[GuildChannelType], Type[Thread]]], ChannelType]:
+) -> tuple[Optional[Union[type[GuildChannelType], type[Thread]]], ChannelType]:
     cls, value = _guild_channel_factory(channel_type)
     if value in (ChannelType.private_thread, ChannelType.public_thread, ChannelType.news_thread):
         return Thread, value
@@ -5191,8 +5185,8 @@ def _threaded_guild_channel_factory(
 
 
 def _channel_type_factory(
-    cls: Union[Type[disnake.abc.GuildChannel], Type[Thread]],
-) -> List[ChannelType]:
+    cls: Union[type[disnake.abc.GuildChannel], type[Thread]],
+) -> list[ChannelType]:
     return {
         # FIXME: this includes private channels; improve this once there's a common base type for all channels
         disnake.abc.GuildChannel: list(ChannelType.__members__.values()),

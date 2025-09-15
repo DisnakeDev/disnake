@@ -14,11 +14,8 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    List,
     Literal,
     Optional,
-    Tuple,
-    Type,
     TypedDict,
     TypeVar,
     overload,
@@ -108,14 +105,14 @@ signal_ctl: SignalCtl = {
 }
 
 
-def _err_lt(result: int, func: Callable[..., Any], args: List[Any]) -> int:
+def _err_lt(result: int, func: Callable[..., Any], args: list[Any]) -> int:
     if result < OK:
         _log.info("error has happened in %s", func.__name__)
         raise OpusError(result)
     return result
 
 
-def _err_ne(result: T, func: Callable[..., Any], args: List[Any]) -> T:
+def _err_ne(result: T, func: Callable[..., Any], args: list[Any]) -> T:
     ret = args[-1]._obj
     if ret.value != OK:
         _log.info("error has happened in %s", func.__name__)
@@ -128,8 +125,8 @@ def _err_ne(result: T, func: Callable[..., Any], args: List[Any]) -> T:
 # The second one are the types of arguments it takes.
 # The third is the result type.
 # The fourth is the error handler.
-exported_functions: List[
-    Tuple[str, Optional[List[Type[ctypes._CData]]], Optional[Type[ctypes._CData]], Any]
+exported_functions: list[
+    tuple[str, Optional[list[type[ctypes._CData]]], Optional[type[ctypes._CData]], Any]
 ] = [
     # Generic
     ("opus_get_version_string", [], ctypes.c_char_p, None),
