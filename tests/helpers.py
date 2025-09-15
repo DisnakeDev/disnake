@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: MIT
 
-import asyncio
 import datetime
 import functools
+import inspect
 import types
 from typing import TYPE_CHECKING, Callable, ContextManager, Optional, Type, TypeVar
 from unittest import mock
@@ -60,7 +60,7 @@ class freeze_time(ContextManager):
         return type(self._mock).__exit__(self._mock, typ, value, tb)
 
     def __call__(self, func: CallableT) -> CallableT:
-        if asyncio.iscoroutinefunction(func):
+        if inspect.iscoroutinefunction(func):
 
             @functools.wraps(func)
             async def wrap_async(*args, **kwargs):

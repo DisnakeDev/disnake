@@ -11,6 +11,7 @@ from typing import (
     Callable,
     Dict,
     List,
+    Literal,
     NoReturn,
     Optional,
     Tuple,
@@ -96,7 +97,7 @@ class Shard:
         self.loop: asyncio.AbstractEventLoop = self._client.loop
         self._disconnect: bool = False
         self._reconnect = client._reconnect
-        self._backoff: ExponentialBackoff = ExponentialBackoff()
+        self._backoff: ExponentialBackoff[Literal[False]] = ExponentialBackoff()
         self._task: Optional[asyncio.Task] = None
         self._handled_exceptions: Tuple[Type[Exception], ...] = (
             OSError,

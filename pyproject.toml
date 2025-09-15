@@ -16,6 +16,7 @@ keywords = ["disnake", "discord", "discord api"]
 license = { text = "MIT" }
 dependencies = [
     "aiohttp>=3.7.0,<4.0",
+    "typing-extensions>=4.1",
 ]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
@@ -52,7 +53,7 @@ speed = [
 ]
 voice = [
     "PyNaCl>=1.5.0,<1.6",
-    'audioop-lts==0.2.1; python_version >= "3.13"'
+    'audioop-lts>=0.2.1; python_version >= "3.13"'
 ]
 docs = [
     "sphinx==7.0.1",
@@ -73,21 +74,20 @@ tools = [
     "pre-commit~=3.0",
     "slotscheck~=0.16.4",
     "check-manifest==0.49",
-    "ruff==0.12.11",
+    "ruff==0.12.12",
 ]
 changelog = [
     "towncrier==23.6.0",
 ]
 codemod = [
-    # run codemods on the respository (mostly automated typing)
+    # run codemods on the repository (mostly automated typing)
     "libcst~=1.1.0",
-    "ruff==0.12.11",
+    "ruff==0.12.12",
     "autotyping==23.2.0",
 ]
 typing = [
     # this is not pyright itself, but the python wrapper
-    "pyright==1.1.336",
-    "typing-extensions~=4.12.0",
+    "pyright==1.1.405",
     # only used for type-checking, version does not matter
     "pytz",
 ]
@@ -97,12 +97,16 @@ test = [
     "pytest-asyncio~=0.24.0",
     "looptime~=0.2.0",
     "coverage[toml]~=7.6.0",
+    "typing-extensions>=4.6",
 ]
 build = [
-    "wheel~=0.40.0",
-    "build~=0.10.0",
-    "twine~=5.1.1",
+    "build~=1.2",
+    "twine~=6.1",
 ]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["disnake*"]
 
 [tool.nox]
 script-venv-backend = "uv|virtualenv"
@@ -117,12 +121,15 @@ ignore_package_warnings = ["*"]
 docs = { cmd = "nox -Rs docs --", help = "Build the documentation for development" }
 lint = { cmd = "nox -Rs lint --", help = "Check all files for linting errors" }
 pyright = { cmd = "nox -Rs pyright --", help = "Run pyright" }
-setup_env = { cmd = "{pdm} install -G:all", help = "Set up the local environment and all dependencies" }
-post_setup_env = { composite = ["python -m ensurepip --default-pip", "pre-commit install --install-hooks"] }
+setup_env = { cmd = "{pdm} run noxfile.py -s dev", help = "Set up the local environment and all dependencies" }
 test = { cmd = "nox -Rs test --", help = "Run pytest" }
 
 [tool.ruff]
 line-length = 100
+
+[tool.codespell]
+skip = ['docs/_static/**', '*.po']
+ignore-words-list = ['GroupT', "OT",]
 
 [tool.ruff.lint]
 select = ["ALL"]
@@ -140,7 +147,7 @@ ignore = [
     "BLE", # similar to S110, but also flags Exception
     ## flake8-boolean-trap
     "FBT", # TODO: enable
-    "COM", # TODO: enable, in seperate PR (has autofixes)
+    "COM", # TODO: enable, in separate PR (has autofixes)
     ## flake8-errmsg
     "EM", # TODO: Enable; too noisy for this, but has autofixes
     ## flake8-fixme
@@ -148,7 +155,7 @@ ignore = [
     ## flake8-future-annotations
     "FA", # TODO: stringify *every single annotation*
     ## flake8-implict-str-concat
-    "ISC002", # incompatiable with the formatter.
+    "ISC002", # incompatible with the formatter.
     ## flake8-no-pep420
     "INP001", # Ha.
     ## flake8-pie
@@ -156,7 +163,7 @@ ignore = [
     ## flake8-print
     # "T20", # TODO: disabled until the library configures logging
     ## flake8-pyi
-    "PYI", # TODO: enable, in seperate PR (most have autofixes)
+    "PYI", # TODO: enable, in separate PR (most have autofixes)
     ## flake8-return
     "RET", # TODO: enable, most have autofixes.
     ## flake8-self
@@ -172,7 +179,7 @@ ignore = [
     ## flake8-unused-arguments
     "ARG", # most unused arguments are intentional
     ## flake8-use-pathlib
-    "PTH", # todo: enable in seperate PR
+    "PTH", # todo: enable in separate PR
     ## mccabe
     "C90", # todo: enable at some point
     ## pep8-naming
@@ -216,7 +223,7 @@ ignore = [
 "examples/*.py" = [
     "ANN", # missing type annotations in examples is fine
     "B008", # do not perform function calls in argument defaults, this is how most commands work
-    "E741", # allow ambigious variable names
+    "E741", # allow ambiguous variable names
     "S104", # flake8-bandit: allow binding to all interfaces
     "T201", # print found, printing is okay in examples
 ]
@@ -233,12 +240,12 @@ ignore = [
 ## tests
 "!tests/*" = [ "PT" ] # enable PT in only the tests directory
 "tests/*.py" = [
-    "E741", # ambigious variable names
+    "E741", # ambiguous variable names
     "S101", # flake8-bandit: allow tests to use assertions
     "PT030", # to be enabled: allow pytest.warns without a match parameter
 ]
 "tests/test_utils.py" = [
-    # TODO: enalbe
+    # TODO: enable
     "ISC001", # allow implicit string concatenation in tests
 ]
 "noxfile.py" = ["EXE003"]
@@ -362,6 +369,12 @@ reportConstantRedefinition = false
 reportImportCycles = false
 reportIncompatibleMethodOverride = false
 reportIncompatibleVariableOverride = false
+
+# TODO: re-enable
+# these were added in the upgrade from pyright 1.1.336 to 1.1.405
+reportInconsistentOverload = false
+reportInvalidTypeVarUse = false
+reportInvalidTypeForm = false
 
 # these are largely due to missing type hints, and make up most of the error count
 reportUnknownMemberType = false

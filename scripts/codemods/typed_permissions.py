@@ -73,7 +73,7 @@ class PermissionTypings(BaseCodemodCommand):
         if not m.matches(node.name, m.Name("PermissionOverwrite")):
             return node
 
-        # we're in the defintion of PermissionOverwrite
+        # we're in the definition of PermissionOverwrite
         body = node.body
         for b in body.children:
             if m.matches(b, m.If(test=m.Name("TYPE_CHECKING"))):

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 import os
 from abc import ABC, abstractmethod
 from typing import (
@@ -23,7 +22,7 @@ from typing import (
 from ...components import AnySelectMenu, SelectDefaultValue
 from ...enums import ComponentType, SelectDefaultValueType
 from ...object import Object
-from ...utils import MISSING, humanize_list
+from ...utils import MISSING, humanize_list, iscoroutinefunction
 from ..item import DecoratedItem, Item
 
 __all__ = ("BaseSelect",)
@@ -72,6 +71,7 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
         "min_values",
         "max_values",
         "disabled",
+        "required",
     )
     # We have to set this to MISSING in order to overwrite the abstract property from UIComponent
     _underlying: SelectMenuT = MISSING
@@ -90,6 +90,7 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
         max_values: int,
         disabled: bool,
         default_values: Optional[Sequence[SelectDefaultValueInputType[SelectValueT]]],
+        required: bool,
         id: int,
         row: Optional[int],
     ) -> None:
@@ -106,6 +107,7 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
             max_values=max_values,
             disabled=disabled,
             default_values=self._transform_default_values(default_values) if default_values else [],
+            required=required,
         )
         self.row = row
 
@@ -172,6 +174,19 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
         self, value: Optional[Sequence[SelectDefaultValueInputType[SelectValueT]]]
     ) -> None:
         self._underlying.default_values = self._transform_default_values(value) if value else []
+
+    @property
+    def required(self) -> bool:
+        """:class:`bool`: Whether the select menu is required.
+        Only applies to components in modals.
+
+        .. versionadded:: 2.11
+        """
+        return self._underlying.required
+
+    @required.setter
+    def required(self, value: bool) -> None:
+        self._underlying.required = bool(value)
 
     @property
     def values(self) -> List[SelectValueT]:
@@ -253,7 +268,7 @@ def _create_decorator(
         raise TypeError("cls argument must be callable")
 
     def decorator(func: ItemCallbackType[V_co, S_co]) -> DecoratedItem[S_co]:
-        if not asyncio.iscoroutinefunction(func):
+        if not iscoroutinefunction(func):
             raise TypeError("select function must be a coroutine function")
 
         func.__discord_ui_model_type__ = cls

@@ -7,7 +7,6 @@ import datetime
 import inspect
 import sys
 import traceback
-import warnings
 from collections.abc import Sequence
 from typing import (
     TYPE_CHECKING,
@@ -30,7 +29,7 @@ import aiohttp
 
 import disnake
 from disnake.backoff import ExponentialBackoff
-from disnake.utils import MISSING, utcnow
+from disnake.utils import MISSING, iscoroutinefunction, utcnow
 
 if TYPE_CHECKING:
     from typing_extensions import Concatenate, ParamSpec, Self
@@ -125,7 +124,7 @@ class Loop(Generic[LF]):
         self._last_iteration: datetime.datetime = MISSING
         self._next_iteration = None
 
-        if not asyncio.iscoroutinefunction(self.coro):
+        if not iscoroutinefunction(self.coro):
             raise TypeError(f"Expected coroutine function, not {type(self.coro).__name__!r}.")
 
     async def _call_loop_function(self, name: str, *args: Any, **kwargs: Any) -> None:
@@ -325,9 +324,7 @@ class Loop(Generic[LF]):
             args = (self._injected, *args)
 
         if self.loop is MISSING:
-            with warnings.catch_warnings():
-                warnings.simplefilter("ignore", DeprecationWarning)
-                self.loop = asyncio.get_event_loop()
+            self.loop = disnake.utils.get_event_loop()
 
         self._task = self.loop.create_task(self._loop(*args, **kwargs))
         return self._task
@@ -499,7 +496,7 @@ class Loop(Generic[LF]):
         TypeError
             The function was not a coroutine.
         """
-        if not asyncio.iscoroutinefunction(coro):
+        if not iscoroutinefunction(coro):
             raise TypeError(f"Expected coroutine function, received {coro.__class__.__name__!r}.")
 
         self._before_loop = coro
@@ -526,7 +523,7 @@ class Loop(Generic[LF]):
         TypeError
             The function was not a coroutine.
         """
-        if not asyncio.iscoroutinefunction(coro):
+        if not iscoroutinefunction(coro):
             raise TypeError(f"Expected coroutine function, received {coro.__class__.__name__!r}.")
 
         self._after_loop = coro
@@ -552,7 +549,7 @@ class Loop(Generic[LF]):
         TypeError
             The function was not a coroutine.
         """
-        if not asyncio.iscoroutinefunction(coro):
+        if not iscoroutinefunction(coro):
             raise TypeError(f"Expected coroutine function, received {coro.__class__.__name__!r}.")
 
         self._error = coro  # type: ignore
@@ -703,7 +700,7 @@ class Loop(Generic[LF]):
 
 
 T_co = TypeVar("T_co", covariant=True)
-L_co = TypeVar("L_co", bound=Loop, covariant=True)
+L_co = TypeVar("L_co", bound=Loop[Any], covariant=True)
 
 
 class Object(Protocol[T_co, P]):
@@ -775,7 +772,8 @@ def loop(
         one used in :meth:`disnake.Client.connect`.
     loop: :class:`asyncio.AbstractEventLoop`
         The loop to use to register the task, if not given
-        defaults to :func:`asyncio.get_event_loop`.
+        defaults to the current event loop or creates a new one
+        if there is none.
 
     Raises
     ------
@@ -793,7 +791,7 @@ def loop(
         raise TypeError(f"cls argument must be a subclass of Loop, got {cls!r}")
 
     def decorator(func: LF) -> L_co:
-        if not asyncio.iscoroutinefunction(func):
+        if not iscoroutinefunction(func):
             raise TypeError("decorated function must be a coroutine")
 
         return cast("Type[L_co]", cls)(func, **kwargs)

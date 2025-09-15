@@ -656,7 +656,7 @@ class MediaChannelConverter(IDConverter[disnake.MediaChannel]):
 
 
 class ThreadConverter(IDConverter[disnake.Thread]):
-    """Coverts to a :class:`~disnake.Thread`.
+    """Converts to a :class:`~disnake.Thread`.
 
     All lookups are via the local guild.
 
@@ -1010,7 +1010,7 @@ class PermissionsConverter(Converter[disnake.Permissions]):
                 break
 
             if callable(attr):
-                perms.append(attr())
+                perms.append(attr())  # pyright: ignore[reportArgumentType]
             else:
                 perms.append(disnake.Permissions(**{name: True}))
         else:
@@ -1023,7 +1023,7 @@ class PermissionsConverter(Converter[disnake.Permissions]):
             raise BadArgument(f"Invalid Permissions: {name!r}")
 
         if callable(attr):
-            return attr()
+            return attr()  # pyright: ignore[reportReturnType]
         else:
             return disnake.Permissions(**{name: True})
 
@@ -1194,12 +1194,12 @@ class Greedy(List[T]):
             raise TypeError("Greedy[...] expects a type or a Converter instance.")
 
         if converter in (str, type(None)) or origin is Greedy:
-            raise TypeError(f"Greedy[{converter.__name__}] is invalid.")
+            raise TypeError(f"Greedy[{converter.__name__}] is invalid.")  # pyright: ignore[reportAttributeAccessIssue]
 
         if origin is Union and type(None) in args:
             raise TypeError(f"Greedy[{converter!r}] is invalid.")
 
-        return cls(converter=converter)
+        return cls(converter=converter)  # pyright: ignore[reportArgumentType]
 
 
 def _convert_to_bool(argument: str) -> bool:
@@ -1278,7 +1278,7 @@ async def _actual_conversion(
             else:
                 return await converter().convert(ctx, argument)
         elif isinstance(converter, Converter):
-            return await converter.convert(ctx, argument)  # type: ignore
+            return await converter.convert(ctx, argument)
     except CommandError:
         raise
     except Exception as exc:
