@@ -446,8 +446,8 @@ class Role(Hashable):
         return self.tertiary_colour
 
     @property
-    def is_gradient(self) -> bool:
-        """Whether the role is gradient.
+    def has_gradient(self) -> bool:
+        """Whether the role has a gradient.
 
         .. versionadded:: 2.12
 
