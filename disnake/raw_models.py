@@ -83,10 +83,7 @@ class RawMessageDeleteEvent(_RawReprMixin):
         self.message_id: int = int(data["id"])
         self.channel_id: int = int(data["channel_id"])
         self.cached_message: Optional[Message] = None
-        try:
-            self.guild_id: Optional[int] = int(data["guild_id"])
-        except KeyError:
-            self.guild_id: Optional[int] = None
+        self.guild_id: Optional[int] = _get_as_snowflake(data, "guild_id")
 
 
 class RawBulkMessageDeleteEvent(_RawReprMixin):
@@ -110,10 +107,7 @@ class RawBulkMessageDeleteEvent(_RawReprMixin):
         self.message_ids: Set[int] = {int(x) for x in data.get("ids", [])}
         self.channel_id: int = int(data["channel_id"])
         self.cached_messages: List[Message] = []
-        try:
-            self.guild_id: Optional[int] = int(data["guild_id"])
-        except KeyError:
-            self.guild_id: Optional[int] = None
+        self.guild_id: Optional[int] = _get_as_snowflake(data, "guild_id")
 
 
 class RawMessageUpdateEvent(_RawReprMixin):
@@ -147,10 +141,7 @@ class RawMessageUpdateEvent(_RawReprMixin):
         self.channel_id: int = int(data["channel_id"])
         self.data: MessageUpdateEvent = data
         self.cached_message: Optional[Message] = None
-        try:
-            self.guild_id: Optional[int] = int(data["guild_id"])
-        except KeyError:
-            self.guild_id: Optional[int] = None
+        self.guild_id: Optional[int] = _get_as_snowflake(data, "guild_id")
 
 
 PollEventType = Literal["POLL_VOTE_ADD", "POLL_VOTE_REMOVE"]
@@ -203,10 +194,7 @@ class RawPollVoteActionEvent(_RawReprMixin):
         self.channel_id: int = int(data["channel_id"])
         self.event_type = event_type
         self.answer_id: int = int(data["answer_id"])
-        try:
-            self.guild_id: Optional[int] = int(data["guild_id"])
-        except KeyError:
-            self.guild_id: Optional[int] = None
+        self.guild_id: Optional[int] = _get_as_snowflake(data, "guild_id")
 
 
 ReactionEventType = Literal["REACTION_ADD", "REACTION_REMOVE"]
@@ -275,10 +263,7 @@ class RawReactionActionEvent(_RawReprMixin):
         self.emoji: PartialEmoji = emoji
         self.event_type: ReactionEventType = event_type
         self.member: Optional[Member] = None
-        try:
-            self.guild_id: Optional[int] = int(data["guild_id"])
-        except KeyError:
-            self.guild_id: Optional[int] = None
+        self.guild_id: Optional[int] = _get_as_snowflake(data, "guild_id")
         self.message_author_id: Optional[int] = _get_as_snowflake(data, "message_author_id")
 
 
@@ -300,10 +285,7 @@ class RawReactionClearEvent(_RawReprMixin):
     def __init__(self, data: MessageReactionRemoveAllEvent) -> None:
         self.message_id: int = int(data["message_id"])
         self.channel_id: int = int(data["channel_id"])
-        try:
-            self.guild_id: Optional[int] = int(data["guild_id"])
-        except KeyError:
-            self.guild_id: Optional[int] = None
+        self.guild_id: Optional[int] = _get_as_snowflake(data, "guild_id")
 
 
 class RawReactionClearEmojiEvent(_RawReprMixin):
@@ -332,10 +314,7 @@ class RawReactionClearEmojiEvent(_RawReprMixin):
         self.emoji: PartialEmoji = emoji
         self.message_id: int = int(data["message_id"])
         self.channel_id: int = int(data["channel_id"])
-        try:
-            self.guild_id: Optional[int] = int(data["guild_id"])
-        except KeyError:
-            self.guild_id: Optional[int] = None
+        self.guild_id: Optional[int] = _get_as_snowflake(data, "guild_id")
 
 
 class RawIntegrationDeleteEvent(_RawReprMixin):
@@ -358,10 +337,7 @@ class RawIntegrationDeleteEvent(_RawReprMixin):
     def __init__(self, data: IntegrationDeleteEvent) -> None:
         self.integration_id: int = int(data["id"])
         self.guild_id: int = int(data["guild_id"])
-        try:
-            self.application_id: Optional[int] = int(data["application_id"])
-        except KeyError:
-            self.application_id: Optional[int] = None
+        self.application_id: Optional[int] = _get_as_snowflake(data, "application_id")
 
 
 class RawGuildScheduledEventUserActionEvent(_RawReprMixin):
@@ -483,10 +459,7 @@ class RawTypingEvent(_RawReprMixin):
         self.timestamp: datetime.datetime = datetime.datetime.fromtimestamp(
             data["timestamp"], tz=datetime.timezone.utc
         )
-        try:
-            self.guild_id: Optional[int] = int(data["guild_id"])
-        except KeyError:
-            self.guild_id: Optional[int] = None
+        self.guild_id: Optional[int] = _get_as_snowflake(data, "guild_id")
 
 
 class RawGuildMemberRemoveEvent(_RawReprMixin):
