@@ -39,7 +39,7 @@ class InstallParams:
 
     .. versionadded:: 2.5
 
-    .. versionchanged:: 2.11
+    .. versionchanged:: |vnext|
         This class can now be created by users.
 
     Attributes
@@ -117,7 +117,7 @@ class InstallTypeConfiguration:
 
     .. versionadded:: 2.10
 
-    .. versionchanged:: 2.11
+    .. versionchanged:: |vnext|
 
         This class can now be created by users.
 
@@ -455,8 +455,8 @@ class AppInfo:
         description: Optional[str] = MISSING,
         role_connections_verification_url: Optional[str] = MISSING,
         install_params: Optional[InstallParams] = MISSING,
-        guild_install_type_config: InstallTypeConfiguration = MISSING,
-        user_install_type_config: InstallTypeConfiguration = MISSING,
+        guild_install_type_config: Optional[InstallTypeConfiguration] = MISSING,
+        user_install_type_config: Optional[InstallTypeConfiguration] = MISSING,
         flags: ApplicationFlags = MISSING,
         icon: Optional[AssetBytes] = MISSING,
         cover_image: Optional[AssetBytes] = MISSING,
@@ -472,13 +472,13 @@ class AppInfo:
 
         All parameters are optional.
 
-        .. versionadded:: 2.11
+        .. versionadded:: |vnext|
 
         Parameters
         ----------
         description: Optional[:class:`str`]
             The application's description.
-        flags: Optional[:class:`ApplicationFlags`]
+        flags: :class:`ApplicationFlags`
             The application's public flags.
 
             This is restricted to only affecting the limited intent flags:
@@ -490,7 +490,7 @@ class AppInfo:
                 Disabling an intent that you are currently requesting during your current session
                 will cause you to be disconnected from the gateway. Take caution when providing this parameter.
 
-        tags: Optional[List[:class:`str`]]
+        tags: List[:class:`str`]
             The application's tags.
         install_params: Optional[:class:`InstallParams`]
             The installation parameters for this application.
@@ -543,12 +543,16 @@ class AppInfo:
             ] = {}
 
             if guild_install_type_config is not MISSING:
-                integration_types_config[0] = guild_install_type_config.to_dict()
+                integration_types_config[0] = (
+                    guild_install_type_config.to_dict() if guild_install_type_config else {}
+                )
             elif self.guild_install_type_config:
                 integration_types_config[0] = self.guild_install_type_config.to_dict()
 
             if user_install_type_config is not MISSING:
-                integration_types_config[1] = user_install_type_config.to_dict()
+                integration_types_config[1] = (
+                    user_install_type_config.to_dict() if user_install_type_config else {}
+                )
             elif self.user_install_type_config:
                 integration_types_config[1] = self.user_install_type_config.to_dict()
 
