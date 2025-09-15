@@ -451,7 +451,7 @@ class Role(Hashable):
 
         :return type: :class:`bool`
         """
-        return self.secondary_color is not None and self.tertiary_color is None
+        return self.secondary_color is not None and not self.is_holographic
 
     @property
     def is_holographic(self) -> bool:
