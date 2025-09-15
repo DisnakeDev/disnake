@@ -1137,7 +1137,11 @@ class DiscordVoiceWebSocket:
         elif op == self.DAVE_MLS_ANNOUNCE_COMMIT_TRANSITION:
             # XXX: assuming big endian, this doesn't really seem to be documented
             transition_id = int.from_bytes(msg[1:3], "big", signed=False)
-            await self.dave.handle_announce_commit_transition(transition_id, msg[3:])
+            await self.dave.handle_mls_announce_commit_transition(transition_id, msg[3:])
+        elif op == self.DAVE_MLS_WELCOME:
+            # XXX: assuming big endian, this doesn't really seem to be documented
+            transition_id = int.from_bytes(msg[1:3], "big", signed=False)
+            await self.dave.handle_mls_welcome(transition_id, msg[3:])
 
     async def initial_connection(self, data: VoiceReadyPayload) -> None:
         state = self._connection
@@ -1278,6 +1282,7 @@ class DaveState:
                 f"Gateway selected DAVE version {version}, maximum supported version is {self.max_version}"
             )
 
+        # TODO: change this log and the error above, this method isn't only called from gw
         _log.debug("gateway selected DAVE version %d", version)
         self.selected_version = version
 
@@ -1316,15 +1321,15 @@ class DaveState:
             _log.debug("sending commit + welcome message")
             await self.ws.send_dave_mls_commit_welcome(commit_welcome)
 
-    async def handle_announce_commit_transition(self, transition_id: int, data: bytes) -> None:
+    async def handle_mls_announce_commit_transition(self, transition_id: int, data: bytes) -> None:
         _log.debug("group participants are changing with transition ID %d", transition_id)
         # TODO: for the love of god please fix the type casting already
-        processed = self._session.process_commit(list(data))
+        maybe_roster = self._session.process_commit(list(data))
 
-        if processed is dave.RejectType.ignored:
+        if maybe_roster is dave.RejectType.ignored:
             _log.debug("ignored commit for unexpected group ID")
             return
-        elif processed is dave.RejectType.failed:
+        elif maybe_roster is dave.RejectType.failed:
             # "If the client receives a welcome or commit they cannot process, they send the dave_mls_invalid_commit_welcome opcode (31) to the voice gateway to flag the invalid message."
             # "The client receiving the invalid commit or welcome locally resets their MLS state and generates a new key package to be delivered to the voice gateway via dave_mls_key_package opcode (26)."
             _log.error("failed to process commit")
@@ -1332,6 +1337,24 @@ class DaveState:
             await self.reinit_state(self._session.get_protocol_version())
         else:
             # joined group
+            _log.debug("processed commit, roster: %r", list(maybe_roster.keys()))
+            await self.prepare_transition(transition_id, self._session.get_protocol_version())
+
+    # very similar to mls_announce_commit_transition, just slightly different error handling
+    async def handle_mls_welcome(self, transition_id: int, data: bytes) -> None:
+        _log.debug("received welcome, transition ID %d", transition_id)
+        roster = self._session.process_welcome(
+            list(data),
+            {str(u) for u in self._get_recognized_users(with_self=True)},
+        )
+
+        if roster is None:
+            _log.error("failed to process welcome")
+            await self.ws.send_dave_mls_invalid_commit_welcome(transition_id)
+            await self.reinit_state(self._session.get_protocol_version())
+        else:
+            # joined group
+            _log.debug("processed welcome, roster: %r", list(roster.keys()))
             await self.prepare_transition(transition_id, self._session.get_protocol_version())
 
     async def prepare_epoch(self, epoch: int) -> None:
