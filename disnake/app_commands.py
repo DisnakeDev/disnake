@@ -11,7 +11,6 @@ from .enums import (
     ApplicationCommandPermissionType,
     ApplicationCommandType,
     ChannelType,
-    Locale,
     OptionType,
     enum_if_int,
     try_enum,
@@ -25,6 +24,9 @@ from .utils import MISSING, _get_as_snowflake, _maybe_cast, deprecated, warn_dep
 if TYPE_CHECKING:
     from typing_extensions import Self
 
+    from .enums import (
+        Locale,
+    )
     from .i18n import LocalizationProtocol, LocalizationValue, LocalizedOptional, LocalizedRequired
     from .state import ConnectionState
     from .types.interactions import (

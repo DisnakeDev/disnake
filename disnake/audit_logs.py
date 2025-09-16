@@ -19,10 +19,10 @@ from typing import (
     cast,
 )
 
-from . import abc, enums, flags, utils
+from . import enums, flags, utils
 from .app_commands import ApplicationCommandPermissions
 from .asset import Asset
-from .automod import AutoModAction, AutoModTriggerMetadata, _automod_action_factory
+from .automod import AutoModTriggerMetadata, _automod_action_factory
 from .colour import Colour
 from .invite import Invite
 from .mixins import Hashable
@@ -40,8 +40,9 @@ __all__ = (
 if TYPE_CHECKING:
     import datetime
 
+    from . import abc
     from .app_commands import APIApplicationCommand
-    from .automod import AutoModRule
+    from .automod import AutoModAction, AutoModRule
     from .emoji import Emoji
     from .guild import Guild
     from .guild_scheduled_event import GuildScheduledEvent
