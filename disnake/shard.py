@@ -466,6 +466,7 @@ class AutoShardedClient(Client):
         # keep reading the shard while others connect
         self.__shards[shard_id] = ret = Shard(ws, self, self.__queue.put_nowait)
         ret.launch()
+        return None
 
     async def launch_shards(self, *, ignore_session_start_limit: bool = False) -> None:
         shard_count, gateway, session_start_limit = await self.http.get_bot_gateway(

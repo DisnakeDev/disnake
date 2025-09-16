@@ -427,8 +427,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         return self
 
     async def _get_channel(self) -> DMChannel:
-        ch = await self.create_dm()
-        return ch
+        return await self.create_dm()
 
     def _update(self, data: GuildMemberUpdateEvent) -> None:
         # the nickname change is optional,
@@ -499,6 +498,7 @@ class Member(disnake.abc.Messageable, _UserTag):
             ) = modified
             # Signal to dispatch on_user_update
             return to_return, u
+        return None
 
     @property
     def status(self) -> Status:
@@ -664,6 +664,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         """
         if self.activities:
             return self.activities[0]
+        return None
 
     def mentioned_in(self, message: Message) -> bool:
         """Whether the member is mentioned in the specified message.
