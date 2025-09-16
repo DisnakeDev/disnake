@@ -51,9 +51,9 @@ class Emoji(_EmojiTag, AssetMixin):
 
             Returns the emoji rendered for Discord.
 
-    .. versionchanged:: 2.11
+    .. versionchanged:: |vnext|
 
-        This class can now represents app emojis too. You can use :meth:`Emoji.is_app_emoji` to check for this.
+        This class can now represents app emojis. Use :meth:`Emoji.is_app_emoji` to check for this.
 
     Attributes
     ----------
@@ -168,7 +168,7 @@ class Emoji(_EmojiTag, AssetMixin):
     def guild(self) -> Optional[Guild]:
         """Optional[:class:`Guild`]: The guild this emoji belongs to. ``None`` if this is an app emoji.
 
-        .. versionchanged:: 2.11
+        .. versionchanged:: |vnext|
 
             This can now return ``None`` if the emoji is an
             application owned emoji.
@@ -179,7 +179,7 @@ class Emoji(_EmojiTag, AssetMixin):
     def application_id(self) -> Optional[int]:
         """Optional[:class:`int`]: The ID of the application which owns this emoji.
 
-        .. versionadded:: 2.11
+        .. versionadded:: |vnext|
         """
         if self.guild_id is None:
             return None
@@ -189,7 +189,7 @@ class Emoji(_EmojiTag, AssetMixin):
     def is_app_emoji(self) -> bool:
         """:class:`bool`: Whether this is an application emoji.
 
-        .. versionadded:: 2.11
+        .. versionadded:: |vnext|
         """
         return self.guild_id is None
 

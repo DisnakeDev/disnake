@@ -2423,7 +2423,7 @@ class Client:
 
         Retrieves an application level :class:`~disnake.Emoji` based on its ID.
 
-        .. versionadded:: 2.11
+        .. versionadded:: |vnext|
 
         Parameters
         ----------
@@ -2450,7 +2450,7 @@ class Client:
 
         Creates an application emoji.
 
-        .. versionadded:: 2.11
+        .. versionadded:: |vnext|
 
         Parameters
         ----------
@@ -2487,7 +2487,7 @@ class Client:
 
         Retrieves all the :class:`.Emoji` of the application.
 
-        ..  versionadded:: 2.11
+        ..  versionadded:: |vnext|
 
         Raises
         ------
