@@ -129,7 +129,12 @@ class Emoji(_EmojiTag, AssetMixin):
         return f"<:{self.name}:{self.id}>"
 
     def __repr__(self) -> str:
-        return f"<Emoji id={self.id} name={self.name!r} animated={self.animated} managed={self.managed}>"
+        return (
+            f"<Emoji id={self.id} name={self.name!r} animated={self.animated} managed={self.managed} "
+            + (f"{self.guild_id=}" if self.guild_id else "")
+            + (f"{self.application_id=}" if self.application_id else "")
+            + ">"
+        )
 
     def __eq__(self, other: Any) -> bool:
         return isinstance(other, _EmojiTag) and self.id == other.id
@@ -183,7 +188,7 @@ class Emoji(_EmojiTag, AssetMixin):
 
         .. versionadded:: |vnext|
         """
-        if self.guild_id is None:
+        if self.guild_id:
             return None
         return self._state.application_id
 
