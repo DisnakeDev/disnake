@@ -817,9 +817,8 @@ class SelectOption:
             elif isinstance(emoji, _EmojiTag):
                 emoji = emoji._to_partial()
             else:
-                raise TypeError(
-                    f"expected emoji to be str, Emoji, or PartialEmoji not {emoji.__class__}"
-                )
+                msg = f"expected emoji to be str, Emoji, or PartialEmoji not {emoji.__class__}"
+                raise TypeError(msg)
 
         self.emoji = emoji
         self.default = default
@@ -1569,7 +1568,8 @@ def handle_media_item_input(value: MediaItemInput) -> UnfurledMediaItem:
         return UnfurledMediaItem(value.url)
 
     assert_never(value)
-    raise TypeError(f"{type(value).__name__} cannot be converted to UnfurledMediaItem")
+    msg = f"{type(value).__name__} cannot be converted to UnfurledMediaItem"
+    raise TypeError(msg)
 
 
 C = TypeVar("C", bound="Component")
