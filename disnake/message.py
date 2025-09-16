@@ -25,10 +25,7 @@ from typing import (
 
 from . import utils
 from .channel import PartialMessageable
-from .components import (
-    MessageTopLevelComponent,
-    _message_component_factory,
-)
+from .components import MessageTopLevelComponent, _message_component_factory
 from .embeds import Embed
 from .emoji import Emoji
 from .enums import (
@@ -63,9 +60,7 @@ if TYPE_CHECKING:
     from .role import Role
     from .state import ConnectionState
     from .threads import AnyThreadArchiveDuration
-    from .types.components import (
-        MessageTopLevelComponent as MessageTopLevelComponentPayload,
-    )
+    from .types.components import MessageTopLevelComponent as MessageTopLevelComponentPayload
     from .types.embed import Embed as EmbedPayload
     from .types.gateway import (
         MessageReactionAddEvent,
@@ -390,7 +385,7 @@ class Attachment(Hashable):
 
     async def save(
         self,
-        fp: Union[io.BufferedIOBase, PathLike],
+        fp: Union[io.BufferedIOBase, PathLike[str], PathLike[bytes]],
         *,
         seek_begin: bool = True,
         use_cached: bool = False,
@@ -435,7 +430,7 @@ class Attachment(Hashable):
                 fp.seek(0)
             return written
         else:
-            with open(fp, "wb") as f:
+            with open(fp, "wb") as f:  # noqa: ASYNC230
                 return f.write(data)
 
     async def read(self, *, use_cached: bool = False) -> bytes:
@@ -1241,17 +1236,12 @@ class Message(Hashable):
             "role_subscription_data"
         )
 
-        try:
-            ref = data["message_reference"]
-        except KeyError:
-            self.reference = None
-        else:
-            self.reference = ref = MessageReference.with_state(state, ref)
-            try:
+        self.reference: Optional[MessageReference] = None
+        if "message_reference" in data:
+            self.reference = ref = MessageReference.with_state(state, data["message_reference"])
+
+            if "referenced_message" in data:
                 resolved = data["referenced_message"]
-            except KeyError:
-                pass
-            else:
                 if resolved is None:
                     ref.resolved = DeletedReferencedMessage(ref)
                 else:
@@ -1276,10 +1266,8 @@ class Message(Hashable):
         ]
 
         for handler in ("author", "member", "mentions", "mention_roles"):
-            try:
-                getattr(self, f"_handle_{handler}")(data[handler])
-            except KeyError:
-                continue
+            if handler in data:
+                getattr(self, f"_handle_{handler}")(data[handler])  # type: ignore
 
     def __repr__(self) -> str:
         name = self.__class__.__name__
@@ -1829,6 +1817,8 @@ class Message(Hashable):
             else:
                 msg += "\n\nThere was no winner."
             return msg
+        if self.type is MessageType.emoji_added:
+            return f"{self.author.name} added a new emoji."
 
         # in the event of an unknown or unsupported message type, we return nothing
         return None

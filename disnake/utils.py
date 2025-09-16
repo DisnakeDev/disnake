@@ -48,7 +48,35 @@ from typing import (
 )
 from urllib.parse import parse_qs, urlencode
 
+if TYPE_CHECKING:
+    from typing_extensions import Self
+
 from .enums import Locale
+
+if sys.version_info >= (3, 14):
+    import threading
+    from inspect import iscoroutinefunction as iscoroutinefunction
+
+    def get_event_loop():
+        try:
+            # If there is no event loop, this will raise a RuntimeError starting with Python 3.14+.
+            # In that case, we create and set a new loop below.
+            # This is more of a bandaid fix, we should really use asyncio.run in the long term.
+            return asyncio.get_event_loop()
+        except RuntimeError:
+            if threading.current_thread() is not threading.main_thread():
+                raise
+            asyncio.set_event_loop(loop := asyncio.new_event_loop())
+            return loop
+else:
+    from asyncio import iscoroutinefunction as iscoroutinefunction
+
+    def get_event_loop():
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", DeprecationWarning)
+            # get_event_loop emits deprecation warnings in 3.10-3.13
+            return asyncio.get_event_loop()
+
 
 try:
     import orjson
@@ -240,7 +268,7 @@ def isoformat_utc(dt: Optional[datetime.datetime]) -> Optional[str]:
     return None
 
 
-def copy_doc(original: Union[Callable, property]) -> Callable[[T], T]:
+def copy_doc(original: Union[Callable[..., Any], property]) -> Callable[[T], T]:
     def decorator(overridden: T) -> T:
         overridden.__doc__ = original.__doc__
         if callable(original):
@@ -590,7 +618,7 @@ async def maybe_coroutine(
     if _isawaitable(value):
         return await value
     else:
-        return value  # type: ignore  # typeguard doesn't narrow in the negative case
+        return value
 
 
 async def async_all(gen: Iterable[Union[Awaitable[bool], bool]]) -> bool:
@@ -795,7 +823,7 @@ def resolve_template(code: Union[Template, str]) -> str:
 
 
 _MARKDOWN_ESCAPE_SUBREGEX = "|".join(
-    r"\{0}(?=([\s\S]*((?<!\{0})\{0})))".format(c) for c in ("*", "`", "_", "~", "|")
+    rf"\{c}(?=([\s\S]*((?<!\{c})\{c})))" for c in ("*", "`", "_", "~", "|")
 )
 
 _MARKDOWN_ESCAPE_COMMON = r"^>(?:>>)?\s|\[.+\]\(.+\)"
@@ -1027,7 +1055,7 @@ def _get_option_desc(lines: List[str]) -> Dict[str, _DocstringParam]:
     return options
 
 
-def parse_docstring(func: Callable) -> _ParsedDocstring:
+def parse_docstring(func: Callable[..., Any]) -> _ParsedDocstring:
     doc = _getdoc(func)
     if doc is None:
         return {
@@ -1185,7 +1213,7 @@ def evaluate_annotation(
     if hasattr(tp, "__args__"):
         if not hasattr(tp, "__origin__"):
             if tp.__class__ is UnionType:
-                converted = Union[tp.__args__]  # type: ignore
+                converted = Union[tp.__args__]
                 return evaluate_annotation(converted, globals, locals, cache)
 
             return tp

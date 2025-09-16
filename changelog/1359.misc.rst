@@ -1,1 +1,0 @@
-Rework the ``nox -s coverage`` session to allow providing arguments directly to coverage.py.

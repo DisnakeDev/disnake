@@ -111,12 +111,10 @@ class _BaseActivity:
         .. versionchanged:: 2.6
             This attribute can now be ``None``.
         """
-        try:
-            timestamp = self._timestamps["start"] / 1000
-        except KeyError:
+        if "start" not in self._timestamps:
             return None
-        else:
-            return datetime.datetime.fromtimestamp(timestamp, tz=datetime.timezone.utc)
+        timestamp = self._timestamps["start"] / 1000
+        return datetime.datetime.fromtimestamp(timestamp, tz=datetime.timezone.utc)
 
     @property
     def end(self) -> Optional[datetime.datetime]:
@@ -125,12 +123,10 @@ class _BaseActivity:
         .. versionchanged:: 2.6
             This attribute can now be ``None``.
         """
-        try:
-            timestamp = self._timestamps["end"] / 1000
-        except KeyError:
+        if "end" not in self._timestamps:
             return None
-        else:
-            return datetime.datetime.fromtimestamp(timestamp, tz=datetime.timezone.utc)
+        timestamp = self._timestamps["end"] / 1000
+        return datetime.datetime.fromtimestamp(timestamp, tz=datetime.timezone.utc)
 
     def to_dict(self) -> ActivityPayload:
         raise NotImplementedError
@@ -152,12 +148,9 @@ class _BaseActivity:
             Moved from :class:`Activity` to base type, making this available to all activity types.
             Additionally, supports dynamic asset urls using the ``mp:`` prefix now.
         """
-        try:
-            large_image = self.assets["large_image"]
-        except KeyError:
-            return None
-        else:
-            return self._create_image_url(large_image)
+        if "large_image" in self.assets:
+            return self._create_image_url(self.assets["large_image"])
+        return None
 
     @property
     def small_image_url(self) -> Optional[str]:
@@ -167,12 +160,9 @@ class _BaseActivity:
             Moved from :class:`Activity` to base type, making this available to all activity types.
             Additionally, supports dynamic asset urls using the ``mp:`` prefix now.
         """
-        try:
-            small_image = self.assets["small_image"]
-        except KeyError:
-            return None
-        else:
-            return self._create_image_url(small_image)
+        if "small_image" in self.assets:
+            return self._create_image_url(self.assets["small_image"])
+        return None
 
     @property
     def large_image_text(self) -> Optional[str]:
@@ -613,12 +603,10 @@ class Streaming(BaseActivity):
         This corresponds to the ``large_image`` key of the :attr:`Streaming.assets`
         dictionary if it starts with ``twitch:``. Typically set by the Discord client.
         """
-        try:
-            name = self.assets["large_image"]
-        except KeyError:
+        if "large_image" not in self.assets:
             return None
-        else:
-            return name[7:] if name[:7] == "twitch:" else None
+        name = self.assets["large_image"]
+        return name[7:] if name[:7] == "twitch:" else None
 
     def to_dict(self) -> Dict[str, Any]:
         ret: Dict[str, Any] = {

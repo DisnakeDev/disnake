@@ -48,7 +48,7 @@ jobs:
 
   # Used to determine which python versions to test against.
   # noxfile.py is the source of truth, which in turn draws from
-  # pyproject.toml's `project.requires-python` and `project.classifers`.
+  # pyproject.toml's `project.requires-python` and `project.classifiers`.
   python-versions:
     runs-on: ubuntu-latest
     outputs:
@@ -71,10 +71,17 @@ jobs:
           echo docs=$(nox -s docs --list --json | jq -rc '.[].python') | tee --append $GITHUB_OUTPUT
           echo libcst=$(nox -s codemod --list --json | jq -rc '[.[].python][0]') | tee --append $GITHUB_OUTPUT
           echo tests=$(nox -s test --list --json | jq -c '[.[].python]') | tee --append $GITHUB_OUTPUT
+
   lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Cache pre-commit
+        uses: actions/cache@v4
+        with:
+          key: pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}
+          path: ~/.cache/pip
 
       - name: Run pre-commit
         id: pre-commit
@@ -100,7 +107,7 @@ jobs:
           python-version: ${{ needs.python-versions.outputs.docs }}
 
       - name: Run sphinx-build
-        run: nox --force-python ${{ steps.setup-env.outputs.python-version }} -s docs -- --keep-going -W -w $GITHUB_STEP_SUMMARY
+        run: nox -s docs -- --keep-going -W -w $GITHUB_STEP_SUMMARY
 
   pyright:
     runs-on: ubuntu-latest
@@ -110,32 +117,31 @@ jobs:
       - lint
     strategy:
       matrix:
+        # TODO: add 3.14 once we switch to uv
         python-version: ${{ fromJson(needs.python-versions.outputs.pyright) }}
         experimental: [false]
       fail-fast: false
     continue-on-error: ${{ matrix.experimental }}
-
+    env:
+      NOXFORCEPYTHON: ${{ matrix.python-version }}
     steps:
       - uses: actions/checkout@v4
 
       - name: Set up environment
         id: setup-env
         uses: ./.github/actions/setup-env
-        env:
-          PDM_USE_VENV: true
-          PDM_VENV_IN_PROJECT: true
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install dependencies
-        # `--no-venv` to install in the main pdm venv instead of nox's pyright-specific one
-        # because nox uses pdm internally to install, this means that the venv that is used is
-        # the one that pdm would create in project: `.venv`
-        run: |
-          nox -s pyright --no-venv --install-only --force-python ${{ steps.setup-env.outputs.python-version }}
-
       - name: Add .venv/bin to PATH
         run: dirname "$(pdm info --python)" >> $GITHUB_PATH
+
+      - name: Install dependencies
+        env:
+          NOX_DEFAULT_VENV_BACKEND: none
+          PIP_PYTHON: "./.venv/bin/python"
+        run: |
+          nox -s pyright --install-only
 
       - name: Set pyright version
         id: pyright-version
@@ -179,7 +185,8 @@ jobs:
 
       - name: Run slotscheck
         if: (success() || failure()) && steps.setup.outcome == 'success'
-        run: nox -s slotscheck
+        run: |
+          nox -s slotscheck
 
       - name: Run check-manifest
         if: (success() || failure()) && steps.setup.outcome == 'success'
@@ -217,7 +224,7 @@ jobs:
         run: |
           nox -s codemod -- run-all
 
-      - name: Check for changes made by libcst codemod
+      - name: Check for changes by libcst
         run: |
           if [ -n "$(git status --porcelain)" ]; then
             echo "::error::Please run 'nox -s codemod -- run-all' locally and commit the changes." >&2;
@@ -241,10 +248,14 @@ jobs:
     strategy:
       matrix:
         os: ["windows-latest", "ubuntu-latest", "macos-latest"]
+        # TODO: add 3.14 once we switch to uv
         python-version: ${{ fromJson(needs.python-versions.outputs.tests) }}
         experimental: [false]
       fail-fast: true
     continue-on-error: ${{ matrix.experimental }}
+    env:
+      NOXSESSION: test
+      NOXFORCEPYTHON: python
     steps:
       - uses: actions/checkout@v4
 
@@ -256,7 +267,7 @@ jobs:
 
       - name: Install nox environment
         run: |
-          nox -s test --no-venv --install-only --force-python ${{ steps.setup-env.outputs.python-version }}
+          nox --install-only
 
       - name: Run pytest
         id: run_tests
@@ -265,14 +276,16 @@ jobs:
           TZ: "America/New_York"
         run: |
           echo "$GITHUB_STEP_SUMMARY_HEADER" | sed "s/#name#/Test Summary/" >> $GITHUB_STEP_SUMMARY
-          pdm run nox --no-venv -s test -- --color=no --cov-report= | tee -a $GITHUB_STEP_SUMMARY
+          nox --no-install -- --color=no --cov-report= | tee -a $GITHUB_STEP_SUMMARY
           echo "$GITHUB_STEP_SUMMARY_FOOTER" >> $GITHUB_STEP_SUMMARY
 
       - name: Print Coverage Output
         if: always() && (steps.run_tests.outcome == 'success' || steps.run_tests.outcome == 'failure')
+        env:
+          NOXSESSION: coverage
         run: |
           echo "$GITHUB_STEP_SUMMARY_HEADER" | sed "s/#name#/Coverage Summary/" >> $GITHUB_STEP_SUMMARY
-          pdm run nox --no-venv -s coverage -- report | tee -a $GITHUB_STEP_SUMMARY
+          nox --no-install -- report | tee -a $GITHUB_STEP_SUMMARY
           echo "$GITHUB_STEP_SUMMARY_FOOTER" >> $GITHUB_STEP_SUMMARY
 
   # thanks to aiohttp for this part of the workflow

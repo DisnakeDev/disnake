@@ -1,1 +1,0 @@
-Avoid stripping port from voice websocket endpoints.
