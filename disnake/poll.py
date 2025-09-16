@@ -290,7 +290,7 @@ class Poll:
         :data:`None` if this poll does not originate from the discord API.
         """
         if not self.message:
-            return
+            return None
         return utils.snowflake_time(self.message.id)
 
     @property
@@ -302,12 +302,12 @@ class Poll:
         """
         # non-expiring poll
         if not self.duration:
-            return
+            return None
 
         created_at = self.created_at
         # manually built object
         if not created_at:
-            return
+            return None
         return created_at + self.duration
 
     @property
@@ -321,7 +321,7 @@ class Poll:
         if self.is_finalized:
             return timedelta(hours=0)
         if not self.expires_at or not self.message:
-            return
+            return None
 
         return self.expires_at - utils.utcnow()
 

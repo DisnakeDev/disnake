@@ -138,7 +138,7 @@ class PermissionTypings(BaseCodemodCommand):
             msg = 'a function cannot be decorated with "_overload_with_permissions" and not take any kwargs unless it is an overload.'
             raise RuntimeError(msg)
         # always true if this isn't an overload
-        elif node.params.star_kwarg:
+        if node.params.star_kwarg:
             # use the existing annotation if one exists
             annotation = node.params.star_kwarg.annotation
             if annotation is None:
@@ -166,8 +166,7 @@ class PermissionTypings(BaseCodemodCommand):
         params = params.with_changes(kwonly_params=kwonly_params)
 
         if is_overload:
-            node = node.with_changes(params=params)
-            return node
+            return node.with_changes(params=params)
 
         # make an overload before permissions
         empty_overload = node.deep_clone().with_changes(params=empty_overload_params)

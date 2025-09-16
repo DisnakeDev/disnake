@@ -253,18 +253,18 @@ class Emoji(_EmojiTag, AssetMixin):
         InvalidData
             The emoji data is invalid and cannot be processed.
         """
-        if self.guild_id is None:
-            # this is an app emoji
-            if self.application_id is None:
-                # should never happen
-                msg = (
-                    f"guild_id and application_id are both None when attempting to delete emoji with ID {self.id}."
-                    " This may be a library bug! Open an issue on GitHub."
-                )
-                raise InvalidData(msg)
-
-            return await self._state.http.delete_app_emoji(self.application_id, self.id)
-        await self._state.http.delete_custom_emoji(self.guild_id, self.id, reason=reason)
+        if self.guild_id is not None:
+            await self._state.http.delete_custom_emoji(self.guild_id, self.id, reason=reason)
+            return
+        if self.application_id is not None:
+            await self._state.http.delete_app_emoji(self.application_id, self.id)
+            return
+        # should never happen
+        msg = (
+            f"guild_id and application_id are both None when attempting to delete emoji with ID {self.id}."
+            " This may be a library bug! Open an issue on GitHub."
+        )
+        raise InvalidData(msg)
 
     async def edit(
         self, *, name: str = MISSING, roles: List[Snowflake] = MISSING, reason: Optional[str] = None

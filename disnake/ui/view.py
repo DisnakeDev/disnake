@@ -156,7 +156,7 @@ class View:
         while True:
             # Guard just in case someone changes the value of the timeout at runtime
             if self.timeout is None:
-                return
+                return None
 
             if self.__timeout_expiry is None:
                 return self._dispatch_timeout()
@@ -223,7 +223,7 @@ class View:
         for component in walk_components(message.components):
             if isinstance(component, ActionRowComponent):
                 continue
-            elif not isinstance(component, VALID_ACTION_ROW_MESSAGE_COMPONENT_TYPES):
+            if not isinstance(component, VALID_ACTION_ROW_MESSAGE_COMPONENT_TYPES):
                 # can happen if message uses components v2
                 msg = f"Cannot construct view from message - unexpected {type(component).__name__}"
                 raise TypeError(msg)
@@ -360,7 +360,7 @@ class View:
 
             allow = await self.interaction_check(interaction)
             if not allow:
-                return
+                return None
 
             await item.callback(interaction)
         except Exception as e:

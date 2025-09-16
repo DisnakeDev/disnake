@@ -1321,6 +1321,7 @@ class Client:
             except KeyboardInterrupt:
                 # I am unsure why this gets raised here but suppress it anyway
                 return None
+        return None
 
     # properties
 
@@ -1458,6 +1459,7 @@ class Client:
 
         if isinstance(channel, StageChannel):
             return channel.instance
+        return None
 
     def get_guild(self, id: int, /) -> Optional[Guild]:
         """Returns a guild with the given ID.
