@@ -1016,7 +1016,8 @@ class _Clazz:
     @decorator
     def decorated(self) -> None: ...
 
-    _lambda: Callable[["_Clazz"], None] = lambda _: None
+    # we cannot stringify this file due to it testing annotation resolving
+    _lambda: Callable[["_Clazz"], None] = lambda _: None  # noqa: UP037
 
 
 @pytest.mark.parametrize(
