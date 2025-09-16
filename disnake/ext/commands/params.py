@@ -12,7 +12,6 @@ import itertools
 import math
 import types
 from abc import ABC, abstractmethod
-from collections.abc import Sequence
 from dataclasses import dataclass
 from enum import Enum, EnumMeta
 from types import EllipsisType, UnionType
@@ -52,6 +51,8 @@ from .converter import CONVERTER_MAPPING
 T_ = TypeVar("T_")
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
     from typing_extensions import Concatenate, ParamSpec, Self, TypeGuard
 
     from disnake.app_commands import Choices

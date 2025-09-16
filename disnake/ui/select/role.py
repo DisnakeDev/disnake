@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -13,7 +12,6 @@ from typing import (
     overload,
 )
 
-from ...abc import Snowflake
 from ...components import RoleSelectMenu
 from ...enums import ComponentType, SelectDefaultValueType
 from ...object import Object
@@ -22,8 +20,11 @@ from ...utils import MISSING
 from .base import BaseSelect, P, SelectDefaultValueInputType, V_co, _create_decorator
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping, Sequence
+
     from typing_extensions import Self
 
+    from ...abc import Snowflake
     from ..item import DecoratedItem, ItemCallbackType
 
 

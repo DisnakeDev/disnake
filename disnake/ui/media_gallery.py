@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
 from typing import TYPE_CHECKING, ClassVar
 
 from ..components import MediaGallery as MediaGalleryComponent, MediaGalleryItem
@@ -11,6 +10,8 @@ from ..utils import MISSING
 from .item import UIComponent
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
     from typing_extensions import Self
 
 __all__ = ("MediaGallery",)

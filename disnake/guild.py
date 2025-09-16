@@ -5,7 +5,6 @@ from __future__ import annotations
 import copy
 import datetime
 import unicodedata
-from collections.abc import Iterable, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -20,7 +19,6 @@ from typing import (
 )
 
 from . import abc, utils
-from .app_commands import GuildApplicationCommandPermissions
 from .asset import Asset
 from .automod import AutoModAction, AutoModRule
 from .bans import BanEntry, BulkBanResult
@@ -56,7 +54,6 @@ from .enums import (
     try_enum_to_int,
 )
 from .errors import ClientException, HTTPException, InvalidData
-from .file import File
 from .flags import SystemChannelFlags
 from .guild_scheduled_event import GuildScheduledEvent, GuildScheduledEventMetadata
 from .integrations import Integration, _integration_factory
@@ -88,10 +85,13 @@ VocalGuildChannel = Union[VoiceChannel, StageChannel]
 MISSING = utils.MISSING
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable, Sequence
+
     from .abc import Snowflake, SnowflakeTime
-    from .app_commands import APIApplicationCommand
+    from .app_commands import APIApplicationCommand, GuildApplicationCommandPermissions
     from .asset import AssetBytes
     from .automod import AutoModTriggerMetadata
+    from .file import File
     from .permissions import Permissions
     from .state import ConnectionState
     from .template import Template

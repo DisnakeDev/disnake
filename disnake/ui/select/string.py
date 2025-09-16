@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -14,15 +13,17 @@ from typing import (
     overload,
 )
 
-from ...abc import Snowflake
 from ...components import SelectOption, StringSelectMenu
 from ...enums import ComponentType, SelectDefaultValueType
 from ...utils import MISSING
 from .base import BaseSelect, P, V_co, _create_decorator
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from typing_extensions import Self
 
+    from ...abc import Snowflake
     from ...emoji import Emoji
     from ...partial_emoji import PartialEmoji
     from ..item import DecoratedItem, ItemCallbackType

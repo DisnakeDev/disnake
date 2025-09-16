@@ -5,7 +5,6 @@ from __future__ import annotations
 import asyncio
 import logging
 import re
-from collections.abc import Sequence
 from contextvars import ContextVar
 from errno import ECONNRESET
 from typing import (
@@ -48,6 +47,7 @@ _log = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     import datetime
+    from collections.abc import Sequence
     from types import TracebackType
 
     from typing_extensions import Self

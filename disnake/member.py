@@ -5,7 +5,6 @@ from __future__ import annotations
 import datetime
 import itertools
 import sys
-from collections.abc import Sequence
 from operator import attrgetter
 from typing import (
     TYPE_CHECKING,
@@ -37,6 +36,8 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
     from typing_extensions import Self
 
     from .abc import Snowflake

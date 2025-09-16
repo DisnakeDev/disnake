@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import asyncio
 import time
-from collections.abc import Iterable, Sequence
 from typing import TYPE_CHECKING, Callable, Literal, Optional, Union
 
 from .abc import GuildChannel, Messageable
@@ -25,6 +24,7 @@ __all__ = (
 
 if TYPE_CHECKING:
     import datetime
+    from collections.abc import Iterable, Sequence
 
     from typing_extensions import Self
 

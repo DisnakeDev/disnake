@@ -5,7 +5,6 @@ from __future__ import annotations
 import functools
 import inspect
 import re
-from collections.abc import Iterable
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -50,6 +49,8 @@ from .errors import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
+
     from disnake.abc import MessageableChannel
 
 

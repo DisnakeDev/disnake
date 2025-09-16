@@ -6,7 +6,6 @@ import asyncio
 import datetime
 import functools
 import inspect
-from collections.abc import Generator
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -59,6 +58,8 @@ from .errors import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Generator
+
     from typing_extensions import Concatenate, ParamSpec, Self
 
     from disnake.message import Message

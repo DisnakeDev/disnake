@@ -40,7 +40,6 @@ from ..errors import (
 )
 from ..flags import InteractionContextTypes, MessageFlags
 from ..guild import Guild
-from ..http import HTTPClient
 from ..i18n import Localized
 from ..member import Member
 from ..message import Attachment, AuthorizingIntegrationOwners, Message
@@ -69,6 +68,7 @@ if TYPE_CHECKING:
     from ..embeds import Embed
     from ..ext.commands import AutoShardedBot, Bot
     from ..file import File
+    from ..http import HTTPClient
     from ..mentions import AllowedMentions
     from ..poll import Poll
     from ..state import ConnectionState

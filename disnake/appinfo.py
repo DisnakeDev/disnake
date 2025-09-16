@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
 from typing import TYPE_CHECKING, Optional, cast
 
 from . import utils
@@ -13,6 +12,8 @@ from .permissions import Permissions
 from .utils import MISSING
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
     from .guild import Guild
     from .state import ConnectionState
     from .types.appinfo import (

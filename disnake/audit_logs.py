@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from collections.abc import Generator, Mapping
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -22,7 +21,6 @@ from .colour import Colour
 from .invite import Invite
 from .mixins import Hashable
 from .object import Object
-from .partial_emoji import PartialEmoji
 from .permissions import PermissionOverwrite, Permissions
 from .threads import ForumTag, Thread
 
@@ -35,6 +33,7 @@ __all__ = (
 
 if TYPE_CHECKING:
     import datetime
+    from collections.abc import Generator, Mapping
 
     from .app_commands import APIApplicationCommand
     from .automod import AutoModRule
@@ -43,6 +42,7 @@ if TYPE_CHECKING:
     from .guild_scheduled_event import GuildScheduledEvent
     from .integrations import PartialIntegration
     from .member import Member
+    from .partial_emoji import PartialEmoji
     from .role import Role
     from .stage_instance import StageInstance
     from .sticker import GuildSticker

@@ -11,7 +11,6 @@ import logging
 import os
 import weakref
 from collections import OrderedDict, deque
-from collections.abc import Coroutine, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -92,6 +91,8 @@ from .utils import MISSING
 from .webhook import Webhook
 
 if TYPE_CHECKING:
+    from collections.abc import Coroutine, Sequence
+
     from typing_extensions import Concatenate
 
     from .abc import AnyChannel, MessageableChannel, PrivateChannel
