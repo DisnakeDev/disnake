@@ -40,13 +40,13 @@ from .enums import (
 )
 from .errors import ClientException
 from .file import File
-from .flags import ChannelFlags, MessageFlags
+from .flags import ChannelFlags
 from .iterators import ArchivedThreadIterator
 from .mixins import Hashable
 from .object import Object
 from .partial_emoji import PartialEmoji
-from .permissions import PermissionOverwrite, Permissions
-from .soundboard import GuildSoundboardSound, PartialSoundboardSound, SoundboardSound
+from .permissions import Permissions
+from .soundboard import GuildSoundboardSound, PartialSoundboardSound
 from .stage_instance import StageInstance
 from .threads import ForumTag, Thread
 from .utils import MISSING
@@ -75,10 +75,13 @@ if TYPE_CHECKING:
     from .asset import AssetBytes
     from .embeds import Embed
     from .emoji import Emoji
+    from .flags import MessageFlags
     from .guild import Guild, GuildChannel as GuildChannelType
     from .member import Member, VoiceState
     from .message import AllowedMentions, Message, PartialMessage
+    from .permissions import PermissionOverwrite
     from .role import Role
+    from .soundboard import SoundboardSound
     from .state import ConnectionState
     from .sticker import GuildSticker, StandardSticker, StickerItem
     from .threads import AnyThreadArchiveDuration, ThreadType

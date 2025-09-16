@@ -25,8 +25,6 @@ from typing import (
 
 from ..components import (
     ActionRow as ActionRowComponent,
-    ActionRowChildComponent,
-    ActionRowMessageComponent as ActionRowMessageComponentRaw,
     Button as ButtonComponent,
     ChannelSelectMenu as ChannelSelectComponent,
     Component,
@@ -44,15 +42,13 @@ from ..components import (
     Thumbnail as ThumbnailComponent,
     UserSelectMenu as UserSelectComponent,
 )
-from ..enums import ButtonStyle, ChannelType, ComponentType, TextInputStyle
+from ..enums import ButtonStyle, ComponentType, TextInputStyle
 from ..utils import MISSING, SequenceProxy, assert_never, copy_doc, deprecated
 from ._types import (
     ActionRowChildT,
     ActionRowMessageComponent,
     ActionRowModalComponent,
     ComponentInput,
-    MessageTopLevelComponent,
-    NonActionRowChildT,
 )
 from .button import Button
 from .container import Container
@@ -71,7 +67,12 @@ if TYPE_CHECKING:
     from typing_extensions import Self, TypeAlias
 
     from ..abc import AnyChannel
+    from ..components import (
+        ActionRowChildComponent,
+        ActionRowMessageComponent as ActionRowMessageComponentRaw,
+    )
     from ..emoji import Emoji
+    from ..enums import ChannelType
     from ..member import Member
     from ..message import Message
     from ..partial_emoji import PartialEmoji
@@ -81,6 +82,10 @@ if TYPE_CHECKING:
         MessageTopLevelComponent as MessageTopLevelComponentPayload,
     )
     from ..user import User
+    from ._types import (
+        MessageTopLevelComponent,
+        NonActionRowChildT,
+    )
     from .select.base import SelectDefaultValueInputType, SelectDefaultValueMultiInputType
     from .select.string import SelectOptionInput
 

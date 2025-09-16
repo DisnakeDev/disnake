@@ -11,6 +11,7 @@
 #
 # All configuration values have a default; values that are commented out
 # serve to show the default.
+from __future__ import annotations
 
 import importlib.util
 import inspect
@@ -18,9 +19,10 @@ import os
 import re
 import subprocess  # noqa: TID251
 import sys
-from typing import Any, Dict, Optional
+from typing import TYPE_CHECKING, Any, Dict, Optional
 
-from sphinx.application import Sphinx
+if TYPE_CHECKING:
+    from sphinx.application import Sphinx
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the

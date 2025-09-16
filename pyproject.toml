@@ -135,7 +135,7 @@ skip = ['docs/_static/**', '*.po']
 ignore-words-list = ['GroupT', "OT",]
 
 [tool.ruff.lint]
-future-annotations = false
+future-annotations = true
 select = ["ALL"]
 ignore = [
     ## eradicate
