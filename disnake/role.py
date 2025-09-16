@@ -374,7 +374,7 @@ class Role(Hashable):
 
         :return type: :class:`bool`
         """
-        return self.secondary_color != None and self.tertiary_color == None
+        return self.secondary_color is not None and self.tertiary_color is None
     
     def has_holographic_gradient(self) -> bool:
         """
@@ -384,7 +384,7 @@ class Role(Hashable):
 
         :return type: :class:`bool`
         """
-        return self.tertiary_color != None
+        return self.tertiary_color is not None
 
     @property
     def permissions(self) -> Permissions:
