@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Iterator, List, Optional, Tuple, Union
 
 from .asset import Asset, AssetMixin
+from .errors import InvalidData
 from .partial_emoji import PartialEmoji, _EmojiTag
 from .user import User
 from .utils import MISSING, SnowflakeList, snowflake_time
@@ -228,12 +229,15 @@ class Emoji(_EmojiTag, AssetMixin):
             You are not allowed to delete this emoji.
         HTTPException
             An error occurred deleting the emoji.
+        InvalidData
+            The emoji data is invalid and cannot be processed.
         """
         # this is an app emoji
         if self.guild is None:
             if self.application_id is None:
                 # should never happen
-                raise ValueError("This may be a library bug! Open an issue on GitHub.")
+                msg = f"guild and application_id are both None when attempting to delete emoji with ID {self.id} This may be a library bug! Open an issue on GitHub."
+                raise InvalidData(msg)
 
             return await self._state.http.delete_app_emoji(self.application_id, self.id)
         await self._state.http.delete_custom_emoji(self.guild.id, self.id, reason=reason)
@@ -270,6 +274,8 @@ class Emoji(_EmojiTag, AssetMixin):
             You are not allowed to edit this emoji.
         HTTPException
             An error occurred editing the emoji.
+        InvalidData
+            The emoji data is invalid and cannot be processed.
 
         Returns
         -------
@@ -285,7 +291,8 @@ class Emoji(_EmojiTag, AssetMixin):
         if self.guild is None:
             if self.application_id is None:
                 # should never happen
-                raise ValueError("This may be a library bug! Open an issue on GitHub.")
+                msg = f"guild and application_id are both None when attempting to edit emoji with ID {self.id} This may be a library bug! Open an issue on GitHub."
+                raise InvalidData(msg)
 
             data = await self._state.http.edit_app_emoji(self.application_id, self.id, name)
         else:
