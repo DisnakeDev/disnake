@@ -34,7 +34,7 @@ from typing import (
 import disnake
 from disnake.app_commands import Option, OptionChoice
 from disnake.channel import _channel_type_factory
-from disnake.enums import ChannelType, OptionType, try_enum_to_int
+from disnake.enums import OptionType, try_enum_to_int
 from disnake.ext import commands
 from disnake.i18n import Localized
 from disnake.interactions import ApplicationCommandInteraction
@@ -56,6 +56,7 @@ if TYPE_CHECKING:
     from typing_extensions import Concatenate, ParamSpec, Self, TypeGuard
 
     from disnake.app_commands import Choices
+    from disnake.enums import ChannelType
     from disnake.i18n import LocalizationValue, LocalizedOptional
     from disnake.types.interactions import ApplicationCommandOptionChoiceValue
 

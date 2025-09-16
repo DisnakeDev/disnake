@@ -17,7 +17,7 @@ from ...enums import ComponentType, SelectDefaultValueType
 from ...object import Object
 from ...role import Role
 from ...utils import MISSING
-from .base import BaseSelect, P, SelectDefaultValueInputType, V_co, _create_decorator
+from .base import BaseSelect, V_co, _create_decorator
 
 if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
@@ -26,6 +26,7 @@ if TYPE_CHECKING:
 
     from ...abc import Snowflake
     from ..item import DecoratedItem, ItemCallbackType
+    from .base import P, SelectDefaultValueInputType
 
 
 __all__ = (

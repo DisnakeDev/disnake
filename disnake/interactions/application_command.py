@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Optional, Union
 
 from .. import utils
-from ..enums import ApplicationCommandType, Locale, OptionType, try_enum
+from ..enums import ApplicationCommandType, OptionType, try_enum
 from .base import ClientT, Interaction, InteractionDataResolved
 
 __all__ = (
@@ -31,6 +31,7 @@ MISSING = utils.MISSING
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
+    from ..enums import Locale
     from ..ext.commands import InvokableApplicationCommand
     from ..guild import Guild
     from ..member import Member

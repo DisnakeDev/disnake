@@ -6,7 +6,6 @@ import copy
 import functools
 import itertools
 import re
-from re import Match
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -25,6 +24,7 @@ from .errors import CommandError
 
 if TYPE_CHECKING:
     from collections.abc import Generator, Iterable, Mapping, Sequence
+    from re import Match
 
     from typing_extensions import Self
 

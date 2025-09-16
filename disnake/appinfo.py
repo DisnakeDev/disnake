@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Optional, cast
 
 from . import utils
-from .asset import Asset, AssetBytes
+from .asset import Asset
 from .enums import ApplicationEventWebhookStatus, try_enum
 from .flags import ApplicationFlags
 from .permissions import Permissions
@@ -14,6 +14,7 @@ from .utils import MISSING
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
+    from .asset import AssetBytes
     from .guild import Guild
     from .state import ConnectionState
     from .types.appinfo import (

@@ -7,7 +7,7 @@ import time
 from typing import TYPE_CHECKING, Callable, Literal, Optional, Union
 
 from .abc import GuildChannel, Messageable
-from .enums import ChannelType, ThreadArchiveDuration, try_enum, try_enum_to_int
+from .enums import ChannelType, try_enum, try_enum_to_int
 from .errors import ClientException
 from .flags import ChannelFlags
 from .mixins import Hashable
@@ -31,6 +31,7 @@ if TYPE_CHECKING:
     from .abc import Snowflake, SnowflakeTime
     from .channel import CategoryChannel, ForumChannel, MediaChannel, TextChannel
     from .emoji import Emoji
+    from .enums import ThreadArchiveDuration
     from .guild import Guild
     from .member import Member
     from .message import Message, PartialMessage

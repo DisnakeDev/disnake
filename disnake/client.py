@@ -8,7 +8,7 @@ import signal
 import sys
 import traceback
 import types
-from collections.abc import Coroutine, Generator, Mapping, Sequence
+from collections.abc import Coroutine
 from datetime import datetime, timedelta
 from errno import ECONNRESET
 from typing import (
@@ -27,13 +27,11 @@ from typing import (
 import aiohttp
 
 from . import abc, utils
-from .activity import ActivityTypes, BaseActivity, create_activity
+from .activity import BaseActivity, create_activity
 from .app_commands import (
     APIMessageCommand,
     APISlashCommand,
     APIUserCommand,
-    ApplicationCommand,
-    GuildApplicationCommandPermissions,
 )
 from .appinfo import AppInfo
 from .application_role_connection import ApplicationRoleConnectionMetadata
@@ -41,7 +39,7 @@ from .backoff import ExponentialBackoff
 from .channel import PartialMessageable, _threaded_channel_factory
 from .emoji import Emoji
 from .entitlement import Entitlement
-from .enums import ApplicationCommandType, ChannelType, Event, Status
+from .enums import ChannelType, Event, Status
 from .errors import (
     ConnectionClosed,
     GatewayNotFound,
@@ -54,16 +52,16 @@ from .gateway import DiscordWebSocket, ReconnectWebSocket
 from .guild import Guild, GuildBuilder
 from .guild_preview import GuildPreview
 from .http import HTTPClient
-from .i18n import LocalizationProtocol, LocalizationStore
+from .i18n import LocalizationStore
 from .invite import Invite
 from .iterators import EntitlementIterator, GuildIterator
 from .mentions import AllowedMentions
 from .object import Object
 from .sku import SKU
-from .soundboard import GuildSoundboardSound, SoundboardSound
+from .soundboard import SoundboardSound
 from .stage_instance import StageInstance
 from .state import ConnectionState
-from .sticker import GuildSticker, StandardSticker, StickerPack, _sticker_factory
+from .sticker import StickerPack, _sticker_factory
 from .template import Template
 from .ui.view import View
 from .user import ClientUser, User
@@ -74,15 +72,30 @@ from .webhook import Webhook
 from .widget import Widget
 
 if TYPE_CHECKING:
+    from collections.abc import Generator, Mapping, Sequence
+    from datetime import datetime
+
     from typing_extensions import NotRequired
 
     from .abc import GuildChannel, PrivateChannel, Snowflake, SnowflakeTime
-    from .app_commands import APIApplicationCommand, MessageCommand, SlashCommand, UserCommand
+    from .activity import ActivityTypes
+    from .app_commands import (
+        APIApplicationCommand,
+        ApplicationCommand,
+        GuildApplicationCommandPermissions,
+        MessageCommand,
+        SlashCommand,
+        UserCommand,
+    )
     from .asset import AssetBytes
     from .channel import DMChannel
+    from .enums import ApplicationCommandType
     from .flags import ApplicationFlags, Intents, MemberCacheFlags
+    from .i18n import LocalizationProtocol
     from .member import Member
     from .message import Message
+    from .soundboard import GuildSoundboardSound
+    from .sticker import GuildSticker, StandardSticker
     from .threads import Thread
     from .types.application_role_connection import (
         ApplicationRoleConnectionMetadata as ApplicationRoleConnectionMetadataPayload,

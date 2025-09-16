@@ -14,9 +14,9 @@ from typing import (
 )
 
 from ...components import SelectOption, StringSelectMenu
-from ...enums import ComponentType, SelectDefaultValueType
+from ...enums import ComponentType
 from ...utils import MISSING
-from .base import BaseSelect, P, V_co, _create_decorator
+from .base import BaseSelect, V_co, _create_decorator
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -25,8 +25,10 @@ if TYPE_CHECKING:
 
     from ...abc import Snowflake
     from ...emoji import Emoji
+    from ...enums import SelectDefaultValueType
     from ...partial_emoji import PartialEmoji
     from ..item import DecoratedItem, ItemCallbackType
+    from .base import P
 
 
 __all__ = (

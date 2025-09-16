@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Literal, Optional, TypedDict, Union
 
-from .components import MessageTopLevelComponent, Modal
+from .components import Modal
 from .snowflake import Snowflake
 
 if TYPE_CHECKING:
@@ -12,6 +12,7 @@ if TYPE_CHECKING:
 
     from .appinfo import ApplicationIntegrationType
     from .channel import ChannelType
+    from .components import MessageTopLevelComponent
     from .embed import Embed
     from .entitlement import Entitlement
     from .i18n import LocalizationDict

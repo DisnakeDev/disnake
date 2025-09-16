@@ -35,8 +35,6 @@ from .channel import (
 from .colour import Colour
 from .emoji import Emoji
 from .enums import (
-    AuditLogAction,
-    AutoModEventType,
     AutoModTriggerType,
     ChannelType,
     ContentFilter,
@@ -45,10 +43,7 @@ from .enums import (
     Locale,
     NotificationLevel,
     NSFWLevel,
-    ThreadLayout,
-    ThreadSortOrder,
     VerificationLevel,
-    VideoQualityMode,
     WidgetStyle,
     try_enum,
     try_enum_to_int,
@@ -56,7 +51,7 @@ from .enums import (
 from .errors import ClientException, HTTPException, InvalidData
 from .flags import SystemChannelFlags
 from .guild_scheduled_event import GuildScheduledEvent, GuildScheduledEventMetadata
-from .integrations import Integration, _integration_factory
+from .integrations import _integration_factory
 from .invite import Invite
 from .iterators import AuditLogIterator, BanIterator, MemberIterator
 from .member import Member, VoiceState
@@ -91,7 +86,15 @@ if TYPE_CHECKING:
     from .app_commands import APIApplicationCommand, GuildApplicationCommandPermissions
     from .asset import AssetBytes
     from .automod import AutoModTriggerMetadata
+    from .enums import (
+        AuditLogAction,
+        AutoModEventType,
+        ThreadLayout,
+        ThreadSortOrder,
+        VideoQualityMode,
+    )
     from .file import File
+    from .integrations import Integration
     from .permissions import Permissions
     from .state import ConnectionState
     from .template import Template

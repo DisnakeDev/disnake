@@ -23,9 +23,6 @@ from .context_managers import Typing
 from .enums import (
     ChannelType,
     PartyType,
-    ThreadLayout,
-    ThreadSortOrder,
-    VideoQualityMode,
     try_enum_to_int,
 )
 from .errors import ClientException
@@ -62,7 +59,12 @@ if TYPE_CHECKING:
     from .client import Client
     from .embeds import Embed
     from .emoji import Emoji
-    from .enums import InviteTarget
+    from .enums import (
+        InviteTarget,
+        ThreadLayout,
+        ThreadSortOrder,
+        VideoQualityMode,
+    )
     from .guild import Guild, GuildChannel as AnyGuildChannel, GuildMessageable
     from .guild_scheduled_event import GuildScheduledEvent
     from .iterators import ChannelPinsIterator, HistoryIterator

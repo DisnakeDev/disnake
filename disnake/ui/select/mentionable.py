@@ -19,7 +19,7 @@ from ...member import Member
 from ...role import Role
 from ...user import ClientUser, User
 from ...utils import MISSING
-from .base import BaseSelect, P, SelectDefaultValueMultiInputType, V_co, _create_decorator
+from .base import BaseSelect, V_co, _create_decorator
 
 if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
@@ -28,6 +28,7 @@ if TYPE_CHECKING:
 
     from ...abc import Snowflake
     from ..item import DecoratedItem, ItemCallbackType
+    from .base import P, SelectDefaultValueMultiInputType
 
 
 __all__ = (

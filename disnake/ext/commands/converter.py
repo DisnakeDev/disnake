@@ -21,7 +21,7 @@ from typing import (
 
 import disnake
 
-from .context import AnyContext, Context
+from .context import Context
 from .errors import (
     BadArgument,
     BadBoolArgument,
@@ -52,6 +52,8 @@ if TYPE_CHECKING:
     from collections.abc import Iterable
 
     from disnake.abc import MessageableChannel
+
+    from .context import AnyContext
 
 
 # TODO: USE ACTUAL FUNCTIONS INSTEAD OF USELESS CLASSES

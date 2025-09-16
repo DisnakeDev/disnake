@@ -20,8 +20,8 @@ from typing import (
 import disnake.abc
 
 from . import utils
-from .activity import ActivityTypes, create_activity
-from .asset import Asset, AssetBytes
+from .activity import create_activity
+from .asset import Asset
 from .colour import Colour
 from .enums import Status, try_enum
 from .flags import MemberFlags
@@ -41,6 +41,8 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from .abc import Snowflake
+    from .activity import ActivityTypes
+    from .asset import AssetBytes
     from .channel import DMChannel, StageChannel, VoiceChannel
     from .flags import PublicUserFlags
     from .guild import Guild

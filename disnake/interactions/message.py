@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Optional, Union
 
-from ..components import VALID_ACTION_ROW_MESSAGE_COMPONENT_TYPES, ActionRowMessageComponent
+from ..components import VALID_ACTION_ROW_MESSAGE_COMPONENT_TYPES
 from ..enums import ComponentType, try_enum
 from ..message import Message
 from ..ui.action_row import walk_components
@@ -20,6 +20,7 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
     from ..abc import AnyChannel
+    from ..components import ActionRowMessageComponent
     from ..member import Member
     from ..role import Role
     from ..state import ConnectionState

@@ -28,7 +28,7 @@ from disnake.utils import (
     maybe_coroutine,
 )
 
-from .cooldowns import BucketType, CooldownMapping, MaxConcurrency
+from .cooldowns import BucketType, CooldownMapping
 from .errors import CheckFailure, CommandError, CommandInvokeError, CommandOnCooldown
 
 if TYPE_CHECKING:
@@ -39,6 +39,7 @@ if TYPE_CHECKING:
 
     from ._types import AppCheck, Coro, Error, Hook
     from .cog import Cog
+    from .cooldowns import MaxConcurrency
     from .interaction_bot_base import InteractionBotBase
 
     ApplicationCommandInteractionT = TypeVar(
