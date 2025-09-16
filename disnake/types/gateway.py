@@ -2,32 +2,34 @@
 
 from __future__ import annotations
 
-from typing import Any, List, Literal, Optional, Sequence, Tuple, TypedDict, Union
+from typing import TYPE_CHECKING, Any, List, Literal, Optional, Sequence, Tuple, TypedDict, Union
 
 from typing_extensions import NotRequired
 
 from .activity import PartialPresenceUpdate, PresenceData, SendableActivity
-from .appinfo import PartialAppInfo, PartialGatewayAppInfo
 from .audit_log import AuditLogEntry
 from .automod import AutoModAction, AutoModRule, AutoModTriggerType
 from .channel import Channel, GuildChannel, StageInstance
-from .emoji import Emoji, PartialEmoji
 from .entitlement import Entitlement
 from .guild import Guild, UnavailableGuild
 from .guild_scheduled_event import GuildScheduledEvent
 from .integration import BaseIntegration
 from .interactions import BaseInteraction, GuildApplicationCommandPermissions
-from .invite import InviteTargetType, InviteType
 from .member import MemberWithUser
 from .message import Message
-from .role import Role
-from .snowflake import Snowflake, SnowflakeList
 from .soundboard import GuildSoundboardSound
-from .sticker import GuildSticker
 from .subscription import Subscription
 from .threads import Thread, ThreadMember, ThreadMemberWithPresence, ThreadType
 from .user import AvatarDecorationData, User
 from .voice import GuildVoiceState, SupportedModes, VoiceChannelEffect
+
+if TYPE_CHECKING:
+    from .appinfo import PartialAppInfo, PartialGatewayAppInfo
+    from .emoji import Emoji, PartialEmoji
+    from .invite import InviteTargetType, InviteType
+    from .role import Role
+    from .snowflake import Snowflake, SnowflakeList
+    from .sticker import GuildSticker
 
 
 class SessionStartLimit(TypedDict):

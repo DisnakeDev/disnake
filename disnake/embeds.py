@@ -21,7 +21,6 @@ from typing import (
 
 from . import utils
 from .colour import Colour
-from .file import File
 from .utils import MISSING, classproperty, warn_deprecated
 
 __all__ = ("Embed",)
@@ -74,6 +73,8 @@ if TYPE_CHECKING:
         EmbedType,
         EmbedVideo as EmbedVideoPayload,
     )
+
+    from .file import File
 
     class _EmbedFooterProxy(Sized, Protocol):
         text: Optional[str]
