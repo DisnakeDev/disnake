@@ -39,7 +39,7 @@ from .ctx_menus_core import (
 )
 from .errors import CommandRegistrationError
 from .flags import CommandSyncFlags
-from .slash_core import InvokableSlashCommand, SubCommand, SubCommandGroup, slash_command
+from .slash_core import InvokableSlashCommand, SubCommandGroup, slash_command
 
 if TYPE_CHECKING:
     from typing_extensions import NotRequired, ParamSpec
@@ -61,6 +61,7 @@ if TYPE_CHECKING:
         InteractionCommandCallback,
         InvokableApplicationCommand,
     )
+    from .slash_core import SubCommand
 
     P = ParamSpec("P")
 

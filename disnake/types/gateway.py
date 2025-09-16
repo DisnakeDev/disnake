@@ -6,9 +6,9 @@ from typing import TYPE_CHECKING, Any, List, Literal, Optional, Sequence, Tuple,
 
 from typing_extensions import NotRequired
 
-from .activity import PartialPresenceUpdate, PresenceData, SendableActivity
+from .activity import PartialPresenceUpdate
 from .audit_log import AuditLogEntry
-from .automod import AutoModAction, AutoModRule, AutoModTriggerType
+from .automod import AutoModRule
 from .channel import Channel, GuildChannel, StageInstance
 from .entitlement import Entitlement
 from .guild import Guild, UnavailableGuild
@@ -19,17 +19,22 @@ from .member import MemberWithUser
 from .message import Message
 from .soundboard import GuildSoundboardSound
 from .subscription import Subscription
-from .threads import Thread, ThreadMember, ThreadMemberWithPresence, ThreadType
-from .user import AvatarDecorationData, User
-from .voice import GuildVoiceState, SupportedModes, VoiceChannelEffect
+from .threads import Thread, ThreadMember
+from .user import User
+from .voice import GuildVoiceState, VoiceChannelEffect
 
 if TYPE_CHECKING:
+    from .activity import PresenceData, SendableActivity
     from .appinfo import PartialAppInfo, PartialGatewayAppInfo
+    from .automod import AutoModAction, AutoModTriggerType
     from .emoji import Emoji, PartialEmoji
     from .invite import InviteTargetType, InviteType
     from .role import Role
     from .snowflake import Snowflake, SnowflakeList
     from .sticker import GuildSticker
+    from .threads import ThreadMemberWithPresence, ThreadType
+    from .user import AvatarDecorationData
+    from .voice import SupportedModes
 
 
 class SessionStartLimit(TypedDict):
