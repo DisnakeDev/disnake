@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from collections.abc import Callable, Coroutine
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -24,6 +23,8 @@ I = TypeVar("I", bound="Item[Any]")  # noqa: E741
 V_co = TypeVar("V_co", bound="View | None", covariant=True)
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Coroutine
+
     from typing_extensions import Self
 
     from ..client import Client

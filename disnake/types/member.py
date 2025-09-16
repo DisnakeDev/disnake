@@ -1,11 +1,15 @@
 # SPDX-License-Identifier: MIT
+from __future__ import annotations
 
-from typing import TypedDict
+from typing import TYPE_CHECKING, TypedDict
 
 from typing_extensions import NotRequired
 
-from .snowflake import SnowflakeList
-from .user import AvatarDecorationData, User
+from .user import User
+
+if TYPE_CHECKING:
+    from .snowflake import SnowflakeList
+    from .user import AvatarDecorationData
 
 
 class BaseMember(TypedDict):

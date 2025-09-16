@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 import struct
-from collections.abc import Generator
 from typing import IO, TYPE_CHECKING, ClassVar
 
 from .errors import DiscordException
+
+if TYPE_CHECKING:
+    from collections.abc import Generator
 
 __all__ = (
     "OggError",

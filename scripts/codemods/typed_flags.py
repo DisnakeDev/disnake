@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: MIT
+from __future__ import annotations
 
 import importlib
 import textwrap
-import types
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 import libcst as cst
 import libcst.codemod.visitors as codevisitors
@@ -13,6 +13,9 @@ from libcst import codemod
 from disnake import flags
 
 from .base import BaseCodemodCommand
+
+if TYPE_CHECKING:
+    import types
 
 BASE_FLAG_CLASSES = (flags.BaseFlags, flags.ListBaseFlags)
 

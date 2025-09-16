@@ -5,9 +5,7 @@ from __future__ import annotations
 import inspect
 import re
 import sys
-from collections.abc import Iterator
 from dataclasses import dataclass, field
-from re import Pattern
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -38,6 +36,9 @@ __all__ = (
 
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
+    from re import Pattern
+
     from typing_extensions import Self
 
     from .context import Context

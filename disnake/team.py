@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import datetime
 from typing import TYPE_CHECKING
 
 from . import utils
@@ -11,6 +10,8 @@ from .enums import TeamMemberRole, TeamMembershipState, try_enum
 from .user import BaseUser
 
 if TYPE_CHECKING:
+    import datetime
+
     from .state import ConnectionState
     from .types.team import Team as TeamPayload, TeamMember as TeamMemberPayload
 

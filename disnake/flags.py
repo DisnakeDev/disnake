@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import functools
 import operator
-from collections.abc import Callable, Iterator, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -19,6 +18,8 @@ from .enums import UserFlags
 from .utils import MISSING, _generated
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Iterator, Sequence
+
     from typing_extensions import Self
 
     from disnake.types.appinfo import ApplicationIntegrationType

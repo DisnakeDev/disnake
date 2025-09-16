@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import inspect
 import re
 from typing import TYPE_CHECKING, Any, Generic, TypeAlias, TypeVar
 
@@ -10,14 +9,16 @@ import disnake.abc
 import disnake.utils
 from disnake import ApplicationCommandInteraction
 from disnake.message import Message
-from disnake.permissions import Permissions
 
 if TYPE_CHECKING:
+    import inspect
+
     from typing_extensions import ParamSpec
 
     from disnake.channel import DMChannel, GroupChannel
     from disnake.guild import Guild, GuildMessageable
     from disnake.member import Member
+    from disnake.permissions import Permissions
     from disnake.state import ConnectionState
     from disnake.user import ClientUser, User
     from disnake.voice_client import VoiceProtocol

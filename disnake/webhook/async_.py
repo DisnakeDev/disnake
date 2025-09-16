@@ -5,7 +5,6 @@ from __future__ import annotations
 import asyncio
 import logging
 import re
-from collections.abc import Sequence
 from contextvars import ContextVar
 from errno import ECONNRESET
 from typing import (
@@ -33,7 +32,7 @@ from ..message import Message
 from ..mixins import Hashable
 from ..object import Object
 from ..ui.action_row import normalize_components_to_dict
-from ..user import BaseUser, ClientUser, User
+from ..user import BaseUser, User
 
 __all__ = (
     "Webhook",
@@ -46,6 +45,7 @@ _log = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     import datetime
+    from collections.abc import Sequence
     from types import TracebackType
 
     from typing_extensions import Self
@@ -66,6 +66,7 @@ if TYPE_CHECKING:
     from ..types.webhook import Webhook as WebhookPayload
     from ..ui._types import MessageComponents
     from ..ui.view import View
+    from ..user import ClientUser
 
 MISSING = utils.MISSING
 

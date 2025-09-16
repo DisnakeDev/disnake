@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: MIT
+from __future__ import annotations
 
 import asyncio
 import datetime
@@ -7,7 +8,6 @@ import inspect
 import os
 import sys
 import warnings
-from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import timedelta, timezone
 from typing import (
@@ -29,6 +29,8 @@ from disnake import utils
 from . import helpers, utils_helper_module
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from typing_extensions import TypeAliasType
 elif sys.version_info >= (3, 12):
     # non-3.12 tests shouldn't be using this
@@ -997,7 +999,7 @@ class _Clazz:
     def decorated(self) -> None: ...
 
     # we cannot stringify this file due to it testing annotation resolving
-    _lambda: Callable[["_Clazz"], None] = lambda _: None  # noqa: UP037
+    _lambda: Callable[[_Clazz], None] = lambda _: None
 
 
 @pytest.mark.parametrize(

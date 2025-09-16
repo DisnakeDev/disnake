@@ -5,10 +5,11 @@ import json
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from sphinx.application import Sphinx
 from sphinx.util.fileutil import copy_asset_file
 
 if TYPE_CHECKING:
+    from sphinx.application import Sphinx
+
     from ._types import SphinxExtensionMeta
 
 SCRIPT_PATH = "_templates/api_redirect.js_t"

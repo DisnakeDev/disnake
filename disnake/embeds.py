@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import datetime
-from collections.abc import Mapping, Sized
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -16,8 +15,12 @@ from typing import (
 
 from . import utils
 from .colour import Colour
-from .file import File
 from .utils import MISSING, classproperty, warn_deprecated
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping, Sized
+
+    from .file import File
 
 __all__ = ("Embed",)
 

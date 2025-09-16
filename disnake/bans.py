@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
 from typing import TYPE_CHECKING, NamedTuple
 
 __all__ = ("BanEntry",)
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
     from .abc import Snowflake
     from .user import User
 

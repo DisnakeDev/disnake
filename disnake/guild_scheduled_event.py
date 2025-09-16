@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from datetime import datetime
 from typing import TYPE_CHECKING, Any, Literal, overload
 
 from .asset import Asset
@@ -25,6 +24,8 @@ from .utils import (
 )
 
 if TYPE_CHECKING:
+    from datetime import datetime
+
     from .abc import GuildChannel, Snowflake
     from .asset import AssetBytes
     from .guild import Guild

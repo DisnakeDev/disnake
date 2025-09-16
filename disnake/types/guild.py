@@ -1,22 +1,27 @@
 # SPDX-License-Identifier: MIT
+from __future__ import annotations
 
-from typing import Literal, TypedDict
+from typing import TYPE_CHECKING, Literal, TypedDict
 
 from typing_extensions import NotRequired
 
-from .activity import PartialPresenceUpdate
-from .channel import CreateGuildChannel, GuildChannel, StageInstance
-from .emoji import Emoji
-from .guild_scheduled_event import GuildScheduledEvent
-from .member import Member
-from .role import CreateRole, Role
-from .snowflake import Snowflake
-from .soundboard import GuildSoundboardSound
-from .sticker import GuildSticker
-from .threads import Thread
-from .user import User
-from .voice import GuildVoiceState
-from .welcome_screen import WelcomeScreen
+from .channel import CreateGuildChannel
+from .role import CreateRole
+
+if TYPE_CHECKING:
+    from .activity import PartialPresenceUpdate
+    from .channel import GuildChannel, StageInstance
+    from .emoji import Emoji
+    from .guild_scheduled_event import GuildScheduledEvent
+    from .member import Member
+    from .role import Role
+    from .snowflake import Snowflake
+    from .soundboard import GuildSoundboardSound
+    from .sticker import GuildSticker
+    from .threads import Thread
+    from .user import User
+    from .voice import GuildVoiceState
+    from .welcome_screen import WelcomeScreen
 
 
 class Ban(TypedDict):

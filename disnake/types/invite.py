@@ -2,15 +2,16 @@
 
 from __future__ import annotations
 
-from typing import Literal, TypedDict
+from typing import TYPE_CHECKING, Literal, TypedDict
 
 from typing_extensions import NotRequired
 
-from .appinfo import PartialAppInfo
-from .channel import InviteChannel
-from .guild import InviteGuild
-from .guild_scheduled_event import GuildScheduledEvent
-from .user import PartialUser
+if TYPE_CHECKING:
+    from .appinfo import PartialAppInfo
+    from .channel import InviteChannel
+    from .guild import InviteGuild
+    from .guild_scheduled_event import GuildScheduledEvent
+    from .user import PartialUser
 
 InviteType = Literal[0, 1, 2]
 InviteTargetType = Literal[1, 2]

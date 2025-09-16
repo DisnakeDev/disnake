@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from .activity import BaseActivity, Spotify, create_activity
+from .activity import create_activity
 from .asset import Asset
 from .enums import Status, WidgetStyle, try_enum
 from .invite import Invite
@@ -15,6 +15,7 @@ if TYPE_CHECKING:
     import datetime
 
     from .abc import GuildChannel, Snowflake
+    from .activity import BaseActivity, Spotify
     from .guild import Guild
     from .state import ConnectionState
     from .types.widget import (

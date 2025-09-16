@@ -6,7 +6,6 @@ import asyncio
 import os
 import sys
 import traceback
-from collections.abc import Callable
 from functools import partial
 from typing import TYPE_CHECKING, TypeAlias, TypeVar, cast
 
@@ -18,6 +17,8 @@ from .label import Label
 from .text_input import TextInput
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from ..client import Client
     from ..interactions.modal import ModalInteraction
     from ..state import ConnectionState

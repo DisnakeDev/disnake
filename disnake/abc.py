@@ -5,7 +5,6 @@ from __future__ import annotations
 import asyncio
 import copy
 from abc import ABC
-from collections.abc import Callable, Mapping, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -22,9 +21,6 @@ from .context_managers import Typing
 from .enums import (
     ChannelType,
     PartyType,
-    ThreadLayout,
-    ThreadSortOrder,
-    VideoQualityMode,
     try_enum_to_int,
 )
 from .errors import ClientException
@@ -36,7 +32,6 @@ from .object import Object
 from .partial_emoji import PartialEmoji
 from .permissions import PermissionOverwrite, Permissions
 from .role import Role
-from .sticker import GuildSticker, StandardSticker, StickerItem
 from .utils import _overload_with_permissions
 from .voice_client import VoiceClient, VoiceProtocol
 
@@ -52,6 +47,7 @@ __all__ = (
 VoiceProtocolT = TypeVar("VoiceProtocolT", bound=VoiceProtocol)
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Mapping, Sequence
     from datetime import datetime
 
     from typing_extensions import Self
@@ -61,7 +57,12 @@ if TYPE_CHECKING:
     from .client import Client
     from .embeds import Embed
     from .emoji import Emoji
-    from .enums import InviteTarget
+    from .enums import (
+        InviteTarget,
+        ThreadLayout,
+        ThreadSortOrder,
+        VideoQualityMode,
+    )
     from .guild import Guild, GuildChannel as AnyGuildChannel, GuildMessageable
     from .guild_scheduled_event import GuildScheduledEvent
     from .iterators import ChannelPinsIterator, HistoryIterator
@@ -69,6 +70,7 @@ if TYPE_CHECKING:
     from .message import Message, MessageReference, PartialMessage
     from .poll import Poll
     from .state import ConnectionState
+    from .sticker import GuildSticker, StandardSticker, StickerItem
     from .threads import AnyThreadArchiveDuration, ForumTag
     from .types.channel import (
         Channel as ChannelPayload,

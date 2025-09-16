@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import datetime
-from collections.abc import AsyncIterator, Awaitable, Callable, Generator
+from collections.abc import AsyncIterator, Awaitable, Callable
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -40,6 +40,8 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Generator
+
     from .abc import Messageable, Snowflake
     from .app_commands import APIApplicationCommand
     from .client import Client

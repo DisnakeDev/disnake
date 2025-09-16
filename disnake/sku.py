@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import datetime
 from typing import TYPE_CHECKING
 
 from .enums import SKUType, try_enum
@@ -13,6 +12,8 @@ from .subscription import Subscription
 from .utils import snowflake_time
 
 if TYPE_CHECKING:
+    import datetime
+
     from .abc import Snowflake, SnowflakeTime
     from .state import ConnectionState
     from .types.sku import SKU as SKUPayload
