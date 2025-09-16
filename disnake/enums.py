@@ -128,7 +128,9 @@ class EnumMeta(type):
         _enum_value_map_: ClassVar[Dict[Any, Any]]
         _enum_value_cls_: ClassVar[Type[_EnumValueBase]]
 
-    def __new__(cls: EnumMetaT, name: str, bases, attrs, *, comparable: bool = False) -> EnumMetaT:
+    def __new__(
+        cls: Type[EnumMeta], name: str, bases, attrs, *, comparable: bool = False
+    ) -> EnumMeta:
         value_mapping = {}
         member_mapping = {}
         member_names = []
@@ -166,10 +168,12 @@ class EnumMeta(type):
         value_cls._actual_enum_cls_ = actual_cls  # type: ignore
         return actual_cls
 
-    def __iter__(cls: EnumMetaT) -> Iterator[EnumMetaT]:
+    # this type hint is never used because Enum is defined as stdlib enums later on.
+    def __iter__(cls) -> Iterator[Any]:
         return (cls._enum_member_map_[name] for name in cls._enum_member_names_)
 
-    def __reversed__(cls: EnumMetaT) -> Iterator[EnumMetaT]:
+    # this type hint is never used because Enum is defined as stdlib enums later on.
+    def __reversed__(cls) -> Iterator[Any]:
         return (cls._enum_member_map_[name] for name in reversed(cls._enum_member_names_))
 
     def __len__(cls) -> int:
