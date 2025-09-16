@@ -20,7 +20,6 @@ from typing import (
     Literal,
     NamedTuple,
     Protocol,
-    Sequence,
     Set,
     TypeVar,
 )
@@ -1065,8 +1064,8 @@ class DiscordVoiceWebSocket:
 
         await self.send_as_json(payload)
 
-    async def send_dave_mls_key_package(self, key_package: Sequence[int]) -> None:
-        data = struct.pack(">B", self.DAVE_MLS_KEY_PACKAGE) + bytes(key_package)
+    async def send_dave_mls_key_package(self, key_package: bytes) -> None:
+        data = struct.pack(">B", self.DAVE_MLS_KEY_PACKAGE) + key_package
         await self.send_as_bytes(data)
 
     async def send_dave_transition_ready(self, transition_id: int) -> None:
@@ -1076,8 +1075,8 @@ class DiscordVoiceWebSocket:
         }
         await self.send_as_json(payload)
 
-    async def send_dave_mls_commit_welcome(self, commit_welcome: Sequence[int]) -> None:
-        data = struct.pack(">B", self.DAVE_MLS_COMMIT_WELCOME) + bytes(commit_welcome)
+    async def send_dave_mls_commit_welcome(self, commit_welcome: bytes) -> None:
+        data = struct.pack(">B", self.DAVE_MLS_COMMIT_WELCOME) + commit_welcome
         await self.send_as_bytes(data)
 
     async def send_dave_mls_invalid_commit_welcome(self, transition_id: int) -> None:
@@ -1310,13 +1309,12 @@ class DaveState:
 
     def handle_mls_external_sender(self, data: bytes) -> None:
         _log.debug("received MLS external sender")
-        # TODO: improve the type casting here, requiring list[int] is clearly not right
-        self._session.set_external_sender(list(data))
+        self._session.set_external_sender(data)
 
     async def handle_mls_proposals(self, data: bytes) -> None:
-        # TODO: improve type casting
         commit_welcome = self._session.process_proposals(
-            list(data),
+            data,
+            # TODO: improve type casting, or store IDs as strings?
             {str(u) for u in self._get_recognized_users(with_self=True)},
         )
         if commit_welcome is not None:
@@ -1325,8 +1323,7 @@ class DaveState:
 
     async def handle_mls_announce_commit_transition(self, transition_id: int, data: bytes) -> None:
         _log.debug("group participants are changing with transition ID %d", transition_id)
-        # TODO: for the love of god please fix the type casting already
-        maybe_roster = self._session.process_commit(list(data))
+        maybe_roster = self._session.process_commit(data)
 
         if maybe_roster is dave.RejectType.ignored:
             _log.debug("ignored commit for unexpected group ID")
@@ -1346,7 +1343,7 @@ class DaveState:
     async def handle_mls_welcome(self, transition_id: int, data: bytes) -> None:
         _log.debug("received welcome, transition ID %d", transition_id)
         roster = self._session.process_welcome(
-            list(data),
+            data,
             {str(u) for u in self._get_recognized_users(with_self=True)},
         )
 
