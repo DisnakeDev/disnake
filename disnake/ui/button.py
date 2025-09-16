@@ -274,7 +274,7 @@ class Button(Item[V_co]):
     def is_persistent(self) -> bool:
         if self.style is ButtonStyle.link:
             return self.url is not None
-        elif self.style is ButtonStyle.premium:
+        if self.style is ButtonStyle.premium:
             return self.sku_id is not None
         return super().is_persistent()
 

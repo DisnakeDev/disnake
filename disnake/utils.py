@@ -538,20 +538,19 @@ _mime_type_extensions = {
 def _get_mime_type_for_data(data: _BytesLike) -> str:
     if data[0:8] == b"\x89\x50\x4e\x47\x0d\x0a\x1a\x0a":
         return "image/png"
-    elif data[0:3] == b"\xff\xd8\xff" or data[6:10] in (b"JFIF", b"Exif"):
+    if data[0:3] == b"\xff\xd8\xff" or data[6:10] in (b"JFIF", b"Exif"):
         return "image/jpeg"
-    elif data[0:6] in (b"\x47\x49\x46\x38\x37\x61", b"\x47\x49\x46\x38\x39\x61"):
+    if data[0:6] in (b"\x47\x49\x46\x38\x37\x61", b"\x47\x49\x46\x38\x39\x61"):
         return "image/gif"
-    elif data[0:4] == b"RIFF" and data[8:12] == b"WEBP":
+    if data[0:4] == b"RIFF" and data[8:12] == b"WEBP":
         return "image/webp"
-    elif data[0:3] == b"ID3" or data[0:2] in (b"\xff\xfb", b"\xff\xf3", b"\xff\xf2"):
+    if data[0:3] == b"ID3" or data[0:2] in (b"\xff\xfb", b"\xff\xf3", b"\xff\xf2"):
         # n.b. this doesn't support the unofficial MPEG-2.5 frame header (which starts with 0xFFEx).
         # Discord also doesn't accept it.
         return "audio/mpeg"
-    elif data[0:4] == b"OggS":
+    if data[0:4] == b"OggS":
         return "audio/ogg"
-    else:
-        raise ValueError("Unsupported file type provided")
+    raise ValueError("Unsupported file type provided")
 
 
 def _bytes_to_base64_data(data: _BytesLike) -> str:
@@ -607,8 +606,7 @@ def _parse_ratelimit_header(request: Any, *, use_clock: bool = False) -> float:
         now = datetime.datetime.now(utc)
         reset = datetime.datetime.fromtimestamp(float(request.headers["X-Ratelimit-Reset"]), utc)
         return (reset - now).total_seconds()
-    else:
-        return float(reset_after)
+    return float(reset_after)
 
 
 async def maybe_coroutine(
@@ -617,8 +615,7 @@ async def maybe_coroutine(
     value = f(*args, **kwargs)
     if _isawaitable(value):
         return await value
-    else:
-        return value
+    return value
 
 
 async def async_all(gen: Iterable[Union[Awaitable[bool], bool]]) -> bool:
@@ -814,11 +811,10 @@ def resolve_template(code: Union[Template, str]) -> str:
 
     if isinstance(code, Template):
         return code.code
-    else:
-        rx = r"(?:https?\:\/\/)?discord(?:\.new|(?:app)?\.com\/template)\/(.+)"
-        m = re.match(rx, code)
-        if m:
-            return m.group(1)
+    rx = r"(?:https?\:\/\/)?discord(?:\.new|(?:app)?\.com\/template)\/(.+)"
+    m = re.match(rx, code)
+    if m:
+        return m.group(1)
     return code
 
 
@@ -908,9 +904,8 @@ def escape_markdown(text: str, *, as_needed: bool = False, ignore_links: bool = 
         if ignore_links:
             regex = f"(?:{_URL_REGEX}|{regex})"
         return re.sub(regex, replacement, text, flags=re.MULTILINE)
-    else:
-        text = re.sub(r"\\", r"\\\\", text)
-        return _MARKDOWN_ESCAPE_REGEX.sub(r"\\\1", text)
+    text = re.sub(r"\\", r"\\\\", text)
+    return _MARKDOWN_ESCAPE_REGEX.sub(r"\\\1", text)
 
 
 def escape_mentions(text: str) -> str:
@@ -1535,10 +1530,9 @@ def as_valid_locale(locale: str) -> Optional[str]:
 def humanize_list(values: List[str], combine: str) -> str:
     if len(values) > 2:
         return f"{', '.join(values[:-1])}, {combine} {values[-1]}"
-    elif len(values) == 0:
+    if len(values) == 0:
         return "<none>"
-    else:
-        return f" {combine} ".join(values)
+    return f" {combine} ".join(values)
 
 
 # Similar to typing.assert_never, but returns instead of raising (i.e. has no runtime effect).

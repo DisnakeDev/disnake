@@ -230,6 +230,7 @@ class Loop(Generic[LF]):
         """
         if self._seconds is not MISSING:
             return self._seconds
+        return None
 
     @property
     def minutes(self) -> Optional[float]:
@@ -240,6 +241,7 @@ class Loop(Generic[LF]):
         """
         if self._minutes is not MISSING:
             return self._minutes
+        return None
 
     @property
     def hours(self) -> Optional[float]:
@@ -250,6 +252,7 @@ class Loop(Generic[LF]):
         """
         if self._hours is not MISSING:
             return self._hours
+        return None
 
     @property
     def time(self) -> Optional[List[datetime.time]]:
@@ -260,6 +263,7 @@ class Loop(Generic[LF]):
         """
         if self._time is not MISSING:
             return self._time.copy()
+        return None
 
     @property
     def current_loop(self) -> int:
@@ -274,7 +278,7 @@ class Loop(Generic[LF]):
         """
         if self._task is MISSING:
             return None
-        elif (self._task and self._task.done()) or self._stop_next_iteration:
+        if (self._task and self._task.done()) or self._stop_next_iteration:
             return None
         return self._next_iteration
 
@@ -574,11 +578,10 @@ class Loop(Generic[LF]):
             self._time_index += 1
             if next_time > utcnow().timetz():
                 return datetime.datetime.combine(utcnow(), next_time)
-            else:
-                return datetime.datetime.combine(
-                    utcnow() + datetime.timedelta(days=1),
-                    next_time,
-                )
+            return datetime.datetime.combine(
+                utcnow() + datetime.timedelta(days=1),
+                next_time,
+            )
 
         next_date = self._last_iteration
         if next_time < next_date.timetz():
@@ -625,8 +628,7 @@ class Loop(Generic[LF]):
                 )
             ret.append(t if t.tzinfo is not None else t.replace(tzinfo=utc))
 
-        ret = sorted(set(ret))  # de-dupe and sort times
-        return ret
+        return sorted(set(ret))  # de-dupe and sort times
 
     def change_interval(
         self,

@@ -232,13 +232,12 @@ def _transform_type(
     action_name = entry.action.name
     if action_name.startswith("sticker_"):
         return enums.try_enum(enums.StickerType, data)
-    elif action_name.startswith("webhook_"):
+    if action_name.startswith("webhook_"):
         return enums.try_enum(enums.WebhookType, data)
-    elif action_name.startswith(("integration_", "overwrite_")):
+    if action_name.startswith(("integration_", "overwrite_")):
         # integration: str, overwrite: int
         return data
-    else:
-        return enums.try_enum(enums.ChannelType, data)
+    return enums.try_enum(enums.ChannelType, data)
 
 
 def _transform_datetime(entry: AuditLogEntry, data: Optional[str]) -> Optional[datetime.datetime]:
@@ -380,7 +379,7 @@ class AuditLogChanges:
             if attr == "$add":
                 self._handle_role(self.before, self.after, entry, elem["new_value"])  # type: ignore
                 continue
-            elif attr == "$remove":
+            if attr == "$remove":
                 self._handle_role(self.after, self.before, entry, elem["new_value"])  # type: ignore
                 continue
 

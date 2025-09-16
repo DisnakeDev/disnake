@@ -1559,7 +1559,7 @@ VALID_ACTION_ROW_MESSAGE_COMPONENT_TYPES: Final = (
 def handle_media_item_input(value: MediaItemInput) -> UnfurledMediaItem:
     if isinstance(value, UnfurledMediaItem):
         return value
-    elif isinstance(value, str):
+    if isinstance(value, str):
         return UnfurledMediaItem(value)
 
     # circular import

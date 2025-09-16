@@ -355,14 +355,13 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
             if hasattr(entity, "__cog_commands__"):
                 injected = wrap_callback(cmd.send_cog_help)
                 return await injected(entity)
-            elif isinstance(entity, Group):
+            if isinstance(entity, Group):
                 injected = wrap_callback(cmd.send_group_help)
                 return await injected(entity)
-            elif isinstance(entity, Command):
+            if isinstance(entity, Command):
                 injected = wrap_callback(cmd.send_command_help)
                 return await injected(entity)
-            else:
-                return None
+            return None
         except CommandError as e:
             await cmd.on_help_command_error(self, e)
 

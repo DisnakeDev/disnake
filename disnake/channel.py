@@ -548,6 +548,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         if payload is not None:
             # the payload will always be the proper channel payload
             return self.__class__(state=self._state, guild=self.guild, data=payload)  # type: ignore
+        return None
 
     async def clone(
         self,
@@ -1707,6 +1708,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         if payload is not None:
             # the payload will always be the proper channel payload
             return self.__class__(state=self._state, guild=self.guild, data=payload)  # type: ignore
+        return None
 
     async def delete_messages(self, messages: Iterable[Snowflake]) -> None:
         """|coro|
@@ -2562,6 +2564,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         if payload is not None:
             # the payload will always be the proper channel payload
             return self.__class__(state=self._state, guild=self.guild, data=payload)  # type: ignore
+        return None
 
     async def delete_messages(self, messages: Iterable[Snowflake]) -> None:
         """|coro|
@@ -3053,6 +3056,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         if payload is not None:
             # the payload will always be the proper channel payload
             return self.__class__(state=self._state, guild=self.guild, data=payload)  # type: ignore
+        return None
 
     @overload
     async def move(
@@ -3737,7 +3741,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
 
         if params.files and len(params.files) > 10:
             raise ValueError("files parameter must be a list of up to 10 elements")
-        elif params.files and not all(isinstance(file, File) for file in params.files):
+        if params.files and not all(isinstance(file, File) for file in params.files):
             raise TypeError("files parameter must be a list of File")
 
         channel_data = {
@@ -4209,6 +4213,7 @@ class ForumChannel(ThreadOnlyGuildChannel):
         if payload is not None:
             # the payload will always be the proper channel payload
             return self.__class__(state=self._state, guild=self.guild, data=payload)  # type: ignore
+        return None
 
     async def clone(
         self,
@@ -4607,6 +4612,7 @@ class MediaChannel(ThreadOnlyGuildChannel):
         if payload is not None:
             # the payload will always be the proper channel payload
             return self.__class__(state=self._state, guild=self.guild, data=payload)  # type: ignore
+        return None
 
     async def clone(
         self,
@@ -5139,20 +5145,19 @@ def _guild_channel_factory(
     value = try_enum(ChannelType, channel_type)
     if value is ChannelType.text:
         return TextChannel, value
-    elif value is ChannelType.voice:
+    if value is ChannelType.voice:
         return VoiceChannel, value
-    elif value is ChannelType.category:
+    if value is ChannelType.category:
         return CategoryChannel, value
-    elif value is ChannelType.news:
+    if value is ChannelType.news:
         return TextChannel, value
-    elif value is ChannelType.stage_voice:
+    if value is ChannelType.stage_voice:
         return StageChannel, value
-    elif value is ChannelType.forum:
+    if value is ChannelType.forum:
         return ForumChannel, value
-    elif value is ChannelType.media:
+    if value is ChannelType.media:
         return MediaChannel, value
-    else:
-        return None, value
+    return None, value
 
 
 def _channel_factory(
@@ -5163,10 +5168,9 @@ def _channel_factory(
     cls, value = _guild_channel_factory(channel_type)
     if value is ChannelType.private:
         return DMChannel, value
-    elif value is ChannelType.group:
+    if value is ChannelType.group:
         return GroupChannel, value
-    else:
-        return cls, value
+    return cls, value
 
 
 def _threaded_channel_factory(

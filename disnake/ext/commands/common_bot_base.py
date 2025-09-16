@@ -151,8 +151,7 @@ class CommonBotBase(Generic[CogT]):
 
         if self.owner_id:
             return user.id == self.owner_id
-        else:
-            return user.id in self.owner_ids
+        return user.id in self.owner_ids
 
     def add_cog(self, cog: Cog, *, override: bool = False) -> None:
         """Adds a "cog" to the bot.
@@ -245,7 +244,7 @@ class CommonBotBase(Generic[CogT]):
         """
         cog = self.__cogs.pop(name, None)
         if cog is None:
-            return
+            return None
 
         help_command: Optional[HelpCommand] = getattr(self, "_help_command", None)
         if help_command and help_command.cog is cog:

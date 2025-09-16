@@ -36,7 +36,7 @@ if not TYPE_CHECKING:
                 "`EmptyEmbed` is deprecated and will be removed in a future version. Use `None` instead.",
                 stacklevel=2,
             )
-            return None
+            return
         raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
 
 
@@ -232,7 +232,7 @@ class Embed:
                 "`Embed.Empty` is deprecated and will be removed in a future version. Use `None` instead.",
                 stacklevel=3,
             )
-            return None
+            return
 
     @classmethod
     def from_dict(cls, data: EmbedData) -> Self:
@@ -887,9 +887,8 @@ class Embed:
                 raise TypeError("File must have a filename")
             self._files[key] = file
             return f"attachment://{file.filename}"
-        else:
-            self._files.pop(key, None)
-            return str(url) if url else None
+        self._files.pop(key, None)
+        return str(url) if url else None
 
     def check_limits(self) -> None:
         """Checks if this embed fits within the limits dictated by Discord.

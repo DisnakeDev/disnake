@@ -198,10 +198,9 @@ class WebhookAdapter:
 
                         if response.status_code == 403:
                             raise Forbidden(response, data)
-                        elif response.status_code == 404:
+                        if response.status_code == 404:
                             raise NotFound(response, data)
-                        else:
-                            raise HTTPException(response, data)
+                        raise HTTPException(response, data)
 
                 except OSError as e:
                     if attempt < 4 and e.errno == ECONNRESET:
@@ -1143,6 +1142,7 @@ class SyncWebhook(BaseWebhook):
                     f.close()
         if wait:
             return self._create_message(data, thread=thread, thread_name=thread_name)
+        return None
 
     def fetch_message(
         self, id: int, /, *, thread: Optional[Snowflake] = None
