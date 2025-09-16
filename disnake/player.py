@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import asyncio
-import io
 import logging
 import re
 import shlex
@@ -21,6 +20,8 @@ from .oggparse import OggStream
 from .opus import Encoder as OpusEncoder
 
 if TYPE_CHECKING:
+    import io
+
     from typing_extensions import Self
 
     from .voice_client import VoiceClient

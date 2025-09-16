@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import asyncio
-import datetime
 import time
 from typing import (
     TYPE_CHECKING,
@@ -68,6 +67,8 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
+    import datetime
+
     from typing_extensions import Never, Self
 
     from .abc import Snowflake, SnowflakeTime
