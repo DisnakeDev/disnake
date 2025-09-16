@@ -2502,7 +2502,10 @@ class Client:
             The list of application emojis you requested.
         """
         data = await self.http.get_all_app_emojis(self.application_id)
-        return [Emoji(guild=None, state=self._connection, data=emoji_data) for emoji_data in data]
+        return [
+            Emoji(guild=None, state=self._connection, data=emoji_data)
+            for emoji_data in data["items"]
+        ]
 
     async def fetch_user(self, user_id: int, /) -> User:
         """|coro|

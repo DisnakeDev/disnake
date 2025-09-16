@@ -1750,7 +1750,7 @@ class HTTPClient:
             reason=reason,
         )
 
-    def get_all_app_emojis(self, app_id: Snowflake) -> Response[List[emoji.Emoji]]:
+    def get_all_app_emojis(self, app_id: Snowflake) -> Response[emoji.ListAppEmoji]:
         return self.request(Route("GET", "/applications/{app_id}/emojis", app_id=app_id))
 
     def get_app_emoji(self, app_id: Snowflake, emoji_id: Snowflake) -> Response[emoji.Emoji]:
@@ -1770,12 +1770,7 @@ class HTTPClient:
             )
         )
 
-    def create_app_emoji(
-        self,
-        app_id: Snowflake,
-        name: str,
-        image: str,
-    ) -> Response[emoji.Emoji]:
+    def create_app_emoji(self, app_id: Snowflake, name: str, image: str) -> Response[emoji.Emoji]:
         payload: Dict[str, Any] = {
             "name": name,
             "image": image,
@@ -1785,10 +1780,7 @@ class HTTPClient:
         return self.request(r, json=payload)
 
     def edit_app_emoji(
-        self,
-        app_id: Snowflake,
-        emoji_id: Snowflake,
-        name: str,
+        self, app_id: Snowflake, emoji_id: Snowflake, name: str
     ) -> Response[emoji.Emoji]:
         payload: Dict[str, Any] = {
             "name": name,
