@@ -25,14 +25,11 @@ from typing import (
 )
 
 import disnake
-from disnake.app_commands import ApplicationCommand, Option
 from disnake.custom_warnings import SyncWarning
 from disnake.enums import ApplicationCommandType
-from disnake.flags import ApplicationInstallTypes, InteractionContextTypes
 from disnake.utils import iscoroutinefunction, warn_deprecated
 
 from . import errors
-from .base_core import InvokableApplicationCommand
 from .common_bot_base import CommonBotBase
 from .ctx_menus_core import (
     InvokableMessageCommand,
@@ -47,6 +44,8 @@ from .slash_core import InvokableSlashCommand, SubCommand, SubCommandGroup, slas
 if TYPE_CHECKING:
     from typing_extensions import NotRequired, ParamSpec
 
+    from disnake.app_commands import ApplicationCommand, Option
+    from disnake.flags import ApplicationInstallTypes, InteractionContextTypes
     from disnake.i18n import LocalizedOptional
     from disnake.interactions import (
         ApplicationCommandInteraction,
@@ -56,7 +55,12 @@ if TYPE_CHECKING:
     from disnake.permissions import Permissions
 
     from ._types import AppCheck, CoroFunc
-    from .base_core import CogT, CommandCallback, InteractionCommandCallback
+    from .base_core import (
+        CogT,
+        CommandCallback,
+        InteractionCommandCallback,
+        InvokableApplicationCommand,
+    )
 
     P = ParamSpec("P")
 

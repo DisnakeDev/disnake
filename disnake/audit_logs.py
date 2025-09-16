@@ -27,7 +27,6 @@ from .colour import Colour
 from .invite import Invite
 from .mixins import Hashable
 from .object import Object
-from .partial_emoji import PartialEmoji
 from .permissions import PermissionOverwrite, Permissions
 from .threads import ForumTag, Thread
 
@@ -48,6 +47,7 @@ if TYPE_CHECKING:
     from .guild_scheduled_event import GuildScheduledEvent
     from .integrations import PartialIntegration
     from .member import Member
+    from .partial_emoji import PartialEmoji
     from .role import Role
     from .stage_instance import StageInstance
     from .sticker import GuildSticker

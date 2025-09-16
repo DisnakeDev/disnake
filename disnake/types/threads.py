@@ -2,14 +2,15 @@
 
 from __future__ import annotations
 
-from typing import List, Literal, Optional, TypedDict
+from typing import TYPE_CHECKING, List, Literal, Optional, TypedDict
 
 from typing_extensions import NotRequired
 
-from .activity import PresenceData
-from .member import Member
-from .message import Message
-from .snowflake import Snowflake, SnowflakeList
+if TYPE_CHECKING:
+    from .activity import PresenceData
+    from .member import Member
+    from .message import Message
+    from .snowflake import Snowflake, SnowflakeList
 
 ThreadType = Literal[10, 11, 12]
 ThreadArchiveDurationLiteral = Literal[60, 1440, 4320, 10080]

@@ -135,7 +135,7 @@ skip = ['docs/_static/**', '*.po']
 ignore-words-list = ['GroupT', "OT",]
 
 [tool.ruff.lint]
-future-annotations = true
+future-annotations = false
 select = ["ALL"]
 ignore = [
     ## eradicate
@@ -176,8 +176,6 @@ ignore = [
     "TID252", # we still use relative imports
     ## flake8-todos
     "TD", # similar to flake8-fixme, though they may conflict
-    ## flake8-typechecking
-    "TC", # TODO: enable in typing PR
     ## flake8-unused-arguments
     "ARG", # most unused arguments are intentional
     ## flake8-use-pathlib

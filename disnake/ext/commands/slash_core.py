@@ -20,10 +20,7 @@ from typing import (
 from disnake import utils
 from disnake.app_commands import Option, SlashCommand
 from disnake.enums import OptionType
-from disnake.flags import ApplicationInstallTypes, InteractionContextTypes
 from disnake.i18n import Localized
-from disnake.interactions import ApplicationCommandInteraction
-from disnake.permissions import Permissions
 
 from .base_core import InvokableApplicationCommand, _get_overridden_method
 from .errors import CommandError, CommandInvokeError
@@ -31,7 +28,10 @@ from .params import call_param_func, classify_autocompleter, expand_params
 
 if TYPE_CHECKING:
     from disnake.app_commands import Choices
+    from disnake.flags import ApplicationInstallTypes, InteractionContextTypes
     from disnake.i18n import LocalizedOptional
+    from disnake.interactions import ApplicationCommandInteraction
+    from disnake.permissions import Permissions
 
     from .base_core import CommandCallback
 
