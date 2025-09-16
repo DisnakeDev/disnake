@@ -117,9 +117,6 @@ def _is_descriptor(obj) -> bool:
     return hasattr(obj, "__get__") or hasattr(obj, "__set__") or hasattr(obj, "__delete__")
 
 
-EnumMetaT = TypeVar("EnumMetaT", bound="EnumMeta")
-
-
 class EnumMeta(type):
     if TYPE_CHECKING:
         __name__: ClassVar[str]
@@ -128,9 +125,7 @@ class EnumMeta(type):
         _enum_value_map_: ClassVar[Dict[Any, Any]]
         _enum_value_cls_: ClassVar[Type[_EnumValueBase]]
 
-    def __new__(
-        cls: Type[EnumMeta], name: str, bases, attrs, *, comparable: bool = False
-    ) -> EnumMeta:
+    def __new__(cls: EnumMetaT, name: str, bases, attrs, *, comparable: bool = False) -> EnumMetaT:
         value_mapping = {}
         member_mapping = {}
         member_names = []
@@ -168,12 +163,10 @@ class EnumMeta(type):
         value_cls._actual_enum_cls_ = actual_cls  # type: ignore
         return actual_cls
 
-    # this type hint is never used because Enum is defined as stdlib enums later on.
-    def __iter__(cls) -> Iterator[Any]:
+    def __iter__(cls) -> Iterator[EnumMetaT]:
         return (cls._enum_member_map_[name] for name in cls._enum_member_names_)
 
-    # this type hint is never used because Enum is defined as stdlib enums later on.
-    def __reversed__(cls) -> Iterator[Any]:
+    def __reversed__(cls) -> Iterator[EnumMetaT]:
         return (cls._enum_member_map_[name] for name in reversed(cls._enum_member_names_))
 
     def __len__(cls) -> int:
@@ -276,6 +269,10 @@ class ChannelType(Enum):
 
     def __str__(self) -> str:
         return self.name
+
+
+for member in ChannelType:
+    print(member)
 
 
 class MessageType(Enum):
