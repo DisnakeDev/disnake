@@ -2418,6 +2418,95 @@ class Client:
         data = await self.http.application_info()
         return AppInfo(self._connection, data)
 
+    async def fetch_application_emoji(self, emoji_id: int) -> Emoji:
+        """|coro|
+
+        Retrieves an application level :class:`~disnake.Emoji` based on its ID.
+
+        .. versionadded:: |vnext|
+
+        Parameters
+        ----------
+        emoji_id: :class:`int`
+            The ID of the emoji to retrieve.
+
+        Raises
+        ------
+        NotFound
+            The app emoji couldn't be found.
+        Forbidden
+            You are not allowed to get the app emoji.
+
+        Returns
+        -------
+        :class:`.Emoji`
+            The application emoji you requested.
+        """
+        data = await self.http.get_app_emoji(self.application_id, emoji_id)
+        return Emoji(guild=None, state=self._connection, data=data)
+
+    async def create_application_emoji(self, *, name: str, image: AssetBytes) -> Emoji:
+        """|coro|
+
+        Creates an application emoji.
+
+        .. versionadded:: |vnext|
+
+        Parameters
+        ----------
+        name: :class:`str`
+            The emoji name. Must be at least 2 characters.
+        image: |resource_type|
+            The image data of the emoji.
+            Only JPG, PNG and GIF images are supported.
+
+        Raises
+        ------
+        NotFound
+            The ``image`` asset couldn't be found.
+        Forbidden
+            You are not allowed to create app emojis.
+        HTTPException
+            An error occurred creating an app emoji.
+        TypeError
+            The ``image`` asset is a lottie sticker (see :func:`Sticker.read <disnake.Sticker.read>`).
+        ValueError
+            Wrong image format passed for ``image``.
+
+        Returns
+        -------
+        :class:`.Emoji`
+            The newly created application emoji.
+        """
+        img = await utils._assetbytes_to_base64_data(image)
+        data = await self.http.create_app_emoji(self.application_id, name, img)
+        return Emoji(guild=None, state=self._connection, data=data)
+
+    async def fetch_application_emojis(self) -> List[Emoji]:
+        """|coro|
+
+        Retrieves all the :class:`.Emoji` of the application.
+
+        ..  versionadded:: |vnext|
+
+        Raises
+        ------
+        NotFound
+            The app emojis for this application ID couldn't be found.
+        Forbidden
+            You are not allowed to get app emojis.
+
+        Returns
+        -------
+        List[:class:`.Emoji`]
+            The list of application emojis you requested.
+        """
+        data = await self.http.get_all_app_emojis(self.application_id)
+        return [
+            Emoji(guild=None, state=self._connection, data=emoji_data)
+            for emoji_data in data["items"]
+        ]
+
     async def fetch_user(self, user_id: int, /) -> User:
         """|coro|
 
