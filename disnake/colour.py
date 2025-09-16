@@ -54,7 +54,8 @@ class Colour:
 
     def __init__(self, value: int) -> None:
         if not isinstance(value, int):
-            raise TypeError(f"Expected int parameter, received {value.__class__.__name__} instead.")
+            msg = f"Expected int parameter, received {value.__class__.__name__} instead."
+            raise TypeError(msg)
 
         self.value: int = value
 

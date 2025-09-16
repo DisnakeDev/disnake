@@ -151,7 +151,8 @@ class Paginator:
         """
         max_page_size = self.max_size - self._prefix_len - self._suffix_len - 2 * self._linesep_len
         if len(line) > max_page_size:
-            raise RuntimeError(f"Line exceeds maximum page size {max_page_size}")
+            msg = f"Line exceeds maximum page size {max_page_size}"
+            raise RuntimeError(msg)
 
         if self._count + len(line) + self._linesep_len > self.max_size - self._suffix_len:
             self.close_page()

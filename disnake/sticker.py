@@ -156,7 +156,8 @@ class _StickerTag(Hashable, AssetMixin):
             The content of the asset.
         """
         if self.format is StickerFormatType.lottie:
-            raise TypeError('Cannot read stickers of format "lottie".')
+            msg = 'Cannot read stickers of format "lottie".'
+            raise TypeError(msg)
         return await super().read()
 
 
@@ -356,7 +357,8 @@ class StandardSticker(Sticker):
 
         if pack:
             return StickerPack(state=self._state, data=pack)
-        raise InvalidData(f"Could not find corresponding sticker pack for {self!r}")
+        msg = f"Could not find corresponding sticker pack for {self!r}"
+        raise InvalidData(msg)
 
 
 class GuildSticker(Sticker):

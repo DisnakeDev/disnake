@@ -178,17 +178,15 @@ class CogMeta(type):
                     value = value.__func__
                 if isinstance(value, _BaseCommand):
                     if is_static_method:
-                        raise TypeError(
-                            f"Command in method {base}.{elem!r} must not be staticmethod."
-                        )
+                        msg = f"Command in method {base}.{elem!r} must not be staticmethod."
+                        raise TypeError(msg)
                     if elem.startswith(("cog_", "bot_")):
                         raise TypeError(no_bot_cog.format(base, elem))
                     commands[elem] = value
                 elif isinstance(value, InvokableApplicationCommand):
                     if is_static_method:
-                        raise TypeError(
-                            f"Application command in method {base}.{elem!r} must not be staticmethod."
-                        )
+                        msg = f"Application command in method {base}.{elem!r} must not be staticmethod."
+                        raise TypeError(msg)
                     if elem.startswith(("cog_", "bot_")):
                         raise TypeError(no_bot_cog.format(base, elem))
                     app_commands[elem] = value
@@ -410,16 +408,16 @@ class Cog(metaclass=CogMeta):
             the name.
         """
         if name is not MISSING and not isinstance(name, (str, Event)):
-            raise TypeError(
-                f"Cog.listener expected str or Enum but received {name.__class__.__name__!r} instead."
-            )
+            msg = f"Cog.listener expected str or Enum but received {name.__class__.__name__!r} instead."
+            raise TypeError(msg)
 
         def decorator(func: FuncT) -> FuncT:
             actual = func
             if isinstance(actual, staticmethod):
                 actual = actual.__func__
             if not disnake.utils.iscoroutinefunction(actual):
-                raise TypeError("Listener function must be a coroutine function.")
+                msg = "Listener function must be a coroutine function."
+                raise TypeError(msg)
             actual.__cog_listener__ = True
             to_assign = (
                 actual.__name__
@@ -729,7 +727,8 @@ class Cog(metaclass=CogMeta):
             isinstance(bot, (InteractionBot, AutoShardedInteractionBot))
             and len(self.__cog_commands__) > 0
         ):
-            raise TypeError("@commands.command is not supported for interaction bots.")
+            msg = "@commands.command is not supported for interaction bots."
+            raise TypeError(msg)
 
         # realistically, the only thing that can cause loading errors
         # is essentially just the command loading, which raises if there are
@@ -773,13 +772,15 @@ class Cog(metaclass=CogMeta):
         # check if we're overriding the default
         if cls.bot_check is not Cog.bot_check:
             if isinstance(bot, (InteractionBot, AutoShardedInteractionBot)):
-                raise TypeError("Cog.bot_check is not supported for interaction bots.")
+                msg = "Cog.bot_check is not supported for interaction bots."
+                raise TypeError(msg)
 
             bot.add_check(self.bot_check)
 
         if cls.bot_check_once is not Cog.bot_check_once:
             if isinstance(bot, (InteractionBot, AutoShardedInteractionBot)):
-                raise TypeError("Cog.bot_check_once is not supported for interaction bots.")
+                msg = "Cog.bot_check_once is not supported for interaction bots."
+                raise TypeError(msg)
 
             bot.add_check(self.bot_check_once, call_once=True)
 

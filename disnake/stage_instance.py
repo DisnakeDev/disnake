@@ -182,7 +182,8 @@ class StageInstance(Hashable):
 
         if privacy_level is not MISSING:
             if not isinstance(privacy_level, StagePrivacyLevel):
-                raise TypeError("privacy_level field must be of type PrivacyLevel")
+                msg = "privacy_level field must be of type PrivacyLevel"
+                raise TypeError(msg)
             if privacy_level is StagePrivacyLevel.public:
                 warn_deprecated(
                     "Setting privacy_level to public is deprecated and will be removed in a future version.",

@@ -336,11 +336,14 @@ def user_command(
         func: InteractionCommandCallback[CogT, UserCommandInteraction, P],
     ) -> InvokableUserCommand:
         if not iscoroutinefunction(func):
-            raise TypeError(f"<{func.__qualname__}> must be a coroutine function")
+            msg = f"<{func.__qualname__}> must be a coroutine function"
+            raise TypeError(msg)
         if hasattr(func, "__command_flag__"):
-            raise TypeError("Callback is already a command.")
+            msg = "Callback is already a command."
+            raise TypeError(msg)
         if guild_ids and not all(isinstance(guild_id, int) for guild_id in guild_ids):
-            raise ValueError("guild_ids must be a sequence of int.")
+            msg = "guild_ids must be a sequence of int."
+            raise ValueError(msg)
         return InvokableUserCommand(
             func,
             name=name,
@@ -444,11 +447,14 @@ def message_command(
         func: InteractionCommandCallback[CogT, MessageCommandInteraction, P],
     ) -> InvokableMessageCommand:
         if not iscoroutinefunction(func):
-            raise TypeError(f"<{func.__qualname__}> must be a coroutine function")
+            msg = f"<{func.__qualname__}> must be a coroutine function"
+            raise TypeError(msg)
         if hasattr(func, "__command_flag__"):
-            raise TypeError("Callback is already a command.")
+            msg = "Callback is already a command."
+            raise TypeError(msg)
         if guild_ids and not all(isinstance(guild_id, int) for guild_id in guild_ids):
-            raise ValueError("guild_ids must be a sequence of int.")
+            msg = "guild_ids must be a sequence of int."
+            raise ValueError(msg)
         return InvokableMessageCommand(
             func,
             name=name,

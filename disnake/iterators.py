@@ -109,7 +109,8 @@ class _AsyncIterator(AsyncIterator[T]):
 
     def chunk(self, max_size: int) -> _ChunkedAsyncIterator[T]:
         if max_size <= 0:
-            raise ValueError("async iterator chunk sizes must be greater than 0.")
+            msg = "async iterator chunk sizes must be greater than 0."
+            raise ValueError(msg)
         return _ChunkedAsyncIterator(self, max_size)
 
     def map(self, func: _Func[T, OT]) -> _MappedAsyncIterator[OT]:
@@ -296,9 +297,11 @@ class HistoryIterator(_AsyncIterator["Message"]):
 
         if self.around:
             if self.limit is None:
-                raise ValueError("history does not support around with limit=None")
+                msg = "history does not support around with limit=None"
+                raise ValueError(msg)
             if self.limit > 101:
-                raise ValueError("history max limit 101 when specifying around parameter")
+                msg = "history max limit 101 when specifying around parameter"
+                raise ValueError(msg)
             elif self.limit == 101:
                 self.limit = 100  # Thanks Discord
 
@@ -851,7 +854,8 @@ class ArchivedThreadIterator(_AsyncIterator["Thread"]):
         self.http = guild._state.http
 
         if joined and not private:
-            raise ValueError("Cannot iterate over joined public archived threads")
+            msg = "Cannot iterate over joined public archived threads"
+            raise ValueError(msg)
 
         self.before: Optional[str]
         if before is None:
@@ -1334,9 +1338,8 @@ class ChannelPinsIterator(_AsyncIterator["Message"]):
             elif isinstance(before, Object):
                 before_ = snowflake_time(before.id).isoformat()
             else:
-                raise TypeError(
-                    f"Expected either `disnake.Snowflake` or `datetime.datetime` for `before`. Got `{before.__class__.__name__!r}`."
-                )
+                msg = f"Expected either `disnake.Snowflake` or `datetime.datetime` for `before`. Got `{before.__class__.__name__!r}`."
+                raise TypeError(msg)
 
         self.messageable = messageable
         self._state = messageable._state

@@ -74,7 +74,8 @@ def application_command_factory(data: ApplicationCommandPayload) -> APIApplicati
     if cmd_type is ApplicationCommandType.message:
         return APIMessageCommand.from_dict(data)
 
-    raise TypeError(f"Application command of type {cmd_type} is not valid")
+    msg = f"Application command of type {cmd_type} is not valid"
+    raise TypeError(msg)
 
 
 def _validate_name(name: str) -> None:
@@ -82,16 +83,16 @@ def _validate_name(name: str) -> None:
     # see https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-naming
 
     if not isinstance(name, str):
-        raise TypeError(
-            f"Slash command name and option names must be an instance of class 'str', received '{name.__class__}'"
-        )
+        msg = f"Slash command name and option names must be an instance of class 'str', received '{name.__class__}'"
+        raise TypeError(msg)
 
     if name != name.lower() or not re.fullmatch(r"[\w-]{1,32}", name):
-        raise ValueError(
+        msg = (
             f"Slash command or option name '{name}' should be lowercase, "
             "between 1 and 32 characters long, and only consist of "
             "these symbols: a-z, 0-9, -, _, and other languages'/scripts' symbols"
         )
+        raise ValueError(msg)
 
 
 class OptionChoice:
@@ -298,17 +299,20 @@ class Option:
         self.max_length: Optional[int] = max_length
 
         if channel_types is not None and not all(isinstance(t, ChannelType) for t in channel_types):
-            raise TypeError("channel_types must be a list of `ChannelType`s")
+            msg = "channel_types must be a list of `ChannelType`s"
+            raise TypeError(msg)
 
         self.channel_types: List[ChannelType] = channel_types or []
 
         self.choices: List[OptionChoice] = []
         if choices is not None:
             if autocomplete:
-                raise TypeError("can not specify both choices and autocomplete args")
+                msg = "can not specify both choices and autocomplete args"
+                raise TypeError(msg)
 
             if isinstance(choices, str):  # str matches `Sequence[str]`, but isn't meant to be used
-                raise TypeError("choices argument should be a list/sequence or dict, not str")
+                msg = "choices argument should be a list/sequence or dict, not str"
+                raise TypeError(msg)
 
             if isinstance(choices, Mapping):
                 self.choices = [OptionChoice(name, value) for name, value in choices.items()]
@@ -539,7 +543,8 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
             # allow everyone to use the command if its not supplied
             self._default_member_permissions = None
         elif isinstance(default_member_permissions, bool):
-            raise TypeError("`default_member_permissions` cannot be a bool")
+            msg = "`default_member_permissions` cannot be a bool"
+            raise TypeError(msg)
         elif isinstance(default_member_permissions, int):
             self._default_member_permissions = default_member_permissions
         else:
@@ -575,7 +580,8 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
             # (n.b. these can be assigned to later, in which case no exception will be raised.
             # assume the user knows what they're doing, in that case)
             if self.contexts is not None:
-                raise ValueError("Cannot use both `dm_permission` and `contexts` at the same time")
+                msg = "Cannot use both `dm_permission` and `contexts` at the same time"
+                raise ValueError(msg)
 
     @property
     def default_member_permissions(self) -> Optional[Permissions]:
@@ -734,7 +740,8 @@ class _APIApplicationCommandMixin:
 
     def _update_common(self, data: ApplicationCommandPayload) -> None:
         if not isinstance(self, ApplicationCommand):
-            raise TypeError("_APIApplicationCommandMixin must be used with ApplicationCommand")
+            msg = "_APIApplicationCommandMixin must be used with ApplicationCommand"
+            raise TypeError(msg)
 
         self.id: int = int(data["id"])
         self.application_id: int = int(data["application_id"])
@@ -855,7 +862,8 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
     def from_dict(cls, data: ApplicationCommandPayload) -> Self:
         cmd_type = data.get("type", 0)
         if cmd_type != ApplicationCommandType.user.value:
-            raise ValueError(f"Invalid payload type for UserCommand: {cmd_type}")
+            msg = f"Invalid payload type for UserCommand: {cmd_type}"
+            raise ValueError(msg)
 
         self = cls(
             name=Localized(data["name"], data=data.get("name_localizations")),
@@ -983,7 +991,8 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
     def from_dict(cls, data: ApplicationCommandPayload) -> Self:
         cmd_type = data.get("type", 0)
         if cmd_type != ApplicationCommandType.message.value:
-            raise ValueError(f"Invalid payload type for MessageCommand: {cmd_type}")
+            msg = f"Invalid payload type for MessageCommand: {cmd_type}"
+            raise ValueError(msg)
 
         self = cls(
             name=Localized(data["name"], data=data.get("name_localizations")),
@@ -1203,7 +1212,8 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
     def from_dict(cls, data: ApplicationCommandPayload) -> Self:
         cmd_type = data.get("type", 0)
         if cmd_type != ApplicationCommandType.chat_input.value:
-            raise ValueError(f"Invalid payload type for SlashCommand: {cmd_type}")
+            msg = f"Invalid payload type for SlashCommand: {cmd_type}"
+            raise ValueError(msg)
 
         self = cls(
             name=Localized(data["name"], data=data.get("name_localizations")),

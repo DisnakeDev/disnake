@@ -864,9 +864,8 @@ class CustomActivity(BaseActivity):
         elif isinstance(emoji, PartialEmoji):
             self.emoji = emoji
         else:
-            raise TypeError(
-                f"Expected str, PartialEmoji, or None, received {type(emoji)!r} instead."
-            )
+            msg = f"Expected str, PartialEmoji, or None, received {type(emoji)!r} instead."
+            raise TypeError(msg)
 
     @property
     def type(self) -> Literal[ActivityType.custom]:
