@@ -1038,8 +1038,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
                         else f"[{name}={param.default}]..."
                     )
                     continue
-                else:
-                    result.append(f"[{name}]")
+                result.append(f"[{name}]")
 
             elif param.kind == param.VAR_POSITIONAL:
                 if self.require_var_positional:
