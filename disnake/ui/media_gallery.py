@@ -4,13 +4,15 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, ClassVar, List, Sequence, Tuple
 
-from ..components import MediaGallery as MediaGalleryComponent, MediaGalleryItem
+from ..components import MediaGallery as MediaGalleryComponent
 from ..enums import ComponentType
 from ..utils import MISSING
 from .item import UIComponent
 
 if TYPE_CHECKING:
     from typing_extensions import Self
+
+    from ..components import MediaGalleryItem
 
 __all__ = ("MediaGallery",)
 

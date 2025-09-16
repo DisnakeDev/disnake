@@ -23,7 +23,7 @@ from typing import (
 
 from . import utils
 from .channel import PartialMessageable
-from .components import MessageTopLevelComponent, _message_component_factory
+from .components import _message_component_factory
 from .embeds import Embed
 from .emoji import Emoji
 from .enums import (
@@ -55,6 +55,7 @@ if TYPE_CHECKING:
 
     from .abc import GuildChannel, MessageableChannel, Snowflake
     from .channel import DMChannel, GroupChannel
+    from .components import MessageTopLevelComponent
     from .guild import GuildMessageable
     from .mentions import AllowedMentions
     from .role import Role
