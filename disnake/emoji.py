@@ -203,10 +203,11 @@ class Emoji(_EmojiTag, AssetMixin):
         """
         if not self.available:
             return False
+        if not self.guild:
+            # if we don't have a guild, this is an app emoji
+            return self.available
         if not self._roles:
             return True
-        if not self.guild:
-            return self.available
         emoji_roles, my_roles = self._roles, self.guild.me._roles
         return any(my_roles.has(role_id) for role_id in emoji_roles)
 
