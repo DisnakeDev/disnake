@@ -71,11 +71,14 @@ docs = [
 nox = [
     "nox==2025.5.1",
 ]
+ruff = [
+    "ruff==0.13.0",
+]
 tools = [
     "pre-commit~=3.0",
     "slotscheck~=0.16.4",
     "check-manifest==0.49",
-    "ruff==0.12.12",
+    { include-group = "ruff" },
 ]
 changelog = [
     "towncrier==23.6.0",
@@ -83,8 +86,8 @@ changelog = [
 codemod = [
     # run codemods on the repository (mostly automated typing)
     "libcst~=1.1.0",
-    "ruff==0.12.12",
     "autotyping==23.2.0",
+    { include-group = "ruff" },
 ]
 typing = [
     # this is not pyright itself, but the python wrapper
@@ -132,6 +135,7 @@ skip = ['docs/_static/**', '*.po']
 ignore-words-list = ['GroupT', "OT",]
 
 [tool.ruff.lint]
+future-annotations = true
 select = ["ALL"]
 ignore = [
     ## eradicate
