@@ -6,10 +6,6 @@ from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, Uni
 
 from .. import utils
 from ..enums import ApplicationCommandType, Locale, OptionType, try_enum
-from ..guild import Guild
-from ..member import Member
-from ..message import Message
-from ..user import User
 from .base import ClientT, Interaction, InteractionDataResolved
 
 __all__ = (
@@ -34,11 +30,15 @@ MISSING = utils.MISSING
 
 if TYPE_CHECKING:
     from ..ext.commands import InvokableApplicationCommand
+    from ..guild import Guild
+    from ..member import Member
+    from ..message import Message
     from ..state import ConnectionState
     from ..types.interactions import (
         ApplicationCommandInteraction as ApplicationCommandInteractionPayload,
         ApplicationCommandInteractionData as ApplicationCommandInteractionDataPayload,
     )
+    from ..user import User
 
 
 class ApplicationCommandInteraction(Interaction[ClientT]):

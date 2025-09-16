@@ -17,7 +17,6 @@ from typing import (
     overload,
 )
 
-from ...abc import Snowflake
 from ...components import UserSelectMenu
 from ...enums import ComponentType, SelectDefaultValueType
 from ...member import Member
@@ -29,6 +28,7 @@ from .base import BaseSelect, P, SelectDefaultValueInputType, V_co, _create_deco
 if TYPE_CHECKING:
     from typing_extensions import Self
 
+    from ...abc import Snowflake
     from ..item import DecoratedItem, ItemCallbackType
 
 

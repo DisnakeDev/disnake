@@ -56,7 +56,6 @@ from .errors import (
     PrivilegedIntentsRequired,
     SessionStartLimitReached,
 )
-from .flags import ApplicationFlags, Intents, MemberCacheFlags
 from .gateway import DiscordWebSocket, ReconnectWebSocket
 from .guild import Guild, GuildBuilder
 from .guild_preview import GuildPreview
@@ -72,7 +71,6 @@ from .stage_instance import StageInstance
 from .state import ConnectionState
 from .sticker import GuildSticker, StandardSticker, StickerPack, _sticker_factory
 from .template import Template
-from .threads import Thread
 from .ui.view import View
 from .user import ClientUser, User
 from .utils import MISSING, deprecated
@@ -88,8 +86,10 @@ if TYPE_CHECKING:
     from .app_commands import APIApplicationCommand, MessageCommand, SlashCommand, UserCommand
     from .asset import AssetBytes
     from .channel import DMChannel
+    from .flags import ApplicationFlags, Intents, MemberCacheFlags
     from .member import Member
     from .message import Message
+    from .threads import Thread
     from .types.application_role_connection import (
         ApplicationRoleConnectionMetadata as ApplicationRoleConnectionMetadataPayload,
     )
