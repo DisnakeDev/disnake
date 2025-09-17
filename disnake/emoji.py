@@ -223,10 +223,8 @@ class Emoji(_EmojiTag, AssetMixin):
         """
         if not self.available:
             return False
-        if not self.guild:
-            # if we don't have a guild, this is an app emoji
-            return self.available
-        if not self._roles:
+        # if we don't have a guild, this is an app emoji
+        if not self.guild or not self._roles:
             return True
         emoji_roles, my_roles = self._roles, self.guild.me._roles
         return any(my_roles.has(role_id) for role_id in emoji_roles)
@@ -255,15 +253,18 @@ class Emoji(_EmojiTag, AssetMixin):
         InvalidData
             The emoji data is invalid and cannot be processed.
         """
-        # this is an app emoji
-        if self.guild is None:
+        if self.guild_id is None:
+            # this is an app emoji
             if self.application_id is None:
                 # should never happen
-                msg = f"guild and application_id are both None when attempting to delete emoji with ID {self.id} This may be a library bug! Open an issue on GitHub."
+                msg = (
+                    f"guild_id and application_id are both None when attempting to delete emoji with ID {self.id}."
+                    " This may be a library bug! Open an issue on GitHub."
+                )
                 raise InvalidData(msg)
 
             return await self._state.http.delete_app_emoji(self.application_id, self.id)
-        await self._state.http.delete_custom_emoji(self.guild.id, self.id, reason=reason)
+        await self._state.http.delete_custom_emoji(self.guild_id, self.id, reason=reason)
 
     async def edit(
         self, *, name: str = MISSING, roles: List[Snowflake] = MISSING, reason: Optional[str] = None
@@ -309,21 +310,25 @@ class Emoji(_EmojiTag, AssetMixin):
         :class:`Emoji`
             The newly updated emoji.
         """
-        payload = {}
-        if name is not MISSING:
-            payload["name"] = name
-        if roles is not MISSING:
-            payload["roles"] = [role.id for role in roles]
-
-        if self.guild is None:
+        if self.guild_id is None:
+            # this is an app emoji
             if self.application_id is None:
                 # should never happen
-                msg = f"guild and application_id are both None when attempting to edit emoji with ID {self.id} This may be a library bug! Open an issue on GitHub."
+                msg = (
+                    f"guild_id and application_id are both None when attempting to edit emoji with ID {self.id}."
+                    " This may be a library bug! Open an issue on GitHub."
+                )
                 raise InvalidData(msg)
 
             data = await self._state.http.edit_app_emoji(self.application_id, self.id, name=name)
         else:
+            payload = {}
+            if name is not MISSING:
+                payload["name"] = name
+            if roles is not MISSING:
+                payload["roles"] = [role.id for role in roles]
+
             data = await self._state.http.edit_custom_emoji(
-                self.guild.id, self.id, payload=payload, reason=reason
+                self.guild_id, self.id, payload=payload, reason=reason
             )
         return Emoji(guild=self.guild, data=data, state=self._state)
