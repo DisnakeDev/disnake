@@ -21,8 +21,6 @@ from typing import (
     List,
     Optional,
     Tuple,
-    Union,
-    overload,
 )
 
 import nox
@@ -54,7 +52,7 @@ else:
 @dataclasses.dataclass
 class ExecutionGroup(ExecutionGroupType):
     sessions: Tuple[str, ...] = ()
-    python: Optional[str] = None
+    python: Optional[str] = MIN_PYTHON
     project: bool = True
     extras: Tuple[str, ...] = ()
     groups: Tuple[str, ...] = ()
@@ -64,9 +62,7 @@ class ExecutionGroup(ExecutionGroupType):
 
     def __post_init__(self) -> None:
         if self.pyright_paths and "pyright" not in self.sessions:
-            self.sessions = (*self.sessions, "pyright")
-        if not self.python:
-            self.python = MIN_PYTHON
+            raise TypeError("pyright_paths can only be set if pyright is in sessions")
         if self.python in EXPERIMENTAL_PYTHON_VERSIONS:
             self.experimental = True
         for key in self.__dataclass_fields__.keys():
@@ -90,13 +86,13 @@ EXECUTION_GROUPS: List[ExecutionGroup] = [
     ),
     # docs and pyright
     ExecutionGroup(
-        sessions=("docs",),
+        sessions=("docs", "pyright"),
         pyright_paths=("docs",),
         extras=("docs",),
     ),
     # codemodding and pyright
     ExecutionGroup(
-        sessions=("codemod", "autotyping"),
+        sessions=("codemod", "autotyping", "pyright"),
         pyright_paths=("scripts",),
         groups=("codemod",),
     ),
@@ -127,19 +123,11 @@ def get_groups_for_session(name: str) -> List[ExecutionGroup]:
     return [g for g in EXECUTION_GROUPS if name in g.sessions]
 
 
-@overload
-def get_version_for_session(name: str, *, exactly_one: bool = True) -> str: ...
-@overload
-def get_version_for_session(name: str, *, exactly_one: bool = False) -> List[str]: ...
-
-
-def get_version_for_session(name: str, *, exactly_one: bool = True) -> Union[str, List[str]]:
+def get_version_for_session(name: str) -> str:
     versions = dict.fromkeys(g.python for g in get_groups_for_session(name) if g.python)
-    if exactly_one:
-        if len(versions) != 1:
-            raise TypeError(f"not the right number of groups for session {name}")
-        return next(iter(versions))
-    return list(versions)
+    if len(versions) != 1:
+        raise TypeError(f"not the right number of groups for session {name}")
+    return next(iter(versions))
 
 
 def install_deps(session: nox.Session, *, execution_group: Optional[ExecutionGroup] = None) -> None:
@@ -213,7 +201,7 @@ def install_deps(session: nox.Session, *, execution_group: Optional[ExecutionGro
             session.install(*execution_group.dependencies, env=env)
 
 
-@nox.session(python=get_version_for_session("docs", exactly_one=True), default=False)
+@nox.session(python=get_version_for_session("docs"), default=False)
 def docs(session: nox.Session) -> None:
     """Build and generate the documentation.
 
@@ -260,14 +248,14 @@ def check_manifest(session: nox.Session) -> None:
     session.run("check-manifest", "-v")
 
 
-@nox.session(python=get_version_for_session("slotscheck", exactly_one=True))
+@nox.session(python=get_version_for_session("slotscheck"))
 def slotscheck(session: nox.Session) -> None:
     """Run slotscheck."""
     install_deps(session)
     session.run("python", "-m", "slotscheck", "--verbose", "-m", "disnake")
 
 
-@nox.session(python=get_version_for_session("autotyping", exactly_one=True))
+@nox.session(python=get_version_for_session("autotyping"))
 def autotyping(session: nox.Session) -> None:
     """Run autotyping.
 
@@ -329,7 +317,7 @@ def autotyping(session: nox.Session) -> None:
         )
 
 
-@nox.session(name="codemod", python=get_version_for_session("codemod", exactly_one=True))
+@nox.session(name="codemod", python=get_version_for_session("codemod"))
 def codemod(session: nox.Session) -> None:
     """Run libcst codemods."""
     install_deps(session)

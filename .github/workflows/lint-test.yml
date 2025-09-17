@@ -149,6 +149,7 @@ jobs:
           NOXSESSION: ${{ matrix.session.name }}
           NOX_DEFAULT_VENV_BACKEND: "none"
           ## needed to install specific dependencies
+          ## used internally when nox calls pip to install a dependency in the venv
           PIP_PYTHON: ${{ steps.venv-bin.outputs.python }}
         run: |
           nox --install-only
