@@ -74,9 +74,12 @@ class Emoji(_EmojiTag, AssetMixin):
     available: :class:`bool`
         Whether the emoji is available for use.
     user: Optional[:class:`User`]
-        The user that created this emoji. This can only be retrieved using
-        :meth:`Guild.fetch_emoji`/:meth:`Guild.fetch_emojis` while
+        The user that created this emoji. If this is a guild emoji, this can only be retrieved
+        using :meth:`Guild.fetch_emoji`/:meth:`Guild.fetch_emojis` while
         having the :attr:`~Permissions.manage_guild_expressions` permission.
+
+        If this is an app emoji, this is the team member that uploaded the emoji,
+        or the bot user if created using :meth:`Client.create_application_emoji`.
     """
 
     __slots__: Tuple[str, ...] = (
@@ -184,7 +187,8 @@ class Emoji(_EmojiTag, AssetMixin):
 
     @property
     def application_id(self) -> Optional[int]:
-        """Optional[:class:`int`]: The ID of the application which owns this emoji.
+        """Optional[:class:`int`]: The ID of the application which owns this emoji,
+        if this is an app emoji.
 
         .. versionadded:: |vnext|
         """
@@ -233,12 +237,14 @@ class Emoji(_EmojiTag, AssetMixin):
         Deletes the custom emoji.
 
         You must have :attr:`~Permissions.manage_guild_expressions` permission to
-        do this.
+        do this, if this is not an app emoji.
 
         Parameters
         ----------
         reason: Optional[:class:`str`]
             The reason for deleting this emoji. Shows up on the audit log.
+
+            Only applies to guild emojis, not app emojis.
 
         Raises
         ------
@@ -267,7 +273,7 @@ class Emoji(_EmojiTag, AssetMixin):
         Edits the custom emoji.
 
         You must have :attr:`~Permissions.manage_guild_expressions` permission to
-        do this.
+        do this, if this is not an app emoji.
 
         .. versionchanged:: 2.0
             The newly updated emoji is returned.
@@ -282,8 +288,12 @@ class Emoji(_EmojiTag, AssetMixin):
             An emoji cannot have both subscription roles (see :attr:`RoleTags.integration_id`) and
             non-subscription roles, and emojis can't be converted between premium and non-premium
             after creation.
+
+            Only applies to guild emojis, not app emojis.
         reason: Optional[:class:`str`]
             The reason for editing this emoji. Shows up on the audit log.
+
+            Only applies to guild emojis, not app emojis.
 
         Raises
         ------
