@@ -2434,8 +2434,8 @@ class Client:
         ------
         NotFound
             The app emoji couldn't be found.
-        Forbidden
-            You are not allowed to get the app emoji.
+        HTTPException
+            An error occurred fetching the app emoji.
 
         Returns
         -------
@@ -2464,10 +2464,8 @@ class Client:
         ------
         NotFound
             The ``image`` asset couldn't be found.
-        Forbidden
-            You are not allowed to create app emojis.
         HTTPException
-            An error occurred creating an app emoji.
+            An error occurred creating the app emoji.
         TypeError
             The ``image`` asset is a lottie sticker (see :func:`Sticker.read <disnake.Sticker.read>`).
         ValueError
@@ -2491,10 +2489,8 @@ class Client:
 
         Raises
         ------
-        NotFound
-            The app emojis for this application ID couldn't be found.
-        Forbidden
-            You are not allowed to get app emojis.
+        HTTPException
+            An error occurred fetching the app emojis.
 
         Returns
         -------
