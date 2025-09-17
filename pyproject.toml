@@ -24,6 +24,7 @@ classifiers = [
     "Intended Audience :: Developers",
     "Natural Language :: English",
     "Operating System :: OS Independent",
+    # it is important that the python classifiers are sorted in the sequential order
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
@@ -91,8 +92,7 @@ codemod = [
 typing = [
     # this is not pyright itself, but the python wrapper
     "pyright==1.1.405",
-    # only used for type-checking, version does not matter
-    "pytz",
+    # all type-check only dependencies are defined in noxfile.py.
 ]
 test = [
     "pytest~=8.3.2",

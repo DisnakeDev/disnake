@@ -55,8 +55,8 @@ jobs:
       min-python: ${{ steps.set-matrix.outputs.min-python }}
       docs: ${{ steps.set-matrix.outputs.docs }}
       libcst: ${{ steps.set-matrix.outputs.libcst }}
-      pyright: ${{ steps.set-matrix.outputs.tests }}
-      tests: ${{ steps.set-matrix.outputs.tests }}
+      pyright-sessions: ${{ steps.set-matrix.outputs.pyright-sessions }}
+      test-sessions: ${{ steps.set-matrix.outputs.test-sessions }}
     steps:
       - uses: actions/checkout@v4
       - name: Set up environment
@@ -66,11 +66,14 @@ jobs:
 
       - name: Determine Python versions to test and lint against
         id: set-matrix
+        # raw values (without a list) need the raw flag in order to not print quotes
+        # lists do not need the raw flag, as we parse them with fromJSON() later on
         run: |
           echo min-python=$(nox -s test --list --json | jq -rc '[.[].python][0]') | tee --append $GITHUB_OUTPUT
           echo docs=$(nox -s docs --list --json | jq -rc '.[].python') | tee --append $GITHUB_OUTPUT
           echo libcst=$(nox -s codemod --list --json | jq -rc '[.[].python][0]') | tee --append $GITHUB_OUTPUT
-          echo tests=$(nox -s test --list --json | jq -c '[.[].python]') | tee --append $GITHUB_OUTPUT
+          echo test-sessions=$(nox -s test --list --json | jq -c '[.[] | { python: .python, name: .session, extras: .call_spec.execution_group.extras, experimental: (.call_spec.execution_group.experimental == true) }]') | tee --append $GITHUB_OUTPUT
+          echo pyright-sessions=$(nox -s pyright --list --json | jq -c '[.[] | {python: .python, name: .session, paths: .call_spec.execution_group.pyright_paths, experimental: (.call_spec.execution_group.experimental == true) }]') | tee --append $GITHUB_OUTPUT
 
   lint:
     runs-on: ubuntu-latest
@@ -118,12 +121,9 @@ jobs:
     strategy:
       matrix:
         # TODO: add 3.14 once we switch to uv
-        python-version: ${{ fromJson(needs.python-versions.outputs.pyright) }}
-        experimental: [false]
+        session: ${{ fromJson(needs.python-versions.outputs.pyright-sessions) }}
       fail-fast: false
-    continue-on-error: ${{ matrix.experimental }}
-    env:
-      NOXFORCEPYTHON: ${{ matrix.python-version }}
+    continue-on-error: ${{ matrix.session.experimental }}
     steps:
       - uses: actions/checkout@v4
 
@@ -131,17 +131,28 @@ jobs:
         id: setup-env
         uses: ./.github/actions/setup-env
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: ${{ matrix.session.python }}
 
       - name: Add .venv/bin to PATH
-        run: dirname "$(pdm info --python)" >> $GITHUB_PATH
+        id: venv-bin
+        run: |
+          pdm venv create
+          dirname "$(pdm info --python)" >> $GITHUB_PATH
+          echo python="$(pdm info --python)" >> $GITHUB_OUTPUT
 
       - name: Install dependencies
+        # `--no-venv` to install in the main pdm venv instead of nox's pyright-specific one
+        # because nox uses pdm internally to install, this means that the venv that is used is
+        # the one that pdm would create in project: `.venv`
+        # python is NOT forced here because the session name is explicit
         env:
-          NOX_DEFAULT_VENV_BACKEND: none
-          PIP_PYTHON: "./.venv/bin/python"
+          NOXSESSION: ${{ matrix.session.name }}
+          NOX_DEFAULT_VENV_BACKEND: "none"
+          ## needed to install specific dependencies
+          ## used internally when nox calls pip to install a dependency in the venv
+          PIP_PYTHON: ${{ steps.venv-bin.outputs.python }}
         run: |
-          nox -s pyright --install-only
+          nox --install-only
 
       - name: Run pyright (Linux)
         uses: jakebailey/pyright-action@v2.3.3
@@ -150,8 +161,9 @@ jobs:
           version: PATH
           python-version: ${{ steps.setup-env.outputs.python-version }}
           python-platform: "Linux"
-          annotate: ${{ matrix.python-version == needs.python-versions.outputs.min-python }} # only add comments for one version
+          annotate: ${{ matrix.session.python == needs.python-versions.outputs.min-python }} # only add comments for one version
           warnings: true
+          extra-args: ${{join(matrix.session.paths, ' ')}}
 
       - name: Run pyright (Windows)
         uses: jakebailey/pyright-action@v2.3.3
@@ -162,6 +174,7 @@ jobs:
           python-platform: "Windows"
           annotate: false # only add comments for one platform (see above)
           warnings: true
+          extra-args: ${{join(matrix.session.paths, ' ')}}
 
   misc:
     runs-on: ubuntu-latest
@@ -244,13 +257,11 @@ jobs:
       matrix:
         os: ["windows-latest", "ubuntu-latest", "macos-latest"]
         # TODO: add 3.14 once we switch to uv
-        python-version: ${{ fromJson(needs.python-versions.outputs.tests) }}
-        experimental: [false]
+        session: ${{ fromJson(needs.python-versions.outputs.test-sessions) }}
       fail-fast: true
-    continue-on-error: ${{ matrix.experimental }}
+    continue-on-error: ${{ matrix.session.experimental }}
     env:
-      NOXSESSION: test
-      NOXFORCEPYTHON: python
+      NOXSESSION: ${{ matrix.session.name }}
     steps:
       - uses: actions/checkout@v4
 
@@ -258,7 +269,7 @@ jobs:
         id: setup-env
         uses: ./.github/actions/setup-env
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: ${{ matrix.session.python }}
 
       - name: Install nox environment
         run: |
@@ -280,7 +291,7 @@ jobs:
           NOXSESSION: coverage
         run: |
           echo "$GITHUB_STEP_SUMMARY_HEADER" | sed "s/#name#/Coverage Summary/" >> $GITHUB_STEP_SUMMARY
-          nox --no-install -- report | tee -a $GITHUB_STEP_SUMMARY
+          nox -- report | tee -a $GITHUB_STEP_SUMMARY
           echo "$GITHUB_STEP_SUMMARY_FOOTER" >> $GITHUB_STEP_SUMMARY
 
   # thanks to aiohttp for this part of the workflow
