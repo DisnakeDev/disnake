@@ -124,10 +124,10 @@ def get_groups_for_session(name: str) -> List[ExecutionGroup]:
 
 
 def get_version_for_session(name: str) -> str:
-    versions = dict.fromkeys(g.python for g in get_groups_for_session(name) if g.python)
+    versions = {g.python for g in get_groups_for_session(name) if g.python}
     if len(versions) != 1:
         raise TypeError(f"not the right number of groups for session {name}")
-    return next(iter(versions))
+    return versions.pop()
 
 
 def install_deps(session: nox.Session, *, execution_group: Optional[ExecutionGroup] = None) -> None:
