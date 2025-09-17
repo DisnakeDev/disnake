@@ -271,10 +271,6 @@ class ChannelType(Enum):
         return self.name
 
 
-for member in ChannelType:
-    print(member)
-
-
 class MessageType(Enum):
     """Specifies the type of :class:`Message`. This is used to denote if a message
     is to be interpreted as a system message or a regular message.
