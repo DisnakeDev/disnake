@@ -54,8 +54,8 @@ class Emoji(_EmojiTag, AssetMixin):
 
     .. versionchanged:: |vnext|
 
-        This class can now represents app emojis. Use :attr:`Emoji.is_app_emoji` to check for this.
-        To check if this is a guild emoji, use :attr:`Emoji.is_guild_emoji`.
+        This class can now represent app emojis. Use :meth:`Emoji.is_app_emoji` to check for this.
+        To check if this is a guild emoji, use :meth:`Emoji.is_guild_emoji`.
 
     Attributes
     ----------
@@ -192,19 +192,21 @@ class Emoji(_EmojiTag, AssetMixin):
             return None
         return self._state.application_id
 
-    @property
     def is_guild_emoji(self) -> bool:
-        """:class:`bool`: Whether this is a guild emoji.
+        """Whether this is a guild emoji.
 
         .. versionadded:: |vnext|
+
+        :return type: :class:`bool`
         """
         return self.guild_id is not None
 
-    @property
     def is_app_emoji(self) -> bool:
-        """:class:`bool`: Whether this is an application emoji.
+        """Whether this is an application emoji.
 
         .. versionadded:: |vnext|
+
+        :return type: :class:`bool`
         """
         return self.guild_id is None
 
