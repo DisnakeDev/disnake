@@ -197,9 +197,11 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
     @options.setter
     def options(self, value: List[SelectOption]) -> None:
         if not isinstance(value, list):
-            raise TypeError("options must be a list of SelectOption")
+            msg = "options must be a list of SelectOption"
+            raise TypeError(msg)
         if not all(isinstance(obj, SelectOption) for obj in value):
-            raise TypeError("all list items must subclass SelectOption")
+            msg = "all list items must subclass SelectOption"
+            raise TypeError(msg)
 
         self._underlying.options = value
 
@@ -263,7 +265,8 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
             The number of options exceeds 25.
         """
         if len(self._underlying.options) >= 25:
-            raise ValueError("maximum number of options already provided")
+            msg = "maximum number of options already provided"
+            raise ValueError(msg)
 
         self._underlying.options.append(option)
 

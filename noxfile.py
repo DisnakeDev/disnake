@@ -46,7 +46,8 @@ def install_deps(
 ) -> None:
     """Helper to install dependencies from a group."""
     if not project and extras:
-        raise TypeError("Cannot install extras without also installing the project")
+        msg = "Cannot install extras without also installing the project"
+        raise TypeError(msg)
 
     command: List[str]
 

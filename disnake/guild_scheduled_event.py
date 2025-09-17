@@ -464,19 +464,20 @@ class GuildScheduledEvent(Hashable):
                 elif channel_type is ChannelType.stage_voice:
                     entity_type = GuildScheduledEventEntityType.stage_instance
                 else:
-                    raise TypeError("channel type must be either 'voice' or 'stage_voice'")
+                    msg = "channel type must be either 'voice' or 'stage_voice'"
+                    raise TypeError(msg)
 
         if privacy_level is not MISSING:
             if not isinstance(privacy_level, GuildScheduledEventPrivacyLevel):
-                raise TypeError(
-                    "privacy_level must be an instance of GuildScheduledEventPrivacyLevel"
-                )
+                msg = "privacy_level must be an instance of GuildScheduledEventPrivacyLevel"
+                raise TypeError(msg)
 
             fields["privacy_level"] = privacy_level.value
 
         if entity_type is not MISSING:
             if not isinstance(entity_type, GuildScheduledEventEntityType):
-                raise TypeError("entity_type must be an instance of GuildScheduledEventEntityType")
+                msg = "entity_type must be an instance of GuildScheduledEventEntityType"
+                raise TypeError(msg)
 
             fields["entity_type"] = entity_type.value
 
@@ -488,13 +489,13 @@ class GuildScheduledEvent(Hashable):
                 fields["entity_metadata"] = entity_metadata.to_dict()
 
             else:
-                raise TypeError(
-                    "entity_metadata must be an instance of GuildScheduledEventMetadata"
-                )
+                msg = "entity_metadata must be an instance of GuildScheduledEventMetadata"
+                raise TypeError(msg)
 
         if status is not MISSING:
             if not isinstance(status, GuildScheduledEventStatus):
-                raise TypeError("status must be an instance of GuildScheduledEventStatus")
+                msg = "status must be an instance of GuildScheduledEventStatus"
+                raise TypeError(msg)
 
             fields["status"] = status.value
 
@@ -555,7 +556,8 @@ class GuildScheduledEvent(Hashable):
             The started guild scheduled event instance.
         """
         if self.status is not GuildScheduledEventStatus.scheduled:
-            raise ValueError("This event is not scheduled")
+            msg = "This event is not scheduled"
+            raise ValueError(msg)
         return await self._edit_status(GuildScheduledEventStatus.active, reason=reason)
 
     async def end(self, *, reason: Optional[str] = None) -> GuildScheduledEvent:
@@ -589,7 +591,8 @@ class GuildScheduledEvent(Hashable):
             The ended guild scheduled event instance.
         """
         if self.status is not GuildScheduledEventStatus.active:
-            raise ValueError("This event is not active")
+            msg = "This event is not active"
+            raise ValueError(msg)
         return await self._edit_status(GuildScheduledEventStatus.completed, reason=reason)
 
     async def cancel(self, *, reason: Optional[str] = None) -> GuildScheduledEvent:
@@ -623,7 +626,8 @@ class GuildScheduledEvent(Hashable):
             The cancelled guild scheduled event instance.
         """
         if self.status is not GuildScheduledEventStatus.scheduled:
-            raise ValueError("This event is not scheduled")
+            msg = "This event is not scheduled"
+            raise ValueError(msg)
         return await self._edit_status(GuildScheduledEventStatus.cancelled, reason=reason)
 
     # shortcut for editing just the event status, bypasses other edit logic

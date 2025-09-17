@@ -62,7 +62,8 @@ class File:
     ) -> None:
         if isinstance(fp, io.IOBase):
             if not (fp.seekable() and fp.readable()):
-                raise ValueError(f"File buffer {fp!r} must be seekable and readable")
+                msg = f"File buffer {fp!r} must be seekable and readable"
+                raise ValueError(msg)
             self.fp = fp
             self._original_pos = fp.tell()
             self._owner = False

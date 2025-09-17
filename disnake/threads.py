@@ -306,7 +306,8 @@ class Thread(Messageable, Hashable):
         """
         parent = self.parent
         if parent is None:
-            raise ClientException("Parent channel not found")
+            msg = "Parent channel not found"
+            raise ClientException(msg)
         return parent.category
 
     @property
@@ -325,7 +326,8 @@ class Thread(Messageable, Hashable):
         """
         parent = self.parent
         if parent is None:
-            raise ClientException("Parent channel not found")
+            msg = "Parent channel not found"
+            raise ClientException(msg)
         return parent.category_id
 
     @property
@@ -473,7 +475,8 @@ class Thread(Messageable, Hashable):
         """
         parent = self.parent
         if parent is None:
-            raise ClientException("Parent channel not found")
+            msg = "Parent channel not found"
+            raise ClientException(msg)
         # n.b. GuildChannel is used here so implicit overrides are not applied based on send_messages
         base = GuildChannel.permissions_for(parent, obj, ignore_timeout=ignore_timeout)
 
@@ -541,7 +544,8 @@ class Thread(Messageable, Hashable):
             return
 
         if len(messages) > 100:
-            raise ClientException("Can only bulk delete messages up to 100 messages")
+            msg = "Can only bulk delete messages up to 100 messages"
+            raise ClientException(msg)
 
         message_ids: SnowflakeList = [m.id for m in messages]
         await self._state.http.delete_messages(self.id, message_ids)
@@ -767,7 +771,8 @@ class Thread(Messageable, Hashable):
 
         if flags is not MISSING:
             if not isinstance(flags, ChannelFlags):
-                raise TypeError("flags field must be of type ChannelFlags")
+                msg = "flags field must be of type ChannelFlags"
+                raise TypeError(msg)
             payload["flags"] = flags.value
 
         if applied_tags is not MISSING:
@@ -1081,7 +1086,8 @@ class ThreadMember(Hashable):
             self.id = int(data["user_id"])
         except KeyError as err:
             if (self_id := self._state.self_id) is None:
-                raise AssertionError("self_id is None when updating our own ThreadMember.") from err
+                msg = "self_id is None when updating our own ThreadMember."
+                raise AssertionError(msg) from err
             self.id = self_id
 
         try:
@@ -1181,7 +1187,8 @@ class ForumTag(Hashable):
         elif isinstance(emoji, _EmojiTag):
             self.emoji = emoji
         else:
-            raise TypeError("emoji must be None, a str, PartialEmoji, or Emoji instance.")
+            msg = "emoji must be None, a str, PartialEmoji, or Emoji instance."
+            raise TypeError(msg)
 
     def __str__(self) -> str:
         return self.name

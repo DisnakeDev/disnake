@@ -52,9 +52,8 @@ class BaseCodemodCommand(NoMetadataWrapperMixin, cst.CSTTransformer, codemod.Cod
                 code = f.read()
 
             if self.CHECK_MARKER not in code:
-                raise codemod.SkipFile(
-                    f"this module does not contain the required marker: `{self.CHECK_MARKER}`."
-                )
+                msg = f"this module does not contain the required marker: `{self.CHECK_MARKER}`."
+                raise codemod.SkipFile(msg)
 
         return super().transform_module(tree)
 

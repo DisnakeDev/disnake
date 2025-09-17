@@ -224,7 +224,8 @@ class AsyncWebhookAdapter:
                     raise DiscordServerError(response, data)
                 raise HTTPException(response, data)
 
-            raise RuntimeError("Unreachable code in HTTP handling.")
+            msg = "Unreachable code in HTTP handling."
+            raise RuntimeError(msg)
 
     def delete_webhook(
         self,
@@ -521,11 +522,14 @@ def handle_message_parameters_dict(
     applied_tags: Sequence[Snowflake] = MISSING,
 ) -> DictPayloadParameters:
     if files is not MISSING and file is not MISSING:
-        raise TypeError("Cannot mix file and files keyword arguments.")
+        msg = "Cannot mix file and files keyword arguments."
+        raise TypeError(msg)
     if embeds is not MISSING and embed is not MISSING:
-        raise TypeError("Cannot mix embed and embeds keyword arguments.")
+        msg = "Cannot mix embed and embeds keyword arguments."
+        raise TypeError(msg)
     if view is not MISSING and components is not MISSING:
-        raise TypeError("Cannot mix view and components keyword arguments.")
+        msg = "Cannot mix view and components keyword arguments."
+        raise TypeError(msg)
 
     if file is not MISSING:
         files = [file]
@@ -535,7 +539,8 @@ def handle_message_parameters_dict(
         embeds = [embed] if embed else []
     if embeds is not MISSING:
         if len(embeds) > 10:
-            raise ValueError("embeds has a maximum of 10 elements.")
+            msg = "embeds has a maximum of 10 elements."
+            raise ValueError(msg)
         payload["embeds"] = [e.to_dict() for e in embeds]
         for embed in embeds:
             if embed._files:
@@ -560,7 +565,8 @@ def handle_message_parameters_dict(
         flags.is_components_v2 = True
     # components v2 cannot be used with other content fields
     if flags and flags.is_components_v2 and (content or embeds or stickers or poll):
-        raise ValueError("Cannot use v2 components with content, embeds, stickers, or polls")
+        msg = "Cannot use v2 components with content, embeds, stickers, or polls"
+        raise ValueError(msg)
 
     if attachments is not MISSING:
         payload["attachments"] = [] if attachments is None else [a.to_dict() for a in attachments]
@@ -725,7 +731,8 @@ class _FriendlyHttpAttributeErrorHelper:
     __slots__ = ()
 
     def __getattr__(self, attr) -> NoReturn:
-        raise AttributeError("PartialWebhookState does not support http methods.")
+        msg = "PartialWebhookState does not support http methods."
+        raise AttributeError(msg)
 
 
 WebhookT = TypeVar("WebhookT", bound="BaseWebhook")
@@ -779,7 +786,8 @@ class _WebhookState(Generic[WebhookT]):
         if self._parent is not None:
             return getattr(self._parent, attr)
 
-        raise AttributeError(f"PartialWebhookState does not support {attr!r}.")
+        msg = f"PartialWebhookState does not support {attr!r}."
+        raise AttributeError(msg)
 
 
 class WebhookMessage(Message):
@@ -1264,7 +1272,8 @@ class Webhook(BaseWebhook):
             url,
         )
         if m is None:
-            raise ValueError("Invalid webhook URL given.")
+            msg = "Invalid webhook URL given."
+            raise ValueError(msg)
 
         data: Dict[str, Any] = m.groupdict()
         data["type"] = 1
@@ -1342,7 +1351,8 @@ class Webhook(BaseWebhook):
         elif self.token:
             data = await adapter.fetch_webhook_with_token(self.id, self.token, session=self.session)
         else:
-            raise WebhookTokenMissing("This webhook does not have a token associated with it")
+            msg = "This webhook does not have a token associated with it"
+            raise WebhookTokenMissing(msg)
 
         return Webhook(data, self.session, token=self.auth_token, state=self._state)
 
@@ -1379,7 +1389,8 @@ class Webhook(BaseWebhook):
             This webhook does not have a token associated with it.
         """
         if self.token is None and self.auth_token is None:
-            raise WebhookTokenMissing("This webhook does not have a token associated with it")
+            msg = "This webhook does not have a token associated with it"
+            raise WebhookTokenMissing(msg)
 
         adapter = async_context.get()
 
@@ -1452,7 +1463,8 @@ class Webhook(BaseWebhook):
             The newly edited webhook.
         """
         if self.token is None and self.auth_token is None:
-            raise WebhookTokenMissing("This webhook does not have a token associated with it")
+            msg = "This webhook does not have a token associated with it"
+            raise WebhookTokenMissing(msg)
 
         payload: Dict[str, Any] = {}
         if name is not MISSING:
@@ -1467,7 +1479,8 @@ class Webhook(BaseWebhook):
         # If a channel is given, always use the authenticated endpoint
         if channel is not None:
             if self.auth_token is None:
-                raise WebhookTokenMissing("Editing channel requires authenticated webhook")
+                msg = "Editing channel requires authenticated webhook"
+                raise WebhookTokenMissing(msg)
 
             payload["channel_id"] = channel.id
             data = await adapter.edit_webhook(
@@ -1484,7 +1497,8 @@ class Webhook(BaseWebhook):
             )
 
         if data is None:
-            raise RuntimeError("Unreachable code hit: data was not assigned")
+            msg = "Unreachable code hit: data was not assigned"
+            raise RuntimeError(msg)
 
         return Webhook(data=data, session=self.session, token=self.auth_token, state=self._state)
 
@@ -1761,7 +1775,8 @@ class Webhook(BaseWebhook):
             If ``wait`` is ``True`` then the message that was sent, otherwise ``None``.
         """
         if self.token is None:
-            raise WebhookTokenMissing("This webhook does not have a token associated with it")
+            msg = "This webhook does not have a token associated with it"
+            raise WebhookTokenMissing(msg)
 
         previous_mentions: Optional[AllowedMentions] = getattr(
             self._state, "allowed_mentions", None
@@ -1771,23 +1786,24 @@ class Webhook(BaseWebhook):
 
         application_webhook = self.type is WebhookType.application
         if ephemeral and not application_webhook:
-            raise TypeError("ephemeral messages can only be sent from application webhooks")
+            msg = "ephemeral messages can only be sent from application webhooks"
+            raise TypeError(msg)
 
         if application_webhook or delete_after is not MISSING:
             wait = True
 
         if view is not MISSING:
             if isinstance(self._state, _WebhookState):
-                raise TypeError("Webhook views require an associated state with the webhook")
+                msg = "Webhook views require an associated state with the webhook"
+                raise TypeError(msg)
             if ephemeral is True and view.timeout is None:
                 view.timeout = 15 * 60.0
 
         thread_id: Optional[int] = None
         if thread is not MISSING:
             if thread_name or applied_tags:
-                raise TypeError(
-                    "Cannot use `thread_name` or `applied_tags` when `thread` is provided."
-                )
+                msg = "Cannot use `thread_name` or `applied_tags` when `thread` is provided."
+                raise TypeError(msg)
             thread_id = thread.id
 
         params = handle_message_parameters(
@@ -1881,7 +1897,8 @@ class Webhook(BaseWebhook):
             The message asked for.
         """
         if self.token is None:
-            raise WebhookTokenMissing("This webhook does not have a token associated with it")
+            msg = "This webhook does not have a token associated with it"
+            raise WebhookTokenMissing(msg)
 
         adapter = async_context.get()
         data = await adapter.get_webhook_message(
@@ -2024,11 +2041,13 @@ class Webhook(BaseWebhook):
             The newly edited webhook message.
         """
         if self.token is None:
-            raise WebhookTokenMissing("This webhook does not have a token associated with it")
+            msg = "This webhook does not have a token associated with it"
+            raise WebhookTokenMissing(msg)
 
         if view is not MISSING:
             if isinstance(self._state, _WebhookState):
-                raise TypeError("This webhook does not have state associated with it")
+                msg = "This webhook does not have state associated with it"
+                raise TypeError(msg)
 
             self._state.prevent_view_updates_for(message_id)
 
@@ -2109,7 +2128,8 @@ class Webhook(BaseWebhook):
             There was no token associated with this webhook
         """
         if self.token is None:
-            raise WebhookTokenMissing("This webhook does not have a token associated with it")
+            msg = "This webhook does not have a token associated with it"
+            raise WebhookTokenMissing(msg)
 
         adapter = async_context.get()
         await adapter.delete_webhook_message(

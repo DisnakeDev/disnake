@@ -63,7 +63,8 @@ class WelcomeScreenChannel:
         elif isinstance(emoji, _EmojiTag):
             self.emoji = emoji
         else:
-            raise TypeError("emoji must be None, a str, PartialEmoji, or Emoji instance.")
+            msg = "emoji must be None, a str, PartialEmoji, or Emoji instance."
+            raise TypeError(msg)
 
     def __repr__(self) -> str:
         return f"<WelcomeScreenChannel id={self.id!r} emoji={self.emoji!r} description={self.description!r}>"
@@ -186,7 +187,8 @@ class WelcomeScreen:
         from .guild import Guild
 
         if not isinstance(self._guild, Guild):
-            raise TypeError("May not edit a WelcomeScreen from a PartialInviteGuild.")
+            msg = "May not edit a WelcomeScreen from a PartialInviteGuild."
+            raise TypeError(msg)
 
         return await self._guild.edit_welcome_screen(
             enabled=enabled,

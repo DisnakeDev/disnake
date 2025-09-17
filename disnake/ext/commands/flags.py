@@ -110,7 +110,8 @@ class CommandSyncFlags(BaseFlags):
         self.value = all_flags_value(self.VALID_FLAGS)
         for key, value in kwargs.items():
             if key not in self.VALID_FLAGS:
-                raise TypeError(f"{key!r} is not a valid flag name.")
+                msg = f"{key!r} is not a valid flag name."
+                raise TypeError(msg)
             setattr(self, key, value)
 
     @classmethod

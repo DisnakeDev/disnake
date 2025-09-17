@@ -1043,7 +1043,8 @@ class Member(disnake.abc.Messageable, _UserTag):
 
         if suppress is not MISSING:
             if self.voice is None or self.voice.channel is None:
-                raise Exception("Cannot suppress a member which isn't in a vc")  # noqa: TRY002
+                msg = "Cannot suppress a member which isn't in a vc"
+                raise Exception(msg)  # noqa: TRY002
 
             voice_state_payload: Dict[str, Any] = {
                 "channel_id": self.voice.channel.id,
@@ -1113,7 +1114,8 @@ class Member(disnake.abc.Messageable, _UserTag):
             The operation failed.
         """
         if self.voice is None or self.voice.channel is None:
-            raise Exception("Cannot request to speak when not in a vc")  # noqa: TRY002
+            msg = "Cannot request to speak when not in a vc"
+            raise Exception(msg)  # noqa: TRY002
 
         payload = {
             "channel_id": self.voice.channel.id,

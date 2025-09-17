@@ -62,7 +62,8 @@ def visit_attributetablebadge_node(self: HTMLTranslator, node: nodes.Element) ->
     """Add a class to each badge of the type that it is."""
     badge_type: str = node["badge-type"]
     if badge_type not in ("coroutine", "decorator", "method", "classmethod"):
-        raise RuntimeError(f"badge_type {badge_type} is currently unsupported")
+        msg = f"badge_type {badge_type} is currently unsupported"
+        raise RuntimeError(msg)
     attributes = {
         "class": f"badge-{badge_type}",
     }
@@ -113,7 +114,8 @@ class PyAttributeTable(SphinxDirective):
             if not modulename:
                 modulename = self.env.ref_context.get("py:module")
         if modulename is None:
-            raise RuntimeError(f"modulename somehow None for {content} in {self.env.docname}.")
+            msg = f"modulename somehow None for {content} in {self.env.docname}."
+            raise RuntimeError(msg)
 
         return modulename, name
 
