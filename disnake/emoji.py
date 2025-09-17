@@ -311,7 +311,7 @@ class Emoji(_EmojiTag, AssetMixin):
                 msg = f"guild and application_id are both None when attempting to edit emoji with ID {self.id} This may be a library bug! Open an issue on GitHub."
                 raise InvalidData(msg)
 
-            data = await self._state.http.edit_app_emoji(self.application_id, self.id, name)
+            data = await self._state.http.edit_app_emoji(self.application_id, self.id, name=name)
         else:
             data = await self._state.http.edit_custom_emoji(
                 self.guild.id, self.id, payload=payload, reason=reason
