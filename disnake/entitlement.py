@@ -154,10 +154,7 @@ class Entitlement(Hashable):
         now = utcnow()
         if self.starts_at is not None and now < self.starts_at:
             return False
-        if self.ends_at is not None and now >= self.ends_at:
-            return False
-
-        return True
+        return not (self.ends_at is not None and now >= self.ends_at)
 
     async def consume(self) -> None:
         """|coro|

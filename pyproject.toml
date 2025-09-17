@@ -168,7 +168,8 @@ ignore = [
     ## flake8-self
     "SLF", # private member access, this is unlikely to be enabled.
     ## flake8-simplify
-    "SIM", # TODO: enable, most have autofixes.
+    "SIM105", # TODO: enable, most have autofixes.
+    "SIM108", # too opinionated.
     ## flake8-tidy-imports
     "TID252", # we still use relative imports
     ## flake8-todos
@@ -222,6 +223,7 @@ ignore = [
     "ANN", # missing type annotations in examples is fine
     "B008", # do not perform function calls in argument defaults, this is how most commands work
     "E741", # allow ambiguous variable names
+    "SIM108", # allow if else blocks that don't use ternary
     "S104", # flake8-bandit: allow binding to all interfaces
     "T201", # print found, printing is okay in examples
 ]
