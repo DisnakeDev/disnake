@@ -86,8 +86,13 @@ if TYPE_CHECKING:
 else:
     P = TypeVar("P")
 
+
 if sys.version_info >= (3, 10):
     from types import EllipsisType, UnionType
+elif TYPE_CHECKING:
+    EllipsisType = type(Ellipsis)
+    UnionType = Type[Union]
+
 else:
     UnionType = object()
     EllipsisType = type(Ellipsis)
