@@ -52,7 +52,7 @@ else:
 @dataclasses.dataclass
 class ExecutionGroup(ExecutionGroupType):
     sessions: Tuple[str, ...] = ()
-    python: Optional[str] = MIN_PYTHON
+    python: str = MIN_PYTHON
     project: bool = True
     extras: Tuple[str, ...] = ()
     groups: Tuple[str, ...] = ()
