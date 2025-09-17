@@ -154,16 +154,11 @@ jobs:
         run: |
           nox --install-only
 
-      - name: Set pyright version
-        id: pyright-version
-        run: |
-          echo "pyright-version=$(${{steps.venv-bin.outputs.python}} -c 'import pyright; print(pyright.__pyright_version__)')" >> $GITHUB_OUTPUT
-
       - name: Run pyright (Linux)
-        uses: jakebailey/pyright-action@v2.2.1
+        uses: jakebailey/pyright-action@v2.3.3
         id: pyright-linux
         with:
-          version: ${{ steps.pyright-version.outputs.pyright-version }}
+          version: PATH
           python-version: ${{ steps.setup-env.outputs.python-version }}
           python-platform: "Linux"
           annotate: ${{ matrix.session.python == needs.python-versions.outputs.min-python }} # only add comments for one version
@@ -171,10 +166,10 @@ jobs:
           extra-args: ${{join(matrix.session.paths, ' ')}}
 
       - name: Run pyright (Windows)
-        uses: jakebailey/pyright-action@v2.2.1
+        uses: jakebailey/pyright-action@v2.3.3
         if: always() && (steps.pyright-linux.outcome == 'success' || steps.pyright-linux.outcome == 'failure')
         with:
-          version: ${{ steps.pyright-version.outputs.pyright-version }}
+          version: PATH
           python-version: ${{ steps.setup-env.outputs.python-version }}
           python-platform: "Windows"
           annotate: false # only add comments for one platform (see above)
