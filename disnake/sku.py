@@ -99,6 +99,10 @@ class SKU(Hashable):
 
         All parameters, except ``user``, are optional.
 
+        .. versionchanged:: |vnext|
+            Now returns an async iterator, like all other iterator methods.
+            Previously, this mistakenly returned a coroutine.
+
         Parameters
         ----------
         user: :class:`abc.Snowflake`
