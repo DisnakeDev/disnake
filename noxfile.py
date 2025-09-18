@@ -31,6 +31,7 @@ nox.needs_version = ">=2025.5.1"
 
 nox.options.error_on_external_run = True
 nox.options.reuse_venv = "yes"
+nox.options.default_venv_backend = "uv|virtualenv"
 
 PYPROJECT = nox.project.load_toml()
 
@@ -62,6 +63,7 @@ class ExecutionGroup(ExecutionGroupType):
     dependencies: Tuple[str, ...] = ()
     experimental: bool = False
     pyright_paths: Tuple[str, ...] = ()
+    tags: Dict[str, Tuple[str, ...]] = dataclasses.field(default_factory=dict)
 
     def __post_init__(self) -> None:
         if not self.experimental:
@@ -96,6 +98,17 @@ EXECUTION_GROUPS: List[ExecutionGroup] = [
             extras=("speed", "voice") if python not in EXPERIMENTAL_PYTHON_VERSIONS else ("voice",),
             groups=("test", "nox"),
             dependencies=("setuptools", "pytz", "requests"),  # needed for type checking
+            tags={
+                "pyright": tuple(
+                    x
+                    for x in (
+                        "ci",
+                        "typing",
+                        "quick" if python in (MIN_PYTHON, SUPPORTED_PYTHONS[-1]) else None,
+                    )
+                    if x
+                ),
+            },
         )
         for python in ALL_PYTHONS
     ),
@@ -104,12 +117,14 @@ EXECUTION_GROUPS: List[ExecutionGroup] = [
         sessions=("docs", "pyright"),
         pyright_paths=("docs",),
         extras=("docs",),
+        tags={"pyright": ("docs", "ci")},
     ),
     # codemodding and pyright
     ExecutionGroup(
         sessions=("codemod", "autotyping", "pyright"),
         pyright_paths=("scripts",),
         groups=("codemod",),
+        tags={"pyright": ("scripts", "ci")},
     ),
     # the other sessions, they don't need pyright, but they need to run
     ExecutionGroup(
@@ -122,6 +137,16 @@ EXECUTION_GROUPS: List[ExecutionGroup] = [
             sessions=("test",),
             python=python,
             groups=("test",),
+            tags={
+                "test": tuple(
+                    x
+                    for x in (
+                        "ci",
+                        "quick" if python in (MIN_PYTHON, SUPPORTED_PYTHONS[-1]) else None,
+                    )
+                    if x
+                ),
+            },
         )
         for python in ALL_PYTHONS
     ),
@@ -234,7 +259,7 @@ def install_deps(session: nox.Session, *, execution_group: Optional[ExecutionGro
             session.install(*execution_group.dependencies, env=env)
 
 
-@nox.session(python=get_version_for_session("docs"), default=False)
+@nox.session(python=get_version_for_session("docs"), tags=("ci", "docs"), default=False)
 def docs(session: nox.Session) -> None:
     """Build and generate the documentation.
 
@@ -267,28 +292,60 @@ def docs(session: nox.Session) -> None:
             )
 
 
-@nox.session
+@nox.session(tags=("ci", "quick", "fix"))
 def lint(session: nox.Session) -> None:
     """Check all paths for linting errors"""
     install_deps(session)
     session.run("pre-commit", "run", "--all-files", *session.posargs)
 
 
-@nox.session(name="check-manifest")
+@nox.session(name="check-manifest", tags=("ci", "build"))
 def check_manifest(session: nox.Session) -> None:
     """Run check-manifest."""
     install_deps(session)
     session.run("check-manifest", "-v")
 
 
-@nox.session(python=get_version_for_session("slotscheck"))
+@nox.session(python=get_version_for_session("slotscheck"), tags=("ci",))
 def slotscheck(session: nox.Session) -> None:
     """Run slotscheck."""
     install_deps(session)
     session.run("python", "-m", "slotscheck", "--verbose", "-m", "disnake")
 
 
-@nox.session(python=get_version_for_session("autotyping"))
+@nox.session(
+    name="codemod",
+    python=get_version_for_session("codemod"),
+    tags=("ci", "typehints", "fix", "scripts"),
+)
+def codemod(session: nox.Session) -> None:
+    """Run libcst codemods."""
+    install_deps(session)
+
+    base_command = ["python", "-m", "libcst.tool"]
+    base_command_codemod = [*base_command, "codemod"]
+    if not session.interactive:
+        base_command_codemod += ["--hide-progress"]
+
+    if (session.posargs and session.posargs[0] == "run-all") or not session.interactive:
+        # run all of the transformers on disnake
+        session.log("Running all transformers.")
+
+        session.run(*base_command_codemod, "combined.CombinedCodemod", "disnake")
+    elif session.posargs:
+        if len(session.posargs) < 2:
+            session.posargs.append("disnake")
+
+        session.run(*base_command_codemod, *session.posargs)
+    else:
+        session.run(*base_command, "list")
+        return  # don't run autotyping in this case
+
+
+@nox.session(
+    python=get_version_for_session("autotyping"),
+    tags=("ci", "codemod", "typehints", "fix"),
+)
 def autotyping(session: nox.Session) -> None:
     """Run autotyping.
 
@@ -350,38 +407,12 @@ def autotyping(session: nox.Session) -> None:
         )
 
 
-@nox.session(name="codemod", python=get_version_for_session("codemod"))
-def codemod(session: nox.Session) -> None:
-    """Run libcst codemods."""
-    install_deps(session)
-
-    base_command = ["python", "-m", "libcst.tool"]
-    base_command_codemod = [*base_command, "codemod"]
-    if not session.interactive:
-        base_command_codemod += ["--hide-progress"]
-
-    if (session.posargs and session.posargs[0] == "run-all") or not session.interactive:
-        # run all of the transformers on disnake
-        session.log("Running all transformers.")
-
-        session.run(*base_command_codemod, "combined.CombinedCodemod", "disnake")
-    elif session.posargs:
-        if len(session.posargs) < 2:
-            session.posargs.append("disnake")
-
-        session.run(*base_command_codemod, *session.posargs)
-    else:
-        session.run(*base_command, "list")
-        return  # don't run autotyping in this case
-
-    session.notify("autotyping", posargs=[])
-
-
 @nox.session()
 @nox.parametrize(
     ("python", "execution_group"),
     [(group.python, group) for group in get_groups_for_session("pyright")],
     ids=[group.pyright_session_id for group in get_groups_for_session("pyright")],
+    tags=[group.tags.get("pyright", []) for group in get_groups_for_session("pyright")],
 )
 def pyright(session: nox.Session, execution_group: ExecutionGroup, **kwargs: Any) -> None:
     if paths := session.posargs:
@@ -453,6 +484,7 @@ def pyright_cli(session: nox.Session) -> None:
     ("python", "execution_group"),
     [(group.python, group) for group in get_groups_for_session("test")],
     ids=[group.test_session_id for group in get_groups_for_session("test")],
+    tags=[group.tags.get("test", []) for group in get_groups_for_session("test")],
 )
 def test(session: nox.Session, execution_group: ExecutionGroup) -> None:
     """Run tests."""
@@ -475,7 +507,7 @@ def test(session: nox.Session, execution_group: ExecutionGroup) -> None:
     )
 
 
-@nox.session
+@nox.session(tags=("ci", "test"))
 def coverage(session: nox.Session) -> None:
     """Display coverage information from the tests."""
     install_deps(session)
