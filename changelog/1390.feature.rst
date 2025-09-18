@@ -1,0 +1,1 @@
+Add a :class:`ui.FileUpload` component for modals. This allows you to receive up to 10 files from users in a modal.
