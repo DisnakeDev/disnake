@@ -557,7 +557,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
             except ArgumentParsingError:
                 if (
                     self._is_typing_optional(param.annotation)
-                    and not param.kind == param.VAR_POSITIONAL
+                    and param.kind != param.VAR_POSITIONAL
                 ):
                     view.index = previous
                     return None

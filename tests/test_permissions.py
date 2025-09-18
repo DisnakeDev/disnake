@@ -336,4 +336,4 @@ class TestPermissionOverwrite:
         po = PermissionOverwrite(**expected)
 
         for perm, value in po:
-            assert expected.get(perm, None) is value
+            assert expected.get(perm) is value
