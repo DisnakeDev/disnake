@@ -1,0 +1,1 @@
+Add support for modifying application info using :meth:`AppInfo.edit`.

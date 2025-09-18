@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, List, Optional, cast
+from typing import TYPE_CHECKING, Dict, List, Optional, Sequence, cast
 
 from . import utils
-from .asset import Asset
+from .asset import Asset, AssetBytes
 from .enums import ApplicationEventWebhookStatus, try_enum
 from .flags import ApplicationFlags
 from .permissions import Permissions
+from .utils import MISSING
 
 if TYPE_CHECKING:
     from .guild import Guild
@@ -17,11 +18,13 @@ if TYPE_CHECKING:
         AppInfo as AppInfoPayload,
         ApplicationIntegrationType as ApplicationIntegrationTypeLiteral,
         ApplicationIntegrationTypeConfiguration as ApplicationIntegrationTypeConfigurationPayload,
+        EditAppInfo as EditAppInfoPayload,
         InstallParams as InstallParamsPayload,
         PartialAppInfo as PartialAppInfoPayload,
         Team as TeamPayload,
     )
     from .user import User
+
 
 __all__ = (
     "AppInfo",
@@ -35,6 +38,9 @@ class InstallParams:
     """Represents the installation parameters for the application, provided by Discord.
 
     .. versionadded:: 2.5
+
+    .. versionchanged:: |vnext|
+        This class can now be created by users.
 
     Attributes
     ----------
@@ -53,15 +59,27 @@ class InstallParams:
 
     def __init__(
         self,
+        *,
+        scopes: List[str],
+        permissions: Permissions,
+    ) -> None:
+        self.scopes = scopes
+        self.permissions = permissions
+        self._app_id: int = 0
+        self._install_type: Optional[ApplicationIntegrationTypeLiteral] = None
+
+    @classmethod
+    def _from_data(
+        cls,
         data: InstallParamsPayload,
         parent: AppInfo,
         *,
         install_type: Optional[ApplicationIntegrationTypeLiteral] = None,
-    ) -> None:
-        self._app_id = parent.id
-        self._install_type: Optional[ApplicationIntegrationTypeLiteral] = install_type
-        self.scopes = data["scopes"]
-        self.permissions = Permissions(int(data["permissions"]))
+    ) -> InstallParams:
+        instance = cls(permissions=Permissions(int(data["permissions"])), scopes=data["scopes"])
+        instance._install_type = install_type
+        instance._app_id = parent.id
+        return instance
 
     def __repr__(self) -> str:
         return f"<InstallParams scopes={self.scopes!r} permissions={self.permissions!r}>"
@@ -69,11 +87,15 @@ class InstallParams:
     def to_url(self) -> str:
         """Returns a string that can be used to install this application.
 
+        .. note:: This method can only be used on InstallParams that have been created by :meth:`.Client.application_info`
+
         Returns
         -------
         :class:`str`
             The invite url.
         """
+        if not self._app_id:
+            raise ValueError("This InstallParams instance is not linked to an application.")
         return utils.oauth_url(
             self._app_id,
             scopes=self.scopes,
@@ -83,11 +105,21 @@ class InstallParams:
             ),
         )
 
+    def to_dict(self) -> InstallParamsPayload:
+        return {
+            "scopes": self.scopes,
+            "permissions": str(self.permissions.value),
+        }
+
 
 class InstallTypeConfiguration:
     """Represents the configuration for a particular application installation type.
 
     .. versionadded:: 2.10
+
+    .. versionchanged:: |vnext|
+
+        This class can now be created by users.
 
     Attributes
     ----------
@@ -97,18 +129,30 @@ class InstallTypeConfiguration:
 
     __slots__ = ("install_params",)
 
-    def __init__(
-        self,
+    def __init__(self, *, install_params: Optional[InstallParams] = None) -> None:
+        self.install_params: Optional[InstallParams] = install_params
+
+    @classmethod
+    def _from_data(
+        cls,
         data: ApplicationIntegrationTypeConfigurationPayload,
         *,
         parent: AppInfo,
         install_type: ApplicationIntegrationTypeLiteral,
-    ) -> None:
-        self.install_params: Optional[InstallParams] = (
-            InstallParams(install_params, parent=parent, install_type=install_type)
+    ) -> InstallTypeConfiguration:
+        return cls(
+            install_params=InstallParams._from_data(
+                install_params, parent=parent, install_type=install_type
+            )
             if (install_params := data.get("oauth2_install_params"))
             else None
         )
+
+    def to_dict(self) -> ApplicationIntegrationTypeConfigurationPayload:
+        payload: ApplicationIntegrationTypeConfigurationPayload = {}
+        if self.install_params:
+            payload["oauth2_install_params"] = self.install_params.to_dict()
+        return payload
 
 
 class AppInfo:
@@ -307,7 +351,9 @@ class AppInfo:
         )
         self.tags: Optional[List[str]] = data.get("tags")
         self.install_params: Optional[InstallParams] = (
-            InstallParams(data["install_params"], parent=self) if "install_params" in data else None
+            InstallParams._from_data(data["install_params"], parent=self)
+            if "install_params" in data
+            else None
         )
         self.custom_install_url: Optional[str] = data.get("custom_install_url")
         self.redirect_uris: Optional[List[str]] = data.get("redirect_uris")
@@ -332,7 +378,7 @@ class AppInfo:
         ] = {}
         for type_str, config in (data.get("integration_types_config") or {}).items():
             install_type = cast("ApplicationIntegrationTypeLiteral", int(type_str))
-            self._install_types_config[install_type] = InstallTypeConfiguration(
+            self._install_types_config[install_type] = InstallTypeConfiguration._from_data(
                 config or {},
                 parent=self,
                 install_type=install_type,
@@ -401,6 +447,154 @@ class AppInfo:
         .. versionadded:: 2.10
         """
         return self._install_types_config.get(1)
+
+    async def edit(
+        self,
+        *,
+        custom_install_url: Optional[str] = MISSING,
+        description: Optional[str] = MISSING,
+        role_connections_verification_url: Optional[str] = MISSING,
+        install_params: Optional[InstallParams] = MISSING,
+        guild_install_type_config: Optional[InstallTypeConfiguration] = MISSING,
+        user_install_type_config: Optional[InstallTypeConfiguration] = MISSING,
+        flags: ApplicationFlags = MISSING,
+        icon: Optional[AssetBytes] = MISSING,
+        cover_image: Optional[AssetBytes] = MISSING,
+        interactions_endpoint_url: Optional[str] = MISSING,
+        tags: Sequence[str] = MISSING,
+        event_webhooks_url: Optional[str] = MISSING,
+        event_webhooks_status: ApplicationEventWebhookStatus = MISSING,
+        event_webhooks_types: Sequence[str] = MISSING,
+    ) -> AppInfo:
+        """|coro|
+
+        Edit's the application's information.
+
+        All parameters are optional.
+
+        .. versionadded:: |vnext|
+
+        Parameters
+        ----------
+        description: Optional[:class:`str`]
+            The application's description.
+        flags: :class:`ApplicationFlags`
+            The application's public flags.
+
+            This is restricted to only affecting the limited intent flags:
+            :attr:`~ApplicationFlags.gateway_guild_members_limited`,
+            :attr:`~ApplicationFlags.gateway_presence_limited`, and
+            :attr:`~ApplicationFlags.gateway_message_content_limited`.
+
+            .. warning::
+                Disabling an intent that you are currently requesting during your current session
+                will cause you to be disconnected from the gateway. Take caution when providing this parameter.
+
+        tags: List[:class:`str`]
+            The application's tags.
+        install_params: Optional[:class:`InstallParams`]
+            The installation parameters for this application.
+
+            Cannot be provided with ``custom_install_url``.
+        custom_install_url: Optional[:class:`str`]
+            The custom installation url for this application.
+        role_connections_verification_url: Optional[:class:`str`]
+            The application's role connection verification entry point,
+            which when configured will render the app as a verification method
+            in the guild role verification configuration.
+        interactions_endpoint_url: Optional[:class:`str`]
+            The application's interactions endpoint URL.
+        icon: Optional[|resource_type|]
+            Update the application's icon asset, if any.
+        cover_image: Optional[|resource_type|]
+            Update the cover_image for rich presence integrations.
+        guild_install_type_config: Optional[:class:`InstallTypeConfiguration`]
+            The guild installation type configuration for this application.
+        user_install_type_config: Optional[:class:`InstallTypeConfiguration`]
+            The user installation type configuration for this application.
+        event_webhooks_url: Optional[:class:`str`]
+            The application's event webhooks URL.
+        event_webhooks_status: :class:`ApplicationEventWebhookStatus`
+            The application's event webhooks status.
+        event_webhook_types: Optional[List]
+            The application's event webhook types. See `webhook event types <https://discord.com/developers/docs/events/webhook-events#event-types>`_
+            for a list of valid events.
+
+        Raises
+        ------
+        HTTPException
+            Editing the application information failed.
+
+        Returns
+        -------
+        :class:`.AppInfo`
+            The new application information.
+        """
+        fields: EditAppInfoPayload = {}
+
+        if install_params is not MISSING:
+            fields["install_params"] = (
+                install_params.to_dict() if install_params is not None else None
+            )
+
+        if guild_install_type_config is not MISSING or user_install_type_config is not MISSING:
+            integration_types_config: Dict[
+                ApplicationIntegrationTypeLiteral, ApplicationIntegrationTypeConfigurationPayload
+            ] = {}
+
+            if guild_install_type_config is not MISSING:
+                integration_types_config[0] = (
+                    guild_install_type_config.to_dict() if guild_install_type_config else {}
+                )
+            elif self.guild_install_type_config:
+                integration_types_config[0] = self.guild_install_type_config.to_dict()
+
+            if user_install_type_config is not MISSING:
+                integration_types_config[1] = (
+                    user_install_type_config.to_dict() if user_install_type_config else {}
+                )
+            elif self.user_install_type_config:
+                integration_types_config[1] = self.user_install_type_config.to_dict()
+
+            fields["integration_types_config"] = integration_types_config
+
+        if icon is not MISSING:
+            fields["icon"] = await utils._assetbytes_to_base64_data(icon)
+
+        if cover_image is not MISSING:
+            fields["cover_image"] = await utils._assetbytes_to_base64_data(cover_image)
+
+        if flags is not MISSING:
+            fields["flags"] = flags.value
+
+        if description is not MISSING:
+            fields["description"] = description or ""
+
+        if custom_install_url is not MISSING:
+            fields["custom_install_url"] = custom_install_url
+
+        if role_connections_verification_url is not MISSING:
+            fields["role_connections_verification_url"] = role_connections_verification_url
+
+        if interactions_endpoint_url is not MISSING:
+            fields["interactions_endpoint_url"] = interactions_endpoint_url
+
+        if event_webhooks_url is not MISSING:
+            fields["event_webhooks_url"] = event_webhooks_url
+
+        if event_webhooks_status is not MISSING:
+            if event_webhooks_status is ApplicationEventWebhookStatus.disabled_by_discord:
+                raise TypeError(f"cannot set 'event_webhooks_status' to {event_webhooks_status!r}")
+            fields["event_webhooks_status"] = event_webhooks_status.value
+
+        if event_webhooks_types is not MISSING:
+            fields["event_webhooks_types"] = list(event_webhooks_types)
+
+        if tags is not MISSING:
+            fields["tags"] = list(tags) if tags else None
+
+        data = await self._state.http.edit_application_info(**fields)
+        return AppInfo(self._state, data)
 
 
 class PartialAppInfo:
