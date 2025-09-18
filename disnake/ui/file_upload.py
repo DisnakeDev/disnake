@@ -28,7 +28,7 @@ class FileUpload(UIComponent):
         If not given then one is generated for you.
     min_values: :class:`int`
         The minimum number of files that must be uploaded.
-        Defaults to 0 and must be between 0 and 10.
+        Defaults to 1 and must be between 0 and 10.
     max_values: :class:`int`
         The maximum number of files that must be uploaded.
         Defaults to 1 and must be between 1 and 10.
