@@ -2210,7 +2210,7 @@ class ConnectionState:
     def _get_partial_interaction_channel(
         self,
         data: InteractionChannelPayload,
-        guild: Optional[Union[Guild, Object]],
+        guild: Optional[Guild],
         *,
         # this param is purely for type-checking, it has no effect on runtime behavior.
         return_messageable: bool = False,
