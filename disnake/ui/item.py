@@ -25,7 +25,7 @@ __all__ = (
     "Item",
 )
 
-I = TypeVar("I", bound="Item[Any]")
+I = TypeVar("I", bound="Item[Any]")  # noqa: E741
 V_co = TypeVar("V_co", bound="Optional[View]", covariant=True)
 
 if TYPE_CHECKING:
@@ -44,7 +44,7 @@ ClientT = TypeVar("ClientT", bound="Client")
 UIComponentT = TypeVar("UIComponentT", bound="UIComponent")
 
 
-def ensure_ui_component(obj: UIComponentT, name: str) -> UIComponentT:
+def ensure_ui_component(obj: UIComponentT, name: str = "component") -> UIComponentT:
     if not isinstance(obj, UIComponent):
         raise TypeError(f"{name} should be a valid UI component, got {type(obj).__name__}.")
     return obj
@@ -66,6 +66,7 @@ class UIComponent(ABC):
     - :class:`disnake.ui.File`
     - :class:`disnake.ui.Separator`
     - :class:`disnake.ui.Container`
+    - :class:`disnake.ui.Label`
 
     .. versionadded:: 2.11
     """
@@ -212,7 +213,7 @@ class Item(WrappedComponent, Generic[V_co]):
 
         The callback associated with this UI item.
 
-        This can be overriden by subclasses.
+        This can be overridden by subclasses.
 
         Parameters
         ----------

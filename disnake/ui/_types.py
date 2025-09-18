@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, NoReturn, Optional, Sequence, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Optional, Sequence, TypeVar, Union
 
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
@@ -12,6 +12,7 @@ if TYPE_CHECKING:
         Button,
         Container,
         File,
+        Label,
         MediaGallery,
         Section,
         Separator,
@@ -34,7 +35,7 @@ AnySelect = Union[
 
 # valid `ActionRow.components` item types in a message/modal
 ActionRowMessageComponent = Union["Button[Any]", "AnySelect[Any]"]
-ActionRowModalComponent: TypeAlias = "TextInput"
+ActionRowModalComponent: TypeAlias = "TextInput"  # deprecated
 
 # valid message component types (v1/v2)
 MessageTopLevelComponentV1: TypeAlias = "ActionRow[ActionRowMessageComponent]"
@@ -48,8 +49,21 @@ MessageTopLevelComponentV2 = Union[
 ]
 MessageTopLevelComponent = Union[MessageTopLevelComponentV1, MessageTopLevelComponentV2]
 
+# valid modal component types (separate type with ActionRow until fully deprecated)
+ModalTopLevelComponent_ = Union[
+    "TextDisplay",
+    "Label",
+]
+ModalTopLevelComponent = Union[
+    ModalTopLevelComponent_,
+    "ActionRow[ActionRowModalComponent]",  # deprecated
+]
+
 ActionRowChildT = TypeVar("ActionRowChildT", bound="WrappedComponent")
-NonActionRowChildT = TypeVar("NonActionRowChildT", bound=MessageTopLevelComponentV2)
+NonActionRowChildT = TypeVar(
+    "NonActionRowChildT",
+    bound=Union[MessageTopLevelComponentV2, ModalTopLevelComponent_],
+)
 
 # generic utility type for any single ui component (within some generic bounds)
 AnyUIComponentInput = Union[
@@ -72,4 +86,8 @@ ComponentInput = Union[
 ]
 
 MessageComponents = ComponentInput[ActionRowMessageComponent, MessageTopLevelComponentV2]
-ModalComponents = ComponentInput[ActionRowModalComponent, NoReturn]
+
+ModalComponents = ComponentInput[
+    ActionRowModalComponent,  # deprecated
+    ModalTopLevelComponent_,
+]

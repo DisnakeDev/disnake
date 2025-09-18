@@ -258,7 +258,7 @@ class HTTPClient:
 
     async def ws_connect(self, url: str, *, compress: int = 0) -> aiohttp.ClientWebSocketResponse:
         if hasattr(aiohttp, "ClientWSTimeout"):
-            timeout = aiohttp.ClientWSTimeout(ws_close=30.0)  # pyright: ignore
+            timeout = aiohttp.ClientWSTimeout(ws_close=30.0)  # pyright: ignore[reportCallIssue]
         else:
             timeout = 30.0
         return await self.__session.ws_connect(
@@ -1482,6 +1482,12 @@ class HTTPClient:
             Route("PATCH", "/guilds/{guild_id}", guild_id=guild_id), json=payload, reason=reason
         )
 
+    def edit_guild_incident_actions(
+        self, guild_id: Snowflake, payload: guild.IncidentsData
+    ) -> Response[guild.IncidentsData]:
+        r = Route("PUT", "/guilds/{guild_id}/incident-actions", guild_id=guild_id)
+        return self.request(r, json=payload)
+
     def get_template(self, code: str) -> Response[template.Template]:
         return self.request(Route("GET", "/guilds/templates/{code}", code=code))
 
@@ -1744,6 +1750,16 @@ class HTTPClient:
             reason=reason,
         )
 
+    def get_all_app_emojis(self, app_id: Snowflake) -> Response[emoji.ListAppEmoji]:
+        return self.request(Route("GET", "/applications/{app_id}/emojis", app_id=app_id))
+
+    def get_app_emoji(self, app_id: Snowflake, emoji_id: Snowflake) -> Response[emoji.Emoji]:
+        return self.request(
+            Route(
+                "GET", "/applications/{app_id}/emojis/{emoji_id}", app_id=app_id, emoji_id=emoji_id
+            )
+        )
+
     def get_all_custom_emojis(self, guild_id: Snowflake) -> Response[List[emoji.Emoji]]:
         return self.request(Route("GET", "/guilds/{guild_id}/emojis", guild_id=guild_id))
 
@@ -1751,6 +1767,37 @@ class HTTPClient:
         return self.request(
             Route(
                 "GET", "/guilds/{guild_id}/emojis/{emoji_id}", guild_id=guild_id, emoji_id=emoji_id
+            )
+        )
+
+    def create_app_emoji(self, app_id: Snowflake, name: str, image: str) -> Response[emoji.Emoji]:
+        payload: Dict[str, Any] = {
+            "name": name,
+            "image": image,
+        }
+
+        r = Route("POST", "/applications/{app_id}/emojis", app_id=app_id)
+        return self.request(r, json=payload)
+
+    def edit_app_emoji(
+        self, app_id: Snowflake, emoji_id: Snowflake, name: str
+    ) -> Response[emoji.Emoji]:
+        payload: Dict[str, Any] = {
+            "name": name,
+        }
+
+        r = Route(
+            "PATCH", "/applications/{app_id}/emojis/{emoji_id}", app_id=app_id, emoji_id=emoji_id
+        )
+        return self.request(r, json=payload)
+
+    def delete_app_emoji(self, app_id: Snowflake, emoji_id: Snowflake) -> Response[None]:
+        return self.request(
+            Route(
+                "DELETE",
+                "/applications/{app_id}/emojis/{emoji_id}",
+                app_id=app_id,
+                emoji_id=emoji_id,
             )
         )
 
@@ -1977,6 +2024,7 @@ class HTTPClient:
             "name",
             "permissions",
             "color",
+            "colors",
             "hoist",
             "mentionable",
             "icon",

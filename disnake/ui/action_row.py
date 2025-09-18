@@ -32,6 +32,7 @@ from ..components import (
     Component,
     Container as ContainerComponent,
     FileComponent as FileComponent,
+    Label as LabelComponent,
     MediaGallery as MediaGalleryComponent,
     MentionableSelectMenu as MentionableSelectComponent,
     RoleSelectMenu as RoleSelectComponent,
@@ -44,7 +45,7 @@ from ..components import (
     UserSelectMenu as UserSelectComponent,
 )
 from ..enums import ButtonStyle, ChannelType, ComponentType, TextInputStyle
-from ..utils import MISSING, SequenceProxy, assert_never, copy_doc
+from ..utils import MISSING, SequenceProxy, assert_never, copy_doc, deprecated
 from ._types import (
     ActionRowChildT,
     ActionRowMessageComponent,
@@ -57,6 +58,7 @@ from .button import Button
 from .container import Container
 from .file import File
 from .item import UIComponent, WrappedComponent
+from .label import Label
 from .media_gallery import MediaGallery
 from .section import Section
 from .select import ChannelSelect, MentionableSelect, RoleSelect, StringSelect, UserSelect
@@ -699,6 +701,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         )
         return self
 
+    @deprecated('Label("<text>", TextInput(...))')
     def add_text_input(
         self: TextInputCompatibleActionRowT,
         *,
@@ -721,6 +724,10 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         This function returns the class instance to allow for fluent-style chaining.
 
         .. versionadded:: 2.4
+
+        .. deprecated:: 2.11
+            Use of action rows in modals is deprecated, use
+            ``Label("<text>", TextInput(...))`` directly instead.
 
         Parameters
         ----------
@@ -856,12 +863,17 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         return iter(self._children)
 
     @classmethod
+    @deprecated()
     def with_modal_components(cls, *, id: int = 0) -> ActionRow[ActionRowModalComponent]:
         """Create an empty action row meant to store components compatible with
         :class:`disnake.ui.Modal`. Saves the need to import type specifiers to
         typehint empty action rows.
 
         .. versionadded:: 2.6
+
+        .. deprecated:: 2.11
+            Use of action rows in modals is deprecated, compatible components
+            can be passed directly to modals.
 
         Returns
         -------
@@ -972,23 +984,28 @@ MessageActionRow = ActionRow[ActionRowMessageComponent]
 ModalActionRow = ActionRow[ActionRowModalComponent]
 
 
+# n.b. the typings with `modal = True` are technically slightly off here,
+# however this is only used internally and does not affect public typings
 @overload
 def normalize_components(
-    components: ComponentInput[NoReturn, NonActionRowChildT], /
+    components: ComponentInput[NoReturn, NonActionRowChildT], /, modal: bool = False
 ) -> Sequence[NonActionRowChildT]: ...
 
 
 @overload
 def normalize_components(
-    components: ComponentInput[ActionRowChildT, NonActionRowChildT], /
+    components: ComponentInput[ActionRowChildT, NonActionRowChildT], /, modal: bool = False
 ) -> Sequence[Union[ActionRow[ActionRowChildT], NonActionRowChildT]]: ...
 
 
 def normalize_components(
-    components: ComponentInput[ActionRowChildT, NonActionRowChildT], /
+    components: ComponentInput[ActionRowChildT, NonActionRowChildT], /, modal: bool = False
 ) -> Sequence[Union[ActionRow[ActionRowChildT], NonActionRowChildT]]:
     """Wraps consecutive actionrow-compatible components or lists in `ActionRow`s,
     while respecting the width limit. Other components are returned as-is.
+
+    If `modal` is `True`, only wraps `TextInput`s in action rows, and returns other (otherwise
+    actionrow-compatible) components as-is.
     """
     if not isinstance(components, Sequence):
         components = [components]
@@ -996,8 +1013,10 @@ def normalize_components(
     result: List[Union[ActionRow[ActionRowChildT], NonActionRowChildT]] = []
     auto_row: ActionRow[ActionRowChildT] = ActionRow[ActionRowChildT]()
 
+    wrap_types = TextInput if modal else WrappedComponent
+
     for component in components:
-        if isinstance(component, WrappedComponent):
+        if isinstance(component, wrap_types):
             # action row child component, try to insert into current row, otherwise create new row
             try:
                 auto_row.append_item(component)
@@ -1011,7 +1030,8 @@ def normalize_components(
                 auto_row = ActionRow[ActionRowChildT]()
 
             if isinstance(component, UIComponent):
-                # append non-actionrow-child components (action rows or v2 components) as-is
+                # append non-actionrow-child components as-is
+                # (action rows, v2 components, or actionrow-child components in modals)
                 result.append(component)
 
             elif isinstance(component, Sequence):
@@ -1070,6 +1090,8 @@ def _walk_internal(component: ComponentT, seen: Set[ComponentT]) -> Iterator[Com
     elif isinstance(component, (ContainerComponent, Container)):
         for item in component.children:
             yield from _walk_internal(item, seen)  # type: ignore
+    elif isinstance(component, (LabelComponent, Label)):
+        yield from _walk_internal(component.component, seen)
 
 
 def walk_components(components: Sequence[ComponentT]) -> Iterator[ComponentT]:
@@ -1138,6 +1160,7 @@ UI_COMPONENT_LOOKUP: Mapping[Type[Component], Type[UIComponent]] = {
     FileComponent: File,
     SeparatorComponent: Separator,
     ContainerComponent: Container,
+    LabelComponent: Label,
 }
 
 
@@ -1146,9 +1169,9 @@ def _to_ui_component(component: Component) -> UIComponent:
         ui_cls = UI_COMPONENT_LOOKUP[type(component)]
     except KeyError:
         # this should never happen
-        raise TypeError(f"unknown component type: {type(component)}")
+        raise TypeError(f"unknown component type: {type(component)}") from None
     else:
-        return ui_cls.from_component(component)  # type: ignore
+        return ui_cls.from_component(component)
 
 
 def _message_component_to_item(

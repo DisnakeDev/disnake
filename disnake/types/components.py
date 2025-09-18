@@ -10,7 +10,7 @@ from .channel import ChannelType
 from .emoji import PartialEmoji
 from .snowflake import Snowflake
 
-ComponentType = Literal[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 17]
+ComponentType = Literal[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 17, 18]
 ButtonStyle = Literal[1, 2, 3, 4, 5, 6]
 TextInputStyle = Literal[1, 2]
 SeparatorSpacing = Literal[1, 2]
@@ -33,10 +33,21 @@ Component = Union[
     "FileComponent",
     "SeparatorComponent",
     "ContainerComponent",
+    "LabelComponent",
 ]
 
-ActionRowChildComponent = Union["ButtonComponent", "AnySelectMenu", "TextInput"]
+ActionRowChildComponent = Union[
+    "ButtonComponent",
+    "AnySelectMenu",
+    "TextInput",  # deprecated
+]
 
+LabelChildComponent = Union[
+    "TextInput",
+    "AnySelectMenu",
+]
+
+# valid message component types (v1/v2)
 MessageTopLevelComponentV1: TypeAlias = "ActionRow"
 # currently, all v2 components except Thumbnail
 MessageTopLevelComponentV2 = Union[
@@ -48,6 +59,13 @@ MessageTopLevelComponentV2 = Union[
     "ContainerComponent",
 ]
 MessageTopLevelComponent = Union[MessageTopLevelComponentV1, MessageTopLevelComponentV2]
+
+# valid modal component types
+ModalTopLevelComponent = Union[
+    "ActionRow",  # deprecated
+    "TextDisplayComponent",
+    "LabelComponent",
+]
 
 
 # base types
@@ -101,6 +119,7 @@ class _SelectMenu(_BaseComponent):
     disabled: NotRequired[bool]
     # This is technically not applicable to string selects, but for simplicity we'll just have it here
     default_values: NotRequired[List[SelectDefaultValue]]
+    required: NotRequired[bool]
 
 
 class BaseSelectMenu(_SelectMenu):
@@ -144,19 +163,26 @@ AnySelectMenu = Union[
 class Modal(TypedDict):
     title: str
     custom_id: str
-    components: List[ActionRow]
+    components: List[ModalTopLevelComponent]
 
 
 class TextInput(_BaseComponent):
     type: Literal[4]
     custom_id: str
     style: TextInputStyle
-    label: str
+    label: NotRequired[Optional[str]]
     min_length: NotRequired[int]
     max_length: NotRequired[int]
     required: NotRequired[bool]
     value: NotRequired[str]
     placeholder: NotRequired[str]
+
+
+class LabelComponent(_BaseComponent):
+    type: Literal[18]
+    label: str
+    description: NotRequired[str]
+    component: LabelChildComponent
 
 
 # components v2

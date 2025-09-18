@@ -18,6 +18,7 @@ runs:
       id: setup-python
       uses: pdm-project/setup-pdm@v4
       with:
+        allow-python-prereleases: true
         python-version: ${{ inputs.python-version }}
         version: "2.20.1"  # last version to support python 3.8
         cache: false
@@ -31,10 +32,6 @@ runs:
       shell: bash
       run: |
         echo "PDM_IGNORE_SAVED_PYTHON=1" >> $GITHUB_ENV
-
-    - name: Update pip, wheel, setuptools
-      shell: bash
-      run: python -m pip install -U pip wheel setuptools
 
     - name: Install nox
       shell: bash
