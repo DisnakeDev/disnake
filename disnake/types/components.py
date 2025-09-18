@@ -46,6 +46,7 @@ ActionRowChildComponent = Union[
 LabelChildComponent = Union[
     "TextInput",
     "AnySelectMenu",
+    "FileUploadComponent",
 ]
 
 # valid message component types (v1/v2)

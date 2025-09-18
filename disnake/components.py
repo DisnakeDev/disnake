@@ -142,6 +142,7 @@ ContainerChildComponent = Union[
 # valid `Label.component` types
 LabelChildComponent = Union[
     "TextInput",
+    "FileUpload",
     "AnySelectMenu",
 ]
 
@@ -1507,7 +1508,7 @@ class Label(Component):
         The label text.
     description: Optional[:class:`str`]
         The description text for the label.
-    component: Union[:class:`TextInput`, :class:`StringSelectMenu`]
+    component: Union[:class:`TextInput`, :class:`FileUpload`, :class:`StringSelectMenu`]
         The component within the label.
     id: :class:`int`
         The numeric identifier for the component.
@@ -1549,6 +1550,8 @@ class Label(Component):
 
 class FileUpload(Component):
     """Represents a file upload component from the Discord Bot UI Kit.
+
+    This allows you to receive files from users, and can only be used in modals.
 
     .. note::
         The user constructible and usable type to create a
