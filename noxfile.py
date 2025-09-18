@@ -20,6 +20,7 @@ from typing import (
     Final,
     List,
     Optional,
+    Set,
     Tuple,
 )
 
@@ -42,6 +43,8 @@ CI: Final[bool] = "CI" in os.environ
 
 # used to reset cached coverage data once for the first test run only
 reset_coverage = True
+# used to only show the pyright warning once
+pyright_warning_shown = False
 
 if TYPE_CHECKING:
     ExecutionGroupType = object
@@ -49,7 +52,7 @@ else:
     ExecutionGroupType = Dict[str, Any]
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class ExecutionGroup(ExecutionGroupType):
     sessions: Tuple[str, ...] = ()
     python: str = MIN_PYTHON
@@ -61,12 +64,24 @@ class ExecutionGroup(ExecutionGroupType):
     pyright_paths: Tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
+        if not self.experimental:
+            object.__setattr__(
+                self,
+                "experimental",
+                self.python in EXPERIMENTAL_PYTHON_VERSIONS,
+            )
         if self.pyright_paths and "pyright" not in self.sessions:
             raise TypeError("pyright_paths can only be set if pyright is in sessions")
-        if self.python in EXPERIMENTAL_PYTHON_VERSIONS:
-            self.experimental = True
         for key in self.__dataclass_fields__.keys():
             self[key] = getattr(self, key)  # type: ignore
+
+    @property
+    def pyright_session_id(self) -> str:
+        return (self.python or "") + "-" + self.pyright_paths[0]
+
+    @property
+    def test_session_id(self) -> str:
+        return (self.python or "") + (f"({'-'.join(self.extras)})" if self.extras else "")
 
 
 EXECUTION_GROUPS: List[ExecutionGroup] = [
@@ -121,6 +136,24 @@ EXECUTION_GROUPS: List[ExecutionGroup] = [
 
 def get_groups_for_session(name: str) -> List[ExecutionGroup]:
     return [g for g in EXECUTION_GROUPS if name in g.sessions]
+
+
+def check_paths(session: nox.Session, paths: List[str], group: ExecutionGroup) -> List[str]:
+    """Check that the provided paths are valid for the given group."""
+    paths = []
+    for arg in session.posargs:
+        if arg.startswith("-"):
+            paths.append(arg)
+            continue
+        if any(
+            arg == pyright_path
+            or arg.startswith((f"{pyright_path}{os.path.sep}", f"{pyright_path}/"))
+            for pyright_path in group.pyright_paths
+        ):
+            paths.append(arg)
+            continue
+
+    return paths
 
 
 def get_version_for_session(name: str) -> str:
@@ -348,15 +381,19 @@ def codemod(session: nox.Session) -> None:
 @nox.parametrize(
     ("python", "execution_group"),
     [(group.python, group) for group in get_groups_for_session("pyright")],
-    ids=[
-        (group.python or "") + "-" + group.pyright_paths[0]
-        for group in get_groups_for_session("pyright")
-    ],
+    ids=[group.pyright_session_id for group in get_groups_for_session("pyright")],
 )
-def pyright(session: nox.Session, execution_group: ExecutionGroup) -> None:
+def pyright(session: nox.Session, execution_group: ExecutionGroup, **kwargs: Any) -> None:
+    if paths := session.posargs:
+        paths = check_paths(session, session.posargs, execution_group)
+        if not paths:
+            session.skip(
+                "Provided paths do not match this session's pyright paths.",
+            )
     groups = execution_group.groups
     if "typing" not in groups:
-        execution_group.groups = (*groups, "typing")
+        # typing is not included because these groups can be reused for other tasks that don't need pyright
+        execution_group = dataclasses.replace(execution_group, groups=(*groups, "typing"))
     install_deps(session, execution_group=execution_group)
 
     env = {
@@ -367,12 +404,10 @@ def pyright(session: nox.Session, execution_group: ExecutionGroup) -> None:
             "python",
             "-m",
             "pyright",
-            *execution_group.pyright_paths,
-            *session.posargs,
+            *(paths or execution_group.pyright_paths),
             env=env,
+            interrupt_timeout=0.0000,
         )
-    except KeyboardInterrupt:
-        session.error("Quit pyright")
     except Exception:
         if not CI and execution_group.experimental:
             session.warn(
@@ -382,14 +417,42 @@ def pyright(session: nox.Session, execution_group: ExecutionGroup) -> None:
             raise
 
 
+@nox.session(name="pyright-cli", default=False, python=None, venv_backend="none")
+def pyright_cli(session: nox.Session) -> None:
+    """Serves as a runner for running specific pyright sessions."""
+    if not session.interactive:
+        session.error("pyright-cli can only be run interactively.")
+    # filter down to just the min python, max python, and the speciality directories
+    forced_python = session.python
+    paths_covered: Dict[str, Set[str]] = {}
+    for group in get_groups_for_session("pyright"):
+        if group.python not in paths_covered:
+            paths_covered[group.python] = set()
+        if paths_covered[group.python].issuperset(set(group.pyright_paths)):
+            continue
+        if (
+            paths_covered.get(MIN_PYTHON)
+            and paths_covered[MIN_PYTHON].issuperset(set(group.pyright_paths))
+            and group.python != SUPPORTED_PYTHONS[-1]
+        ):
+            continue
+        if forced_python and group.python != forced_python:
+            continue
+        paths_covered[group.python].update(group.pyright_paths)
+        paths = session.posargs
+        if not paths or (paths := check_paths(session, session.posargs, group)):
+            session.log(f"Running pyright({group.pyright_session_id})")
+            session.notify(
+                f"pyright({group.pyright_session_id})",
+                paths or group.pyright_paths,
+            )
+
+
 @nox.session()
 @nox.parametrize(
     ("python", "execution_group"),
     [(group.python, group) for group in get_groups_for_session("test")],
-    ids=[
-        (group.python or "") + (f"({'-'.join(group.extras)})" if group.extras else "")
-        for group in get_groups_for_session("test")
-    ],
+    ids=[group.test_session_id for group in get_groups_for_session("test")],
 )
 def test(session: nox.Session, execution_group: ExecutionGroup) -> None:
     """Run tests."""
