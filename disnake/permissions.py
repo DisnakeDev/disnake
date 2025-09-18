@@ -201,6 +201,7 @@ class Permissions(BaseFlags):
         send_polls: bool = ...,
         send_tts_messages: bool = ...,
         send_voice_messages: bool = ...,
+        set_voice_channel_status: bool = ...,
         speak: bool = ...,
         start_embedded_activities: bool = ...,
         stream: bool = ...,
@@ -321,6 +322,9 @@ class Permissions(BaseFlags):
 
         .. versionchanged:: 2.10
             Added :attr:`create_events` permission.
+
+        .. versionchanged:: |vnext|
+            Added :attr:`set_voice_channel_status` permission.
         """
         instance = cls.all()
         instance.update(
@@ -459,6 +463,7 @@ class Permissions(BaseFlags):
             mute_members=True,
             deafen_members=True,
             move_members=True,
+            set_voice_channel_status=True,
         )
 
     @classmethod
@@ -606,6 +611,7 @@ class Permissions(BaseFlags):
         send_polls: bool = ...,
         send_tts_messages: bool = ...,
         send_voice_messages: bool = ...,
+        set_voice_channel_status: bool = ...,
         speak: bool = ...,
         start_embedded_activities: bool = ...,
         stream: bool = ...,
@@ -1061,6 +1067,16 @@ class Permissions(BaseFlags):
         """
         return 1 << 46
 
+    # 1 << 47 was the use clyde AI permission which never rolled fully out
+
+    @flag_value
+    def set_voice_channel_status(self) -> int:
+        """:class:`bool`: Returns ``True`` if a user can set the voice channel status.
+
+        .. versionadded:: |vnext|
+        """
+        return 1 << 48
+
     @flag_value
     def send_polls(self) -> int:
         """:class:`bool`: Returns ``True`` if a user can send polls.
@@ -1198,6 +1214,7 @@ class PermissionOverwrite:
         send_polls: Optional[bool]
         send_tts_messages: Optional[bool]
         send_voice_messages: Optional[bool]
+        set_voice_channel_status: Optional[bool]
         speak: Optional[bool]
         start_embedded_activities: Optional[bool]
         stream: Optional[bool]
@@ -1267,6 +1284,7 @@ class PermissionOverwrite:
         send_polls: Optional[bool] = ...,
         send_tts_messages: Optional[bool] = ...,
         send_voice_messages: Optional[bool] = ...,
+        set_voice_channel_status: Optional[bool] = ...,
         speak: Optional[bool] = ...,
         start_embedded_activities: Optional[bool] = ...,
         stream: Optional[bool] = ...,
@@ -1403,6 +1421,7 @@ class PermissionOverwrite:
         send_polls: Optional[bool] = ...,
         send_tts_messages: Optional[bool] = ...,
         send_voice_messages: Optional[bool] = ...,
+        set_voice_channel_status: Optional[bool] = ...,
         speak: Optional[bool] = ...,
         start_embedded_activities: Optional[bool] = ...,
         stream: Optional[bool] = ...,
