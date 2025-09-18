@@ -50,6 +50,7 @@ class Modal:
         Currently supports the following components:
             - :class:`.ui.TextDisplay`
             - :class:`.ui.TextInput`, in a :class:`.ui.Label`
+            - :class:`.ui.FileUpload`, in a :class:`.ui.Label`
             - select menus (e.g. :class:`.ui.StringSelect`), in a :class:`.ui.Label`
 
         .. versionchanged:: 2.11
