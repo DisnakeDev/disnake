@@ -1,9 +1,12 @@
 # SPDX-License-Identifier: MIT
+from __future__ import annotations
 
-from typing import List, Optional, TypedDict
+from typing import TYPE_CHECKING, List, Optional, TypedDict
 
-from .snowflake import Snowflake
 from .user import User
+
+if TYPE_CHECKING:
+    from .snowflake import Snowflake
 
 
 class WidgetChannel(TypedDict):

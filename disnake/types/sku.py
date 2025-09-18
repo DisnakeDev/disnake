@@ -1,8 +1,10 @@
 # SPDX-License-Identifier: MIT
+from __future__ import annotations
 
-from typing import Literal, TypedDict
+from typing import TYPE_CHECKING, Literal, TypedDict
 
-from .snowflake import Snowflake
+if TYPE_CHECKING:
+    from .snowflake import Snowflake
 
 SKUType = Literal[2, 3, 5, 6]
 
