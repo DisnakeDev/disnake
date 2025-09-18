@@ -455,6 +455,8 @@ def pyright_cli(session: nox.Session) -> None:
         session.error("pyright-cli can only be run interactively.")
     # filter down to just the min python, max python, and the speciality directories
     forced_python = session.python
+    if not isinstance(forced_python, (str, type(None))):
+        forced_python = None
     paths_covered: Dict[str, Set[str]] = {}
     for group in get_groups_for_session("pyright"):
         if group.python not in paths_covered:
@@ -467,9 +469,20 @@ def pyright_cli(session: nox.Session) -> None:
             and group.python != SUPPORTED_PYTHONS[-1]
         ):
             continue
-        if forced_python and group.python != forced_python:
-            continue
-        paths_covered[group.python].update(group.pyright_paths)
+        use_python = group.python
+        if forced_python:
+            # this checks if the current group has a python group for itself already.
+            # eg pyright_paths has a specific definition already, such as 3.12.
+            # there's probably a more effective way of checking this
+            if group.python != forced_python and any(
+                group_internal.python == forced_python
+                for group_internal in get_groups_for_session("pyright")
+                if group_internal.pyright_paths == group.pyright_paths
+            ):
+                continue
+            # so we have a group that *doesn't* have a python for this specific python version
+            use_python = forced_python
+        paths_covered[use_python].update(group.pyright_paths)
         paths = session.posargs
         if not paths or (paths := check_paths(session, session.posargs, group)):
             session.log(f"Running pyright({group.pyright_session_id})")
