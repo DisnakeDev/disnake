@@ -77,40 +77,19 @@ jobs:
 
   lint:
     runs-on: ubuntu-latest
+    env:
+      RUFF_OUTPUT_FORMAT: github
     steps:
-      # like with the pre-commit action we are NOT pinning prek here.
-      # this simply uses the latest version, much like how pre-commit worked.
 
       - uses: actions/checkout@v4
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v6
+      - name: Run prek
+        id: prek
+        uses: j178/prek-action@v1.0.3
+        # given the interoperability and the nature of prek, we stay unpinned for now
+        # note that this action by default uses the latest version of prek
+        # this is exactly how the pre-commit action worked, and we never had any issues
 
-      - uses: actions/cache/restore@v4
-        id: cache
-        with:
-          path: ~/.cache/prek
-          key: prek|${{ hashFiles('.pre-commit-config.yaml') }}
-
-      - name: Install hooks
-        if: ${{ steps.cache.outputs.cache-hit != 'true' }}
-        shell: bash
-        # todo(onerandomusername): find this bug and pr it upstream
-        run: |
-          uvx prek install-hooks
-          rm -rf ~/.cache/prek/hooks/pygrep-*
-
-      - name: Save cache
-        uses: actions/cache/save@v4
-        if: ${{ steps.cache.outputs.cache-hit != 'true' }}
-        with:
-          path: ~/.cache/prek
-          key: prek|${{ hashFiles('.pre-commit-config.yaml') }}
-
-      - run: uvx prek run --show-diff-on-failure --color=always --all-files
-        shell: bash
-        env:
-          RUFF_OUTPUT_FORMAT: github
 
   docs:
     # unlike the other workflows, we explicitly use the same version as
