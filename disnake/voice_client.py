@@ -46,7 +46,6 @@ has_nacl: bool
 
 try:
     import nacl.secret
-    import nacl.utils
 
     has_nacl = True
 except ImportError:
@@ -283,7 +282,7 @@ class VoiceClient(VoiceProtocol):
             )
             return
 
-        self.endpoint, _, _ = endpoint.rpartition(":")
+        self.endpoint = endpoint
         if self.endpoint.startswith("wss://"):
             # Just in case, strip it off since we're going to add it later
             self.endpoint = self.endpoint[6:]
@@ -505,7 +504,7 @@ class VoiceClient(VoiceProtocol):
 
     # audio related
 
-    def _get_voice_packet(self, data):
+    def _get_voice_packet(self, data: bytes) -> bytes:
         header = bytearray(12)
 
         # Formulate rtp header
@@ -518,7 +517,7 @@ class VoiceClient(VoiceProtocol):
         encrypt_packet = getattr(self, f"_encrypt_{self.mode}")
         return encrypt_packet(header, data)
 
-    def _get_nonce(self, pad: int):
+    def _get_nonce(self, pad: int) -> Tuple[bytes, bytes]:
         # returns (nonce, padded_nonce).
         # n.b. all currently implemented modes use the same nonce size (192 bits / 24 bytes)
         nonce = struct.pack(">I", self._lite_nonce)
@@ -530,8 +529,8 @@ class VoiceClient(VoiceProtocol):
         return (nonce, nonce.ljust(pad, b"\0"))
 
     def _encrypt_aead_xchacha20_poly1305_rtpsize(self, header: bytes, data) -> bytes:
-        box = nacl.secret.Aead(bytes(self.secret_key))
-        nonce, padded_nonce = self._get_nonce(nacl.secret.Aead.NONCE_SIZE)
+        box = nacl.secret.Aead(bytes(self.secret_key))  # type: ignore[reportPossiblyUnboundVariable]
+        nonce, padded_nonce = self._get_nonce(nacl.secret.Aead.NONCE_SIZE)  # type: ignore[reportPossiblyUnboundVariable]
 
         return (
             header

@@ -64,7 +64,10 @@ class AssetMixin:
         return await self._state.http.get_from_cdn(self.url)
 
     async def save(
-        self, fp: Union[str, bytes, os.PathLike, io.BufferedIOBase], *, seek_begin: bool = True
+        self,
+        fp: Union[str, bytes, os.PathLike[str], os.PathLike[bytes], io.BufferedIOBase],
+        *,
+        seek_begin: bool = True,
     ) -> int:
         """|coro|
 
@@ -101,7 +104,7 @@ class AssetMixin:
                 fp.seek(0)
             return written
         else:
-            with open(fp, "wb") as f:
+            with open(fp, "wb") as f:  # noqa: ASYNC230
                 return f.write(data)
 
     async def to_file(
@@ -153,7 +156,7 @@ class AssetMixin:
             filename = yarl.URL(self.url).name
             # if the filename doesn't have an extension (e.g. widget member avatars),
             # try to infer it from the data
-            if not os.path.splitext(filename)[1]:
+            if filename and not os.path.splitext(filename)[1]:
                 ext = utils._get_extension_for_data(data)
                 if ext:
                     filename += ext
@@ -338,6 +341,26 @@ class Asset(AssetMixin):
             url=f"{cls.BASE}/avatar-decoration-presets/{avatar_decoration_asset}.png?size=1024",
             key=avatar_decoration_asset,
             animated=animated,
+        )
+
+    @classmethod
+    def _from_nameplate(cls, state: AnyState, nameplate_asset: str, animated: bool = True) -> Self:
+        suffix = "asset.webm" if animated else "static.png"
+        return cls(
+            state,
+            # nameplate_asset already includes an ending /
+            url=f"{cls.BASE}/assets/collectibles/{nameplate_asset}{suffix}",
+            key=nameplate_asset,
+            animated=animated,
+        )
+
+    @classmethod
+    def _from_guild_tag_badge(cls, state: AnyState, primary_guild_id: int, badge_hash: str) -> Self:
+        return cls(
+            state,
+            url=f"{cls.BASE}/guild-tag-badges/{primary_guild_id}/{badge_hash}.png?size=16",
+            key=badge_hash,
+            animated=False,
         )
 
     def __str__(self) -> str:

@@ -118,8 +118,8 @@ def _transform_guild_id(entry: AuditLogEntry, data: Optional[Snowflake]) -> Opti
 
 def _transform_overwrites(
     entry: AuditLogEntry, data: List[PermissionOverwritePayload]
-) -> List[Tuple[Object, PermissionOverwrite]]:
-    overwrites = []
+) -> List[Tuple[Union[Object, Member, Role, User], PermissionOverwrite]]:
+    overwrites: List[Tuple[Union[Object, Member, Role, User], PermissionOverwrite]] = []
     for elem in data:
         allow = Permissions(int(elem["allow"]))
         deny = Permissions(int(elem["deny"]))
@@ -234,7 +234,7 @@ def _transform_type(
         return enums.try_enum(enums.StickerType, data)
     elif action_name.startswith("webhook_"):
         return enums.try_enum(enums.WebhookType, data)
-    elif action_name.startswith("integration_") or action_name.startswith("overwrite_"):
+    elif action_name.startswith(("integration_", "overwrite_")):
         # integration: str, overwrite: int
         return data
     else:
@@ -405,24 +405,20 @@ class AuditLogChanges:
                 if key:
                     attr = key
 
-            try:
+            if "old_value" in elem:
                 before = elem["old_value"]
-            except KeyError:
-                before = None
-            else:
                 if transformer:
                     before = transformer(entry, before)
-
+            else:
+                before = None
             setattr(self.before, attr, before)
 
-            try:
+            if "new_value" in elem:
                 after = elem["new_value"]
-            except KeyError:
-                after = None
-            else:
                 if transformer:
                     after = transformer(entry, after)
-
+            else:
+                after = None
             setattr(self.after, attr, after)
 
         if has_emoji_fields:
@@ -670,6 +666,7 @@ class AuditLogEntry(Hashable):
                 enums.AuditLogAction.automod_block_message,
                 enums.AuditLogAction.automod_send_alert_message,
                 enums.AuditLogAction.automod_timeout,
+                enums.AuditLogAction.automod_quarantine_user,
             ):
                 elems = {
                     "channel": (
@@ -826,6 +823,7 @@ class AuditLogEntry(Hashable):
             "uses": changeset.uses,
             "type": 0,
             "channel": None,
+            "expires_at": None,
         }
 
         obj = Invite(

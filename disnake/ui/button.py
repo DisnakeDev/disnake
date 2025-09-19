@@ -2,23 +2,13 @@
 
 from __future__ import annotations
 
-import asyncio
 import os
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Optional,
-    Tuple,
-    TypeVar,
-    Union,
-    overload,
-)
+from typing import TYPE_CHECKING, Any, Callable, ClassVar, Optional, Tuple, TypeVar, Union, overload
 
 from ..components import Button as ButtonComponent
 from ..enums import ButtonStyle, ComponentType
 from ..partial_emoji import PartialEmoji, _EmojiTag
-from ..utils import MISSING
+from ..utils import MISSING, iscoroutinefunction
 from .item import DecoratedItem, Item
 
 __all__ = (
@@ -67,6 +57,12 @@ class Button(Item[V_co]):
         Premium buttons additionally cannot have a ``label``, ``url``, or ``emoji``.
 
         .. versionadded:: 2.11
+    id: :class:`int`
+        The numeric identifier for the component. Must be unique within the message.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the message.
+
+        .. versionadded:: 2.11
     row: Optional[:class:`int`]
         The relative row this button belongs to. A Discord component can only have 5
         rows. By default, items are arranged automatically into those 5 rows. If you'd
@@ -75,7 +71,7 @@ class Button(Item[V_co]):
         ordering. The row number must be between 0 and 4 (i.e. zero indexed).
     """
 
-    __repr_attributes__: Tuple[str, ...] = (
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
         "style",
         "url",
         "disabled",
@@ -84,7 +80,7 @@ class Button(Item[V_co]):
         "sku_id",
         "row",
     )
-    # We have to set this to MISSING in order to overwrite the abstract property from WrappedComponent
+    # We have to set this to MISSING in order to overwrite the abstract property from UIComponent
     _underlying: ButtonComponent = MISSING
 
     @overload
@@ -98,6 +94,7 @@ class Button(Item[V_co]):
         url: Optional[str] = None,
         emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
         sku_id: Optional[int] = None,
+        id: int = 0,
         row: Optional[int] = None,
     ) -> None: ...
 
@@ -112,6 +109,7 @@ class Button(Item[V_co]):
         url: Optional[str] = None,
         emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
         sku_id: Optional[int] = None,
+        id: int = 0,
         row: Optional[int] = None,
     ) -> None: ...
 
@@ -125,6 +123,7 @@ class Button(Item[V_co]):
         url: Optional[str] = None,
         emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
         sku_id: Optional[int] = None,
+        id: int = 0,
         row: Optional[int] = None,
     ) -> None:
         super().__init__()
@@ -154,6 +153,7 @@ class Button(Item[V_co]):
 
         self._underlying = ButtonComponent._raw_construct(
             type=ComponentType.button,
+            id=id,
             custom_id=custom_id,
             url=url,
             disabled=disabled,
@@ -264,6 +264,7 @@ class Button(Item[V_co]):
             url=button.url,
             emoji=button.emoji,
             sku_id=button.sku_id,
+            id=button.id,
             row=None,
         )
 
@@ -289,6 +290,7 @@ def button(
     disabled: bool = False,
     style: ButtonStyle = ButtonStyle.secondary,
     emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
+    id: int = 0,
     row: Optional[int] = None,
 ) -> Callable[[ItemCallbackType[V_co, Button[V_co]]], DecoratedItem[Button[V_co]]]: ...
 
@@ -335,6 +337,12 @@ def button(
     emoji: Optional[Union[:class:`str`, :class:`.Emoji`, :class:`.PartialEmoji`]]
         The emoji of the button. This can be in string form or a :class:`.PartialEmoji`
         or a full :class:`.Emoji`.
+    id: :class:`int`
+        The numeric identifier for the component. Must be unique within the message.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the message.
+
+        .. versionadded:: 2.11
     row: Optional[:class:`int`]
         The relative row this button belongs to. A Discord component can only have 5
         rows. By default, items are arranged automatically into those 5 rows. If you'd
@@ -346,7 +354,7 @@ def button(
         raise TypeError("cls argument must be callable")
 
     def decorator(func: ItemCallbackType[V_co, B_co]) -> DecoratedItem[B_co]:
-        if not asyncio.iscoroutinefunction(func):
+        if not iscoroutinefunction(func):
             raise TypeError("button function must be a coroutine function")
 
         func.__discord_ui_model_type__ = cls

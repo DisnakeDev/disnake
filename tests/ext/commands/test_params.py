@@ -72,7 +72,7 @@ class TestBaseRange:
     @pytest.mark.parametrize("args", [int, (int,), (int, 1, 2, 3)])
     def test_param_count(self, args) -> None:
         with pytest.raises(TypeError, match=r"`Range` expects 3 type arguments"):
-            commands.Range[args]  # type: ignore
+            commands.Range[args]
 
     @pytest.mark.parametrize("value", ["int", 42, Optional[int], Union[int, float]])
     def test_invalid_type(self, value) -> None:
@@ -109,16 +109,16 @@ class TestBaseRange:
     @pytest.mark.parametrize(
         ("create", "expected"),
         [
-            (lambda: commands.Range[1, 2], (int, 1, 2)),  # type: ignore
-            (lambda: commands.Range[0, 10.0], (float, 0, 10.0)),  # type: ignore
+            (lambda: commands.Range[1, 2], (int, 1, 2)),
+            (lambda: commands.Range[0, 10.0], (float, 0, 10.0)),
             (lambda: commands.Range[..., 10.0], (float, None, 10.0)),
-            (lambda: commands.String[5, 10], (str, 5, 10)),  # type: ignore
+            (lambda: commands.String[5, 10], (str, 5, 10)),
         ],
     )
     def test_backwards_compatible(self, create: Any, expected) -> None:
         with pytest.warns(DeprecationWarning, match=r"without an explicit type argument"):
             value = create()
-            assert (value.underlying_type, value.min_value, value.max_value) == expected
+        assert (value.underlying_type, value.min_value, value.max_value) == expected
 
 
 class TestRange:

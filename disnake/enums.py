@@ -28,6 +28,7 @@ __all__ = (
     "VerificationLevel",
     "ContentFilter",
     "Status",
+    "StatusDisplayType",
     "DefaultAvatar",
     "AuditLogAction",
     "AuditLogActionCategory",
@@ -72,6 +73,7 @@ __all__ = (
     "ThreadLayout",
     "Event",
     "ApplicationRoleConnectionMetadataType",
+    "ApplicationEventWebhookStatus",
     "OnboardingPromptType",
     "SKUType",
     "EntitlementType",
@@ -79,12 +81,16 @@ __all__ = (
     "PollLayoutType",
     "VoiceChannelEffectAnimationType",
     "MessageReferenceType",
+    "SeparatorSpacing",
+    "NameplatePalette",
 )
+
+EnumMetaT = TypeVar("EnumMetaT", bound="Type[EnumMeta]")
 
 
 class _EnumValueBase(NamedTuple):
     if TYPE_CHECKING:
-        _cls_name: ClassVar[str]
+        _cls_name: ClassVar[str]  # type: ignore
 
     name: str
     value: Any
@@ -110,8 +116,11 @@ def _create_value_cls(name: str, comparable: bool) -> Type[_EnumValueBase]:
     return type(f"{parent.__name__}_{name}", (parent,), {"_cls_name": name})  # type: ignore
 
 
-def _is_descriptor(obj):
+def _is_descriptor(obj) -> bool:
     return hasattr(obj, "__get__") or hasattr(obj, "__set__") or hasattr(obj, "__delete__")
+
+
+EnumMetaT = TypeVar("EnumMetaT", bound="EnumMeta")
 
 
 class EnumMeta(type):
@@ -122,7 +131,7 @@ class EnumMeta(type):
         _enum_value_map_: ClassVar[Dict[Any, Any]]
         _enum_value_cls_: ClassVar[Type[_EnumValueBase]]
 
-    def __new__(cls, name: str, bases, attrs, *, comparable: bool = False):
+    def __new__(cls: EnumMetaT, name: str, bases, attrs, *, comparable: bool = False) -> EnumMetaT:
         value_mapping = {}
         member_mapping = {}
         member_names = []
@@ -160,10 +169,10 @@ class EnumMeta(type):
         value_cls._actual_enum_cls_ = actual_cls  # type: ignore
         return actual_cls
 
-    def __iter__(cls) -> Iterator[Self]:
+    def __iter__(cls: EnumMetaT) -> Iterator[EnumMetaT]:
         return (cls._enum_member_map_[name] for name in cls._enum_member_names_)
 
-    def __reversed__(cls) -> Iterator[Self]:
+    def __reversed__(cls: EnumMetaT) -> Iterator[EnumMetaT]:
         return (cls._enum_member_map_[name] for name in reversed(cls._enum_member_names_))
 
     def __len__(cls) -> int:
@@ -176,16 +185,16 @@ class EnumMeta(type):
     def __members__(cls):
         return types.MappingProxyType(cls._enum_member_map_)
 
-    def __call__(cls, value):
+    def __call__(cls, value: Any) -> Any:
         try:
             return cls._enum_value_map_[value]
         except (KeyError, TypeError):
             raise ValueError(f"{value!r} is not a valid {cls.__name__}") from None
 
-    def __getitem__(cls, key):
+    def __getitem__(cls, key: str) -> Any:
         return cls._enum_member_map_[key]
 
-    def __setattr__(cls, name: str, value) -> NoReturn:
+    def __setattr__(cls, name: str, value: Any) -> NoReturn:
         raise TypeError("Enums are immutable.")
 
     def __delattr__(cls, attr) -> NoReturn:
@@ -206,7 +215,7 @@ else:
 
     class Enum(metaclass=EnumMeta):
         @classmethod
-        def try_value(cls, value):
+        def try_value(cls, value: Any) -> Self:
             try:
                 return cls._enum_value_map_[value]
             except (KeyError, TypeError):
@@ -428,6 +437,11 @@ class MessageType(Enum):
 
     .. versionadded:: 2.10
     """
+    emoji_added = 63
+    """The system message denoting that an emoji was added to the server.
+
+    .. versionadded: 2.11
+    """
 
 
 class PartyType(Enum):
@@ -606,6 +620,23 @@ class Status(Enum):
         return self.value
 
 
+class StatusDisplayType(Enum):
+    """Specifies an :class:`Activity` display status.
+
+    .. versionadded:: 2.11
+    """
+
+    name = 0  # type: ignore[reportAssignmentType]
+    """The name of the activity is displayed, e.g: ``Listening to Spotify``."""
+    state = 1
+    """The state of the activity is displayed, e.g: ``Listening to Rick Astley``."""
+    details = 2
+    """The details of the activity are displayed, e.g: ``Listening to Never Gonna Give You Up``."""
+
+    def __int__(self) -> int:
+        return self.value
+
+
 class DefaultAvatar(Enum):
     """Represents the default avatar of a Discord :class:`User`."""
 
@@ -741,6 +772,7 @@ class AuditLogAction(Enum):
     automod_block_message                 = 143
     automod_send_alert_message            = 144
     automod_timeout                       = 145
+    automod_quarantine_user               = 146
     creator_monetization_request_created  = 150
     creator_monetization_terms_accepted   = 151
     # fmt: on
@@ -806,6 +838,7 @@ class AuditLogAction(Enum):
             AuditLogAction.automod_block_message:                 None,
             AuditLogAction.automod_send_alert_message:            None,
             AuditLogAction.automod_timeout:                       None,
+            AuditLogAction.automod_quarantine_user:               None,
             AuditLogAction.creator_monetization_request_created:  None,
             AuditLogAction.creator_monetization_terms_accepted:   None,
         }
@@ -851,7 +884,7 @@ class AuditLogAction(Enum):
             return None
         elif v < 143:
             return "automod_rule"
-        elif v < 146:
+        elif v < 147:
             return "user"
         elif v < 152:
             return None
@@ -1210,6 +1243,46 @@ class ComponentType(Enum):
     """Represents a channel select component.
 
     .. versionadded:: 2.7
+    """
+    section = 9
+    """Represents a Components V2 section component.
+
+    .. versionadded:: 2.11
+    """
+    text_display = 10
+    """Represents a Components V2 text display component.
+
+    .. versionadded:: 2.11
+    """
+    thumbnail = 11
+    """Represents a Components V2 thumbnail component.
+
+    .. versionadded:: 2.11
+    """
+    media_gallery = 12
+    """Represents a Components V2 media gallery component.
+
+    .. versionadded:: 2.11
+    """
+    file = 13
+    """Represents a Components V2 file component.
+
+    .. versionadded:: 2.11
+    """
+    separator = 14
+    """Represents a Components V2 separator component.
+
+    .. versionadded:: 2.11
+    """
+    container = 17
+    """Represents a Components V2 container component.
+
+    .. versionadded:: 2.11
+    """
+    label = 18
+    """Represents a label component.
+
+    .. versionadded:: 2.11
     """
 
     def __int__(self) -> int:
@@ -2275,6 +2348,20 @@ class ApplicationRoleConnectionMetadataType(Enum):
     """The metadata value (``integer``) is not equal to the guild's configured value."""
 
 
+class ApplicationEventWebhookStatus(Enum):
+    """Represents the status of an application event webhook.
+
+    .. versionadded:: 2.11
+    """
+
+    disabled = 1
+    """Webhook events are disabled by developer."""
+    enabled = 2
+    """Webhook events are enabled by developer."""
+    disabled_by_discord = 3
+    """Webhook events are disabled by Discord, usually due to inactivity."""
+
+
 class OnboardingPromptType(Enum):
     """Represents the type of onboarding prompt.
 
@@ -2374,6 +2461,48 @@ class MessageReferenceType(Enum):
     """A standard message reference used in message replies."""
     forward = 1
     """Reference used to point to a message at a point in time (forward)."""
+
+
+class SeparatorSpacing(Enum):
+    """Specifies the size of a :class:`Separator` component's padding.
+
+    .. versionadded:: 2.11
+    """
+
+    small = 1
+    """Small spacing."""
+    large = 2
+    """Large spacing."""
+
+
+class NameplatePalette(Enum):
+    """Specifies the palette of a :class:`Nameplate`.
+
+    .. versionadded:: 2.11
+    """
+
+    crimson = "crimson"
+    """Crimson color palette."""
+    berry = "berry"
+    """Berry color palette."""
+    sky = "sky"
+    """Sky color palette."""
+    teal = "teal"
+    """Teal color palette."""
+    forest = "forest"
+    """Forest color palette."""
+    bubble_gum = "bubble_gum"
+    """Bubble gum color palette."""
+    violet = "violet"
+    """Violet color palette."""
+    cobalt = "cobalt"
+    """Cobalt color palette."""
+    clover = "clover"
+    """Clover color palette."""
+    lemon = "lemon"
+    """Lemon color palette."""
+    white = "white"
+    """White color palette."""
 
 
 T = TypeVar("T")

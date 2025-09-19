@@ -17,6 +17,7 @@ from typing import (
     List,
     Optional,
     Tuple,
+    Type,
     Union,
     cast,
     overload,
@@ -24,7 +25,7 @@ from typing import (
 
 from . import utils
 from .channel import PartialMessageable
-from .components import ActionRow, MessageComponent, _component_factory
+from .components import MessageTopLevelComponent, _message_component_factory
 from .embeds import Embed
 from .emoji import Emoji
 from .enums import (
@@ -46,7 +47,6 @@ from .poll import Poll
 from .reaction import Reaction
 from .sticker import StickerItem
 from .threads import Thread
-from .ui.action_row import components_to_dict
 from .user import User
 from .utils import MISSING, _get_as_snowflake, assert_never, deprecated, escape_mentions
 
@@ -60,7 +60,7 @@ if TYPE_CHECKING:
     from .role import Role
     from .state import ConnectionState
     from .threads import AnyThreadArchiveDuration
-    from .types.components import Component as ComponentPayload
+    from .types.components import MessageTopLevelComponent as MessageTopLevelComponentPayload
     from .types.embed import Embed as EmbedPayload
     from .types.gateway import (
         MessageReactionAddEvent,
@@ -85,7 +85,7 @@ if TYPE_CHECKING:
     )
     from .types.threads import ThreadArchiveDurationLiteral
     from .types.user import User as UserPayload
-    from .ui.action_row import Components, MessageUIComponent
+    from .ui._types import MessageComponents
     from .ui.view import View
 
     EmojiInputType = Union[Emoji, PartialEmoji, str]
@@ -147,7 +147,7 @@ async def _edit_handler(
     flags: MessageFlags,
     allowed_mentions: Optional[AllowedMentions],
     view: Optional[View],
-    components: Optional[Components[MessageUIComponent]],
+    components: Optional[MessageComponents],
 ) -> Message:
     if embed is not MISSING and embeds is not MISSING:
         raise TypeError("Cannot mix embed and embeds keyword arguments.")
@@ -184,12 +184,6 @@ async def _edit_handler(
                 files = files or []
                 files.extend(embed._files.values())
 
-    if suppress_embeds is not MISSING:
-        flags = MessageFlags._from_value(default_flags if flags is MISSING else flags.value)
-        flags.suppress_embeds = suppress_embeds
-    if flags is not MISSING:
-        payload["flags"] = flags.value
-
     if allowed_mentions is MISSING:
         if previous_allowed_mentions:
             payload["allowed_mentions"] = previous_allowed_mentions.to_dict()
@@ -212,8 +206,30 @@ async def _edit_handler(
         else:
             payload["components"] = []
 
+    is_v2 = False
     if components is not MISSING:
-        payload["components"] = [] if components is None else components_to_dict(components)
+        from .ui.action_row import normalize_components_to_dict
+
+        if components:
+            payload["components"], is_v2 = normalize_components_to_dict(components)
+        else:
+            payload["components"] = []
+
+    # set cv2 flag automatically
+    if is_v2:
+        flags = MessageFlags._from_value(default_flags if flags is MISSING else flags.value)
+        flags.is_components_v2 = True
+    # components v2 cannot be used with other content fields
+    # (n.b. this doesn't take into account editing messages that *already* have content/embeds,
+    # since we can't know that for certain with partial messages anyway)
+    if flags and flags.is_components_v2 and (content or embeds):
+        raise ValueError("Cannot use v2 components with content or embeds")
+
+    if suppress_embeds is not MISSING:
+        flags = MessageFlags._from_value(default_flags if flags is MISSING else flags.value)
+        flags.suppress_embeds = suppress_embeds
+    if flags is not MISSING:
+        payload["flags"] = flags.value
 
     try:
         data = await msg._state.http.edit_message(msg.channel.id, msg.id, **payload, files=files)
@@ -369,7 +385,7 @@ class Attachment(Hashable):
 
     async def save(
         self,
-        fp: Union[io.BufferedIOBase, PathLike],
+        fp: Union[io.BufferedIOBase, PathLike[str], PathLike[bytes]],
         *,
         seek_begin: bool = True,
         use_cached: bool = False,
@@ -414,7 +430,7 @@ class Attachment(Hashable):
                 fp.seek(0)
             return written
         else:
-            with open(fp, "wb") as f:
+            with open(fp, "wb") as f:  # noqa: ASYNC230
                 return f.write(data)
 
     async def read(self, *, use_cached: bool = False) -> bytes:
@@ -940,7 +956,7 @@ class RoleSubscriptionData:
         self.is_renewal: bool = data["is_renewal"]
 
 
-def flatten_handlers(cls):
+def flatten_handlers(cls: Type[Message]) -> Type[Message]:
     prefix = len("_handle_")
     handlers = [
         (key[prefix:], value)
@@ -1085,7 +1101,7 @@ class Message(Hashable):
 
         .. versionadded:: 2.0
 
-    message_snapshots: list[:class:`ForwardedMessage`]
+    message_snapshots: List[:class:`ForwardedMessage`]
         A list of forwarded messages.
 
         .. versionadded:: 2.10
@@ -1137,6 +1153,7 @@ class Message(Hashable):
         "poll",
         "_edited_timestamp",
         "_role_subscription_data",
+        "_pinned_at",
     )
 
     if TYPE_CHECKING:
@@ -1177,6 +1194,7 @@ class Message(Hashable):
         )
         self.type: MessageType = try_enum(MessageType, data["type"])
         self.pinned: bool = data["pinned"]
+        self._pinned_at: Optional[datetime.datetime] = None
         self.flags: MessageFlags = MessageFlags._from_value(data.get("flags", 0))
         self.mention_everyone: bool = data["mention_everyone"]
         self.tts: bool = data["tts"]
@@ -1185,9 +1203,8 @@ class Message(Hashable):
         self.stickers: List[StickerItem] = [
             StickerItem(data=d, state=state) for d in data.get("sticker_items", [])
         ]
-        self.components: List[ActionRow[MessageComponent]] = [
-            _component_factory(d, type=ActionRow[MessageComponent])
-            for d in data.get("components", [])
+        self.components: List[MessageTopLevelComponent] = [
+            _message_component_factory(d) for d in data.get("components", [])
         ]
 
         self.poll: Optional[Poll] = None
@@ -1219,17 +1236,12 @@ class Message(Hashable):
             "role_subscription_data"
         )
 
-        try:
-            ref = data["message_reference"]
-        except KeyError:
-            self.reference = None
-        else:
-            self.reference = ref = MessageReference.with_state(state, ref)
-            try:
+        self.reference: Optional[MessageReference] = None
+        if "message_reference" in data:
+            self.reference = ref = MessageReference.with_state(state, data["message_reference"])
+
+            if "referenced_message" in data:
                 resolved = data["referenced_message"]
-            except KeyError:
-                pass
-            else:
                 if resolved is None:
                     ref.resolved = DeletedReferencedMessage(ref)
                 else:
@@ -1254,14 +1266,13 @@ class Message(Hashable):
         ]
 
         for handler in ("author", "member", "mentions", "mention_roles"):
-            try:
-                getattr(self, f"_handle_{handler}")(data[handler])
-            except KeyError:
-                continue
+            if handler in data:
+                getattr(self, f"_handle_{handler}")(data[handler])  # type: ignore
 
     def __repr__(self) -> str:
         name = self.__class__.__name__
-        return f"<{name} id={self.id} channel={self.channel!r} type={self.type!r} author={self.author!r} flags={self.flags!r}>"
+        content = (self.content[:22] + "...") if len(self.content) > 25 else self.content
+        return f"<{name} id={self.id} content={content!r} channel={self.channel!r} type={self.type!r} author={self.author!r} flags={self.flags!r}>"
 
     def _try_patch(self, data, key, transform=None) -> None:
         try:
@@ -1433,10 +1444,8 @@ class Message(Hashable):
                 if role is not None:
                     self.role_mentions.append(role)
 
-    def _handle_components(self, components: List[ComponentPayload]) -> None:
-        self.components = [
-            _component_factory(d, type=ActionRow[MessageComponent]) for d in components
-        ]
+    def _handle_components(self, components: List[MessageTopLevelComponentPayload]) -> None:
+        self.components = [_message_component_factory(d) for d in components]
 
     def _rebind_cached_references(self, new_guild: Guild, new_channel: GuildMessageable) -> None:
         self.guild = new_guild
@@ -1521,7 +1530,7 @@ class Message(Hashable):
             }
             transformations.update(role_transforms)
 
-        def repl(obj):
+        def repl(obj) -> str:
             return transformations.get(re.escape(obj.group(0)), "")
 
         pattern = re.compile("|".join(transformations.keys()))
@@ -1537,6 +1546,17 @@ class Message(Hashable):
     def edited_at(self) -> Optional[datetime.datetime]:
         """Optional[:class:`datetime.datetime`]: An aware UTC datetime object containing the edited time of the message."""
         return self._edited_timestamp
+
+    @property
+    def pinned_at(self) -> Optional[datetime.datetime]:
+        """Optional[:class:`datetime.datetime`]: An aware UTC datetime object containing the pin time of the message.
+
+        .. note::
+            This is only set on messages retrieved using :meth:`abc.Messageable.pins`.
+
+        .. versionadded:: 2.11
+        """
+        return self._pinned_at
 
     @property
     def jump_url(self) -> str:
@@ -1797,6 +1817,8 @@ class Message(Hashable):
             else:
                 msg += "\n\nThere was no winner."
             return msg
+        if self.type is MessageType.emoji_added:
+            return f"{self.author.name} added a new emoji."
 
         # in the event of an unknown or unsupported message type, we return nothing
         return None
@@ -1866,7 +1888,7 @@ class Message(Hashable):
         flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components[MessageUIComponent]] = ...,
+        components: Optional[MessageComponents] = ...,
         delete_after: Optional[float] = ...,
     ) -> Message: ...
 
@@ -1882,7 +1904,7 @@ class Message(Hashable):
         flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components[MessageUIComponent]] = ...,
+        components: Optional[MessageComponents] = ...,
         delete_after: Optional[float] = ...,
     ) -> Message: ...
 
@@ -1898,7 +1920,7 @@ class Message(Hashable):
         flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components[MessageUIComponent]] = ...,
+        components: Optional[MessageComponents] = ...,
         delete_after: Optional[float] = ...,
     ) -> Message: ...
 
@@ -1914,7 +1936,7 @@ class Message(Hashable):
         flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components[MessageUIComponent]] = ...,
+        components: Optional[MessageComponents] = ...,
         delete_after: Optional[float] = ...,
     ) -> Message: ...
 
@@ -1932,7 +1954,7 @@ class Message(Hashable):
         flags: MessageFlags = MISSING,
         allowed_mentions: Optional[AllowedMentions] = MISSING,
         view: Optional[View] = MISSING,
-        components: Optional[Components[MessageUIComponent]] = MISSING,
+        components: Optional[MessageComponents] = MISSING,
         delete_after: Optional[float] = None,
     ) -> Message:
         """|coro|
@@ -2008,7 +2030,8 @@ class Message(Hashable):
             suppressed.
         flags: :class:`MessageFlags`
             The new flags to set for this message. Overrides existing flags.
-            Only :attr:`~MessageFlags.suppress_embeds` is supported.
+            Only :attr:`~MessageFlags.suppress_embeds` and :attr:`~MessageFlags.is_components_v2`
+            are supported.
 
             If parameter ``suppress_embeds`` is provided,
             that will override the setting of :attr:`.MessageFlags.suppress_embeds`.
@@ -2041,6 +2064,12 @@ class Message(Hashable):
 
             .. versionadded:: 2.4
 
+            .. note::
+                Passing v2 components here automatically sets the :attr:`~MessageFlags.is_components_v2` flag.
+                Setting this flag cannot be reverted. Note that this also disables the
+                ``content`` and ``embeds`` fields.
+                If the message previously had any of these fields set, you must set them to ``None``.
+
         Raises
         ------
         HTTPException
@@ -2050,6 +2079,8 @@ class Message(Hashable):
             edited a message's content or embed that isn't yours.
         TypeError
             You specified both ``embed`` and ``embeds``, or ``file`` and ``files``, or ``view`` and ``components``.
+        ValueError
+            You tried to send v2 components together with ``content`` or ``embeds``.
 
         Returns
         -------
@@ -2110,7 +2141,7 @@ class Message(Hashable):
 
         Pins the message.
 
-        You must have the :attr:`~Permissions.manage_messages` permission to do
+        You must have the :attr:`~Permissions.pin_messages` permission to do
         this in a non-private channel context.
 
         This does not work with messages sent in a :class:`VoiceChannel` or :class:`StageChannel`.
@@ -2140,7 +2171,7 @@ class Message(Hashable):
 
         Unpins the message.
 
-        You must have the :attr:`~Permissions.manage_messages` permission to do
+        You must have the :attr:`~Permissions.pin_messages` permission to do
         this in a non-private channel context.
 
         Parameters
@@ -2629,7 +2660,7 @@ class PartialMessage(Hashable):
         flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components[MessageUIComponent]] = ...,
+        components: Optional[MessageComponents] = ...,
         delete_after: Optional[float] = ...,
     ) -> Message: ...
 
@@ -2645,7 +2676,7 @@ class PartialMessage(Hashable):
         flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components[MessageUIComponent]] = ...,
+        components: Optional[MessageComponents] = ...,
         delete_after: Optional[float] = ...,
     ) -> Message: ...
 
@@ -2661,7 +2692,7 @@ class PartialMessage(Hashable):
         flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components[MessageUIComponent]] = ...,
+        components: Optional[MessageComponents] = ...,
         delete_after: Optional[float] = ...,
     ) -> Message: ...
 
@@ -2677,7 +2708,7 @@ class PartialMessage(Hashable):
         flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
         view: Optional[View] = ...,
-        components: Optional[Components[MessageUIComponent]] = ...,
+        components: Optional[MessageComponents] = ...,
         delete_after: Optional[float] = ...,
     ) -> Message: ...
 
@@ -2695,7 +2726,7 @@ class PartialMessage(Hashable):
         flags: MessageFlags = MISSING,
         allowed_mentions: Optional[AllowedMentions] = MISSING,
         view: Optional[View] = MISSING,
-        components: Optional[Components[MessageUIComponent]] = MISSING,
+        components: Optional[MessageComponents] = MISSING,
         delete_after: Optional[float] = None,
     ) -> Message:
         """|coro|
@@ -2773,7 +2804,8 @@ class PartialMessage(Hashable):
             suppressed.
         flags: :class:`MessageFlags`
             The new flags to set for this message. Overrides existing flags.
-            Only :attr:`~MessageFlags.suppress_embeds` is supported.
+            Only :attr:`~MessageFlags.suppress_embeds` and :attr:`~MessageFlags.is_components_v2`
+            are supported.
 
             If parameter ``suppress_embeds`` is provided,
             that will override the setting of :attr:`.MessageFlags.suppress_embeds`.
@@ -2805,6 +2837,12 @@ class PartialMessage(Hashable):
 
             .. versionadded:: 2.4
 
+            .. note::
+                Passing v2 components here automatically sets the :attr:`~MessageFlags.is_components_v2` flag.
+                Setting this flag cannot be reverted. Note that this also disables the
+                ``content`` and ``embeds`` fields.
+                If the message previously had any of these fields set, you must set them to ``None``.
+
         Raises
         ------
         NotFound
@@ -2816,6 +2854,8 @@ class PartialMessage(Hashable):
             edited a message's content or embed that isn't yours.
         TypeError
             You specified both ``embed`` and ``embeds``, or ``file`` and ``files``, or ``view`` and ``components``.
+        ValueError
+            You tried to send v2 components together with ``content`` or ``embeds``.
 
         Returns
         -------
@@ -2929,9 +2969,8 @@ class ForwardedMessage:
         self.stickers: List[StickerItem] = [
             StickerItem(data=d, state=state) for d in data.get("sticker_items", [])
         ]
-        self.components = [
-            _component_factory(d, type=ActionRow[MessageComponent])
-            for d in data.get("components", [])
+        self.components: List[MessageTopLevelComponent] = [
+            _message_component_factory(d) for d in data.get("components", [])
         ]
         self.guild_id = guild_id
 

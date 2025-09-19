@@ -48,7 +48,35 @@ from typing import (
 )
 from urllib.parse import parse_qs, urlencode
 
+if TYPE_CHECKING:
+    from typing_extensions import Self
+
 from .enums import Locale
+
+if sys.version_info >= (3, 14):
+    import threading
+    from inspect import iscoroutinefunction as iscoroutinefunction
+
+    def get_event_loop():
+        try:
+            # If there is no event loop, this will raise a RuntimeError starting with Python 3.14+.
+            # In that case, we create and set a new loop below.
+            # This is more of a bandaid fix, we should really use asyncio.run in the long term.
+            return asyncio.get_event_loop()
+        except RuntimeError:
+            if threading.current_thread() is not threading.main_thread():
+                raise
+            asyncio.set_event_loop(loop := asyncio.new_event_loop())
+            return loop
+else:
+    from asyncio import iscoroutinefunction as iscoroutinefunction
+
+    def get_event_loop():
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", DeprecationWarning)
+            # get_event_loop emits deprecation warnings in 3.10-3.13
+            return asyncio.get_event_loop()
+
 
 try:
     import orjson
@@ -240,11 +268,12 @@ def isoformat_utc(dt: Optional[datetime.datetime]) -> Optional[str]:
     return None
 
 
-def copy_doc(original: Callable) -> Callable[[T], T]:
-    def decorator(overriden: T) -> T:
-        overriden.__doc__ = original.__doc__
-        overriden.__signature__ = _signature(original)  # type: ignore
-        return overriden
+def copy_doc(original: Union[Callable[..., Any], property]) -> Callable[[T], T]:
+    def decorator(overridden: T) -> T:
+        overridden.__doc__ = original.__doc__
+        if callable(original):
+            overridden.__signature__ = _signature(original)  # type: ignore
+        return overridden
 
     return decorator
 
@@ -589,7 +618,7 @@ async def maybe_coroutine(
     if _isawaitable(value):
         return await value
     else:
-        return value  # type: ignore  # typeguard doesn't narrow in the negative case
+        return value
 
 
 async def async_all(gen: Iterable[Union[Awaitable[bool], bool]]) -> bool:
@@ -688,7 +717,7 @@ class SnowflakeList(array.array):
 
         def __init__(self, data: Iterable[int], *, is_sorted: bool = False) -> None: ...
 
-    def __new__(cls, data: Iterable[int], *, is_sorted: bool = False):
+    def __new__(cls, data: Iterable[int], *, is_sorted: bool = False) -> Self:
         return array.array.__new__(cls, "Q", data if is_sorted else sorted(data))  # type: ignore
 
     def add(self, element: int) -> None:
@@ -794,7 +823,7 @@ def resolve_template(code: Union[Template, str]) -> str:
 
 
 _MARKDOWN_ESCAPE_SUBREGEX = "|".join(
-    r"\{0}(?=([\s\S]*((?<!\{0})\{0})))".format(c) for c in ("*", "`", "_", "~", "|")
+    rf"\{c}(?=([\s\S]*((?<!\{c})\{c})))" for c in ("*", "`", "_", "~", "|")
 )
 
 _MARKDOWN_ESCAPE_COMMON = r"^>(?:>>)?\s|\[.+\]\(.+\)"
@@ -832,7 +861,7 @@ def remove_markdown(text: str, *, ignore_links: bool = True) -> str:
         The text with the markdown special characters removed.
     """
 
-    def replacement(match):
+    def replacement(match: re.Match) -> str:
         groupdict = match.groupdict()
         return groupdict.get("url", "")
 
@@ -868,7 +897,7 @@ def escape_markdown(text: str, *, as_needed: bool = False, ignore_links: bool = 
     """
     if not as_needed:
 
-        def replacement(match):
+        def replacement(match: re.Match) -> str:
             groupdict = match.groupdict()
             is_url = groupdict.get("url")
             if is_url:
@@ -1026,7 +1055,7 @@ def _get_option_desc(lines: List[str]) -> Dict[str, _DocstringParam]:
     return options
 
 
-def parse_docstring(func: Callable) -> _ParsedDocstring:
+def parse_docstring(func: Callable[..., Any]) -> _ParsedDocstring:
     doc = _getdoc(func)
     if doc is None:
         return {
@@ -1134,12 +1163,12 @@ def flatten_literal_params(parameters: Iterable[Any]) -> Tuple[Any, ...]:
 
 def normalise_optional_params(parameters: Iterable[Any]) -> Tuple[Any, ...]:
     none_cls = type(None)
-    return tuple(p for p in parameters if p is not none_cls) + (none_cls,)
+    return (*tuple(p for p in parameters if p is not none_cls), none_cls)
 
 
 def _resolve_typealiastype(
     tp: Any, globals: Dict[str, Any], locals: Dict[str, Any], cache: Dict[str, Any]
-):
+) -> Any:
     # Use __module__ to get the (global) namespace in which the type alias was defined.
     if mod := sys.modules.get(tp.__module__):
         mod_globals = mod.__dict__
@@ -1162,7 +1191,7 @@ def evaluate_annotation(
     cache: Dict[str, Any],
     *,
     implicit_str: bool = True,
-):
+) -> Any:
     if isinstance(tp, ForwardRef):
         tp = tp.__forward_arg__
         # ForwardRefs always evaluate their internals
@@ -1184,7 +1213,7 @@ def evaluate_annotation(
     if hasattr(tp, "__args__"):
         if not hasattr(tp, "__origin__"):
             if tp.__class__ is UnionType:
-                converted = Union[tp.__args__]  # type: ignore
+                converted = Union[tp.__args__]
                 return evaluate_annotation(converted, globals, locals, cache)
 
             return tp

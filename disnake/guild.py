@@ -89,6 +89,7 @@ from .welcome_screen import WelcomeScreen, WelcomeScreenChannel
 from .widget import Widget, WidgetSettings
 
 __all__ = (
+    "IncidentsData",
     "Guild",
     "GuildBuilder",
 )
@@ -105,16 +106,20 @@ if TYPE_CHECKING:
     from .state import ConnectionState
     from .template import Template
     from .threads import AnyThreadArchiveDuration, ForumTag
-    from .types.channel import PermissionOverwrite as PermissionOverwritePayload
+    from .types.channel import (
+        GuildChannel as GuildChannelPayload,
+        PermissionOverwrite as PermissionOverwritePayload,
+    )
     from .types.guild import (
         Ban as BanPayload,
         CreateGuildPlaceholderChannel,
         CreateGuildPlaceholderRole,
         Guild as GuildPayload,
         GuildFeature,
+        IncidentsData as IncidentsDataPayload,
         MFALevel,
     )
-    from .types.integration import IntegrationType
+    from .types.integration import Integration as IntegrationPayload, IntegrationType
     from .types.role import CreateRole as CreateRolePayload
     from .types.sticker import CreateGuildSticker as CreateStickerPayload
     from .types.threads import Thread as ThreadPayload, ThreadArchiveDurationLiteral
@@ -135,6 +140,94 @@ class _GuildLimit(NamedTuple):
     bitrate: float
     filesize: int
     sounds: int
+
+
+class IncidentsData:
+    """Represents data about various security incidents/actions in a guild.
+
+    .. collapse:: operations
+
+        .. describe:: x == y
+
+            Checks if two ``IncidentsData`` instances are equal.
+
+        .. describe:: x != y
+
+            Checks if two ``IncidentsData`` instances are not equal.
+
+    .. versionadded:: 2.11
+
+    Attributes
+    ----------
+    dm_spam_detected_at: Optional[:class:`datetime.datetime`]
+        The time (in UTC) at which DM spam was last detected.
+    raid_detected_at: Optional[:class:`datetime.datetime`]
+        The time (in UTC) at which a raid was last detected.
+    """
+
+    __slots__ = (
+        "_invites_disabled_until",
+        "_dms_disabled_until",
+        "dm_spam_detected_at",
+        "raid_detected_at",
+    )
+
+    def __init__(self, data: IncidentsDataPayload) -> None:
+        self._invites_disabled_until: Optional[datetime.datetime] = utils.parse_time(
+            data.get("invites_disabled_until")
+        )
+        self._dms_disabled_until: Optional[datetime.datetime] = utils.parse_time(
+            data.get("dms_disabled_until")
+        )
+        self.dm_spam_detected_at: Optional[datetime.datetime] = utils.parse_time(
+            data.get("dm_spam_detected_at")
+        )
+        self.raid_detected_at: Optional[datetime.datetime] = utils.parse_time(
+            data.get("raid_detected_at")
+        )
+
+    @property
+    def invites_disabled_until(self) -> Optional[datetime.datetime]:
+        """Optional[:class:`datetime.datetime`]: Returns the time (in UTC) until
+        which users cannot join the server via invites, if any.
+        """
+        if (
+            self._invites_disabled_until is not None
+            and self._invites_disabled_until < utils.utcnow()
+        ):
+            self._invites_disabled_until = None
+
+        return self._invites_disabled_until
+
+    @property
+    def dms_disabled_until(self) -> Optional[datetime.datetime]:
+        """Optional[:class:`datetime.datetime`]: Returns the time (in UTC) until
+        which members cannot send DMs to each other, if any.
+
+        This does not apply to moderators, bots, or members who are
+        already friends with each other.
+        """
+        if self._dms_disabled_until is not None and self._dms_disabled_until < utils.utcnow():
+            self._dms_disabled_until = None
+
+        return self._dms_disabled_until
+
+    def __eq__(self, other: Any) -> bool:
+        return (
+            isinstance(other, IncidentsData)
+            and self.invites_disabled_until == other.invites_disabled_until
+            and self.dms_disabled_until == other.dms_disabled_until
+            and self.dm_spam_detected_at == other.dm_spam_detected_at
+            and self.raid_detected_at == other.raid_detected_at
+        )
+
+    def __repr__(self) -> str:
+        return (
+            f"<IncidentsData invites_disabled_until={self.invites_disabled_until!r}"
+            f" dms_disabled_until={self.dms_disabled_until!r}"
+            f" dm_spam_detected_at={self.dm_spam_detected_at!r}"
+            f" raid_detected_at={self.raid_detected_at!r}>"
+        )
 
 
 class Guild(Hashable):
@@ -324,6 +417,11 @@ class Guild(Hashable):
         To get a full :class:`Invite` object, see :attr:`Guild.vanity_invite`.
 
         .. versionadded:: 2.5
+
+    incidents_data: Optional[:class:`IncidentsData`]
+        Data about various security incidents/actions in this guild, like disabled invites/DMs.
+
+        .. versionadded:: 2.11
     """
 
     __slots__ = (
@@ -356,6 +454,7 @@ class Guild(Hashable):
         "widget_enabled",
         "widget_channel_id",
         "vanity_url_code",
+        "incidents_data",
         "_members",
         "_channels",
         "_icon",
@@ -473,11 +572,8 @@ class Guild(Hashable):
             self._voice_states[user_id] = after
 
         member = self.get_member(user_id)
-        if member is None:
-            try:
-                member = Member(data=data["member"], state=self._state, guild=self)
-            except KeyError:
-                member = None
+        if member is None and "member" in data:
+            member = Member(data=data["member"], state=self._state, guild=self)
 
         return member, before, after
 
@@ -602,6 +698,11 @@ class Guild(Hashable):
         self._safety_alerts_channel_id: Optional[int] = utils._get_as_snowflake(
             guild, "safety_alerts_channel_id"
         )
+        self.incidents_data: Optional[IncidentsData] = (
+            IncidentsData(incidents_data)
+            if (incidents_data := guild.get("incidents_data"))
+            else None
+        )
 
         stage_instances = guild.get("stage_instances")
         if stage_instances is not None:
@@ -638,10 +739,8 @@ class Guild(Hashable):
 
     # TODO: refactor/remove?
     def _sync(self, data: GuildPayload) -> None:
-        try:
+        if "large" in data:
             self._large = data["large"]
-        except KeyError:
-            pass
 
         empty_tuple = ()
         for presence in data.get("presences", []):
@@ -2042,6 +2141,8 @@ class Guild(Hashable):
         discovery_splash: Optional[AssetBytes] = MISSING,
         community: bool = MISSING,
         invites_disabled: bool = MISSING,
+        invites_disabled_until: Optional[Union[datetime.datetime, datetime.timedelta]] = MISSING,
+        dms_disabled_until: Optional[Union[datetime.datetime, datetime.timedelta]] = MISSING,
         raid_alerts_disabled: bool = MISSING,
         afk_channel: Optional[VoiceChannel] = MISSING,
         owner: Snowflake = MISSING,
@@ -2127,7 +2228,8 @@ class Guild(Hashable):
             Whether the guild should be a Community guild. If set to ``True``\\, both ``rules_channel``
             and ``public_updates_channel`` parameters are required.
         invites_disabled: :class:`bool`
-            Whether the guild has paused invites, preventing new users from joining.
+            Whether the guild has paused invites (indefinitely), preventing new users from joining.
+            See also the ``invites_disabled_until`` parameter.
 
             This is only available to guilds that contain ``COMMUNITY``
             in :attr:`Guild.features`.
@@ -2135,6 +2237,28 @@ class Guild(Hashable):
             This cannot be changed at the same time as the ``community`` feature due a Discord API limitation.
 
             .. versionadded:: 2.6
+
+        invites_disabled_until: Optional[Union[:class:`datetime.datetime`, :class:`datetime.timedelta`]]
+            The time until/for which invites are paused, up to 24 hours in the future.
+            See also the ``invites_disabled`` parameter.
+            Can be set to ``None`` to re-enable invites.
+
+            This is only available to guilds that contain ``COMMUNITY``
+            in :attr:`Guild.features`.
+
+            .. versionadded:: 2.11
+
+        dms_disabled_until: Union[:class:`datetime.datetime`, :class:`datetime.timedelta`]
+            The time until/for which DMs between guild members are disabled, up to 24 hours in the future.
+            Can be set to ``None`` to re-enable DMs.
+
+            This does not apply to moderators, bots, or members who are
+            already friends with each other.
+
+            This is only available to guilds that contain ``COMMUNITY``
+            in :attr:`Guild.features`.
+
+            .. versionadded:: 2.11
 
         raid_alerts_disabled: :class:`bool`
             Whether the guild has disabled join raid alerts.
@@ -2221,6 +2345,30 @@ class Guild(Hashable):
 
         if vanity_code is not MISSING:
             await http.change_vanity_code(self.id, vanity_code, reason=reason)
+
+        if invites_disabled_until is not MISSING or dms_disabled_until is not MISSING:
+            payload: IncidentsDataPayload = {}
+
+            # we need to include the old values, otherwise Discord will consider them set to `null`
+            # (which would e.g. re-enable DMs when disabling invites)
+            if self.incidents_data:
+                if invites_disabled_until is MISSING:
+                    invites_disabled_until = self.incidents_data.invites_disabled_until
+                if dms_disabled_until is MISSING:
+                    dms_disabled_until = self.incidents_data.dms_disabled_until
+
+            if invites_disabled_until is not MISSING:
+                if isinstance(invites_disabled_until, datetime.timedelta):
+                    invites_disabled_until = utils.utcnow() + invites_disabled_until
+                payload["invites_disabled_until"] = utils.isoformat_utc(invites_disabled_until)
+
+            if dms_disabled_until is not MISSING:
+                if isinstance(dms_disabled_until, datetime.timedelta):
+                    dms_disabled_until = utils.utcnow() + dms_disabled_until
+                payload["dms_disabled_until"] = utils.isoformat_utc(dms_disabled_until)
+
+            if payload:
+                await http.edit_guild_incident_actions(self.id, payload)
 
         fields: Dict[str, Any] = {}
         if name is not MISSING:
@@ -2391,12 +2539,16 @@ class Guild(Hashable):
         """
         data = await self._state.http.get_all_guild_channels(self.id)
 
-        def convert(d):
+        def convert(d: GuildChannelPayload) -> GuildChannel:
             factory, _ = _guild_channel_factory(d["type"])
             if factory is None:
                 raise InvalidData("Unknown channel type {type} for channel ID {id}.".format_map(d))
 
-            channel = factory(guild=self, state=self._state, data=d)
+            channel = factory(
+                guild=self,
+                state=self._state,
+                data=d,  # type: ignore
+            )
             return channel
 
         return [convert(d) for d in data]
@@ -3305,8 +3457,10 @@ class Guild(Hashable):
 
         Returns a list of all active instant invites from the guild.
 
-        You must have :attr:`~Permissions.manage_guild` permission to
-        use this.
+        You must have :attr:`~Permissions.manage_guild` or :attr:`~Permissions.view_audit_log`
+        permission to use this.
+        Some attributes (see :ref:`table <invite_attr_table>`) are only available with
+        :attr:`~Permissions.manage_guild` permissions.
 
         .. note::
 
@@ -3326,7 +3480,7 @@ class Guild(Hashable):
             The list of invites that are currently active.
         """
         data = await self._state.http.invites_from(self.id)
-        result = []
+        result: List[Invite] = []
         for invite in data:
             if channel_data := invite.get("channel"):
                 channel = self.get_channel(int(channel_data["id"]))
@@ -3423,7 +3577,7 @@ class Guild(Hashable):
         """
         data = await self._state.http.get_all_integrations(self.id)
 
-        def convert(d):
+        def convert(d: IntegrationPayload) -> Integration:
             factory, _ = _integration_factory(d["type"])
             return factory(guild=self, data=d)
 
@@ -3863,6 +4017,12 @@ class Guild(Hashable):
         permissions: Permissions = MISSING,
         color: Union[Colour, int] = MISSING,
         colour: Union[Colour, int] = MISSING,
+        primary_colour: Union[Colour, int] = MISSING,
+        primary_color: Union[Colour, int] = MISSING,
+        secondary_colour: Optional[Union[Colour, int]] = None,
+        secondary_color: Optional[Union[Colour, int]] = None,
+        tertiary_colour: Optional[Union[Colour, int]] = None,
+        tertiary_color: Optional[Union[Colour, int]] = None,
         hoist: bool = MISSING,
         icon: AssetBytes = MISSING,
         emoji: str = MISSING,
@@ -3893,6 +4053,28 @@ class Guild(Hashable):
         colour: Union[:class:`Colour`, :class:`int`]
             The colour for the role. Defaults to :meth:`Colour.default`.
             This is aliased to ``color`` as well.
+
+            .. note::
+                This is equivalent to ``primary_colour``.
+        primary_colour: Union[:class:`Colour`, :class:`int`]
+            The primary_colour for the role. Defaults to :meth:`Colour.default`.
+            This is aliased to ``primary_color`` as well.
+
+            .. versionadded:: 2.11
+        secondary_colour: Optional[Union[:class:`Colour`, :class:`int`]]
+            The secondary_colour for the role. Defaults to ``None``.
+            This is aliased to ``secondary_color`` as well.
+
+            .. versionadded:: 2.11
+        tertiary_colour: Optional[Union[:class:`Colour`, :class:`int`]]
+            The tertiary_colour for the role. Defaults to ``None``.
+            This is aliased to ``tertiary_color`` as well.
+
+            .. note::
+                When passing this the only permitted values are the ones returned by
+                :meth:`Colour.holographic_style`, any other color value will get rejected.
+
+            .. versionadded:: 2.11
         hoist: :class:`bool`
             Whether the role should be shown separately in the member list.
             Defaults to ``False``.
@@ -3933,11 +4115,25 @@ class Guild(Hashable):
         else:
             fields["permissions"] = "0"
 
-        actual_colour = colour or color or Colour.default()
-        if isinstance(actual_colour, int):
-            fields["color"] = actual_colour
-        else:
-            fields["color"] = actual_colour.value
+        actual_primary_color = colour or color or primary_colour or primary_color
+        actual_secondary_color = secondary_colour or secondary_color
+        actual_tertiary_color = tertiary_colour or tertiary_color
+        if actual_primary_color is MISSING:
+            actual_primary_color = 0
+        elif isinstance(actual_primary_color, Colour):
+            actual_primary_color = actual_primary_color.value
+
+        if isinstance(actual_secondary_color, Colour):
+            actual_secondary_color = actual_secondary_color.value
+
+        if isinstance(actual_tertiary_color, Colour):
+            actual_tertiary_color = actual_tertiary_color.value
+
+        fields["colors"] = {
+            "primary_color": actual_primary_color,
+            "secondary_color": actual_secondary_color,
+            "tertiary_color": actual_tertiary_color,
+        }
 
         if hoist is not MISSING:
             fields["hoist"] = hoist
@@ -4663,7 +4859,7 @@ class Guild(Hashable):
         *,
         limit: int = 1,
         cache: bool = True,
-    ):
+    ) -> List[Member]:
         """|coro|
 
         Retrieves members that belong to this guild whose name starts with
@@ -4702,7 +4898,7 @@ class Guild(Hashable):
             raise ValueError("limit must be at least 1")
         limit = min(1000, limit)
         members = await self._state.http.search_guild_members(self.id, query=query, limit=limit)
-        resp = []
+        resp: List[Member] = []
         for member in members:
             member = Member(state=self._state, data=member, guild=self)
             if cache and member.id not in self._members:
@@ -5566,9 +5762,9 @@ class GuildBuilder:
 
         actual_colour = colour or color or Colour.default()
         if isinstance(actual_colour, int):
-            data["color"] = actual_colour
+            data["color"] = actual_colour  # type: ignore
         else:
-            data["color"] = actual_colour.value
+            data["color"] = actual_colour.value  # type: ignore
 
         if hoist is not MISSING:
             data["hoist"] = hoist

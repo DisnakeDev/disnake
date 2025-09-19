@@ -29,7 +29,7 @@ from disnake.app_commands import ApplicationCommand, Option
 from disnake.custom_warnings import SyncWarning
 from disnake.enums import ApplicationCommandType
 from disnake.flags import ApplicationInstallTypes, InteractionContextTypes
-from disnake.utils import warn_deprecated
+from disnake.utils import iscoroutinefunction, warn_deprecated
 
 from . import errors
 from .base_core import InvokableApplicationCommand
@@ -80,7 +80,7 @@ class _Diff(TypedDict):
     delete_ignored: NotRequired[List[ApplicationCommand]]
 
 
-def _get_to_send_from_diff(diff: _Diff):
+def _get_to_send_from_diff(diff: _Diff) -> List[ApplicationCommand]:
     return diff["no_changes"] + diff["upsert"] + diff["edit"] + diff.get("delete_ignored", [])
 
 
@@ -821,8 +821,8 @@ class InteractionBotBase(CommonBotBase):
     def _ordered_unsynced_commands(
         self, test_guilds: Optional[Sequence[int]] = None
     ) -> Tuple[List[ApplicationCommand], Dict[int, List[ApplicationCommand]]]:
-        global_cmds = []
-        guilds = {}
+        global_cmds: List[ApplicationCommand] = []
+        guilds: Dict[int, List[ApplicationCommand]] = {}
 
         for cmd in self.application_commands_iterator():
             if not cmd.auto_sync:
@@ -881,7 +881,7 @@ class InteractionBotBase(CommonBotBase):
             return
 
         # We assume that all commands are already cached.
-        # Sort all invokable commands between guild IDs:
+        # Sort all invocable commands between guild IDs:
         global_cmds, guild_cmds = self._ordered_unsynced_commands(self._test_guilds)
 
         if self._command_sync_flags.sync_global_commands:
@@ -1300,7 +1300,7 @@ class InteractionBotBase(CommonBotBase):
         """Similar to :meth:`Bot.before_invoke` but for slash commands,
         and it takes an :class:`.ApplicationCommandInteraction` as its only parameter.
         """
-        if not asyncio.iscoroutinefunction(coro):
+        if not iscoroutinefunction(coro):
             raise TypeError("The pre-invoke hook must be a coroutine.")
 
         self._before_slash_command_invoke = coro
@@ -1310,7 +1310,7 @@ class InteractionBotBase(CommonBotBase):
         """Similar to :meth:`Bot.after_invoke` but for slash commands,
         and it takes an :class:`.ApplicationCommandInteraction` as its only parameter.
         """
-        if not asyncio.iscoroutinefunction(coro):
+        if not iscoroutinefunction(coro):
             raise TypeError("The post-invoke hook must be a coroutine.")
 
         self._after_slash_command_invoke = coro
@@ -1318,7 +1318,7 @@ class InteractionBotBase(CommonBotBase):
 
     def before_user_command_invoke(self, coro: CFT) -> CFT:
         """Similar to :meth:`Bot.before_slash_command_invoke` but for user commands."""
-        if not asyncio.iscoroutinefunction(coro):
+        if not iscoroutinefunction(coro):
             raise TypeError("The pre-invoke hook must be a coroutine.")
 
         self._before_user_command_invoke = coro
@@ -1326,7 +1326,7 @@ class InteractionBotBase(CommonBotBase):
 
     def after_user_command_invoke(self, coro: CFT) -> CFT:
         """Similar to :meth:`Bot.after_slash_command_invoke` but for user commands."""
-        if not asyncio.iscoroutinefunction(coro):
+        if not iscoroutinefunction(coro):
             raise TypeError("The post-invoke hook must be a coroutine.")
 
         self._after_user_command_invoke = coro
@@ -1334,7 +1334,7 @@ class InteractionBotBase(CommonBotBase):
 
     def before_message_command_invoke(self, coro: CFT) -> CFT:
         """Similar to :meth:`Bot.before_slash_command_invoke` but for message commands."""
-        if not asyncio.iscoroutinefunction(coro):
+        if not iscoroutinefunction(coro):
             raise TypeError("The pre-invoke hook must be a coroutine.")
 
         self._before_message_command_invoke = coro
@@ -1342,7 +1342,7 @@ class InteractionBotBase(CommonBotBase):
 
     def after_message_command_invoke(self, coro: CFT) -> CFT:
         """Similar to :meth:`Bot.after_slash_command_invoke` but for message commands."""
-        if not asyncio.iscoroutinefunction(coro):
+        if not iscoroutinefunction(coro):
             raise TypeError("The post-invoke hook must be a coroutine.")
 
         self._after_message_command_invoke = coro
@@ -1416,7 +1416,7 @@ class InteractionBotBase(CommonBotBase):
                     # either malformed API request, or some other error
                     # in theory this will never error: if a command exists the bot has authorisation
                     # in practice this is not the case, the API could change valid requests at any time
-                    message = "This command could not be processed. Additionally, an error occured when trying to sync commands."
+                    message = "This command could not be processed. Additionally, an error occurred when trying to sync commands."
                 else:
                     message = "This command has just been synced."
             else:
@@ -1455,7 +1455,7 @@ class InteractionBotBase(CommonBotBase):
             event_name = "message_command"
 
         if event_name is None or app_command is None:
-            # If we are here, the command being invoked is either unknown or has an unknonw type.
+            # If we are here, the command being invoked is either unknown or has an unknown type.
             # This usually happens if the auto sync is disabled, so let's just ignore this.
             return
 
