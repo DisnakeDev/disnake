@@ -117,9 +117,6 @@ def _is_descriptor(obj) -> bool:
     return hasattr(obj, "__get__") or hasattr(obj, "__set__") or hasattr(obj, "__delete__")
 
 
-EnumMetaT = TypeVar("EnumMetaT", bound="EnumMeta")
-
-
 class EnumMeta(type):
     if TYPE_CHECKING:
         __name__: ClassVar[str]
@@ -166,10 +163,10 @@ class EnumMeta(type):
         value_cls._actual_enum_cls_ = actual_cls  # type: ignore
         return actual_cls
 
-    def __iter__(cls: EnumMetaT) -> Iterator[EnumMetaT]:
+    def __iter__(cls) -> Iterator[EnumMetaT]:
         return (cls._enum_member_map_[name] for name in cls._enum_member_names_)
 
-    def __reversed__(cls: EnumMetaT) -> Iterator[EnumMetaT]:
+    def __reversed__(cls) -> Iterator[EnumMetaT]:
         return (cls._enum_member_map_[name] for name in reversed(cls._enum_member_names_))
 
     def __len__(cls) -> int:
