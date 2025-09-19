@@ -91,7 +91,7 @@ if sys.version_info >= (3, 10):
     from types import EllipsisType, UnionType
 elif TYPE_CHECKING:
     EllipsisType = type(Ellipsis)
-    UnionType = Type[Union]
+    UnionType = NoReturn
 
 else:
     UnionType = object()
