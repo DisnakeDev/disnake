@@ -1,9 +1,8 @@
 # SPDX-License-Identifier: MIT
 
-## Pre-commit setup
-
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
+    # note that this version is ignored by prek when using the fastpath
     rev: v5.0.0
     hooks:
       - id: check-case-conflict

@@ -238,7 +238,7 @@ def docs(session: nox.Session) -> None:
 def lint(session: nox.Session) -> None:
     """Check all paths for linting errors"""
     install_deps(session)
-    session.run("pre-commit", "run", "--all-files", *session.posargs)
+    session.run("prek", "run", "--all-files", *session.posargs)
 
 
 @nox.session(name="check-manifest")
@@ -444,7 +444,7 @@ def dev(session: nox.Session) -> None:
     session.run("pdm", "lock", "-dG:all", "-G:all", external=True)
     session.run("pdm", "venv", "create", "--force", external=True)
     session.run("pdm", "sync", "--clean-unselected", "-dG:all", "-G:all")
-    session.run("pdm", "run", "pre-commit", "install")
+    session.run("pdm", "run", "prek", "install", "--force")
 
 
 if __name__ == "__main__":

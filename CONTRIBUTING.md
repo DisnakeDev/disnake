@@ -71,7 +71,7 @@ Specific development aspects are further explained below.
 
 We use [PDM](https://pdm-project.org/) as our dependency manager. If it isn't already installed on your system, you can follow the installation steps [from PDM](https://pdm-project.org/latest/#installation) to get started.
 
-Once PDM is installed, use the following command to initialize a virtual environment, install the necessary development dependencies, and install the [`pre-commit`](#formatting) hooks.
+Once PDM is installed, use the following command to initialize a virtual environment, install the necessary development dependencies, and install the [`prek`](#formatting) hooks.
 
 ```sh
 $ pdm run setup_env
@@ -82,7 +82,7 @@ This will:
 - create `pdm.lock`
 - create a venv at `.venv`
 - install all dependences to `.venv`
-- install pre-commit hooks at `.git/hooks/pre-commit`
+- install prek hooks at `.git/hooks/pre-commit`
 
 Other tools used in this project include [ruff](https://docs.astral.sh/ruff) (formatter and linter), and [pyright](https://microsoft.github.io/pyright/#/) (type-checker). For the most part, these automatically run on every commit with no additional action required - see below for details.
 
@@ -112,9 +112,9 @@ Details about the specific commit types can be found on the [conventional commit
 
 This project follows PEP-8 guidelines (mostly) with a column limit of 100 characters, and uses the tools mentioned above to enforce a consistent coding style.
 
-The installed [`pre-commit`](https://pre-commit.com/) hooks will automatically run before every commit, which will format/lint the code
+The installed [`prek`](https://github.com/j178/prek) hooks will automatically run before every commit, which will format/lint the code
 to match the project's style. Note that you will have to stage and commit again if anything was updated!  
-Most of the time, running pre-commit will automatically fix any issues that arise.
+Most of the time, running prek will automatically fix any issues that arise.
 
 ### Pyright
 
@@ -174,4 +174,4 @@ $ nox -s dev
 ```
 
 > [!TIP]
-> To provide arguments to the selected sessions with `nox`, pass them **after** `--`. For example, to tell `pre-commit` to only run `ruff format`, run `nox -s lint -- ruff-format`.
+> To provide arguments to the selected sessions with `nox`, pass them **after** `--`. For example, to tell `prek` to only run `ruff format`, run `nox -s lint -- ruff-format`.
