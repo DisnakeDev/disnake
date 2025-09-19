@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable, List, Optional, Tuple, Type, Union
+from typing import TYPE_CHECKING, Any, Callable, List, Optional, Tuple, Union
 
 from disnake.errors import ClientException, DiscordException
 from disnake.utils import humanize_list
@@ -49,6 +49,7 @@ __all__ = (
     "BadInviteArgument",
     "EmojiNotFound",
     "GuildStickerNotFound",
+    "GuildSoundboardSoundNotFound",
     "GuildScheduledEventNotFound",
     "PartialEmojiConversionFailure",
     "BadBoolArgument",
@@ -499,6 +500,24 @@ class GuildStickerNotFound(BadArgument):
         super().__init__(f'Sticker "{argument}" not found.')
 
 
+class GuildSoundboardSoundNotFound(BadArgument):
+    """Exception raised when the bot can not find the soundboard sound.
+
+    This inherits from :exc:`BadArgument`
+
+    .. versionadded:: 2.10
+
+    Attributes
+    ----------
+    argument: :class:`str`
+        The soundboard sound supplied by the caller that was not found
+    """
+
+    def __init__(self, argument: str) -> None:
+        self.argument: str = argument
+        super().__init__(f'Soundboard sound "{argument}" not found.')
+
+
 class GuildScheduledEventNotFound(BadArgument):
     """Exception raised when the bot cannot find the scheduled event.
 
@@ -518,7 +537,7 @@ class GuildScheduledEventNotFound(BadArgument):
 
 
 class BadBoolArgument(BadArgument):
-    """Exception raised when a boolean argument was not convertable.
+    """Exception raised when a boolean argument was not convertible.
 
     This inherits from :exc:`BadArgument`
 
@@ -802,10 +821,10 @@ class BadUnionArgument(UserInputError):
     """
 
     def __init__(
-        self, param: Parameter, converters: Tuple[Type, ...], errors: List[CommandError]
+        self, param: Parameter, converters: Tuple[type, ...], errors: List[CommandError]
     ) -> None:
         self.param: Parameter = param
-        self.converters: Tuple[Type, ...] = converters
+        self.converters: Tuple[type, ...] = converters
         self.errors: List[CommandError] = errors
 
         def _get_name(x):

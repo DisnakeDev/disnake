@@ -7,8 +7,8 @@ import time
 from collections import deque
 from typing import TYPE_CHECKING, Any, Callable, Deque, Dict, Optional
 
-from disnake.abc import PrivateChannel
 from disnake.enums import Enum
+from disnake.member import Member
 
 from .errors import MaxConcurrencyReached
 
@@ -27,13 +27,25 @@ __all__ = (
 
 
 class BucketType(Enum):
+    """Specifies a type of bucket for, e.g. a cooldown."""
+
     default = 0
+    """The default bucket operates on a global basis."""
     user = 1
+    """The user bucket operates on a per-user basis."""
     guild = 2
+    """The guild bucket operates on a per-guild basis."""
     channel = 3
+    """The channel bucket operates on a per-channel basis."""
     member = 4
+    """The member bucket operates on a per-member basis."""
     category = 5
+    """The category bucket operates on a per-category basis."""
     role = 6
+    """The role bucket operates on a per-role basis.
+
+    .. versionadded:: 1.3
+    """
 
     def get_key(self, msg: Message) -> Any:
         if self is BucketType.user:
@@ -47,11 +59,11 @@ class BucketType(Enum):
         elif self is BucketType.category:
             return (msg.channel.category or msg.channel).id  # type: ignore
         elif self is BucketType.role:
-            # we return the channel id of a private-channel as there are only roles in guilds
-            # and that yields the same result as for a guild with only the @everyone role
-            # NOTE: PrivateChannel doesn't actually have an id attribute but we assume we are
-            # recieving a DMChannel or GroupChannel which inherit from PrivateChannel and do
-            return (msg.channel if isinstance(msg.channel, PrivateChannel) else msg.author.top_role).id  # type: ignore
+            # if author is not a Member we are in a private-channel context; returning its id
+            # yields the same result as for a guild with only the @everyone role
+            return (
+                msg.author.top_role if msg.guild and isinstance(msg.author, Member) else msg.channel
+            ).id
 
     def __call__(self, msg: Message) -> Any:
         return self.get_key(msg)

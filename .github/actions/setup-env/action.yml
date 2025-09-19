@@ -6,12 +6,6 @@ inputs:
   python-version:
     description: The python version to install
     required: true
-  cache-dependency-path:
-    description: The path(s) to use for pip caching, defaults to setup + pdm
-    required: false
-    default: |
-      pyproject.toml
-      setup.py
 outputs:
   python-version:
     description: The python version that was installed.
@@ -22,16 +16,12 @@ runs:
   steps:
     - name: Set up pdm with python ${{ inputs.python-version }}
       id: setup-python
-      uses: pdm-project/setup-pdm@v3
+      uses: pdm-project/setup-pdm@v4
       with:
+        allow-python-prereleases: true
         python-version: ${{ inputs.python-version }}
-        version: "2.4.6"
+        version: "2.20.1"  # last version to support python 3.8
         cache: false
-        cache-dependency-path: ${{ inputs.cache-dependency-path }}
-        enable-pep582: false  # Disable PEP 582 package loading globally
-      env:
-        # temporary fix, see https://github.com/pdm-project/pdm/issues/1894#issuecomment-1537126396
-        PDM_DEPS: 'urllib3<2'
 
     - name: Disable PDM version check
       shell: bash
@@ -43,10 +33,6 @@ runs:
       run: |
         echo "PDM_IGNORE_SAVED_PYTHON=1" >> $GITHUB_ENV
 
-    - name: Update pip, wheel, setuptools
-      shell: bash
-      run: python -m pip install -U pip wheel setuptools
-
     - name: Install nox
       shell: bash
       run: pip install nox
@@ -55,3 +41,6 @@ runs:
       id: python-version
       shell: bash
       run: echo "python-version=$(python -c 'import sys; print(".".join(map(str,sys.version_info[:2])))')" >> $GITHUB_OUTPUT
+
+    - name: Configure cache
+      uses: ./.github/actions/cache-pdm

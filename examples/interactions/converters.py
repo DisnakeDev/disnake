@@ -16,8 +16,7 @@ bot = commands.Bot(command_prefix=commands.when_mentioned)
 async def clean_command(
     inter: disnake.CommandInteraction[commands.Bot],
     text: str = commands.Param(converter=lambda inter, text: text.replace("@", "\\@")),
-):
-    ...
+): ...
 
 
 # Converters may also set the type of the option using annotations.
@@ -31,8 +30,7 @@ def avatar_converter(inter: disnake.CommandInteraction, user: disnake.User) -> s
 async def command_with_avatar(
     inter: disnake.CommandInteraction,
     avatar: str = commands.Param(converter=avatar_converter),
-):
-    ...
+): ...
 
 
 # Converting to custom classes is also very easy using class methods.
@@ -50,8 +48,7 @@ class SomeCustomClass:
 async def command_with_clsmethod(
     inter: disnake.CommandInteraction,
     some: SomeCustomClass = commands.Param(converter=SomeCustomClass.from_option),
-):
-    ...
+): ...
 
 
 # An even better approach is to register a method as the class converter,
@@ -72,8 +69,7 @@ class OtherCustomClass:
 async def command_with_convmethod(
     inter: disnake.CommandInteraction,
     other: OtherCustomClass,
-):
-    ...
+): ...
 
 
 @bot.event

@@ -9,7 +9,18 @@ import sys
 import warnings
 from dataclasses import dataclass
 from datetime import timedelta, timezone
-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, TypeVar, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Literal,
+    Optional,
+    Tuple,
+    TypeVar,
+    Union,
+)
 from unittest import mock
 
 import pytest
@@ -73,8 +84,7 @@ def test_copy_doc() -> None:
         ...
 
     @utils.copy_doc(func)
-    def func2(*args: Any, **kwargs: Any) -> Any:
-        ...
+    def func2(*args: Any, **kwargs: Any) -> Any: ...
 
     assert func2.__doc__ == func.__doc__
     assert inspect.signature(func) == inspect.signature(func2)
@@ -94,18 +104,46 @@ def test_deprecated(mock_warn: mock.Mock, instead, msg) -> None:
     mock_warn.assert_called_once_with(msg, stacklevel=3, category=DeprecationWarning)
 
 
+@mock.patch.object(utils, "_root_module_path", os.path.dirname(__file__))
+@pytest.mark.xfail(
+    sys.version_info < (3, 12),
+    raises=AssertionError,
+    strict=True,
+    reason="requires 3.12 functionality",
+)
+def test_deprecated_skip() -> None:
+    def func(n: int) -> None:
+        if n == 0:
+            utils.warn_deprecated("test", skip_internal_frames=True)
+        else:
+            func(n - 1)
+
+    with warnings.catch_warnings(record=True) as result:
+        # show a warning a couple frames deep
+        func(10)
+
+    # if we successfully skipped all frames in the current module,
+    # we should end up in the mock decorator's frame
+    assert len(result) == 1
+    assert result[0].filename == mock.__file__
+
+
 @pytest.mark.parametrize(
-    ("expected", "perms", "guild", "redirect", "scopes", "disable_select"),
+    ("params", "expected"),
     [
         (
+            {},
             {"scope": "bot"},
-            utils.MISSING,
-            utils.MISSING,
-            utils.MISSING,
-            utils.MISSING,
-            False,
         ),
         (
+            {
+                "permissions": disnake.Permissions(42),
+                "guild": disnake.Object(9999),
+                "redirect_uri": "http://endless.horse",
+                "scopes": ["bot", "applications.commands"],
+                "disable_guild_select": True,
+                "integration_type": 1,
+            },
             {
                 "scope": "bot applications.commands",
                 "permissions": "42",
@@ -113,24 +151,13 @@ def test_deprecated(mock_warn: mock.Mock, instead, msg) -> None:
                 "response_type": "code",
                 "redirect_uri": "http://endless.horse",
                 "disable_guild_select": "true",
+                "integration_type": "1",
             },
-            disnake.Permissions(42),
-            disnake.Object(9999),
-            "http://endless.horse",
-            ["bot", "applications.commands"],
-            True,
         ),
     ],
 )
-def test_oauth_url(expected, perms, guild, redirect, scopes, disable_select) -> None:
-    url = utils.oauth_url(
-        1234,
-        permissions=perms,
-        guild=guild,
-        redirect_uri=redirect,
-        scopes=scopes,
-        disable_guild_select=disable_select,
-    )
+def test_oauth_url(params, expected) -> None:
+    url = utils.oauth_url(1234, **params)
     assert dict(yarl.URL(url).query) == {"client_id": "1234", **expected}
 
 
@@ -242,31 +269,34 @@ def test_maybe_cast() -> None:
 @pytest.mark.parametrize(
     ("data", "expected_mime", "expected_ext"),
     [
-        (b"\x89\x50\x4E\x47\x0D\x0A\x1A\x0A", "image/png", ".png"),
-        (b"\xFF\xD8\xFFxxxJFIF", "image/jpeg", ".jpg"),
-        (b"\xFF\xD8\xFFxxxExif", "image/jpeg", ".jpg"),
-        (b"\xFF\xD8\xFFxxxxxxxxxxxx", "image/jpeg", ".jpg"),
+        (b"\x89\x50\x4e\x47\x0d\x0a\x1a\x0a", "image/png", ".png"),
+        (b"\xff\xd8\xffxxxJFIF", "image/jpeg", ".jpg"),
+        (b"\xff\xd8\xffxxxExif", "image/jpeg", ".jpg"),
+        (b"\xff\xd8\xffxxxxxxxxxxxx", "image/jpeg", ".jpg"),
         (b"xxxxxxJFIF", "image/jpeg", ".jpg"),
         (b"\x47\x49\x46\x38\x37\x61", "image/gif", ".gif"),
         (b"\x47\x49\x46\x38\x39\x61", "image/gif", ".gif"),
         (b"RIFFxxxxWEBP", "image/webp", ".webp"),
+        (b"ID3", "audio/mpeg", ".mp3"),
+        (b"\xff\xf3", "audio/mpeg", ".mp3"),
+        (b"OggS", "audio/ogg", ".ogg"),
     ],
 )
 def test_mime_type_valid(data, expected_mime, expected_ext) -> None:
-    for d in (data, data + b"\xFF"):
-        assert utils._get_mime_type_for_image(d) == expected_mime
-        assert utils._get_extension_for_image(d) == expected_ext
+    for d in (data, data + b"\xff"):
+        assert utils._get_mime_type_for_data(d) == expected_mime
+        assert utils._get_extension_for_data(d) == expected_ext
 
-    prefixed = b"\xFF" + data
-    with pytest.raises(ValueError, match=r"Unsupported image type given"):
-        utils._get_mime_type_for_image(prefixed)
-    assert utils._get_extension_for_image(prefixed) is None
+    prefixed = b"\xff" + data
+    with pytest.raises(ValueError, match=r"Unsupported file type provided"):
+        utils._get_mime_type_for_data(prefixed)
+    assert utils._get_extension_for_data(prefixed) is None
 
 
 @pytest.mark.parametrize(
     "data",
     [
-        b"\x89\x50\x4E\x47\x0D\x0A\x1A\xFF",  # invalid png end
+        b"\x89\x50\x4e\x47\x0d\x0a\x1a\xff",  # invalid png end
         b"\x47\x49\x46\x38\x38\x61",  # invalid gif version
         b"RIFFxxxxAAAA",
         b"AAAAxxxxWEBP",
@@ -274,9 +304,9 @@ def test_mime_type_valid(data, expected_mime, expected_ext) -> None:
     ],
 )
 def test_mime_type_invalid(data) -> None:
-    with pytest.raises(ValueError, match=r"Unsupported image type given"):
-        utils._get_mime_type_for_image(data)
-    assert utils._get_extension_for_image(data) is None
+    with pytest.raises(ValueError, match=r"Unsupported file type provided"):
+        utils._get_mime_type_for_data(data)
+    assert utils._get_extension_for_data(data) is None
 
 
 @pytest.mark.asyncio
@@ -479,18 +509,18 @@ def test_resolve_template(url, expected) -> None:
             # it's just meant to test several combinations
             "*hi* ~~a~ |aaa~*\\``\n`py x``` __uwu__ y",
             "hi a aaa\npy x uwu y",
-            r"\*hi\* \~\~a\~ \|aaa\~\*\\\`\`" "\n" r"\`py x\`\`\` \_\_uwu\_\_ y",
+            r"\*hi\* \~\~a\~ \|aaa\~\*\\\`\`" + "\n" + r"\`py x\`\`\` \_\_uwu\_\_ y",
         ),
         (
-            "aaaaa\n> h\n>> abc \n>>> te*st_",
-            "aaaaa\nh\n>> abc \ntest",
-            "aaaaa\n\\> h\n>> abc \n\\>>> te\\*st\\_",
+            "aaaaa\n> h\n>> abc \n>>> nay*ern_",
+            "aaaaa\nh\n>> abc \nnayern",
+            "aaaaa\n\\> h\n>> abc \n\\>>> nay\\*ern\\_",
         ),
         (
             "*h*\n> [li|nk](~~url~~) xyz **https://google.com/stuff?uwu=owo",
             "h\n xyz https://google.com/stuff?uwu=owo",
             # NOTE: currently doesn't escape inside `[x](y)`, should that be changed?
-            r"\*h\*" "\n" r"\> \[li|nk](~~url~~) xyz \*\*https://google.com/stuff?uwu=owo",
+            r"\*h\*" + "\n" + r"\> \[li|nk](~~url~~) xyz \*\*https://google.com/stuff?uwu=owo",
         ),
     ],
 )
@@ -587,8 +617,7 @@ def test_escape_mentions(text: str, expected) -> None:
     ],
 )
 def test_parse_docstring_desc(docstring: Optional[str], expected) -> None:
-    def f() -> None:
-        ...
+    def f() -> None: ...
 
     f.__doc__ = docstring
     assert utils.parse_docstring(f) == {
@@ -647,8 +676,7 @@ def test_parse_docstring_desc(docstring: Optional[str], expected) -> None:
     ],
 )
 def test_parse_docstring_param(docstring: str, expected) -> None:
-    def f() -> None:
-        ...
+    def f() -> None: ...
 
     f.__doc__ = docstring
     expected = {
@@ -727,7 +755,7 @@ def test_as_chunks_size(max_size: int) -> None:
         ([], ()),
         ([disnake.CommandInter, int, Optional[str]], (disnake.CommandInter, int, Optional[str])),
         # check flattening + deduplication (both of these are done automatically in 3.9.1+)
-        ([float, Literal[1, 2, Literal[3, 4]], Literal["a", "bc"]], (float, 1, 2, 3, 4, "a", "bc")),
+        ([float, Literal[1, 2, Literal[3, 4]], Literal["a", "bc"]], (float, 1, 2, 3, 4, "a", "bc")),  # noqa: RUF041
         ([Literal[1, 1, 2, 3, 3]], (1, 2, 3)),
     ],
 )
@@ -755,7 +783,7 @@ def test_normalise_optional_params(params, expected) -> None:
         # complex types
         (List[int], List[int], False),
         (Dict[float, "List[yarl.URL]"], Dict[float, List[yarl.URL]], True),
-        (Literal[1, Literal[False], "hi"], Literal[1, False, "hi"], False),
+        (Literal[1, Literal[False], "hi"], Literal[1, False, "hi"], False),  # noqa: RUF041
         # unions
         (Union[timezone, float], Union[timezone, float], False),
         (Optional[int], Optional[int], False),
@@ -788,31 +816,34 @@ def test_resolve_annotation_literal() -> None:
     with pytest.raises(
         TypeError, match=r"Literal arguments must be of type str, int, bool, or NoneType."
     ):
-        utils.resolve_annotation(Literal[timezone.utc, 3], globals(), locals(), {})  # type: ignore
+        utils.resolve_annotation(Literal[timezone.utc, 3], globals(), locals(), {})
+
+
+# declared here as `TypeAliasType` is only valid in class/module scopes
+if TYPE_CHECKING or sys.version_info >= (3, 12):
+    # this is equivalent to `type CoolList = List[int]`
+    CoolList = TypeAliasType("CoolList", List[int])
+
+    # this is equivalent to `type CoolList[T] = List[T]`
+    T = TypeVar("T")
+    CoolListGeneric = TypeAliasType("CoolListGeneric", List[T], type_params=(T,))
 
 
 @pytest.mark.skipif(sys.version_info < (3, 12), reason="syntax requires py3.12")
 class TestResolveAnnotationTypeAliasType:
     def test_simple(self) -> None:
-        # this is equivalent to `type CoolList = List[int]`
-        CoolList = TypeAliasType("CoolList", List[int])
-        assert utils.resolve_annotation(CoolList, globals(), locals(), {}) == List[int]
+        annotation = CoolList
+        assert utils.resolve_annotation(annotation, globals(), locals(), {}) == List[int]
 
     def test_generic(self) -> None:
-        # this is equivalent to `type CoolList[T] = List[T]; CoolList[int]`
-        T = TypeVar("T")
-        CoolList = TypeAliasType("CoolList", List[T], type_params=(T,))
-
-        annotation = CoolList[int]
+        annotation = CoolListGeneric[int]
         assert utils.resolve_annotation(annotation, globals(), locals(), {}) == List[int]
 
     # alias and arg in local scope
     def test_forwardref_local(self) -> None:
-        T = TypeVar("T")
         IntOrStr = Union[int, str]
-        CoolList = TypeAliasType("CoolList", List[T], type_params=(T,))
 
-        annotation = CoolList["IntOrStr"]
+        annotation = CoolListGeneric["IntOrStr"]
         assert utils.resolve_annotation(annotation, globals(), locals(), {}) == List[IntOrStr]
 
     # alias and arg in other module scope
@@ -950,8 +981,7 @@ def test_humanize_list(values, expected) -> None:
 
 # used for `test_signature_has_self_param`
 def _toplevel():
-    def inner() -> None:
-        ...
+    def inner() -> None: ...
 
     return inner
 
@@ -967,33 +997,27 @@ def decorator(f):
 # used for `test_signature_has_self_param`
 class _Clazz:
     def func(self):
-        def inner() -> None:
-            ...
+        def inner() -> None: ...
 
         return inner
 
     @classmethod
-    def cmethod(cls) -> None:
-        ...
+    def cmethod(cls) -> None: ...
 
     @staticmethod
-    def smethod() -> None:
-        ...
+    def smethod() -> None: ...
 
     class Nested:
         def func(self):
-            def inner() -> None:
-                ...
+            def inner() -> None: ...
 
             return inner
 
-    rebind = _toplevel
-
     @decorator
-    def decorated(self) -> None:
-        ...
+    def decorated(self) -> None: ...
 
-    _lambda = lambda: None
+    # we cannot stringify this file due to it testing annotation resolving
+    _lambda: Callable[["_Clazz"], None] = lambda _: None  # noqa: UP037
 
 
 @pytest.mark.parametrize(
@@ -1004,9 +1028,6 @@ class _Clazz:
         # methods in class
         (_Clazz.func, True),
         (_Clazz().func, False),
-        # unfortunately doesn't work
-        (_Clazz.rebind, False),
-        (_Clazz().rebind, False),
         # classmethod/staticmethod isn't supported, but checked to ensure consistency
         (_Clazz.cmethod, False),
         (_Clazz.smethod, True),

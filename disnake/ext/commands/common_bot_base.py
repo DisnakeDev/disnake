@@ -21,10 +21,7 @@ from .cog import Cog
 
 if TYPE_CHECKING:
     from ._types import CoroFunc
-    from .bot import AutoShardedBot, AutoShardedInteractionBot, Bot, InteractionBot
     from .help import HelpCommand
-
-    AnyBot = Union[Bot, AutoShardedBot, InteractionBot, AutoShardedInteractionBot]
 
 __all__ = ("CommonBotBase",)
 _log = logging.getLogger(__name__)
@@ -162,6 +159,10 @@ class CommonBotBase(Generic[CogT]):
 
         A cog is a class that has its own event listeners and commands.
 
+        This automatically re-syncs application commands, provided that
+        :attr:`command_sync_flags.sync_on_cog_actions <.CommandSyncFlags.sync_on_cog_actions>`
+        isn't disabled.
+
         .. versionchanged:: 2.0
 
             :exc:`.ClientException` is raised when a cog with the same name
@@ -227,6 +228,10 @@ class CommonBotBase(Generic[CogT]):
         cog has registered will be removed as well.
 
         If no cog is found then this method has no effect.
+
+        This automatically re-syncs application commands, provided that
+        :attr:`command_sync_flags.sync_on_cog_actions <.CommandSyncFlags.sync_on_cog_actions>`
+        isn't disabled.
 
         Parameters
         ----------

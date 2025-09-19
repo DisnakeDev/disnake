@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, ClassVar, List
 
 from docutils import nodes
 from docutils.parsers.rst import Directive, directives
@@ -20,7 +20,7 @@ class collapse(nodes.General, nodes.Element):
 
 def visit_collapse_node(self: HTMLTranslator, node: nodes.Element) -> None:
     attrs = {"open": ""} if node["open"] else {}
-    self.body.append(self.starttag(node, "details", **attrs))
+    self.body.append(self.starttag(node, "details", **attrs))  # type: ignore[reportArgumentType]
     self.body.append("<summary></summary>")
 
 
@@ -36,7 +36,7 @@ class CollapseDirective(Directive):
 
     option_spec: ClassVar[OptionSpec] = {"open": directives.flag}
 
-    def run(self):
+    def run(self) -> List[collapse]:
         self.assert_has_content()
         node = collapse(
             "\n".join(self.content),

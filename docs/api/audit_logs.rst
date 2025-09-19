@@ -282,10 +282,10 @@ AuditLogDiff
 
     .. attribute:: topic
 
-        The topic of a :class:`TextChannel`, :class:`StageChannel`, :class:`StageInstance` or :class:`ForumChannel`.
+        The topic of a :class:`TextChannel`, :class:`StageChannel`, :class:`StageInstance`, :class:`ForumChannel` or :class:`MediaChannel`.
 
         See also :attr:`TextChannel.topic`, :attr:`StageChannel.topic`,
-        :attr:`StageInstance.topic` or :attr:`ForumChannel.topic`.
+        :attr:`StageInstance.topic`, :attr:`ForumChannel.topic` or :attr:`MediaChannel.topic`.
 
         :type: :class:`str`
 
@@ -467,7 +467,7 @@ AuditLogDiff
 
         See also :attr:`TextChannel.slowmode_delay`, :attr:`VoiceChannel.slowmode_delay`,
         :attr:`StageChannel.slowmode_delay`, :attr:`ForumChannel.slowmode_delay`,
-        or :attr:`Thread.slowmode_delay`.
+        :attr:`MediaChannel.slowmode_delay` or :attr:`Thread.slowmode_delay`.
 
         :type: :class:`int`
 
@@ -476,8 +476,9 @@ AuditLogDiff
         The default number of seconds members have to wait before
         sending another message in new threads created in the channel.
 
-        See also :attr:`TextChannel.default_thread_slowmode_delay` or
-        :attr:`ForumChannel.default_thread_slowmode_delay`.
+        See also :attr:`TextChannel.default_thread_slowmode_delay`,
+        :attr:`ForumChannel.default_thread_slowmode_delay` or
+        :attr:`MediaChannel.default_thread_slowmode_delay`.
 
         :type: :class:`int`
 
@@ -510,7 +511,7 @@ AuditLogDiff
 
         Whether the channel is marked as "not safe for work".
 
-        See also :attr:`TextChannel.nsfw`, :attr:`VoiceChannel.nsfw`, :attr:`StageChannel.nsfw`, or :attr:`ForumChannel.nsfw`.
+        See also :attr:`TextChannel.nsfw`, :attr:`VoiceChannel.nsfw`, :attr:`StageChannel.nsfw`, :attr:`ForumChannel.nsfw` or :attr:`MediaChannel.nsfw`.
 
         :type: :class:`bool`
 
@@ -524,11 +525,15 @@ AuditLogDiff
 
     .. attribute:: emoji
 
-        The name of the sticker's or role's emoji being changed.
+        For stickers or roles, the emoji name of the target being changed
+        (this will be of type :class:`str`).
 
-        See also :attr:`GuildSticker.emoji` or :attr:`Role.emoji`.
+        For soundboard sounds, the associated emoji of the target being changed
+        (this will be of type Optional[Union[:class:`Emoji`, :class:`PartialEmoji`]]).
 
-        :type: :class:`str`
+        See also :attr:`GuildSticker.emoji`, :attr:`Role.emoji`, or :attr:`GuildSoundboardSound.emoji`.
+
+        :type: Union[:class:`str`, Optional[Union[:class:`Emoji`, :class:`PartialEmoji`]]]
 
     .. attribute:: description
 
@@ -687,7 +692,7 @@ AuditLogDiff
 
     .. attribute:: applied_tags
 
-        The tags applied to a thread in a forum channel being changed.
+        The tags applied to a thread in a forum/media channel being changed.
 
         If a tag is not found, then it is an :class:`Object` with the ID
         being set.
@@ -696,13 +701,13 @@ AuditLogDiff
 
     .. attribute:: available_tags
 
-        The available tags for threads in a forum channel being changed.
+        The available tags for threads in a forum/media channel being changed.
 
         :type: List[:class:`ForumTag`]
 
     .. attribute:: default_reaction
 
-        The default emoji shown for reacting to threads in a forum channel being changed.
+        The default emoji shown for reacting to threads in a forum/media channel being changed.
 
         Due to a Discord limitation, this will have an empty
         :attr:`~PartialEmoji.name` if it is a custom :class:`PartialEmoji`.
@@ -711,9 +716,15 @@ AuditLogDiff
 
     .. attribute:: default_sort_order
 
-        The default sort order of threads in a forum channel being changed.
+        The default sort order of threads in a forum/media channel being changed.
 
         :type: Optional[:class:`ThreadSortOrder`]
+
+    .. attribute:: volume
+
+        The volume of a soundboard sound being changed.
+
+        :type: :class:`float`
 
 Enumerations
 ------------
@@ -860,9 +871,8 @@ AuditLogAction
 
         When this is the action, the type of :attr:`~AuditLogEntry.extra` is
         either a :class:`Role` or :class:`Member`. If the object is not found
-        then it is a :class:`Object` with an ID being filled, a name, and a
-        ``type`` attribute set to either ``'role'`` or ``'member'`` to help
-        dictate what type of ID it is.
+        then it is a :class:`Object` with an ID being filled, additionally if the object
+        refers to a role then the :class:`Object` has also a ``name`` attribute.
 
         Possible attributes for :class:`AuditLogDiff`:
 
@@ -1585,6 +1595,44 @@ AuditLogAction
         .. versionchanged:: 2.6
             Added support for :class:`PartialIntegration`, and added ``integration`` to :attr:`~AuditLogEntry.extra`.
 
+    .. attribute:: soundboard_sound_create
+
+        A soundboard sound was created.
+
+        Possible attributes for :class:`AuditLogDiff`:
+
+        - :attr:`~AuditLogDiff.id`
+        - :attr:`~AuditLogDiff.name`
+        - :attr:`~AuditLogDiff.volume`
+        - :attr:`~AuditLogDiff.emoji`
+
+        .. versionadded:: 2.10
+
+    .. attribute:: soundboard_sound_update
+
+        A soundboard sound was updated.
+
+        Possible attributes for :class:`AuditLogDiff`:
+
+        - :attr:`~AuditLogDiff.name`
+        - :attr:`~AuditLogDiff.volume`
+        - :attr:`~AuditLogDiff.emoji`
+
+        .. versionadded:: 2.10
+
+    .. attribute:: soundboard_sound_delete
+
+        A soundboard sound was deleted.
+
+        Possible attributes for :class:`AuditLogDiff`:
+
+        - :attr:`~AuditLogDiff.id`
+        - :attr:`~AuditLogDiff.name`
+        - :attr:`~AuditLogDiff.volume`
+        - :attr:`~AuditLogDiff.emoji`
+
+        .. versionadded:: 2.10
+
     .. attribute:: automod_rule_create
 
         An auto moderation rule was created.
@@ -1691,6 +1739,19 @@ AuditLogAction
 
         .. versionadded:: 2.6
 
+    .. attribute:: automod_quarantine_user
+
+        A member was quarantined by auto moderation.
+
+        When this is the action, the type of :attr:`~AuditLogEntry.target` is
+        the :class:`Member` or :class:`User` who was quarantined.
+        If the user is not found then it is a :class:`Object` with the user's ID.
+
+        See :attr:`automod_block_message` for more information on how the
+        :attr:`~AuditLogEntry.extra` field is set.
+
+        .. versionadded:: 2.11
+
     .. attribute:: creator_monetization_request_created
 
         A creator monetization request was created.
@@ -1706,23 +1767,8 @@ AuditLogAction
 AuditLogActionCategory
 ~~~~~~~~~~~~~~~~~~~~~~
 
-.. class:: AuditLogActionCategory
-
-    Represents the category that the :class:`AuditLogAction` belongs to.
-
-    This can be retrieved via :attr:`AuditLogEntry.category`.
-
-    .. attribute:: create
-
-        The action is the creation of something.
-
-    .. attribute:: delete
-
-        The action is the deletion of something.
-
-    .. attribute:: update
-
-        The action is the update of something.
+.. autoclass:: AuditLogActionCategory()
+    :members:
 
 Events
 ------

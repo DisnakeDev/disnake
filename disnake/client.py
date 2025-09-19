@@ -8,7 +8,6 @@ import signal
 import sys
 import traceback
 import types
-import warnings
 from datetime import datetime, timedelta
 from errno import ECONNRESET
 from typing import (
@@ -33,7 +32,7 @@ from typing import (
 
 import aiohttp
 
-from . import utils
+from . import abc, utils
 from .activity import ActivityTypes, BaseActivity, create_activity
 from .app_commands import (
     APIMessageCommand,
@@ -47,6 +46,7 @@ from .application_role_connection import ApplicationRoleConnectionMetadata
 from .backoff import ExponentialBackoff
 from .channel import PartialMessageable, _threaded_channel_factory
 from .emoji import Emoji
+from .entitlement import Entitlement
 from .enums import ApplicationCommandType, ChannelType, Event, Status
 from .errors import (
     ConnectionClosed,
@@ -63,9 +63,11 @@ from .guild_preview import GuildPreview
 from .http import HTTPClient
 from .i18n import LocalizationProtocol, LocalizationStore
 from .invite import Invite
-from .iterators import GuildIterator
+from .iterators import EntitlementIterator, GuildIterator
 from .mentions import AllowedMentions
 from .object import Object
+from .sku import SKU
+from .soundboard import GuildSoundboardSound, SoundboardSound
 from .stage_instance import StageInstance
 from .state import ConnectionState
 from .sticker import GuildSticker, StandardSticker, StickerPack, _sticker_factory
@@ -83,7 +85,7 @@ if TYPE_CHECKING:
     from typing_extensions import NotRequired
 
     from .abc import GuildChannel, PrivateChannel, Snowflake, SnowflakeTime
-    from .app_commands import APIApplicationCommand
+    from .app_commands import APIApplicationCommand, MessageCommand, SlashCommand, UserCommand
     from .asset import AssetBytes
     from .channel import DMChannel
     from .member import Member
@@ -237,8 +239,8 @@ class Client:
             Allow disabling the message cache and change the default size to ``1000``.
     loop: Optional[:class:`asyncio.AbstractEventLoop`]
         The :class:`asyncio.AbstractEventLoop` to use for asynchronous operations.
-        Defaults to ``None``, in which case the default event loop is used via
-        :func:`asyncio.get_event_loop()`.
+        Defaults to ``None``, in which case the current event loop is
+        used, or a new loop is created if there is none.
     asyncio_debug: :class:`bool`
         Whether to enable asyncio debugging when the client starts.
         Defaults to False.
@@ -404,9 +406,7 @@ class Client:
         self.ws: DiscordWebSocket = None  # type: ignore
 
         if loop is None:
-            with warnings.catch_warnings():
-                warnings.simplefilter("ignore", DeprecationWarning)
-                self.loop: asyncio.AbstractEventLoop = asyncio.get_event_loop()
+            self.loop: asyncio.AbstractEventLoop = utils.get_event_loop()
         else:
             self.loop: asyncio.AbstractEventLoop = loop
 
@@ -422,12 +422,14 @@ class Client:
             loop=self.loop,
         )
 
-        self._handlers: Dict[str, Callable] = {
+        self._handlers: Dict[str, Callable[..., Any]] = {
             "ready": self._handle_ready,
             "connect_internal": self._handle_first_connect,
         }
 
-        self._hooks: Dict[str, Callable] = {"before_identify": self._call_before_identify_hook}
+        self._hooks: Dict[str, Callable[..., Any]] = {
+            "before_identify": self._call_before_identify_hook
+        }
 
         self._enable_debug_events: bool = enable_debug_events
         self._enable_gateway_error_handler: bool = enable_gateway_error_handler
@@ -570,6 +572,14 @@ class Client:
         return self._connection.stickers
 
     @property
+    def soundboard_sounds(self) -> List[GuildSoundboardSound]:
+        """List[:class:`.GuildSoundboardSound`]: The soundboard sounds that the connected client has.
+
+        .. versionadded:: 2.10
+        """
+        return self._connection.soundboard_sounds
+
+    @property
     def cached_messages(self) -> Sequence[Message]:
         """Sequence[:class:`.Message`]: Read-only list of messages the connected client has cached.
 
@@ -666,12 +676,10 @@ class Client:
     @overload
     async def get_or_fetch_user(
         self, user_id: int, *, strict: Literal[False] = ...
-    ) -> Optional[User]:
-        ...
+    ) -> Optional[User]: ...
 
     @overload
-    async def get_or_fetch_user(self, user_id: int, *, strict: Literal[True]) -> User:
-        ...
+    async def get_or_fetch_user(self, user_id: int, *, strict: Literal[True]) -> User: ...
 
     async def get_or_fetch_user(self, user_id: int, *, strict: bool = False) -> Optional[User]:
         """|coro|
@@ -831,7 +839,7 @@ class Client:
             else (name if isinstance(name, str) else f"on_{name.value}")
         )
 
-        if not asyncio.iscoroutinefunction(func):
+        if not utils.iscoroutinefunction(func):
             raise TypeError("Listeners must be coroutines")
 
         if name_ in self.extra_events:
@@ -1270,7 +1278,12 @@ class Client:
 
             This function must be the last function to call due to the fact that it
             is blocking. That means that registration of events or anything being
-            called after this function call will not execute until it returns.
+            called after this function call will not execute until it returns
+
+        Parameters
+        ----------
+        token: :class:`str`
+            The discord token of the bot that is being ran.
         """
         loop = self.loop
 
@@ -1333,7 +1346,7 @@ class Client:
             raise TypeError("activity must derive from BaseActivity.")
 
     @property
-    def status(self):
+    def status(self) -> Status:
         """:class:`.Status`: The status being used upon logging on to Discord.
 
         .. versionadded:: 2.0
@@ -1494,7 +1507,7 @@ class Client:
 
         .. note::
 
-            To retrieve standard stickers, use :meth:`.fetch_sticker`.
+            To retrieve standard stickers, use :meth:`.fetch_sticker`
             or :meth:`.fetch_sticker_packs`.
 
         Returns
@@ -1503,6 +1516,22 @@ class Client:
             The sticker or ``None`` if not found.
         """
         return self._connection.get_sticker(id)
+
+    def get_soundboard_sound(self, id: int, /) -> Optional[GuildSoundboardSound]:
+        """Returns a guild soundboard sound with the given ID.
+
+        .. versionadded:: 2.10
+
+        .. note::
+
+            To retrieve standard soundboard sounds, use :meth:`.fetch_default_soundboard_sounds`.
+
+        Returns
+        -------
+        Optional[:class:`.GuildSoundboardSound`]
+            The soundboard sound or ``None`` if not found.
+        """
+        return self._connection.get_soundboard_sound(id)
 
     def get_all_channels(self) -> Generator[GuildChannel, None, None]:
         """A generator that retrieves every :class:`.abc.GuildChannel` the client can 'access'.
@@ -1836,7 +1865,7 @@ class Client:
         TypeError
             The coroutine passed is not actually a coroutine.
         """
-        if not asyncio.iscoroutinefunction(coro):
+        if not utils.iscoroutinefunction(coro):
             raise TypeError("event registered must be a coroutine function")
 
         setattr(self, coro.__name__, coro)
@@ -1916,8 +1945,8 @@ class Client:
 
         .. note::
 
-            Using this, you will only receive :attr:`.Guild.owner`, :attr:`.Guild.icon`,
-            :attr:`.Guild.id`, and :attr:`.Guild.name` per :class:`.Guild`.
+            Using this, you will only receive :attr:`.Guild.id`, :attr:`.Guild.name`,
+            :attr:`.Guild.features`, :attr:`.Guild.icon`, and :attr:`.Guild.banner` per :class:`.Guild`.
 
         .. note::
 
@@ -2204,8 +2233,8 @@ class Client:
         url: Union[Invite, str],
         *,
         with_counts: bool = True,
-        with_expiration: bool = True,
         guild_scheduled_event_id: Optional[int] = None,
+        with_expiration: bool = False,
     ) -> Invite:
         """|coro|
 
@@ -2225,12 +2254,6 @@ class Client:
             Whether to include count information in the invite. This fills the
             :attr:`.Invite.approximate_member_count` and :attr:`.Invite.approximate_presence_count`
             fields.
-        with_expiration: :class:`bool`
-            Whether to include the expiration date of the invite. This fills the
-            :attr:`.Invite.expires_at` field.
-
-            .. versionadded:: 2.0
-
         guild_scheduled_event_id: :class:`int`
             The ID of the scheduled event to include in the invite.
             If not provided, defaults to the ``event`` parameter in the URL if it exists,
@@ -2250,6 +2273,14 @@ class Client:
         :class:`.Invite`
             The invite from the URL/ID.
         """
+        if with_expiration:
+            utils.warn_deprecated(
+                "Using the `with_expiration` argument is deprecated and will "
+                "result in an error in future versions. "
+                "The `expires_at` field is always included now.",
+                stacklevel=2,
+            )
+
         invite_id, params = utils.resolve_invite(url, with_params=True)
 
         if not guild_scheduled_event_id:
@@ -2262,7 +2293,6 @@ class Client:
         data = await self.http.get_invite(
             invite_id,
             with_counts=with_counts,
-            with_expiration=with_expiration,
             guild_scheduled_event_id=guild_scheduled_event_id,
         )
         return Invite.from_incomplete(state=self._connection, data=data)
@@ -2350,6 +2380,26 @@ class Client:
         data = await self.http.get_widget(guild_id)
         return Widget(state=self._connection, data=data)
 
+    async def fetch_default_soundboard_sounds(self) -> List[SoundboardSound]:
+        """|coro|
+
+        Retrieves the list of default :class:`.SoundboardSound`\\s provided by Discord.
+
+        .. versionadded:: 2.10
+
+        Raises
+        ------
+        HTTPException
+            Retrieving the soundboard sounds failed.
+
+        Returns
+        -------
+        List[:class:`.SoundboardSound`]
+            The default soundboard sounds.
+        """
+        data = await self.http.get_default_soundboard_sounds()
+        return [SoundboardSound(data=d, state=self._connection) for d in data]
+
     async def application_info(self) -> AppInfo:
         """|coro|
 
@@ -2366,9 +2416,96 @@ class Client:
             The bot's application information.
         """
         data = await self.http.application_info()
-        if "rpc_origins" not in data:
-            data["rpc_origins"] = None
         return AppInfo(self._connection, data)
+
+    async def fetch_application_emoji(self, emoji_id: int) -> Emoji:
+        """|coro|
+
+        Retrieves an application level :class:`~disnake.Emoji` based on its ID.
+
+        .. versionadded:: |vnext|
+
+        Parameters
+        ----------
+        emoji_id: :class:`int`
+            The ID of the emoji to retrieve.
+
+        Raises
+        ------
+        NotFound
+            The app emoji couldn't be found.
+        Forbidden
+            You are not allowed to get the app emoji.
+
+        Returns
+        -------
+        :class:`.Emoji`
+            The application emoji you requested.
+        """
+        data = await self.http.get_app_emoji(self.application_id, emoji_id)
+        return Emoji(guild=None, state=self._connection, data=data)
+
+    async def create_application_emoji(self, *, name: str, image: AssetBytes) -> Emoji:
+        """|coro|
+
+        Creates an application emoji.
+
+        .. versionadded:: |vnext|
+
+        Parameters
+        ----------
+        name: :class:`str`
+            The emoji name. Must be at least 2 characters.
+        image: |resource_type|
+            The image data of the emoji.
+            Only JPG, PNG and GIF images are supported.
+
+        Raises
+        ------
+        NotFound
+            The ``image`` asset couldn't be found.
+        Forbidden
+            You are not allowed to create app emojis.
+        HTTPException
+            An error occurred creating an app emoji.
+        TypeError
+            The ``image`` asset is a lottie sticker (see :func:`Sticker.read <disnake.Sticker.read>`).
+        ValueError
+            Wrong image format passed for ``image``.
+
+        Returns
+        -------
+        :class:`.Emoji`
+            The newly created application emoji.
+        """
+        img = await utils._assetbytes_to_base64_data(image)
+        data = await self.http.create_app_emoji(self.application_id, name, img)
+        return Emoji(guild=None, state=self._connection, data=data)
+
+    async def fetch_application_emojis(self) -> List[Emoji]:
+        """|coro|
+
+        Retrieves all the :class:`.Emoji` of the application.
+
+        ..  versionadded:: |vnext|
+
+        Raises
+        ------
+        NotFound
+            The app emojis for this application ID couldn't be found.
+        Forbidden
+            You are not allowed to get app emojis.
+
+        Returns
+        -------
+        List[:class:`.Emoji`]
+            The list of application emojis you requested.
+        """
+        data = await self.http.get_all_app_emojis(self.application_id)
+        return [
+            Emoji(guild=None, state=self._connection, data=emoji_data)
+            for emoji_data in data["items"]
+        ]
 
     async def fetch_user(self, user_id: int, /) -> User:
         """|coro|
@@ -2509,6 +2646,33 @@ class Client:
         data = await self.http.get_sticker(sticker_id)
         cls, _ = _sticker_factory(data["type"])  # type: ignore
         return cls(state=self._connection, data=data)  # type: ignore
+
+    async def fetch_sticker_pack(self, pack_id: int, /) -> StickerPack:
+        """|coro|
+
+        Retrieves a :class:`.StickerPack` with the given ID.
+
+        .. versionadded:: 2.10
+
+        Parameters
+        ----------
+        pack_id: :class:`int`
+            The ID of the sticker pack to retrieve.
+
+        Raises
+        ------
+        HTTPException
+            Retrieving the sticker pack failed.
+        NotFound
+            Invalid sticker pack ID.
+
+        Returns
+        -------
+        :class:`.StickerPack`
+            The sticker pack you requested.
+        """
+        data = await self.http.get_sticker_pack(pack_id)
+        return StickerPack(state=self._connection, data=data)
 
     async def fetch_sticker_packs(self) -> List[StickerPack]:
         """|coro|
@@ -2658,6 +2822,22 @@ class Client:
         """
         return await self._connection.fetch_global_command(command_id)
 
+    @overload
+    async def create_global_command(self, application_command: SlashCommand) -> APISlashCommand: ...
+
+    @overload
+    async def create_global_command(self, application_command: UserCommand) -> APIUserCommand: ...
+
+    @overload
+    async def create_global_command(
+        self, application_command: MessageCommand
+    ) -> APIMessageCommand: ...
+
+    @overload
+    async def create_global_command(
+        self, application_command: ApplicationCommand
+    ) -> APIApplicationCommand: ...
+
     async def create_global_command(
         self, application_command: ApplicationCommand
     ) -> APIApplicationCommand:
@@ -2679,6 +2859,26 @@ class Client:
         """
         application_command.localize(self.i18n)
         return await self._connection.create_global_command(application_command)
+
+    @overload
+    async def edit_global_command(
+        self, command_id: int, new_command: SlashCommand
+    ) -> APISlashCommand: ...
+
+    @overload
+    async def edit_global_command(
+        self, command_id: int, new_command: UserCommand
+    ) -> APIUserCommand: ...
+
+    @overload
+    async def edit_global_command(
+        self, command_id: int, new_command: MessageCommand
+    ) -> APIMessageCommand: ...
+
+    @overload
+    async def edit_global_command(
+        self, command_id: int, new_command: ApplicationCommand
+    ) -> APIApplicationCommand: ...
 
     async def edit_global_command(
         self, command_id: int, new_command: ApplicationCommand
@@ -2794,6 +2994,26 @@ class Client:
         """
         return await self._connection.fetch_guild_command(guild_id, command_id)
 
+    @overload
+    async def create_guild_command(
+        self, guild_id: int, application_command: SlashCommand
+    ) -> APISlashCommand: ...
+
+    @overload
+    async def create_guild_command(
+        self, guild_id: int, application_command: UserCommand
+    ) -> APIUserCommand: ...
+
+    @overload
+    async def create_guild_command(
+        self, guild_id: int, application_command: MessageCommand
+    ) -> APIMessageCommand: ...
+
+    @overload
+    async def create_guild_command(
+        self, guild_id: int, application_command: ApplicationCommand
+    ) -> APIApplicationCommand: ...
+
     async def create_guild_command(
         self, guild_id: int, application_command: ApplicationCommand
     ) -> APIApplicationCommand:
@@ -2817,6 +3037,26 @@ class Client:
         """
         application_command.localize(self.i18n)
         return await self._connection.create_guild_command(guild_id, application_command)
+
+    @overload
+    async def edit_guild_command(
+        self, guild_id: int, command_id: int, new_command: SlashCommand
+    ) -> APISlashCommand: ...
+
+    @overload
+    async def edit_guild_command(
+        self, guild_id: int, command_id: int, new_command: UserCommand
+    ) -> APIUserCommand: ...
+
+    @overload
+    async def edit_guild_command(
+        self, guild_id: int, command_id: int, new_command: MessageCommand
+    ) -> APIMessageCommand: ...
+
+    @overload
+    async def edit_guild_command(
+        self, guild_id: int, command_id: int, new_command: ApplicationCommand
+    ) -> APIApplicationCommand: ...
 
     async def edit_guild_command(
         self, guild_id: int, command_id: int, new_command: ApplicationCommand
@@ -2854,7 +3094,7 @@ class Client:
         Parameters
         ----------
         guild_id: :class:`int`
-            The ID of the guild where the applcation command should be deleted.
+            The ID of the guild where the application command should be deleted.
         command_id: :class:`int`
             The ID of the application command to delete.
         """
@@ -2989,3 +3229,171 @@ class Client:
             self.application_id, payload
         )
         return [ApplicationRoleConnectionMetadata._from_data(record) for record in data]
+
+    async def skus(self) -> List[SKU]:
+        """|coro|
+
+        Retrieves the :class:`.SKU`\\s for the application.
+
+        To manage application subscription entitlements, you should use the SKU
+        with :attr:`.SKUType.subscription` (not the :attr:`~.SKUType.subscription_group` one).
+
+        .. versionadded:: 2.10
+
+        Raises
+        ------
+        HTTPException
+            Retrieving the SKUs failed.
+
+        Returns
+        -------
+        List[:class:`.SKU`]
+            The list of SKUs.
+        """
+        data = await self.http.get_skus(self.application_id)
+        return [SKU(data=d, state=self._connection) for d in data]
+
+    def entitlements(
+        self,
+        *,
+        limit: Optional[int] = 100,
+        before: Optional[SnowflakeTime] = None,
+        after: Optional[SnowflakeTime] = None,
+        user: Optional[Snowflake] = None,
+        guild: Optional[Snowflake] = None,
+        skus: Optional[Sequence[Snowflake]] = None,
+        exclude_ended: bool = False,
+        exclude_deleted: bool = True,
+        oldest_first: bool = False,
+    ) -> EntitlementIterator:
+        """Retrieves an :class:`.AsyncIterator` that enables receiving entitlements for the application.
+
+        .. note::
+
+            This method is an API call. To get the entitlements of the invoking user/guild
+            in interactions, consider using :attr:`.Interaction.entitlements`.
+
+        Entries are returned in order from newest to oldest by default;
+        pass ``oldest_first=True`` to reverse the iteration order.
+
+        All parameters are optional.
+
+        .. versionadded:: 2.10
+
+        Parameters
+        ----------
+        limit: Optional[:class:`int`]
+            The number of entitlements to retrieve.
+            If ``None``, retrieves every entitlement.
+            Note, however, that this would make it a slow operation.
+            Defaults to ``100``.
+        before: Union[:class:`.abc.Snowflake`, :class:`datetime.datetime`]
+            Retrieves entitlements created before this date or object.
+            If a datetime is provided, it is recommended to use a UTC aware datetime.
+            If the datetime is naive, it is assumed to be local time.
+        after: Union[:class:`.abc.Snowflake`, :class:`datetime.datetime`]
+            Retrieve entitlements created after this date or object.
+            If a datetime is provided, it is recommended to use a UTC aware datetime.
+            If the datetime is naive, it is assumed to be local time.
+        user: Optional[:class:`.abc.Snowflake`]
+            The user to retrieve entitlements for.
+        guild: Optional[:class:`.abc.Snowflake`]
+            The guild to retrieve entitlements for.
+        skus: Optional[Sequence[:class:`.abc.Snowflake`]]
+            The SKUs for which entitlements are retrieved.
+        exclude_ended: :class:`bool`
+            Whether to exclude ended/expired entitlements. Defaults to ``False``.
+        exclude_deleted: :class:`bool`
+            Whether to exclude deleted entitlements. Defaults to ``True``.
+        oldest_first: :class:`bool`
+            If set to ``True``, return entries in oldest->newest order. Defaults to ``False``.
+
+        Raises
+        ------
+        HTTPException
+            Retrieving the entitlements failed.
+
+        Yields
+        ------
+        :class:`.Entitlement`
+            The entitlements for the given parameters.
+        """
+        return EntitlementIterator(
+            self.application_id,
+            state=self._connection,
+            limit=limit,
+            before=before,
+            after=after,
+            user_id=user.id if user is not None else None,
+            guild_id=guild.id if guild is not None else None,
+            sku_ids=[sku.id for sku in skus] if skus else None,
+            exclude_ended=exclude_ended,
+            exclude_deleted=exclude_deleted,
+            oldest_first=oldest_first,
+        )
+
+    async def fetch_entitlement(self, entitlement_id: int, /) -> Entitlement:
+        """|coro|
+
+        Retrieves a :class:`.Entitlement` for the given ID.
+
+        .. note::
+
+            This method is an API call. To get the entitlements of the invoking user/guild
+            in interactions, consider using :attr:`.Interaction.entitlements`.
+
+        .. versionadded:: 2.10
+
+        Parameters
+        ----------
+        entitlement_id: :class:`int`
+            The ID of the entitlement to retrieve.
+
+        Raises
+        ------
+        HTTPException
+            Retrieving the entitlement failed.
+
+        Returns
+        -------
+        :class:`.Entitlement`
+            The retrieved entitlement.
+        """
+        data = await self.http.get_entitlement(self.application_id, entitlement_id=entitlement_id)
+        return Entitlement(data=data, state=self._connection)
+
+    async def create_entitlement(
+        self, sku: Snowflake, owner: Union[abc.User, Guild]
+    ) -> Entitlement:
+        """|coro|
+
+        Creates a new test :class:`.Entitlement` for the given user or guild, with no expiry.
+
+        .. note::
+            This is only meant to be used with subscription SKUs. To test one-time purchases,
+            use Application Test Mode.
+
+        Parameters
+        ----------
+        sku: :class:`.abc.Snowflake`
+            The :class:`.SKU` to grant the entitlement for.
+        owner: Union[:class:`.abc.User`, :class:`.Guild`]
+            The user or guild to grant the entitlement to.
+
+        Raises
+        ------
+        HTTPException
+            Creating the entitlement failed.
+
+        Returns
+        -------
+        :class:`.Entitlement`
+            The newly created entitlement.
+        """
+        data = await self.http.create_test_entitlement(
+            self.application_id,
+            sku_id=sku.id,
+            owner_id=owner.id,
+            owner_type=2 if isinstance(owner, abc.User) else 1,
+        )
+        return Entitlement(data=data, state=self._connection)
