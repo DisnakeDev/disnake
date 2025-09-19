@@ -60,6 +60,9 @@ __all__ = (
     "GuildScheduledEventEntityType",
     "GuildScheduledEventStatus",
     "GuildScheduledEventPrivacyLevel",
+    "GuildScheduledEventFrequency",
+    "GuildScheduledEventWeekday",
+    "GuildScheduledEventMonth",
     "ThreadArchiveDuration",
     "WidgetStyle",
     "Locale",
@@ -1523,6 +1526,59 @@ class GuildScheduledEventStatus(Enum):
 
     .. versionadded:: 2.6
     """
+
+
+class GuildScheduledEventFrequency(Enum):
+    """Represents the frequency of recurrence for a scheduled event.
+
+    This determines how often the event should repeat, such as daily, weekly, monthly, or yearly.
+
+    .. versionadded:: 2.11
+    """
+
+    YEARLY = 0
+    MONTHLY = 1
+    WEEKLY = 2
+    DAILY = 3
+
+
+class GuildScheduledEventWeekday(Enum):
+    """Represents the day of the week used in recurrence rules.
+
+    Used for specifying which days an event should recur on.
+
+    .. versionadded:: 2.11
+    """
+
+    MONDAY = 0
+    TUESDAY = 1
+    WEDNESDAY = 2
+    THURSDAY = 3
+    FRIDAY = 4
+    SATURDAY = 5
+    SUNDAY = 6
+
+
+class GuildScheduledEventMonth(Enum):
+    """Represents the month of the year used in recurrence rules.
+
+    Used for specifying which months an event should recur on.
+
+    .. versionadded:: 2.11
+    """
+
+    JANUARY = 1
+    FEBRUARY = 2
+    MARCH = 3
+    APRIL = 4
+    MAY = 5
+    JUNE = 6
+    JULY = 7
+    AUGUST = 8
+    SEPTEMBER = 9
+    OCTOBER = 10
+    NOVEMBER = 11
+    DECEMBER = 12
 
 
 class GuildScheduledEventPrivacyLevel(Enum):
