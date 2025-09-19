@@ -84,7 +84,7 @@ def wrap_callback(coro):
         except CommandError:
             raise
         except asyncio.CancelledError:
-            return
+            return None
         except Exception as exc:
             raise CommandInvokeError(exc) from exc
         return ret
@@ -263,8 +263,7 @@ class InvokableApplicationCommand(ABC):
             kw.update(self.__original_kwargs__)
             copy = type(self)(self.callback, **kw)
             return self._ensure_assignment_on_copy(copy)
-        else:
-            return self.copy()
+        return self.copy()
 
     def _apply_guild_only(self) -> None:
         # If we have a `GuildCommandInteraction` annotation, set `contexts` and `install_types` accordingly.
@@ -366,8 +365,7 @@ class InvokableApplicationCommand(ABC):
         """
         if self.cog is not None:
             return await self.callback(self.cog, interaction, *args, **kwargs)
-        else:
-            return await self.callback(interaction, *args, **kwargs)
+        return await self.callback(interaction, *args, **kwargs)
 
     def _prepare_cooldowns(self, inter: ApplicationCommandInteraction) -> None:
         if self._buckets.valid:
@@ -501,13 +499,12 @@ class InvokableApplicationCommand(ABC):
         self, inter: ApplicationCommandInteraction, error: CommandError
     ) -> Any:
         if not self.has_error_handler():
-            return
+            return None
 
         injected = wrap_callback(self.on_error)
         if self.cog is not None:
             return await injected(self.cog, inter, error)
-        else:
-            return await injected(inter, error)
+        return await injected(inter, error)
 
     async def _call_external_error_handlers(
         self, inter: ApplicationCommandInteraction, error: CommandError

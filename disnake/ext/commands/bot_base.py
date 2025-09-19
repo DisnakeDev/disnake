@@ -86,8 +86,7 @@ def when_mentioned_or(*prefixes: str) -> Callable[[BotBase, Message], List[str]]
 
     def inner(bot: BotBase, msg: Message) -> List[str]:
         r = list(prefixes)
-        r = when_mentioned(bot, msg) + r
-        return r
+        return when_mentioned(bot, msg) + r
 
     return inner
 
@@ -511,7 +510,7 @@ class BotBase(CommonBotBase, GroupMixin):
 
         if prefix is None:
             return ctx
-        elif isinstance(prefix, str):
+        if isinstance(prefix, str):
             if not view.skip_string(prefix):
                 return ctx
         else:

@@ -119,7 +119,7 @@ def issubclass_(obj: Any, tp: Union[TypeT, Tuple[TypeT, ...]]) -> TypeGuard[Type
     """
     if not isinstance(tp, (type, tuple)):
         return False
-    elif isinstance(obj, type):
+    if isinstance(obj, type):
         # common case
         return issubclass(obj, tp)
 
@@ -131,8 +131,7 @@ def issubclass_(obj: Any, tp: Union[TypeT, Tuple[TypeT, ...]]) -> TypeGuard[Type
         # If we have a Union, try matching any of its args
         # (recursively, to handle possibly generic types inside this union)
         return any(issubclass_(o, tp) for o in obj.__args__)
-    else:
-        return isinstance(origin, type) and issubclass(origin, tp)
+    return isinstance(origin, type) and issubclass(origin, tp)
 
 
 def remove_optionals(annotation: Any) -> Any:
@@ -157,11 +156,10 @@ def _xt_to_xe(xe: Optional[float], xt: Optional[float], direction: float = 1) ->
         if xt is not None:
             raise TypeError("Cannot combine lt and le or gt and le")
         return xe
-    elif xt is not None:
+    if xt is not None:
         epsilon = math.ldexp(1.0, -1024)
         return xt + (epsilon * direction)
-    else:
-        return None
+    return None
 
 
 class Injection(Generic[P, T_]):
@@ -215,8 +213,7 @@ class Injection(Generic[P, T_]):
         """
         if self._injected is not None:
             return self.function(self._injected, *args, **kwargs)  # type: ignore
-        else:
-            return self.function(*args, **kwargs)  # type: ignore
+        return self.function(*args, **kwargs)  # type: ignore
 
     @classmethod
     def register(
@@ -330,12 +327,11 @@ class _BaseRange(ABC):
     def _coerce_bound(value: Any, name: str) -> Optional[Union[int, float]]:
         if value is None or isinstance(value, EllipsisType):
             return None
-        elif isinstance(value, (int, float)):
+        if isinstance(value, (int, float)):
             if not math.isfinite(value):
                 raise ValueError(f"{name} value may not be NaN, inf, or -inf")
             return value
-        else:
-            raise TypeError(f"{name} value must be int, float, None, or `...`, not `{type(value)}`")
+        raise TypeError(f"{name} value must be int, float, None, or `...`, not `{type(value)}`")
 
     def __repr__(self) -> str:
         a = "..." if self.min_value is None else self.min_value
@@ -1041,7 +1037,7 @@ def format_kwargs(
         raise TypeError(
             "When calling a slash command only self and the interaction should be positional"
         )
-    elif first and not isinstance(first, commands.Cog):
+    if first and not isinstance(first, commands.Cog):
         raise TypeError("Method slash commands may be created only in cog subclasses")
 
     cog: Optional[commands.Cog] = first

@@ -50,20 +50,21 @@ class BucketType(Enum):
     def get_key(self, msg: Message) -> Any:
         if self is BucketType.user:
             return msg.author.id
-        elif self is BucketType.guild:
+        if self is BucketType.guild:
             return (msg.guild or msg.author).id
-        elif self is BucketType.channel:
+        if self is BucketType.channel:
             return msg.channel.id
-        elif self is BucketType.member:
+        if self is BucketType.member:
             return ((msg.guild and msg.guild.id), msg.author.id)
-        elif self is BucketType.category:
+        if self is BucketType.category:
             return (msg.channel.category or msg.channel).id  # type: ignore
-        elif self is BucketType.role:
+        if self is BucketType.role:
             # if author is not a Member we are in a private-channel context; returning its id
             # yields the same result as for a guild with only the @everyone role
             return (
                 msg.author.top_role if msg.guild and isinstance(msg.author, Member) else msg.channel
             ).id
+        return None
 
     def __call__(self, msg: Message) -> Any:
         return self.get_key(msg)
@@ -163,6 +164,7 @@ class Cooldown:
 
         # we're not so decrement our tokens
         self._tokens -= 1
+        return None
 
     def reset(self) -> None:
         """Reset the cooldown to its initial state."""

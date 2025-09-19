@@ -208,10 +208,9 @@ class AsyncWebhookAdapter:
 
                         if response.status == 403:
                             raise Forbidden(response, data)
-                        elif response.status == 404:
+                        if response.status == 404:
                             raise NotFound(response, data)
-                        else:
-                            raise HTTPException(response, data)
+                        raise HTTPException(response, data)
 
                 except OSError as e:
                     if attempt < 4 and e.errno == ECONNRESET:
