@@ -8,19 +8,21 @@ The following is a set of guidelines for contributing to the repository. These a
 
 ## Table of Contents
 
-- [Table of Contents](#table-of-contents)
-- [This is too much to read! I want to ask a question!](#this-is-too-much-to-read-i-want-to-ask-a-question)
-- [Good Bug Reports](#good-bug-reports)
-- [Creating a Pull Request](#creating-a-pull-request)
-  - [Overview](#overview)
-  - [Initial setup](#initial-setup)
-  - [Commit/PR Naming Guidelines](#commitpr-naming-guidelines)
-  - [Formatting](#formatting)
-  - [Pyright](#pyright)
-  - [Changelogs](#changelogs)
-  - [Documentation](#documentation)
-- [Migrating development environments](#migrating-development-environments)
-  - [Migrating `pdm`'s scripts to `nox`](#migrating-pdms-scripts-to-nox)
+- [Contributing to disnake](#contributing-to-disnake)
+  - [Table of Contents](#table-of-contents)
+  - [This is too much to read! I want to ask a question!](#this-is-too-much-to-read-i-want-to-ask-a-question)
+  - [Good Bug Reports](#good-bug-reports)
+  - [Creating a Pull Request](#creating-a-pull-request)
+    - [Overview](#overview)
+    - [Initial setup](#initial-setup)
+    - [Commit/PR Naming Guidelines](#commitpr-naming-guidelines)
+    - [Formatting](#formatting)
+    - [Pyright](#pyright)
+    - [Changelogs](#changelogs)
+    - [Documentation](#documentation)
+  - [Migrating development environments](#migrating-development-environments)
+    - [Migrating from `pdm` to `uv`](#migrating-from-pdm-to-uv)
+    - [Migrating `pdm`'s scripts to `nox`](#migrating-pdms-scripts-to-nox)
 
 ## This is too much to read! I want to ask a question!
 
@@ -59,7 +61,7 @@ If you're unsure about some aspect of development, feel free to use existing fil
 The general workflow can be summarized as follows:
 
 1. Fork + clone the repository.
-2. Initialize the development environment: `pdm run nox -s dev`.
+2. Initialize the development environment: `uv run nox -s dev`.
 3. Create a new branch.
 4. Commit your changes, update documentation if required.
 5. Add a changelog entry (e.g. `changelog/1234.feature.rst`).
@@ -69,19 +71,19 @@ Specific development aspects are further explained below.
 
 ### Initial setup
 
-We use [PDM](https://pdm-project.org/) as our dependency manager. If it isn't already installed on your system, you can follow the installation steps [from PDM](https://pdm-project.org/latest/#installation) to get started.
+We use [uv][uv] as our dependency manager. If it isn't already installed on your system, you can follow the installation steps [from astral](https://docs.astral.sh/uv/getting-started/installation/) to get started.
 
-Once PDM is installed, use the following command to initialize a virtual environment, install the necessary development dependencies, and install the [`prek`](#formatting) hooks.
+Once uv is installed, we have one command to run that creates our entire development environment at once.
 
 ```sh
-$ pdm run setup_env
+uvx nox -s dev
 ```
 
 This will:
 
-- create `pdm.lock`
+- create `uv.lock`
 - create a venv at `.venv`
-- install all dependences to `.venv`
+- install all dependencies to `.venv`
 - install pre-commit hooks (via prek) at `.git/hooks/pre-commit`
 
 Other tools used in this project include [ruff](https://docs.astral.sh/ruff) (formatter and linter), and [pyright](https://microsoft.github.io/pyright/#/) (type-checker). For the most part, these automatically run on every commit with no additional action required - see below for details.
@@ -118,7 +120,7 @@ Most of the time, running prek will automatically fix any issues that arise.
 
 ### Pyright
 
-For type-checking, run `pdm run nox -s pyright` (append `-- -w` to have it automatically re-check on every file change).
+For type-checking, run `uv run nox -s pyright` (append `-- -w` to have it automatically re-check on every file change).
 > [!NOTE]
 > If you're using VSCode and pylance, it will use the same type-checking settings, which generally means that you don't necessarily have to run `pyright` separately.  
 > However, since we use a specific version of `pyright` (which may not match pylance's version), there can be version differences which may lead to different results.
@@ -130,7 +132,7 @@ We use [towncrier](https://github.com/twisted/towncrier) for managing our change
 ### Documentation
 
 We use Sphinx to build the project's documentation, which includes [automatically generating](https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html) the API Reference from docstrings using the [NumPy style](https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_numpy.html).  
-To build the documentation locally, use `pdm run nox -s docs` and visit <http://127.0.0.1:8009/> once built.
+To build the documentation locally, use `uv run nox -s docs` and visit <http://127.0.0.1:8009/> once built.
 
 Changes should be marked with a [version directive](https://www.sphinx-doc.org/en/master/usage/restructuredtext/directives.html#describing-changes-between-versions) as documented on the Sphinx documentation.
 
@@ -138,6 +140,13 @@ For the `version` argument, provide ``|vnext|`` as the argument.
 We have a custom role which replaces ``|vnext|`` with the next version of the library upon building the documentation.
 
 ## Migrating development environments
+
+### Migrating from `pdm` to `uv`
+
+We've recently migrated from pdm to [uv][uv] for dependency and environment management for local development, in hopes of a developer experience with less friction.
+
+1. delete `pdm.lock` and `.pdm-python`, and the `.nox` directory.
+2. run `uvx nox -s dev`to recreate the virtual environment, refresh installation of pre-commit
 
 ### Migrating `pdm`'s scripts to `nox`
 
@@ -155,21 +164,21 @@ $ pdm setup_env
 Becomes:
 
 ```sh
-$ pdm run nox -s docs
-$ pdm run nox -s lint
-$ pdm run nox -s pyright
-$ pdm run nox -s test
-$ pdm run noxfile.py -s dev
+$ uv run nox -s docs
+$ uv run nox -s lint
+$ uv run nox -s pyright
+$ uv run nox -s test
+$ uv run noxfile.py -s dev
 ```
 
-`nox` may also be installed to your path using either [uv](https://docs.astral.sh/uv) or [pipx](https://pipx.pypa.io) and used on the root: eg `nox -s docs` with no preceding `pdm run`
+`nox` may also be installed to your path using either [uv](https://docs.astral.sh/uv) or [pipx](https://pipx.pypa.io) and used on the root: eg `nox -s docs` with no preceding `uv run`
 
 ```sh
 # without global nox
-$ pdm run noxfile.py -s dev
+$ uv run noxfile.py -s dev
 
 # with global nox
-$ pipx install nox
+$ uv tool install nox  # or pipx install nox
 $ nox -s dev
 ```
 

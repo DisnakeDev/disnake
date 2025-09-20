@@ -25,6 +25,10 @@ defaults:
     shell: bash
 
 env:
+  # https://docs.astral.sh/uv/reference/environment/
+  UV_LOCKED: 1
+  UV_NO_SYNC: 1
+  UV_PYTHON_DOWNLOADS: never
   GITHUB_STEP_SUMMARY_HEADER: "<details><summary>#name#</summary>\n<pre>"
   GITHUB_STEP_SUMMARY_FOOTER: "</pre></details>\n"
 
@@ -36,15 +40,48 @@ jobs:
     # while still not needing to commit a lockfile to the repo, which is discouraged for libraries as per
     # https://pdm-project.org/en/latest/usage/lockfile/
     runs-on: ubuntu-latest
+    env:
+      UV_RESOLUTION: highest
     steps:
       - uses: actions/checkout@v4
 
-    # Instead of setup-env, we call the cache-pdm action here directly.
-    # This avoids having to install PDM, only to find out the cache is already up to date sometimes.
-      - name: Configure cache
-        uses: ./.github/actions/cache-pdm
+      - name: Set up environment
+        id: setup-env
+        uses: ./.github/actions/setup-env
         with:
-          env-already-initialized: false
+          use-cached-uv-lock: 'false' # we don't need the lock here, we will automatically download it below
+
+      - name: Restore uv lock
+        uses: actions/cache/restore@v4
+        id: cache-uv-lock
+        with:
+          key: uv-lock-resolved-${{ env.UV_RESOLUTION }}
+          restore-keys: |
+            uv-lock-resolved-${{ env.UV_RESOLUTION }}
+          path: uv.lock
+          enableCrossOsArchive: true
+
+      - name: Check if uv.lock changed
+        id: uv-lock-changed
+        continue-on-error: true
+        if: steps.cache-uv-lock.outputs.cache-hit == 'true' || steps.cache-uv-lock.outputs.cache-hit == 'false'
+        run: |
+          uv lock --check
+
+      - name: Lock dependencies
+        if: steps.uv-lock-changed.outcome == 'failure' || steps.cache-uv-lock.outputs.cache-hit != 'true' && steps.cache-uv-lock.outputs.cache-hit != 'false'
+        id: lock-uv-deps
+        env:
+          UV_LOCKED: 0
+        run: uv lock --refresh
+
+      - uses: actions/cache/save@v4
+        if: steps.lock-uv-deps.outcome == 'success'
+        name: upload-uv-lock
+        with:
+          key: uv-lock-resolved-${{ env.UV_RESOLUTION }}-${{ hashFiles('uv.lock') }}
+          path: uv.lock
+          enableCrossOsArchive: true
 
   # Used to determine which python versions to test against.
   # noxfile.py is the source of truth, which in turn draws from
@@ -62,7 +99,7 @@ jobs:
       - name: Set up environment
         uses: ./.github/actions/setup-env
         with:
-          python-version: 3.8
+          use-cached-uv-lock: 'false' # we don't need the lock here
 
       - name: Determine Python versions to test and lint against
         id: set-matrix
@@ -124,7 +161,6 @@ jobs:
       - lint
     strategy:
       matrix:
-        # TODO: add 3.14 once we switch to uv
         session: ${{ fromJson(needs.python-versions.outputs.pyright-sessions) }}
       fail-fast: false
     continue-on-error: ${{ matrix.session.experimental }}
@@ -140,9 +176,9 @@ jobs:
       - name: Add .venv/bin to PATH
         id: venv-bin
         run: |
-          pdm venv create
-          dirname "$(pdm info --python)" >> $GITHUB_PATH
-          echo python="$(pdm info --python)" >> $GITHUB_OUTPUT
+          uv venv .venv
+          dirname "$(uv python find)" >> $GITHUB_PATH
+          echo python="$(uv python find)" >> $GITHUB_OUTPUT
 
       - name: Install dependencies
         # `--no-venv` to install in the main pdm venv instead of nox's pyright-specific one
@@ -200,21 +236,15 @@ jobs:
         run: |
           nox -s slotscheck
 
-      - name: Run check-manifest
-        if: (success() || failure()) && steps.setup.outcome == 'success'
-        run: nox -s check-manifest
-
-      # This only runs if the previous steps were successful, no point in running it otherwise
       - name: Try building package
+        if: (success() || failure()) && steps.setup.outcome == 'success'
         run: |
-          pdm install -dG build
-
-          pdm run python -m build
+          nox -s build
           ls -la dist/
 
       - name: Check README.md renders properly on PyPI
         run: |
-          pdm run twine check --strict dist/*
+          uvx twine~=6.1 check --strict dist/*
 
   codemod:
     runs-on: ubuntu-latest
@@ -241,7 +271,7 @@ jobs:
           if [ -n "$(git status --porcelain)" ]; then
             echo "::error::Please run 'nox -s codemod -- run-all' locally and commit the changes." >&2;
             echo "$GITHUB_STEP_SUMMARY_HEADER" | sed "s/#name#/LibCST Codemod/" >> $GITHUB_STEP_SUMMARY
-            echo "The libcst codemod made changes to the codebase. Please run 'nox -s codemod -- run-all' locally and commit the changes." >> $GITHUB_STEP_SUMMARY
+            echo "The libcst codemod made changes to the codebase. Please run 'uv run nox -s codemod -- run-all' locally and commit the changes." >> $GITHUB_STEP_SUMMARY
             echo "::group::git diff"
             git diff |& tee -a $GITHUB_STEP_SUMMARY
             echo "::endgroup::"
@@ -260,7 +290,6 @@ jobs:
     strategy:
       matrix:
         os: ["windows-latest", "ubuntu-latest", "macos-latest"]
-        # TODO: add 3.14 once we switch to uv
         session: ${{ fromJson(needs.python-versions.outputs.test-sessions) }}
       fail-fast: true
     continue-on-error: ${{ matrix.session.experimental }}
@@ -292,6 +321,7 @@ jobs:
       - name: Print Coverage Output
         if: always() && (steps.run_tests.outcome == 'success' || steps.run_tests.outcome == 'failure')
         env:
+          UV_NO_SYNC: 0
           NOXSESSION: coverage
         run: |
           echo "$GITHUB_STEP_SUMMARY_HEADER" | sed "s/#name#/Coverage Summary/" >> $GITHUB_STEP_SUMMARY
