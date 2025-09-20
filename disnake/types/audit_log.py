@@ -289,14 +289,14 @@ class _AuditLogChange_AutoModTriggerMetadata(TypedDict):
 
 class _AuditLogChange_OnboardingPrompts(TypedDict):
     key: Literal["prompts"]
-    new_value: List[OnboardingPrompt]
-    old_value: List[OnboardingPrompt]
+    new_value: NotRequired[List[OnboardingPrompt]]
+    old_value: NotRequired[List[OnboardingPrompt]]
 
 
 class _AuditLogChange_OnboardingPromptOptions(TypedDict):
     key: Literal["options"]
-    new_value: List[OnboardingPromptOption]
-    old_value: List[OnboardingPromptOption]
+    new_value: NotRequired[List[OnboardingPromptOption]]
+    old_value: NotRequired[List[OnboardingPromptOption]]
 
 
 AuditLogChange = Union[
