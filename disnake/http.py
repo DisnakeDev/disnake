@@ -23,6 +23,7 @@ from typing import (
     Type,
     TypeVar,
     Union,
+    cast,
 )
 from urllib.parse import quote as _uriquote
 
@@ -257,10 +258,10 @@ class HTTPClient:
             )
 
     async def ws_connect(self, url: str, *, compress: int = 0) -> aiohttp.ClientWebSocketResponse:
-        if hasattr(aiohttp, "ClientWSTimeout"):
-            timeout = aiohttp.ClientWSTimeout(ws_close=30.0)  # pyright: ignore[reportCallIssue]
-        else:
-            timeout = 30.0
+        timeout = cast(
+            "Any",
+            aiohttp.ClientWSTimeout(ws_close=30.0) if hasattr(aiohttp, "ClientWSTimeout") else 30.0,  # type: ignore
+        )
         return await self.__session.ws_connect(
             url,
             proxy_auth=self.proxy_auth,

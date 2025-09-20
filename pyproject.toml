@@ -24,6 +24,7 @@ classifiers = [
     "Intended Audience :: Developers",
     "Natural Language :: English",
     "Operating System :: OS Independent",
+    # it is important that the python classifiers are sorted in the sequential order
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
@@ -67,14 +68,24 @@ docs = [
 ]
 
 [dependency-groups]
+dev   = [
+    { include-group = "tools" },
+    { include-group = "nox" },
+    { include-group = "codemod" },
+    { include-group = "typing" },
+    { include-group = "test" },
+    { include-group = "build" },
+]
 nox = [
-    "nox==2025.5.1",
+    # note: nox should be synced with nox.needs_version in noxfile.py
+    # and the pinned nox version in noxfile.py must be within these bounds
+    "nox>=2025.5.1",
 ]
 ruff = [
     "ruff==0.13.0",
 ]
 tools = [
-    "pre-commit~=3.0",
+    "prek>=0.2.0",
     "slotscheck~=0.16.4",
     "check-manifest==0.49",
     { include-group = "ruff" },
@@ -91,8 +102,7 @@ codemod = [
 typing = [
     # this is not pyright itself, but the python wrapper
     "pyright==1.1.405",
-    # only used for type-checking, version does not matter
-    "pytz",
+    # all type-check only dependencies are defined in noxfile.py.
 ]
 test = [
     "pytest~=8.3.2",
@@ -103,29 +113,16 @@ test = [
     "typing-extensions>=4.6",
 ]
 build = [
-    "build~=1.2",
-    "twine~=6.1",
+    "build>=1.2.2.post1",
+    "twine>=6.1.0",
 ]
 
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["disnake*"]
 
-[tool.nox]
-script-venv-backend = "uv|virtualenv"
-
-[tool.pdm]
-# Ignore `requires-python` warnings when locking, the latest versions of some
-# dependencies already require >=3.9
-# See also https://pdm-project.org/en/latest/usage/config/#ignore-package-warnings
-ignore_package_warnings = ["*"]
-
-[tool.pdm.scripts]
-docs = { cmd = "nox -Rs docs --", help = "Build the documentation for development" }
-lint = { cmd = "nox -Rs lint --", help = "Check all files for linting errors" }
-pyright = { cmd = "nox -Rs pyright --", help = "Run pyright" }
-setup_env = { cmd = "{pdm} run noxfile.py -s dev", help = "Set up the local environment and all dependencies" }
-test = { cmd = "nox -Rs test --", help = "Run pytest" }
+[tool.uv]
+required-version = ">=0.8.4"
 
 [tool.ruff]
 line-length = 100
@@ -370,7 +367,6 @@ reportIncompatibleVariableOverride = false
 # these were added in the upgrade from pyright 1.1.336 to 1.1.405
 reportInconsistentOverload = false
 reportInvalidTypeVarUse = false
-reportInvalidTypeForm = false
 
 # these are largely due to missing type hints, and make up most of the error count
 reportUnknownMemberType = false
