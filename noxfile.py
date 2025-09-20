@@ -439,7 +439,7 @@ def dev(session: nox.Session) -> None:
     - lock all dependencies with pdm
     - create a .venv/ directory, overwriting the existing one,
     - install all dependencies needed for development.
-    - install the pre-commit hook
+    - install the pre-commit hook (prek)
     """
     session.run("pdm", "lock", "-dG:all", "-G:all", external=True)
     session.run("pdm", "venv", "create", "--force", external=True)
