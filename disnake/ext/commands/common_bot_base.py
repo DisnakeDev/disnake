@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import collections.abc
+import importlib.machinery
 import importlib.util
 import logging
 import os
@@ -19,13 +20,8 @@ from . import errors
 from .cog import Cog
 
 if TYPE_CHECKING:
-    import importlib.machinery
-
     from ._types import CoroFunc
-    from .bot import AutoShardedBot, AutoShardedInteractionBot, Bot, InteractionBot
     from .help import HelpCommand
-
-    AnyBot = Union[Bot, AutoShardedBot, InteractionBot, AutoShardedInteractionBot]
 
 __all__ = ("CommonBotBase",)
 _log = logging.getLogger(__name__)
@@ -80,12 +76,15 @@ class CommonBotBase(Generic[CogT]):
         if self.owner_id or self.owner_ids:
             return
 
-        await self.wait_until_first_connect()  # type: ignore
-
-        app = await self.application_info()  # type: ignore
+        app: disnake.AppInfo = await self.application_info()  # type: ignore
         if app.team:
-            self.owners = set(app.team.members)
-            self.owner_ids = {m.id for m in app.team.members}
+            self.owners = owners = {
+                member
+                for member in app.team.members
+                # these roles can access the bot token, consider them bot owners
+                if member.role in (disnake.TeamMemberRole.admin, disnake.TeamMemberRole.developer)
+            }
+            self.owner_ids = {m.id for m in owners}
         else:
             self.owner = app.owner
             self.owner_id = app.owner.id
@@ -111,11 +110,14 @@ class CommonBotBase(Generic[CogT]):
 
     @disnake.utils.copy_doc(disnake.Client.login)
     async def login(self, token: str) -> None:
-        self.loop.create_task(self._fill_owners())  # type: ignore
-
-        if self.reload:
-            self.loop.create_task(self._watchdog())  # type: ignore
         await super().login(token=token)  # type: ignore
+
+        loop: asyncio.AbstractEventLoop = self.loop  # type: ignore
+        if self.reload:
+            loop.create_task(self._watchdog())
+
+        # prefetch
+        loop.create_task(self._fill_owners())
 
     async def is_owner(self, user: Union[disnake.User, disnake.Member]) -> bool:
         """|coro|
@@ -123,12 +125,16 @@ class CommonBotBase(Generic[CogT]):
         Checks if a :class:`~disnake.User` or :class:`~disnake.Member` is the owner of
         this bot.
 
-        If an :attr:`owner_id` is not set, it is fetched automatically
+        If :attr:`owner_id` and :attr:`owner_ids` are not set, they are fetched automatically
         through the use of :meth:`~.Bot.application_info`.
 
         .. versionchanged:: 1.3
             The function also checks if the application is team-owned if
             :attr:`owner_ids` is not set.
+
+        .. versionchanged:: 2.10
+            Also takes team roles into account; only team members with the :attr:`~disnake.TeamMemberRole.admin`
+            or :attr:`~disnake.TeamMemberRole.developer` roles are considered bot owners.
 
         Parameters
         ----------
@@ -140,25 +146,22 @@ class CommonBotBase(Generic[CogT]):
         :class:`bool`
             Whether the user is the owner.
         """
+        if not self.owner_id and not self.owner_ids:
+            await self._fill_owners()
+
         if self.owner_id:
             return user.id == self.owner_id
-        elif self.owner_ids:
-            return user.id in self.owner_ids
         else:
-            app = await self.application_info()  # type: ignore
-            if app.team:
-                self.owners = set(app.team.members)
-                self.owner_ids = ids = {m.id for m in app.team.members}
-                return user.id in ids
-            else:
-                self.owner = app.owner
-                self.owner_id = owner_id = app.owner.id
-                return user.id == owner_id
+            return user.id in self.owner_ids
 
     def add_cog(self, cog: Cog, *, override: bool = False) -> None:
         """Adds a "cog" to the bot.
 
         A cog is a class that has its own event listeners and commands.
+
+        This automatically re-syncs application commands, provided that
+        :attr:`command_sync_flags.sync_on_cog_actions <.CommandSyncFlags.sync_on_cog_actions>`
+        isn't disabled.
 
         .. versionchanged:: 2.0
 
@@ -225,6 +228,10 @@ class CommonBotBase(Generic[CogT]):
         cog has registered will be removed as well.
 
         If no cog is found then this method has no effect.
+
+        This automatically re-syncs application commands, provided that
+        :attr:`command_sync_flags.sync_on_cog_actions <.CommandSyncFlags.sync_on_cog_actions>`
+        isn't disabled.
 
         Parameters
         ----------

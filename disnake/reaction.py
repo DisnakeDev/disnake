@@ -26,7 +26,7 @@ class Reaction:
     Depending on the way this object was created, some of the attributes can
     have a value of ``None``.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 

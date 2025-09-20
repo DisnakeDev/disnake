@@ -29,7 +29,7 @@ class Object(Hashable):
     receive this class rather than the actual data class. These cases are
     extremely rare.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -54,7 +54,7 @@ class Object(Hashable):
             id = int(id)
         except ValueError:
             raise TypeError(
-                f"id parameter must be convertable to int not {id.__class__!r}"
+                f"id parameter must be convertible to int not {id.__class__!r}"
             ) from None
         else:
             self.id = id

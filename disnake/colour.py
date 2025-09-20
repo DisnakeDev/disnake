@@ -22,7 +22,7 @@ class Colour:
 
     There is an alias for this called Color.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -278,12 +278,12 @@ class Colour:
 
     @classmethod
     def dark_theme(cls) -> Self:
-        """A factory method that returns a :class:`Colour` with a value of ``0x36393F``.
+        """A factory method that returns a :class:`Colour` with a value of ``0x313338``.
         This will appear transparent on Discord's dark theme.
 
         .. versionadded:: 1.5
         """
-        return cls(0x36393F)
+        return cls(0x313338)
 
     @classmethod
     def fuchsia(cls) -> Self:
@@ -300,6 +300,37 @@ class Colour:
         .. versionadded:: 2.0
         """
         return cls(0xFEE75C)
+
+    @classmethod
+    def light_embed(cls) -> Self:
+        """A factory method that returns a :class:`Colour` with a value of ``0xF2F3F5``.
+        This matches the embed background colour on Discord's light theme.
+
+        .. versionadded:: 2.10
+        """
+        return cls(0xF2F3F5)
+
+    @classmethod
+    def dark_embed(cls) -> Self:
+        """A factory method that returns a :class:`Colour` with a value of ``0x2B2D31``.
+        This matches the embed background colour on Discord's dark theme.
+
+        .. versionadded:: 2.10
+        """
+        return cls(0x2B2D31)
+
+    @classmethod
+    def holographic_style(cls) -> Tuple[Self, Self, Self]:
+        """A factory method that returns a tuple of :class:`Colour` with values of
+        ``0xA9C9FF``, ``0xFFBBEC``, ``0xFFC3A0``. This matches the holographic colour style
+        for roles.
+
+        The first value represents the ``colour`` (``primary_color``), the second and the third
+        represents the ``secondary_colour`` and ``tertiary_colour`` respectively.
+
+        .. versionadded:: 2.11
+        """
+        return cls(0xA9C9FF), cls(0xFFBBEC), cls(0xFFC3A0)
 
 
 Color = Colour

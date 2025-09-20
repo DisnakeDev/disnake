@@ -98,7 +98,7 @@ Message Content Intent
 ++++++++++++++++++++++
 
 - Whether you want a prefix that isn't the bot mention.
-- Whether you want to access the contents of messages. This includes content (text), embeds, attachments, and components.
+- Whether you want to access the contents of messages. This includes content (text), embeds, attachments, components and polls.
 
 .. _need_presence_intent:
 
@@ -191,12 +191,13 @@ As of August 31st, 2022, Discord has blocked message content from being sent to 
 
 If you are on version 2.4 or before, your bot will be able to access message content without the intent enabled in the code. However, as of version 2.5, it is required to enable :attr:`Intents.message_content` to receive message content over the gateway.
 
-Message content refers to four attributes on the :class:`.Message` object:
+Message content refers to five attributes on the :class:`.Message` object:
 
 - :attr:`~.Message.content`
 - :attr:`~.Message.embeds`
 - :attr:`~.Message.attachments`
 - :attr:`~.Message.components`
+- :attr:`~.Message.poll`
 
 You will always receive message content in the following cases even without the message content intent:
 

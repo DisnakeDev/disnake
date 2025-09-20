@@ -44,7 +44,7 @@ class StickerPack(Hashable):
     .. versionchanged:: 2.8
         :attr:`cover_sticker_id`, :attr:`cover_sticker` and :attr:`banner` are now optional.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: str(x)
 
@@ -128,7 +128,9 @@ class _StickerTag(Hashable, AssetMixin):
     @property
     def url(self) -> str:
         """:class:`str`: The url for the sticker's image."""
-        return f"{Asset.BASE}/stickers/{self.id}.{self.format.file_extension}"
+        # https://github.com/discord/discord-api-docs/issues/6675#issuecomment-1954755672
+        base = Asset.BASE_MEDIA if self.format is StickerFormatType.gif else Asset.BASE
+        return f"{base}/stickers/{self.id}.{self.format.file_extension}"
 
     async def read(self) -> bytes:
         """|coro|
@@ -163,7 +165,7 @@ class StickerItem(_StickerTag):
 
     .. versionadded:: 2.0
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: str(x)
 
@@ -226,7 +228,7 @@ class Sticker(_StickerTag):
 
     .. versionadded:: 1.6
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: str(x)
 
@@ -283,7 +285,7 @@ class StandardSticker(Sticker):
 
     .. versionadded:: 2.0
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: str(x)
 
@@ -362,7 +364,7 @@ class GuildSticker(Sticker):
 
     .. versionadded:: 2.0
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: str(x)
 
@@ -450,7 +452,7 @@ class GuildSticker(Sticker):
         Raises
         ------
         Forbidden
-            You are not allowed to edit stickers.
+            You are not allowed to edit this sticker.
         HTTPException
             An error occurred editing the sticker.
 
@@ -498,7 +500,7 @@ class GuildSticker(Sticker):
         Raises
         ------
         Forbidden
-            You are not allowed to delete stickers.
+            You are not allowed to delete this sticker.
         HTTPException
             An error occurred deleting the sticker.
         """
@@ -506,7 +508,7 @@ class GuildSticker(Sticker):
 
 
 def _sticker_factory(
-    sticker_type: Literal[1, 2]
+    sticker_type: Literal[1, 2],
 ) -> Tuple[Type[Union[StandardSticker, GuildSticker, Sticker]], StickerType]:
     value = try_enum(StickerType, sticker_type)
     if value == StickerType.standard:

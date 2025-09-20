@@ -16,6 +16,7 @@ keywords = ["disnake", "discord", "discord api"]
 license = { text = "MIT" }
 dependencies = [
     "aiohttp>=3.7.0,<4.0",
+    "typing-extensions>=4.1",
 ]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
@@ -23,10 +24,13 @@ classifiers = [
     "Intended Audience :: Developers",
     "Natural Language :: English",
     "Operating System :: OS Independent",
+    # it is important that the python classifiers are sorted in the sequential order
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Internet",
     "Topic :: Software Development :: Libraries",
     "Topic :: Software Development :: Libraries :: Python Modules",
@@ -49,7 +53,8 @@ speed = [
     'cchardet; python_version < "3.10"',
 ]
 voice = [
-    "PyNaCl>=1.3.0,<1.6",
+    "PyNaCl>=1.5.0,<1.6",
+    'audioop-lts>=0.2.1; python_version >= "3.13"'
 ]
 docs = [
     "sphinx==7.0.1",
@@ -59,180 +64,223 @@ docs = [
     "sphinxcontrib-towncrier==0.3.2a0",
     "towncrier==23.6.0",
     "sphinx-notfound-page==0.8.3",
+    "sphinxext-opengraph==0.9.1",
 ]
-discord = ["discord-disnake"]
 
-[tool.pdm.dev-dependencies]
+[dependency-groups]
+dev   = [
+    { include-group = "tools" },
+    { include-group = "nox" },
+    { include-group = "codemod" },
+    { include-group = "typing" },
+    { include-group = "test" },
+    { include-group = "build" },
+]
 nox = [
-    "nox==2022.11.21",
+    # note: nox should be synced with nox.needs_version in noxfile.py
+    # and the pinned nox version in noxfile.py must be within these bounds
+    "nox>=2025.5.1",
+]
+ruff = [
+    "ruff==0.13.0",
 ]
 tools = [
-    "pre-commit~=3.0",
+    "prek>=0.2.0",
     "slotscheck~=0.16.4",
-    "python-dotenv~=1.0.0",
-    "towncrier==23.6.0",
     "check-manifest==0.49",
-    "ruff==0.0.261",
+    { include-group = "ruff" },
+]
+changelog = [
+    "towncrier==23.6.0",
 ]
 codemod = [
-    # run codemods on the respository (mostly automated typing)
-    "libcst~=0.4.9",
-    "black==23.1.0",
+    # run codemods on the repository (mostly automated typing)
+    "libcst~=1.1.0",
     "autotyping==23.2.0",
+    { include-group = "ruff" },
 ]
 typing = [
     # this is not pyright itself, but the python wrapper
-    "pyright==1.1.291",
-    "typing-extensions~=4.5.0",
-    # only used for type-checking, version does not matter
-    "pytz",
+    "pyright==1.1.405",
+    # all type-check only dependencies are defined in noxfile.py.
 ]
 test = [
-    "pytest~=7.2.1",
+    "pytest~=8.3.2",
     "pytest-cov~=4.0.0",
-    "pytest-asyncio~=0.20.3",
-    "looptime~=0.2",
-    "coverage[toml]~=6.5.0",
+    "pytest-asyncio~=0.24.0",
+    "looptime~=0.2.0",
+    "coverage[toml]~=7.6.0",
+    "typing-extensions>=4.6",
+]
+build = [
+    "build>=1.2.2.post1",
+    "twine>=6.1.0",
 ]
 
-[tool.pdm.scripts]
-black = { composite = ["lint black"], help = "Run black" }
-docs = { cmd = "nox -Rs docs --", help = "Build the documentation for development" }
-isort = { composite = ["lint isort"], help = "Run isort" }
-lint = { cmd = "nox -Rs lint --", help = "Check all files for linting errors" }
-pyright = { cmd = "nox -Rs pyright --", help = "Run pyright" }
-setup_env = { cmd = "pdm install -d -G speed -G docs -G voice", help = "Set up the local environment and all dependencies" }
-post_setup_env = { composite = ["python -m ensurepip --default-pip", "pre-commit install --install-hooks"] }
-test = { cmd = "nox -Rs test --", help = "Run pytest" }
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["disnake*"]
 
-# legacy tasks for those who still type `task`
-[tool.taskipy.tasks]
-black = { cmd = "black", help = "Run black" }
-docs = { cmd = "docs", help = "Build the documentation for development" }
-isort = { cmd = "isort", help = "Run isort" }
-lint = { cmd = "lint", help = "Check all files for linting errors" }
-pyright = { cmd = "pyright", help = "Run pyright" }
-setup_env = { cmd = "setup_env", help = "Setup the local environment and set up all dependencies" }
-test = { cmd = "test", help = "Run pytest" }
-
-[tool.taskipy.settings]
-runner = "pdm run"
-
-[tool.black]
-line-length = 100
-target-version = ["py38", "py39", "py310", "py311"]
-
-[tool.isort]
-profile = "black"
-py_version = 38
-line_length = 100
-combine_as_imports = true
-filter_files = true
+[tool.uv]
+required-version = ">=0.8.4"
 
 [tool.ruff]
 line-length = 100
-target-version = "py38"
-select = [
-    # commented out codes are intended to be enabled in future prs
-    "F", # pyflakes
-    "E", "W", # pycodestyle
-    # "D", # pydocstyle
-    "D2",  # pydocstyle, docstring formatting
-    "D4",  # pydocstyle, docstring structure/content
-    # "ANN", # flake8-annotations
-    "S", # flake8-bandit
-    "B", # flake8-bugbear
-    "C4", # flake8-comprehensions
-    "DTZ", # flake8-datetimez
-    # "EM", # flake8-errmsg
-    "G", # flake8-logging-format
-    # "RET", # flake8-return
-    # "SIM", # flake8-simplify
-    "TID251", # flake8-tidy-imports, replaces S404
-    # "TCH", # flake8-type-checking
-    "RUF",    # ruff specific exceptions
-    "PT",     # flake8-pytest-style
-    "Q",      # flake8-quotes
-    "RSE",    # flake8-raise
-    "T20",    # flake8-print
-    "PGH",    # pygrep-hooks
-    "PLC",    # pylint convention
-    "PLE",    # pylint error
-    # "PLR",    # pylint refactor
-    "PLW",    # pylint warnings
-    "TRY002", "TRY004", "TRY201", # tryceratops
-]
+
+[tool.codespell]
+skip = ['docs/_static/**', '*.po']
+ignore-words-list = ['GroupT', "OT",]
+
+[tool.ruff.lint]
+future-annotations = true
+select = ["ALL"]
 ignore = [
-    # star imports
-    "F403",
-
-    # pydocstyle
-    "D203", # incompat with D211
-    "D213", # multiline docstring should start on second line, incompatiable with D212
-    "D400", # first line ends in period, does not work with `|coro|` etc.
-    "D415", # same thing but punctuation in general
-    "D416", # section name should end with a colon, incompatible with D406
-
-    # unknown if this is actually an issue
-    "RUF005", # might not be actually faster
-    "RUF006", # might not be an issue/very extreme cases
-
-    # ignore try-except-pass. Bare excepts are caught with E722
-    "S110",
-
-    # provide specific codes on type: ignore
-    "PGH003",
-
-    # import aliases are fixed by isort
+    ## eradicate
+    "ERA", # most of our commented-out code is excluded
+    ## flake8-annotations
+    "ANN0",
+    "ANN4",
+    ## flake8-bandit
+    "S311", # use of random is fine in most cases
+    "S603", # calling subprocess with dynamic arguments is generally fine, the only way to avoid this is ignoring it
+    "S607", # partial executable paths (i.e. "git" instead of "/usr/bin/git") are fine
+    "S110", # ignore try-except-pass. Bare excepts are caught with E722
+    ## flake8-blind-except
+    "BLE", # similar to S110, but also flags Exception
+    ## flake8-boolean-trap
+    "FBT", # at some point we should make booleans keyword only
+    ## flake8-commas
+    "COM812", # mostly managed by the formatter
+    ## flake8-errmsg
+    "EM", # TODO: Enable; too noisy for this, but has autofixes
+    ## flake8-fixme
+    "FIX", # TODO: what the name says!
+    ## flake8-no-pep420
+    "INP001", # Ha.
+    ## flake8-pie
+    "PIE790", # TODO: removes pass or ... when there is a docstring
+    ## flake8-print
+    "T201", # TODO: disabled until the library configures logging
+    ## flake8-pyi
+    "PYI", # TODO: enable, in separate PR (most have autofixes)
+    ## flake8-return
+    "RET", # TODO: enable, most have autofixes.
+    ## flake8-self
+    "SLF", # private member access, this is unlikely to be enabled.
+    ## flake8-simplify
+    "SIM", # TODO: enable, most have autofixes.
+    ## flake8-tidy-imports
+    "TID252", # we still use relative imports
+    ## flake8-todos
+    "TD", # similar to flake8-fixme, though they may conflict
+    ## flake8-typechecking
+    "TC", # TODO: enable in typing PR
+    ## flake8-unused-arguments
+    "ARG", # most unused arguments are intentional
+    ## flake8-use-pathlib
+    "PTH", # TODO: enable in separate PR
+    ## mccabe
+    "C90",
+    ## pep8-naming
+    "N", # too specific for now
+    ## Perflint
+    "PERF203", # try, except within loops; # TODO: refactor
+    "PERF401", # TODO: enable!
+    ## pycodestyle
+    "E501", # lines too long
+    "E731", # lambda expression assigned
+    ## pydocstyle
+    "D1", "D205", "D301", "D400", "D401",
+    ## pygrep-hooks
+    "PGH003", # blanket type ignores
+    ## Pylint
+    # PLC
+    "PLC0105",
     "PLC0414",
-
-
-    # outer loop variables are overwritten by inner assignment target, these are mostly intentional
+    "PLC0415",
+    "PLR",
+    # PLW
+    "PLW1641",
     "PLW2901",
-
-    # temporary disables, to fix later
-    "D205",   # blank line required between summary and description
-    "D401",   # first line of docstring should be in imperative mood
-    "D417",   # missing argument description in docstring
-    "B904",   # within an except clause raise from error or from none
-    "B026",   # backwards star-arg unpacking
-    "E501",   # line too long
-    "E731",   # assigning lambdas to variables
-    "T201",   # print statements
+    ## Ruff-specific rules
+    "RUF006", # not actually sure this is a bug at all...
+    "RUF022", # TODO: consider enabling
+    "RUF023", # TODO: consider enabling
+    ## tryceratops
+    "TRY003", # as of 0.12.11 still has some false positives
+    "TRY301", # TODO: enable
+    "TRY300", # TODO: enable
 ]
 
-[tool.ruff.per-file-ignores]
-"disnake/__main__.py" = ["T201"] # print statements are okay in our simple cli
-"disnake/i18n.py" = [
-    "B027", # lib bug. Excluded here because ruff does not have a --disable-noqa flag yet
+[tool.ruff.lint.per-file-ignores]
+"disnake/*.py" = [
+    "F403", # Pyflakes: allow star imports
 ]
-"disnake/ui/select/*.py" = [
-    "F401", # unused imports. Excluded because there is a bug with ruff.
-]
-"disnake/**.py" = ["PT"] # this is not a module of pytest tests
-"test_bot/*.py" = [
-    "B008", # do not perform function calls in argument defaults
-    "T201", # print found, printing is currently accepted in the test bot
-    "PT",   # this is not a module of pytest tests
-]
-"scripts/*.py" = ["S101"] # use of assert is okay in scripts
-"tests/*.py" = ["S101"] # use of assert is okay in test files
-# we are not using noqa in the example files themselves
+"disnake/client.py" = ["T201"]
+## examples
 "examples/*.py" = [
+    "ANN", # missing type annotations in examples is fine
     "B008", # do not perform function calls in argument defaults, this is how most commands work
-    "PT",   # this is not a module of pytest tests
-    "S311", # pseudo-random generators aren't suitable for cryptographic purposes
+    "E741", # allow ambiguous variable names
+    "S104", # flake8-bandit: allow binding to all interfaces
     "T201", # print found, printing is okay in examples
 ]
 "examples/basic_voice.py" = ["S104"] # possible binding to all interfaces
-"examples/views/tic_tac_toe.py" = ["E741"] # ambigious variable name: `O`
 
-[tool.ruff.flake8-pytest-style]
+## scripts
+"scripts/*.py" = [
+    "S101", # flake8-bandit: allow scripts to use assertions
+]
+"scripts/ci/*.py" = [
+    "T20", # allow print temporarily before shifting to logging
+]
+
+## tests
+"!tests/*" = [ "PT" ] # enable PT in only the tests directory
+"tests/*.py" = [
+    "E741", # ambiguous variable names
+    "S101", # flake8-bandit: allow tests to use assertions
+    "PT030", # to be enabled: allow pytest.warns without a match parameter
+]
+"noxfile.py" = ["EXE003"]
+
+[tool.ruff.lint.flake8-annotations]
+ignore-fully-untyped = true
+
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = [
+    "disnake.ext.commands.inject",
+    "disnake.ext.commands.Param",
+    "disnake.webhook.async_.AsyncWebhookAdapter",
+]
+
+[tool.ruff.lint.flake8-builtins]
+ignorelist = [
+    "id",
+    "type",
+    "copyright",
+    "format",
+
+    # TODO: remove
+    "globals",
+    "locals",
+]
+
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+"subprocess".msg = "Consider possible security implications associated with the subprocess module." # replaces S404
+
+[tool.ruff.lint.flake8-pytest-style]
 fixture-parentheses = false
 mark-parentheses = false
 
-[tool.ruff.flake8-tidy-imports.banned-api]
-"subprocess".msg = "Consider possible security implications associated with the subprocess module." # replaces S404
+[tool.ruff.lint.isort]
+combine-as-imports = true
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.ruff.lint.pyupgrade]
+keep-runtime-typing = true
 
 [tool.towncrier]
 template = "changelog/_template.rst.jinja"
@@ -291,7 +339,7 @@ include = [
     "disnake",
     "docs",
     "examples",
-    "test_bot",
+    "scripts",
     "tests",
     "*.py",
 ]
@@ -315,6 +363,11 @@ reportImportCycles = false
 reportIncompatibleMethodOverride = false
 reportIncompatibleVariableOverride = false
 
+# TODO: re-enable
+# these were added in the upgrade from pyright 1.1.336 to 1.1.405
+reportInconsistentOverload = false
+reportInvalidTypeVarUse = false
+
 # these are largely due to missing type hints, and make up most of the error count
 reportUnknownMemberType = false
 reportUnknownParameterType = false
@@ -325,6 +378,8 @@ reportMissingTypeArgument = false
 
 
 [tool.pytest.ini_options]
+minversion = "8.2"
+pythonpath = "." # legacy configuration, new pytest versions don't add the rootdir to path
 testpaths = "tests"
 addopts = "--strict-markers -Werror -s"
 xfail_strict = true
@@ -363,12 +418,12 @@ ignore = [
     "noxfile.py",
     # docs
     "CONTRIBUTING.md",
+    "RELEASE.md",
     "assets/**",
     "changelog/**",
     "docs/**",
     "examples/**",
     # tests
-    "test_bot/**",
     "tests/**",
     "scripts/**",
 ]

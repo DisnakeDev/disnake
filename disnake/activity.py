@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union, ove
 
 from .asset import Asset
 from .colour import Colour
-from .enums import ActivityType, try_enum
+from .enums import ActivityType, StatusDisplayType, try_enum
 from .partial_emoji import PartialEmoji
 
 __all__ = (
@@ -111,12 +111,10 @@ class _BaseActivity:
         .. versionchanged:: 2.6
             This attribute can now be ``None``.
         """
-        try:
-            timestamp = self._timestamps["start"] / 1000
-        except KeyError:
+        if "start" not in self._timestamps:
             return None
-        else:
-            return datetime.datetime.fromtimestamp(timestamp, tz=datetime.timezone.utc)
+        timestamp = self._timestamps["start"] / 1000
+        return datetime.datetime.fromtimestamp(timestamp, tz=datetime.timezone.utc)
 
     @property
     def end(self) -> Optional[datetime.datetime]:
@@ -125,12 +123,10 @@ class _BaseActivity:
         .. versionchanged:: 2.6
             This attribute can now be ``None``.
         """
-        try:
-            timestamp = self._timestamps["end"] / 1000
-        except KeyError:
+        if "end" not in self._timestamps:
             return None
-        else:
-            return datetime.datetime.fromtimestamp(timestamp, tz=datetime.timezone.utc)
+        timestamp = self._timestamps["end"] / 1000
+        return datetime.datetime.fromtimestamp(timestamp, tz=datetime.timezone.utc)
 
     def to_dict(self) -> ActivityPayload:
         raise NotImplementedError
@@ -152,12 +148,9 @@ class _BaseActivity:
             Moved from :class:`Activity` to base type, making this available to all activity types.
             Additionally, supports dynamic asset urls using the ``mp:`` prefix now.
         """
-        try:
-            large_image = self.assets["large_image"]
-        except KeyError:
-            return None
-        else:
-            return self._create_image_url(large_image)
+        if "large_image" in self.assets:
+            return self._create_image_url(self.assets["large_image"])
+        return None
 
     @property
     def small_image_url(self) -> Optional[str]:
@@ -167,12 +160,9 @@ class _BaseActivity:
             Moved from :class:`Activity` to base type, making this available to all activity types.
             Additionally, supports dynamic asset urls using the ``mp:`` prefix now.
         """
-        try:
-            small_image = self.assets["small_image"]
-        except KeyError:
-            return None
-        else:
-            return self._create_image_url(small_image)
+        if "small_image" in self.assets:
+            return self._create_image_url(self.assets["small_image"])
+        return None
 
     @property
     def large_image_text(self) -> Optional[str]:
@@ -181,7 +171,7 @@ class _BaseActivity:
         .. versionchanged:: 2.10
             Moved from :class:`Activity` to base type, making this available to all activity types.
         """
-        return self.assets.get("large_text", None)
+        return self.assets.get("large_text")
 
     @property
     def small_image_text(self) -> Optional[str]:
@@ -190,7 +180,23 @@ class _BaseActivity:
         .. versionchanged:: 2.10
             Moved from :class:`Activity` to base type, making this available to all activity types.
         """
-        return self.assets.get("small_text", None)
+        return self.assets.get("small_text")
+
+    @property
+    def large_image_link(self) -> Optional[str]:
+        """Optional[:class:`str`]: Returns the large image asset URL of this activity, if applicable.
+
+        .. versionadded:: 2.11
+        """
+        return self.assets.get("large_url")
+
+    @property
+    def small_image_link(self) -> Optional[str]:
+        """Optional[:class:`str`]: Returns the small image asset URL of this activity, if applicable.
+
+        .. versionadded:: 2.11
+        """
+        return self.assets.get("small_url")
 
 
 # tag type for user-settable activities
@@ -267,8 +273,10 @@ class Activity(BaseActivity):
 
         - ``large_image``: A string representing the ID for the large image asset.
         - ``large_text``: A string representing the text when hovering over the large image asset.
+        - ``large_url``: A string representing an URL that is opened when clicking on the large image.
         - ``small_image``: A string representing the ID for the small image asset.
         - ``small_text``: A string representing the text when hovering over the small image asset.
+        - ``small_url``: A string representing a URL that is opened when clicking on the small image.
     party: :class:`dict`
         A dictionary representing the activity party. It contains the following optional keys:
 
@@ -284,6 +292,18 @@ class Activity(BaseActivity):
 
     emoji: Optional[:class:`PartialEmoji`]
         The emoji that belongs to this activity.
+    details_url: Optional[:class:`str`]
+        An URL that is linked when clicking on the details text of an activity.
+
+        .. versionadded:: 2.11
+    state_url: Optional[:class:`str`]
+        An URL that is linked when clicking on the state text of an activity.
+
+        .. versionadded:: 2.11
+    status_display_type: Optional[:class:`StatusDisplayType`]
+        Controls which field is displayed in the user's status activity text in the member list.
+
+        .. versionadded:: 2.11
     """
 
     __slots__ = (
@@ -301,6 +321,9 @@ class Activity(BaseActivity):
         "platform",
         "sync_id",
         "session_id",
+        "details_url",
+        "state_url",
+        "status_display_type",
     )
 
     def __init__(
@@ -310,7 +333,9 @@ class Activity(BaseActivity):
         url: Optional[str] = None,
         type: Optional[Union[ActivityType, int]] = None,
         state: Optional[str] = None,
+        state_url: Optional[str] = None,
         details: Optional[str] = None,
+        details_url: Optional[str] = None,
         party: Optional[ActivityParty] = None,
         application_id: Optional[Union[str, int]] = None,
         flags: Optional[int] = None,
@@ -320,11 +345,14 @@ class Activity(BaseActivity):
         platform: Optional[str] = None,
         sync_id: Optional[str] = None,
         session_id: Optional[str] = None,
+        status_display_type: Optional[Union[StatusDisplayType, int]] = None,
         **kwargs: Any,
     ) -> None:
         super().__init__(**kwargs)
         self.state: Optional[str] = state
+        self.state_url: Optional[str] = state_url
         self.details: Optional[str] = details
+        self.details_url: Optional[str] = details_url
         self.party: ActivityParty = party or {}
         self.application_id: Optional[int] = (
             int(application_id) if application_id is not None else None
@@ -345,6 +373,12 @@ class Activity(BaseActivity):
             activity_type
             if isinstance(activity_type, ActivityType)
             else try_enum(ActivityType, activity_type)
+        )
+
+        self.status_display_type: Optional[StatusDisplayType] = (
+            try_enum(StatusDisplayType, status_display_type)
+            if isinstance(status_display_type, int)
+            else status_display_type
         )
 
         self.emoji: Optional[PartialEmoji] = (
@@ -379,6 +413,9 @@ class Activity(BaseActivity):
         # fix type field
         ret["type"] = int(self.type)
 
+        if self.status_display_type:
+            ret["status_display_type"] = int(self.status_display_type)
+
         if self.emoji:
             ret["emoji"] = self.emoji.to_dict()
         # defined in base class slots
@@ -404,7 +441,7 @@ class Game(BaseActivity):
 
     This is typically displayed via **Playing** on the official Discord client.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -487,7 +524,7 @@ class Streaming(BaseActivity):
 
     This is typically displayed via **Streaming** on the official Discord client.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -560,18 +597,16 @@ class Streaming(BaseActivity):
         return f"<Streaming name={self.name!r}>"
 
     @property
-    def twitch_name(self):
+    def twitch_name(self) -> Optional[str]:
         """Optional[:class:`str`]: If provided, the twitch name of the user streaming.
 
         This corresponds to the ``large_image`` key of the :attr:`Streaming.assets`
         dictionary if it starts with ``twitch:``. Typically set by the Discord client.
         """
-        try:
-            name = self.assets["large_image"]
-        except KeyError:
+        if "large_image" not in self.assets:
             return None
-        else:
-            return name[7:] if name[:7] == "twitch:" else None
+        name = self.assets["large_image"]
+        return name[7:] if name[:7] == "twitch:" else None
 
     def to_dict(self) -> Dict[str, Any]:
         ret: Dict[str, Any] = {
@@ -597,7 +632,7 @@ class Streaming(BaseActivity):
 class Spotify(_BaseActivity):
     """Represents a Spotify listening activity from Discord.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -770,7 +805,7 @@ class Spotify(_BaseActivity):
 class CustomActivity(BaseActivity):
     """Represents a Custom activity from Discord.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -796,6 +831,8 @@ class CustomActivity(BaseActivity):
         The custom activity's name.
     emoji: Optional[:class:`PartialEmoji`]
         The emoji to pass to the activity, if any.
+
+        This currently cannot be set by bots.
     """
 
     __slots__ = ("name", "emoji", "state")
@@ -810,7 +847,10 @@ class CustomActivity(BaseActivity):
     ) -> None:
         super().__init__(**kwargs)
         self.name: Optional[str] = name
-        self.state: Optional[str] = state
+        # Fall back to `name`, since `state` is the relevant field for custom status (`name` is not shown)
+        self.state: Optional[str] = state or name
+
+        # The official client uses "Custom Status" as the name, the actual name is in `state`
         if self.name == "Custom Status":
             self.name = self.state
 
@@ -885,13 +925,11 @@ ActivityTypes = Union[Activity, Game, CustomActivity, Streaming, Spotify]
 @overload
 def create_activity(
     data: Union[ActivityPayload, WidgetActivityPayload], *, state: Optional[ConnectionState] = None
-) -> ActivityTypes:
-    ...
+) -> ActivityTypes: ...
 
 
 @overload
-def create_activity(data: None, *, state: Optional[ConnectionState] = None) -> None:
-    ...
+def create_activity(data: None, *, state: Optional[ConnectionState] = None) -> None: ...
 
 
 def create_activity(
@@ -904,7 +942,9 @@ def create_activity(
 
     activity: ActivityTypes
     game_type = try_enum(ActivityType, data.get("type", -1))
-    if game_type is ActivityType.playing and not ("application_id" in data or "session_id" in data):
+    if game_type is ActivityType.playing and not (
+        "application_id" in data or "session_id" in data or "state" in data
+    ):
         activity = Game(**data)  # type: ignore  # pyright bug(?)
     elif game_type is ActivityType.custom and "name" in data:
         activity = CustomActivity(**data)  # type: ignore
@@ -914,7 +954,7 @@ def create_activity(
     elif game_type is ActivityType.listening and "sync_id" in data and "session_id" in data:
         activity = Spotify(**data)
     else:
-        activity = Activity(**data)
+        activity = Activity(**data)  # type: ignore
 
     if isinstance(activity, (Activity, CustomActivity)) and activity.emoji and state:
         activity.emoji._state = state
