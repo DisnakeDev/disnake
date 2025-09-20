@@ -8,20 +8,21 @@ The following is a set of guidelines for contributing to the repository. These a
 
 ## Table of Contents
 
-- [Table of Contents](#table-of-contents)
-- [This is too much to read! I want to ask a question!](#this-is-too-much-to-read-i-want-to-ask-a-question)
-- [Good Bug Reports](#good-bug-reports)
-- [Creating a Pull Request](#creating-a-pull-request)
-  - [Overview](#overview)
-  - [Initial setup](#initial-setup)
-  - [Commit/PR Naming Guidelines](#commitpr-naming-guidelines)
-  - [Formatting](#formatting)
-  - [Pyright](#pyright)
-  - [Changelogs](#changelogs)
-  - [Documentation](#documentation)
-- [Migrating development environments](#migrating-development-environments)
-  - [Migrating from `pdm` to `uv`](#migrating-from-pdm-to-uv)
-  - [Migrating `pdm`'s scripts to `nox`](#migrating-pdms-scripts-to-nox)
+- [Contributing to disnake](#contributing-to-disnake)
+  - [Table of Contents](#table-of-contents)
+  - [This is too much to read! I want to ask a question!](#this-is-too-much-to-read-i-want-to-ask-a-question)
+  - [Good Bug Reports](#good-bug-reports)
+  - [Creating a Pull Request](#creating-a-pull-request)
+    - [Overview](#overview)
+    - [Initial setup](#initial-setup)
+    - [Commit/PR Naming Guidelines](#commitpr-naming-guidelines)
+    - [Formatting](#formatting)
+    - [Pyright](#pyright)
+    - [Changelogs](#changelogs)
+    - [Documentation](#documentation)
+  - [Migrating development environments](#migrating-development-environments)
+    - [Migrating from `pdm` to `uv`](#migrating-from-pdm-to-uv)
+    - [Migrating `pdm`'s scripts to `nox`](#migrating-pdms-scripts-to-nox)
 
 ## This is too much to read! I want to ask a question!
 
@@ -83,7 +84,7 @@ This will:
 - create `uv.lock`
 - create a venv at `.venv`
 - install all dependencies to `.venv`
-- install pre-commit hooks at `.git/hooks/pre-commit`
+- install pre-commit hooks (via prek) at `.git/hooks/pre-commit`
 
 Other tools used in this project include [ruff](https://docs.astral.sh/ruff) (formatter and linter), and [pyright](https://microsoft.github.io/pyright/#/) (type-checker). For the most part, these automatically run on every commit with no additional action required - see below for details.
 
@@ -113,9 +114,9 @@ Details about the specific commit types can be found on the [conventional commit
 
 This project follows PEP-8 guidelines (mostly) with a column limit of 100 characters, and uses the tools mentioned above to enforce a consistent coding style.
 
-The installed [`pre-commit`](https://pre-commit.com/) hooks will automatically run before every commit, which will format/lint the code
+The installed [`prek`](https://github.com/j178/prek) hooks will automatically run before every commit, which will format/lint the code
 to match the project's style. Note that you will have to stage and commit again if anything was updated!  
-Most of the time, running pre-commit will automatically fix any issues that arise.
+Most of the time, running prek will automatically fix any issues that arise.
 
 ### Pyright
 
@@ -182,4 +183,4 @@ $ nox -s dev
 ```
 
 > [!TIP]
-> To provide arguments to the selected sessions with `nox`, pass them **after** `--`. For example, to tell `pre-commit` to only run `ruff format`, run `nox -s lint -- ruff-format`.
+> To provide arguments to the selected sessions with `nox`, pass them **after** `--`. For example, to tell `prek` to only run `ruff format`, run `nox -s lint -- ruff-format`.

@@ -247,7 +247,7 @@ def docs(session: nox.Session) -> None:
 def lint(session: nox.Session) -> None:
     """Check all paths for linting errors"""
     install_deps(session)
-    session.run("pre-commit", "run", "--all-files", *session.posargs)
+    session.run("prek", "run", "--all-files", *session.posargs)
 
 
 @nox.session(name="check-manifest")
@@ -466,12 +466,12 @@ def dev(session: nox.Session) -> None:
     - lock all dependencies with pdm
     - create a .venv/ directory, overwriting the existing one,
     - install all dependencies needed for development.
-    - install the pre-commit hook
+    - install the pre-commit hook (prek)
     """
     session.run("uv", "lock", external=True)
     session.run("uv", "venv", "--clear", external=True)
     session.run("uv", "sync", "--all-extras", "--all-groups", external=True)
-    session.run("uv", "run", "pre-commit", "install", external=True)
+    session.run("uv", "run", "prek", "install", "--overwrite", external=True)
 
 
 if __name__ == "__main__":
