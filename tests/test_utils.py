@@ -9,12 +9,14 @@ import sys
 import warnings
 from dataclasses import dataclass
 from datetime import timedelta, timezone
-from typing import (
+from typing import (  # noqa: UP035
     TYPE_CHECKING,
     Any,
     Callable,
+    List,
     Literal,
     Optional,
+    Tuple,
     TypeVar,
     Union,
 )
@@ -787,7 +789,7 @@ def test_normalise_optional_params(params, expected) -> None:
         (Union["tuple", None, int], Union[tuple, int, None], True),
         # forward refs
         ("bool", bool, True),
-        ("Tuple[dict, List[Literal[42, 99]]]", tuple[dict, list[Literal[42, 99]]], True),
+        ("Tuple[dict, List[Literal[42, 99]]]", Tuple[dict, List[Literal[42, 99]]], True),  # noqa: UP006
         # 3.10 union syntax
         pytest.param(
             "int | float",
