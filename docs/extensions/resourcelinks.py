@@ -4,7 +4,7 @@
 # Licensed under BSD.
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Tuple
 
 from docutils import nodes, utils
 from sphinx.util.nodes import split_explicit_title
@@ -26,7 +26,7 @@ def make_link_role(resource_links: Dict[str, str]) -> RoleFunction:
         lineno: int,
         inliner: Inliner,
         options: Optional[Dict[str, Any]] = None,
-        content: Optional[List[str]] = None,
+        content: Optional[Sequence[str]] = None,
     ) -> Tuple[List[Node], List[system_message]]:
         text = utils.unescape(text)
         has_explicit_title, title, key = split_explicit_title(text)
