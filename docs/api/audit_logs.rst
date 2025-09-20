@@ -1779,6 +1779,8 @@ AuditLogAction
         See :attr:`automod_block_message` for more information on how the
         :attr:`~AuditLogEntry.extra` field is set.
 
+        .. versionadded: 2.6
+
     .. attribute:: automod_quarantine_user
 
         A member was quarantined by auto moderation.
