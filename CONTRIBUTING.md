@@ -82,7 +82,7 @@ This will:
 - create `pdm.lock`
 - create a venv at `.venv`
 - install all dependences to `.venv`
-- install prek hooks at `.git/hooks/pre-commit`
+- install pre-commit hooks (via prek) at `.git/hooks/pre-commit`
 
 Other tools used in this project include [ruff](https://docs.astral.sh/ruff) (formatter and linter), and [pyright](https://microsoft.github.io/pyright/#/) (type-checker). For the most part, these automatically run on every commit with no additional action required - see below for details.
 
