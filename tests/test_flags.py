@@ -178,7 +178,6 @@ class TestBaseFlags:
 
         assert ins is not other
         assert ins == other
-        assert ins == other
 
         ins.two = False
         assert ins != other
@@ -191,7 +190,6 @@ class TestBaseFlags:
         assert ins == TestFlags.one
         assert TestFlags.one == ins
 
-        assert ins == TestFlags.one
         assert ins != TestFlags.two
 
         assert other != TestFlags.one

@@ -223,7 +223,6 @@ ignore = [
     "ANN", # missing type annotations in examples is fine
     "B008", # do not perform function calls in argument defaults, this is how most commands work
     "E741", # allow ambiguous variable names
-    "SIM108", # allow if else blocks that don't use ternary
     "S104", # flake8-bandit: allow binding to all interfaces
     "T201", # print found, printing is okay in examples
 ]
