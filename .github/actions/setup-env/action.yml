@@ -5,13 +5,20 @@ description: .
 inputs:
   python-version:
     description: The python version to install
-    required: true
-  cache-dependency-path:
-    description: The path(s) to use for pip caching, defaults to setup + pdm
     required: false
-    default: |
-      pyproject.toml
-      setup.py
+    default: '3.8'
+  use-cached-uv-lock:
+    description: Whether to download the uv lock cache.
+    required: false
+    default: 'true'
+  update-uv-lock:
+    description: Whether to update the uv lock file. Allows the cache to fail.
+    required: false
+    default: 'false'
+  uv-resolution-strategy:
+    description: The uv resolution strategy to use. See https://docs.astral.sh/uv/reference/environment/#uv_resolution for details.
+    required: false
+    default: 'highest'
 outputs:
   python-version:
     description: The python version that was installed.
@@ -20,35 +27,52 @@ outputs:
 runs:
   using: composite
   steps:
-    - name: Set up pdm with python ${{ inputs.python-version }}
-      id: setup-python
-      uses: pdm-project/setup-pdm@v3
+    - name: Download uv lock
+      uses: actions/cache/restore@v4
+      if: ${{ inputs.use-cached-uv-lock != 'false' }}
+      id: restore-uv-lock
       with:
+        key: uv-lock-resolved-${{ inputs.uv-resolution-strategy }}
+        path: uv.lock
+        restore-keys: |
+          uv-lock-resolved-${{ inputs.uv-resolution-strategy }}
+        enableCrossOsArchive: true
+        fail-on-cache-miss: ${{ inputs.update-uv-lock != 'true' }}
+
+    - name: Set up uv with python ${{ inputs.python-version }}
+      id: setup-python
+      uses: astral-sh/setup-uv@v6
+      with:
+        version: '0.8.14'
+        enable-cache: true
+        # this doesn't install python but pins the uv version; its the same as providing UV_PYTHON
         python-version: ${{ inputs.python-version }}
-        version: "2.4.6"
-        cache: false
-        cache-dependency-path: ${{ inputs.cache-dependency-path }}
-        enable-pep582: false  # Disable PEP 582 package loading globally
 
-    - name: Disable PDM version check
+    - name: Install python ${{ inputs.python-version }}
       shell: bash
+      env:
+        UV_PYTHON_DOWNLOADS: automatic
       run: |
-        pdm config check_update false
-
-    - name: Ignore saved pythons
-      shell: bash
-      run: |
-        echo "PDM_IGNORE_SAVED_PYTHON=1" >> $GITHUB_ENV
-
-    - name: Update pip, wheel, setuptools
-      shell: bash
-      run: python -m pip install -U pip wheel setuptools
+        uv python install ${{ inputs.python-version }}
 
     - name: Install nox
       shell: bash
-      run: pip install nox
+      run: |
+        uv tool install nox
+
+    - name: Lock dependencies
+      id: lock-uv-deps
+      if: ${{ inputs.update-uv-lock }}
+      shell: bash
+      env:
+        UV_LOCKED: 0
+      run: uv lock --refresh
 
     - name: Set python version
       id: python-version
       shell: bash
-      run: echo "python-version=$(python -c 'import sys; print(".".join(map(str,sys.version_info[:2])))')" >> $GITHUB_OUTPUT
+      env:
+        UV_VENV_CLEAR: 1
+      run: |
+        uv venv .venv
+        echo "python-version=$(uv run python -c 'import sys; print(".".join(map(str,sys.version_info[:2])))')" >> $GITHUB_OUTPUT

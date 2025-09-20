@@ -1,0 +1,213 @@
+# SPDX-License-Identifier: MIT
+
+name: Release
+
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+
+permissions:
+  contents: read
+
+jobs:
+  # Builds sdist and wheel, runs `twine check`, and uploads artifacts.
+  build:
+    name: Build package
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up environment
+        id: setup
+        uses: ./.github/actions/setup-env
+        with:
+          python-version: 3.8
+
+      - name: Build package
+        run: |
+          uvx --from=build~=1.3 pyproject-build
+          ls -la dist/
+
+      - name: Twine check
+        run: uvx twine~=6.1 check --strict dist/*
+
+      - name: Show metadata
+        run: |
+          mkdir out/
+          tar -xf dist/*.tar.gz -C out/
+
+          echo -e "<details><summary>Metadata</summary>\n" >> $GITHUB_STEP_SUMMARY
+          cat out/*/PKG-INFO | sed 's/^/    /' | tee -a $GITHUB_STEP_SUMMARY
+          echo -e "\n</details>\n" >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          if-no-files-found: error
+
+
+  # Ensures that git tag and built version match.
+  validate-tag:
+    name: Validate tag
+    runs-on: ubuntu-latest
+    needs:
+      - build
+    env:
+      GIT_TAG: ${{ github.ref_name }}
+    outputs:
+      bump_dev: ${{ steps.check-dev.outputs.bump_dev }}
+
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Compare sdist version to git tag
+        run: |
+          mkdir out/
+          tar -xf dist/*.tar.gz -C out/
+
+          SDIST_VERSION="$(grep "^Version:" out/*/PKG-INFO | cut -d' ' -f2-)"
+          echo "git tag: $GIT_TAG"
+          echo "sdist version: $SDIST_VERSION"
+
+          if [ "$GIT_TAG" != "v$SDIST_VERSION" ]; then
+            echo "error: git tag does not match sdist version" >&2
+            exit 1
+          fi
+
+      - name: Determine if dev version PR is needed
+        id: check-dev
+        run: |
+          BUMP_DEV=
+          # if this is a new major/minor version, create a PR later
+          if [[ "$GIT_TAG" =~ ^v[0-9]+\.[0-9]+\.0$ ]]; then
+            BUMP_DEV=1
+          fi
+          echo "bump_dev=$BUMP_DEV" | tee -a $GITHUB_OUTPUT
+
+
+  # Creates a draft release on GitHub, and uploads the artifacts there.
+  release-github:
+    name: Create GitHub draft release
+    runs-on: ubuntu-latest
+    needs:
+      - build
+      - validate-tag
+    permissions:
+      contents: write  # required for creating releases
+
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Calculate versions
+        id: versions
+        env:
+          GIT_TAG: ${{ github.ref_name }}
+        run: |
+          # v1.2.3 -> v1-2-3 (for changelog)
+          echo "docs_version=${GIT_TAG//./-}" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@9d7c94cfd0a1f3ed45544c887983e9fa900f0564  # v2.0.4
+        with:
+          files: dist/*
+          draft: true
+          body: |
+            TBD.
+
+            **Changelog**: https://docs.disnake.dev/en/stable/whats_new.html#${{ steps.versions.outputs.docs_version }}
+            **Git history**: https://github.com/${{ github.repository }}/compare/vTODO...${{ github.ref_name }}
+
+
+  # Creates a PyPI release (using an environment which requires separate confirmation).
+  release-pypi:
+    name: Publish package to pypi.org
+    environment:
+      name: release-pypi
+      url: https://pypi.org/project/disnake/
+    runs-on: ubuntu-latest
+    needs:
+      - build
+      - validate-tag
+    permissions:
+      id-token: write  # this permission is mandatory for trusted publishing
+
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Upload to pypi
+        uses: pypa/gh-action-pypi-publish@81e9d935c883d0b210363ab89cf05f3894778450  # v1.8.14
+        with:
+          print-hash: true
+
+
+  # Creates a PR to bump to an alpha version for development, if applicable.
+  create-dev-version-pr:
+    name: Create dev version bump PR
+    runs-on: ubuntu-latest
+    if: needs.validate-tag.outputs.bump_dev
+    needs:
+      - validate-tag
+      - release-github
+      - release-pypi
+
+    steps:
+      # https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/making-authenticated-api-requests-with-a-github-app-in-a-github-actions-workflow
+      - name: Generate app token
+        id: generate_token
+        uses: actions/create-github-app-token@f2acddfb5195534d487896a656232b016a682f3c  # v1.9.0
+        with:
+          app-id: ${{ secrets.BOT_APP_ID }}
+          private-key: ${{ secrets.BOT_PRIVATE_KEY }}
+
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ steps.generate_token.outputs.token }}
+          persist-credentials: false
+          ref: master  # the PR action wants a proper base branch
+
+      - name: Set git name/email
+        env:
+          GIT_USER: ${{ vars.GIT_APP_USER_NAME }}
+          GIT_EMAIL: ${{ vars.GIT_APP_USER_EMAIL }}
+        run: |
+          git config user.name "$GIT_USER"
+          git config user.email "$GIT_EMAIL"
+
+      - name: Update version to dev
+        id: update-version
+        run: |
+          NEW_VERSION="$(python scripts/ci/versiontool.py --set dev)"
+          git commit -a -m "chore: update version to v$NEW_VERSION"
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@70a41aba780001da0a30141984ae2a0c95d8704e  # v6.0.2
+        with:
+          token: ${{ steps.generate_token.outputs.token }}
+          branch: auto/dev-v${{ steps.update-version.outputs.new_version }}
+          delete-branch: true
+          base: master
+          title: "chore: update version to v${{ steps.update-version.outputs.new_version }}"
+          body: |
+            Automated dev version PR.
+
+            <sub>https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}</sub>
+          labels: |
+            skip news
+            t: meta

@@ -8,9 +8,9 @@ import disnake.abc
 
 from .asset import Asset
 from .colour import Colour
-from .enums import DefaultAvatar, Locale, try_enum
+from .enums import Locale, NameplatePalette, try_enum
 from .flags import PublicUserFlags
-from .utils import MISSING, _assetbytes_to_base64_data, snowflake_time
+from .utils import MISSING, _assetbytes_to_base64_data, _get_as_snowflake, snowflake_time
 
 if TYPE_CHECKING:
     from datetime import datetime
@@ -23,12 +23,22 @@ if TYPE_CHECKING:
     from .message import Message
     from .state import ConnectionState
     from .types.channel import DMChannel as DMChannelPayload
-    from .types.user import PartialUser as PartialUserPayload, User as UserPayload
+    from .types.user import (
+        AvatarDecorationData as AvatarDecorationDataPayload,
+        Collectibles as CollectiblesPayload,
+        Nameplate as NameplatePayload,
+        PartialUser as PartialUserPayload,
+        User as UserPayload,
+        UserPrimaryGuild as UserPrimaryGuildPayload,
+    )
 
 
 __all__ = (
     "User",
     "ClientUser",
+    "Nameplate",
+    "Collectibles",
+    "PrimaryGuild",
 )
 
 
@@ -42,41 +52,37 @@ class BaseUser(_UserTag):
         "name",
         "id",
         "discriminator",
-        "_avatar",
-        "_banner",
-        "_accent_colour",
+        "global_name",
         "bot",
         "system",
+        "_avatar",
+        "_banner",
+        "_avatar_decoration_data",
+        "_accent_colour",
         "_public_flags",
+        "_collectibles",
+        "_primary_guild",
         "_state",
     )
-
-    if TYPE_CHECKING:
-        name: str
-        id: int
-        discriminator: str
-        bot: bool
-        system: bool
-        _state: ConnectionState
-        _avatar: Optional[str]
-        _banner: Optional[str]
-        _accent_colour: Optional[str]
-        _public_flags: int
 
     def __init__(
         self, *, state: ConnectionState, data: Union[UserPayload, PartialUserPayload]
     ) -> None:
-        self._state = state
+        self._state: ConnectionState = state
         self._update(data)
 
     def __repr__(self) -> str:
         return (
-            f"<BaseUser id={self.id} name={self.name!r} discriminator={self.discriminator!r}"
-            f" bot={self.bot} system={self.system}>"
+            f"<BaseUser id={self.id} name={self.name!r} global_name={self.global_name!r}"
+            f" discriminator={self.discriminator!r} bot={self.bot} system={self.system}>"
         )
 
     def __str__(self) -> str:
-        return f"{self.name}#{self.discriminator}"
+        discriminator = self.discriminator
+        if discriminator == "0":
+            return self.name
+        # legacy behavior
+        return f"{self.name}#{discriminator}"
 
     def __eq__(self, other: Any) -> bool:
         return isinstance(other, _UserTag) and other.id == self.id
@@ -88,29 +94,40 @@ class BaseUser(_UserTag):
         return self.id >> 22
 
     def _update(self, data: Union[UserPayload, PartialUserPayload]) -> None:
-        self.name = data["username"]
-        self.id = int(data["id"])
-        self.discriminator = data["discriminator"]
-        self._avatar = data["avatar"]
-        self._banner = data.get("banner", None)
-        self._accent_colour = data.get("accent_color", None)
-        self._public_flags = data.get("public_flags", 0)
-        self.bot = data.get("bot", False)
-        self.system = data.get("system", False)
+        self.name: str = data["username"]
+        self.id: int = int(data["id"])
+        self.discriminator: str = data["discriminator"]
+        self.global_name: Optional[str] = data.get("global_name")
+        self._avatar: Optional[str] = data["avatar"]
+        self._banner: Optional[str] = data.get("banner")
+        self._avatar_decoration_data: Optional[AvatarDecorationDataPayload] = data.get(
+            "avatar_decoration_data"
+        )
+        self._accent_colour: Optional[int] = data.get("accent_color")
+        self._public_flags: int = data.get("public_flags", 0)
+        self._collectibles: Optional[CollectiblesPayload] = data.get("collectibles")
+        self._primary_guild: Optional[UserPrimaryGuildPayload] = data.get("primary_guild")
+        self.bot: bool = data.get("bot", False)
+        self.system: bool = data.get("system", False)
 
     @classmethod
     def _copy(cls, user: BaseUser) -> Self:
         self = cls.__new__(cls)  # bypass __init__
 
+        self._state = user._state
         self.name = user.name
         self.id = user.id
         self.discriminator = user.discriminator
+        self.global_name = user.global_name
         self._avatar = user._avatar
         self._banner = user._banner
+        self._avatar_decoration_data = user._avatar_decoration_data
         self._accent_colour = user._accent_colour
-        self.bot = user.bot
-        self._state = user._state
         self._public_flags = user._public_flags
+        self._collectibles = user._collectibles
+        self._primary_guild = user._primary_guild
+        self.bot = user.bot
+        self.system = user.system
 
         return self
 
@@ -120,8 +137,12 @@ class BaseUser(_UserTag):
             "id": self.id,
             "avatar": self._avatar,
             "discriminator": self.discriminator,
+            "global_name": self.global_name,
             "bot": self.bot,
             "public_flags": self._public_flags,
+            "avatar_decoration_data": self._avatar_decoration_data,
+            "collectibles": self._collectibles,
+            "primary_guild": self._primary_guild,
         }
 
     @property
@@ -142,8 +163,17 @@ class BaseUser(_UserTag):
 
     @property
     def default_avatar(self) -> Asset:
-        """:class:`Asset`: Returns the default avatar for a given user. This is calculated by the user's discriminator."""
-        return Asset._from_default_avatar(self._state, int(self.discriminator) % len(DefaultAvatar))
+        """:class:`Asset`: Returns the default avatar for a given user.
+
+        .. versionchanged:: 2.9
+            Added handling for users migrated to the new username system without discriminators.
+        """
+        if self.discriminator == "0":
+            index = (self.id >> 22) % 6
+        else:
+            # legacy behavior
+            index = int(self.discriminator) % 5
+        return Asset._from_default_avatar(self._state, index)
 
     @property
     def display_avatar(self) -> Asset:
@@ -162,11 +192,42 @@ class BaseUser(_UserTag):
         .. versionadded:: 2.0
 
         .. note::
+
             This information is only available via :meth:`Client.fetch_user`.
         """
         if self._banner is None:
             return None
         return Asset._from_banner(self._state, self.id, self._banner)
+
+    @property
+    def avatar_decoration(self) -> Optional[Asset]:
+        """Optional[:class:`Asset`]: Returns the user's avatar decoration asset, if available.
+
+        .. versionadded:: 2.10
+
+        .. note::
+
+            Since Discord always sends an animated PNG for animated avatar decorations,
+            the following methods will not work as expected:
+
+            - :meth:`Asset.replace`
+            - :meth:`Asset.with_size`
+            - :meth:`Asset.with_format`
+            - :meth:`Asset.with_static_format`
+        """
+        if self._avatar_decoration_data is None:
+            return None
+        return Asset._from_avatar_decoration(self._state, self._avatar_decoration_data["asset"])
+
+    @property
+    def collectibles(self) -> Collectibles:
+        """:class:`Collectibles`: Returns the user's collectibles.
+
+        .. versionadded:: 2.11
+        """
+        return Collectibles(
+            state=self._state, data=(self._collectibles if self._collectibles else {})
+        )
 
     @property
     def accent_colour(self) -> Optional[Colour]:
@@ -233,11 +294,26 @@ class BaseUser(_UserTag):
     def display_name(self) -> str:
         """:class:`str`: Returns the user's display name.
 
-        For regular users this is just their username, but
-        if they have a guild specific nickname then that
-        is returned instead.
+        This is their :attr:`global name <.global_name>` if set,
+        or their :attr:`username <.name>` otherwise.
+
+        .. versionchanged:: 2.9
+            Added :attr:`.global_name`.
         """
-        return self.name
+        return self.global_name or self.name
+
+    @property
+    def primary_guild(self) -> Optional[PrimaryGuild]:
+        """Optional[:class:`PrimaryGuild`]: Returns the user's primary guild, if any.
+
+        .. versionadded:: 2.11
+        """
+        if self._primary_guild is not None:
+            return PrimaryGuild(
+                state=self._state,
+                data=self._primary_guild,
+            )
+        return None
 
     def mentioned_in(self, message: Message) -> bool:
         """Checks if the user is mentioned in the specified message.
@@ -261,7 +337,7 @@ class BaseUser(_UserTag):
 class ClientUser(BaseUser):
     """Represents your Discord user.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -277,7 +353,7 @@ class ClientUser(BaseUser):
 
         .. describe:: str(x)
 
-            Returns the user's name with discriminator.
+            Returns the user's username (with discriminator, if not migrated to new system yet).
 
     Attributes
     ----------
@@ -286,7 +362,14 @@ class ClientUser(BaseUser):
     id: :class:`int`
         The user's unique ID.
     discriminator: :class:`str`
-        The user's discriminator. This is given when the username has conflicts.
+        The user's discriminator.
+
+    global_name: Optional[:class:`str`]
+        The user's global display name, if set.
+        This takes precedence over :attr:`.name` when shown.
+
+        .. versionadded:: 2.9
+
     bot: :class:`bool`
         Specifies if the user is a bot account.
     system: :class:`bool`
@@ -319,7 +402,7 @@ class ClientUser(BaseUser):
 
     def __repr__(self) -> str:
         return (
-            f"<ClientUser id={self.id} name={self.name!r} discriminator={self.discriminator!r}"
+            f"<ClientUser id={self.id} name={self.name!r} global_name={self.global_name!r} discriminator={self.discriminator!r}"
             f" bot={self.bot} verified={self.verified} mfa_enabled={self.mfa_enabled}>"
         )
 
@@ -332,18 +415,15 @@ class ClientUser(BaseUser):
         self.mfa_enabled = data.get("mfa_enabled", False)
 
     async def edit(
-        self, *, username: str = MISSING, avatar: Optional[AssetBytes] = MISSING
+        self,
+        *,
+        username: str = MISSING,
+        avatar: Optional[AssetBytes] = MISSING,
+        banner: Optional[AssetBytes] = MISSING,
     ) -> ClientUser:
         """|coro|
 
         Edits the current profile of the client.
-
-        .. note::
-
-            To upload an avatar, a resource (see below) or a :term:`py:bytes-like object`
-            must be passed in that represents the image being uploaded.
-
-            The only image formats supported for uploading are JPG and PNG.
 
         .. versionchanged:: 2.0
             The edit is no longer in-place, instead the newly edited client user is returned.
@@ -359,19 +439,29 @@ class ClientUser(BaseUser):
             A :term:`py:bytes-like object` or asset representing the image to upload.
             Could be ``None`` to denote no avatar.
 
+            Only JPG, PNG, WEBP (static), and GIF (static/animated) images are supported.
+
             .. versionchanged:: 2.5
                 Now accepts various resource types in addition to :class:`bytes`.
+
+        banner: Optional[|resource_type|]
+            A :term:`py:bytes-like object` or asset representing the image to upload.
+            Could be ``None`` to denote no banner.
+
+            Only JPG, PNG, WEBP (static), and GIF (static/animated) images are supported.
+
+            .. versionadded:: 2.10
 
         Raises
         ------
         NotFound
-            The ``avatar`` asset couldn't be found.
+            The ``avatar`` or ``banner`` asset couldn't be found.
         HTTPException
             Editing your profile failed.
         TypeError
-            The ``avatar`` asset is a lottie sticker (see :func:`Sticker.read`).
+            The ``avatar`` or ``banner`` asset is a lottie sticker (see :func:`Sticker.read`).
         ValueError
-            Wrong image format passed for ``avatar``.
+            Wrong image format passed for ``avatar`` or ``banner``.
 
         Returns
         -------
@@ -385,14 +475,104 @@ class ClientUser(BaseUser):
         if avatar is not MISSING:
             payload["avatar"] = await _assetbytes_to_base64_data(avatar)
 
+        if banner is not MISSING:
+            payload["banner"] = await _assetbytes_to_base64_data(banner)
+
         data: UserPayload = await self._state.http.edit_profile(payload)
         return ClientUser(state=self._state, data=data)
+
+
+class Nameplate:
+    """
+    Represents the decoration behind the name of a user that appears
+    in the server, DM and DM group members list.
+
+    .. versionadded:: 2.11
+
+    Attributes
+    ----------
+    sku_id: :class:`int`
+        The ID of the nameplate SKU.
+    label: :class:`str`
+        The label of this nameplate.
+    palette: :class:`NameplatePalette`
+        The background color of the nameplate.
+    """
+
+    __slots__ = (
+        "sku_id",
+        "label",
+        "palette",
+        "_state",
+        "_asset",
+    )
+
+    def __init__(self, *, state: ConnectionState, data: NameplatePayload) -> None:
+        self._state: ConnectionState = state
+        self.sku_id: int = int(data["sku_id"])
+        self._asset: str = data["asset"]
+        self.label: str = data["label"]
+        self.palette = try_enum(NameplatePalette, data["palette"])
+
+    def __repr__(self) -> str:
+        return f"<Nameplate sku_id={self.sku_id} label={self.label!r} palette={self.palette}>"
+
+    @property
+    def animated_asset(self) -> Asset:
+        """:class:`Asset`: Returns the animated nameplate for the user.
+
+        .. versionadded:: 2.11
+
+        .. note::
+
+             Since Discord always sends a WEBM for animated nameplates,
+             the following methods will not work as expected:
+
+             - :meth:`Asset.replace`
+             - :meth:`Asset.with_size`
+             - :meth:`Asset.with_format`
+             - :meth:`Asset.with_static_format`
+        """
+        return Asset._from_nameplate(self._state, self._asset)
+
+    @property
+    def static_asset(self) -> Asset:
+        """:class:`Asset`: Returns the static nameplate for the user.
+
+        .. versionadded:: 2.11
+        """
+        return Asset._from_nameplate(self._state, self._asset, animated=False)
+
+
+class Collectibles:
+    """
+    Represents the collectibles the user has, excluding Avatar Decorations and Profile Effects.
+
+    .. versionadded:: 2.11
+
+    Attributes
+    ----------
+    nameplate: Optional[:class:`Nameplate`]
+        The nameplate of the user, if available.
+    """
+
+    __slots__ = ("nameplate",)
+
+    def __init__(self, state: ConnectionState, data: CollectiblesPayload) -> None:
+        self.nameplate: Optional[Nameplate] = (
+            Nameplate(state=state, data=nameplate_data)
+            if (nameplate_data := data.get("nameplate"))
+            else None
+        )
+
+    def __repr__(self) -> str:
+        return f"<Collectibles nameplate={self.nameplate}>"
 
 
 class User(BaseUser, disnake.abc.Messageable):
     """Represents a Discord user.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -408,7 +588,7 @@ class User(BaseUser, disnake.abc.Messageable):
 
         .. describe:: str(x)
 
-            Returns the user's name with discriminator.
+            Returns the user's username (with discriminator, if not migrated to new system yet).
 
     Attributes
     ----------
@@ -417,7 +597,20 @@ class User(BaseUser, disnake.abc.Messageable):
     id: :class:`int`
         The user's unique ID.
     discriminator: :class:`str`
-        The user's discriminator. This is given when the username has conflicts.
+        The user's discriminator.
+
+        .. note::
+            This is being phased out by Discord; the username system is moving away from ``username#discriminator``
+            to users having a globally unique username.
+            The value of a single zero (``"0"``) indicates that the user has been migrated to the new system.
+            See the `help article <https://dis.gd/app-usernames>`__ for details.
+
+    global_name: Optional[:class:`str`]
+        The user's global display name, if set.
+        This takes precedence over :attr:`.name` when shown.
+
+        .. versionadded:: 2.9
+
     bot: :class:`bool`
         Specifies if the user is a bot account.
     system: :class:`bool`
@@ -427,7 +620,10 @@ class User(BaseUser, disnake.abc.Messageable):
     __slots__ = ("__weakref__",)
 
     def __repr__(self) -> str:
-        return f"<User id={self.id} name={self.name!r} discriminator={self.discriminator!r} bot={self.bot}>"
+        return (
+            f"<User id={self.id} name={self.name!r} global_name={self.global_name!r}"
+            f" discriminator={self.discriminator!r} bot={self.bot}>"
+        )
 
     async def _get_channel(self) -> DMChannel:
         ch = await self.create_dm()
@@ -474,3 +670,47 @@ class User(BaseUser, disnake.abc.Messageable):
         state = self._state
         data: DMChannelPayload = await state.http.start_private_message(self.id)
         return state.add_dm_channel(data)
+
+
+class PrimaryGuild:
+    """Represents a user's primary guild.
+
+    .. versionadded:: 2.11
+
+    Attributes
+    ----------
+    guild_id: Optional[:class:`int`]
+        The ID of the user's primary guild.
+    identity_enabled: Optional[:class:`bool`]
+        Whether the user is displaying the primary guild's server tag. This can be ``None``
+        if the system clears the identity, e.g. the server no longer supports tags. This will be ``False``
+        if the user manually removes their tag.
+    tag: Optional[:class:`str`]
+        The text of the user's server tag, up to 4 characters.
+    """
+
+    __slots__ = (
+        "guild_id",
+        "identity_enabled",
+        "tag",
+        "_state",
+        "_badge",
+    )
+
+    def __init__(self, *, state: ConnectionState, data: UserPrimaryGuildPayload) -> None:
+        self._state = state
+        self.guild_id: Optional[int] = _get_as_snowflake(data, "identity_guild_id")
+        self.identity_enabled: Optional[bool] = data.get("identity_enabled")
+        self.tag: Optional[str] = data.get("tag")
+        self._badge: Optional[str] = data.get("badge")
+
+    def __repr__(self) -> str:
+        return f"<PrimaryGuild guild_id={self.guild_id} identity_enabled={self.identity_enabled} tag={self.tag}>"
+
+    @property
+    def badge(self) -> Optional[Asset]:
+        """Optional[:class:`Asset`]: Returns the server tag badge, if any."""
+        # if badge is not None identity_guild_id won't be None either
+        if self._badge is not None and self.guild_id is not None:
+            return Asset._from_guild_tag_badge(self._state, self.guild_id, self._badge)
+        return None

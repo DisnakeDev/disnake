@@ -18,7 +18,7 @@ AsyncIterator
     Represents the "AsyncIterator" concept. Note that no such class exists,
     it is purely abstract.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: async for x in y
 

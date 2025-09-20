@@ -34,7 +34,7 @@ __all__ = (
 class WidgetChannel:
     """Represents a "partial" widget channel.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -89,7 +89,7 @@ class WidgetChannel:
 class WidgetMember(BaseUser):
     """Represents a "partial" member of the widget's guild.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -105,16 +105,21 @@ class WidgetMember(BaseUser):
 
         .. describe:: str(x)
 
-            Returns the widget member's `name#discriminator`.
+            Returns the widget member's name.
 
     Attributes
     ----------
     id: :class:`int`
         The member's anonymized ID.
     name: :class:`str`
-        The member's nickname (if set in the guild) or username.
+        The member's name.
     discriminator: :class:`str`
         The member's anonymized discriminator.
+
+        .. note::
+            This is being phased out by Discord; the username system is moving away from ``username#discriminator``
+            to users having a globally unique username.
+            See the `help article <https://dis.gd/app-usernames>`__ for details.
     status: :class:`Status`
         The member's status.
     activity: Optional[Union[:class:`BaseActivity`, :class:`Spotify`]]
@@ -257,7 +262,7 @@ class WidgetSettings:
 class Widget:
     """Represents a :class:`Guild` widget.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -286,9 +291,8 @@ class Widget:
         .. note::
 
             Due to a Discord limitation, if this data is available
-            the users will be "anonymized" with linear IDs and discriminator
-            information being incorrect. Likewise, the number of members
-            retrieved is capped.
+            the users will be "anonymized" with linear IDs.
+            Likewise, the number of members retrieved is capped.
 
     presence_count: :class:`int`
         The number of online members in the server.
@@ -321,7 +325,9 @@ class Widget:
             elif connected_channel:
                 connected_channel = WidgetChannel(id=connected_channel, name="", position=0)
 
-            self.members.append(WidgetMember(state=self._state, data=member, connected_channel=connected_channel))  # type: ignore
+            self.members.append(
+                WidgetMember(state=self._state, data=member, connected_channel=connected_channel)
+            )
 
     def __str__(self) -> str:
         return self.json_url

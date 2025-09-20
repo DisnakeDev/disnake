@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: MIT
 
-import asyncio
 import datetime
 import functools
+import inspect
 import types
 from typing import TYPE_CHECKING, Callable, ContextManager, Optional, Type, TypeVar
 from unittest import mock
@@ -14,6 +14,15 @@ else:
     # to avoid flake8 noqas
     def reveal_type(*args, **kwargs) -> None:
         raise RuntimeError
+
+
+if TYPE_CHECKING:
+    # NOTE: using undocumented `expected_text` parameter of pyright instead of `assert_type`,
+    # as `assert_type` can't handle bound ParamSpecs
+    reveal_type(
+        42,  # type: ignore  # suppress "revealed type is ..." output
+        expected_text="str",  # type: ignore  # ensure the functionality we want still works as expected
+    )
 
 
 CallableT = TypeVar("CallableT", bound=Callable)
@@ -32,7 +41,7 @@ class freeze_time(ContextManager):
         dt = dt or datetime.datetime.now(datetime.timezone.utc)
         assert dt.tzinfo
 
-        def fake_now(tz=None):
+        def fake_now(tz=None) -> datetime.datetime:
             return dt.astimezone(tz).replace(tzinfo=tz)
 
         self.mock_datetime = mock.MagicMock(wraps=datetime.datetime)
@@ -51,7 +60,7 @@ class freeze_time(ContextManager):
         return type(self._mock).__exit__(self._mock, typ, value, tb)
 
     def __call__(self, func: CallableT) -> CallableT:
-        if asyncio.iscoroutinefunction(func):
+        if inspect.iscoroutinefunction(func):
 
             @functools.wraps(func)
             async def wrap_async(*args, **kwargs):

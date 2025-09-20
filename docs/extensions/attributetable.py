@@ -1,12 +1,11 @@
 # SPDX-License-Identifier: MIT
 from __future__ import annotations
 
-import asyncio
 import importlib
 import inspect
 import re
 from collections import defaultdict
-from typing import TYPE_CHECKING, DefaultDict, Dict, List, NamedTuple, Optional, Tuple
+from typing import TYPE_CHECKING, ClassVar, DefaultDict, Dict, List, NamedTuple, Optional, Tuple
 
 from docutils import nodes
 from sphinx import addnodes
@@ -14,10 +13,12 @@ from sphinx.locale import _
 from sphinx.util.docutils import SphinxDirective
 
 if TYPE_CHECKING:
-    from _types import SphinxExtensionMeta
     from sphinx.application import Sphinx
     from sphinx.environment import BuildEnvironment
+    from sphinx.util.typing import OptionSpec
     from sphinx.writers.html import HTMLTranslator
+
+    from ._types import SphinxExtensionMeta
 
 
 class attributetable(nodes.General, nodes.Element):
@@ -65,7 +66,7 @@ def visit_attributetablebadge_node(self: HTMLTranslator, node: nodes.Element) ->
     attributes = {
         "class": f"badge-{badge_type}",
     }
-    self.body.append(self.starttag(node, "span", **attributes))
+    self.body.append(self.starttag(node, "span", **attributes))  # type: ignore[reportArgumentType]
 
 
 def visit_attributetable_item_node(self: HTMLTranslator, node: nodes.Element) -> None:
@@ -100,7 +101,7 @@ class PyAttributeTable(SphinxDirective):
     required_arguments = 1
     optional_arguments = 0
     final_argument_whitespace = False
-    option_spec = {}
+    option_spec: ClassVar[OptionSpec] = {}
 
     def parse_name(self, content: str) -> Tuple[str, Optional[str]]:
         match = _name_parser_regex.match(content)
@@ -237,7 +238,7 @@ def get_class_results(
 
         if value is not None:
             doc = value.__doc__ or ""
-            if asyncio.iscoroutinefunction(value) or doc.startswith("|coro|"):
+            if inspect.iscoroutinefunction(value) or doc.startswith("|coro|"):
                 key = _("Methods")
                 badge = attributetablebadge("async", "async")
                 badge["badge-type"] = _("coroutine")
@@ -270,10 +271,10 @@ def class_results_to_node(key: str, elements: List[TableElement]) -> attributeta
         ref = nodes.reference(
             "",
             "",
+            *[nodes.Text(element.label)],
             internal=True,
             refuri="#" + element.fullname,
             anchorname="",
-            *[nodes.Text(element.label)],
         )
         para = addnodes.compact_paragraph("", "", ref)
         if element.badge is not None:

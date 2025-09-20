@@ -5,14 +5,16 @@ import functools
 import inspect
 from typing import TYPE_CHECKING, Any
 
+from docutils import nodes
 from sphinx.environment.adapters.indexentries import IndexEntries
+from sphinxext.opengraph.descriptionparser import DescriptionParser
 
 if TYPE_CHECKING:
-    from _types import SphinxExtensionMeta
-    from docutils import nodes
     from sphinx.application import Sphinx
     from sphinx.config import Config
     from sphinx.writers.html5 import HTML5Translator
+
+    from ._types import SphinxExtensionMeta
 
 if TYPE_CHECKING:
     translator_base = HTML5Translator
@@ -57,6 +59,22 @@ def patch_genindex(*args: Any) -> None:
     IndexEntries.create_index = new_create_index  # type: ignore
 
 
+def patch_opengraph(*args: Any) -> None:
+    # Patch sphinxext-opengraph's description parser to only take the first section
+    # into account, resulting in cleaner descriptions.
+    orig = DescriptionParser.dispatch_visit
+
+    def patched_dispatch_visit(self, node: nodes.Element) -> None:
+        if isinstance(node, nodes.section):
+            if getattr(self, "section_found", False):
+                # stop when encountering nested section
+                raise nodes.StopTraversal
+            self.section_found = True
+        return orig(self, node)
+
+    DescriptionParser.dispatch_visit = patched_dispatch_visit
+
+
 def disable_mathjax(app: Sphinx, config: Config) -> None:
     # prevent installation of mathjax script, which gets installed due to
     # https://github.com/readthedocs/sphinx-hoverxref/commit/7c4655092c482bd414b1816bdb4f393da117062a
@@ -64,13 +82,15 @@ def disable_mathjax(app: Sphinx, config: Config) -> None:
     # inspired by https://github.com/readthedocs/sphinx-hoverxref/blob/003b84fee48262f1a969c8143e63c177bd98aa26/hoverxref/extension.py#L151
 
     for listener in app.events.listeners.get("html-page-context", []):
-        module_name = inspect.getmodule(listener.handler).__name__  # type: ignore
+        module = inspect.getmodule(listener.handler)
+        module_name = module.__name__ if module else ""
         if module_name == "sphinx.ext.mathjax":
             app.disconnect(listener.id)
 
 
 def setup(app: Sphinx) -> SphinxExtensionMeta:
     app.connect("config-inited", patch_genindex)
+    app.connect("config-inited", patch_opengraph)
     app.connect("config-inited", disable_mathjax)
     app.connect("builder-inited", set_translator)
 

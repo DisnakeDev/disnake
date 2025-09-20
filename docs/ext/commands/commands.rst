@@ -371,8 +371,8 @@ For example, to receive a :class:`Member` you can just pass it as a converter:
         await ctx.send(f'{member} joined on {member.joined_at}')
 
 When this command is executed, it attempts to convert the string given into a :class:`Member` and then passes it as a
-parameter for the function. This works by checking if the string is a mention, an ID, a nickname, a username + discriminator,
-or just a regular username. The default set of converters have been written to be as easy to use as possible.
+parameter for the function. This works by checking if the string is a mention, an ID, a username + discriminator,
+a nickname, a global name, or just a regular username. The default set of converters have been written to be as easy to use as possible.
 
 A lot of Discord models work out of the gate as a parameter:
 
@@ -387,6 +387,7 @@ A lot of Discord models work out of the gate as a parameter:
 - :class:`StageChannel` (since v1.7)
 - :class:`CategoryChannel`
 - :class:`ForumChannel` (since v2.5)
+- :class:`MediaChannel` (since v2.10)
 - :class:`Thread` (since v2.0)
 - :class:`Colour`
 - :class:`Role`
@@ -398,6 +399,7 @@ A lot of Discord models work out of the gate as a parameter:
 - :class:`GuildSticker` (since v2.0)
 - :class:`Permissions` (since v2.3)
 - :class:`GuildScheduledEvent` (since v2.5)
+- :class:`GuildSoundboardSound` (since v2.10)
 
 Having any of these set as the converter will intelligently convert the argument to the appropriate target type you
 specify.
@@ -430,6 +432,8 @@ converter is given below:
 +------------------------------+--------------------------------------------------------+
 | :class:`ForumChannel`        | :class:`~ext.commands.ForumChannelConverter`           |
 +------------------------------+--------------------------------------------------------+
+| :class:`MediaChannel`        | :class:`~ext.commands.MediaChannelConverter`           |
++------------------------------+--------------------------------------------------------+
 | :class:`Thread`              | :class:`~ext.commands.ThreadConverter`                 |
 +------------------------------+--------------------------------------------------------+
 | :class:`Colour`              | :class:`~ext.commands.ColourConverter`                 |
@@ -451,6 +455,8 @@ converter is given below:
 | :class:`Permissions`         | :class:`~ext.commands.PermissionsConverter`            |
 +------------------------------+--------------------------------------------------------+
 | :class:`GuildScheduledEvent` | :class:`~ext.commands.GuildScheduledEventConverter`    |
++------------------------------+--------------------------------------------------------+
+| :class:`GuildSoundboardSound`| :class:`~ext.commands.GuildSoundboardSoundConverter`   |
 +------------------------------+--------------------------------------------------------+
 
 By providing the converter it allows us to use them as building blocks for another converter:
@@ -831,7 +837,7 @@ decorator. For example:
         """A bad example of an eval command"""
         await ctx.send(eval(code))
 
-This would only evaluate the command if the function ``is_owner`` returns ``True``. Sometimes we re-use a check often and
+This would only evaluate the command if the function ``is_owner`` returns ``True``. Sometimes we reuse a check often and
 want to split it into its own decorator. To do that we can just add another level of depth:
 
 .. code-block:: python3

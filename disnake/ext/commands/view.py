@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: MIT
 
+from typing import Optional
+
 from .errors import ExpectedClosingQuoteError, InvalidEndOfQuotedStringError, UnexpectedQuoteError
 
 # map from opening quotes to closing quotes
@@ -33,17 +35,17 @@ class StringView:
         self.previous = 0
 
     @property
-    def current(self):
+    def current(self) -> Optional[str]:
         return None if self.eof else self.buffer[self.index]
 
     @property
-    def eof(self):
+    def eof(self) -> bool:
         return self.index >= self.end
 
     def undo(self) -> None:
         self.index = self.previous
 
-    def skip_ws(self):
+    def skip_ws(self) -> bool:
         pos = 0
         while not self.eof:
             try:
@@ -66,19 +68,19 @@ class StringView:
             return True
         return False
 
-    def read_rest(self):
+    def read_rest(self) -> str:
         result = self.buffer[self.index :]
         self.previous = self.index
         self.index = self.end
         return result
 
-    def read(self, n):
+    def read(self, n: int) -> str:
         result = self.buffer[self.index : self.index + n]
         self.previous = self.index
         self.index += n
         return result
 
-    def get(self):
+    def get(self) -> Optional[str]:
         try:
             result = self.buffer[self.index + 1]
         except IndexError:
@@ -88,7 +90,7 @@ class StringView:
         self.index += 1
         return result
 
-    def get_word(self):
+    def get_word(self) -> str:
         pos = 0
         while not self.eof:
             try:
@@ -103,7 +105,7 @@ class StringView:
         self.index += pos
         return result
 
-    def get_quoted_word(self):
+    def get_quoted_word(self) -> Optional[str]:
         current = self.current
         if current is None:
             return None

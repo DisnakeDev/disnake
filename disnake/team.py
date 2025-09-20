@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
+import datetime
 from typing import TYPE_CHECKING, List, Optional
 
 from . import utils
 from .asset import Asset
-from .enums import TeamMembershipState, try_enum
+from .enums import TeamMemberRole, TeamMembershipState, try_enum
 from .user import BaseUser
 
 if TYPE_CHECKING:
@@ -20,7 +21,8 @@ __all__ = (
 
 
 class Team:
-    """Represents an application team for a bot provided by Discord.
+    """Represents an application team.
+    Teams are groups of users who share access to an application's configuration.
 
     Attributes
     ----------
@@ -29,7 +31,7 @@ class Team:
     name: :class:`str`
         The team name.
     owner_id: :class:`int`
-        The team's owner ID.
+        The team owner's ID.
     members: List[:class:`TeamMember`]
         A list of the members in the team.
 
@@ -43,7 +45,7 @@ class Team:
 
         self.id: int = int(data["id"])
         self.name: str = data["name"]
-        self._icon: Optional[str] = data["icon"]
+        self._icon: Optional[str] = data.get("icon")
         self.owner_id: Optional[int] = utils._get_as_snowflake(data, "owner_user_id")
         self.members: List[TeamMember] = [
             TeamMember(self, self._state, member) for member in data["members"]
@@ -51,6 +53,14 @@ class Team:
 
     def __repr__(self) -> str:
         return f"<{self.__class__.__name__} id={self.id} name={self.name}>"
+
+    @property
+    def created_at(self) -> datetime.datetime:
+        """:class:`datetime.datetime`: Returns the team's creation time in UTC.
+
+        .. versionadded:: 2.10
+        """
+        return utils.snowflake_time(self.id)
 
     @property
     def icon(self) -> Optional[Asset]:
@@ -68,7 +78,7 @@ class Team:
 class TeamMember(BaseUser):
     """Represents a team member in a team.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -84,7 +94,7 @@ class TeamMember(BaseUser):
 
         .. describe:: str(x)
 
-            Returns the team member's name with discriminator.
+            Returns the team member's username (with discriminator, if not migrated to new system yet).
 
     .. versionadded:: 1.3
 
@@ -95,29 +105,40 @@ class TeamMember(BaseUser):
     id: :class:`int`
         The team member's unique ID.
     discriminator: :class:`str`
-        The team member's discriminator. This is given when the username has conflicts.
-    avatar: Optional[:class:`str`]
-        The avatar hash the team member has. Could be None.
-    bot: :class:`bool`
-        Specifies if the user is a bot account.
+        The team member's discriminator.
+
+        .. note::
+            This is being phased out by Discord; the username system is moving away from ``username#discriminator``
+            to users having a globally unique username.
+            The value of a single zero (``"0"``) indicates that the user has been migrated to the new system.
+            See the `help article <https://dis.gd/app-usernames>`__ for details.
+
+    global_name: Optional[:class:`str`]
+        The team member's global display name, if set.
+        This takes precedence over :attr:`.name` when shown.
+
+        .. versionadded:: 2.9
+
     team: :class:`Team`
         The team that the member is from.
     membership_state: :class:`TeamMembershipState`
-        The membership state of the member (e.g. invited or accepted)
+        The membership state of the member (e.g. invited or accepted).
+    role: :class:`TeamMemberRole`
+        The role of the team member in the team.
     """
 
-    __slots__ = ("team", "membership_state", "permissions")
+    __slots__ = ("team", "membership_state", "role")
 
     def __init__(self, team: Team, state: ConnectionState, data: TeamMemberPayload) -> None:
         self.team: Team = team
         self.membership_state: TeamMembershipState = try_enum(
             TeamMembershipState, data["membership_state"]
         )
-        self.permissions: List[str] = data["permissions"]
+        self.role: TeamMemberRole = try_enum(TeamMemberRole, data.get("role"))
         super().__init__(state=state, data=data["user"])
 
     def __repr__(self) -> str:
         return (
-            f"<{self.__class__.__name__} id={self.id} name={self.name!r} "
-            f"discriminator={self.discriminator!r} membership_state={self.membership_state!r}>"
+            f"<{self.__class__.__name__} id={self.id} name={self.name!r} global_name={self.global_name!r}"
+            f" discriminator={self.discriminator!r} membership_state={self.membership_state!r}>"
         )

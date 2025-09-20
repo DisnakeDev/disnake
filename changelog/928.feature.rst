@@ -1,6 +1,0 @@
-Implement Onboarding.
-    - Add :class:`Onboarding`, :class:`OnboardingPrompt` and :class:`OnboardingPromptOption`.
-    - Add :meth:`Guild.onboarding`.
-    - Add Audit Log fields.
-        - New :class:`AuditLogAction`\s: :attr:`AuditLogAction.onboarding_prompt_create`\, :attr:`AuditLogAction.onboarding_prompt_update` and :attr:`AuditLogAction.onboarding_update`.
-        - New :class:`AuditLogDiff`\s: :attr:`AuditLogDiff.options`\, :attr:`AuditLogDiff.prompts` and :attr:`AuditLogDiff.default_channels`.

@@ -101,65 +101,41 @@ VoiceRegion
 .. autoclass:: VoiceRegion()
     :members:
 
+VoiceChannelEffect
+~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: VoiceChannelEffect
+
+.. autoclass:: VoiceChannelEffect()
+    :members:
+
+RawVoiceChannelEffectEvent
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: RawVoiceChannelEffectEvent
+
+.. autoclass:: RawVoiceChannelEffectEvent()
+    :members:
+
 
 Enumerations
 ------------
 
+VoiceChannelEffectAnimationType
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: VoiceChannelEffectAnimationType()
+    :members:
+
 PartyType
 ~~~~~~~~~
 
-.. class:: PartyType
-
-    Represents the type of a voice channel activity/application.
-
-    .. attribute:: poker
-
-        The "Poker Night" activity.
-    .. attribute:: betrayal
-
-        The "Betrayal.io" activity.
-    .. attribute:: fishing
-
-        The "Fishington.io" activity.
-    .. attribute:: chess
-
-        The "Chess In The Park" activity.
-    .. attribute:: letter_tile
-
-        The "Letter Tile" activity.
-    .. attribute:: word_snack
-
-        The "Word Snacks" activity.
-    .. attribute:: doodle_crew
-
-        The "Doodle Crew" activity.
-    .. attribute:: checkers
-
-        The "Checkers In The Park" activity.
-
-        .. versionadded:: 2.3
-    .. attribute:: spellcast
-
-        The "SpellCast" activity.
-
-        .. versionadded:: 2.3
-    .. attribute:: watch_together
-
-        The "Watch Together" activity, a Youtube application.
-
-        .. versionadded:: 2.3
-    .. attribute:: sketch_heads
-
-        The "Sketch Heads" activity.
-
-        .. versionadded:: 2.4
-    .. attribute:: ocho
-
-        The "Ocho" activity.
-
-        .. versionadded:: 2.4
+.. autoclass:: PartyType()
+    :members:
 
 Events
 ------
 
 - :func:`on_voice_state_update(member, before, after) <disnake.on_voice_state_update>`
+- :func:`on_voice_channel_effect(channel, member, effect) <disnake.on_voice_channel_effect>`
+- :func:`on_raw_voice_channel_effect(payload) <disnake.on_raw_voice_channel_effect>`

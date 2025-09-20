@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from .asset import Asset
 from .colour import Colour
+from .flags import RoleFlags
 from .mixins import Hashable
 from .partial_emoji import PartialEmoji
 from .permissions import Permissions
@@ -139,7 +140,7 @@ class RoleTags:
 class Role(Hashable):
     """Represents a Discord role in a :class:`Guild`.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -207,7 +208,6 @@ class Role(Hashable):
         "id",
         "name",
         "_permissions",
-        "_colour",
         "position",
         "managed",
         "mentionable",
@@ -216,7 +216,11 @@ class Role(Hashable):
         "_emoji",
         "guild",
         "tags",
+        "_flags",
         "_state",
+        "_primary_color",
+        "_secondary_color",
+        "_tertiary_color",
     )
 
     def __init__(self, *, guild: Guild, state: ConnectionState, data: RolePayload) -> None:
@@ -271,18 +275,21 @@ class Role(Hashable):
         self.name: str = data["name"]
         self._permissions: int = int(data.get("permissions", 0))
         self.position: int = data.get("position", 0)
-        self._colour: int = data.get("color", 0)
+        colors = data["colors"]
+        self._primary_color: int = colors["primary_color"]
+        self._secondary_color: Optional[int] = colors["secondary_color"]
+        self._tertiary_color: Optional[int] = colors["tertiary_color"]
         self.hoist: bool = data.get("hoist", False)
         self._icon: Optional[str] = data.get("icon")
         self._emoji: Optional[str] = data.get("unicode_emoji")
         self.managed: bool = data.get("managed", False)
         self.mentionable: bool = data.get("mentionable", False)
-        self.tags: Optional[RoleTags]
 
-        try:
+        self.tags: Optional[RoleTags] = None
+        if "tags" in data:
             self.tags = RoleTags(data["tags"])
-        except KeyError:
-            self.tags = None
+
+        self._flags: int = data.get("flags", 0)
 
     def is_default(self) -> bool:
         """Checks if the role is the default role.
@@ -366,13 +373,75 @@ class Role(Hashable):
 
     @property
     def colour(self) -> Colour:
-        """:class:`Colour`: Returns the role colour. An alias exists under ``color``."""
-        return Colour(self._colour)
+        """:class:`Colour`: Returns the role colour. An alias exists under ``color``.
+
+        .. note::
+
+            This is equivalent to :meth:`primary_colour`.
+        """
+        return self.primary_colour
 
     @property
     def color(self) -> Colour:
-        """:class:`Colour`: Returns the role color. An alias exists under ``colour``."""
-        return self.colour
+        """:class:`Colour`: Returns the role color. An alias exists under ``colour``.
+
+        .. note::
+
+            This is equivalent to :meth:`primary_color`.
+        """
+        return self.primary_colour
+
+    @property
+    def primary_colour(self) -> Colour:
+        """:class:`Colour`: Returns the primary colour for the role. An alias exists under ``primary_color``.
+
+        .. versionadded:: 2.11
+        """
+        return Colour(self._primary_color)
+
+    @property
+    def primary_color(self) -> Colour:
+        """:class:`Colour`: Returns the primary color for the role. An alias exists under ``primary_colour``.
+
+        .. versionadded:: 2.11
+        """
+        return self.primary_colour
+
+    @property
+    def secondary_colour(self) -> Optional[Colour]:
+        """Optional[:class:`Colour`]: Returns the secondary colour for the role, if any. An alias exists under ``secondary_color``.
+
+        .. versionadded:: 2.11
+        """
+        if self._secondary_color:
+            return Colour(self._secondary_color)
+        return None
+
+    @property
+    def secondary_color(self) -> Optional[Colour]:
+        """Optional[:class:`Colour`]: Returns the secondary color for the role, if any. An alias exists under ``secondary_colour``.
+
+        .. versionadded:: 2.11
+        """
+        return self.secondary_colour
+
+    @property
+    def tertiary_colour(self) -> Optional[Colour]:
+        """Optional[:class:`Colour`]: Returns the tertiary colour for the role, if any. An alias exists under ``tertiary_color``.
+
+        .. versionadded:: 2.11
+        """
+        if self._tertiary_color:
+            return Colour(self._tertiary_color)
+        return None
+
+    @property
+    def tertiary_color(self) -> Optional[Colour]:
+        """Optional[:class:`Colour`]: Returns the tertiary color for the role, if any. An alias exists under ``tertiary_colour``.
+
+        .. versionadded:: 2.11
+        """
+        return self.tertiary_colour
 
     @property
     def icon(self) -> Optional[Asset]:
@@ -393,6 +462,14 @@ class Role(Hashable):
         if self._emoji is None:
             return None
         return PartialEmoji(name=self._emoji)
+
+    @property
+    def flags(self) -> RoleFlags:
+        """:class:`RoleFlags`: Returns the role's flags.
+
+        .. versionadded:: 2.10
+        """
+        return RoleFlags._from_value(self._flags)
 
     @property
     def created_at(self) -> datetime.datetime:
@@ -450,6 +527,12 @@ class Role(Hashable):
         permissions: Permissions = MISSING,
         colour: Union[Colour, int] = MISSING,
         color: Union[Colour, int] = MISSING,
+        primary_colour: Union[Colour, int] = MISSING,
+        primary_color: Union[Colour, int] = MISSING,
+        secondary_colour: Optional[Union[Colour, int]] = MISSING,
+        secondary_color: Optional[Union[Colour, int]] = MISSING,
+        tertiary_colour: Optional[Union[Colour, int]] = MISSING,
+        tertiary_color: Optional[Union[Colour, int]] = MISSING,
         hoist: bool = MISSING,
         icon: Optional[AssetBytes] = MISSING,
         emoji: Optional[str] = MISSING,
@@ -483,6 +566,25 @@ class Role(Hashable):
             The new permissions to change to.
         colour: Union[:class:`Colour`, :class:`int`]
             The new colour to change to. (aliased to ``color`` as well)
+
+            .. note::
+                This is equivalent to ``primary_colour``.
+        primary_colour: Union[:class:`Colour`, :class:`int`]
+            The new primary_colour to change to. (aliased to ``primary_color`` as well)
+
+            .. versionadded:: 2.11
+        secondary_colour: Optional[Union[:class:`Colour`, :class:`int`]]
+            The new secondary_colour to change to. (aliased to ``secondary_color`` as well)
+
+            .. versionadded:: 2.11
+        tertiary_colour: Optional[Union[:class:`Colour`, :class:`int`]]
+            The new tertiary_colour to change to. (aliased to ``tertiary_color`` as well)
+
+            .. note::
+                When passing this the only permitted values are the ones returned by
+                :meth:`Colour.holographic_style`, any other color value will get rejected.
+
+            .. versionadded:: 2.11
         hoist: :class:`bool`
             Indicates if the role should be shown separately in the member list.
         icon: Optional[|resource_type|]
@@ -524,14 +626,52 @@ class Role(Hashable):
             await self._move(position, reason=reason)
 
         payload: Dict[str, Any] = {}
-        if color is not MISSING:
-            colour = color
 
-        if colour is not MISSING:
-            if isinstance(colour, int):
-                payload["color"] = colour
+        colors: Dict[str, Any] = {
+            "primary_color": self._primary_color,
+            "secondary_color": self._secondary_color,
+            "tertiary_color": self._tertiary_color,
+        }
+        if color is not MISSING:
+            primary_colour = color
+        elif colour is not MISSING:
+            primary_colour = colour
+
+        if primary_color is not MISSING:
+            primary_colour = primary_color
+
+        if primary_colour is not MISSING:
+            if isinstance(primary_colour, int):
+                colors["primary_color"] = primary_colour
             else:
-                payload["color"] = colour.value
+                colors["primary_color"] = primary_colour.value
+
+        if secondary_color is not MISSING:
+            secondary_colour = secondary_color
+
+        if secondary_colour is not MISSING:
+            if isinstance(secondary_colour, Colour):
+                colors["secondary_color"] = secondary_colour.value
+            else:
+                colors["secondary_color"] = secondary_colour
+
+        if tertiary_color is not MISSING:
+            tertiary_colour = tertiary_color
+
+        if tertiary_colour is not MISSING:
+            if isinstance(tertiary_colour, Colour):
+                colors["tertiary_color"] = tertiary_colour.value
+            else:
+                colors["tertiary_color"] = tertiary_colour
+
+        if any(
+            [
+                colors["primary_color"] != self._primary_color,
+                colors["secondary_color"] != self._secondary_color,
+                colors["tertiary_color"] != self._tertiary_color,
+            ]
+        ):
+            payload["colors"] = colors
 
         if name is not MISSING:
             payload["name"] = name

@@ -19,7 +19,6 @@ import re
 import subprocess  # noqa: TID251
 import sys
 from typing import Any, Dict, Optional
-from urllib.parse import urljoin
 
 from sphinx.application import Sphinx
 
@@ -48,12 +47,16 @@ extensions = [
     "sphinxcontrib.towncrier.ext",
     "hoverxref.extension",
     "notfound.extension",
+    "sphinxext.opengraph",
     "redirects",
     "fulltoc",
     "exception_hierarchy",
     "attributetable",
     "resourcelinks",
+    "collapse",
+    "enumattrs",
     "nitpick_file_ignorer",
+    "versionchange",
 ]
 
 autodoc_member_order = "bysource"
@@ -77,7 +80,8 @@ rst_prolog = """
 .. |coro| replace:: This function is a |coroutine_link|_.
 .. |maybecoro| replace:: This function *could be a* |coroutine_link|_.
 .. |coroutine_link| replace:: *coroutine*
-.. |components_type| replace:: Union[:class:`disnake.ui.ActionRow`, :class:`disnake.ui.WrappedComponent`, List[Union[:class:`disnake.ui.ActionRow`, :class:`disnake.ui.WrappedComponent`, List[:class:`disnake.ui.WrappedComponent`]]]]
+.. |components_type| replace:: Union[:class:`~disnake.ui.UIComponent`, List[Union[:class:`~disnake.ui.UIComponent`, List[:class:`~disnake.ui.WrappedComponent`]]]]
+.. |modal_components_type| replace:: Union[:class:`~disnake.ui.UIComponent`, List[:class:`~disnake.ui.UIComponent`]]
 .. |resource_type| replace:: Union[:class:`bytes`, :class:`.Asset`, :class:`.Emoji`, :class:`.PartialEmoji`, :class:`.StickerItem`, :class:`.Sticker`]
 .. _coroutine_link: https://docs.python.org/3/library/asyncio-task.html#coroutine
 """
@@ -225,6 +229,15 @@ def linkcode_resolve(domain: str, info: Dict[str, Any]) -> Optional[str]:
     return f"{github_repo}/blob/{git_ref}/disnake/{path}"
 
 
+# Links used for cross-referencing stuff in other documentation
+# when this is updated hoverxref_intersphinx also needs to be updated IF THE docs are hosted on readthedocs.
+intersphinx_mapping = {
+    "py": ("https://docs.python.org/3", None),
+    "aio": ("https://docs.aiohttp.org/en/stable/", None),
+    "req": ("https://requests.readthedocs.io/en/latest/", None),
+}
+
+
 hoverx_default_type = "tooltip"
 hoverxref_domains = ["py"]
 hoverxref_role_types = dict.fromkeys(
@@ -235,19 +248,7 @@ hoverxref_tooltip_theme = ["tooltipster-custom"]
 hoverxref_tooltip_lazy = True
 
 # these have to match the keys on intersphinx_mapping, and those projects must be hosted on readthedocs.
-hoverxref_intersphinx = [
-    "py",
-    "aio",
-    "req",
-]
-
-# Links used for cross-referencing stuff in other documentation
-# when this is updated hoverxref_intersphinx also needs to be updated IF THE docs are hosted on readthedocs.
-intersphinx_mapping = {
-    "py": ("https://docs.python.org/3", None),
-    "aio": ("https://docs.aiohttp.org/en/stable/", None),
-    "req": ("https://requests.readthedocs.io/en/latest/", None),
-}
+hoverxref_intersphinx = list(intersphinx_mapping.keys())
 
 
 # use proxied API endpoint on readthedocs to avoid CORS issues
@@ -259,9 +260,31 @@ if _IS_READTHEDOCS:
 if not _IS_READTHEDOCS:
     notfound_urls_prefix = "/"
 
+# ignore common link types that we don't particularly care about or are unable to check
 linkcheck_ignore = [
     r"https?://github.com/.+?/.+?/(issues|pull)/\d+",
     r"https?://support.discord.com/",
+]
+
+if _IS_READTHEDOCS:
+    # set html_baseurl based on readthedocs-provided env variable
+    # https://github.com/readthedocs/readthedocs.org/pull/10224
+    # https://docs.readthedocs.io/en/stable/reference/environment-variables.html#envvar-READTHEDOCS_CANONICAL_URL
+    html_baseurl = os.environ.get("READTHEDOCS_CANONICAL_URL")
+    if not html_baseurl:
+        raise RuntimeError("Expected `READTHEDOCS_CANONICAL_URL` to be set on readthedocs")
+
+    # enable opensearch (see description somewhere below)
+    html_use_opensearch = html_baseurl.rstrip("/")
+
+
+# ogp_site_url = ""  # automatically set on readthedocs
+ogp_site_name = "disnake documentation"
+ogp_image = "https://disnake.dev/assets/disnake-logo-transparent.png"
+ogp_image_alt = "disnake icon"
+ogp_custom_meta_tags = [
+    '<meta property="og:image:width" content="64" />',
+    '<meta property="og:image:height" content="64" />',
 ]
 
 
@@ -279,6 +302,7 @@ html_context = {
         ("disnake.ext.commands", "ext/commands"),
         ("disnake.ext.tasks", "ext/tasks"),
     ],
+    "READTHEDOCS": _IS_READTHEDOCS,
 }
 
 resource_links = {
@@ -360,7 +384,7 @@ html_static_path = ["_static"]
 # If true, an OpenSearch description file will be output, and all pages will
 # contain a <link> tag referring to it.  The value of this option must be the
 # base URL from which the finished HTML is served.
-# html_use_opensearch = ''
+# html_use_opensearch = ''  # NOTE: this is being set above
 
 # This is the file name suffix for HTML files (e.g. ".xhtml").
 # html_file_suffix = None
@@ -475,19 +499,6 @@ def setup(app: Sphinx) -> None:
         app.config.intersphinx_mapping["py"] = ("https://docs.python.org/ja/3", None)
         app.config.html_context["discord_invite"] = "https://discord.gg/disnake"
         app.config.resource_links["disnake"] = "https://discord.gg/disnake"
-
-    # readthedocs appends additional stuff to conf.py,
-    # we can't access it above since it wouldn't have run yet
-    if _IS_READTHEDOCS:
-        # this is the "canonical" url, which always points to stable in our case
-        if not (base_url := globals().get("html_baseurl")):
-            raise RuntimeError("Expected `html_baseurl` to be set on readthedocs")
-
-        # special case for convenience: if latest, use that for opensearch
-        if os.environ["READTHEDOCS_VERSION"] == "latest":
-            base_url = urljoin(base_url, "../latest")
-
-        app.config["html_use_opensearch"] = base_url.rstrip("/")
 
     # HACK: avoid deprecation warnings caused by sphinx always iterating over all class attributes
     import disnake

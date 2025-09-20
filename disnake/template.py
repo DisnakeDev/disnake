@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, NoReturn, Optional
+from typing import TYPE_CHECKING, Any, List, NoReturn, Optional
 
-from .guild import Guild
+from .guild import Guild, Member
 from .utils import MISSING, _assetbytes_to_base64_data, parse_time
 
 __all__ = ("Template",)
@@ -13,9 +13,11 @@ if TYPE_CHECKING:
     import datetime
 
     from .asset import AssetBytes
+    from .flags import MemberCacheFlags
     from .state import ConnectionState
+    from .types.emoji import Emoji as EmojiPayload
     from .types.template import Template as TemplatePayload
-    from .user import User
+    from .user import ClientUser, User
 
 
 class _FriendlyHttpAttributeErrorHelper:
@@ -26,39 +28,39 @@ class _FriendlyHttpAttributeErrorHelper:
 
 
 class _PartialTemplateState:
-    def __init__(self, *, state) -> None:
-        self.__state = state
+    def __init__(self, *, state: ConnectionState) -> None:
+        self.__state: ConnectionState = state
         self.http = _FriendlyHttpAttributeErrorHelper()
 
     @property
-    def shard_count(self):
+    def shard_count(self) -> Optional[int]:
         return self.__state.shard_count
 
     @property
-    def user(self):
+    def user(self) -> ClientUser:
         return self.__state.user
 
     @property
-    def self_id(self):
+    def self_id(self) -> int:
         return self.__state.user.id
 
     @property
-    def member_cache_flags(self):
+    def member_cache_flags(self) -> MemberCacheFlags:
         return self.__state.member_cache_flags
 
-    def store_emoji(self, guild, packet):
+    def store_emoji(self, guild: Guild, data: EmojiPayload) -> None:
         return None
 
-    def _get_voice_client(self, id):
+    def _get_voice_client(self, id: int) -> None:
         return None
 
-    def _get_message(self, id):
+    def _get_message(self, id: int) -> None:
         return None
 
-    def _get_guild(self, id):
+    def _get_guild(self, id) -> Optional[Guild]:
         return self.__state._get_guild(id)
 
-    async def query_members(self, **kwargs: Any):
+    async def query_members(self, **kwargs: Any) -> List[Member]:
         return []
 
     def __getattr__(self, attr) -> NoReturn:

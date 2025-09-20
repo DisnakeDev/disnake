@@ -12,6 +12,8 @@ from libcst import codemod
 
 from disnake import flags
 
+from .base import BaseCodemodCommand
+
 BASE_FLAG_CLASSES = (flags.BaseFlags, flags.ListBaseFlags)
 
 MODULES = (
@@ -20,7 +22,7 @@ MODULES = (
 )
 
 
-class FlagTypings(codemod.VisitorBasedCodemodCommand):
+class FlagTypings(BaseCodemodCommand):
     DESCRIPTION: str = (
         "Types every flag classes's init method, using overloads or if typechecking blocks."
     )
@@ -36,7 +38,7 @@ class FlagTypings(codemod.VisitorBasedCodemodCommand):
         # import and load the module
         module = importlib.import_module(current_module)
         # we preformulate a list of all flag classes on the imported flags module
-        all_flag_classes = []
+        all_flag_classes: List[str] = []
         for attr_name in dir(module):
             obj = getattr(module, attr_name)
             if (
@@ -55,7 +57,7 @@ class FlagTypings(codemod.VisitorBasedCodemodCommand):
         # no reason to continue into classes
         return False
 
-    def leave_ClassDef(self, _: cst.ClassDef, node: cst.ClassDef):
+    def leave_ClassDef(self, _: cst.ClassDef, node: cst.ClassDef) -> cst.ClassDef:
         if not m.matches(node.name, m.OneOf(*map(m.Name, self.flag_classes))):
             return node
 

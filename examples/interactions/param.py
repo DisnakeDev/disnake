@@ -24,8 +24,7 @@ async def simple(
     inter: disnake.CommandInteraction,
     required: str,
     optional: int = 0,
-):
-    ...
+): ...
 
 
 # builtins are not the only types supported.
@@ -37,8 +36,7 @@ async def other_types(
     user: disnake.User,
     emoji: disnake.Emoji,
     member_or_role: Union[disnake.Member, disnake.Role],
-):
-    ...
+): ...
 
 
 # Adding descriptions to the command itself and to its options is
@@ -63,27 +61,22 @@ async def description(
 # by using `Param` and passing a callable.
 @bot.slash_command()
 async def defaults(
-    inter: disnake.CommandInteraction,
+    inter: disnake.CommandInteraction[commands.Bot],
     string: str = "this is a default value",
     user: disnake.User = commands.Param(lambda inter: inter.author),
-):
-    ...
+): ...
 
 
 # You may limit numbers to a certain range using `commands.Range`.
-# "..." is impicitly infinity. Range[0, ...] therefore means any integer from 0 to infinity,
-# and Range[..., 0] means anything from -inf to 0.
-
-
-# The 1.0 in the `fraction` parameter below is important - the usage of a float specifies
-# that the argument may be a float in that range, not just an integer.
-# All of these bounds are inclusive, meaning `Range[1, 4]` would allow any of 1, 2, 3, or 4.
+# "..." is implicitly infinity. Range[int, 0, ...] therefore means any integer from 0 to infinity,
+# and Range[int, ..., 0] means anything from -inf to 0.
+# All of these bounds are inclusive, meaning `Range[int, 1, 4]` would allow any of 1, 2, 3, or 4.
 @bot.slash_command()
 async def ranges(
     inter: disnake.CommandInteraction,
-    ranking: commands.Range[1, 10],
-    negative: commands.Range[..., 0],
-    fraction: commands.Range[0, 1.0],
+    ranking: commands.Range[int, 1, 10],
+    negative: commands.Range[int, ..., 0],
+    fraction: commands.Range[float, 0, 1.0],
 ):
     """Command with limited ranges
 
@@ -100,8 +93,7 @@ async def ranges(
 # This results in the slash command using a string option, which will be
 # converted to an integer locally, allowing for a wider range of numbers.
 @bot.slash_command()
-async def large(inter: disnake.CommandInteraction, largenumber: commands.LargeInt):
-    ...
+async def large(inter: disnake.CommandInteraction, largenumber: commands.LargeInt): ...
 
 
 @bot.event

@@ -77,7 +77,7 @@ class GuildScheduledEvent(Hashable):
 
     .. versionadded:: 2.3
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -253,7 +253,7 @@ class GuildScheduledEvent(Hashable):
 
         Deletes the guild scheduled event.
 
-        You must have :attr:`.Permissions.manage_events` permission to do this.
+        You must have :attr:`~Permissions.manage_events` permission to do this.
 
         Raises
         ------
@@ -285,8 +285,7 @@ class GuildScheduledEvent(Hashable):
         entity_metadata: Optional[GuildScheduledEventMetadata] = ...,
         status: GuildScheduledEventStatus = ...,
         reason: Optional[str] = ...,
-    ) -> GuildScheduledEvent:
-        ...
+    ) -> GuildScheduledEvent: ...
 
     # new entity_type is `external`, no channel
     @overload
@@ -304,8 +303,7 @@ class GuildScheduledEvent(Hashable):
         entity_metadata: GuildScheduledEventMetadata = ...,
         status: GuildScheduledEventStatus = ...,
         reason: Optional[str] = ...,
-    ) -> GuildScheduledEvent:
-        ...
+    ) -> GuildScheduledEvent: ...
 
     # new entity_type is `voice` or `stage_instance`, no entity_metadata
     @overload
@@ -325,8 +323,7 @@ class GuildScheduledEvent(Hashable):
         scheduled_end_time: Optional[datetime] = ...,
         status: GuildScheduledEventStatus = ...,
         reason: Optional[str] = ...,
-    ) -> GuildScheduledEvent:
-        ...
+    ) -> GuildScheduledEvent: ...
 
     # channel=None, no entity_type
     @overload
@@ -343,8 +340,7 @@ class GuildScheduledEvent(Hashable):
         entity_metadata: GuildScheduledEventMetadata = ...,
         status: GuildScheduledEventStatus = ...,
         reason: Optional[str] = ...,
-    ) -> GuildScheduledEvent:
-        ...
+    ) -> GuildScheduledEvent: ...
 
     # valid channel, no entity_type
     @overload
@@ -360,8 +356,7 @@ class GuildScheduledEvent(Hashable):
         scheduled_end_time: Optional[datetime] = ...,
         status: GuildScheduledEventStatus = ...,
         reason: Optional[str] = ...,
-    ) -> GuildScheduledEvent:
-        ...
+    ) -> GuildScheduledEvent: ...
 
     async def edit(
         self,
@@ -382,7 +377,7 @@ class GuildScheduledEvent(Hashable):
 
         Edits the guild scheduled event.
 
-        You must have :attr:`.Permissions.manage_events` permission to do this.
+        You must have :attr:`~Permissions.manage_events` permission to do this.
 
         .. versionchanged:: 2.6
             Updates must follow requirements of :func:`Guild.create_scheduled_event`
@@ -536,7 +531,7 @@ class GuildScheduledEvent(Hashable):
 
         Changes the event status to :attr:`~GuildScheduledEventStatus.active`.
 
-        You must have :attr:`.Permissions.manage_events` permission to do this.
+        You must have :attr:`~Permissions.manage_events` permission to do this.
 
         .. versionadded:: 2.7
 
@@ -570,7 +565,7 @@ class GuildScheduledEvent(Hashable):
 
         Changes the event status to :attr:`~GuildScheduledEventStatus.completed`.
 
-        You must have :attr:`.Permissions.manage_events` permission to do this.
+        You must have :attr:`~Permissions.manage_events` permission to do this.
 
         .. versionadded:: 2.7
 
@@ -604,7 +599,7 @@ class GuildScheduledEvent(Hashable):
 
         Changes the event status to :attr:`~GuildScheduledEventStatus.cancelled`.
 
-        You must have :attr:`.Permissions.manage_events` permission to do this.
+        You must have :attr:`~Permissions.manage_events` permission to do this.
 
         .. versionadded:: 2.7
 
