@@ -83,13 +83,18 @@ jobs:
 
       - uses: actions/checkout@v4
 
+      - name: Cache pip cache
+        uses: actions/cache@v4
+        with:
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/pyproject.toml') }}
+          path: ~/.cache/pip
+
       - name: Run prek
         id: prek
         uses: j178/prek-action@v1.0.3
         # given the interoperability and the nature of prek, we stay unpinned for now
         # note that this action by default uses the latest version of prek
         # this is exactly how the pre-commit action worked, and we never had any issues
-
 
   docs:
     # unlike the other workflows, we explicitly use the same version as
