@@ -141,7 +141,7 @@ def wrap_callback(coro: Callable[..., Coro[T]]) -> Callable[..., Coro[Optional[T
 
 
 def hooked_wrapped_callback(
-    command: "Command[Any, ..., T]", ctx: Context, coro: Callable[..., Coro[T]]
+    command: Command[Any, ..., T], ctx: Context, coro: Callable[..., Coro[T]]
 ) -> Callable[..., Coro[Optional[T]]]:
     # there's no way to type it nicely without causing issues down the line
     @functools.wraps(coro)
@@ -1307,7 +1307,7 @@ class GroupMixin(Generic[CogT]):
 
         def decorator(func: CommandCallback[CogT, ContextT, P, T]) -> Command[Any, Any, Any]:
             kwargs.setdefault("parent", self)
-            result = command(name=name, cls=cls, *args, **kwargs)(func)
+            result = command(name, cls, *args, **kwargs)(func)
             self.add_command(result)
             return result
 
@@ -1357,7 +1357,7 @@ class GroupMixin(Generic[CogT]):
 
         def decorator(func: CommandCallback[CogT, ContextT, P, T]) -> Group[Any, Any, Any]:
             kwargs.setdefault("parent", self)
-            result = group(name=name, cls=cls, *args, **kwargs)(func)
+            result = group(name, cls, *args, **kwargs)(func)
             self.add_command(result)
             return result
 

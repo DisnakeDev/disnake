@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 class BanEntry(NamedTuple):
     reason: Optional[str]
-    user: "User"
+    user: User
 
 
 class BulkBanResult(NamedTuple):

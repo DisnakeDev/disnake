@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-from typing import Optional, TypedDict
+from typing import List, Optional, TypedDict
 
 from .snowflake import Snowflake, SnowflakeList
 from .user import User
@@ -23,3 +23,7 @@ class Emoji(PartialEmoji, total=False):
 class EditEmoji(TypedDict):
     name: str
     roles: Optional[SnowflakeList]
+
+
+class ListAppEmoji(TypedDict):
+    items: List[Emoji]

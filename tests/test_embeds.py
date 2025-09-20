@@ -350,25 +350,25 @@ def test_field_restraints() -> None:
     embed.check_limits()
 
     embed.add_field(name="A", value="B")  # Breaks limit of 6000 chars
-    with pytest.raises(ValueError, match="^Embed total size"):
+    with pytest.raises(ValueError, match=r"^Embed total size"):
         embed.check_limits()
     embed.remove_field(3)
 
     embed.check_limits()
     embed.insert_field_at(index=3, name="A", value="B")  # Breaks limit of 6000 chars
-    with pytest.raises(ValueError, match="^Embed total size"):
+    with pytest.raises(ValueError, match=r"^Embed total size"):
         embed.check_limits()
     embed.remove_field(3)
 
     embed.set_field_at(index=2, name="A" * 113, value="B" * 1024)  # Breaks limit of 6000 chars
     assert len(embed) == 6001
-    with pytest.raises(ValueError, match="^Embed total size"):
+    with pytest.raises(ValueError, match=r"^Embed total size"):
         embed.check_limits()
     embed.set_field_at(index=2, name="A" * 112, value="B" * 1024)
     assert len(embed) == 6000
 
     embed.set_author(name="A")  # Breaks limit of 6000 chars
-    with pytest.raises(ValueError, match="^Embed total size"):
+    with pytest.raises(ValueError, match=r"^Embed total size"):
         embed.check_limits()
     embed.remove_author()
 
@@ -390,26 +390,26 @@ def test_field_restraints() -> None:
     embed.set_author(name="A" * 256)
     embed.check_limits()
     embed.set_author(name="B" * 257)
-    with pytest.raises(ValueError, match="^Embed author"):
+    with pytest.raises(ValueError, match=r"^Embed author"):
         embed.check_limits()
 
     embed = Embed(title="footer_check")
     embed.set_footer(text="A" * 2048)
     embed.check_limits()
     embed.set_footer(text="B" * 2049)
-    with pytest.raises(ValueError, match="^Embed footer"):
+    with pytest.raises(ValueError, match=r"^Embed footer"):
         embed.check_limits()
 
     embed = Embed(title="title_check" + "A" * 245)
     embed.check_limits()
     embed = Embed(title="title_check" + "A" * 246)
-    with pytest.raises(ValueError, match="^Embed title"):
+    with pytest.raises(ValueError, match=r"^Embed title"):
         embed.check_limits()
 
     embed = Embed(description="desc_check" + "A" * 4086)
     embed.check_limits()
     embed = Embed(description="desc_check" + "A" * 4087)
-    with pytest.raises(ValueError, match="^Embed description"):
+    with pytest.raises(ValueError, match=r"^Embed description"):
         embed.check_limits()
 
 

@@ -3,5 +3,7 @@
 extend = "../pyproject.toml"
 src = ["../"]
 
+lint.future-annotations = false
+
 [lint.isort]
 known-third-party = ["disnake"]

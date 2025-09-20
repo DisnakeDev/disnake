@@ -1,9 +1,8 @@
 # SPDX-License-Identifier: MIT
 
-## Pre-commit setup
-
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
+    # note that this version is ignored by prek when using the fastpath
     rev: v5.0.0
     hooks:
       - id: check-case-conflict
@@ -52,7 +51,7 @@ repos:
         exclude: 'changelog/|py.typed|disnake/bin/COPYING|.github/PULL_REQUEST_TEMPLATE.md|.github/CODEOWNERS|LICENSE|MANIFEST.in|.gitattributes'
 
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.12.12
+    rev: v0.13.0
     hooks:
       - id: ruff-format
       - id: ruff-check

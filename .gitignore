@@ -31,7 +31,6 @@ venvs/
 .coverage*
 coverage.xml
 __pypackages__/
-.pdm.toml
-.pdm-python
-pdm.lock
 disnake/_version.py
+.python-version
+uv.lock

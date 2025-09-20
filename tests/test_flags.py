@@ -160,16 +160,16 @@ class TestBaseFlags:
         assert ins.two is False
 
     def test__init__invalid_kwargs(self) -> None:
-        with pytest.raises(TypeError, match="'h' is not a valid flag name."):
+        with pytest.raises(TypeError, match=r"'h' is not a valid flag name."):
             TestFlags(h=True)
 
     def test_set_require_bool(self) -> None:
-        with pytest.raises(TypeError, match="Value to set for TestFlags must be a bool."):
+        with pytest.raises(TypeError, match=r"Value to set for TestFlags must be a bool."):
             TestFlags(one="h")  # type: ignore
 
         ins = TestFlags()
 
-        with pytest.raises(TypeError, match="Value to set for TestFlags must be a bool."):
+        with pytest.raises(TypeError, match=r"Value to set for TestFlags must be a bool."):
             ins.two = "h"  # type: ignore
 
     def test__eq__(self) -> None:

@@ -48,7 +48,7 @@ class BaseCodemodCommand(NoMetadataWrapperMixin, cst.CSTTransformer, codemod.Cod
 
             # n.b. doing it this way is faster than using `tree.code`,
             # which codegen's the entire module again
-            with open(self.context.filename, "r", encoding="utf-8") as f:
+            with open(self.context.filename, encoding="utf-8") as f:
                 code = f.read()
 
             if self.CHECK_MARKER not in code:

@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: MIT
+from __future__ import annotations
 
 import contextlib
 from typing import Any, Iterator, Type, TypeVar
@@ -16,7 +17,7 @@ I = TypeVar("I", bound=ui.Item)
 @contextlib.contextmanager
 def create_callback(
     view_type: Type[V], item_type: Type[I]
-) -> Iterator["ui.item.ItemCallbackType[V, I]"]:
+) -> Iterator[ui.item.ItemCallbackType[V, I]]:
     async def callback(self: V, item: I, inter) -> None:
         pytest.fail("callback should not be invoked")
 
