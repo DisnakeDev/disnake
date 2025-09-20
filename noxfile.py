@@ -444,7 +444,7 @@ def dev(session: nox.Session) -> None:
     session.run("pdm", "lock", "-dG:all", "-G:all", external=True)
     session.run("pdm", "venv", "create", "--force", external=True)
     session.run("pdm", "sync", "--clean-unselected", "-dG:all", "-G:all")
-    session.run("pdm", "run", "prek", "install", "--force")
+    session.run("pdm", "run", "prek", "install", "--overwrite")
 
 
 if __name__ == "__main__":
