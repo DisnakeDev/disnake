@@ -79,7 +79,7 @@ jobs:
         if: steps.lock-uv-deps.outcome == 'success'
         name: upload-uv-lock
         with:
-          key: uv-lock-resolved-${{ env.UV_RESOLUTION}}-${{hashFiles('uv.lock') }}
+          key: uv-lock-resolved-${{ env.UV_RESOLUTION }}-${{ hashFiles('uv.lock') }}
           path: uv.lock
           enableCrossOsArchive: true
 

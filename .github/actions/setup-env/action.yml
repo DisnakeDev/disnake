@@ -75,4 +75,4 @@ runs:
         UV_VENV_CLEAR: 1
       run: |
         uv venv .venv
-        echo "python-version=$($(uv python find) -c 'import sys; print(".".join(map(str,sys.version_info[:2])))')" >> $GITHUB_OUTPUT
+        echo "python-version=$(uv run python -c 'import sys; print(".".join(map(str,sys.version_info[:2])))')" >> $GITHUB_OUTPUT

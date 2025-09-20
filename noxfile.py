@@ -12,6 +12,7 @@ from __future__ import annotations
 import dataclasses
 import os
 import pathlib
+import shutil
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -267,12 +268,9 @@ def slotscheck(session: nox.Session) -> None:
 def build(session: nox.Session) -> None:
     """Build a dist."""
     install_deps(session)
-    import pathlib
 
     dist_path = pathlib.Path("dist")
     if dist_path.exists():
-        import shutil
-
         shutil.rmtree(dist_path)
     session.run("python", "-m", "build", "--outdir", "dist")
 
