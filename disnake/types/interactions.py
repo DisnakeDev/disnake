@@ -4,10 +4,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Dict, List, Literal, Optional, TypedDict, Union
 
-from typing_extensions import NotRequired
-
+from .appinfo import ApplicationIntegrationType
 from .channel import ChannelType
-from .components import Component, Modal
+from .components import MessageTopLevelComponent, Modal
 from .embed import Embed
 from .entitlement import Entitlement
 from .i18n import LocalizationDict
@@ -18,10 +17,14 @@ from .threads import ThreadMetadata
 from .user import User
 
 if TYPE_CHECKING:
+    from typing_extensions import NotRequired, TypeAlias
+
     from .message import AllowedMentions, Attachment, Message
 
 
 ApplicationCommandType = Literal[1, 2, 3]
+
+InteractionContextType = Literal[1, 2, 3]  # GUILD, BOT_DM, PRIVATE_CHANNEL
 
 
 class ApplicationCommand(TypedDict):
@@ -35,9 +38,11 @@ class ApplicationCommand(TypedDict):
     description_localizations: NotRequired[Optional[LocalizationDict]]
     options: NotRequired[List[ApplicationCommandOption]]
     default_member_permissions: NotRequired[Optional[str]]
-    dm_permission: NotRequired[Optional[bool]]
+    dm_permission: NotRequired[Optional[bool]]  # deprecated
     default_permission: NotRequired[bool]  # deprecated
     nsfw: NotRequired[bool]
+    integration_types: NotRequired[List[ApplicationIntegrationType]]
+    contexts: NotRequired[Optional[List[InteractionContextType]]]
     version: Snowflake
 
 
@@ -89,7 +94,7 @@ class GuildApplicationCommandPermissions(TypedDict):
 InteractionType = Literal[1, 2, 3, 4, 5]
 
 
-class ResolvedPartialChannel(TypedDict):
+class InteractionChannel(TypedDict):
     id: Snowflake
     type: ChannelType
     permissions: str
@@ -104,8 +109,10 @@ class InteractionDataResolved(TypedDict, total=False):
     users: Dict[Snowflake, User]
     members: Dict[Snowflake, Member]
     roles: Dict[Snowflake, Role]
-    channels: Dict[Snowflake, ResolvedPartialChannel]
-    # only in application commands
+    channels: Dict[Snowflake, InteractionChannel]
+
+
+class ApplicationCommandInteractionDataResolved(InteractionDataResolved, total=False):
     messages: Dict[Snowflake, Message]
     attachments: Dict[Snowflake, Attachment]
 
@@ -158,7 +165,7 @@ class ApplicationCommandInteractionData(TypedDict):
     id: Snowflake
     name: str
     type: ApplicationCommandType
-    resolved: NotRequired[InteractionDataResolved]
+    resolved: NotRequired[ApplicationCommandInteractionDataResolved]
     options: NotRequired[List[ApplicationCommandInteractionDataOption]]
     # this is the guild the command is registered to, not the guild the command was invoked in (see interaction.guild_id)
     guild_id: NotRequired[Snowflake]
@@ -169,39 +176,45 @@ class ApplicationCommandInteractionData(TypedDict):
 
 
 class _BaseComponentInteractionData(TypedDict):
+    id: int
+
+
+class _BaseCustomIdComponentInteractionData(_BaseComponentInteractionData):
     custom_id: str
-
-
-class _BaseSnowflakeComponentInteractionData(_BaseComponentInteractionData):
-    values: List[Snowflake]
-    resolved: NotRequired[InteractionDataResolved]
 
 
 ### Message interaction components
 
 
-class MessageComponentInteractionButtonData(_BaseComponentInteractionData):
+class _BaseSnowflakeMessageComponentInteractionData(_BaseCustomIdComponentInteractionData):
+    values: List[Snowflake]
+    resolved: NotRequired[InteractionDataResolved]
+
+
+class MessageComponentInteractionButtonData(_BaseCustomIdComponentInteractionData):
     component_type: Literal[2]
 
 
-class MessageComponentInteractionStringSelectData(_BaseComponentInteractionData):
+class MessageComponentInteractionStringSelectData(_BaseCustomIdComponentInteractionData):
     component_type: Literal[3]
     values: List[str]
 
 
-class MessageComponentInteractionUserSelectData(_BaseSnowflakeComponentInteractionData):
+class MessageComponentInteractionUserSelectData(_BaseSnowflakeMessageComponentInteractionData):
     component_type: Literal[5]
 
 
-class MessageComponentInteractionRoleSelectData(_BaseSnowflakeComponentInteractionData):
+class MessageComponentInteractionRoleSelectData(_BaseSnowflakeMessageComponentInteractionData):
     component_type: Literal[6]
 
 
-class MessageComponentInteractionMentionableSelectData(_BaseSnowflakeComponentInteractionData):
+class MessageComponentInteractionMentionableSelectData(
+    _BaseSnowflakeMessageComponentInteractionData
+):
     component_type: Literal[7]
 
 
-class MessageComponentInteractionChannelSelectData(_BaseSnowflakeComponentInteractionData):
+class MessageComponentInteractionChannelSelectData(_BaseSnowflakeMessageComponentInteractionData):
     component_type: Literal[8]
 
 
@@ -218,34 +231,90 @@ MessageComponentInteractionData = Union[
 ### Modal interaction components
 
 
-# TODO: add other select types
-class ModalInteractionStringSelectData(_BaseComponentInteractionData):
+class _BaseSnowflakeModalComponentInteractionData(_BaseCustomIdComponentInteractionData):
+    values: List[Snowflake]
+
+
+class ModalInteractionStringSelectData(_BaseCustomIdComponentInteractionData):
     type: Literal[3]
     values: List[str]
 
 
-class ModalInteractionTextInputData(_BaseComponentInteractionData):
+class ModalInteractionTextInputData(_BaseCustomIdComponentInteractionData):
     type: Literal[4]
     value: str
 
 
-ModalInteractionComponentData = Union[
+class ModalInteractionUserSelectData(_BaseSnowflakeModalComponentInteractionData):
+    type: Literal[5]
+
+
+class ModalInteractionRoleSelectData(_BaseSnowflakeModalComponentInteractionData):
+    type: Literal[6]
+
+
+class ModalInteractionMentionableSelectData(_BaseSnowflakeModalComponentInteractionData):
+    type: Literal[7]
+
+
+class ModalInteractionChannelSelectData(_BaseSnowflakeModalComponentInteractionData):
+    type: Literal[8]
+
+
+# top-level modal component data
+
+ModalInteractionActionRowChildData: TypeAlias = ModalInteractionTextInputData
+
+
+class ModalInteractionActionRowData(_BaseComponentInteractionData):
+    type: Literal[1]
+    components: List[ModalInteractionActionRowChildData]
+
+
+class ModalInteractionTextDisplayData(_BaseComponentInteractionData):
+    type: Literal[10]
+
+
+ModalInteractionLabelChildData = Union[
     ModalInteractionStringSelectData,
     ModalInteractionTextInputData,
+    ModalInteractionUserSelectData,
+    ModalInteractionRoleSelectData,
+    ModalInteractionMentionableSelectData,
+    ModalInteractionChannelSelectData,
 ]
 
 
-class ModalInteractionActionRow(TypedDict):
-    type: Literal[1]
-    components: List[ModalInteractionComponentData]
+class ModalInteractionLabelData(_BaseComponentInteractionData):
+    type: Literal[18]
+    component: ModalInteractionLabelChildData
+
+
+# innermost (non-layout) components, i.e. those containing user input
+ModalInteractionInnerComponentData = Union[
+    ModalInteractionActionRowChildData,
+    ModalInteractionLabelChildData,
+]
+
+# top-level components
+ModalInteractionComponentData = Union[
+    ModalInteractionActionRowData,
+    ModalInteractionTextDisplayData,
+    ModalInteractionLabelData,
+]
 
 
 class ModalInteractionData(TypedDict):
     custom_id: str
-    components: List[ModalInteractionActionRow]
+    components: List[ModalInteractionComponentData]
+    # resolved: NotRequired[InteractionDataResolved]  # undocumented
 
 
 ## Interactions
+
+
+# keys are stringified ApplicationInstallType's
+AuthorizingIntegrationOwners = Dict[str, Snowflake]
 
 
 # base type for *all* interactions
@@ -254,18 +323,22 @@ class _BaseInteraction(TypedDict):
     application_id: Snowflake
     token: str
     version: Literal[1]
+    app_permissions: str
+    attachment_size_limit: int
 
 
 # common properties in non-ping interactions
 class _BaseUserInteraction(_BaseInteraction):
-    # the docs specify `channel_id` as optional,
-    # but it is assumed to always exist on non-ping interactions
+    # the docs specify `channel_id` and 'channel` as optional,
+    # but they're assumed to always exist on non-ping interactions
     channel_id: Snowflake
+    channel: InteractionChannel
     locale: str
-    app_permissions: NotRequired[str]
     guild_id: NotRequired[Snowflake]
     guild_locale: NotRequired[str]
     entitlements: NotRequired[List[Entitlement]]
+    authorizing_integration_owners: NotRequired[AuthorizingIntegrationOwners]
+    context: NotRequired[InteractionContextType]
     # one of these two will always exist, according to docs
     member: NotRequired[MemberWithUser]
     user: NotRequired[User]
@@ -307,7 +380,7 @@ class InteractionApplicationCommandCallbackData(TypedDict, total=False):
     embeds: List[Embed]
     allowed_mentions: AllowedMentions
     flags: int
-    components: List[Component]
+    components: List[MessageTopLevelComponent]
     attachments: List[Attachment]
 
 
@@ -334,6 +407,38 @@ class InteractionMessageReference(TypedDict):
     type: InteractionType
     name: str
     user: User
+    member: NotRequired[Member]
+
+
+class _BaseInteractionMetadata(TypedDict):
+    id: Snowflake
+    type: InteractionType
+    user: User
+    authorizing_integration_owners: AuthorizingIntegrationOwners
+    original_response_message_id: NotRequired[Snowflake]  # only on followups
+
+
+class ApplicationCommandInteractionMetadata(_BaseInteractionMetadata):
+    target_user: NotRequired[User]  # only on user command interactions
+    target_message_id: NotRequired[Snowflake]  # only on message command interactions
+
+
+class MessageComponentInteractionMetadata(_BaseInteractionMetadata):
+    interacted_message_id: Snowflake
+
+
+class ModalInteractionMetadata(_BaseInteractionMetadata):
+    triggering_interaction_metadata: Union[
+        ApplicationCommandInteractionMetadata,
+        MessageComponentInteractionMetadata,
+    ]
+
+
+InteractionMetadata = Union[
+    ApplicationCommandInteractionMetadata,
+    MessageComponentInteractionMetadata,
+    ModalInteractionMetadata,
+]
 
 
 class EditApplicationCommand(TypedDict):
@@ -343,8 +448,10 @@ class EditApplicationCommand(TypedDict):
     description_localizations: NotRequired[Optional[LocalizationDict]]
     options: NotRequired[Optional[List[ApplicationCommandOption]]]
     default_member_permissions: NotRequired[Optional[str]]
-    dm_permission: NotRequired[bool]
+    dm_permission: NotRequired[bool]  # deprecated
     default_permission: NotRequired[bool]  # deprecated
     nsfw: NotRequired[bool]
-    # TODO: remove, this cannot be changed
+    integration_types: NotRequired[Optional[List[ApplicationIntegrationType]]]
+    contexts: NotRequired[Optional[List[InteractionContextType]]]
+    # n.b. this cannot be changed
     type: NotRequired[ApplicationCommandType]

@@ -43,67 +43,20 @@ Enumerations
 GuildScheduledEventEntityType
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. class:: GuildScheduledEventEntityType
-
-    Represents the type of a guild scheduled event entity.
-
-    .. versionadded:: 2.3
-
-    .. attribute:: stage_instance
-
-        The guild scheduled event will take place in a stage channel.
-
-    .. attribute:: voice
-
-        The guild scheduled event will take place in a voice channel.
-
-    .. attribute:: external
-
-        The guild scheduled event will take place in a custom location.
+.. autoclass:: GuildScheduledEventEntityType()
+    :members:
 
 GuildScheduledEventStatus
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. class:: GuildScheduledEventStatus
-
-    Represents the status of a guild scheduled event.
-
-    .. versionadded:: 2.3
-
-    .. attribute:: scheduled
-
-        Represents a scheduled event.
-
-    .. attribute:: active
-
-        Represents an active event.
-
-    .. attribute:: completed
-
-        Represents a completed event.
-
-    .. attribute:: canceled
-
-        Represents a canceled event.
-
-    .. attribute:: cancelled
-
-        An alias for :attr:`canceled`.
-
-        .. versionadded:: 2.6
+.. autoclass:: GuildScheduledEventStatus()
+    :members:
 
 GuildScheduledEventPrivacyLevel
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. class:: GuildScheduledEventPrivacyLevel
-
-    Represents the privacy level of a guild scheduled event.
-
-    .. versionadded:: 2.3
-
-    .. attribute:: guild_only
-
-        The guild scheduled event is only for a specific guild.
+.. autoclass:: GuildScheduledEventPrivacyLevel()
+    :members:
 
 Events
 ------

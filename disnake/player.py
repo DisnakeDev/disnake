@@ -25,9 +25,14 @@ if TYPE_CHECKING:
 
     from .voice_client import VoiceClient
 
-with warnings.catch_warnings():
-    warnings.simplefilter("ignore", DeprecationWarning)
-    import audioop
+try:
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", DeprecationWarning)
+        import audioop
+
+    has_audioop = True
+except ImportError:
+    has_audioop = False
 
 MISSING = utils.MISSING
 
@@ -552,8 +557,7 @@ class FFmpegOpusAudio(FFmpegAudio):
             fallback = cls._probe_codec_fallback
         else:
             raise TypeError(
-                "Expected str or callable for parameter 'probe', "
-                f"not '{method.__class__.__name__}'"
+                f"Expected str or callable for parameter 'probe', not '{method.__class__.__name__}'"
             )
 
         codec = bitrate = None
@@ -563,7 +567,7 @@ class FFmpegOpusAudio(FFmpegAudio):
         except Exception:
             if not fallback:
                 _log.exception("Probe '%s' using '%s' failed", method, executable)
-                return  # type: ignore
+                return None, None
 
             _log.exception("Probe '%s' using '%s' failed, trying fallback", method, executable)
             try:
@@ -576,8 +580,7 @@ class FFmpegOpusAudio(FFmpegAudio):
                 _log.info("Fallback probe found codec=%s, bitrate=%s", codec, bitrate)
         else:
             _log.info("Probe found codec=%s, bitrate=%s", codec, bitrate)
-        finally:
-            return codec, bitrate  # noqa: B012
+        return codec, bitrate
 
     @staticmethod
     def _probe_codec_native(
@@ -660,6 +663,11 @@ class PCMVolumeTransformer(AudioSource, Generic[AT]):
     """
 
     def __init__(self, original: AT, volume: float = 1.0) -> None:
+        if not has_audioop:
+            raise RuntimeError(
+                f"audioop-lts library needed in Python >=3.13 in order to use {type(self).__name__}"
+            )
+
         if not isinstance(original, AudioSource):
             raise TypeError(f"expected AudioSource not {original.__class__.__name__}.")
 
@@ -683,7 +691,7 @@ class PCMVolumeTransformer(AudioSource, Generic[AT]):
 
     def read(self) -> bytes:
         ret = self.original.read()
-        return audioop.mul(ret, 2, min(self._volume, 2.0))
+        return audioop.mul(ret, 2, min(self._volume, 2.0))  # type: ignore[reportPossiblyUnboundVariable]
 
 
 class AudioPlayer(threading.Thread):

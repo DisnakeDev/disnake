@@ -31,6 +31,7 @@ from disnake.utils import (
     _generated,
     _overload_with_permissions,
     get_signature_parameters,
+    iscoroutinefunction,
     unwrap_function,
 )
 
@@ -102,6 +103,7 @@ __all__ = (
 MISSING: Any = disnake.utils.MISSING
 
 T = TypeVar("T")
+VT = TypeVar("VT")
 CogT = TypeVar("CogT", bound="Optional[Cog]")
 CommandT = TypeVar("CommandT", bound="Command")
 ContextT = TypeVar("ContextT", bound="Context")
@@ -121,15 +123,16 @@ else:
     P = TypeVar("P")
 
 
-def wrap_callback(coro):
+def wrap_callback(coro: Callable[..., Coro[T]]) -> Callable[..., Coro[Optional[T]]]:
+    # there's no way to type it nicely without causing issues down the line
     @functools.wraps(coro)
-    async def wrapped(*args, **kwargs):
+    async def wrapped(*args: Any, **kwargs: Any) -> Optional[T]:
         try:
             ret = await coro(*args, **kwargs)
         except CommandError:
             raise
         except asyncio.CancelledError:
-            return
+            return None
         except Exception as exc:
             raise CommandInvokeError(exc) from exc
         return ret
@@ -137,9 +140,12 @@ def wrap_callback(coro):
     return wrapped
 
 
-def hooked_wrapped_callback(command, ctx, coro):
+def hooked_wrapped_callback(
+    command: Command[Any, ..., T], ctx: Context, coro: Callable[..., Coro[T]]
+) -> Callable[..., Coro[Optional[T]]]:
+    # there's no way to type it nicely without causing issues down the line
     @functools.wraps(coro)
-    async def wrapped(*args, **kwargs):
+    async def wrapped(*args: Any, **kwargs: Any) -> Optional[T]:
         try:
             ret = await coro(*args, **kwargs)
         except CommandError:
@@ -147,13 +153,13 @@ def hooked_wrapped_callback(command, ctx, coro):
             raise
         except asyncio.CancelledError:
             ctx.command_failed = True
-            return
+            return None
         except Exception as exc:
             ctx.command_failed = True
             raise CommandInvokeError(exc) from exc
         finally:
             if command._max_concurrency is not None:
-                await command._max_concurrency.release(ctx)
+                await command._max_concurrency.release(ctx)  # type: ignore
 
             await command.call_after_hooks(ctx)
         return ret
@@ -161,23 +167,23 @@ def hooked_wrapped_callback(command, ctx, coro):
     return wrapped
 
 
-class _CaseInsensitiveDict(dict):
-    def __contains__(self, k) -> bool:
+class _CaseInsensitiveDict(Dict[str, VT]):
+    def __contains__(self, k: str) -> bool:
         return super().__contains__(k.casefold())
 
-    def __delitem__(self, k):
+    def __delitem__(self, k: str) -> None:
         return super().__delitem__(k.casefold())
 
-    def __getitem__(self, k):
+    def __getitem__(self, k: str) -> VT:
         return super().__getitem__(k.casefold())
 
-    def get(self, k, default=None):
+    def get(self, k: str, default: T = None) -> Union[VT, T]:
         return super().get(k.casefold(), default)
 
-    def pop(self, k, default=None):
+    def pop(self, k: str, default: T = None) -> Union[VT, T]:
         return super().pop(k.casefold(), default)
 
-    def __setitem__(self, k, v) -> None:
+    def __setitem__(self, k: str, v: VT) -> None:
         super().__setitem__(k.casefold(), v)
 
 
@@ -278,7 +284,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         func: CommandCallback[CogT, ContextT, P, T],
         **kwargs: Any,
     ) -> None:
-        if not asyncio.iscoroutinefunction(func):
+        if not iscoroutinefunction(func):
             raise TypeError("Callback must be a coroutine.")
 
         name = kwargs.get("name") or func.__name__
@@ -508,9 +514,8 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
                     stop_propagation = await wrapped(ctx, error)
                     # User has an option to cancel the global error handler by returning True
         finally:
-            if stop_propagation:
-                return  # noqa: B012
-            ctx.bot.dispatch("command_error", ctx, error)
+            if not stop_propagation:
+                ctx.bot.dispatch("command_error", ctx, error)
 
     async def transform(self, ctx: Context, param: inspect.Parameter) -> Any:
         required = param.default is param.empty
@@ -617,7 +622,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         in ``?one two three`` the parent name would be ``one two``.
         """
         entries = []
-        command: Command[Any, ..., Any] = self
+        command: Command[CogT, ..., Any] = self
         # command.parent is type-hinted as GroupMixin some attributes are resolved via MRO
         while command.parent is not None:
             command = command.parent  # type: ignore
@@ -626,7 +631,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         return " ".join(reversed(entries))
 
     @property
-    def parents(self) -> List[Group]:
+    def parents(self) -> List[Group[CogT, ..., Any]]:
         """List[:class:`Group`]: Retrieves the parents of this command.
 
         If the command has no parents then it returns an empty :class:`list`.
@@ -636,7 +641,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         .. versionadded:: 1.1
         """
         entries = []
-        command: Command[Any, ..., Any] = self
+        command: Command[CogT, ..., Any] = self
         while command.parent is not None:
             command = command.parent  # type: ignore
             entries.append(command)
@@ -644,7 +649,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         return entries
 
     @property
-    def root_parent(self) -> Optional[Group]:
+    def root_parent(self) -> Optional[Group[CogT, ..., Any]]:
         """Optional[:class:`Group`]: Retrieves the root parent of this command.
 
         If the command has no parents then it returns ``None``.
@@ -886,7 +891,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         TypeError
             The coroutine passed is not actually a coroutine.
         """
-        if not asyncio.iscoroutinefunction(coro):
+        if not iscoroutinefunction(coro):
             raise TypeError("The error handler must be a coroutine.")
 
         self.on_error: Error = coro
@@ -922,7 +927,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         TypeError
             The coroutine passed is not actually a coroutine.
         """
-        if not asyncio.iscoroutinefunction(coro):
+        if not iscoroutinefunction(coro):
             raise TypeError("The pre-invoke hook must be a coroutine.")
 
         self._before_invoke = coro
@@ -949,7 +954,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         TypeError
             The coroutine passed is not actually a coroutine.
         """
-        if not asyncio.iscoroutinefunction(coro):
+        if not iscoroutinefunction(coro):
             raise TypeError("The post-invoke hook must be a coroutine.")
 
         self._after_invoke = coro
@@ -975,7 +980,9 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         return ""
 
     def _is_typing_optional(self, annotation: Union[T, Optional[T]]) -> TypeGuard[Optional[T]]:
-        return getattr(annotation, "__origin__", None) is Union and type(None) in annotation.__args__  # type: ignore
+        return (
+            getattr(annotation, "__origin__", None) is Union and type(None) in annotation.__args__  # type: ignore
+        )
 
     @property
     def signature(self) -> str:
@@ -987,7 +994,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         if not params:
             return ""
 
-        result = []
+        result: List[str] = []
         for name, param in params.items():
             greedy = isinstance(param.annotation, Greedy)
             optional = False  # postpone evaluation of if it's an optional argument
@@ -1263,8 +1270,7 @@ class GroupMixin(Generic[CogT]):
         cls: Type[CommandT],
         *args: Any,
         **kwargs: Any,
-    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], CommandT]:
-        ...
+    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], CommandT]: ...
 
     @overload
     def command(
@@ -1273,8 +1279,7 @@ class GroupMixin(Generic[CogT]):
         *args: Any,
         cls: Type[CommandT],
         **kwargs: Any,
-    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], CommandT]:
-        ...
+    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], CommandT]: ...
 
     @overload
     def command(
@@ -1282,8 +1287,7 @@ class GroupMixin(Generic[CogT]):
         name: str = ...,
         *args: Any,
         **kwargs: Any,
-    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], Command[CogT, P, T]]:
-        ...
+    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], Command[CogT, P, T]]: ...
 
     def command(
         self,
@@ -1303,7 +1307,7 @@ class GroupMixin(Generic[CogT]):
 
         def decorator(func: CommandCallback[CogT, ContextT, P, T]) -> Command[Any, Any, Any]:
             kwargs.setdefault("parent", self)
-            result = command(name=name, cls=cls, *args, **kwargs)(func)
+            result = command(name, cls, *args, **kwargs)(func)
             self.add_command(result)
             return result
 
@@ -1316,8 +1320,7 @@ class GroupMixin(Generic[CogT]):
         cls: Type[GroupT],
         *args: Any,
         **kwargs: Any,
-    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], GroupT]:
-        ...
+    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], GroupT]: ...
 
     @overload
     def group(
@@ -1326,8 +1329,7 @@ class GroupMixin(Generic[CogT]):
         *args: Any,
         cls: Type[GroupT],
         **kwargs: Any,
-    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], GroupT]:
-        ...
+    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], GroupT]: ...
 
     @overload
     def group(
@@ -1335,8 +1337,7 @@ class GroupMixin(Generic[CogT]):
         name: str = ...,
         *args: Any,
         **kwargs: Any,
-    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], Group[CogT, P, T]]:
-        ...
+    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], Group[CogT, P, T]]: ...
 
     def group(
         self,
@@ -1356,7 +1357,7 @@ class GroupMixin(Generic[CogT]):
 
         def decorator(func: CommandCallback[CogT, ContextT, P, T]) -> Group[Any, Any, Any]:
             kwargs.setdefault("parent", self)
-            result = group(name=name, cls=cls, *args, **kwargs)(func)
+            result = group(name, cls, *args, **kwargs)(func)
             self.add_command(result)
             return result
 
@@ -1483,25 +1484,23 @@ if TYPE_CHECKING:
         @overload
         def __call__(
             self, func: Callable[Concatenate[ContextT, P], Coro[T]]
-        ) -> Command[None, P, T]:
-            ...
+        ) -> Command[None, P, T]: ...
 
         @overload
         def __call__(
             self, func: Callable[Concatenate[CogT, ContextT, P], Coro[T]]
-        ) -> Command[CogT, P, T]:
-            ...
+        ) -> Command[CogT, P, T]: ...
 
     class GroupDecorator(Protocol):
         @overload
-        def __call__(self, func: Callable[Concatenate[ContextT, P], Coro[T]]) -> Group[None, P, T]:
-            ...
+        def __call__(
+            self, func: Callable[Concatenate[ContextT, P], Coro[T]]
+        ) -> Group[None, P, T]: ...
 
         @overload
         def __call__(
             self, func: Callable[Concatenate[CogT, ContextT, P], Coro[T]]
-        ) -> Group[CogT, P, T]:
-            ...
+        ) -> Group[CogT, P, T]: ...
 
 
 # Small explanation regarding these overloads:
@@ -1518,8 +1517,7 @@ def command(
     name: str,
     cls: Type[CommandT],
     **attrs: Any,
-) -> Callable[[CommandCallback[CogT, ContextT, P, T]], CommandT]:
-    ...
+) -> Callable[[CommandCallback[CogT, ContextT, P, T]], CommandT]: ...
 
 
 @overload
@@ -1528,16 +1526,14 @@ def command(
     *,
     cls: Type[CommandT],
     **attrs: Any,
-) -> Callable[[CommandCallback[CogT, ContextT, P, T]], CommandT]:
-    ...
+) -> Callable[[CommandCallback[CogT, ContextT, P, T]], CommandT]: ...
 
 
 @overload
 def command(
     name: str = ...,
     **attrs: Any,
-) -> CommandDecorator:
-    ...
+) -> CommandDecorator: ...
 
 
 def command(
@@ -1590,8 +1586,7 @@ def group(
     name: str,
     cls: Type[GroupT],
     **attrs: Any,
-) -> Callable[[CommandCallback[CogT, ContextT, P, T]], GroupT]:
-    ...
+) -> Callable[[CommandCallback[CogT, ContextT, P, T]], GroupT]: ...
 
 
 @overload
@@ -1600,16 +1595,14 @@ def group(
     *,
     cls: Type[GroupT],
     **attrs: Any,
-) -> Callable[[CommandCallback[CogT, ContextT, P, T]], GroupT]:
-    ...
+) -> Callable[[CommandCallback[CogT, ContextT, P, T]], GroupT]: ...
 
 
 @overload
 def group(
     name: str = ...,
     **attrs: Any,
-) -> GroupDecorator:
-    ...
+) -> GroupDecorator: ...
 
 
 def group(
@@ -1703,7 +1696,9 @@ def check(predicate: Check) -> Callable[[T], T]:
         The predicate to check if the command should be invoked.
     """
 
-    def decorator(func: Union[Command, CoroFunc]) -> Union[Command, CoroFunc]:
+    def decorator(
+        func: Union[Command[Any, ..., Any], CoroFunc],
+    ) -> Union[Command[Any, ..., Any], CoroFunc]:
         if hasattr(func, "__command_flag__"):
             func.checks.append(predicate)
         else:
@@ -1714,7 +1709,7 @@ def check(predicate: Check) -> Callable[[T], T]:
 
         return func
 
-    if asyncio.iscoroutinefunction(predicate):
+    if iscoroutinefunction(predicate):
         decorator.predicate = predicate
     else:
 
@@ -1947,7 +1942,7 @@ def bot_has_role(item: int) -> Callable[[T], T]:
         if ctx.guild is None:
             raise NoPrivateMessage
 
-        me = cast(disnake.Member, ctx.me)
+        me = cast("disnake.Member", ctx.me)
         if isinstance(item, int):
             role = disnake.utils.get(me.roles, id=item)
         else:
@@ -1977,7 +1972,7 @@ def bot_has_any_role(*items: int) -> Callable[[T], T]:
         if ctx.guild is None:
             raise NoPrivateMessage
 
-        me = cast(disnake.Member, ctx.me)
+        me = cast("disnake.Member", ctx.me)
         getter = functools.partial(disnake.utils.get, me.roles)
         if any(
             getter(id=item) is not None if isinstance(item, int) else getter(name=item) is not None
@@ -2026,12 +2021,14 @@ def has_permissions(
     moderate_members: bool = ...,
     move_members: bool = ...,
     mute_members: bool = ...,
+    pin_messages: bool = ...,
     priority_speaker: bool = ...,
     read_message_history: bool = ...,
     read_messages: bool = ...,
     request_to_speak: bool = ...,
     send_messages: bool = ...,
     send_messages_in_threads: bool = ...,
+    send_polls: bool = ...,
     send_tts_messages: bool = ...,
     send_voice_messages: bool = ...,
     speak: bool = ...,
@@ -2039,6 +2036,7 @@ def has_permissions(
     stream: bool = ...,
     use_application_commands: bool = ...,
     use_embedded_activities: bool = ...,
+    use_external_apps: bool = ...,
     use_external_emojis: bool = ...,
     use_external_sounds: bool = ...,
     use_external_stickers: bool = ...,
@@ -2049,14 +2047,12 @@ def has_permissions(
     view_channel: bool = ...,
     view_creator_monetization_analytics: bool = ...,
     view_guild_insights: bool = ...,
-) -> Callable[[T], T]:
-    ...
+) -> Callable[[T], T]: ...
 
 
 @overload
 @_generated
-def has_permissions() -> Callable[[T], T]:
-    ...
+def has_permissions() -> Callable[[T], T]: ...
 
 
 @_overload_with_permissions
@@ -2150,12 +2146,14 @@ def bot_has_permissions(
     moderate_members: bool = ...,
     move_members: bool = ...,
     mute_members: bool = ...,
+    pin_messages: bool = ...,
     priority_speaker: bool = ...,
     read_message_history: bool = ...,
     read_messages: bool = ...,
     request_to_speak: bool = ...,
     send_messages: bool = ...,
     send_messages_in_threads: bool = ...,
+    send_polls: bool = ...,
     send_tts_messages: bool = ...,
     send_voice_messages: bool = ...,
     speak: bool = ...,
@@ -2163,6 +2161,7 @@ def bot_has_permissions(
     stream: bool = ...,
     use_application_commands: bool = ...,
     use_embedded_activities: bool = ...,
+    use_external_apps: bool = ...,
     use_external_emojis: bool = ...,
     use_external_sounds: bool = ...,
     use_external_stickers: bool = ...,
@@ -2173,14 +2172,12 @@ def bot_has_permissions(
     view_channel: bool = ...,
     view_creator_monetization_analytics: bool = ...,
     view_guild_insights: bool = ...,
-) -> Callable[[T], T]:
-    ...
+) -> Callable[[T], T]: ...
 
 
 @overload
 @_generated
-def bot_has_permissions() -> Callable[[T], T]:
-    ...
+def bot_has_permissions() -> Callable[[T], T]: ...
 
 
 @_overload_with_permissions
@@ -2252,12 +2249,14 @@ def has_guild_permissions(
     moderate_members: bool = ...,
     move_members: bool = ...,
     mute_members: bool = ...,
+    pin_messages: bool = ...,
     priority_speaker: bool = ...,
     read_message_history: bool = ...,
     read_messages: bool = ...,
     request_to_speak: bool = ...,
     send_messages: bool = ...,
     send_messages_in_threads: bool = ...,
+    send_polls: bool = ...,
     send_tts_messages: bool = ...,
     send_voice_messages: bool = ...,
     speak: bool = ...,
@@ -2265,6 +2264,7 @@ def has_guild_permissions(
     stream: bool = ...,
     use_application_commands: bool = ...,
     use_embedded_activities: bool = ...,
+    use_external_apps: bool = ...,
     use_external_emojis: bool = ...,
     use_external_sounds: bool = ...,
     use_external_stickers: bool = ...,
@@ -2275,14 +2275,12 @@ def has_guild_permissions(
     view_channel: bool = ...,
     view_creator_monetization_analytics: bool = ...,
     view_guild_insights: bool = ...,
-) -> Callable[[T], T]:
-    ...
+) -> Callable[[T], T]: ...
 
 
 @overload
 @_generated
-def has_guild_permissions() -> Callable[[T], T]:
-    ...
+def has_guild_permissions() -> Callable[[T], T]: ...
 
 
 @_overload_with_permissions
@@ -2351,12 +2349,14 @@ def bot_has_guild_permissions(
     moderate_members: bool = ...,
     move_members: bool = ...,
     mute_members: bool = ...,
+    pin_messages: bool = ...,
     priority_speaker: bool = ...,
     read_message_history: bool = ...,
     read_messages: bool = ...,
     request_to_speak: bool = ...,
     send_messages: bool = ...,
     send_messages_in_threads: bool = ...,
+    send_polls: bool = ...,
     send_tts_messages: bool = ...,
     send_voice_messages: bool = ...,
     speak: bool = ...,
@@ -2364,6 +2364,7 @@ def bot_has_guild_permissions(
     stream: bool = ...,
     use_application_commands: bool = ...,
     use_embedded_activities: bool = ...,
+    use_external_apps: bool = ...,
     use_external_emojis: bool = ...,
     use_external_sounds: bool = ...,
     use_external_stickers: bool = ...,
@@ -2374,14 +2375,12 @@ def bot_has_guild_permissions(
     view_channel: bool = ...,
     view_creator_monetization_analytics: bool = ...,
     view_guild_insights: bool = ...,
-) -> Callable[[T], T]:
-    ...
+) -> Callable[[T], T]: ...
 
 
 @overload
 @_generated
-def bot_has_guild_permissions() -> Callable[[T], T]:
-    ...
+def bot_has_guild_permissions() -> Callable[[T], T]: ...
 
 
 @_overload_with_permissions
@@ -2418,11 +2417,14 @@ def dm_only() -> Callable[[T], T]:
     This check raises a special exception, :exc:`.PrivateMessageOnly`
     that is inherited from :exc:`.CheckFailure`.
 
+    .. note::
+        For application commands, consider setting the allowed :ref:`contexts <app_command_contexts>` instead.
+
     .. versionadded:: 1.1
     """
 
     def predicate(ctx: AnyContext) -> bool:
-        if ctx.guild is not None:
+        if (ctx.guild if isinstance(ctx, Context) else ctx.guild_id) is not None:
             raise PrivateMessageOnly
         return True
 
@@ -2436,10 +2438,13 @@ def guild_only() -> Callable[[T], T]:
 
     This check raises a special exception, :exc:`.NoPrivateMessage`
     that is inherited from :exc:`.CheckFailure`.
+
+    .. note::
+        For application commands, consider setting the allowed :ref:`contexts <app_command_contexts>` instead.
     """
 
     def predicate(ctx: AnyContext) -> bool:
-        if ctx.guild is None:
+        if (ctx.guild if isinstance(ctx, Context) else ctx.guild_id) is None:
             raise NoPrivateMessage
         return True
 
@@ -2525,7 +2530,9 @@ def cooldown(
             Callables are now supported for custom bucket types.
     """
 
-    def decorator(func: Union[Command, CoroFunc]) -> Union[Command, CoroFunc]:
+    def decorator(
+        func: Union[Command[CogT, P, T], CoroFunc],
+    ) -> Union[Command[CogT, P, T], CoroFunc]:
         if hasattr(func, "__command_flag__"):
             func._buckets = CooldownMapping(Cooldown(rate, per), type)
         else:
@@ -2569,7 +2576,9 @@ def dynamic_cooldown(
     if not callable(cooldown):
         raise TypeError("A callable must be provided")
 
-    def decorator(func: Union[Command, CoroFunc]) -> Union[Command, CoroFunc]:
+    def decorator(
+        func: Union[Command[CogT, P, T], CoroFunc],
+    ) -> Union[Command[CogT, P, T], CoroFunc]:
         if hasattr(func, "__command_flag__"):
             func._buckets = DynamicCooldownMapping(cooldown, type)
         else:
@@ -2605,7 +2614,9 @@ def max_concurrency(
         then the command waits until it can be executed.
     """
 
-    def decorator(func: Union[Command, CoroFunc]) -> Union[Command, CoroFunc]:
+    def decorator(
+        func: Union[Command[CogT, P, T], CoroFunc],
+    ) -> Union[Command[CogT, P, T], CoroFunc]:
         value = MaxConcurrency(number, per=per, wait=wait)
         if hasattr(func, "__command_flag__"):
             func._max_concurrency = value
@@ -2654,7 +2665,9 @@ def before_invoke(coro) -> Callable[[T], T]:
         bot.add_cog(What())
     """
 
-    def decorator(func: Union[Command, CoroFunc]) -> Union[Command, CoroFunc]:
+    def decorator(
+        func: Union[Command[CogT, P, T], CoroFunc],
+    ) -> Union[Command[CogT, P, T], CoroFunc]:
         if hasattr(func, "__command_flag__"):
             func.before_invoke(coro)
         else:
@@ -2673,7 +2686,9 @@ def after_invoke(coro) -> Callable[[T], T]:
     .. versionadded:: 1.4
     """
 
-    def decorator(func: Union[Command, CoroFunc]) -> Union[Command, CoroFunc]:
+    def decorator(
+        func: Union[Command[CogT, P, T], CoroFunc],
+    ) -> Union[Command[CogT, P, T], CoroFunc]:
         if hasattr(func, "__command_flag__"):
             func.after_invoke(coro)
         else:

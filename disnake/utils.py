@@ -48,7 +48,35 @@ from typing import (
 )
 from urllib.parse import parse_qs, urlencode
 
+if TYPE_CHECKING:
+    from typing_extensions import Self
+
 from .enums import Locale
+
+if sys.version_info >= (3, 14):
+    import threading
+    from inspect import iscoroutinefunction as iscoroutinefunction
+
+    def get_event_loop():
+        try:
+            # If there is no event loop, this will raise a RuntimeError starting with Python 3.14+.
+            # In that case, we create and set a new loop below.
+            # This is more of a bandaid fix, we should really use asyncio.run in the long term.
+            return asyncio.get_event_loop()
+        except RuntimeError:
+            if threading.current_thread() is not threading.main_thread():
+                raise
+            asyncio.set_event_loop(loop := asyncio.new_event_loop())
+            return loop
+else:
+    from asyncio import iscoroutinefunction as iscoroutinefunction
+
+    def get_event_loop():
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", DeprecationWarning)
+            # get_event_loop emits deprecation warnings in 3.10-3.13
+            return asyncio.get_event_loop()
+
 
 try:
     import orjson
@@ -120,6 +148,7 @@ if TYPE_CHECKING:
     from .invite import Invite
     from .permissions import Permissions
     from .template import Template
+    from .types.appinfo import ApplicationIntegrationType as ApplicationIntegrationTypeLiteral
 
     class _RequestLike(Protocol):
         headers: Mapping[str, Any]
@@ -144,12 +173,10 @@ class CachedSlotProperty(Generic[T, T_co]):
         self.__doc__ = function.__doc__
 
     @overload
-    def __get__(self, instance: None, owner: Type[Any]) -> Self:
-        ...
+    def __get__(self, instance: None, owner: Type[Any]) -> Self: ...
 
     @overload
-    def __get__(self, instance: T, owner: Type[Any]) -> T_co:
-        ...
+    def __get__(self, instance: T, owner: Type[Any]) -> T_co: ...
 
     def __get__(self, instance: Optional[T], owner: Type[Any]) -> Any:
         if instance is None:
@@ -210,18 +237,15 @@ class SequenceProxy(Sequence[T_co]):
 
 
 @overload
-def parse_time(timestamp: None) -> None:
-    ...
+def parse_time(timestamp: None) -> None: ...
 
 
 @overload
-def parse_time(timestamp: str) -> datetime.datetime:
-    ...
+def parse_time(timestamp: str) -> datetime.datetime: ...
 
 
 @overload
-def parse_time(timestamp: Optional[str]) -> Optional[datetime.datetime]:
-    ...
+def parse_time(timestamp: Optional[str]) -> Optional[datetime.datetime]: ...
 
 
 def parse_time(timestamp: Optional[str]) -> Optional[datetime.datetime]:
@@ -231,13 +255,11 @@ def parse_time(timestamp: Optional[str]) -> Optional[datetime.datetime]:
 
 
 @overload
-def isoformat_utc(dt: datetime.datetime) -> str:
-    ...
+def isoformat_utc(dt: datetime.datetime) -> str: ...
 
 
 @overload
-def isoformat_utc(dt: Optional[datetime.datetime]) -> Optional[str]:
-    ...
+def isoformat_utc(dt: Optional[datetime.datetime]) -> Optional[str]: ...
 
 
 def isoformat_utc(dt: Optional[datetime.datetime]) -> Optional[str]:
@@ -246,16 +268,19 @@ def isoformat_utc(dt: Optional[datetime.datetime]) -> Optional[str]:
     return None
 
 
-def copy_doc(original: Callable) -> Callable[[T], T]:
-    def decorator(overriden: T) -> T:
-        overriden.__doc__ = original.__doc__
-        overriden.__signature__ = _signature(original)  # type: ignore
-        return overriden
+def copy_doc(original: Union[Callable[..., Any], property]) -> Callable[[T], T]:
+    def decorator(overridden: T) -> T:
+        overridden.__doc__ = original.__doc__
+        if callable(original):
+            overridden.__signature__ = _signature(original)  # type: ignore
+        return overridden
 
     return decorator
 
 
-def deprecated(instead: Optional[str] = None) -> Callable[[Callable[P, T]], Callable[P, T]]:
+def deprecated(
+    instead: Optional[str] = None, *, skip_internal_frames: bool = False
+) -> Callable[[Callable[P, T]], Callable[P, T]]:
     def actual_decorator(func: Callable[P, T]) -> Callable[P, T]:
         @functools.wraps(func)
         def decorated(*args: P.args, **kwargs: P.kwargs) -> T:
@@ -264,7 +289,7 @@ def deprecated(instead: Optional[str] = None) -> Callable[[Callable[P, T]], Call
             else:
                 msg = f"{func.__name__} is deprecated."
 
-            warn_deprecated(msg, stacklevel=2)
+            warn_deprecated(msg, stacklevel=2, skip_internal_frames=skip_internal_frames)
             return func(*args, **kwargs)
 
         return decorated
@@ -272,7 +297,18 @@ def deprecated(instead: Optional[str] = None) -> Callable[[Callable[P, T]], Call
     return actual_decorator
 
 
-def warn_deprecated(*args: Any, stacklevel: int = 1, **kwargs: Any) -> None:
+_root_module_path = os.path.join(os.path.dirname(__file__), "")  # add trailing slash
+
+
+def warn_deprecated(
+    *args: Any, stacklevel: int = 1, skip_internal_frames: bool = False, **kwargs: Any
+) -> None:
+    # NOTE: skip_file_prefixes was added in 3.12; in older versions,
+    # we'll just have to live with the warning location possibly being wrong
+    if sys.version_info >= (3, 12) and skip_internal_frames:
+        kwargs["skip_file_prefixes"] = (_root_module_path,)
+        stacklevel = 1  # reset stacklevel, assume we just want the first frame outside library code
+
     old_filters = warnings.filters[:]
     try:
         warnings.simplefilter("always", DeprecationWarning)
@@ -289,9 +325,9 @@ def oauth_url(
     redirect_uri: str = MISSING,
     scopes: Iterable[str] = MISSING,
     disable_guild_select: bool = False,
+    integration_type: ApplicationIntegrationTypeLiteral = MISSING,
 ) -> str:
-    """A helper function that returns the OAuth2 URL for inviting the bot
-    into guilds.
+    """A helper function that returns the OAuth2 URL for authorizing the application.
 
     Parameters
     ----------
@@ -314,6 +350,11 @@ def oauth_url(
 
         .. versionadded:: 2.0
 
+    integration_type: :class:`int`
+        An optional integration type/installation type to install the application with.
+
+        .. versionadded:: 2.10
+
     Returns
     -------
     :class:`str`
@@ -329,6 +370,8 @@ def oauth_url(
         url += "&response_type=code&" + urlencode({"redirect_uri": redirect_uri})
     if disable_guild_select:
         url += "&disable_guild_select=true"
+    if integration_type is not MISSING:
+        url += f"&integration_type={integration_type}"
     return url
 
 
@@ -487,11 +530,13 @@ _mime_type_extensions = {
     "image/jpeg": ".jpg",
     "image/gif": ".gif",
     "image/webp": ".webp",
+    "audio/mpeg": ".mp3",
+    "audio/ogg": ".ogg",
 }
 
 
-def _get_mime_type_for_image(data: _BytesLike) -> str:
-    if data[0:8] == b"\x89\x50\x4E\x47\x0D\x0A\x1A\x0A":
+def _get_mime_type_for_data(data: _BytesLike) -> str:
+    if data[0:8] == b"\x89\x50\x4e\x47\x0d\x0a\x1a\x0a":
         return "image/png"
     elif data[0:3] == b"\xff\xd8\xff" or data[6:10] in (b"JFIF", b"Exif"):
         return "image/jpeg"
@@ -499,33 +544,37 @@ def _get_mime_type_for_image(data: _BytesLike) -> str:
         return "image/gif"
     elif data[0:4] == b"RIFF" and data[8:12] == b"WEBP":
         return "image/webp"
+    elif data[0:3] == b"ID3" or data[0:2] in (b"\xff\xfb", b"\xff\xf3", b"\xff\xf2"):
+        # n.b. this doesn't support the unofficial MPEG-2.5 frame header (which starts with 0xFFEx).
+        # Discord also doesn't accept it.
+        return "audio/mpeg"
+    elif data[0:4] == b"OggS":
+        return "audio/ogg"
     else:
-        raise ValueError("Unsupported image type given")
+        raise ValueError("Unsupported file type provided")
 
 
 def _bytes_to_base64_data(data: _BytesLike) -> str:
     fmt = "data:{mime};base64,{data}"
-    mime = _get_mime_type_for_image(data)
+    mime = _get_mime_type_for_data(data)
     b64 = b64encode(data).decode("ascii")
     return fmt.format(mime=mime, data=b64)
 
 
-def _get_extension_for_image(data: _BytesLike) -> Optional[str]:
+def _get_extension_for_data(data: _BytesLike) -> Optional[str]:
     try:
-        mime_type = _get_mime_type_for_image(data)
+        mime_type = _get_mime_type_for_data(data)
     except ValueError:
         return None
     return _mime_type_extensions.get(mime_type)
 
 
 @overload
-async def _assetbytes_to_base64_data(data: None) -> None:
-    ...
+async def _assetbytes_to_base64_data(data: None) -> None: ...
 
 
 @overload
-async def _assetbytes_to_base64_data(data: AssetBytes) -> str:
-    ...
+async def _assetbytes_to_base64_data(data: AssetBytes) -> str: ...
 
 
 async def _assetbytes_to_base64_data(data: Optional[AssetBytes]) -> Optional[str]:
@@ -569,7 +618,7 @@ async def maybe_coroutine(
     if _isawaitable(value):
         return await value
     else:
-        return value  # type: ignore  # typeguard doesn't narrow in the negative case
+        return value
 
 
 async def async_all(gen: Iterable[Union[Awaitable[bool], bool]]) -> bool:
@@ -666,10 +715,9 @@ class SnowflakeList(array.array):
 
     if TYPE_CHECKING:
 
-        def __init__(self, data: Iterable[int], *, is_sorted: bool = False) -> None:
-            ...
+        def __init__(self, data: Iterable[int], *, is_sorted: bool = False) -> None: ...
 
-    def __new__(cls, data: Iterable[int], *, is_sorted: bool = False):
+    def __new__(cls, data: Iterable[int], *, is_sorted: bool = False) -> Self:
         return array.array.__new__(cls, "Q", data if is_sorted else sorted(data))  # type: ignore
 
     def add(self, element: int) -> None:
@@ -700,15 +748,13 @@ def _string_width(string: str, *, _IS_ASCII=_IS_ASCII) -> int:
 
 
 @overload
-def resolve_invite(invite: Union[Invite, str], *, with_params: Literal[False] = False) -> str:
-    ...
+def resolve_invite(invite: Union[Invite, str], *, with_params: Literal[False] = False) -> str: ...
 
 
 @overload
 def resolve_invite(
     invite: Union[Invite, str], *, with_params: Literal[True]
-) -> Tuple[str, Dict[str, str]]:
-    ...
+) -> Tuple[str, Dict[str, str]]: ...
 
 
 def resolve_invite(
@@ -777,7 +823,7 @@ def resolve_template(code: Union[Template, str]) -> str:
 
 
 _MARKDOWN_ESCAPE_SUBREGEX = "|".join(
-    r"\{0}(?=([\s\S]*((?<!\{0})\{0})))".format(c) for c in ("*", "`", "_", "~", "|")
+    rf"\{c}(?=([\s\S]*((?<!\{c})\{c})))" for c in ("*", "`", "_", "~", "|")
 )
 
 _MARKDOWN_ESCAPE_COMMON = r"^>(?:>>)?\s|\[.+\]\(.+\)"
@@ -815,7 +861,7 @@ def remove_markdown(text: str, *, ignore_links: bool = True) -> str:
         The text with the markdown special characters removed.
     """
 
-    def replacement(match):
+    def replacement(match: re.Match) -> str:
         groupdict = match.groupdict()
         return groupdict.get("url", "")
 
@@ -851,7 +897,7 @@ def escape_markdown(text: str, *, as_needed: bool = False, ignore_links: bool = 
     """
     if not as_needed:
 
-        def replacement(match):
+        def replacement(match: re.Match) -> str:
             groupdict = match.groupdict()
             is_url = groupdict.get("url")
             if is_url:
@@ -1009,7 +1055,7 @@ def _get_option_desc(lines: List[str]) -> Dict[str, _DocstringParam]:
     return options
 
 
-def parse_docstring(func: Callable) -> _ParsedDocstring:
+def parse_docstring(func: Callable[..., Any]) -> _ParsedDocstring:
     doc = _getdoc(func)
     if doc is None:
         return {
@@ -1060,13 +1106,11 @@ async def _achunk(iterator: AsyncIterator[T], max_size: int) -> AsyncIterator[Li
 
 
 @overload
-def as_chunks(iterator: Iterator[T], max_size: int) -> Iterator[List[T]]:
-    ...
+def as_chunks(iterator: Iterator[T], max_size: int) -> Iterator[List[T]]: ...
 
 
 @overload
-def as_chunks(iterator: AsyncIterator[T], max_size: int) -> AsyncIterator[List[T]]:
-    ...
+def as_chunks(iterator: AsyncIterator[T], max_size: int) -> AsyncIterator[List[T]]: ...
 
 
 def as_chunks(iterator: _Iter[T], max_size: int) -> _Iter[List[T]]:
@@ -1119,12 +1163,12 @@ def flatten_literal_params(parameters: Iterable[Any]) -> Tuple[Any, ...]:
 
 def normalise_optional_params(parameters: Iterable[Any]) -> Tuple[Any, ...]:
     none_cls = type(None)
-    return tuple(p for p in parameters if p is not none_cls) + (none_cls,)
+    return (*tuple(p for p in parameters if p is not none_cls), none_cls)
 
 
 def _resolve_typealiastype(
     tp: Any, globals: Dict[str, Any], locals: Dict[str, Any], cache: Dict[str, Any]
-):
+) -> Any:
     # Use __module__ to get the (global) namespace in which the type alias was defined.
     if mod := sys.modules.get(tp.__module__):
         mod_globals = mod.__dict__
@@ -1147,7 +1191,7 @@ def evaluate_annotation(
     cache: Dict[str, Any],
     *,
     implicit_str: bool = True,
-):
+) -> Any:
     if isinstance(tp, ForwardRef):
         tp = tp.__forward_arg__
         # ForwardRefs always evaluate their internals
@@ -1158,7 +1202,7 @@ def evaluate_annotation(
             return cache[tp]
 
         # this is how annotations are supposed to be unstringifed
-        evaluated = eval(tp, globals, locals)  # noqa: PGH001, S307
+        evaluated = eval(tp, globals, locals)  # noqa: S307
         # recurse to resolve nested args further
         evaluated = evaluate_annotation(evaluated, globals, locals, cache)
 
@@ -1169,7 +1213,7 @@ def evaluate_annotation(
     if hasattr(tp, "__args__"):
         if not hasattr(tp, "__origin__"):
             if tp.__class__ is UnionType:
-                converted = Union[tp.__args__]  # type: ignore
+                converted = Union[tp.__args__]
                 return evaluate_annotation(converted, globals, locals, cache)
 
             return tp

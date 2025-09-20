@@ -1,1 +1,0 @@
-Move the event listener system implementation from :class:`.ext.commands.Bot` to :class:`.Client`, making Clients able to have more than one listener per event type.

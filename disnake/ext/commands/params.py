@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-"""Repsonsible for handling Params for slash commands"""
+"""Responsible for handling Params for slash commands"""
 
 from __future__ import annotations
 
@@ -33,6 +33,7 @@ from typing import (
     Type,
     TypeVar,
     Union,
+    cast,
     get_origin,
 )
 
@@ -62,6 +63,7 @@ if TYPE_CHECKING:
     from disnake.i18n import LocalizationValue, LocalizedOptional
     from disnake.types.interactions import ApplicationCommandOptionChoiceValue
 
+    from ._types import FuncT
     from .base_core import CogT
     from .cog import Cog
     from .slash_core import InvokableSlashCommand, SubCommand
@@ -84,15 +86,19 @@ if TYPE_CHECKING:
 else:
     P = TypeVar("P")
 
+
 if sys.version_info >= (3, 10):
     from types import EllipsisType, UnionType
+elif TYPE_CHECKING:
+    EllipsisType = type(Ellipsis)
+    UnionType = NoReturn
+
 else:
     UnionType = object()
     EllipsisType = type(Ellipsis)
 
 T = TypeVar("T", bound=Any)
 TypeT = TypeVar("TypeT", bound=Type[Any])
-CallableT = TypeVar("CallableT", bound=Callable[..., Any])
 BotT = TypeVar("BotT", bound="disnake.Client", covariant=True)
 
 __all__ = (
@@ -141,7 +147,7 @@ def remove_optionals(annotation: Any) -> Any:
         if len(args) == 1:
             annotation = args[0]
         else:
-            annotation = Union[args]  # type: ignore
+            annotation = Union[args]
 
     return annotation
 
@@ -193,7 +199,7 @@ class Injection(Generic[P, T_]):
             for autocomp in autocompleters.values():
                 classify_autocompleter(autocomp)
 
-        self.function: InjectionCallback[CogT, P, T_] = function
+        self.function: InjectionCallback[Any, P, T_] = function
         self.autocompleters: Dict[str, Callable] = autocompleters or {}
         self._injected: Optional[Cog] = None
 
@@ -229,7 +235,7 @@ class Injection(Generic[P, T_]):
         cls._registered[annotation] = self
         return self
 
-    def autocomplete(self, option_name: str) -> Callable[[CallableT], CallableT]:
+    def autocomplete(self, option_name: str) -> Callable[[FuncT], FuncT]:
         """A decorator that registers an autocomplete function for the specified option.
 
         .. versionadded:: 2.6
@@ -254,7 +260,7 @@ class Injection(Generic[P, T_]):
                 f"This injection already has an autocompleter set for option '{option_name}'"
             )
 
-        def decorator(func: CallableT) -> CallableT:
+        def decorator(func: FuncT) -> FuncT:
             classify_autocompleter(func)
             self.autocompleters[option_name] = func
             return func
@@ -292,7 +298,7 @@ class _BaseRange(ABC):
             )
 
             # infer type from min/max values
-            params = (cls._infer_type(params),) + params
+            params = (cls._infer_type(params), *params)
 
         if len(params) != 3:
             raise TypeError(
@@ -354,7 +360,7 @@ class _BaseRange(ABC):
     if sys.version_info >= (3, 10):
 
         def __or__(self, other):
-            return Union[self, other]  # type: ignore
+            return Union[self, other]
 
 
 if TYPE_CHECKING:
@@ -377,7 +383,7 @@ else:
 
         _allowed_types = (int, float)
 
-        def __post_init__(self):
+        def __post_init__(self) -> None:
             for value in (self.min_value, self.max_value):
                 if value is None:
                     continue
@@ -406,7 +412,7 @@ else:
 
         _allowed_types = (str,)
 
-        def __post_init__(self):
+        def __post_init__(self) -> None:
             for value in (self.min_value, self.max_value):
                 if value is None:
                     continue
@@ -477,8 +483,7 @@ class ParamInfo:
         .. versionadded:: 2.6
     """
 
-    TYPES: ClassVar[Dict[type, int]] = {
-        # fmt: off
+    TYPES: ClassVar[Dict[Union[type, UnionType], int]] = {
         str:                                               OptionType.string.value,
         int:                                               OptionType.integer.value,
         bool:                                              OptionType.boolean.value,
@@ -495,9 +500,8 @@ class ParamInfo:
         Union[disnake.User, disnake.Member, disnake.Role]: OptionType.mentionable.value,
         float:                                             OptionType.number.value,
         disnake.Attachment:                                OptionType.attachment.value,
-        # fmt: on
-    }
-    _registered_converters: ClassVar[Dict[type, Callable]] = {}
+    }  # fmt: skip
+    _registered_converters: ClassVar[Dict[type, Callable[..., Any]]] = {}
 
     def __init__(
         self,
@@ -531,7 +535,11 @@ class ParamInfo:
         self.param_name: str = self.name
         self.converter = converter
         self.convert_default = convert_default
+
+        if autocomplete:
+            classify_autocompleter(autocomplete)
         self.autocomplete = autocomplete
+
         self.choices = choices or []
         self.type = type or str
         self.channel_types = channel_types or []
@@ -610,7 +618,7 @@ class ParamInfo:
         return self
 
     @classmethod
-    def register_converter(cls, annotation: Any, converter: CallableT) -> CallableT:
+    def register_converter(cls, annotation: Any, converter: FuncT) -> FuncT:
         cls._registered_converters[annotation] = converter
         return converter
 
@@ -675,7 +683,10 @@ class ParamInfo:
 
     def _parse_enum(self, annotation: Any) -> None:
         if isinstance(annotation, (EnumMeta, disnake.enums.EnumMeta)):
-            self.choices = [OptionChoice(name, value.value) for name, value in annotation.__members__.items()]  # type: ignore
+            self.choices = [
+                OptionChoice(name, value.value)  # type: ignore
+                for name, value in annotation.__members__.items()
+            ]
         else:
             self.choices = [OptionChoice(str(i), i) for i in annotation.__args__]
 
@@ -712,14 +723,22 @@ class ParamInfo:
         if annotation is inspect.Parameter.empty or annotation is Any:
             return False
 
+        # Range and String are aliased to Annotated for type-checking, which breaks
+        # the `isinstance` below for pyright, so alias them back to a known type.
+        if TYPE_CHECKING:
+            _Range = _String = _BaseRange
+        else:
+            _Range = Range
+            _String = String
+
         # resolve type aliases and special types
-        if isinstance(annotation, Range):
+        if isinstance(annotation, _Range):
             self.min_value = annotation.min_value
             self.max_value = annotation.max_value
             annotation = annotation.underlying_type
-        if isinstance(annotation, String):
-            self.min_length = annotation.min_value
-            self.max_length = annotation.max_value
+        if isinstance(annotation, _String):
+            self.min_length = cast("Optional[int]", annotation.min_value)
+            self.max_length = cast("Optional[int]", annotation.max_value)
             annotation = annotation.underlying_type
         if issubclass_(annotation, LargeInt):
             self.large = True
@@ -766,7 +785,9 @@ class ParamInfo:
 
         return True
 
-    def parse_converter_annotation(self, converter: Callable, fallback_annotation: Any) -> None:
+    def parse_converter_annotation(
+        self, converter: Callable[..., Any], fallback_annotation: Any
+    ) -> None:
         if isinstance(converter, (types.FunctionType, types.MethodType)):
             converter_func = converter
         else:
@@ -804,7 +825,7 @@ class ParamInfo:
         self.param_name = param.name
 
     def parse_doc(self, doc: disnake.utils._DocstringParam) -> None:
-        if self.type == str and doc["type"] is not None:
+        if self.type is str and doc["type"] is not None:
             self.parse_annotation(doc["type"])
 
         self.description = self.description or doc["description"]
@@ -882,7 +903,7 @@ def safe_call(function: Callable[..., T], /, *possible_args: Any, **possible_kwa
 
 
 def isolate_self(
-    function: Callable,
+    function: Callable[..., Any],
     parameters: Optional[Dict[str, inspect.Parameter]] = None,
 ) -> Tuple[Tuple[Optional[inspect.Parameter], ...], Dict[str, inspect.Parameter]]:
     """Create parameters without self and the first interaction.
@@ -946,7 +967,7 @@ def classify_autocompleter(autocompleter: AnyAutocompleter) -> None:
 
 
 def collect_params(
-    function: Callable,
+    function: Callable[..., Any],
     parameters: Optional[Dict[str, inspect.Parameter]] = None,
 ) -> Tuple[Optional[str], Optional[str], List[ParamInfo], Dict[str, Injection]]:
     """Collect all parameters in a function.
@@ -999,7 +1020,7 @@ def collect_params(
     )
 
 
-def collect_nested_params(function: Callable) -> List[ParamInfo]:
+def collect_nested_params(function: Callable[..., Any]) -> List[ParamInfo]:
     """Collect all options from a function"""
     # TODO: Have these be actually sorted properly and not have injections always at the end
     _, _, paraminfos, injections = collect_params(function)
@@ -1055,8 +1076,12 @@ async def run_injections(
 
 
 async def call_param_func(
-    function: Callable, interaction: ApplicationCommandInteraction, /, *args: Any, **kwargs: Any
-) -> Any:
+    function: Callable[..., T],
+    interaction: ApplicationCommandInteraction,
+    /,
+    *args: Any,
+    **kwargs: Any,
+) -> T:
     """Call a function utilizing ParamInfo"""
     cog_param, inter_param, paraminfos, injections = collect_params(function)
     formatted_kwargs = format_kwargs(interaction, cog_param, inter_param, *args, **kwargs)
@@ -1121,7 +1146,7 @@ def Param(
     choices: Optional[Choices] = None,
     converter: Optional[Callable[[ApplicationCommandInteraction[BotT], Any], Any]] = None,
     convert_defaults: bool = False,
-    autocomplete: Optional[Callable[[ApplicationCommandInteraction[BotT], str], Any]] = None,
+    autocomplete: Optional[AnyAutocompleter] = None,
     channel_types: Optional[List[ChannelType]] = None,
     lt: Optional[float] = None,
     le: Optional[float] = None,

@@ -1,1 +1,0 @@
-Move asset properties from :class:`Activity` to all activity types: :attr:`~Game.large_image_url`, :attr:`~Game.small_image_url`, :attr:`~Game.large_image_text`, :attr:`~Game.small_image_text`.

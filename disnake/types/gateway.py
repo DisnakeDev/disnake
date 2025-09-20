@@ -17,15 +17,17 @@ from .guild import Guild, UnavailableGuild
 from .guild_scheduled_event import GuildScheduledEvent
 from .integration import BaseIntegration
 from .interactions import BaseInteraction, GuildApplicationCommandPermissions
-from .invite import InviteTargetType
+from .invite import InviteTargetType, InviteType
 from .member import MemberWithUser
 from .message import Message
 from .role import Role
 from .snowflake import Snowflake, SnowflakeList
+from .soundboard import GuildSoundboardSound
 from .sticker import GuildSticker
+from .subscription import Subscription
 from .threads import Thread, ThreadMember, ThreadMemberWithPresence, ThreadType
-from .user import User
-from .voice import GuildVoiceState, SupportedModes
+from .user import AvatarDecorationData, User
+from .voice import GuildVoiceState, SupportedModes, VoiceChannelEffect
 
 
 class SessionStartLimit(TypedDict):
@@ -258,8 +260,7 @@ class ReadyEvent(TypedDict):
 
 
 # https://discord.com/developers/docs/topics/gateway-events#resumed
-class ResumedEvent(TypedDict):
-    ...
+class ResumedEvent(TypedDict): ...
 
 
 # https://discord.com/developers/docs/topics/gateway-events#application-command-permissions-update
@@ -304,8 +305,7 @@ class MessageReactionAddEvent(_BaseReactionEvent):
 
 
 # https://discord.com/developers/docs/topics/gateway-events#message-reaction-remove
-class MessageReactionRemoveEvent(_BaseReactionEvent):
-    ...
+class MessageReactionRemoveEvent(_BaseReactionEvent): ...
 
 
 # https://discord.com/developers/docs/topics/gateway-events#message-reaction-remove-all
@@ -321,6 +321,24 @@ class MessageReactionRemoveEmojiEvent(TypedDict):
     guild_id: NotRequired[Snowflake]
     message_id: Snowflake
     emoji: PartialEmoji
+
+
+# https://discord.com/developers/docs/topics/gateway-events#message-poll-vote-add
+class PollVoteAddEvent(TypedDict):
+    channel_id: Snowflake
+    guild_id: NotRequired[Snowflake]
+    message_id: Snowflake
+    user_id: Snowflake
+    answer_id: int
+
+
+# https://discord.com/developers/docs/topics/gateway-events#message-poll-vote-remove
+class PollVoteRemoveEvent(TypedDict):
+    channel_id: Snowflake
+    guild_id: NotRequired[Snowflake]
+    message_id: Snowflake
+    user_id: Snowflake
+    answer_id: int
 
 
 # https://discord.com/developers/docs/topics/gateway-events#interaction-create
@@ -348,6 +366,7 @@ class InviteCreateEvent(TypedDict):
     target_user: NotRequired[User]
     target_application: NotRequired[PartialAppInfo]
     temporary: bool
+    type: InviteType
     uses: int  # always 0
 
 
@@ -434,6 +453,7 @@ class GuildMemberUpdateEvent(TypedDict):
     user: User
     nick: NotRequired[Optional[str]]
     avatar: Optional[str]
+    banner: Optional[str]
     joined_at: Optional[str]
     premium_since: NotRequired[Optional[str]]
     deaf: NotRequired[bool]
@@ -441,6 +461,7 @@ class GuildMemberUpdateEvent(TypedDict):
     pending: NotRequired[bool]
     communication_disabled_until: NotRequired[Optional[str]]
     flags: int
+    avatar_decoration_data: NotRequired[Optional[AvatarDecorationData]]
 
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-emojis-update
@@ -592,6 +613,13 @@ class VoiceServerUpdateEvent(TypedDict):
     endpoint: Optional[str]
 
 
+# https://discord.com/developers/docs/topics/gateway-events#voice-channel-effect-send
+class VoiceChannelEffectSendEvent(VoiceChannelEffect):
+    channel_id: Snowflake
+    guild_id: Snowflake
+    user_id: Snowflake
+
+
 # https://discord.com/developers/docs/topics/gateway-events#typing-start
 class TypingStartEvent(TypedDict):
     channel_id: Snowflake
@@ -628,13 +656,45 @@ class AutoModerationActionExecutionEvent(TypedDict):
     matched_keyword: NotRequired[Optional[str]]
 
 
-# https://discord.com/developers/docs/monetization/entitlements#new-entitlement
+# https://discord.com/developers/docs/events/gateway-events#entitlement-create
 EntitlementCreate = Entitlement
 
 
-# https://discord.com/developers/docs/monetization/entitlements#updated-entitlement
+# https://discord.com/developers/docs/events/gateway-events#entitlement-update
 EntitlementUpdate = Entitlement
 
 
-# https://discord.com/developers/docs/monetization/entitlements#deleted-entitlement
+# https://discord.com/developers/docs/events/gateway-events#entitlement-delete
 EntitlementDelete = Entitlement
+
+
+# https://discord.com/developers/docs/events/gateway-events#subscription-create
+SubscriptionCreate = Subscription
+
+
+# https://discord.com/developers/docs/events/gateway-events#subscription-update
+SubscriptionUpdate = Subscription
+
+
+# https://discord.com/developers/docs/events/gateway-events#subscription-delete
+SubscriptionDelete = Subscription
+
+
+# https://discord.com/developers/docs/topics/gateway-events#guild-soundboard-sound-create
+GuildSoundboardSoundCreate = GuildSoundboardSound
+
+
+# https://discord.com/developers/docs/topics/gateway-events#guild-soundboard-sound-update
+GuildSoundboardSoundUpdate = GuildSoundboardSound
+
+
+# https://discord.com/developers/docs/topics/gateway-events#guild-soundboard-sound-delete
+class GuildSoundboardSoundDelete(TypedDict):
+    guild_id: Snowflake
+    sound_id: Snowflake
+
+
+# https://discord.com/developers/docs/topics/gateway-events#guild-soundboard-sounds-update
+class GuildSoundboardSoundsUpdate(TypedDict):
+    guild_id: Snowflake
+    soundboard_sounds: List[GuildSoundboardSound]

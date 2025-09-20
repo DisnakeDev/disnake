@@ -1,1 +1,0 @@
-Update ``choices`` type in app commands to accept any :class:`~py:typing.Sequence` or :class:`~py:typing.Mapping`, instead of the more constrained :class:`list`/:class:`dict` types.

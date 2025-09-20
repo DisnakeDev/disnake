@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
-import asyncio
 from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Sequence, Tuple, Union
 
 from disnake.app_commands import MessageCommand, UserCommand
+from disnake.flags import ApplicationInstallTypes, InteractionContextTypes
 from disnake.i18n import Localized
 from disnake.permissions import Permissions
+from disnake.utils import iscoroutinefunction
 
 from .base_core import InvokableApplicationCommand, _get_overridden_method
 from .errors import CommandError
@@ -73,9 +74,11 @@ class InvokableUserCommand(InvokableApplicationCommand):
         func: InteractionCommandCallback[CogT, UserCommandInteraction, P],
         *,
         name: LocalizedOptional = None,
-        dm_permission: Optional[bool] = None,
+        dm_permission: Optional[bool] = None,  # deprecated
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         nsfw: Optional[bool] = None,
+        install_types: Optional[ApplicationInstallTypes] = None,
+        contexts: Optional[InteractionContextTypes] = None,
         guild_ids: Optional[Sequence[int]] = None,
         auto_sync: Optional[bool] = None,
         **kwargs: Any,
@@ -86,24 +89,28 @@ class InvokableUserCommand(InvokableApplicationCommand):
         self.auto_sync: bool = True if auto_sync is None else auto_sync
 
         try:
-            default_perms: int = func.__default_member_permissions__
+            default_member_permissions = func.__default_member_permissions__
         except AttributeError:
             pass
-        else:
-            if default_member_permissions is not None:
-                raise ValueError(
-                    "Cannot set `default_member_permissions` in both parameter and decorator"
-                )
-            default_member_permissions = default_perms
-
-        dm_permission = True if dm_permission is None else dm_permission
+        try:
+            install_types = func.__install_types__
+        except AttributeError:
+            pass
+        try:
+            contexts = func.__contexts__
+        except AttributeError:
+            pass
 
         self.body = UserCommand(
             name=name_loc._upgrade(self.name),
-            dm_permission=dm_permission and not self._guild_only,
+            dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
             nsfw=nsfw,
+            install_types=install_types,
+            contexts=contexts,
         )
+
+        self._apply_guild_only()
 
     async def _call_external_error_handlers(
         self, inter: ApplicationCommandInteraction, error: CommandError
@@ -117,9 +124,8 @@ class InvokableUserCommand(InvokableApplicationCommand):
                     stop_propagation = await local(inter, error)
                     # User has an option to cancel the global error handler by returning True
         finally:
-            if stop_propagation:
-                return  # noqa: B012
-            inter.bot.dispatch("user_command_error", inter, error)
+            if not stop_propagation:
+                inter.bot.dispatch("user_command_error", inter, error)
 
     async def __call__(
         self,
@@ -129,7 +135,7 @@ class InvokableUserCommand(InvokableApplicationCommand):
         **kwargs: Any,
     ) -> None:
         # the target may just not be passed in
-        args = (target or interaction.target,) + args
+        args = (target or interaction.target, *args)
         if self.cog is not None:
             await safe_call(self.callback, self.cog, interaction, *args, **kwargs)
         else:
@@ -179,9 +185,11 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         func: InteractionCommandCallback[CogT, MessageCommandInteraction, P],
         *,
         name: LocalizedOptional = None,
-        dm_permission: Optional[bool] = None,
+        dm_permission: Optional[bool] = None,  # deprecated
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         nsfw: Optional[bool] = None,
+        install_types: Optional[ApplicationInstallTypes] = None,
+        contexts: Optional[InteractionContextTypes] = None,
         guild_ids: Optional[Sequence[int]] = None,
         auto_sync: Optional[bool] = None,
         **kwargs: Any,
@@ -195,15 +203,25 @@ class InvokableMessageCommand(InvokableApplicationCommand):
             default_member_permissions = func.__default_member_permissions__
         except AttributeError:
             pass
-
-        dm_permission = True if dm_permission is None else dm_permission
+        try:
+            install_types = func.__install_types__
+        except AttributeError:
+            pass
+        try:
+            contexts = func.__contexts__
+        except AttributeError:
+            pass
 
         self.body = MessageCommand(
             name=name_loc._upgrade(self.name),
-            dm_permission=dm_permission and not self._guild_only,
+            dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
             nsfw=nsfw,
+            install_types=install_types,
+            contexts=contexts,
         )
+
+        self._apply_guild_only()
 
     async def _call_external_error_handlers(
         self, inter: ApplicationCommandInteraction, error: CommandError
@@ -217,9 +235,8 @@ class InvokableMessageCommand(InvokableApplicationCommand):
                     stop_propagation = await local(inter, error)
                     # User has an option to cancel the global error handler by returning True
         finally:
-            if stop_propagation:
-                return  # noqa: B012
-            inter.bot.dispatch("message_command_error", inter, error)
+            if not stop_propagation:
+                inter.bot.dispatch("message_command_error", inter, error)
 
     async def __call__(
         self,
@@ -229,7 +246,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         **kwargs: Any,
     ) -> None:
         # the target may just not be passed in
-        args = (target or interaction.target,) + args
+        args = (target or interaction.target, *args)
         if self.cog is not None:
             await safe_call(self.callback, self.cog, interaction, *args, **kwargs)
         else:
@@ -239,9 +256,11 @@ class InvokableMessageCommand(InvokableApplicationCommand):
 def user_command(
     *,
     name: LocalizedOptional = None,
-    dm_permission: Optional[bool] = None,
+    dm_permission: Optional[bool] = None,  # deprecated
     default_member_permissions: Optional[Union[Permissions, int]] = None,
     nsfw: Optional[bool] = None,
+    install_types: Optional[ApplicationInstallTypes] = None,
+    contexts: Optional[InteractionContextTypes] = None,
     guild_ids: Optional[Sequence[int]] = None,
     auto_sync: Optional[bool] = None,
     extras: Optional[Dict[str, Any]] = None,
@@ -260,6 +279,11 @@ def user_command(
     dm_permission: :class:`bool`
         Whether this command can be used in DMs.
         Defaults to ``True``.
+
+        .. deprecated:: 2.10
+            Use ``contexts`` instead.
+            This is equivalent to the :attr:`.InteractionContextTypes.bot_dm` flag.
+
     default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]
         The default required permissions for this command.
         See :attr:`.ApplicationCommand.default_member_permissions` for details.
@@ -271,6 +295,23 @@ def user_command(
         Defaults to ``False``.
 
         .. versionadded:: 2.8
+
+    install_types: Optional[:class:`.ApplicationInstallTypes`]
+        The installation types where the command is available.
+        Defaults to :attr:`.ApplicationInstallTypes.guild` only.
+        Only available for global commands.
+
+        See :ref:`app_command_contexts` for details.
+
+        .. versionadded:: 2.10
+
+    contexts: Optional[:class:`.InteractionContextTypes`]
+        The interaction contexts where the command can be used.
+        Only available for global commands.
+
+        See :ref:`app_command_contexts` for details.
+
+        .. versionadded:: 2.10
 
     auto_sync: :class:`bool`
         Whether to automatically register the command. Defaults to ``True``.
@@ -292,9 +333,9 @@ def user_command(
     """
 
     def decorator(
-        func: InteractionCommandCallback[CogT, UserCommandInteraction, P]
+        func: InteractionCommandCallback[CogT, UserCommandInteraction, P],
     ) -> InvokableUserCommand:
-        if not asyncio.iscoroutinefunction(func):
+        if not iscoroutinefunction(func):
             raise TypeError(f"<{func.__qualname__}> must be a coroutine function")
         if hasattr(func, "__command_flag__"):
             raise TypeError("Callback is already a command.")
@@ -306,6 +347,8 @@ def user_command(
             dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
             nsfw=nsfw,
+            install_types=install_types,
+            contexts=contexts,
             guild_ids=guild_ids,
             auto_sync=auto_sync,
             extras=extras,
@@ -318,9 +361,11 @@ def user_command(
 def message_command(
     *,
     name: LocalizedOptional = None,
-    dm_permission: Optional[bool] = None,
+    dm_permission: Optional[bool] = None,  # deprecated
     default_member_permissions: Optional[Union[Permissions, int]] = None,
     nsfw: Optional[bool] = None,
+    install_types: Optional[ApplicationInstallTypes] = None,
+    contexts: Optional[InteractionContextTypes] = None,
     guild_ids: Optional[Sequence[int]] = None,
     auto_sync: Optional[bool] = None,
     extras: Optional[Dict[str, Any]] = None,
@@ -342,6 +387,11 @@ def message_command(
     dm_permission: :class:`bool`
         Whether this command can be used in DMs.
         Defaults to ``True``.
+
+        .. deprecated:: 2.10
+            Use ``contexts`` instead.
+            This is equivalent to the :attr:`.InteractionContextTypes.bot_dm` flag.
+
     default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]
         The default required permissions for this command.
         See :attr:`.ApplicationCommand.default_member_permissions` for details.
@@ -353,6 +403,23 @@ def message_command(
         Defaults to ``False``.
 
         .. versionadded:: 2.8
+
+    install_types: Optional[:class:`.ApplicationInstallTypes`]
+        The installation types where the command is available.
+        Defaults to :attr:`.ApplicationInstallTypes.guild` only.
+        Only available for global commands.
+
+        See :ref:`app_command_contexts` for details.
+
+        .. versionadded:: 2.10
+
+    contexts: Optional[:class:`.InteractionContextTypes`]
+        The interaction contexts where the command can be used.
+        Only available for global commands.
+
+        See :ref:`app_command_contexts` for details.
+
+        .. versionadded:: 2.10
 
     auto_sync: :class:`bool`
         Whether to automatically register the command. Defaults to ``True``.
@@ -374,9 +441,9 @@ def message_command(
     """
 
     def decorator(
-        func: InteractionCommandCallback[CogT, MessageCommandInteraction, P]
+        func: InteractionCommandCallback[CogT, MessageCommandInteraction, P],
     ) -> InvokableMessageCommand:
-        if not asyncio.iscoroutinefunction(func):
+        if not iscoroutinefunction(func):
             raise TypeError(f"<{func.__qualname__}> must be a coroutine function")
         if hasattr(func, "__command_flag__"):
             raise TypeError("Callback is already a command.")
@@ -388,6 +455,8 @@ def message_command(
             dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
             nsfw=nsfw,
+            install_types=install_types,
+            contexts=contexts,
             guild_ids=guild_ids,
             auto_sync=auto_sync,
             extras=extras,
