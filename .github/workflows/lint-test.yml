@@ -86,7 +86,7 @@ jobs:
       - name: Cache pip cache
         uses: actions/cache@v4
         with:
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/pyproject.toml') }}
+          key: ${{ runner.os }}-prek-pip-${{ hashFiles('**/pyproject.toml') }}
           path: ~/.cache/pip
 
       - name: Run prek
