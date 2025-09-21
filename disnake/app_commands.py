@@ -99,13 +99,13 @@ class OptionChoice:
 
     Parameters
     ----------
-    name: Union[:class:`str`, :class:`.Localized`]
+    name: :class:`str` | :class:`.Localized`
         The name of the option choice (visible to users).
 
         .. versionchanged:: 2.5
             Added support for localizations.
 
-    value: Union[:class:`str`, :class:`int`]
+    value: :class:`str` | :class:`int`
         The value of the option choice.
     """
 
@@ -166,13 +166,13 @@ class Option:
 
     Parameters
     ----------
-    name: Union[:class:`str`, :class:`.Localized`]
+    name: :class:`str` | :class:`.Localized`
         The option's name.
 
         .. versionchanged:: 2.5
             Added support for localizations.
 
-    description: Optional[Union[:class:`str`, :class:`.Localized`]]
+    description: :class:`str` | :class:`.Localized` | ``None``
         The option's description.
 
         .. versionchanged:: 2.5
@@ -182,7 +182,7 @@ class Option:
         The option type, e.g. :class:`OptionType.user`.
     required: :class:`bool`
         Whether this option is required.
-    choices: Union[Sequence[:class:`OptionChoice`], Sequence[Union[:class:`str`, :class:`int`, :class:`float`]], Mapping[:class:`str`, Union[:class:`str`, :class:`int`, :class:`float`]]]
+    choices: Sequence[:class:`OptionChoice`, Sequence[:class:`str` | :class:`int` | :class:`float`], Mapping[:class:`str`, :class:`str` | :class:`int` | :class:`float`]]
         The pre-defined choices for this option.
     options: List[:class:`Option`]
         The list of sub options. Normally you don't have to specify it directly,
@@ -192,9 +192,9 @@ class Option:
         By default, it supports all channel types.
     autocomplete: :class:`bool`
         Whether this option can be autocompleted.
-    min_value: Union[:class:`int`, :class:`float`]
+    min_value: :class:`int` | :class:`float`
         The minimum value permitted.
-    max_value: Union[:class:`int`, :class:`float`]
+    max_value: :class:`int` | :class:`float`
         The maximum value permitted.
     min_length: :class:`int`
         The minimum length for this option if this is a string option.
@@ -226,9 +226,9 @@ class Option:
         By default, it supports all channel types.
     autocomplete: :class:`bool`
         Whether this option can be autocompleted.
-    min_value: Union[:class:`int`, :class:`float`]
+    min_value: :class:`int` | :class:`float`
         The minimum value permitted.
-    max_value: Union[:class:`int`, :class:`float`]
+    max_value: :class:`int` | :class:`float`
         The maximum value permitted.
     min_length: :class:`int`
         The minimum length for this option if this is a string option.
@@ -494,14 +494,14 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
 
         .. versionadded:: 2.8
 
-    install_types: Optional[:class:`ApplicationInstallTypes`]
+    install_types: :class:`ApplicationInstallTypes` | ``None``
         The installation types where the command is available.
         Defaults to :attr:`ApplicationInstallTypes.guild` only.
         Only available for global commands.
 
         .. versionadded:: 2.10
 
-    contexts: Optional[:class:`InteractionContextTypes`]
+    contexts: :class:`InteractionContextTypes` | ``None``
         The interaction contexts where the command can be used.
         Only available for global commands.
 
@@ -579,7 +579,7 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
 
     @property
     def default_member_permissions(self) -> Optional[Permissions]:
-        """Optional[:class:`Permissions`]: The default required member permissions for this command.
+        """:class:`Permissions` | ``None``: The default required member permissions for this command.
         A member must have *all* these permissions to be able to invoke the command in a guild.
 
         This is a default value, the set of users/roles that may invoke this command can be
@@ -766,14 +766,14 @@ class UserCommand(ApplicationCommand):
 
         .. versionadded:: 2.8
 
-    install_types: Optional[:class:`ApplicationInstallTypes`]
+    install_types: :class:`ApplicationInstallTypes` | ``None``
         The installation types where the command is available.
         Defaults to :attr:`ApplicationInstallTypes.guild` only.
         Only available for global commands.
 
         .. versionadded:: 2.10
 
-    contexts: Optional[:class:`InteractionContextTypes`]
+    contexts: :class:`InteractionContextTypes` | ``None``
         The interaction contexts where the command can be used.
         Only available for global commands.
 
@@ -823,14 +823,14 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
 
         .. versionadded:: 2.8
 
-    install_types: Optional[:class:`ApplicationInstallTypes`]
+    install_types: :class:`ApplicationInstallTypes` | ``None``
         The installation types where the command is available.
         Defaults to :attr:`ApplicationInstallTypes.guild` only.
         Only available for global commands.
 
         .. versionadded:: 2.10
 
-    contexts: Optional[:class:`InteractionContextTypes`]
+    contexts: :class:`InteractionContextTypes` | ``None``
         The interaction contexts where the command can be used.
         Only available for global commands.
 
@@ -840,7 +840,7 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
         The user command's ID.
     application_id: :class:`int`
         The application ID this command belongs to.
-    guild_id: Optional[:class:`int`]
+    guild_id: :class:`int` | ``None``
         The ID of the guild this user command is enabled in, or ``None`` if it's global.
     version: :class:`int`
         Autoincrementing version identifier updated during substantial record changes.
@@ -894,14 +894,14 @@ class MessageCommand(ApplicationCommand):
 
         .. versionadded:: 2.8
 
-    install_types: Optional[:class:`ApplicationInstallTypes`]
+    install_types: :class:`ApplicationInstallTypes` | ``None``
         The installation types where the command is available.
         Defaults to :attr:`ApplicationInstallTypes.guild` only.
         Only available for global commands.
 
         .. versionadded:: 2.10
 
-    contexts: Optional[:class:`InteractionContextTypes`]
+    contexts: :class:`InteractionContextTypes` | ``None``
         The interaction contexts where the command can be used.
         Only available for global commands.
 
@@ -951,14 +951,14 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
 
         .. versionadded:: 2.8
 
-    install_types: Optional[:class:`ApplicationInstallTypes`]
+    install_types: :class:`ApplicationInstallTypes` | ``None``
         The installation types where the command is available.
         Defaults to :attr:`ApplicationInstallTypes.guild` only.
         Only available for global commands.
 
         .. versionadded:: 2.10
 
-    contexts: Optional[:class:`InteractionContextTypes`]
+    contexts: :class:`InteractionContextTypes` | ``None``
         The interaction contexts where the command can be used.
         Only available for global commands.
 
@@ -968,7 +968,7 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
         The message command's ID.
     application_id: :class:`int`
         The application ID this command belongs to.
-    guild_id: Optional[:class:`int`]
+    guild_id: :class:`int` | ``None``
         The ID of the guild this message command is enabled in, or ``None`` if it's global.
     version: :class:`int`
         Autoincrementing version identifier updated during substantial record changes.
@@ -1029,14 +1029,14 @@ class SlashCommand(ApplicationCommand):
 
         .. versionadded:: 2.8
 
-    install_types: Optional[:class:`ApplicationInstallTypes`]
+    install_types: :class:`ApplicationInstallTypes` | ``None``
         The installation types where the command is available.
         Defaults to :attr:`ApplicationInstallTypes.guild` only.
         Only available for global commands.
 
         .. versionadded:: 2.10
 
-    contexts: Optional[:class:`InteractionContextTypes`]
+    contexts: :class:`InteractionContextTypes` | ``None``
         The interaction contexts where the command can be used.
         Only available for global commands.
 
@@ -1169,14 +1169,14 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
 
         .. versionadded:: 2.8
 
-    install_types: Optional[:class:`ApplicationInstallTypes`]
+    install_types: :class:`ApplicationInstallTypes` | ``None``
         The installation types where the command is available.
         Defaults to :attr:`ApplicationInstallTypes.guild` only.
         Only available for global commands.
 
         .. versionadded:: 2.10
 
-    contexts: Optional[:class:`InteractionContextTypes`]
+    contexts: :class:`InteractionContextTypes` | ``None``
         The interaction contexts where the command can be used.
         Only available for global commands.
 
@@ -1188,7 +1188,7 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
         The list of options the slash command has.
     application_id: :class:`int`
         The application ID this command belongs to.
-    guild_id: Optional[:class:`int`]
+    guild_id: :class:`int` | ``None``
         The ID of the guild this slash command is enabled in, or ``None`` if it's global.
     version: :class:`int`
         Autoincrementing version identifier updated during substantial record changes.

@@ -216,7 +216,7 @@ class CommonBotBase(Generic[CogT]):
 
         Returns
         -------
-        Optional[:class:`Cog`]
+        :class:`Cog` | ``None``
             The cog that was requested. If not found, returns ``None``.
         """
         return self.__cogs.get(name)
@@ -240,7 +240,7 @@ class CommonBotBase(Generic[CogT]):
 
         Returns
         -------
-        Optional[:class:`.Cog`]
+        :class:`.Cog` | ``None``
             The cog that was removed. Returns ``None`` if not found.
         """
         cog = self.__cogs.pop(name, None)
@@ -346,7 +346,7 @@ class CommonBotBase(Generic[CogT]):
             The extension name to load. It must be dot separated like
             regular Python imports if accessing a sub-module. e.g.
             ``foo.test`` if you want to import ``foo/test.py``.
-        package: Optional[:class:`str`]
+        package: :class:`str` | ``None``
             The package name to resolve relative imports with.
             This is required when loading an extension using a relative path, e.g ``.foo.test``.
             Defaults to ``None``.
@@ -393,7 +393,7 @@ class CommonBotBase(Generic[CogT]):
             The extension name to unload. It must be dot separated like
             regular Python imports if accessing a sub-module. e.g.
             ``foo.test`` if you want to import ``foo/test.py``.
-        package: Optional[:class:`str`]
+        package: :class:`str` | ``None``
             The package name to resolve relative imports with.
             This is required when unloading an extension using a relative path, e.g ``.foo.test``.
             Defaults to ``None``.
@@ -430,7 +430,7 @@ class CommonBotBase(Generic[CogT]):
             The extension name to reload. It must be dot separated like
             regular Python imports if accessing a sub-module. e.g.
             ``foo.test`` if you want to import ``foo/test.py``.
-        package: Optional[:class:`str`]
+        package: :class:`str` | ``None``
             The package name to resolve relative imports with.
             This is required when reloading an extension using a relative path, e.g ``.foo.test``.
             Defaults to ``None``.

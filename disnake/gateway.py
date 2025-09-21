@@ -471,7 +471,7 @@ class DiscordWebSocket:
         predicate: Callable[[Dict[:class:`str`, Any]], :class:`bool`]
             A function that takes a data parameter to check for event
             properties. The data parameter is the 'd' key in the JSON message.
-        result: Optional[Callable[[Dict[:class:`str`, Any]], T]]
+        result: Callable[[Dict[:class:`str`, Any | ``None``], T]]
             A function that takes the same data parameter and executes to send
             the result to the future. If ``None``, returns the data.
 

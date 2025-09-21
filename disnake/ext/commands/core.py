@@ -200,22 +200,22 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         The name of the command.
     callback: :ref:`coroutine <coroutine>`
         The coroutine that is executed when the command is called.
-    help: Optional[:class:`str`]
+    help: :class:`str` | ``None``
         The long help text for the command.
-    brief: Optional[:class:`str`]
+    brief: :class:`str` | ``None``
         The short help text for the command.
-    usage: Optional[:class:`str`]
+    usage: :class:`str` | ``None``
         A replacement for arguments in the default help text.
-    aliases: Union[List[:class:`str`], Tuple[:class:`str`]]
+    aliases: List[:class:`str`, Tuple[:class:`str`]]
         The list of aliases the command can be invoked under.
     enabled: :class:`bool`
         Whether the command is currently enabled.
         If the command is invoked while it is disabled, then
         :exc:`.DisabledCommand` is raised to the :func:`.on_command_error`
         event. Defaults to ``True``.
-    parent: Optional[:class:`Group`]
+    parent: :class:`Group` | ``None``
         The parent group that this command belongs to. ``None`` if there isn't one.
-    cog: Optional[:class:`Cog`]
+    cog: :class:`Cog` | ``None``
         The cog that this command belongs to. ``None`` if there isn't one.
     checks: List[Callable[[:class:`.Context`], :class:`bool`]]
         A list of predicates that verifies if the command could be executed
@@ -235,7 +235,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         regular matter rather than passing the rest completely raw. If ``True``
         then the keyword-only argument will pass in the rest of the arguments
         in a completely raw matter. Defaults to ``False``.
-    invoked_subcommand: Optional[:class:`Command`]
+    invoked_subcommand: :class:`Command` | ``None``
         The subcommand that was invoked, if any.
     require_var_positional: :class:`bool`
         If ``True`` and a variadic positional argument is specified, requires
@@ -650,7 +650,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
 
     @property
     def root_parent(self) -> Optional[Group[CogT, ..., Any]]:
-        """Optional[:class:`Group`]: Retrieves the root parent of this command.
+        """:class:`Group` | ``None``: Retrieves the root parent of this command.
 
         If the command has no parents then it returns ``None``.
 
@@ -962,7 +962,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
 
     @property
     def cog_name(self) -> Optional[str]:
-        """Optional[:class:`str`]: The name of the cog this command belongs to, if any."""
+        """:class:`str` | ``None``: The name of the cog this command belongs to, if any."""
         return type(self.cog).__cog_name__ if self.cog is not None else None
 
     @property
@@ -1182,7 +1182,7 @@ class GroupMixin(Generic[CogT]):
 
         Returns
         -------
-        Optional[:class:`.Command`]
+        :class:`.Command` | ``None``
             The command that was removed. If the name is not valid then
             ``None`` is returned instead.
         """
@@ -1214,7 +1214,7 @@ class GroupMixin(Generic[CogT]):
 
         Yields
         ------
-        Union[:class:`.Command`, :class:`.Group`]
+        :class:`.Command` | :class:`.Group`
             A command or group from the internal list of commands.
         """
         for command in self.commands:
@@ -1239,7 +1239,7 @@ class GroupMixin(Generic[CogT]):
 
         Returns
         -------
-        Optional[:class:`Command`]
+        :class:`Command` | ``None``
             The command that was requested. If not found, returns ``None``.
         """
         # fast path, no space in name.
@@ -1855,7 +1855,7 @@ def has_role(item: Union[int, str]) -> Callable[[T], T]:
 
     Parameters
     ----------
-    item: Union[:class:`int`, :class:`str`]
+    item: :class:`int` | :class:`str`
         The name or ID of the role to check.
     """
 
@@ -1893,7 +1893,7 @@ def has_any_role(*items: Union[int, str]) -> Callable[[T], T]:
 
     Parameters
     ----------
-    items: List[Union[:class:`str`, :class:`int`]]
+    items: List[:class:`str` | :class:`int`]
         An argument list of names or IDs to check that the member has roles wise.
 
     Example
@@ -2523,7 +2523,7 @@ def cooldown(
         The number of times a command can be used before triggering a cooldown.
     per: :class:`float`
         The amount of seconds to wait for a cooldown when it's been triggered.
-    type: Union[:class:`.BucketType`, Callable[[:class:`.Message`], Any]]
+    type: :class:`.BucketType` | Callable[[:class:`.Message`, Any]]
         The type of cooldown to have. If callable, should return a key for the mapping.
 
         .. versionchanged:: 1.7
@@ -2567,7 +2567,7 @@ def dynamic_cooldown(
 
     Parameters
     ----------
-    cooldown: Callable[[:class:`.disnake.Message`], Optional[:class:`.Cooldown`]]
+    cooldown: Callable[[:class:`.disnake.Message`], :class:`.Cooldown` | ``None``]
         A function that takes a message and returns a cooldown that will
         apply to this invocation or ``None`` if the cooldown should be bypassed.
     type: :class:`.BucketType`

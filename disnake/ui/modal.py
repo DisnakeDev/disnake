@@ -181,15 +181,15 @@ class Modal:
             If not given then one is generated for you.
         style: :class:`.TextInputStyle`
             The style of the text input.
-        placeholder: Optional[:class:`str`]
+        placeholder: :class:`str` | ``None``
             The placeholder text that is shown if nothing is entered.
-        value: Optional[:class:`str`]
+        value: :class:`str` | ``None``
             The pre-filled value of the text input.
         required: :class:`bool`
             Whether the text input is required. Defaults to ``True``.
-        min_length: Optional[:class:`int`]
+        min_length: :class:`int` | ``None``
             The minimum length of the text input.
-        max_length: Optional[:class:`int`]
+        max_length: :class:`int` | ``None``
             The maximum length of the text input.
 
         Raises

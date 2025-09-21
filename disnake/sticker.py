@@ -70,9 +70,9 @@ class StickerPack(Hashable):
         The stickers of this sticker pack.
     sku_id: :class:`int`
         The SKU ID of the sticker pack.
-    cover_sticker_id: Optional[:class:`int`]
+    cover_sticker_id: :class:`int` | ``None``
          The ID of the sticker used for the cover of the sticker pack, if any.
-    cover_sticker: Optional[:class:`StandardSticker`]
+    cover_sticker: :class:`StandardSticker` | ``None``
         The sticker used for the cover of the sticker pack, if any.
     """
 
@@ -107,7 +107,7 @@ class StickerPack(Hashable):
 
     @property
     def banner(self) -> Optional[Asset]:
-        """Optional[:class:`Asset`]: The banner asset of the sticker pack, if any."""
+        """:class:`Asset` | ``None``: The banner asset of the sticker pack, if any."""
         if not self._banner:
             return None
         return Asset._from_sticker_banner(self._state, self._banner)
@@ -215,7 +215,7 @@ class StickerItem(_StickerTag):
 
         Returns
         -------
-        Union[:class:`StandardSticker`, :class:`GuildSticker`]
+        :class:`StandardSticker` | :class:`GuildSticker`
             The retrieved sticker.
         """
         data: StickerPayload = await self._state.http.get_sticker(self.id)
@@ -392,7 +392,7 @@ class GuildSticker(Sticker):
         Whether this sticker is available for use.
     guild_id: :class:`int`
         The ID of the guild that this sticker is from.
-    user: Optional[:class:`User`]
+    user: :class:`User` | ``None``
         The user that created this sticker. This can only be retrieved using
         :meth:`Guild.fetch_sticker`/:meth:`Guild.fetch_stickers` while
         having the :attr:`~Permissions.manage_guild_expressions` permission.
@@ -416,7 +416,7 @@ class GuildSticker(Sticker):
 
     @cached_slot_property("_cs_guild")
     def guild(self) -> Optional[Guild]:
-        """Optional[:class:`Guild`]: The guild that this sticker is from.
+        """:class:`Guild` | ``None``: The guild that this sticker is from.
         Could be ``None`` if the bot is not in the guild.
 
         .. versionadded:: 2.0
@@ -442,11 +442,11 @@ class GuildSticker(Sticker):
         ----------
         name: :class:`str`
             The sticker's new name. Must be at least 2 characters.
-        description: Optional[:class:`str`]
+        description: :class:`str` | ``None``
             The sticker's new description. Can be ``None``.
         emoji: :class:`str`
             The name of a unicode emoji that represents the sticker's expression.
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | ``None``
             The reason for editing this sticker. Shows up on the audit log.
 
         Raises
@@ -494,7 +494,7 @@ class GuildSticker(Sticker):
 
         Parameters
         ----------
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | ``None``
             The reason for deleting this sticker. Shows up on the audit log.
 
         Raises

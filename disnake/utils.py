@@ -331,7 +331,7 @@ def oauth_url(
 
     Parameters
     ----------
-    client_id: Union[:class:`int`, :class:`str`]
+    client_id: :class:`int` | :class:`str`
         The client ID for your bot.
     permissions: :class:`~disnake.Permissions`
         The permissions you're requesting. If not given then you won't be requesting any
@@ -764,7 +764,7 @@ def resolve_invite(
 
     Parameters
     ----------
-    invite: Union[:class:`~disnake.Invite`, :class:`str`]
+    invite: :class:`~disnake.Invite` | :class:`str`
         The invite to resolve.
     with_params: :class:`bool`
         Whether to also return the query parameters of the invite, if it's a url.
@@ -773,7 +773,7 @@ def resolve_invite(
 
     Returns
     -------
-    Union[:class:`str`, Tuple[:class:`str`, Dict[:class:`str`, :class:`str`]]]
+    :class:`str` | Tuple[:class:`str` | Dict[:class:`str` | :class:`str`]]
         The invite code if ``with_params`` is ``False``, otherwise a tuple containing the
         invite code and the url's query parameters, if applicable.
     """
@@ -802,7 +802,7 @@ def resolve_template(code: Union[Template, str]) -> str:
 
     Parameters
     ----------
-    code: Union[:class:`~disnake.Template`, :class:`str`]
+    code: :class:`~disnake.Template` | :class:`str`
         The code.
 
     Returns
@@ -1120,7 +1120,7 @@ def as_chunks(iterator: _Iter[T], max_size: int) -> _Iter[List[T]]:
 
     Parameters
     ----------
-    iterator: Union[:class:`collections.abc.Iterator`, :class:`collections.abc.AsyncIterator`]
+    iterator: :class:`collections.abc.Iterator` | :class:`collections.abc.AsyncIterator`
         The iterator to chunk, can be sync or async.
     max_size: :class:`int`
         The maximum chunk size.
@@ -1132,7 +1132,7 @@ def as_chunks(iterator: _Iter[T], max_size: int) -> _Iter[List[T]]:
 
     Returns
     -------
-    Union[:class:`Iterator`, :class:`AsyncIterator`]
+    :class:`Iterator` | :class:`AsyncIterator`
         A new iterator which yields chunks of a given size.
     """
     if max_size <= 0:
@@ -1449,7 +1449,7 @@ def format_dt(dt: Union[datetime.datetime, float], /, style: TimestampStyle = "f
 
     Parameters
     ----------
-    dt: Union[:class:`datetime.datetime`, :class:`int`, :class:`float`]
+    dt: :class:`datetime.datetime` | :class:`int` | :class:`float`
         The datetime to format.
         If this is a naive datetime, it is assumed to be local time.
     style: :class:`str`

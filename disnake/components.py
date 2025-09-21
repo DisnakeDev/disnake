@@ -255,7 +255,7 @@ class ActionRow(Component, Generic[ActionRowChildComponentT]):
 
     Attributes
     ----------
-    children: List[Union[:class:`Button`, :class:`BaseSelectMenu`, :class:`TextInput`]]
+    children: List[:class:`Button` | :class:`BaseSelectMenu` | :class:`TextInput`]
         The children components that this holds, if any.
     id: :class:`int`
         The numeric identifier for the component.
@@ -300,18 +300,18 @@ class Button(Component):
     ----------
     style: :class:`.ButtonStyle`
         The style of the button.
-    custom_id: Optional[:class:`str`]
+    custom_id: :class:`str` | ``None``
         The ID of the button that gets received during an interaction.
         If this button is for a URL or an SKU, it does not have a custom ID.
-    url: Optional[:class:`str`]
+    url: :class:`str` | ``None``
         The URL this button sends you to.
     disabled: :class:`bool`
         Whether the button is disabled or not.
-    label: Optional[:class:`str`]
+    label: :class:`str` | ``None``
         The label of the button, if any.
-    emoji: Optional[:class:`PartialEmoji`]
+    emoji: :class:`PartialEmoji` | ``None``
         The emoji of the button, if available.
-    sku_id: Optional[:class:`int`]
+    sku_id: :class:`int` | ``None``
         The ID of a purchasable SKU, for premium buttons.
         Premium buttons additionally cannot have a ``label``, ``url``, or ``emoji``.
 
@@ -395,9 +395,9 @@ class BaseSelectMenu(Component):
 
     Attributes
     ----------
-    custom_id: Optional[:class:`str`]
+    custom_id: :class:`str` | ``None``
         The ID of the select menu that gets received during an interaction.
-    placeholder: Optional[:class:`str`]
+    placeholder: :class:`str` | ``None``
         The placeholder text that is shown if nothing is selected, if any.
     min_values: :class:`int`
         The minimum number of items that must be chosen for this select menu.
@@ -495,9 +495,9 @@ class StringSelectMenu(BaseSelectMenu):
 
     Attributes
     ----------
-    custom_id: Optional[:class:`str`]
+    custom_id: :class:`str` | ``None``
         The ID of the select menu that gets received during an interaction.
-    placeholder: Optional[:class:`str`]
+    placeholder: :class:`str` | ``None``
         The placeholder text that is shown if nothing is selected, if any.
     min_values: :class:`int`
         The minimum number of items that must be chosen for this select menu.
@@ -556,9 +556,9 @@ class UserSelectMenu(BaseSelectMenu):
 
     Attributes
     ----------
-    custom_id: Optional[:class:`str`]
+    custom_id: :class:`str` | ``None``
         The ID of the select menu that gets received during an interaction.
-    placeholder: Optional[:class:`str`]
+    placeholder: :class:`str` | ``None``
         The placeholder text that is shown if nothing is selected, if any.
     min_values: :class:`int`
         The minimum number of items that must be chosen for this select menu.
@@ -607,9 +607,9 @@ class RoleSelectMenu(BaseSelectMenu):
 
     Attributes
     ----------
-    custom_id: Optional[:class:`str`]
+    custom_id: :class:`str` | ``None``
         The ID of the select menu that gets received during an interaction.
-    placeholder: Optional[:class:`str`]
+    placeholder: :class:`str` | ``None``
         The placeholder text that is shown if nothing is selected, if any.
     min_values: :class:`int`
         The minimum number of items that must be chosen for this select menu.
@@ -658,9 +658,9 @@ class MentionableSelectMenu(BaseSelectMenu):
 
     Attributes
     ----------
-    custom_id: Optional[:class:`str`]
+    custom_id: :class:`str` | ``None``
         The ID of the select menu that gets received during an interaction.
-    placeholder: Optional[:class:`str`]
+    placeholder: :class:`str` | ``None``
         The placeholder text that is shown if nothing is selected, if any.
     min_values: :class:`int`
         The minimum number of items that must be chosen for this select menu.
@@ -709,9 +709,9 @@ class ChannelSelectMenu(BaseSelectMenu):
 
     Attributes
     ----------
-    custom_id: Optional[:class:`str`]
+    custom_id: :class:`str` | ``None``
         The ID of the select menu that gets received during an interaction.
-    placeholder: Optional[:class:`str`]
+    placeholder: :class:`str` | ``None``
         The placeholder text that is shown if nothing is selected, if any.
     min_values: :class:`int`
         The minimum number of items that must be chosen for this select menu.
@@ -721,7 +721,7 @@ class ChannelSelectMenu(BaseSelectMenu):
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select menu is disabled or not.
-    channel_types: Optional[List[:class:`ChannelType`]]
+    channel_types: List[:class:`ChannelType` | ``None``]
         A list of channel types that can be selected in this select menu.
         If ``None``, channels of all types may be selected.
     default_values: List[:class:`SelectDefaultValue`]
@@ -781,10 +781,10 @@ class SelectOption:
         The value of the option. This is not displayed to users.
         If not provided when constructed then it defaults to the
         label. Can only be up to 100 characters.
-    description: Optional[:class:`str`]
+    description: :class:`str` | ``None``
         An additional description of the option, if any.
         Can only be up to 100 characters.
-    emoji: Optional[Union[:class:`str`, :class:`Emoji`, :class:`PartialEmoji`]]
+    emoji: :class:`str` | :class:`Emoji` | :class:`PartialEmoji` | ``None``
         The emoji of the option, if available.
     default: :class:`bool`
         Whether this option is selected by default.
@@ -920,7 +920,7 @@ class TextInput(Component):
     ----------
     style: :class:`TextInputStyle`
         The style of the text input.
-    label: Optional[:class:`str`]
+    label: :class:`str` | ``None``
         The label of the text input.
 
         .. deprecated:: 2.11
@@ -928,15 +928,15 @@ class TextInput(Component):
 
     custom_id: :class:`str`
         The ID of the text input that gets received during an interaction.
-    placeholder: Optional[:class:`str`]
+    placeholder: :class:`str` | ``None``
         The placeholder text that is shown if nothing is entered.
-    value: Optional[:class:`str`]
+    value: :class:`str` | ``None``
         The pre-filled text of the text input.
     required: :class:`bool`
         Whether the text input is required. Defaults to ``True``.
-    min_length: Optional[:class:`int`]
+    min_length: :class:`int` | ``None``
         The minimum length of the text input.
-    max_length: Optional[:class:`int`]
+    max_length: :class:`int` | ``None``
         The maximum length of the text input.
     id: :class:`int`
         The numeric identifier for the component.
@@ -1014,7 +1014,7 @@ class Section(Component):
     ----------
     children: List[:class:`TextDisplay`]
         The text items in this section.
-    accessory: Union[:class:`Thumbnail`, :class:`Button`]
+    accessory: :class:`Thumbnail` | :class:`Button`
         The accessory component displayed next to the section text.
     id: :class:`int`
         The numeric identifier for the component.
@@ -1103,13 +1103,13 @@ class UnfurledMediaItem:
     proxy_url: :class:`str`
         The proxied URL of this media item. This is a cached version of
         the :attr:`url` in the case of images.
-    height: Optional[:class:`int`]
+    height: :class:`int` | ``None``
         The height of this media item, if applicable.
-    width: Optional[:class:`int`]
+    width: :class:`int` | ``None``
         The width of this media item, if applicable.
-    content_type: Optional[:class:`str`]
+    content_type: :class:`str` | ``None``
         The `media type <https://en.wikipedia.org/wiki/Media_type>`_ of this media item.
-    attachment_id: Optional[:class:`int`]
+    attachment_id: :class:`int` | ``None``
         The ID of the uploaded attachment. Only present if the media item was
         uploaded as an attachment.
     """
@@ -1167,7 +1167,7 @@ class Thumbnail(Component):
     media: :class:`UnfurledMediaItem`
         The media item to display. Can be an arbitrary URL or attachment
         reference (``attachment://<filename>``).
-    description: Optional[:class:`str`]
+    description: :class:`str` | ``None``
         The thumbnail's description ("alt text"), if any.
     spoiler: :class:`bool`
         Whether the thumbnail is marked as a spoiler. Defaults to ``False``.
@@ -1261,10 +1261,10 @@ class MediaGalleryItem:
 
     Parameters
     ----------
-    media: Union[:class:`str`, :class:`.Asset`, :class:`.Attachment`, :class:`.UnfurledMediaItem`]
+    media: :class:`str` | :class:`.Asset` | :class:`.Attachment` | :class:`.UnfurledMediaItem`
         The media item to display. Can be an arbitrary URL or attachment
         reference (``attachment://<filename>``).
-    description: Optional[:class:`str`]
+    description: :class:`str` | ``None``
         The item's description ("alt text"), if any.
     spoiler: :class:`bool`
         Whether the item is marked as a spoiler. Defaults to ``False``.
@@ -1328,10 +1328,10 @@ class FileComponent(Component):
         using the ``attachment://<filename>`` syntax), not arbitrary URLs.
     spoiler: :class:`bool`
         Whether the file is marked as a spoiler. Defaults to ``False``.
-    name: Optional[:class:`str`]
+    name: :class:`str` | ``None``
         The name of the file.
         This is available in objects from the API, and ignored when sending.
-    size: Optional[:class:`int`]
+    size: :class:`int` | ``None``
         The size of the file.
         This is available in objects from the API, and ignored when sending.
     id: :class:`int`
@@ -1428,9 +1428,9 @@ class Container(Component):
 
     Attributes
     ----------
-    children: List[Union[:class:`ActionRow`, :class:`Section`, :class:`TextDisplay`, :class:`MediaGallery`, :class:`FileComponent`, :class:`Separator`]]
+    children: List[:class:`ActionRow` | :class:`Section` | :class:`TextDisplay` | :class:`MediaGallery` | :class:`FileComponent` | :class:`Separator`]
         The child components in this container.
-    accent_colour: Optional[:class:`Colour`]
+    accent_colour: :class:`Colour` | ``None``
         The accent colour of the container. An alias exists under ``accent_color``.
     spoiler: :class:`bool`
         Whether the container is marked as a spoiler. Defaults to ``False``.
@@ -1479,7 +1479,7 @@ class Container(Component):
 
     @property
     def accent_color(self) -> Optional[Colour]:
-        """Optional[:class:`Colour`]: The accent color of the container.
+        """:class:`Colour` | ``None``: The accent color of the container.
         An alias exists under ``accent_colour``.
         """
         return self.accent_colour
@@ -1502,9 +1502,9 @@ class Label(Component):
     ----------
     text: :class:`str`
         The label text.
-    description: Optional[:class:`str`]
+    description: :class:`str` | ``None``
         The description text for the label.
-    component: Union[:class:`TextInput`, :class:`StringSelectMenu`]
+    component: :class:`TextInput` | :class:`StringSelectMenu`
         The component within the label.
     id: :class:`int`
         The numeric identifier for the component.

@@ -317,18 +317,18 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
             this method defaults to appending the button to the action row.
         style: :class:`.ButtonStyle`
             The style of the button.
-        custom_id: Optional[:class:`str`]
+        custom_id: :class:`str` | ``None``
             The ID of the button that gets received during an interaction.
             If this button is for a URL, it does not have a custom ID.
-        url: Optional[:class:`str`]
+        url: :class:`str` | ``None``
             The URL this button sends you to.
         disabled: :class:`bool`
             Whether the button is disabled or not.
-        label: Optional[:class:`str`]
+        label: :class:`str` | ``None``
             The label of the button, if any.
-        emoji: Optional[Union[:class:`.PartialEmoji`, :class:`.Emoji`, :class:`str`]]
+        emoji: :class:`.PartialEmoji` | :class:`.Emoji` | :class:`str` | ``None``
             The emoji of the button, if available.
-        sku_id: Optional[:class:`int`]
+        sku_id: :class:`int` | ``None``
             The ID of a purchasable SKU, for premium buttons.
             Premium buttons additionally cannot have a ``label``, ``url``, or ``emoji``.
 
@@ -387,7 +387,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         custom_id: :class:`str`
             The ID of the select menu that gets received during an interaction.
             If not given then one is generated for you.
-        placeholder: Optional[:class:`str`]
+        placeholder: :class:`str` | ``None``
             The placeholder text that is shown if nothing is selected, if any.
         min_values: :class:`int`
             The minimum number of items that must be chosen for this select menu.
@@ -395,7 +395,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         max_values: :class:`int`
             The maximum number of items that must be chosen for this select menu.
             Defaults to 1 and must be between 1 and 25.
-        options: Union[List[:class:`disnake.SelectOption`], List[:class:`str`], Dict[:class:`str`, :class:`str`]]
+        options: List[:class:`disnake.SelectOption`, List[:class:`str`], Dict[:class:`str`, :class:`str`]]
             A list of options that can be selected in this menu. Use explicit :class:`.SelectOption`\\s
             for fine-grained control over the options. Alternatively, a list of strings will be treated
             as a list of labels, and a dict will be treated as a mapping of labels to values.
@@ -454,7 +454,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         custom_id: :class:`str`
             The ID of the select menu that gets received during an interaction.
             If not given then one is generated for you.
-        placeholder: Optional[:class:`str`]
+        placeholder: :class:`str` | ``None``
             The placeholder text that is shown if nothing is selected, if any.
         min_values: :class:`int`
             The minimum number of items that must be chosen for this select menu.
@@ -464,7 +464,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
             Defaults to 1 and must be between 1 and 25.
         disabled: :class:`bool`
             Whether the select is disabled. Defaults to ``False``.
-        default_values: Optional[Sequence[Union[:class:`~disnake.User`, :class:`.Member`, :class:`.SelectDefaultValue`, :class:`.Object`]]]
+        default_values: Sequence[:class:`~disnake.User` | :class:`.Member` | :class:`.SelectDefaultValue` | :class:`.Object` | ``None``]
             The list of values (users/members) that are selected by default.
             If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
@@ -520,7 +520,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         custom_id: :class:`str`
             The ID of the select menu that gets received during an interaction.
             If not given then one is generated for you.
-        placeholder: Optional[:class:`str`]
+        placeholder: :class:`str` | ``None``
             The placeholder text that is shown if nothing is selected, if any.
         min_values: :class:`int`
             The minimum number of items that must be chosen for this select menu.
@@ -530,7 +530,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
             Defaults to 1 and must be between 1 and 25.
         disabled: :class:`bool`
             Whether the select is disabled. Defaults to ``False``.
-        default_values: Optional[Sequence[Union[:class:`.Role`, :class:`.SelectDefaultValue`, :class:`.Object`]]]
+        default_values: Sequence[:class:`.Role` | :class:`.SelectDefaultValue` | :class:`.Object` | ``None``]
             The list of values (roles) that are selected by default.
             If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
@@ -588,7 +588,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         custom_id: :class:`str`
             The ID of the select menu that gets received during an interaction.
             If not given then one is generated for you.
-        placeholder: Optional[:class:`str`]
+        placeholder: :class:`str` | ``None``
             The placeholder text that is shown if nothing is selected, if any.
         min_values: :class:`int`
             The minimum number of items that must be chosen for this select menu.
@@ -598,7 +598,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
             Defaults to 1 and must be between 1 and 25.
         disabled: :class:`bool`
             Whether the select is disabled. Defaults to ``False``.
-        default_values: Optional[Sequence[Union[:class:`~disnake.User`, :class:`.Member`, :class:`.Role`, :class:`.SelectDefaultValue`]]]
+        default_values: Sequence[:class:`~disnake.User` | :class:`.Member` | :class:`.Role` | :class:`.SelectDefaultValue` | ``None``]
             The list of values (users/roles) that are selected by default.
             If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
@@ -657,7 +657,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         custom_id: :class:`str`
             The ID of the select menu that gets received during an interaction.
             If not given then one is generated for you.
-        placeholder: Optional[:class:`str`]
+        placeholder: :class:`str` | ``None``
             The placeholder text that is shown if nothing is selected, if any.
         min_values: :class:`int`
             The minimum number of items that must be chosen for this select menu.
@@ -667,10 +667,10 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
             Defaults to 1 and must be between 1 and 25.
         disabled: :class:`bool`
             Whether the select is disabled. Defaults to ``False``.
-        channel_types: Optional[List[:class:`.ChannelType`]]
+        channel_types: List[:class:`.ChannelType` | ``None``]
             The list of channel types that can be selected in this select menu.
             Defaults to all types (i.e. ``None``).
-        default_values: Optional[Sequence[Union[:class:`.abc.GuildChannel`, :class:`.Thread`, :class:`.abc.PrivateChannel`, :class:`.PartialMessageable`, :class:`.SelectDefaultValue`, :class:`.Object`]]]
+        default_values: Sequence[:class:`.abc.GuildChannel` | :class:`.Thread` | :class:`.abc.PrivateChannel` | :class:`.PartialMessageable` | :class:`.SelectDefaultValue` | :class:`.Object` | ``None``]
             The list of values (channels) that are selected by default.
             If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
@@ -737,15 +737,15 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
             The label of the text input.
         custom_id: :class:`str`
             The ID of the text input that gets received during an interaction.
-        placeholder: Optional[:class:`str`]
+        placeholder: :class:`str` | ``None``
             The placeholder text that is shown if nothing is entered.
-        value: Optional[:class:`str`]
+        value: :class:`str` | ``None``
             The pre-filled value of the text input.
         required: :class:`bool`
             Whether the text input is required. Defaults to ``True``.
-        min_length: Optional[:class:`int`]
+        min_length: :class:`int` | ``None``
             The minimum length of the text input.
-        max_length: Optional[:class:`int`]
+        max_length: :class:`int` | ``None``
             The maximum length of the text input.
         id: :class:`int`
             The numeric identifier for the component.
@@ -1102,13 +1102,13 @@ def walk_components(components: Sequence[ComponentT]) -> Iterator[ComponentT]:
 
     Parameters
     ----------
-    components: Union[Sequence[:class:`~disnake.Component`], Sequence[:class:`UIComponent`]]
+    components: Sequence[:class:`~disnake.Component`, Sequence[:class:`UIComponent`]]
         The sequence of components to iterate over. This supports both :class:`disnake.Component`
         objects and :class:`.ui.UIComponent` objects.
 
     Yields
     ------
-    Union[:class:`~disnake.Component`, :class:`UIComponent`]
+    :class:`~disnake.Component` | :class:`UIComponent`
         A component from the given sequence or child component thereof.
     """
     seen: Set[ComponentT] = set()

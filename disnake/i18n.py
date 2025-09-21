@@ -74,13 +74,13 @@ class Localized(Generic[StringT]):
 
     Parameters
     ----------
-    string: Optional[:class:`str`]
+    string: :class:`str` | ``None``
         The default (non-localized) value of the string.
         Whether this is optional or not depends on the localized parameter type.
     key: :class:`str`
         A localization key used for lookups.
         Incompatible with ``data``.
-    data: Union[Dict[:class:`.Locale`, :class:`str`], Dict[:class:`str`, :class:`str`]]
+    data: Dict[:class:`.Locale` | :class:`str`, Dict[:class:`str`, :class:`str`]]
         A mapping of locales to localized values.
         Incompatible with ``key``.
     """
@@ -231,7 +231,7 @@ class LocalizationValue:
 
     @property
     def data(self) -> Optional[Dict[str, str]]:
-        """Optional[Dict[:class:`str`, :class:`str`]]: A dict with a locale -> localization mapping, if available."""
+        """Dict[:class:`str`, :class:`str` | ``None``]: A dict with a locale -> localization mapping, if available."""
         if self._data is MISSING:
             # This will happen when `_link(store)` hasn't been called yet, which *shouldn't* occur under normal circumstances.
             warnings.warn(
@@ -279,7 +279,7 @@ class LocalizationProtocol(ABC):
 
         Returns
         -------
-        Optional[Dict[:class:`str`, :class:`str`]]
+        Dict[:class:`str`, :class:`str` | ``None``]
             The localizations for the provided key.
             May return ``None`` if no localizations could be found.
         """
@@ -291,7 +291,7 @@ class LocalizationProtocol(ABC):
 
         Parameters
         ----------
-        path: Union[:class:`str`, :class:`os.PathLike`]
+        path: :class:`str` | :class:`os.PathLike`
             The path to the file/directory to load.
 
         Raises
@@ -342,7 +342,7 @@ class LocalizationStore(LocalizationProtocol):
 
         Returns
         -------
-        Optional[Dict[:class:`str`, :class:`str`]]
+        Dict[:class:`str`, :class:`str` | ``None``]
             The localizations for the provided key.
             Returns ``None`` if no localizations could be found and :attr:`strict` is disabled.
         """
@@ -358,7 +358,7 @@ class LocalizationStore(LocalizationProtocol):
 
         Parameters
         ----------
-        path: Union[:class:`str`, :class:`os.PathLike`]
+        path: :class:`str` | :class:`os.PathLike`
             The path to the file/directory to load.
 
         Raises

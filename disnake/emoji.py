@@ -69,11 +69,11 @@ class Emoji(_EmojiTag, AssetMixin):
         Whether the emoji is animated or not.
     managed: :class:`bool`
         Whether the emoji is managed by a Twitch integration.
-    guild_id: Optional[:class:`int`]
+    guild_id: :class:`int` | ``None``
         The guild ID the emoji belongs to. ``None`` if this is an app emoji.
     available: :class:`bool`
         Whether the emoji is available for use.
-    user: Optional[:class:`User`]
+    user: :class:`User` | ``None``
         The user that created this emoji. This can only be retrieved using
         :meth:`Guild.fetch_emoji`/:meth:`Guild.fetch_emojis` while
         having the :attr:`~Permissions.manage_guild_expressions` permission.
@@ -173,7 +173,7 @@ class Emoji(_EmojiTag, AssetMixin):
 
     @property
     def guild(self) -> Optional[Guild]:
-        """Optional[:class:`Guild`]: The guild this emoji belongs to. ``None`` if this is an app emoji.
+        """:class:`Guild` | ``None``: The guild this emoji belongs to. ``None`` if this is an app emoji.
 
         .. versionchanged:: |vnext|
 
@@ -184,7 +184,7 @@ class Emoji(_EmojiTag, AssetMixin):
 
     @property
     def application_id(self) -> Optional[int]:
-        """Optional[:class:`int`]: The ID of the application which owns this emoji.
+        """:class:`int` | ``None``: The ID of the application which owns this emoji.
 
         .. versionadded:: |vnext|
         """
@@ -235,7 +235,7 @@ class Emoji(_EmojiTag, AssetMixin):
 
         Parameters
         ----------
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | ``None``
             The reason for deleting this emoji. Shows up on the audit log.
 
         Raises
@@ -274,13 +274,13 @@ class Emoji(_EmojiTag, AssetMixin):
         ----------
         name: :class:`str`
             The new emoji name.
-        roles: Optional[List[:class:`~disnake.abc.Snowflake`]]
+        roles: List[:class:`~disnake.abc.Snowflake` | ``None``]
             A list of roles that can use this emoji. An empty list can be passed to make it available to everyone.
 
             An emoji cannot have both subscription roles (see :attr:`RoleTags.integration_id`) and
             non-subscription roles, and emojis can't be converted between premium and non-premium
             after creation.
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | ``None``
             The reason for editing this emoji. Shows up on the audit log.
 
         Raises

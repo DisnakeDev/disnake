@@ -142,7 +142,7 @@ class SubCommandGroup(InvokableApplicationCommand):
         API representation of this subcommand.
     callback: :ref:`coroutine <coroutine>`
         The coroutine that is executed when the command group is invoked.
-    cog: Optional[:class:`Cog`]
+    cog: :class:`Cog` | ``None``
         The cog that this group belongs to. ``None`` if there isn't one.
     checks: List[Callable[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
         A list of predicates that verifies if the group could be executed
@@ -257,7 +257,7 @@ class SubCommand(InvokableApplicationCommand):
     qualified_name: :class:`str`
         The full command name, including parent names in the case of slash subcommands or groups.
         For example, the qualified name for ``/one two three`` would be ``one two three``.
-    parent: Union[:class:`InvokableSlashCommand`, :class:`SubCommandGroup`]
+    parent: :class:`InvokableSlashCommand` | :class:`SubCommandGroup`
         The parent command or group this subcommand belongs to.
 
         .. versionadded:: 2.6
@@ -265,7 +265,7 @@ class SubCommand(InvokableApplicationCommand):
         API representation of this subcommand.
     callback: :ref:`coroutine <coroutine>`
         The coroutine that is executed when the subcommand is called.
-    cog: Optional[:class:`Cog`]
+    cog: :class:`Cog` | ``None``
         The cog that this subcommand belongs to. ``None`` if there isn't one.
     checks: List[Callable[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
         A list of predicates that verifies if the subcommand could be executed
@@ -335,7 +335,7 @@ class SubCommand(InvokableApplicationCommand):
     def parents(
         self,
     ) -> Union[Tuple[InvokableSlashCommand], Tuple[SubCommandGroup, InvokableSlashCommand]]:
-        """Union[Tuple[:class:`InvokableSlashCommand`], Tuple[:class:`SubCommandGroup`, :class:`InvokableSlashCommand`]]:
+        """Tuple[:class:`InvokableSlashCommand`, Tuple[:class:`SubCommandGroup`, :class:`InvokableSlashCommand`]]:
         Returns all parents of this subcommand.
 
         For example, the parents of the ``c`` subcommand in ``/a b c`` are ``(b, a)``.
@@ -414,7 +414,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         An object being registered in the API.
     callback: :ref:`coroutine <coroutine>`
         The coroutine that is executed when the command is called.
-    cog: Optional[:class:`Cog`]
+    cog: :class:`Cog` | ``None``
         The cog that this command belongs to. ``None`` if there isn't one.
     checks: List[Callable[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
         A list of predicates that verifies if the command could be executed
@@ -423,7 +423,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         :exc:`.CommandError` should be used. Note that if the checks fail then
         :exc:`.CheckFailure` exception is raised to the :func:`.on_slash_command_error`
         event.
-    guild_ids: Optional[Tuple[:class:`int`, ...]]
+    guild_ids: Tuple[:class:`int`, ... | ``None``]
         The list of IDs of the guilds where the command is synced. ``None`` if this command is global.
     connectors: Dict[:class:`str`, :class:`str`]
         A mapping of option names to function parameter names, mainly for internal processes.
@@ -562,13 +562,13 @@ class InvokableSlashCommand(InvokableApplicationCommand):
 
         Parameters
         ----------
-        name: Optional[Union[:class:`str`, :class:`.Localized`]]
+        name: :class:`str` | :class:`.Localized` | ``None``
             The name of the subcommand (defaults to function name).
 
             .. versionchanged:: 2.5
                 Added support for localizations.
 
-        description: Optional[Union[:class:`str`, :class:`.Localized`]]
+        description: :class:`str` | :class:`.Localized` | ``None``
             The description of the subcommand.
 
             .. versionchanged:: 2.5
@@ -624,7 +624,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
 
         Parameters
         ----------
-        name: Optional[Union[:class:`str`, :class:`.Localized`]]
+        name: :class:`str` | :class:`.Localized` | ``None``
             The name of the subcommand group (defaults to function name).
 
             .. versionchanged:: 2.5
@@ -798,13 +798,13 @@ def slash_command(
     ----------
     auto_sync: :class:`bool`
         Whether to automatically register the command. Defaults to ``True``.
-    name: Optional[Union[:class:`str`, :class:`.Localized`]]
+    name: :class:`str` | :class:`.Localized` | ``None``
         The name of the slash command (defaults to function name).
 
         .. versionchanged:: 2.5
             Added support for localizations.
 
-    description: Optional[Union[:class:`str`, :class:`.Localized`]]
+    description: :class:`str` | :class:`.Localized` | ``None``
         The description of the slash command. It will be visible in Discord.
 
         .. versionchanged:: 2.5
@@ -816,7 +816,7 @@ def slash_command(
 
         .. versionadded:: 2.8
 
-    install_types: Optional[:class:`.ApplicationInstallTypes`]
+    install_types: :class:`.ApplicationInstallTypes` | ``None``
         The installation types where the command is available.
         Defaults to :attr:`.ApplicationInstallTypes.guild` only.
         Only available for global commands.
@@ -825,7 +825,7 @@ def slash_command(
 
         .. versionadded:: 2.10
 
-    contexts: Optional[:class:`.InteractionContextTypes`]
+    contexts: :class:`.InteractionContextTypes` | ``None``
         The interaction contexts where the command can be used.
         Only available for global commands.
 
@@ -844,7 +844,7 @@ def slash_command(
             Use ``contexts`` instead.
             This is equivalent to the :attr:`.InteractionContextTypes.bot_dm` flag.
 
-    default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]
+    default_member_permissions: :class:`.Permissions` | :class:`int` | ``None``
         The default required permissions for this command.
         See :attr:`.ApplicationCommand.default_member_permissions` for details.
 

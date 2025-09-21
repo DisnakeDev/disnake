@@ -67,7 +67,7 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
     custom_id: :class:`str`
         The ID of the select menu that gets received during an interaction.
         If not given then one is generated for you.
-    placeholder: Optional[:class:`str`]
+    placeholder: :class:`str` | ``None``
         The placeholder text that is shown if nothing is selected, if any.
     min_values: :class:`int`
         The minimum number of items that must be chosen for this select menu.
@@ -77,7 +77,7 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select is disabled.
-    options: Union[List[:class:`disnake.SelectOption`], List[:class:`str`], Dict[:class:`str`, :class:`str`]]
+    options: List[:class:`disnake.SelectOption`, List[:class:`str`], Dict[:class:`str`, :class:`str`]]
         A list of options that can be selected in this menu. Use explicit :class:`.SelectOption`\\s
         for fine-grained control over the options. Alternatively, a list of strings will be treated
         as a list of labels, and a dict will be treated as a mapping of labels to values.
@@ -97,7 +97,7 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
         sequential identifiers to the components in the message.
 
         .. versionadded:: 2.11
-    row: Optional[:class:`int`]
+    row: :class:`int` | ``None``
         The relative row this select menu belongs to. A Discord component can only have 5
         rows. By default, items are arranged automatically into those 5 rows. If you'd
         like to control the relative positioning of the row then passing an index is advised.
@@ -225,10 +225,10 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
         value: :class:`str`
             The value of the option. This is not displayed to users.
             If not given, defaults to the label. Can only be up to 100 characters.
-        description: Optional[:class:`str`]
+        description: :class:`str` | ``None``
             An additional description of the option, if any.
             Can only be up to 100 characters.
-        emoji: Optional[Union[:class:`str`, :class:`.Emoji`, :class:`.PartialEmoji`]]
+        emoji: :class:`str` | :class:`.Emoji` | :class:`.PartialEmoji` | ``None``
             The emoji of the option, if available. This can either be a string representing
             the custom or unicode emoji or an instance of :class:`.PartialEmoji` or :class:`.Emoji`.
         default: :class:`bool`
@@ -317,7 +317,7 @@ def string_select(
         Instead, this decorator will accept the same keywords as the passed callable/class does.
 
         .. versionadded:: 2.6
-    placeholder: Optional[:class:`str`]
+    placeholder: :class:`str` | ``None``
         The placeholder text that is shown if nothing is selected, if any.
     custom_id: :class:`str`
         The ID of the select menu that gets received during an interaction.
@@ -328,7 +328,7 @@ def string_select(
     max_values: :class:`int`
         The maximum number of items that must be chosen for this select menu.
         Defaults to 1 and must be between 1 and 25.
-    options: Union[List[:class:`disnake.SelectOption`], List[:class:`str`], Dict[:class:`str`, :class:`str`]]
+    options: List[:class:`disnake.SelectOption`, List[:class:`str`], Dict[:class:`str`, :class:`str`]]
         A list of options that can be selected in this menu. Use explicit :class:`.SelectOption`\\s
         for fine-grained control over the options. Alternatively, a list of strings will be treated
         as a list of labels, and a dict will be treated as a mapping of labels to values.
@@ -345,7 +345,7 @@ def string_select(
         sequential identifiers to the components in the message.
 
         .. versionadded:: 2.11
-    row: Optional[:class:`int`]
+    row: :class:`int` | ``None``
         The relative row this select menu belongs to. A Discord component can only have 5
         rows. By default, items are arranged automatically into those 5 rows. If you'd
         like to control the relative positioning of the row then passing an index is advised.

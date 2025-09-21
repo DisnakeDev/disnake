@@ -122,15 +122,15 @@ class WidgetMember(BaseUser):
             See the `help article <https://dis.gd/app-usernames>`__ for details.
     status: :class:`Status`
         The member's status.
-    activity: Optional[Union[:class:`BaseActivity`, :class:`Spotify`]]
+    activity: :class:`BaseActivity` | :class:`Spotify` | ``None``
         The member's activity. This generally only has the ``name`` set.
-    deafened: Optional[:class:`bool`]
+    deafened: :class:`bool` | ``None``
         Whether the member is currently deafened.
-    muted: Optional[:class:`bool`]
+    muted: :class:`bool` | ``None``
         Whether the member is currently muted.
-    suppress: Optional[:class:`bool`]
+    suppress: :class:`bool` | ``None``
         Whether the member is currently being suppressed.
-    connected_channel: Optional[:class:`WidgetChannel`]
+    connected_channel: :class:`WidgetChannel` | ``None``
         Which channel the member is connected to.
     """
 
@@ -171,7 +171,7 @@ class WidgetMember(BaseUser):
     # and instead a separate `avatar_url` field with a full url
     @property
     def avatar(self) -> Optional[Asset]:
-        """Optional[:class:`Asset`]: The user's avatar.
+        """:class:`Asset` | ``None``: The user's avatar.
         The size can be chosen using :func:`Asset.with_size`, however the format is always
         static and cannot be changed through :func:`Asset.with_format` or similar methods.
         """
@@ -196,7 +196,7 @@ class WidgetSettings:
         The widget's guild.
     enabled: :class:`bool`
         Whether the widget is enabled.
-    channel_id: Optional[:class:`int`]
+    channel_id: :class:`int` | ``None``
         The widget channel ID. If set, an invite link for this channel will be generated,
         which allows users to join the guild from the widget.
     """
@@ -216,7 +216,7 @@ class WidgetSettings:
 
     @property
     def channel(self) -> Optional[GuildChannel]:
-        """Optional[:class:`abc.GuildChannel`]: The widget channel, if set."""
+        """:class:`abc.GuildChannel` | ``None``: The widget channel, if set."""
         return self.guild.get_channel(self.channel_id) if self.channel_id is not None else None
 
     async def edit(
@@ -237,11 +237,11 @@ class WidgetSettings:
         ----------
         enabled: :class:`bool`
             Whether to enable the widget.
-        channel: Optional[:class:`~disnake.abc.Snowflake`]
+        channel: :class:`~disnake.abc.Snowflake` | ``None``
             The new widget channel. Pass ``None`` to remove the widget channel.
             If set, an invite link for this channel will be generated,
             which allows users to join the guild from the widget.
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | ``None``
             The reason for editing the widget. Shows up on the audit log.
 
         Raises
@@ -355,7 +355,7 @@ class Widget:
 
     @property
     def invite_url(self) -> Optional[str]:
-        """Optional[:class:`str`]: The invite URL for the guild, if available."""
+        """:class:`str` | ``None``: The invite URL for the guild, if available."""
         return self._invite
 
     async def fetch_invite(self, *, with_counts: bool = True) -> Optional[Invite]:
@@ -378,7 +378,7 @@ class Widget:
 
         Returns
         -------
-        Optional[:class:`Invite`]
+        :class:`Invite` | ``None``
             The invite from the widget's invite URL, if available.
         """
         if not self._invite:
@@ -408,9 +408,9 @@ class Widget:
         ----------
         enabled: :class:`bool`
             Whether to enable the widget.
-        channel: Optional[:class:`~disnake.abc.Snowflake`]
+        channel: :class:`~disnake.abc.Snowflake` | ``None``
             The new widget channel. Pass ``None`` to remove the widget channel.
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | ``None``
             The reason for editing the widget. Shows up on the audit log.
 
         Raises

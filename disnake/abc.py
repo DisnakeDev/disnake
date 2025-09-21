@@ -144,7 +144,7 @@ class User(Snowflake, Protocol):
             The value of a single zero (``"0"``) indicates that the user has been migrated to the new system.
             See the `help article <https://dis.gd/app-usernames>`__ for details.
 
-    global_name: Optional[:class:`str`]
+    global_name: :class:`str` | ``None``
         The user's global display name, if set.
         This takes precedence over :attr:`.name` when shown.
 
@@ -173,7 +173,7 @@ class User(Snowflake, Protocol):
 
     @property
     def avatar(self) -> Optional[Asset]:
-        """Optional[:class:`~disnake.Asset`]: Returns an :class:`~disnake.Asset` for
+        """:class:`~disnake.Asset` | ``None``: Returns an :class:`~disnake.Asset` for
         the avatar the user has.
         """
         raise NotImplementedError
@@ -536,7 +536,7 @@ class GuildChannel(ABC):
 
         Parameters
         ----------
-        obj: Union[:class:`.Role`, :class:`.abc.User`]
+        obj: :class:`.Role` | :class:`.abc.User`
             The role or user denoting
             whose overwrite to get.
 
@@ -571,7 +571,7 @@ class GuildChannel(ABC):
 
         Returns
         -------
-        Dict[Union[:class:`~disnake.Role`, :class:`~disnake.Member`], :class:`~disnake.PermissionOverwrite`]
+        Dict[:class:`~disnake.Role` | :class:`~disnake.Member`, :class:`~disnake.PermissionOverwrite`]
             The channel's permission overwrites.
         """
         ret = {}
@@ -597,7 +597,7 @@ class GuildChannel(ABC):
 
     @property
     def category(self) -> Optional[CategoryChannel]:
-        """Optional[:class:`~disnake.CategoryChannel`]: The category this channel belongs to.
+        """:class:`~disnake.CategoryChannel` | ``None``: The category this channel belongs to.
 
         If there is no category then this is ``None``.
         """
@@ -694,7 +694,7 @@ class GuildChannel(ABC):
 
         Parameters
         ----------
-        obj: Union[:class:`~disnake.Member`, :class:`~disnake.Role`]
+        obj: :class:`~disnake.Member` | :class:`~disnake.Role`
             The object to resolve permissions for. This could be either
             a member or a role. If it's a role then member overwrites
             are not computed.
@@ -831,7 +831,7 @@ class GuildChannel(ABC):
 
         Parameters
         ----------
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | ``None``
             The reason for deleting this channel. Shows up on the audit log.
 
         Raises
@@ -976,15 +976,15 @@ class GuildChannel(ABC):
 
         Parameters
         ----------
-        target: Union[:class:`.Member`, :class:`.Role`]
+        target: :class:`.Member` | :class:`.Role`
             The member or role to overwrite permissions for.
-        overwrite: Optional[:class:`.PermissionOverwrite`]
+        overwrite: :class:`.PermissionOverwrite` | ``None``
             The permissions to allow and deny to the target, or ``None`` to
             delete the overwrite.
         **permissions
             A keyword argument list of permissions to set for ease of use.
             Cannot be mixed with ``overwrite``.
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | ``None``
             The reason for doing this action. Shows up on the audit log.
 
         Raises
@@ -1098,9 +1098,9 @@ class GuildChannel(ABC):
 
         Parameters
         ----------
-        name: Optional[:class:`str`]
+        name: :class:`str` | ``None``
             The name of the new channel. If not provided, defaults to this channel name.
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | ``None``
             The reason for cloning this channel. Shows up on the audit log.
 
         Raises
@@ -1204,13 +1204,13 @@ class GuildChannel(ABC):
             while a negative number moves it above. Note that this
             number is relative and computed after the ``beginning``,
             ``end``, ``before``, and ``after`` parameters.
-        category: Optional[:class:`.abc.Snowflake`]
+        category: :class:`.abc.Snowflake` | ``None``
             The category to move this channel under.
             If ``None`` is given then it moves it out of the category.
             This parameter is ignored if moving a category channel.
         sync_permissions: :class:`bool`
             Whether to sync the permissions with the category (if given).
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | ``None``
             The reason for moving this channel. Shows up on the audit log.
 
         Raises
@@ -1319,18 +1319,18 @@ class GuildChannel(ABC):
             Whether a unique invite URL should be created. Defaults to ``True``.
             If this is set to ``False`` then it will return a previously created
             invite.
-        target_type: Optional[:class:`.InviteTarget`]
+        target_type: :class:`.InviteTarget` | ``None``
             The type of target for the voice channel invite, if any.
 
             .. versionadded:: 2.0
 
-        target_user: Optional[:class:`User`]
+        target_user: :class:`User` | ``None``
             The user whose stream to display for this invite, required if ``target_type`` is :attr:`.InviteTarget.stream`.
             The user must be streaming in the channel.
 
             .. versionadded:: 2.0
 
-        target_application: Optional[:class:`.Snowflake`]
+        target_application: :class:`.Snowflake` | ``None``
             The ID of the embedded application for the invite, required if ``target_type`` is :attr:`.InviteTarget.embedded_application`.
 
             .. versionadded:: 2.0
@@ -1338,12 +1338,12 @@ class GuildChannel(ABC):
             .. versionchanged:: 2.9
                 ``PartyType`` is deprecated, and :class:`.Snowflake` should be used instead.
 
-        guild_scheduled_event: Optional[:class:`.GuildScheduledEvent`]
+        guild_scheduled_event: :class:`.GuildScheduledEvent` | ``None``
             The guild scheduled event to include with the invite.
 
             .. versionadded:: 2.3
 
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | ``None``
             The reason for creating this invite. Shows up on the audit log.
 
         Raises
@@ -1556,7 +1556,7 @@ class Messageable:
 
         Parameters
         ----------
-        content: Optional[:class:`str`]
+        content: :class:`str` | ``None``
             The content of the message to send.
         tts: :class:`bool`
             Whether the message should be sent using text-to-speech.
@@ -1574,12 +1574,12 @@ class Messageable:
         files: List[:class:`~disnake.File`]
             A list of files to upload. Must be a maximum of 10.
             This cannot be mixed with the ``file`` parameter.
-        stickers: Sequence[Union[:class:`.GuildSticker`, :class:`.StandardSticker`, :class:`.StickerItem`]]
+        stickers: Sequence[:class:`.GuildSticker` | :class:`.StandardSticker` | :class:`.StickerItem`]
             A list of stickers to upload. Must be a maximum of 3.
 
             .. versionadded:: 2.0
 
-        nonce: Union[:class:`str`, :class:`int`]
+        nonce: :class:`str` | :class:`int`
             The nonce to use for sending this message. If the message was successfully sent,
             then the message will have a nonce with this value.
         delete_after: :class:`float`
@@ -1596,7 +1596,7 @@ class Messageable:
 
             .. versionadded:: 1.4
 
-        reference: Union[:class:`.Message`, :class:`.MessageReference`, :class:`.PartialMessage`]
+        reference: :class:`.Message` | :class:`.MessageReference` | :class:`.PartialMessage`
             A reference to the :class:`.Message` to which you are replying, this can be created using
             :meth:`.Message.to_reference` or passed directly as a :class:`.Message`. You can control
             whether this mentions the author of the referenced message using the :attr:`.AllowedMentions.replied_user`
@@ -1610,7 +1610,7 @@ class Messageable:
                 you must explicitly transform the message to a :class:`.MessageReference` using :meth:`.Message.to_reference` and specify the :class:`.MessageReferenceType`,
                 or use :meth:`.Message.forward`.
 
-        mention_author: Optional[:class:`bool`]
+        mention_author: :class:`bool` | ``None``
             If set, overrides the :attr:`.AllowedMentions.replied_user` attribute of ``allowed_mentions``.
 
             .. versionadded:: 1.6
@@ -1900,11 +1900,11 @@ class Messageable:
 
         Parameters
         ----------
-        limit: Optional[:class:`int`]
+        limit: :class:`int` | ``None``
             The number of pinned messages to retrieve.
             If ``None``, retrieves every pinned message in the channel. Note, however,
             that this would make it a slow operation.
-        before: Optional[Union[:class:`.abc.Snowflake`, :class:`datetime.datetime`]]
+        before: :class:`.abc.Snowflake` | :class:`datetime.datetime` | ``None``
             Retrieve messages pinned before this date or message.
             If a datetime is provided, it is recommended to use a UTC aware datetime.
             If the datetime is naive, it is assumed to be local time.
@@ -1954,25 +1954,25 @@ class Messageable:
 
         Parameters
         ----------
-        limit: Optional[:class:`int`]
+        limit: :class:`int` | ``None``
             The number of messages to retrieve.
             If ``None``, retrieves every message in the channel. Note, however,
             that this would make it a slow operation.
-        before: Optional[Union[:class:`.abc.Snowflake`, :class:`datetime.datetime`]]
+        before: :class:`.abc.Snowflake` | :class:`datetime.datetime` | ``None``
             Retrieve messages before this date or message.
             If a datetime is provided, it is recommended to use a UTC aware datetime.
             If the datetime is naive, it is assumed to be local time.
-        after: Optional[Union[:class:`.abc.Snowflake`, :class:`datetime.datetime`]]
+        after: :class:`.abc.Snowflake` | :class:`datetime.datetime` | ``None``
             Retrieve messages after this date or message.
             If a datetime is provided, it is recommended to use a UTC aware datetime.
             If the datetime is naive, it is assumed to be local time.
-        around: Optional[Union[:class:`.abc.Snowflake`, :class:`datetime.datetime`]]
+        around: :class:`.abc.Snowflake` | :class:`datetime.datetime` | ``None``
             Retrieve messages around this date or message.
             If a datetime is provided, it is recommended to use a UTC aware datetime.
             If the datetime is naive, it is assumed to be local time.
             When using this argument, the maximum limit is 101. Note that if the limit is an
             even number then this will return at most limit + 1 messages.
-        oldest_first: Optional[:class:`bool`]
+        oldest_first: :class:`bool` | ``None``
             If set to ``True``, return messages in oldest->newest order. Defaults to ``True`` if
             ``after`` is specified, otherwise ``False``.
 

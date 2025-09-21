@@ -365,7 +365,7 @@ class Cog(metaclass=CogMeta):
 
         Yields
         ------
-        Union[:class:`.Command`, :class:`.Group`]
+        :class:`.Command` | :class:`.Group`
             A command or group from the cog.
         """
         from .core import GroupMixin
@@ -399,7 +399,7 @@ class Cog(metaclass=CogMeta):
 
         Parameters
         ----------
-        name: Union[:class:`str`, :class:`.Event`]
+        name: :class:`str` | :class:`.Event`
             The name of the event being listened to. If not provided, it
             defaults to the function's name.
 

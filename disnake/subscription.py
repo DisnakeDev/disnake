@@ -65,7 +65,7 @@ class Subscription(Hashable):
         The time at which the current period for the given subscription will end.
     status: :class:`SubscriptionStatus`
         The current status of the given subscription.
-    canceled_at: Optional[:class:`datetime.datetime`]
+    canceled_at: :class:`datetime.datetime` | ``None``
         The time at which the subscription was canceled.
 
         See also :attr:`is_canceled`.
@@ -108,7 +108,7 @@ class Subscription(Hashable):
 
     @property
     def user(self) -> Optional[User]:
-        """Optional[:class:`User`]: The user who is subscribed to the :attr:`sku_ids`.
+        """:class:`User` | ``None``: The user who is subscribed to the :attr:`sku_ids`.
 
         Requires the user to be cached.
         See also :attr:`user_id`.

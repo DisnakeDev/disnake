@@ -96,7 +96,7 @@ class VoiceState:
 
         .. versionadded:: 1.7
 
-    requested_to_speak_at: Optional[:class:`datetime.datetime`]
+    requested_to_speak_at: :class:`datetime.datetime` | ``None``
         An aware datetime object that specifies the date and time in UTC that the member
         requested to speak. It will be ``None`` if they are not requesting to speak
         anymore or have been accepted to speak.
@@ -107,7 +107,7 @@ class VoiceState:
 
     afk: :class:`bool`
         Whether the user is currently in the AFK channel in the guild.
-    channel: Optional[Union[:class:`VoiceChannel`, :class:`StageChannel`]]
+    channel: :class:`VoiceChannel` | :class:`StageChannel` | ``None``
         The voice channel that the user is currently connected to. ``None`` if the user
         is not currently in a voice channel.
     """
@@ -236,10 +236,10 @@ class Member(disnake.abc.Messageable, _UserTag):
 
     Attributes
     ----------
-    joined_at: Optional[:class:`datetime.datetime`]
+    joined_at: :class:`datetime.datetime` | ``None``
         An aware datetime object that specifies the date and time in UTC that the member joined the guild.
         If the member left and rejoined the guild, this will be the latest date. In certain cases, this can be ``None``.
-    activities: Tuple[Union[:class:`BaseActivity`, :class:`Spotify`]]
+    activities: Tuple[:class:`BaseActivity` | :class:`Spotify`]
         The activities that the user is currently doing.
 
         .. note::
@@ -249,7 +249,7 @@ class Member(disnake.abc.Messageable, _UserTag):
             than 128 characters. See :issue-dpy:`1738` for more information.
     guild: :class:`Guild`
         The guild that the member belongs to.
-    nick: Optional[:class:`str`]
+    nick: :class:`str` | ``None``
         The guild specific nickname of the user.
         This takes precedence over :attr:`.global_name` and :attr:`.name` when shown.
     pending: :class:`bool`
@@ -257,7 +257,7 @@ class Member(disnake.abc.Messageable, _UserTag):
 
         .. versionadded:: 1.6
 
-    premium_since: Optional[:class:`datetime.datetime`]
+    premium_since: :class:`datetime.datetime` | ``None``
         An aware datetime object that specifies the date and time in UTC when the member used their
         "Nitro boost" on the guild, if available. This could be ``None``.
     """
@@ -623,7 +623,7 @@ class Member(disnake.abc.Messageable, _UserTag):
 
     @property
     def guild_avatar(self) -> Optional[Asset]:
-        """Optional[:class:`Asset`]: Returns an :class:`Asset` for the guild avatar
+        """:class:`Asset` | ``None``: Returns an :class:`Asset` for the guild avatar
         the member has. If unavailable, ``None`` is returned.
 
         .. versionadded:: 2.0
@@ -638,7 +638,7 @@ class Member(disnake.abc.Messageable, _UserTag):
     # https://github.com/DisnakeDev/disnake/pull/1204#discussion_r1685773429
     @property
     def guild_banner(self) -> Optional[Asset]:
-        """Optional[:class:`Asset`]: Returns an :class:`Asset` for the guild banner
+        """:class:`Asset` | ``None``: Returns an :class:`Asset` for the guild banner
         the member has. If unavailable, ``None`` is returned.
 
         .. versionadded:: 2.10
@@ -649,7 +649,7 @@ class Member(disnake.abc.Messageable, _UserTag):
 
     @property
     def activity(self) -> Optional[ActivityTypes]:
-        """Optional[Union[:class:`BaseActivity`, :class:`Spotify`]]: Returns the primary
+        """:class:`BaseActivity` | :class:`Spotify` | ``None``: Returns the primary
         activity the user is currently doing. Could be ``None`` if no activity is being done.
 
         .. note::
@@ -701,7 +701,7 @@ class Member(disnake.abc.Messageable, _UserTag):
 
     @property
     def role_icon(self) -> Optional[Union[Asset, PartialEmoji]]:
-        """Optional[Union[:class:`Asset`, :class:`PartialEmoji`]]: Returns the member's displayed role icon, if any.
+        """:class:`Asset` | :class:`PartialEmoji` | ``None``: Returns the member's displayed role icon, if any.
 
         .. versionadded:: 2.5
         """
@@ -738,12 +738,12 @@ class Member(disnake.abc.Messageable, _UserTag):
 
     @property
     def voice(self) -> Optional[VoiceState]:
-        """Optional[:class:`VoiceState`]: Returns the member's current voice state."""
+        """:class:`VoiceState` | ``None``: Returns the member's current voice state."""
         return self.guild._voice_state_for(self._user.id)
 
     @property
     def current_timeout(self) -> Optional[datetime.datetime]:
-        """Optional[:class:`datetime.datetime`]: Returns the datetime when the timeout expires.
+        """:class:`datetime.datetime` | ``None``: Returns the datetime when the timeout expires.
 
         If the member is not timed out or the timeout has already expired, returns ``None``.
 
@@ -767,7 +767,7 @@ class Member(disnake.abc.Messageable, _UserTag):
 
     @property
     def display_avatar_decoration(self) -> Optional[Asset]:
-        """Optional[:class:`Asset`]: Returns the member's display avatar decoration.
+        """:class:`Asset` | ``None``: Returns the member's display avatar decoration.
 
         For regular members this is just their avatar decoration, but
         if they have a guild specific avatar decoration then that
@@ -789,7 +789,7 @@ class Member(disnake.abc.Messageable, _UserTag):
 
     @property
     def guild_avatar_decoration(self) -> Optional[Asset]:
-        """Optional[:class:`Asset`]: Returns an :class:`Asset` for the guild avatar decoration
+        """:class:`Asset` | ``None``: Returns an :class:`Asset` for the guild avatar decoration
         the member has. If unavailable, ``None`` is returned.
 
         .. versionadded:: 2.10
@@ -939,7 +939,7 @@ class Member(disnake.abc.Messageable, _UserTag):
 
         Parameters
         ----------
-        nick: Optional[:class:`str`]
+        nick: :class:`str` | ``None``
             The member's new nickname. Use ``None`` to remove the nickname.
 
             To change your own nickname, :attr:`~Permissions.change_nickname`
@@ -955,10 +955,10 @@ class Member(disnake.abc.Messageable, _UserTag):
 
         roles: Sequence[:class:`Role`]
             The member's new list of roles. This *replaces* the roles.
-        voice_channel: Optional[:class:`VoiceChannel`]
+        voice_channel: :class:`VoiceChannel` | ``None``
             The voice channel to move the member to.
             Pass ``None`` to kick them from voice.
-        timeout: Optional[Union[:class:`float`, :class:`datetime.timedelta`, :class:`datetime.datetime`]]
+        timeout: :class:`float` | :class:`datetime.timedelta` | :class:`datetime.datetime` | ``None``
             The duration (seconds or timedelta) or the expiry (datetime) of the timeout;
             until then, the member will not be able to interact with the guild.
             Set to ``None`` to remove the timeout. Supports up to 28 days in the future.
@@ -978,27 +978,27 @@ class Member(disnake.abc.Messageable, _UserTag):
 
             .. versionadded:: 2.8
 
-        bio: Optional[:class:`str`]
+        bio: :class:`str` | ``None``
             The member's new guild bio.
             Can only be used on the bot's guild member, not other members.
 
             .. versionadded:: 2.11
 
-        avatar: Optional[|resource_type|]
+        avatar: |resource_type| | ``None``
             The member's new guild avatar.
             Use ``None`` to remove the avatar and revert back to the member's global avatar.
             Can only be used on the bot's guild member, not other members.
 
             .. versionadded:: 2.11
 
-        banner: Optional[|resource_type|]
+        banner: |resource_type| | ``None``
             The member's new guild banner.
             Use ``None`` to remove the banner and revert back to the member's global banner.
             Can only be used on the bot's guild member, not other members.
 
             .. versionadded:: 2.11
 
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | ``None``
             The reason for editing this member. Shows up on the audit log.
 
         Raises
@@ -1014,7 +1014,7 @@ class Member(disnake.abc.Messageable, _UserTag):
 
         Returns
         -------
-        Optional[:class:`.Member`]
+        :class:`.Member` | ``None``
             The newly updated member, if applicable. This is only returned
             when certain fields are updated.
         """
@@ -1141,10 +1141,10 @@ class Member(disnake.abc.Messageable, _UserTag):
 
         Parameters
         ----------
-        channel: Optional[:class:`VoiceChannel`]
+        channel: :class:`VoiceChannel` | ``None``
             The new voice channel to move the member to.
             Pass ``None`` to kick them from voice.
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | ``None``
             The reason for doing this action. Shows up on the audit log.
         """
         await self.edit(voice_channel=channel, reason=reason)
@@ -1165,7 +1165,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         *roles: :class:`abc.Snowflake`
             An argument list of :class:`abc.Snowflake` representing a :class:`Role`
             to give to the member.
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | ``None``
             The reason for adding these roles. Shows up on the audit log.
         atomic: :class:`bool`
             Whether to atomically add roles. This will ensure that multiple
@@ -1205,7 +1205,7 @@ class Member(disnake.abc.Messageable, _UserTag):
         *roles: :class:`abc.Snowflake`
             An argument list of :class:`abc.Snowflake` representing a :class:`Role`
             to remove from the member.
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | ``None``
             The reason for removing these roles. Shows up on the audit log.
         atomic: :class:`bool`
             Whether to atomically remove roles. This will ensure that multiple
@@ -1247,7 +1247,7 @@ class Member(disnake.abc.Messageable, _UserTag):
 
         Returns
         -------
-        Optional[:class:`Role`]
+        :class:`Role` | ``None``
             The role or ``None`` if not found in the member's roles.
         """
         return self.guild.get_role(role_id) if self._roles.has(role_id) else None
@@ -1287,15 +1287,15 @@ class Member(disnake.abc.Messageable, _UserTag):
 
         Parameters
         ----------
-        duration: Optional[Union[:class:`float`, :class:`datetime.timedelta`]]
+        duration: :class:`float` | :class:`datetime.timedelta` | ``None``
             The duration (seconds or timedelta) of the member's timeout. Set to ``None`` to remove the timeout.
             Supports up to 28 days in the future.
             May not be used in combination with the ``until`` parameter.
-        until: Optional[:class:`datetime.datetime`]
+        until: :class:`datetime.datetime` | ``None``
             The expiry date/time of the member's timeout. Set to ``None`` to remove the timeout.
             Supports up to 28 days in the future.
             May not be used in combination with the ``duration`` parameter.
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | ``None``
             The reason for this timeout. Appears on the audit log.
 
         Raises

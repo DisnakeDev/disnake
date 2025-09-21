@@ -107,16 +107,16 @@ class SKU(Hashable):
         ----------
         user: :class:`abc.Snowflake`
             The user to retrieve subscriptions for.
-        limit: Optional[:class:`int`]
+        limit: :class:`int` | ``None``
             The number of subscriptions to retrieve.
             If ``None``, retrieves every subscription.
             Note, however, that this would make it a slow operation.
             Defaults to ``50``.
-        before: Union[:class:`.abc.Snowflake`, :class:`datetime.datetime`]
+        before: :class:`.abc.Snowflake` | :class:`datetime.datetime`
             Retrieves subscriptions created before this date or object.
             If a datetime is provided, it is recommended to use a UTC aware datetime.
             If the datetime is naive, it is assumed to be local time.
-        after: Union[:class:`.abc.Snowflake`, :class:`datetime.datetime`]
+        after: :class:`.abc.Snowflake` | :class:`datetime.datetime`
             Retrieve subscriptions created after this date or object.
             If a datetime is provided, it is recommended to use a UTC aware datetime.
             If the datetime is naive, it is assumed to be local time.

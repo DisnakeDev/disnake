@@ -553,7 +553,7 @@ class AuditLogEntry(Hashable):
     ----------
     action: :class:`AuditLogAction`
         The action that was done.
-    user: Optional[Union[:class:`Member`, :class:`User`, :class:`Object`]]
+    user: :class:`Member` | :class:`User` | :class:`Object` | ``None``
         The user who initiated this action. Usually :class:`Member`\\, unless gone
         then it's a :class:`User`.
 
@@ -569,7 +569,7 @@ class AuditLogEntry(Hashable):
         For most actions, this is ``None``. However in some cases it
         contains extra information. See :class:`AuditLogAction` for
         which actions have this field filled out.
-    reason: Optional[:class:`str`]
+    reason: :class:`str` | ``None``
         The reason this action was done.
     """
 
@@ -778,7 +778,7 @@ class AuditLogEntry(Hashable):
 
     @utils.cached_property
     def category(self) -> Optional[enums.AuditLogActionCategory]:
-        """Optional[:class:`AuditLogActionCategory`]: The category of the action, if applicable."""
+        """:class:`AuditLogActionCategory` | ``None``: The category of the action, if applicable."""
         return self.action.category
 
     @utils.cached_property

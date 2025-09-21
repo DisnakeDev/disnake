@@ -25,7 +25,7 @@ class File(UIComponent):
 
     Parameters
     ----------
-    file: Union[:class:`str`, :class:`.UnfurledMediaItem`]
+    file: :class:`str` | :class:`.UnfurledMediaItem`
         The file to display. This **only** supports attachment references (i.e.
         using the ``attachment://<filename>`` syntax), not arbitrary URLs.
     spoiler: :class:`bool`
@@ -90,14 +90,14 @@ class File(UIComponent):
 
     @property
     def name(self) -> Optional[str]:
-        """Optional[:class:`str`]: The name of the file.
+        """:class:`str` | ``None``: The name of the file.
         This is available in objects from the API, and ignored when sending.
         """
         return self._underlying.name
 
     @property
     def size(self) -> Optional[int]:
-        """Optional[:class:`int`]: The size of the file.
+        """:class:`int` | ``None``: The size of the file.
         This is available in objects from the API, and ignored when sending.
         """
         return self._underlying.size

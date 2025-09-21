@@ -100,13 +100,13 @@ class View:
 
     Parameters
     ----------
-    timeout: Optional[:class:`float`]
+    timeout: :class:`float` | ``None``
         Timeout in seconds from last interaction with the UI before no longer accepting input.
         If ``None`` then there is no timeout.
 
     Attributes
     ----------
-    timeout: Optional[:class:`float`]
+    timeout: :class:`float` | ``None``
         Timeout from last interaction with the UI before no longer accepting input.
         If ``None`` then there is no timeout.
     children: List[:class:`Item`]
@@ -200,7 +200,7 @@ class View:
         ----------
         message: :class:`disnake.Message`
             The message with components to convert into a view.
-        timeout: Optional[:class:`float`]
+        timeout: :class:`float` | ``None``
             The timeout of the converted view.
 
         Raises

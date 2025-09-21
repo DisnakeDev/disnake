@@ -122,7 +122,7 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
 
         .. versionadded:: 2.5
 
-    default_install_types: Optional[:class:`.ApplicationInstallTypes`]
+    default_install_types: :class:`.ApplicationInstallTypes` | ``None``
         The default installation types where application commands will be available.
         This applies to all commands added either through the respective decorators
         or directly using :meth:`.add_slash_command` (etc.).
@@ -133,7 +133,7 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
 
         .. versionadded:: 2.10
 
-    default_contexts: Optional[:class:`.InteractionContextTypes`]
+    default_contexts: :class:`.InteractionContextTypes` | ``None``
         The default contexts where application commands will be usable.
         This applies to all commands added either through the respective decorators
         or directly using :meth:`.add_slash_command` (etc.).
@@ -194,21 +194,21 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
 
         This can be provided as a parameter at creation.
 
-    help_command: Optional[:class:`.HelpCommand`]
+    help_command: :class:`.HelpCommand` | ``None``
         The help command implementation to use. This can be dynamically
         set at runtime. To remove the help command pass ``None``. For more
         information on implementing a help command, see :ref:`ext_commands_api_help_commands`.
 
         This can be provided as a parameter at creation.
 
-    owner_id: Optional[:class:`int`]
+    owner_id: :class:`int` | ``None``
         The ID of the user that owns the bot. If this is not set and is then queried via
         :meth:`.is_owner` then it is fetched automatically using
         :meth:`~.Bot.application_info`.
 
         This can be provided as a parameter at creation.
 
-    owner_ids: Optional[Collection[:class:`int`]]
+    owner_ids: Collection[:class:`int` | ``None``]
         The IDs of the users that own the bot. This is similar to :attr:`owner_id`.
         If this is not set and the application is team based, then it is
         fetched automatically using :meth:`~.Bot.application_info` (taking team roles into account).
@@ -420,7 +420,7 @@ class InteractionBot(InteractionBotBase, disnake.Client):
 
         .. versionadded:: 2.5
 
-    default_install_types: Optional[:class:`.ApplicationInstallTypes`]
+    default_install_types: :class:`.ApplicationInstallTypes` | ``None``
         The default installation types where application commands will be available.
         This applies to all commands added either through the respective decorators
         or directly using :meth:`.add_slash_command` (etc.).
@@ -431,7 +431,7 @@ class InteractionBot(InteractionBotBase, disnake.Client):
 
         .. versionadded:: 2.10
 
-    default_contexts: Optional[:class:`.InteractionContextTypes`]
+    default_contexts: :class:`.InteractionContextTypes` | ``None``
         The default contexts where application commands will be usable.
         This applies to all commands added either through the respective decorators
         or directly using :meth:`.add_slash_command` (etc.).
@@ -444,14 +444,14 @@ class InteractionBot(InteractionBotBase, disnake.Client):
 
     Attributes
     ----------
-    owner_id: Optional[:class:`int`]
+    owner_id: :class:`int` | ``None``
         The ID of the user that owns the bot. If this is not set and is then queried via
         :meth:`.is_owner` then it is fetched automatically using
         :meth:`~.Bot.application_info`.
 
         This can be provided as a parameter at creation.
 
-    owner_ids: Optional[Collection[:class:`int`]]
+    owner_ids: Collection[:class:`int` | ``None``]
         The IDs of the users that own the bot. This is similar to :attr:`owner_id`.
         If this is not set and the application is team based, then it is
         fetched automatically using :meth:`~.Bot.application_info` (taking team roles into account).

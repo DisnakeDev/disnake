@@ -91,7 +91,7 @@ class Template:
         This is referred to as "last synced" in the official Discord client.
     source_guild: :class:`Guild`
         The source guild.
-    is_dirty: Optional[:class:`bool`]
+    is_dirty: :class:`bool` | ``None``
         Whether the template has unsynced changes.
 
         .. versionadded:: 2.0
@@ -165,7 +165,7 @@ class Template:
         ----------
         name: :class:`str`
             The name of the guild.
-        icon: Optional[|resource_type|]
+        icon: |resource_type| | ``None``
             The icon of the guild.
             See :meth:`.ClientUser.edit` for more details on what is expected.
 
@@ -247,7 +247,7 @@ class Template:
         ----------
         name: :class:`str`
             The template's new name.
-        description: Optional[:class:`str`]
+        description: :class:`str` | ``None``
             The template's new description.
 
         Raises

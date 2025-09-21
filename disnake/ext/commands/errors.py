@@ -202,7 +202,7 @@ class CheckAnyFailure(CheckFailure):
     ----------
     errors: List[:class:`CheckFailure`]
         A list of errors that were caught during execution.
-    checks: List[Callable[[Union[:class:`Context`, :class:`disnake.ApplicationCommandInteraction`]], :class:`bool`]]
+    checks: List[Callable[[:class:`Context` | :class:`disnake.ApplicationCommandInteraction`], :class:`bool`]]
         A list of check predicates that failed.
     """
 
@@ -348,7 +348,7 @@ class ChannelNotReadable(BadArgument):
 
     Attributes
     ----------
-    argument: Union[:class:`.abc.GuildChannel`, :class:`.Thread`]
+    argument: :class:`.abc.GuildChannel` | :class:`.Thread`
         The channel supplied by the caller that was not readable
     """
 
@@ -654,7 +654,7 @@ class MissingRole(CheckFailure):
 
     Attributes
     ----------
-    missing_role: Union[:class:`str`, :class:`int`]
+    missing_role: :class:`str` | :class:`int`
         The required role that is missing.
         This is the parameter passed to :func:`~.commands.has_role`.
     """
@@ -674,7 +674,7 @@ class BotMissingRole(CheckFailure):
 
     Attributes
     ----------
-    missing_role: Union[:class:`str`, :class:`int`]
+    missing_role: :class:`str` | :class:`int`
         The required role that is missing.
         This is the parameter passed to :func:`~.commands.has_role`.
     """
@@ -695,7 +695,7 @@ class MissingAnyRole(CheckFailure):
 
     Attributes
     ----------
-    missing_roles: List[Union[:class:`str`, :class:`int`]]
+    missing_roles: List[:class:`str` | :class:`int`]
         The roles that the invoker is missing.
         These are the parameters passed to :func:`~.commands.has_any_role`.
     """
@@ -720,7 +720,7 @@ class BotMissingAnyRole(CheckFailure):
 
     Attributes
     ----------
-    missing_roles: List[Union[:class:`str`, :class:`int`]]
+    missing_roles: List[:class:`str` | :class:`int`]
         The roles that the bot's member is missing.
         These are the parameters passed to :func:`~.commands.has_any_role`.
 
@@ -745,7 +745,7 @@ class NSFWChannelRequired(CheckFailure):
 
     Parameters
     ----------
-    channel: Union[:class:`.abc.GuildChannel`, :class:`.Thread`]
+    channel: :class:`.abc.GuildChannel` | :class:`.Thread`
         The channel that does not have NSFW enabled.
     """
 

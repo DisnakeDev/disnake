@@ -47,7 +47,7 @@ class InvokableUserCommand(InvokableApplicationCommand):
         An object being registered in the API.
     callback: :ref:`coroutine <coroutine>`
         The coroutine that is executed when the user command is called.
-    cog: Optional[:class:`Cog`]
+    cog: :class:`Cog` | ``None``
         The cog that this user command belongs to. ``None`` if there isn't one.
     checks: List[Callable[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
         A list of predicates that verifies if the command could be executed
@@ -56,7 +56,7 @@ class InvokableUserCommand(InvokableApplicationCommand):
         :exc:`.CommandError` should be used. Note that if the checks fail then
         :exc:`.CheckFailure` exception is raised to the :func:`.on_user_command_error`
         event.
-    guild_ids: Optional[Tuple[:class:`int`, ...]]
+    guild_ids: Tuple[:class:`int`, ... | ``None``]
         The list of IDs of the guilds where the command is synced. ``None`` if this command is global.
     auto_sync: :class:`bool`
         Whether to automatically register the command.
@@ -158,7 +158,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         An object being registered in the API.
     callback: :ref:`coroutine <coroutine>`
         The coroutine that is executed when the message command is called.
-    cog: Optional[:class:`Cog`]
+    cog: :class:`Cog` | ``None``
         The cog that this message command belongs to. ``None`` if there isn't one.
     checks: List[Callable[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
         A list of predicates that verifies if the command could be executed
@@ -167,7 +167,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         :exc:`.CommandError` should be used. Note that if the checks fail then
         :exc:`.CheckFailure` exception is raised to the :func:`.on_message_command_error`
         event.
-    guild_ids: Optional[Tuple[:class:`int`, ...]]
+    guild_ids: Tuple[:class:`int`, ... | ``None``]
         The list of IDs of the guilds where the command is synced. ``None`` if this command is global.
     auto_sync: :class:`bool`
         Whether to automatically register the command.
@@ -270,7 +270,7 @@ def user_command(
 
     Parameters
     ----------
-    name: Optional[Union[:class:`str`, :class:`.Localized`]]
+    name: :class:`str` | :class:`.Localized` | ``None``
         The name of the user command (defaults to the function name).
 
         .. versionchanged:: 2.5
@@ -284,7 +284,7 @@ def user_command(
             Use ``contexts`` instead.
             This is equivalent to the :attr:`.InteractionContextTypes.bot_dm` flag.
 
-    default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]
+    default_member_permissions: :class:`.Permissions` | :class:`int` | ``None``
         The default required permissions for this command.
         See :attr:`.ApplicationCommand.default_member_permissions` for details.
 
@@ -296,7 +296,7 @@ def user_command(
 
         .. versionadded:: 2.8
 
-    install_types: Optional[:class:`.ApplicationInstallTypes`]
+    install_types: :class:`.ApplicationInstallTypes` | ``None``
         The installation types where the command is available.
         Defaults to :attr:`.ApplicationInstallTypes.guild` only.
         Only available for global commands.
@@ -305,7 +305,7 @@ def user_command(
 
         .. versionadded:: 2.10
 
-    contexts: Optional[:class:`.InteractionContextTypes`]
+    contexts: :class:`.InteractionContextTypes` | ``None``
         The interaction contexts where the command can be used.
         Only available for global commands.
 
@@ -378,7 +378,7 @@ def message_command(
 
     Parameters
     ----------
-    name: Optional[Union[:class:`str`, :class:`.Localized`]]
+    name: :class:`str` | :class:`.Localized` | ``None``
         The name of the message command (defaults to the function name).
 
         .. versionchanged:: 2.5
@@ -392,7 +392,7 @@ def message_command(
             Use ``contexts`` instead.
             This is equivalent to the :attr:`.InteractionContextTypes.bot_dm` flag.
 
-    default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]
+    default_member_permissions: :class:`.Permissions` | :class:`int` | ``None``
         The default required permissions for this command.
         See :attr:`.ApplicationCommand.default_member_permissions` for details.
 
@@ -404,7 +404,7 @@ def message_command(
 
         .. versionadded:: 2.8
 
-    install_types: Optional[:class:`.ApplicationInstallTypes`]
+    install_types: :class:`.ApplicationInstallTypes` | ``None``
         The installation types where the command is available.
         Defaults to :attr:`.ApplicationInstallTypes.guild` only.
         Only available for global commands.
@@ -413,7 +413,7 @@ def message_command(
 
         .. versionadded:: 2.10
 
-    contexts: Optional[:class:`.InteractionContextTypes`]
+    contexts: :class:`.InteractionContextTypes` | ``None``
         The interaction contexts where the command can be used.
         Only available for global commands.
 

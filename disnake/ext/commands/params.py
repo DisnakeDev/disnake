@@ -119,7 +119,7 @@ __all__ = (
 
 def issubclass_(obj: Any, tp: Union[TypeT, Tuple[TypeT, ...]]) -> TypeGuard[TypeT]:
     """Similar to the builtin `issubclass`, but more lenient.
-    Can also handle unions (`issubclass(Union[int, str], int)`) and
+    Can also handle unions (`issubclass(int | str, int)`) and
     generic types (`issubclass(X[T], X)`) in the first argument.
     """
     if not isinstance(tp, (type, tuple)):
@@ -442,23 +442,23 @@ class ParamInfo:
 
     Parameters
     ----------
-    default: Union[Any, Callable[[:class:`.ApplicationCommandInteraction`], Any]]
+    default: Any | Callable[[:class:`.ApplicationCommandInteraction`, Any]]
         The actual default value for the corresponding function param.
         Can be a sync/async callable taking an interaction and returning a dynamic default value,
         if the user didn't pass a value for this parameter.
-    name: Optional[Union[:class:`str`, :class:`.Localized`]]
+    name: :class:`str` | :class:`.Localized` | ``None``
         The name of this slash command option.
 
         .. versionchanged:: 2.5
             Added support for localizations.
 
-    description: Optional[Union[:class:`str`, :class:`.Localized`]]
+    description: :class:`str` | :class:`.Localized` | ``None``
         The description of this slash command option.
 
         .. versionchanged:: 2.5
             Added support for localizations.
 
-    choices: Union[Sequence[:class:`.OptionChoice`], Sequence[Union[:class:`str`, :class:`int`, :class:`float`]], Mapping[:class:`str`, Union[:class:`str`, :class:`int`, :class:`float`]]]
+    choices: Sequence[:class:`.OptionChoice`, Sequence[:class:`str` | :class:`int` | :class:`float`], Mapping[:class:`str`, :class:`str` | :class:`int` | :class:`float`]]
         The pre-defined choices for this option.
     ge: :class:`float`
         The lowest allowed value for this option.
@@ -1164,24 +1164,24 @@ def Param(
 
     Parameters
     ----------
-    default: Union[Any, Callable[[:class:`.ApplicationCommandInteraction`], Any]]
+    default: Any | Callable[[:class:`.ApplicationCommandInteraction`, Any]]
         The actual default value of the function parameter that should be passed instead of the :class:`ParamInfo` instance.
         Can be a sync/async callable taking an interaction and returning a dynamic default value,
         if the user didn't pass a value for this parameter.
-    name: Optional[Union[:class:`str`, :class:`.Localized`]]
+    name: :class:`str` | :class:`.Localized` | ``None``
         The name of the option. By default, the option name is the parameter name.
 
         .. versionchanged:: 2.5
             Added support for localizations.
 
-    description: Optional[Union[:class:`str`, :class:`.Localized`]]
+    description: :class:`str` | :class:`.Localized` | ``None``
         The description of the option. You can skip this kwarg and use docstrings. See :ref:`param_syntax`.
         Kwarg aliases: ``desc``.
 
         .. versionchanged:: 2.5
             Added support for localizations.
 
-    choices: Union[Sequence[:class:`.OptionChoice`], Sequence[Union[:class:`str`, :class:`int`, :class:`float`]], Mapping[:class:`str`, Union[:class:`str`, :class:`int`, :class:`float`]]]
+    choices: Sequence[:class:`.OptionChoice`, Sequence[:class:`str` | :class:`int` | :class:`float`], Mapping[:class:`str`, :class:`str` | :class:`int` | :class:`float`]]
         The pre-defined choices for this slash command option.
     converter: Callable[[:class:`.ApplicationCommandInteraction`, Any], Any]
         A function that will convert the original input to a desired format.
@@ -1351,7 +1351,7 @@ def option_enum(
 
     Parameters
     ----------
-    choices: Union[Dict[:class:`str`, :class:`Any`], List[:class:`Any`]]
+    choices: Dict[:class:`str` | :class:`Any`, List[:class:`Any`]]
         A name/value mapping of choices, or a list of values whose stringified representations
         will be used as the names.
     **kwargs

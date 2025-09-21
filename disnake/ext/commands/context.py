@@ -64,17 +64,17 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
         A dictionary of transformed arguments that were passed into the command.
         Similar to :attr:`args`\\, if this is accessed in the
         :func:`.on_command_error` event then this dict could be incomplete.
-    current_parameter: Optional[:class:`inspect.Parameter`]
+    current_parameter: :class:`inspect.Parameter` | ``None``
         The parameter that is currently being inspected and converted.
         This is only of use for within converters.
 
         .. versionadded:: 2.0
 
-    prefix: Optional[:class:`str`]
+    prefix: :class:`str` | ``None``
         The prefix that was used to invoke the command.
-    command: Optional[:class:`Command`]
+    command: :class:`Command` | ``None``
         The command that is being invoked currently.
-    invoked_with: Optional[:class:`str`]
+    invoked_with: :class:`str` | ``None``
         The command name that triggered this invocation. Useful for finding out
         which alias called the command.
     invoked_parents: List[:class:`str`]
@@ -85,10 +85,10 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
 
         .. versionadded:: 1.7
 
-    invoked_subcommand: Optional[:class:`Command`]
+    invoked_subcommand: :class:`Command` | ``None``
         The subcommand that was invoked.
         If no valid subcommand was invoked then this is equal to ``None``.
-    subcommand_passed: Optional[:class:`str`]
+    subcommand_passed: :class:`str` | ``None``
         The string that was attempted to call a subcommand. This does not have
         to point to a valid registered subcommand and could just point to a
         nonsense string. If nothing was passed to attempt a call to a
@@ -251,33 +251,33 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
 
     @property
     def cog(self) -> Optional[Cog]:
-        """Optional[:class:`.Cog`]: Returns the cog associated with this context's command. Returns ``None`` if it does not exist."""
+        """:class:`.Cog` | ``None``: Returns the cog associated with this context's command. Returns ``None`` if it does not exist."""
         if self.command is None:
             return None
         return self.command.cog
 
     @disnake.utils.cached_property
     def guild(self) -> Optional[Guild]:
-        """Optional[:class:`.Guild`]: Returns the guild associated with this context's command. Returns ``None`` if not available."""
+        """:class:`.Guild` | ``None``: Returns the guild associated with this context's command. Returns ``None`` if not available."""
         return self.message.guild
 
     @disnake.utils.cached_property
     def channel(self) -> Union[GuildMessageable, DMChannel, GroupChannel]:
-        """Union[:class:`.abc.Messageable`]: Returns the channel associated with this context's command.
+        """:class:`.abc.Messageable`: Returns the channel associated with this context's command.
         Shorthand for :attr:`.Message.channel`.
         """
         return self.message.channel
 
     @disnake.utils.cached_property
     def author(self) -> Union[User, Member]:
-        """Union[:class:`~disnake.User`, :class:`.Member`]:
+        """:class:`~disnake.User` | :class:`.Member`:
         Returns the author associated with this context's command. Shorthand for :attr:`.Message.author`
         """
         return self.message.author
 
     @disnake.utils.cached_property
     def me(self) -> Union[Member, ClientUser]:
-        """Union[:class:`.Member`, :class:`.ClientUser`]:
+        """:class:`.Member` | :class:`.ClientUser`:
         Similar to :attr:`.Guild.me` except it may return the :class:`.ClientUser` in private message contexts.
         """
         # bot.user will never be None at this point.
@@ -285,7 +285,7 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
 
     @property
     def voice_client(self) -> Optional[VoiceProtocol]:
-        r"""Optional[:class:`.VoiceProtocol`]: A shortcut to :attr:`.Guild.voice_client`\, if applicable."""
+        r""":class:`.VoiceProtocol` | ``None``: A shortcut to :attr:`.Guild.voice_client`\, if applicable."""
         g = self.guild
         return g.voice_client if g else None
 
@@ -309,7 +309,7 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
 
         Parameters
         ----------
-        entity: Optional[Union[:class:`Command`, :class:`Cog`, :class:`str`]]
+        entity: :class:`Command` | :class:`Cog` | :class:`str` | ``None``
             The entity to show help for.
 
         Returns

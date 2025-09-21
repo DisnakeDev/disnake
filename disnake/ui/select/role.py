@@ -50,7 +50,7 @@ class RoleSelect(BaseSelect[RoleSelectMenu, "Role", V_co]):
     custom_id: :class:`str`
         The ID of the select menu that gets received during an interaction.
         If not given then one is generated for you.
-    placeholder: Optional[:class:`str`]
+    placeholder: :class:`str` | ``None``
         The placeholder text that is shown if nothing is selected, if any.
     min_values: :class:`int`
         The minimum number of items that must be chosen for this select menu.
@@ -60,7 +60,7 @@ class RoleSelect(BaseSelect[RoleSelectMenu, "Role", V_co]):
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select is disabled.
-    default_values: Optional[Sequence[Union[:class:`.Role`, :class:`.SelectDefaultValue`, :class:`.Object`]]]
+    default_values: Sequence[:class:`.Role` | :class:`.SelectDefaultValue` | :class:`.Object` | ``None``]
         The list of values (roles) that are selected by default.
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
@@ -76,7 +76,7 @@ class RoleSelect(BaseSelect[RoleSelectMenu, "Role", V_co]):
         sequential identifiers to the components in the message.
 
         .. versionadded:: 2.11
-    row: Optional[:class:`int`]
+    row: :class:`int` | ``None``
         The relative row this select menu belongs to. A Discord component can only have 5
         rows. By default, items are arranged automatically into those 5 rows. If you'd
         like to control the relative positioning of the row then passing an index is advised.
@@ -210,7 +210,7 @@ def role_select(
         A callable (may be a :class:`RoleSelect` subclass) to create a new instance of this component.
         If provided, the other parameters described below do not apply.
         Instead, this decorator will accept the same keywords as the passed callable/class does.
-    placeholder: Optional[:class:`str`]
+    placeholder: :class:`str` | ``None``
         The placeholder text that is shown if nothing is selected, if any.
     custom_id: :class:`str`
         The ID of the select menu that gets received during an interaction.
@@ -223,7 +223,7 @@ def role_select(
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select is disabled. Defaults to ``False``.
-    default_values: Optional[Sequence[Union[:class:`.Role`, :class:`.SelectDefaultValue`, :class:`.Object`]]]
+    default_values: Sequence[:class:`.Role` | :class:`.SelectDefaultValue` | :class:`.Object` | ``None``]
         The list of values (roles) that are selected by default.
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
@@ -234,7 +234,7 @@ def role_select(
         sequential identifiers to the components in the message.
 
         .. versionadded:: 2.11
-    row: Optional[:class:`int`]
+    row: :class:`int` | ``None``
         The relative row this select menu belongs to. A Discord component can only have 5
         rows. By default, items are arranged automatically into those 5 rows. If you'd
         like to control the relative positioning of the row then passing an index is advised.

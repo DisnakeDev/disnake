@@ -85,9 +85,9 @@ class Thread(Messageable, Hashable):
         The thread ID.
     parent_id: :class:`int`
         The parent :class:`TextChannel`, :class:`ForumChannel`, or :class:`MediaChannel` ID this thread belongs to.
-    owner_id: Optional[:class:`int`]
+    owner_id: :class:`int` | ``None``
         The user's ID that created this thread.
-    last_message_id: Optional[:class:`int`]
+    last_message_id: :class:`int` | ``None``
         The last message ID of the message sent to this thread. It may
         *not* point to an existing or valid message.
     slowmode_delay: :class:`int`
@@ -95,15 +95,15 @@ class Thread(Messageable, Hashable):
         in this thread. A value of `0` denotes that it is disabled.
         Bots, and users with :attr:`~Permissions.manage_channels` or
         :attr:`~Permissions.manage_messages`, bypass slowmode.
-    message_count: Optional[:class:`int`]
+    message_count: :class:`int` | ``None``
         An approximate number of messages in this thread.
 
         .. note::
 
             If the thread was created before July 1, 2022, this could be inaccurate.
-    member_count: Optional[:class:`int`]
+    member_count: :class:`int` | ``None``
         An approximate number of members in this thread. This caps at 50.
-    total_message_sent: Optional[:class:`int`]
+    total_message_sent: :class:`int` | ``None``
         The total number of messages sent in the thread, including deleted messages.
 
         .. versionadded:: 2.6
@@ -111,7 +111,7 @@ class Thread(Messageable, Hashable):
         .. note::
 
             If the thread was created before July 1, 2022, this could be inaccurate.
-    me: Optional[:class:`ThreadMember`]
+    me: :class:`ThreadMember` | ``None``
         A thread member representing yourself, if you've joined the thread.
         This could not be available.
     archived: :class:`bool`
@@ -126,13 +126,13 @@ class Thread(Messageable, Hashable):
         Usually a value of 60, 1440, 4320 and 10080.
     archive_timestamp: :class:`datetime.datetime`
         An aware timestamp of when the thread's archived status was last updated in UTC.
-    create_timestamp: Optional[:class:`datetime.datetime`]
+    create_timestamp: :class:`datetime.datetime` | ``None``
         An aware timestamp of when the thread was created in UTC.
         This is only available for threads created after 2022-01-09.
 
         .. versionadded:: 2.4
 
-    last_pin_timestamp: Optional[:class:`datetime.datetime`]
+    last_pin_timestamp: :class:`datetime.datetime` | ``None``
         The time the most recent message was pinned, or ``None`` if no message is currently pinned.
 
         .. versionadded:: 2.5
@@ -242,14 +242,14 @@ class Thread(Messageable, Hashable):
 
     @property
     def parent(self) -> Optional[Union[TextChannel, ForumChannel, MediaChannel]]:
-        """Optional[Union[:class:`TextChannel`, :class:`ForumChannel`, :class:`MediaChannel`]]: The parent channel this thread belongs to."""
+        """:class:`TextChannel` | :class:`ForumChannel` | :class:`MediaChannel` | ``None``: The parent channel this thread belongs to."""
         if isinstance(self.guild, Object):
             return None
         return self.guild.get_channel(self.parent_id)  # type: ignore
 
     @property
     def owner(self) -> Optional[Member]:
-        """Optional[:class:`Member`]: The member this thread belongs to."""
+        """:class:`Member` | ``None``: The member this thread belongs to."""
         if self.owner_id is None or isinstance(self.guild, Object):
             return None
         return self.guild.get_member(self.owner_id)
@@ -285,7 +285,7 @@ class Thread(Messageable, Hashable):
 
         Returns
         -------
-        Optional[:class:`Message`]
+        :class:`Message` | ``None``
             The last message in this channel or ``None`` if not found.
         """
         return self._state._get_message(self.last_message_id) if self.last_message_id else None
@@ -301,7 +301,7 @@ class Thread(Messageable, Hashable):
 
         Returns
         -------
-        Optional[:class:`CategoryChannel`]
+        :class:`CategoryChannel` | ``None``
             The parent channel's category.
         """
         parent = self.parent
@@ -320,7 +320,7 @@ class Thread(Messageable, Hashable):
 
         Returns
         -------
-        Optional[:class:`int`]
+        :class:`int` | ``None``
             The parent channel's category ID.
         """
         parent = self.parent
@@ -443,7 +443,7 @@ class Thread(Messageable, Hashable):
 
         Parameters
         ----------
-        obj: Union[:class:`~disnake.Member`, :class:`~disnake.Role`]
+        obj: :class:`~disnake.Member` | :class:`~disnake.Role`
             The object to resolve permissions for. This could be either
             a member or a role. If it's a role then member overwrites
             are not computed.
@@ -580,19 +580,19 @@ class Thread(Messageable, Hashable):
 
         Parameters
         ----------
-        limit: Optional[:class:`int`]
+        limit: :class:`int` | ``None``
             The number of messages to search through. This is not the number
             of messages that will be deleted, though it can be.
         check: Callable[[:class:`Message`], :class:`bool`]
             The function used to check if a message should be deleted.
             It must take a :class:`Message` as its sole parameter.
-        before: Optional[Union[:class:`abc.Snowflake`, :class:`datetime.datetime`]]
+        before: :class:`abc.Snowflake` | :class:`datetime.datetime` | ``None``
             Same as ``before`` in :meth:`history`.
-        after: Optional[Union[:class:`abc.Snowflake`, :class:`datetime.datetime`]]
+        after: :class:`abc.Snowflake` | :class:`datetime.datetime` | ``None``
             Same as ``after`` in :meth:`history`.
-        around: Optional[Union[:class:`abc.Snowflake`, :class:`datetime.datetime`]]
+        around: :class:`abc.Snowflake` | :class:`datetime.datetime` | ``None``
             Same as ``around`` in :meth:`history`.
-        oldest_first: Optional[:class:`bool`]
+        oldest_first: :class:`bool` | ``None``
             Same as ``oldest_first`` in :meth:`history`.
         bulk: :class:`bool`
             If ``True``, use bulk delete. Setting this to ``False`` is useful for mass-deleting
@@ -699,7 +699,7 @@ class Thread(Messageable, Hashable):
         invitable: :class:`bool`
             Whether non-moderators can add other non-moderators to this thread.
             Only available for private threads.
-        auto_archive_duration: Union[:class:`int`, :class:`ThreadArchiveDuration`]
+        auto_archive_duration: :class:`int` | :class:`ThreadArchiveDuration`
             The new duration in minutes before a thread is automatically archived for inactivity.
             Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
         slowmode_delay: :class:`int`
@@ -729,7 +729,7 @@ class Thread(Messageable, Hashable):
 
             .. versionadded:: 2.6
 
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | ``None``
             The reason for editing this thread. Shows up on the audit log.
 
             .. versionadded:: 2.5
@@ -908,7 +908,7 @@ class Thread(Messageable, Hashable):
 
         Parameters
         ----------
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | ``None``
             The reason for deleting this thread. Shows up on the audit log.
 
             .. versionadded:: 2.5
@@ -940,7 +940,7 @@ class Thread(Messageable, Hashable):
         *tags: :class:`abc.Snowflake`
             An argument list of :class:`abc.Snowflake` representing the :class:`ForumTag`\\s
             to add to the thread.
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | ``None``
             The reason for editing this thread. Shows up on the audit log.
 
         Raises
@@ -977,7 +977,7 @@ class Thread(Messageable, Hashable):
         *tags: :class:`abc.Snowflake`
             An argument list of :class:`abc.Snowflake` representing the :class:`ForumTag`\\s
             to remove from the thread.
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | ``None``
             The reason for editing this thread. Shows up on the audit log.
 
         Raises
@@ -1154,7 +1154,7 @@ class ForumTag(Hashable):
     moderated: :class:`bool`
         Whether only moderators can add this tag to threads or remove it.
         Defaults to ``False``.
-    emoji: Optional[Union[:class:`Emoji`, :class:`PartialEmoji`]]
+    emoji: :class:`Emoji` | :class:`PartialEmoji` | ``None``
         The emoji associated with this tag, if any.
         Due to a Discord limitation, this will have an empty
         :attr:`~PartialEmoji.name` if it is a custom :class:`PartialEmoji`.

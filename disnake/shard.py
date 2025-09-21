@@ -245,7 +245,7 @@ class ShardInfo:
     ----------
     id: :class:`int`
         The shard ID for this shard.
-    shard_count: Optional[:class:`int`]
+    shard_count: :class:`int` | ``None``
         The shard count for this cluster. If this is ``None`` then the bot has not started yet.
     """
 
@@ -336,7 +336,7 @@ class AutoShardedClient(Client):
 
     Attributes
     ----------
-    shard_ids: Optional[List[:class:`int`]]
+    shard_ids: List[:class:`int` | ``None``]
         An optional list of shard_ids to launch the shards with.
     """
 
@@ -435,7 +435,7 @@ class AutoShardedClient(Client):
     def get_shard(self, shard_id: int) -> Optional[ShardInfo]:
         """Gets the shard information of a given shard ID, or ``None`` if not found.
 
-        :return type: Optional[:class:`ShardInfo`]
+        :return type: :class:`ShardInfo` | ``None``
         """
         try:
             parent = self.__shards[shard_id]
@@ -568,12 +568,12 @@ class AutoShardedClient(Client):
 
         Parameters
         ----------
-        activity: Optional[:class:`BaseActivity`]
+        activity: :class:`BaseActivity` | ``None``
             The activity being done. ``None`` if no currently active activity is done.
-        status: Optional[:class:`Status`]
+        status: :class:`Status` | ``None``
             Indicates what status to change to. If ``None``, then
             :attr:`Status.online` is used.
-        shard_id: Optional[:class:`int`]
+        shard_id: :class:`int` | ``None``
             The shard_id to change the presence to. If not specified
             or ``None``, then it will change the presence of every
             shard the bot can see.
