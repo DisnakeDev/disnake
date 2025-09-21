@@ -65,9 +65,9 @@ class Reaction:
     ) -> None:
         self.message: Message = message
         # _get_emoji_from_data won't return None
-        self.emoji: Union[PartialEmoji, Emoji, str] = emoji or message._state._get_emoji_from_data(  # type: ignore
+        self.emoji: Union[PartialEmoji, Emoji, str] = emoji or message._state._get_emoji_from_data(
             data["emoji"]
-        )
+        )  # pyright: ignore[reportAttributeAccessIssue]
         self.count: int = data.get("count", 1)
         self.me: bool = data["me"]
 

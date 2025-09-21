@@ -159,7 +159,7 @@ class WebhookAdapter:
                         )
                         response.encoding = "utf-8"
                         # Compatibility with aiohttp
-                        response.status = response.status_code  # type: ignore
+                        response.status = response.status_code  # pyright: ignore[reportAttributeAccessIssue]
 
                         data = response.text or None
                         if data and response.headers["Content-Type"] == "application/json":
@@ -183,7 +183,8 @@ class WebhookAdapter:
                             if not response.headers.get("Via"):
                                 raise HTTPException(response, data)
 
-                            retry_after: float = data["retry_after"]  # type: ignore
+                            assert isinstance(data, dict)
+                            retry_after: float = data["retry_after"]
                             _log.warning(
                                 "Webhook ID %s is rate limited. Retrying in %.2f seconds",
                                 webhook_id,
@@ -683,7 +684,7 @@ class SyncWebhook(BaseWebhook):
             if not isinstance(session, requests.Session):
                 raise TypeError(f"expected requests.Session not {session.__class__!r}")
         else:
-            session = requests  # type: ignore
+            session = requests  # pyright: ignore[reportAssignmentType]
         return cls(data, session, token=bot_token)
 
     @classmethod
@@ -726,16 +727,19 @@ class SyncWebhook(BaseWebhook):
         if m is None:
             raise ValueError("Invalid webhook URL given.")
 
-        data: Dict[str, Any] = m.groupdict()
-        data["type"] = 1
+        data: WebhookPayload = {
+            "id": m.group("id"),
+            "type": 1,
+            "token": m.group("token"),
+        }
         import requests
 
         if session is not MISSING:
             if not isinstance(session, requests.Session):
                 raise TypeError(f"expected requests.Session not {session.__class__!r}")
         else:
-            session = requests  # type: ignore
-        return cls(data, session, token=bot_token)  # type: ignore
+            session = requests  # pyright: ignore[reportAssignmentType]
+        return cls(data, session, token=bot_token)
 
     def fetch(self, *, prefer_auth: bool = True) -> SyncWebhook:
         """Fetches the current webhook.
@@ -909,7 +913,11 @@ class SyncWebhook(BaseWebhook):
         )
 
     def _create_message(
-        self, data, *, thread: Optional[Snowflake] = None, thread_name: Optional[str] = None
+        self,
+        data: MessagePayload,
+        *,
+        thread: Optional[Snowflake] = None,
+        thread_name: Optional[str] = None,
     ) -> SyncWebhookMessage:
         # see async webhook's _create_message for details
         channel_id = int(data["channel_id"])
@@ -918,10 +926,10 @@ class SyncWebhook(BaseWebhook):
 
         state = _WebhookState(self, parent=self._state, thread=thread)
         channel = self.channel
-        if not channel or self.channel_id != channel_id:
-            channel = PartialMessageable(state=self._state, id=channel_id)  # type: ignore
+        if channel is None or self.channel_id != channel_id:
+            channel = PartialMessageable(state=self._state, id=channel_id)  # pyright: ignore[reportArgumentType]
         # state is artificial
-        return SyncWebhookMessage(data=data, state=state, channel=channel)  # type: ignore
+        return SyncWebhookMessage(data=data, state=state, channel=channel)  # pyright: ignore[reportArgumentType]
 
     @overload
     def send(

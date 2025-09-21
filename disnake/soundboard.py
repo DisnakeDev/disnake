@@ -228,7 +228,7 @@ class GuildSoundboardSound(SoundboardSound):
     def guild(self) -> Guild:
         """:class:`Guild`: The guild that this sound is from."""
         # this will most likely never return None
-        return self._state._get_guild(self.guild_id)  # type: ignore
+        return self._state._get_guild(self.guild_id)  # pyright: ignore[reportReturnType]
 
     async def edit(
         self,

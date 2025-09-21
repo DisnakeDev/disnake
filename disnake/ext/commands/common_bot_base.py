@@ -70,13 +70,13 @@ class CommonBotBase(Generic[CogT]):
     # FIXME: make event name pos-only or remove entirely in v3.0
     def dispatch(self, event_name: str, *args: Any, **kwargs: Any) -> None:
         # super() will resolve to Client
-        super().dispatch(event_name, *args, **kwargs)  # type: ignore
+        super().dispatch(event_name, *args, **kwargs)  # pyright: ignore[reportAttributeAccessIssue]
 
     async def _fill_owners(self) -> None:
         if self.owner_id or self.owner_ids:
             return
 
-        app: disnake.AppInfo = await self.application_info()  # type: ignore
+        app: disnake.AppInfo = await self.application_info()  # pyright: ignore[reportAttributeAccessIssue]
         if app.team:
             self.owners = owners = {
                 member
@@ -106,13 +106,13 @@ class CommonBotBase(Generic[CogT]):
                 error.__suppress_context__ = True
                 _log.exception("Failed to remove cog %r", cog, exc_info=error)
 
-        await super().close()  # type: ignore
+        await super().close()  # pyright: ignore[reportAttributeAccessIssue]
 
     @disnake.utils.copy_doc(disnake.Client.login)
     async def login(self, token: str) -> None:
-        await super().login(token=token)  # type: ignore
+        await super().login(token=token)  # pyright: ignore[reportAttributeAccessIssue]
 
-        loop: asyncio.AbstractEventLoop = self.loop  # type: ignore
+        loop: asyncio.AbstractEventLoop = self.loop  # pyright: ignore[reportAttributeAccessIssue]
         if self.reload:
             loop.create_task(self._watchdog())
 
@@ -199,7 +199,7 @@ class CommonBotBase(Generic[CogT]):
             self.remove_cog(cog_name)
 
         # NOTE: Should be covariant
-        cog = cog._inject(self)  # type: ignore
+        cog = cog._inject(self)  # pyright: ignore[reportArgumentType]
         self.__cogs[cog_name] = cog
 
     def get_cog(self, name: str) -> Optional[Cog]:
@@ -251,7 +251,7 @@ class CommonBotBase(Generic[CogT]):
         if help_command and help_command.cog is cog:
             help_command.cog = None
         # NOTE: Should be covariant
-        cog._eject(self)  # type: ignore
+        cog._eject(self)  # pyright: ignore[reportArgumentType]
 
         return cog
 
@@ -303,7 +303,8 @@ class CommonBotBase(Generic[CogT]):
         lib = importlib.util.module_from_spec(spec)
         sys.modules[key] = lib
         try:
-            spec.loader.exec_module(lib)  # type: ignore
+            assert spec.loader is not None
+            spec.loader.exec_module(lib)
         except Exception as e:
             del sys.modules[key]
             raise errors.ExtensionFailed(key, e) from e
@@ -526,7 +527,7 @@ class CommonBotBase(Generic[CogT]):
 
             if extensions:
                 try:
-                    self.i18n.reload()  # type: ignore
+                    self.i18n.reload()  # pyright: ignore[reportAttributeAccessIssue]
                 except Exception as e:
                     reload_log.exception(e)
 

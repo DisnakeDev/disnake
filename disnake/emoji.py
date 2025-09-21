@@ -105,8 +105,8 @@ class Emoji(_EmojiTag, AssetMixin):
     def _from_data(self, emoji: EmojiPayload) -> None:
         self.require_colons: bool = emoji.get("require_colons", False)
         self.managed: bool = emoji.get("managed", False)
-        self.id: int = int(emoji["id"])  # type: ignore
-        self.name: str = emoji["name"]  # type: ignore
+        self.id: int = int(emoji["id"])  # pyright: ignore[reportArgumentType]
+        self.name: str = emoji["name"]  # pyright: ignore[reportAttributeAccessIssue]
         self.animated: bool = emoji.get("animated", False)
         self.available: bool = emoji.get("available", True)
         self._roles: SnowflakeList = SnowflakeList(map(int, emoji.get("roles", [])))
@@ -165,11 +165,10 @@ class Emoji(_EmojiTag, AssetMixin):
         Emojis with :attr:`subscription roles <RoleTags.integration_id>` are considered premium emojis,
         and count towards a separate limit of 25 emojis.
         """
-        guild = self.guild
-        if guild is None:
+        if self.guild is None:
             return []
 
-        return [role for role in guild.roles if self._roles.has(role.id)]
+        return [role for role in self.guild.roles if self._roles.has(role.id)]
 
     @property
     def guild(self) -> Optional[Guild]:
