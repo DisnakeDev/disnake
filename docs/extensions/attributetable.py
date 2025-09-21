@@ -66,7 +66,7 @@ def visit_attributetablebadge_node(self: HTMLTranslator, node: nodes.Element) ->
     attributes = {
         "class": f"badge-{badge_type}",
     }
-    self.body.append(self.starttag(node, "span", **attributes))
+    self.body.append(self.starttag(node, "span", **attributes))  # type: ignore[reportArgumentType]
 
 
 def visit_attributetable_item_node(self: HTMLTranslator, node: nodes.Element) -> None:
@@ -271,10 +271,10 @@ def class_results_to_node(key: str, elements: List[TableElement]) -> attributeta
         ref = nodes.reference(
             "",
             "",
+            *[nodes.Text(element.label)],
             internal=True,
             refuri="#" + element.fullname,
             anchorname="",
-            *[nodes.Text(element.label)],
         )
         para = addnodes.compact_paragraph("", "", ref)
         if element.badge is not None:

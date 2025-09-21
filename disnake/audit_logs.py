@@ -234,7 +234,7 @@ def _transform_type(
         return enums.try_enum(enums.StickerType, data)
     elif action_name.startswith("webhook_"):
         return enums.try_enum(enums.WebhookType, data)
-    elif action_name.startswith("integration_") or action_name.startswith("overwrite_"):
+    elif action_name.startswith(("integration_", "overwrite_")):
         # integration: str, overwrite: int
         return data
     else:
@@ -405,24 +405,20 @@ class AuditLogChanges:
                 if key:
                     attr = key
 
-            try:
+            if "old_value" in elem:
                 before = elem["old_value"]
-            except KeyError:
-                before = None
-            else:
                 if transformer:
                     before = transformer(entry, before)
-
+            else:
+                before = None
             setattr(self.before, attr, before)
 
-            try:
+            if "new_value" in elem:
                 after = elem["new_value"]
-            except KeyError:
-                after = None
-            else:
                 if transformer:
                     after = transformer(entry, after)
-
+            else:
+                after = None
             setattr(self.after, attr, after)
 
         if has_emoji_fields:

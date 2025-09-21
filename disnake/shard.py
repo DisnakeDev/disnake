@@ -11,6 +11,7 @@ from typing import (
     Callable,
     Dict,
     List,
+    Literal,
     NoReturn,
     Optional,
     Tuple,
@@ -63,9 +64,9 @@ class EventType:
 class EventItem:
     __slots__ = ("type", "shard", "error")
 
-    def __init__(self, etype: int, shard: Optional["Shard"], error: Optional[Exception]) -> None:
+    def __init__(self, etype: int, shard: Optional[Shard], error: Optional[Exception]) -> None:
         self.type: int = etype
-        self.shard: Optional["Shard"] = shard
+        self.shard: Optional[Shard] = shard
         self.error: Optional[Exception] = error
 
     def __lt__(self, other: Self) -> bool:
@@ -96,7 +97,7 @@ class Shard:
         self.loop: asyncio.AbstractEventLoop = self._client.loop
         self._disconnect: bool = False
         self._reconnect = client._reconnect
-        self._backoff: ExponentialBackoff = ExponentialBackoff()
+        self._backoff: ExponentialBackoff[Literal[False]] = ExponentialBackoff()
         self._task: Optional[asyncio.Task] = None
         self._handled_exceptions: Tuple[Type[Exception], ...] = (
             OSError,

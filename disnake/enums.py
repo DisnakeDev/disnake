@@ -87,7 +87,7 @@ EnumMetaT = TypeVar("EnumMetaT", bound="Type[EnumMeta]")
 
 class _EnumValueBase(NamedTuple):
     if TYPE_CHECKING:
-        _cls_name: ClassVar[str]
+        _cls_name: ClassVar[str]  # type: ignore
 
     name: str
     value: Any
@@ -163,10 +163,10 @@ class EnumMeta(type):
         value_cls._actual_enum_cls_ = actual_cls  # type: ignore
         return actual_cls
 
-    def __iter__(cls) -> Iterator[Self]:
+    def __iter__(cls) -> Iterator[EnumMetaT]:
         return (cls._enum_member_map_[name] for name in cls._enum_member_names_)
 
-    def __reversed__(cls) -> Iterator[Self]:
+    def __reversed__(cls) -> Iterator[EnumMetaT]:
         return (cls._enum_member_map_[name] for name in reversed(cls._enum_member_names_))
 
     def __len__(cls) -> int:

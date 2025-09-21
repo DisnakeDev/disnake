@@ -19,6 +19,7 @@ from typing import (
     Match,
     Optional,
     Sequence,
+    TypeVar,
     Union,
 )
 
@@ -39,6 +40,8 @@ if TYPE_CHECKING:
 
     # note: no InteractionBot
     AnyBot = Union[Bot, AutoShardedBot]
+
+CogT = TypeVar("CogT", bound="Cog")
 
 
 __all__ = (
@@ -195,7 +198,7 @@ def _not_overriden(f: FuncT) -> FuncT:
     return f
 
 
-class _HelpCommandImpl(Command[Optional["Cog"], Any, None]):
+class _HelpCommandImpl(Command[Optional[CogT], Any, None]):
     def __init__(self, inject: HelpCommand, *args: Any, **kwargs: Any) -> None:
         super().__init__(inject.command_callback, *args, **kwargs)
         self._original: HelpCommand = inject
@@ -230,7 +233,7 @@ class _HelpCommandImpl(Command[Optional["Cog"], Any, None]):
     ) -> None:
         await self._injected.on_help_command_error(ctx, error)
 
-    def _inject_into_cog(self, cog: Cog) -> None:
+    def _inject_into_cog(self, cog: CogT) -> None:
         # Warning: hacky
 
         # Make the cog think that get_commands returns this command
@@ -242,7 +245,7 @@ class _HelpCommandImpl(Command[Optional["Cog"], Any, None]):
 
         def wrapped_get_commands() -> List[Command[Any, ..., Any]]:
             ret = original_get_commands()
-            ret.append(self)
+            ret.append(self)  # pyright: ignore[reportArgumentType]
             return ret
 
         # Ditto here
@@ -262,8 +265,8 @@ class _HelpCommandImpl(Command[Optional["Cog"], Any, None]):
 
         # revert back into their original methods
         cog = self.cog
-        cog.get_commands = cog.get_commands.__wrapped__
-        cog.walk_commands = cog.walk_commands.__wrapped__
+        cog.get_commands = cog.get_commands.__wrapped__  # pyright: ignore[reportAttributeAccessIssue]
+        cog.walk_commands = cog.walk_commands.__wrapped__  # pyright: ignore[reportAttributeAccessIssue]
         self.cog = None
 
 

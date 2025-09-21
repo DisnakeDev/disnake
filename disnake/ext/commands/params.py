@@ -33,6 +33,7 @@ from typing import (
     Type,
     TypeVar,
     Union,
+    cast,
     get_origin,
 )
 
@@ -85,8 +86,13 @@ if TYPE_CHECKING:
 else:
     P = TypeVar("P")
 
+
 if sys.version_info >= (3, 10):
     from types import EllipsisType, UnionType
+elif TYPE_CHECKING:
+    EllipsisType = type(Ellipsis)
+    UnionType = NoReturn
+
 else:
     UnionType = object()
     EllipsisType = type(Ellipsis)
@@ -141,7 +147,7 @@ def remove_optionals(annotation: Any) -> Any:
         if len(args) == 1:
             annotation = args[0]
         else:
-            annotation = Union[args]  # type: ignore
+            annotation = Union[args]
 
     return annotation
 
@@ -193,7 +199,7 @@ class Injection(Generic[P, T_]):
             for autocomp in autocompleters.values():
                 classify_autocompleter(autocomp)
 
-        self.function: InjectionCallback[CogT, P, T_] = function
+        self.function: InjectionCallback[Any, P, T_] = function
         self.autocompleters: Dict[str, Callable] = autocompleters or {}
         self._injected: Optional[Cog] = None
 
@@ -354,7 +360,7 @@ class _BaseRange(ABC):
     if sys.version_info >= (3, 10):
 
         def __or__(self, other):
-            return Union[self, other]  # type: ignore
+            return Union[self, other]
 
 
 if TYPE_CHECKING:
@@ -477,7 +483,7 @@ class ParamInfo:
         .. versionadded:: 2.6
     """
 
-    TYPES: ClassVar[Dict[type, int]] = {
+    TYPES: ClassVar[Dict[Union[type, UnionType], int]] = {
         str:                                               OptionType.string.value,
         int:                                               OptionType.integer.value,
         bool:                                              OptionType.boolean.value,
@@ -495,7 +501,7 @@ class ParamInfo:
         float:                                             OptionType.number.value,
         disnake.Attachment:                                OptionType.attachment.value,
     }  # fmt: skip
-    _registered_converters: ClassVar[Dict[type, Callable]] = {}
+    _registered_converters: ClassVar[Dict[type, Callable[..., Any]]] = {}
 
     def __init__(
         self,
@@ -717,14 +723,22 @@ class ParamInfo:
         if annotation is inspect.Parameter.empty or annotation is Any:
             return False
 
+        # Range and String are aliased to Annotated for type-checking, which breaks
+        # the `isinstance` below for pyright, so alias them back to a known type.
+        if TYPE_CHECKING:
+            _Range = _String = _BaseRange
+        else:
+            _Range = Range
+            _String = String
+
         # resolve type aliases and special types
-        if isinstance(annotation, Range):
+        if isinstance(annotation, _Range):
             self.min_value = annotation.min_value
             self.max_value = annotation.max_value
             annotation = annotation.underlying_type
-        if isinstance(annotation, String):
-            self.min_length = annotation.min_value
-            self.max_length = annotation.max_value
+        if isinstance(annotation, _String):
+            self.min_length = cast("Optional[int]", annotation.min_value)
+            self.max_length = cast("Optional[int]", annotation.max_value)
             annotation = annotation.underlying_type
         if issubclass_(annotation, LargeInt):
             self.large = True
@@ -771,7 +785,9 @@ class ParamInfo:
 
         return True
 
-    def parse_converter_annotation(self, converter: Callable, fallback_annotation: Any) -> None:
+    def parse_converter_annotation(
+        self, converter: Callable[..., Any], fallback_annotation: Any
+    ) -> None:
         if isinstance(converter, (types.FunctionType, types.MethodType)):
             converter_func = converter
         else:
@@ -887,7 +903,7 @@ def safe_call(function: Callable[..., T], /, *possible_args: Any, **possible_kwa
 
 
 def isolate_self(
-    function: Callable,
+    function: Callable[..., Any],
     parameters: Optional[Dict[str, inspect.Parameter]] = None,
 ) -> Tuple[Tuple[Optional[inspect.Parameter], ...], Dict[str, inspect.Parameter]]:
     """Create parameters without self and the first interaction.
@@ -951,7 +967,7 @@ def classify_autocompleter(autocompleter: AnyAutocompleter) -> None:
 
 
 def collect_params(
-    function: Callable,
+    function: Callable[..., Any],
     parameters: Optional[Dict[str, inspect.Parameter]] = None,
 ) -> Tuple[Optional[str], Optional[str], List[ParamInfo], Dict[str, Injection]]:
     """Collect all parameters in a function.
@@ -1004,7 +1020,7 @@ def collect_params(
     )
 
 
-def collect_nested_params(function: Callable) -> List[ParamInfo]:
+def collect_nested_params(function: Callable[..., Any]) -> List[ParamInfo]:
     """Collect all options from a function"""
     # TODO: Have these be actually sorted properly and not have injections always at the end
     _, _, paraminfos, injections = collect_params(function)
@@ -1060,8 +1076,12 @@ async def run_injections(
 
 
 async def call_param_func(
-    function: Callable, interaction: ApplicationCommandInteraction, /, *args: Any, **kwargs: Any
-) -> Any:
+    function: Callable[..., T],
+    interaction: ApplicationCommandInteraction,
+    /,
+    *args: Any,
+    **kwargs: Any,
+) -> T:
     """Call a function utilizing ParamInfo"""
     cog_param, inter_param, paraminfos, injections = collect_params(function)
     formatted_kwargs = format_kwargs(interaction, cog_param, inter_param, *args, **kwargs)
