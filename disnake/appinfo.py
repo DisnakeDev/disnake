@@ -510,8 +510,12 @@ class AppInfo:
             Update the cover_image for rich presence integrations.
         guild_install_type_config: Optional[:class:`InstallTypeConfiguration`]
             The guild installation type configuration for this application.
+
+            Cannot be provided with ``custom_install_url``.
         user_install_type_config: Optional[:class:`InstallTypeConfiguration`]
             The user installation type configuration for this application.
+
+            Cannot be provided with ``custom_install_url``.
         event_webhooks_url: Optional[:class:`str`]
             The application's event webhooks URL.
         event_webhooks_status: :class:`ApplicationEventWebhookStatus`
