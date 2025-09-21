@@ -496,6 +496,9 @@ class AppInfo:
             The installation parameters for this application.
 
             Cannot be provided with ``custom_install_url``.
+
+            It's recommended to use :attr:`guild_install_type_config` and :attr:`user_install_type_config`
+            instead of this parameter.
         custom_install_url: Optional[:class:`str`]
             The custom installation url for this application.
         role_connections_verification_url: Optional[:class:`str`]
@@ -510,12 +513,10 @@ class AppInfo:
             Update the cover_image for rich presence integrations.
         guild_install_type_config: Optional[:class:`InstallTypeConfiguration`]
             The guild installation type configuration for this application.
-
-            Cannot be provided with ``custom_install_url``.
+            If set to ``None``, guild installations will be disabled.
         user_install_type_config: Optional[:class:`InstallTypeConfiguration`]
             The user installation type configuration for this application.
-
-            Cannot be provided with ``custom_install_url``.
+            If set to ``None``, user installations will be disabled.
         event_webhooks_url: Optional[:class:`str`]
             The application's event webhooks URL.
         event_webhooks_status: :class:`ApplicationEventWebhookStatus`
@@ -538,17 +539,24 @@ class AppInfo:
         if guild_install_type_config is not MISSING or user_install_type_config is not MISSING:
             integration_types_config: Dict[str, ApplicationIntegrationTypeConfigurationPayload] = {}
 
-            if guild_install_type_config is MISSING:
-                guild_install_type_config = self.guild_install_type_config
-            if guild_install_type_config:
-                integration_types_config["0"] = guild_install_type_config.to_dict()
+            if guild_install_type_config is not None:
+                if guild_install_type_config is MISSING:
+                    guild_install_type_config = self.guild_install_type_config
+                if guild_install_type_config:
+                    integration_types_config["0"] = guild_install_type_config.to_dict()
 
-            if user_install_type_config is MISSING:
-                user_install_type_config = self.user_install_type_config
-            if user_install_type_config:
-                integration_types_config["1"] = user_install_type_config.to_dict()
+            if user_install_type_config is not None:
+                if user_install_type_config is MISSING:
+                    user_install_type_config = self.user_install_type_config
+                if user_install_type_config:
+                    integration_types_config["1"] = user_install_type_config.to_dict()
 
             fields["integration_types_config"] = integration_types_config
+
+        if install_params is not MISSING:
+            if custom_install_url is not MISSING:
+                raise ValueError("cannot provide both 'install_params' and 'custom_install_url'")
+            fields["install_params"] = install_params.to_dict() if install_params else None
 
         if icon is not MISSING:
             fields["icon"] = await utils._assetbytes_to_base64_data(icon)
