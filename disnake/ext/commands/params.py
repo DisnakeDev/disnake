@@ -442,7 +442,7 @@ class ParamInfo:
 
     Parameters
     ----------
-    default: Any | :class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`, Any]]
+    default: :class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`], Any] | Any
         The actual default value for the corresponding function param.
         Can be a sync/async callable taking an interaction and returning a dynamic default value,
         if the user didn't pass a value for this parameter.
@@ -1164,7 +1164,7 @@ def Param(
 
     Parameters
     ----------
-    default: Any | :class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`, Any]]
+    default: :class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`], Any] | Any
         The actual default value of the function parameter that should be passed instead of the :class:`ParamInfo` instance.
         Can be a sync/async callable taking an interaction and returning a dynamic default value,
         if the user didn't pass a value for this parameter.
