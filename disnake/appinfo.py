@@ -572,7 +572,7 @@ class AppInfo:
 
         if event_webhooks_status is not MISSING:
             if event_webhooks_status is ApplicationEventWebhookStatus.disabled_by_discord:
-                raise TypeError(f"cannot set 'event_webhooks_status' to {event_webhooks_status!r}")
+                raise ValueError(f"cannot set 'event_webhooks_status' to {event_webhooks_status!r}")
             fields["event_webhooks_status"] = str(event_webhooks_status.value)
 
         if event_webhooks_types is not MISSING:
