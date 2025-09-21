@@ -293,18 +293,18 @@ class Injection(Generic[P, T_]):
         return decorator
 
 
-NumberT = TypeVar("NumberT", bound=Union[int, float])
+NumT = TypeVar("NumT", bound=Union[int, float])
 
 
 @dataclass(frozen=True)
-class _BaseRange(ABC, Generic[NumberT]):
+class _BaseRange(ABC, Generic[NumT]):
     """Internal base type for supporting ``Range[...]`` and ``String[...]``."""
 
     _allowed_types: ClassVar[tuple[type[Any], ...]]
 
     underlying_type: type[Any]
-    min_value: Optional[NumberT]
-    max_value: Optional[NumberT]
+    min_value: Optional[NumT]
+    max_value: Optional[NumT]
 
     def __class_getitem__(cls, params: tuple[Any, ...]) -> Self:
         if cls is _BaseRange:
@@ -364,7 +364,7 @@ class _BaseRange(ABC, Generic[NumberT]):
         return cls(underlying_type=underlying_type, min_value=min_value, max_value=max_value)
 
     @staticmethod
-    def _coerce_bound(value: Union[Optional[NumberT], EllipsisType], name: str) -> Optional[NumberT]:
+    def _coerce_bound(value: Union[NumT, EllipsisType, None], name: str) -> Optional[NumT]:
         if value is None or value is ...:
             return None
         elif isinstance(value, (int, float)):
