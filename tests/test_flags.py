@@ -165,12 +165,12 @@ class TestBaseFlags:
 
     def test_set_require_bool(self) -> None:
         with pytest.raises(TypeError, match=r"Value to set for TestFlags must be a bool."):
-            TestFlags(one="h")  # pyright: ignore[reportArgumentType] # type: ignore
+            TestFlags(one="h")  # pyright: ignore[reportArgumentType]
 
         ins = TestFlags()
 
         with pytest.raises(TypeError, match=r"Value to set for TestFlags must be a bool."):
-            ins.two = "h"  # pyright: ignore[reportAttributeAccessIssue] # type: ignore
+            ins.two = "h"  # pyright: ignore[reportAttributeAccessIssue]
 
     def test__eq__(self) -> None:
         ins = TestFlags(one=True, two=True)

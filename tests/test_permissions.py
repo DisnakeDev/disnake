@@ -25,11 +25,11 @@ class TestPermissions:
 
     def test_init_invalid_value(self) -> None:
         with pytest.raises(TypeError, match=r"Expected int parameter, received str instead."):
-            Permissions("h")  # pyright: ignore[reportArgumentType, reportCallIssue] # type: ignore
+            Permissions("h")  # pyright: ignore[reportArgumentType, reportCallIssue]
 
     def test_init_invalid_perms(self) -> None:
         with pytest.raises(TypeError, match=r"'h' is not a valid permission name."):
-            Permissions(h=True)  # pyright: ignore[reportCallIssue] # type: ignore
+            Permissions(h=True)  # pyright: ignore[reportCallIssue]
 
     @pytest.mark.parametrize(
         ("perms_int", "other_int", "expected"),
@@ -209,7 +209,7 @@ class TestPermissionOverwrite:
 
     def test_init_invalid_perms(self) -> None:
         with pytest.raises(ValueError, match=r"'h' is not a valid permission name."):
-            PermissionOverwrite(h=True)  # pyright: ignore[reportCallIssue] # type: ignore
+            PermissionOverwrite(h=True)  # pyright: ignore[reportCallIssue]
 
     def test_equality(self) -> None:
         one = PermissionOverwrite()

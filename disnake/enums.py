@@ -83,11 +83,13 @@ __all__ = (
     "NameplatePalette",
 )
 
+EnumMetaT = TypeVar("EnumMetaT", bound="EnumMeta")
+
 
 class _EnumValueBase(NamedTuple):
     if TYPE_CHECKING:
-        _cls_name: ClassVar[str]  # pyright: ignore[reportGeneralTypeIssues]
-        _actual_enum_cls_: ClassVar["EnumMeta"]  # pyright: ignore[reportGeneralTypeIssues]
+        _cls_name: ClassVar[str]  # pyright: ignore[reportGeneralTypeIssues, reportInvalidTypeForm]
+        _actual_enum_cls_: ClassVar[EnumMeta]  # pyright: ignore[reportGeneralTypeIssues, reportInvalidTypeForm]
 
     name: str
     value: Any
@@ -198,7 +200,7 @@ class EnumMeta(type):
         raise TypeError("Enums are immutable.")
 
     def __delattr__(cls, attr: str) -> NoReturn:
-        raise TypeError("Enums are immutable")
+        raise TypeError("Enums are immutable.")
 
     def __instancecheck__(self, instance: object) -> bool:
         # isinstance(x, Y)

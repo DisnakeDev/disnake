@@ -192,8 +192,6 @@ ignore = [
     "E731", # lambda expression assigned
     ## pydocstyle
     "D1", "D205", "D301", "D400", "D401",
-    ## pygrep-hooks
-    "PGH003", # blanket type ignores
     ## Pylint
     # PLC
     "PLC0105",
