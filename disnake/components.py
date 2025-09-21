@@ -2,15 +2,19 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
 from typing import (
     TYPE_CHECKING,
     Any,
     ClassVar,
+    Dict,
     Final,
     Generic,
+    List,
     Literal,
+    Mapping,
     Optional,
+    Tuple,
+    Type,
     TypeVar,
     Union,
     cast,
@@ -210,9 +214,9 @@ class Component:
         .. versionadded:: 2.11
     """
 
-    __slots__: tuple[str, ...] = ("type", "id")
+    __slots__: Tuple[str, ...] = ("type", "id")
 
-    __repr_attributes__: ClassVar[tuple[str, ...]]
+    __repr_attributes__: ClassVar[Tuple[str, ...]]
 
     # subclasses are expected to overwrite this if they're only usable with `MessageFlags.is_components_v2`
     is_v2: ClassVar[bool] = False
@@ -236,7 +240,7 @@ class Component:
                 setattr(self, slot, value)
         return self
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         raise NotImplementedError
 
 
@@ -261,16 +265,16 @@ class ActionRow(Component, Generic[ActionRowChildComponentT]):
         .. versionadded:: 2.11
     """
 
-    __slots__: tuple[str, ...] = ("children",)
+    __slots__: Tuple[str, ...] = ("children",)
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = __slots__
 
     def __init__(self, data: ActionRowPayload) -> None:
         self.type: Literal[ComponentType.action_row] = ComponentType.action_row
         self.id = data.get("id", 0)
 
         children = [_component_factory(d) for d in data.get("components", [])]
-        self.children: list[ActionRowChildComponentT] = children  # type: ignore
+        self.children: List[ActionRowChildComponentT] = children  # type: ignore
 
     def to_dict(self) -> ActionRowPayload:
         return {
@@ -320,7 +324,7 @@ class Button(Component):
         .. versionadded:: 2.11
     """
 
-    __slots__: tuple[str, ...] = (
+    __slots__: Tuple[str, ...] = (
         "style",
         "custom_id",
         "url",
@@ -330,7 +334,7 @@ class Button(Component):
         "sku_id",
     )
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = __slots__
 
     def __init__(self, data: ButtonComponentPayload) -> None:
         self.type: Literal[ComponentType.button] = ComponentType.button
@@ -424,7 +428,7 @@ class BaseSelectMenu(Component):
         .. versionadded:: 2.11
     """
 
-    __slots__: tuple[str, ...] = (
+    __slots__: Tuple[str, ...] = (
         "custom_id",
         "placeholder",
         "min_values",
@@ -435,7 +439,7 @@ class BaseSelectMenu(Component):
     )
 
     # FIXME: this isn't pretty; we should decouple __repr__ from slots
-    __repr_attributes__: ClassVar[tuple[str, ...]] = tuple(
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = tuple(
         s for s in __slots__ if s != "default_values"
     )
 
@@ -452,7 +456,7 @@ class BaseSelectMenu(Component):
         self.min_values: int = data.get("min_values", 1)
         self.max_values: int = data.get("max_values", 1)
         self.disabled: bool = data.get("disabled", False)
-        self.default_values: list[SelectDefaultValue] = [
+        self.default_values: List[SelectDefaultValue] = [
             SelectDefaultValue._from_dict(d) for d in (data.get("default_values") or [])
         ]
         self.required: bool = data.get("required", True)
@@ -518,9 +522,9 @@ class StringSelectMenu(BaseSelectMenu):
         .. versionadded:: 2.11
     """
 
-    __slots__: tuple[str, ...] = ("options",)
+    __slots__: Tuple[str, ...] = ("options",)
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = (
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
         *BaseSelectMenu.__repr_attributes__,
         *__slots__,
     )
@@ -528,7 +532,7 @@ class StringSelectMenu(BaseSelectMenu):
 
     def __init__(self, data: StringSelectMenuPayload) -> None:
         super().__init__(data)
-        self.options: list[SelectOption] = [
+        self.options: List[SelectOption] = [
             SelectOption.from_dict(option) for option in data.get("options", [])
         ]
 
@@ -582,7 +586,7 @@ class UserSelectMenu(BaseSelectMenu):
         .. versionadded:: 2.11
     """
 
-    __slots__: tuple[str, ...] = ()
+    __slots__: Tuple[str, ...] = ()
 
     type: Literal[ComponentType.user_select]
 
@@ -633,7 +637,7 @@ class RoleSelectMenu(BaseSelectMenu):
         .. versionadded:: 2.11
     """
 
-    __slots__: tuple[str, ...] = ()
+    __slots__: Tuple[str, ...] = ()
 
     type: Literal[ComponentType.role_select]
 
@@ -684,7 +688,7 @@ class MentionableSelectMenu(BaseSelectMenu):
         .. versionadded:: 2.11
     """
 
-    __slots__: tuple[str, ...] = ()
+    __slots__: Tuple[str, ...] = ()
 
     type: Literal[ComponentType.mentionable_select]
 
@@ -738,9 +742,9 @@ class ChannelSelectMenu(BaseSelectMenu):
         .. versionadded:: 2.11
     """
 
-    __slots__: tuple[str, ...] = ("channel_types",)
+    __slots__: Tuple[str, ...] = ("channel_types",)
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = (
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
         *BaseSelectMenu.__repr_attributes__,
         *__slots__,
     )
@@ -750,7 +754,7 @@ class ChannelSelectMenu(BaseSelectMenu):
         super().__init__(data)
         # on the API side, an empty list is (currently) equivalent to no value
         channel_types = data.get("channel_types")
-        self.channel_types: Optional[list[ChannelType]] = (
+        self.channel_types: Optional[List[ChannelType]] = (
             [try_enum(ChannelType, t) for t in channel_types] if channel_types else None
         )
 
@@ -786,7 +790,7 @@ class SelectOption:
         Whether this option is selected by default.
     """
 
-    __slots__: tuple[str, ...] = (
+    __slots__: Tuple[str, ...] = (
         "label",
         "value",
         "description",
@@ -882,7 +886,7 @@ class SelectDefaultValue:
         The type of the target object.
     """
 
-    __slots__: tuple[str, ...] = ("id", "type")
+    __slots__: Tuple[str, ...] = ("id", "type")
 
     def __init__(self, id: int, type: SelectDefaultValueType) -> None:
         self.id: int = id
@@ -942,7 +946,7 @@ class TextInput(Component):
         .. versionadded:: 2.11
     """
 
-    __slots__: tuple[str, ...] = (
+    __slots__: Tuple[str, ...] = (
         "style",
         "custom_id",
         "label",
@@ -953,7 +957,7 @@ class TextInput(Component):
         "min_length",
     )
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = __slots__
 
     def __init__(self, data: TextInputPayload) -> None:
         self.type: Literal[ComponentType.text_input] = ComponentType.text_input
@@ -1020,9 +1024,9 @@ class Section(Component):
         .. versionadded:: 2.11
     """
 
-    __slots__: tuple[str, ...] = ("children", "accessory")
+    __slots__: Tuple[str, ...] = ("children", "accessory")
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = __slots__
 
     is_v2 = True
 
@@ -1030,7 +1034,7 @@ class Section(Component):
         self.type: Literal[ComponentType.section] = ComponentType.section
         self.id = data.get("id", 0)
 
-        self.children: list[SectionChildComponent] = [
+        self.children: List[SectionChildComponent] = [
             _component_factory(d, type=SectionChildComponent) for d in data.get("components", [])
         ]
 
@@ -1067,9 +1071,9 @@ class TextDisplay(Component):
         .. versionadded:: 2.11
     """
 
-    __slots__: tuple[str, ...] = ("content",)
+    __slots__: Tuple[str, ...] = ("content",)
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = __slots__
 
     is_v2 = True
 
@@ -1110,7 +1114,7 @@ class UnfurledMediaItem:
         uploaded as an attachment.
     """
 
-    __slots__: tuple[str, ...] = (
+    __slots__: Tuple[str, ...] = (
         "url",
         "proxy_url",
         "height",
@@ -1175,13 +1179,13 @@ class Thumbnail(Component):
         .. versionadded:: 2.11
     """
 
-    __slots__: tuple[str, ...] = (
+    __slots__: Tuple[str, ...] = (
         "media",
         "description",
         "spoiler",
     )
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = __slots__
 
     is_v2 = True
 
@@ -1230,9 +1234,9 @@ class MediaGallery(Component):
         .. versionadded:: 2.11
     """
 
-    __slots__: tuple[str, ...] = ("items",)
+    __slots__: Tuple[str, ...] = ("items",)
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = __slots__
 
     is_v2 = True
 
@@ -1240,7 +1244,7 @@ class MediaGallery(Component):
         self.type: Literal[ComponentType.media_gallery] = ComponentType.media_gallery
         self.id = data.get("id", 0)
 
-        self.items: list[MediaGalleryItem] = [MediaGalleryItem.from_dict(i) for i in data["items"]]
+        self.items: List[MediaGalleryItem] = [MediaGalleryItem.from_dict(i) for i in data["items"]]
 
     def to_dict(self) -> MediaGalleryComponentPayload:
         return {
@@ -1266,7 +1270,7 @@ class MediaGalleryItem:
         Whether the item is marked as a spoiler. Defaults to ``False``.
     """
 
-    __slots__: tuple[str, ...] = (
+    __slots__: Tuple[str, ...] = (
         "media",
         "description",
         "spoiler",
@@ -1338,9 +1342,9 @@ class FileComponent(Component):
         .. versionadded:: 2.11
     """
 
-    __slots__: tuple[str, ...] = ("file", "spoiler", "name", "size")
+    __slots__: Tuple[str, ...] = ("file", "spoiler", "name", "size")
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = __slots__
 
     is_v2 = True
 
@@ -1389,9 +1393,9 @@ class Separator(Component):
         .. versionadded:: 2.11
     """
 
-    __slots__: tuple[str, ...] = ("divider", "spacing")
+    __slots__: Tuple[str, ...] = ("divider", "spacing")
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = __slots__
 
     is_v2 = True
 
@@ -1438,13 +1442,13 @@ class Container(Component):
         .. versionadded:: 2.11
     """
 
-    __slots__: tuple[str, ...] = (
+    __slots__: Tuple[str, ...] = (
         "children",
         "accent_colour",
         "spoiler",
     )
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = __slots__
 
     is_v2 = True
 
@@ -1453,7 +1457,7 @@ class Container(Component):
         self.id = data.get("id", 0)
 
         components = [_component_factory(d) for d in data.get("components", [])]
-        self.children: list[ContainerChildComponent] = components  # type: ignore
+        self.children: List[ContainerChildComponent] = components  # type: ignore
 
         self.accent_colour: Optional[Colour] = (
             Colour(accent_color) if (accent_color := data.get("accent_color")) is not None else None
@@ -1508,13 +1512,13 @@ class Label(Component):
         and unique within a message.
     """
 
-    __slots__: tuple[str, ...] = (
+    __slots__: Tuple[str, ...] = (
         "text",
         "description",
         "component",
     )
 
-    __repr_info__: ClassVar[tuple[str, ...]] = __slots__
+    __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
 
     def __init__(self, data: LabelComponentPayload) -> None:
         self.type: Literal[ComponentType.label] = ComponentType.label
@@ -1571,7 +1575,7 @@ def handle_media_item_input(value: MediaItemInput) -> UnfurledMediaItem:
 C = TypeVar("C", bound="Component")
 
 
-COMPONENT_LOOKUP: Mapping[ComponentTypeLiteral, type[Component]] = {
+COMPONENT_LOOKUP: Mapping[ComponentTypeLiteral, Type[Component]] = {
     ComponentType.action_row.value: ActionRow,
     ComponentType.button.value: Button,
     ComponentType.string_select.value: StringSelectMenu,
@@ -1593,7 +1597,7 @@ COMPONENT_LOOKUP: Mapping[ComponentTypeLiteral, type[Component]] = {
 
 # NOTE: The type param is purely for type-checking, it has no implications on runtime behavior.
 # FIXME: could be improved with https://peps.python.org/pep-0747/
-def _component_factory(data: ComponentPayload, *, type: type[C] = Component) -> C:
+def _component_factory(data: ComponentPayload, *, type: Type[C] = Component) -> C:
     component_type = data["type"]
 
     try:

@@ -4,7 +4,7 @@
 
 import os
 from enum import IntEnum
-from typing import Optional
+from typing import List, Optional
 
 import disnake
 from disnake.ext import commands
@@ -76,7 +76,7 @@ class TicTacToeButton(disnake.ui.Button["TicTacToe"]):
 class TicTacToe(disnake.ui.View):
     # This tells the IDE or linter that all our children will be TicTacToeButtons
     # (this is not required)
-    children: list[TicTacToeButton]
+    children: List[TicTacToeButton]
 
     def __init__(self):
         super().__init__()
@@ -84,7 +84,7 @@ class TicTacToe(disnake.ui.View):
         self.current_player: Player = Player.X
 
         u = Player.unknown
-        self.board: list[list[Player]] = [
+        self.board: List[List[Player]] = [
             [u, u, u],
             [u, u, u],
             [u, u, u],

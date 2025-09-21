@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, ClassVar, Optional, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Mapping, Optional, Tuple, Union
 
 if TYPE_CHECKING:
     from aiohttp import ClientResponse, ClientWebSocketResponse
@@ -71,14 +70,14 @@ class GatewayNotFound(DiscordException):
         super().__init__(message)
 
 
-def _flatten_error_dict(d: dict[str, Any], key: str = "") -> dict[str, str]:
-    items: list[tuple[str, str]] = []
+def _flatten_error_dict(d: Dict[str, Any], key: str = "") -> Dict[str, str]:
+    items: List[Tuple[str, str]] = []
     for k, v in d.items():
         new_key = f"{key}.{k}" if key else k
 
         if isinstance(v, dict):
             try:
-                _errors: list[dict[str, Any]] = v["_errors"]
+                _errors: List[Dict[str, Any]] = v["_errors"]
             except KeyError:
                 items.extend(_flatten_error_dict(v, new_key).items())
             else:
@@ -108,7 +107,7 @@ class HTTPException(DiscordException):
     """
 
     def __init__(
-        self, response: _ResponseType, message: Optional[Union[str, dict[str, Any]]]
+        self, response: _ResponseType, message: Optional[Union[str, Dict[str, Any]]]
     ) -> None:
         self.response: _ResponseType = response
         self.status: int = response.status  # type: ignore

@@ -16,7 +16,10 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
+    Deque,
+    Dict,
     Final,
+    List,
     Literal,
     NamedTuple,
     Optional,
@@ -98,9 +101,9 @@ class WebSocketClosure(Exception):
 
 
 class EventListener(NamedTuple):
-    predicate: Callable[[dict[str, Any]], bool]
+    predicate: Callable[[Dict[str, Any]], bool]
     event: str
-    result: Optional[Callable[[dict[str, Any]], Any]]
+    result: Optional[Callable[[Dict[str, Any]], Any]]
     future: asyncio.Future[Any]
 
 
@@ -251,7 +254,7 @@ class KeepAliveHandler(threading.Thread):
 class VoiceKeepAliveHandler(KeepAliveHandler):
     def __init__(self, *args: Any, ws: HeartbeatWebSocket, interval: float, **kwargs: Any) -> None:
         super().__init__(*args, ws=ws, interval=interval, **kwargs)
-        self.recent_ack_latencies: deque[float] = deque(maxlen=20)
+        self.recent_ack_latencies: Deque[float] = deque(maxlen=20)
         self.msg = "Keeping shard ID %s voice websocket alive with timestamp %s."
         self.block_msg = "Shard ID %s voice heartbeat blocked for more than %s seconds"
         self.behind_msg = "High socket latency, shard ID %s heartbeat is %.1fs behind"
@@ -348,7 +351,7 @@ class DiscordWebSocket:
         self._dispatch: DispatchFunc = lambda event, *args: None
         self._dispatch_gateway_error: Optional[GatewayErrorFunc] = None
         # generic event listeners
-        self._dispatch_listeners: list[EventListener] = []
+        self._dispatch_listeners: List[EventListener] = []
         # the keep alive
         self._keep_alive: Optional[KeepAliveHandler] = None
         self.thread_id: int = threading.get_ident()
@@ -366,7 +369,7 @@ class DiscordWebSocket:
         # set in `from_client`
         self.token: str
         self._connection: ConnectionState
-        self._discord_parsers: dict[str, Callable[[dict[str, Any]], Any]]
+        self._discord_parsers: Dict[str, Callable[[Dict[str, Any]], Any]]
         self.gateway: str
         self.call_hooks: CallHooksFunc
         self._initial_identify: bool
@@ -456,8 +459,8 @@ class DiscordWebSocket:
     def wait_for(
         self,
         event: str,
-        predicate: Callable[[dict[str, Any]], bool],
-        result: Optional[Callable[[dict[str, Any]], T]] = None,
+        predicate: Callable[[Dict[str, Any]], bool],
+        result: Optional[Callable[[Dict[str, Any]], T]] = None,
     ) -> asyncio.Future[T]:
         """Waits for a DISPATCH'd event that meets the predicate.
 
@@ -650,7 +653,7 @@ class DiscordWebSocket:
                 )
 
         # remove the dispatched listeners
-        removed: list[int] = []
+        removed: List[int] = []
         for index, entry in enumerate(self._dispatch_listeners):
             if entry.event != event:
                 continue
@@ -806,7 +809,7 @@ class DiscordWebSocket:
         query: Optional[str] = None,
         *,
         limit: int,
-        user_ids: Optional[list[int]] = None,
+        user_ids: Optional[List[int]] = None,
         presences: bool = False,
         nonce: Optional[str] = None,
     ) -> None:
@@ -907,7 +910,7 @@ class DiscordVoiceWebSocket:
         self.loop: asyncio.AbstractEventLoop = loop
         self._keep_alive: Optional[VoiceKeepAliveHandler] = None
         self._close_code: Optional[int] = None
-        self.secret_key: Optional[list[int]] = None
+        self.secret_key: Optional[List[int]] = None
         self.thread_id: int = threading.get_ident()
         if hook:
             self._hook = hook
@@ -1048,7 +1051,7 @@ class DiscordVoiceWebSocket:
         _log.debug("detected ip: %s port: %s", state.ip, state.port)
 
         # there *should* always be at least one supported mode
-        modes: list[SupportedModes] = [
+        modes: List[SupportedModes] = [
             mode for mode in data["modes"] if mode in self._connection.supported_modes
         ]
         _log.debug("received supported encryption modes: %s", ", ".join(modes))

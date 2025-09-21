@@ -3,6 +3,7 @@
 """An example showcasing the two ways of adding autocompletion to slash command options."""
 
 import os
+from typing import List
 
 import disnake
 from disnake.ext import commands
@@ -21,7 +22,7 @@ LANGUAGES = ["Python", "JavaScript", "TypeScript", "Java", "Rust", "Lisp", "Elix
 # with up to 25 elements.
 
 
-async def autocomplete_langs(inter, string: str) -> list[str]:
+async def autocomplete_langs(inter, string: str) -> List[str]:
     string = string.lower()
     return [lang for lang in LANGUAGES if string in lang.lower()]
 

@@ -2,13 +2,16 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
     ClassVar,
+    Mapping,
     Optional,
+    Sequence,
+    Tuple,
+    Type,
     TypeVar,
     overload,
 )
@@ -87,7 +90,7 @@ class RoleSelect(BaseSelect[RoleSelectMenu, "Role", V_co]):
     """
 
     _default_value_type_map: ClassVar[
-        Mapping[SelectDefaultValueType, tuple[type[Snowflake], ...]]
+        Mapping[SelectDefaultValueType, Tuple[Type[Snowflake], ...]]
     ] = {
         SelectDefaultValueType.role: (Role, Object),
     }

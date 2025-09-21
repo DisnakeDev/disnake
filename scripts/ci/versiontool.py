@@ -7,7 +7,7 @@ import re
 import sys
 from enum import Enum
 from pathlib import Path
-from typing import NamedTuple, NoReturn
+from typing import List, NamedTuple, NoReturn
 
 TARGET_FILE = Path("disnake/__init__.py")
 ORIG_INIT_CONTENTS = TARGET_FILE.read_text("utf-8")
@@ -66,7 +66,7 @@ def get_current_version() -> VersionInfo:
 
 
 def replace_line(text: str, regex: str, repl: str) -> str:
-    lines: list[str] = []
+    lines: List[str] = []
     found = False
 
     for line in text.split("\n"):

@@ -3,8 +3,7 @@
 from __future__ import annotations
 
 import struct
-from collections.abc import Generator
-from typing import IO, TYPE_CHECKING, ClassVar, Optional
+from typing import IO, TYPE_CHECKING, ClassVar, Generator, Optional, Tuple
 
 from .errors import DiscordException
 
@@ -54,7 +53,7 @@ class OggPage:
         except Exception:
             raise OggError("bad data stream") from None
 
-    def iter_packets(self) -> Generator[tuple[bytes, bool], None, None]:
+    def iter_packets(self) -> Generator[Tuple[bytes, bool], None, None]:
         packetlen = offset = 0
         partial = True
 

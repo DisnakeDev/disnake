@@ -1,18 +1,19 @@
 # SPDX-License-Identifier: MIT
 
 import inspect
+from typing import List, Type
 
 import pytest
 
 from disnake import ui
 
-all_ui_component_types: list[type[ui.UIComponent]] = [
+all_ui_component_types: List[Type[ui.UIComponent]] = [
     c
     for c in ui.__dict__.values()
     if isinstance(c, type) and issubclass(c, ui.UIComponent) and not inspect.isabstract(c)
 ]
 
-all_ui_component_objects: list[ui.UIComponent] = [
+all_ui_component_objects: List[ui.UIComponent] = [
     ui.ActionRow(),
     ui.Button(),
     ui.ChannelSelect(),

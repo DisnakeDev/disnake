@@ -5,14 +5,19 @@ from __future__ import annotations
 import inspect
 import re
 import sys
-from collections.abc import Iterator
 from dataclasses import dataclass, field
-from re import Pattern
 from typing import (
     TYPE_CHECKING,
     Any,
+    Dict,
+    Iterator,
+    List,
     Literal,
     Optional,
+    Pattern,
+    Set,
+    Tuple,
+    Type,
     TypeVar,
     Union,
     get_args,
@@ -43,7 +48,7 @@ if TYPE_CHECKING:
 
     from .context import Context
 
-FlagsMetaT = TypeVar("FlagsMetaT", bound="type[FlagsMeta]")
+FlagsMetaT = TypeVar("FlagsMetaT", bound="Type[FlagsMeta]")
 
 
 @dataclass
@@ -74,7 +79,7 @@ class Flag:
     """
 
     name: str = MISSING
-    aliases: list[str] = field(default_factory=list)
+    aliases: List[str] = field(default_factory=list)
     attribute: str = MISSING
     annotation: Any = MISSING
     default: Any = MISSING
@@ -94,7 +99,7 @@ class Flag:
 def flag(
     *,
     name: str = MISSING,
-    aliases: list[str] = MISSING,
+    aliases: List[str] = MISSING,
     default: Any = MISSING,
     max_args: int = MISSING,
     override: bool = MISSING,
@@ -123,7 +128,7 @@ def flag(
     return Flag(name=name, aliases=aliases, default=default, max_args=max_args, override=override)
 
 
-def validate_flag_name(name: str, forbidden: set[str]) -> None:
+def validate_flag_name(name: str, forbidden: Set[str]) -> None:
     if not name:
         raise ValueError("flag names should not be empty")
 
@@ -137,13 +142,13 @@ def validate_flag_name(name: str, forbidden: set[str]) -> None:
 
 
 def get_flags(
-    namespace: dict[str, Any], globals: dict[str, Any], locals: dict[str, Any]
-) -> dict[str, Flag]:
+    namespace: Dict[str, Any], globals: Dict[str, Any], locals: Dict[str, Any]
+) -> Dict[str, Flag]:
     annotations = namespace.get("__annotations__", {})
     case_insensitive = namespace["__commands_flag_case_insensitive__"]
-    flags: dict[str, Flag] = {}
-    cache: dict[str, Any] = {}
-    names: set[str] = set()
+    flags: Dict[str, Flag] = {}
+    cache: Dict[str, Any] = {}
+    names: Set[str] = set()
     for name, annotation in annotations.items():
         flag = namespace.pop(name, MISSING)
         if isinstance(flag, Flag):
@@ -244,8 +249,8 @@ def get_flags(
 class FlagsMeta(type):
     if TYPE_CHECKING:
         __commands_is_flag__: bool
-        __commands_flags__: dict[str, Flag]
-        __commands_flag_aliases__: dict[str, str]
+        __commands_flags__: Dict[str, Flag]
+        __commands_flag_aliases__: Dict[str, str]
         __commands_flag_regex__: Pattern[str]
         __commands_flag_case_insensitive__: bool
         __commands_flag_delimiter__: str
@@ -254,8 +259,8 @@ class FlagsMeta(type):
     def __new__(
         cls: FlagsMetaT,
         name: str,
-        bases: tuple[type, ...],
-        attrs: dict[str, Any],
+        bases: Tuple[type, ...],
+        attrs: Dict[str, Any],
         *,
         case_insensitive: bool = MISSING,
         delimiter: str = MISSING,
@@ -280,8 +285,8 @@ class FlagsMeta(type):
         finally:
             del frame
 
-        flags: dict[str, Flag] = {}
-        aliases: dict[str, str] = {}
+        flags: Dict[str, Flag] = {}
+        aliases: Dict[str, str] = {}
         for base in reversed(bases):
             if base.__dict__.get("__commands_is_flag__", False):
                 flags.update(base.__dict__["__commands_flags__"])
@@ -341,7 +346,7 @@ class FlagsMeta(type):
 
 async def tuple_convert_all(
     ctx: Context, argument: str, flag: Flag, converter: Any
-) -> tuple[Any, ...]:
+) -> Tuple[Any, ...]:
     view = StringView(argument)
     results = []
     param: inspect.Parameter = ctx.current_parameter  # type: ignore
@@ -368,7 +373,7 @@ async def tuple_convert_all(
 
 async def tuple_convert_flag(
     ctx: Context, argument: str, flag: Flag, converters: Any
-) -> tuple[Any, ...]:
+) -> Tuple[Any, ...]:
     view = StringView(argument)
     results = []
     param: inspect.Parameter = ctx.current_parameter  # type: ignore
@@ -459,7 +464,7 @@ class FlagConverter(metaclass=FlagsMeta):
     """
 
     @classmethod
-    def get_flags(cls) -> dict[str, Flag]:
+    def get_flags(cls) -> Dict[str, Flag]:
         """Dict[:class:`str`, :class:`Flag`]: A mapping of flag name to flag object this converter has."""
         return cls.__commands_flags__.copy()
 
@@ -467,7 +472,7 @@ class FlagConverter(metaclass=FlagsMeta):
     def _can_be_constructible(cls) -> bool:
         return all(not flag.required for flag in cls.__commands_flags__.values())
 
-    def __iter__(self) -> Iterator[tuple[str, Any]]:
+    def __iter__(self) -> Iterator[Tuple[str, Any]]:
         for flag in self.__class__.__commands_flags__.values():
             yield (flag.name, getattr(self, flag.attribute))
 
@@ -493,8 +498,8 @@ class FlagConverter(metaclass=FlagsMeta):
         return f"<{self.__class__.__name__} {pairs}>"
 
     @classmethod
-    def parse_flags(cls, argument: str) -> dict[str, list[str]]:
-        result: dict[str, list[str]] = {}
+    def parse_flags(cls, argument: str) -> Dict[str, List[str]]:
+        result: Dict[str, List[str]] = {}
         flags = cls.__commands_flags__
         aliases = cls.__commands_flag_aliases__
         last_position = 0

@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, ClassVar, List
 
 from docutils import nodes
 from docutils.parsers.rst import Directive, directives
@@ -36,7 +36,7 @@ class CollapseDirective(Directive):
 
     option_spec: ClassVar[OptionSpec] = {"open": directives.flag}
 
-    def run(self) -> list[collapse]:
+    def run(self) -> List[collapse]:
         self.assert_has_content()
         node = collapse(
             "\n".join(self.content),

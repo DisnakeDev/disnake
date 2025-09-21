@@ -4,8 +4,7 @@ import datetime
 import functools
 import inspect
 import types
-from contextlib import AbstractContextManager
-from typing import TYPE_CHECKING, Callable, Optional, TypeVar
+from typing import TYPE_CHECKING, Callable, ContextManager, Optional, Type, TypeVar
 from unittest import mock
 
 if TYPE_CHECKING:
@@ -29,7 +28,7 @@ if TYPE_CHECKING:
 CallableT = TypeVar("CallableT", bound=Callable)
 
 
-class freeze_time(AbstractContextManager):
+class freeze_time(ContextManager):
     """Helper class that freezes time at the given datetime by patching `datetime.now`.
     If no datetime is provided, defaults to the current time.
     Can be used as a sync context manager or decorator for sync/async functions.
@@ -54,7 +53,7 @@ class freeze_time(AbstractContextManager):
 
     def __exit__(
         self,
-        typ: Optional[type[BaseException]],
+        typ: Optional[Type[BaseException]],
         value: Optional[BaseException],
         tb: Optional[types.TracebackType],
     ) -> Optional[bool]:

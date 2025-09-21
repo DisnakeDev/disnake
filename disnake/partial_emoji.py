@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING, Any, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union
 
 from . import utils
 from .asset import Asset, AssetMixin
@@ -85,7 +85,7 @@ class PartialEmoji(_EmojiTag, AssetMixin):
 
     @classmethod
     def from_dict(
-        cls, data: Union[PartialEmojiPayload, ActivityEmojiPayload, dict[str, Any]]
+        cls, data: Union[PartialEmojiPayload, ActivityEmojiPayload, Dict[str, Any]]
     ) -> Self:
         return cls(
             animated=data.get("animated", False),
@@ -255,7 +255,7 @@ class PartialEmoji(_EmojiTag, AssetMixin):
     @staticmethod
     def _emoji_to_name_id(
         emoji: Optional[Union[str, Emoji, PartialEmoji]],
-    ) -> tuple[Optional[str], Optional[int]]:
+    ) -> Tuple[Optional[str], Optional[int]]:
         if emoji is None:
             return None, None
 

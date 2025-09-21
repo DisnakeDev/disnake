@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import timedelta
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 from . import utils
 from .abc import Snowflake
@@ -241,7 +241,7 @@ class Poll:
         self,
         question: Union[str, PollMedia],
         *,
-        answers: list[Union[str, PollAnswer]],
+        answers: List[Union[str, PollAnswer]],
         duration: timedelta = timedelta(hours=24),
         allow_multiselect: bool = False,
         layout_type: PollLayoutType = PollLayoutType.default,
@@ -257,7 +257,7 @@ class Poll:
                 f"Expected 'str' or 'PollMedia' for 'question', got {question.__class__.__name__!r}."
             )
 
-        self._answers: dict[int, PollAnswer] = {}
+        self._answers: Dict[int, PollAnswer] = {}
         for i, answer in enumerate(answers, 1):
             if isinstance(answer, PollAnswer):
                 self._answers[i] = answer
@@ -277,7 +277,7 @@ class Poll:
         return f"<{self.__class__.__name__} question={self.question!r} answers={self.answers!r}>"
 
     @property
-    def answers(self) -> list[PollAnswer]:
+    def answers(self) -> List[PollAnswer]:
         """List[:class:`PollAnswer`]: The list of answers for this poll.
 
         See also :meth:`get_answer` to get specific answers by ID.

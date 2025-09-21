@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-from typing import Literal, Optional, TypedDict
+from typing import List, Literal, Optional, TypedDict
 
 from typing_extensions import NotRequired
 
@@ -58,7 +58,7 @@ class VoiceReady(TypedDict):
     ssrc: int
     ip: str
     port: int
-    modes: list[SupportedModes]
+    modes: List[SupportedModes]
     heartbeat_interval: int
 
 

@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
-from typing import TYPE_CHECKING, Any, Callable, Optional, Union
+from typing import TYPE_CHECKING, Any, Callable, List, Optional, Sequence, Set, Union
 
 import disnake
 
@@ -257,7 +256,7 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
             *,
             strip_after_prefix: bool = False,
             owner_id: Optional[int] = None,
-            owner_ids: Optional[set[int]] = None,
+            owner_ids: Optional[Set[int]] = None,
             reload: bool = False,
             case_insensitive: bool = False,
             command_sync_flags: CommandSyncFlags = ...,
@@ -310,7 +309,7 @@ class AutoShardedBot(BotBase, InteractionBotBase, disnake.AutoShardedClient):
             *,
             strip_after_prefix: bool = False,
             owner_id: Optional[int] = None,
-            owner_ids: Optional[set[int]] = None,
+            owner_ids: Optional[Set[int]] = None,
             reload: bool = False,
             case_insensitive: bool = False,
             command_sync_flags: CommandSyncFlags = ...,
@@ -322,7 +321,7 @@ class AutoShardedBot(BotBase, InteractionBotBase, disnake.AutoShardedClient):
             default_contexts: Optional[InteractionContextTypes] = None,
             asyncio_debug: bool = False,
             loop: Optional[asyncio.AbstractEventLoop] = None,
-            shard_ids: Optional[list[int]] = None,  # instead of shard_id
+            shard_ids: Optional[List[int]] = None,  # instead of shard_id
             shard_count: Optional[int] = None,
             enable_debug_events: bool = False,
             enable_gateway_error_handler: bool = True,
@@ -483,7 +482,7 @@ class InteractionBot(InteractionBotBase, disnake.Client):
             self,
             *,
             owner_id: Optional[int] = None,
-            owner_ids: Optional[set[int]] = None,
+            owner_ids: Optional[Set[int]] = None,
             reload: bool = False,
             command_sync_flags: CommandSyncFlags = ...,
             sync_commands: bool = ...,
@@ -529,7 +528,7 @@ class AutoShardedInteractionBot(InteractionBotBase, disnake.AutoShardedClient):
             self,
             *,
             owner_id: Optional[int] = None,
-            owner_ids: Optional[set[int]] = None,
+            owner_ids: Optional[Set[int]] = None,
             reload: bool = False,
             command_sync_flags: CommandSyncFlags = ...,
             sync_commands: bool = ...,
@@ -540,7 +539,7 @@ class AutoShardedInteractionBot(InteractionBotBase, disnake.AutoShardedClient):
             default_contexts: Optional[InteractionContextTypes] = None,
             asyncio_debug: bool = False,
             loop: Optional[asyncio.AbstractEventLoop] = None,
-            shard_ids: Optional[list[int]] = None,  # instead of shard_id
+            shard_ids: Optional[List[int]] = None,  # instead of shard_id
             shard_count: Optional[int] = None,
             enable_debug_events: bool = False,
             enable_gateway_error_handler: bool = True,

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Literal, Optional, TypedDict
+from typing import List, Literal, Optional, TypedDict
 
 from .snowflake import Snowflake
 from .user import PartialUser
@@ -22,5 +22,5 @@ class Team(TypedDict):
     id: Snowflake
     name: str
     owner_user_id: Snowflake
-    members: list[TeamMember]
+    members: List[TeamMember]
     icon: Optional[str]

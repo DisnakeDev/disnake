@@ -4,12 +4,15 @@ from __future__ import annotations
 
 import asyncio
 import inspect
-from collections.abc import Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
+    Dict,
+    List,
     Optional,
+    Sequence,
+    Tuple,
     TypeVar,
     Union,
 )
@@ -102,7 +105,7 @@ _INVALID_SUB_KWARGS = frozenset(
 
 # this is just a helpful message for users trying to set specific
 # top-level-only fields on subcommands or groups
-def _check_invalid_sub_kwargs(func: CommandCallback, kwargs: dict[str, Any]) -> None:
+def _check_invalid_sub_kwargs(func: CommandCallback, kwargs: Dict[str, Any]) -> None:
     invalid_keys = kwargs.keys() & _INVALID_SUB_KWARGS
 
     for decorator_key in [
@@ -168,7 +171,7 @@ class SubCommandGroup(InvokableApplicationCommand):
         name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
         self.parent: InvokableSlashCommand = parent
-        self.children: dict[str, SubCommand] = {}
+        self.children: Dict[str, SubCommand] = {}
 
         # while subcommand groups don't have a description, parse the docstring regardless to
         # retrieve the localization key, if any
@@ -194,7 +197,7 @@ class SubCommandGroup(InvokableApplicationCommand):
         return self.parent
 
     @property
-    def parents(self) -> tuple[InvokableSlashCommand]:
+    def parents(self) -> Tuple[InvokableSlashCommand]:
         """Tuple[:class:`InvokableSlashCommand`]: Returns all parents of this group.
 
         .. versionadded:: 2.6
@@ -209,9 +212,9 @@ class SubCommandGroup(InvokableApplicationCommand):
         self,
         name: LocalizedOptional = None,
         description: LocalizedOptional = None,
-        options: Optional[list[Option]] = None,
-        connectors: Optional[dict[str, str]] = None,
-        extras: Optional[dict[str, Any]] = None,
+        options: Optional[List[Option]] = None,
+        connectors: Optional[Dict[str, str]] = None,
+        extras: Optional[Dict[str, Any]] = None,
         **kwargs: Any,
     ) -> Callable[[CommandCallback], SubCommand]:
         """A decorator that creates a subcommand in the subcommand group.
@@ -289,15 +292,15 @@ class SubCommand(InvokableApplicationCommand):
         *,
         name: LocalizedOptional = None,
         description: LocalizedOptional = None,
-        options: Optional[list[Option]] = None,
-        connectors: Optional[dict[str, str]] = None,
+        options: Optional[List[Option]] = None,
+        connectors: Optional[Dict[str, str]] = None,
         **kwargs: Any,
     ) -> None:
         name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
         self.parent: Union[InvokableSlashCommand, SubCommandGroup] = parent
-        self.connectors: dict[str, str] = connectors or {}
-        self.autocompleters: dict[str, Union[Choices, Callable[..., Optional[Choices]]]] = (
+        self.connectors: Dict[str, str] = connectors or {}
+        self.autocompleters: Dict[str, Union[Choices, Callable[..., Optional[Choices]]]] = (
             kwargs.get("autocompleters", {})
         )
 
@@ -331,7 +334,7 @@ class SubCommand(InvokableApplicationCommand):
     @property
     def parents(
         self,
-    ) -> Union[tuple[InvokableSlashCommand], tuple[SubCommandGroup, InvokableSlashCommand]]:
+    ) -> Union[Tuple[InvokableSlashCommand], Tuple[SubCommandGroup, InvokableSlashCommand]]:
         """Union[Tuple[:class:`InvokableSlashCommand`], Tuple[:class:`SubCommandGroup`, :class:`InvokableSlashCommand`]]:
         Returns all parents of this subcommand.
 
@@ -446,25 +449,25 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         *,
         name: LocalizedOptional = None,
         description: LocalizedOptional = None,
-        options: Optional[list[Option]] = None,
+        options: Optional[List[Option]] = None,
         dm_permission: Optional[bool] = None,  # deprecated
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         nsfw: Optional[bool] = None,
         install_types: Optional[ApplicationInstallTypes] = None,
         contexts: Optional[InteractionContextTypes] = None,
         guild_ids: Optional[Sequence[int]] = None,
-        connectors: Optional[dict[str, str]] = None,
+        connectors: Optional[Dict[str, str]] = None,
         auto_sync: Optional[bool] = None,
         **kwargs: Any,
     ) -> None:
         name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
         self.parent = None
-        self.connectors: dict[str, str] = connectors or {}
-        self.children: dict[str, Union[SubCommand, SubCommandGroup]] = {}
+        self.connectors: Dict[str, str] = connectors or {}
+        self.children: Dict[str, Union[SubCommand, SubCommandGroup]] = {}
         self.auto_sync: bool = True if auto_sync is None else auto_sync
-        self.guild_ids: Optional[tuple[int, ...]] = None if guild_ids is None else tuple(guild_ids)
-        self.autocompleters: dict[str, Union[Choices, Callable[..., Optional[Choices]]]] = (
+        self.guild_ids: Optional[Tuple[int, ...]] = None if guild_ids is None else tuple(guild_ids)
+        self.autocompleters: Dict[str, Union[Choices, Callable[..., Optional[Choices]]]] = (
             kwargs.get("autocompleters", {})
         )
 
@@ -511,7 +514,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         return None
 
     @property
-    def parents(self) -> tuple[()]:
+    def parents(self) -> Tuple[()]:
         """Tuple[()]: This is mainly for consistency with :class:`SubCommand`, and is equivalent to an empty tuple.
 
         .. versionadded:: 2.6
@@ -542,7 +545,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         return self.body.description
 
     @property
-    def options(self) -> list[Option]:
+    def options(self) -> List[Option]:
         """List[:class:`.Option`]: The list of options the slash command has. Shorthand for :attr:`self.body.options <.SlashCommand.options>`."""
         return self.body.options
 
@@ -550,9 +553,9 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         self,
         name: LocalizedOptional = None,
         description: LocalizedOptional = None,
-        options: Optional[list[Option]] = None,
-        connectors: Optional[dict[str, str]] = None,
-        extras: Optional[dict[str, Any]] = None,
+        options: Optional[List[Option]] = None,
+        connectors: Optional[Dict[str, str]] = None,
+        extras: Optional[Dict[str, Any]] = None,
         **kwargs: Any,
     ) -> Callable[[CommandCallback], SubCommand]:
         """A decorator that creates a subcommand under the base command.
@@ -614,7 +617,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
     def sub_command_group(
         self,
         name: LocalizedOptional = None,
-        extras: Optional[dict[str, Any]] = None,
+        extras: Optional[Dict[str, Any]] = None,
         **kwargs: Any,
     ) -> Callable[[CommandCallback], SubCommandGroup]:
         """A decorator that creates a subcommand group under the base command.
@@ -782,11 +785,11 @@ def slash_command(
     nsfw: Optional[bool] = None,
     install_types: Optional[ApplicationInstallTypes] = None,
     contexts: Optional[InteractionContextTypes] = None,
-    options: Optional[list[Option]] = None,
+    options: Optional[List[Option]] = None,
     guild_ids: Optional[Sequence[int]] = None,
-    connectors: Optional[dict[str, str]] = None,
+    connectors: Optional[Dict[str, str]] = None,
     auto_sync: Optional[bool] = None,
-    extras: Optional[dict[str, Any]] = None,
+    extras: Optional[Dict[str, Any]] = None,
     **kwargs: Any,
 ) -> Callable[[CommandCallback], InvokableSlashCommand]:
     """A decorator that builds a slash command.

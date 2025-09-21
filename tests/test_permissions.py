@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-from typing import Literal, Optional
+from typing import Dict, Literal, Optional
 
 import pytest
 
@@ -106,9 +106,9 @@ class TestPermissions:
     )
     def test_update(
         self,
-        perms_dict: dict[str, bool],
-        update: dict[str, bool],
-        expected: dict[str, Literal[True]],
+        perms_dict: Dict[str, bool],
+        update: Dict[str, bool],
+        expected: Dict[str, Literal[True]],
     ) -> None:
         perms = Permissions(**perms_dict)
         perms.update(**update)
@@ -126,7 +126,7 @@ class TestPermissions:
             ({"view_channel": False, "read_messages": True}, 8 + 1024),
         ],
     )
-    def test_update_aliases(self, update: dict[str, bool], expected: int) -> None:
+    def test_update_aliases(self, update: Dict[str, bool], expected: int) -> None:
         perms = Permissions(administrator=True)
         perms.update(**update)
         assert perms.value == expected
@@ -142,7 +142,7 @@ class TestPermissions:
             ),
         ],
     )
-    def test_iter(self, parameters: dict[str, bool], expected: Optional[dict[str, bool]]) -> None:
+    def test_iter(self, parameters: Dict[str, bool], expected: Optional[Dict[str, bool]]) -> None:
         perms = Permissions(**parameters)
         if expected is None:
             expected = parameters
@@ -252,8 +252,8 @@ class TestPermissionOverwrite:
     )
     def test_from_pair(
         self,
-        allow: dict[str, bool],
-        deny: dict[str, bool],
+        allow: Dict[str, bool],
+        deny: Dict[str, bool],
     ) -> None:
         perm_allow = Permissions(**allow)
         perm_deny = Permissions(**deny)
@@ -331,7 +331,7 @@ class TestPermissionOverwrite:
     )
     def test_iter(
         self,
-        expected: dict[str, bool],
+        expected: Dict[str, bool],
     ) -> None:
         po = PermissionOverwrite(**expected)
 

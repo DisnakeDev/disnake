@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-from typing import Literal, Optional, TypedDict
+from typing import List, Literal, Optional, TypedDict
 
 from typing_extensions import NotRequired
 
@@ -25,8 +25,8 @@ class Ban(TypedDict):
 
 
 class BulkBanResult(TypedDict):
-    banned_users: list[Snowflake]
-    failed_users: list[Snowflake]
+    banned_users: List[Snowflake]
+    failed_users: List[Snowflake]
 
 
 class UnavailableGuild(TypedDict):
@@ -99,10 +99,10 @@ class _BaseGuildPreview(UnavailableGuild):
     icon: Optional[str]
     splash: Optional[str]
     discovery_splash: Optional[str]
-    emojis: list[Emoji]
-    features: list[GuildFeature]
+    emojis: List[Emoji]
+    features: List[GuildFeature]
     description: Optional[str]
-    stickers: list[GuildSticker]
+    stickers: List[GuildSticker]
 
 
 class GuildPreview(_BaseGuildPreview):
@@ -123,7 +123,7 @@ class Guild(_BaseGuildPreview):
     verification_level: VerificationLevel
     default_message_notifications: DefaultMessageNotificationLevel
     explicit_content_filter: ExplicitContentFilterLevel
-    roles: list[Role]
+    roles: List[Role]
     mfa_level: MFALevel
     application_id: Optional[Snowflake]
     system_channel_id: Optional[Snowflake]
@@ -142,7 +142,7 @@ class Guild(_BaseGuildPreview):
     approximate_member_count: NotRequired[int]
     approximate_presence_count: NotRequired[int]
     nsfw_level: NSFWLevel
-    stickers: NotRequired[list[GuildSticker]]
+    stickers: NotRequired[List[GuildSticker]]
     premium_progress_bar_enabled: bool
     safety_alerts_channel_id: Optional[Snowflake]
     incidents_data: Optional[IncidentsData]
@@ -151,14 +151,14 @@ class Guild(_BaseGuildPreview):
     joined_at: NotRequired[Optional[str]]
     large: NotRequired[bool]
     member_count: NotRequired[int]
-    voice_states: NotRequired[list[GuildVoiceState]]
-    members: NotRequired[list[Member]]
-    channels: NotRequired[list[GuildChannel]]
-    threads: NotRequired[list[Thread]]
-    presences: NotRequired[list[PartialPresenceUpdate]]
-    stage_instances: NotRequired[list[StageInstance]]
-    guild_scheduled_events: NotRequired[list[GuildScheduledEvent]]
-    soundboard_sounds: NotRequired[list[GuildSoundboardSound]]
+    voice_states: NotRequired[List[GuildVoiceState]]
+    members: NotRequired[List[Member]]
+    channels: NotRequired[List[GuildChannel]]
+    threads: NotRequired[List[Thread]]
+    presences: NotRequired[List[PartialPresenceUpdate]]
+    stage_instances: NotRequired[List[StageInstance]]
+    guild_scheduled_events: NotRequired[List[GuildScheduledEvent]]
+    soundboard_sounds: NotRequired[List[GuildSoundboardSound]]
 
 
 class InviteGuild(Guild, total=False):
@@ -199,8 +199,8 @@ class CreateGuild(TypedDict):
     verification_level: NotRequired[VerificationLevel]
     default_message_notifications: NotRequired[DefaultMessageNotificationLevel]
     explicit_content_filter: NotRequired[ExplicitContentFilterLevel]
-    roles: NotRequired[list[CreateGuildPlaceholderRole]]
-    channels: NotRequired[list[CreateGuildPlaceholderChannel]]
+    roles: NotRequired[List[CreateGuildPlaceholderRole]]
+    channels: NotRequired[List[CreateGuildPlaceholderChannel]]
     afk_channel_id: NotRequired[Snowflake]
     afk_timeout: NotRequired[int]
     system_channel_id: NotRequired[Snowflake]

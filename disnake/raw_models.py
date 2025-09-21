@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING, Literal, Optional, Union, cast
+from typing import TYPE_CHECKING, List, Literal, Optional, Set, Union, cast
 
 from .enums import ChannelType, try_enum
 from .utils import _get_as_snowflake, get_slots
@@ -104,9 +104,9 @@ class RawBulkMessageDeleteEvent(_RawReprMixin):
     __slots__ = ("message_ids", "channel_id", "guild_id", "cached_messages")
 
     def __init__(self, data: MessageDeleteBulkEvent) -> None:
-        self.message_ids: set[int] = {int(x) for x in data.get("ids", [])}
+        self.message_ids: Set[int] = {int(x) for x in data.get("ids", [])}
         self.channel_id: int = int(data["channel_id"])
-        self.cached_messages: list[Message] = []
+        self.cached_messages: List[Message] = []
         self.guild_id: Optional[int] = _get_as_snowflake(data, "guild_id")
 
 

@@ -11,14 +11,19 @@ import logging
 import os
 import weakref
 from collections import OrderedDict, deque
-from collections.abc import Coroutine, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
+    Coroutine,
+    Deque,
+    Dict,
     Generic,
+    List,
     Literal,
     Optional,
+    Sequence,
+    Tuple,
     TypeVar,
     Union,
     overload,
@@ -123,7 +128,7 @@ class AsyncRequest(Generic[T]):
     def __init__(self, guild_id: int, loop: asyncio.AbstractEventLoop) -> None:
         self.guild_id: int = guild_id
         self.loop: asyncio.AbstractEventLoop = loop
-        self.waiters: list[asyncio.Future[T]] = []
+        self.waiters: List[asyncio.Future[T]] = []
 
     async def wait(self) -> T:
         future: asyncio.Future[T] = self.loop.create_future()
@@ -144,7 +149,7 @@ class AsyncRequest(Generic[T]):
                 future.set_result(result)
 
 
-class ChunkRequest(AsyncRequest[list[Member]]):
+class ChunkRequest(AsyncRequest[List[Member]]):
     def __init__(
         self,
         guild_id: int,
@@ -157,9 +162,9 @@ class ChunkRequest(AsyncRequest[list[Member]]):
         self.resolver: Callable[[int], Any] = resolver
         self.cache: bool = cache
         self.nonce: str = os.urandom(16).hex()
-        self.buffer: list[Member] = []
+        self.buffer: List[Member] = []
 
-    def add_members(self, members: list[Member]) -> None:
+    def add_members(self, members: List[Member]) -> None:
         self.buffer.extend(members)
         if self.cache:
             guild = self.resolver(self.guild_id)
@@ -189,14 +194,14 @@ class ConnectionState:
     if TYPE_CHECKING:
         _get_websocket: Callable[..., DiscordWebSocket]
         _get_client: Callable[..., Client]
-        _parsers: dict[str, Callable[[dict[str, Any]], None]]
+        _parsers: Dict[str, Callable[[Dict[str, Any]], None]]
 
     def __init__(
         self,
         *,
         dispatch: Callable[Concatenate[str, ...], Any],
-        handlers: dict[str, Callable[..., Any]],
-        hooks: dict[str, Callable[..., Any]],
+        handlers: Dict[str, Callable[..., Any]],
+        hooks: Dict[str, Callable[..., Any]],
         http: HTTPClient,
         loop: asyncio.AbstractEventLoop,
         max_messages: Optional[int] = 1000,
@@ -217,8 +222,8 @@ class ConnectionState:
             self.max_messages = 1000
 
         self.dispatch: Callable[Concatenate[str, ...], Any] = dispatch
-        self.handlers: dict[str, Callable[..., Any]] = handlers
-        self.hooks: dict[str, Callable[..., Any]] = hooks
+        self.handlers: Dict[str, Callable[..., Any]] = handlers
+        self.hooks: Dict[str, Callable[..., Any]] = hooks
         self.shard_count: Optional[int] = None
         self._ready_task: Optional[asyncio.Task] = None
         self.application_id: Optional[int] = None if application_id is None else int(application_id)
@@ -231,7 +236,7 @@ class ConnectionState:
             raise TypeError("allowed_mentions parameter must be AllowedMentions.")
 
         self.allowed_mentions: Optional[AllowedMentions] = allowed_mentions
-        self._chunk_requests: dict[Union[int, str], ChunkRequest] = {}
+        self._chunk_requests: Dict[Union[int, str], ChunkRequest] = {}
 
         if activity:
             if not isinstance(activity, BaseActivity):
@@ -298,14 +303,14 @@ class ConnectionState:
         # - the weakref slot + object in user objects likely results in a small increase in memory usage
         # - accesses on `_users` are slower, e.g. `__getitem__` takes ~1us with weakrefs and ~0.2us without
         self._users: weakref.WeakValueDictionary[int, User] = weakref.WeakValueDictionary()
-        self._emojis: dict[int, Emoji] = {}
-        self._stickers: dict[int, GuildSticker] = {}
-        self._soundboard_sounds: dict[int, GuildSoundboardSound] = {}
-        self._guilds: dict[int, Guild] = {}
+        self._emojis: Dict[int, Emoji] = {}
+        self._stickers: Dict[int, GuildSticker] = {}
+        self._soundboard_sounds: Dict[int, GuildSoundboardSound] = {}
+        self._guilds: Dict[int, Guild] = {}
 
         if application_commands:
-            self._global_application_commands: dict[int, APIApplicationCommand] = {}
-            self._guild_application_commands: dict[int, dict[int, APIApplicationCommand]] = {}
+            self._global_application_commands: Dict[int, APIApplicationCommand] = {}
+            self._guild_application_commands: Dict[int, Dict[int, APIApplicationCommand]] = {}
 
         if views:
             self._view_store: ViewStore = ViewStore(self)
@@ -313,19 +318,19 @@ class ConnectionState:
         if modals:
             self._modal_store: ModalStore = ModalStore(self)
 
-        self._voice_clients: dict[int, VoiceProtocol] = {}
+        self._voice_clients: Dict[int, VoiceProtocol] = {}
 
         # LRU of max size 128
         self._private_channels: OrderedDict[int, PrivateChannel] = OrderedDict()
         # extra dict to look up private channels by user id
-        self._private_channels_by_user: dict[int, DMChannel] = {}
+        self._private_channels_by_user: Dict[int, DMChannel] = {}
         if self.max_messages is not None:
-            self._messages: Optional[deque[Message]] = deque(maxlen=self.max_messages)
+            self._messages: Optional[Deque[Message]] = deque(maxlen=self.max_messages)
         else:
-            self._messages: Optional[deque[Message]] = None
+            self._messages: Optional[Deque[Message]] = None
 
     def process_chunk_requests(
-        self, guild_id: int, nonce: Optional[str], members: list[Member], complete: bool
+        self, guild_id: int, nonce: Optional[str], members: List[Member], complete: bool
     ) -> None:
         removed = []
         for key, request in self._chunk_requests.items():
@@ -366,7 +371,7 @@ class ConnectionState:
         return ret
 
     @property
-    def voice_clients(self) -> list[VoiceProtocol]:
+    def voice_clients(self) -> List[VoiceProtocol]:
         return list(self._voice_clients.values())
 
     def _get_voice_client(self, guild_id: Optional[int]) -> Optional[VoiceProtocol]:
@@ -434,7 +439,7 @@ class ConnectionState:
         return self._view_store.persistent_views
 
     @property
-    def guilds(self) -> list[Guild]:
+    def guilds(self) -> List[Guild]:
         return list(self._guilds.values())
 
     def _get_guild(self, guild_id: Optional[int]) -> Optional[Guild]:
@@ -526,15 +531,15 @@ class ConnectionState:
                 return cmd
 
     @property
-    def emojis(self) -> list[Emoji]:
+    def emojis(self) -> List[Emoji]:
         return list(self._emojis.values())
 
     @property
-    def stickers(self) -> list[GuildSticker]:
+    def stickers(self) -> List[GuildSticker]:
         return list(self._stickers.values())
 
     @property
-    def soundboard_sounds(self) -> list[GuildSoundboardSound]:
+    def soundboard_sounds(self) -> List[GuildSoundboardSound]:
         return list(self._soundboard_sounds.values())
 
     def get_emoji(self, emoji_id: Optional[int]) -> Optional[Emoji]:
@@ -550,7 +555,7 @@ class ConnectionState:
         return self._soundboard_sounds.get(sound_id)  # type: ignore
 
     @property
-    def private_channels(self) -> list[PrivateChannel]:
+    def private_channels(self) -> List[PrivateChannel]:
         return list(self._private_channels.values())
 
     def _get_private_channel(self, channel_id: Optional[int]) -> Optional[PrivateChannel]:
@@ -618,7 +623,7 @@ class ConnectionState:
     def _get_guild_channel(
         self,
         data: Union[MessagePayload, gateway.TypingStartEvent],
-    ) -> tuple[Union[PartialChannel, Thread], Optional[Guild]]:
+    ) -> Tuple[Union[PartialChannel, Thread], Optional[Guild]]:
         channel_id = int(data["channel_id"])
         guild_id = utils._get_as_snowflake(data, "guild_id")
 
@@ -659,10 +664,10 @@ class ConnectionState:
         guild: Guild,
         query: Optional[str],
         limit: int,
-        user_ids: Optional[list[int]],
+        user_ids: Optional[List[int]],
         cache: bool,
         presences: bool,
-    ) -> list[Member]:
+    ) -> List[Member]:
         guild_id = guild.id
         ws = self._get_websocket(guild_id)
 
@@ -1435,16 +1440,16 @@ class ConnectionState:
     @overload
     async def chunk_guild(
         self, guild: Guild, *, wait: Literal[False], cache: Optional[bool] = None
-    ) -> asyncio.Future[list[Member]]: ...
+    ) -> asyncio.Future[List[Member]]: ...
 
     @overload
     async def chunk_guild(
         self, guild: Guild, *, wait: Literal[True] = True, cache: Optional[bool] = None
-    ) -> list[Member]: ...
+    ) -> List[Member]: ...
 
     async def chunk_guild(
         self, guild: Guild, *, wait: bool = True, cache: Optional[bool] = None
-    ) -> Union[list[Member], asyncio.Future[list[Member]]]:
+    ) -> Union[List[Member], asyncio.Future[List[Member]]]:
         cache = cache or self.member_cache_flags.joined
         request = self._chunk_requests.get(guild.id)
         if request is None:
@@ -1520,7 +1525,7 @@ class ConnectionState:
 
         # do a cleanup of the messages cache
         if self._messages is not None:
-            self._messages: Optional[deque[Message]] = deque(
+            self._messages: Optional[Deque[Message]] = deque(
                 (msg for msg in self._messages if msg.guild != guild), maxlen=self.max_messages
             )
 
@@ -2099,7 +2104,7 @@ class ConnectionState:
         )
 
     def _handle_soundboard_update(
-        self, guild: Guild, new_sounds: tuple[GuildSoundboardSound, ...]
+        self, guild: Guild, new_sounds: Tuple[GuildSoundboardSound, ...]
     ) -> None:
         before_sounds = guild.soundboard_sounds
         guild.soundboard_sounds = new_sounds
@@ -2268,7 +2273,7 @@ class ConnectionState:
         self,
         *,
         with_localizations: bool = True,
-    ) -> list[APIApplicationCommand]:
+    ) -> List[APIApplicationCommand]:
         results = await self.http.get_global_commands(
             self.application_id,  # type: ignore
             with_localizations=with_localizations,
@@ -2307,8 +2312,8 @@ class ConnectionState:
         self._remove_global_application_command(command_id)
 
     async def bulk_overwrite_global_commands(
-        self, application_commands: list[ApplicationCommand]
-    ) -> list[APIApplicationCommand]:
+        self, application_commands: List[ApplicationCommand]
+    ) -> List[APIApplicationCommand]:
         payload = [cmd.to_dict() for cmd in application_commands]
         results = await self.http.bulk_upsert_global_commands(self.application_id, payload)  # type: ignore
         commands = [application_command_factory(data) for data in results]
@@ -2322,7 +2327,7 @@ class ConnectionState:
         guild_id: int,
         *,
         with_localizations: bool = True,
-    ) -> list[APIApplicationCommand]:
+    ) -> List[APIApplicationCommand]:
         results = await self.http.get_guild_commands(
             self.application_id,  # type: ignore
             guild_id,
@@ -2368,8 +2373,8 @@ class ConnectionState:
         self._remove_guild_application_command(guild_id, command_id)
 
     async def bulk_overwrite_guild_commands(
-        self, guild_id: int, application_commands: list[ApplicationCommand]
-    ) -> list[APIApplicationCommand]:
+        self, guild_id: int, application_commands: List[ApplicationCommand]
+    ) -> List[APIApplicationCommand]:
         payload = [cmd.to_dict() for cmd in application_commands]
         results = await self.http.bulk_upsert_guild_commands(
             self.application_id,  # type: ignore
@@ -2384,7 +2389,7 @@ class ConnectionState:
 
     async def bulk_fetch_command_permissions(
         self, guild_id: int
-    ) -> list[GuildApplicationCommandPermissions]:
+    ) -> List[GuildApplicationCommandPermissions]:
         array = await self.http.get_guild_application_command_permissions(
             self.application_id,  # type: ignore
             guild_id,
@@ -2405,7 +2410,7 @@ class ConnectionState:
 class AutoShardedConnectionState(ConnectionState):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
-        self.shard_ids: Union[list[int], range] = []
+        self.shard_ids: Union[List[int], range] = []
         self.shards_launched: asyncio.Event = asyncio.Event()
 
     def _update_guild_channel_references(self) -> None:
@@ -2473,7 +2478,7 @@ class AutoShardedConnectionState(ConnectionState):
 
     async def _delay_ready(self) -> None:
         await self.shards_launched.wait()
-        processed: list[tuple[Guild, asyncio.Future[list[Member]]]] = []
+        processed: List[Tuple[Guild, asyncio.Future[List[Member]]]] = []
         max_concurrency = len(self.shard_ids) * 2
         current_bucket = []
         while True:
@@ -2486,7 +2491,7 @@ class AutoShardedConnectionState(ConnectionState):
             except asyncio.TimeoutError:
                 break
             else:
-                future: asyncio.Future[list[Member]]
+                future: asyncio.Future[List[Member]]
                 if self._guild_needs_chunking(guild):
                     _log.debug(
                         "Guild ID %d requires chunking, will be done in the background.", guild.id
@@ -2517,8 +2522,8 @@ class AutoShardedConnectionState(ConnectionState):
         guilds = sorted(processed, key=lambda g: g[0].shard_id)
         for shard_id, info in itertools.groupby(guilds, key=lambda g: g[0].shard_id):
             # this is equivalent to `children, futures = zip(*info)`, but typed properly
-            children: list[Guild] = []
-            futures: list[asyncio.Future[list[Member]]] = []
+            children: List[Guild] = []
+            futures: List[asyncio.Future[List[Member]]] = []
             for c, f in info:
                 children.append(c)
                 futures.append(f)

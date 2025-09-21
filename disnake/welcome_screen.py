@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, List, Optional, Union
 
 from . import utils
 from .partial_emoji import PartialEmoji, _EmojiTag
@@ -125,7 +125,7 @@ class WelcomeScreen:
         self._state = state
         self._guild = guild
         self.description: Optional[str] = data.get("description")
-        self.channels: list[WelcomeScreenChannel] = [
+        self.channels: List[WelcomeScreenChannel] = [
             WelcomeScreenChannel._from_data(data=channel, state=state)
             for channel in data["welcome_channels"]
         ]
@@ -145,7 +145,7 @@ class WelcomeScreen:
         *,
         enabled: bool = MISSING,
         description: Optional[str] = MISSING,
-        channels: Optional[list[WelcomeScreenChannel]] = MISSING,
+        channels: Optional[List[WelcomeScreenChannel]] = MISSING,
         reason: Optional[str] = None,
     ) -> WelcomeScreen:
         """|coro|

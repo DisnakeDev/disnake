@@ -2,13 +2,16 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
     ClassVar,
+    Mapping,
     Optional,
+    Sequence,
+    Tuple,
+    Type,
     TypeVar,
     Union,
     overload,
@@ -91,7 +94,7 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, R
     """
 
     _default_value_type_map: ClassVar[
-        Mapping[SelectDefaultValueType, tuple[type[Snowflake], ...]]
+        Mapping[SelectDefaultValueType, Tuple[Type[Snowflake], ...]]
     ] = {
         SelectDefaultValueType.user: (Member, User, ClientUser),
         SelectDefaultValueType.role: (Role,),

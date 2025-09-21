@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, ClassVar, List, Sequence, Tuple
 
 from ..components import MediaGallery as MediaGalleryComponent, MediaGalleryItem
 from ..enums import ComponentType
@@ -33,7 +32,7 @@ class MediaGallery(UIComponent):
         sequential identifiers to the components in the message.
     """
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = ("items",)
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = ("items",)
     # We have to set this to MISSING in order to overwrite the abstract property from UIComponent
     _underlying: MediaGalleryComponent = MISSING
 
@@ -45,7 +44,7 @@ class MediaGallery(UIComponent):
         )
 
     @property
-    def items(self) -> list[MediaGalleryItem]:
+    def items(self) -> List[MediaGalleryItem]:
         """List[:class:`.MediaGalleryItem`]: The images in this gallery."""
         return self._underlying.items
 

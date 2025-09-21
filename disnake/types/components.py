@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Literal, Optional, TypedDict, Union
+from typing import List, Literal, Optional, TypedDict, Union
 
 from typing_extensions import NotRequired, Required, TypeAlias
 
@@ -78,7 +78,7 @@ class _BaseComponent(TypedDict):
 
 class ActionRow(_BaseComponent):
     type: Literal[1]
-    components: list[ActionRowChildComponent]
+    components: List[ActionRowChildComponent]
 
 
 # button
@@ -118,7 +118,7 @@ class _SelectMenu(_BaseComponent):
     max_values: NotRequired[int]
     disabled: NotRequired[bool]
     # This is technically not applicable to string selects, but for simplicity we'll just have it here
-    default_values: NotRequired[list[SelectDefaultValue]]
+    default_values: NotRequired[List[SelectDefaultValue]]
     required: NotRequired[bool]
 
 
@@ -128,7 +128,7 @@ class BaseSelectMenu(_SelectMenu):
 
 class StringSelectMenu(_SelectMenu):
     type: Literal[3]
-    options: list[SelectOption]
+    options: List[SelectOption]
 
 
 class UserSelectMenu(_SelectMenu):
@@ -145,7 +145,7 @@ class MentionableSelectMenu(_SelectMenu):
 
 class ChannelSelectMenu(_SelectMenu):
     type: Literal[8]
-    channel_types: NotRequired[list[ChannelType]]
+    channel_types: NotRequired[List[ChannelType]]
 
 
 AnySelectMenu = Union[
@@ -163,7 +163,7 @@ AnySelectMenu = Union[
 class Modal(TypedDict):
     title: str
     custom_id: str
-    components: list[ModalTopLevelComponent]
+    components: List[ModalTopLevelComponent]
 
 
 class TextInput(_BaseComponent):
@@ -203,7 +203,7 @@ class UnfurledMediaItem(TypedDict, total=False):
 class SectionComponent(_BaseComponent):
     type: Literal[9]
     # note: this may be expanded to more component types in the future
-    components: list[TextDisplayComponent]
+    components: List[TextDisplayComponent]
     # note: same as above
     accessory: Union[ThumbnailComponent, ButtonComponent]
 
@@ -229,7 +229,7 @@ class MediaGalleryItem(TypedDict):
 
 class MediaGalleryComponent(_BaseComponent):
     type: Literal[12]
-    items: list[MediaGalleryItem]
+    items: List[MediaGalleryItem]
 
 
 class FileComponent(_BaseComponent):
@@ -250,7 +250,7 @@ class ContainerComponent(_BaseComponent):
     type: Literal[17]
     accent_color: NotRequired[int]
     spoiler: NotRequired[bool]
-    components: list[
+    components: List[
         Union[
             ActionRow,
             SectionComponent,

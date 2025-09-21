@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, ClassVar, Tuple
 
 from ..components import TextDisplay as TextDisplayComponent
 from ..enums import ComponentType
@@ -30,7 +30,7 @@ class TextDisplay(UIComponent):
         sequential identifiers to the components in the message.
     """
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = ("content",)
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = ("content",)
     # We have to set this to MISSING in order to overwrite the abstract property from UIComponent
     _underlying: TextDisplayComponent = MISSING
 

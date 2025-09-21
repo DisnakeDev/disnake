@@ -6,14 +6,19 @@ import copy
 import functools
 import itertools
 import re
-from collections.abc import Generator, Iterable, Mapping, Sequence
-from re import Match
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
     ClassVar,
+    Dict,
+    Generator,
+    Iterable,
+    List,
+    Mapping,
+    Match,
     Optional,
+    Sequence,
     TypeVar,
     Union,
 )
@@ -107,12 +112,12 @@ class Paginator:
     def clear(self) -> None:
         """Clears the paginator to have no pages."""
         if self.prefix is not None:
-            self._current_page: list[str] = [self.prefix]
+            self._current_page: List[str] = [self.prefix]
             self._count: int = len(self.prefix) + self._linesep_len  # prefix + newline
         else:
             self._current_page = []
             self._count = 0
-        self._pages: list[str] = []
+        self._pages: List[str] = []
 
     @property
     def _prefix_len(self) -> int:
@@ -176,7 +181,7 @@ class Paginator:
         return total + self._count
 
     @property
-    def pages(self) -> list[str]:
+    def pages(self) -> List[str]:
         """List[:class:`str`]: Returns the rendered list of pages."""
         # we have more than just the prefix in our current page
         if len(self._current_page) > (0 if self.prefix is None else 1):
@@ -238,7 +243,7 @@ class _HelpCommandImpl(Command[Optional[CogT], Any, None]):
         original_get_commands = cog.get_commands
         original_walk_commands = cog.walk_commands
 
-        def wrapped_get_commands() -> list[Command[Any, ..., Any]]:
+        def wrapped_get_commands() -> List[Command[Any, ..., Any]]:
             ret = original_get_commands()
             ret.append(self)  # pyright: ignore[reportArgumentType]
             return ret
@@ -331,7 +336,7 @@ class HelpCommand:
         attrs = options.pop("command_attrs", {})
         attrs.setdefault("name", "help")
         attrs.setdefault("help", "Shows this message")
-        self.command_attrs: dict[str, Any] = attrs
+        self.command_attrs: Dict[str, Any] = attrs
 
         self.context: Context[AnyBot] = disnake.utils.MISSING
         self._command_impl: _HelpCommandImpl = _HelpCommandImpl(self, **self.command_attrs)
@@ -377,10 +382,10 @@ class HelpCommand:
         """
         self._command_impl.remove_check(func)
 
-    def get_bot_mapping(self) -> dict[Optional[Cog], list[Command[Any, ..., Any]]]:
+    def get_bot_mapping(self) -> Dict[Optional[Cog], List[Command[Any, ..., Any]]]:
         """Retrieves the bot mapping passed to :meth:`send_bot_help`."""
         bot = self.context.bot
-        mapping: dict[Optional[Cog], list[Command[Any, ..., Any]]] = {
+        mapping: Dict[Optional[Cog], List[Command[Any, ..., Any]]] = {
             cog: cog.get_commands() for cog in bot.cogs.values()
         }
         mapping[None] = [c for c in bot.commands if c.cog is None]
@@ -546,7 +551,7 @@ class HelpCommand:
         *,
         sort: bool = False,
         key: Optional[Callable[[Command[Any, ..., Any]], Any]] = None,
-    ) -> list[Command[Any, ..., Any]]:
+    ) -> List[Command[Any, ..., Any]]:
         """|coro|
 
         Returns a filtered list of commands and optionally sorts them.
@@ -594,7 +599,7 @@ class HelpCommand:
             except CommandError:
                 return False
 
-        ret: list[Command[Any, ..., Any]] = []
+        ret: List[Command[Any, ..., Any]] = []
         for cmd in iterator:
             valid = await predicate(cmd)
             if valid:
@@ -680,7 +685,7 @@ class HelpCommand:
         pass
 
     async def send_bot_help(
-        self, mapping: Mapping[Optional[Cog], list[Command[Any, ..., Any]]]
+        self, mapping: Mapping[Optional[Cog], List[Command[Any, ..., Any]]]
     ) -> None:
         """|coro|
 
@@ -1042,7 +1047,7 @@ class DefaultHelpCommand(HelpCommand):
         await super().prepare_help_command(ctx, command)
 
     async def send_bot_help(
-        self, mapping: Mapping[Optional[Cog], list[Command[Any, ..., Any]]]
+        self, mapping: Mapping[Optional[Cog], List[Command[Any, ..., Any]]]
     ) -> None:
         ctx = self.context
         bot = ctx.bot
@@ -1290,7 +1295,7 @@ class MinimalHelpCommand(HelpCommand):
         await super().prepare_help_command(ctx, command)
 
     async def send_bot_help(
-        self, mapping: Mapping[Optional[Cog], list[Command[Any, ..., Any]]]
+        self, mapping: Mapping[Optional[Cog], List[Command[Any, ..., Any]]]
     ) -> None:
         ctx = self.context
         bot = ctx.bot

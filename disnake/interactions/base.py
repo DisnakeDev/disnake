@@ -3,13 +3,17 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Mapping, Sequence
 from datetime import timedelta
 from typing import (
     TYPE_CHECKING,
     Any,
+    Dict,
     Generic,
+    List,
+    Mapping,
     Optional,
+    Sequence,
+    Tuple,
     TypeVar,
     Union,
     cast,
@@ -196,7 +200,7 @@ class Interaction(Generic[ClientT]):
         .. versionadded:: 2.11
     """
 
-    __slots__: tuple[str, ...] = (
+    __slots__: Tuple[str, ...] = (
         "data",
         "id",
         "type",
@@ -272,7 +276,7 @@ class Interaction(Generic[ClientT]):
             data["channel"], guild_fallback, return_messageable=True
         )
 
-        self.entitlements: list[Entitlement] = (
+        self.entitlements: List[Entitlement] = (
             [Entitlement(data=e, state=state) for e in entitlements_data]
             if (entitlements_data := data.get("entitlements"))
             else []
@@ -441,10 +445,10 @@ class Interaction(Generic[ClientT]):
         content: Optional[str] = MISSING,
         *,
         embed: Optional[Embed] = MISSING,
-        embeds: list[Embed] = MISSING,
+        embeds: List[Embed] = MISSING,
         file: File = MISSING,
-        files: list[File] = MISSING,
-        attachments: Optional[list[Attachment]] = MISSING,
+        files: List[File] = MISSING,
+        attachments: Optional[List[Attachment]] = MISSING,
         view: Optional[View] = MISSING,
         components: Optional[MessageComponents] = MISSING,
         poll: Poll = MISSING,
@@ -691,9 +695,9 @@ class Interaction(Generic[ClientT]):
         content: Optional[str] = None,
         *,
         embed: Embed = MISSING,
-        embeds: list[Embed] = MISSING,
+        embeds: List[Embed] = MISSING,
         file: File = MISSING,
-        files: list[File] = MISSING,
+        files: List[File] = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         view: View = MISSING,
         components: MessageComponents = MISSING,
@@ -830,7 +834,7 @@ class InteractionResponse:
     .. versionadded:: 2.0
     """
 
-    __slots__: tuple[str, ...] = (
+    __slots__: Tuple[str, ...] = (
         "_parent",
         "_response_type",
     )
@@ -912,7 +916,7 @@ class InteractionResponse:
             raise InteractionResponded(self._parent)
 
         defer_type: Optional[InteractionResponseType] = None
-        data: dict[str, Any] = {}
+        data: Dict[str, Any] = {}
         parent = self._parent
 
         if parent.type is InteractionType.application_command:
@@ -982,9 +986,9 @@ class InteractionResponse:
         content: Optional[str] = None,
         *,
         embed: Embed = MISSING,
-        embeds: list[Embed] = MISSING,
+        embeds: List[Embed] = MISSING,
         file: File = MISSING,
-        files: list[File] = MISSING,
+        files: List[File] = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         view: View = MISSING,
         components: MessageComponents = MISSING,
@@ -1083,7 +1087,7 @@ class InteractionResponse:
         if self._response_type is not None:
             raise InteractionResponded(self._parent)
 
-        payload: dict[str, Any] = {
+        payload: Dict[str, Any] = {
             "tts": tts,
         }
 
@@ -1191,10 +1195,10 @@ class InteractionResponse:
         content: Optional[str] = MISSING,
         *,
         embed: Optional[Embed] = MISSING,
-        embeds: list[Embed] = MISSING,
+        embeds: List[Embed] = MISSING,
         file: File = MISSING,
-        files: list[File] = MISSING,
-        attachments: Optional[list[Attachment]] = MISSING,
+        files: List[File] = MISSING,
+        attachments: Optional[List[Attachment]] = MISSING,
         view: Optional[View] = MISSING,
         components: Optional[MessageComponents] = MISSING,
         flags: MessageFlags = MISSING,
@@ -1425,7 +1429,7 @@ class InteractionResponse:
         if self._response_type is not None:
             raise InteractionResponded(self._parent)
 
-        choices_data: list[ApplicationCommandOptionChoicePayload]
+        choices_data: List[ApplicationCommandOptionChoicePayload]
         if isinstance(choices, Mapping):
             choices_data = [{"name": n, "value": v} for n, v in choices.items()]
         else:
@@ -1548,7 +1552,7 @@ class InteractionResponse:
                 "title": title,
                 "custom_id": custom_id,
                 "components": cast(
-                    "list[ModalTopLevelComponentPayload]",
+                    "List[ModalTopLevelComponentPayload]",
                     [component.to_component_dict() for component in items],
                 ),
             }
@@ -1725,7 +1729,7 @@ class InteractionMessage(Message):
         *,
         embed: Optional[Embed] = ...,
         file: File = ...,
-        attachments: Optional[list[Attachment]] = ...,
+        attachments: Optional[List[Attachment]] = ...,
         suppress_embeds: bool = ...,
         flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
@@ -1740,8 +1744,8 @@ class InteractionMessage(Message):
         content: Optional[str] = ...,
         *,
         embed: Optional[Embed] = ...,
-        files: list[File] = ...,
-        attachments: Optional[list[Attachment]] = ...,
+        files: List[File] = ...,
+        attachments: Optional[List[Attachment]] = ...,
         suppress_embeds: bool = ...,
         flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
@@ -1755,9 +1759,9 @@ class InteractionMessage(Message):
         self,
         content: Optional[str] = ...,
         *,
-        embeds: list[Embed] = ...,
+        embeds: List[Embed] = ...,
         file: File = ...,
-        attachments: Optional[list[Attachment]] = ...,
+        attachments: Optional[List[Attachment]] = ...,
         suppress_embeds: bool = ...,
         flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
@@ -1771,9 +1775,9 @@ class InteractionMessage(Message):
         self,
         content: Optional[str] = ...,
         *,
-        embeds: list[Embed] = ...,
-        files: list[File] = ...,
-        attachments: Optional[list[Attachment]] = ...,
+        embeds: List[Embed] = ...,
+        files: List[File] = ...,
+        attachments: Optional[List[Attachment]] = ...,
         suppress_embeds: bool = ...,
         flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
@@ -1787,10 +1791,10 @@ class InteractionMessage(Message):
         content: Optional[str] = MISSING,
         *,
         embed: Optional[Embed] = MISSING,
-        embeds: list[Embed] = MISSING,
+        embeds: List[Embed] = MISSING,
         file: File = MISSING,
-        files: list[File] = MISSING,
-        attachments: Optional[list[Attachment]] = MISSING,
+        files: List[File] = MISSING,
+        attachments: Optional[List[Attachment]] = MISSING,
         suppress_embeds: bool = MISSING,
         flags: MessageFlags = MISSING,
         allowed_mentions: Optional[AllowedMentions] = MISSING,
@@ -1978,7 +1982,7 @@ class InteractionMessage(Message):
             await self._state._interaction.delete_original_response()
 
 
-class InteractionDataResolved(dict[str, Any]):
+class InteractionDataResolved(Dict[str, Any]):
     """Represents the resolved data related to an interaction.
 
     .. versionadded:: 2.1
@@ -2016,12 +2020,12 @@ class InteractionDataResolved(dict[str, Any]):
         data = data or {}
         super().__init__(data)
 
-        self.members: dict[int, Member] = {}
-        self.users: dict[int, User] = {}
-        self.roles: dict[int, Role] = {}
-        self.channels: dict[int, AnyChannel] = {}
-        self.messages: dict[int, Message] = {}
-        self.attachments: dict[int, Attachment] = {}
+        self.members: Dict[int, Member] = {}
+        self.users: Dict[int, User] = {}
+        self.roles: Dict[int, Role] = {}
+        self.channels: Dict[int, AnyChannel] = {}
+        self.messages: Dict[int, Message] = {}
+        self.attachments: Dict[int, Attachment] = {}
 
         users = data.get("users", {})
         members = data.get("members", {})

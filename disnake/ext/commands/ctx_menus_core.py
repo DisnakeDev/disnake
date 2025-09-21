@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
-from typing import TYPE_CHECKING, Any, Callable, Optional, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Sequence, Tuple, Union
 
 from disnake.app_commands import MessageCommand, UserCommand
 from disnake.flags import ApplicationInstallTypes, InteractionContextTypes
@@ -86,7 +85,7 @@ class InvokableUserCommand(InvokableApplicationCommand):
     ) -> None:
         name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
-        self.guild_ids: Optional[tuple[int, ...]] = None if guild_ids is None else tuple(guild_ids)
+        self.guild_ids: Optional[Tuple[int, ...]] = None if guild_ids is None else tuple(guild_ids)
         self.auto_sync: bool = True if auto_sync is None else auto_sync
 
         try:
@@ -197,7 +196,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
     ) -> None:
         name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
-        self.guild_ids: Optional[tuple[int, ...]] = None if guild_ids is None else tuple(guild_ids)
+        self.guild_ids: Optional[Tuple[int, ...]] = None if guild_ids is None else tuple(guild_ids)
         self.auto_sync: bool = True if auto_sync is None else auto_sync
 
         try:
@@ -264,7 +263,7 @@ def user_command(
     contexts: Optional[InteractionContextTypes] = None,
     guild_ids: Optional[Sequence[int]] = None,
     auto_sync: Optional[bool] = None,
-    extras: Optional[dict[str, Any]] = None,
+    extras: Optional[Dict[str, Any]] = None,
     **kwargs: Any,
 ) -> Callable[[InteractionCommandCallback[CogT, UserCommandInteraction, P]], InvokableUserCommand]:
     """A shortcut decorator that builds a user command.
@@ -369,7 +368,7 @@ def message_command(
     contexts: Optional[InteractionContextTypes] = None,
     guild_ids: Optional[Sequence[int]] = None,
     auto_sync: Optional[bool] = None,
-    extras: Optional[dict[str, Any]] = None,
+    extras: Optional[Dict[str, Any]] = None,
     **kwargs: Any,
 ) -> Callable[
     [InteractionCommandCallback[CogT, MessageCommandInteraction, P]],

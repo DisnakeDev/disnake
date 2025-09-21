@@ -3,15 +3,18 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from collections.abc import Coroutine
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
     ClassVar,
+    Coroutine,
+    Dict,
     Generic,
     Optional,
     Protocol,
+    Tuple,
+    Type,
     TypeVar,
     overload,
 )
@@ -68,7 +71,7 @@ class UIComponent(ABC):
     .. versionadded:: 2.11
     """
 
-    __repr_attributes__: ClassVar[tuple[str, ...]]
+    __repr_attributes__: ClassVar[Tuple[str, ...]]
 
     @property
     @abstractmethod
@@ -102,7 +105,7 @@ class UIComponent(ABC):
     def id(self, value: int) -> None:
         self._underlying.id = value
 
-    def to_component_dict(self) -> dict[str, Any]:
+    def to_component_dict(self) -> Dict[str, Any]:
         return self._underlying.to_dict()
 
     @classmethod
@@ -155,7 +158,7 @@ class Item(WrappedComponent, Generic[V_co]):
     .. versionadded:: 2.0
     """
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = ("row",)
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = ("row",)
 
     @overload
     def __init__(self: Item[None]) -> None: ...
@@ -228,7 +231,7 @@ SelfViewT = TypeVar("SelfViewT", bound="Optional[View]")
 # which work as `View.__init__` replaces the handler with the item.
 class DecoratedItem(Protocol[I]):
     @overload
-    def __get__(self, obj: None, objtype: type[SelfViewT]) -> ItemCallbackType[SelfViewT, I]: ...
+    def __get__(self, obj: None, objtype: Type[SelfViewT]) -> ItemCallbackType[SelfViewT, I]: ...
 
     @overload
     def __get__(self, obj: Any, objtype: Any) -> I: ...

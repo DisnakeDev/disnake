@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING, Any, Literal, Optional, Union, overload
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union, overload
 
 from .asset import Asset
 from .colour import Colour
@@ -339,7 +339,7 @@ class Activity(BaseActivity):
         party: Optional[ActivityParty] = None,
         application_id: Optional[Union[str, int]] = None,
         flags: Optional[int] = None,
-        buttons: Optional[list[str]] = None,
+        buttons: Optional[List[str]] = None,
         emoji: Optional[Union[PartialEmojiPayload, ActivityEmojiPayload]] = None,
         id: Optional[str] = None,
         platform: Optional[str] = None,
@@ -360,7 +360,7 @@ class Activity(BaseActivity):
         self.name: Optional[str] = name
         self.url: Optional[str] = url
         self.flags: int = flags or 0
-        self.buttons: list[str] = buttons or []
+        self.buttons: List[str] = buttons or []
 
         # undocumented fields:
         self.id: Optional[str] = id
@@ -398,8 +398,8 @@ class Activity(BaseActivity):
         inner = " ".join(f"{k!s}={v!r}" for k, v in attrs)
         return f"<Activity {inner}>"
 
-    def to_dict(self) -> dict[str, Any]:
-        ret: dict[str, Any] = {}
+    def to_dict(self) -> Dict[str, Any]:
+        ret: Dict[str, Any] = {}
         for attr in self.__slots__:
             value = getattr(self, attr, None)
             if value is None:
@@ -608,8 +608,8 @@ class Streaming(BaseActivity):
         name = self.assets["large_image"]
         return name[7:] if name[:7] == "twitch:" else None
 
-    def to_dict(self) -> dict[str, Any]:
-        ret: dict[str, Any] = {
+    def to_dict(self) -> Dict[str, Any]:
+        ret: Dict[str, Any] = {
             "type": ActivityType.streaming.value,
             "name": str(self.name),
             "url": str(self.url),
@@ -700,7 +700,7 @@ class Spotify(_BaseActivity):
         """
         return self.colour
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         return {
             "flags": 48,  # SYNC | PLAY
             "name": "Spotify",
@@ -744,7 +744,7 @@ class Spotify(_BaseActivity):
         return self._details
 
     @property
-    def artists(self) -> list[str]:
+    def artists(self) -> List[str]:
         """List[:class:`str`]: The artists of the song being played."""
         return self._state.split("; ")
 

@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: MIT
 
+from typing import Dict
 
-LocalizationDict = dict[str, str]
+LocalizationDict = Dict[str, str]

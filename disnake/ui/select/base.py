@@ -4,13 +4,17 @@ from __future__ import annotations
 
 import os
 from abc import ABC, abstractmethod
-from collections.abc import Mapping, Sequence
 from typing import (
     TYPE_CHECKING,
     Callable,
     ClassVar,
     Generic,
+    List,
+    Mapping,
     Optional,
+    Sequence,
+    Tuple,
+    Type,
     TypeVar,
     Union,
 )
@@ -62,7 +66,7 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
     .. versionadded:: 2.7
     """
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = (
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
         "placeholder",
         "min_values",
         "max_values",
@@ -73,11 +77,11 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
     _underlying: SelectMenuT = MISSING
 
     # Subclasses are expected to set this
-    _default_value_type_map: ClassVar[Mapping[SelectDefaultValueType, tuple[type[Snowflake], ...]]]
+    _default_value_type_map: ClassVar[Mapping[SelectDefaultValueType, Tuple[Type[Snowflake], ...]]]
 
     def __init__(
         self,
-        underlying_type: type[SelectMenuT],
+        underlying_type: Type[SelectMenuT],
         component_type: ComponentType,
         *,
         custom_id: str,
@@ -91,7 +95,7 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
         row: Optional[int],
     ) -> None:
         super().__init__()
-        self._selected_values: list[SelectValueT] = []
+        self._selected_values: List[SelectValueT] = []
         self._provided_custom_id = custom_id is not MISSING
         custom_id = os.urandom(16).hex() if custom_id is MISSING else custom_id
         self._underlying = underlying_type._raw_construct(
@@ -159,7 +163,7 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
         self._underlying.disabled = bool(value)
 
     @property
-    def default_values(self) -> list[SelectDefaultValue]:
+    def default_values(self) -> List[SelectDefaultValue]:
         """List[:class:`.SelectDefaultValue`]: The list of values that are selected by default.
         Only available for auto-populated select menus.
         """
@@ -185,7 +189,7 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
         self._underlying.required = bool(value)
 
     @property
-    def values(self) -> list[SelectValueT]:
+    def values(self) -> List[SelectValueT]:
         return self._selected_values
 
     @property
@@ -213,8 +217,8 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
     @classmethod
     def _transform_default_values(
         cls, values: Sequence[SelectDefaultValueInputType[SelectValueT]]
-    ) -> list[SelectDefaultValue]:
-        result: list[SelectDefaultValue] = []
+    ) -> List[SelectDefaultValue]:
+        result: List[SelectDefaultValue] = []
 
         for value in values:
             # If we have a SelectDefaultValue, just use it as-is

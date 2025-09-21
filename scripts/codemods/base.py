@@ -1,10 +1,9 @@
 # SPDX-License-Identifier: MIT
 
 from abc import ABC
-from collections.abc import Generator
 from contextlib import contextmanager
 from contextvars import ContextVar
-from typing import TYPE_CHECKING, ClassVar, Optional
+from typing import TYPE_CHECKING, ClassVar, Generator, Optional
 
 import libcst as cst
 import libcst.codemod as codemod

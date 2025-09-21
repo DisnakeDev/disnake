@@ -2,14 +2,17 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterator
 from functools import wraps
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
     ClassVar,
+    Dict,
+    Iterator,
     Optional,
+    Set,
+    Tuple,
     overload,
 )
 
@@ -1215,8 +1218,8 @@ class PermissionOverwrite:
         view_guild_insights: Optional[bool]
 
     if TYPE_CHECKING:
-        VALID_NAMES: ClassVar[set[str]]
-        PURE_FLAGS: ClassVar[set[str]]
+        VALID_NAMES: ClassVar[Set[str]]
+        PURE_FLAGS: ClassVar[Set[str]]
 
     @overload
     @_generated
@@ -1292,7 +1295,7 @@ class PermissionOverwrite:
 
     @_overload_with_permissions
     def __init__(self, **kwargs: Optional[bool]) -> None:
-        self._values: dict[str, Optional[bool]] = {}
+        self._values: Dict[str, Optional[bool]] = {}
 
         for key, value in kwargs.items():
             if key not in self.VALID_NAMES:
@@ -1312,7 +1315,7 @@ class PermissionOverwrite:
         else:
             self._values[key] = value
 
-    def pair(self) -> tuple[Permissions, Permissions]:
+    def pair(self) -> Tuple[Permissions, Permissions]:
         """Tuple[:class:`Permissions`, :class:`Permissions`]: Returns the (allow, deny) pair from this overwrite."""
         allow = Permissions.none()
         deny = Permissions.none()
@@ -1443,6 +1446,6 @@ class PermissionOverwrite:
 
             setattr(self, key, value)
 
-    def __iter__(self) -> Iterator[tuple[str, Optional[bool]]]:
+    def __iter__(self) -> Iterator[Tuple[str, Optional[bool]]]:
         for key in self.PURE_FLAGS:
             yield key, self._values.get(key)

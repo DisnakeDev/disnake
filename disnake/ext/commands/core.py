@@ -6,15 +6,20 @@ import asyncio
 import datetime
 import functools
 import inspect
-from collections.abc import Generator
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
+    Dict,
+    Generator,
     Generic,
+    List,
     Literal,
     Optional,
     Protocol,
+    Set,
+    Tuple,
+    Type,
     TypeVar,
     Union,
     cast,
@@ -162,7 +167,7 @@ def hooked_wrapped_callback(
     return wrapped
 
 
-class _CaseInsensitiveDict(dict[str, VT]):
+class _CaseInsensitiveDict(Dict[str, VT]):
     def __contains__(self, k: str) -> bool:
         return super().__contains__(k.casefold())
 
@@ -256,7 +261,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         .. versionadded:: 2.0
     """
 
-    __original_kwargs__: dict[str, Any]
+    __original_kwargs__: Dict[str, Any]
 
     def __new__(cls, *args: Any, **kwargs: Any) -> Self:
         # if you're wondering why this is done, it's because we need to ensure
@@ -303,8 +308,8 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         self.brief: Optional[str] = kwargs.get("brief")
         self.usage: Optional[str] = kwargs.get("usage")
         self.rest_is_raw: bool = kwargs.get("rest_is_raw", False)
-        self.aliases: Union[list[str], tuple[str]] = kwargs.get("aliases", [])
-        self.extras: dict[str, Any] = kwargs.get("extras", {})
+        self.aliases: Union[List[str], Tuple[str]] = kwargs.get("aliases", [])
+        self.extras: Dict[str, Any] = kwargs.get("extras", {})
 
         if not isinstance(self.aliases, (list, tuple)):
             raise TypeError("Aliases of a command must be a list or a tuple of strings.")
@@ -318,7 +323,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         except AttributeError:
             checks = kwargs.get("checks", [])
 
-        self.checks: list[Check] = checks
+        self.checks: List[Check] = checks
 
         try:
             cooldown = func.__commands_cooldown__
@@ -475,7 +480,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         ret = self.__class__(self.callback, **self.__original_kwargs__)
         return self._ensure_assignment_on_copy(ret)
 
-    def _update_copy(self: CommandT, kwargs: dict[str, Any]) -> CommandT:
+    def _update_copy(self: CommandT, kwargs: Dict[str, Any]) -> CommandT:
         if kwargs:
             kw = kwargs.copy()
             kw.update(self.__original_kwargs__)
@@ -601,7 +606,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
             return value
 
     @property
-    def clean_params(self) -> dict[str, inspect.Parameter]:
+    def clean_params(self) -> Dict[str, inspect.Parameter]:
         """Dict[:class:`str`, :class:`inspect.Parameter`]:
         Retrieves the parameter dictionary without the context or self parameters.
 
@@ -626,7 +631,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         return " ".join(reversed(entries))
 
     @property
-    def parents(self) -> list[Group[CogT, ..., Any]]:
+    def parents(self) -> List[Group[CogT, ..., Any]]:
         """List[:class:`Group`]: Retrieves the parents of this command.
 
         If the command has no parents then it returns an empty :class:`list`.
@@ -989,7 +994,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         if not params:
             return ""
 
-        result: list[str] = []
+        result: List[str] = []
         for name, param in params.items():
             greedy = isinstance(param.annotation, Greedy)
             optional = False  # postpone evaluation of if it's an optional argument
@@ -1110,14 +1115,14 @@ class GroupMixin(Generic[CogT]):
     """
 
     def __init__(self, *args: Any, case_insensitive: bool = False, **kwargs: Any) -> None:
-        self.all_commands: dict[str, Command[CogT, Any, Any]] = (
+        self.all_commands: Dict[str, Command[CogT, Any, Any]] = (
             _CaseInsensitiveDict() if case_insensitive else {}
         )
         self.case_insensitive: bool = case_insensitive
         super().__init__(*args, **kwargs)
 
     @property
-    def commands(self) -> set[Command[CogT, Any, Any]]:
+    def commands(self) -> Set[Command[CogT, Any, Any]]:
         """Set[:class:`.Command`]: A unique set of commands without aliases that are registered."""
         return set(self.all_commands.values())
 
@@ -1262,7 +1267,7 @@ class GroupMixin(Generic[CogT]):
     def command(
         self,
         name: str,
-        cls: type[CommandT],
+        cls: Type[CommandT],
         *args: Any,
         **kwargs: Any,
     ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], CommandT]: ...
@@ -1272,7 +1277,7 @@ class GroupMixin(Generic[CogT]):
         self,
         name: str = ...,
         *args: Any,
-        cls: type[CommandT],
+        cls: Type[CommandT],
         **kwargs: Any,
     ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], CommandT]: ...
 
@@ -1287,7 +1292,7 @@ class GroupMixin(Generic[CogT]):
     def command(
         self,
         name: str = MISSING,
-        cls: type[Command[Any, Any, Any]] = Command,
+        cls: Type[Command[Any, Any, Any]] = Command,
         *args: Any,
         **kwargs: Any,
     ) -> Any:
@@ -1312,7 +1317,7 @@ class GroupMixin(Generic[CogT]):
     def group(
         self,
         name: str,
-        cls: type[GroupT],
+        cls: Type[GroupT],
         *args: Any,
         **kwargs: Any,
     ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], GroupT]: ...
@@ -1322,7 +1327,7 @@ class GroupMixin(Generic[CogT]):
         self,
         name: str = ...,
         *args: Any,
-        cls: type[GroupT],
+        cls: Type[GroupT],
         **kwargs: Any,
     ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], GroupT]: ...
 
@@ -1337,7 +1342,7 @@ class GroupMixin(Generic[CogT]):
     def group(
         self,
         name: str = MISSING,
-        cls: type[Group[Any, Any, Any]] = MISSING,
+        cls: Type[Group[Any, Any, Any]] = MISSING,
         *args: Any,
         **kwargs: Any,
     ) -> Any:
@@ -1510,7 +1515,7 @@ if TYPE_CHECKING:
 @overload
 def command(
     name: str,
-    cls: type[CommandT],
+    cls: Type[CommandT],
     **attrs: Any,
 ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], CommandT]: ...
 
@@ -1519,7 +1524,7 @@ def command(
 def command(
     name: str = ...,
     *,
-    cls: type[CommandT],
+    cls: Type[CommandT],
     **attrs: Any,
 ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], CommandT]: ...
 
@@ -1533,7 +1538,7 @@ def command(
 
 def command(
     name: str = MISSING,
-    cls: type[Command[Any, Any, Any]] = MISSING,
+    cls: Type[Command[Any, Any, Any]] = MISSING,
     **attrs: Any,
 ) -> Any:
     """A decorator that transforms a function into a :class:`.Command`
@@ -1579,7 +1584,7 @@ def command(
 @overload
 def group(
     name: str,
-    cls: type[GroupT],
+    cls: Type[GroupT],
     **attrs: Any,
 ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], GroupT]: ...
 
@@ -1588,7 +1593,7 @@ def group(
 def group(
     name: str = ...,
     *,
-    cls: type[GroupT],
+    cls: Type[GroupT],
     **attrs: Any,
 ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], GroupT]: ...
 
@@ -1602,7 +1607,7 @@ def group(
 
 def group(
     name: str = MISSING,
-    cls: type[Group[Any, Any, Any]] = MISSING,
+    cls: Type[Group[Any, Any, Any]] = MISSING,
     **attrs: Any,
 ) -> Any:
     """A decorator that transforms a function into a :class:`.Group`.

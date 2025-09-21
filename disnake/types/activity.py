@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Literal, Optional, TypedDict
+from typing import List, Literal, Optional, TypedDict
 
 from typing_extensions import NotRequired
 
@@ -16,7 +16,7 @@ StatusDisplayType = Literal[0, 1, 2]
 class PresenceData(TypedDict):
     user: User
     status: StatusType
-    activities: list[Activity]
+    activities: List[Activity]
     client_status: ClientStatus
 
 
@@ -37,7 +37,7 @@ class ActivityTimestamps(TypedDict, total=False):
 
 class ActivityParty(TypedDict, total=False):
     id: str
-    size: list[int]  # (current size, max size)
+    size: List[int]  # (current size, max size)
 
 
 class ActivityAssets(TypedDict, total=False):
@@ -89,7 +89,7 @@ class Activity(SendableActivity, total=False):
     flags: int
     # `buttons` is a list of strings when received over gw,
     # bots cannot access the full button data (like urls)
-    buttons: list[str]
+    buttons: List[str]
     # all of these are undocumented, but still useful in some cases:
     id: Optional[str]
     platform: Optional[str]

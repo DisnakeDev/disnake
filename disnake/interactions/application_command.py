@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, Union
 
 from .. import utils
 from ..enums import ApplicationCommandType, Locale, OptionType, try_enum
@@ -160,12 +159,12 @@ class ApplicationCommandInteraction(Interaction[ClientT]):
         return self.data.target
 
     @property
-    def options(self) -> dict[str, Any]:
+    def options(self) -> Dict[str, Any]:
         """Dict[:class:`str`, :class:`Any`]: The full option tree, including nestings"""
         return {opt.name: opt._simplified_value() for opt in self.data.options}
 
     @property
-    def filled_options(self) -> dict[str, Any]:
+    def filled_options(self) -> Dict[str, Any]:
         """Dict[:class:`str`, :class:`Any`]: The options of the command (or sub-command) being invoked"""
         _, kwargs = self.data._get_chain_and_kwargs()
         return kwargs
@@ -214,7 +213,7 @@ class MessageCommandInteraction(ApplicationCommandInteraction[ClientT]):
     target: Message
 
 
-class ApplicationCommandInteractionData(dict[str, Any]):
+class ApplicationCommandInteractionData(Dict[str, Any]):
     """Represents the data of an interaction with an application command.
 
     .. versionadded:: 2.1
@@ -263,7 +262,7 @@ class ApplicationCommandInteractionData(dict[str, Any]):
         target = self.resolved.get_by_id(self.target_id)
         self.target: Optional[Union[User, Member, Message]] = target  # type: ignore
 
-        self.options: list[ApplicationCommandInteractionDataOption] = [
+        self.options: List[ApplicationCommandInteractionDataOption] = [
             ApplicationCommandInteractionDataOption(data=d, resolved=self.resolved)
             for d in data.get("options", [])
         ]
@@ -275,8 +274,8 @@ class ApplicationCommandInteractionData(dict[str, Any]):
         )
 
     def _get_chain_and_kwargs(
-        self, chain: Optional[tuple[str, ...]] = None
-    ) -> tuple[tuple[str, ...], dict[str, Any]]:
+        self, chain: Optional[Tuple[str, ...]] = None
+    ) -> Tuple[Tuple[str, ...], Dict[str, Any]]:
         """Returns a chain of sub-command names and a dict of filled options."""
         if chain is None:
             chain = ()
@@ -306,7 +305,7 @@ class ApplicationCommandInteractionData(dict[str, Any]):
         return self._get_focused_option()  # type: ignore
 
 
-class ApplicationCommandInteractionDataOption(dict[str, Any]):
+class ApplicationCommandInteractionDataOption(Dict[str, Any]):
     """Represents the structure of an interaction data option from the API.
 
     Attributes
@@ -335,7 +334,7 @@ class ApplicationCommandInteractionDataOption(dict[str, Any]):
         if (value := data.get("value")) is not None:
             self.value: Any = resolved.get_with_type(value, self.type, value)
 
-        self.options: list[ApplicationCommandInteractionDataOption] = [
+        self.options: List[ApplicationCommandInteractionDataOption] = [
             ApplicationCommandInteractionDataOption(data=d, resolved=resolved)
             for d in data.get("options", [])
         ]
@@ -361,8 +360,8 @@ class ApplicationCommandInteractionDataOption(dict[str, Any]):
         return None
 
     def _get_chain_and_kwargs(
-        self, chain: Optional[tuple[str, ...]] = None
-    ) -> tuple[tuple[str, ...], dict[str, Any]]:
+        self, chain: Optional[Tuple[str, ...]] = None
+    ) -> Tuple[Tuple[str, ...], Dict[str, Any]]:
         if chain is None:
             chain = ()
         for option in self.options:

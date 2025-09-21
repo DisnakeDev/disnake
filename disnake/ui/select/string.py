@@ -2,13 +2,17 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
     ClassVar,
+    Dict,
+    List,
+    Mapping,
     Optional,
+    Tuple,
+    Type,
     TypeVar,
     Union,
     overload,
@@ -36,10 +40,10 @@ __all__ = (
 )
 
 
-SelectOptionInput = Union[list[SelectOption], list[str], dict[str, str]]
+SelectOptionInput = Union[List[SelectOption], List[str], Dict[str, str]]
 
 
-def _parse_select_options(options: SelectOptionInput) -> list[SelectOption]:
+def _parse_select_options(options: SelectOptionInput) -> List[SelectOption]:
     if isinstance(options, dict):
         return [SelectOption(label=key, value=val) for key, val in options.items()]
 
@@ -106,11 +110,11 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
         A list of values that have been selected by the user.
     """
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = (*BaseSelect.__repr_attributes__, "options")
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = (*BaseSelect.__repr_attributes__, "options")
 
     # In practice this should never be used by anything, might as well have it anyway though.
     _default_value_type_map: ClassVar[
-        Mapping[SelectDefaultValueType, tuple[type[Snowflake], ...]]
+        Mapping[SelectDefaultValueType, Tuple[Type[Snowflake], ...]]
     ] = {}
 
     @overload
@@ -186,12 +190,12 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
         )
 
     @property
-    def options(self) -> list[SelectOption]:
+    def options(self) -> List[SelectOption]:
         """List[:class:`disnake.SelectOption`]: A list of options that can be selected in this select menu."""
         return self._underlying.options
 
     @options.setter
-    def options(self, value: list[SelectOption]) -> None:
+    def options(self, value: List[SelectOption]) -> None:
         if not isinstance(value, list):
             raise TypeError("options must be a list of SelectOption")
         if not all(isinstance(obj, SelectOption) for obj in value):

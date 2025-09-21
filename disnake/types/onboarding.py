@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-from typing import Literal, Optional, TypedDict
+from typing import List, Literal, Optional, TypedDict
 
 from .emoji import Emoji
 from .snowflake import Snowflake, SnowflakeList
@@ -20,7 +20,7 @@ class OnboardingPromptOption(TypedDict):
 class OnboardingPrompt(TypedDict):
     id: Snowflake
     title: str
-    options: list[OnboardingPromptOption]
+    options: List[OnboardingPromptOption]
     single_select: bool
     required: bool
     in_onboarding: bool
@@ -29,6 +29,6 @@ class OnboardingPrompt(TypedDict):
 
 class Onboarding(TypedDict):
     guild_id: Snowflake
-    prompts: list[OnboardingPrompt]
+    prompts: List[OnboardingPrompt]
     default_channel_ids: SnowflakeList
     enabled: bool

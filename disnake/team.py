@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, List, Optional
 
 from . import utils
 from .asset import Asset
@@ -47,7 +47,7 @@ class Team:
         self.name: str = data["name"]
         self._icon: Optional[str] = data.get("icon")
         self.owner_id: Optional[int] = utils._get_as_snowflake(data, "owner_user_id")
-        self.members: list[TeamMember] = [
+        self.members: List[TeamMember] = [
             TeamMember(self, self._state, member) for member in data["members"]
         ]
 

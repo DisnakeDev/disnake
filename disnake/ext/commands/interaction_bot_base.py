@@ -7,13 +7,18 @@ import logging
 import sys
 import traceback
 import warnings
-from collections.abc import Iterable, Sequence
 from itertools import chain
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
+    Dict,
+    Iterable,
+    List,
     Optional,
+    Sequence,
+    Set,
+    Tuple,
     TypedDict,
     TypeVar,
     Union,
@@ -68,14 +73,14 @@ _log = logging.getLogger(__name__)
 
 
 class _Diff(TypedDict):
-    no_changes: list[ApplicationCommand]
-    upsert: list[ApplicationCommand]
-    edit: list[ApplicationCommand]
-    delete: list[ApplicationCommand]
-    delete_ignored: NotRequired[list[ApplicationCommand]]
+    no_changes: List[ApplicationCommand]
+    upsert: List[ApplicationCommand]
+    edit: List[ApplicationCommand]
+    delete: List[ApplicationCommand]
+    delete_ignored: NotRequired[List[ApplicationCommand]]
 
 
-def _get_to_send_from_diff(diff: _Diff) -> list[ApplicationCommand]:
+def _get_to_send_from_diff(diff: _Diff) -> List[ApplicationCommand]:
     return diff["no_changes"] + diff["upsert"] + diff["edit"] + diff.get("delete_ignored", [])
 
 
@@ -122,7 +127,7 @@ _diff_map = {
 
 
 def _format_diff(diff: _Diff) -> str:
-    lines: list[str] = []
+    lines: List[str] = []
     for key, label in _diff_map.items():
         if key not in diff:
             continue
@@ -154,7 +159,7 @@ class InteractionBotBase(CommonBotBase):
         super().__init__(**options)
 
         test_guilds = None if test_guilds is None else tuple(test_guilds)
-        self._test_guilds: Optional[tuple[int, ...]] = test_guilds
+        self._test_guilds: Optional[Tuple[int, ...]] = test_guilds
 
         if command_sync_flags is not None and (
             sync_commands is not MISSING
@@ -214,9 +219,9 @@ class InteractionBotBase(CommonBotBase):
         self._before_message_command_invoke = None
         self._after_message_command_invoke = None
 
-        self.all_slash_commands: dict[str, InvokableSlashCommand] = {}
-        self.all_user_commands: dict[str, InvokableUserCommand] = {}
-        self.all_message_commands: dict[str, InvokableMessageCommand] = {}
+        self.all_slash_commands: Dict[str, InvokableSlashCommand] = {}
+        self.all_user_commands: Dict[str, InvokableUserCommand] = {}
+        self.all_message_commands: Dict[str, InvokableMessageCommand] = {}
 
     @disnake.utils.copy_doc(disnake.Client.login)
     async def login(self, token: str) -> None:
@@ -240,22 +245,22 @@ class InteractionBotBase(CommonBotBase):
         )
 
     @property
-    def application_commands(self) -> set[InvokableApplicationCommand]:
+    def application_commands(self) -> Set[InvokableApplicationCommand]:
         """Set[:class:`InvokableApplicationCommand`]: A set of all application commands the bot has."""
         return set(self.application_commands_iterator())
 
     @property
-    def slash_commands(self) -> set[InvokableSlashCommand]:
+    def slash_commands(self) -> Set[InvokableSlashCommand]:
         """Set[:class:`InvokableSlashCommand`]: A set of all slash commands the bot has."""
         return set(self.all_slash_commands.values())
 
     @property
-    def user_commands(self) -> set[InvokableUserCommand]:
+    def user_commands(self) -> Set[InvokableUserCommand]:
         """Set[:class:`InvokableUserCommand`]: A set of all user commands the bot has."""
         return set(self.all_user_commands.values())
 
     @property
-    def message_commands(self) -> set[InvokableMessageCommand]:
+    def message_commands(self) -> Set[InvokableMessageCommand]:
         """Set[:class:`InvokableMessageCommand`]: A set of all message commands the bot has."""
         return set(self.all_message_commands.values())
 
@@ -495,11 +500,11 @@ class InteractionBotBase(CommonBotBase):
         nsfw: Optional[bool] = None,
         install_types: Optional[ApplicationInstallTypes] = None,
         contexts: Optional[InteractionContextTypes] = None,
-        options: Optional[list[Option]] = None,
+        options: Optional[List[Option]] = None,
         guild_ids: Optional[Sequence[int]] = None,
-        connectors: Optional[dict[str, str]] = None,
+        connectors: Optional[Dict[str, str]] = None,
         auto_sync: Optional[bool] = None,
-        extras: Optional[dict[str, Any]] = None,
+        extras: Optional[Dict[str, Any]] = None,
         **kwargs: Any,
     ) -> Callable[[CommandCallback], InvokableSlashCommand]:
         """A shortcut decorator that invokes :func:`~disnake.ext.commands.slash_command` and adds it to
@@ -616,7 +621,7 @@ class InteractionBotBase(CommonBotBase):
         contexts: Optional[InteractionContextTypes] = None,
         guild_ids: Optional[Sequence[int]] = None,
         auto_sync: Optional[bool] = None,
-        extras: Optional[dict[str, Any]] = None,
+        extras: Optional[Dict[str, Any]] = None,
         **kwargs: Any,
     ) -> Callable[
         [InteractionCommandCallback[CogT, UserCommandInteraction, P]], InvokableUserCommand
@@ -719,7 +724,7 @@ class InteractionBotBase(CommonBotBase):
         contexts: Optional[InteractionContextTypes] = None,
         guild_ids: Optional[Sequence[int]] = None,
         auto_sync: Optional[bool] = None,
-        extras: Optional[dict[str, Any]] = None,
+        extras: Optional[Dict[str, Any]] = None,
         **kwargs: Any,
     ) -> Callable[
         [InteractionCommandCallback[CogT, MessageCommandInteraction, P]], InvokableMessageCommand
@@ -815,9 +820,9 @@ class InteractionBotBase(CommonBotBase):
 
     def _ordered_unsynced_commands(
         self, test_guilds: Optional[Sequence[int]] = None
-    ) -> tuple[list[ApplicationCommand], dict[int, list[ApplicationCommand]]]:
-        global_cmds: list[ApplicationCommand] = []
-        guilds: dict[int, list[ApplicationCommand]] = {}
+    ) -> Tuple[List[ApplicationCommand], Dict[int, List[ApplicationCommand]]]:
+        global_cmds: List[ApplicationCommand] = []
+        guilds: Dict[int, List[ApplicationCommand]] = {}
 
         for cmd in self.application_commands_iterator():
             if not cmd.auto_sync:

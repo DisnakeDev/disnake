@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-from collections.abc import Coroutine
-from typing import TYPE_CHECKING, Any, Callable, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Callable, Coroutine, TypeVar, Union
 
 if TYPE_CHECKING:
     from disnake import ApplicationCommandInteraction

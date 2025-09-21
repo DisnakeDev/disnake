@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, ClassVar, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, ClassVar, Optional, Tuple, Union, cast
 
 from ..components import Label as LabelComponent
 from ..enums import ComponentType
@@ -53,7 +53,7 @@ class Label(UIComponent):
         The description text for the label.
     """
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = (
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
         "text",
         "description",
         "component",

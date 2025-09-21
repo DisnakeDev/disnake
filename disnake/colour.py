@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import colorsys
 import random
-from typing import TYPE_CHECKING, Any, Optional, Union
+from typing import TYPE_CHECKING, Any, Optional, Tuple, Union
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -94,7 +94,7 @@ class Colour:
         """:class:`int`: Returns the blue component of the colour."""
         return self._get_byte(0)
 
-    def to_rgb(self) -> tuple[int, int, int]:
+    def to_rgb(self) -> Tuple[int, int, int]:
         """Tuple[:class:`int`, :class:`int`, :class:`int`]: Returns an (r, g, b) tuple representing the colour."""
         return (self.r, self.g, self.b)
 
@@ -320,7 +320,7 @@ class Colour:
         return cls(0x2B2D31)
 
     @classmethod
-    def holographic_style(cls) -> tuple[Self, Self, Self]:
+    def holographic_style(cls) -> Tuple[Self, Self, Self]:
         """A factory method that returns a tuple of :class:`Colour` with values of
         ``0xA9C9FF``, ``0xFFBBEC``, ``0xFFC3A0``. This matches the holographic colour style
         for roles.

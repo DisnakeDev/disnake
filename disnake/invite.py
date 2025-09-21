@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, List, Optional, Union
 
 from .appinfo import PartialAppInfo
 from .asset import Asset
@@ -95,7 +95,7 @@ class PartialInviteChannel:
         self.name: Optional[str] = data.get("name")
         self.type: ChannelType = try_enum(ChannelType, data["type"])
         if self.type is ChannelType.group:
-            self._recipients: list[GroupInviteRecipientPayload] = data.get("recipients", [])
+            self._recipients: List[GroupInviteRecipientPayload] = data.get("recipients", [])
         else:
             self._recipients = []
         self._icon: Optional[str] = data.get("icon")
@@ -202,7 +202,7 @@ class PartialInviteGuild:
         self._state: ConnectionState = state
         self.id: int = id
         self.name: str = data["name"]
-        self.features: list[GuildFeature] = data.get("features", [])
+        self.features: List[GuildFeature] = data.get("features", [])
         self._icon: Optional[str] = data.get("icon")
         self._banner: Optional[str] = data.get("banner")
         self._splash: Optional[str] = data.get("splash")

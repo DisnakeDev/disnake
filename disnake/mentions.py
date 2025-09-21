@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Union
+from typing import TYPE_CHECKING, Any, List, Union
 
 from .enums import MessageType
 
@@ -69,8 +69,8 @@ class AllowedMentions:
         self,
         *,
         everyone: bool = default,
-        users: Union[bool, list[Snowflake]] = default,
-        roles: Union[bool, list[Snowflake]] = default,
+        users: Union[bool, List[Snowflake]] = default,
+        roles: Union[bool, List[Snowflake]] = default,
         replied_user: bool = default,
     ) -> None:
         self.everyone = everyone
@@ -119,7 +119,7 @@ class AllowedMentions:
         )
 
     def to_dict(self) -> AllowedMentionsPayload:
-        parse: list[AllowedMentionTypePayload] = []
+        parse: List[AllowedMentionTypePayload] = []
         data: AllowedMentionsPayload = {}  # type: ignore
 
         if self.everyone:

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Literal, Optional, TypedDict, Union
+from typing import List, Literal, Optional, TypedDict, Union
 
 from typing_extensions import NotRequired
 
@@ -44,7 +44,7 @@ Sticker = Union[BaseSticker, StandardSticker, GuildSticker]
 
 class StickerPack(TypedDict):
     id: Snowflake
-    stickers: list[StandardSticker]
+    stickers: List[StandardSticker]
     name: str
     sku_id: Snowflake
     cover_sticker_id: NotRequired[Snowflake]
@@ -65,4 +65,4 @@ class EditGuildSticker(TypedDict, total=False):
 
 
 class ListStickerPacks(TypedDict):
-    sticker_packs: list[StickerPack]
+    sticker_packs: List[StickerPack]

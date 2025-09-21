@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-from typing import Literal, TypedDict
+from typing import List, Literal, TypedDict
 
 from typing_extensions import NotRequired
 
@@ -66,4 +66,4 @@ class Embed(TypedDict, total=False):
     video: EmbedVideo
     provider: EmbedProvider
     author: EmbedAuthor
-    fields: list[EmbedField]
+    fields: List[EmbedField]

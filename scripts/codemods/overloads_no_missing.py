@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-from collections.abc import Sequence
-from typing import Optional
+from typing import List, Optional, Sequence
 
 import libcst as cst
 import libcst.matchers as m
@@ -32,7 +31,7 @@ class EllipsisOverloads(BaseCodemodCommand):
             if not params:
                 continue
 
-            new_params: list[cst.Param] = []
+            new_params: List[cst.Param] = []
             for param in params:
                 if param.default and m.matches(param.default, m.Name("MISSING")):
                     new_param = param.with_changes(default=cst.Ellipsis())

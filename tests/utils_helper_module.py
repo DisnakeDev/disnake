@@ -3,7 +3,7 @@
 """Separate module file for some test_utils.py type annotation tests."""
 
 import sys
-from typing import TYPE_CHECKING, TypeVar, Union
+from typing import TYPE_CHECKING, List, TypeVar, Union
 
 version = sys.version_info  # assign to variable to trick pyright
 
@@ -16,11 +16,11 @@ elif version >= (3, 12):
 if version >= (3, 12):
     CoolUniqueIntOrStrAlias = Union[int, str]
     ListWithForwardRefAlias = TypeAliasType(
-        "ListWithForwardRefAlias", list["CoolUniqueIntOrStrAlias"]
+        "ListWithForwardRefAlias", List["CoolUniqueIntOrStrAlias"]
     )
 
     T = TypeVar("T")
-    GenericListAlias = TypeAliasType("GenericListAlias", list[T], type_params=(T,))
+    GenericListAlias = TypeAliasType("GenericListAlias", List[T], type_params=(T,))
 
     DuplicateAlias = str
-    ListWithDuplicateAlias = TypeAliasType("ListWithDuplicateAlias", list["DuplicateAlias"])
+    ListWithDuplicateAlias = TypeAliasType("ListWithDuplicateAlias", List["DuplicateAlias"])

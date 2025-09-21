@@ -2,8 +2,7 @@
 from __future__ import annotations
 
 import contextlib
-from collections.abc import Iterator
-from typing import Any, TypeVar
+from typing import Any, Iterator, Type, TypeVar
 
 import pytest
 from typing_extensions import assert_type
@@ -17,7 +16,7 @@ I = TypeVar("I", bound=ui.Item)
 
 @contextlib.contextmanager
 def create_callback(
-    view_type: type[V], item_type: type[I]
+    view_type: Type[V], item_type: Type[I]
 ) -> Iterator[ui.item.ItemCallbackType[V, I]]:
     async def callback(self: V, item: I, inter) -> None:
         pytest.fail("callback should not be invoked")
@@ -56,7 +55,7 @@ class TestDecorator:
     # as @ui.string_select etc. works identically
 
     @pytest.mark.parametrize("cls", [_CustomButton, _CustomButton[Any]])
-    def test_cls(self, cls: type[_CustomButton[ui.View]]) -> None:
+    def test_cls(self, cls: Type[_CustomButton[ui.View]]) -> None:
         with create_callback(_CustomView, cls) as func:
             res = ui.button(cls=cls, param=1337)(func)
             assert_type(res, ui.item.DecoratedItem[_CustomButton[ui.View]])

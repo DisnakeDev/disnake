@@ -4,8 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import time
-from collections.abc import Iterable, Sequence
-from typing import TYPE_CHECKING, Callable, Literal, Optional, Union
+from typing import TYPE_CHECKING, Callable, Dict, Iterable, List, Literal, Optional, Sequence, Union
 
 from .abc import GuildChannel, Messageable
 from .enums import ChannelType, ThreadArchiveDuration, try_enum, try_enum_to_int
@@ -168,7 +167,7 @@ class Thread(Messageable, Hashable):
     def __init__(self, *, guild: Guild, state: ConnectionState, data: ThreadPayload) -> None:
         self._state: ConnectionState = state
         self.guild: Guild = guild
-        self._members: dict[int, ThreadMember] = {}
+        self._members: Dict[int, ThreadMember] = {}
         self._from_data(data)
 
     async def _get_channel(self) -> Self:
@@ -199,7 +198,7 @@ class Thread(Messageable, Hashable):
             data.get("last_pin_timestamp")
         )
         self._flags: int = data.get("flags", 0)
-        self._applied_tags: list[int] = list(map(int, data.get("applied_tags", [])))
+        self._applied_tags: List[int] = list(map(int, data.get("applied_tags", [])))
         self._unroll_metadata(data["thread_metadata"])
 
         if "member" in data:
@@ -261,7 +260,7 @@ class Thread(Messageable, Hashable):
         return f"<#{self.id}>"
 
     @property
-    def members(self) -> list[ThreadMember]:
+    def members(self) -> List[ThreadMember]:
         """List[:class:`ThreadMember`]: A list of thread members in this thread.
 
         This requires :attr:`Intents.members` to be properly filled. Most of the time however,
@@ -399,7 +398,7 @@ class Thread(Messageable, Hashable):
         return self.flags.pinned
 
     @property
-    def applied_tags(self) -> list[ForumTag]:
+    def applied_tags(self) -> List[ForumTag]:
         """List[:class:`ForumTag`]: The tags currently applied to this thread.
         Only applicable to threads in channels of type :class:`ForumChannel` or :class:`MediaChannel`.
 
@@ -557,7 +556,7 @@ class Thread(Messageable, Hashable):
         around: Optional[SnowflakeTime] = None,
         oldest_first: Optional[bool] = False,
         bulk: bool = True,
-    ) -> list[Message]:
+    ) -> List[Message]:
         """|coro|
 
         Purges a list of messages that meet the criteria given by the predicate
@@ -618,7 +617,7 @@ class Thread(Messageable, Hashable):
         iterator = self.history(
             limit=limit, before=before, after=after, oldest_first=oldest_first, around=around
         )
-        ret: list[Message] = []
+        ret: List[Message] = []
         count = 0
 
         minimum_time = int((time.time() - 14 * 24 * 60 * 60) * 1000.0 - 1420070400000) << 22
@@ -877,7 +876,7 @@ class Thread(Messageable, Hashable):
         member_data = await self._state.http.get_thread_member(self.id, member_id)
         return ThreadMember(parent=self, data=member_data)
 
-    async def fetch_members(self) -> list[ThreadMember]:
+    async def fetch_members(self) -> List[ThreadMember]:
         """|coro|
 
         Retrieves all :class:`ThreadMember` that are in this thread.
@@ -954,7 +953,7 @@ class Thread(Messageable, Hashable):
         if not tags:
             return
 
-        new_tags: list[int] = self._applied_tags.copy()
+        new_tags: List[int] = self._applied_tags.copy()
         new_tags.extend(t.id for t in tags)
         new_tags = _unique(new_tags)
 
@@ -992,7 +991,7 @@ class Thread(Messageable, Hashable):
             return
 
         to_remove = {t.id for t in tags}
-        new_tags: list[int] = [tag_id for tag_id in self._applied_tags if tag_id not in to_remove]
+        new_tags: List[int] = [tag_id for tag_id in self._applied_tags if tag_id not in to_remove]
 
         await self._state.http.edit_channel(self.id, applied_tags=new_tags, reason=reason)
 

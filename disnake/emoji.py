@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterator
-from typing import TYPE_CHECKING, Any, Optional, Union
+from typing import TYPE_CHECKING, Any, Iterator, List, Optional, Tuple, Union
 
 from .asset import Asset, AssetMixin
 from .errors import InvalidData
@@ -80,7 +79,7 @@ class Emoji(_EmojiTag, AssetMixin):
         having the :attr:`~Permissions.manage_guild_expressions` permission.
     """
 
-    __slots__: tuple[str, ...] = (
+    __slots__: Tuple[str, ...] = (
         "require_colons",
         "animated",
         "managed",
@@ -117,7 +116,7 @@ class Emoji(_EmojiTag, AssetMixin):
     def _to_partial(self) -> PartialEmoji:
         return PartialEmoji(name=self.name, animated=self.animated, id=self.id)
 
-    def __iter__(self) -> Iterator[tuple[str, Any]]:
+    def __iter__(self) -> Iterator[Tuple[str, Any]]:
         for attr in self.__slots__:
             if attr[0] != "_":
                 value = getattr(self, attr, None)
@@ -158,7 +157,7 @@ class Emoji(_EmojiTag, AssetMixin):
         return f"{Asset.BASE}/emojis/{self.id}.{fmt}"
 
     @property
-    def roles(self) -> list[Role]:
+    def roles(self) -> List[Role]:
         """List[:class:`Role`]: A :class:`list` of roles that are allowed to use this emoji.
 
         If roles is empty, the emoji is unrestricted.
@@ -259,7 +258,7 @@ class Emoji(_EmojiTag, AssetMixin):
         await self._state.http.delete_custom_emoji(self.guild.id, self.id, reason=reason)
 
     async def edit(
-        self, *, name: str = MISSING, roles: list[Snowflake] = MISSING, reason: Optional[str] = None
+        self, *, name: str = MISSING, roles: List[Snowflake] = MISSING, reason: Optional[str] = None
     ) -> Emoji:
         """|coro|
 

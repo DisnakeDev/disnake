@@ -3,10 +3,15 @@
 from __future__ import annotations
 
 import datetime
-from collections.abc import Iterable, Sequence
 from typing import (
     TYPE_CHECKING,
+    Dict,
+    FrozenSet,
+    Iterable,
+    List,
     Optional,
+    Sequence,
+    Type,
     Union,
     overload,
 )
@@ -466,18 +471,18 @@ class AutoModRule:
         self.creator_id: int = int(data["creator_id"])
         self.event_type: AutoModEventType = try_enum(AutoModEventType, data["event_type"])
         self.trigger_type: AutoModTriggerType = try_enum(AutoModTriggerType, data["trigger_type"])
-        self._actions: list[AutoModAction] = [
+        self._actions: List[AutoModAction] = [
             _automod_action_factory(action) for action in data["actions"]
         ]
         self.trigger_metadata: AutoModTriggerMetadata = AutoModTriggerMetadata._from_dict(
             data.get("trigger_metadata", {})
         )
-        self.exempt_role_ids: frozenset[int] = (
+        self.exempt_role_ids: FrozenSet[int] = (
             frozenset(map(int, exempt_roles))
             if (exempt_roles := data.get("exempt_roles"))
             else frozenset()
         )
-        self.exempt_channel_ids: frozenset[int] = (
+        self.exempt_channel_ids: FrozenSet[int] = (
             frozenset(map(int, exempt_channels))
             if (exempt_channels := data.get("exempt_channels"))
             else frozenset()
@@ -492,7 +497,7 @@ class AutoModRule:
         return snowflake_time(self.id)
 
     @property
-    def actions(self) -> list[AutoModAction]:
+    def actions(self) -> List[AutoModAction]:
         """List[Union[:class:`AutoModBlockMessageAction`, :class:`AutoModSendAlertAction`, :class:`AutoModTimeoutAction`, :class:`AutoModAction`]]:
         The list of actions that will execute if a matching event triggered this rule.
         """
@@ -506,12 +511,12 @@ class AutoModRule:
         return self.guild.get_member(self.creator_id)
 
     @property
-    def exempt_roles(self) -> list[Role]:
+    def exempt_roles(self) -> List[Role]:
         """List[:class:`Role`]: The list of roles that are exempt from this rule."""
         return list(filter(None, map(self.guild.get_role, self.exempt_role_ids)))
 
     @property
-    def exempt_channels(self) -> list[GuildChannel]:
+    def exempt_channels(self) -> List[GuildChannel]:
         """List[:class:`abc.GuildChannel`]: The list of channels that are exempt from this rule."""
         return list(filter(None, map(self.guild.get_channel, self.exempt_channel_ids)))
 
@@ -786,7 +791,7 @@ class AutoModActionExecution:
         return self.guild._state._get_message(self.alert_message_id)
 
 
-_action_map: dict[int, type[AutoModAction]] = {
+_action_map: Dict[int, Type[AutoModAction]] = {
     AutoModActionType.block_message.value: AutoModBlockMessageAction,
     AutoModActionType.send_alert_message.value: AutoModSendAlertAction,
     AutoModActionType.timeout.value: AutoModTimeoutAction,

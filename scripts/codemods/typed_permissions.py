@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
 
 import itertools
-from typing import Optional, Union
+from typing import List, Optional, Union
 
 import libcst as cst
 import libcst.codemod.visitors as codevisitors
@@ -16,7 +16,7 @@ ALL_PERMISSIONS = sorted(Permissions.VALID_FLAGS.keys())
 PERMISSION_MATCHERS = m.OneOf(*map(m.Name, ALL_PERMISSIONS))
 
 
-def get_perm_kwargs(annotation: cst.Annotation) -> list[cst.Param]:
+def get_perm_kwargs(annotation: cst.Annotation) -> List[cst.Param]:
     return [
         cst.Param(
             cst.Name(perm),

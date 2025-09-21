@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import copy
-from typing import TYPE_CHECKING, ClassVar, Optional
+from typing import TYPE_CHECKING, ClassVar, Optional, Tuple
 
 from ..components import FileComponent, UnfurledMediaItem, handle_media_item_input
 from ..enums import ComponentType
@@ -36,7 +36,7 @@ class File(UIComponent):
         sequential identifiers to the components in the message.
     """
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = (
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
         "file",
         "spoiler",
     )

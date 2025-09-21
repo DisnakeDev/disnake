@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
-from typing import TYPE_CHECKING, Any, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Union
 
 from ..components import VALID_ACTION_ROW_MESSAGE_COMPONENT_TYPES, ActionRowMessageComponent
 from ..enums import ComponentType, try_enum
@@ -137,7 +136,7 @@ class MessageInteraction(Interaction[ClientT]):
         self.message = Message(state=self._state, channel=self.channel, data=data["message"])
 
     @property
-    def values(self) -> Optional[list[str]]:
+    def values(self) -> Optional[List[str]]:
         """Optional[List[:class:`str`]]: The values the user selected.
 
         For select menus of type :attr:`~ComponentType.string_select`,
@@ -169,7 +168,7 @@ class MessageInteraction(Interaction[ClientT]):
             return self.data.values
 
         resolved = self.data.resolved
-        values: list[Union[Member, User, Role, AnyChannel]] = []
+        values: List[Union[Member, User, Role, AnyChannel]] = []
         for key in self.data.values:
             # force upcast to avoid typing issues; we expect the api to only provide valid values
             value: Any = resolved.get_with_type(key, component_type, key)
@@ -190,7 +189,7 @@ class MessageInteraction(Interaction[ClientT]):
         raise Exception("MessageInteraction is malformed - no component found")  # noqa: TRY002
 
 
-class MessageInteractionData(dict[str, Any]):
+class MessageInteractionData(Dict[str, Any]):
     """Represents the data of an interaction with a message component.
 
     .. versionadded:: 2.1
@@ -221,7 +220,7 @@ class MessageInteractionData(dict[str, Any]):
         super().__init__(data)
         self.custom_id: str = data["custom_id"]
         self.component_type: ComponentType = try_enum(ComponentType, data["component_type"])
-        self.values: Optional[list[str]] = (
+        self.values: Optional[List[str]] = (
             list(map(str, values)) if (values := data.get("values")) else None
         )
 

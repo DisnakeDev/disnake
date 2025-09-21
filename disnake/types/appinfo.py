@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Literal, Optional, TypedDict
+from typing import Dict, List, Literal, Optional, TypedDict
 
 from typing_extensions import NotRequired
 
@@ -28,7 +28,7 @@ class BaseAppInfo(TypedDict):
 
 
 class InstallParams(TypedDict):
-    scopes: list[str]
+    scopes: List[str]
     permissions: str
 
 
@@ -37,7 +37,7 @@ class ApplicationIntegrationTypeConfiguration(TypedDict, total=False):
 
 
 class AppInfo(BaseAppInfo):
-    rpc_origins: NotRequired[list[str]]
+    rpc_origins: NotRequired[List[str]]
     bot_public: bool
     bot_require_code_grant: bool
     bot: NotRequired[User]
@@ -47,24 +47,24 @@ class AppInfo(BaseAppInfo):
     guild_id: NotRequired[Snowflake]
     primary_sku_id: NotRequired[Snowflake]
     slug: NotRequired[str]
-    tags: NotRequired[list[str]]
+    tags: NotRequired[List[str]]
     install_params: NotRequired[InstallParams]
     custom_install_url: NotRequired[str]
     role_connections_verification_url: NotRequired[str]
     approximate_guild_count: NotRequired[int]
     approximate_user_install_count: NotRequired[int]
     approximate_user_authorization_count: NotRequired[int]
-    redirect_uris: NotRequired[list[str]]
+    redirect_uris: NotRequired[List[str]]
     interactions_endpoint_url: NotRequired[Optional[str]]
     event_webhooks_url: NotRequired[Optional[str]]
     event_webhooks_status: NotRequired[str]
-    event_webhooks_type: NotRequired[list[str]]
+    event_webhooks_type: NotRequired[List[str]]
     # values in this dict generally shouldn't be null, but they can be empty dicts
-    integration_types_config: NotRequired[dict[str, ApplicationIntegrationTypeConfiguration]]
+    integration_types_config: NotRequired[Dict[str, ApplicationIntegrationTypeConfiguration]]
 
 
 class PartialAppInfo(BaseAppInfo, total=False):
-    rpc_origins: list[str]
+    rpc_origins: List[str]
     cover_image: str
     flags: int
 

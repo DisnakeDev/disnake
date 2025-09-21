@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
 
 import datetime
-from typing import Any
+from typing import Any, Tuple
 
 import pytest
 
@@ -37,7 +37,7 @@ class TestLoops:
 
     def test_inheritance(self) -> None:
         class HyperLoop(Loop[LF]):
-            def __init__(self, coro: LF, time_tup: tuple[float, float, float]) -> None:
+            def __init__(self, coro: LF, time_tup: Tuple[float, float, float]) -> None:
                 s, m, h = time_tup
                 super().__init__(coro, seconds=s, minutes=m, hours=h)
 

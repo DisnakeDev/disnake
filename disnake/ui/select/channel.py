@@ -2,13 +2,17 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
     ClassVar,
+    List,
+    Mapping,
     Optional,
+    Sequence,
+    Tuple,
+    Type,
     TypeVar,
     overload,
 )
@@ -91,13 +95,13 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
         A list of channels that have been selected by the user.
     """
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = (
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
         *BaseSelect.__repr_attributes__,
         "channel_types",
     )
 
     _default_value_type_map: ClassVar[
-        Mapping[SelectDefaultValueType, tuple[type[Snowflake], ...]]
+        Mapping[SelectDefaultValueType, Tuple[Type[Snowflake], ...]]
     ] = {
         SelectDefaultValueType.channel: (
             GuildChannel,
@@ -118,7 +122,7 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
-        channel_types: Optional[list[ChannelType]] = None,
+        channel_types: Optional[List[ChannelType]] = None,
         default_values: Optional[Sequence[SelectDefaultValueInputType[AnyChannel]]] = None,
         required: bool = True,
         id: int = 0,
@@ -134,7 +138,7 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
-        channel_types: Optional[list[ChannelType]] = None,
+        channel_types: Optional[List[ChannelType]] = None,
         default_values: Optional[Sequence[SelectDefaultValueInputType[AnyChannel]]] = None,
         required: bool = True,
         id: int = 0,
@@ -149,7 +153,7 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
-        channel_types: Optional[list[ChannelType]] = None,
+        channel_types: Optional[List[ChannelType]] = None,
         default_values: Optional[Sequence[SelectDefaultValueInputType[AnyChannel]]] = None,
         required: bool = True,
         id: int = 0,
@@ -186,12 +190,12 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
         )
 
     @property
-    def channel_types(self) -> Optional[list[ChannelType]]:
+    def channel_types(self) -> Optional[List[ChannelType]]:
         """Optional[List[:class:`disnake.ChannelType`]]: A list of channel types that can be selected in this select menu."""
         return self._underlying.channel_types
 
     @channel_types.setter
-    def channel_types(self, value: Optional[list[ChannelType]]) -> None:
+    def channel_types(self, value: Optional[List[ChannelType]]) -> None:
         if value is not None:
             if not isinstance(value, list):
                 raise TypeError("channel_types must be a list of ChannelType")
@@ -212,7 +216,7 @@ def channel_select(
     min_values: int = 1,
     max_values: int = 1,
     disabled: bool = False,
-    channel_types: Optional[list[ChannelType]] = None,
+    channel_types: Optional[List[ChannelType]] = None,
     default_values: Optional[Sequence[SelectDefaultValueInputType[AnyChannel]]] = None,
     id: int = 0,
     row: Optional[int] = None,

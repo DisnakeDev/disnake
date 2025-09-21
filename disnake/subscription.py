@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, List, Optional
 
 from .enums import SubscriptionStatus, try_enum
 from .mixins import Hashable
@@ -89,9 +89,9 @@ class Subscription(Hashable):
 
         self.id: int = int(data["id"])
         self.user_id: int = int(data["user_id"])
-        self.sku_ids: list[int] = list(map(int, data["sku_ids"]))
-        self.entitlement_ids: list[int] = list(map(int, data["entitlement_ids"]))
-        self.renewal_sku_ids: Optional[list[int]] = (
+        self.sku_ids: List[int] = list(map(int, data["sku_ids"]))
+        self.entitlement_ids: List[int] = list(map(int, data["entitlement_ids"]))
+        self.renewal_sku_ids: Optional[List[int]] = (
             list(map(int, renewal_sku_ids))
             if (renewal_sku_ids := data.get("renewal_sku_ids")) is not None
             else None

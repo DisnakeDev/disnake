@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
-from typing import Any, Literal, Optional, TypedDict, Union
+from typing import Any, List, Literal, Optional, Sequence, Tuple, TypedDict, Union
 
 from typing_extensions import NotRequired
 
@@ -85,7 +84,7 @@ class IdentifyData(TypedDict):
     properties: IdentifyProperties
     compress: NotRequired[bool]
     large_threshold: NotRequired[int]
-    shard: NotRequired[tuple[int, int]]
+    shard: NotRequired[Tuple[int, int]]
     presence: NotRequired[PresenceUpdateData]
     intents: int
 
@@ -170,12 +169,12 @@ class VoiceReadyPayload(TypedDict):
     ssrc: int
     ip: str
     port: int
-    modes: list[str]
+    modes: List[str]
 
 
 class VoiceSessionDescriptionPayload(TypedDict):
     mode: SupportedModes
-    secret_key: list[int]
+    secret_key: List[int]
 
 
 #####
@@ -253,10 +252,10 @@ class VoiceResumeCommand(TypedDict):
 class ReadyEvent(TypedDict):
     v: int
     user: User
-    guilds: list[UnavailableGuild]
+    guilds: List[UnavailableGuild]
     session_id: str
     resume_gateway_url: str
-    shard: NotRequired[tuple[int, int]]
+    shard: NotRequired[Tuple[int, int]]
     application: PartialGatewayAppInfo
 
 
@@ -286,7 +285,7 @@ class MessageDeleteEvent(TypedDict):
 
 # https://discord.com/developers/docs/topics/gateway-events#message-delete-bulk
 class MessageDeleteBulkEvent(TypedDict):
-    ids: list[Snowflake]
+    ids: List[Snowflake]
     channel_id: Snowflake
     guild_id: NotRequired[Snowflake]
 
@@ -417,9 +416,9 @@ class ThreadDeleteEvent(TypedDict):
 # https://discord.com/developers/docs/topics/gateway-events#thread-list-sync
 class ThreadListSyncEvent(TypedDict):
     guild_id: Snowflake
-    channel_ids: NotRequired[list[Snowflake]]
-    threads: list[Thread]
-    members: list[ThreadMember]
+    channel_ids: NotRequired[List[Snowflake]]
+    threads: List[Thread]
+    members: List[ThreadMember]
 
 
 # https://discord.com/developers/docs/topics/gateway-events#thread-member-update
@@ -432,8 +431,8 @@ class ThreadMembersUpdateEvent(TypedDict):
     id: Snowflake
     guild_id: Snowflake
     member_count: int
-    added_members: NotRequired[list[ThreadMemberWithPresence]]
-    removed_member_ids: NotRequired[list[Snowflake]]
+    added_members: NotRequired[List[ThreadMemberWithPresence]]
+    removed_member_ids: NotRequired[List[Snowflake]]
 
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-member-add
@@ -450,7 +449,7 @@ class GuildMemberRemoveEvent(TypedDict):
 # https://discord.com/developers/docs/topics/gateway-events#guild-member-update
 class GuildMemberUpdateEvent(TypedDict):
     guild_id: Snowflake
-    roles: list[Snowflake]
+    roles: List[Snowflake]
     user: User
     nick: NotRequired[Optional[str]]
     avatar: Optional[str]
@@ -468,13 +467,13 @@ class GuildMemberUpdateEvent(TypedDict):
 # https://discord.com/developers/docs/topics/gateway-events#guild-emojis-update
 class GuildEmojisUpdateEvent(TypedDict):
     guild_id: Snowflake
-    emojis: list[Emoji]
+    emojis: List[Emoji]
 
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-stickers-update
 class GuildStickersUpdateEvent(TypedDict):
     guild_id: Snowflake
-    stickers: list[GuildSticker]
+    stickers: List[GuildSticker]
 
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-create
@@ -554,11 +553,11 @@ GuildScheduledEventUserRemoveEvent = _GuildScheduledEventUserEvent
 # https://discord.com/developers/docs/topics/gateway-events#guild-members-chunk
 class GuildMembersChunkEvent(TypedDict):
     guild_id: Snowflake
-    members: list[MemberWithUser]
+    members: List[MemberWithUser]
     chunk_index: int
     chunk_count: int
-    not_found: NotRequired[list[Snowflake]]
-    presences: NotRequired[list[PresenceData]]
+    not_found: NotRequired[List[Snowflake]]
+    presences: NotRequired[List[PresenceData]]
     nonce: NotRequired[str]
 
 
@@ -698,4 +697,4 @@ class GuildSoundboardSoundDelete(TypedDict):
 # https://discord.com/developers/docs/topics/gateway-events#guild-soundboard-sounds-update
 class GuildSoundboardSoundsUpdate(TypedDict):
     guild_id: Snowflake
-    soundboard_sounds: list[GuildSoundboardSound]
+    soundboard_sounds: List[GuildSoundboardSound]

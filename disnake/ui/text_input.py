@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING, ClassVar, Optional
+from typing import TYPE_CHECKING, ClassVar, Optional, Tuple
 
 from ..components import TextInput as TextInputComponent
 from ..enums import ComponentType, TextInputStyle
@@ -55,7 +55,7 @@ class TextInput(WrappedComponent):
         .. versionadded:: 2.11
     """
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = (
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
         "style",
         "custom_id",
         "placeholder",

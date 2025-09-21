@@ -3,14 +3,17 @@
 from __future__ import annotations
 
 import datetime
-from collections.abc import Mapping, Sized
 from typing import (
     TYPE_CHECKING,
     Any,
     ClassVar,
+    Dict,
+    List,
     Literal,
+    Mapping,
     Optional,
     Protocol,
+    Sized,
     Union,
     cast,
     overload,
@@ -216,9 +219,9 @@ class Embed:
         self._author: Optional[EmbedAuthorPayload] = None
         self._image: Optional[EmbedImagePayload] = None
         self._footer: Optional[EmbedFooterPayload] = None
-        self._fields: Optional[list[EmbedFieldPayload]] = None
+        self._fields: Optional[List[EmbedFieldPayload]] = None
 
-        self._files: dict[_FileKey, File] = {}
+        self._files: Dict[_FileKey, File] = {}
 
     # see `EmptyEmbed` above
     if not TYPE_CHECKING:
@@ -652,14 +655,14 @@ class Embed:
         return self
 
     @property
-    def fields(self) -> list[_EmbedFieldProxy]:
+    def fields(self) -> List[_EmbedFieldProxy]:
         """List[``EmbedProxy``]: Returns a :class:`list` of ``EmbedProxy`` denoting the field contents.
 
         See :meth:`add_field` for possible values you can access.
 
         If an attribute is not set, it will be ``None``.
         """
-        return cast("list[_EmbedFieldProxy]", [EmbedProxy(d) for d in (self._fields or [])])
+        return cast("List[_EmbedFieldProxy]", [EmbedProxy(d) for d in (self._fields or [])])
 
     def add_field(self, name: Any, value: Any, *, inline: bool = True) -> Self:
         """Adds a field to the embed object.
