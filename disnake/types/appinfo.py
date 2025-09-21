@@ -88,4 +88,4 @@ class EditAppInfo(TypedDict, total=False):
     tags: Optional[List[str]]
     event_webhooks_url: Optional[str]
     event_webhooks_status: str
-    event_webhooks_types: List[str]
+    event_webhooks_types: Optional[List[str]]

@@ -498,7 +498,7 @@ class AppInfo:
             Cannot be provided with ``custom_install_url``.
 
             It's recommended to use :attr:`guild_install_type_config` and :attr:`user_install_type_config`
-            instead of this parameter.
+            instead of this parameter, as this parameter is soft-deprecated by Discord.
         custom_install_url: Optional[:class:`str`]
             The custom installation url for this application.
         role_connections_verification_url: Optional[:class:`str`]
@@ -588,7 +588,9 @@ class AppInfo:
             fields["event_webhooks_status"] = str(event_webhooks_status.value)
 
         if event_webhooks_types is not MISSING:
-            fields["event_webhooks_types"] = list(event_webhooks_types)
+            fields["event_webhooks_types"] = (
+                list(event_webhooks_types) if event_webhooks_types else None
+            )
 
         if tags is not MISSING:
             fields["tags"] = list(tags) if tags else None
