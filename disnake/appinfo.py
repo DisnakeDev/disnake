@@ -531,12 +531,6 @@ class AppInfo:
             The new application information.
         """
         fields: EditAppInfoPayload = {}
-
-        if install_params is not MISSING:
-            fields["install_params"] = (
-                install_params.to_dict() if install_params is not None else None
-            )
-
         if guild_install_type_config is not MISSING or user_install_type_config is not MISSING:
             integration_types_config: Dict[str, ApplicationIntegrationTypeConfigurationPayload] = {}
 
