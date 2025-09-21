@@ -374,12 +374,7 @@ class Member(disnake.abc.Messageable, _UserTag):
     def _from_message(cls, *, message: Message, data: MemberPayload) -> Self:
         user_data = message.author._to_minimal_user_json()  # pyright: ignore[reportAttributeAccessIssue]
         assert message.guild is not None
-        return cls(
-            data=data,
-            user_data=user_data,
-            guild=message.guild,
-            state=message._state,
-        )
+        return cls(data=data, user_data=user_data, guild=message.guild, state=message._state)
 
     def _update_from_message(self, data: MemberPayload) -> None:
         self.joined_at = utils.parse_time(data.get("joined_at"))
