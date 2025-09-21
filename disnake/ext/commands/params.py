@@ -31,6 +31,8 @@ from typing import (
     get_origin,
 )
 
+from typing_extensions import Concatenate, ParamSpec, Self, TypeGuard
+
 import disnake
 from disnake.app_commands import Option, OptionChoice
 from disnake.channel import _channel_type_factory
@@ -48,11 +50,10 @@ from disnake.utils import (
 from . import errors
 from .converter import CONVERTER_MAPPING
 
-T_ = TypeVar("T_")
+T = TypeVar("T")
+P = ParamSpec("P")
 
 if TYPE_CHECKING:
-    from typing_extensions import Concatenate, ParamSpec, Self, TypeGuard
-
     from disnake.app_commands import Choices
     from disnake.i18n import LocalizationValue, LocalizedOptional
     from disnake.types.interactions import ApplicationCommandOptionChoiceValue
@@ -64,11 +65,9 @@ if TYPE_CHECKING:
 
     AnySlashCommand = Union[InvokableSlashCommand, SubCommand]
 
-    P = ParamSpec("P")
-
     InjectionCallback = Union[
-        Callable[Concatenate[CogT, P], T_],
-        Callable[P, T_],
+        Callable[Concatenate[CogT, P], T],
+        Callable[P, T],
     ]
     AnyAutocompleter = Union[
         Sequence[Any],
@@ -76,12 +75,6 @@ if TYPE_CHECKING:
         Callable[Concatenate[CogT, ApplicationCommandInteraction, str, P], Any],
     ]
 
-    TChoice = TypeVar("TChoice", bound=ApplicationCommandOptionChoiceValue)
-else:
-    P = TypeVar("P")
-
-
-T = TypeVar("T")
 TypeT = TypeVar("TypeT", bound=type[Any])
 BotT = TypeVar("BotT", bound="disnake.Client", covariant=True)
 
@@ -165,7 +158,7 @@ def _int_to_str_len(number: int) -> int:
     )
 
 
-def _range_to_str_len(min_value: int, max_value: int) -> Tuple[int, int]:
+def _range_to_str_len(min_value: int, max_value: int) -> tuple[int, int]:
     min_ = _int_to_str_len(min_value)
     max_ = _int_to_str_len(max_value)
     opposite_sign = (min_value < 0) ^ (max_value < 0)
@@ -179,7 +172,7 @@ def _range_to_str_len(min_value: int, max_value: int) -> Tuple[int, int]:
 
 def _unbound_range_to_str_len(
     min_value: Optional[int], max_value: Optional[int]
-) -> Tuple[Optional[int], Optional[int]]:
+) -> tuple[Optional[int], Optional[int]]:
     if min_value is not None and max_value is not None:
         return _range_to_str_len(min_value, max_value)
 
@@ -194,7 +187,7 @@ def _unbound_range_to_str_len(
     return None, None
 
 
-class Injection(Generic[P, T_]):
+class Injection(Generic[P, T]):
     """Represents a slash command injection.
 
     .. versionadded:: 2.3
@@ -216,7 +209,7 @@ class Injection(Generic[P, T_]):
 
     def __init__(
         self,
-        function: InjectionCallback[CogT, P, T_],
+        function: InjectionCallback[CogT, P, T],
         *,
         autocompleters: Optional[dict[str, Callable]] = None,
     ) -> None:
@@ -224,7 +217,7 @@ class Injection(Generic[P, T_]):
             for autocomp in autocompleters.values():
                 classify_autocompleter(autocomp)
 
-        self.function: InjectionCallback[Any, P, T_] = function
+        self.function: InjectionCallback[Any, P, T] = function
         self.autocompleters: dict[str, Callable] = autocompleters or {}
         self._injected: Optional[Cog] = None
 
@@ -238,7 +231,7 @@ class Injection(Generic[P, T_]):
 
         return copy
 
-    def __call__(self, *args: P.args, **kwargs: P.kwargs) -> T_:
+    def __call__(self, *args: P.args, **kwargs: P.kwargs) -> T:
         """Calls the underlying function that the injection holds.
 
         .. versionadded:: 2.6
@@ -251,11 +244,11 @@ class Injection(Generic[P, T_]):
     @classmethod
     def register(
         cls,
-        function: InjectionCallback[CogT, P, T_],
+        function: InjectionCallback[CogT, P, T],
         annotation: Any,
         *,
         autocompleters: Optional[dict[str, Callable]] = None,
-    ) -> Injection[P, T_]:
+    ) -> Injection[P, T]:
         self = cls(function, autocompleters=autocompleters)
         cls._registered[annotation] = self
         return self
@@ -309,7 +302,7 @@ class _BaseRange(ABC, Generic[NumT]):
     def __class_getitem__(cls, params: tuple[Any, ...]) -> Self:
         if cls is _BaseRange:
             # needed since made generic
-            return super().__class_getitem__(params)  # pyright: ignore
+            return super().__class_getitem__(params)  # pyright: ignore[reportAttributeAccessIssue]
 
         # deconstruct type arguments
         if not isinstance(params, tuple):
@@ -527,7 +520,7 @@ class ParamInfo:
         .. versionadded:: 2.6
     """
 
-    TYPES: ClassVar[dict[Union[type, UnionType], int]] = {
+    TYPES: ClassVar[dict[Union[type[Any], UnionType], int]] = {
         str:                                               OptionType.string.value,
         int:                                               OptionType.integer.value,
         bool:                                              OptionType.boolean.value,
@@ -803,8 +796,8 @@ class ParamInfo:
                 raise TypeError(msg)
             self.type = str
             self.min_length, self.max_length = _unbound_range_to_str_len(
-                self.min_value,  # type: ignore
-                self.max_value,  # type: ignore
+                self.min_value,  # pyright: ignore[reportArgumentType]
+                self.max_value,  # pyright: ignore[reportArgumentType]
             )
 
         elif annotation in self.TYPES:
@@ -1403,6 +1396,9 @@ def injection(
     return decorator
 
 
+TChoice = TypeVar("TChoice", bound="ApplicationCommandOptionChoiceValue")
+
+
 def option_enum(
     choices: Union[dict[str, TChoice], list[TChoice]], **kwargs: TChoice
 ) -> type[TChoice]:
@@ -1451,10 +1447,10 @@ else:
 
 
 def register_injection(
-    function: InjectionCallback[CogT, P, T_],
+    function: InjectionCallback[CogT, P, T],
     *,
     autocompleters: Optional[dict[str, Callable]] = None,
-) -> Injection[P, T_]:
+) -> Injection[P, T]:
     """A decorator to register a global injection.
 
     .. versionadded:: 2.3
