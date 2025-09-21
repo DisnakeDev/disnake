@@ -16,11 +16,8 @@ import shutil
 from typing import (
     TYPE_CHECKING,
     Any,
-    Dict,
     Final,
-    List,
     Optional,
-    Tuple,
 )
 
 import nox
@@ -34,10 +31,10 @@ nox.options.default_venv_backend = "uv|virtualenv"
 
 PYPROJECT = nox.project.load_toml()
 
-SUPPORTED_PYTHONS: Final[List[str]] = nox.project.python_versions(PYPROJECT)
+SUPPORTED_PYTHONS: Final[list[str]] = nox.project.python_versions(PYPROJECT)
 # TODO(onerandomusername): add 3.14 once CI supports 3.14.
-EXPERIMENTAL_PYTHON_VERSIONS: Final[List[str]] = []
-ALL_PYTHONS: Final[List[str]] = [*SUPPORTED_PYTHONS, *EXPERIMENTAL_PYTHON_VERSIONS]
+EXPERIMENTAL_PYTHON_VERSIONS: Final[list[str]] = []
+ALL_PYTHONS: Final[list[str]] = [*SUPPORTED_PYTHONS, *EXPERIMENTAL_PYTHON_VERSIONS]
 MIN_PYTHON: Final[str] = SUPPORTED_PYTHONS[0]
 CI: Final[bool] = "CI" in os.environ
 
@@ -47,19 +44,19 @@ reset_coverage = True
 if TYPE_CHECKING:
     ExecutionGroupType = object
 else:
-    ExecutionGroupType = Dict[str, Any]
+    ExecutionGroupType = dict[str, Any]
 
 
 @dataclasses.dataclass
 class ExecutionGroup(ExecutionGroupType):
-    sessions: Tuple[str, ...] = ()
+    sessions: tuple[str, ...] = ()
     python: str = MIN_PYTHON
     project: bool = True
-    extras: Tuple[str, ...] = ()
-    groups: Tuple[str, ...] = ()
-    dependencies: Tuple[str, ...] = ()
+    extras: tuple[str, ...] = ()
+    groups: tuple[str, ...] = ()
+    dependencies: tuple[str, ...] = ()
     experimental: bool = False
-    pyright_paths: Tuple[str, ...] = ()
+    pyright_paths: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         if self.pyright_paths and "pyright" not in self.sessions:
@@ -70,7 +67,7 @@ class ExecutionGroup(ExecutionGroupType):
             self[key] = getattr(self, key)  # type: ignore
 
 
-EXECUTION_GROUPS: List[ExecutionGroup] = [
+EXECUTION_GROUPS: list[ExecutionGroup] = [
     ## pyright
     *(
         ExecutionGroup(
@@ -125,7 +122,7 @@ EXECUTION_GROUPS: List[ExecutionGroup] = [
 ]
 
 
-def get_groups_for_session(name: str) -> List[ExecutionGroup]:
+def get_groups_for_session(name: str) -> list[ExecutionGroup]:
     return [g for g in EXECUTION_GROUPS if name in g.sessions]
 
 
@@ -150,7 +147,7 @@ def install_deps(session: nox.Session, *, execution_group: Optional[ExecutionGro
     if not execution_group.project and execution_group.extras:
         raise TypeError("Cannot install extras without also installing the project")
 
-    command: List[str]
+    command: list[str]
 
     # If not using uv, install with pip
     if os.getenv("INSTALL_WITH_PIP") is not None:
@@ -177,7 +174,7 @@ def install_deps(session: nox.Session, *, execution_group: Optional[ExecutionGro
         "sync",
         "--no-default-groups",
     ]
-    env: Dict[str, Any] = {}
+    env: dict[str, Any] = {}
 
     if session.venv_backend != "none":
         command.append(f"--python={session.virtualenv.location}")
@@ -287,7 +284,7 @@ def autotyping(session: nox.Session) -> None:
     if not session.interactive:
         base_command += ["--hide-progress"]
 
-    dir_options: Dict[Tuple[str, ...], Tuple[str, ...]] = {
+    dir_options: dict[tuple[str, ...], tuple[str, ...]] = {
         (
             "disnake",
             "scripts",

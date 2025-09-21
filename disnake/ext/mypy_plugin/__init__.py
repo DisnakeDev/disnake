@@ -10,5 +10,5 @@ class DisnakePlugin(Plugin):
     """Custom mypy plugin; no-op as of version 2.9."""
 
 
-def plugin(version: str) -> t.Type[Plugin]:
+def plugin(version: str) -> type[Plugin]:
     return DisnakePlugin

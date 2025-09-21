@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import inspect
 import re
-from typing import TYPE_CHECKING, Any, Dict, Generic, List, Optional, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Generic, Optional, TypeVar, Union
 
 import disnake.abc
 import disnake.utils
@@ -103,12 +103,12 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
         message: Message,
         bot: BotT,
         view: StringView,
-        args: List[Any] = MISSING,
-        kwargs: Dict[str, Any] = MISSING,
+        args: list[Any] = MISSING,
+        kwargs: dict[str, Any] = MISSING,
         prefix: Optional[str] = None,
         command: Optional[Command[Any, ..., Any]] = None,
         invoked_with: Optional[str] = None,
-        invoked_parents: List[str] = MISSING,
+        invoked_parents: list[str] = MISSING,
         invoked_subcommand: Optional[Command[Any, ..., Any]] = None,
         subcommand_passed: Optional[str] = None,
         command_failed: bool = False,
@@ -116,13 +116,13 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
     ) -> None:
         self.message: Message = message
         self.bot: BotT = bot
-        self.args: List[Any] = args or []
-        self.kwargs: Dict[str, Any] = kwargs or {}
+        self.args: list[Any] = args or []
+        self.kwargs: dict[str, Any] = kwargs or {}
         self.prefix: Optional[str] = prefix
         self.command: Optional[Command[Any, ..., Any]] = command
         self.view: StringView = view
         self.invoked_with: Optional[str] = invoked_with
-        self.invoked_parents: List[str] = invoked_parents or []
+        self.invoked_parents: list[str] = invoked_parents or []
         self.invoked_subcommand: Optional[Command[Any, ..., Any]] = invoked_subcommand
         self.subcommand_passed: Optional[str] = subcommand_passed
         self.command_failed: bool = command_failed

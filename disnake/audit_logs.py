@@ -2,18 +2,13 @@
 
 from __future__ import annotations
 
+from collections.abc import Generator, Mapping
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
     ClassVar,
-    Dict,
-    Generator,
-    List,
-    Mapping,
     Optional,
-    Tuple,
-    Type,
     TypeVar,
     Union,
     cast,
@@ -117,9 +112,9 @@ def _transform_guild_id(entry: AuditLogEntry, data: Optional[Snowflake]) -> Opti
 
 
 def _transform_overwrites(
-    entry: AuditLogEntry, data: List[PermissionOverwritePayload]
-) -> List[Tuple[Union[Object, Member, Role, User], PermissionOverwrite]]:
-    overwrites: List[Tuple[Union[Object, Member, Role, User], PermissionOverwrite]] = []
+    entry: AuditLogEntry, data: list[PermissionOverwritePayload]
+) -> list[tuple[Union[Object, Member, Role, User], PermissionOverwrite]]:
+    overwrites: list[tuple[Union[Object, Member, Role, User], PermissionOverwrite]] = []
     for elem in data:
         allow = Permissions(int(elem["allow"]))
         deny = Permissions(int(elem["deny"]))
@@ -199,7 +194,7 @@ EnumT = TypeVar("EnumT", bound=enums.Enum)
 FlagsT = TypeVar("FlagsT", bound=flags.BaseFlags)
 
 
-def _enum_transformer(enum: Type[EnumT]) -> Callable[[AuditLogEntry, int], EnumT]:
+def _enum_transformer(enum: type[EnumT]) -> Callable[[AuditLogEntry, int], EnumT]:
     def _transform(entry: AuditLogEntry, data: int) -> EnumT:
         return enums.try_enum(enum, data)
 
@@ -207,7 +202,7 @@ def _enum_transformer(enum: Type[EnumT]) -> Callable[[AuditLogEntry, int], EnumT
 
 
 def _flags_transformer(
-    flags_type: Type[FlagsT],
+    flags_type: type[FlagsT],
 ) -> Callable[[AuditLogEntry, Optional[int]], Optional[FlagsT]]:
     def _transform(entry: AuditLogEntry, data: Optional[int]) -> Optional[FlagsT]:
         return flags_type._from_value(data) if data is not None else None
@@ -217,8 +212,8 @@ def _flags_transformer(
 
 def _list_transformer(
     func: Callable[[AuditLogEntry, Any], T],
-) -> Callable[[AuditLogEntry, Any], List[T]]:
-    def _transform(entry: AuditLogEntry, data: Any) -> List[T]:
+) -> Callable[[AuditLogEntry, Any], list[T]]:
+    def _transform(entry: AuditLogEntry, data: Any) -> list[T]:
         if not data:
             return []
         return [func(entry, value) for value in data if value is not None]
@@ -294,7 +289,7 @@ class AuditLogDiff:
     def __len__(self) -> int:
         return len(self.__dict__)
 
-    def __iter__(self) -> Generator[Tuple[str, Any], None, None]:
+    def __iter__(self) -> Generator[tuple[str, Any], None, None]:
         yield from self.__dict__.items()
 
     def __repr__(self) -> str:
@@ -313,7 +308,7 @@ Transformer = Callable[["AuditLogEntry", Any], Any]
 
 class AuditLogChanges:
     # fmt: off
-    TRANSFORMERS: ClassVar[Dict[str, Tuple[Optional[str], Optional[Transformer]]]] = {
+    TRANSFORMERS: ClassVar[dict[str, tuple[Optional[str], Optional[Transformer]]]] = {
         "verification_level":                 (None, _enum_transformer(enums.VerificationLevel)),
         "explicit_content_filter":            (None, _enum_transformer(enums.ContentFilter)),
         "allow":                              (None, _transform_permissions),
@@ -367,7 +362,7 @@ class AuditLogChanges:
     }
     # fmt: on
 
-    def __init__(self, entry: AuditLogEntry, data: List[AuditLogChangePayload]) -> None:
+    def __init__(self, entry: AuditLogEntry, data: list[AuditLogChangePayload]) -> None:
         self.before = AuditLogDiff()
         self.after = AuditLogDiff()
 
@@ -440,7 +435,7 @@ class AuditLogChanges:
         first: AuditLogDiff,
         second: AuditLogDiff,
         entry: AuditLogEntry,
-        elem: List[RolePayload],
+        elem: list[RolePayload],
     ) -> None:
         if not hasattr(first, "roles"):
             first.roles = []

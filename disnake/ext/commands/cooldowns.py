@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 import time
 from collections import deque
-from typing import TYPE_CHECKING, Any, Callable, Deque, Dict, Optional
+from typing import TYPE_CHECKING, Any, Callable, Optional
 
 from disnake.enums import Enum
 from disnake.member import Member
@@ -192,7 +192,7 @@ class CooldownMapping:
         if not callable(type):
             raise TypeError("Cooldown type must be a BucketType or callable")
 
-        self._cache: Dict[Any, Cooldown] = {}
+        self._cache: dict[Any, Cooldown] = {}
         self._cooldown: Optional[Cooldown] = original
         self._type: Callable[[Message], Any] = type
 
@@ -296,7 +296,7 @@ class _Semaphore:
     def __init__(self, number: int) -> None:
         self.value: int = number
         self.loop: asyncio.AbstractEventLoop = asyncio.get_running_loop()
-        self._waiters: Deque[asyncio.Future] = deque()
+        self._waiters: deque[asyncio.Future] = deque()
 
     def __repr__(self) -> str:
         return f"<_Semaphore value={self.value} waiters={len(self._waiters)}>"
@@ -342,7 +342,7 @@ class MaxConcurrency:
     __slots__ = ("number", "per", "wait", "_mapping")
 
     def __init__(self, number: int, *, per: BucketType, wait: bool) -> None:
-        self._mapping: Dict[Any, _Semaphore] = {}
+        self._mapping: dict[Any, _Semaphore] = {}
         self.per: BucketType = per
         self.number: int = number
         self.wait: bool = wait

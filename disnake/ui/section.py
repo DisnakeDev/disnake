@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, ClassVar, List, Tuple, Union, cast
+from typing import TYPE_CHECKING, Any, ClassVar, Union, cast
 
 from ..components import Section as SectionComponent
 from ..enums import ComponentType
@@ -47,7 +47,7 @@ class Section(UIComponent):
         The accessory component displayed next to the section text.
     """
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (
         "children",
         "accessory",
     )
@@ -61,7 +61,7 @@ class Section(UIComponent):
         self._id: int = id
         # this list can be modified without any runtime checks later on,
         # just assume the user knows what they're doing at that point
-        self.children: List[TextDisplay] = [
+        self.children: list[TextDisplay] = [
             TextDisplay(c) if isinstance(c, str) else ensure_ui_component(c, "components")
             for c in components
         ]
@@ -93,7 +93,7 @@ class Section(UIComponent):
 
         return cls(
             *cast(
-                "List[TextDisplay]",
+                "list[TextDisplay]",
                 [_to_ui_component(c) for c in section.children],
             ),
             accessory=cast("SectionAccessoryUIComponent", _to_ui_component(section.accessory)),

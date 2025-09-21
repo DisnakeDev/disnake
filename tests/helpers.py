@@ -4,7 +4,7 @@ import datetime
 import functools
 import inspect
 import types
-from typing import TYPE_CHECKING, Callable, ContextManager, Optional, Type, TypeVar
+from typing import TYPE_CHECKING, Callable, ContextManager, Optional, TypeVar
 from unittest import mock
 
 if TYPE_CHECKING:
@@ -53,7 +53,7 @@ class freeze_time(ContextManager):
 
     def __exit__(
         self,
-        typ: Optional[Type[BaseException]],
+        typ: Optional[type[BaseException]],
         value: Optional[BaseException],
         tb: Optional[types.TracebackType],
     ) -> Optional[bool]:
