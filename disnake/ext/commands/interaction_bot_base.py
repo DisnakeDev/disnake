@@ -566,7 +566,7 @@ class InteractionBotBase(CommonBotBase):
 
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``
-        guild_ids: :class:`~typing.Sequence`\\[:class:`int`]
+        guild_ids: :class:`~collections.abc.Sequence`\\[:class:`int`]
             If specified, the client will register the command in these guilds.
             Otherwise, this command will be registered globally.
         connectors: :class:`dict`\\[:class:`str`, :class:`str`]
@@ -676,7 +676,7 @@ class InteractionBotBase(CommonBotBase):
 
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``.
-        guild_ids: :class:`~typing.Sequence`\\[:class:`int`]
+        guild_ids: :class:`~collections.abc.Sequence`\\[:class:`int`]
             If specified, the client will register the command in these guilds.
             Otherwise, this command will be registered globally.
         extras: :class:`dict`\\[:class:`str`, Any]
@@ -779,7 +779,7 @@ class InteractionBotBase(CommonBotBase):
 
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``
-        guild_ids: :class:`~typing.Sequence`\\[:class:`int`]
+        guild_ids: :class:`~collections.abc.Sequence`\\[:class:`int`]
             If specified, the client will register the command in these guilds.
             Otherwise, this command will be registered globally.
         extras: :class:`dict`\\[:class:`str`, Any]

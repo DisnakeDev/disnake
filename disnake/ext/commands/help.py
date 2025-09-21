@@ -614,7 +614,7 @@ class HelpCommand:
 
         Parameters
         ----------
-        commands: :class:`~typing.Sequence`\\[:class:`Command`]
+        commands: :class:`~collections.abc.Sequence`\\[:class:`Command`]
             A sequence of commands to check for the largest size.
 
         Returns
@@ -708,7 +708,7 @@ class HelpCommand:
 
         Parameters
         ----------
-        mapping: :class:`~typing.Mapping`\\[:class:`Cog` | :obj:`None`, :class:`list`\\[:class:`Command`]]
+        mapping: :class:`~collections.abc.Mapping`\\[:class:`Cog` | :obj:`None`, :class:`list`\\[:class:`Command`]]
             A mapping of cogs to commands that have been requested by the user for help.
             The key of the mapping is the :class:`~.commands.Cog` that the command belongs to, or
             :obj:`None` if there isn't one, and the value is a list of commands that belongs to that cog.
@@ -982,7 +982,7 @@ class DefaultHelpCommand(HelpCommand):
 
         Parameters
         ----------
-        commands: :class:`~typing.Sequence`\\[:class:`Command`]
+        commands: :class:`~collections.abc.Sequence`\\[:class:`Command`]
             A list of commands to indent for output.
         heading: :class:`str`
             The heading to add to the output. This is only added
@@ -1209,7 +1209,7 @@ class MinimalHelpCommand(HelpCommand):
 
         Parameters
         ----------
-        commands: :class:`~typing.Sequence`\\[:class:`Command`]
+        commands: :class:`~collections.abc.Sequence`\\[:class:`Command`]
             A list of commands that belong to the heading.
         heading: :class:`str`
             The heading to add to the line.
@@ -1250,7 +1250,7 @@ class MinimalHelpCommand(HelpCommand):
 
         Parameters
         ----------
-        aliases: :class:`~typing.Sequence`\\[:class:`str`]
+        aliases: :class:`~collections.abc.Sequence`\\[:class:`str`]
             A list of aliases to format.
         """
         self.paginator.add_line(f"**{self.aliases_heading}** {', '.join(aliases)}", empty=True)

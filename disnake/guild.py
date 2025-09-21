@@ -1816,7 +1816,7 @@ class Guild(Hashable):
             A :class:`dict` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply upon creation of a channel.
             Useful for creating secret channels.
-        available_tags: :class:`~typing.Sequence`\\[:class:`ForumTag` | :obj:`None`]
+        available_tags: :class:`~collections.abc.Sequence`\\[:class:`ForumTag` | :obj:`None`]
             The tags available for threads in this channel.
 
             .. versionadded:: 2.6
@@ -1959,7 +1959,7 @@ class Guild(Hashable):
             A :class:`dict` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply upon creation of a channel.
             Useful for creating secret channels.
-        available_tags: :class:`~typing.Sequence`\\[:class:`ForumTag` | :obj:`None`]
+        available_tags: :class:`~collections.abc.Sequence`\\[:class:`ForumTag` | :obj:`None`]
             The tags available for threads in this channel.
         default_reaction: :class:`str` | :class:`Emoji` | :class:`PartialEmoji` | :obj:`None`
             The default emoji shown for reacting to threads.
@@ -2529,7 +2529,7 @@ class Guild(Hashable):
 
         Returns
         -------
-        :class:`~typing.Sequence`\\[:class:`abc.GuildChannel`]
+        :class:`~collections.abc.Sequence`\\[:class:`abc.GuildChannel`]
             All channels that the guild has.
         """
         data = await self._state.http.get_all_guild_channels(self.id)
@@ -5159,16 +5159,16 @@ class Guild(Hashable):
             If set to :attr:`~AutoModTriggerType.keyword`, :attr:`~AutoModTriggerType.keyword_preset`,
             or :attr:`~AutoModTriggerType.mention_spam`, ``trigger_metadata`` must be set accordingly.
             This cannot be changed after creation.
-        actions: :class:`~typing.Sequence`\\[:class:`AutoModBlockMessageAction` | :class:`AutoModSendAlertAction` | :class:`AutoModTimeoutAction` | :class:`AutoModAction`]
+        actions: :class:`~collections.abc.Sequence`\\[:class:`AutoModBlockMessageAction` | :class:`AutoModSendAlertAction` | :class:`AutoModTimeoutAction` | :class:`AutoModAction`]
             The list of actions that will execute if a matching event triggered this rule.
             Must contain at least one action.
         trigger_metadata: :class:`AutoModTriggerMetadata` | :obj:`None`
             Additional metadata associated with the trigger type.
         enabled: :class:`bool`
             Whether to enable the rule. Defaults to ``False``.
-        exempt_roles: :class:`~typing.Sequence`\\[:class:`abc.Snowflake` | :obj:`None`]
+        exempt_roles: :class:`~collections.abc.Sequence`\\[:class:`abc.Snowflake` | :obj:`None`]
             The roles that are exempt from this rule, up to 20. By default, no roles are exempt.
-        exempt_channels: :class:`~typing.Sequence`\\[:class:`abc.Snowflake` | :obj:`None`]
+        exempt_channels: :class:`~collections.abc.Sequence`\\[:class:`abc.Snowflake` | :obj:`None`]
             The channels that are exempt from this rule, up to 50. By default, no channels are exempt.
             Can also include categories, in which case all channels inside that category will be exempt.
         reason: :class:`str` | :obj:`None`

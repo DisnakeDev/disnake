@@ -205,7 +205,7 @@ class ModalInteraction(Interaction[ClientT]):
 
     @cached_slot_property("_cs_values")
     def values(self) -> ResolvedValues[str]:
-        """:class:`dict`\\[:class:`str`, :class:`str` | :class:`~typing.Sequence`\\[:class:`str`]]: Returns all raw values the user has entered in the modal.
+        """:class:`dict`\\[:class:`str`, :class:`str` | :class:`~collections.abc.Sequence`\\[:class:`str`]]: Returns all raw values the user has entered in the modal.
         This is a dict of the form ``{custom_id: value}``.
 
         For select menus, the corresponding dict value is a list of the values the user has selected.
@@ -221,7 +221,7 @@ class ModalInteraction(Interaction[ClientT]):
 
     @cached_slot_property("_cs_resolved_values")
     def resolved_values(self) -> ResolvedValues[Union[str, Member, User, Role, AnyChannel]]:
-        """:class:`dict`\\[:class:`str`, :class:`str` | :class:`~typing.Sequence`\\[:class:`str` | :class:`Member` | :class:`User` | :class:`Role` | :class:`abc.GuildChannel` | :class:`Thread` | :class:`PartialMessageable`]]: The (resolved) values the user entered in the modal.
+        """:class:`dict`\\[:class:`str`, :class:`str` | :class:`~collections.abc.Sequence`\\[:class:`str` | :class:`Member` | :class:`User` | :class:`Role` | :class:`abc.GuildChannel` | :class:`Thread` | :class:`PartialMessageable`]]: The (resolved) values the user entered in the modal.
         This is a dict of the form ``{custom_id: value}``.
 
         For select menus, the corresponding dict value is a list of the values the user has selected.

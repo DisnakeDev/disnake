@@ -581,7 +581,7 @@ class Client:
 
     @property
     def cached_messages(self) -> Sequence[Message]:
-        """:class:`~typing.Sequence`\\[:class:`.Message`]: Read-only list of messages the connected client has cached.
+        """:class:`~collections.abc.Sequence`\\[:class:`.Message`]: Read-only list of messages the connected client has cached.
 
         .. versionadded:: 1.1
         """
@@ -933,7 +933,7 @@ class Client:
         return decorator
 
     def get_listeners(self) -> Mapping[str, List[CoroFunc]]:
-        """:class:`~typing.Mapping`\\[:class:`str`, :class:`list`\\[Callable]]: A read-only mapping of event names to listeners.
+        """:class:`~collections.abc.Mapping`\\[:class:`str`, :class:`list`\\[Callable]]: A read-only mapping of event names to listeners.
 
         .. note::
             To add or remove a listener you should use :meth:`.add_listener` and
@@ -2770,7 +2770,7 @@ class Client:
 
     @property
     def persistent_views(self) -> Sequence[View]:
-        """:class:`~typing.Sequence`\\[:class:`.View`]: A sequence of persistent views added to the client.
+        """:class:`~collections.abc.Sequence`\\[:class:`.View`]: A sequence of persistent views added to the client.
 
         .. versionadded:: 2.0
         """
@@ -3207,7 +3207,7 @@ class Client:
 
         Parameters
         ----------
-        records: :class:`~typing.Sequence`\\[:class:`.ApplicationRoleConnectionMetadata`]
+        records: :class:`~collections.abc.Sequence`\\[:class:`.ApplicationRoleConnectionMetadata`]
             The new metadata records.
 
         Raises
@@ -3299,7 +3299,7 @@ class Client:
             The user to retrieve entitlements for.
         guild: :class:`.abc.Snowflake` | :obj:`None`
             The guild to retrieve entitlements for.
-        skus: :class:`~typing.Sequence`\\[:class:`.abc.Snowflake` | :obj:`None`]
+        skus: :class:`~collections.abc.Sequence`\\[:class:`.abc.Snowflake` | :obj:`None`]
             The SKUs for which entitlements are retrieved.
         exclude_ended: :class:`bool`
             Whether to exclude ended/expired entitlements. Defaults to ``False``.

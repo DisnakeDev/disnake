@@ -1248,7 +1248,7 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
 
         Returns
         -------
-        :class:`~typing.Mapping`\\[:class:`int`, :class:`VoiceState`]
+        :class:`~collections.abc.Mapping`\\[:class:`int`, :class:`VoiceState`]
             The mapping of member ID to a voice state.
         """
         if isinstance(self.guild, Object):
@@ -3638,7 +3638,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
             If set to :obj:`None` or not provided, slowmode is inherited from the parent's
             :attr:`default_thread_slowmode_delay`.
-        applied_tags: :class:`~typing.Sequence`\\[:class:`abc.Snowflake`]
+        applied_tags: :class:`~collections.abc.Sequence`\\[:class:`abc.Snowflake`]
             The tags to apply to the new thread. Maximum of 5.
 
             .. versionadded:: 2.6
@@ -3669,7 +3669,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         files: :class:`list`\\[:class:`~disnake.File`]
             A list of files to upload. Must be a maximum of 10.
             This cannot be mixed with the ``file`` parameter.
-        stickers: :class:`~typing.Sequence`\\[:class:`.GuildSticker` | :class:`.StandardSticker` | :class:`.StickerItem`]
+        stickers: :class:`~collections.abc.Sequence`\\[:class:`.GuildSticker` | :class:`.StandardSticker` | :class:`.StickerItem`]
             A list of stickers to upload. Must be a maximum of 3.
         allowed_mentions: :class:`.AllowedMentions`
             Controls the mentions being processed in this message. If this is
@@ -4136,7 +4136,7 @@ class ForumChannel(ThreadOnlyGuildChannel):
 
             .. versionadded:: 2.6
 
-        available_tags: :class:`~typing.Sequence`\\[:class:`ForumTag`]
+        available_tags: :class:`~collections.abc.Sequence`\\[:class:`ForumTag`]
             The new :class:`ForumTag`\\s available for threads in this channel.
             Can be used to create new tags and edit/reorder/delete existing tags.
             Maximum of 20.
@@ -4267,7 +4267,7 @@ class ForumChannel(ThreadOnlyGuildChannel):
             The default thread slowmode delay of the new channel. If not provided, defaults to this channel's default thread slowmode delay.
         default_auto_archive_duration: :class:`int` | :class:`ThreadArchiveDuration` | :obj:`None`
             The default auto archive duration of the new channel. If not provided, defaults to this channel's default auto archive duration.
-        available_tags: :class:`~typing.Sequence`\\[:class:`ForumTag`]
+        available_tags: :class:`~collections.abc.Sequence`\\[:class:`ForumTag`]
             The applicable tags of the new channel. If not provided, defaults to this channel's available tags.
         default_reaction: :class:`str` | :class:`Emoji` | :class:`PartialEmoji` | :obj:`None`
             The default reaction of the new channel. If not provided, defaults to this channel's default reaction.
@@ -4549,7 +4549,7 @@ class MediaChannel(ThreadOnlyGuildChannel):
             If parameter ``require_tag`` is provided, that will override the setting of :attr:`ChannelFlags.require_tag`.
         require_tag: :class:`bool`
             Whether all newly created threads are required to have a tag.
-        available_tags: :class:`~typing.Sequence`\\[:class:`ForumTag`]
+        available_tags: :class:`~collections.abc.Sequence`\\[:class:`ForumTag`]
             The new :class:`ForumTag`\\s available for threads in this channel.
             Can be used to create new tags and edit/reorder/delete existing tags.
             Maximum of 20.
@@ -4655,7 +4655,7 @@ class MediaChannel(ThreadOnlyGuildChannel):
             The default thread slowmode delay of the new channel. If not provided, defaults to this channel's default thread slowmode delay.
         default_auto_archive_duration: :class:`int` | :class:`ThreadArchiveDuration` | :obj:`None`
             The default auto archive duration of the new channel. If not provided, defaults to this channel's default auto archive duration.
-        available_tags: :class:`~typing.Sequence`\\[:class:`ForumTag`]
+        available_tags: :class:`~collections.abc.Sequence`\\[:class:`ForumTag`]
             The applicable tags of the new channel. If not provided, defaults to this channel's available tags.
         default_reaction: :class:`str` | :class:`Emoji` | :class:`PartialEmoji` | :obj:`None`
             The default reaction of the new channel. If not provided, defaults to this channel's default reaction.

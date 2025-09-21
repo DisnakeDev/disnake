@@ -458,7 +458,7 @@ class ParamInfo:
         .. versionchanged:: 2.5
             Added support for localizations.
 
-    choices: :class:`~typing.Sequence`\\[:class:`.OptionChoice`, :class:`~typing.Sequence`\\[:class:`str` | :class:`int` | :class:`float`], :class:`~typing.Mapping`\\[:class:`str`, :class:`str` | :class:`int` | :class:`float`]]
+    choices: :class:`~collections.abc.Sequence`\\[:class:`.OptionChoice`, :class:`~collections.abc.Sequence`\\[:class:`str` | :class:`int` | :class:`float`], :class:`~collections.abc.Mapping`\\[:class:`str`, :class:`str` | :class:`int` | :class:`float`]]
         The pre-defined choices for this option.
     ge: :class:`float`
         The lowest allowed value for this option.
@@ -1181,7 +1181,7 @@ def Param(
         .. versionchanged:: 2.5
             Added support for localizations.
 
-    choices: :class:`~typing.Sequence`\\[:class:`.OptionChoice`, :class:`~typing.Sequence`\\[:class:`str` | :class:`int` | :class:`float`], :class:`~typing.Mapping`\\[:class:`str`, :class:`str` | :class:`int` | :class:`float`]]
+    choices: :class:`~collections.abc.Sequence`\\[:class:`.OptionChoice`, :class:`~collections.abc.Sequence`\\[:class:`str` | :class:`int` | :class:`float`], :class:`~collections.abc.Mapping`\\[:class:`str`, :class:`str` | :class:`int` | :class:`float`]]
         The pre-defined choices for this slash command option.
     converter: Callable[[:class:`.ApplicationCommandInteraction`, Any], Any]
         A function that will convert the original input to a desired format.

@@ -953,7 +953,7 @@ class Member(disnake.abc.Messageable, _UserTag):
 
             .. versionadded:: 1.7
 
-        roles: :class:`~typing.Sequence`\\[:class:`Role`]
+        roles: :class:`~collections.abc.Sequence`\\[:class:`Role`]
             The member's new list of roles. This *replaces* the roles.
         voice_channel: :class:`VoiceChannel` | :obj:`None`
             The voice channel to move the member to.

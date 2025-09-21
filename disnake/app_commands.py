@@ -182,7 +182,7 @@ class Option:
         The option type, e.g. :class:`OptionType.user`.
     required: :class:`bool`
         Whether this option is required.
-    choices: :class:`~typing.Sequence`\\[:class:`OptionChoice`, :class:`~typing.Sequence`\\[:class:`str` | :class:`int` | :class:`float`], :class:`~typing.Mapping`\\[:class:`str`, :class:`str` | :class:`int` | :class:`float`]]
+    choices: :class:`~collections.abc.Sequence`\\[:class:`OptionChoice`, :class:`~collections.abc.Sequence`\\[:class:`str` | :class:`int` | :class:`float`], :class:`~collections.abc.Mapping`\\[:class:`str`, :class:`str` | :class:`int` | :class:`float`]]
         The pre-defined choices for this option.
     options: :class:`list`\\[:class:`Option`]
         The list of sub options. Normally you don't have to specify it directly,
