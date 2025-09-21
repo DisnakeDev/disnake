@@ -135,7 +135,7 @@ class AppInfo:
     bot_require_code_grant: :class:`bool`
         Whether the bot requires the completion of the full oauth2 code
         grant flow to join.
-    rpc_origins: :class:`list`\\[:class:`str` | :obj:`None`]
+    rpc_origins: :class:`list`\\[:class:`str`] | :obj:`None`
         A list of RPC origin URLs, if RPC is enabled.
     verify_key: :class:`str`
         The hex encoded key for verification in interactions and the
@@ -176,7 +176,7 @@ class AppInfo:
 
         .. versionadded:: 2.3
 
-    tags: :class:`list`\\[:class:`str` | :obj:`None`]
+    tags: :class:`list`\\[:class:`str`] | :obj:`None`
         The application's tags.
 
         .. versionadded:: 2.5
@@ -213,7 +213,7 @@ class AppInfo:
         The approximate number of users that have authorized the app with OAuth2.
 
         .. versionadded:: 2.11
-    redirect_uris: :class:`list`\\[:class:`str` | :obj:`None`]
+    redirect_uris: :class:`list`\\[:class:`str`] | :obj:`None`
         The application's OAuth2 redirect URIs.
 
         .. versionadded:: 2.11
@@ -233,7 +233,7 @@ class AppInfo:
 
         .. versionadded:: 2.11
 
-    event_webhooks_types: :class:`list`\\[:class:`str` | :obj:`None`]
+    event_webhooks_types: :class:`list`\\[:class:`str`] | :obj:`None`
         The application's event webhook types, if any.
 
         .. versionadded:: 2.11
@@ -416,7 +416,7 @@ class PartialAppInfo:
         The application's name.
     description: :class:`str`
         The application's description.
-    rpc_origins: :class:`list`\\[:class:`str` | :obj:`None`]
+    rpc_origins: :class:`list`\\[:class:`str`] | :obj:`None`
         A list of RPC origin URLs, if RPC is enabled.
     verify_key: :class:`str`
         The hex encoded key for verification in interactions and the

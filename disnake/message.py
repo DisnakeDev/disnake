@@ -2015,7 +2015,7 @@ class Message(Hashable):
 
             .. versionadded:: 2.1
 
-        attachments: :class:`list`\\[:class:`Attachment` | :obj:`None`]
+        attachments: :class:`list`\\[:class:`Attachment`] | :obj:`None`
             A list of attachments to keep in the message.
             If ``[]`` or :obj:`None` is passed then all existing attachments are removed.
             Keeps existing attachments if not provided.
@@ -2787,7 +2787,7 @@ class PartialMessage(Hashable):
 
             .. versionadded:: 2.1
 
-        attachments: :class:`list`\\[:class:`Attachment` | :obj:`None`]
+        attachments: :class:`list`\\[:class:`Attachment`] | :obj:`None`
             A list of attachments to keep in the message.
             If ``[]`` or :obj:`None` is passed then all existing attachments are removed.
             Keeps existing attachments if not provided.

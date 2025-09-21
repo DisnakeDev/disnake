@@ -2567,7 +2567,7 @@ def dynamic_cooldown(
 
     Parameters
     ----------
-    cooldown: :class:`~collections.abc.Callable`\\[[:class:`.disnake.Message`], :class:`.Cooldown` | :obj:`None`]
+    cooldown: :class:`~collections.abc.Callable`\\[[:class:`.disnake.Message`], :class:`.Cooldown` | :obj:`None`
         A function that takes a message and returns a cooldown that will
         apply to this invocation or :obj:`None` if the cooldown should be bypassed.
     type: :class:`.BucketType`

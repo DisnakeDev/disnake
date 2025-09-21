@@ -441,7 +441,7 @@ class BotBase(CommonBotBase, GroupMixin):
 
         Returns
         -------
-        :class:`list`\\[:class:`str`, :class:`str` | :obj:`None`]
+        :class:`list`\\[:class:`str`, :class:`str`] | :obj:`None`
             A list of prefixes or a single prefix that the bot is
             listening for. None if the bot isn't listening for prefixes.
         """

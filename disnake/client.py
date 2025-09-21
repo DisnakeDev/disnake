@@ -3299,7 +3299,7 @@ class Client:
             The user to retrieve entitlements for.
         guild: :class:`.abc.Snowflake` | :obj:`None`
             The guild to retrieve entitlements for.
-        skus: :class:`~collections.abc.Sequence`\\[:class:`.abc.Snowflake` | :obj:`None`]
+        skus: :class:`~collections.abc.Sequence`\\[:class:`.abc.Snowflake`] | :obj:`None`
             The SKUs for which entitlements are retrieved.
         exclude_ended: :class:`bool`
             Whether to exclude ended/expired entitlements. Defaults to ``False``.

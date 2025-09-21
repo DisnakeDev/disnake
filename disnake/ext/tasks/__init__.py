@@ -253,7 +253,7 @@ class Loop(Generic[LF]):
 
     @property
     def time(self) -> Optional[List[datetime.time]]:
-        """:class:`list`\\[:class:`datetime.time` | :obj:`None`]: Read-only list for the exact times this loop runs at.
+        """:class:`list`\\[:class:`datetime.time`] | :obj:`None`: Read-only list for the exact times this loop runs at.
         :obj:`None` if relative times were passed instead.
 
         .. versionadded:: 2.0

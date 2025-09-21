@@ -464,7 +464,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
             Defaults to 1 and must be between 1 and 25.
         disabled: :class:`bool`
             Whether the select is disabled. Defaults to ``False``.
-        default_values: :class:`~collections.abc.Sequence`\\[:class:`~disnake.User` | :class:`.Member` | :class:`.SelectDefaultValue` | :class:`.Object` | :obj:`None`]
+        default_values: :class:`~collections.abc.Sequence`\\[:class:`~disnake.User` | :class:`.Member` | :class:`.SelectDefaultValue` | :class:`.Object`] | :obj:`None`
             The list of values (users/members) that are selected by default.
             If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
@@ -530,7 +530,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
             Defaults to 1 and must be between 1 and 25.
         disabled: :class:`bool`
             Whether the select is disabled. Defaults to ``False``.
-        default_values: :class:`~collections.abc.Sequence`\\[:class:`.Role` | :class:`.SelectDefaultValue` | :class:`.Object` | :obj:`None`]
+        default_values: :class:`~collections.abc.Sequence`\\[:class:`.Role` | :class:`.SelectDefaultValue` | :class:`.Object`] | :obj:`None`
             The list of values (roles) that are selected by default.
             If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
@@ -598,7 +598,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
             Defaults to 1 and must be between 1 and 25.
         disabled: :class:`bool`
             Whether the select is disabled. Defaults to ``False``.
-        default_values: :class:`~collections.abc.Sequence`\\[:class:`~disnake.User` | :class:`.Member` | :class:`.Role` | :class:`.SelectDefaultValue` | :obj:`None`]
+        default_values: :class:`~collections.abc.Sequence`\\[:class:`~disnake.User` | :class:`.Member` | :class:`.Role` | :class:`.SelectDefaultValue`] | :obj:`None`
             The list of values (users/roles) that are selected by default.
             If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
@@ -667,10 +667,10 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
             Defaults to 1 and must be between 1 and 25.
         disabled: :class:`bool`
             Whether the select is disabled. Defaults to ``False``.
-        channel_types: :class:`list`\\[:class:`.ChannelType` | :obj:`None`]
+        channel_types: :class:`list`\\[:class:`.ChannelType`] | :obj:`None`
             The list of channel types that can be selected in this select menu.
             Defaults to all types (i.e. :obj:`None`).
-        default_values: :class:`~collections.abc.Sequence`\\[:class:`.abc.GuildChannel` | :class:`.Thread` | :class:`.abc.PrivateChannel` | :class:`.PartialMessageable` | :class:`.SelectDefaultValue` | :class:`.Object` | :obj:`None`]
+        default_values: :class:`~collections.abc.Sequence`\\[:class:`.abc.GuildChannel` | :class:`.Thread` | :class:`.abc.PrivateChannel` | :class:`.PartialMessageable` | :class:`.SelectDefaultValue` | :class:`.Object`] | :obj:`None`
             The list of values (channels) that are selected by default.
             If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 

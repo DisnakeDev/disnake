@@ -873,7 +873,7 @@ class Guild(Hashable):
 
         Returns
         -------
-        :class:`list`\\[:class:`tuple`\\[:class:`CategoryChannel` | :obj:`None`, :class:`list`\\[:class:`abc.GuildChannel`]]]:
+        :class:`list`\\[:class:`tuple`\\[:class:`CategoryChannel` | :obj:`None`:
             The categories and their associated channels.
         """
         grouped: Dict[Optional[int], List[GuildChannel]] = {}
@@ -1816,7 +1816,7 @@ class Guild(Hashable):
             A :class:`dict` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply upon creation of a channel.
             Useful for creating secret channels.
-        available_tags: :class:`~collections.abc.Sequence`\\[:class:`ForumTag` | :obj:`None`]
+        available_tags: :class:`~collections.abc.Sequence`\\[:class:`ForumTag`] | :obj:`None`
             The tags available for threads in this channel.
 
             .. versionadded:: 2.6
@@ -1959,7 +1959,7 @@ class Guild(Hashable):
             A :class:`dict` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply upon creation of a channel.
             Useful for creating secret channels.
-        available_tags: :class:`~collections.abc.Sequence`\\[:class:`ForumTag` | :obj:`None`]
+        available_tags: :class:`~collections.abc.Sequence`\\[:class:`ForumTag`] | :obj:`None`
             The tags available for threads in this channel.
         default_reaction: :class:`str` | :class:`Emoji` | :class:`PartialEmoji` | :obj:`None`
             The default emoji shown for reacting to threads.
@@ -2892,7 +2892,7 @@ class Guild(Hashable):
             Whether the welcome screen is enabled.
         description: :class:`str` | :obj:`None`
             The new guild description in the welcome screen.
-        channels: :class:`list`\\[:class:`WelcomeScreenChannel` | :obj:`None`]
+        channels: :class:`list`\\[:class:`WelcomeScreenChannel`] | :obj:`None`
             The new welcome channels.
         reason: :class:`str` | :obj:`None`
             The reason for editing the welcome screen. Shows up on the audit log.
@@ -4646,7 +4646,7 @@ class Guild(Hashable):
 
         Returns
         -------
-        :class:`list`\\[:class:`Member` | :obj:`None`]
+        :class:`list`\\[:class:`Member`] | :obj:`None`
              Returns a list of all the members within the guild.
         """
         if not self._state._intents.members:
@@ -4691,7 +4691,7 @@ class Guild(Hashable):
         cache: :class:`bool`
             Whether to cache the members internally. This makes operations
             such as :meth:`get_member` work for those that matched.
-        user_ids: :class:`list`\\[:class:`int` | :obj:`None`]
+        user_ids: :class:`list`\\[:class:`int`] | :obj:`None`
             List of user IDs to search for. If the user ID is not in the guild then it won't be returned.
 
             .. versionadded:: 1.4
@@ -5166,9 +5166,9 @@ class Guild(Hashable):
             Additional metadata associated with the trigger type.
         enabled: :class:`bool`
             Whether to enable the rule. Defaults to ``False``.
-        exempt_roles: :class:`~collections.abc.Sequence`\\[:class:`abc.Snowflake` | :obj:`None`]
+        exempt_roles: :class:`~collections.abc.Sequence`\\[:class:`abc.Snowflake`] | :obj:`None`
             The roles that are exempt from this rule, up to 20. By default, no roles are exempt.
-        exempt_channels: :class:`~collections.abc.Sequence`\\[:class:`abc.Snowflake` | :obj:`None`]
+        exempt_channels: :class:`~collections.abc.Sequence`\\[:class:`abc.Snowflake`] | :obj:`None`
             The channels that are exempt from this rule, up to 50. By default, no channels are exempt.
             Can also include categories, in which case all channels inside that category will be exempt.
         reason: :class:`str` | :obj:`None`

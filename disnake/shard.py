@@ -336,7 +336,7 @@ class AutoShardedClient(Client):
 
     Attributes
     ----------
-    shard_ids: :class:`list`\\[:class:`int` | :obj:`None`]
+    shard_ids: :class:`list`\\[:class:`int`] | :obj:`None`
         An optional list of shard_ids to launch the shards with.
     """
 

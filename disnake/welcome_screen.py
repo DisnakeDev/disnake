@@ -163,7 +163,7 @@ class WelcomeScreen:
             Whether the welcome screen is enabled.
         description: :class:`str` | :obj:`None`
             The new guild description in the welcome screen.
-        channels: :class:`list`\\[:class:`WelcomeScreenChannel` | :obj:`None`]
+        channels: :class:`list`\\[:class:`WelcomeScreenChannel`] | :obj:`None`
             The new welcome channels.
         reason: :class:`str` | :obj:`None`
             The reason for editing the welcome screen. Shows up on the audit log.

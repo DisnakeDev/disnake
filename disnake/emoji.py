@@ -274,7 +274,7 @@ class Emoji(_EmojiTag, AssetMixin):
         ----------
         name: :class:`str`
             The new emoji name.
-        roles: :class:`list`\\[:class:`~disnake.abc.Snowflake` | :obj:`None`]
+        roles: :class:`list`\\[:class:`~disnake.abc.Snowflake`] | :obj:`None`
             A list of roles that can use this emoji. An empty list can be passed to make it available to everyone.
 
             An emoji cannot have both subscription roles (see :attr:`RoleTags.integration_id`) and

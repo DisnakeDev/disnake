@@ -231,7 +231,7 @@ class LocalizationValue:
 
     @property
     def data(self) -> Optional[Dict[str, str]]:
-        """:class:`dict`\\[:class:`str`, :class:`str` | :obj:`None`]: A dict with a locale -> localization mapping, if available."""
+        """:class:`dict`\\[:class:`str`, :class:`str`] | :obj:`None`: A dict with a locale -> localization mapping, if available."""
         if self._data is MISSING:
             # This will happen when `_link(store)` hasn't been called yet, which *shouldn't* occur under normal circumstances.
             warnings.warn(
@@ -279,7 +279,7 @@ class LocalizationProtocol(ABC):
 
         Returns
         -------
-        :class:`dict`\\[:class:`str`, :class:`str` | :obj:`None`]
+        :class:`dict`\\[:class:`str`, :class:`str`] | :obj:`None`
             The localizations for the provided key.
             May return :obj:`None` if no localizations could be found.
         """
@@ -342,7 +342,7 @@ class LocalizationStore(LocalizationProtocol):
 
         Returns
         -------
-        :class:`dict`\\[:class:`str`, :class:`str` | :obj:`None`]
+        :class:`dict`\\[:class:`str`, :class:`str`] | :obj:`None`
             The localizations for the provided key.
             Returns :obj:`None` if no localizations could be found and :attr:`strict` is disabled.
         """

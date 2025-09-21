@@ -208,7 +208,7 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
 
         This can be provided as a parameter at creation.
 
-    owner_ids: :class:`~collections.abc.Collection`\\[:class:`int` | :obj:`None`]
+    owner_ids: :class:`~collections.abc.Collection`\\[:class:`int`] | :obj:`None`
         The IDs of the users that own the bot. This is similar to :attr:`owner_id`.
         If this is not set and the application is team based, then it is
         fetched automatically using :meth:`~.Bot.application_info` (taking team roles into account).
@@ -451,7 +451,7 @@ class InteractionBot(InteractionBotBase, disnake.Client):
 
         This can be provided as a parameter at creation.
 
-    owner_ids: :class:`~collections.abc.Collection`\\[:class:`int` | :obj:`None`]
+    owner_ids: :class:`~collections.abc.Collection`\\[:class:`int`] | :obj:`None`
         The IDs of the users that own the bot. This is similar to :attr:`owner_id`.
         If this is not set and the application is team based, then it is
         fetched automatically using :meth:`~.Bot.application_info` (taking team roles into account).

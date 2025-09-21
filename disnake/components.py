@@ -721,7 +721,7 @@ class ChannelSelectMenu(BaseSelectMenu):
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select menu is disabled or not.
-    channel_types: :class:`list`\\[:class:`ChannelType` | :obj:`None`]
+    channel_types: :class:`list`\\[:class:`ChannelType`] | :obj:`None`
         A list of channel types that can be selected in this select menu.
         If :obj:`None`, channels of all types may be selected.
     default_values: :class:`list`\\[:class:`SelectDefaultValue`]
