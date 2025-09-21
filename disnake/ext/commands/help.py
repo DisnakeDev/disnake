@@ -182,7 +182,7 @@ class Paginator:
 
     @property
     def pages(self) -> List[str]:
-        """List[:class:`str`]: Returns the rendered list of pages."""
+        """:class:`list`\\[:class:`str`]: Returns the rendered list of pages."""
         # we have more than just the prefix in our current page
         if len(self._current_page) > (0 if self.prefix is None else 1):
             self.close_page()
@@ -572,7 +572,7 @@ class HelpCommand:
 
         Returns
         -------
-        List[:class:`Command`]
+        :class:`list`\\[:class:`Command`]
             A list of commands that passed the filter.
         """
         # set `key` iff `sort` is true
@@ -614,7 +614,7 @@ class HelpCommand:
 
         Parameters
         ----------
-        commands: Sequence[:class:`Command`]
+        commands: :class:`~typing.Sequence`\\[:class:`Command`]
             A sequence of commands to check for the largest size.
 
         Returns
@@ -708,7 +708,7 @@ class HelpCommand:
 
         Parameters
         ----------
-        mapping: Mapping[:class:`Cog` | ``None``, List[:class:`Command`]]
+        mapping: :class:`~typing.Mapping`\\[:class:`Cog` | ``None``, :class:`list`\\[:class:`Command`]]
             A mapping of cogs to commands that have been requested by the user for help.
             The key of the mapping is the :class:`~.commands.Cog` that the command belongs to, or
             ``None`` if there isn't one, and the value is a list of commands that belongs to that cog.
@@ -982,7 +982,7 @@ class DefaultHelpCommand(HelpCommand):
 
         Parameters
         ----------
-        commands: Sequence[:class:`Command`]
+        commands: :class:`~typing.Sequence`\\[:class:`Command`]
             A list of commands to indent for output.
         heading: :class:`str`
             The heading to add to the output. This is only added
@@ -1209,7 +1209,7 @@ class MinimalHelpCommand(HelpCommand):
 
         Parameters
         ----------
-        commands: Sequence[:class:`Command`]
+        commands: :class:`~typing.Sequence`\\[:class:`Command`]
             A list of commands that belong to the heading.
         heading: :class:`str`
             The heading to add to the line.
@@ -1250,7 +1250,7 @@ class MinimalHelpCommand(HelpCommand):
 
         Parameters
         ----------
-        aliases: Sequence[:class:`str`]
+        aliases: :class:`~typing.Sequence`\\[:class:`str`]
             A list of aliases to format.
         """
         self.paginator.add_line(f"**{self.aliases_heading}** {', '.join(aliases)}", empty=True)

@@ -200,7 +200,7 @@ class Poll:
     ----------
     question: :class:`str` | :class:`PollMedia`
         The question of the poll. Currently, emojis are not supported in poll questions.
-    answers: List[:class:`str` | :class:`PollAnswer`]
+    answers: :class:`list`\\[:class:`str` | :class:`PollAnswer`]
         The answers for this poll, up to 10.
     duration: :class:`datetime.timedelta`
         The total duration of the poll, up to 32 days. Defaults to 1 day.
@@ -278,7 +278,7 @@ class Poll:
 
     @property
     def answers(self) -> List[PollAnswer]:
-        """List[:class:`PollAnswer`]: The list of answers for this poll.
+        """:class:`list`\\[:class:`PollAnswer`]: The list of answers for this poll.
 
         See also :meth:`get_answer` to get specific answers by ID.
         """

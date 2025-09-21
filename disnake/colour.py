@@ -95,7 +95,7 @@ class Colour:
         return self._get_byte(0)
 
     def to_rgb(self) -> Tuple[int, int, int]:
-        """Tuple[:class:`int`, :class:`int`, :class:`int`]: Returns an (r, g, b) tuple representing the colour."""
+        """:class:`tuple`\\[:class:`int`, :class:`int`, :class:`int`]: Returns an (r, g, b) tuple representing the colour."""
         return (self.r, self.g, self.b)
 
     @classmethod

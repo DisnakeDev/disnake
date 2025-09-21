@@ -402,7 +402,7 @@ class BotIntegration(Integration):
         The integration account information.
     application: :class:`IntegrationApplication`
         The application tied to this integration.
-    scopes: List[:class:`str`]
+    scopes: :class:`list`\\[:class:`str`]
         The OAuth2 scopes the application has been authorized for.
 
         .. versionadded:: 2.6

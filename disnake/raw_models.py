@@ -91,13 +91,13 @@ class RawBulkMessageDeleteEvent(_RawReprMixin):
 
     Attributes
     ----------
-    message_ids: Set[:class:`int`]
+    message_ids: :class:`set`\\[:class:`int`]
         A :class:`set` of the message IDs that were deleted.
     channel_id: :class:`int`
         The channel ID where the deletion took place.
     guild_id: :class:`int` | ``None``
         The guild ID where the deletion took place, if applicable.
-    cached_messages: List[:class:`Message`]
+    cached_messages: :class:`list`\\[:class:`Message`]
         The cached messages, if found in the internal message cache.
     """
 

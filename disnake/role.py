@@ -485,7 +485,7 @@ class Role(Hashable):
 
     @property
     def members(self) -> List[Member]:
-        """List[:class:`Member`]: Returns all the members with this role."""
+        """:class:`list`\\[:class:`Member`]: Returns all the members with this role."""
         all_members = self.guild.members
         if self.is_default():
             return all_members

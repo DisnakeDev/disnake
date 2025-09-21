@@ -24,15 +24,15 @@ class GuildPreview:
     ----------
     name: :class:`str`
         The guild's name.
-    emojis: Tuple[:class:`Emoji`, ...]
+    emojis: :class:`tuple`\\[:class:`Emoji`, ...]
         All emojis that the guild owns.
-    stickers: Tuple[:class:`GuildSticker`, ...]
+    stickers: :class:`tuple`\\[:class:`GuildSticker`, ...]
         All stickers that the guild owns.
     id: :class:`int`
         The ID of the guild this preview represents.
     description: :class:`str` | ``None``
         The guild's description.
-    features: List[:class:`str`]
+    features: :class:`list`\\[:class:`str`]
         A list of features that the guild has. The features that a guild can have are
         subject to arbitrary change by Discord.
 

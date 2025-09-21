@@ -252,14 +252,14 @@ class Guild(Hashable):
     ----------
     name: :class:`str`
         The guild's name.
-    emojis: Tuple[:class:`Emoji`, ...]
+    emojis: :class:`tuple`\\[:class:`Emoji`, ...]
         All emojis that the guild owns.
-    stickers: Tuple[:class:`GuildSticker`, ...]
+    stickers: :class:`tuple`\\[:class:`GuildSticker`, ...]
         All stickers that the guild owns.
 
         .. versionadded:: 2.0
 
-    soundboard_sounds: Tuple[:class:`GuildSoundboardSound`, ...]
+    soundboard_sounds: :class:`tuple`\\[:class:`GuildSoundboardSound`, ...]
         All soundboard sounds that the guild owns.
 
         .. versionadded:: 2.10
@@ -309,7 +309,7 @@ class Guild(Hashable):
         The guild's explicit content filter.
     default_notifications: :class:`NotificationLevel`
         The guild's notification settings.
-    features: List[:class:`str`]
+    features: :class:`list`\\[:class:`str`]
         A list of features that the guild has. The features that a guild can have are
         subject to arbitrary change by Discord.
 
@@ -758,12 +758,12 @@ class Guild(Hashable):
 
     @property
     def channels(self) -> List[GuildChannel]:
-        """List[:class:`abc.GuildChannel`]: A list of channels that belong to this guild."""
+        """:class:`list`\\[:class:`abc.GuildChannel`]: A list of channels that belong to this guild."""
         return list(self._channels.values())
 
     @property
     def threads(self) -> List[Thread]:
-        """List[:class:`Thread`]: A list of threads that you have permission to view.
+        """:class:`list`\\[:class:`Thread`]: A list of threads that you have permission to view.
 
         .. versionadded:: 2.0
         """
@@ -785,7 +785,7 @@ class Guild(Hashable):
 
     @property
     def voice_channels(self) -> List[VoiceChannel]:
-        """List[:class:`VoiceChannel`]: A list of voice channels that belong to this guild.
+        """:class:`list`\\[:class:`VoiceChannel`]: A list of voice channels that belong to this guild.
 
         This is sorted by the position and are in UI order from top to bottom.
         """
@@ -795,7 +795,7 @@ class Guild(Hashable):
 
     @property
     def stage_channels(self) -> List[StageChannel]:
-        """List[:class:`StageChannel`]: A list of stage channels that belong to this guild.
+        """:class:`list`\\[:class:`StageChannel`]: A list of stage channels that belong to this guild.
 
         .. versionadded:: 1.7
 
@@ -807,7 +807,7 @@ class Guild(Hashable):
 
     @property
     def forum_channels(self) -> List[ForumChannel]:
-        """List[:class:`ForumChannel`]: A list of forum channels that belong to this guild.
+        """:class:`list`\\[:class:`ForumChannel`]: A list of forum channels that belong to this guild.
 
         This is sorted by the position and are in UI order from top to bottom.
 
@@ -819,7 +819,7 @@ class Guild(Hashable):
 
     @property
     def media_channels(self) -> List[MediaChannel]:
-        """List[:class:`MediaChannel`]: A list of media channels that belong to this guild.
+        """:class:`list`\\[:class:`MediaChannel`]: A list of media channels that belong to this guild.
 
         This is sorted by the position and are in UI order from top to bottom.
 
@@ -845,7 +845,7 @@ class Guild(Hashable):
 
     @property
     def text_channels(self) -> List[TextChannel]:
-        """List[:class:`TextChannel`]: A list of text channels that belong to this guild.
+        """:class:`list`\\[:class:`TextChannel`]: A list of text channels that belong to this guild.
 
         This is sorted by the position and are in UI order from top to bottom.
         """
@@ -855,7 +855,7 @@ class Guild(Hashable):
 
     @property
     def categories(self) -> List[CategoryChannel]:
-        """List[:class:`CategoryChannel`]: A list of categories that belong to this guild.
+        """:class:`list`\\[:class:`CategoryChannel`]: A list of categories that belong to this guild.
 
         This is sorted by the position and are in UI order from top to bottom.
         """
@@ -873,7 +873,7 @@ class Guild(Hashable):
 
         Returns
         -------
-        List[Tuple[:class:`CategoryChannel` | ``None``, List[:class:`abc.GuildChannel`]]]:
+        :class:`list`\\[:class:`tuple`\\[:class:`CategoryChannel` | ``None``, :class:`list`\\[:class:`abc.GuildChannel`]]]:
             The categories and their associated channels.
         """
         grouped: Dict[Optional[int], List[GuildChannel]] = {}
@@ -1052,7 +1052,7 @@ class Guild(Hashable):
 
     @property
     def members(self) -> List[Member]:
-        """List[:class:`Member`]: A list of members that belong to this guild."""
+        """:class:`list`\\[:class:`Member`]: A list of members that belong to this guild."""
         return list(self._members.values())
 
     def get_member(self, user_id: int, /) -> Optional[Member]:
@@ -1072,12 +1072,12 @@ class Guild(Hashable):
 
     @property
     def premium_subscribers(self) -> List[Member]:
-        """List[:class:`Member`]: A list of members who have "boosted" this guild."""
+        """:class:`list`\\[:class:`Member`]: A list of members who have "boosted" this guild."""
         return [member for member in self.members if member.premium_since is not None]
 
     @property
     def roles(self) -> List[Role]:
-        """List[:class:`Role`]: Returns a :class:`list` of the guild's roles in hierarchy order.
+        """:class:`list`\\[:class:`Role`]: Returns a :class:`list` of the guild's roles in hierarchy order.
 
         The first element of this list will be the lowest role in the
         hierarchy.
@@ -1131,7 +1131,7 @@ class Guild(Hashable):
 
     @property
     def stage_instances(self) -> List[StageInstance]:
-        """List[:class:`StageInstance`]: Returns a :class:`list` of the guild's stage instances that
+        """:class:`list`\\[:class:`StageInstance`]: Returns a :class:`list` of the guild's stage instances that
         are currently running.
 
         .. versionadded:: 2.0
@@ -1157,7 +1157,7 @@ class Guild(Hashable):
 
     @property
     def scheduled_events(self) -> List[GuildScheduledEvent]:
-        """List[:class:`GuildScheduledEvent`]: Returns a :class:`list` of existing guild scheduled events.
+        """:class:`list`\\[:class:`GuildScheduledEvent`]: Returns a :class:`list` of existing guild scheduled events.
 
         .. versionadded:: 2.3
         """
@@ -1414,7 +1414,7 @@ class Guild(Hashable):
         ----------
         name: :class:`str`
             The channel's name.
-        overwrites: Dict[:class:`Role` | :class:`Member`, :class:`PermissionOverwrite`]
+        overwrites: :class:`dict`\\[:class:`Role` | :class:`Member`, :class:`PermissionOverwrite`]
             A :class:`dict` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply upon creation of a channel.
             Useful for creating secret channels.
@@ -1536,7 +1536,7 @@ class Guild(Hashable):
         ----------
         name: :class:`str`
             The channel's name.
-        overwrites: Dict[:class:`Role` | :class:`Member`, :class:`PermissionOverwrite`]
+        overwrites: :class:`dict`\\[:class:`Role` | :class:`Member`, :class:`PermissionOverwrite`]
             A :class:`dict` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply upon creation of a channel.
             Useful for creating secret channels.
@@ -1662,7 +1662,7 @@ class Guild(Hashable):
             .. versionchanged:: 2.5
                 This is no longer required to be provided.
 
-        overwrites: Dict[:class:`Role` | :class:`Member`, :class:`PermissionOverwrite`]
+        overwrites: :class:`dict`\\[:class:`Role` | :class:`Member`, :class:`PermissionOverwrite`]
             A :class:`dict` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply upon creation of a channel.
             Useful for creating secret channels.
@@ -1812,11 +1812,11 @@ class Guild(Hashable):
             Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
         nsfw: :class:`bool`
             Whether to mark the channel as NSFW.
-        overwrites: Dict[:class:`Role` | :class:`Member`, :class:`PermissionOverwrite`]
+        overwrites: :class:`dict`\\[:class:`Role` | :class:`Member`, :class:`PermissionOverwrite`]
             A :class:`dict` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply upon creation of a channel.
             Useful for creating secret channels.
-        available_tags: Sequence[:class:`ForumTag` | ``None``]
+        available_tags: :class:`~typing.Sequence`\\[:class:`ForumTag` | ``None``]
             The tags available for threads in this channel.
 
             .. versionadded:: 2.6
@@ -1955,11 +1955,11 @@ class Guild(Hashable):
             Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
         nsfw: :class:`bool`
             Whether to mark the channel as NSFW.
-        overwrites: Dict[:class:`Role` | :class:`Member`, :class:`PermissionOverwrite`]
+        overwrites: :class:`dict`\\[:class:`Role` | :class:`Member`, :class:`PermissionOverwrite`]
             A :class:`dict` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply upon creation of a channel.
             Useful for creating secret channels.
-        available_tags: Sequence[:class:`ForumTag` | ``None``]
+        available_tags: :class:`~typing.Sequence`\\[:class:`ForumTag` | ``None``]
             The tags available for threads in this channel.
         default_reaction: :class:`str` | :class:`Emoji` | :class:`PartialEmoji` | ``None``
             The default emoji shown for reacting to threads.
@@ -2054,7 +2054,7 @@ class Guild(Hashable):
         ----------
         name: :class:`str`
             The category's name.
-        overwrites: Dict[:class:`Role` | :class:`Member`, :class:`PermissionOverwrite`]
+        overwrites: :class:`dict`\\[:class:`Role` | :class:`Member`, :class:`PermissionOverwrite`]
             A :class:`dict` of target (either a role or a member) to
             :class:`PermissionOverwrite` which can be synced to channels.
         position: :class:`int`
@@ -2529,7 +2529,7 @@ class Guild(Hashable):
 
         Returns
         -------
-        Sequence[:class:`abc.GuildChannel`]
+        :class:`~typing.Sequence`\\[:class:`abc.GuildChannel`]
             All channels that the guild has.
         """
         data = await self._state.http.get_all_guild_channels(self.id)
@@ -2564,7 +2564,7 @@ class Guild(Hashable):
 
         Returns
         -------
-        List[:class:`Thread`]
+        :class:`list`\\[:class:`Thread`]
             The active threads.
         """
         data = await self._state.http.get_active_threads(self.id)
@@ -2598,7 +2598,7 @@ class Guild(Hashable):
 
         Returns
         -------
-        List[:class:`GuildScheduledEvent`]
+        :class:`list`\\[:class:`GuildScheduledEvent`]
             The existing guild scheduled events.
         """
         raw_events = await self._state.http.get_guild_scheduled_events(
@@ -2892,7 +2892,7 @@ class Guild(Hashable):
             Whether the welcome screen is enabled.
         description: :class:`str` | ``None``
             The new guild description in the welcome screen.
-        channels: List[:class:`WelcomeScreenChannel` | ``None``]
+        channels: :class:`list`\\[:class:`WelcomeScreenChannel` | ``None``]
             The new welcome channels.
         reason: :class:`str` | ``None``
             The reason for editing the welcome screen. Shows up on the audit log.
@@ -3200,7 +3200,7 @@ class Guild(Hashable):
             which makes it prone to timeouts in very large guilds. In order
             to prevent timeouts, you must set this to ``False``. If this is
             set to ``False``\\, then this function will always return ``None``.
-        roles: List[:class:`abc.Snowflake`]
+        roles: :class:`list`\\[:class:`abc.Snowflake`]
             A list of :class:`abc.Snowflake` that represent roles to include in the pruning process. If a member
             has a role that is not specified, they'll be excluded.
         reason: :class:`str` | ``None``
@@ -3253,7 +3253,7 @@ class Guild(Hashable):
 
         Returns
         -------
-        List[:class:`Template`]
+        :class:`list`\\[:class:`Template`]
             The templates for this guild.
         """
         from .template import Template
@@ -3276,7 +3276,7 @@ class Guild(Hashable):
 
         Returns
         -------
-        List[:class:`Webhook`]
+        :class:`list`\\[:class:`Webhook`]
             The webhooks for this guild.
         """
         from .webhook import Webhook
@@ -3298,7 +3298,7 @@ class Guild(Hashable):
         ----------
         days: :class:`int`
             The number of days before counting as inactive.
-        roles: List[:class:`abc.Snowflake`]
+        roles: :class:`list`\\[:class:`abc.Snowflake`]
             A list of :class:`abc.Snowflake` that represent roles to include in the estimate. If a member
             has a role that is not specified, they'll be excluded.
 
@@ -3355,7 +3355,7 @@ class Guild(Hashable):
 
         Returns
         -------
-        List[:class:`Invite`]
+        :class:`list`\\[:class:`Invite`]
             The list of invites that are currently active.
         """
         data = await self._state.http.invites_from(self.id)
@@ -3451,7 +3451,7 @@ class Guild(Hashable):
 
         Returns
         -------
-        List[:class:`Integration`]
+        :class:`list`\\[:class:`Integration`]
             The list of integrations that are attached to the guild.
         """
         data = await self._state.http.get_all_integrations(self.id)
@@ -3480,7 +3480,7 @@ class Guild(Hashable):
 
         Returns
         -------
-        List[:class:`GuildSticker`]
+        :class:`list`\\[:class:`GuildSticker`]
             The retrieved stickers.
         """
         data = await self._state.http.get_all_guild_stickers(self.id)
@@ -3618,7 +3618,7 @@ class Guild(Hashable):
 
         Returns
         -------
-        List[:class:`Emoji`]
+        :class:`list`\\[:class:`Emoji`]
             The retrieved emojis.
         """
         data = await self._state.http.get_all_custom_emojis(self.id)
@@ -3694,7 +3694,7 @@ class Guild(Hashable):
             .. versionchanged:: 2.5
                 Now accepts various resource types in addition to :class:`bytes`.
 
-        roles: List[:class:`Role`]
+        roles: :class:`list`\\[:class:`Role`]
             A list of roles that can use this emoji. Leave empty to make it available to everyone.
 
             An emoji cannot have both subscription roles (see :attr:`RoleTags.integration_id`) and
@@ -3806,7 +3806,7 @@ class Guild(Hashable):
 
         Returns
         -------
-        List[:class:`Role`]
+        :class:`list`\\[:class:`Role`]
             All roles that the guild has.
         """
         data = await self._state.http.get_roles(self.id)
@@ -4081,7 +4081,7 @@ class Guild(Hashable):
 
         Returns
         -------
-        List[:class:`Role`]
+        :class:`list`\\[:class:`Role`]
             A list of all the roles in the guild.
         """
         if not isinstance(positions, dict):
@@ -4646,7 +4646,7 @@ class Guild(Hashable):
 
         Returns
         -------
-        List[:class:`Member` | ``None``]
+        :class:`list`\\[:class:`Member` | ``None``]
              Returns a list of all the members within the guild.
         """
         if not self._state._intents.members:
@@ -4691,7 +4691,7 @@ class Guild(Hashable):
         cache: :class:`bool`
             Whether to cache the members internally. This makes operations
             such as :meth:`get_member` work for those that matched.
-        user_ids: List[:class:`int` | ``None``]
+        user_ids: :class:`list`\\[:class:`int` | ``None``]
             List of user IDs to search for. If the user ID is not in the guild then it won't be returned.
 
             .. versionadded:: 1.4
@@ -4708,7 +4708,7 @@ class Guild(Hashable):
 
         Returns
         -------
-        List[:class:`Member`]
+        :class:`list`\\[:class:`Member`]
             The list of members that have matched the query.
         """
         if presences and not self._state._intents.presences:
@@ -4768,7 +4768,7 @@ class Guild(Hashable):
 
         Returns
         -------
-        List[:class:`Member`]
+        :class:`list`\\[:class:`Member`]
             The list of members that have matched the query.
         """
         if not query:
@@ -4806,7 +4806,7 @@ class Guild(Hashable):
 
         Parameters
         ----------
-        user_ids: List[:class:`int`]
+        user_ids: :class:`list`\\[:class:`int`]
             List of user IDs to search for. If the user ID is not in the guild then it won't be returned.
         presences: :class:`bool`
             Whether to request for presences to be provided. Defaults to ``False``.
@@ -4824,7 +4824,7 @@ class Guild(Hashable):
 
         Returns
         -------
-        List[:class:`Member`]
+        :class:`list`\\[:class:`Member`]
             The list of members with the given IDs, if they exist.
         """
         if presences and not self._state._intents.presences:
@@ -5114,7 +5114,7 @@ class Guild(Hashable):
 
         Returns
         -------
-        List[:class:`AutoModRule`]
+        :class:`list`\\[:class:`AutoModRule`]
             The guild's auto moderation rules.
         """
         data = await self._state.http.get_auto_moderation_rules(self.id)
@@ -5159,16 +5159,16 @@ class Guild(Hashable):
             If set to :attr:`~AutoModTriggerType.keyword`, :attr:`~AutoModTriggerType.keyword_preset`,
             or :attr:`~AutoModTriggerType.mention_spam`, ``trigger_metadata`` must be set accordingly.
             This cannot be changed after creation.
-        actions: Sequence[:class:`AutoModBlockMessageAction` | :class:`AutoModSendAlertAction` | :class:`AutoModTimeoutAction` | :class:`AutoModAction`]
+        actions: :class:`~typing.Sequence`\\[:class:`AutoModBlockMessageAction` | :class:`AutoModSendAlertAction` | :class:`AutoModTimeoutAction` | :class:`AutoModAction`]
             The list of actions that will execute if a matching event triggered this rule.
             Must contain at least one action.
         trigger_metadata: :class:`AutoModTriggerMetadata` | ``None``
             Additional metadata associated with the trigger type.
         enabled: :class:`bool`
             Whether to enable the rule. Defaults to ``False``.
-        exempt_roles: Sequence[:class:`abc.Snowflake` | ``None``]
+        exempt_roles: :class:`~typing.Sequence`\\[:class:`abc.Snowflake` | ``None``]
             The roles that are exempt from this rule, up to 20. By default, no roles are exempt.
-        exempt_channels: Sequence[:class:`abc.Snowflake` | ``None``]
+        exempt_channels: :class:`~typing.Sequence`\\[:class:`abc.Snowflake` | ``None``]
             The channels that are exempt from this rule, up to 50. By default, no channels are exempt.
             Can also include categories, in which case all channels inside that category will be exempt.
         reason: :class:`str` | ``None``
@@ -5347,7 +5347,7 @@ class Guild(Hashable):
 
         Returns
         -------
-        List[:class:`GuildSoundboardSound`]
+        :class:`list`\\[:class:`GuildSoundboardSound`]
             All soundboard sounds that the guild has.
         """
         data = await self._state.http.get_guild_soundboard_sounds(self.id)
@@ -5668,7 +5668,7 @@ class GuildBuilder:
         ----------
         name: :class:`str`
             The category's name.
-        overwrites: Dict[``PlaceholderID``, :class:`PermissionOverwrite`]
+        overwrites: :class:`dict`\\[``PlaceholderID``, :class:`PermissionOverwrite`]
             A :class:`dict` of roles to :class:`PermissionOverwrite`\\s which can be synced to channels.
 
         Returns
@@ -5698,7 +5698,7 @@ class GuildBuilder:
         ----------
         name: :class:`str`
             The channel's name.
-        overwrites: Dict[``PlaceholderID``, :class:`PermissionOverwrite`]
+        overwrites: :class:`dict`\\[``PlaceholderID``, :class:`PermissionOverwrite`]
             A :class:`dict` of roles to :class:`PermissionOverwrite`\\s to apply to the channel.
         category: ``PlaceholderID``
             The category to place the new channel under.
@@ -5760,7 +5760,7 @@ class GuildBuilder:
         ----------
         name: :class:`str`
             The channel's name.
-        overwrites: Dict[``PlaceholderID``, :class:`PermissionOverwrite`]
+        overwrites: :class:`dict`\\[``PlaceholderID``, :class:`PermissionOverwrite`]
             A :class:`dict` of roles to :class:`PermissionOverwrite`\\s to apply to the channel.
         category: ``PlaceholderID``
             The category to place the new channel under.

@@ -261,7 +261,7 @@ class Thread(Messageable, Hashable):
 
     @property
     def members(self) -> List[ThreadMember]:
-        """List[:class:`ThreadMember`]: A list of thread members in this thread.
+        """:class:`list`\\[:class:`ThreadMember`]: A list of thread members in this thread.
 
         This requires :attr:`Intents.members` to be properly filled. Most of the time however,
         this data is not provided by the gateway and a call to :meth:`fetch_members` is
@@ -399,7 +399,7 @@ class Thread(Messageable, Hashable):
 
     @property
     def applied_tags(self) -> List[ForumTag]:
-        """List[:class:`ForumTag`]: The tags currently applied to this thread.
+        """:class:`list`\\[:class:`ForumTag`]: The tags currently applied to this thread.
         Only applicable to threads in channels of type :class:`ForumChannel` or :class:`MediaChannel`.
 
         .. versionadded:: 2.6
@@ -608,7 +608,7 @@ class Thread(Messageable, Hashable):
 
         Returns
         -------
-        List[:class:`.Message`]
+        :class:`list`\\[:class:`.Message`]
             The list of messages that were deleted.
         """
         if check is MISSING:
@@ -716,7 +716,7 @@ class Thread(Messageable, Hashable):
 
             .. versionadded:: 2.6
 
-        applied_tags: Sequence[:class:`abc.Snowflake`]
+        applied_tags: :class:`~typing.Sequence`\\[:class:`abc.Snowflake`]
             The new tags of the thread. Maximum of 5.
             Can also be used to reorder existing tags.
 
@@ -891,7 +891,7 @@ class Thread(Messageable, Hashable):
 
         Returns
         -------
-        List[:class:`ThreadMember`]
+        :class:`list`\\[:class:`ThreadMember`]
             All thread members in the thread.
         """
         members = await self._state.http.get_thread_members(self.id)

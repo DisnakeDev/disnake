@@ -242,14 +242,14 @@ class AutoModTriggerMetadata:
 
     Attributes
     ----------
-    keyword_filter: Sequence[:class:`str` | ``None``]
+    keyword_filter: :class:`~typing.Sequence`\\[:class:`str` | ``None``]
         The list of keywords to check for, up to 1000 keywords. Used with :attr:`AutoModTriggerType.keyword`.
 
         See :ddocs:`api docs <resources/auto-moderation#auto-moderation-rule-object-keyword-matching-strategies>`
         for details about how keyword matching works.
         Each keyword must be 60 characters or less.
 
-    regex_patterns: Sequence[:class:`str` | ``None``]
+    regex_patterns: :class:`~typing.Sequence`\\[:class:`str` | ``None``]
         The list of regular expressions to check for. Used with :attr:`AutoModTriggerType.keyword`.
 
         A maximum of 10 regexes can be added, each with up to 260 characters.
@@ -263,7 +263,7 @@ class AutoModTriggerMetadata:
     presets: :class:`AutoModKeywordPresets` | ``None``
         The keyword presets. Used with :attr:`AutoModTriggerType.keyword_preset`.
 
-    allow_list: Sequence[:class:`str` | ``None``]
+    allow_list: :class:`~typing.Sequence`\\[:class:`str` | ``None``]
         The keywords that should be exempt from a preset.
         Used with :attr:`AutoModTriggerType.keyword` (up to 100 exemptions) and :attr:`AutoModTriggerType.keyword_preset` (up to 1000 exemptions).
 
@@ -442,9 +442,9 @@ class AutoModRule:
         The type of trigger that determines whether this rule's actions should run for a specific event.
     trigger_metadata: :class:`AutoModTriggerMetadata`
         Additional metadata associated with this rule's :attr:`.trigger_type`.
-    exempt_role_ids: FrozenSet[:class:`int`]
+    exempt_role_ids: :class:`frozenset`\\[:class:`int`]
         The role IDs that are exempt from this rule.
-    exempt_channel_ids: FrozenSet[:class:`int`]
+    exempt_channel_ids: :class:`frozenset`\\[:class:`int`]
         The channel IDs that are exempt from this rule.
     """
 
@@ -498,7 +498,7 @@ class AutoModRule:
 
     @property
     def actions(self) -> List[AutoModAction]:
-        """List[:class:`AutoModBlockMessageAction` | :class:`AutoModSendAlertAction` | :class:`AutoModTimeoutAction` | :class:`AutoModAction`]:
+        """:class:`list`\\[:class:`AutoModBlockMessageAction` | :class:`AutoModSendAlertAction` | :class:`AutoModTimeoutAction` | :class:`AutoModAction`]:
         The list of actions that will execute if a matching event triggered this rule.
         """
         return list(self._actions)  # return a copy
@@ -512,12 +512,12 @@ class AutoModRule:
 
     @property
     def exempt_roles(self) -> List[Role]:
-        """List[:class:`Role`]: The list of roles that are exempt from this rule."""
+        """:class:`list`\\[:class:`Role`]: The list of roles that are exempt from this rule."""
         return list(filter(None, map(self.guild.get_role, self.exempt_role_ids)))
 
     @property
     def exempt_channels(self) -> List[GuildChannel]:
-        """List[:class:`abc.GuildChannel`]: The list of channels that are exempt from this rule."""
+        """:class:`list`\\[:class:`abc.GuildChannel`]: The list of channels that are exempt from this rule."""
         return list(filter(None, map(self.guild.get_channel, self.exempt_channel_ids)))
 
     def __repr__(self) -> str:
@@ -586,7 +586,7 @@ class AutoModRule:
             The rule's new event type.
         trigger_metadata: :class:`AutoModTriggerMetadata`
             The rule's new associated trigger metadata.
-        actions: Sequence[:class:`AutoModBlockMessageAction` | :class:`AutoModSendAlertAction` | :class:`AutoModTimeoutAction` | :class:`AutoModAction`]
+        actions: :class:`~typing.Sequence`\\[:class:`AutoModBlockMessageAction` | :class:`AutoModSendAlertAction` | :class:`AutoModTimeoutAction` | :class:`AutoModAction`]
             The rule's new actions.
             If provided, must contain at least one action.
         enabled: :class:`bool`

@@ -257,7 +257,7 @@ class CommonBotBase(Generic[CogT]):
 
     @property
     def cogs(self) -> Mapping[str, Cog]:
-        """Mapping[:class:`str`, :class:`Cog`]: A read-only mapping of cog name to cog."""
+        """:class:`~typing.Mapping`\\[:class:`str`, :class:`Cog`]: A read-only mapping of cog name to cog."""
         return types.MappingProxyType(self.__cogs)
 
     # extensions
@@ -493,7 +493,7 @@ class CommonBotBase(Generic[CogT]):
 
     @property
     def extensions(self) -> Mapping[str, types.ModuleType]:
-        """Mapping[:class:`str`, :class:`py:types.ModuleType`]: A read-only mapping of extension name to extension."""
+        """:class:`~typing.Mapping`\\[:class:`str`, :class:`py:types.ModuleType`]: A read-only mapping of extension name to extension."""
         return types.MappingProxyType(self.__extensions)
 
     async def _watchdog(self) -> None:

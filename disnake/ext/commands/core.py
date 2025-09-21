@@ -206,7 +206,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         The short help text for the command.
     usage: :class:`str` | ``None``
         A replacement for arguments in the default help text.
-    aliases: List[:class:`str`, Tuple[:class:`str`]]
+    aliases: :class:`list`\\[:class:`str`, :class:`tuple`\\[:class:`str`]]
         The list of aliases the command can be invoked under.
     enabled: :class:`bool`
         Whether the command is currently enabled.
@@ -217,7 +217,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         The parent group that this command belongs to. ``None`` if there isn't one.
     cog: :class:`Cog` | ``None``
         The cog that this command belongs to. ``None`` if there isn't one.
-    checks: List[Callable[[:class:`.Context`], :class:`bool`]]
+    checks: :class:`list`\\[Callable[[:class:`.Context`], :class:`bool`]]
         A list of predicates that verifies if the command could be executed
         with the given :class:`.Context` as the sole parameter. If an exception
         is necessary to be thrown to signal failure, then one inherited from
@@ -607,7 +607,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
 
     @property
     def clean_params(self) -> Dict[str, inspect.Parameter]:
-        """Dict[:class:`str`, :class:`inspect.Parameter`]:
+        """:class:`dict`\\[:class:`str`, :class:`inspect.Parameter`]:
         Retrieves the parameter dictionary without the context or self parameters.
 
         Useful for inspecting signature.
@@ -632,7 +632,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
 
     @property
     def parents(self) -> List[Group[CogT, ..., Any]]:
-        """List[:class:`Group`]: Retrieves the parents of this command.
+        """:class:`list`\\[:class:`Group`]: Retrieves the parents of this command.
 
         If the command has no parents then it returns an empty :class:`list`.
 
@@ -1123,7 +1123,7 @@ class GroupMixin(Generic[CogT]):
 
     @property
     def commands(self) -> Set[Command[CogT, Any, Any]]:
-        """Set[:class:`.Command`]: A unique set of commands without aliases that are registered."""
+        """:class:`set`\\[:class:`.Command`]: A unique set of commands without aliases that are registered."""
         return set(self.all_commands.values())
 
     def recursively_remove_all_commands(self) -> None:
@@ -1893,7 +1893,7 @@ def has_any_role(*items: Union[int, str]) -> Callable[[T], T]:
 
     Parameters
     ----------
-    items: List[:class:`str` | :class:`int`]
+    items: :class:`list`\\[:class:`str` | :class:`int`]
         An argument list of names or IDs to check that the member has roles wise.
 
     Example

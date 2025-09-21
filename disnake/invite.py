@@ -163,7 +163,7 @@ class PartialInviteGuild:
         The partial guild's ID.
     description: :class:`str` | ``None``
         The partial guild's description.
-    features: List[:class:`str`]
+    features: :class:`list`\\[:class:`str`]
         A list of features the partial guild has. See :attr:`Guild.features` for more information.
     nsfw_level: :class:`NSFWLevel`
         The partial guild's nsfw level.

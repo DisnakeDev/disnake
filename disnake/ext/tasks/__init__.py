@@ -253,7 +253,7 @@ class Loop(Generic[LF]):
 
     @property
     def time(self) -> Optional[List[datetime.time]]:
-        """List[:class:`datetime.time` | ``None``]: Read-only list for the exact times this loop runs at.
+        """:class:`list`\\[:class:`datetime.time` | ``None``]: Read-only list for the exact times this loop runs at.
         ``None`` if relative times were passed instead.
 
         .. versionadded:: 2.0
@@ -648,7 +648,7 @@ class Loop(Generic[LF]):
             The number of minutes between every iteration.
         hours: :class:`float`
             The number of hours between every iteration.
-        time: :class:`datetime.time` | Sequence[:class:`datetime.time`]
+        time: :class:`datetime.time` | :class:`~typing.Sequence`\\[:class:`datetime.time`]
             The exact times to run this loop at. Either a non-empty list or a single
             value of :class:`datetime.time` should be passed.
             This cannot be used in conjunction with the relative time parameters.
@@ -750,7 +750,7 @@ def loop(
         The number of minutes between every iteration.
     hours: :class:`float`
         The number of hours between every iteration.
-    time: :class:`datetime.time` | Sequence[:class:`datetime.time`]
+    time: :class:`datetime.time` | :class:`~typing.Sequence`\\[:class:`datetime.time`]
         The exact times to run this loop at. Either a non-empty list or a single
         value of :class:`datetime.time` should be passed. Timezones are supported.
         If no timezone is given for the times, it is assumed to represent UTC time.

@@ -506,7 +506,7 @@ class GuildChannel(ABC):
 
     @property
     def changed_roles(self) -> List[Role]:
-        """List[:class:`.Role`]: Returns a list of roles that have been overridden from
+        """:class:`list`\\[:class:`.Role`]: Returns a list of roles that have been overridden from
         their default values in the :attr:`.Guild.roles` attribute.
         """
         ret: List[Role] = []
@@ -571,7 +571,7 @@ class GuildChannel(ABC):
 
         Returns
         -------
-        Dict[:class:`~disnake.Role` | :class:`~disnake.Member`, :class:`~disnake.PermissionOverwrite`]
+        :class:`dict`\\[:class:`~disnake.Role` | :class:`~disnake.Member`, :class:`~disnake.PermissionOverwrite`]
             The channel's permission overwrites.
         """
         ret = {}
@@ -1395,7 +1395,7 @@ class GuildChannel(ABC):
 
         Returns
         -------
-        List[:class:`.Invite`]
+        :class:`list`\\[:class:`.Invite`]
             The list of invites that are currently active.
         """
         state = self._state
@@ -1563,7 +1563,7 @@ class Messageable:
         embed: :class:`.Embed`
             The rich embed for the content to send. This cannot be mixed with the
             ``embeds`` parameter.
-        embeds: List[:class:`.Embed`]
+        embeds: :class:`list`\\[:class:`.Embed`]
             A list of embeds to send with the content. Must be a maximum of 10.
             This cannot be mixed with the ``embed`` parameter.
 
@@ -1571,10 +1571,10 @@ class Messageable:
 
         file: :class:`~disnake.File`
             The file to upload. This cannot be mixed with the ``files`` parameter.
-        files: List[:class:`~disnake.File`]
+        files: :class:`list`\\[:class:`~disnake.File`]
             A list of files to upload. Must be a maximum of 10.
             This cannot be mixed with the ``file`` parameter.
-        stickers: Sequence[:class:`.GuildSticker` | :class:`.StandardSticker` | :class:`.StickerItem`]
+        stickers: :class:`~typing.Sequence`\\[:class:`.GuildSticker` | :class:`.StandardSticker` | :class:`.StickerItem`]
             A list of stickers to upload. Must be a maximum of 3.
 
             .. versionadded:: 2.0

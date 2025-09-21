@@ -106,7 +106,7 @@ class ApplicationCommandInteraction(Interaction[ClientT]):
         The token to continue the interaction. These are valid for 15 minutes.
     client: :class:`Client`
         The interaction client.
-    entitlements: List[:class:`Entitlement`]
+    entitlements: :class:`list`\\[:class:`Entitlement`]
         The entitlements for the invoking user and guild,
         representing access to an application subscription.
 
@@ -160,12 +160,12 @@ class ApplicationCommandInteraction(Interaction[ClientT]):
 
     @property
     def options(self) -> Dict[str, Any]:
-        """Dict[:class:`str`, :class:`Any`]: The full option tree, including nestings"""
+        """:class:`dict`\\[:class:`str`, :class:`Any`]: The full option tree, including nestings"""
         return {opt.name: opt._simplified_value() for opt in self.data.options}
 
     @property
     def filled_options(self) -> Dict[str, Any]:
-        """Dict[:class:`str`, :class:`Any`]: The options of the command (or sub-command) being invoked"""
+        """:class:`dict`\\[:class:`str`, :class:`Any`]: The options of the command (or sub-command) being invoked"""
         _, kwargs = self.data._get_chain_and_kwargs()
         return kwargs
 
@@ -228,7 +228,7 @@ class ApplicationCommandInteractionData(Dict[str, Any]):
         The application command type.
     resolved: :class:`InteractionDataResolved`
         All resolved objects related to this interaction.
-    options: List[:class:`ApplicationCommandInteractionDataOption`]
+    options: :class:`list`\\[:class:`ApplicationCommandInteractionDataOption`]
         A list of options from the API.
     target_id: :class:`int`
         ID of the user or message targeted by a user or message command
@@ -316,7 +316,7 @@ class ApplicationCommandInteractionDataOption(Dict[str, Any]):
         The option's type.
     value: :class:`Any`
         The option's value.
-    options: List[:class:`ApplicationCommandInteractionDataOption`]
+    options: :class:`list`\\[:class:`ApplicationCommandInteractionDataOption`]
         The list of options of this option. Only exists for subcommands and groups.
     focused: :class:`bool`
         Whether this option is focused by the user. May be ``True`` in

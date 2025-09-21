@@ -104,7 +104,7 @@ class WelcomeScreen:
     ----------
     description: :class:`str` | ``None``
         The guild description in the welcome screen.
-    channels: List[:class:`WelcomeScreenChannel`]
+    channels: :class:`list`\\[:class:`WelcomeScreenChannel`]
         The welcome screen's channels.
     """
 
@@ -163,7 +163,7 @@ class WelcomeScreen:
             Whether the welcome screen is enabled.
         description: :class:`str` | ``None``
             The new guild description in the welcome screen.
-        channels: List[:class:`WelcomeScreenChannel` | ``None``]
+        channels: :class:`list`\\[:class:`WelcomeScreenChannel` | ``None``]
             The new welcome channels.
         reason: :class:`str` | ``None``
             The reason for editing the welcome screen. Shows up on the audit log.

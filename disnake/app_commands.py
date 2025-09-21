@@ -182,12 +182,12 @@ class Option:
         The option type, e.g. :class:`OptionType.user`.
     required: :class:`bool`
         Whether this option is required.
-    choices: Sequence[:class:`OptionChoice`, Sequence[:class:`str` | :class:`int` | :class:`float`], Mapping[:class:`str`, :class:`str` | :class:`int` | :class:`float`]]
+    choices: :class:`~typing.Sequence`\\[:class:`OptionChoice`, :class:`~typing.Sequence`\\[:class:`str` | :class:`int` | :class:`float`], :class:`~typing.Mapping`\\[:class:`str`, :class:`str` | :class:`int` | :class:`float`]]
         The pre-defined choices for this option.
-    options: List[:class:`Option`]
+    options: :class:`list`\\[:class:`Option`]
         The list of sub options. Normally you don't have to specify it directly,
         instead consider using ``@main_cmd.sub_command`` or ``@main_cmd.sub_command_group`` decorators.
-    channel_types: List[:class:`ChannelType`]
+    channel_types: :class:`list`\\[:class:`ChannelType`]
         The list of channel types that your option supports, if the type is :class:`OptionType.channel`.
         By default, it supports all channel types.
     autocomplete: :class:`bool`
@@ -216,12 +216,12 @@ class Option:
         The option type, e.g. :class:`OptionType.user`.
     required: :class:`bool`
         Whether this option is required.
-    choices: List[:class:`OptionChoice`]
+    choices: :class:`list`\\[:class:`OptionChoice`]
         The list of pre-defined choices.
-    options: List[:class:`Option`]
+    options: :class:`list`\\[:class:`Option`]
         The list of sub options. Normally you don't have to specify it directly,
         instead consider using ``@main_cmd.sub_command`` or ``@main_cmd.sub_command_group`` decorators.
-    channel_types: List[:class:`ChannelType`]
+    channel_types: :class:`list`\\[:class:`ChannelType`]
         The list of channel types that your option supports, if the type is :class:`OptionType.channel`.
         By default, it supports all channel types.
     autocomplete: :class:`bool`
@@ -1042,7 +1042,7 @@ class SlashCommand(ApplicationCommand):
 
         .. versionadded:: 2.10
 
-    options: List[:class:`Option`]
+    options: :class:`list`\\[:class:`Option`]
         The list of options the slash command has.
     """
 
@@ -1184,7 +1184,7 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
 
     id: :class:`int`
         The slash command's ID.
-    options: List[:class:`Option`]
+    options: :class:`list`\\[:class:`Option`]
         The list of options the slash command has.
     application_id: :class:`int`
         The application ID this command belongs to.
@@ -1295,7 +1295,7 @@ class GuildApplicationCommandPermissions:
         The application ID this command belongs to.
     guild_id: :class:`int`
         The ID of the guild where these permissions are applied.
-    permissions: List[:class:`ApplicationCommandPermissions`]
+    permissions: :class:`list`\\[:class:`ApplicationCommandPermissions`]
         A list of :class:`ApplicationCommandPermissions`.
     """
 

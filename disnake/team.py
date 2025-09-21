@@ -32,7 +32,7 @@ class Team:
         The team name.
     owner_id: :class:`int`
         The team owner's ID.
-    members: List[:class:`TeamMember`]
+    members: :class:`list`\\[:class:`TeamMember`]
         A list of the members in the team.
 
         .. versionadded:: 1.3

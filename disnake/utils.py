@@ -773,7 +773,7 @@ def resolve_invite(
 
     Returns
     -------
-    :class:`str` | Tuple[:class:`str` | Dict[:class:`str` | :class:`str`]]
+    :class:`str` | :class:`tuple`\\[:class:`str` | :class:`dict`\\[:class:`str` | :class:`str`]]
         The invite code if ``with_params`` is ``False``, otherwise a tuple containing the
         invite code and the url's query parameters, if applicable.
     """

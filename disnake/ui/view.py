@@ -109,7 +109,7 @@ class View:
     timeout: :class:`float` | ``None``
         Timeout from last interaction with the UI before no longer accepting input.
         If ``None`` then there is no timeout.
-    children: List[:class:`Item`]
+    children: :class:`list`\\[:class:`Item`]
         The list of children attached to this view.
     """
 

@@ -336,7 +336,7 @@ class AutoShardedClient(Client):
 
     Attributes
     ----------
-    shard_ids: List[:class:`int` | ``None``]
+    shard_ids: :class:`list`\\[:class:`int` | ``None``]
         An optional list of shard_ids to launch the shards with.
     """
 
@@ -426,7 +426,7 @@ class AutoShardedClient(Client):
 
     @property
     def latencies(self) -> List[Tuple[int, float]]:
-        """List[Tuple[:class:`int`, :class:`float`]]: A list of latencies between a HEARTBEAT and a HEARTBEAT_ACK in seconds.
+        """:class:`list`\\[:class:`tuple`\\[:class:`int`, :class:`float`]]: A list of latencies between a HEARTBEAT and a HEARTBEAT_ACK in seconds.
 
         This returns a list of tuples with elements ``(shard_id, latency)``.
         """
@@ -446,7 +446,7 @@ class AutoShardedClient(Client):
 
     @property
     def shards(self) -> Dict[int, ShardInfo]:
-        """Mapping[int, :class:`ShardInfo`]: Returns a mapping of shard IDs to their respective info object."""
+        """:class:`~typing.Mapping`\\[int, :class:`ShardInfo`]: Returns a mapping of shard IDs to their respective info object."""
         return {
             shard_id: ShardInfo(parent, self.shard_count)
             for shard_id, parent in self.__shards.items()

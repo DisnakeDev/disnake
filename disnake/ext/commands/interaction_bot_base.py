@@ -246,22 +246,22 @@ class InteractionBotBase(CommonBotBase):
 
     @property
     def application_commands(self) -> Set[InvokableApplicationCommand]:
-        """Set[:class:`InvokableApplicationCommand`]: A set of all application commands the bot has."""
+        """:class:`set`\\[:class:`InvokableApplicationCommand`]: A set of all application commands the bot has."""
         return set(self.application_commands_iterator())
 
     @property
     def slash_commands(self) -> Set[InvokableSlashCommand]:
-        """Set[:class:`InvokableSlashCommand`]: A set of all slash commands the bot has."""
+        """:class:`set`\\[:class:`InvokableSlashCommand`]: A set of all slash commands the bot has."""
         return set(self.all_slash_commands.values())
 
     @property
     def user_commands(self) -> Set[InvokableUserCommand]:
-        """Set[:class:`InvokableUserCommand`]: A set of all user commands the bot has."""
+        """:class:`set`\\[:class:`InvokableUserCommand`]: A set of all user commands the bot has."""
         return set(self.all_user_commands.values())
 
     @property
     def message_commands(self) -> Set[InvokableMessageCommand]:
-        """Set[:class:`InvokableMessageCommand`]: A set of all message commands the bot has."""
+        """:class:`set`\\[:class:`InvokableMessageCommand`]: A set of all message commands the bot has."""
         return set(self.all_message_commands.values())
 
     def add_slash_command(self, slash_command: InvokableSlashCommand) -> None:
@@ -524,7 +524,7 @@ class InteractionBotBase(CommonBotBase):
             .. versionchanged:: 2.5
                 Added support for localizations.
 
-        options: List[:class:`.Option`]
+        options: :class:`list`\\[:class:`.Option`]
             The list of slash command options. The options will be visible in Discord.
             This is the old way of specifying options. Consider using :ref:`param_syntax` instead.
         dm_permission: :class:`bool`
@@ -566,16 +566,16 @@ class InteractionBotBase(CommonBotBase):
 
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``
-        guild_ids: Sequence[:class:`int`]
+        guild_ids: :class:`~typing.Sequence`\\[:class:`int`]
             If specified, the client will register the command in these guilds.
             Otherwise, this command will be registered globally.
-        connectors: Dict[:class:`str`, :class:`str`]
+        connectors: :class:`dict`\\[:class:`str`, :class:`str`]
             Binds function names to option names. If the name
             of an option already matches the corresponding function param,
             you don't have to specify the connectors. Connectors template:
             ``{"option-name": "param_name", ...}``.
             If you're using :ref:`param_syntax`, you don't need to specify this.
-        extras: Dict[:class:`str`, Any]
+        extras: :class:`dict`\\[:class:`str`, Any]
             A dict of user provided extras to attach to the command.
 
             .. note::
@@ -676,10 +676,10 @@ class InteractionBotBase(CommonBotBase):
 
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``.
-        guild_ids: Sequence[:class:`int`]
+        guild_ids: :class:`~typing.Sequence`\\[:class:`int`]
             If specified, the client will register the command in these guilds.
             Otherwise, this command will be registered globally.
-        extras: Dict[:class:`str`, Any]
+        extras: :class:`dict`\\[:class:`str`, Any]
             A dict of user provided extras to attach to the command.
 
             .. note::
@@ -779,10 +779,10 @@ class InteractionBotBase(CommonBotBase):
 
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``
-        guild_ids: Sequence[:class:`int`]
+        guild_ids: :class:`~typing.Sequence`\\[:class:`int`]
             If specified, the client will register the command in these guilds.
             Otherwise, this command will be registered globally.
-        extras: Dict[:class:`str`, Any]
+        extras: :class:`dict`\\[:class:`str`, Any]
             A dict of user provided extras to attach to the command.
 
             .. note::

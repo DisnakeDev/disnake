@@ -181,7 +181,7 @@ class Injection(Generic[P, T_]):
     ----------
     function: Callable
         The underlying injection function.
-    autocompleters: Dict[:class:`str`, Callable]
+    autocompleters: :class:`dict`\\[:class:`str`, Callable]
         A mapping of injection's option names to their respective autocompleters.
 
         .. versionadded:: 2.6
@@ -458,7 +458,7 @@ class ParamInfo:
         .. versionchanged:: 2.5
             Added support for localizations.
 
-    choices: Sequence[:class:`.OptionChoice`, Sequence[:class:`str` | :class:`int` | :class:`float`], Mapping[:class:`str`, :class:`str` | :class:`int` | :class:`float`]]
+    choices: :class:`~typing.Sequence`\\[:class:`.OptionChoice`, :class:`~typing.Sequence`\\[:class:`str` | :class:`int` | :class:`float`], :class:`~typing.Mapping`\\[:class:`str`, :class:`str` | :class:`int` | :class:`float`]]
         The pre-defined choices for this option.
     ge: :class:`float`
         The lowest allowed value for this option.
@@ -466,7 +466,7 @@ class ParamInfo:
         The greatest allowed value for this option.
     type: Any
         The type of the parameter.
-    channel_types: List[:class:`.ChannelType`]
+    channel_types: :class:`list`\\[:class:`.ChannelType`]
         The list of channel types supported by this slash command option.
     autocomplete: Callable[[:class:`.ApplicationCommandInteraction`, :class:`str`], Any]
         The function that will suggest possible autocomplete options while typing.
@@ -1181,7 +1181,7 @@ def Param(
         .. versionchanged:: 2.5
             Added support for localizations.
 
-    choices: Sequence[:class:`.OptionChoice`, Sequence[:class:`str` | :class:`int` | :class:`float`], Mapping[:class:`str`, :class:`str` | :class:`int` | :class:`float`]]
+    choices: :class:`~typing.Sequence`\\[:class:`.OptionChoice`, :class:`~typing.Sequence`\\[:class:`str` | :class:`int` | :class:`float`], :class:`~typing.Mapping`\\[:class:`str`, :class:`str` | :class:`int` | :class:`float`]]
         The pre-defined choices for this slash command option.
     converter: Callable[[:class:`.ApplicationCommandInteraction`, Any], Any]
         A function that will convert the original input to a desired format.
@@ -1286,7 +1286,7 @@ def inject(
     ----------
     function: Callable
         The injection function.
-    autocompleters: Dict[:class:`str`, Callable]
+    autocompleters: :class:`dict`\\[:class:`str`, Callable]
         A mapping of the injection's option names to their respective autocompleters.
 
         See also :func:`Injection.autocomplete`.
@@ -1318,7 +1318,7 @@ def injection(
 
     Parameters
     ----------
-    autocompleters: Dict[:class:`str`, Callable]
+    autocompleters: :class:`dict`\\[:class:`str`, Callable]
         A mapping of the injection's option names to their respective autocompleters.
 
         See also :func:`Injection.autocomplete`.
@@ -1351,7 +1351,7 @@ def option_enum(
 
     Parameters
     ----------
-    choices: Dict[:class:`str` | :class:`Any`, List[:class:`Any`]]
+    choices: :class:`dict`\\[:class:`str` | :class:`Any`, :class:`list`\\[:class:`Any`]]
         A name/value mapping of choices, or a list of values whose stringified representations
         will be used as the names.
     **kwargs

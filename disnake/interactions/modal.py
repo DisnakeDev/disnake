@@ -104,7 +104,7 @@ class ModalInteraction(Interaction[ClientT]):
 
     client: :class:`Client`
         The interaction client.
-    entitlements: List[:class:`Entitlement`]
+    entitlements: :class:`list`\\[:class:`Entitlement`]
         The entitlements for the invoking user and guild,
         representing access to an application subscription.
 
@@ -205,7 +205,7 @@ class ModalInteraction(Interaction[ClientT]):
 
     @cached_slot_property("_cs_values")
     def values(self) -> ResolvedValues[str]:
-        """Dict[:class:`str`, :class:`str` | Sequence[:class:`str`]]: Returns all raw values the user has entered in the modal.
+        """:class:`dict`\\[:class:`str`, :class:`str` | :class:`~typing.Sequence`\\[:class:`str`]]: Returns all raw values the user has entered in the modal.
         This is a dict of the form ``{custom_id: value}``.
 
         For select menus, the corresponding dict value is a list of the values the user has selected.
@@ -221,7 +221,7 @@ class ModalInteraction(Interaction[ClientT]):
 
     @cached_slot_property("_cs_resolved_values")
     def resolved_values(self) -> ResolvedValues[Union[str, Member, User, Role, AnyChannel]]:
-        """Dict[:class:`str`, :class:`str` | Sequence[:class:`str` | :class:`Member` | :class:`User` | :class:`Role` | Union[:class:`abc.GuildChannel` | :class:`Thread` | :class:`PartialMessageable`]]]: The (resolved) values the user entered in the modal.
+        """:class:`dict`\\[:class:`str`, :class:`str` | :class:`~typing.Sequence`\\[:class:`str` | :class:`Member` | :class:`User` | :class:`Role` | :class:`abc.GuildChannel` | :class:`Thread` | :class:`PartialMessageable`]]: The (resolved) values the user entered in the modal.
         This is a dict of the form ``{custom_id: value}``.
 
         For select menus, the corresponding dict value is a list of the values the user has selected.
@@ -237,7 +237,7 @@ class ModalInteraction(Interaction[ClientT]):
 
     @cached_slot_property("_cs_text_values")
     def text_values(self) -> Dict[str, str]:
-        """Dict[:class:`str`, :class:`str`]: Returns the text values the user has entered in the modal.
+        """:class:`dict`\\[:class:`str`, :class:`str`]: Returns the text values the user has entered in the modal.
         This is a dict of the form ``{custom_id: value}``.
         """
         text_input_type = ComponentType.text_input.value
@@ -262,7 +262,7 @@ class ModalInteractionData(Dict[str, Any]):
     ----------
     custom_id: :class:`str`
         The custom ID of the modal.
-    components: List[:class:`dict`]
+    components: :class:`list`\\[:class:`dict`]
         The raw component data of the modal interaction, as provided by Discord.
         This does not contain all fields of the components due to API limitations.
 

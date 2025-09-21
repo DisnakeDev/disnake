@@ -341,14 +341,14 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
     @property
     def members(self) -> List[Member]:
-        """List[:class:`Member`]: Returns all members that can see this channel."""
+        """:class:`list`\\[:class:`Member`]: Returns all members that can see this channel."""
         if isinstance(self.guild, Object):
             return []
         return [m for m in self.guild.members if self.permissions_for(m).view_channel]
 
     @property
     def threads(self) -> List[Thread]:
-        """List[:class:`Thread`]: Returns all the threads that you can see.
+        """:class:`list`\\[:class:`Thread`]: Returns all the threads that you can see.
 
         .. versionadded:: 2.0
         """
@@ -768,7 +768,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
         Returns
         -------
-        List[:class:`.Message`]
+        :class:`list`\\[:class:`.Message`]
             A list of messages that were deleted.
         """
         if check is MISSING:
@@ -833,7 +833,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
         Returns
         -------
-        List[:class:`Webhook`]
+        :class:`list`\\[:class:`Webhook`]
             The list of webhooks this channel has.
         """
         from .webhook import Webhook
@@ -1223,7 +1223,7 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
 
     @property
     def members(self) -> List[Member]:
-        """List[:class:`Member`]: Returns all members that are currently inside this voice channel."""
+        """:class:`list`\\[:class:`Member`]: Returns all members that are currently inside this voice channel."""
         if isinstance(self.guild, Object):
             return []
 
@@ -1248,7 +1248,7 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
 
         Returns
         -------
-        Mapping[:class:`int`, :class:`VoiceState`]
+        :class:`~typing.Mapping`\\[:class:`int`, :class:`VoiceState`]
             The mapping of member ID to a voice state.
         """
         if isinstance(self.guild, Object):
@@ -1817,7 +1817,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         Returns
         -------
-        List[:class:`.Message`]
+        :class:`list`\\[:class:`.Message`]
             A list of messages that were deleted.
         """
         if check is MISSING:
@@ -1884,7 +1884,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         Returns
         -------
-        List[:class:`Webhook`]
+        :class:`list`\\[:class:`Webhook`]
             The list of webhooks this channel has.
         """
         from .webhook import Webhook
@@ -2084,7 +2084,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
 
     @property
     def requesting_to_speak(self) -> List[Member]:
-        """List[:class:`Member`]: A list of members who are requesting to speak in the stage channel."""
+        """:class:`list`\\[:class:`Member`]: A list of members who are requesting to speak in the stage channel."""
         return [
             member
             for member in self.members
@@ -2093,7 +2093,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
 
     @property
     def speakers(self) -> List[Member]:
-        """List[:class:`Member`]: A list of members who have been permitted to speak in the stage channel.
+        """:class:`list`\\[:class:`Member`]: A list of members who have been permitted to speak in the stage channel.
 
         .. versionadded:: 2.0
         """
@@ -2107,7 +2107,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
 
     @property
     def listeners(self) -> List[Member]:
-        """List[:class:`Member`]: A list of members who are listening in the stage channel.
+        """:class:`list`\\[:class:`Member`]: A list of members who are listening in the stage channel.
 
         .. versionadded:: 2.0
         """
@@ -2115,7 +2115,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
 
     @property
     def moderators(self) -> List[Member]:
-        """List[:class:`Member`]: A list of members who are moderating the stage channel.
+        """:class:`list`\\[:class:`Member`]: A list of members who are moderating the stage channel.
 
         .. versionadded:: 2.0
         """
@@ -2672,7 +2672,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         Returns
         -------
-        List[:class:`.Message`]
+        :class:`list`\\[:class:`.Message`]
             A list of messages that were deleted.
         """
         if check is MISSING:
@@ -2739,7 +2739,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         Returns
         -------
-        List[:class:`Webhook`]
+        :class:`list`\\[:class:`Webhook`]
             The list of webhooks this channel has.
         """
         from .webhook import Webhook
@@ -3101,7 +3101,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
 
     @property
     def channels(self) -> List[GuildChannelType]:
-        """List[:class:`abc.GuildChannel`]: Returns the channels that are under this category.
+        """:class:`list`\\[:class:`abc.GuildChannel`]: Returns the channels that are under this category.
 
         These are sorted by the official Discord UI, which places voice channels below the text channels.
         """
@@ -3120,7 +3120,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
 
     @property
     def text_channels(self) -> List[TextChannel]:
-        """List[:class:`TextChannel`]: Returns the text channels that are under this category."""
+        """:class:`list`\\[:class:`TextChannel`]: Returns the text channels that are under this category."""
         if isinstance(self.guild, Object):
             return []
 
@@ -3134,7 +3134,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
 
     @property
     def voice_channels(self) -> List[VoiceChannel]:
-        """List[:class:`VoiceChannel`]: Returns the voice channels that are under this category."""
+        """:class:`list`\\[:class:`VoiceChannel`]: Returns the voice channels that are under this category."""
         if isinstance(self.guild, Object):
             return []
 
@@ -3148,7 +3148,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
 
     @property
     def stage_channels(self) -> List[StageChannel]:
-        """List[:class:`StageChannel`]: Returns the stage channels that are under this category.
+        """:class:`list`\\[:class:`StageChannel`]: Returns the stage channels that are under this category.
 
         .. versionadded:: 1.7
         """
@@ -3165,7 +3165,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
 
     @property
     def forum_channels(self) -> List[ForumChannel]:
-        """List[:class:`ForumChannel`]: Returns the forum channels that are under this category.
+        """:class:`list`\\[:class:`ForumChannel`]: Returns the forum channels that are under this category.
 
         .. versionadded:: 2.5
         """
@@ -3182,7 +3182,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
 
     @property
     def media_channels(self) -> List[MediaChannel]:
-        """List[:class:`MediaChannel`]: Returns the media channels that are under this category.
+        """:class:`list`\\[:class:`MediaChannel`]: Returns the media channels that are under this category.
 
         .. versionadded:: 2.10
         """
@@ -3399,14 +3399,14 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
 
     @property
     def members(self) -> List[Member]:
-        """List[:class:`Member`]: Returns all members that can see this channel."""
+        """:class:`list`\\[:class:`Member`]: Returns all members that can see this channel."""
         if isinstance(self.guild, Object):
             return []
         return [m for m in self.guild.members if self.permissions_for(m).view_channel]
 
     @property
     def threads(self) -> List[Thread]:
-        """List[:class:`Thread`]: Returns all the threads that you can see."""
+        """:class:`list`\\[:class:`Thread`]: Returns all the threads that you can see."""
         if isinstance(self.guild, Object):
             return []
         return [thread for thread in self.guild._threads.values() if thread.parent_id == self.id]
@@ -3466,7 +3466,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
 
     @property
     def available_tags(self) -> List[ForumTag]:
-        """List[:class:`ForumTag`]: The available tags for threads in this channel.
+        """:class:`list`\\[:class:`ForumTag`]: The available tags for threads in this channel.
 
         To create/edit/delete tags, use :func:`edit`.
 
@@ -3638,7 +3638,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
             If set to ``None`` or not provided, slowmode is inherited from the parent's
             :attr:`default_thread_slowmode_delay`.
-        applied_tags: Sequence[:class:`abc.Snowflake`]
+        applied_tags: :class:`~typing.Sequence`\\[:class:`abc.Snowflake`]
             The tags to apply to the new thread. Maximum of 5.
 
             .. versionadded:: 2.6
@@ -3648,7 +3648,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         embed: :class:`.Embed`
             The rich embed for the content to send. This cannot be mixed with the
             ``embeds`` parameter.
-        embeds: List[:class:`.Embed`]
+        embeds: :class:`list`\\[:class:`.Embed`]
             A list of embeds to send with the content. Must be a maximum of 10.
             This cannot be mixed with the ``embed`` parameter.
         suppress_embeds: :class:`bool`
@@ -3666,10 +3666,10 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
 
         file: :class:`~disnake.File`
             The file to upload. This cannot be mixed with the ``files`` parameter.
-        files: List[:class:`~disnake.File`]
+        files: :class:`list`\\[:class:`~disnake.File`]
             A list of files to upload. Must be a maximum of 10.
             This cannot be mixed with the ``file`` parameter.
-        stickers: Sequence[:class:`.GuildSticker` | :class:`.StandardSticker` | :class:`.StickerItem`]
+        stickers: :class:`~typing.Sequence`\\[:class:`.GuildSticker` | :class:`.StandardSticker` | :class:`.StickerItem`]
             A list of stickers to upload. Must be a maximum of 3.
         allowed_mentions: :class:`.AllowedMentions`
             Controls the mentions being processed in this message. If this is
@@ -3822,7 +3822,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
 
         Returns
         -------
-        List[:class:`Webhook`]
+        :class:`list`\\[:class:`Webhook`]
             The list of webhooks this channel has.
         """
         from .webhook import Webhook
@@ -4136,7 +4136,7 @@ class ForumChannel(ThreadOnlyGuildChannel):
 
             .. versionadded:: 2.6
 
-        available_tags: Sequence[:class:`ForumTag`]
+        available_tags: :class:`~typing.Sequence`\\[:class:`ForumTag`]
             The new :class:`ForumTag`\\s available for threads in this channel.
             Can be used to create new tags and edit/reorder/delete existing tags.
             Maximum of 20.
@@ -4267,7 +4267,7 @@ class ForumChannel(ThreadOnlyGuildChannel):
             The default thread slowmode delay of the new channel. If not provided, defaults to this channel's default thread slowmode delay.
         default_auto_archive_duration: :class:`int` | :class:`ThreadArchiveDuration` | ``None``
             The default auto archive duration of the new channel. If not provided, defaults to this channel's default auto archive duration.
-        available_tags: Sequence[:class:`ForumTag`]
+        available_tags: :class:`~typing.Sequence`\\[:class:`ForumTag`]
             The applicable tags of the new channel. If not provided, defaults to this channel's available tags.
         default_reaction: :class:`str` | :class:`Emoji` | :class:`PartialEmoji` | ``None``
             The default reaction of the new channel. If not provided, defaults to this channel's default reaction.
@@ -4549,7 +4549,7 @@ class MediaChannel(ThreadOnlyGuildChannel):
             If parameter ``require_tag`` is provided, that will override the setting of :attr:`ChannelFlags.require_tag`.
         require_tag: :class:`bool`
             Whether all newly created threads are required to have a tag.
-        available_tags: Sequence[:class:`ForumTag`]
+        available_tags: :class:`~typing.Sequence`\\[:class:`ForumTag`]
             The new :class:`ForumTag`\\s available for threads in this channel.
             Can be used to create new tags and edit/reorder/delete existing tags.
             Maximum of 20.
@@ -4655,7 +4655,7 @@ class MediaChannel(ThreadOnlyGuildChannel):
             The default thread slowmode delay of the new channel. If not provided, defaults to this channel's default thread slowmode delay.
         default_auto_archive_duration: :class:`int` | :class:`ThreadArchiveDuration` | ``None``
             The default auto archive duration of the new channel. If not provided, defaults to this channel's default auto archive duration.
-        available_tags: Sequence[:class:`ForumTag`]
+        available_tags: :class:`~typing.Sequence`\\[:class:`ForumTag`]
             The applicable tags of the new channel. If not provided, defaults to this channel's available tags.
         default_reaction: :class:`str` | :class:`Emoji` | :class:`PartialEmoji` | ``None``
             The default reaction of the new channel. If not provided, defaults to this channel's default reaction.
@@ -4919,7 +4919,7 @@ class GroupChannel(disnake.abc.Messageable, Hashable):
 
     Attributes
     ----------
-    recipients: List[:class:`User`]
+    recipients: :class:`list`\\[:class:`User`]
         The users you are participating with in the group channel.
         If this channel is received through the gateway, the recipient information
         may not be always available.

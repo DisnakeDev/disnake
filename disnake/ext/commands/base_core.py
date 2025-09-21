@@ -117,18 +117,18 @@ class InvokableApplicationCommand(ABC):
         The coroutine that is executed when the command is called.
     cog: :class:`Cog` | ``None``
         The cog that this command belongs to. ``None`` if there isn't one.
-    checks: List[Callable[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
+    checks: :class:`list`\\[Callable[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
         A list of predicates that verifies if the command could be executed
         with the given :class:`.ApplicationCommandInteraction` as the sole parameter. If an exception
         is necessary to be thrown to signal failure, then one inherited from
         :exc:`.CommandError` should be used. Note that if the checks fail then
         :exc:`.CheckFailure` exception is raised to the :func:`.on_slash_command_error`
         event.
-    guild_ids: Tuple[:class:`int`, ... | ``None``]
+    guild_ids: :class:`tuple`\\[:class:`int`, ... | ``None``]
         The list of IDs of the guilds where the command is synced. ``None`` if this command is global.
     auto_sync: :class:`bool`
         Whether to automatically register the command.
-    extras: Dict[:class:`str`, Any]
+    extras: :class:`dict`\\[:class:`str`, Any]
         A dict of user provided extras to attach to the command.
 
         .. versionadded:: 2.5

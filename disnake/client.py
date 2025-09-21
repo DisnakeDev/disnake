@@ -555,17 +555,17 @@ class Client:
 
     @property
     def guilds(self) -> List[Guild]:
-        """List[:class:`.Guild`]: The guilds that the connected client is a member of."""
+        """:class:`list`\\[:class:`.Guild`]: The guilds that the connected client is a member of."""
         return self._connection.guilds
 
     @property
     def emojis(self) -> List[Emoji]:
-        """List[:class:`.Emoji`]: The emojis that the connected client has."""
+        """:class:`list`\\[:class:`.Emoji`]: The emojis that the connected client has."""
         return self._connection.emojis
 
     @property
     def stickers(self) -> List[GuildSticker]:
-        """List[:class:`.GuildSticker`]: The stickers that the connected client has.
+        """:class:`list`\\[:class:`.GuildSticker`]: The stickers that the connected client has.
 
         .. versionadded:: 2.0
         """
@@ -573,7 +573,7 @@ class Client:
 
     @property
     def soundboard_sounds(self) -> List[GuildSoundboardSound]:
-        """List[:class:`.GuildSoundboardSound`]: The soundboard sounds that the connected client has.
+        """:class:`list`\\[:class:`.GuildSoundboardSound`]: The soundboard sounds that the connected client has.
 
         .. versionadded:: 2.10
         """
@@ -581,7 +581,7 @@ class Client:
 
     @property
     def cached_messages(self) -> Sequence[Message]:
-        """Sequence[:class:`.Message`]: Read-only list of messages the connected client has cached.
+        """:class:`~typing.Sequence`\\[:class:`.Message`]: Read-only list of messages the connected client has cached.
 
         .. versionadded:: 1.1
         """
@@ -589,7 +589,7 @@ class Client:
 
     @property
     def private_channels(self) -> List[PrivateChannel]:
-        """List[:class:`.abc.PrivateChannel`]: The private channels that the connected client is participating on.
+        """:class:`list`\\[:class:`.abc.PrivateChannel`]: The private channels that the connected client is participating on.
 
         .. note::
 
@@ -600,7 +600,7 @@ class Client:
 
     @property
     def voice_clients(self) -> List[VoiceProtocol]:
-        """List[:class:`.VoiceProtocol`]: Represents a list of voice connections.
+        """:class:`list`\\[:class:`.VoiceProtocol`]: Represents a list of voice connections.
 
         These are usually :class:`.VoiceClient` instances.
         """
@@ -628,12 +628,12 @@ class Client:
 
     @property
     def global_application_commands(self) -> List[APIApplicationCommand]:
-        """List[:class:`.APIUserCommand` | :class:`.APIMessageCommand` | :class:`.APISlashCommand`: The client's global application commands."""
+        """:class:`list`\\[:class:`.APIUserCommand` | :class:`.APIMessageCommand` | :class:`.APISlashCommand`: The client's global application commands."""
         return list(self._connection._global_application_commands.values())
 
     @property
     def global_slash_commands(self) -> List[APISlashCommand]:
-        """List[:class:`.APISlashCommand`]: The client's global slash commands."""
+        """:class:`list`\\[:class:`.APISlashCommand`]: The client's global slash commands."""
         return [
             cmd
             for cmd in self._connection._global_application_commands.values()
@@ -642,7 +642,7 @@ class Client:
 
     @property
     def global_user_commands(self) -> List[APIUserCommand]:
-        """List[:class:`.APIUserCommand`]: The client's global user commands."""
+        """:class:`list`\\[:class:`.APIUserCommand`]: The client's global user commands."""
         return [
             cmd
             for cmd in self._connection._global_application_commands.values()
@@ -651,7 +651,7 @@ class Client:
 
     @property
     def global_message_commands(self) -> List[APIMessageCommand]:
-        """List[:class:`.APIMessageCommand`]: The client's global message commands."""
+        """:class:`list`\\[:class:`.APIMessageCommand`]: The client's global message commands."""
         return [
             cmd
             for cmd in self._connection._global_application_commands.values()
@@ -933,7 +933,7 @@ class Client:
         return decorator
 
     def get_listeners(self) -> Mapping[str, List[CoroFunc]]:
-        """Mapping[:class:`str`, List[Callable]]: A read-only mapping of event names to listeners.
+        """:class:`~typing.Mapping`\\[:class:`str`, :class:`list`\\[Callable]]: A read-only mapping of event names to listeners.
 
         .. note::
             To add or remove a listener you should use :meth:`.add_listener` and
@@ -1391,7 +1391,7 @@ class Client:
 
     @property
     def users(self) -> List[User]:
-        """List[:class:`~disnake.User`]: Returns a list of all the users the bot can see."""
+        """:class:`list`\\[:class:`~disnake.User`]: Returns a list of all the users the bot can see."""
         return list(self._connection._users.values())
 
     def get_channel(self, id: int, /) -> Optional[Union[GuildChannel, Thread, PrivateChannel]]:
@@ -1583,7 +1583,7 @@ class Client:
 
         Returns
         -------
-        List[:class:`.APIUserCommand` | :class:`.APIMessageCommand` | :class:`.APISlashCommand`]
+        :class:`list`\\[:class:`.APIUserCommand` | :class:`.APIMessageCommand` | :class:`.APISlashCommand`]
             The list of application commands.
         """
         data = self._connection._guild_application_commands.get(guild_id, {})
@@ -1599,7 +1599,7 @@ class Client:
 
         Returns
         -------
-        List[:class:`.APISlashCommand`]
+        :class:`list`\\[:class:`.APISlashCommand`]
             The list of slash commands.
         """
         data = self._connection._guild_application_commands.get(guild_id, {})
@@ -1615,7 +1615,7 @@ class Client:
 
         Returns
         -------
-        List[:class:`.APIUserCommand`]
+        :class:`list`\\[:class:`.APIUserCommand`]
             The list of user commands.
         """
         data = self._connection._guild_application_commands.get(guild_id, {})
@@ -1631,7 +1631,7 @@ class Client:
 
         Returns
         -------
-        List[:class:`.APIMessageCommand`]
+        :class:`list`\\[:class:`.APIMessageCommand`]
             The list of message commands.
         """
         data = self._connection._guild_application_commands.get(guild_id, {})
@@ -2394,7 +2394,7 @@ class Client:
 
         Returns
         -------
-        List[:class:`.SoundboardSound`]
+        :class:`list`\\[:class:`.SoundboardSound`]
             The default soundboard sounds.
         """
         data = await self.http.get_default_soundboard_sounds()
@@ -2498,7 +2498,7 @@ class Client:
 
         Returns
         -------
-        List[:class:`.Emoji`]
+        :class:`list`\\[:class:`.Emoji`]
             The list of application emojis you requested.
         """
         data = await self.http.get_all_app_emojis(self.application_id)
@@ -2691,7 +2691,7 @@ class Client:
 
         Returns
         -------
-        List[:class:`.StickerPack`]
+        :class:`list`\\[:class:`.StickerPack`]
             All available sticker packs.
         """
         data = await self.http.list_sticker_packs()
@@ -2770,7 +2770,7 @@ class Client:
 
     @property
     def persistent_views(self) -> Sequence[View]:
-        """Sequence[:class:`.View`]: A sequence of persistent views added to the client.
+        """:class:`~typing.Sequence`\\[:class:`.View`]: A sequence of persistent views added to the client.
 
         .. versionadded:: 2.0
         """
@@ -2798,7 +2798,7 @@ class Client:
 
         Returns
         -------
-        List[:class:`.APIUserCommand` | :class:`.APIMessageCommand` | :class:`.APISlashCommand`]
+        :class:`list`\\[:class:`.APIUserCommand` | :class:`.APIMessageCommand` | :class:`.APISlashCommand`]
             A list of application commands.
         """
         return await self._connection.fetch_global_commands(with_localizations=with_localizations)
@@ -2929,12 +2929,12 @@ class Client:
 
         Parameters
         ----------
-        application_commands: List[:class:`.ApplicationCommand`]
+        application_commands: :class:`list`\\[:class:`.ApplicationCommand`]
             A list of application commands to insert instead of the existing commands.
 
         Returns
         -------
-        List[:class:`.APIUserCommand` | :class:`.APIMessageCommand` | :class:`.APISlashCommand`]
+        :class:`list`\\[:class:`.APIUserCommand` | :class:`.APIMessageCommand` | :class:`.APISlashCommand`]
             A list of registered application commands.
         """
         for cmd in application_commands:
@@ -2966,7 +2966,7 @@ class Client:
 
         Returns
         -------
-        List[:class:`.APIUserCommand` | :class:`.APIMessageCommand` | :class:`.APISlashCommand`]
+        :class:`list`\\[:class:`.APIUserCommand` | :class:`.APIMessageCommand` | :class:`.APISlashCommand`]
             A list of application commands.
         """
         return await self._connection.fetch_guild_commands(
@@ -3113,12 +3113,12 @@ class Client:
         ----------
         guild_id: :class:`int`
             The ID of the guild where the application commands should be overwritten.
-        application_commands: List[:class:`.ApplicationCommand`]
+        application_commands: :class:`list`\\[:class:`.ApplicationCommand`]
             A list of application commands to insert instead of the existing commands.
 
         Returns
         -------
-        List[:class:`.APIUserCommand` | :class:`.APIMessageCommand` | :class:`.APISlashCommand`]
+        :class:`list`\\[:class:`.APIUserCommand` | :class:`.APIMessageCommand` | :class:`.APISlashCommand`]
             A list of registered application commands.
         """
         for cmd in application_commands:
@@ -3183,7 +3183,7 @@ class Client:
 
         Returns
         -------
-        List[:class:`.ApplicationRoleConnectionMetadata`]
+        :class:`list`\\[:class:`.ApplicationRoleConnectionMetadata`]
             The list of metadata records.
         """
         data = await self.http.get_application_role_connection_metadata_records(self.application_id)
@@ -3207,7 +3207,7 @@ class Client:
 
         Parameters
         ----------
-        records: Sequence[:class:`.ApplicationRoleConnectionMetadata`]
+        records: :class:`~typing.Sequence`\\[:class:`.ApplicationRoleConnectionMetadata`]
             The new metadata records.
 
         Raises
@@ -3217,7 +3217,7 @@ class Client:
 
         Returns
         -------
-        List[:class:`.ApplicationRoleConnectionMetadata`]
+        :class:`list`\\[:class:`.ApplicationRoleConnectionMetadata`]
             The list of newly edited metadata records.
         """
         payload: List[ApplicationRoleConnectionMetadataPayload] = []
@@ -3247,7 +3247,7 @@ class Client:
 
         Returns
         -------
-        List[:class:`.SKU`]
+        :class:`list`\\[:class:`.SKU`]
             The list of SKUs.
         """
         data = await self.http.get_skus(self.application_id)
@@ -3299,7 +3299,7 @@ class Client:
             The user to retrieve entitlements for.
         guild: :class:`.abc.Snowflake` | ``None``
             The guild to retrieve entitlements for.
-        skus: Sequence[:class:`.abc.Snowflake` | ``None``]
+        skus: :class:`~typing.Sequence`\\[:class:`.abc.Snowflake` | ``None``]
             The SKUs for which entitlements are retrieved.
         exclude_ended: :class:`bool`
             Whether to exclude ended/expired entitlements. Defaults to ``False``.

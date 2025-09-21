@@ -66,7 +66,7 @@ class StickerPack(Hashable):
         The description of the sticker pack.
     id: :class:`int`
         The id of the sticker pack.
-    stickers: List[:class:`StandardSticker`]
+    stickers: :class:`list`\\[:class:`StandardSticker`]
         The stickers of this sticker pack.
     sku_id: :class:`int`
         The SKU ID of the sticker pack.
@@ -311,7 +311,7 @@ class StandardSticker(Sticker):
         The ID of the sticker's pack.
     format: :class:`StickerFormatType`
         The format for the sticker's image.
-    tags: List[:class:`str`]
+    tags: :class:`list`\\[:class:`str`]
         A list of tags for the sticker.
     sort_value: :class:`int`
         The sticker's sort order within its pack.

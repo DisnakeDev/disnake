@@ -537,7 +537,7 @@ class FFmpegOpusAudio(FFmpegAudio):
 
         Returns
         -------
-        Tuple[Optional[:class:`str` | ``None``, :class:`int` | ``None``]]
+        :class:`tuple`\\[:class:`str` | ``None``, :class:`int` | ``None`` | ``None``]
             A 2-tuple with the codec and bitrate of the input source.
         """
         method = method or "native"

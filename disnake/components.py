@@ -255,7 +255,7 @@ class ActionRow(Component, Generic[ActionRowChildComponentT]):
 
     Attributes
     ----------
-    children: List[:class:`Button` | :class:`BaseSelectMenu` | :class:`TextInput`]
+    children: :class:`list`\\[:class:`Button` | :class:`BaseSelectMenu` | :class:`TextInput`]
         The children components that this holds, if any.
     id: :class:`int`
         The numeric identifier for the component.
@@ -405,11 +405,11 @@ class BaseSelectMenu(Component):
     max_values: :class:`int`
         The maximum number of items that must be chosen for this select menu.
         Defaults to 1 and must be between 1 and 25.
-    options: List[:class:`SelectOption`]
+    options: :class:`list`\\[:class:`SelectOption`]
         A list of options that can be selected in this select menu.
     disabled: :class:`bool`
         Whether the select menu is disabled or not.
-    default_values: List[:class:`SelectDefaultValue`]
+    default_values: :class:`list`\\[:class:`SelectDefaultValue`]
         The list of values (users/roles/channels) that are selected by default.
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
         Only available for auto-populated select menus.
@@ -507,7 +507,7 @@ class StringSelectMenu(BaseSelectMenu):
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select menu is disabled or not.
-    options: List[:class:`SelectOption`]
+    options: :class:`list`\\[:class:`SelectOption`]
         A list of options that can be selected in this select menu.
     required: :class:`bool`
         Whether the select menu is required. Only applies to components in modals.
@@ -568,7 +568,7 @@ class UserSelectMenu(BaseSelectMenu):
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select menu is disabled or not.
-    default_values: List[:class:`SelectDefaultValue`]
+    default_values: :class:`list`\\[:class:`SelectDefaultValue`]
         The list of values (users/members) that are selected by default.
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
@@ -619,7 +619,7 @@ class RoleSelectMenu(BaseSelectMenu):
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select menu is disabled or not.
-    default_values: List[:class:`SelectDefaultValue`]
+    default_values: :class:`list`\\[:class:`SelectDefaultValue`]
         The list of values (roles) that are selected by default.
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
@@ -670,7 +670,7 @@ class MentionableSelectMenu(BaseSelectMenu):
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select menu is disabled or not.
-    default_values: List[:class:`SelectDefaultValue`]
+    default_values: :class:`list`\\[:class:`SelectDefaultValue`]
         The list of values (users/roles) that are selected by default.
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
@@ -721,10 +721,10 @@ class ChannelSelectMenu(BaseSelectMenu):
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select menu is disabled or not.
-    channel_types: List[:class:`ChannelType` | ``None``]
+    channel_types: :class:`list`\\[:class:`ChannelType` | ``None``]
         A list of channel types that can be selected in this select menu.
         If ``None``, channels of all types may be selected.
-    default_values: List[:class:`SelectDefaultValue`]
+    default_values: :class:`list`\\[:class:`SelectDefaultValue`]
         The list of values (channels) that are selected by default.
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
@@ -1012,7 +1012,7 @@ class Section(Component):
 
     Attributes
     ----------
-    children: List[:class:`TextDisplay`]
+    children: :class:`list`\\[:class:`TextDisplay`]
         The text items in this section.
     accessory: :class:`Thumbnail` | :class:`Button`
         The accessory component displayed next to the section text.
@@ -1224,7 +1224,7 @@ class MediaGallery(Component):
 
     Attributes
     ----------
-    items: List[:class:`MediaGalleryItem`]
+    items: :class:`list`\\[:class:`MediaGalleryItem`]
         The images in this gallery.
     id: :class:`int`
         The numeric identifier for the component.
@@ -1428,7 +1428,7 @@ class Container(Component):
 
     Attributes
     ----------
-    children: List[:class:`ActionRow` | :class:`Section` | :class:`TextDisplay` | :class:`MediaGallery` | :class:`FileComponent` | :class:`Separator`]
+    children: :class:`list`\\[:class:`ActionRow` | :class:`Section` | :class:`TextDisplay` | :class:`MediaGallery` | :class:`FileComponent` | :class:`Separator`]
         The child components in this container.
     accent_colour: :class:`Colour` | ``None``
         The accent colour of the container. An alias exists under ``accent_color``.

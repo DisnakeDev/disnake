@@ -41,7 +41,7 @@ class Section(UIComponent):
 
     Attributes
     ----------
-    children: List[:class:`~.ui.TextDisplay`]
+    children: :class:`list`\\[:class:`~.ui.TextDisplay`]
         The list of text items in this section.
     accessory: :class:`~.ui.Thumbnail` | :class:`~.ui.Button`
         The accessory component displayed next to the section text.

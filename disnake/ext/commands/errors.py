@@ -200,9 +200,9 @@ class CheckAnyFailure(CheckFailure):
 
     Attributes
     ----------
-    errors: List[:class:`CheckFailure`]
+    errors: :class:`list`\\[:class:`CheckFailure`]
         A list of errors that were caught during execution.
-    checks: List[Callable[[:class:`Context` | :class:`disnake.ApplicationCommandInteraction`], :class:`bool`]]
+    checks: :class:`list`\\[Callable[[:class:`Context` | :class:`disnake.ApplicationCommandInteraction`], :class:`bool`]]
         A list of check predicates that failed.
     """
 
@@ -695,7 +695,7 @@ class MissingAnyRole(CheckFailure):
 
     Attributes
     ----------
-    missing_roles: List[:class:`str` | :class:`int`]
+    missing_roles: :class:`list`\\[:class:`str` | :class:`int`]
         The roles that the invoker is missing.
         These are the parameters passed to :func:`~.commands.has_any_role`.
     """
@@ -720,7 +720,7 @@ class BotMissingAnyRole(CheckFailure):
 
     Attributes
     ----------
-    missing_roles: List[:class:`str` | :class:`int`]
+    missing_roles: :class:`list`\\[:class:`str` | :class:`int`]
         The roles that the bot's member is missing.
         These are the parameters passed to :func:`~.commands.has_any_role`.
 
@@ -762,7 +762,7 @@ class MissingPermissions(CheckFailure):
 
     Attributes
     ----------
-    missing_permissions: List[:class:`str`]
+    missing_permissions: :class:`list`\\[:class:`str`]
         The required permissions that are missing.
     """
 
@@ -787,7 +787,7 @@ class BotMissingPermissions(CheckFailure):
 
     Attributes
     ----------
-    missing_permissions: List[:class:`str`]
+    missing_permissions: :class:`list`\\[:class:`str`]
         The required permissions that are missing.
     """
 
@@ -814,9 +814,9 @@ class BadUnionArgument(UserInputError):
     ----------
     param: :class:`inspect.Parameter`
         The parameter that failed being converted.
-    converters: Tuple[Type, ``...``]
+    converters: :class:`tuple`\\[Type, ``...``]
         A tuple of converters attempted in conversion, in order of failure.
-    errors: List[:class:`CommandError`]
+    errors: :class:`list`\\[:class:`CommandError`]
         A list of errors that were caught from failing the conversion.
     """
 
@@ -853,9 +853,9 @@ class BadLiteralArgument(UserInputError):
     ----------
     param: :class:`inspect.Parameter`
         The parameter that failed being converted.
-    literals: Tuple[Any, ``...``]
+    literals: :class:`tuple`\\[Any, ``...``]
         A tuple of values compared against in conversion, in order of failure.
-    errors: List[:class:`CommandError`]
+    errors: :class:`list`\\[:class:`CommandError`]
         A list of errors that were caught from failing the conversion.
     """
 
@@ -1066,7 +1066,7 @@ class TooManyFlags(FlagError):
     ----------
     flag: :class:`.Flag`
         The flag that received too many values.
-    values: List[:class:`str`]
+    values: :class:`list`\\[:class:`str`]
         The values that were passed.
     """
 

@@ -77,7 +77,7 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
     invoked_with: :class:`str` | ``None``
         The command name that triggered this invocation. Useful for finding out
         which alias called the command.
-    invoked_parents: List[:class:`str`]
+    invoked_parents: :class:`list`\\[:class:`str`]
         The command names of the parents that triggered this invocation. Useful for
         finding out which aliases called the command.
 

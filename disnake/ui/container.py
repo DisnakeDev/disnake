@@ -54,7 +54,7 @@ class Container(UIComponent):
 
     Attributes
     ----------
-    children: List[:class:`~.ui.ActionRow` | :class:`~.ui.Section` | :class:`~.ui.TextDisplay` | :class:`~.ui.MediaGallery` | :class:`~.ui.File` | :class:`~.ui.Separator`]
+    children: :class:`list`\\[:class:`~.ui.ActionRow` | :class:`~.ui.Section` | :class:`~.ui.TextDisplay` | :class:`~.ui.MediaGallery` | :class:`~.ui.File` | :class:`~.ui.Separator`]
         The list of child components in this container.
     accent_colour: :class:`.Colour` | ``None``
         The accent colour of the container.

@@ -59,7 +59,7 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
 
     Parameters
     ----------
-    test_guilds: List[:class:`int`]
+    test_guilds: :class:`list`\\[:class:`int`]
         The list of IDs of the guilds where you're going to test your application commands.
         Defaults to ``None``, which means global registration of commands across
         all guilds.
@@ -357,7 +357,7 @@ class InteractionBot(InteractionBotBase, disnake.Client):
 
     Parameters
     ----------
-    test_guilds: List[:class:`int`]
+    test_guilds: :class:`list`\\[:class:`int`]
         The list of IDs of the guilds where you're going to test your application commands.
         Defaults to ``None``, which means global registration of commands across
         all guilds.

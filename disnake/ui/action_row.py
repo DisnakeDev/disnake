@@ -227,7 +227,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
 
     @property
     def children(self) -> Sequence[ActionRowChildT]:
-        """Sequence[:class:`WrappedComponent`]:
+        """:class:`~typing.Sequence`\\[:class:`WrappedComponent`]:
         A read-only proxy of the UI components stored in this action row. To add/remove
         components to/from the action row, use its methods to directly modify it.
 
@@ -395,7 +395,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         max_values: :class:`int`
             The maximum number of items that must be chosen for this select menu.
             Defaults to 1 and must be between 1 and 25.
-        options: List[:class:`disnake.SelectOption`, List[:class:`str`], Dict[:class:`str`, :class:`str`]]
+        options: :class:`list`\\[:class:`disnake.SelectOption`, :class:`list`\\[:class:`str`], :class:`dict`\\[:class:`str`, :class:`str`]]
             A list of options that can be selected in this menu. Use explicit :class:`.SelectOption`\\s
             for fine-grained control over the options. Alternatively, a list of strings will be treated
             as a list of labels, and a dict will be treated as a mapping of labels to values.
@@ -464,7 +464,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
             Defaults to 1 and must be between 1 and 25.
         disabled: :class:`bool`
             Whether the select is disabled. Defaults to ``False``.
-        default_values: Sequence[:class:`~disnake.User` | :class:`.Member` | :class:`.SelectDefaultValue` | :class:`.Object` | ``None``]
+        default_values: :class:`~typing.Sequence`\\[:class:`~disnake.User` | :class:`.Member` | :class:`.SelectDefaultValue` | :class:`.Object` | ``None``]
             The list of values (users/members) that are selected by default.
             If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
@@ -530,7 +530,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
             Defaults to 1 and must be between 1 and 25.
         disabled: :class:`bool`
             Whether the select is disabled. Defaults to ``False``.
-        default_values: Sequence[:class:`.Role` | :class:`.SelectDefaultValue` | :class:`.Object` | ``None``]
+        default_values: :class:`~typing.Sequence`\\[:class:`.Role` | :class:`.SelectDefaultValue` | :class:`.Object` | ``None``]
             The list of values (roles) that are selected by default.
             If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
@@ -598,7 +598,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
             Defaults to 1 and must be between 1 and 25.
         disabled: :class:`bool`
             Whether the select is disabled. Defaults to ``False``.
-        default_values: Sequence[:class:`~disnake.User` | :class:`.Member` | :class:`.Role` | :class:`.SelectDefaultValue` | ``None``]
+        default_values: :class:`~typing.Sequence`\\[:class:`~disnake.User` | :class:`.Member` | :class:`.Role` | :class:`.SelectDefaultValue` | ``None``]
             The list of values (users/roles) that are selected by default.
             If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
@@ -667,10 +667,10 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
             Defaults to 1 and must be between 1 and 25.
         disabled: :class:`bool`
             Whether the select is disabled. Defaults to ``False``.
-        channel_types: List[:class:`.ChannelType` | ``None``]
+        channel_types: :class:`list`\\[:class:`.ChannelType` | ``None``]
             The list of channel types that can be selected in this select menu.
             Defaults to all types (i.e. ``None``).
-        default_values: Sequence[:class:`.abc.GuildChannel` | :class:`.Thread` | :class:`.abc.PrivateChannel` | :class:`.PartialMessageable` | :class:`.SelectDefaultValue` | :class:`.Object` | ``None``]
+        default_values: :class:`~typing.Sequence`\\[:class:`.abc.GuildChannel` | :class:`.Thread` | :class:`.abc.PrivateChannel` | :class:`.PartialMessageable` | :class:`.SelectDefaultValue` | :class:`.Object` | ``None``]
             The list of values (channels) that are selected by default.
             If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
@@ -931,7 +931,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
 
         Returns
         -------
-        List[:class:`ActionRow`]:
+        :class:`list`\\[:class:`ActionRow`]:
             The action rows parsed from the components on the message.
         """
         rows: List[ActionRow[ActionRowMessageComponent]] = []
@@ -966,12 +966,12 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
 
         Parameters
         ----------
-        action_rows: Sequence[:class:`ActionRow`]
+        action_rows: :class:`~typing.Sequence`\\[:class:`ActionRow`]
             The sequence of action rows over which to iterate.
 
         Yields
         ------
-        Tuple[:class:`ActionRow`, :class:`WrappedComponent`]
+        :class:`tuple`\\[:class:`ActionRow`, :class:`WrappedComponent`]
             A tuple containing an action row and a component of that action row.
         """
         for row in tuple(action_rows):
@@ -1102,7 +1102,7 @@ def walk_components(components: Sequence[ComponentT]) -> Iterator[ComponentT]:
 
     Parameters
     ----------
-    components: Sequence[:class:`~disnake.Component`, Sequence[:class:`UIComponent`]]
+    components: :class:`~typing.Sequence`\\[:class:`~disnake.Component`, :class:`~typing.Sequence`\\[:class:`UIComponent`]]
         The sequence of components to iterate over. This supports both :class:`disnake.Component`
         objects and :class:`.ui.UIComponent` objects.
 
@@ -1137,7 +1137,7 @@ def components_from_message(message: Message) -> List[MessageTopLevelComponent]:
 
     Returns
     -------
-    List[:class:`UIComponent`]:
+    :class:`list`\\[:class:`UIComponent`]:
         The ui components parsed from the components on the message.
     """
     components: List[UIComponent] = [_to_ui_component(c) for c in message.components]

@@ -93,7 +93,7 @@ class MessageInteraction(Interaction[ClientT]):
 
     client: :class:`Client`
         The interaction client.
-    entitlements: List[:class:`Entitlement`]
+    entitlements: :class:`list`\\[:class:`Entitlement`]
         The entitlements for the invoking user and guild,
         representing access to an application subscription.
 
@@ -137,7 +137,7 @@ class MessageInteraction(Interaction[ClientT]):
 
     @property
     def values(self) -> Optional[List[str]]:
-        """List[:class:`str` | ``None``]: The values the user selected.
+        """:class:`list`\\[:class:`str` | ``None``]: The values the user selected.
 
         For select menus of type :attr:`~ComponentType.string_select`,
         these are just the string values the user selected.
@@ -151,7 +151,7 @@ class MessageInteraction(Interaction[ClientT]):
     def resolved_values(
         self,
     ) -> Optional[Sequence[Union[str, Member, User, Role, AnyChannel]]]:
-        """Sequence[:class:`str`, :class:`Member`, :class:`User`, :class:`Role`, :class:`abc.GuildChannel` | :class:`Thread` | :class:`PartialMessageable` | ``None``]: The (resolved) values the user selected.
+        """:class:`~typing.Sequence`\\[:class:`str`, :class:`Member`, :class:`User`, :class:`Role`, :class:`abc.GuildChannel` | :class:`Thread` | :class:`PartialMessageable` | ``None``]: The (resolved) values the user selected.
 
         For select menus of type :attr:`~ComponentType.string_select`,
         this is equivalent to :attr:`values`.
@@ -200,7 +200,7 @@ class MessageInteractionData(Dict[str, Any]):
         The custom ID of the component.
     component_type: :class:`ComponentType`
         The type of the component.
-    values: List[:class:`str` | ``None``]
+    values: :class:`list`\\[:class:`str` | ``None``]
         The values the user has selected in a select menu.
         For non-string select menus, this contains IDs for use with :attr:`resolved`.
     resolved: :class:`InteractionDataResolved`

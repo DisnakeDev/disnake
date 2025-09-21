@@ -112,7 +112,7 @@ class Interaction(Generic[ClientT]):
 
     Attributes
     ----------
-    data: Mapping[:class:`str`, Any]
+    data: :class:`~typing.Mapping`\\[:class:`str`, Any]
         The interaction's raw data. This might be replaced with a more processed version in subclasses.
     id: :class:`int`
         The interaction's ID.
@@ -170,7 +170,7 @@ class Interaction(Generic[ClientT]):
         The token to continue the interaction. These are valid for 15 minutes.
     client: :class:`Client`
         The interaction client.
-    entitlements: List[:class:`Entitlement`]
+    entitlements: :class:`list`\\[:class:`Entitlement`]
         The entitlements for the invoking user and guild,
         representing access to an application subscription.
 
@@ -485,7 +485,7 @@ class Interaction(Generic[ClientT]):
             The new embed to replace the original with. This cannot be mixed with the
             ``embeds`` parameter.
             Could be ``None`` to remove the embed.
-        embeds: List[:class:`Embed`]
+        embeds: :class:`list`\\[:class:`Embed`]
             The new embeds to replace the original with. Must be a maximum of 10.
             This cannot be mixed with the ``embed`` parameter.
             To remove all embeds ``[]`` should be passed.
@@ -493,11 +493,11 @@ class Interaction(Generic[ClientT]):
             The file to upload. This cannot be mixed with the ``files`` parameter.
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
-        files: List[:class:`File`]
+        files: :class:`list`\\[:class:`File`]
             A list of files to upload. This cannot be mixed with the ``file`` parameter.
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
-        attachments: List[:class:`Attachment` | ``None``]
+        attachments: :class:`list`\\[:class:`Attachment` | ``None``]
             A list of attachments to keep in the message.
             If ``[]`` or ``None`` is passed then all existing attachments are removed.
             Keeps existing attachments if not provided.
@@ -728,12 +728,12 @@ class Interaction(Generic[ClientT]):
         embed: :class:`Embed`
             The rich embed for the content to send. This cannot be mixed with the
             ``embeds`` parameter.
-        embeds: List[:class:`Embed`]
+        embeds: :class:`list`\\[:class:`Embed`]
             A list of embeds to send with the content. Must be a maximum of 10.
             This cannot be mixed with the ``embed`` parameter.
         file: :class:`File`
             The file to upload. This cannot be mixed with the ``files`` parameter.
-        files: List[:class:`File`]
+        files: :class:`list`\\[:class:`File`]
             A list of files to upload. Must be a maximum of 10.
             This cannot be mixed with the ``file`` parameter.
         allowed_mentions: :class:`AllowedMentions`
@@ -1010,12 +1010,12 @@ class InteractionResponse:
         embed: :class:`Embed`
             The rich embed for the content to send. This cannot be mixed with the
             ``embeds`` parameter.
-        embeds: List[:class:`Embed`]
+        embeds: :class:`list`\\[:class:`Embed`]
             A list of embeds to send with the content. Must be a maximum of 10.
             This cannot be mixed with the ``embed`` parameter.
         file: :class:`File`
             The file to upload. This cannot be mixed with the ``files`` parameter.
-        files: List[:class:`File`]
+        files: :class:`list`\\[:class:`File`]
             A list of files to upload. Must be a maximum of 10.
             This cannot be mixed with the ``file`` parameter.
         allowed_mentions: :class:`AllowedMentions`
@@ -1229,7 +1229,7 @@ class InteractionResponse:
             The new embed to replace the original with. This cannot be mixed with the
             ``embeds`` parameter.
             Could be ``None`` to remove the embed.
-        embeds: List[:class:`Embed`]
+        embeds: :class:`list`\\[:class:`Embed`]
             The new embeds to replace the original with. Must be a maximum of 10.
             This cannot be mixed with the ``embed`` parameter.
             To remove all embeds ``[]`` should be passed.
@@ -1239,13 +1239,13 @@ class InteractionResponse:
 
             .. versionadded:: 2.2
 
-        files: List[:class:`File`]
+        files: :class:`list`\\[:class:`File`]
             A list of files to upload. This cannot be mixed with the ``file`` parameter.
             Files will be appended to the message.
 
             .. versionadded:: 2.2
 
-        attachments: List[:class:`Attachment` | ``None``]
+        attachments: :class:`list`\\[:class:`Attachment` | ``None``]
             A list of attachments to keep in the message.
             If ``[]`` or ``None`` is passed then all existing attachments are removed.
             Keeps existing attachments if not provided.
@@ -1416,7 +1416,7 @@ class InteractionResponse:
 
         Parameters
         ----------
-        choices: Sequence[:class:`OptionChoice`, Sequence[:class:`str` | :class:`int` | :class:`float`], Mapping[:class:`str`, :class:`str` | :class:`int` | :class:`float`]]
+        choices: :class:`~typing.Sequence`\\[:class:`OptionChoice`, :class:`~typing.Sequence`\\[:class:`str` | :class:`int` | :class:`float`], :class:`~typing.Mapping`\\[:class:`str`, :class:`str` | :class:`int` | :class:`float`]]
             The choices to suggest.
 
         Raises
@@ -1664,7 +1664,7 @@ class InteractionMessage(Message):
         private channel, then it is a :class:`User` instead.
     content: :class:`str`
         The actual contents of the message.
-    embeds: List[:class:`Embed`]
+    embeds: :class:`list`\\[:class:`Embed`]
         A list of embeds the message has.
     channel: :class:`TextChannel` | :class:`VoiceChannel` | :class:`StageChannel` | :class:`Thread` | :class:`DMChannel` | :class:`GroupChannel` | :class:`PartialMessageable`
         The channel that the message was sent from.
@@ -1684,7 +1684,7 @@ class InteractionMessage(Message):
             This does not check if the ``@everyone`` or the ``@here`` text is in the message itself.
             Rather this boolean indicates if either the ``@everyone`` or the ``@here`` text is in the message
             **and** it did end up mentioning.
-    mentions: List[:class:`abc.User`]
+    mentions: :class:`list`\\[:class:`abc.User`]
         A list of :class:`Member` that were mentioned. If the message is in a private message
         then the list will be of :class:`User` instead.
 
@@ -1692,24 +1692,24 @@ class InteractionMessage(Message):
 
             The order of the mentions list is not in any particular order so you should
             not rely on it. This is a Discord limitation, not one with the library.
-    role_mentions: List[:class:`Role`]
+    role_mentions: :class:`list`\\[:class:`Role`]
         A list of :class:`Role` that were mentioned. If the message is in a private message
         then the list is always empty.
     id: :class:`int`
         The message ID.
     webhook_id: :class:`int` | ``None``
         The ID of the application that sent this message.
-    attachments: List[:class:`Attachment`]
+    attachments: :class:`list`\\[:class:`Attachment`]
         A list of attachments given to a message.
     pinned: :class:`bool`
         Specifies if the message is currently pinned.
     flags: :class:`MessageFlags`
         Extra features of the message.
-    reactions : List[:class:`Reaction`]
+    reactions : :class:`list`\\[:class:`Reaction`]
         Reactions to a message. Reactions can be either custom emoji or standard unicode emoji.
-    stickers: List[:class:`StickerItem`]
+    stickers: :class:`list`\\[:class:`StickerItem`]
         A list of sticker items given to the message.
-    components: List[:class:`Component`]
+    components: :class:`list`\\[:class:`Component`]
         A list of components in the message.
     guild: :class:`Guild` | ``None``
         The guild that the message belongs to, if applicable.
@@ -1820,7 +1820,7 @@ class InteractionMessage(Message):
             The new embed to replace the original with. This cannot be mixed with the
             ``embeds`` parameter.
             Could be ``None`` to remove the embed.
-        embeds: List[:class:`Embed`]
+        embeds: :class:`list`\\[:class:`Embed`]
             The new embeds to replace the original with. Must be a maximum of 10.
             This cannot be mixed with the ``embed`` parameter.
             To remove all embeds ``[]`` should be passed.
@@ -1828,11 +1828,11 @@ class InteractionMessage(Message):
             The file to upload. This cannot be mixed with the ``files`` parameter.
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
-        files: List[:class:`File`]
+        files: :class:`list`\\[:class:`File`]
             A list of files to upload. This cannot be mixed with the ``file`` parameter.
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
-        attachments: List[:class:`Attachment` | ``None``]
+        attachments: :class:`list`\\[:class:`Attachment` | ``None``]
             A list of attachments to keep in the message.
             If ``[]`` or ``None`` is passed then all existing attachments are removed.
             Keeps existing attachments if not provided.
@@ -1992,18 +1992,18 @@ class InteractionDataResolved(Dict[str, Any]):
 
     Attributes
     ----------
-    members: Dict[:class:`int`, :class:`Member`]
+    members: :class:`dict`\\[:class:`int`, :class:`Member`]
         A mapping of IDs to partial members (``deaf`` and ``mute`` attributes are missing).
-    users: Dict[:class:`int`, :class:`User`]
+    users: :class:`dict`\\[:class:`int`, :class:`User`]
         A mapping of IDs to users.
-    roles: Dict[:class:`int`, :class:`Role`]
+    roles: :class:`dict`\\[:class:`int`, :class:`Role`]
         A mapping of IDs to roles.
-    channels: Dict[:class:`int`, :class:`abc.GuildChannel` | :class:`Thread` | :class:`abc.PrivateChannel` | :class:`PartialMessageable`]
+    channels: :class:`dict`\\[:class:`int`, :class:`abc.GuildChannel` | :class:`Thread` | :class:`abc.PrivateChannel` | :class:`PartialMessageable`]
         A mapping of IDs to partial channels (only ``id``, ``name`` and ``permissions`` are included,
         threads also have ``thread_metadata`` and ``parent_id``).
-    messages: Dict[:class:`int`, :class:`Message`]
+    messages: :class:`dict`\\[:class:`int`, :class:`Message`]
         A mapping of IDs to messages.
-    attachments: Dict[:class:`int`, :class:`Attachment`]
+    attachments: :class:`dict`\\[:class:`int`, :class:`Attachment`]
         A mapping of IDs to attachments.
 
         .. versionadded:: 2.4

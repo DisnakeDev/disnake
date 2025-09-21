@@ -239,7 +239,7 @@ class Member(disnake.abc.Messageable, _UserTag):
     joined_at: :class:`datetime.datetime` | ``None``
         An aware datetime object that specifies the date and time in UTC that the member joined the guild.
         If the member left and rejoined the guild, this will be the latest date. In certain cases, this can be ``None``.
-    activities: Tuple[:class:`BaseActivity` | :class:`Spotify`]
+    activities: :class:`tuple`\\[:class:`BaseActivity` | :class:`Spotify`]
         The activities that the user is currently doing.
 
         .. note::
@@ -575,7 +575,7 @@ class Member(disnake.abc.Messageable, _UserTag):
 
     @property
     def roles(self) -> List[Role]:
-        """List[:class:`Role`]: A :class:`list` of :class:`Role` that the member belongs to. Note
+        """:class:`list`\\[:class:`Role`]: A :class:`list` of :class:`Role` that the member belongs to. Note
         that the first element of this list is always the default '@everyone'
         role.
 
@@ -953,7 +953,7 @@ class Member(disnake.abc.Messageable, _UserTag):
 
             .. versionadded:: 1.7
 
-        roles: Sequence[:class:`Role`]
+        roles: :class:`~typing.Sequence`\\[:class:`Role`]
             The member's new list of roles. This *replaces* the roles.
         voice_channel: :class:`VoiceChannel` | ``None``
             The voice channel to move the member to.

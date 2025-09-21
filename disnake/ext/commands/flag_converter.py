@@ -63,7 +63,7 @@ class Flag:
     ----------
     name: :class:`str`
         The name of the flag.
-    aliases: List[:class:`str`]
+    aliases: :class:`list`\\[:class:`str`]
         The aliases of the flag name.
     attribute: :class:`str`
         The attribute in the class that corresponds to this flag.
@@ -111,7 +111,7 @@ def flag(
     ----------
     name: :class:`str`
         The flag name. If not given, defaults to the attribute name.
-    aliases: List[:class:`str`]
+    aliases: :class:`list`\\[:class:`str`]
         Aliases to the flag name. If not given no aliases are set.
     default: Any
         The default parameter. This could be either a value or a callable that takes
@@ -465,7 +465,7 @@ class FlagConverter(metaclass=FlagsMeta):
 
     @classmethod
     def get_flags(cls) -> Dict[str, Flag]:
-        """Dict[:class:`str`, :class:`Flag`]: A mapping of flag name to flag object this converter has."""
+        """:class:`dict`\\[:class:`str`, :class:`Flag`]: A mapping of flag name to flag object this converter has."""
         return cls.__commands_flags__.copy()
 
     @classmethod

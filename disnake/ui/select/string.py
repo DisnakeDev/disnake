@@ -77,7 +77,7 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select is disabled.
-    options: List[:class:`disnake.SelectOption`, List[:class:`str`], Dict[:class:`str`, :class:`str`]]
+    options: :class:`list`\\[:class:`disnake.SelectOption`, :class:`list`\\[:class:`str`], :class:`dict`\\[:class:`str`, :class:`str`]]
         A list of options that can be selected in this menu. Use explicit :class:`.SelectOption`\\s
         for fine-grained control over the options. Alternatively, a list of strings will be treated
         as a list of labels, and a dict will be treated as a mapping of labels to values.
@@ -106,7 +106,7 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
 
     Attributes
     ----------
-    values: List[:class:`str`]
+    values: :class:`list`\\[:class:`str`]
         A list of values that have been selected by the user.
     """
 
@@ -191,7 +191,7 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
 
     @property
     def options(self) -> List[SelectOption]:
-        """List[:class:`disnake.SelectOption`]: A list of options that can be selected in this select menu."""
+        """:class:`list`\\[:class:`disnake.SelectOption`]: A list of options that can be selected in this select menu."""
         return self._underlying.options
 
     @options.setter
@@ -328,7 +328,7 @@ def string_select(
     max_values: :class:`int`
         The maximum number of items that must be chosen for this select menu.
         Defaults to 1 and must be between 1 and 25.
-    options: List[:class:`disnake.SelectOption`, List[:class:`str`], Dict[:class:`str`, :class:`str`]]
+    options: :class:`list`\\[:class:`disnake.SelectOption`, :class:`list`\\[:class:`str`], :class:`dict`\\[:class:`str`, :class:`str`]]
         A list of options that can be selected in this menu. Use explicit :class:`.SelectOption`\\s
         for fine-grained control over the options. Alternatively, a list of strings will be treated
         as a list of labels, and a dict will be treated as a mapping of labels to values.

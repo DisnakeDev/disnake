@@ -37,7 +37,7 @@ assets: dict
     small_text: str (max: 128)
 party: dict
     id: str (max: 128),
-    size: List[int] (max-length: 2)
+    size: :class:`list`\\[int] (max-length: 2)
         elem: int (min: 1)
 secrets: dict
     match: str (max: 128)
@@ -282,13 +282,13 @@ class Activity(BaseActivity):
 
         - ``id``: A string representing the party ID.
         - ``size``: A list of two integers denoting (current_size, maximum_size).
-    buttons: List[str]
+    buttons: :class:`list`\\[str]
         A list of strings representing the labels of custom buttons shown in a rich presence.
 
         .. versionadded:: 2.0
 
         .. versionchanged:: 2.6
-            Changed type to ``List[str]`` to match API types.
+            Changed type to ``:class:`list`\\[str]`` to match API types.
 
     emoji: :class:`PartialEmoji` | ``None``
         The emoji that belongs to this activity.
@@ -745,7 +745,7 @@ class Spotify(_BaseActivity):
 
     @property
     def artists(self) -> List[str]:
-        """List[:class:`str`]: The artists of the song being played."""
+        """:class:`list`\\[:class:`str`]: The artists of the song being played."""
         return self._state.split("; ")
 
     @property

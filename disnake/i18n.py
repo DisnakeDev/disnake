@@ -80,7 +80,7 @@ class Localized(Generic[StringT]):
     key: :class:`str`
         A localization key used for lookups.
         Incompatible with ``data``.
-    data: Dict[:class:`.Locale` | :class:`str`, Dict[:class:`str`, :class:`str`]]
+    data: :class:`dict`\\[:class:`.Locale` | :class:`str`, :class:`dict`\\[:class:`str`, :class:`str`]]
         A mapping of locales to localized values.
         Incompatible with ``key``.
     """
@@ -231,7 +231,7 @@ class LocalizationValue:
 
     @property
     def data(self) -> Optional[Dict[str, str]]:
-        """Dict[:class:`str`, :class:`str` | ``None``]: A dict with a locale -> localization mapping, if available."""
+        """:class:`dict`\\[:class:`str`, :class:`str` | ``None``]: A dict with a locale -> localization mapping, if available."""
         if self._data is MISSING:
             # This will happen when `_link(store)` hasn't been called yet, which *shouldn't* occur under normal circumstances.
             warnings.warn(
@@ -279,7 +279,7 @@ class LocalizationProtocol(ABC):
 
         Returns
         -------
-        Dict[:class:`str`, :class:`str` | ``None``]
+        :class:`dict`\\[:class:`str`, :class:`str` | ``None``]
             The localizations for the provided key.
             May return ``None`` if no localizations could be found.
         """
@@ -342,7 +342,7 @@ class LocalizationStore(LocalizationProtocol):
 
         Returns
         -------
-        Dict[:class:`str`, :class:`str` | ``None``]
+        :class:`dict`\\[:class:`str`, :class:`str` | ``None``]
             The localizations for the provided key.
             Returns ``None`` if no localizations could be found and :attr:`strict` is disabled.
         """
