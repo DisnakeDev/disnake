@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     # NOTE: using undocumented `expected_text` parameter of pyright instead of `assert_type`,
     # as `assert_type` can't handle bound ParamSpecs
     reveal_type(
-        42,  # pyright: ignore  # suppress "revealed type is ..." output
+        42,  # pyright: ignore  # noqa: PGH003  # suppress "revealed type is ..." output
         expected_text="str",  # pyright: ignore[reportGeneralTypeIssues]  # ensure the functionality we want still works as expected
     )
 

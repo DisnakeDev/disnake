@@ -83,11 +83,13 @@ __all__ = (
     "NameplatePalette",
 )
 
+EnumMetaT = TypeVar("EnumMetaT", bound="EnumMeta")
+
 
 class _EnumValueBase(NamedTuple):
     if TYPE_CHECKING:
-        _cls_name: ClassVar[str]  # pyright: ignore[reportGeneralTypeIssues]
-        _actual_enum_cls_: ClassVar["EnumMeta"]  # pyright: ignore[reportGeneralTypeIssues]
+        _cls_name: ClassVar[str]  # pyright: ignore[reportGeneralTypeIssues, reportInvalidTypeForm]
+        _actual_enum_cls_: ClassVar[EnumMeta]  # pyright: ignore[reportGeneralTypeIssues, reportInvalidTypeForm]
 
     name: str
     value: Any

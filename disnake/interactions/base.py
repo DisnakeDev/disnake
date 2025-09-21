@@ -2069,7 +2069,7 @@ class InteractionDataResolved(Dict[str, Any]):
                 self.users[user_id] = User(state=state, data=user)
                 continue
 
-            if guild is not None and (member := guild.get_member(user_id)):
+            if guild is not None and (member := guild.get_member(user_id)) is not None:
                 self.members[user_id] = member
             else:
                 self.members[user_id] = Member(
