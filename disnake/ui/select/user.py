@@ -208,7 +208,7 @@ def user_select(
 
     Parameters
     ----------
-    cls: Callable[..., :class:`UserSelect`]
+    cls: :class:`~collections.abc.Callable`\\[..., :class:`UserSelect`]
         A callable (may be a :class:`UserSelect` subclass) to create a new instance of this component.
         If provided, the other parameters described below do not apply.
         Instead, this decorator will accept the same keywords as the passed callable/class does.

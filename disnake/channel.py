@@ -743,7 +743,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         limit: :class:`int` | :obj:`None`
             The number of messages to search through. This is not the number
             of messages that will be deleted, though it can be.
-        check: Callable[[:class:`Message`], :class:`bool`]
+        check: :class:`~collections.abc.Callable`\\[[:class:`Message`], :class:`bool`]
             The function used to check if a message should be deleted.
             It must take a :class:`Message` as its sole parameter.
         before: :class:`abc.Snowflake` | :class:`datetime.datetime` | :obj:`None`
@@ -1792,7 +1792,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         limit: :class:`int` | :obj:`None`
             The number of messages to search through. This is not the number
             of messages that will be deleted, though it can be.
-        check: Callable[[:class:`Message`], :class:`bool`]
+        check: :class:`~collections.abc.Callable`\\[[:class:`Message`], :class:`bool`]
             The function used to check if a message should be deleted.
             It must take a :class:`Message` as its sole parameter.
         before: :class:`abc.Snowflake` | :class:`datetime.datetime` | :obj:`None`
@@ -2647,7 +2647,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         limit: :class:`int` | :obj:`None`
             The number of messages to search through. This is not the number
             of messages that will be deleted, though it can be.
-        check: Callable[[:class:`Message`], :class:`bool`]
+        check: :class:`~collections.abc.Callable`\\[[:class:`Message`], :class:`bool`]
             The function used to check if a message should be deleted.
             It must take a :class:`Message` as its sole parameter.
         before: :class:`abc.Snowflake` | :class:`datetime.datetime` | :obj:`None`

@@ -247,7 +247,7 @@ def channel_select(
 
     Parameters
     ----------
-    cls: Callable[..., :class:`ChannelSelect`]
+    cls: :class:`~collections.abc.Callable`\\[..., :class:`ChannelSelect`]
         A callable (may be a :class:`ChannelSelect` subclass) to create a new instance of this component.
         If provided, the other parameters described below do not apply.
         Instead, this decorator will accept the same keywords as the passed callable/class does.

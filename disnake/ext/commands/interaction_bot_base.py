@@ -585,7 +585,7 @@ class InteractionBotBase(CommonBotBase):
 
         Returns
         -------
-        Callable[..., :class:`InvokableSlashCommand`]
+        :class:`~collections.abc.Callable`\\[..., :class:`InvokableSlashCommand`]
             A decorator that converts the provided method into an InvokableSlashCommand, adds it to the bot, then returns it.
         """
 
@@ -689,7 +689,7 @@ class InteractionBotBase(CommonBotBase):
 
         Returns
         -------
-        Callable[..., :class:`InvokableUserCommand`]
+        :class:`~collections.abc.Callable`\\[..., :class:`InvokableUserCommand`]
             A decorator that converts the provided method into an InvokableUserCommand, adds it to the bot, then returns it.
         """
 
@@ -792,7 +792,7 @@ class InteractionBotBase(CommonBotBase):
 
         Returns
         -------
-        Callable[..., :class:`InvokableMessageCommand`]
+        :class:`~collections.abc.Callable`\\[..., :class:`InvokableMessageCommand`]
             A decorator that converts the provided method into an InvokableMessageCommand, adds it to the bot, then returns it.
         """
 

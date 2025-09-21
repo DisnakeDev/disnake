@@ -221,7 +221,7 @@ def mentionable_select(
 
     Parameters
     ----------
-    cls: Callable[..., :class:`MentionableSelect`]
+    cls: :class:`~collections.abc.Callable`\\[..., :class:`MentionableSelect`]
         A callable (may be a :class:`MentionableSelect` subclass) to create a new instance of this component.
         If provided, the other parameters described below do not apply.
         Instead, this decorator will accept the same keywords as the passed callable/class does.

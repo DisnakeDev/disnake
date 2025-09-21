@@ -1806,7 +1806,7 @@ class Client:
             The event name, similar to the :ref:`event reference <disnake_api_events>`,
             but without the ``on_`` prefix, to wait for. It's recommended
             to use :class:`.Event`.
-        check: Callable[..., :class:`bool` | :obj:`None`]
+        check: :class:`~collections.abc.Callable`\\[..., :class:`bool` | :obj:`None`]
             A predicate to check what to wait for. The arguments must meet the
             parameters of the event being waited for.
         timeout: :class:`float` | :obj:`None`

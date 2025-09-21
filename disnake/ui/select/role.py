@@ -206,7 +206,7 @@ def role_select(
 
     Parameters
     ----------
-    cls: Callable[..., :class:`RoleSelect`]
+    cls: :class:`~collections.abc.Callable`\\[..., :class:`RoleSelect`]
         A callable (may be a :class:`RoleSelect` subclass) to create a new instance of this component.
         If provided, the other parameters described below do not apply.
         Instead, this decorator will accept the same keywords as the passed callable/class does.
