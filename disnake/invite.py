@@ -72,7 +72,7 @@ class PartialInviteChannel:
 
     Attributes
     ----------
-    name: :class:`str` | ``None``
+    name: :class:`str` | :obj:`None`
         The partial channel's name.
     id: :class:`int`
         The partial channel's ID.
@@ -122,7 +122,7 @@ class PartialInviteChannel:
 
     @property
     def icon(self) -> Optional[Asset]:
-        """:class:`Asset` | ``None``: Returns the channel's icon asset if available.
+        """:class:`Asset` | :obj:`None`: Returns the channel's icon asset if available.
 
         .. versionadded:: 2.6
         """
@@ -161,7 +161,7 @@ class PartialInviteGuild:
         The partial guild's name.
     id: :class:`int`
         The partial guild's ID.
-    description: :class:`str` | ``None``
+    description: :class:`str` | :obj:`None`
         The partial guild's description.
     features: :class:`list`\\[:class:`str`]
         A list of features the partial guild has. See :attr:`Guild.features` for more information.
@@ -170,7 +170,7 @@ class PartialInviteGuild:
 
         .. versionadded:: 2.4
 
-    vanity_url_code: :class:`str` | ``None``
+    vanity_url_code: :class:`str` | :obj:`None`
         The partial guild's vanity url code, if any.
 
         .. versionadded:: 2.4
@@ -230,21 +230,21 @@ class PartialInviteGuild:
 
     @property
     def icon(self) -> Optional[Asset]:
-        """:class:`Asset` | ``None``: Returns the guild's icon asset, if available."""
+        """:class:`Asset` | :obj:`None`: Returns the guild's icon asset, if available."""
         if self._icon is None:
             return None
         return Asset._from_guild_icon(self._state, self.id, self._icon)
 
     @property
     def banner(self) -> Optional[Asset]:
-        """:class:`Asset` | ``None``: Returns the guild's banner asset, if available."""
+        """:class:`Asset` | :obj:`None`: Returns the guild's banner asset, if available."""
         if self._banner is None:
             return None
         return Asset._from_banner(self._state, self.id, self._banner)
 
     @property
     def splash(self) -> Optional[Asset]:
-        """:class:`Asset` | ``None``: Returns the guild's invite splash asset, if available."""
+        """:class:`Asset` | :obj:`None`: Returns the guild's invite splash asset, if available."""
         if self._splash is None:
             return None
         return Asset._from_guild_image(self._state, self.id, self._splash, path="splashes")
@@ -254,7 +254,7 @@ class Invite(Hashable):
     """Represents a Discord :class:`Guild` or :class:`abc.GuildChannel` invite.
 
     Depending on the way this object was created, some of the attributes can
-    have a value of ``None`` (see table below).
+    have a value of :obj:`None` (see table below).
 
     .. collapse:: operations
 
@@ -315,72 +315,72 @@ class Invite(Hashable):
 
         .. versionadded:: 2.10
 
-    guild: :class:`Guild` | :class:`Object` | :class:`PartialInviteGuild` | ``None``
-        The guild the invite is for. Can be ``None`` if it's not a guild invite (see :attr:`type`).
-    max_age: :class:`int` | ``None``
+    guild: :class:`Guild` | :class:`Object` | :class:`PartialInviteGuild` | :obj:`None`
+        The guild the invite is for. Can be :obj:`None` if it's not a guild invite (see :attr:`type`).
+    max_age: :class:`int` | :obj:`None`
         How long before the invite expires in seconds.
         A value of ``0`` indicates that it doesn't expire.
 
         Optional according to the :ref:`table <invite_attr_table>` above.
-    max_uses: :class:`int` | ``None``
+    max_uses: :class:`int` | :obj:`None`
         How many times the invite can be used.
         A value of ``0`` indicates that it has unlimited uses.
 
         Optional according to the :ref:`table <invite_attr_table>` above.
-    created_at: :class:`datetime.datetime` | ``None``
+    created_at: :class:`datetime.datetime` | :obj:`None`
         An aware UTC datetime object denoting the time the invite was created.
 
         Optional according to the :ref:`table <invite_attr_table>` above.
-    temporary: :class:`bool` | ``None``
+    temporary: :class:`bool` | :obj:`None`
         Whether the invite grants temporary membership.
         If ``True``, members who joined via this invite will be kicked upon disconnect.
 
         Optional according to the :ref:`table <invite_attr_table>` above.
-    uses: :class:`int` | ``None``
+    uses: :class:`int` | :obj:`None`
         How many times the invite has been used.
 
         Optional according to the :ref:`table <invite_attr_table>` above.
-    approximate_member_count: :class:`int` | ``None``
+    approximate_member_count: :class:`int` | :obj:`None`
         The approximate number of members in the guild.
 
         Optional according to the :ref:`table <invite_attr_table>` above.
-    approximate_presence_count: :class:`int` | ``None``
+    approximate_presence_count: :class:`int` | :obj:`None`
         The approximate number of members currently active in the guild.
         This includes idle, dnd, online, and invisible members. Offline members are excluded.
 
         Optional according to the :ref:`table <invite_attr_table>` above.
-    expires_at: :class:`datetime.datetime` | ``None``
-        The expiration date of the invite. If the value is ``None`` the invite will never expire.
+    expires_at: :class:`datetime.datetime` | :obj:`None`
+        The expiration date of the invite. If the value is :obj:`None` the invite will never expire.
 
         .. versionadded:: 2.0
 
-    inviter: :class:`User` | ``None``
+    inviter: :class:`User` | :obj:`None`
         The user who created the invite, if any.
 
-        This is ``None`` in vanity invites, for example.
-    channel: :class:`abc.GuildChannel` | :class:`Object` | :class:`PartialInviteChannel` | ``None``
+        This is :obj:`None` in vanity invites, for example.
+    channel: :class:`abc.GuildChannel` | :class:`Object` | :class:`PartialInviteChannel` | :obj:`None`
         The channel the invite is for.
     target_type: :class:`InviteTarget`
         The type of target for the voice channel invite.
 
         .. versionadded:: 2.0
 
-    target_user: :class:`User` | ``None``
+    target_user: :class:`User` | :obj:`None`
         The user whose stream to display for this invite, if any.
 
         .. versionadded:: 2.0
 
-    target_application: :class:`PartialAppInfo` | ``None``
+    target_application: :class:`PartialAppInfo` | :obj:`None`
         The embedded application the invite targets, if any.
 
         .. versionadded:: 2.0
 
-    guild_scheduled_event: :class:`GuildScheduledEvent` | ``None``
+    guild_scheduled_event: :class:`GuildScheduledEvent` | :obj:`None`
         The guild scheduled event included in the invite, if any.
 
         .. versionadded:: 2.3
 
-    guild_welcome_screen: :class:`WelcomeScreen` | ``None``
+    guild_welcome_screen: :class:`WelcomeScreen` | :obj:`None`
         The partial guild's welcome screen, if any.
 
         .. versionadded:: 2.5
@@ -585,7 +585,7 @@ class Invite(Hashable):
 
         Parameters
         ----------
-        reason: :class:`str` | ``None``
+        reason: :class:`str` | :obj:`None`
             The reason for deleting this invite. Shows up on the audit log.
 
         Raises

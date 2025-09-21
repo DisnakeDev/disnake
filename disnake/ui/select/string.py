@@ -67,7 +67,7 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
     custom_id: :class:`str`
         The ID of the select menu that gets received during an interaction.
         If not given then one is generated for you.
-    placeholder: :class:`str` | ``None``
+    placeholder: :class:`str` | :obj:`None`
         The placeholder text that is shown if nothing is selected, if any.
     min_values: :class:`int`
         The minimum number of items that must be chosen for this select menu.
@@ -97,11 +97,11 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
         sequential identifiers to the components in the message.
 
         .. versionadded:: 2.11
-    row: :class:`int` | ``None``
+    row: :class:`int` | :obj:`None`
         The relative row this select menu belongs to. A Discord component can only have 5
         rows. By default, items are arranged automatically into those 5 rows. If you'd
         like to control the relative positioning of the row then passing an index is advised.
-        For example, row=1 will show up before row=2. Defaults to ``None``, which is automatic
+        For example, row=1 will show up before row=2. Defaults to :obj:`None`, which is automatic
         ordering. The row number must be between 0 and 4 (i.e. zero indexed).
 
     Attributes
@@ -225,10 +225,10 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
         value: :class:`str`
             The value of the option. This is not displayed to users.
             If not given, defaults to the label. Can only be up to 100 characters.
-        description: :class:`str` | ``None``
+        description: :class:`str` | :obj:`None`
             An additional description of the option, if any.
             Can only be up to 100 characters.
-        emoji: :class:`str` | :class:`.Emoji` | :class:`.PartialEmoji` | ``None``
+        emoji: :class:`str` | :class:`.Emoji` | :class:`.PartialEmoji` | :obj:`None`
             The emoji of the option, if available. This can either be a string representing
             the custom or unicode emoji or an instance of :class:`.PartialEmoji` or :class:`.Emoji`.
         default: :class:`bool`
@@ -317,7 +317,7 @@ def string_select(
         Instead, this decorator will accept the same keywords as the passed callable/class does.
 
         .. versionadded:: 2.6
-    placeholder: :class:`str` | ``None``
+    placeholder: :class:`str` | :obj:`None`
         The placeholder text that is shown if nothing is selected, if any.
     custom_id: :class:`str`
         The ID of the select menu that gets received during an interaction.
@@ -345,11 +345,11 @@ def string_select(
         sequential identifiers to the components in the message.
 
         .. versionadded:: 2.11
-    row: :class:`int` | ``None``
+    row: :class:`int` | :obj:`None`
         The relative row this select menu belongs to. A Discord component can only have 5
         rows. By default, items are arranged automatically into those 5 rows. If you'd
         like to control the relative positioning of the row then passing an index is advised.
-        For example, row=1 will show up before row=2. Defaults to ``None``, which is automatic
+        For example, row=1 will show up before row=2. Defaults to :obj:`None`, which is automatic
         ordering. The row number must be between 0 and 4 (i.e. zero indexed).
     """
     return _create_decorator(cls, **kwargs)

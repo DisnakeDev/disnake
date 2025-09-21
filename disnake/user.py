@@ -152,9 +152,9 @@ class BaseUser(_UserTag):
 
     @property
     def avatar(self) -> Optional[Asset]:
-        """:class:`Asset` | ``None``: Returns an :class:`Asset` for the avatar the user has.
+        """:class:`Asset` | :obj:`None`: Returns an :class:`Asset` for the avatar the user has.
 
-        If the user does not have a traditional avatar, ``None`` is returned.
+        If the user does not have a traditional avatar, :obj:`None` is returned.
         If you want the avatar that a user has displayed, consider :attr:`display_avatar`.
         """
         if self._avatar is not None:
@@ -187,7 +187,7 @@ class BaseUser(_UserTag):
 
     @property
     def banner(self) -> Optional[Asset]:
-        """:class:`Asset` | ``None``: Returns the user's banner asset, if available.
+        """:class:`Asset` | :obj:`None`: Returns the user's banner asset, if available.
 
         .. versionadded:: 2.0
 
@@ -201,7 +201,7 @@ class BaseUser(_UserTag):
 
     @property
     def avatar_decoration(self) -> Optional[Asset]:
-        """:class:`Asset` | ``None``: Returns the user's avatar decoration asset, if available.
+        """:class:`Asset` | :obj:`None`: Returns the user's avatar decoration asset, if available.
 
         .. versionadded:: 2.10
 
@@ -231,7 +231,7 @@ class BaseUser(_UserTag):
 
     @property
     def accent_colour(self) -> Optional[Colour]:
-        """:class:`Colour` | ``None``: Returns the user's accent colour, if applicable.
+        """:class:`Colour` | :obj:`None`: Returns the user's accent colour, if applicable.
 
         There is an alias for this named :attr:`accent_color`.
 
@@ -247,7 +247,7 @@ class BaseUser(_UserTag):
 
     @property
     def accent_color(self) -> Optional[Colour]:
-        """:class:`Colour` | ``None``: Returns the user's accent color, if applicable.
+        """:class:`Colour` | :obj:`None`: Returns the user's accent color, if applicable.
 
         There is an alias for this named :attr:`accent_colour`.
 
@@ -304,7 +304,7 @@ class BaseUser(_UserTag):
 
     @property
     def primary_guild(self) -> Optional[PrimaryGuild]:
-        """:class:`PrimaryGuild` | ``None``: Returns the user's primary guild, if any.
+        """:class:`PrimaryGuild` | :obj:`None`: Returns the user's primary guild, if any.
 
         .. versionadded:: 2.11
         """
@@ -364,7 +364,7 @@ class ClientUser(BaseUser):
     discriminator: :class:`str`
         The user's discriminator.
 
-    global_name: :class:`str` | ``None``
+    global_name: :class:`str` | :obj:`None`
         The user's global display name, if set.
         This takes precedence over :attr:`.name` when shown.
 
@@ -379,7 +379,7 @@ class ClientUser(BaseUser):
 
     verified: :class:`bool`
         Specifies if the user's email is verified.
-    locale: :class:`Locale` | ``None``
+    locale: :class:`Locale` | :obj:`None`
         The IETF language tag used to identify the language the user is using.
 
         .. versionchanged:: 2.5
@@ -435,18 +435,18 @@ class ClientUser(BaseUser):
         ----------
         username: :class:`str`
             The new username you wish to change to.
-        avatar: |resource_type| | ``None``
+        avatar: |resource_type| | :obj:`None`
             A :term:`py:bytes-like object` or asset representing the image to upload.
-            Could be ``None`` to denote no avatar.
+            Could be :obj:`None` to denote no avatar.
 
             Only JPG, PNG, WEBP (static), and GIF (static/animated) images are supported.
 
             .. versionchanged:: 2.5
                 Now accepts various resource types in addition to :class:`bytes`.
 
-        banner: |resource_type| | ``None``
+        banner: |resource_type| | :obj:`None`
             A :term:`py:bytes-like object` or asset representing the image to upload.
-            Could be ``None`` to denote no banner.
+            Could be :obj:`None` to denote no banner.
 
             Only JPG, PNG, WEBP (static), and GIF (static/animated) images are supported.
 
@@ -552,7 +552,7 @@ class Collectibles:
 
     Attributes
     ----------
-    nameplate: :class:`Nameplate` | ``None``
+    nameplate: :class:`Nameplate` | :obj:`None`
         The nameplate of the user, if available.
     """
 
@@ -605,7 +605,7 @@ class User(BaseUser, disnake.abc.Messageable):
             The value of a single zero (``"0"``) indicates that the user has been migrated to the new system.
             See the `help article <https://dis.gd/app-usernames>`__ for details.
 
-    global_name: :class:`str` | ``None``
+    global_name: :class:`str` | :obj:`None`
         The user's global display name, if set.
         This takes precedence over :attr:`.name` when shown.
 
@@ -631,9 +631,9 @@ class User(BaseUser, disnake.abc.Messageable):
 
     @property
     def dm_channel(self) -> Optional[DMChannel]:
-        """:class:`DMChannel` | ``None``: Returns the channel associated with this user if it exists.
+        """:class:`DMChannel` | :obj:`None`: Returns the channel associated with this user if it exists.
 
-        If this returns ``None``, you can create a DM channel by calling the
+        If this returns :obj:`None`, you can create a DM channel by calling the
         :meth:`create_dm` coroutine function.
         """
         return self._state._get_private_channel_by_user(self.id)
@@ -679,13 +679,13 @@ class PrimaryGuild:
 
     Attributes
     ----------
-    guild_id: :class:`int` | ``None``
+    guild_id: :class:`int` | :obj:`None`
         The ID of the user's primary guild.
-    identity_enabled: :class:`bool` | ``None``
-        Whether the user is displaying the primary guild's server tag. This can be ``None``
+    identity_enabled: :class:`bool` | :obj:`None`
+        Whether the user is displaying the primary guild's server tag. This can be :obj:`None`
         if the system clears the identity, e.g. the server no longer supports tags. This will be ``False``
         if the user manually removes their tag.
-    tag: :class:`str` | ``None``
+    tag: :class:`str` | :obj:`None`
         The text of the user's server tag, up to 4 characters.
     """
 
@@ -709,7 +709,7 @@ class PrimaryGuild:
 
     @property
     def badge(self) -> Optional[Asset]:
-        """:class:`Asset` | ``None``: Returns the server tag badge, if any."""
+        """:class:`Asset` | :obj:`None`: Returns the server tag badge, if any."""
         # if badge is not None identity_guild_id won't be None either
         if self._badge is not None and self.guild_id is not None:
             return Asset._from_guild_tag_badge(self._state, self.guild_id, self._badge)

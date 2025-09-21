@@ -278,13 +278,13 @@ class Attachment(Hashable):
         The attachment's ID.
     size: :class:`int`
         The attachment's size in bytes.
-    height: :class:`int` | ``None``
+    height: :class:`int` | :obj:`None`
         The attachment's height, in pixels. Only applicable to images and videos.
-    width: :class:`int` | ``None``
+    width: :class:`int` | :obj:`None`
         The attachment's width, in pixels. Only applicable to images and videos.
     filename: :class:`str`
         The attachment's filename.
-    title: :class:`str` | ``None``
+    title: :class:`str` | :obj:`None`
         The attachment title. If the filename contained special characters,
         this will be set to the original filename, without filename extension.
 
@@ -297,7 +297,7 @@ class Attachment(Hashable):
         The proxy URL. This is a cached version of the :attr:`~Attachment.url` in the
         case of images. When the message is deleted, this URL might be valid for a few
         minutes or not valid at all.
-    content_type: :class:`str` | ``None``
+    content_type: :class:`str` | :obj:`None`
         The attachment's `media type <https://en.wikipedia.org/wiki/Media_type>`_.
 
         .. versionadded:: 1.7
@@ -312,13 +312,13 @@ class Attachment(Hashable):
 
         .. versionadded:: 2.3
 
-    duration: :class:`float` | ``None``
+    duration: :class:`float` | :obj:`None`
         The duration of the audio attachment in seconds, if this is attached to a voice message
         (see :attr:`MessageFlags.is_voice_message`).
 
         .. versionadded:: 2.9
 
-    waveform: :class:`bytes` | ``None``
+    waveform: :class:`bytes` | :obj:`None`
         The byte array representing a sampled waveform, if this is attached to a voice message
         (see :attr:`MessageFlags.is_voice_message`).
 
@@ -499,9 +499,9 @@ class Attachment(Hashable):
 
             .. versionadded:: 1.4
 
-        description: :class:`str` | ``None``
+        description: :class:`str` | :obj:`None`
             The file's description. Copies this attachment's description by default,
-            set to ``None`` to remove.
+            set to :obj:`None` to remove.
 
             .. versionadded:: 2.3
 
@@ -585,7 +585,7 @@ class DeletedReferencedMessage:
 
     @property
     def guild_id(self) -> Optional[int]:
-        """:class:`int` | ``None``: The guild ID of the deleted referenced message."""
+        """:class:`int` | :obj:`None`: The guild ID of the deleted referenced message."""
         return self._parent.guild_id
 
 
@@ -604,11 +604,11 @@ class MessageReference:
 
         .. versionadded:: 2.10
 
-    message_id: :class:`int` | ``None``
+    message_id: :class:`int` | :obj:`None`
         The ID of the message referenced/forwarded.
     channel_id: :class:`int`
         The channel ID of the message referenced/forwarded.
-    guild_id: :class:`int` | ``None``
+    guild_id: :class:`int` | :obj:`None`
         The guild ID of the message referenced/forwarded.
     fail_if_not_exists: :class:`bool`
         Whether replying to the referenced message should raise :class:`HTTPException`
@@ -616,8 +616,8 @@ class MessageReference:
 
         .. versionadded:: 1.7
 
-    resolved: :class:`Message` | :class:`DeletedReferencedMessage` | ``None``
-        The message that this reference resolved to. If this is ``None``
+    resolved: :class:`Message` | :class:`DeletedReferencedMessage` | :obj:`None`
+        The message that this reference resolved to. If this is :obj:`None`
         then the original message was not fetched either due to the Discord API
         not attempting to resolve it or it not being available at the time of creation.
         If the message was resolved at a prior point but has since been deleted then
@@ -714,7 +714,7 @@ class MessageReference:
 
     @property
     def cached_message(self) -> Optional[Message]:
-        """:class:`~disnake.Message` | ``None``: The cached message, if found in the internal message cache."""
+        """:class:`~disnake.Message` | :obj:`None`: The cached message, if found in the internal message cache."""
         return self._state and self._state._get_message(self.message_id)
 
     @property
@@ -830,22 +830,22 @@ class InteractionMetadata:
     authorizing_integration_owners: :class:`AuthorizingIntegrationOwners`
         Details about the authorizing user/guild for the application installation
         related to the interaction.
-    original_response_message_id: :class:`int` | ``None``
+    original_response_message_id: :class:`int` | :obj:`None`
         The ID of the original response message.
         Only present on :attr:`~Interaction.followup` messages.
 
-    target_user: :class:`User` | ``None``
+    target_user: :class:`User` | :obj:`None`
         The ID of the message the command was run on.
         Only present on interactions of :attr:`ApplicationCommandType.message` commands.
-    target_message_id: :class:`int` | ``None``
+    target_message_id: :class:`int` | :obj:`None`
         The user the command was run on.
         Only present on interactions of :attr:`ApplicationCommandType.user` commands.
 
-    interacted_message_id: :class:`int` | ``None``
+    interacted_message_id: :class:`int` | :obj:`None`
         The ID of the message containing the component.
         Only present on :attr:`InteractionType.component` interactions.
 
-    triggering_interaction_metadata: :class:`InteractionMetadata` | ``None``
+    triggering_interaction_metadata: :class:`InteractionMetadata` | :obj:`None`
         The metadata of the original interaction that triggered the modal.
         Only present on :attr:`InteractionType.modal_submit` interactions.
     """
@@ -903,10 +903,10 @@ class AuthorizingIntegrationOwners:
 
     Attributes
     ----------
-    guild_id: :class:`int` | ``None``
+    guild_id: :class:`int` | :obj:`None`
         The ID of the authorizing guild, if the application (and command, if applicable)
         was installed to the guild. In DMs with the bot, this will be ``0``.
-    user_id: :class:`int` | ``None``
+    user_id: :class:`int` | :obj:`None`
         The ID of the authorizing user, if the application (and command, if applicable)
         was installed to the user.
     """
@@ -1003,7 +1003,7 @@ class Message(Hashable):
         private channel or the user has the left the guild, then it is a :class:`User` instead.
     content: :class:`str`
         The actual contents of the message.
-    nonce: :class:`str` | :class:`int` | ``None``
+    nonce: :class:`str` | :class:`int` | :obj:`None`
         The value used by the Discord guild and the client to verify that the message is successfully sent.
         This is not stored long term within Discord's servers and is only used ephemerally.
     embeds: :class:`list`\\[:class:`Embed`]
@@ -1011,21 +1011,21 @@ class Message(Hashable):
     channel: :class:`TextChannel` | :class:`VoiceChannel` | :class:`StageChannel` | :class:`Thread` | :class:`DMChannel` | :class:`GroupChannel` | :class:`PartialMessageable`
         The channel that the message was sent from.
         Could be a :class:`DMChannel` or :class:`GroupChannel` if it's a private message.
-    position: :class:`int` | ``None``
+    position: :class:`int` | :obj:`None`
         A number that indicates the approximate position of a message in a :class:`Thread`.
         This is a number that starts at 0. e.g. the first message is position 0.
         This is `None` if the message was not sent in a :class:`Thread`, or if it was sent before July 1, 2022.
 
         .. versionadded:: 2.6
 
-    reference: :class:`~disnake.MessageReference` | ``None``
+    reference: :class:`~disnake.MessageReference` | :obj:`None`
         The message that this message references. This is only applicable to messages of
         type :attr:`MessageType.pins_add`, crossposted messages created by a
         followed channel integration, message replies, or application command responses.
 
         .. versionadded:: 1.5
 
-    interaction_metadata: :class:`InteractionMetadata` | ``None``
+    interaction_metadata: :class:`InteractionMetadata` | :obj:`None`
         The metadata about the interaction that caused this message, if any.
 
         .. versionadded:: 2.10
@@ -1053,13 +1053,13 @@ class Message(Hashable):
         then the list is always empty.
     id: :class:`int`
         The message ID.
-    application_id: :class:`int` | ``None``
+    application_id: :class:`int` | :obj:`None`
         If this message was sent from an interaction, or is an application owned webhook,
         then this is the ID of the application.
 
         .. versionadded:: 2.5
 
-    webhook_id: :class:`int` | ``None``
+    webhook_id: :class:`int` | :obj:`None`
         If this message was sent by a webhook, then this is the webhook ID's that sent this
         message.
     attachments: :class:`list`\\[:class:`Attachment`]
@@ -1073,7 +1073,7 @@ class Message(Hashable):
 
     reactions : :class:`list`\\[:class:`Reaction`]
         Reactions to a message. Reactions can be either custom emoji or standard unicode emoji.
-    activity: :class:`dict` | ``None``
+    activity: :class:`dict` | :obj:`None`
         The activity associated with this message. Sent with Rich-Presence related messages that for
         example, request joining, spectating, or listening to or with another member.
 
@@ -1081,7 +1081,7 @@ class Message(Hashable):
 
         - ``type``: An integer denoting the type of message activity being requested.
         - ``party_id``: The party ID associated with the party.
-    application: :class:`dict` | ``None``
+    application: :class:`dict` | :obj:`None`
         The rich presence enabled application associated with this message.
 
         It is a dictionary with the following keys:
@@ -1106,10 +1106,10 @@ class Message(Hashable):
 
         .. versionadded:: 2.10
 
-    guild: :class:`Guild` | ``None``
+    guild: :class:`Guild` | :obj:`None`
         The guild that the message belongs to, if applicable.
 
-    poll: :class:`Poll` | ``None``
+    poll: :class:`Poll` | :obj:`None`
         The poll contained in this message.
 
         .. versionadded:: 2.10
@@ -1544,12 +1544,12 @@ class Message(Hashable):
 
     @property
     def edited_at(self) -> Optional[datetime.datetime]:
-        """:class:`datetime.datetime` | ``None``: An aware UTC datetime object containing the edited time of the message."""
+        """:class:`datetime.datetime` | :obj:`None`: An aware UTC datetime object containing the edited time of the message."""
         return self._edited_timestamp
 
     @property
     def pinned_at(self) -> Optional[datetime.datetime]:
-        """:class:`datetime.datetime` | ``None``: An aware UTC datetime object containing the pin time of the message.
+        """:class:`datetime.datetime` | :obj:`None`: An aware UTC datetime object containing the pin time of the message.
 
         .. note::
             This is only set on messages retrieved using :meth:`abc.Messageable.pins`.
@@ -1566,7 +1566,7 @@ class Message(Hashable):
 
     @property
     def thread(self) -> Optional[Thread]:
-        """:class:`Thread` | ``None``: The thread started from this message. ``None`` if no thread has been started.
+        """:class:`Thread` | :obj:`None`: The thread started from this message. :obj:`None` if no thread has been started.
 
         .. versionadded:: 2.4
         """
@@ -1577,7 +1577,7 @@ class Message(Hashable):
 
     @property
     def role_subscription_data(self) -> Optional[RoleSubscriptionData]:
-        """:class:`RoleSubscriptionData` | ``None``: The metadata of the role
+        """:class:`RoleSubscriptionData` | :obj:`None`: The metadata of the role
         subscription purchase/renewal, if this message is a :attr:`MessageType.role_subscription_purchase`.
 
         .. versionadded:: 2.9
@@ -1606,14 +1606,14 @@ class Message(Hashable):
 
     @utils.cached_slot_property("_cs_system_content")
     def system_content(self) -> Optional[str]:
-        """:class:`str` | ``None``: A property that returns the content that is rendered
+        """:class:`str` | :obj:`None`: A property that returns the content that is rendered
         regardless of the :attr:`Message.type`.
 
         In the case of :attr:`MessageType.default` and :attr:`MessageType.reply`\\,
         this just returns the regular :attr:`Message.content`. Otherwise this
         returns an English message denoting the contents of the system message.
 
-        If the message type is unrecognised this method will return ``None``.
+        If the message type is unrecognised this method will return :obj:`None`.
         """
         if self.type in (MessageType.default, MessageType.reply):
             return self.content
@@ -1826,7 +1826,7 @@ class Message(Hashable):
     @property
     @deprecated("interaction_metadata")
     def interaction(self) -> Optional[InteractionReference]:
-        """:class:`~disnake.InteractionReference` | ``None``: The interaction that this message references.
+        """:class:`~disnake.InteractionReference` | :obj:`None`: The interaction that this message references.
         This exists only when the message is a response to an interaction without an existing message.
 
         .. versionadded:: 2.1
@@ -1850,7 +1850,7 @@ class Message(Hashable):
 
         Parameters
         ----------
-        delay: :class:`float` | ``None``
+        delay: :class:`float` | :obj:`None`
             If provided, the number of seconds to wait in the background
             before deleting the message. If the deletion fails then it is silently ignored.
 
@@ -1987,13 +1987,13 @@ class Message(Hashable):
 
         Parameters
         ----------
-        content: :class:`str` | ``None``
+        content: :class:`str` | :obj:`None`
             The new content to replace the message with.
-            Could be ``None`` to remove the content.
-        embed: :class:`Embed` | ``None``
+            Could be :obj:`None` to remove the content.
+        embed: :class:`Embed` | :obj:`None`
             The new embed to replace the original with. This cannot be mixed with the
             ``embeds`` parameter.
-            Could be ``None`` to remove the embed.
+            Could be :obj:`None` to remove the embed.
         embeds: :class:`list`\\[:class:`Embed`]
             The new embeds to replace the original with. Must be a maximum of 10.
             This cannot be mixed with the ``embed`` parameter.
@@ -2015,13 +2015,13 @@ class Message(Hashable):
 
             .. versionadded:: 2.1
 
-        attachments: :class:`list`\\[:class:`Attachment` | ``None``]
+        attachments: :class:`list`\\[:class:`Attachment` | :obj:`None`]
             A list of attachments to keep in the message.
-            If ``[]`` or ``None`` is passed then all existing attachments are removed.
+            If ``[]`` or :obj:`None` is passed then all existing attachments are removed.
             Keeps existing attachments if not provided.
 
             .. versionchanged:: 2.5
-                Supports passing ``None`` to clear attachments.
+                Supports passing :obj:`None` to clear attachments.
 
         suppress_embeds: :class:`bool`
             Whether to suppress embeds for the message. This hides
@@ -2038,11 +2038,11 @@ class Message(Hashable):
 
             .. versionadded:: 2.9
 
-        delete_after: :class:`float` | ``None``
+        delete_after: :class:`float` | :obj:`None`
             If provided, the number of seconds to wait in the background
             before deleting the message we just edited. If the deletion fails,
             then it is silently ignored.
-        allowed_mentions: :class:`~disnake.AllowedMentions` | ``None``
+        allowed_mentions: :class:`~disnake.AllowedMentions` | :obj:`None`
             Controls the mentions being processed in this message. If this is
             passed, then the object is merged with :attr:`Client.allowed_mentions`.
             The merging behaviour only overrides attributes that have been explicitly passed
@@ -2052,15 +2052,15 @@ class Message(Hashable):
 
             .. versionadded:: 1.4
 
-        view: :class:`~disnake.ui.View` | ``None``
+        view: :class:`~disnake.ui.View` | :obj:`None`
             The updated view to update this message with. This cannot be mixed with ``components``.
-            If ``None`` is passed then the view is removed.
+            If :obj:`None` is passed then the view is removed.
 
             .. versionadded:: 2.0
 
         components: |components_type|
             The updated components to update this message with. This cannot be mixed with ``view``.
-            If ``None`` is passed then the components are removed.
+            If :obj:`None` is passed then the components are removed.
 
             .. versionadded:: 2.4
 
@@ -2068,7 +2068,7 @@ class Message(Hashable):
                 Passing v2 components here automatically sets the :attr:`~MessageFlags.is_components_v2` flag.
                 Setting this flag cannot be reverted. Note that this also disables the
                 ``content`` and ``embeds`` fields.
-                If the message previously had any of these fields set, you must set them to ``None``.
+                If the message previously had any of these fields set, you must set them to :obj:`None`.
 
         Raises
         ------
@@ -2148,7 +2148,7 @@ class Message(Hashable):
 
         Parameters
         ----------
-        reason: :class:`str` | ``None``
+        reason: :class:`str` | :obj:`None`
             The reason for pinning the message. Shows up on the audit log.
 
             .. versionadded:: 1.4
@@ -2176,7 +2176,7 @@ class Message(Hashable):
 
         Parameters
         ----------
-        reason: :class:`str` | ``None``
+        reason: :class:`str` | :obj:`None`
             The reason for unpinning the message. Shows up on the audit log.
 
             .. versionadded:: 1.4
@@ -2348,15 +2348,15 @@ class Message(Hashable):
             The duration in minutes before a thread is automatically archived for inactivity.
             If not provided, the channel's default auto archive duration is used.
             Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
-        slowmode_delay: :class:`int` | ``None``
+        slowmode_delay: :class:`int` | :obj:`None`
             Specifies the slowmode rate limit for users in this thread, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
-            If set to ``None`` or not provided, slowmode is inherited from the parent's
+            If set to :obj:`None` or not provided, slowmode is inherited from the parent's
             :attr:`~TextChannel.default_thread_slowmode_delay`.
 
             .. versionadded:: 2.3
 
-        reason: :class:`str` | ``None``
+        reason: :class:`str` | :obj:`None`
             The reason for creating the thread. Shows up on the audit log.
 
             .. versionadded:: 2.5
@@ -2623,7 +2623,7 @@ class PartialMessage(Hashable):
 
     @utils.cached_slot_property("_cs_guild")
     def guild(self) -> Optional[Guild]:
-        """:class:`Guild` | ``None``: The guild that the partial message belongs to, if applicable."""
+        """:class:`Guild` | :obj:`None`: The guild that the partial message belongs to, if applicable."""
         return getattr(self.channel, "guild", None)
 
     async def fetch(self) -> Message:
@@ -2759,13 +2759,13 @@ class PartialMessage(Hashable):
 
         Parameters
         ----------
-        content: :class:`str` | ``None``
+        content: :class:`str` | :obj:`None`
             The new content to replace the message with.
-            Could be ``None`` to remove the content.
-        embed: :class:`Embed` | ``None``
+            Could be :obj:`None` to remove the content.
+        embed: :class:`Embed` | :obj:`None`
             The new embed to replace the original with. This cannot be mixed with the
             ``embeds`` parameter.
-            Could be ``None`` to remove the embed.
+            Could be :obj:`None` to remove the embed.
         embeds: :class:`list`\\[:class:`Embed`]
             The new embeds to replace the original with. Must be a maximum of 10.
             This cannot be mixed with the ``embed`` parameter.
@@ -2787,15 +2787,15 @@ class PartialMessage(Hashable):
 
             .. versionadded:: 2.1
 
-        attachments: :class:`list`\\[:class:`Attachment` | ``None``]
+        attachments: :class:`list`\\[:class:`Attachment` | :obj:`None`]
             A list of attachments to keep in the message.
-            If ``[]`` or ``None`` is passed then all existing attachments are removed.
+            If ``[]`` or :obj:`None` is passed then all existing attachments are removed.
             Keeps existing attachments if not provided.
 
             .. versionadded:: 2.1
 
             .. versionchanged:: 2.5
-                Supports passing ``None`` to clear attachments.
+                Supports passing :obj:`None` to clear attachments.
 
         suppress_embeds: :class:`bool`
             Whether to suppress embeds for the message. This hides
@@ -2812,11 +2812,11 @@ class PartialMessage(Hashable):
 
             .. versionadded:: 2.9
 
-        delete_after: :class:`float` | ``None``
+        delete_after: :class:`float` | :obj:`None`
             If provided, the number of seconds to wait in the background
             before deleting the message we just edited. If the deletion fails,
             then it is silently ignored.
-        allowed_mentions: :class:`~disnake.AllowedMentions` | ``None``
+        allowed_mentions: :class:`~disnake.AllowedMentions` | :obj:`None`
             Controls the mentions being processed in this message. If this is
             passed, then the object is merged with :attr:`Client.allowed_mentions`.
             The merging behaviour only overrides attributes that have been explicitly passed
@@ -2825,15 +2825,15 @@ class PartialMessage(Hashable):
             .. note::
                 Unlike :meth:`Message.edit`, this does not default to
                 :attr:`Client.allowed_mentions` if no object is passed.
-        view: :class:`~disnake.ui.View` | ``None``
+        view: :class:`~disnake.ui.View` | :obj:`None`
             The updated view to update this message with. This cannot be mixed with ``components``.
-            If ``None`` is passed then the view is removed.
+            If :obj:`None` is passed then the view is removed.
 
             .. versionadded:: 2.0
 
         components: |components_type|
             The updated components to update this message with. This cannot be mixed with ``view``.
-            If ``None`` is passed then the components are removed.
+            If :obj:`None` is passed then the components are removed.
 
             .. versionadded:: 2.4
 
@@ -2841,7 +2841,7 @@ class PartialMessage(Hashable):
                 Passing v2 components here automatically sets the :attr:`~MessageFlags.is_components_v2` flag.
                 Setting this flag cannot be reverted. Note that this also disables the
                 ``content`` and ``embeds`` fields.
-                If the message previously had any of these fields set, you must set them to ``None``.
+                If the message previously had any of these fields set, you must set them to :obj:`None`.
 
         Raises
         ------
@@ -2923,7 +2923,7 @@ class ForwardedMessage:
         A list of sticker items given to the message.
     components: :class:`list`\\[:class:`Component`]
         A list of components in the message.
-    guild_id: :class:`int` | ``None``
+    guild_id: :class:`int` | :obj:`None`
         The guild ID where the message was forwarded from, if applicable.
     """
 
@@ -3000,15 +3000,15 @@ class ForwardedMessage:
 
     @property
     def guild(self) -> Optional[Guild]:
-        """:class:`disnake.Guild` | ``None``: The guild where the message was forwarded from, if applicable.
-        This could be ``None`` if the guild is not cached.
+        """:class:`disnake.Guild` | :obj:`None`: The guild where the message was forwarded from, if applicable.
+        This could be :obj:`None` if the guild is not cached.
         """
         return self._state._get_guild(self.guild_id)
 
     @property
     def channel(self) -> Optional[Union[GuildChannel, Thread, PartialMessageable]]:
-        """:class:`TextChannel` | :class:`VoiceChannel` | :class:`StageChannel` | :class:`Thread` | :class:`PartialMessageable` | ``None``:
-        The channel that the message was forwarded from. This could be ``None`` if the channel is not cached or a
+        """:class:`TextChannel` | :class:`VoiceChannel` | :class:`StageChannel` | :class:`Thread` | :class:`PartialMessageable` | :obj:`None`:
+        The channel that the message was forwarded from. This could be :obj:`None` if the channel is not cached or a
         :class:`disnake.PartialMessageable` if the ``guild`` is not cached or if the message forwarded is not coming from a guild (e.g DMs).
         """
         if self.guild:
@@ -3024,5 +3024,5 @@ class ForwardedMessage:
 
     @property
     def edited_at(self) -> Optional[datetime.datetime]:
-        """:class:`datetime.datetime` | ``None``: An aware UTC datetime object containing the edited time of the message."""
+        """:class:`datetime.datetime` | :obj:`None`: An aware UTC datetime object containing the edited time of the message."""
         return self._edited_timestamp

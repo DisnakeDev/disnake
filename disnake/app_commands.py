@@ -172,7 +172,7 @@ class Option:
         .. versionchanged:: 2.5
             Added support for localizations.
 
-    description: :class:`str` | :class:`.Localized` | ``None``
+    description: :class:`str` | :class:`.Localized` | :obj:`None`
         The option's description.
 
         .. versionchanged:: 2.5
@@ -494,14 +494,14 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
 
         .. versionadded:: 2.8
 
-    install_types: :class:`ApplicationInstallTypes` | ``None``
+    install_types: :class:`ApplicationInstallTypes` | :obj:`None`
         The installation types where the command is available.
         Defaults to :attr:`ApplicationInstallTypes.guild` only.
         Only available for global commands.
 
         .. versionadded:: 2.10
 
-    contexts: :class:`InteractionContextTypes` | ``None``
+    contexts: :class:`InteractionContextTypes` | :obj:`None`
         The interaction contexts where the command can be used.
         Only available for global commands.
 
@@ -579,13 +579,13 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
 
     @property
     def default_member_permissions(self) -> Optional[Permissions]:
-        """:class:`Permissions` | ``None``: The default required member permissions for this command.
+        """:class:`Permissions` | :obj:`None`: The default required member permissions for this command.
         A member must have *all* these permissions to be able to invoke the command in a guild.
 
         This is a default value, the set of users/roles that may invoke this command can be
         overridden by moderators on a guild-specific basis, disregarding this setting.
 
-        If ``None`` is returned, it means everyone can use the command by default.
+        If :obj:`None` is returned, it means everyone can use the command by default.
         If an empty :class:`Permissions` object is returned (that is, all permissions set to ``False``),
         this means no one can use the command.
 
@@ -766,14 +766,14 @@ class UserCommand(ApplicationCommand):
 
         .. versionadded:: 2.8
 
-    install_types: :class:`ApplicationInstallTypes` | ``None``
+    install_types: :class:`ApplicationInstallTypes` | :obj:`None`
         The installation types where the command is available.
         Defaults to :attr:`ApplicationInstallTypes.guild` only.
         Only available for global commands.
 
         .. versionadded:: 2.10
 
-    contexts: :class:`InteractionContextTypes` | ``None``
+    contexts: :class:`InteractionContextTypes` | :obj:`None`
         The interaction contexts where the command can be used.
         Only available for global commands.
 
@@ -823,14 +823,14 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
 
         .. versionadded:: 2.8
 
-    install_types: :class:`ApplicationInstallTypes` | ``None``
+    install_types: :class:`ApplicationInstallTypes` | :obj:`None`
         The installation types where the command is available.
         Defaults to :attr:`ApplicationInstallTypes.guild` only.
         Only available for global commands.
 
         .. versionadded:: 2.10
 
-    contexts: :class:`InteractionContextTypes` | ``None``
+    contexts: :class:`InteractionContextTypes` | :obj:`None`
         The interaction contexts where the command can be used.
         Only available for global commands.
 
@@ -840,8 +840,8 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
         The user command's ID.
     application_id: :class:`int`
         The application ID this command belongs to.
-    guild_id: :class:`int` | ``None``
-        The ID of the guild this user command is enabled in, or ``None`` if it's global.
+    guild_id: :class:`int` | :obj:`None`
+        The ID of the guild this user command is enabled in, or :obj:`None` if it's global.
     version: :class:`int`
         Autoincrementing version identifier updated during substantial record changes.
     """
@@ -894,14 +894,14 @@ class MessageCommand(ApplicationCommand):
 
         .. versionadded:: 2.8
 
-    install_types: :class:`ApplicationInstallTypes` | ``None``
+    install_types: :class:`ApplicationInstallTypes` | :obj:`None`
         The installation types where the command is available.
         Defaults to :attr:`ApplicationInstallTypes.guild` only.
         Only available for global commands.
 
         .. versionadded:: 2.10
 
-    contexts: :class:`InteractionContextTypes` | ``None``
+    contexts: :class:`InteractionContextTypes` | :obj:`None`
         The interaction contexts where the command can be used.
         Only available for global commands.
 
@@ -951,14 +951,14 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
 
         .. versionadded:: 2.8
 
-    install_types: :class:`ApplicationInstallTypes` | ``None``
+    install_types: :class:`ApplicationInstallTypes` | :obj:`None`
         The installation types where the command is available.
         Defaults to :attr:`ApplicationInstallTypes.guild` only.
         Only available for global commands.
 
         .. versionadded:: 2.10
 
-    contexts: :class:`InteractionContextTypes` | ``None``
+    contexts: :class:`InteractionContextTypes` | :obj:`None`
         The interaction contexts where the command can be used.
         Only available for global commands.
 
@@ -968,8 +968,8 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
         The message command's ID.
     application_id: :class:`int`
         The application ID this command belongs to.
-    guild_id: :class:`int` | ``None``
-        The ID of the guild this message command is enabled in, or ``None`` if it's global.
+    guild_id: :class:`int` | :obj:`None`
+        The ID of the guild this message command is enabled in, or :obj:`None` if it's global.
     version: :class:`int`
         Autoincrementing version identifier updated during substantial record changes.
     """
@@ -1029,14 +1029,14 @@ class SlashCommand(ApplicationCommand):
 
         .. versionadded:: 2.8
 
-    install_types: :class:`ApplicationInstallTypes` | ``None``
+    install_types: :class:`ApplicationInstallTypes` | :obj:`None`
         The installation types where the command is available.
         Defaults to :attr:`ApplicationInstallTypes.guild` only.
         Only available for global commands.
 
         .. versionadded:: 2.10
 
-    contexts: :class:`InteractionContextTypes` | ``None``
+    contexts: :class:`InteractionContextTypes` | :obj:`None`
         The interaction contexts where the command can be used.
         Only available for global commands.
 
@@ -1169,14 +1169,14 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
 
         .. versionadded:: 2.8
 
-    install_types: :class:`ApplicationInstallTypes` | ``None``
+    install_types: :class:`ApplicationInstallTypes` | :obj:`None`
         The installation types where the command is available.
         Defaults to :attr:`ApplicationInstallTypes.guild` only.
         Only available for global commands.
 
         .. versionadded:: 2.10
 
-    contexts: :class:`InteractionContextTypes` | ``None``
+    contexts: :class:`InteractionContextTypes` | :obj:`None`
         The interaction contexts where the command can be used.
         Only available for global commands.
 
@@ -1188,8 +1188,8 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
         The list of options the slash command has.
     application_id: :class:`int`
         The application ID this command belongs to.
-    guild_id: :class:`int` | ``None``
-        The ID of the guild this slash command is enabled in, or ``None`` if it's global.
+    guild_id: :class:`int` | :obj:`None`
+        The ID of the guild this slash command is enabled in, or :obj:`None` if it's global.
     version: :class:`int`
         Autoincrementing version identifier updated during substantial record changes.
     """

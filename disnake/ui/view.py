@@ -100,15 +100,15 @@ class View:
 
     Parameters
     ----------
-    timeout: :class:`float` | ``None``
+    timeout: :class:`float` | :obj:`None`
         Timeout in seconds from last interaction with the UI before no longer accepting input.
-        If ``None`` then there is no timeout.
+        If :obj:`None` then there is no timeout.
 
     Attributes
     ----------
-    timeout: :class:`float` | ``None``
+    timeout: :class:`float` | :obj:`None`
         Timeout from last interaction with the UI before no longer accepting input.
-        If ``None`` then there is no timeout.
+        If :obj:`None` then there is no timeout.
     children: :class:`list`\\[:class:`Item`]
         The list of children attached to this view.
     """
@@ -200,7 +200,7 @@ class View:
         ----------
         message: :class:`disnake.Message`
             The message with components to convert into a view.
-        timeout: :class:`float` | ``None``
+        timeout: :class:`float` | :obj:`None`
             The timeout of the converted view.
 
         Raises
@@ -459,7 +459,7 @@ class View:
 
         A persistent view only has components with a set ``custom_id``
         (or non-interactive components such as :attr:`~.ButtonStyle.link` or :attr:`~.ButtonStyle.premium` buttons),
-        and a :attr:`timeout` set to ``None``.
+        and a :attr:`timeout` set to :obj:`None`.
 
         :return type: :class:`bool`
         """

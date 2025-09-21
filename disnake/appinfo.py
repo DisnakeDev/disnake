@@ -91,7 +91,7 @@ class InstallTypeConfiguration:
 
     Attributes
     ----------
-    install_params: :class:`InstallParams` | ``None``
+    install_params: :class:`InstallParams` | :obj:`None`
         The parameters for this installation type.
     """
 
@@ -122,7 +122,7 @@ class AppInfo:
         The application's name.
     owner: :class:`User`
         The application's owner.
-    team: :class:`Team` | ``None``
+    team: :class:`Team` | :obj:`None`
         The application's team.
 
         .. versionadded:: 1.3
@@ -135,7 +135,7 @@ class AppInfo:
     bot_require_code_grant: :class:`bool`
         Whether the bot requires the completion of the full oauth2 code
         grant flow to join.
-    rpc_origins: :class:`list`\\[:class:`str` | ``None``]
+    rpc_origins: :class:`list`\\[:class:`str` | :obj:`None`]
         A list of RPC origin URLs, if RPC is enabled.
     verify_key: :class:`str`
         The hex encoded key for verification in interactions and the
@@ -143,45 +143,45 @@ class AppInfo:
 
         .. versionadded:: 1.3
 
-    guild_id: :class:`int` | ``None``
+    guild_id: :class:`int` | :obj:`None`
         The ID of the guild associated with the application, if any.
 
         .. versionadded:: 1.3
 
-    primary_sku_id: :class:`int` | ``None``
+    primary_sku_id: :class:`int` | :obj:`None`
         If this application is a game sold on Discord,
         this field will be the ID of the "Game SKU" that is created,
         if it exists.
 
         .. versionadded:: 1.3
 
-    slug: :class:`str` | ``None``
+    slug: :class:`str` | :obj:`None`
         If this application is a game sold on Discord,
         this field will be the URL slug that links to the store page.
 
         .. versionadded:: 1.3
 
-    terms_of_service_url: :class:`str` | ``None``
+    terms_of_service_url: :class:`str` | :obj:`None`
         The application's terms of service URL, if set.
 
         .. versionadded:: 2.0
 
-    privacy_policy_url: :class:`str` | ``None``
+    privacy_policy_url: :class:`str` | :obj:`None`
         The application's privacy policy URL, if set.
 
         .. versionadded:: 2.0
 
-    flags: :class:`ApplicationFlags` | ``None``
+    flags: :class:`ApplicationFlags` | :obj:`None`
         The application's public flags.
 
         .. versionadded:: 2.3
 
-    tags: :class:`list`\\[:class:`str` | ``None``]
+    tags: :class:`list`\\[:class:`str` | :obj:`None`]
         The application's tags.
 
         .. versionadded:: 2.5
 
-    install_params: :class:`InstallParams` | ``None``
+    install_params: :class:`InstallParams` | :obj:`None`
         The installation parameters for this application.
 
         See also :attr:`guild_install_type_config`/:attr:`user_install_type_config`
@@ -189,11 +189,11 @@ class AppInfo:
 
         .. versionadded:: 2.5
 
-    custom_install_url: :class:`str` | ``None``
+    custom_install_url: :class:`str` | :obj:`None`
         The custom installation url for this application.
 
         .. versionadded:: 2.5
-    role_connections_verification_url: :class:`str` | ``None``
+    role_connections_verification_url: :class:`str` | :obj:`None`
         The application's role connection verification entry point,
         which when configured will render the app as a verification method
         in the guild role verification configuration.
@@ -213,17 +213,17 @@ class AppInfo:
         The approximate number of users that have authorized the app with OAuth2.
 
         .. versionadded:: 2.11
-    redirect_uris: :class:`list`\\[:class:`str` | ``None``]
+    redirect_uris: :class:`list`\\[:class:`str` | :obj:`None`]
         The application's OAuth2 redirect URIs.
 
         .. versionadded:: 2.11
 
-    interactions_endpoint_url: :class:`str` | ``None``
+    interactions_endpoint_url: :class:`str` | :obj:`None`
         The application's interactions endpoint URL.
 
         .. versionadded:: 2.11
 
-    event_webhooks_url: :class:`str` | ``None``
+    event_webhooks_url: :class:`str` | :obj:`None`
         The application's event webhooks URL.
 
         .. versionadded:: 2.11
@@ -233,7 +233,7 @@ class AppInfo:
 
         .. versionadded:: 2.11
 
-    event_webhooks_types: :class:`list`\\[:class:`str` | ``None``]
+    event_webhooks_types: :class:`list`\\[:class:`str` | :obj:`None`]
         The application's event webhook types, if any.
 
         .. versionadded:: 2.11
@@ -347,21 +347,21 @@ class AppInfo:
 
     @property
     def icon(self) -> Optional[Asset]:
-        """:class:`.Asset` | ``None``: Retrieves the application's icon asset, if any."""
+        """:class:`.Asset` | :obj:`None`: Retrieves the application's icon asset, if any."""
         if self._icon is None:
             return None
         return Asset._from_icon(self._state, self.id, self._icon, path="app")
 
     @property
     def cover_image(self) -> Optional[Asset]:
-        """:class:`.Asset` | ``None``: Retrieves the rich presence cover image asset, if any."""
+        """:class:`.Asset` | :obj:`None`: Retrieves the rich presence cover image asset, if any."""
         if self._cover_image is None:
             return None
         return Asset._from_cover_image(self._state, self.id, self._cover_image)
 
     @property
     def guild(self) -> Optional[Guild]:
-        """:class:`Guild` | ``None``: The guild associated with the application, if any.
+        """:class:`Guild` | :obj:`None`: The guild associated with the application, if any.
 
         .. versionadded:: 1.3
         """
@@ -386,8 +386,8 @@ class AppInfo:
 
     @property
     def guild_install_type_config(self) -> Optional[InstallTypeConfiguration]:
-        """:class:`InstallTypeConfiguration` | ``None``: The guild installation parameters for
-        this application. If this application cannot be installed to guilds, returns ``None``.
+        """:class:`InstallTypeConfiguration` | :obj:`None`: The guild installation parameters for
+        this application. If this application cannot be installed to guilds, returns :obj:`None`.
 
         .. versionadded:: 2.10
         """
@@ -395,8 +395,8 @@ class AppInfo:
 
     @property
     def user_install_type_config(self) -> Optional[InstallTypeConfiguration]:
-        """:class:`InstallTypeConfiguration` | ``None``: The user installation parameters for
-        this application. If this application cannot be installed to users, returns ``None``.
+        """:class:`InstallTypeConfiguration` | :obj:`None`: The user installation parameters for
+        this application. If this application cannot be installed to users, returns :obj:`None`.
 
         .. versionadded:: 2.10
         """
@@ -416,14 +416,14 @@ class PartialAppInfo:
         The application's name.
     description: :class:`str`
         The application's description.
-    rpc_origins: :class:`list`\\[:class:`str` | ``None``]
+    rpc_origins: :class:`list`\\[:class:`str` | :obj:`None`]
         A list of RPC origin URLs, if RPC is enabled.
     verify_key: :class:`str`
         The hex encoded key for verification in interactions and the
         GameSDK's :ddocs:`GetTicket <game-sdk/applications#getticket>`.
-    terms_of_service_url: :class:`str` | ``None``
+    terms_of_service_url: :class:`str` | :obj:`None`
         The application's terms of service URL, if set.
-    privacy_policy_url: :class:`str` | ``None``
+    privacy_policy_url: :class:`str` | :obj:`None`
         The application's privacy policy URL, if set.
     """
 
@@ -457,7 +457,7 @@ class PartialAppInfo:
 
     @property
     def icon(self) -> Optional[Asset]:
-        """:class:`.Asset` | ``None``: Retrieves the application's icon asset, if any."""
+        """:class:`.Asset` | :obj:`None`: Retrieves the application's icon asset, if any."""
         if self._icon is None:
             return None
         return Asset._from_icon(self._state, self.id, self._icon, path="app")

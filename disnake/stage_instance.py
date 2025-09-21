@@ -50,7 +50,7 @@ class StageInstance(Hashable):
         The topic of the stage instance.
     privacy_level: :class:`StagePrivacyLevel`
         The privacy level of the stage instance.
-    guild_scheduled_event_id: :class:`int` | ``None``
+    guild_scheduled_event_id: :class:`int` | :obj:`None`
         The ID of the stage instance's associated scheduled event, if applicable.
         See also :attr:`.guild_scheduled_event`.
     """
@@ -95,7 +95,7 @@ class StageInstance(Hashable):
 
     @cached_slot_property("_cs_channel")
     def channel(self) -> Optional[StageChannel]:
-        """:class:`StageChannel` | ``None``: The channel that stage instance is running in."""
+        """:class:`StageChannel` | :obj:`None`: The channel that stage instance is running in."""
         # the returned channel will always be a StageChannel or None
         return self._state.get_channel(self.channel_id)  # type: ignore
 
@@ -130,7 +130,7 @@ class StageInstance(Hashable):
 
     @property
     def guild_scheduled_event(self) -> Optional[GuildScheduledEvent]:
-        """:class:`GuildScheduledEvent` | ``None``: The stage instance's scheduled event.
+        """:class:`GuildScheduledEvent` | :obj:`None`: The stage instance's scheduled event.
 
         This is only set if this stage instance has an associated scheduled event,
         and requires that event to be cached
@@ -163,7 +163,7 @@ class StageInstance(Hashable):
             The stage instance's new topic.
         privacy_level: :class:`StagePrivacyLevel`
             The stage instance's new privacy level.
-        reason: :class:`str` | ``None``
+        reason: :class:`str` | :obj:`None`
             The reason the stage instance was edited. Shows up on the audit log.
 
         Raises
@@ -204,7 +204,7 @@ class StageInstance(Hashable):
 
         Parameters
         ----------
-        reason: :class:`str` | ``None``
+        reason: :class:`str` | :obj:`None`
             The reason the stage instance was deleted. Shows up on the audit log.
 
         Raises

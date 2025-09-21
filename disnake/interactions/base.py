@@ -120,12 +120,12 @@ class Interaction(Generic[ClientT]):
         The interaction's type.
     application_id: :class:`int`
         The application ID that the interaction was for.
-    guild_id: :class:`int` | ``None``
+    guild_id: :class:`int` | :obj:`None`
         The guild ID the interaction was sent from.
-    guild_locale: :class:`Locale` | ``None``
+    guild_locale: :class:`Locale` | :obj:`None`
         The selected language of the interaction's guild.
         This value is only meaningful in guilds with ``COMMUNITY`` feature and receives a default value otherwise.
-        If the interaction was in a DM, then this value is ``None``.
+        If the interaction was in a DM, then this value is :obj:`None`.
 
         .. versionadded:: 2.4
 
@@ -312,11 +312,11 @@ class Interaction(Generic[ClientT]):
 
     @property
     def guild(self) -> Optional[Guild]:
-        """:class:`Guild` | ``None``: The guild the interaction was sent from.
+        """:class:`Guild` | :obj:`None`: The guild the interaction was sent from.
 
         .. note::
             In some scenarios, e.g. for user-installed applications, this will usually be
-            ``None``, despite the interaction originating from a guild.
+            :obj:`None`, despite the interaction originating from a guild.
             This will only return a full :class:`Guild` for cached guilds,
             i.e. those the bot is already a member of.
 
@@ -479,12 +479,12 @@ class Interaction(Generic[ClientT]):
 
         Parameters
         ----------
-        content: :class:`str` | ``None``
-            The content to edit the message with, or ``None`` to clear it.
-        embed: :class:`Embed` | ``None``
+        content: :class:`str` | :obj:`None`
+            The content to edit the message with, or :obj:`None` to clear it.
+        embed: :class:`Embed` | :obj:`None`
             The new embed to replace the original with. This cannot be mixed with the
             ``embeds`` parameter.
-            Could be ``None`` to remove the embed.
+            Could be :obj:`None` to remove the embed.
         embeds: :class:`list`\\[:class:`Embed`]
             The new embeds to replace the original with. Must be a maximum of 10.
             This cannot be mixed with the ``embed`` parameter.
@@ -497,22 +497,22 @@ class Interaction(Generic[ClientT]):
             A list of files to upload. This cannot be mixed with the ``file`` parameter.
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
-        attachments: :class:`list`\\[:class:`Attachment` | ``None``]
+        attachments: :class:`list`\\[:class:`Attachment` | :obj:`None`]
             A list of attachments to keep in the message.
-            If ``[]`` or ``None`` is passed then all existing attachments are removed.
+            If ``[]`` or :obj:`None` is passed then all existing attachments are removed.
             Keeps existing attachments if not provided.
 
             .. versionadded:: 2.2
 
             .. versionchanged:: 2.5
-                Supports passing ``None`` to clear attachments.
+                Supports passing :obj:`None` to clear attachments.
 
-        view: :class:`~disnake.ui.View` | ``None``
+        view: :class:`~disnake.ui.View` | :obj:`None`
             The updated view to update this message with. This cannot be mixed with ``components``.
-            If ``None`` is passed then the view is removed.
-        components: |components_type| | ``None``
+            If :obj:`None` is passed then the view is removed.
+        components: |components_type| | :obj:`None`
             A list of components to update this message with. This cannot be mixed with ``view``.
-            If ``None`` is passed then the components are removed.
+            If :obj:`None` is passed then the components are removed.
 
             .. versionadded:: 2.4
 
@@ -520,7 +520,7 @@ class Interaction(Generic[ClientT]):
                 Passing v2 components here automatically sets the :attr:`~MessageFlags.is_components_v2` flag.
                 Setting this flag cannot be reverted. Note that this also disables the
                 ``content`` and ``embeds`` fields.
-                If the message previously had any of these fields set, you must set them to ``None``.
+                If the message previously had any of these fields set, you must set them to :obj:`None`.
 
         poll: :class:`Poll`
             A poll. This can only be sent after a defer. If not used after a defer the
@@ -550,7 +550,7 @@ class Interaction(Generic[ClientT]):
 
             .. versionadded:: 2.9
 
-        delete_after: :class:`float` | ``None``
+        delete_after: :class:`float` | :obj:`None`
             If provided, the number of seconds to wait in the background
             before deleting the message we just edited. If the deletion fails,
             then it is silently ignored.
@@ -643,7 +643,7 @@ class Interaction(Generic[ClientT]):
 
         Parameters
         ----------
-        delay: :class:`float` | ``None``
+        delay: :class:`float` | :obj:`None`
             If provided, the number of seconds to wait in the background
             before deleting the original response message. If the deletion fails,
             then it is silently ignored.
@@ -723,7 +723,7 @@ class Interaction(Generic[ClientT]):
 
         Parameters
         ----------
-        content: :class:`str` | ``None``
+        content: :class:`str` | :obj:`None`
             The content of the message to send.
         embed: :class:`Embed`
             The rich embed for the content to send. This cannot be mixed with the
@@ -845,7 +845,7 @@ class InteractionResponse:
 
     @property
     def type(self) -> Optional[InteractionResponseType]:
-        """:class:`InteractionResponseType` | ``None``: If a response was successfully made, this is the type of the response.
+        """:class:`InteractionResponseType` | :obj:`None`: If a response was successfully made, this is the type of the response.
 
         .. versionadded:: 2.6
         """
@@ -1005,7 +1005,7 @@ class InteractionResponse:
 
         Parameters
         ----------
-        content: :class:`str` | ``None``
+        content: :class:`str` | :obj:`None`
             The content of the message to send.
         embed: :class:`Embed`
             The rich embed for the content to send. This cannot be mixed with the
@@ -1223,12 +1223,12 @@ class InteractionResponse:
 
         Parameters
         ----------
-        content: :class:`str` | ``None``
-            The new content to replace the message with. ``None`` removes the content.
-        embed: :class:`Embed` | ``None``
+        content: :class:`str` | :obj:`None`
+            The new content to replace the message with. :obj:`None` removes the content.
+        embed: :class:`Embed` | :obj:`None`
             The new embed to replace the original with. This cannot be mixed with the
             ``embeds`` parameter.
-            Could be ``None`` to remove the embed.
+            Could be :obj:`None` to remove the embed.
         embeds: :class:`list`\\[:class:`Embed`]
             The new embeds to replace the original with. Must be a maximum of 10.
             This cannot be mixed with the ``embed`` parameter.
@@ -1245,22 +1245,22 @@ class InteractionResponse:
 
             .. versionadded:: 2.2
 
-        attachments: :class:`list`\\[:class:`Attachment` | ``None``]
+        attachments: :class:`list`\\[:class:`Attachment` | :obj:`None`]
             A list of attachments to keep in the message.
-            If ``[]`` or ``None`` is passed then all existing attachments are removed.
+            If ``[]`` or :obj:`None` is passed then all existing attachments are removed.
             Keeps existing attachments if not provided.
 
             .. versionadded:: 2.4
 
             .. versionchanged:: 2.5
-                Supports passing ``None`` to clear attachments.
+                Supports passing :obj:`None` to clear attachments.
 
-        view: :class:`~disnake.ui.View` | ``None``
+        view: :class:`~disnake.ui.View` | :obj:`None`
             The updated view to update this message with. This cannot be mixed with ``components``.
-            If ``None`` is passed then the view is removed.
-        components: |components_type| | ``None``
+            If :obj:`None` is passed then the view is removed.
+        components: |components_type| | :obj:`None`
             A list of components to update this message with. This cannot be mixed with ``view``.
-            If ``None`` is passed then the components are removed.
+            If :obj:`None` is passed then the components are removed.
 
             .. versionadded:: 2.4
 
@@ -1268,7 +1268,7 @@ class InteractionResponse:
                 Passing v2 components here automatically sets the :attr:`~MessageFlags.is_components_v2` flag.
                 Setting this flag cannot be reverted. Note that this also disables the
                 ``content`` and ``embeds`` fields.
-                If the message previously had any of these fields set, you must set them to ``None``.
+                If the message previously had any of these fields set, you must set them to :obj:`None`.
 
         flags: :class:`MessageFlags`
             The new flags to set for this message. Overrides existing flags.
@@ -1280,7 +1280,7 @@ class InteractionResponse:
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
 
-        delete_after: :class:`float` | ``None``
+        delete_after: :class:`float` | :obj:`None`
             If provided, the number of seconds to wait in the background
             before deleting the message we just edited. If the deletion fails,
             then it is silently ignored.
@@ -1669,9 +1669,9 @@ class InteractionMessage(Message):
     channel: :class:`TextChannel` | :class:`VoiceChannel` | :class:`StageChannel` | :class:`Thread` | :class:`DMChannel` | :class:`GroupChannel` | :class:`PartialMessageable`
         The channel that the message was sent from.
         Could be a :class:`DMChannel` or :class:`GroupChannel` if it's a private message.
-    reference: :class:`~disnake.MessageReference` | ``None``
+    reference: :class:`~disnake.MessageReference` | :obj:`None`
         The message that this message references. This is only applicable to message replies.
-    interaction_metadata: :class:`InteractionMetadata` | ``None``
+    interaction_metadata: :class:`InteractionMetadata` | :obj:`None`
         The metadata about the interaction that caused this message, if any.
 
         .. versionadded:: 2.10
@@ -1697,7 +1697,7 @@ class InteractionMessage(Message):
         then the list is always empty.
     id: :class:`int`
         The message ID.
-    webhook_id: :class:`int` | ``None``
+    webhook_id: :class:`int` | :obj:`None`
         The ID of the application that sent this message.
     attachments: :class:`list`\\[:class:`Attachment`]
         A list of attachments given to a message.
@@ -1711,9 +1711,9 @@ class InteractionMessage(Message):
         A list of sticker items given to the message.
     components: :class:`list`\\[:class:`Component`]
         A list of components in the message.
-    guild: :class:`Guild` | ``None``
+    guild: :class:`Guild` | :obj:`None`
         The guild that the message belongs to, if applicable.
-    poll: :class:`Poll` | ``None``
+    poll: :class:`Poll` | :obj:`None`
         The poll contained in this message.
 
         .. versionadded:: 2.10
@@ -1814,12 +1814,12 @@ class InteractionMessage(Message):
 
         Parameters
         ----------
-        content: :class:`str` | ``None``
-            The content to edit the message with, or ``None`` to clear it.
-        embed: :class:`Embed` | ``None``
+        content: :class:`str` | :obj:`None`
+            The content to edit the message with, or :obj:`None` to clear it.
+        embed: :class:`Embed` | :obj:`None`
             The new embed to replace the original with. This cannot be mixed with the
             ``embeds`` parameter.
-            Could be ``None`` to remove the embed.
+            Could be :obj:`None` to remove the embed.
         embeds: :class:`list`\\[:class:`Embed`]
             The new embeds to replace the original with. Must be a maximum of 10.
             This cannot be mixed with the ``embed`` parameter.
@@ -1832,22 +1832,22 @@ class InteractionMessage(Message):
             A list of files to upload. This cannot be mixed with the ``file`` parameter.
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
-        attachments: :class:`list`\\[:class:`Attachment` | ``None``]
+        attachments: :class:`list`\\[:class:`Attachment` | :obj:`None`]
             A list of attachments to keep in the message.
-            If ``[]`` or ``None`` is passed then all existing attachments are removed.
+            If ``[]`` or :obj:`None` is passed then all existing attachments are removed.
             Keeps existing attachments if not provided.
 
             .. versionadded:: 2.2
 
             .. versionchanged:: 2.5
-                Supports passing ``None`` to clear attachments.
+                Supports passing :obj:`None` to clear attachments.
 
-        view: :class:`~disnake.ui.View` | ``None``
+        view: :class:`~disnake.ui.View` | :obj:`None`
             The updated view to update this message with. This cannot be mixed with ``components``.
-            If ``None`` is passed then the view is removed.
-        components: |components_type| | ``None``
+            If :obj:`None` is passed then the view is removed.
+        components: |components_type| | :obj:`None`
             A list of components to update this message with. This cannot be mixed with ``view``.
-            If ``None`` is passed then the components are removed.
+            If :obj:`None` is passed then the components are removed.
 
             .. versionadded:: 2.4
 
@@ -1855,7 +1855,7 @@ class InteractionMessage(Message):
                 Passing v2 components here automatically sets the :attr:`~MessageFlags.is_components_v2` flag.
                 Setting this flag cannot be reverted. Note that this also disables the
                 ``content`` and ``embeds`` fields.
-                If the message previously had any of these fields set, you must set them to ``None``.
+                If the message previously had any of these fields set, you must set them to :obj:`None`.
 
         suppress_embeds: :class:`bool`
             Whether to suppress embeds for the message. This hides
@@ -1878,7 +1878,7 @@ class InteractionMessage(Message):
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
             See :meth:`.abc.Messageable.send` for more information.
-        delete_after: :class:`float` | ``None``
+        delete_after: :class:`float` | :obj:`None`
             If provided, the number of seconds to wait in the background
             before deleting the message we just edited. If the deletion fails,
             then it is silently ignored.
@@ -1953,7 +1953,7 @@ class InteractionMessage(Message):
 
         Parameters
         ----------
-        delay: :class:`float` | ``None``
+        delay: :class:`float` | :obj:`None`
             If provided, the number of seconds to wait before deleting the message.
             The waiting is done in the background and deletion failures are ignored.
 

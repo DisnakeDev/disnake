@@ -79,7 +79,7 @@ class PartialIntegration:
         The integration type (i.e. ``twitch``).
     account: :class:`IntegrationAccount`
         The account linked to this integration.
-    application_id: :class:`int` | ``None``
+    application_id: :class:`int` | :obj:`None`
         The ID of the application tied to this integration.
     """
 
@@ -135,7 +135,7 @@ class Integration(PartialIntegration):
         Whether the integration is currently enabled.
     account: :class:`IntegrationAccount`
         The account linked to this integration.
-    user: :class:`User` | ``None``
+    user: :class:`User` | :obj:`None`
         The user that added this integration.
     """
 
@@ -168,7 +168,7 @@ class Integration(PartialIntegration):
 
         Parameters
         ----------
-        reason: :class:`str` | ``None``
+        reason: :class:`str` | :obj:`None`
             The reason the integration was deleted. Shows up on the audit log.
 
             .. versionadded:: 2.0
@@ -202,7 +202,7 @@ class StreamIntegration(Integration):
         Whether the integration is currently enabled.
     syncing: :class:`bool`
         Whether the integration is currently syncing.
-    enable_emoticons: :class:`bool` | ``None``
+    enable_emoticons: :class:`bool` | :obj:`None`
         Whether emoticons should be synced for this integration (currently twitch only).
     expire_behaviour: :class:`ExpireBehaviour`
         The behaviour of expiring subscribers. Aliased to ``expire_behavior`` as well.
@@ -245,7 +245,7 @@ class StreamIntegration(Integration):
 
     @property
     def role(self) -> Optional[Role]:
-        """:class:`Role` | ``None`` The role which the integration uses for subscribers."""
+        """:class:`Role` | :obj:`None` The role which the integration uses for subscribers."""
         return self.guild.get_role(self._role_id)  # type: ignore
 
     @deprecated()
@@ -338,11 +338,11 @@ class IntegrationApplication:
         The application's ID.
     name: :class:`str`
         The application's name.
-    icon: :class:`str` | ``None``
+    icon: :class:`str` | :obj:`None`
         The application's icon hash.
     description: :class:`str`
         The application's description. Can be an empty string.
-    user: :class:`User` | ``None``
+    user: :class:`User` | :obj:`None`
         The bot user associated with this application.
     """
 

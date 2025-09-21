@@ -116,7 +116,7 @@ class AutoModBlockMessageAction(AutoModAction):
 
     Parameters
     ----------
-    custom_message: :class:`str` | ``None``
+    custom_message: :class:`str` | :obj:`None`
         The custom message to show to the user when the rule is triggered.
         Maximum length is 150 characters.
 
@@ -141,7 +141,7 @@ class AutoModBlockMessageAction(AutoModAction):
 
     @property
     def custom_message(self) -> Optional[str]:
-        """:class:`str` | ``None``: The custom message to show to the user when the rule is triggered.
+        """:class:`str` | :obj:`None`: The custom message to show to the user when the rule is triggered.
 
         .. versionadded:: 2.9
         """
@@ -242,14 +242,14 @@ class AutoModTriggerMetadata:
 
     Attributes
     ----------
-    keyword_filter: :class:`~typing.Sequence`\\[:class:`str` | ``None``]
+    keyword_filter: :class:`~typing.Sequence`\\[:class:`str` | :obj:`None`]
         The list of keywords to check for, up to 1000 keywords. Used with :attr:`AutoModTriggerType.keyword`.
 
         See :ddocs:`api docs <resources/auto-moderation#auto-moderation-rule-object-keyword-matching-strategies>`
         for details about how keyword matching works.
         Each keyword must be 60 characters or less.
 
-    regex_patterns: :class:`~typing.Sequence`\\[:class:`str` | ``None``]
+    regex_patterns: :class:`~typing.Sequence`\\[:class:`str` | :obj:`None`]
         The list of regular expressions to check for. Used with :attr:`AutoModTriggerType.keyword`.
 
         A maximum of 10 regexes can be added, each with up to 260 characters.
@@ -260,19 +260,19 @@ class AutoModTriggerMetadata:
 
         .. versionadded:: 2.7
 
-    presets: :class:`AutoModKeywordPresets` | ``None``
+    presets: :class:`AutoModKeywordPresets` | :obj:`None`
         The keyword presets. Used with :attr:`AutoModTriggerType.keyword_preset`.
 
-    allow_list: :class:`~typing.Sequence`\\[:class:`str` | ``None``]
+    allow_list: :class:`~typing.Sequence`\\[:class:`str` | :obj:`None`]
         The keywords that should be exempt from a preset.
         Used with :attr:`AutoModTriggerType.keyword` (up to 100 exemptions) and :attr:`AutoModTriggerType.keyword_preset` (up to 1000 exemptions).
 
         Each keyword must be 60 characters or less.
 
-    mention_total_limit: :class:`int` | ``None``
+    mention_total_limit: :class:`int` | :obj:`None`
         The maximum number of mentions (members + roles) allowed, between 1 and 50. Used with :attr:`AutoModTriggerType.mention_spam`.
 
-    mention_raid_protection_enabled: :class:`bool` | ``None``
+    mention_raid_protection_enabled: :class:`bool` | :obj:`None`
         Whether to automatically detect mention raids. Used with :attr:`AutoModTriggerType.mention_spam`.
 
         Defaults to ``False``.
@@ -505,8 +505,8 @@ class AutoModRule:
 
     @property
     def creator(self) -> Optional[Member]:
-        """:class:`Member` | ``None``: The guild member that created this rule.
-        May be ``None`` if the member cannot be found. See also :attr:`.creator_id`.
+        """:class:`Member` | :obj:`None`: The guild member that created this rule.
+        May be :obj:`None` if the member cannot be found. See also :attr:`.creator_id`.
         """
         return self.guild.get_member(self.creator_id)
 
@@ -591,14 +591,14 @@ class AutoModRule:
             If provided, must contain at least one action.
         enabled: :class:`bool`
             Whether to enable the rule.
-        exempt_roles: Iterable[:class:`abc.Snowflake` | ``None``]
+        exempt_roles: Iterable[:class:`abc.Snowflake` | :obj:`None`]
             The rule's new exempt roles, up to 20.
-            If ``[]`` or ``None`` is passed then all role exemptions are removed.
-        exempt_channels: Iterable[:class:`abc.Snowflake` | ``None``]
+            If ``[]`` or :obj:`None` is passed then all role exemptions are removed.
+        exempt_channels: Iterable[:class:`abc.Snowflake` | :obj:`None`]
             The rule's new exempt channels, up to 50.
             Can also include categories, in which case all channels inside that category will be exempt.
-            If ``[]`` or ``None`` is passed then all channel exemptions are removed.
-        reason: :class:`str` | ``None``
+            If ``[]`` or :obj:`None` is passed then all channel exemptions are removed.
+        reason: :class:`str` | :obj:`None`
             The reason for editing the rule. Shows up on the audit log.
 
         Raises
@@ -661,7 +661,7 @@ class AutoModRule:
 
         Parameters
         ----------
-        reason: :class:`str` | ``None``
+        reason: :class:`str` | :obj:`None`
             The reason for deleting this rule. Shows up on the audit log.
 
         Raises
@@ -696,14 +696,14 @@ class AutoModActionExecution:
     user_id: :class:`int`
         The ID of the user that triggered this action.
         See also :attr:`.user`.
-    channel_id: :class:`int` | ``None``
+    channel_id: :class:`int` | :obj:`None`
         The channel or thread ID in which the event occurred, if any.
         See also :attr:`.channel`.
-    message_id: :class:`int` | ``None``
-        The ID of the message that matched. ``None`` if the message was blocked,
+    message_id: :class:`int` | :obj:`None`
+        The ID of the message that matched. :obj:`None` if the message was blocked,
         or if the content was not part of a message.
         See also :attr:`.message`.
-    alert_message_id: :class:`int` | ``None``
+    alert_message_id: :class:`int` | :obj:`None`
         The ID of the alert message sent as a result of this action, if any.
         See also :attr:`.alert_message`.
     content: :class:`str`
@@ -712,10 +712,10 @@ class AutoModActionExecution:
         Requires :attr:`Intents.message_content` to be enabled,
         otherwise this field will be empty.
 
-    matched_keyword: :class:`str` | ``None``
+    matched_keyword: :class:`str` | :obj:`None`
         The keyword or regex that matched.
 
-    matched_content: :class:`str` | ``None``
+    matched_content: :class:`str` | :obj:`None`
         The substring of :attr:`.content` that matched the rule/keyword.
 
         Requires :attr:`Intents.message_content` to be enabled,
@@ -762,21 +762,21 @@ class AutoModActionExecution:
 
     @property
     def user(self) -> Optional[Member]:
-        """:class:`Member` | ``None``: The guild member that triggered this action.
-        May be ``None`` if the member cannot be found. See also :attr:`.user_id`.
+        """:class:`Member` | :obj:`None`: The guild member that triggered this action.
+        May be :obj:`None` if the member cannot be found. See also :attr:`.user_id`.
         """
         return self.guild.get_member(self.user_id)
 
     @property
     def channel(self) -> Optional[Union[GuildChannel, Thread]]:
-        """:class:`abc.GuildChannel` | :class:`Thread` | ``None``:
+        """:class:`abc.GuildChannel` | :class:`Thread` | :obj:`None`:
         The channel or thread in which the event occurred, if any.
         """
         return self.guild._resolve_channel(self.channel_id)
 
     @property
     def message(self) -> Optional[Message]:
-        """:class:`Message` | ``None``: The message that matched, if any.
+        """:class:`Message` | :obj:`None`: The message that matched, if any.
         Not available if the message was blocked, if the content was not part of a message,
         or if the message was not found in the message cache.
         """
@@ -784,7 +784,7 @@ class AutoModActionExecution:
 
     @property
     def alert_message(self) -> Optional[Message]:
-        """:class:`Message` | ``None``: The alert message sent as a result of this action, if any.
+        """:class:`Message` | :obj:`None`: The alert message sent as a result of this action, if any.
         Only available if :attr:`action.type <AutoModAction.type>` is :attr:`~AutoModActionType.send_alert_message`
         and the message was found in the message cache.
         """

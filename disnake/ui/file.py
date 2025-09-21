@@ -90,14 +90,14 @@ class File(UIComponent):
 
     @property
     def name(self) -> Optional[str]:
-        """:class:`str` | ``None``: The name of the file.
+        """:class:`str` | :obj:`None`: The name of the file.
         This is available in objects from the API, and ignored when sending.
         """
         return self._underlying.name
 
     @property
     def size(self) -> Optional[int]:
-        """:class:`int` | ``None``: The size of the file.
+        """:class:`int` | :obj:`None`: The size of the file.
         This is available in objects from the API, and ignored when sending.
         """
         return self._underlying.size

@@ -115,8 +115,8 @@ class InvokableApplicationCommand(ABC):
         An object being registered in the API.
     callback: :ref:`coroutine <coroutine>`
         The coroutine that is executed when the command is called.
-    cog: :class:`Cog` | ``None``
-        The cog that this command belongs to. ``None`` if there isn't one.
+    cog: :class:`Cog` | :obj:`None`
+        The cog that this command belongs to. :obj:`None` if there isn't one.
     checks: :class:`list`\\[Callable[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
         A list of predicates that verifies if the command could be executed
         with the given :class:`.ApplicationCommandInteraction` as the sole parameter. If an exception
@@ -124,8 +124,8 @@ class InvokableApplicationCommand(ABC):
         :exc:`.CommandError` should be used. Note that if the checks fail then
         :exc:`.CheckFailure` exception is raised to the :func:`.on_slash_command_error`
         event.
-    guild_ids: :class:`tuple`\\[:class:`int`, ... | ``None``]
-        The list of IDs of the guilds where the command is synced. ``None`` if this command is global.
+    guild_ids: :class:`tuple`\\[:class:`int`, ... | :obj:`None`]
+        The list of IDs of the guilds where the command is synced. :obj:`None` if this command is global.
     auto_sync: :class:`bool`
         Whether to automatically register the command.
     extras: :class:`dict`\\[:class:`str`, Any]
@@ -286,13 +286,13 @@ class InvokableApplicationCommand(ABC):
 
     @property
     def default_member_permissions(self) -> Optional[Permissions]:
-        """:class:`.Permissions` | ``None``: The default required member permissions for this command.
+        """:class:`.Permissions` | :obj:`None`: The default required member permissions for this command.
         A member must have *all* these permissions to be able to invoke the command in a guild.
 
         This is a default value, the set of users/roles that may invoke this command can be
         overridden by moderators on a guild-specific basis, disregarding this setting.
 
-        If ``None`` is returned, it means everyone can use the command by default.
+        If :obj:`None` is returned, it means everyone can use the command by default.
         If an empty :class:`.Permissions` object is returned (that is, all permissions set to ``False``),
         this means no one can use the command.
 
@@ -302,7 +302,7 @@ class InvokableApplicationCommand(ABC):
 
     @property
     def install_types(self) -> Optional[ApplicationInstallTypes]:
-        """:class:`.ApplicationInstallTypes` | ``None``: The installation types
+        """:class:`.ApplicationInstallTypes` | :obj:`None`: The installation types
         where the command is available. Only available for global commands.
 
         .. versionadded:: 2.10
@@ -311,7 +311,7 @@ class InvokableApplicationCommand(ABC):
 
     @property
     def contexts(self) -> Optional[InteractionContextTypes]:
-        """:class:`.InteractionContextTypes` | ``None``: The interaction contexts
+        """:class:`.InteractionContextTypes` | :obj:`None`: The interaction contexts
         where the command can be used. Only available for global commands.
 
         .. versionadded:: 2.10
@@ -634,7 +634,7 @@ class InvokableApplicationCommand(ABC):
 
     @property
     def cog_name(self) -> Optional[str]:
-        """:class:`str` | ``None``: The name of the cog this application command belongs to, if any."""
+        """:class:`str` | :obj:`None`: The name of the cog this application command belongs to, if any."""
         return type(self.cog).__cog_name__ if self.cog is not None else None
 
     async def can_run(self, inter: ApplicationCommandInteraction) -> bool:

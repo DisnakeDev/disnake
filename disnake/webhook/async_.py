@@ -715,7 +715,7 @@ class PartialWebhookGuild(Hashable):
 
     @property
     def icon(self) -> Optional[Asset]:
-        """:class:`Asset` | ``None``: Returns the guild's icon asset, if available."""
+        """:class:`Asset` | :obj:`None`: Returns the guild's icon asset, if available."""
         if self._icon is None:
             return None
         return Asset._from_guild_icon(self._state, self.id, self._icon)
@@ -826,11 +826,11 @@ class WebhookMessage(Message):
 
         Parameters
         ----------
-        content: :class:`str` | ``None``
-            The content to edit the message with, or ``None`` to clear it.
-        embed: :class:`Embed` | ``None``
+        content: :class:`str` | :obj:`None`
+            The content to edit the message with, or :obj:`None` to clear it.
+        embed: :class:`Embed` | :obj:`None`
             The new embed to replace the original with. This cannot be mixed with the ``embeds`` parameter.
-            Could be ``None`` to remove the embed.
+            Could be :obj:`None` to remove the embed.
         embeds: :class:`list`\\[:class:`Embed`]
             The new embeds to replace the original with. Must be a maximum of 10.
             This cannot be mixed with the ``embed`` parameter.
@@ -849,25 +849,25 @@ class WebhookMessage(Message):
 
             .. versionadded:: 2.0
 
-        attachments: :class:`list`\\[:class:`Attachment` | ``None``]
+        attachments: :class:`list`\\[:class:`Attachment` | :obj:`None`]
             A list of attachments to keep in the message.
-            If ``[]`` or ``None`` is passed then all existing attachments are removed.
+            If ``[]`` or :obj:`None` is passed then all existing attachments are removed.
             Keeps existing attachments if not provided.
 
             .. versionadded:: 2.2
 
             .. versionchanged:: 2.5
-                Supports passing ``None`` to clear attachments.
+                Supports passing :obj:`None` to clear attachments.
 
-        view: :class:`~disnake.ui.View` | ``None``
+        view: :class:`~disnake.ui.View` | :obj:`None`
             The view to update this message with. This cannot be mixed with ``components``.
-            If ``None`` is passed then the view is removed.
+            If :obj:`None` is passed then the view is removed.
 
             .. versionadded:: 2.0
 
-        components: |components_type| | ``None``
+        components: |components_type| | :obj:`None`
             A list of components to update the message with. This cannot be mixed with ``view``.
-            If ``None`` is passed then the components are removed.
+            If :obj:`None` is passed then the components are removed.
 
             .. versionadded:: 2.4
 
@@ -875,7 +875,7 @@ class WebhookMessage(Message):
                 Passing v2 components here automatically sets the :attr:`~MessageFlags.is_components_v2` flag.
                 Setting this flag cannot be reverted. Note that this also disables the
                 ``content`` and ``embeds`` fields.
-                If the message previously had any of these fields set, you must set them to ``None``.
+                If the message previously had any of these fields set, you must set them to :obj:`None`.
 
         flags: :class:`MessageFlags`
             The new flags to set for this message. Overrides existing flags.
@@ -934,7 +934,7 @@ class WebhookMessage(Message):
 
         Parameters
         ----------
-        delay: :class:`float` | ``None``
+        delay: :class:`float` | :obj:`None`
             If provided, the number of seconds to wait before deleting the message.
             The waiting is done in the background and deletion failures are ignored.
 
@@ -1039,9 +1039,9 @@ class BaseWebhook(Hashable):
 
     @property
     def guild(self) -> Optional[Guild]:
-        """:class:`Guild` | ``None``: The guild this webhook belongs to.
+        """:class:`Guild` | :obj:`None`: The guild this webhook belongs to.
 
-        If this is a partial webhook, then this will always return ``None``.
+        If this is a partial webhook, then this will always return :obj:`None`.
         """
         return self._state and self._state._get_guild(self.guild_id)
 
@@ -1049,9 +1049,9 @@ class BaseWebhook(Hashable):
     def channel(
         self,
     ) -> Optional[Union[TextChannel, VoiceChannel, StageChannel, ForumChannel, MediaChannel]]:
-        """:class:`TextChannel` | :class:`VoiceChannel` | :class:`StageChannel` | :class:`ForumChannel` | :class:`MediaChannel` | ``None``: The channel this webhook belongs to.
+        """:class:`TextChannel` | :class:`VoiceChannel` | :class:`StageChannel` | :class:`ForumChannel` | :class:`MediaChannel` | :obj:`None`: The channel this webhook belongs to.
 
-        If this is a partial webhook, then this will always return ``None``.
+        If this is a partial webhook, then this will always return :obj:`None`.
 
         Webhooks in a :class:`ForumChannel` or :class:`MediaChannel` can not send messages directly.
         They can only create new threads (see ``thread_name`` for :attr:`Webhook.send`)
@@ -1133,31 +1133,31 @@ class Webhook(BaseWebhook):
 
         .. versionadded:: 1.3
 
-    token: :class:`str` | ``None``
-        The authentication token of the webhook. If this is ``None``
+    token: :class:`str` | :obj:`None`
+        The authentication token of the webhook. If this is :obj:`None`
         then the webhook cannot be used to make requests.
-    guild_id: :class:`int` | ``None``
+    guild_id: :class:`int` | :obj:`None`
         The guild ID this webhook belongs to.
-    channel_id: :class:`int` | ``None``
+    channel_id: :class:`int` | :obj:`None`
         The channel ID this webhook belongs to.
-    user: :class:`abc.User` | ``None``
+    user: :class:`abc.User` | :obj:`None`
         The user this webhook was created by. If the webhook was
-        received without authentication then this will be ``None``.
-    name: :class:`str` | ``None``
+        received without authentication then this will be :obj:`None`.
+    name: :class:`str` | :obj:`None`
         The default name of the webhook.
-    source_guild: :class:`PartialWebhookGuild` | ``None``
+    source_guild: :class:`PartialWebhookGuild` | :obj:`None`
         The guild of the channel that this webhook is following.
         Only given if :attr:`type` is :attr:`WebhookType.channel_follower`.
 
         .. versionadded:: 2.0
 
-    source_channel: :class:`PartialWebhookChannel` | ``None``
+    source_channel: :class:`PartialWebhookChannel` | :obj:`None`
         The channel that this webhook is following.
         Only given if :attr:`type` is :attr:`WebhookType.channel_follower`.
 
         .. versionadded:: 2.0
 
-    application_id: :class:`int` | ``None``
+    application_id: :class:`int` | :obj:`None`
         The ID of the application associated with this webhook, if it was created by an application.
 
         .. versionadded:: 2.6
@@ -1202,7 +1202,7 @@ class Webhook(BaseWebhook):
 
             .. versionadded:: 2.0
 
-        bot_token: :class:`str` | ``None``
+        bot_token: :class:`str` | :obj:`None`
             The bot authentication token for authenticated requests
             involving the webhook.
 
@@ -1242,7 +1242,7 @@ class Webhook(BaseWebhook):
 
             .. versionadded:: 2.0
 
-        bot_token: :class:`str` | ``None``
+        bot_token: :class:`str` | :obj:`None`
             The bot authentication token for authenticated requests
             involving the webhook.
 
@@ -1356,7 +1356,7 @@ class Webhook(BaseWebhook):
 
         Parameters
         ----------
-        reason: :class:`str` | ``None``
+        reason: :class:`str` | :obj:`None`
             The reason for deleting this webhook. Shows up on the audit log.
 
             .. versionadded:: 1.4
@@ -1410,15 +1410,15 @@ class Webhook(BaseWebhook):
 
         Parameters
         ----------
-        name: :class:`str` | ``None``
+        name: :class:`str` | :obj:`None`
             The webhook's new default name.
-        avatar: |resource_type| | ``None``
+        avatar: |resource_type| | :obj:`None`
             The webhook's new default avatar.
 
             .. versionchanged:: 2.5
                 Now accepts various resource types in addition to :class:`bytes`.
 
-        channel: :class:`abc.Snowflake` | ``None``
+        channel: :class:`abc.Snowflake` | :obj:`None`
             The webhook's new channel. This requires an authenticated webhook.
 
             .. versionadded:: 2.0
@@ -1429,7 +1429,7 @@ class Webhook(BaseWebhook):
 
             .. versionadded:: 2.0
 
-        reason: :class:`str` | ``None``
+        reason: :class:`str` | :obj:`None`
             The reason for editing this webhook. Shows up on the audit log.
 
             .. versionadded:: 1.4
@@ -1617,7 +1617,7 @@ class Webhook(BaseWebhook):
 
         Parameters
         ----------
-        content: :class:`str` | ``None``
+        content: :class:`str` | :obj:`None`
             The content of the message to send.
         username: :class:`str`
             The username to send with this message. If no username is provided
@@ -1700,7 +1700,7 @@ class Webhook(BaseWebhook):
 
         wait: :class:`bool`
             Whether the server should wait before sending a response. This essentially
-            means that the return type of this function changes from ``None`` to
+            means that the return type of this function changes from :obj:`None` to
             a :class:`WebhookMessage` if set to ``True``. If the type of webhook
             is :attr:`WebhookType.application` then this is always set to ``True``.
         delete_after: :class:`float`
@@ -1757,8 +1757,8 @@ class Webhook(BaseWebhook):
 
         Returns
         -------
-        :class:`WebhookMessage` | ``None``
-            If ``wait`` is ``True`` then the message that was sent, otherwise ``None``.
+        :class:`WebhookMessage` | :obj:`None`
+            If ``wait`` is ``True`` then the message that was sent, otherwise :obj:`None`.
         """
         if self.token is None:
             raise WebhookTokenMissing("This webhook does not have a token associated with it")
@@ -1859,7 +1859,7 @@ class Webhook(BaseWebhook):
         ----------
         id: :class:`int`
             The message ID to look for.
-        thread: :class:`~disnake.abc.Snowflake` | ``None``
+        thread: :class:`~disnake.abc.Snowflake` | :obj:`None`
             The thread the message is in, if any.
 
             .. versionadded:: 2.10
@@ -1934,12 +1934,12 @@ class Webhook(BaseWebhook):
         ----------
         message_id: :class:`int`
             The ID of the message to edit.
-        content: :class:`str` | ``None``
-            The content to edit the message with, or ``None`` to clear it.
-        embed: :class:`Embed` | ``None``
+        content: :class:`str` | :obj:`None`
+            The content to edit the message with, or :obj:`None` to clear it.
+        embed: :class:`Embed` | :obj:`None`
             The new embed to replace the original with. This cannot be mixed with the
             ``embeds`` parameter.
-            Could be ``None`` to remove the embed.
+            Could be :obj:`None` to remove the embed.
         embeds: :class:`list`\\[:class:`Embed`]
             The new embeds to replace the original with. Must be a maximum of 10.
             This cannot be mixed with the ``embed`` parameter.
@@ -1958,26 +1958,26 @@ class Webhook(BaseWebhook):
 
             .. versionadded:: 2.0
 
-        attachments: :class:`list`\\[:class:`Attachment` | ``None``]
+        attachments: :class:`list`\\[:class:`Attachment` | :obj:`None`]
             A list of attachments to keep in the message.
-            If ``[]`` or ``None`` is passed then all existing attachments are removed.
+            If ``[]`` or :obj:`None` is passed then all existing attachments are removed.
             Keeps existing attachments if not provided.
 
             .. versionadded:: 2.2
 
             .. versionchanged:: 2.5
-                Supports passing ``None`` to clear attachments.
+                Supports passing :obj:`None` to clear attachments.
 
-        view: :class:`~disnake.ui.View` | ``None``
-            The updated view to update this message with. If ``None`` is passed then
+        view: :class:`~disnake.ui.View` | :obj:`None`
+            The updated view to update this message with. If :obj:`None` is passed then
             the view is removed. The webhook must have state attached, similar to
             :meth:`send`. This cannot be mixed with ``components``.
 
             .. versionadded:: 2.0
 
-        components: |components_type| | ``None``
+        components: |components_type| | :obj:`None`
             A list of components to update this message with. This cannot be mixed with ``view``.
-            If ``None`` is passed then the components are removed.
+            If :obj:`None` is passed then the components are removed.
 
             .. versionadded:: 2.4
 
@@ -1985,7 +1985,7 @@ class Webhook(BaseWebhook):
                 Passing v2 components here automatically sets the :attr:`~MessageFlags.is_components_v2` flag.
                 Setting this flag cannot be reverted. Note that this also disables the
                 ``content`` and ``embeds`` fields.
-                If the message previously had any of these fields set, you must set them to ``None``.
+                If the message previously had any of these fields set, you must set them to :obj:`None`.
 
         flags: :class:`MessageFlags`
             The new flags to set for this message. Overrides existing flags.
@@ -1998,7 +1998,7 @@ class Webhook(BaseWebhook):
             Controls the mentions being processed in this message.
             See :meth:`.abc.Messageable.send` for more information.
 
-        thread: :class:`~disnake.abc.Snowflake` | ``None``
+        thread: :class:`~disnake.abc.Snowflake` | :obj:`None`
             The thread the message is in, if any.
 
             .. versionadded:: 2.10
@@ -2094,7 +2094,7 @@ class Webhook(BaseWebhook):
         ----------
         message_id: :class:`int`
             The ID of the message to delete.
-        thread: :class:`~disnake.abc.Snowflake` | ``None``
+        thread: :class:`~disnake.abc.Snowflake` | :obj:`None`
             The thread the message is in, if any.
 
             .. versionadded:: 2.10

@@ -84,9 +84,9 @@ class Paginator:
 
     Attributes
     ----------
-    prefix: :class:`str` | ``None``
+    prefix: :class:`str` | :obj:`None`
         The prefix inserted to every page. e.g. three backticks.
-    suffix: :class:`str` | ``None``
+    suffix: :class:`str` | :obj:`None`
         The suffix appended at the end of every page. e.g. three backticks.
     max_size: :class:`int`
         The maximum amount of codepoints allowed in a page.
@@ -284,16 +284,16 @@ class HelpCommand:
 
     Attributes
     ----------
-    context: :class:`Context` | ``None``
+    context: :class:`Context` | :obj:`None`
         The context that invoked this help formatter. This is generally set after
         the help command assigned, :func:`command_callback`\\, has been called.
     show_hidden: :class:`bool`
         Specifies if hidden commands should be shown in the output.
         Defaults to ``False``.
-    verify_checks: :class:`bool` | ``None``
+    verify_checks: :class:`bool` | :obj:`None`
         Specifies if commands should have their :attr:`.Command.checks` called
         and verified. If ``True``, always calls :attr:`.Command.checks`.
-        If ``None``, only calls :attr:`.Command.checks` in a guild setting.
+        If :obj:`None`, only calls :attr:`.Command.checks` in a guild setting.
         If ``False``, never calls :attr:`.Command.checks`. Defaults to ``True``.
 
         .. versionchanged:: 1.7
@@ -403,7 +403,7 @@ class HelpCommand:
 
         Returns
         -------
-        :class:`str` | ``None``
+        :class:`str` | :obj:`None`
             The command name that triggered this invocation.
         """
         command_name = self._command_impl.name
@@ -476,11 +476,11 @@ class HelpCommand:
         belongs to that cog. All cog special methods will apply to the help
         command and it will be automatically unset on unload.
 
-        To unbind the cog from the help command, you can set it to ``None``.
+        To unbind the cog from the help command, you can set it to :obj:`None`.
 
         Returns
         -------
-        :class:`Cog` | ``None``
+        :class:`Cog` | :obj:`None`
             The cog that is currently set for the help command.
         """
         return self._command_impl.cog
@@ -565,7 +565,7 @@ class HelpCommand:
             An iterable of commands that are getting filtered.
         sort: :class:`bool`
             Whether to sort the result.
-        key: Callable[[:class:`Command` | ``None``, Any]]
+        key: Callable[[:class:`Command` | :obj:`None`, Any]]
             An optional key function to pass to :func:`py:sorted` that
             takes a :class:`Command` as its sole parameter. If ``sort`` is
             passed as ``True`` then this will default to using the command name.
@@ -708,10 +708,10 @@ class HelpCommand:
 
         Parameters
         ----------
-        mapping: :class:`~typing.Mapping`\\[:class:`Cog` | ``None``, :class:`list`\\[:class:`Command`]]
+        mapping: :class:`~typing.Mapping`\\[:class:`Cog` | :obj:`None`, :class:`list`\\[:class:`Command`]]
             A mapping of cogs to commands that have been requested by the user for help.
             The key of the mapping is the :class:`~.commands.Cog` that the command belongs to, or
-            ``None`` if there isn't one, and the value is a list of commands that belongs to that cog.
+            :obj:`None` if there isn't one, and the value is a list of commands that belongs to that cog.
         """
         return None
 
@@ -828,7 +828,7 @@ class HelpCommand:
         ----------
         ctx: :class:`Context`
             The invocation context.
-        command: :class:`str` | ``None``
+        command: :class:`str` | :obj:`None`
             The argument passed to the help command.
         """
         pass
@@ -910,16 +910,16 @@ class DefaultHelpCommand(HelpCommand):
         Defaults to 80.
     sort_commands: :class:`bool`
         Whether to sort the commands in the output alphabetically. Defaults to ``True``.
-    dm_help: :class:`bool` | ``None``
+    dm_help: :class:`bool` | :obj:`None`
         A tribool that indicates if the help command should DM the user instead of
         sending it to the channel it received it from. If the boolean is set to
         ``True``, then all help output is DM'd. If ``False``, none of the help
-        output is DM'd. If ``None``, then the bot will only DM when the help
+        output is DM'd. If :obj:`None`, then the bot will only DM when the help
         message becomes too long (dictated by more than :attr:`dm_help_threshold` characters).
         Defaults to ``False``.
     dm_help_threshold: :class:`int`
         The number of characters the paginator must accumulate before getting DM'd to the
-        user if :attr:`dm_help` is set to ``None``. Defaults to 1000.
+        user if :attr:`dm_help` is set to :obj:`None`. Defaults to 1000.
     indent: :class:`int`
         How much to indent the commands from a heading. Defaults to ``2``.
     commands_heading: :class:`str`
@@ -987,7 +987,7 @@ class DefaultHelpCommand(HelpCommand):
         heading: :class:`str`
             The heading to add to the output. This is only added
             if the list of commands is greater than 0.
-        max_size: :class:`int` | ``None``
+        max_size: :class:`int` | :obj:`None`
             The max size to use for the gap between indents.
             If unspecified, calls :meth:`~HelpCommand.get_max_size` on the
             commands parameter.
@@ -1129,16 +1129,16 @@ class MinimalHelpCommand(HelpCommand):
     aliases_heading: :class:`str`
         The alias list's heading string used to list the aliases of the command. Useful for i18n.
         Defaults to ``"Aliases:"``.
-    dm_help: :class:`bool` | ``None``
+    dm_help: :class:`bool` | :obj:`None`
         A tribool that indicates if the help command should DM the user instead of
         sending it to the channel it received it from. If the boolean is set to
         ``True``, then all help output is DM'd. If ``False``, none of the help
-        output is DM'd. If ``None``, then the bot will only DM when the help
+        output is DM'd. If :obj:`None`, then the bot will only DM when the help
         message becomes too long (dictated by more than :attr:`dm_help_threshold` characters).
         Defaults to ``False``.
     dm_help_threshold: :class:`int`
         The number of characters the paginator must accumulate before getting DM'd to the
-        user if :attr:`dm_help` is set to ``None``. Defaults to 1000.
+        user if :attr:`dm_help` is set to :obj:`None`. Defaults to 1000.
     no_category: :class:`str`
         The string used when there is a command which does not belong to any category(cog).
         Useful for i18n. Defaults to ``"No Category"``

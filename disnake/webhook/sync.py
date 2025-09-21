@@ -473,12 +473,12 @@ class SyncWebhookMessage(Message):
 
         Parameters
         ----------
-        content: :class:`str` | ``None``
-            The content to edit the message with or ``None`` to clear it.
-        embed: :class:`Embed` | ``None``
+        content: :class:`str` | :obj:`None`
+            The content to edit the message with or :obj:`None` to clear it.
+        embed: :class:`Embed` | :obj:`None`
             The new embed to replace the original with. This cannot be mixed with the
             ``embeds`` parameter.
-            Could be ``None`` to remove the embed.
+            Could be :obj:`None` to remove the embed.
         embeds: :class:`list`\\[:class:`Embed`]
             The new embeds to replace the original with. Must be a maximum of 10.
             This cannot be mixed with the ``embed`` parameter.
@@ -491,15 +491,15 @@ class SyncWebhookMessage(Message):
             A list of files to upload. This cannot be mixed with the ``file`` parameter.
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
-        attachments: :class:`list`\\[:class:`Attachment` | ``None``]
+        attachments: :class:`list`\\[:class:`Attachment` | :obj:`None`]
             A list of attachments to keep in the message.
-            If ``[]`` or ``None`` is passed then all existing attachments are removed.
+            If ``[]`` or :obj:`None` is passed then all existing attachments are removed.
             Keeps existing attachments if not provided.
 
             .. versionadded:: 2.2
 
             .. versionchanged:: 2.5
-                Supports passing ``None`` to clear attachments.
+                Supports passing :obj:`None` to clear attachments.
 
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
@@ -548,7 +548,7 @@ class SyncWebhookMessage(Message):
 
         Parameters
         ----------
-        delay: :class:`float` | ``None``
+        delay: :class:`float` | :obj:`None`
             If provided, the number of seconds to wait before deleting the message.
             This blocks the thread.
 
@@ -599,31 +599,31 @@ class SyncWebhook(BaseWebhook):
 
         .. versionadded:: 1.3
 
-    token: :class:`str` | ``None``
-        The authentication token of the webhook. If this is ``None``
+    token: :class:`str` | :obj:`None`
+        The authentication token of the webhook. If this is :obj:`None`
         then the webhook cannot be used to make requests.
-    guild_id: :class:`int` | ``None``
+    guild_id: :class:`int` | :obj:`None`
         The guild ID this webhook belongs to.
-    channel_id: :class:`int` | ``None``
+    channel_id: :class:`int` | :obj:`None`
         The channel ID this webhook belongs to.
-    user: :class:`abc.User` | ``None``
+    user: :class:`abc.User` | :obj:`None`
         The user this webhook was created by. If the webhook was
-        received without authentication then this will be ``None``.
-    name: :class:`str` | ``None``
+        received without authentication then this will be :obj:`None`.
+    name: :class:`str` | :obj:`None`
         The default name of the webhook.
-    source_guild: :class:`PartialWebhookGuild` | ``None``
+    source_guild: :class:`PartialWebhookGuild` | :obj:`None`
         The guild of the channel that this webhook is following.
         Only given if :attr:`type` is :attr:`WebhookType.channel_follower`.
 
         .. versionadded:: 2.0
 
-    source_channel: :class:`PartialWebhookChannel` | ``None``
+    source_channel: :class:`PartialWebhookChannel` | :obj:`None`
         The channel that this webhook is following.
         Only given if :attr:`type` is :attr:`WebhookType.channel_follower`.
 
         .. versionadded:: 2.0
 
-    application_id: :class:`int` | ``None``
+    application_id: :class:`int` | :obj:`None`
         The ID of the application associated with this webhook, if it was created by an application.
 
         .. versionadded:: 2.6
@@ -662,7 +662,7 @@ class SyncWebhook(BaseWebhook):
             that the library does not manage the session and
             will not close it. If not given, the ``requests``
             auto session creation functions are used instead.
-        bot_token: :class:`str` | ``None``
+        bot_token: :class:`str` | :obj:`None`
             The bot authentication token for authenticated requests
             involving the webhook.
 
@@ -704,7 +704,7 @@ class SyncWebhook(BaseWebhook):
             that the library does not manage the session and
             will not close it. If not given, the ``requests``
             auto session creation functions are used instead.
-        bot_token: :class:`str` | ``None``
+        bot_token: :class:`str` | :obj:`None`
             The bot authentication token for authenticated requests
             involving the webhook.
 
@@ -790,7 +790,7 @@ class SyncWebhook(BaseWebhook):
 
         Parameters
         ----------
-        reason: :class:`str` | ``None``
+        reason: :class:`str` | :obj:`None`
             The reason for deleting this webhook. Shows up on the audit log.
 
             .. versionadded:: 1.4
@@ -840,16 +840,16 @@ class SyncWebhook(BaseWebhook):
 
         Parameters
         ----------
-        name: :class:`str` | ``None``
+        name: :class:`str` | :obj:`None`
             The webhook's new default name.
-        avatar: :class:`bytes` | ``None``
+        avatar: :class:`bytes` | :obj:`None`
             A :term:`py:bytes-like object` representing the webhook's new default avatar.
-        channel: :class:`abc.Snowflake` | ``None``
+        channel: :class:`abc.Snowflake` | :obj:`None`
             The webhook's new channel. This requires an authenticated webhook.
         prefer_auth: :class:`bool`
             Whether to use the bot token over the webhook token
             if available. Defaults to ``True``.
-        reason: :class:`str` | ``None``
+        reason: :class:`str` | :obj:`None`
             The reason for editing this webhook. Shows up on the audit log.
 
             .. versionadded:: 1.4
@@ -1004,7 +1004,7 @@ class SyncWebhook(BaseWebhook):
 
         Parameters
         ----------
-        content: :class:`str` | ``None``
+        content: :class:`str` | :obj:`None`
             The content of the message to send.
         username: :class:`str`
             The username to send with this message. If no username is provided
@@ -1065,7 +1065,7 @@ class SyncWebhook(BaseWebhook):
 
         wait: :class:`bool`
             Whether the server should wait before sending a response. This essentially
-            means that the return type of this function changes from ``None`` to
+            means that the return type of this function changes from :obj:`None` to
             a :class:`WebhookMessage` if set to ``True``.
 
         Raises
@@ -1087,8 +1087,8 @@ class SyncWebhook(BaseWebhook):
 
         Returns
         -------
-        :class:`SyncWebhookMessage` | ``None``
-            If ``wait`` is ``True`` then the message that was sent, otherwise ``None``.
+        :class:`SyncWebhookMessage` | :obj:`None`
+            If ``wait`` is ``True`` then the message that was sent, otherwise :obj:`None`.
         """
         if self.token is None:
             raise WebhookTokenMissing("This webhook does not have a token associated with it")
@@ -1158,7 +1158,7 @@ class SyncWebhook(BaseWebhook):
         ----------
         id: :class:`int`
             The message ID to look for.
-        thread: :class:`~disnake.abc.Snowflake` | ``None``
+        thread: :class:`~disnake.abc.Snowflake` | :obj:`None`
             The thread the message is in, if any.
 
             .. versionadded:: 2.10
@@ -1225,12 +1225,12 @@ class SyncWebhook(BaseWebhook):
         ----------
         message_id: :class:`int`
             The ID of the message to edit.
-        content: :class:`str` | ``None``
-            The content to edit the message with, or ``None`` to clear it.
-        embed: :class:`Embed` | ``None``
+        content: :class:`str` | :obj:`None`
+            The content to edit the message with, or :obj:`None` to clear it.
+        embed: :class:`Embed` | :obj:`None`
             The new embed to replace the original with. This cannot be mixed with the
             ``embeds`` parameter.
-            Could be ``None`` to remove the embed.
+            Could be :obj:`None` to remove the embed.
         embeds: :class:`list`\\[:class:`Embed`]
             The new embeds to replace the original with. Must be a maximum of 10.
             This cannot be mixed with the ``embed`` parameter.
@@ -1243,20 +1243,20 @@ class SyncWebhook(BaseWebhook):
             A list of files to upload. This cannot be mixed with the ``file`` parameter.
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
-        attachments: :class:`list`\\[:class:`Attachment` | ``None``]
+        attachments: :class:`list`\\[:class:`Attachment` | :obj:`None`]
             A list of attachments to keep in the message.
-            If ``[]`` or ``None`` is passed then all existing attachments are removed.
+            If ``[]`` or :obj:`None` is passed then all existing attachments are removed.
             Keeps existing attachments if not provided.
 
             .. versionadded:: 2.2
 
             .. versionchanged:: 2.5
-                Supports passing ``None`` to clear attachments.
+                Supports passing :obj:`None` to clear attachments.
 
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
             See :meth:`.abc.Messageable.send` for more information.
-        thread: :class:`~disnake.abc.Snowflake` | ``None``
+        thread: :class:`~disnake.abc.Snowflake` | :obj:`None`
             The thread the message is in, if any.
 
             .. versionadded:: 2.10
@@ -1328,7 +1328,7 @@ class SyncWebhook(BaseWebhook):
         ----------
         message_id: :class:`int`
             The ID of the message to delete.
-        thread: :class:`~disnake.abc.Snowflake` | ``None``
+        thread: :class:`~disnake.abc.Snowflake` | :obj:`None`
             The thread the message is in, if any.
 
             .. versionadded:: 2.10

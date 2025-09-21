@@ -423,7 +423,7 @@ def find(predicate: Callable[[T], Any], seq: Iterable[T]) -> Optional[T]:
         member = disnake.utils.find(lambda m: m.name == 'Mighty', channel.guild.members)
 
     would find the first :class:`~disnake.Member` whose name is 'Mighty' and return it.
-    If an entry is not found, then ``None`` is returned.
+    If an entry is not found, then :obj:`None` is returned.
 
     This is different from :func:`py:filter` due to the fact it stops the moment it finds
     a valid entry.
@@ -454,7 +454,7 @@ def get(iterable: Iterable[T], **attrs: Any) -> Optional[T]:
     pass in ``x__y`` as the keyword argument.
 
     If nothing is found that matches the attributes passed, then
-    ``None`` is returned.
+    :obj:`None` is returned.
 
     Examples
     --------
@@ -1504,7 +1504,7 @@ def search_directory(path: str) -> Iterator[str]:
 def as_valid_locale(locale: str) -> Optional[str]:
     """Converts the provided locale name to a name that is valid for use with the API,
     for example by returning ``en-US`` for ``en_US``.
-    Returns ``None`` for invalid names.
+    Returns :obj:`None` for invalid names.
 
     .. versionadded:: 2.5
 

@@ -64,17 +64,17 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
         A dictionary of transformed arguments that were passed into the command.
         Similar to :attr:`args`\\, if this is accessed in the
         :func:`.on_command_error` event then this dict could be incomplete.
-    current_parameter: :class:`inspect.Parameter` | ``None``
+    current_parameter: :class:`inspect.Parameter` | :obj:`None`
         The parameter that is currently being inspected and converted.
         This is only of use for within converters.
 
         .. versionadded:: 2.0
 
-    prefix: :class:`str` | ``None``
+    prefix: :class:`str` | :obj:`None`
         The prefix that was used to invoke the command.
-    command: :class:`Command` | ``None``
+    command: :class:`Command` | :obj:`None`
         The command that is being invoked currently.
-    invoked_with: :class:`str` | ``None``
+    invoked_with: :class:`str` | :obj:`None`
         The command name that triggered this invocation. Useful for finding out
         which alias called the command.
     invoked_parents: :class:`list`\\[:class:`str`]
@@ -85,14 +85,14 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
 
         .. versionadded:: 1.7
 
-    invoked_subcommand: :class:`Command` | ``None``
+    invoked_subcommand: :class:`Command` | :obj:`None`
         The subcommand that was invoked.
-        If no valid subcommand was invoked then this is equal to ``None``.
-    subcommand_passed: :class:`str` | ``None``
+        If no valid subcommand was invoked then this is equal to :obj:`None`.
+    subcommand_passed: :class:`str` | :obj:`None`
         The string that was attempted to call a subcommand. This does not have
         to point to a valid registered subcommand and could just point to a
         nonsense string. If nothing was passed to attempt a call to a
-        subcommand then this is set to ``None``.
+        subcommand then this is set to :obj:`None`.
     command_failed: :class:`bool`
         Whether the command failed to be parsed, checked, or invoked.
     """
@@ -251,14 +251,14 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
 
     @property
     def cog(self) -> Optional[Cog]:
-        """:class:`.Cog` | ``None``: Returns the cog associated with this context's command. Returns ``None`` if it does not exist."""
+        """:class:`.Cog` | :obj:`None`: Returns the cog associated with this context's command. Returns :obj:`None` if it does not exist."""
         if self.command is None:
             return None
         return self.command.cog
 
     @disnake.utils.cached_property
     def guild(self) -> Optional[Guild]:
-        """:class:`.Guild` | ``None``: Returns the guild associated with this context's command. Returns ``None`` if not available."""
+        """:class:`.Guild` | :obj:`None`: Returns the guild associated with this context's command. Returns :obj:`None` if not available."""
         return self.message.guild
 
     @disnake.utils.cached_property
@@ -285,7 +285,7 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
 
     @property
     def voice_client(self) -> Optional[VoiceProtocol]:
-        r""":class:`.VoiceProtocol` | ``None``: A shortcut to :attr:`.Guild.voice_client`\, if applicable."""
+        r""":class:`.VoiceProtocol` | :obj:`None`: A shortcut to :attr:`.Guild.voice_client`\, if applicable."""
         g = self.guild
         return g.voice_client if g else None
 
@@ -309,7 +309,7 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
 
         Parameters
         ----------
-        entity: :class:`Command` | :class:`Cog` | :class:`str` | ``None``
+        entity: :class:`Command` | :class:`Cog` | :class:`str` | :obj:`None`
             The entity to show help for.
 
         Returns

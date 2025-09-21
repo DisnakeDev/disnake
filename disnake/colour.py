@@ -127,8 +127,8 @@ class Colour:
 
         Parameters
         ----------
-        seed: :class:`int` | :class:`str` | :class:`float` | :class:`bytes` | :class:`bytearray` | ``None``
-            The seed to initialize the RNG with. If ``None`` is passed the default RNG is used.
+        seed: :class:`int` | :class:`str` | :class:`float` | :class:`bytes` | :class:`bytearray` | :obj:`None`
+            The seed to initialize the RNG with. If :obj:`None` is passed the default RNG is used.
 
             .. versionadded:: 1.7
         """

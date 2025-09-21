@@ -74,7 +74,7 @@ class Localized(Generic[StringT]):
 
     Parameters
     ----------
-    string: :class:`str` | ``None``
+    string: :class:`str` | :obj:`None`
         The default (non-localized) value of the string.
         Whether this is optional or not depends on the localized parameter type.
     key: :class:`str`
@@ -231,7 +231,7 @@ class LocalizationValue:
 
     @property
     def data(self) -> Optional[Dict[str, str]]:
-        """:class:`dict`\\[:class:`str`, :class:`str` | ``None``]: A dict with a locale -> localization mapping, if available."""
+        """:class:`dict`\\[:class:`str`, :class:`str` | :obj:`None`]: A dict with a locale -> localization mapping, if available."""
         if self._data is MISSING:
             # This will happen when `_link(store)` hasn't been called yet, which *shouldn't* occur under normal circumstances.
             warnings.warn(
@@ -279,9 +279,9 @@ class LocalizationProtocol(ABC):
 
         Returns
         -------
-        :class:`dict`\\[:class:`str`, :class:`str` | ``None``]
+        :class:`dict`\\[:class:`str`, :class:`str` | :obj:`None`]
             The localizations for the provided key.
-            May return ``None`` if no localizations could be found.
+            May return :obj:`None` if no localizations could be found.
         """
         raise NotImplementedError
 
@@ -338,13 +338,13 @@ class LocalizationStore(LocalizationProtocol):
         ------
         LocalizationKeyError
             No localizations for the provided key were found.
-            Raised only if :attr:`strict` is enabled, returns ``None`` otherwise.
+            Raised only if :attr:`strict` is enabled, returns :obj:`None` otherwise.
 
         Returns
         -------
-        :class:`dict`\\[:class:`str`, :class:`str` | ``None``]
+        :class:`dict`\\[:class:`str`, :class:`str` | :obj:`None`]
             The localizations for the provided key.
-            Returns ``None`` if no localizations could be found and :attr:`strict` is disabled.
+            Returns :obj:`None` if no localizations could be found and :attr:`strict` is disabled.
         """
         data = self._loc.get(key)
         if data is None and self.strict:

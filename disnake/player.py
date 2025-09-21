@@ -264,12 +264,12 @@ class FFmpegPCMAudio(FFmpegAudio):
     pipe: :class:`bool`
         If ``True``, denotes that ``source`` parameter will be passed
         to the stdin of ffmpeg. Defaults to ``False``.
-    stderr: :term:`py:file object` | ``None``
+    stderr: :term:`py:file object` | :obj:`None`
         A file-like object to pass to the Popen constructor.
         Could also be an instance of ``subprocess.PIPE``.
-    before_options: :class:`str` | ``None``
+    before_options: :class:`str` | :obj:`None`
         Extra command line arguments to pass to ffmpeg before the ``-i`` flag.
-    options: :class:`str` | ``None``
+    options: :class:`str` | :obj:`None`
         Extra command line arguments to pass to ffmpeg after the ``-i`` flag.
 
     Raises
@@ -348,7 +348,7 @@ class FFmpegOpusAudio(FFmpegAudio):
         passed to the stdin of ffmpeg.
     bitrate: :class:`int`
         The bitrate in kbps to encode the output to.  Defaults to ``128``.
-    codec: :class:`str` | ``None``
+    codec: :class:`str` | :obj:`None`
         The codec to use to encode the audio data.  Normally this would be
         just ``libopus``, but is used by :meth:`FFmpegOpusAudio.from_probe` to
         opportunistically skip pointlessly re-encoding Opus audio data by passing
@@ -371,12 +371,12 @@ class FFmpegOpusAudio(FFmpegAudio):
     pipe: :class:`bool`
         If ``True``, denotes that ``source`` parameter will be passed
         to the stdin of ffmpeg. Defaults to ``False``.
-    stderr: :term:`py:file object` | ``None``
+    stderr: :term:`py:file object` | :obj:`None`
         A file-like object to pass to the Popen constructor.
         Could also be an instance of ``subprocess.PIPE``.
-    before_options: :class:`str` | ``None``
+    before_options: :class:`str` | :obj:`None`
         Extra command line arguments to pass to ffmpeg before the ``-i`` flag.
-    options: :class:`str` | ``None``
+    options: :class:`str` | :obj:`None`
         Extra command line arguments to pass to ffmpeg after the ``-i`` flag.
 
     Raises
@@ -479,7 +479,7 @@ class FFmpegOpusAudio(FFmpegAudio):
         ----------
         source
             Identical to the ``source`` parameter for the constructor.
-        method: :class:`str` | Callable[:class:`str` | :class:`str` | ``None``]
+        method: :class:`str` | Callable[:class:`str` | :class:`str` | :obj:`None`]
             The probing method used to determine bitrate and codec information. As a string, valid
             values are ``native`` to use ffprobe (or avprobe) and ``fallback`` to use ffmpeg
             (or avconv).  As a callable, it must take two string arguments, ``source`` and
@@ -537,7 +537,7 @@ class FFmpegOpusAudio(FFmpegAudio):
 
         Returns
         -------
-        :class:`tuple`\\[:class:`str` | ``None``, :class:`int` | ``None`` | ``None``]
+        :class:`tuple`\\[:class:`str` | :obj:`None`, :class:`int` | :obj:`None` | :obj:`None`]
             A 2-tuple with the codec and bitrate of the input source.
         """
         method = method or "native"

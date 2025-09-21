@@ -122,15 +122,15 @@ class WidgetMember(BaseUser):
             See the `help article <https://dis.gd/app-usernames>`__ for details.
     status: :class:`Status`
         The member's status.
-    activity: :class:`BaseActivity` | :class:`Spotify` | ``None``
+    activity: :class:`BaseActivity` | :class:`Spotify` | :obj:`None`
         The member's activity. This generally only has the ``name`` set.
-    deafened: :class:`bool` | ``None``
+    deafened: :class:`bool` | :obj:`None`
         Whether the member is currently deafened.
-    muted: :class:`bool` | ``None``
+    muted: :class:`bool` | :obj:`None`
         Whether the member is currently muted.
-    suppress: :class:`bool` | ``None``
+    suppress: :class:`bool` | :obj:`None`
         Whether the member is currently being suppressed.
-    connected_channel: :class:`WidgetChannel` | ``None``
+    connected_channel: :class:`WidgetChannel` | :obj:`None`
         Which channel the member is connected to.
     """
 
@@ -171,7 +171,7 @@ class WidgetMember(BaseUser):
     # and instead a separate `avatar_url` field with a full url
     @property
     def avatar(self) -> Optional[Asset]:
-        """:class:`Asset` | ``None``: The user's avatar.
+        """:class:`Asset` | :obj:`None`: The user's avatar.
         The size can be chosen using :func:`Asset.with_size`, however the format is always
         static and cannot be changed through :func:`Asset.with_format` or similar methods.
         """
@@ -196,7 +196,7 @@ class WidgetSettings:
         The widget's guild.
     enabled: :class:`bool`
         Whether the widget is enabled.
-    channel_id: :class:`int` | ``None``
+    channel_id: :class:`int` | :obj:`None`
         The widget channel ID. If set, an invite link for this channel will be generated,
         which allows users to join the guild from the widget.
     """
@@ -216,7 +216,7 @@ class WidgetSettings:
 
     @property
     def channel(self) -> Optional[GuildChannel]:
-        """:class:`abc.GuildChannel` | ``None``: The widget channel, if set."""
+        """:class:`abc.GuildChannel` | :obj:`None`: The widget channel, if set."""
         return self.guild.get_channel(self.channel_id) if self.channel_id is not None else None
 
     async def edit(
@@ -237,11 +237,11 @@ class WidgetSettings:
         ----------
         enabled: :class:`bool`
             Whether to enable the widget.
-        channel: :class:`~disnake.abc.Snowflake` | ``None``
-            The new widget channel. Pass ``None`` to remove the widget channel.
+        channel: :class:`~disnake.abc.Snowflake` | :obj:`None`
+            The new widget channel. Pass :obj:`None` to remove the widget channel.
             If set, an invite link for this channel will be generated,
             which allows users to join the guild from the widget.
-        reason: :class:`str` | ``None``
+        reason: :class:`str` | :obj:`None`
             The reason for editing the widget. Shows up on the audit log.
 
         Raises
@@ -355,7 +355,7 @@ class Widget:
 
     @property
     def invite_url(self) -> Optional[str]:
-        """:class:`str` | ``None``: The invite URL for the guild, if available."""
+        """:class:`str` | :obj:`None`: The invite URL for the guild, if available."""
         return self._invite
 
     async def fetch_invite(self, *, with_counts: bool = True) -> Optional[Invite]:
@@ -366,7 +366,7 @@ class Widget:
         code is abstracted away.
 
         .. versionchanged:: 2.6
-            This may now return ``None`` if the widget does not have
+            This may now return :obj:`None` if the widget does not have
             an attached invite URL.
 
         Parameters
@@ -378,7 +378,7 @@ class Widget:
 
         Returns
         -------
-        :class:`Invite` | ``None``
+        :class:`Invite` | :obj:`None`
             The invite from the widget's invite URL, if available.
         """
         if not self._invite:
@@ -408,9 +408,9 @@ class Widget:
         ----------
         enabled: :class:`bool`
             Whether to enable the widget.
-        channel: :class:`~disnake.abc.Snowflake` | ``None``
-            The new widget channel. Pass ``None`` to remove the widget channel.
-        reason: :class:`str` | ``None``
+        channel: :class:`~disnake.abc.Snowflake` | :obj:`None`
+            The new widget channel. Pass :obj:`None` to remove the widget channel.
+        reason: :class:`str` | :obj:`None`
             The reason for editing the widget. Shows up on the audit log.
 
         Raises

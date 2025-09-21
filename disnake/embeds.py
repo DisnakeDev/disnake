@@ -147,21 +147,21 @@ class Embed:
 
     Attributes
     ----------
-    title: :class:`str` | ``None``
+    title: :class:`str` | :obj:`None`
         The title of the embed.
-    type: :class:`str` | ``None``
+    type: :class:`str` | :obj:`None`
         The type of embed. Usually "rich".
         Possible strings for embed types can be found on Discord's
         :ddocs:`api-docs <resources/channel#embed-object-embed-types>`.
-    description: :class:`str` | ``None``
+    description: :class:`str` | :obj:`None`
         The description of the embed.
-    url: :class:`str` | ``None``
+    url: :class:`str` | :obj:`None`
         The URL of the embed.
-    timestamp: :class:`datetime.datetime` | ``None``
+    timestamp: :class:`datetime.datetime` | :obj:`None`
         The timestamp of the embed content. This is an aware datetime.
         If a naive datetime is passed, it is converted to an aware
         datetime with the local timezone.
-    colour: :class:`Colour` | ``None``
+    colour: :class:`Colour` | :obj:`None`
         The colour code of the embed. Aliased to ``color`` as well.
         In addition to :class:`Colour`, :class:`int` can also be assigned to it,
         in which case the value will be converted to a :class:`Colour` object.
@@ -381,7 +381,7 @@ class Embed:
         - ``icon_url``
         - ``proxy_icon_url``
 
-        If an attribute is not set, it will be ``None``.
+        If an attribute is not set, it will be :obj:`None`.
         """
         return cast("_EmbedFooterProxy", EmbedProxy(self._footer))
 
@@ -417,7 +417,7 @@ class Embed:
             .. versionchanged:: 2.6
                 No longer optional, must be set to a valid string.
 
-        icon_url: :class:`str` | ``None``
+        icon_url: :class:`str` | :obj:`None`
             The URL of the footer icon. Only HTTP(S) is supported.
         icon_file: :class:`File`
             The file to use as the footer icon.
@@ -456,7 +456,7 @@ class Embed:
         - ``width``
         - ``height``
 
-        If an attribute is not set, it will be ``None``.
+        If an attribute is not set, it will be :obj:`None`.
         """
         return cast("_EmbedMediaProxy", EmbedProxy(self._image))
 
@@ -483,11 +483,11 @@ class Embed:
             that the :attr:`.File.filename` is unique to avoid duplication.
 
         .. versionchanged:: 1.4
-            Passing ``None`` removes the image.
+            Passing :obj:`None` removes the image.
 
         Parameters
         ----------
-        url: :class:`str` | ``None``
+        url: :class:`str` | :obj:`None`
             The source URL for the image. Only HTTP(S) is supported.
         file: :class:`File`
             The file to use as the image.
@@ -509,7 +509,7 @@ class Embed:
         - ``width``
         - ``height``
 
-        If an attribute is not set, it will be ``None``.
+        If an attribute is not set, it will be :obj:`None`.
         """
         return cast("_EmbedMediaProxy", EmbedProxy(self._thumbnail))
 
@@ -536,11 +536,11 @@ class Embed:
             that the :attr:`.File.filename` is unique to avoid duplication.
 
         .. versionchanged:: 1.4
-            Passing ``None`` removes the thumbnail.
+            Passing :obj:`None` removes the thumbnail.
 
         Parameters
         ----------
-        url: :class:`str` | ``None``
+        url: :class:`str` | :obj:`None`
             The source URL for the thumbnail. Only HTTP(S) is supported.
         file: :class:`File`
             The file to use as the image.
@@ -562,7 +562,7 @@ class Embed:
         - ``height`` for the video height.
         - ``width`` for the video width.
 
-        If an attribute is not set, it will be ``None``.
+        If an attribute is not set, it will be :obj:`None`.
         """
         return cast("_EmbedVideoProxy", EmbedProxy(self._video))
 
@@ -572,7 +572,7 @@ class Embed:
 
         The only attributes that might be accessed are ``name`` and ``url``.
 
-        If an attribute is not set, it will be ``None``.
+        If an attribute is not set, it will be :obj:`None`.
         """
         return cast("_EmbedProviderProxy", EmbedProxy(self._provider))
 
@@ -582,7 +582,7 @@ class Embed:
 
         See :meth:`set_author` for possible values you can access.
 
-        If an attribute is not set, it will be ``None``.
+        If an attribute is not set, it will be :obj:`None`.
         """
         return cast("_EmbedAuthorProxy", EmbedProxy(self._author))
 
@@ -621,9 +621,9 @@ class Embed:
         ----------
         name: :class:`str`
             The name of the author.
-        url: :class:`str` | ``None``
+        url: :class:`str` | :obj:`None`
             The URL for the author.
-        icon_url: :class:`str` | ``None``
+        icon_url: :class:`str` | :obj:`None`
             The URL of the author icon. Only HTTP(S) is supported.
         icon_file: :class:`File`
             The file to use as the author icon.
@@ -660,7 +660,7 @@ class Embed:
 
         See :meth:`add_field` for possible values you can access.
 
-        If an attribute is not set, it will be ``None``.
+        If an attribute is not set, it will be :obj:`None`.
         """
         return cast("List[_EmbedFieldProxy]", [EmbedProxy(d) for d in (self._fields or [])])
 
@@ -841,7 +841,7 @@ class Embed:
 
         Returns
         -------
-        :class:`Colour` | ``None``
+        :class:`Colour` | :obj:`None`
             The colour that was set.
         """
         if value is None or isinstance(value, Colour):
@@ -864,7 +864,7 @@ class Embed:
 
         Returns
         -------
-        :class:`Colour` | ``None``
+        :class:`Colour` | :obj:`None`
             The default colour.
 
         """

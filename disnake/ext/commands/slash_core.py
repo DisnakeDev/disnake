@@ -142,8 +142,8 @@ class SubCommandGroup(InvokableApplicationCommand):
         API representation of this subcommand.
     callback: :ref:`coroutine <coroutine>`
         The coroutine that is executed when the command group is invoked.
-    cog: :class:`Cog` | ``None``
-        The cog that this group belongs to. ``None`` if there isn't one.
+    cog: :class:`Cog` | :obj:`None`
+        The cog that this group belongs to. :obj:`None` if there isn't one.
     checks: :class:`list`\\[Callable[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
         A list of predicates that verifies if the group could be executed
         with the given :class:`.ApplicationCommandInteraction` as the sole parameter. If an exception
@@ -265,8 +265,8 @@ class SubCommand(InvokableApplicationCommand):
         API representation of this subcommand.
     callback: :ref:`coroutine <coroutine>`
         The coroutine that is executed when the subcommand is called.
-    cog: :class:`Cog` | ``None``
-        The cog that this subcommand belongs to. ``None`` if there isn't one.
+    cog: :class:`Cog` | :obj:`None`
+        The cog that this subcommand belongs to. :obj:`None` if there isn't one.
     checks: :class:`list`\\[Callable[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
         A list of predicates that verifies if the subcommand could be executed
         with the given :class:`.ApplicationCommandInteraction` as the sole parameter. If an exception
@@ -414,8 +414,8 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         An object being registered in the API.
     callback: :ref:`coroutine <coroutine>`
         The coroutine that is executed when the command is called.
-    cog: :class:`Cog` | ``None``
-        The cog that this command belongs to. ``None`` if there isn't one.
+    cog: :class:`Cog` | :obj:`None`
+        The cog that this command belongs to. :obj:`None` if there isn't one.
     checks: :class:`list`\\[Callable[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
         A list of predicates that verifies if the command could be executed
         with the given :class:`.ApplicationCommandInteraction` as the sole parameter. If an exception
@@ -423,8 +423,8 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         :exc:`.CommandError` should be used. Note that if the checks fail then
         :exc:`.CheckFailure` exception is raised to the :func:`.on_slash_command_error`
         event.
-    guild_ids: :class:`tuple`\\[:class:`int`, ... | ``None``]
-        The list of IDs of the guilds where the command is synced. ``None`` if this command is global.
+    guild_ids: :class:`tuple`\\[:class:`int`, ... | :obj:`None`]
+        The list of IDs of the guilds where the command is synced. :obj:`None` if this command is global.
     connectors: :class:`dict`\\[:class:`str`, :class:`str`]
         A mapping of option names to function parameter names, mainly for internal processes.
     auto_sync: :class:`bool`
@@ -437,8 +437,8 @@ class InvokableSlashCommand(InvokableApplicationCommand):
 
         .. versionadded:: 2.5
 
-    parent: ``None``
-        This exists for consistency with :class:`SubCommand` and :class:`SubCommandGroup`. Always ``None``.
+    parent: :obj:`None`
+        This exists for consistency with :class:`SubCommand` and :class:`SubCommandGroup`. Always :obj:`None`.
 
         .. versionadded:: 2.6
     """
@@ -507,7 +507,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
 
     @property
     def root_parent(self) -> None:
-        """``None``: This is for consistency with :class:`SubCommand` and :class:`SubCommandGroup`.
+        """:obj:`None`: This is for consistency with :class:`SubCommand` and :class:`SubCommandGroup`.
 
         .. versionadded:: 2.6
         """
@@ -562,13 +562,13 @@ class InvokableSlashCommand(InvokableApplicationCommand):
 
         Parameters
         ----------
-        name: :class:`str` | :class:`.Localized` | ``None``
+        name: :class:`str` | :class:`.Localized` | :obj:`None`
             The name of the subcommand (defaults to function name).
 
             .. versionchanged:: 2.5
                 Added support for localizations.
 
-        description: :class:`str` | :class:`.Localized` | ``None``
+        description: :class:`str` | :class:`.Localized` | :obj:`None`
             The description of the subcommand.
 
             .. versionchanged:: 2.5
@@ -624,7 +624,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
 
         Parameters
         ----------
-        name: :class:`str` | :class:`.Localized` | ``None``
+        name: :class:`str` | :class:`.Localized` | :obj:`None`
             The name of the subcommand group (defaults to function name).
 
             .. versionchanged:: 2.5
@@ -798,13 +798,13 @@ def slash_command(
     ----------
     auto_sync: :class:`bool`
         Whether to automatically register the command. Defaults to ``True``.
-    name: :class:`str` | :class:`.Localized` | ``None``
+    name: :class:`str` | :class:`.Localized` | :obj:`None`
         The name of the slash command (defaults to function name).
 
         .. versionchanged:: 2.5
             Added support for localizations.
 
-    description: :class:`str` | :class:`.Localized` | ``None``
+    description: :class:`str` | :class:`.Localized` | :obj:`None`
         The description of the slash command. It will be visible in Discord.
 
         .. versionchanged:: 2.5
@@ -816,7 +816,7 @@ def slash_command(
 
         .. versionadded:: 2.8
 
-    install_types: :class:`.ApplicationInstallTypes` | ``None``
+    install_types: :class:`.ApplicationInstallTypes` | :obj:`None`
         The installation types where the command is available.
         Defaults to :attr:`.ApplicationInstallTypes.guild` only.
         Only available for global commands.
@@ -825,7 +825,7 @@ def slash_command(
 
         .. versionadded:: 2.10
 
-    contexts: :class:`.InteractionContextTypes` | ``None``
+    contexts: :class:`.InteractionContextTypes` | :obj:`None`
         The interaction contexts where the command can be used.
         Only available for global commands.
 
@@ -844,7 +844,7 @@ def slash_command(
             Use ``contexts`` instead.
             This is equivalent to the :attr:`.InteractionContextTypes.bot_dm` flag.
 
-    default_member_permissions: :class:`.Permissions` | :class:`int` | ``None``
+    default_member_permissions: :class:`.Permissions` | :class:`int` | :obj:`None`
         The default required permissions for this command.
         See :attr:`.ApplicationCommand.default_member_permissions` for details.
 

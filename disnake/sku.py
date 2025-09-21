@@ -107,9 +107,9 @@ class SKU(Hashable):
         ----------
         user: :class:`abc.Snowflake`
             The user to retrieve subscriptions for.
-        limit: :class:`int` | ``None``
+        limit: :class:`int` | :obj:`None`
             The number of subscriptions to retrieve.
-            If ``None``, retrieves every subscription.
+            If :obj:`None`, retrieves every subscription.
             Note, however, that this would make it a slow operation.
             Defaults to ``50``.
         before: :class:`.abc.Snowflake` | :class:`datetime.datetime`

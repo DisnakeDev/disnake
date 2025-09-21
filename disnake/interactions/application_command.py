@@ -56,7 +56,7 @@ class ApplicationCommandInteraction(Interaction[ClientT]):
         The interaction's type.
     application_id: :class:`int`
         The application ID that the interaction was for.
-    guild_id: :class:`int` | ``None``
+    guild_id: :class:`int` | :obj:`None`
         The guild ID the interaction was sent from.
     channel: :class:`abc.GuildChannel` | :class:`Thread` | :class:`abc.PrivateChannel` | :class:`PartialMessageable`
         The channel the interaction was sent from.
@@ -92,10 +92,10 @@ class ApplicationCommandInteraction(Interaction[ClientT]):
         .. versionchanged:: 2.5
             Changed to :class:`Locale` instead of :class:`str`.
 
-    guild_locale: :class:`Locale` | ``None``
+    guild_locale: :class:`Locale` | :obj:`None`
         The selected language of the interaction's guild.
         This value is only meaningful in guilds with ``COMMUNITY`` feature and receives a default value otherwise.
-        If the interaction was in a DM, then this value is ``None``.
+        If the interaction was in a DM, then this value is :obj:`None`.
 
         .. versionadded:: 2.4
 
@@ -155,7 +155,7 @@ class ApplicationCommandInteraction(Interaction[ClientT]):
 
     @property
     def target(self) -> Optional[Union[User, Member, Message]]:
-        """:class:`abc.User` | :class:`Message` | ``None``: The user or message targeted by a user or message command"""
+        """:class:`abc.User` | :class:`Message` | :obj:`None`: The user or message targeted by a user or message command"""
         return self.data.target
 
     @property

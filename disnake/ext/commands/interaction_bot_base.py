@@ -370,8 +370,8 @@ class InteractionBotBase(CommonBotBase):
 
         Returns
         -------
-        :class:`InvokableSlashCommand` | ``None``
-            The slash command that was removed. If the name is not valid then ``None`` is returned instead.
+        :class:`InvokableSlashCommand` | :obj:`None`
+            The slash command that was removed. If the name is not valid then :obj:`None` is returned instead.
         """
         command = self.all_slash_commands.pop(name, None)
         if command is None:
@@ -389,8 +389,8 @@ class InteractionBotBase(CommonBotBase):
 
         Returns
         -------
-        :class:`InvokableUserCommand` | ``None``
-            The user command that was removed. If the name is not valid then ``None`` is returned instead.
+        :class:`InvokableUserCommand` | :obj:`None`
+            The user command that was removed. If the name is not valid then :obj:`None` is returned instead.
         """
         command = self.all_user_commands.pop(name, None)
         if command is None:
@@ -408,8 +408,8 @@ class InteractionBotBase(CommonBotBase):
 
         Returns
         -------
-        :class:`InvokableMessageCommand` | ``None``
-            The message command that was removed. If the name is not valid then ``None`` is returned instead.
+        :class:`InvokableMessageCommand` | :obj:`None`
+            The message command that was removed. If the name is not valid then :obj:`None` is returned instead.
         """
         command = self.all_message_commands.pop(name, None)
         if command is None:
@@ -424,7 +424,7 @@ class InteractionBotBase(CommonBotBase):
         If the name contains spaces, then it will assume that you are looking for a :class:`SubCommand` or
         a :class:`SubCommandGroup`.
         e.g: ``'foo bar'`` will get the sub command group, or the sub command ``bar`` of the top-level slash command
-        ``foo`` if found, otherwise ``None``.
+        ``foo`` if found, otherwise :obj:`None`.
 
         Parameters
         ----------
@@ -438,8 +438,8 @@ class InteractionBotBase(CommonBotBase):
 
         Returns
         -------
-        :class:`InvokableSlashCommand` | :class:`SubCommandGroup` | :class:`SubCommand` | ``None``
-            The slash command that was requested. If not found, returns ``None``.
+        :class:`InvokableSlashCommand` | :class:`SubCommandGroup` | :class:`SubCommand` | :obj:`None`
+            The slash command that was requested. If not found, returns :obj:`None`.
         """
         if not isinstance(name, str):
             raise TypeError(f"Expected name to be str, not {name.__class__}")
@@ -469,8 +469,8 @@ class InteractionBotBase(CommonBotBase):
 
         Returns
         -------
-        :class:`InvokableUserCommand` | ``None``
-            The user command that was requested. If not found, returns ``None``.
+        :class:`InvokableUserCommand` | :obj:`None`
+            The user command that was requested. If not found, returns :obj:`None`.
         """
         return self.all_user_commands.get(name)
 
@@ -485,8 +485,8 @@ class InteractionBotBase(CommonBotBase):
 
         Returns
         -------
-        :class:`InvokableMessageCommand` | ``None``
-            The message command that was requested. If not found, returns ``None``.
+        :class:`InvokableMessageCommand` | :obj:`None`
+            The message command that was requested. If not found, returns :obj:`None`.
         """
         return self.all_message_commands.get(name)
 
@@ -512,13 +512,13 @@ class InteractionBotBase(CommonBotBase):
 
         Parameters
         ----------
-        name: :class:`str` | :class:`.Localized` | ``None``
+        name: :class:`str` | :class:`.Localized` | :obj:`None`
             The name of the slash command (defaults to function name).
 
             .. versionchanged:: 2.5
                 Added support for localizations.
 
-        description: :class:`str` | :class:`.Localized` | ``None``
+        description: :class:`str` | :class:`.Localized` | :obj:`None`
             The description of the slash command. It will be visible in Discord.
 
             .. versionchanged:: 2.5
@@ -535,7 +535,7 @@ class InteractionBotBase(CommonBotBase):
                 Use ``contexts`` instead.
                 This is equivalent to the :attr:`.InteractionContextTypes.bot_dm` flag.
 
-        default_member_permissions: :class:`.Permissions` | :class:`int` | ``None``
+        default_member_permissions: :class:`.Permissions` | :class:`int` | :obj:`None`
             The default required permissions for this command.
             See :attr:`.ApplicationCommand.default_member_permissions` for details.
 
@@ -547,7 +547,7 @@ class InteractionBotBase(CommonBotBase):
 
             .. versionadded:: 2.8
 
-        install_types: :class:`.ApplicationInstallTypes` | ``None``
+        install_types: :class:`.ApplicationInstallTypes` | :obj:`None`
             The installation types where the command is available.
             Defaults to :attr:`.ApplicationInstallTypes.guild` only.
             Only available for global commands.
@@ -556,7 +556,7 @@ class InteractionBotBase(CommonBotBase):
 
             .. versionadded:: 2.10
 
-        contexts: :class:`.InteractionContextTypes` | ``None``
+        contexts: :class:`.InteractionContextTypes` | :obj:`None`
             The interaction contexts where the command can be used.
             Only available for global commands.
 
@@ -631,7 +631,7 @@ class InteractionBotBase(CommonBotBase):
 
         Parameters
         ----------
-        name: :class:`str` | :class:`.Localized` | ``None``
+        name: :class:`str` | :class:`.Localized` | :obj:`None`
             The name of the user command (defaults to function name).
 
             .. versionchanged:: 2.5
@@ -645,7 +645,7 @@ class InteractionBotBase(CommonBotBase):
                 Use ``contexts`` instead.
                 This is equivalent to the :attr:`.InteractionContextTypes.bot_dm` flag.
 
-        default_member_permissions: :class:`.Permissions` | :class:`int` | ``None``
+        default_member_permissions: :class:`.Permissions` | :class:`int` | :obj:`None`
             The default required permissions for this command.
             See :attr:`.ApplicationCommand.default_member_permissions` for details.
 
@@ -657,7 +657,7 @@ class InteractionBotBase(CommonBotBase):
 
             .. versionadded:: 2.8
 
-        install_types: :class:`.ApplicationInstallTypes` | ``None``
+        install_types: :class:`.ApplicationInstallTypes` | :obj:`None`
             The installation types where the command is available.
             Defaults to :attr:`.ApplicationInstallTypes.guild` only.
             Only available for global commands.
@@ -666,7 +666,7 @@ class InteractionBotBase(CommonBotBase):
 
             .. versionadded:: 2.10
 
-        contexts: :class:`.InteractionContextTypes` | ``None``
+        contexts: :class:`.InteractionContextTypes` | :obj:`None`
             The interaction contexts where the command can be used.
             Only available for global commands.
 
@@ -734,7 +734,7 @@ class InteractionBotBase(CommonBotBase):
 
         Parameters
         ----------
-        name: :class:`str` | :class:`.Localized` | ``None``
+        name: :class:`str` | :class:`.Localized` | :obj:`None`
             The name of the message command (defaults to function name).
 
             .. versionchanged:: 2.5
@@ -748,7 +748,7 @@ class InteractionBotBase(CommonBotBase):
                 Use ``contexts`` instead.
                 This is equivalent to the :attr:`.InteractionContextTypes.bot_dm` flag.
 
-        default_member_permissions: :class:`.Permissions` | :class:`int` | ``None``
+        default_member_permissions: :class:`.Permissions` | :class:`int` | :obj:`None`
             The default required permissions for this command.
             See :attr:`.ApplicationCommand.default_member_permissions` for details.
 
@@ -760,7 +760,7 @@ class InteractionBotBase(CommonBotBase):
 
             .. versionadded:: 2.8
 
-        install_types: :class:`.ApplicationInstallTypes` | ``None``
+        install_types: :class:`.ApplicationInstallTypes` | :obj:`None`
             The installation types where the command is available.
             Defaults to :attr:`.ApplicationInstallTypes.guild` only.
             Only available for global commands.
@@ -769,7 +769,7 @@ class InteractionBotBase(CommonBotBase):
 
             .. versionadded:: 2.10
 
-        contexts: :class:`.InteractionContextTypes` | ``None``
+        contexts: :class:`.InteractionContextTypes` | :obj:`None`
             The interaction contexts where the command can be used.
             Only available for global commands.
 

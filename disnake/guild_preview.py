@@ -30,7 +30,7 @@ class GuildPreview:
         All stickers that the guild owns.
     id: :class:`int`
         The ID of the guild this preview represents.
-    description: :class:`str` | ``None``
+    description: :class:`str` | :obj:`None`
         The guild's description.
     features: :class:`list`\\[:class:`str`]
         A list of features that the guild has. The features that a guild can have are
@@ -93,21 +93,21 @@ class GuildPreview:
 
     @property
     def icon(self) -> Optional[Asset]:
-        """:class:`Asset` | ``None``: Returns the guild preview's icon asset, if available."""
+        """:class:`Asset` | :obj:`None`: Returns the guild preview's icon asset, if available."""
         if self._icon is None:
             return None
         return Asset._from_guild_icon(self._state, self.id, self._icon)
 
     @property
     def splash(self) -> Optional[Asset]:
-        """:class:`Asset` | ``None``: Returns the guild preview's invite splash asset, if available."""
+        """:class:`Asset` | :obj:`None`: Returns the guild preview's invite splash asset, if available."""
         if self._splash is None:
             return None
         return Asset._from_guild_image(self._state, self.id, self._splash, path="splashes")
 
     @property
     def discovery_splash(self) -> Optional[Asset]:
-        """:class:`Asset` | ``None``: Returns the guild preview's discovery splash asset, if available."""
+        """:class:`Asset` | :obj:`None`: Returns the guild preview's discovery splash asset, if available."""
         if self._discovery_splash is None:
             return None
         return Asset._from_guild_image(

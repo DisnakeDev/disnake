@@ -45,7 +45,7 @@ class MessageInteraction(Interaction[ClientT]):
         The application ID that the interaction was for.
     token: :class:`str`
         The token to continue the interaction. These are valid for 15 minutes.
-    guild_id: :class:`int` | ``None``
+    guild_id: :class:`int` | :obj:`None`
         The guild ID the interaction was sent from.
     channel: :class:`abc.GuildChannel` | :class:`Thread` | :class:`abc.PrivateChannel` | :class:`PartialMessageable`
         The channel the interaction was sent from.
@@ -81,10 +81,10 @@ class MessageInteraction(Interaction[ClientT]):
         .. versionchanged:: 2.5
             Changed to :class:`Locale` instead of :class:`str`.
 
-    guild_locale: :class:`Locale` | ``None``
+    guild_locale: :class:`Locale` | :obj:`None`
         The selected language of the interaction's guild.
         This value is only meaningful in guilds with ``COMMUNITY`` feature and receives a default value otherwise.
-        If the interaction was in a DM, then this value is ``None``.
+        If the interaction was in a DM, then this value is :obj:`None`.
 
         .. versionadded:: 2.4
 
@@ -124,7 +124,7 @@ class MessageInteraction(Interaction[ClientT]):
 
     data: :class:`MessageInteractionData`
         The wrapped interaction data.
-    message: :class:`Message` | ``None``
+    message: :class:`Message` | :obj:`None`
         The message that this interaction's component is attached to.
     """
 
@@ -137,7 +137,7 @@ class MessageInteraction(Interaction[ClientT]):
 
     @property
     def values(self) -> Optional[List[str]]:
-        """:class:`list`\\[:class:`str` | ``None``]: The values the user selected.
+        """:class:`list`\\[:class:`str` | :obj:`None`]: The values the user selected.
 
         For select menus of type :attr:`~ComponentType.string_select`,
         these are just the string values the user selected.
@@ -151,7 +151,7 @@ class MessageInteraction(Interaction[ClientT]):
     def resolved_values(
         self,
     ) -> Optional[Sequence[Union[str, Member, User, Role, AnyChannel]]]:
-        """:class:`~typing.Sequence`\\[:class:`str`, :class:`Member`, :class:`User`, :class:`Role`, :class:`abc.GuildChannel` | :class:`Thread` | :class:`PartialMessageable` | ``None``]: The (resolved) values the user selected.
+        """:class:`~typing.Sequence`\\[:class:`str`, :class:`Member`, :class:`User`, :class:`Role`, :class:`abc.GuildChannel` | :class:`Thread` | :class:`PartialMessageable` | :obj:`None`]: The (resolved) values the user selected.
 
         For select menus of type :attr:`~ComponentType.string_select`,
         this is equivalent to :attr:`values`.
@@ -200,7 +200,7 @@ class MessageInteractionData(Dict[str, Any]):
         The custom ID of the component.
     component_type: :class:`ComponentType`
         The type of the component.
-    values: :class:`list`\\[:class:`str` | ``None``]
+    values: :class:`list`\\[:class:`str` | :obj:`None`]
         The values the user has selected in a select menu.
         For non-string select menus, this contains IDs for use with :attr:`resolved`.
     resolved: :class:`InteractionDataResolved`

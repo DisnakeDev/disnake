@@ -141,11 +141,11 @@ class OnboardingPromptOption(Hashable):
     ----------
     id: :class:`int`
         The prompt option's ID.
-    emoji: :class:`PartialEmoji` | :class:`Emoji` | :class:`str` | ``None``
+    emoji: :class:`PartialEmoji` | :class:`Emoji` | :class:`str` | :obj:`None`
         The prompt option's emoji.
     title: :class:`str`
         The prompt option's title.
-    description: :class:`str` | ``None``
+    description: :class:`str` | :obj:`None`
         The prompt option's description.
     role_ids: :class:`frozenset`\\[:class:`int`]
         The IDs of the roles that will be added to the user when they select this option.

@@ -53,7 +53,7 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
     custom_id: :class:`str`
         The ID of the select menu that gets received during an interaction.
         If not given then one is generated for you.
-    placeholder: :class:`str` | ``None``
+    placeholder: :class:`str` | :obj:`None`
         The placeholder text that is shown if nothing is selected, if any.
     min_values: :class:`int`
         The minimum number of items that must be chosen for this select menu.
@@ -63,10 +63,10 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select is disabled.
-    channel_types: :class:`list`\\[:class:`.ChannelType` | ``None``]
+    channel_types: :class:`list`\\[:class:`.ChannelType` | :obj:`None`]
         The list of channel types that can be selected in this select menu.
-        Defaults to all types (i.e. ``None``).
-    default_values: :class:`~typing.Sequence`\\[:class:`.abc.GuildChannel` | :class:`.Thread` | :class:`.abc.PrivateChannel` | :class:`.PartialMessageable` | :class:`.SelectDefaultValue` | :class:`.Object` | ``None``]
+        Defaults to all types (i.e. :obj:`None`).
+    default_values: :class:`~typing.Sequence`\\[:class:`.abc.GuildChannel` | :class:`.Thread` | :class:`.abc.PrivateChannel` | :class:`.PartialMessageable` | :class:`.SelectDefaultValue` | :class:`.Object` | :obj:`None`]
         The list of values (channels) that are selected by default.
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
@@ -82,11 +82,11 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
         sequential identifiers to the components in the message.
 
         .. versionadded:: 2.11
-    row: :class:`int` | ``None``
+    row: :class:`int` | :obj:`None`
         The relative row this select menu belongs to. A Discord component can only have 5
         rows. By default, items are arranged automatically into those 5 rows. If you'd
         like to control the relative positioning of the row then passing an index is advised.
-        For example, row=1 will show up before row=2. Defaults to ``None``, which is automatic
+        For example, row=1 will show up before row=2. Defaults to :obj:`None`, which is automatic
         ordering. The row number must be between 0 and 4 (i.e. zero indexed).
 
     Attributes
@@ -191,7 +191,7 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
 
     @property
     def channel_types(self) -> Optional[List[ChannelType]]:
-        """:class:`list`\\[:class:`disnake.ChannelType` | ``None``]: A list of channel types that can be selected in this select menu."""
+        """:class:`list`\\[:class:`disnake.ChannelType` | :obj:`None`]: A list of channel types that can be selected in this select menu."""
         return self._underlying.channel_types
 
     @channel_types.setter
@@ -251,7 +251,7 @@ def channel_select(
         A callable (may be a :class:`ChannelSelect` subclass) to create a new instance of this component.
         If provided, the other parameters described below do not apply.
         Instead, this decorator will accept the same keywords as the passed callable/class does.
-    placeholder: :class:`str` | ``None``
+    placeholder: :class:`str` | :obj:`None`
         The placeholder text that is shown if nothing is selected, if any.
     custom_id: :class:`str`
         The ID of the select menu that gets received during an interaction.
@@ -264,10 +264,10 @@ def channel_select(
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select is disabled. Defaults to ``False``.
-    channel_types: :class:`list`\\[:class:`.ChannelType` | ``None``]
+    channel_types: :class:`list`\\[:class:`.ChannelType` | :obj:`None`]
         The list of channel types that can be selected in this select menu.
-        Defaults to all types (i.e. ``None``).
-    default_values: :class:`~typing.Sequence`\\[:class:`.abc.GuildChannel` | :class:`.Thread` | :class:`.abc.PrivateChannel` | :class:`.PartialMessageable` | :class:`.SelectDefaultValue` | :class:`.Object` | ``None``]
+        Defaults to all types (i.e. :obj:`None`).
+    default_values: :class:`~typing.Sequence`\\[:class:`.abc.GuildChannel` | :class:`.Thread` | :class:`.abc.PrivateChannel` | :class:`.PartialMessageable` | :class:`.SelectDefaultValue` | :class:`.Object` | :obj:`None`]
         The list of values (channels) that are selected by default.
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
@@ -278,11 +278,11 @@ def channel_select(
         sequential identifiers to the components in the message.
 
         .. versionadded:: 2.11
-    row: :class:`int` | ``None``
+    row: :class:`int` | :obj:`None`
         The relative row this select menu belongs to. A Discord component can only have 5
         rows. By default, items are arranged automatically into those 5 rows. If you'd
         like to control the relative positioning of the row then passing an index is advised.
-        For example, row=1 will show up before row=2. Defaults to ``None``, which is automatic
+        For example, row=1 will show up before row=2. Defaults to :obj:`None`, which is automatic
         ordering. The row number must be between 0 and 4 (i.e. zero indexed).
     """
     return _create_decorator(cls, **kwargs)

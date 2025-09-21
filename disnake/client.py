@@ -231,32 +231,32 @@ class Client:
 
     Parameters
     ----------
-    max_messages: :class:`int` | ``None``
+    max_messages: :class:`int` | :obj:`None`
         The maximum number of messages to store in the internal message cache.
-        This defaults to ``1000``. Passing in ``None`` disables the message cache.
+        This defaults to ``1000``. Passing in :obj:`None` disables the message cache.
 
         .. versionchanged:: 1.3
             Allow disabling the message cache and change the default size to ``1000``.
-    loop: :class:`asyncio.AbstractEventLoop` | ``None``
+    loop: :class:`asyncio.AbstractEventLoop` | :obj:`None`
         The :class:`asyncio.AbstractEventLoop` to use for asynchronous operations.
-        Defaults to ``None``, in which case the current event loop is
+        Defaults to :obj:`None`, in which case the current event loop is
         used, or a new loop is created if there is none.
     asyncio_debug: :class:`bool`
         Whether to enable asyncio debugging when the client starts.
         Defaults to False.
-    connector: :class:`aiohttp.BaseConnector` | ``None``
+    connector: :class:`aiohttp.BaseConnector` | :obj:`None`
         The connector to use for connection pooling.
-    proxy: :class:`str` | ``None``
+    proxy: :class:`str` | :obj:`None`
         Proxy URL.
-    proxy_auth: :class:`aiohttp.BasicAuth` | ``None``
+    proxy_auth: :class:`aiohttp.BasicAuth` | :obj:`None`
         An object that represents proxy HTTP Basic Authorization.
-    shard_id: :class:`int` | ``None``
+    shard_id: :class:`int` | :obj:`None`
         Integer starting at ``0`` and less than :attr:`.shard_count`.
-    shard_count: :class:`int` | ``None``
+    shard_count: :class:`int` | :obj:`None`
         The total number of shards.
     application_id: :class:`int`
         The client's application ID.
-    intents: :class:`Intents` | ``None``
+    intents: :class:`Intents` | :obj:`None`
         The intents that you want to enable for the session. This is a way of
         disabling and enabling certain gateway events from triggering and being sent.
         If not given, defaults to a regularly constructed :class:`Intents` class.
@@ -278,11 +278,11 @@ class Client:
 
         .. versionadded:: 1.5
 
-    status: class:`str` | :class:`.Status` | ``None``
+    status: class:`str` | :class:`.Status` | :obj:`None`
         A status to start your presence with upon logging on to Discord.
-    activity: :class:`.BaseActivity` | ``None``
+    activity: :class:`.BaseActivity` | :obj:`None`
         An activity to start your presence with upon logging on to Discord.
-    allowed_mentions: :class:`AllowedMentions` | ``None``
+    allowed_mentions: :class:`AllowedMentions` | :obj:`None`
         Control how the client handles mentions by default on every message sent.
 
         .. versionadded:: 1.4
@@ -360,10 +360,10 @@ class Client:
     Attributes
     ----------
     ws
-        The websocket gateway the client is currently connected to. Could be ``None``.
+        The websocket gateway the client is currently connected to. Could be :obj:`None`.
     loop: :class:`asyncio.AbstractEventLoop`
         The event loop that the client uses for asynchronous operations.
-    session_start_limit: :class:`SessionStartLimit` | ``None``
+    session_start_limit: :class:`SessionStartLimit` | :obj:`None`
         Information about the current session start limit.
         Only available after initiating the connection.
 
@@ -550,7 +550,7 @@ class Client:
 
     @property
     def user(self) -> ClientUser:
-        """:class:`.ClientUser` | ``None``: Represents the connected client. ``None`` if not logged in."""
+        """:class:`.ClientUser` | :obj:`None`: Represents the connected client. :obj:`None` if not logged in."""
         return self._connection.user
 
     @property
@@ -608,7 +608,7 @@ class Client:
 
     @property
     def application_id(self) -> int:
-        """:class:`int` | ``None``: The client's application ID.
+        """:class:`int` | :obj:`None`: The client's application ID.
 
         If this is not passed via ``__init__`` then this is retrieved
         through the gateway when an event contains the data. Usually
@@ -668,7 +668,7 @@ class Client:
 
         Returns
         -------
-        :class:`.Message` | ``None``
+        :class:`.Message` | :obj:`None`
             The corresponding message.
         """
         return utils.get(self.cached_messages, id=id)
@@ -695,14 +695,14 @@ class Client:
             The ID to search for.
         strict: :class:`bool`
             Whether to propagate exceptions from :func:`fetch_user`
-            instead of returning ``None`` in case of failure
+            instead of returning :obj:`None` in case of failure
             (e.g. if the user wasn't found).
             Defaults to ``False``.
 
         Returns
         -------
-        :class:`~disnake.User` | ``None``
-            The user with the given ID, or ``None`` if not found and ``strict`` is set to ``False``.
+        :class:`~disnake.User` | :obj:`None`
+            The user with the given ID, or :obj:`None` if not found and ``strict`` is set to ``False``.
         """
         user = self.get_user(user_id)
         if user is not None:
@@ -1332,7 +1332,7 @@ class Client:
 
     @property
     def activity(self) -> Optional[ActivityTypes]:
-        """:class:`.BaseActivity` | ``None``: The activity being used upon logging in."""
+        """:class:`.BaseActivity` | :obj:`None`: The activity being used upon logging in."""
         return create_activity(self._connection._activity, state=self._connection)
 
     @activity.setter
@@ -1366,7 +1366,7 @@ class Client:
 
     @property
     def allowed_mentions(self) -> Optional[AllowedMentions]:
-        """:class:`~disnake.AllowedMentions` | ``None``: The allowed mention configuration.
+        """:class:`~disnake.AllowedMentions` | :obj:`None`: The allowed mention configuration.
 
         .. versionadded:: 1.4
         """
@@ -1404,8 +1404,8 @@ class Client:
 
         Returns
         -------
-        :class:`.abc.GuildChannel` | :class:`.Thread` | :class:`.abc.PrivateChannel` | ``None``
-            The returned channel or ``None`` if not found.
+        :class:`.abc.GuildChannel` | :class:`.Thread` | :class:`.abc.PrivateChannel` | :obj:`None`
+            The returned channel or :obj:`None` if not found.
         """
         return self._connection.get_channel(id)
 
@@ -1423,7 +1423,7 @@ class Client:
         ----------
         id: :class:`int`
             The channel ID to create a partial messageable for.
-        type: :class:`.ChannelType` | ``None``
+        type: :class:`.ChannelType` | :obj:`None`
             The underlying channel type for the partial messageable.
 
         Returns
@@ -1445,8 +1445,8 @@ class Client:
 
         Returns
         -------
-        :class:`.StageInstance` | ``None``
-            The returns stage instance or ``None`` if not found.
+        :class:`.StageInstance` | :obj:`None`
+            The returns stage instance or :obj:`None` if not found.
         """
         from .channel import StageChannel
 
@@ -1465,8 +1465,8 @@ class Client:
 
         Returns
         -------
-        :class:`.Guild` | ``None``
-            The guild or ``None`` if not found.
+        :class:`.Guild` | :obj:`None`
+            The guild or :obj:`None` if not found.
         """
         return self._connection._get_guild(id)
 
@@ -1480,8 +1480,8 @@ class Client:
 
         Returns
         -------
-        :class:`~disnake.User` | ``None``
-            The user or ``None`` if not found.
+        :class:`~disnake.User` | :obj:`None`
+            The user or :obj:`None` if not found.
         """
         return self._connection.get_user(id)
 
@@ -1495,8 +1495,8 @@ class Client:
 
         Returns
         -------
-        :class:`.Emoji` | ``None``
-            The custom emoji or ``None`` if not found.
+        :class:`.Emoji` | :obj:`None`
+            The custom emoji or :obj:`None` if not found.
         """
         return self._connection.get_emoji(id)
 
@@ -1512,8 +1512,8 @@ class Client:
 
         Returns
         -------
-        :class:`.GuildSticker` | ``None``
-            The sticker or ``None`` if not found.
+        :class:`.GuildSticker` | :obj:`None`
+            The sticker or :obj:`None` if not found.
         """
         return self._connection.get_sticker(id)
 
@@ -1528,8 +1528,8 @@ class Client:
 
         Returns
         -------
-        :class:`.GuildSoundboardSound` | ``None``
-            The soundboard sound or ``None`` if not found.
+        :class:`.GuildSoundboardSound` | :obj:`None`
+            The soundboard sound or :obj:`None` if not found.
         """
         return self._connection.get_soundboard_sound(id)
 
@@ -1647,7 +1647,7 @@ class Client:
 
         Returns
         -------
-        :class:`.APIUserCommand` | :class:`.APIMessageCommand` | :class:`.APISlashCommand` | ``None``
+        :class:`.APIUserCommand` | :class:`.APIMessageCommand` | :class:`.APISlashCommand` | :obj:`None`
             The application command.
         """
         return self._connection._get_global_application_command(id)
@@ -1664,7 +1664,7 @@ class Client:
 
         Returns
         -------
-        :class:`.APIUserCommand` | :class:`.APIMessageCommand` | :class:`.APISlashCommand` | ``None``
+        :class:`.APIUserCommand` | :class:`.APIMessageCommand` | :class:`.APISlashCommand` | :obj:`None`
             The application command.
         """
         return self._connection._get_guild_application_command(guild_id, id)
@@ -1683,7 +1683,7 @@ class Client:
 
         Returns
         -------
-        :class:`.APIUserCommand` | :class:`.APIMessageCommand` | :class:`.APISlashCommand` | ``None``
+        :class:`.APIUserCommand` | :class:`.APIMessageCommand` | :class:`.APISlashCommand` | :obj:`None`
             The application command.
         """
         return self._connection._get_global_command_named(name, cmd_type)
@@ -1704,7 +1704,7 @@ class Client:
 
         Returns
         -------
-        :class:`.APIUserCommand` | :class:`.APIMessageCommand` | :class:`.APISlashCommand` | ``None``
+        :class:`.APIUserCommand` | :class:`.APIMessageCommand` | :class:`.APISlashCommand` | :obj:`None`
             The application command.
         """
         return self._connection._get_guild_command_named(guild_id, name, cmd_type)
@@ -1806,10 +1806,10 @@ class Client:
             The event name, similar to the :ref:`event reference <disnake_api_events>`,
             but without the ``on_`` prefix, to wait for. It's recommended
             to use :class:`.Event`.
-        check: Callable[..., :class:`bool` | ``None``]
+        check: Callable[..., :class:`bool` | :obj:`None`]
             A predicate to check what to wait for. The arguments must meet the
             parameters of the event being waited for.
-        timeout: :class:`float` | ``None``
+        timeout: :class:`float` | :obj:`None`
             The number of seconds to wait before timing out and raising
             :exc:`asyncio.TimeoutError`.
 
@@ -1898,10 +1898,10 @@ class Client:
 
         Parameters
         ----------
-        activity: :class:`.BaseActivity` | ``None``
-            The activity being done. ``None`` if no currently active activity is done.
-        status: :class:`.Status` | ``None``
-            Indicates what status to change to. If ``None``, then
+        activity: :class:`.BaseActivity` | :obj:`None`
+            The activity being done. :obj:`None` if no currently active activity is done.
+        status: :class:`.Status` | :obj:`None`
+            Indicates what status to change to. If :obj:`None`, then
             :attr:`.Status.online` is used.
 
         Raises
@@ -1968,9 +1968,9 @@ class Client:
 
         Parameters
         ----------
-        limit: :class:`int` | ``None``
+        limit: :class:`int` | :obj:`None`
             The number of guilds to retrieve.
-            If ``None``, it retrieves every guild you have access to. Note, however,
+            If :obj:`None`, it retrieves every guild you have access to. Note, however,
             that this would make it a slow operation.
             Defaults to ``100``.
         before: :class:`.abc.Snowflake` | :class:`datetime.datetime`
@@ -2333,7 +2333,7 @@ class Client:
 
         Parameters
         ----------
-        guild_id: :class:`int` | ``None``
+        guild_id: :class:`int` | :obj:`None`
             The guild to get regions for, if provided.
 
         Raises
@@ -2745,7 +2745,7 @@ class Client:
         ----------
         view: :class:`disnake.ui.View`
             The view to register for dispatching.
-        message_id: :class:`int` | ``None``
+        message_id: :class:`int` | :obj:`None`
             The message ID that the view is attached to. This is currently used to
             refresh the view's state during message update events. If not given
             then message update events are not propagated for the view.
@@ -3282,9 +3282,9 @@ class Client:
 
         Parameters
         ----------
-        limit: :class:`int` | ``None``
+        limit: :class:`int` | :obj:`None`
             The number of entitlements to retrieve.
-            If ``None``, retrieves every entitlement.
+            If :obj:`None`, retrieves every entitlement.
             Note, however, that this would make it a slow operation.
             Defaults to ``100``.
         before: :class:`.abc.Snowflake` | :class:`datetime.datetime`
@@ -3295,11 +3295,11 @@ class Client:
             Retrieve entitlements created after this date or object.
             If a datetime is provided, it is recommended to use a UTC aware datetime.
             If the datetime is naive, it is assumed to be local time.
-        user: :class:`.abc.Snowflake` | ``None``
+        user: :class:`.abc.Snowflake` | :obj:`None`
             The user to retrieve entitlements for.
-        guild: :class:`.abc.Snowflake` | ``None``
+        guild: :class:`.abc.Snowflake` | :obj:`None`
             The guild to retrieve entitlements for.
-        skus: :class:`~typing.Sequence`\\[:class:`.abc.Snowflake` | ``None``]
+        skus: :class:`~typing.Sequence`\\[:class:`.abc.Snowflake` | :obj:`None`]
             The SKUs for which entitlements are retrieved.
         exclude_ended: :class:`bool`
             Whether to exclude ended/expired entitlements. Defaults to ``False``.

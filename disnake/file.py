@@ -32,13 +32,13 @@ class File:
 
             To pass binary data, consider usage of ``io.BytesIO``.
 
-    filename: :class:`str` | ``None``
+    filename: :class:`str` | :obj:`None`
         The filename to display when uploading to Discord.
         If this is not given then it defaults to ``fp.name`` or if ``fp`` is
         a string then the ``filename`` will default to the string given.
     spoiler: :class:`bool`
         Whether the attachment is a spoiler.
-    description: :class:`str` | ``None``
+    description: :class:`str` | :obj:`None`
         The file's description.
 
         .. versionadded:: 2.3

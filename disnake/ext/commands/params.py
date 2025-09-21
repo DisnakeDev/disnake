@@ -446,13 +446,13 @@ class ParamInfo:
         The actual default value for the corresponding function param.
         Can be a sync/async callable taking an interaction and returning a dynamic default value,
         if the user didn't pass a value for this parameter.
-    name: :class:`str` | :class:`.Localized` | ``None``
+    name: :class:`str` | :class:`.Localized` | :obj:`None`
         The name of this slash command option.
 
         .. versionchanged:: 2.5
             Added support for localizations.
 
-    description: :class:`str` | :class:`.Localized` | ``None``
+    description: :class:`str` | :class:`.Localized` | :obj:`None`
         The description of this slash command option.
 
         .. versionchanged:: 2.5
@@ -1168,13 +1168,13 @@ def Param(
         The actual default value of the function parameter that should be passed instead of the :class:`ParamInfo` instance.
         Can be a sync/async callable taking an interaction and returning a dynamic default value,
         if the user didn't pass a value for this parameter.
-    name: :class:`str` | :class:`.Localized` | ``None``
+    name: :class:`str` | :class:`.Localized` | :obj:`None`
         The name of the option. By default, the option name is the parameter name.
 
         .. versionchanged:: 2.5
             Added support for localizations.
 
-    description: :class:`str` | :class:`.Localized` | ``None``
+    description: :class:`str` | :class:`.Localized` | :obj:`None`
         The description of the option. You can skip this kwarg and use docstrings. See :ref:`param_syntax`.
         Kwarg aliases: ``desc``.
 
