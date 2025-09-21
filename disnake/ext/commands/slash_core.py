@@ -151,7 +151,7 @@ class SubCommandGroup(InvokableApplicationCommand):
         :exc:`.CommandError` should be used. Note that if the checks fail then
         :exc:`.CheckFailure` exception is raised to the :func:`.on_slash_command_error`
         event.
-    extras: :class:`dict`\\[:class:`str`, Any]
+    extras: :class:`dict`\\[:class:`str`, :class:`~typing.Any`]
         A dict of user provided extras to attach to the subcommand group.
 
         .. note::
@@ -276,7 +276,7 @@ class SubCommand(InvokableApplicationCommand):
         event.
     connectors: :class:`dict`\\[:class:`str`, :class:`str`]
         A mapping of option names to function parameter names, mainly for internal processes.
-    extras: :class:`dict`\\[:class:`str`, Any]
+    extras: :class:`dict`\\[:class:`str`, :class:`~typing.Any`]
         A dict of user provided extras to attach to the subcommand.
 
         .. note::
@@ -429,7 +429,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         A mapping of option names to function parameter names, mainly for internal processes.
     auto_sync: :class:`bool`
         Whether to automatically register the command.
-    extras: :class:`dict`\\[:class:`str`, Any]
+    extras: :class:`dict`\\[:class:`str`, :class:`~typing.Any`]
         A dict of user provided extras to attach to the command.
 
         .. note::
@@ -581,7 +581,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             of an option already matches the corresponding function param,
             you don't have to specify the connectors. Connectors template:
             ``{"option-name": "param_name", ...}``
-        extras: :class:`dict`\\[:class:`str`, Any]
+        extras: :class:`dict`\\[:class:`str`, :class:`~typing.Any`]
             A dict of user provided extras to attach to the subcommand.
 
             .. note::
@@ -629,7 +629,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
 
             .. versionchanged:: 2.5
                 Added support for localizations.
-        extras: :class:`dict`\\[:class:`str`, Any]
+        extras: :class:`dict`\\[:class:`str`, :class:`~typing.Any`]
             A dict of user provided extras to attach to the subcommand group.
 
             .. note::
@@ -859,7 +859,7 @@ def slash_command(
         you don't have to specify the connectors. Connectors template:
         ``{"option-name": "param_name", ...}``.
         If you're using :ref:`param_syntax`, you don't need to specify this.
-    extras: :class:`dict`\\[:class:`str`, Any]
+    extras: :class:`dict`\\[:class:`str`, :class:`~typing.Any`]
         A dict of user provided extras to attach to the command.
 
         .. note::

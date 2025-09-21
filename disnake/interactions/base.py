@@ -112,7 +112,7 @@ class Interaction(Generic[ClientT]):
 
     Attributes
     ----------
-    data: :class:`~collections.abc.Mapping`\\[:class:`str`, Any]
+    data: :class:`~collections.abc.Mapping`\\[:class:`str`, :class:`~typing.Any`]
         The interaction's raw data. This might be replaced with a more processed version in subclasses.
     id: :class:`int`
         The interaction's ID.

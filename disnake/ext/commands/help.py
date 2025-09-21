@@ -565,7 +565,7 @@ class HelpCommand:
             An iterable of commands that are getting filtered.
         sort: :class:`bool`
             Whether to sort the result.
-        key: :class:`~collections.abc.Callable`\\[[:class:`Command`], Any] | :obj:`None`
+        key: :class:`~collections.abc.Callable`\\[[:class:`Command`], :class:`~typing.Any`] | :obj:`None`
             An optional key function to pass to :func:`py:sorted` that
             takes a :class:`Command` as its sole parameter. If ``sort`` is
             passed as ``True`` then this will default to using the command name.

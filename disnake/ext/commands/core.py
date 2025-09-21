@@ -2523,7 +2523,7 @@ def cooldown(
         The number of times a command can be used before triggering a cooldown.
     per: :class:`float`
         The amount of seconds to wait for a cooldown when it's been triggered.
-    type: :class:`.BucketType` | :class:`~collections.abc.Callable`\\[[:class:`.Message`, Any]]
+    type: :class:`.BucketType` | :class:`~collections.abc.Callable`\\[[:class:`.Message`, :class:`~typing.Any`]]
         The type of cooldown to have. If callable, should return a key for the mapping.
 
         .. versionchanged:: 1.7

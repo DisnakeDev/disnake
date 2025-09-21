@@ -442,7 +442,7 @@ class ParamInfo:
 
     Parameters
     ----------
-    default: :class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`], Any] | Any
+    default: :class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`], :class:`~typing.Any`] | :class:`~typing.Any`
         The actual default value for the corresponding function param.
         Can be a sync/async callable taking an interaction and returning a dynamic default value,
         if the user didn't pass a value for this parameter.
@@ -468,9 +468,9 @@ class ParamInfo:
         The type of the parameter.
     channel_types: :class:`list`\\[:class:`.ChannelType`]
         The list of channel types supported by this slash command option.
-    autocomplete: :class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`, :class:`str`], Any]
+    autocomplete: :class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`, :class:`str`], :class:`~typing.Any`]
         The function that will suggest possible autocomplete options while typing.
-    converter: :class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`, Any], Any]
+    converter: :class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`, :class:`~typing.Any`], :class:`~typing.Any`]
         The function that will convert the original input to a desired format.
     min_length: :class:`int`
         The minimum length for this option, if it is a string option.
@@ -1164,7 +1164,7 @@ def Param(
 
     Parameters
     ----------
-    default: :class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`], Any] | Any
+    default: :class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`], :class:`~typing.Any`] | :class:`~typing.Any`
         The actual default value of the function parameter that should be passed instead of the :class:`ParamInfo` instance.
         Can be a sync/async callable taking an interaction and returning a dynamic default value,
         if the user didn't pass a value for this parameter.
@@ -1183,7 +1183,7 @@ def Param(
 
     choices: :class:`~collections.abc.Sequence`\\[:class:`.OptionChoice`, :class:`~collections.abc.Sequence`\\[:class:`str` | :class:`int` | :class:`float`], :class:`~collections.abc.Mapping`\\[:class:`str`, :class:`str` | :class:`int` | :class:`float`]]
         The pre-defined choices for this slash command option.
-    converter: :class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`, Any], Any]
+    converter: :class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`, :class:`~typing.Any`], :class:`~typing.Any`]
         A function that will convert the original input to a desired format.
         Kwarg aliases: ``conv``.
     convert_defaults: :class:`bool`
@@ -1191,7 +1191,7 @@ def Param(
         Defaults to ``False``.
 
         .. versionadded:: 2.3
-    autocomplete: :class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`, :class:`str`], Any]
+    autocomplete: :class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`, :class:`str`], :class:`~typing.Any`]
         A function that will suggest possible autocomplete options while typing.
         See :ref:`param_syntax`. Kwarg aliases: ``autocomp``.
     channel_types: Iterable[:class:`.ChannelType`]
@@ -1325,7 +1325,7 @@ def injection(
 
     Returns
     -------
-    :class:`~collections.abc.Callable`\\[[:class:`~collections.abc.Callable`\\[..., Any]], :class:`Injection`]
+    :class:`~collections.abc.Callable`\\[[:class:`~collections.abc.Callable`\\[..., :class:`~typing.Any`]], :class:`Injection`]
         Decorator which turns your injection function into actual :class:`Injection`.
 
         .. note::

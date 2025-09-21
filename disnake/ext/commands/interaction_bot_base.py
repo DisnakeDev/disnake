@@ -575,7 +575,7 @@ class InteractionBotBase(CommonBotBase):
             you don't have to specify the connectors. Connectors template:
             ``{"option-name": "param_name", ...}``.
             If you're using :ref:`param_syntax`, you don't need to specify this.
-        extras: :class:`dict`\\[:class:`str`, Any]
+        extras: :class:`dict`\\[:class:`str`, :class:`~typing.Any`]
             A dict of user provided extras to attach to the command.
 
             .. note::
@@ -679,7 +679,7 @@ class InteractionBotBase(CommonBotBase):
         guild_ids: :class:`~collections.abc.Sequence`\\[:class:`int`]
             If specified, the client will register the command in these guilds.
             Otherwise, this command will be registered globally.
-        extras: :class:`dict`\\[:class:`str`, Any]
+        extras: :class:`dict`\\[:class:`str`, :class:`~typing.Any`]
             A dict of user provided extras to attach to the command.
 
             .. note::
@@ -782,7 +782,7 @@ class InteractionBotBase(CommonBotBase):
         guild_ids: :class:`~collections.abc.Sequence`\\[:class:`int`]
             If specified, the client will register the command in these guilds.
             Otherwise, this command will be registered globally.
-        extras: :class:`dict`\\[:class:`str`, Any]
+        extras: :class:`dict`\\[:class:`str`, :class:`~typing.Any`]
             A dict of user provided extras to attach to the command.
 
             .. note::

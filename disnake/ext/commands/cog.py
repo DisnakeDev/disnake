@@ -96,7 +96,7 @@ class CogMeta(type):
 
         .. versionadded:: 1.6
 
-    command_attrs: :class:`dict`\\[:class:`str`, Any]
+    command_attrs: :class:`dict`\\[:class:`str`, :class:`~typing.Any`]
         A list of attributes to apply to every command inside this cog. The dictionary
         is passed into the :class:`Command` options at ``__init__``.
         If you specify attributes inside the command attribute in the class, it will
@@ -113,7 +113,7 @@ class CogMeta(type):
                 async def bar(self, ctx):
                     pass # hidden -> False
 
-    slash_command_attrs: :class:`dict`\\[:class:`str`, Any]
+    slash_command_attrs: :class:`dict`\\[:class:`str`, :class:`~typing.Any`]
         A list of attributes to apply to every slash command inside this cog. The dictionary
         is passed into the options of every :class:`InvokableSlashCommand` at ``__init__``.
         Usage of this kwarg is otherwise the same as with ``command_attrs``.
@@ -122,14 +122,14 @@ class CogMeta(type):
 
         .. versionadded:: 2.5
 
-    user_command_attrs: :class:`dict`\\[:class:`str`, Any]
+    user_command_attrs: :class:`dict`\\[:class:`str`, :class:`~typing.Any`]
         A list of attributes to apply to every user command inside this cog. The dictionary
         is passed into the options of every :class:`InvokableUserCommand` at ``__init__``.
         Usage of this kwarg is otherwise the same as with ``command_attrs``.
 
         .. versionadded:: 2.5
 
-    message_command_attrs: :class:`dict`\\[:class:`str`, Any]
+    message_command_attrs: :class:`dict`\\[:class:`str`, :class:`~typing.Any`]
         A list of attributes to apply to every message command inside this cog. The dictionary
         is passed into the options of every :class:`InvokableMessageCommand` at ``__init__``.
         Usage of this kwarg is otherwise the same as with ``command_attrs``.
