@@ -1,0 +1,1 @@
+Update all references to typing.Union and typing.Optional in Sphinx documentation to use the PEP 604 syntax (X | Y and X | None).
