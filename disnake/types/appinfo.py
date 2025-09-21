@@ -80,12 +80,12 @@ class EditAppInfo(TypedDict, total=False):
     description: str
     role_connections_verification_url: Optional[str]
     install_params: Optional[InstallParams]
-    integration_types_config: Dict[Literal[0, 1], ApplicationIntegrationTypeConfiguration]
+    integration_types_config: Dict[str, ApplicationIntegrationTypeConfiguration]
     flags: int
     icon: Optional[str]
     cover_image: Optional[str]
     interactions_endpoint_url: Optional[str]
     tags: Optional[List[str]]
     event_webhooks_url: Optional[str]
-    event_webhooks_status: Literal[1, 2]
+    event_webhooks_status: str
     event_webhooks_types: List[str]

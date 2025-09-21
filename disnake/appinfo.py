@@ -65,7 +65,7 @@ class InstallParams:
     ) -> None:
         self.scopes = scopes
         self.permissions = permissions
-        self._app_id: int = 0
+        self._app_id: Optional[int] = None
         self._install_type: Optional[ApplicationIntegrationTypeLiteral] = None
 
     @classmethod
@@ -94,7 +94,7 @@ class InstallParams:
         :class:`str`
             The invite url.
         """
-        if not self._app_id:
+        if self._app_id is None:
             raise ValueError("This InstallParams instance is not linked to an application.")
         return utils.oauth_url(
             self._app_id,
@@ -585,7 +585,7 @@ class AppInfo:
         if event_webhooks_status is not MISSING:
             if event_webhooks_status is ApplicationEventWebhookStatus.disabled_by_discord:
                 raise TypeError(f"cannot set 'event_webhooks_status' to {event_webhooks_status!r}")
-            fields["event_webhooks_status"] = event_webhooks_status.value
+            fields["event_webhooks_status"] = str(event_webhooks_status.value)
 
         if event_webhooks_types is not MISSING:
             fields["event_webhooks_types"] = list(event_webhooks_types)
