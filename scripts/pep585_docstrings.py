@@ -6,6 +6,36 @@ import pathlib
 import re
 import sys
 
+CONTAINERS = {
+    "Dict": "dict",
+    "List": "list",
+    "Set": "set",
+    "Tuple": "tuple",
+    "FrozenSet": "frozenset",
+    "Sequence": "collections.abc.Sequence",
+    "Mapping": "collections.abc.Mapping",
+    "Callable": "collections.abc.Callable",
+    "Collection": "collections.abc.Collection",
+    "Coroutine": "collections.abc.Coroutine",
+    "AsyncGenerator": "collections.abc.AsyncGenerator",
+    "AsyncIterable": "collections.abc.AsyncIterable",
+    "Awaitable": "collections.abc.Awaitable",
+    "Iterable": "collections.abc.Iterable",
+    "Iterator": "collections.abc.Iterator",
+    "Generator": "collections.abc.Generator",
+    "Type": "type",
+    "Pattern": "re.Pattern",
+    "Match": "re.Match",
+}
+
+REGEXES = {re.compile(rf"\b{k}\["): v for k, v in CONTAINERS.items()}
+
+OPTIONAL = re.compile(r"Optional\[(.*)\]")
+OPTIONAL_GREEDY = re.compile(r"Optional\[(.*?)\]")
+UNION = re.compile(r"Union\[(.*?)\]")
+ANY = re.compile(r"(\||, ?|\[)Any\b")
+NONE = re.compile(r"``None``")
+
 
 def apply_replacements(s):
     # Replace Optional[A] with A | ``None`` using proper bracket matching
@@ -20,45 +50,27 @@ def apply_replacements(s):
                 bracket_count -= 1
             if bracket_count == 0:
                 inner_content = content[start_pos:i]  # Content between Optional[ and matching ]
-                inner_content = re.sub(r"Optional\[.*?\]", replace_optional, inner_content)
+                inner_content = OPTIONAL_GREEDY.sub(replace_optional, inner_content)
                 return inner_content + " | ``None``"
         # Fallback if no matching bracket found
         return content
 
-    s = re.sub(
-        r"Union\[([^]]+)\]",
-        lambda m: " | ".join([x.strip() for x in m.group(1).split(",")]),
-        s,
-    )
-    s = re.sub(r"Optional\[.*\]", replace_optional, s)
+    for _ in range(3):  # don't recurse forever
+        s = UNION.sub(
+            lambda m: " | ".join([x.strip() for x in m.group(1).split(",")]),
+            s,
+        )
+        if r"Union[" not in s:
+            break
 
-    containers = {
-        "Dict": "dict",
-        "List": "list",
-        "Set": "set",
-        "Tuple": "tuple",
-        "FrozenSet": "frozenset",
-        "Sequence": "collections.abc.Sequence",
-        "Mapping": "collections.abc.Mapping",
-        "Callable": "collections.abc.Callable",
-        "Collection": "collections.abc.Collection",
-        "Coroutine": "collections.abc.Coroutine",
-        "AsyncGenerator": "collections.abc.AsyncGenerator",
-        "AsyncIterable": "collections.abc.AsyncIterable",
-        "Awaitable": "collections.abc.Awaitable",
-        "Iterable": "collections.abc.Iterable",
-        "Iterator": "collections.abc.Iterator",
-        "Generator": "collections.abc.Generator",
-        "Type": "type",
-        "Pattern": "re.Pattern",
-        "Match": "re.Match",
-    }
-    for type_name, replacement in containers.items():
-        s = re.sub(rf"\b{type_name}\[", rf":class:`{replacement}`\\\\[", s)
+    s = OPTIONAL.sub(replace_optional, s)
 
-    s = re.sub(r"(\||, ?|\[)Any\b", r"\1:class:`~typing.Any`", s)
+    for regex, replacement in REGEXES.items():
+        s = regex.sub(rf":class:`{replacement}`\\\\[", s)
+
+    s = ANY.sub(r"\1:class:`~typing.Any`", s)
     # # reference to all None's
-    s = re.sub(r"``None``", r":obj:`None`", s)
+    s = NONE.sub(r":obj:`None`", s)
 
     return s
 
