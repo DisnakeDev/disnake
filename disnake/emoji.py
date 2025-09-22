@@ -197,7 +197,7 @@ class Emoji(_EmojiTag, AssetMixin):
         return self._state.application_id
 
     def is_guild_emoji(self) -> bool:
-        """Whether this is a guild emoji.
+        """Whether this emoji is a guild emoji.
 
         .. versionadded:: |vnext|
 
@@ -206,7 +206,7 @@ class Emoji(_EmojiTag, AssetMixin):
         return self.guild_id is not None
 
     def is_app_emoji(self) -> bool:
-        """Whether this is an application emoji.
+        """Whether this emoji is an application emoji.
 
         .. versionadded:: |vnext|
 
@@ -232,10 +232,10 @@ class Emoji(_EmojiTag, AssetMixin):
     async def delete(self, *, reason: Optional[str] = None) -> None:
         """|coro|
 
-        Deletes the custom emoji.
+        Deletes the emoji.
 
-        You must have :attr:`~Permissions.manage_guild_expressions` permission to
-        do this, if this is not an app emoji.
+        If this is not an app emoji, you must have
+        :attr:`~Permissions.manage_guild_expressions` permission to do this.
 
         Parameters
         ----------
@@ -271,10 +271,10 @@ class Emoji(_EmojiTag, AssetMixin):
     ) -> Emoji:
         """|coro|
 
-        Edits the custom emoji.
+        Edits the emoji.
 
-        You must have :attr:`~Permissions.manage_guild_expressions` permission to
-        do this, if this is not an app emoji.
+        If this is not an app emoji, you must have
+        :attr:`~Permissions.manage_guild_expressions` permission to do this.
 
         .. versionchanged:: 2.0
             The newly updated emoji is returned.
