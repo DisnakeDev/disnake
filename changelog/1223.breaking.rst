@@ -1,1 +1,1 @@
-:attr:`Emoji.guild_id` can now be ``None`` if the emoji is owned by an application. You can use :attr:`Emoji.is_guild_emoji` and :attr:`Emoji.is_app_emoji` to check if this is a Guild or App Emoji.
+:attr:`Emoji.guild_id` can now be ``None`` if the emoji is owned by an application. You can use :meth:`Emoji.is_guild_emoji` and :meth:`Emoji.is_app_emoji` to check if this is a Guild or App Emoji.
