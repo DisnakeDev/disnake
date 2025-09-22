@@ -591,10 +591,10 @@ class AutoModRule:
             If provided, must contain at least one action.
         enabled: :class:`bool`
             Whether to enable the rule.
-        exempt_roles: Iterable[:class:`abc.Snowflake`] | :obj:`None`
+        exempt_roles: :class:`~collections.abc.Iterable`\\[:class:`abc.Snowflake`] | :obj:`None`
             The rule's new exempt roles, up to 20.
             If ``[]`` or :obj:`None` is passed then all role exemptions are removed.
-        exempt_channels: Iterable[:class:`abc.Snowflake`] | :obj:`None`
+        exempt_channels: :class:`~collections.abc.Iterable`\\[:class:`abc.Snowflake`] | :obj:`None`
             The rule's new exempt channels, up to 50.
             Can also include categories, in which case all channels inside that category will be exempt.
             If ``[]`` or :obj:`None` is passed then all channel exemptions are removed.

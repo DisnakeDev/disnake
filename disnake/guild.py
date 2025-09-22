@@ -4275,7 +4275,7 @@ class Guild(Hashable):
 
         Parameters
         ----------
-        users: Iterable[:class:`abc.Snowflake`]
+        users: :class:`~collections.abc.Iterable`\\[:class:`abc.Snowflake`]
             The users to ban from the guild, up to 200.
         clean_history_duration: :class:`int` | :class:`datetime.timedelta`
             The timespan (seconds or timedelta) of messages to delete from the users

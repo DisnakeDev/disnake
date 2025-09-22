@@ -675,7 +675,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
         Parameters
         ----------
-        messages: Iterable[:class:`abc.Snowflake`]
+        messages: :class:`~collections.abc.Iterable`\\[:class:`abc.Snowflake`]
             An iterable of messages denoting which ones to bulk delete.
 
         Raises
@@ -1728,7 +1728,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         Parameters
         ----------
-        messages: Iterable[:class:`abc.Snowflake`]
+        messages: :class:`~collections.abc.Iterable`\\[:class:`abc.Snowflake`]
             An iterable of messages denoting which ones to bulk delete.
 
         Raises
@@ -2583,7 +2583,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         Parameters
         ----------
-        messages: Iterable[:class:`abc.Snowflake`]
+        messages: :class:`~collections.abc.Iterable`\\[:class:`abc.Snowflake`]
             An iterable of messages denoting which ones to bulk delete.
 
         Raises

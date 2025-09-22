@@ -2043,7 +2043,7 @@ class Connectable(Protocol):
             Whether the bot should automatically attempt
             a reconnect if a part of the handshake fails
             or the gateway goes down.
-        cls: Type[:class:`VoiceProtocol`]
+        cls: :class:`type`\\[:class:`VoiceProtocol`]
             A type that subclasses :class:`VoiceProtocol` to connect with.
             Defaults to :class:`VoiceClient`.
 

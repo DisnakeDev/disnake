@@ -561,7 +561,7 @@ class HelpCommand:
 
         Parameters
         ----------
-        commands: Iterable[:class:`Command`]
+        commands: :class:`~collections.abc.Iterable`\\[:class:`Command`]
             An iterable of commands that are getting filtered.
         sort: :class:`bool`
             Whether to sort the result.

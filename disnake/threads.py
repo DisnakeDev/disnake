@@ -514,7 +514,7 @@ class Thread(Messageable, Hashable):
 
         Parameters
         ----------
-        messages: Iterable[:class:`abc.Snowflake`]
+        messages: :class:`~collections.abc.Iterable`\\[:class:`abc.Snowflake`]
             An iterable of messages denoting which ones to bulk delete.
 
         Raises

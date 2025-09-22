@@ -555,7 +555,7 @@ class FlagConverter(metaclass=FlagsMeta):
 
         Parameters
         ----------
-        cls: Type[:class:`FlagConverter`]
+        cls: :class:`type`\\[:class:`FlagConverter`]
             The flag converter class.
         ctx: :class:`Context`
             The invocation context.

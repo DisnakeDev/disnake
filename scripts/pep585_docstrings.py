@@ -38,6 +38,10 @@ def apply_replacements(s):
         "Mapping": "~collections.abc.Mapping",
         "Callable": "~collections.abc.Callable",
         "Collection": "~collections.abc.Collection",
+        "Iterable": "~collections.abc.Iterable",
+        "Type": "type",
+        "Pattern": "~re.Pattern",
+        "Match": "~re.Match",
     }
     for type_name, replacement in containers.items():
         s = re.sub(rf"\b{type_name}\[", rf":class:`{replacement}`\\\\[", s)

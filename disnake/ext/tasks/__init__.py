@@ -394,7 +394,7 @@ class Loop(Generic[LF]):
 
         Parameters
         ----------
-        *exceptions: Type[:class:`BaseException`]
+        *exceptions: :class:`type`\\[:class:`BaseException`]
             An argument list of exception classes to handle.
 
         Raises
@@ -424,7 +424,7 @@ class Loop(Generic[LF]):
 
         Parameters
         ----------
-        *exceptions: Type[:class:`BaseException`]
+        *exceptions: :class:`type`\\[:class:`BaseException`]
             An argument list of exception classes to handle.
 
         Returns
@@ -737,7 +737,7 @@ def loop(
 
     Parameters
     ----------
-    cls: Type[:class:`Loop`]
+    cls: :class:`type`\\[:class:`Loop`]
         The loop subclass to create an instance of. If provided, the following parameters
         described below do not apply. Instead, this decorator will accept the same keywords
         as the passed cls does.

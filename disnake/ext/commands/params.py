@@ -1194,7 +1194,7 @@ def Param(
     autocomplete: :class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`, :class:`str`], :class:`~typing.Any`]
         A function that will suggest possible autocomplete options while typing.
         See :ref:`param_syntax`. Kwarg aliases: ``autocomp``.
-    channel_types: Iterable[:class:`.ChannelType`]
+    channel_types: :class:`~collections.abc.Iterable`\\[:class:`.ChannelType`]
         A list of channel types that should be allowed.
         By default these are discerned from the annotation.
     lt: :class:`float`
