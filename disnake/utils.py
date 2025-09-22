@@ -198,7 +198,8 @@ class classproperty(Generic[T_co]):
         return self.fget(owner)
 
     def __set__(self, instance, value) -> NoReturn:
-        raise AttributeError("cannot set attribute")
+        msg = "cannot set attribute"
+        raise AttributeError(msg)
 
 
 def cached_slot_property(name: str) -> Callable[[Callable[[T], T_co]], CachedSlotProperty[T, T_co]]:
@@ -551,7 +552,8 @@ def _get_mime_type_for_data(data: _BytesLike) -> str:
     elif data[0:4] == b"OggS":
         return "audio/ogg"
     else:
-        raise ValueError("Unsupported file type provided")
+        msg = "Unsupported file type provided"
+        raise ValueError(msg)
 
 
 def _bytes_to_base64_data(data: _BytesLike) -> str:
@@ -1136,7 +1138,8 @@ def as_chunks(iterator: _Iter[T], max_size: int) -> _Iter[List[T]]:
         A new iterator which yields chunks of a given size.
     """
     if max_size <= 0:
-        raise ValueError("Chunk sizes must be greater than 0.")
+        msg = "Chunk sizes must be greater than 0."
+        raise ValueError(msg)
 
     if isinstance(iterator, AsyncIterator):
         return _achunk(iterator, max_size)
@@ -1247,7 +1250,8 @@ def evaluate_annotation(
         if is_literal and not all(
             isinstance(x, (str, int, bool, type(None))) for x in evaluated_args
         ):
-            raise TypeError("Literal arguments must be of type str, int, bool, or NoneType.")
+            msg = "Literal arguments must be of type str, int, bool, or NoneType."
+            raise TypeError(msg)
 
         if origin != orig_origin:
             # we can't use `copy_with` in this case, so just skip all of the following logic
@@ -1332,9 +1336,8 @@ def get_signature_parameters(
             try:
                 next(iterator)
             except StopIteration:
-                raise ValueError(
-                    f"Expected command callback to have at least {skip} parameter(s)"
-                ) from None
+                msg = f"Expected command callback to have at least {skip} parameter(s)"
+                raise ValueError(msg) from None
 
     # eval all parameter annotations
     for name, parameter in iterator:
@@ -1480,13 +1483,16 @@ def search_directory(path: str) -> Iterator[str]:
     """
     relpath = os.path.relpath(path)  # relative and normalized
     if ".." in relpath:
-        raise ValueError("Modules outside the cwd require a package to be specified")
+        msg = "Modules outside the cwd require a package to be specified"
+        raise ValueError(msg)
 
     abspath = os.path.abspath(path)
     if not os.path.exists(relpath):
-        raise ValueError(f"Provided path '{abspath}' does not exist")
+        msg = f"Provided path '{abspath}' does not exist"
+        raise ValueError(msg)
     if not os.path.isdir(relpath):
-        raise ValueError(f"Provided path '{abspath}' is not a directory")
+        msg = f"Provided path '{abspath}' is not a directory"
+        raise ValueError(msg)
 
     prefix = relpath.replace(os.sep, ".")
     if prefix in ("", "."):

@@ -183,16 +183,19 @@ class EnumMeta(type):
         try:
             return cls._enum_value_map_[value]
         except (KeyError, TypeError):
-            raise ValueError(f"{value!r} is not a valid {cls.__name__}") from None
+            msg = f"{value!r} is not a valid {cls.__name__}"
+            raise ValueError(msg) from None
 
     def __getitem__(cls, key: str) -> Any:
         return cls._enum_member_map_[key]
 
     def __setattr__(cls, name: str, value: Any) -> NoReturn:
-        raise TypeError("Enums are immutable.")
+        msg = "Enums are immutable."
+        raise TypeError(msg)
 
     def __delattr__(cls, attr) -> NoReturn:
-        raise TypeError("Enums are immutable")
+        msg = "Enums are immutable"
+        raise TypeError(msg)
 
     def __instancecheck__(self, instance) -> bool:
         # isinstance(x, Y)

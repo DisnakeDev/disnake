@@ -94,11 +94,13 @@ class Modal:
         timeout: float = 600,
     ) -> None:
         if timeout is None:  # pyright: ignore[reportUnnecessaryComparison]
-            raise ValueError("Timeout may not be None")
+            msg = "Timeout may not be None"
+            raise ValueError(msg)
 
         items = normalize_components(components)
         if len(items) > 5:
-            raise ValueError("Maximum number of components exceeded.")
+            msg = "Maximum number of components exceeded."
+            raise ValueError(msg)
 
         self.title: str = title
         self.custom_id: str = os.urandom(16).hex() if custom_id is MISSING else custom_id
@@ -145,7 +147,8 @@ class Modal:
             component = [component]
 
         if len(self.components) + len(component) >= 5:
-            raise ValueError("Maximum number of components exceeded.")
+            msg = "Maximum number of components exceeded."
+            raise ValueError(msg)
 
         for c in component:
             c = ensure_ui_component(c)
