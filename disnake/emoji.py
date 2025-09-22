@@ -242,7 +242,7 @@ class Emoji(_EmojiTag, AssetMixin):
         reason: Optional[:class:`str`]
             The reason for deleting this emoji. Shows up on the audit log.
 
-            Only applies to guild emojis, not app emojis.
+            Only applies to emojis that belong to a :class:`.Guild`.
 
         Raises
         ------
@@ -290,11 +290,11 @@ class Emoji(_EmojiTag, AssetMixin):
             non-subscription roles, and emojis can't be converted between premium and non-premium
             after creation.
 
-            Only applies to guild emojis, not app emojis.
+            Only applies to emojis that belong to a :class:`.Guild`.
         reason: Optional[:class:`str`]
             The reason for editing this emoji. Shows up on the audit log.
 
-            Only applies to guild emojis, not app emojis.
+            Only applies to emojis that belong to a :class:`.Guild`.
 
         Raises
         ------
