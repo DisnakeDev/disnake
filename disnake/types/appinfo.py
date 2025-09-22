@@ -12,6 +12,7 @@ from .user import User
 
 # (also called "installation context", which seems more accurate)
 ApplicationIntegrationType = Literal[0, 1]  # GUILD_INSTALL, USER_INSTALL
+ApplicationEventWebhookStatus = Literal[0, 1, 2]  # disabled, enabled, disabled by Discord
 
 
 class BaseAppInfo(TypedDict):
@@ -57,7 +58,7 @@ class AppInfo(BaseAppInfo):
     redirect_uris: NotRequired[List[str]]
     interactions_endpoint_url: NotRequired[Optional[str]]
     event_webhooks_url: NotRequired[Optional[str]]
-    event_webhooks_status: NotRequired[str]
+    event_webhooks_status: NotRequired[ApplicationEventWebhookStatus]
     event_webhooks_type: NotRequired[List[str]]
     # values in this dict generally shouldn't be null, but they can be empty dicts
     integration_types_config: NotRequired[Dict[str, ApplicationIntegrationTypeConfiguration]]
@@ -87,5 +88,5 @@ class EditAppInfo(TypedDict, total=False):
     interactions_endpoint_url: Optional[str]
     tags: Optional[List[str]]
     event_webhooks_url: Optional[str]
-    event_webhooks_status: str
+    event_webhooks_status: ApplicationEventWebhookStatus
     event_webhooks_types: Optional[List[str]]

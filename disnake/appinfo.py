@@ -539,17 +539,15 @@ class AppInfo:
         if guild_install_type_config is not MISSING or user_install_type_config is not MISSING:
             integration_types_config: Dict[str, ApplicationIntegrationTypeConfigurationPayload] = {}
 
-            if guild_install_type_config is not None:
-                if guild_install_type_config is MISSING:
-                    guild_install_type_config = self.guild_install_type_config
-                if guild_install_type_config:
-                    integration_types_config["0"] = guild_install_type_config.to_dict()
+            if guild_install_type_config is MISSING:
+                guild_install_type_config = self.guild_install_type_config
+            if guild_install_type_config:
+                integration_types_config["0"] = guild_install_type_config.to_dict()
 
-            if user_install_type_config is not None:
-                if user_install_type_config is MISSING:
-                    user_install_type_config = self.user_install_type_config
-                if user_install_type_config:
-                    integration_types_config["1"] = user_install_type_config.to_dict()
+            if user_install_type_config is MISSING:
+                user_install_type_config = self.user_install_type_config
+            if user_install_type_config:
+                integration_types_config["1"] = user_install_type_config.to_dict()
 
             fields["integration_types_config"] = integration_types_config
 
@@ -585,7 +583,7 @@ class AppInfo:
         if event_webhooks_status is not MISSING:
             if event_webhooks_status is ApplicationEventWebhookStatus.disabled_by_discord:
                 raise ValueError(f"cannot set 'event_webhooks_status' to {event_webhooks_status!r}")
-            fields["event_webhooks_status"] = str(event_webhooks_status.value)
+            fields["event_webhooks_status"] = event_webhooks_status.value
 
         if event_webhooks_types is not MISSING:
             fields["event_webhooks_types"] = (
