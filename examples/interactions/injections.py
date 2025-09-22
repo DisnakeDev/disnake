@@ -116,8 +116,7 @@ async def get_game_user(
 
     game_user: Optional[GameUser] = await db.search_game_user(username=user, server=server)
     if game_user is None:
-        msg = f"User with username {user!r} could not be found"
-        raise commands.CommandError(msg)
+        raise commands.CommandError(f"User with username {user!r} could not be found")
 
     return game_user
 

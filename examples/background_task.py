@@ -32,8 +32,7 @@ class MyClient(disnake.Client):
 
         channel = self.get_channel(CHANNEL_ID)
         if not isinstance(channel, disnake.TextChannel):
-            msg = "Invalid channel"
-            raise TypeError(msg)
+            raise TypeError("Invalid channel")
 
         self.channel = channel
 
