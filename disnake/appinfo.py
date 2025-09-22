@@ -95,7 +95,8 @@ class InstallParams:
             The invite url.
         """
         if self._app_id is None:
-            raise ValueError("This InstallParams instance is not linked to an application.")
+            msg = "This InstallParams instance is not linked to an application."
+            raise ValueError(msg)
         return utils.oauth_url(
             self._app_id,
             scopes=self.scopes,
@@ -548,7 +549,8 @@ class AppInfo:
 
         if install_params is not MISSING:
             if custom_install_url is not MISSING:
-                raise ValueError("cannot provide both 'install_params' and 'custom_install_url'")
+                msg = "cannot provide both 'install_params' and 'custom_install_url'"
+                raise ValueError(msg)
             fields["install_params"] = install_params.to_dict() if install_params else None
 
         if guild_install_type_config is not MISSING or user_install_type_config is not MISSING:
@@ -586,7 +588,8 @@ class AppInfo:
 
         if event_webhooks_status is not MISSING:
             if event_webhooks_status is ApplicationEventWebhookStatus.disabled_by_discord:
-                raise ValueError(f"cannot set 'event_webhooks_status' to {event_webhooks_status!r}")
+                msg = f"cannot set 'event_webhooks_status' to {event_webhooks_status!r}"
+                raise ValueError(msg)
             fields["event_webhooks_status"] = event_webhooks_status.value
 
         if event_webhooks_types is not MISSING:
