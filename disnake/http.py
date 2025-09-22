@@ -100,7 +100,8 @@ def _workaround_set_api_version(version: Literal[9, 10]) -> None:
         This must be ran **before** connecting to the gateway.
     """
     if version not in (9, 10):
-        raise TypeError("version must be either 9 or 10")
+        msg = "version must be either 9 or 10"
+        raise TypeError(msg)
 
     global _API_VERSION  # noqa: PLW0603
     _API_VERSION = version
@@ -440,7 +441,8 @@ class HTTPClient:
 
                 raise HTTPException(response, data)
 
-            raise RuntimeError("Unreachable code in HTTP handling")
+            msg = "Unreachable code in HTTP handling"
+            raise RuntimeError(msg)
 
     async def get_from_cdn(self, url: str) -> bytes:
         async with self.__session.get(url) as resp:
@@ -474,7 +476,8 @@ class HTTPClient:
         except HTTPException as exc:
             self.token = old_token
             if exc.status == 401:
-                raise LoginFailure("Improper token has been passed.") from exc
+                msg = "Improper token has been passed."
+                raise LoginFailure(msg) from exc
             raise
 
         return data
