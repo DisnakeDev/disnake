@@ -487,7 +487,7 @@ class AppInfo:
         install_params: Optional[:class:`InstallParams`]
             The installation parameters for this application.
 
-            Cannot be provided with ``custom_install_url``.
+            If provided with ``custom_install_url``, must be set to ``None``.
 
             It's recommended to use :attr:`guild_install_type_config` and :attr:`user_install_type_config`
             instead of this parameter, as this parameter is soft-deprecated by Discord.
@@ -548,7 +548,7 @@ class AppInfo:
             fields["role_connections_verification_url"] = role_connections_verification_url
 
         if install_params is not MISSING:
-            if custom_install_url is not MISSING:
+            if custom_install_url is not MISSING and install_params is not None:
                 msg = "cannot provide both 'install_params' and 'custom_install_url'"
                 raise ValueError(msg)
             fields["install_params"] = install_params.to_dict() if install_params else None
