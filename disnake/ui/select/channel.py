@@ -66,7 +66,7 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
     channel_types: :class:`list`\\[:class:`.ChannelType`] | :obj:`None`
         The list of channel types that can be selected in this select menu.
         Defaults to all types (i.e. :obj:`None`).
-    default_values: :class:`~collections.abc.Sequence`\\[:class:`.abc.GuildChannel` | :class:`.Thread` | :class:`.abc.PrivateChannel` | :class:`.PartialMessageable` | :class:`.SelectDefaultValue` | :class:`.Object`] | :obj:`None`
+    default_values: :class:`collections.abc.Sequence`\\[:class:`.abc.GuildChannel` | :class:`.Thread` | :class:`.abc.PrivateChannel` | :class:`.PartialMessageable` | :class:`.SelectDefaultValue` | :class:`.Object`] | :obj:`None`
         The list of values (channels) that are selected by default.
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
@@ -247,7 +247,7 @@ def channel_select(
 
     Parameters
     ----------
-    cls: :class:`~collections.abc.Callable`\\[..., :class:`ChannelSelect`]
+    cls: :class:`collections.abc.Callable`\\[..., :class:`ChannelSelect`]
         A callable (may be a :class:`ChannelSelect` subclass) to create a new instance of this component.
         If provided, the other parameters described below do not apply.
         Instead, this decorator will accept the same keywords as the passed callable/class does.
@@ -267,7 +267,7 @@ def channel_select(
     channel_types: :class:`list`\\[:class:`.ChannelType`] | :obj:`None`
         The list of channel types that can be selected in this select menu.
         Defaults to all types (i.e. :obj:`None`).
-    default_values: :class:`~collections.abc.Sequence`\\[:class:`.abc.GuildChannel` | :class:`.Thread` | :class:`.abc.PrivateChannel` | :class:`.PartialMessageable` | :class:`.SelectDefaultValue` | :class:`.Object`] | :obj:`None`
+    default_values: :class:`collections.abc.Sequence`\\[:class:`.abc.GuildChannel` | :class:`.Thread` | :class:`.abc.PrivateChannel` | :class:`.PartialMessageable` | :class:`.SelectDefaultValue` | :class:`.Object`] | :obj:`None`
         The list of values (channels) that are selected by default.
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 

@@ -62,7 +62,7 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, R
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select is disabled.
-    default_values: :class:`~collections.abc.Sequence`\\[:class:`~disnake.User` | :class:`.Member` | :class:`.Role` | :class:`.SelectDefaultValue`] | :obj:`None`
+    default_values: :class:`collections.abc.Sequence`\\[:class:`~disnake.User` | :class:`.Member` | :class:`.Role` | :class:`.SelectDefaultValue`] | :obj:`None`
         The list of values (users/roles) that are selected by default.
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
@@ -221,7 +221,7 @@ def mentionable_select(
 
     Parameters
     ----------
-    cls: :class:`~collections.abc.Callable`\\[..., :class:`MentionableSelect`]
+    cls: :class:`collections.abc.Callable`\\[..., :class:`MentionableSelect`]
         A callable (may be a :class:`MentionableSelect` subclass) to create a new instance of this component.
         If provided, the other parameters described below do not apply.
         Instead, this decorator will accept the same keywords as the passed callable/class does.
@@ -238,7 +238,7 @@ def mentionable_select(
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select is disabled. Defaults to ``False``.
-    default_values: :class:`~collections.abc.Sequence`\\[:class:`~disnake.User` | :class:`.Member` | :class:`.Role` | :class:`.SelectDefaultValue`] | :obj:`None`
+    default_values: :class:`collections.abc.Sequence`\\[:class:`~disnake.User` | :class:`.Member` | :class:`.Role` | :class:`.SelectDefaultValue`] | :obj:`None`
         The list of values (users/roles) that are selected by default.
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 

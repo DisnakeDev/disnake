@@ -202,7 +202,7 @@ class CheckAnyFailure(CheckFailure):
     ----------
     errors: :class:`list`\\[:class:`CheckFailure`]
         A list of errors that were caught during execution.
-    checks: :class:`list`\\[:class:`~collections.abc.Callable`\\[[:class:`Context` | :class:`disnake.ApplicationCommandInteraction`], :class:`bool`]]
+    checks: :class:`list`\\[:class:`collections.abc.Callable`\\[[:class:`Context` | :class:`disnake.ApplicationCommandInteraction`], :class:`bool`]]
         A list of check predicates that failed.
     """
 

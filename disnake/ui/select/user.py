@@ -62,7 +62,7 @@ class UserSelect(BaseSelect[UserSelectMenu, "Union[User, Member]", V_co]):
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select is disabled.
-    default_values: :class:`~collections.abc.Sequence`\\[:class:`~disnake.User` | :class:`.Member` | :class:`.SelectDefaultValue` | :class:`.Object`] | :obj:`None`
+    default_values: :class:`collections.abc.Sequence`\\[:class:`~disnake.User` | :class:`.Member` | :class:`.SelectDefaultValue` | :class:`.Object`] | :obj:`None`
         The list of values (users/members) that are selected by default.
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
@@ -208,7 +208,7 @@ def user_select(
 
     Parameters
     ----------
-    cls: :class:`~collections.abc.Callable`\\[..., :class:`UserSelect`]
+    cls: :class:`collections.abc.Callable`\\[..., :class:`UserSelect`]
         A callable (may be a :class:`UserSelect` subclass) to create a new instance of this component.
         If provided, the other parameters described below do not apply.
         Instead, this decorator will accept the same keywords as the passed callable/class does.
@@ -225,7 +225,7 @@ def user_select(
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select is disabled. Defaults to ``False``.
-    default_values: :class:`~collections.abc.Sequence`\\[:class:`~disnake.User` | :class:`.Member` | :class:`.SelectDefaultValue` | :class:`.Object`] | :obj:`None`
+    default_values: :class:`collections.abc.Sequence`\\[:class:`~disnake.User` | :class:`.Member` | :class:`.SelectDefaultValue` | :class:`.Object`] | :obj:`None`
         The list of values (users/members) that are selected by default.
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 

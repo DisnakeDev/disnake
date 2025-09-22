@@ -319,7 +319,7 @@ def button(
 
     Parameters
     ----------
-    cls: :class:`~collections.abc.Callable`\\[..., :class:`Button`]
+    cls: :class:`collections.abc.Callable`\\[..., :class:`Button`]
         A callable (may be a :class:`Button` subclass) to create a new instance of this component.
         If provided, the other parameters described below do not apply.
         Instead, this decorator will accept the same keywords as the passed callable/class does.

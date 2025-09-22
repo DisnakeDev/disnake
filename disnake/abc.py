@@ -1574,7 +1574,7 @@ class Messageable:
         files: :class:`list`\\[:class:`~disnake.File`]
             A list of files to upload. Must be a maximum of 10.
             This cannot be mixed with the ``file`` parameter.
-        stickers: :class:`~collections.abc.Sequence`\\[:class:`.GuildSticker` | :class:`.StandardSticker` | :class:`.StickerItem`]
+        stickers: :class:`collections.abc.Sequence`\\[:class:`.GuildSticker` | :class:`.StandardSticker` | :class:`.StickerItem`]
             A list of stickers to upload. Must be a maximum of 3.
 
             .. versionadded:: 2.0

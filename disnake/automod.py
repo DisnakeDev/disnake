@@ -242,14 +242,14 @@ class AutoModTriggerMetadata:
 
     Attributes
     ----------
-    keyword_filter: :class:`~collections.abc.Sequence`\\[:class:`str`] | :obj:`None`
+    keyword_filter: :class:`collections.abc.Sequence`\\[:class:`str`] | :obj:`None`
         The list of keywords to check for, up to 1000 keywords. Used with :attr:`AutoModTriggerType.keyword`.
 
         See :ddocs:`api docs <resources/auto-moderation#auto-moderation-rule-object-keyword-matching-strategies>`
         for details about how keyword matching works.
         Each keyword must be 60 characters or less.
 
-    regex_patterns: :class:`~collections.abc.Sequence`\\[:class:`str`] | :obj:`None`
+    regex_patterns: :class:`collections.abc.Sequence`\\[:class:`str`] | :obj:`None`
         The list of regular expressions to check for. Used with :attr:`AutoModTriggerType.keyword`.
 
         A maximum of 10 regexes can be added, each with up to 260 characters.
@@ -263,7 +263,7 @@ class AutoModTriggerMetadata:
     presets: :class:`AutoModKeywordPresets` | :obj:`None`
         The keyword presets. Used with :attr:`AutoModTriggerType.keyword_preset`.
 
-    allow_list: :class:`~collections.abc.Sequence`\\[:class:`str`] | :obj:`None`
+    allow_list: :class:`collections.abc.Sequence`\\[:class:`str`] | :obj:`None`
         The keywords that should be exempt from a preset.
         Used with :attr:`AutoModTriggerType.keyword` (up to 100 exemptions) and :attr:`AutoModTriggerType.keyword_preset` (up to 1000 exemptions).
 
@@ -586,15 +586,15 @@ class AutoModRule:
             The rule's new event type.
         trigger_metadata: :class:`AutoModTriggerMetadata`
             The rule's new associated trigger metadata.
-        actions: :class:`~collections.abc.Sequence`\\[:class:`AutoModBlockMessageAction` | :class:`AutoModSendAlertAction` | :class:`AutoModTimeoutAction` | :class:`AutoModAction`]
+        actions: :class:`collections.abc.Sequence`\\[:class:`AutoModBlockMessageAction` | :class:`AutoModSendAlertAction` | :class:`AutoModTimeoutAction` | :class:`AutoModAction`]
             The rule's new actions.
             If provided, must contain at least one action.
         enabled: :class:`bool`
             Whether to enable the rule.
-        exempt_roles: :class:`~collections.abc.Iterable`\\[:class:`abc.Snowflake`] | :obj:`None`
+        exempt_roles: :class:`collections.abc.Iterable`\\[:class:`abc.Snowflake`] | :obj:`None`
             The rule's new exempt roles, up to 20.
             If ``[]`` or :obj:`None` is passed then all role exemptions are removed.
-        exempt_channels: :class:`~collections.abc.Iterable`\\[:class:`abc.Snowflake`] | :obj:`None`
+        exempt_channels: :class:`collections.abc.Iterable`\\[:class:`abc.Snowflake`] | :obj:`None`
             The rule's new exempt channels, up to 50.
             Can also include categories, in which case all channels inside that category will be exempt.
             If ``[]`` or :obj:`None` is passed then all channel exemptions are removed.

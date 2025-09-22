@@ -117,7 +117,7 @@ class InvokableApplicationCommand(ABC):
         The coroutine that is executed when the command is called.
     cog: :class:`Cog` | :obj:`None`
         The cog that this command belongs to. :obj:`None` if there isn't one.
-    checks: :class:`list`\\[:class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
+    checks: :class:`list`\\[:class:`collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
         A list of predicates that verifies if the command could be executed
         with the given :class:`.ApplicationCommandInteraction` as the sole parameter. If an exception
         is necessary to be thrown to signal failure, then one inherited from

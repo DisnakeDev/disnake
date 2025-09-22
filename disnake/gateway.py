@@ -468,10 +468,10 @@ class DiscordWebSocket:
         ----------
         event: :class:`str`
             The event name in all upper case to wait for.
-        predicate: :class:`~collections.abc.Callable`\\[[:class:`dict`\\[:class:`str`, :class:`~typing.Any`]], :class:`bool`]
+        predicate: :class:`collections.abc.Callable`\\[[:class:`dict`\\[:class:`str`, :class:`~typing.Any`]], :class:`bool`]
             A function that takes a data parameter to check for event
             properties. The data parameter is the 'd' key in the JSON message.
-        result: :class:`~collections.abc.Callable`\\[[:class:`dict`\\[:class:`str`, :class:`~typing.Any`]], T] | :obj:`None`
+        result: :class:`collections.abc.Callable`\\[[:class:`dict`\\[:class:`str`, :class:`~typing.Any`]], T] | :obj:`None`
             A function that takes the same data parameter and executes to send
             the result to the future. If :obj:`None`, returns the data.
 

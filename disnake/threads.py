@@ -514,7 +514,7 @@ class Thread(Messageable, Hashable):
 
         Parameters
         ----------
-        messages: :class:`~collections.abc.Iterable`\\[:class:`abc.Snowflake`]
+        messages: :class:`collections.abc.Iterable`\\[:class:`abc.Snowflake`]
             An iterable of messages denoting which ones to bulk delete.
 
         Raises
@@ -583,7 +583,7 @@ class Thread(Messageable, Hashable):
         limit: :class:`int` | :obj:`None`
             The number of messages to search through. This is not the number
             of messages that will be deleted, though it can be.
-        check: :class:`~collections.abc.Callable`\\[[:class:`Message`], :class:`bool`]
+        check: :class:`collections.abc.Callable`\\[[:class:`Message`], :class:`bool`]
             The function used to check if a message should be deleted.
             It must take a :class:`Message` as its sole parameter.
         before: :class:`abc.Snowflake` | :class:`datetime.datetime` | :obj:`None`
@@ -716,7 +716,7 @@ class Thread(Messageable, Hashable):
 
             .. versionadded:: 2.6
 
-        applied_tags: :class:`~collections.abc.Sequence`\\[:class:`abc.Snowflake`]
+        applied_tags: :class:`collections.abc.Sequence`\\[:class:`abc.Snowflake`]
             The new tags of the thread. Maximum of 5.
             Can also be used to reorder existing tags.
 

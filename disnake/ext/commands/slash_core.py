@@ -144,7 +144,7 @@ class SubCommandGroup(InvokableApplicationCommand):
         The coroutine that is executed when the command group is invoked.
     cog: :class:`Cog` | :obj:`None`
         The cog that this group belongs to. :obj:`None` if there isn't one.
-    checks: :class:`list`\\[:class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
+    checks: :class:`list`\\[:class:`collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
         A list of predicates that verifies if the group could be executed
         with the given :class:`.ApplicationCommandInteraction` as the sole parameter. If an exception
         is necessary to be thrown to signal failure, then one inherited from
@@ -222,7 +222,7 @@ class SubCommandGroup(InvokableApplicationCommand):
 
         Returns
         -------
-        :class:`~collections.abc.Callable`\\[..., :class:`SubCommand`]
+        :class:`collections.abc.Callable`\\[..., :class:`SubCommand`]
             A decorator that converts the provided method into a SubCommand, adds it to the bot, then returns it.
         """
 
@@ -267,7 +267,7 @@ class SubCommand(InvokableApplicationCommand):
         The coroutine that is executed when the subcommand is called.
     cog: :class:`Cog` | :obj:`None`
         The cog that this subcommand belongs to. :obj:`None` if there isn't one.
-    checks: :class:`list`\\[:class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
+    checks: :class:`list`\\[:class:`collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
         A list of predicates that verifies if the subcommand could be executed
         with the given :class:`.ApplicationCommandInteraction` as the sole parameter. If an exception
         is necessary to be thrown to signal failure, then one inherited from
@@ -416,7 +416,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         The coroutine that is executed when the command is called.
     cog: :class:`Cog` | :obj:`None`
         The cog that this command belongs to. :obj:`None` if there isn't one.
-    checks: :class:`list`\\[:class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
+    checks: :class:`list`\\[:class:`collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
         A list of predicates that verifies if the command could be executed
         with the given :class:`.ApplicationCommandInteraction` as the sole parameter. If an exception
         is necessary to be thrown to signal failure, then one inherited from
@@ -591,7 +591,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
 
         Returns
         -------
-        :class:`~collections.abc.Callable`\\[..., :class:`SubCommand`]
+        :class:`collections.abc.Callable`\\[..., :class:`SubCommand`]
             A decorator that converts the provided method into a :class:`SubCommand`, adds it to the bot, then returns it.
         """
 
@@ -639,7 +639,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
 
         Returns
         -------
-        :class:`~collections.abc.Callable`\\[..., :class:`SubCommandGroup`]
+        :class:`collections.abc.Callable`\\[..., :class:`SubCommandGroup`]
             A decorator that converts the provided method into a :class:`SubCommandGroup`, adds it to the bot, then returns it.
         """
 
@@ -869,7 +869,7 @@ def slash_command(
 
     Returns
     -------
-    :class:`~collections.abc.Callable`\\[..., :class:`InvokableSlashCommand`]
+    :class:`collections.abc.Callable`\\[..., :class:`InvokableSlashCommand`]
         A decorator that converts the provided method into an InvokableSlashCommand and returns it.
     """
 
