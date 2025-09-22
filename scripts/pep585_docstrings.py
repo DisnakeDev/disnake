@@ -1,8 +1,10 @@
 """Update docstrings to use pep 585 and pep 602 style type hints for documentation."""
+
 # SPDX-License-Identifier: MIT
 
-import os
+import pathlib
 import re
+import sys
 
 
 def apply_replacements(s):
@@ -24,7 +26,9 @@ def apply_replacements(s):
         return content
 
     s = re.sub(
-        r"Union\[([^]]+)\]", lambda m: " | ".join([x.strip() for x in m.group(1).split(",")]), s
+        r"Union\[([^]]+)\]",
+        lambda m: " | ".join([x.strip() for x in m.group(1).split(",")]),
+        s,
     )
     s = re.sub(r"Optional\[.*\]", replace_optional, s)
 
@@ -75,9 +79,10 @@ def process_file(file_path) -> None:
 
 
 if __name__ == "__main__":
-    for root, _dirs, files in os.walk("disnake"):
-        for file in files:
-            if file.endswith(".py"):
-                path = os.path.join(root, file)
-                print(f"Processing {path}")
-                process_file(path)
+    if sys.argv[1:]:
+        paths = [pathlib.Path(p) for p in sys.argv[1:]]
+    else:
+        paths = [pathlib.Path("disnake")]
+    for path in paths:
+        for file_path in path.glob("**/*.py"):
+            process_file(file_path)
