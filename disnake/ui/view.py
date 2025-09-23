@@ -156,15 +156,17 @@ class View:
         while True:
             # Guard just in case someone changes the value of the timeout at runtime
             if self.timeout is None:
-                return None
+                return
 
             if self.__timeout_expiry is None:
-                return self._dispatch_timeout()
+                self._dispatch_timeout()
+                return
 
             # Check if we've elapsed our currently set timeout
             now = time.monotonic()
             if now >= self.__timeout_expiry:
-                return self._dispatch_timeout()
+                self._dispatch_timeout()
+                return
 
             # Wait N seconds to see if timeout data has been refreshed
             await asyncio.sleep(self.__timeout_expiry - now)
