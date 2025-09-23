@@ -77,8 +77,6 @@ if TYPE_CHECKING:
         async def __call__(self, *args: Any) -> None: ...
 
 
-_log = logging.getLogger(__name__)
-
 __all__ = (
     "DiscordWebSocket",
     "KeepAliveHandler",
@@ -86,6 +84,10 @@ __all__ = (
     "DiscordVoiceWebSocket",
     "ReconnectWebSocket",
 )
+
+_VOICE_VERSION = 8
+
+_log = logging.getLogger(__name__)
 
 
 class ReconnectWebSocket(Exception):
@@ -975,7 +977,7 @@ class DiscordVoiceWebSocket:
         hook: Optional[HookFunc] = None,
     ) -> Self:
         """Creates a voice websocket for the :class:`VoiceClient`."""
-        gateway = f"wss://{client.endpoint}/?v=8"
+        gateway = f"wss://{client.endpoint}/?v={_VOICE_VERSION}"
         http = client._state.http
         socket = await http.ws_connect(gateway, compress=15)
         ws = cls(socket, loop=client.loop, hook=hook)
