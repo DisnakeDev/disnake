@@ -47,6 +47,7 @@ if TYPE_CHECKING:
         PresenceUpdateCommand,
         RequestMembersCommand,
         ResumeCommand,
+        VoiceHeartbeatData,
         VoiceIdentifyCommand,
         VoicePayload,
         VoiceReadyPayload,
@@ -284,7 +285,7 @@ class HeartbeatWebSocket(Protocol):
 
     async def send_heartbeat(self, data: HeartbeatCommand) -> None: ...
 
-    def get_heartbeat_data(self) -> Optional[int]: ...
+    def get_heartbeat_data(self) -> Union[Optional[int], VoiceHeartbeatData]: ...
 
 
 class DiscordWebSocket:
@@ -909,7 +910,10 @@ class DiscordVoiceWebSocket:
     ) -> None:
         self.ws: aiohttp.ClientWebSocketResponse = socket
         self.loop: asyncio.AbstractEventLoop = loop
+
         self._keep_alive: Optional[VoiceKeepAliveHandler] = None
+        self.sequence: int = -1
+
         self._close_code: Optional[int] = None
         self.secret_key: Optional[List[int]] = None
         self.thread_id: int = threading.get_ident()
@@ -930,8 +934,8 @@ class DiscordVoiceWebSocket:
 
     send_heartbeat = send_as_json
 
-    def get_heartbeat_data(self) -> Optional[int]:
-        return int(time.time() * 1000)
+    def get_heartbeat_data(self) -> VoiceHeartbeatData:
+        return {"t": int(time.time() * 1000), "seq_ack": self.sequence}
 
     async def resume(self) -> None:
         state = self._connection
@@ -941,6 +945,7 @@ class DiscordVoiceWebSocket:
                 "token": state.token,
                 "server_id": str(state.server_id),
                 "session_id": state.session_id,
+                "seq_ack": self.sequence,
             },
         }
         await self.send_as_json(payload)
@@ -967,7 +972,7 @@ class DiscordVoiceWebSocket:
         hook: Optional[HookFunc] = None,
     ) -> Self:
         """Creates a voice websocket for the :class:`VoiceClient`."""
-        gateway = f"wss://{client.endpoint}/?v=4"
+        gateway = f"wss://{client.endpoint}/?v=8"
         http = client._state.http
         socket = await http.ws_connect(gateway, compress=15)
         ws = cls(socket, loop=client.loop, hook=hook)
@@ -1011,6 +1016,10 @@ class DiscordVoiceWebSocket:
         _log.debug("Voice websocket frame received: %s", msg)
         op = msg["op"]
         data: Any = msg.get("d")
+
+        seq = msg.get("seq")
+        if seq is not None:
+            self.sequence = seq
 
         if op == self.READY:
             await self.initial_connection(data)
