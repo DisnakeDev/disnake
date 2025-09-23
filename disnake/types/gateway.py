@@ -165,6 +165,9 @@ class VoicePayload(TypedDict):
     d: Any
 
 
+# voice opcode 2
+
+
 class VoiceReadyPayload(TypedDict):
     ssrc: int
     ip: str
@@ -172,9 +175,32 @@ class VoiceReadyPayload(TypedDict):
     modes: List[str]
 
 
+# voice opcode 4
+
+
 class VoiceSessionDescriptionPayload(TypedDict):
     mode: SupportedModes
     secret_key: List[int]
+
+
+# voice opcode 6
+
+
+class VoiceHeartbeatAckPayload(TypedDict):
+    t: int
+
+
+# voice opcode 8
+
+
+class VoiceHelloPayload(TypedDict):
+    heartbeat_interval: int
+
+
+# voice opcode 9
+
+
+VoiceResumedPayload = None
 
 
 #####

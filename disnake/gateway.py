@@ -883,7 +883,7 @@ class DiscordVoiceWebSocket:
     HELLO
         Receive only. Tells you that your websocket connection was acknowledged.
     RESUMED
-        Sent only. Tells you that your RESUME request has succeeded.
+        Receive only. Tells you that your RESUME request has succeeded.
     CLIENT_DISCONNECT
         Receive only.  Indicates a user has disconnected from voice.
     """
