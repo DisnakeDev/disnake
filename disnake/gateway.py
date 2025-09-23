@@ -1133,20 +1133,21 @@ class DiscordVoiceWebSocket:
         if len(msg) == 0:
             return  # this should not happen.
 
-        op = msg[0]
+        self.sequence = int.from_bytes(msg[0:2], "big", signed=False)
+        op = msg[2]
         # TODO: consider memoryviews
         if op == self.DAVE_MLS_EXTERNAL_SENDER:
-            self.dave.handle_mls_external_sender(msg[1:])
+            self.dave.handle_mls_external_sender(msg[3:])
         elif op == self.DAVE_MLS_PROPOSALS:
-            await self.dave.handle_mls_proposals(msg[1:])
+            await self.dave.handle_mls_proposals(msg[3:])
         elif op == self.DAVE_MLS_ANNOUNCE_COMMIT_TRANSITION:
             # XXX: assuming big endian, this doesn't really seem to be documented
-            transition_id = int.from_bytes(msg[1:3], "big", signed=False)
-            await self.dave.handle_mls_announce_commit_transition(transition_id, msg[3:])
+            transition_id = int.from_bytes(msg[3:5], "big", signed=False)
+            await self.dave.handle_mls_announce_commit_transition(transition_id, msg[5:])
         elif op == self.DAVE_MLS_WELCOME:
             # XXX: assuming big endian, this doesn't really seem to be documented
-            transition_id = int.from_bytes(msg[1:3], "big", signed=False)
-            await self.dave.handle_mls_welcome(transition_id, msg[3:])
+            transition_id = int.from_bytes(msg[3:5], "big", signed=False)
+            await self.dave.handle_mls_welcome(transition_id, msg[5:])
 
     async def initial_connection(self, data: VoiceReadyPayload) -> None:
         state = self._connection
