@@ -1283,9 +1283,10 @@ class DaveState:
 
     async def reinit_state(self, version: int) -> None:
         if version > self.max_version:
-            raise RuntimeError(
+            msg = (
                 f"DAVE version {version} requested, maximum supported version is {self.max_version}"
             )
+            raise RuntimeError(msg)
 
         _log.debug("re-initializing with DAVE version %d", version)
 
