@@ -1036,6 +1036,8 @@ class DiscordVoiceWebSocket:
                 self._keep_alive.ack()
         elif op == self.RESUMED:
             self._resumed.set()
+            # also set _ready as a general indicator of the session being valid
+            self._ready.set()
         elif op == self.SESSION_DESCRIPTION:
             self._connection.mode = data["mode"]
             await self.load_secret_key(data)

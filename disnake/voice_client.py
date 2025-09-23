@@ -451,7 +451,8 @@ class VoiceClient(VoiceProtocol):
                             break
                         else:
                             continue
-                    elif exc.code == 4015 and self.secret_key:
+                    # only attempt to resume if the session is valid/established
+                    elif exc.code == 4015 and self.ws._ready.is_set():
                         _log.info("Disconnected from voice, trying to resume session...")
                         self._connected.clear()
                         try:
