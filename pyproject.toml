@@ -166,7 +166,8 @@ ignore = [
     ## flake8-self
     "SLF", # private member access, this is unlikely to be enabled.
     ## flake8-simplify
-    "SIM", # TODO: enable, most have autofixes.
+    "SIM105", # TODO: enable, most have autofixes.
+    "SIM108", # too opinionated.
     ## flake8-tidy-imports
     "TID252", # we still use relative imports
     ## flake8-todos

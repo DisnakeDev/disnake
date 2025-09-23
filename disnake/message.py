@@ -1231,9 +1231,12 @@ class Message(Hashable):
             else None
         )
 
-        if thread_data := data.get("thread"):
-            if not self.thread and isinstance(self.guild, Guild):
-                self.guild._store_thread(thread_data)
+        if (
+            (thread_data := data.get("thread"))
+            and not self.thread
+            and isinstance(self.guild, Guild)
+        ):
+            self.guild._store_thread(thread_data)
 
         self._role_subscription_data: Optional[RoleSubscriptionDataPayload] = data.get(
             "role_subscription_data"

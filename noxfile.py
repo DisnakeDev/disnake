@@ -67,7 +67,7 @@ class ExecutionGroup(ExecutionGroupType):
             raise TypeError(msg)
         if self.python in EXPERIMENTAL_PYTHON_VERSIONS:
             self.experimental = True
-        for key in self.__dataclass_fields__.keys():
+        for key in self.__dataclass_fields__:
             self[key] = getattr(self, key)  # type: ignore
 
 
