@@ -61,9 +61,11 @@ class InstallParams:
         self,
         *,
         scopes: List[str],
-        permissions: Permissions,
+        permissions: Permissions = MISSING,
     ) -> None:
         self.scopes = scopes
+        if permissions is MISSING:
+            permissions = Permissions.none()
         self.permissions = permissions
         self._app_id: Optional[int] = None
         self._install_type: Optional[ApplicationIntegrationTypeLiteral] = None
