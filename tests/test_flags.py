@@ -181,7 +181,6 @@ class TestBaseFlags:
 
         ins.two = False
         assert ins != other
-        assert ins != other
 
     def test__eq__flag_value(self) -> None:
         ins = TestFlags(one=True)
