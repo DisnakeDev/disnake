@@ -273,7 +273,7 @@ class Emoji(_EmojiTag, AssetMixin):
 
         Edits the emoji.
 
-        If this is not an app emoji, you must have
+        If this emoji is a guild emoji, you must have
         :attr:`~Permissions.manage_guild_expressions` permission to do this.
 
         .. versionchanged:: 2.0
