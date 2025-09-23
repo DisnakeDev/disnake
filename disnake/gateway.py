@@ -914,8 +914,10 @@ class DiscordVoiceWebSocket:
         self._keep_alive: Optional[VoiceKeepAliveHandler] = None
         self.sequence: int = -1
 
+        self._ready: asyncio.Event = asyncio.Event()
+        self._resumed: asyncio.Event = asyncio.Event()
+
         self._close_code: Optional[int] = None
-        self.secret_key: Optional[List[int]] = None
         self.thread_id: int = threading.get_ident()
         if hook:
             self._hook = hook
@@ -969,6 +971,7 @@ class DiscordVoiceWebSocket:
         client: VoiceClient,
         *,
         resume: bool = False,
+        sequence: Optional[int] = None,
         hook: Optional[HookFunc] = None,
     ) -> Self:
         """Creates a voice websocket for the :class:`VoiceClient`."""
@@ -979,6 +982,9 @@ class DiscordVoiceWebSocket:
         ws.gateway = gateway
         ws._connection = client
         ws._max_heartbeat_timeout = 60.0
+
+        if sequence is not None:
+            ws.sequence = sequence
 
         if resume:
             await ws.resume()
@@ -1027,10 +1033,11 @@ class DiscordVoiceWebSocket:
             if self._keep_alive:
                 self._keep_alive.ack()
         elif op == self.RESUMED:
-            _log.info("Voice RESUME succeeded.")
+            self._resumed.set()
         elif op == self.SESSION_DESCRIPTION:
             self._connection.mode = data["mode"]
             await self.load_secret_key(data)
+            self._ready.set()
         elif op == self.HELLO:
             interval: float = data["heartbeat_interval"] / 1000.0
             self._keep_alive = VoiceKeepAliveHandler(ws=self, interval=min(interval, 5.0))
@@ -1087,7 +1094,7 @@ class DiscordVoiceWebSocket:
 
     async def load_secret_key(self, data: VoiceSessionDescriptionPayload) -> None:
         _log.info("received secret key for voice connection")
-        self.secret_key = self._connection.secret_key = data["secret_key"]
+        self._connection.secret_key = data["secret_key"]
         # need to send this at least once to set the ssrc
         await self.speak(False)
 
