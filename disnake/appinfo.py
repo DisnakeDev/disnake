@@ -493,13 +493,22 @@ class AppInfo:
 
             It's recommended to use :attr:`guild_install_type_config` and :attr:`user_install_type_config`
             instead of this parameter, as this parameter is soft-deprecated by Discord.
+
+            :attr:`bot_public` **must** be ``True`` if this parameter is provided.
             in the guild role verification configuration.
         guild_install_type_config: Optional[:class:`InstallTypeConfiguration`]
             The guild installation type configuration for this application.
             If set to ``None``, guild installations will be disabled.
+            You cannot disable both user and guild installations.
+
+            Note the only valid scopes for guild installations are ``applications.commands`` and ``bot``.
+
         user_install_type_config: Optional[:class:`InstallTypeConfiguration`]
             The user installation type configuration for this application.
             If set to ``None``, user installations will be disabled.
+            You cannot disable both user and guild installations.
+
+            Note the only valid scopes for user installations are ``applications.commands``.
         flags: :class:`ApplicationFlags`
             The application's public flags.
 
@@ -527,6 +536,28 @@ class AppInfo:
         event_webhook_types: Optional[List]
             The application's event webhook types. See `webhook event types <https://discord.com/developers/docs/events/webhook-events#event-types>`_
             for a list of valid events.
+
+        Usage
+        -----
+
+        >>> app_info = await client.application_info()
+        >>> await app_info.edit(description="A new description!")
+
+        To enable user installations while using custom install URL.
+        >>> from disnake import InstallTypeConfiguration
+        >>> await app_info.edit(
+        ...     user_install_type_config=InstallTypeConfiguration()
+        ... )
+
+        To disable user installations and guild installations. Note, both cannot be disabled simultaneously.
+        >>> from disnake import InstallTypeConfiguration
+        >>> await app_info.edit(
+        ...     custom_install_url="https://example.com/install",
+            # to disable user installations
+        ...     user_install_type_config=None,
+            # to disable guild installations
+        ...     guild_install_type_config=None,
+        ... )
 
         Raises
         ------
