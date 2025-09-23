@@ -959,6 +959,7 @@ class DiscordVoiceWebSocket:
 
         self._close_code: int | None = None
         self.thread_id: int = threading.get_ident()
+        # FIXME: this isn't preserved across resumes
         self.dave: DaveState = DaveState(self)
         if hook:
             self._hook = hook
@@ -1141,11 +1142,9 @@ class DiscordVoiceWebSocket:
         elif op == self.DAVE_MLS_PROPOSALS:
             await self.dave.handle_mls_proposals(msg[3:])
         elif op == self.DAVE_MLS_ANNOUNCE_COMMIT_TRANSITION:
-            # XXX: assuming big endian, this doesn't really seem to be documented
             transition_id = int.from_bytes(msg[3:5], "big", signed=False)
             await self.dave.handle_mls_announce_commit_transition(transition_id, msg[5:])
         elif op == self.DAVE_MLS_WELCOME:
-            # XXX: assuming big endian, this doesn't really seem to be documented
             transition_id = int.from_bytes(msg[3:5], "big", signed=False)
             await self.dave.handle_mls_welcome(transition_id, msg[5:])
 
