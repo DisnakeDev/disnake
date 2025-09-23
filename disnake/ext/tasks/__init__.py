@@ -117,7 +117,8 @@ class Loop(Generic[LF]):
         self._stop_next_iteration = False
 
         if self.count is not None and self.count <= 0:
-            raise ValueError("count must be greater than 0 or None.")
+            msg = "count must be greater than 0 or None."
+            raise ValueError(msg)
 
         self.change_interval(seconds=seconds, minutes=minutes, hours=hours, time=time)
         self._last_iteration_failed = False
@@ -125,7 +126,8 @@ class Loop(Generic[LF]):
         self._next_iteration = None
 
         if not iscoroutinefunction(self.coro):
-            raise TypeError(f"Expected coroutine function, not {type(self.coro).__name__!r}.")
+            msg = f"Expected coroutine function, not {type(self.coro).__name__!r}."
+            raise TypeError(msg)
 
     async def _call_loop_function(self, name: str, *args: Any, **kwargs: Any) -> None:
         coro = getattr(self, "_" + name)
@@ -272,9 +274,7 @@ class Loop(Generic[LF]):
 
         .. versionadded:: 1.3
         """
-        if self._task is MISSING:
-            return None
-        elif (self._task and self._task.done()) or self._stop_next_iteration:
+        if self._task is MISSING or (self._task and self._task.done()) or self._stop_next_iteration:
             return None
         return self._next_iteration
 
@@ -318,7 +318,8 @@ class Loop(Generic[LF]):
             The task that has been created.
         """
         if self._task is not MISSING and not self._task.done():
-            raise RuntimeError("Task is already launched and is not completed.")
+            msg = "Task is already launched and is not completed."
+            raise RuntimeError(msg)
 
         if self._injected is not None:
             args = (self._injected, *args)
@@ -404,9 +405,11 @@ class Loop(Generic[LF]):
         """
         for exc in exceptions:
             if not inspect.isclass(exc):
-                raise TypeError(f"{exc!r} must be a class.")
+                msg = f"{exc!r} must be a class."
+                raise TypeError(msg)
             if not issubclass(exc, BaseException):
-                raise TypeError(f"{exc!r} must inherit from BaseException.")
+                msg = f"{exc!r} must inherit from BaseException."
+                raise TypeError(msg)
 
         self._valid_exception = (*self._valid_exception, *exceptions)
 
@@ -497,7 +500,8 @@ class Loop(Generic[LF]):
             The function was not a coroutine.
         """
         if not iscoroutinefunction(coro):
-            raise TypeError(f"Expected coroutine function, received {coro.__class__.__name__!r}.")
+            msg = f"Expected coroutine function, received {coro.__class__.__name__!r}."
+            raise TypeError(msg)
 
         self._before_loop = coro
         return coro
@@ -524,7 +528,8 @@ class Loop(Generic[LF]):
             The function was not a coroutine.
         """
         if not iscoroutinefunction(coro):
-            raise TypeError(f"Expected coroutine function, received {coro.__class__.__name__!r}.")
+            msg = f"Expected coroutine function, received {coro.__class__.__name__!r}."
+            raise TypeError(msg)
 
         self._after_loop = coro
         return coro
@@ -550,7 +555,8 @@ class Loop(Generic[LF]):
             The function was not a coroutine.
         """
         if not iscoroutinefunction(coro):
-            raise TypeError(f"Expected coroutine function, received {coro.__class__.__name__!r}.")
+            msg = f"Expected coroutine function, received {coro.__class__.__name__!r}."
+            raise TypeError(msg)
 
         self._error = coro  # type: ignore
         return coro
@@ -611,18 +617,17 @@ class Loop(Generic[LF]):
             inner = time if time.tzinfo is not None else time.replace(tzinfo=utc)
             return [inner]
         if not isinstance(time, Sequence):
-            raise TypeError(
-                f"Expected datetime.time or a sequence of datetime.time for ``time``, received {type(time)!r} instead."
-            )
+            msg = f"Expected datetime.time or a sequence of datetime.time for ``time``, received {type(time)!r} instead."
+            raise TypeError(msg)
         if not time:
-            raise ValueError("time parameter must not be an empty sequence.")
+            msg = "time parameter must not be an empty sequence."
+            raise ValueError(msg)
 
         ret: List[datetime.time] = []
         for index, t in enumerate(time):
             if not isinstance(t, dt):
-                raise TypeError(
-                    f"Expected a sequence of {dt!r} for ``time``, received {type(t).__name__!r} at index {index} instead."
-                )
+                msg = f"Expected a sequence of {dt!r} for ``time``, received {type(t).__name__!r} at index {index} instead."
+                raise TypeError(msg)
             ret.append(t if t.tzinfo is not None else t.replace(tzinfo=utc))
 
         ret = sorted(set(ret))  # de-dupe and sort times
@@ -673,7 +678,8 @@ class Loop(Generic[LF]):
             hours = hours or 0
             sleep = seconds + (minutes * 60.0) + (hours * 3600.0)
             if sleep < 0:
-                raise ValueError("Total number of seconds cannot be less than zero.")
+                msg = "Total number of seconds cannot be less than zero."
+                raise ValueError(msg)
 
             self._sleep = sleep
             self._seconds = float(seconds)
@@ -682,7 +688,8 @@ class Loop(Generic[LF]):
             self._time: List[datetime.time] = MISSING
         else:
             if any((seconds, minutes, hours)):
-                raise TypeError("Cannot mix explicit time with relative time")
+                msg = "Cannot mix explicit time with relative time"
+                raise TypeError(msg)
             self._time = self._get_time_parameter(time)
             self._sleep = self._seconds = self._minutes = self._hours = MISSING
 
@@ -788,11 +795,13 @@ def loop(
         cls = origin
 
     if not isinstance(cls, type) or not issubclass(cls, Loop):
-        raise TypeError(f"cls argument must be a subclass of Loop, got {cls!r}")
+        msg = f"cls argument must be a subclass of Loop, got {cls!r}"
+        raise TypeError(msg)
 
     def decorator(func: LF) -> L_co:
         if not iscoroutinefunction(func):
-            raise TypeError("decorated function must be a coroutine")
+            msg = "decorated function must be a coroutine"
+            raise TypeError(msg)
 
         return cast("Type[L_co]", cls)(func, **kwargs)
 

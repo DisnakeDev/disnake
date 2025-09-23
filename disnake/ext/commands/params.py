@@ -160,7 +160,8 @@ def _xt_to_xe(xe: Optional[float], xt: Optional[float], direction: float = 1) ->
     """
     if xe is not None:
         if xt is not None:
-            raise TypeError("Cannot combine lt and le or gt and le")
+            msg = "Cannot combine lt and le or gt and le"
+            raise TypeError(msg)
         return xe
     elif xt is not None:
         epsilon = math.ldexp(1.0, -1024)
@@ -253,12 +254,12 @@ class Injection(Generic[P, T_]):
             ``option_name`` is not :class:`str`
         """
         if not isinstance(option_name, str):
-            raise TypeError("option_name must be a type of str")
+            msg = "option_name must be a type of str"
+            raise TypeError(msg)
 
         if option_name in self.autocompleters:
-            raise ValueError(
-                f"This injection already has an autocompleter set for option '{option_name}'"
-            )
+            msg = f"This injection already has an autocompleter set for option '{option_name}'"
+            raise ValueError(msg)
 
         def decorator(func: FuncT) -> FuncT:
             classify_autocompleter(func)
@@ -301,33 +302,34 @@ class _BaseRange(ABC):
             params = (cls._infer_type(params), *params)
 
         if len(params) != 3:
-            raise TypeError(
-                f"`{name}` expects 3 type arguments ({name}[<type>, <min>, <max>]), got {len(params)}"
-            )
+            msg = f"`{name}` expects 3 type arguments ({name}[<type>, <min>, <max>]), got {len(params)}"
+            raise TypeError(msg)
 
         underlying_type, min_value, max_value = params
 
         # validate type (argument 1)
         if not isinstance(underlying_type, type):
-            raise TypeError(f"First `{name}` argument must be a type, not `{underlying_type!r}`")
+            msg = f"First `{name}` argument must be a type, not `{underlying_type!r}`"
+            raise TypeError(msg)
 
         if not issubclass(underlying_type, cls._allowed_types):
             allowed = "/".join(t.__name__ for t in cls._allowed_types)
-            raise TypeError(f"First `{name}` argument must be {allowed}, not `{underlying_type!r}`")
+            msg = f"First `{name}` argument must be {allowed}, not `{underlying_type!r}`"
+            raise TypeError(msg)
 
         # validate min/max (arguments 2/3)
         min_value = cls._coerce_bound(min_value, "min")
         max_value = cls._coerce_bound(max_value, "max")
 
         if min_value is None and max_value is None:
-            raise ValueError(f"`{name}` bounds cannot both be empty")
+            msg = f"`{name}` bounds cannot both be empty"
+            raise ValueError(msg)
 
         # n.b. this allows bounds to be equal, which doesn't really serve a purpose with numbers,
         # but is still accepted by the api
         if min_value is not None and max_value is not None and min_value > max_value:
-            raise ValueError(
-                f"`{name}` minimum ({min_value}) must be less than or equal to maximum ({max_value})"
-            )
+            msg = f"`{name}` minimum ({min_value}) must be less than or equal to maximum ({max_value})"
+            raise ValueError(msg)
 
         return cls(underlying_type=underlying_type, min_value=min_value, max_value=max_value)
 
@@ -337,10 +339,12 @@ class _BaseRange(ABC):
             return None
         elif isinstance(value, (int, float)):
             if not math.isfinite(value):
-                raise ValueError(f"{name} value may not be NaN, inf, or -inf")
+                msg = f"{name} value may not be NaN, inf, or -inf"
+                raise ValueError(msg)
             return value
         else:
-            raise TypeError(f"{name} value must be int, float, None, or `...`, not `{type(value)}`")
+            msg = f"{name} value must be int, float, None, or `...`, not `{type(value)}`"
+            raise TypeError(msg)
 
     def __repr__(self) -> str:
         a = "..." if self.min_value is None else self.min_value
@@ -389,7 +393,8 @@ else:
                     continue
 
                 if self.underlying_type is int and not isinstance(value, int):
-                    raise TypeError("Range[int, ...] bounds must be int, not float")
+                    msg = "Range[int, ...] bounds must be int, not float"
+                    raise TypeError(msg)
 
         @classmethod
         def _infer_type(cls, params: Tuple[Any, ...]) -> Type[Any]:
@@ -418,9 +423,11 @@ else:
                     continue
 
                 if not isinstance(value, int):
-                    raise TypeError("String bounds must be int, not float")
+                    msg = "String bounds must be int, not float"
+                    raise TypeError(msg)
                 if value < 0:
-                    raise ValueError("String bounds may not be negative")
+                    msg = "String bounds may not be negative"
+                    raise ValueError(msg)
 
         @classmethod
         def _infer_type(cls, params: Tuple[Any, ...]) -> Type[Any]:
@@ -590,7 +597,8 @@ class ParamInfo:
                 self.type = t
                 return
 
-        raise TypeError(f"Type {discord_type} is not a valid Param type")
+        msg = f"Type {discord_type} is not a valid Param type"
+        raise TypeError(msg)
 
     @classmethod
     def from_param(
@@ -747,7 +755,8 @@ class ParamInfo:
         if self.large:
             self.type = str
             if annotation is not int:
-                raise TypeError("Large integers must be annotated with int or LargeInt")
+                msg = "Large integers must be annotated with int or LargeInt"
+                raise TypeError(msg)
         elif annotation in self.TYPES:
             self.type = annotation
         elif (
@@ -762,26 +771,25 @@ class ParamInfo:
             ):
                 self._parse_guild_channel(*args)
             else:
-                raise TypeError(
-                    "Unions for anything else other than channels or a mentionable are not supported"
-                )
+                msg = "Unions for anything else other than channels or a mentionable are not supported"
+                raise TypeError(msg)
         elif issubclass_(annotation, (disnake.abc.GuildChannel, disnake.Thread)):
             self._parse_guild_channel(annotation)
         elif issubclass_(get_origin(annotation), collections.abc.Sequence):
-            raise TypeError(
-                f"List arguments have not been implemented yet and therefore {annotation!r} is invalid"
-            )
+            msg = f"List arguments have not been implemented yet and therefore {annotation!r} is invalid"
+            raise TypeError(msg)
 
         elif annotation in CONVERTER_MAPPING:
             if converter_mode:
-                raise TypeError(
-                    f"{annotation!r} implies the usage of a converter but those cannot be nested"
-                )
+                msg = f"{annotation!r} implies the usage of a converter but those cannot be nested"
+                raise TypeError(msg)
             self.converter = CONVERTER_MAPPING[annotation]().convert
         elif converter_mode:
-            raise TypeError(f"{annotation!r} is not a valid converter annotation")
+            msg = f"{annotation!r} is not a valid converter annotation"
+            raise TypeError(msg)
         else:
-            raise TypeError(f"{annotation!r} is not a valid parameter annotation")
+            msg = f"{annotation!r} is not a valid parameter annotation"
+            raise TypeError(msg)
 
         return True
 
@@ -798,9 +806,8 @@ class ParamInfo:
         _, parameters = isolate_self(converter_func)
 
         if len(parameters) != 1:
-            raise TypeError(
-                "Converters must take precisely two arguments: the interaction and the argument"
-            )
+            msg = "Converters must take precisely two arguments: the interaction and the argument"
+            raise TypeError(msg)
 
         _, parameter = parameters.popitem()
         annotation = parameter.annotation
@@ -816,9 +823,8 @@ class ParamInfo:
         if success:
             return
 
-        raise TypeError(
-            f"Both the converter annotation {annotation!r} and the option annotation {fallback_annotation!r} are invalid"
-        )
+        msg = f"Both the converter annotation {annotation!r} and the option annotation {fallback_annotation!r} are invalid"
+        raise TypeError(msg)
 
     def parse_parameter(self, param: inspect.Parameter) -> None:
         self.name = self.name or param.name
@@ -835,7 +841,8 @@ class ParamInfo:
 
     def to_option(self) -> Option:
         if not self.name:
-            raise TypeError("Param must be parsed first")
+            msg = "Param must be parsed first"
+            raise TypeError(msg)
 
         name = Localized(self.name, data=self.name_localizations)
         desc = Localized(self.description, data=self.description_localizations)
@@ -863,10 +870,11 @@ def safe_call(function: Callable[..., T], /, *possible_args: Any, **possible_kwa
     kinds = {p.kind for p in parameters.values()}
     arb = {inspect.Parameter.VAR_POSITIONAL, inspect.Parameter.VAR_KEYWORD}
     if arb.issubset(kinds):
-        raise TypeError(
+        msg = (
             "Cannot safely call a function with both *args and **kwargs. "
             "If this is a wrapper please use functools.wraps to keep the signature correct"
         )
+        raise TypeError(msg)
 
     parsed_pos = False
     args: List[Any] = []
@@ -952,16 +960,18 @@ def classify_autocompleter(autocompleter: AnyAutocompleter) -> None:
             break
 
     if positional_param_count < 2:
-        raise ValueError(
+        msg = (
             "An autocomplete function should have 2 or 3 non-optional positional arguments. "
             "For example, foo(inter, string) or foo(cog, inter, string)"
         )
+        raise ValueError(msg)
 
     if positional_param_count > 3:
-        raise ValueError(
+        msg = (
             "Any additional arguments of an autocomplete function "
             "(apart from the first 3) should be keyword-only"
         )
+        raise ValueError(msg)
 
     autocompleter.__has_cog_param__ = positional_param_count == 3
 
@@ -987,7 +997,8 @@ def collect_params(
         if parameter.kind in [parameter.VAR_POSITIONAL, parameter.VAR_KEYWORD]:
             continue
         if parameter.kind is parameter.POSITIONAL_ONLY:
-            raise TypeError("Positional-only parameters cannot be used in commands")
+            msg = "Positional-only parameters cannot be used in commands"
+            raise TypeError(msg)
 
         default = parameter.default
         if isinstance(default, Injection):
@@ -998,16 +1009,14 @@ def collect_params(
             if inter_param is None:
                 inter_param = parameter
             else:
-                raise TypeError(
-                    f"Found two candidates for the interaction parameter in {function!r}: {inter_param.name} and {parameter.name}"
-                )
+                msg = f"Found two candidates for the interaction parameter in {function!r}: {inter_param.name} and {parameter.name}"
+                raise TypeError(msg)
         elif issubclass_(parameter.annotation, commands.Cog):
             if cog_param is None:
                 cog_param = parameter
             else:
-                raise TypeError(
-                    f"Found two candidates for the cog parameter in {function!r}: {cog_param.name} and {parameter.name}"
-                )
+                msg = f"Found two candidates for the cog parameter in {function!r}: {cog_param.name} and {parameter.name}"
+                raise TypeError(msg)
         else:
             paraminfo = ParamInfo.from_param(parameter, {}, doc)
             paraminfos.append(paraminfo)
@@ -1043,11 +1052,11 @@ def format_kwargs(
     first = args[0] if args else None
 
     if len(args) > 1:
-        raise TypeError(
-            "When calling a slash command only self and the interaction should be positional"
-        )
+        msg = "When calling a slash command only self and the interaction should be positional"
+        raise TypeError(msg)
     elif first and not isinstance(first, commands.Cog):
-        raise TypeError("Method slash commands may be created only in cog subclasses")
+        msg = "Method slash commands may be created only in cog subclasses"
+        raise TypeError(msg)
 
     cog: Optional[commands.Cog] = first
 
@@ -1110,7 +1119,8 @@ def expand_params(command: AnySlashCommand) -> List[Option]:
     _, inter_param, params, injections = collect_params(command.callback, parameters)
 
     if inter_param is None:
-        raise TypeError(f"Couldn't find an interaction parameter in {command.callback}")
+        msg = f"Couldn't find an interaction parameter in {command.callback}"
+        raise TypeError(msg)
 
     for injection in injections.values():
         collected = collect_nested_params(injection.function)
@@ -1119,7 +1129,8 @@ def expand_params(command: AnySlashCommand) -> List[Option]:
             for name, func in injection.autocompleters.items():
                 param = lookup.get(name)
                 if param is None:
-                    raise ValueError(f"Option '{name}' doesn't exist in '{command.qualified_name}'")
+                    msg = f"Option '{name}' doesn't exist in '{command.qualified_name}'"
+                    raise ValueError(msg)
                 param.autocomplete = func
         params += collected
 
@@ -1245,7 +1256,8 @@ def Param(
 
     if kwargs:
         a = ", ".join(map(repr, kwargs))
-        raise TypeError(f"Param() got unexpected keyword arguments: {a}")
+        msg = f"Param() got unexpected keyword arguments: {a}"
+        raise TypeError(msg)
 
     return ParamInfo(
         default,
@@ -1417,8 +1429,10 @@ def register_injection(
     tp = get_signature_return(function)
 
     if tp is inspect.Parameter.empty:
-        raise TypeError("Injection must have a return annotation")
+        msg = "Injection must have a return annotation"
+        raise TypeError(msg)
     if tp in ParamInfo.TYPES:
-        raise TypeError("Injection cannot overwrite builtin types")
+        msg = "Injection cannot overwrite builtin types"
+        raise TypeError(msg)
 
     return Injection.register(function, tp, autocompleters=autocompleters)
