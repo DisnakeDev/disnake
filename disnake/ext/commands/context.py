@@ -195,7 +195,8 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
         cmd = self.command
         view = self.view
         if cmd is None:
-            raise ValueError("This context is not valid.")
+            msg = "This context is not valid."
+            raise ValueError(msg)
 
         # some state to revert to when we're done
         index, previous = view.index, view.previous

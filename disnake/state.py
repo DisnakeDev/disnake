@@ -230,17 +230,20 @@ class ConnectionState:
         self.heartbeat_timeout: float = heartbeat_timeout
         self.guild_ready_timeout: float = guild_ready_timeout
         if self.guild_ready_timeout < 0:
-            raise ValueError("guild_ready_timeout cannot be negative.")
+            msg = "guild_ready_timeout cannot be negative."
+            raise ValueError(msg)
 
         if allowed_mentions is not None and not isinstance(allowed_mentions, AllowedMentions):
-            raise TypeError("allowed_mentions parameter must be AllowedMentions.")
+            msg = "allowed_mentions parameter must be AllowedMentions."
+            raise TypeError(msg)
 
         self.allowed_mentions: Optional[AllowedMentions] = allowed_mentions
         self._chunk_requests: Dict[Union[int, str], ChunkRequest] = {}
 
         if activity:
             if not isinstance(activity, BaseActivity):
-                raise TypeError("activity parameter must derive from BaseActivity.")
+                msg = "activity parameter must derive from BaseActivity."
+                raise TypeError(msg)
 
             self._activity: Optional[ActivityPayload] = activity.to_dict()
         else:
@@ -252,7 +255,8 @@ class ConnectionState:
 
         if intents is not None:
             if not isinstance(intents, Intents):
-                raise TypeError(f"intents parameter must be Intents, not {type(intents)!r}.")
+                msg = f"intents parameter must be Intents, not {type(intents)!r}."
+                raise TypeError(msg)
 
             if not intents.guilds:
                 _log.warning(
@@ -269,16 +273,18 @@ class ConnectionState:
 
         # Ensure these two are set properly
         if not self._intents.members and self._chunk_guilds:
-            raise ValueError("Intents.members must be enabled to chunk guilds at startup.")
+            msg = "Intents.members must be enabled to chunk guilds at startup."
+            raise ValueError(msg)
 
         if member_cache_flags is None:
             member_cache_flags = MemberCacheFlags.from_intents(self._intents)
         else:
             if not isinstance(member_cache_flags, MemberCacheFlags):
-                raise TypeError(
+                msg = (
                     "member_cache_flags parameter must be MemberCacheFlags, "
                     f"not {type(member_cache_flags)!r}"
                 )
+                raise TypeError(msg)
 
             member_cache_flags._verify_intents(self._intents)
 
@@ -476,7 +482,8 @@ class ConnectionState:
         /,
     ) -> None:
         if not application_command.id:
-            raise AssertionError("The provided application command does not have an ID")
+            msg = "The provided application command does not have an ID"
+            raise AssertionError(msg)
         self._global_application_commands[application_command.id] = application_command
 
     def _remove_global_application_command(self, application_command_id: int, /) -> None:
@@ -496,7 +503,8 @@ class ConnectionState:
         self, guild_id: int, application_command: APIApplicationCommand
     ) -> None:
         if not application_command.id:
-            raise AssertionError("The provided application command does not have an ID")
+            msg = "The provided application command does not have an ID"
+            raise AssertionError(msg)
         try:
             granula = self._guild_application_commands[guild_id]
             granula[application_command.id] = application_command
