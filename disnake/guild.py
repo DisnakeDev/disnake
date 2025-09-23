@@ -4038,9 +4038,9 @@ class Guild(Hashable):
             fields["unicode_emoji"] = emoji
 
         data = await self._state.http.create_role(self.id, reason=reason, **fields)
-        return Role(guild=self, data=data, state=self._state)
 
         # TODO: add to cache
+        return Role(guild=self, data=data, state=self._state)
 
     async def edit_role_positions(
         self, positions: Dict[Snowflake, int], *, reason: Optional[str] = None
