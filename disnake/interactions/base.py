@@ -928,9 +928,8 @@ class InteractionResponse:
             else:
                 defer_type = InteractionResponseType.deferred_message_update
         else:
-            raise TypeError(
-                "This interaction must be of type 'application_command', 'modal_submit', or 'component' in order to defer."
-            )
+            msg = "This interaction must be of type 'application_command', 'modal_submit', or 'component' in order to defer."
+            raise TypeError(msg)
 
         if defer_type is InteractionResponseType.deferred_channel_message:
             # we only want to set flags if we are sending a message
@@ -1088,13 +1087,16 @@ class InteractionResponse:
         }
 
         if embed is not MISSING and embeds is not MISSING:
-            raise TypeError("cannot mix embed and embeds keyword arguments")
+            msg = "cannot mix embed and embeds keyword arguments"
+            raise TypeError(msg)
 
         if file is not MISSING and files is not MISSING:
-            raise TypeError("cannot mix file and files keyword arguments")
+            msg = "cannot mix file and files keyword arguments"
+            raise TypeError(msg)
 
         if view is not MISSING and components is not MISSING:
-            raise TypeError("cannot mix view and components keyword arguments")
+            msg = "cannot mix view and components keyword arguments"
+            raise TypeError(msg)
 
         if file is not MISSING:
             files = [file]
@@ -1104,7 +1106,8 @@ class InteractionResponse:
 
         if embeds:
             if len(embeds) > 10:
-                raise ValueError("embeds cannot exceed maximum of 10 elements")
+                msg = "embeds cannot exceed maximum of 10 elements"
+                raise ValueError(msg)
             payload["embeds"] = [e.to_dict() for e in embeds]
             for embed in embeds:
                 if embed._files:
@@ -1112,7 +1115,8 @@ class InteractionResponse:
                     files.extend(embed._files.values())
 
         if files is not MISSING and len(files) > 10:
-            raise ValueError("files cannot exceed maximum of 10 elements")
+            msg = "files cannot exceed maximum of 10 elements"
+            raise ValueError(msg)
 
         previous_mentions: Optional[AllowedMentions] = getattr(
             self._parent._state, "allowed_mentions", None
@@ -1140,7 +1144,8 @@ class InteractionResponse:
             flags.is_components_v2 = True
         # components v2 cannot be used with other content fields
         if flags and flags.is_components_v2 and (content or embeds or poll):
-            raise ValueError("Cannot use v2 components with content, embeds, or polls")
+            msg = "Cannot use v2 components with content, embeds, or polls"
+            raise ValueError(msg)
 
         if poll is not MISSING:
             payload["poll"] = poll._to_dict()
@@ -1316,13 +1321,15 @@ class InteractionResponse:
             payload["content"] = None if content is None else str(content)
 
         if file is not MISSING and files is not MISSING:
-            raise TypeError("cannot mix file and files keyword arguments")
+            msg = "cannot mix file and files keyword arguments"
+            raise TypeError(msg)
 
         if file is not MISSING:
             files = [file]
 
         if embed is not MISSING and embeds is not MISSING:
-            raise TypeError("cannot mix both embed and embeds keyword arguments")
+            msg = "cannot mix both embed and embeds keyword arguments"
+            raise TypeError(msg)
 
         if embed is not MISSING:
             embeds = [] if embed is None else [embed]
@@ -1334,7 +1341,8 @@ class InteractionResponse:
                     files.extend(embed._files.values())
 
         if files is not MISSING and len(files) > 10:
-            raise ValueError("files cannot exceed maximum of 10 elements")
+            msg = "files cannot exceed maximum of 10 elements"
+            raise ValueError(msg)
 
         previous_mentions: Optional[AllowedMentions] = getattr(
             self._parent._state, "allowed_mentions", None
@@ -1357,7 +1365,8 @@ class InteractionResponse:
             )
 
         if view is not MISSING and components is not MISSING:
-            raise TypeError("cannot mix view and components keyword arguments")
+            msg = "cannot mix view and components keyword arguments"
+            raise TypeError(msg)
 
         is_v2 = False
         if view is not MISSING:
@@ -1375,7 +1384,8 @@ class InteractionResponse:
             flags.is_components_v2 = True
         # components v2 cannot be used with other content fields
         if flags and flags.is_components_v2 and (content or embeds):
-            raise ValueError("Cannot use v2 components with content or embeds")
+            msg = "Cannot use v2 components with content or embeds"
+            raise ValueError(msg)
 
         if flags is not MISSING:
             payload["flags"] = flags.value
@@ -1430,7 +1440,8 @@ class InteractionResponse:
             choices_data = [{"name": n, "value": v} for n, v in choices.items()]
         else:
             if isinstance(choices, str):  # str matches `Sequence[str]`, but isn't meant to be used
-                raise TypeError("choices argument should be a list/sequence or dict, not str")
+                msg = "choices argument should be a list/sequence or dict, not str"
+                raise TypeError(msg)
 
             choices_data = []
             value: ApplicationCommandOptionChoicePayload
@@ -1525,7 +1536,8 @@ class InteractionResponse:
             This interaction has already been responded to before.
         """
         if modal is not None and any((title, components, custom_id)):
-            raise TypeError("Cannot mix modal argument and title, custom_id, components arguments")
+            msg = "Cannot mix modal argument and title, custom_id, components arguments"
+            raise TypeError(msg)
 
         parent = self._parent
 
@@ -1542,7 +1554,8 @@ class InteractionResponse:
         elif title and components and custom_id:
             items: Sequence[ModalTopLevelComponent] = normalize_components(components, modal=True)
             if len(items) > 5:
-                raise ValueError("Maximum number of components exceeded.")
+                msg = "Maximum number of components exceeded."
+                raise ValueError(msg)
 
             modal_data = {
                 "title": title,
@@ -1553,7 +1566,8 @@ class InteractionResponse:
                 ),
             }
         else:
-            raise TypeError("Either modal or title, custom_id, components must be provided")
+            msg = "Either modal or title, custom_id, components must be provided"
+            raise TypeError(msg)
 
         adapter = async_context.get()
         response_type = InteractionResponseType.modal

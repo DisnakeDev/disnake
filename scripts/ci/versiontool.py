@@ -33,7 +33,8 @@ class VersionInfo(NamedTuple):
     def from_str(cls, s: str) -> VersionInfo:
         match = version_re.fullmatch(s)
         if not match:
-            raise ValueError(f"invalid version: '{s}'")
+            msg = f"invalid version: '{s}'"
+            raise ValueError(msg)
 
         major, minor, micro, releaselevel, serial = match.groups()
         return VersionInfo(

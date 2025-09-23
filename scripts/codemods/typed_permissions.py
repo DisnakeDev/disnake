@@ -31,10 +31,11 @@ def remove_existing_permissions(params: cst.Parameters, *, is_overload: bool) ->
     """Remove all of the existing permissions from the kwargs of the provided cst.Parameters."""
     for param in params.params:
         if m.matches(param, PERMISSION_MATCHERS):
-            raise RuntimeError(
+            msg = (
                 f"an existing permission '{param.name.value}' is defined as a "
                 "non-keyword argument in a permission overloaded method."
             )
+            raise RuntimeError(msg)
 
     # unlike params, these may contain generated objects
     # we only have to do this for overloads, as we only change overloads directly
@@ -79,7 +80,8 @@ class PermissionTypings(BaseCodemodCommand):
             if m.matches(b, m.If(test=m.Name("TYPE_CHECKING"))):
                 break
         else:
-            raise RuntimeError("could not find TYPE_CHECKING block in PermissionOverwrite.")
+            msg = "could not find TYPE_CHECKING block in PermissionOverwrite."
+            raise RuntimeError(msg)
 
         og_type_check: cst.If = b  # type: ignore
 
@@ -133,17 +135,15 @@ class PermissionTypings(BaseCodemodCommand):
             return node
 
         if not node.params.star_kwarg and not is_overload:
-            raise RuntimeError(
-                'a function cannot be decorated with "_overload_with_permissions" and not take any kwargs unless it is an overload.'
-            )
+            msg = 'a function cannot be decorated with "_overload_with_permissions" and not take any kwargs unless it is an overload.'
+            raise RuntimeError(msg)
         # always true if this isn't an overload
         elif node.params.star_kwarg:
             # use the existing annotation if one exists
             annotation = node.params.star_kwarg.annotation
             if annotation is None:
-                raise RuntimeError(
-                    f"parameter {node.params.star_kwarg.name.value} must be annotated."
-                )
+                msg = f"parameter {node.params.star_kwarg.name.value} must be annotated."
+                raise RuntimeError(msg)
         # only possible in the case of an overload
         else:
             # use the first permission annotation if it exists, otherwise default to `bool`

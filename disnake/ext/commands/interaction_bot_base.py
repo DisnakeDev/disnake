@@ -149,7 +149,8 @@ class InteractionBotBase(CommonBotBase):
         **options: Any,
     ) -> None:
         if test_guilds and not all(isinstance(guild_id, int) for guild_id in test_guilds):
-            raise ValueError("test_guilds must be a sequence of int.")
+            msg = "test_guilds must be a sequence of int."
+            raise ValueError(msg)
 
         super().__init__(**options)
 
@@ -161,9 +162,8 @@ class InteractionBotBase(CommonBotBase):
             or sync_commands_debug is not MISSING
             or sync_commands_on_cog_unload is not MISSING
         ):
-            raise TypeError(
-                "cannot set 'command_sync_flags' and any of 'sync_commands', 'sync_commands_debug', 'sync_commands_on_cog_unload' at the same time."
-            )
+            msg = "cannot set 'command_sync_flags' and any of 'sync_commands', 'sync_commands_debug', 'sync_commands_on_cog_unload' at the same time."
+            raise TypeError(msg)
 
         if command_sync_flags is not None:
             # this makes a copy so it cannot be changed after setting
@@ -278,10 +278,12 @@ class InteractionBotBase(CommonBotBase):
             The slash command passed is not an instance of :class:`InvokableSlashCommand`.
         """
         if not isinstance(self, disnake.Client):
-            raise NotImplementedError("This method is only usable in disnake.Client subclasses")
+            msg = "This method is only usable in disnake.Client subclasses"
+            raise NotImplementedError(msg)
 
         if not isinstance(slash_command, InvokableSlashCommand):
-            raise TypeError("The slash_command passed must be an instance of InvokableSlashCommand")
+            msg = "The slash_command passed must be an instance of InvokableSlashCommand"
+            raise TypeError(msg)
 
         if slash_command.name in self.all_slash_commands:
             raise CommandRegistrationError(slash_command.name)
@@ -309,10 +311,12 @@ class InteractionBotBase(CommonBotBase):
             The user command passed is not an instance of :class:`InvokableUserCommand`.
         """
         if not isinstance(self, disnake.Client):
-            raise NotImplementedError("This method is only usable in disnake.Client subclasses")
+            msg = "This method is only usable in disnake.Client subclasses"
+            raise NotImplementedError(msg)
 
         if not isinstance(user_command, InvokableUserCommand):
-            raise TypeError("The user_command passed must be an instance of InvokableUserCommand")
+            msg = "The user_command passed must be an instance of InvokableUserCommand"
+            raise TypeError(msg)
 
         if user_command.name in self.all_user_commands:
             raise CommandRegistrationError(user_command.name)
@@ -340,12 +344,12 @@ class InteractionBotBase(CommonBotBase):
             The message command passed is not an instance of :class:`InvokableMessageCommand`.
         """
         if not isinstance(self, disnake.Client):
-            raise NotImplementedError("This method is only usable in disnake.Client subclasses")
+            msg = "This method is only usable in disnake.Client subclasses"
+            raise NotImplementedError(msg)
 
         if not isinstance(message_command, InvokableMessageCommand):
-            raise TypeError(
-                "The message_command passed must be an instance of InvokableMessageCommand"
-            )
+            msg = "The message_command passed must be an instance of InvokableMessageCommand"
+            raise TypeError(msg)
 
         if message_command.name in self.all_message_commands:
             raise CommandRegistrationError(message_command.name)
@@ -437,7 +441,8 @@ class InteractionBotBase(CommonBotBase):
             The slash command that was requested. If not found, returns ``None``.
         """
         if not isinstance(name, str):
-            raise TypeError(f"Expected name to be str, not {name.__class__}")
+            msg = f"Expected name to be str, not {name.__class__}"
+            raise TypeError(msg)
 
         chain = name.split()
         slash = self.all_slash_commands.get(chain[0])
@@ -839,7 +844,8 @@ class InteractionBotBase(CommonBotBase):
 
     async def _cache_application_commands(self) -> None:
         if not isinstance(self, disnake.Client):
-            raise NotImplementedError("This method is only usable in disnake.Client subclasses")
+            msg = "This method is only usable in disnake.Client subclasses"
+            raise NotImplementedError(msg)
 
         _, guilds = self._ordered_unsynced_commands(self._test_guilds)
 
@@ -870,7 +876,8 @@ class InteractionBotBase(CommonBotBase):
 
     async def _sync_application_commands(self) -> None:
         if not isinstance(self, disnake.Client):
-            raise NotImplementedError("This method is only usable in disnake.Client subclasses")
+            msg = "This method is only usable in disnake.Client subclasses"
+            raise NotImplementedError(msg)
 
         if not self._command_sync_flags._sync_enabled or self._is_closed or self.loop.is_closed():
             return
@@ -960,7 +967,8 @@ class InteractionBotBase(CommonBotBase):
 
     async def _prepare_application_commands(self) -> None:
         if not isinstance(self, disnake.Client):
-            raise NotImplementedError("Command sync is only possible in disnake.Client subclasses")
+            msg = "Command sync is only possible in disnake.Client subclasses"
+            raise NotImplementedError(msg)
 
         async with self._sync_queued:
             await self.wait_until_first_connect()
@@ -969,7 +977,8 @@ class InteractionBotBase(CommonBotBase):
 
     async def _delayed_command_sync(self) -> None:
         if not isinstance(self, disnake.Client):
-            raise NotImplementedError("This method is only usable in disnake.Client subclasses")
+            msg = "This method is only usable in disnake.Client subclasses"
+            raise NotImplementedError(msg)
 
         if (
             not self._command_sync_flags._sync_enabled
@@ -987,7 +996,8 @@ class InteractionBotBase(CommonBotBase):
 
     def _schedule_app_command_preparation(self) -> None:
         if not isinstance(self, disnake.Client):
-            raise NotImplementedError("Command sync is only possible in disnake.Client subclasses")
+            msg = "Command sync is only possible in disnake.Client subclasses"
+            raise NotImplementedError(msg)
 
         self.loop.create_task(
             self._prepare_application_commands(), name="disnake: app_command_preparation"
@@ -995,7 +1005,8 @@ class InteractionBotBase(CommonBotBase):
 
     def _schedule_delayed_command_sync(self) -> None:
         if not isinstance(self, disnake.Client):
-            raise NotImplementedError("This method is only usable in disnake.Client subclasses")
+            msg = "This method is only usable in disnake.Client subclasses"
+            raise NotImplementedError(msg)
 
         self.loop.create_task(self._delayed_command_sync(), name="disnake: delayed_command_sync")
 
@@ -1296,7 +1307,8 @@ class InteractionBotBase(CommonBotBase):
         and it takes an :class:`.ApplicationCommandInteraction` as its only parameter.
         """
         if not iscoroutinefunction(coro):
-            raise TypeError("The pre-invoke hook must be a coroutine.")
+            msg = "The pre-invoke hook must be a coroutine."
+            raise TypeError(msg)
 
         self._before_slash_command_invoke = coro
         return coro
@@ -1306,7 +1318,8 @@ class InteractionBotBase(CommonBotBase):
         and it takes an :class:`.ApplicationCommandInteraction` as its only parameter.
         """
         if not iscoroutinefunction(coro):
-            raise TypeError("The post-invoke hook must be a coroutine.")
+            msg = "The post-invoke hook must be a coroutine."
+            raise TypeError(msg)
 
         self._after_slash_command_invoke = coro
         return coro
@@ -1314,7 +1327,8 @@ class InteractionBotBase(CommonBotBase):
     def before_user_command_invoke(self, coro: CFT) -> CFT:
         """Similar to :meth:`Bot.before_slash_command_invoke` but for user commands."""
         if not iscoroutinefunction(coro):
-            raise TypeError("The pre-invoke hook must be a coroutine.")
+            msg = "The pre-invoke hook must be a coroutine."
+            raise TypeError(msg)
 
         self._before_user_command_invoke = coro
         return coro
@@ -1322,7 +1336,8 @@ class InteractionBotBase(CommonBotBase):
     def after_user_command_invoke(self, coro: CFT) -> CFT:
         """Similar to :meth:`Bot.after_slash_command_invoke` but for user commands."""
         if not iscoroutinefunction(coro):
-            raise TypeError("The post-invoke hook must be a coroutine.")
+            msg = "The post-invoke hook must be a coroutine."
+            raise TypeError(msg)
 
         self._after_user_command_invoke = coro
         return coro
@@ -1330,7 +1345,8 @@ class InteractionBotBase(CommonBotBase):
     def before_message_command_invoke(self, coro: CFT) -> CFT:
         """Similar to :meth:`Bot.before_slash_command_invoke` but for message commands."""
         if not iscoroutinefunction(coro):
-            raise TypeError("The pre-invoke hook must be a coroutine.")
+            msg = "The pre-invoke hook must be a coroutine."
+            raise TypeError(msg)
 
         self._before_message_command_invoke = coro
         return coro
@@ -1338,7 +1354,8 @@ class InteractionBotBase(CommonBotBase):
     def after_message_command_invoke(self, coro: CFT) -> CFT:
         """Similar to :meth:`Bot.after_slash_command_invoke` but for message commands."""
         if not iscoroutinefunction(coro):
-            raise TypeError("The post-invoke hook must be a coroutine.")
+            msg = "The post-invoke hook must be a coroutine."
+            raise TypeError(msg)
 
         self._after_message_command_invoke = coro
         return coro
@@ -1460,7 +1477,8 @@ class InteractionBotBase(CommonBotBase):
                 await app_command.invoke(interaction)
                 self.dispatch(f"{event_name}_completion", interaction)
             else:
-                raise errors.CheckFailure("The global check_once functions failed.")
+                msg = "The global check_once functions failed."
+                raise errors.CheckFailure(msg)
         except errors.CommandError as exc:
             await app_command.dispatch_error(interaction, exc)
 

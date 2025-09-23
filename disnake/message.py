@@ -118,9 +118,8 @@ def convert_emoji_reaction(emoji: Union[EmojiInputType, Reaction]) -> str:
         return s
 
     assert_never(emoji)
-    raise TypeError(
-        f"emoji argument must be str, Emoji, PartialEmoji, or Reaction, not {emoji.__class__.__name__}."
-    )
+    msg = f"emoji argument must be str, Emoji, PartialEmoji, or Reaction, not {emoji.__class__.__name__}."
+    raise TypeError(msg)
 
 
 async def _edit_handler(
@@ -145,11 +144,14 @@ async def _edit_handler(
     components: Optional[MessageComponents],
 ) -> Message:
     if embed is not MISSING and embeds is not MISSING:
-        raise TypeError("Cannot mix embed and embeds keyword arguments.")
+        err = "Cannot mix embed and embeds keyword arguments."
+        raise TypeError(err)
     if file is not MISSING and files is not MISSING:
-        raise TypeError("Cannot mix file and files keyword arguments.")
+        err = "Cannot mix file and files keyword arguments."
+        raise TypeError(err)
     if view is not MISSING and components is not MISSING:
-        raise TypeError("Cannot mix view and components keyword arguments.")
+        err = "Cannot mix view and components keyword arguments."
+        raise TypeError(err)
     if suppress is not MISSING:
         suppress_deprecated_msg = "'suppress' is deprecated in favour of 'suppress_embeds'."
         if suppress_embeds is not MISSING:
@@ -218,7 +220,8 @@ async def _edit_handler(
     # (n.b. this doesn't take into account editing messages that *already* have content/embeds,
     # since we can't know that for certain with partial messages anyway)
     if flags and flags.is_components_v2 and (content or embeds):
-        raise ValueError("Cannot use v2 components with content or embeds")
+        err = "Cannot use v2 components with content or embeds"
+        raise ValueError(err)
 
     if suppress_embeds is not MISSING:
         flags = MessageFlags._from_value(default_flags if flags is MISSING else flags.value)
@@ -1308,7 +1311,8 @@ class Message(Hashable):
 
         if reaction is None:
             # already removed?
-            raise ValueError("Emoji already removed?")
+            msg = "Emoji already removed?"
+            raise ValueError(msg)
 
         # if reaction isn't in the list, we crash. This means Discord
         # sent bad data, or we stored improperly
@@ -2371,7 +2375,8 @@ class Message(Hashable):
             The created thread.
         """
         if self.guild is None:
-            raise TypeError("This message does not have guild info attached.")
+            msg = "This message does not have guild info attached."
+            raise TypeError(msg)
 
         if auto_archive_duration is not None:
             auto_archive_duration = cast(
@@ -2590,10 +2595,11 @@ class PartialMessage(Hashable):
             ChannelType.voice,
             ChannelType.stage_voice,
         ):
-            raise TypeError(
+            msg = (
                 f"Expected TextChannel, VoiceChannel, StageChannel, Thread, DMChannel, GroupChannel, or PartialMessageable "
                 f"with a valid type, not {type(channel)!r} (type: {channel.type!r})"
             )
+            raise TypeError(msg)
 
         self.channel: MessageableChannel = channel
         self._state: ConnectionState = channel._state

@@ -52,9 +52,8 @@ class File(UIComponent):
     ) -> None:
         file_media = handle_media_item_input(file)
         if not file_media.url.startswith("attachment://"):
-            raise ValueError(
-                "File component only supports `attachment://` references, not external media URLs"
-            )
+            msg = "File component only supports `attachment://` references, not external media URLs"
+            raise ValueError(msg)
 
         self._underlying = FileComponent._raw_construct(
             type=ComponentType.file,
@@ -74,9 +73,8 @@ class File(UIComponent):
     def file(self, value: LocalMediaItemInput) -> None:
         file_media = handle_media_item_input(value)
         if not file_media.url.startswith("attachment://"):
-            raise ValueError(
-                "File component only supports `attachment://` references, not external media URLs"
-            )
+            msg = "File component only supports `attachment://` references, not external media URLs"
+            raise ValueError(msg)
         self._underlying.file = file_media
 
     @property

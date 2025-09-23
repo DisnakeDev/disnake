@@ -33,7 +33,8 @@ class FlagTypings(BaseCodemodCommand):
     def transform_module(self, tree: cst.Module) -> cst.Module:
         current_module = self.context.full_module_name
         if current_module not in MODULES:
-            raise codemod.SkipFile("this module contains no definitions of flag classes.")
+            msg = "this module contains no definitions of flag classes."
+            raise codemod.SkipFile(msg)
 
         # import and load the module
         module = importlib.import_module(current_module)

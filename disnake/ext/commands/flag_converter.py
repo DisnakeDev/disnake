@@ -125,15 +125,19 @@ def flag(
 
 def validate_flag_name(name: str, forbidden: set[str]) -> None:
     if not name:
-        raise ValueError("flag names should not be empty")
+        msg = "flag names should not be empty"
+        raise ValueError(msg)
 
     for ch in name:
         if ch.isspace():
-            raise ValueError(f"flag name {name!r} cannot have spaces")
+            msg = f"flag name {name!r} cannot have spaces"
+            raise ValueError(msg)
         if ch == "\\":
-            raise ValueError(f"flag name {name!r} cannot have backslashes")
+            msg = f"flag name {name!r} cannot have backslashes"
+            raise ValueError(msg)
         if ch in forbidden:
-            raise ValueError(f"flag name {name!r} cannot have any of {forbidden!r} within them")
+            msg = f"flag name {name!r} cannot have any of {forbidden!r} within them"
+            raise ValueError(msg)
 
 
 def get_flags(
@@ -212,9 +216,8 @@ def get_flags(
                 if flag.max_args is MISSING:
                     flag.max_args = 1
             else:
-                raise TypeError(
-                    f"Unsupported typing annotation {annotation!r} for {flag.name!r} flag"
-                )
+                msg = f"Unsupported typing annotation {annotation!r} for {flag.name!r} flag"
+                raise TypeError(msg)
 
         if flag.override is MISSING:
             flag.override = False
@@ -222,7 +225,8 @@ def get_flags(
         # Validate flag names are unique
         name = flag.name.casefold() if case_insensitive else flag.name
         if name in names:
-            raise TypeError(f"{flag.name!r} flag conflicts with previous flag or alias.")
+            msg = f"{flag.name!r} flag conflicts with previous flag or alias."
+            raise TypeError(msg)
         else:
             names.add(name)
 
@@ -230,9 +234,8 @@ def get_flags(
             # Validate alias is unique
             alias = alias.casefold() if case_insensitive else alias
             if alias in names:
-                raise TypeError(
-                    f"{flag.name!r} flag alias {alias!r} conflicts with previous flag or alias."
-                )
+                msg = f"{flag.name!r} flag alias {alias!r} conflicts with previous flag or alias."
+                raise TypeError(msg)
             else:
                 names.add(alias)
 

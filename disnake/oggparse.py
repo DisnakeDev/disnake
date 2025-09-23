@@ -52,7 +52,8 @@ class OggPage:
             bodylen = sum(struct.unpack("B" * self.segnum, self.segtable))
             self.data: bytes = stream.read(bodylen)
         except Exception:
-            raise OggError("bad data stream") from None
+            msg = "bad data stream"
+            raise OggError(msg) from None
 
     def iter_packets(self) -> Generator[tuple[bytes, bool], None, None]:
         packetlen = offset = 0
@@ -84,7 +85,8 @@ class OggStream:
         elif not head:
             return None
         else:
-            raise OggError("invalid header magic")
+            msg = "invalid header magic"
+            raise OggError(msg)
 
     def _iter_pages(self) -> Generator[OggPage, None, None]:
         page = self._next_page()
