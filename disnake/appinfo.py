@@ -486,6 +486,7 @@ class AppInfo:
         role_connections_verification_url: Optional[:class:`str`]
             The application's role connection verification entry point,
             which when configured will render the app as a verification method
+            in the guild role verification configuration.
         install_params: Optional[:class:`InstallParams`]
             The installation parameters for this application.
 
@@ -495,7 +496,6 @@ class AppInfo:
             instead of this parameter, as this parameter is soft-deprecated by Discord.
 
             :attr:`bot_public` **must** be ``True`` if this parameter is provided.
-            in the guild role verification configuration.
         guild_install_type_config: Optional[:class:`InstallTypeConfiguration`]
             The guild installation type configuration for this application.
             If set to ``None``, guild installations will be disabled.
