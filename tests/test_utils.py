@@ -787,7 +787,7 @@ def test_normalise_optional_params(params, expected) -> None:
         (Union["tuple", None, int], Union[tuple, int, None], True),
         # forward refs
         ("bool", bool, True),
-        ("Tuple[dict, List[Literal[42, 99]]]", tuple[dict, list[Literal[42, 99]]], True),
+        ("tuple[dict, List[Literal[42, 99]]]", tuple[dict, list[Literal[42, 99]]], True),
         # 3.10 union syntax
         pytest.param(
             "int | float",
