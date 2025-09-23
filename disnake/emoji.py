@@ -263,9 +263,9 @@ class Emoji(_EmojiTag, AssetMixin):
                 )
                 raise InvalidData(msg)
 
-            return await self._state.http.delete_app_emoji(self.application_id, self.id)
+            await self._state.http.delete_app_emoji(self.application_id, self.id)
+            return
         await self._state.http.delete_custom_emoji(self.guild.id, self.id, reason=reason)
-        return None
 
     async def edit(
         self, *, name: str = MISSING, roles: List[Snowflake] = MISSING, reason: Optional[str] = None
