@@ -1,0 +1,1 @@
+Update references to typing.Dict and other collections in Sphinx documentation to use lowercase built-in types with appropriate Sphinx roles.
