@@ -287,13 +287,7 @@ def autotyping(session: nox.Session) -> None:
     this runs on each folder in the repository with specific settings.
     """
     install_deps(session)
-    base_command = [
-        "python",
-        "-m",
-        "libcst.tool",
-        "codemod",
-        "autotyping.AutotypeCommand",
-    ]
+    base_command = ["python", "-m", "libcst.tool", "codemod", "autotyping.AutotypeCommand"]
     if not session.interactive:
         base_command += ["--hide-progress"]
 
