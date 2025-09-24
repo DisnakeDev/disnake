@@ -800,7 +800,7 @@ def loop(
 
     def decorator(func: LF) -> L_co:
         if not iscoroutinefunction(func):
-            msg = "decorated function must be a coroutine"
+            msg = "The decorated function must be a coroutine function."
             raise TypeError(msg)
 
         return cast("Type[L_co]", cls)(func, **kwargs)

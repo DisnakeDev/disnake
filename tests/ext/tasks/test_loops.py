@@ -18,7 +18,7 @@ class TestLoops:
         for c in (Cog, Cog()):
             assert c.task.seconds == 30
 
-        with pytest.raises(TypeError, match="must be a coroutine"):
+        with pytest.raises(TypeError, match="must be a coroutine function"):
 
             @loop()  # type: ignore
             def task() -> None: ...

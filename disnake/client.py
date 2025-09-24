@@ -1854,8 +1854,6 @@ class Client:
 
         You can find more info about the events in the :ref:`documentation <disnake_api_events>`.
 
-        The events must be a :ref:`coroutine <coroutine>`, if not, :exc:`TypeError` is raised.
-
         Example
         -------
         .. code-block:: python3
@@ -1864,10 +1862,15 @@ class Client:
             async def on_ready():
                 print('Ready!')
 
+        Parameters
+        ----------
+        coro: :ref:`coroutine function <coroutine>`
+            The coroutine function to register as the event handler.
+
         Raises
         ------
         TypeError
-            The coroutine passed is not actually a coroutine.
+            The argument passed is not actually a coroutine function.
         """
         if not utils.iscoroutinefunction(coro):
             msg = "event registered must be a coroutine function"

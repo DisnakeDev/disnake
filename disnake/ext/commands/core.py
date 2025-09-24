@@ -285,7 +285,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         **kwargs: Any,
     ) -> None:
         if not iscoroutinefunction(func):
-            msg = "Callback must be a coroutine."
+            msg = "Callback must be a coroutine function."
             raise TypeError(msg)
 
         name = kwargs.get("name") or func.__name__
@@ -882,7 +882,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
                 await self.call_after_hooks(ctx)
 
     def error(self, coro: ErrorT) -> ErrorT:
-        """A decorator that registers a coroutine as a local error handler.
+        """A decorator that registers a coroutine function as a local error handler.
 
         A local error handler is an :func:`.on_command_error` event limited to
         a single command. However, the :func:`.on_command_error` is still
@@ -890,16 +890,16 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
 
         Parameters
         ----------
-        coro: :ref:`coroutine <coroutine>`
-            The coroutine to register as the local error handler.
+        coro: :ref:`coroutine function <coroutine>`
+            The coroutine function to register as the local error handler.
 
         Raises
         ------
         TypeError
-            The coroutine passed is not actually a coroutine.
+            The argument passed is not actually a coroutine function.
         """
         if not iscoroutinefunction(coro):
-            msg = "The error handler must be a coroutine."
+            msg = "The error handler must be a coroutine function."
             raise TypeError(msg)
 
         self.on_error: Error = coro
@@ -915,7 +915,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         return hasattr(self, "on_error")
 
     def before_invoke(self, coro: HookT) -> HookT:
-        """A decorator that registers a coroutine as a pre-invoke hook.
+        """A decorator that registers a coroutine function as a pre-invoke hook.
 
         A pre-invoke hook is called directly before the command is
         called. This makes it a useful function to set up database
@@ -927,23 +927,23 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
 
         Parameters
         ----------
-        coro: :ref:`coroutine <coroutine>`
-            The coroutine to register as the pre-invoke hook.
+        coro: :ref:`coroutine function <coroutine>`
+            The coroutine function to register as the pre-invoke hook.
 
         Raises
         ------
         TypeError
-            The coroutine passed is not actually a coroutine.
+            The argument passed is not actually a coroutine function.
         """
         if not iscoroutinefunction(coro):
-            msg = "The pre-invoke hook must be a coroutine."
+            msg = "The pre-invoke hook must be a coroutine function."
             raise TypeError(msg)
 
         self._before_invoke = coro
         return coro
 
     def after_invoke(self, coro: HookT) -> HookT:
-        """A decorator that registers a coroutine as a post-invoke hook.
+        """A decorator that registers a coroutine function as a post-invoke hook.
 
         A post-invoke hook is called directly after the command is
         called. This makes it a useful function to clean-up database
@@ -955,16 +955,16 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
 
         Parameters
         ----------
-        coro: :ref:`coroutine <coroutine>`
-            The coroutine to register as the post-invoke hook.
+        coro: :ref:`coroutine function <coroutine>`
+            The coroutine function to register as the post-invoke hook.
 
         Raises
         ------
         TypeError
-            The coroutine passed is not actually a coroutine.
+            The argument passed is not actually a coroutine function.
         """
         if not iscoroutinefunction(coro):
-            msg = "The post-invoke hook must be a coroutine."
+            msg = "The post-invoke hook must be a coroutine function."
             raise TypeError(msg)
 
         self._after_invoke = coro
