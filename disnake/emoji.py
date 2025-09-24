@@ -54,7 +54,7 @@ class Emoji(_EmojiTag, AssetMixin):
 
     .. versionchanged:: |vnext|
 
-        This class can now represents app emojis. Use :attr:`Emoji.is_app_emoji` to check for this.
+        This class can now represent app emojis. Use :attr:`Emoji.is_app_emoji` to check for this.
         To check if this is a guild emoji, use :attr:`Emoji.is_guild_emoji`.
 
     Attributes
@@ -74,9 +74,12 @@ class Emoji(_EmojiTag, AssetMixin):
     available: :class:`bool`
         Whether the emoji is available for use.
     user: Optional[:class:`User`]
-        The user that created this emoji. This can only be retrieved using
-        :meth:`Guild.fetch_emoji`/:meth:`Guild.fetch_emojis` while
+        The user that created this emoji. If this is a guild emoji, this can only be retrieved
+        using :meth:`Guild.fetch_emoji`/:meth:`Guild.fetch_emojis` while
         having the :attr:`~Permissions.manage_guild_expressions` permission.
+
+        If this is an app emoji, this is the team member that uploaded the emoji,
+        or the bot user if created using :meth:`Client.create_application_emoji`.
     """
 
     __slots__: Tuple[str, ...] = (
@@ -184,7 +187,8 @@ class Emoji(_EmojiTag, AssetMixin):
 
     @property
     def application_id(self) -> Optional[int]:
-        """Optional[:class:`int`]: The ID of the application which owns this emoji.
+        """Optional[:class:`int`]: The ID of the application which owns this emoji,
+        if this is an app emoji.
 
         .. versionadded:: |vnext|
         """
@@ -194,7 +198,7 @@ class Emoji(_EmojiTag, AssetMixin):
 
     @property
     def is_guild_emoji(self) -> bool:
-        """:class:`bool`: Whether this is a guild emoji.
+        """:class:`bool`: Whether this emoji is a guild emoji.
 
         .. versionadded:: |vnext|
         """
@@ -202,7 +206,7 @@ class Emoji(_EmojiTag, AssetMixin):
 
     @property
     def is_app_emoji(self) -> bool:
-        """:class:`bool`: Whether this is an application emoji.
+        """:class:`bool`: Whether this emoji is an application emoji.
 
         .. versionadded:: |vnext|
         """
@@ -228,15 +232,17 @@ class Emoji(_EmojiTag, AssetMixin):
     async def delete(self, *, reason: Optional[str] = None) -> None:
         """|coro|
 
-        Deletes the custom emoji.
+        Deletes the emoji.
 
-        You must have :attr:`~Permissions.manage_guild_expressions` permission to
-        do this.
+        If this is not an app emoji, you must have
+        :attr:`~Permissions.manage_guild_expressions` permission to do this.
 
         Parameters
         ----------
         reason: Optional[:class:`str`]
             The reason for deleting this emoji. Shows up on the audit log.
+
+            Only applies to emojis that belong to a :class:`.Guild`.
 
         Raises
         ------
@@ -251,7 +257,10 @@ class Emoji(_EmojiTag, AssetMixin):
         if self.guild is None:
             if self.application_id is None:
                 # should never happen
-                msg = f"guild and application_id are both None when attempting to delete emoji with ID {self.id} This may be a library bug! Open an issue on GitHub."
+                msg = (
+                    f"guild_id and application_id are both None when attempting to delete emoji with ID {self.id}."
+                    " This may be a library bug! Open an issue on GitHub."
+                )
                 raise InvalidData(msg)
 
             return await self._state.http.delete_app_emoji(self.application_id, self.id)
@@ -262,10 +271,10 @@ class Emoji(_EmojiTag, AssetMixin):
     ) -> Emoji:
         """|coro|
 
-        Edits the custom emoji.
+        Edits the emoji.
 
-        You must have :attr:`~Permissions.manage_guild_expressions` permission to
-        do this.
+        If this emoji is a guild emoji, you must have
+        :attr:`~Permissions.manage_guild_expressions` permission to do this.
 
         .. versionchanged:: 2.0
             The newly updated emoji is returned.
@@ -280,8 +289,12 @@ class Emoji(_EmojiTag, AssetMixin):
             An emoji cannot have both subscription roles (see :attr:`RoleTags.integration_id`) and
             non-subscription roles, and emojis can't be converted between premium and non-premium
             after creation.
+
+            Only applies to emojis that belong to a :class:`.Guild`.
         reason: Optional[:class:`str`]
             The reason for editing this emoji. Shows up on the audit log.
+
+            Only applies to emojis that belong to a :class:`.Guild`.
 
         Raises
         ------
@@ -306,7 +319,10 @@ class Emoji(_EmojiTag, AssetMixin):
         if self.guild is None:
             if self.application_id is None:
                 # should never happen
-                msg = f"guild and application_id are both None when attempting to edit emoji with ID {self.id} This may be a library bug! Open an issue on GitHub."
+                msg = (
+                    f"guild_id and application_id are both None when attempting to edit emoji with ID {self.id}."
+                    " This may be a library bug! Open an issue on GitHub."
+                )
                 raise InvalidData(msg)
 
             data = await self._state.http.edit_app_emoji(self.application_id, self.id, name)
