@@ -45,8 +45,8 @@ class InvokableUserCommand(InvokableApplicationCommand):
         The full command name, equivalent to :attr:`.name` for this type of command.
     body: :class:`.UserCommand`
         An object being registered in the API.
-    callback: :ref:`coroutine <coroutine>`
-        The coroutine that is executed when the user command is called.
+    callback: :ref:`coroutine function <coroutine>`
+        The coroutine function that is executed when the user command is called.
     cog: Optional[:class:`Cog`]
         The cog that this user command belongs to. ``None`` if there isn't one.
     checks: List[Callable[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
@@ -156,8 +156,8 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         The full command name, equivalent to :attr:`.name` for this type of command.
     body: :class:`.MessageCommand`
         An object being registered in the API.
-    callback: :ref:`coroutine <coroutine>`
-        The coroutine that is executed when the message command is called.
+    callback: :ref:`coroutine function <coroutine>`
+        The coroutine function that is executed when the message command is called.
     cog: Optional[:class:`Cog`]
         The cog that this message command belongs to. ``None`` if there isn't one.
     checks: List[Callable[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
