@@ -482,7 +482,7 @@ class Loop(Generic[LF]):
         )
 
     def before_loop(self, coro: FT) -> FT:
-        """A decorator that registers a coroutine to be called before the loop starts running.
+        """A decorator that registers a coroutine function to be called before the loop starts running.
 
         This is useful if you want to wait for some bot state before the loop starts,
         such as :meth:`disnake.Client.wait_until_ready`.
@@ -491,13 +491,13 @@ class Loop(Generic[LF]):
 
         Parameters
         ----------
-        coro: :ref:`coroutine <coroutine>`
-            The coroutine to register before the loop runs.
+        coro: :ref:`coroutine function <coroutine>`
+            The coroutine function to register before the loop runs.
 
         Raises
         ------
         TypeError
-            The function was not a coroutine.
+            The function was not a coroutine function.
         """
         if not iscoroutinefunction(coro):
             msg = f"Expected coroutine function, received {coro.__class__.__name__!r}."
@@ -507,7 +507,7 @@ class Loop(Generic[LF]):
         return coro
 
     def after_loop(self, coro: FT) -> FT:
-        """A decorator that register a coroutine to be called after the loop finished running.
+        """A decorator that register a coroutine function to be called after the loop finished running.
 
         The coroutine must take no arguments (except ``self`` in a class context).
 
@@ -519,13 +519,13 @@ class Loop(Generic[LF]):
 
         Parameters
         ----------
-        coro: :ref:`coroutine <coroutine>`
-            The coroutine to register after the loop finishes.
+        coro: :ref:`coroutine function <coroutine>`
+            The coroutine function to register after the loop finishes.
 
         Raises
         ------
         TypeError
-            The function was not a coroutine.
+            The function was not a coroutine function.
         """
         if not iscoroutinefunction(coro):
             msg = f"Expected coroutine function, received {coro.__class__.__name__!r}."
@@ -535,7 +535,7 @@ class Loop(Generic[LF]):
         return coro
 
     def error(self, coro: ET) -> ET:
-        """A decorator that registers a coroutine to be called if the task encounters an unhandled exception.
+        """A decorator that registers a coroutine function to be called if the task encounters an unhandled exception.
 
         The coroutine must take only one argument the exception raised (except ``self`` in a class context).
 
@@ -546,13 +546,13 @@ class Loop(Generic[LF]):
 
         Parameters
         ----------
-        coro: :ref:`coroutine <coroutine>`
-            The coroutine to register in the event of an unhandled exception.
+        coro: :ref:`coroutine function <coroutine>`
+            The coroutine function to register in the event of an unhandled exception.
 
         Raises
         ------
         TypeError
-            The function was not a coroutine.
+            The function was not a coroutine function.
         """
         if not iscoroutinefunction(coro):
             msg = f"Expected coroutine function, received {coro.__class__.__name__!r}."

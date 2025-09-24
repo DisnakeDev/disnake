@@ -113,8 +113,8 @@ class InvokableApplicationCommand(ABC):
         For example, the qualified name for ``/one two three`` would be ``one two three``.
     body: :class:`.ApplicationCommand`
         An object being registered in the API.
-    callback: :ref:`coroutine <coroutine>`
-        The coroutine that is executed when the command is called.
+    callback: :ref:`coroutine function <coroutine>`
+        The coroutine function that is executed when the command is called.
     cog: Optional[:class:`Cog`]
         The cog that this command belongs to. ``None`` if there isn't one.
     checks: List[Callable[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]

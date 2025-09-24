@@ -261,7 +261,7 @@ class BotBase(CommonBotBase, GroupMixin):
 
         .. note::
 
-            This function can either be a regular function or a coroutine.
+            This function can either be a regular function or a coroutine function.
 
         Similar to a command :func:`.check`\\, this takes a single parameter
         of type :class:`.Context` and can only raise exceptions inherited from
@@ -301,7 +301,7 @@ class BotBase(CommonBotBase, GroupMixin):
 
         .. note::
 
-            This function can either be a regular function or a coroutine.
+            This function can either be a regular function or a coroutine function.
 
         Similar to a command :func:`.check`\\, this takes a single parameter
         of type :class:`.Context` and can only raise exceptions inherited from

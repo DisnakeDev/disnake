@@ -198,8 +198,8 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
     ----------
     name: :class:`str`
         The name of the command.
-    callback: :ref:`coroutine <coroutine>`
-        The coroutine that is executed when the command is called.
+    callback: :ref:`coroutine function <coroutine>`
+        The coroutine function that is executed when the command is called.
     help: Optional[:class:`str`]
         The long help text for the command.
     brief: Optional[:class:`str`]
