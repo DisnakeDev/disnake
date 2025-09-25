@@ -172,7 +172,9 @@ ignore = [
     ## flake8-todos
     "TD", # similar to flake8-fixme, though they may conflict
     ## flake8-typechecking
-    "TC", # TODO: enable in typing PR
+    "TC001", # typing-only first party import # to be enabled
+    "TC002", # typing only standard library import # to be enabled
+    "TC003", # typing only third party import # to be enabled
     ## flake8-unused-arguments
     "ARG", # most unused arguments are intentional
     ## flake8-use-pathlib
