@@ -52,8 +52,9 @@ runs:
       shell: bash
       env:
         UV_PYTHON_DOWNLOADS: automatic
+        INPUTS_PYTHON_VERSION: ${{ inputs.python-version }}
       run: |
-        uv python install ${{ inputs.python-version }}
+        uv python install ${INPUTS_PYTHON_VERSION}
 
     - name: Install nox
       shell: bash

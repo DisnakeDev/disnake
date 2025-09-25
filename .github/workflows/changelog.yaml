@@ -26,6 +26,7 @@ jobs:
         with:
           # towncrier needs a non-shallow clone
           fetch-depth: '0'
+          persist-credentials: false
 
       - name: Set up environment
         id: setup-env
