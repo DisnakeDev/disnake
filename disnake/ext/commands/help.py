@@ -151,7 +151,8 @@ class Paginator:
         """
         max_page_size = self.max_size - self._prefix_len - self._suffix_len - 2 * self._linesep_len
         if len(line) > max_page_size:
-            raise RuntimeError(f"Line exceeds maximum page size {max_page_size}")
+            msg = f"Line exceeds maximum page size {max_page_size}"
+            raise RuntimeError(msg)
 
         if self._count + len(line) + self._linesep_len > self.max_size - self._suffix_len:
             self.close_page()
@@ -1035,9 +1036,9 @@ class DefaultHelpCommand(HelpCommand):
 
     def get_destination(self) -> disnake.abc.Messageable:
         ctx = self.context
-        if self.dm_help is True:
-            return ctx.author
-        elif self.dm_help is None and len(self.paginator) > self.dm_help_threshold:
+        if self.dm_help is True or (
+            self.dm_help is None and len(self.paginator) > self.dm_help_threshold
+        ):
             return ctx.author
         else:
             return ctx.channel
@@ -1283,9 +1284,9 @@ class MinimalHelpCommand(HelpCommand):
 
     def get_destination(self) -> disnake.abc.Messageable:
         ctx = self.context
-        if self.dm_help is True:
-            return ctx.author
-        elif self.dm_help is None and len(self.paginator) > self.dm_help_threshold:
+        if self.dm_help is True or (
+            self.dm_help is None and len(self.paginator) > self.dm_help_threshold
+        ):
             return ctx.author
         else:
             return ctx.channel

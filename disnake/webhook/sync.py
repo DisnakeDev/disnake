@@ -214,7 +214,8 @@ class WebhookAdapter:
                     raise DiscordServerError(response, data)
                 raise HTTPException(response, data)
 
-            raise RuntimeError("Unreachable code in HTTP handling.")
+            msg = "Unreachable code in HTTP handling."
+            raise RuntimeError(msg)
 
     def delete_webhook(
         self,
@@ -681,7 +682,8 @@ class SyncWebhook(BaseWebhook):
 
         if session is not MISSING:
             if not isinstance(session, requests.Session):
-                raise TypeError(f"expected requests.Session not {session.__class__!r}")
+                msg = f"expected requests.Session not {session.__class__!r}"
+                raise TypeError(msg)
         else:
             session = requests  # type: ignore
         return cls(data, session, token=bot_token)
@@ -724,7 +726,8 @@ class SyncWebhook(BaseWebhook):
             url,
         )
         if m is None:
-            raise ValueError("Invalid webhook URL given.")
+            msg = "Invalid webhook URL given."
+            raise ValueError(msg)
 
         data: Dict[str, Any] = m.groupdict()
         data["type"] = 1
@@ -732,7 +735,8 @@ class SyncWebhook(BaseWebhook):
 
         if session is not MISSING:
             if not isinstance(session, requests.Session):
-                raise TypeError(f"expected requests.Session not {session.__class__!r}")
+                msg = f"expected requests.Session not {session.__class__!r}"
+                raise TypeError(msg)
         else:
             session = requests  # type: ignore
         return cls(data, session, token=bot_token)  # type: ignore
@@ -778,7 +782,8 @@ class SyncWebhook(BaseWebhook):
         elif self.token:
             data = adapter.fetch_webhook_with_token(self.id, self.token, session=self.session)
         else:
-            raise WebhookTokenMissing("This webhook does not have a token associated with it")
+            msg = "This webhook does not have a token associated with it"
+            raise WebhookTokenMissing(msg)
 
         return SyncWebhook(data, self.session, token=self.auth_token, state=self._state)
 
@@ -811,7 +816,8 @@ class SyncWebhook(BaseWebhook):
             This webhook does not have a token associated with it.
         """
         if self.token is None and self.auth_token is None:
-            raise WebhookTokenMissing("This webhook does not have a token associated with it")
+            msg = "This webhook does not have a token associated with it"
+            raise WebhookTokenMissing(msg)
 
         adapter: WebhookAdapter = _get_webhook_adapter()
 
@@ -870,7 +876,8 @@ class SyncWebhook(BaseWebhook):
             The newly edited webhook.
         """
         if self.token is None and self.auth_token is None:
-            raise WebhookTokenMissing("This webhook does not have a token associated with it")
+            msg = "This webhook does not have a token associated with it"
+            raise WebhookTokenMissing(msg)
 
         payload: Dict[str, Any] = {}
         if name is not MISSING:
@@ -885,7 +892,8 @@ class SyncWebhook(BaseWebhook):
         # If a channel is given, always use the authenticated endpoint
         if channel is not None:
             if self.auth_token is None:
-                raise WebhookTokenMissing("Editing channel requires authenticated webhook")
+                msg = "Editing channel requires authenticated webhook"
+                raise WebhookTokenMissing(msg)
 
             payload["channel_id"] = channel.id
             data = adapter.edit_webhook(
@@ -902,7 +910,8 @@ class SyncWebhook(BaseWebhook):
             )
 
         if data is None:
-            raise RuntimeError("Unreachable code hit: data was not assigned")
+            msg = "Unreachable code hit: data was not assigned"
+            raise RuntimeError(msg)
 
         return SyncWebhook(
             data=data, session=self.session, token=self.auth_token, state=self._state
@@ -1091,7 +1100,8 @@ class SyncWebhook(BaseWebhook):
             If ``wait`` is ``True`` then the message that was sent, otherwise ``None``.
         """
         if self.token is None:
-            raise WebhookTokenMissing("This webhook does not have a token associated with it")
+            msg = "This webhook does not have a token associated with it"
+            raise WebhookTokenMissing(msg)
 
         previous_mentions: Optional[AllowedMentions] = getattr(
             self._state, "allowed_mentions", None
@@ -1102,9 +1112,8 @@ class SyncWebhook(BaseWebhook):
         thread_id: Optional[int] = None
         if thread is not MISSING:
             if thread_name or applied_tags:
-                raise TypeError(
-                    "Cannot use `thread_name` or `applied_tags` when `thread` is provided."
-                )
+                msg = "Cannot use `thread_name` or `applied_tags` when `thread` is provided."
+                raise TypeError(msg)
             thread_id = thread.id
 
         params = handle_message_parameters(
@@ -1180,7 +1189,8 @@ class SyncWebhook(BaseWebhook):
             The message asked for.
         """
         if self.token is None:
-            raise WebhookTokenMissing("This webhook does not have a token associated with it")
+            msg = "This webhook does not have a token associated with it"
+            raise WebhookTokenMissing(msg)
 
         adapter: WebhookAdapter = _get_webhook_adapter()
         data = adapter.get_webhook_message(
@@ -1275,7 +1285,8 @@ class SyncWebhook(BaseWebhook):
             There was no token associated with this webhook.
         """
         if self.token is None:
-            raise WebhookTokenMissing("This webhook does not have a token associated with it")
+            msg = "This webhook does not have a token associated with it"
+            raise WebhookTokenMissing(msg)
 
         # if no attachment list was provided but we're uploading new files,
         # use current attachments as the base
@@ -1343,7 +1354,8 @@ class SyncWebhook(BaseWebhook):
             There is no token associated with this webhook.
         """
         if self.token is None:
-            raise WebhookTokenMissing("This webhook does not have a token associated with it")
+            msg = "This webhook does not have a token associated with it"
+            raise WebhookTokenMissing(msg)
 
         adapter: WebhookAdapter = _get_webhook_adapter()
         adapter.delete_webhook_message(
