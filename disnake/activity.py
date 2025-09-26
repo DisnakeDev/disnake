@@ -103,6 +103,7 @@ class _BaseActivity:
             return datetime.datetime.fromtimestamp(
                 self._created_at / 1000, tz=datetime.timezone.utc
             )
+        return None
 
     @property
     def start(self) -> Optional[datetime.datetime]:

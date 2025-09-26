@@ -263,7 +263,8 @@ class Emoji(_EmojiTag, AssetMixin):
                 )
                 raise InvalidData(msg)
 
-            return await self._state.http.delete_app_emoji(self.application_id, self.id)
+            await self._state.http.delete_app_emoji(self.application_id, self.id)
+            return
         await self._state.http.delete_custom_emoji(self.guild_id, self.id, reason=reason)
 
     async def edit(

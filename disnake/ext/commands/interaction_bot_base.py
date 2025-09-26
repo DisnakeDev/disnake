@@ -462,6 +462,7 @@ class InteractionBotBase(CommonBotBase):
             group = slash.children.get(chain[1])
             if isinstance(group, SubCommandGroup):
                 return group.children.get(chain[2])
+        return None
 
     def get_user_command(self, name: str) -> Optional[InvokableUserCommand]:
         """Gets an :class:`InvokableUserCommand` from the internal list
