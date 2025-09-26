@@ -77,7 +77,7 @@ EXECUTION_GROUPS: List[ExecutionGroup] = [
         ExecutionGroup(
             sessions=("pyright",),
             python=python,
-            pyright_paths=("disnake", "tests", "examples", "noxfile.py", "setup.py"),
+            pyright_paths=("disnake", "tests", "examples", "noxfile.py"),
             project=True,
             # FIXME: orjson doesn't yet support python 3.14, remove once we migrate to uv and have version-specific locks
             extras=("speed", "voice") if python not in EXPERIMENTAL_PYTHON_VERSIONS else ("voice",),
@@ -100,7 +100,7 @@ EXECUTION_GROUPS: List[ExecutionGroup] = [
     ),
     # the other sessions, they don't need pyright, but they need to run
     ExecutionGroup(
-        sessions=("lint", "slotscheck", "check-manifest"),
+        sessions=("lint", "slotscheck"),
         groups=("tools",),
     ),
     # build
@@ -261,7 +261,7 @@ def slotscheck(session: nox.Session) -> None:
     session.run("python", "-m", "slotscheck", "--verbose", "-m", "disnake")
 
 
-@nox.session(requires=["check-manifest"])
+@nox.session()
 def build(session: nox.Session) -> None:
     """Build a dist."""
     install_deps(session)
