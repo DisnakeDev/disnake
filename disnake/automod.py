@@ -629,12 +629,12 @@ class AutoModRule:
             payload["trigger_metadata"] = trigger_metadata.to_dict()
         if actions is not MISSING:
             if not actions:
-                raise ValueError("At least one action must be provided.")
+                msg = "At least one action must be provided."
+                raise ValueError(msg)
             for action in actions:
                 if not isinstance(action, AutoModAction):
-                    raise TypeError(
-                        f"actions must be of type `AutoModAction` (or subtype), not {type(action)!r}"
-                    )
+                    msg = f"actions must be of type `AutoModAction` (or subtype), not {type(action)!r}"
+                    raise TypeError(msg)
             payload["actions"] = [a.to_dict() for a in actions]
         if enabled is not MISSING:
             payload["enabled"] = enabled

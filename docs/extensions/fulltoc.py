@@ -124,7 +124,8 @@ def build_full_toctree(
             toctrees.append(cast("nodes.Element", toctree))
 
     if not toctrees:
-        raise RuntimeError("Expected at least one toctree")
+        msg = "Expected at least one toctree"
+        raise RuntimeError(msg)
 
     result = toctrees[0]
     for toctree in toctrees[1:]:

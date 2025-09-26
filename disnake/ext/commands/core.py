@@ -285,11 +285,13 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         **kwargs: Any,
     ) -> None:
         if not iscoroutinefunction(func):
-            raise TypeError("Callback must be a coroutine.")
+            msg = "Callback must be a coroutine."
+            raise TypeError(msg)
 
         name = kwargs.get("name") or func.__name__
         if not isinstance(name, str):
-            raise TypeError("Name of a command must be a string.")
+            msg = "Name of a command must be a string."
+            raise TypeError(msg)
         self.name: str = name
 
         self.callback = func
@@ -312,7 +314,8 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         self.extras: Dict[str, Any] = kwargs.get("extras", {})
 
         if not isinstance(self.aliases, (list, tuple)):
-            raise TypeError("Aliases of a command must be a list or a tuple of strings.")
+            msg = "Aliases of a command must be a list or a tuple of strings."
+            raise TypeError(msg)
 
         self.description: str = inspect.cleandoc(kwargs.get("description", ""))
         self.hidden: bool = kwargs.get("hidden", False)
@@ -335,7 +338,8 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         elif isinstance(cooldown, CooldownMapping):
             buckets = cooldown
         else:
-            raise TypeError("Cooldown must be a an instance of CooldownMapping or None.")
+            msg = "Cooldown must be a an instance of CooldownMapping or None."
+            raise TypeError(msg)
         self._buckets: CooldownMapping = buckets
 
         try:
@@ -390,7 +394,8 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         params = get_signature_parameters(function, globalns, skip_standard_params=True)
         for param in params.values():
             if param.annotation is Greedy:
-                raise TypeError("Unparameterized Greedy[...] is disallowed in signature.")
+                msg = "Unparameterized Greedy[...] is disallowed in signature."
+                raise TypeError(msg)
         self.params = params
 
     def add_check(self, func: Check) -> None:
@@ -557,7 +562,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
             except ArgumentParsingError:
                 if (
                     self._is_typing_optional(param.annotation)
-                    and not param.kind == param.VAR_POSITIONAL
+                    and param.kind != param.VAR_POSITIONAL
                 ):
                     view.index = previous
                     return None
@@ -709,7 +714,8 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
                         break
 
         if not self.ignore_extra and not view.eof:
-            raise TooManyArguments(f"Too many arguments passed to {self.qualified_name}")
+            msg = f"Too many arguments passed to {self.qualified_name}"
+            raise TooManyArguments(msg)
 
     async def call_before_hooks(self, ctx: Context) -> None:
         # now that we're done preparing we can call the pre-command hooks
@@ -769,7 +775,8 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         ctx.command = self
 
         if not await self.can_run(ctx):
-            raise CheckFailure(f"The check functions for command {self.qualified_name} failed.")
+            msg = f"The check functions for command {self.qualified_name} failed."
+            raise CheckFailure(msg)
 
         if self._max_concurrency is not None:
             # For this application, context can be duck-typed as a Message
@@ -892,7 +899,8 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
             The coroutine passed is not actually a coroutine.
         """
         if not iscoroutinefunction(coro):
-            raise TypeError("The error handler must be a coroutine.")
+            msg = "The error handler must be a coroutine."
+            raise TypeError(msg)
 
         self.on_error: Error = coro
         return coro
@@ -928,7 +936,8 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
             The coroutine passed is not actually a coroutine.
         """
         if not iscoroutinefunction(coro):
-            raise TypeError("The pre-invoke hook must be a coroutine.")
+            msg = "The pre-invoke hook must be a coroutine."
+            raise TypeError(msg)
 
         self._before_invoke = coro
         return coro
@@ -955,7 +964,8 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
             The coroutine passed is not actually a coroutine.
         """
         if not iscoroutinefunction(coro):
-            raise TypeError("The post-invoke hook must be a coroutine.")
+            msg = "The post-invoke hook must be a coroutine."
+            raise TypeError(msg)
 
         self._after_invoke = coro
         return coro
@@ -1072,16 +1082,16 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
             Whether the command can be invoked.
         """
         if not self.enabled:
-            raise DisabledCommand(f"{self.name} command is disabled")
+            msg = f"{self.name} command is disabled"
+            raise DisabledCommand(msg)
 
         original = ctx.command
         ctx.command = self
 
         try:
             if not await ctx.bot.can_run(ctx):
-                raise CheckFailure(
-                    f"The global check functions for command {self.qualified_name} failed."
-                )
+                msg = f"The global check functions for command {self.qualified_name} failed."
+                raise CheckFailure(msg)
 
             cog = self.cog
             if cog is not None:
@@ -1154,7 +1164,8 @@ class GroupMixin(Generic[CogT]):
             If the command passed is not a subclass of :class:`.Command`.
         """
         if not isinstance(command, Command):
-            raise TypeError("The command passed must be a subclass of Command")
+            msg = "The command passed must be a subclass of Command"
+            raise TypeError(msg)
 
         if isinstance(self, Command):
             command.parent = self
@@ -1575,7 +1586,8 @@ def command(
 
     def decorator(func: CommandCallback[CogT, ContextT, P, T]) -> Command[Any, Any, Any]:
         if hasattr(func, "__command_flag__"):
-            raise TypeError("Callback is already a command.")
+            msg = "Callback is already a command."
+            raise TypeError(msg)
         return cls(func, name=name, **attrs)
 
     return decorator
@@ -1772,7 +1784,8 @@ def check_any(*checks: Check) -> Callable[[T], T]:
         try:
             pred = wrapped.predicate
         except AttributeError:
-            raise TypeError(f"{wrapped!r} must be wrapped by commands.check decorator") from None
+            msg = f"{wrapped!r} must be wrapped by commands.check decorator"
+            raise TypeError(msg) from None
         else:
             unwrapped.append(pred)
 
@@ -2090,7 +2103,8 @@ def has_permissions(**perms: bool) -> Callable[[T], T]:
     """
     invalid = set(perms) - set(disnake.Permissions.VALID_FLAGS)
     if invalid:
-        raise TypeError(f"Invalid permission(s): {', '.join(invalid)}")
+        msg = f"Invalid permission(s): {', '.join(invalid)}"
+        raise TypeError(msg)
 
     def predicate(ctx: AnyContext) -> bool:
         if isinstance(ctx, disnake.Interaction):
@@ -2193,7 +2207,8 @@ def bot_has_permissions(**perms: bool) -> Callable[[T], T]:
     """
     invalid = set(perms) - set(disnake.Permissions.VALID_FLAGS)
     if invalid:
-        raise TypeError(f"Invalid permission(s): {', '.join(invalid)}")
+        msg = f"Invalid permission(s): {', '.join(invalid)}"
+        raise TypeError(msg)
 
     def predicate(ctx: AnyContext) -> bool:
         if isinstance(ctx, disnake.Interaction):
@@ -2295,7 +2310,8 @@ def has_guild_permissions(**perms: bool) -> Callable[[T], T]:
     """
     invalid = set(perms) - set(disnake.Permissions.VALID_FLAGS)
     if invalid:
-        raise TypeError(f"Invalid permission(s): {', '.join(invalid)}")
+        msg = f"Invalid permission(s): {', '.join(invalid)}"
+        raise TypeError(msg)
 
     def predicate(ctx: AnyContext) -> bool:
         if not ctx.guild:
@@ -2392,7 +2408,8 @@ def bot_has_guild_permissions(**perms: bool) -> Callable[[T], T]:
     """
     invalid = set(perms) - set(disnake.Permissions.VALID_FLAGS)
     if invalid:
-        raise TypeError(f"Invalid permission(s): {', '.join(invalid)}")
+        msg = f"Invalid permission(s): {', '.join(invalid)}"
+        raise TypeError(msg)
 
     def predicate(ctx: AnyContext) -> bool:
         if not ctx.guild:
@@ -2463,7 +2480,8 @@ def is_owner() -> Callable[[T], T]:
 
     async def predicate(ctx: AnyContext) -> bool:
         if not await ctx.bot.is_owner(ctx.author):
-            raise NotOwner("You do not own this bot.")
+            msg = "You do not own this bot."
+            raise NotOwner(msg)
         return True
 
     return check(predicate)
@@ -2574,7 +2592,8 @@ def dynamic_cooldown(
         The type of cooldown to have.
     """
     if not callable(cooldown):
-        raise TypeError("A callable must be provided")
+        msg = "A callable must be provided"
+        raise TypeError(msg)
 
     def decorator(
         func: Union[Command[CogT, P, T], CoroFunc],

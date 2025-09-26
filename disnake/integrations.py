@@ -290,7 +290,8 @@ class StreamIntegration(Integration):
         payload: Dict[str, Any] = {}
         if expire_behaviour is not MISSING:
             if not isinstance(expire_behaviour, ExpireBehaviour):
-                raise TypeError("expire_behaviour field must be of type ExpireBehaviour")
+                msg = "expire_behaviour field must be of type ExpireBehaviour"
+                raise TypeError(msg)
 
             payload["expire_behavior"] = expire_behaviour.value
 

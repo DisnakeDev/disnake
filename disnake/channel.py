@@ -701,7 +701,8 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             return
 
         if len(messages) > 100:
-            raise ClientException("Can only bulk delete messages up to 100 messages")
+            msg = "Can only bulk delete messages up to 100 messages"
+            raise ClientException(msg)
 
         message_ids: SnowflakeList = [m.id for m in messages]
         await self._state.http.delete_messages(self.id, message_ids)
@@ -934,10 +935,12 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             The newly created webhook.
         """
         if not self.is_news():
-            raise TypeError("This channel must be a news channel.")
+            msg = "This channel must be a news channel."
+            raise TypeError(msg)
 
         if not isinstance(destination, TextChannel):
-            raise TypeError(f"Expected TextChannel received {destination.__class__.__name__}")
+            msg = f"Expected TextChannel received {destination.__class__.__name__}"
+            raise TypeError(msg)
 
         from .webhook import Webhook
 
@@ -1092,7 +1095,8 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             The newly created thread
         """
         if not ((message is None) ^ (type is None)):
-            raise ValueError("Exactly one of message and type must be provided.")
+            msg = "Exactly one of message and type must be provided."
+            raise ValueError(msg)
 
         if auto_archive_duration is not None:
             auto_archive_duration = cast(
@@ -1754,7 +1758,8 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
             return
 
         if len(messages) > 100:
-            raise ClientException("Can only bulk delete messages up to 100 messages")
+            msg = "Can only bulk delete messages up to 100 messages"
+            raise ClientException(msg)
 
         message_ids: SnowflakeList = [m.id for m in messages]
         await self._state.http.delete_messages(self.id, message_ids)
@@ -2359,7 +2364,8 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         if privacy_level is not MISSING:
             if not isinstance(privacy_level, StagePrivacyLevel):
-                raise TypeError("privacy_level field must be of type PrivacyLevel")
+                msg = "privacy_level field must be of type PrivacyLevel"
+                raise TypeError(msg)
             if privacy_level is StagePrivacyLevel.public:
                 utils.warn_deprecated(
                     "Setting privacy_level to public is deprecated and will be removed in a future version.",
@@ -2609,7 +2615,8 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
             return
 
         if len(messages) > 100:
-            raise ClientException("Can only bulk delete messages up to 100 messages")
+            msg = "Can only bulk delete messages up to 100 messages"
+            raise ClientException(msg)
 
         message_ids: SnowflakeList = [m.id for m in messages]
         await self._state.http.delete_messages(self.id, message_ids)
@@ -3208,7 +3215,8 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
             The newly created text channel.
         """
         if "category" in options:
-            raise TypeError("got an unexpected keyword argument 'category'")
+            msg = "got an unexpected keyword argument 'category'"
+            raise TypeError(msg)
         return await self.guild.create_text_channel(name, category=self, **options)
 
     async def create_voice_channel(self, name: str, **options: Any) -> VoiceChannel:
@@ -3222,7 +3230,8 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
             The newly created voice channel.
         """
         if "category" in options:
-            raise TypeError("got an unexpected keyword argument 'category'")
+            msg = "got an unexpected keyword argument 'category'"
+            raise TypeError(msg)
         return await self.guild.create_voice_channel(name, category=self, **options)
 
     async def create_stage_channel(self, name: str, **options: Any) -> StageChannel:
@@ -3238,7 +3247,8 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
             The newly created stage channel.
         """
         if "category" in options:
-            raise TypeError("got an unexpected keyword argument 'category'")
+            msg = "got an unexpected keyword argument 'category'"
+            raise TypeError(msg)
         return await self.guild.create_stage_channel(name, category=self, **options)
 
     async def create_forum_channel(self, name: str, **options: Any) -> ForumChannel:
@@ -3254,7 +3264,8 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
             The newly created forum channel.
         """
         if "category" in options:
-            raise TypeError("got an unexpected keyword argument 'category'")
+            msg = "got an unexpected keyword argument 'category'"
+            raise TypeError(msg)
         return await self.guild.create_forum_channel(name, category=self, **options)
 
     async def create_media_channel(self, name: str, **options: Any) -> MediaChannel:
@@ -3270,7 +3281,8 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
             The newly created media channel.
         """
         if "category" in options:
-            raise TypeError("got an unexpected keyword argument 'category'")
+            msg = "got an unexpected keyword argument 'category'"
+            raise TypeError(msg)
         return await self.guild.create_media_channel(name, category=self, **options)
 
 
@@ -3736,9 +3748,11 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         tag_ids = [t.id for t in applied_tags] if applied_tags else []
 
         if params.files and len(params.files) > 10:
-            raise ValueError("files parameter must be a list of up to 10 elements")
+            msg = "files parameter must be a list of up to 10 elements"
+            raise ValueError(msg)
         elif params.files and not all(isinstance(file, File) for file in params.files):
-            raise TypeError("files parameter must be a list of File")
+            msg = "files parameter must be a list of File"
+            raise TypeError(msg)
 
         channel_data = {
             "name": name,

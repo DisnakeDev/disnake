@@ -143,7 +143,8 @@ class Converter(Protocol[T_co]):
         BadArgument
             The converter failed to convert the argument.
         """
-        raise NotImplementedError("Derived classes need to implement this.")
+        msg = "Derived classes need to implement this."
+        raise NotImplementedError(msg)
 
 
 _ID_REGEX = re.compile(r"([0-9]{17,19})$")
@@ -1020,7 +1021,8 @@ class PermissionsConverter(Converter[disnake.Permissions]):
 
         attr = getattr(disnake.Permissions, name, None)
         if attr is None:
-            raise BadArgument(f"Invalid Permissions: {name!r}")
+            msg = f"Invalid Permissions: {name!r}"
+            raise BadArgument(msg)
 
         if callable(attr):
             return attr()  # pyright: ignore[reportReturnType]
@@ -1184,20 +1186,24 @@ class Greedy(List[T]):
         if not isinstance(params, tuple):
             params = (params,)
         if len(params) != 1:
-            raise TypeError("Greedy[...] only takes a single argument")
+            msg = "Greedy[...] only takes a single argument"
+            raise TypeError(msg)
         converter = params[0]
 
         origin = getattr(converter, "__origin__", None)
         args = getattr(converter, "__args__", ())
 
         if not (callable(converter) or isinstance(converter, Converter) or origin is not None):
-            raise TypeError("Greedy[...] expects a type or a Converter instance.")
+            msg = "Greedy[...] expects a type or a Converter instance."
+            raise TypeError(msg)
 
         if converter in (str, type(None)) or origin is Greedy:
-            raise TypeError(f"Greedy[{converter.__name__}] is invalid.")  # pyright: ignore[reportAttributeAccessIssue]
+            msg = f"Greedy[{converter.__name__}] is invalid."  # pyright: ignore[reportAttributeAccessIssue]
+            raise TypeError(msg)
 
         if origin is Union and type(None) in args:
-            raise TypeError(f"Greedy[{converter!r}] is invalid.")
+            msg = f"Greedy[{converter!r}] is invalid."
+            raise TypeError(msg)
 
         return cls(converter=converter)  # pyright: ignore[reportArgumentType]
 
@@ -1294,7 +1300,8 @@ async def _actual_conversion(
         except AttributeError:
             name = converter.__class__.__name__
 
-        raise BadArgument(f'Converting to "{name}" failed for parameter "{param.name}".') from exc
+        msg = f'Converting to "{name}" failed for parameter "{param.name}".'
+        raise BadArgument(msg) from exc
 
 
 async def run_converters(

@@ -229,14 +229,14 @@ class Permissions(BaseFlags):
     @_overload_with_permissions
     def __init__(self, permissions: int = 0, **kwargs: bool) -> None:
         if not isinstance(permissions, int):
-            raise TypeError(
-                f"Expected int parameter, received {permissions.__class__.__name__} instead."
-            )
+            msg = f"Expected int parameter, received {permissions.__class__.__name__} instead."
+            raise TypeError(msg)
 
         self.value = permissions
         for key, value in kwargs.items():
             if key not in self.VALID_FLAGS:
-                raise TypeError(f"{key!r} is not a valid permission name.")
+                msg = f"{key!r} is not a valid permission name."
+                raise TypeError(msg)
             setattr(self, key, value)
 
     def is_subset(self, other: Permissions) -> bool:
@@ -244,18 +244,16 @@ class Permissions(BaseFlags):
         if isinstance(other, Permissions):
             return (self.value & other.value) == self.value
         else:
-            raise TypeError(
-                f"cannot compare {self.__class__.__name__} with {other.__class__.__name__}"
-            )
+            msg = f"cannot compare {self.__class__.__name__} with {other.__class__.__name__}"
+            raise TypeError(msg)
 
     def is_superset(self, other: Permissions) -> bool:
         """Returns ``True`` if self has the same or more permissions as other."""
         if isinstance(other, Permissions):
             return (self.value | other.value) == self.value
         else:
-            raise TypeError(
-                f"cannot compare {self.__class__.__name__} with {other.__class__.__name__}"
-            )
+            msg = f"cannot compare {self.__class__.__name__} with {other.__class__.__name__}"
+            raise TypeError(msg)
 
     def is_strict_subset(self, other: Permissions) -> bool:
         """Returns ``True`` if the permissions on self are a strict subset of those on other."""
@@ -1299,7 +1297,8 @@ class PermissionOverwrite:
 
         for key, value in kwargs.items():
             if key not in self.VALID_NAMES:
-                raise ValueError(f"{key!r} is not a valid permission name.")
+                msg = f"{key!r} is not a valid permission name."
+                raise ValueError(msg)
 
             setattr(self, key, value)
 
@@ -1308,7 +1307,8 @@ class PermissionOverwrite:
 
     def _set(self, key: str, value: Optional[bool]) -> None:
         if value not in (True, None, False):
-            raise TypeError(f"Expected bool or NoneType, received {value.__class__.__name__}")
+            msg = f"Expected bool or NoneType, received {value.__class__.__name__}"
+            raise TypeError(msg)
 
         if value is None:
             self._values.pop(key, None)

@@ -154,7 +154,7 @@ class Entitlement(Hashable):
         now = utcnow()
         if self.starts_at is not None and now < self.starts_at:
             return False
-        if self.ends_at is not None and now >= self.ends_at:
+        if self.ends_at is not None and now >= self.ends_at:  # noqa: SIM103
             return False
 
         return True

@@ -58,10 +58,12 @@ class CommonBotBase(Generic[CogT]):
         self.owners: Set[disnake.TeamMember] = set()
 
         if self.owner_id and self.owner_ids:
-            raise TypeError("Both owner_id and owner_ids are set.")
+            msg = "Both owner_id and owner_ids are set."
+            raise TypeError(msg)
 
         if self.owner_ids and not isinstance(self.owner_ids, collections.abc.Collection):
-            raise TypeError(f"owner_ids must be a collection not {self.owner_ids.__class__!r}")
+            msg = f"owner_ids must be a collection not {self.owner_ids.__class__!r}"
+            raise TypeError(msg)
 
         self.reload: bool = reload
 
@@ -188,14 +190,16 @@ class CommonBotBase(Generic[CogT]):
             A cog with the same name is already loaded.
         """
         if not isinstance(cog, Cog):
-            raise TypeError("cogs must derive from Cog")
+            msg = "cogs must derive from Cog"
+            raise TypeError(msg)
 
         cog_name = cog.__cog_name__
         existing = self.__cogs.get(cog_name)
 
         if existing is not None:
             if not override:
-                raise disnake.ClientException(f"Cog named {cog_name!r} already loaded")
+                msg = f"Cog named {cog_name!r} already loaded"
+                raise disnake.ClientException(msg)
             self.remove_cog(cog_name)
 
         # NOTE: Should be covariant

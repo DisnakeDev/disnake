@@ -59,7 +59,8 @@ class AssetMixin:
             The content of the asset.
         """
         if self._state is None:
-            raise DiscordException("Invalid state (no ConnectionState provided)")
+            msg = "Invalid state (no ConnectionState provided)"
+            raise DiscordException(msg)
 
         return await self._state.http.get_from_cdn(self.url)
 
@@ -435,20 +436,24 @@ class Asset(AssetMixin):
         if format is not MISSING:
             if self._animated:
                 if format not in VALID_ASSET_FORMATS:
-                    raise ValueError(f"format must be one of {VALID_ASSET_FORMATS}")
+                    msg = f"format must be one of {VALID_ASSET_FORMATS}"
+                    raise ValueError(msg)
             else:
                 if format not in VALID_STATIC_FORMATS:
-                    raise ValueError(f"format must be one of {VALID_STATIC_FORMATS}")
+                    msg = f"format must be one of {VALID_STATIC_FORMATS}"
+                    raise ValueError(msg)
             url = url.with_path(f"{path}.{format}")
 
         if static_format is not MISSING and not self._animated:
             if static_format not in VALID_STATIC_FORMATS:
-                raise ValueError(f"static_format must be one of {VALID_STATIC_FORMATS}")
+                msg = f"static_format must be one of {VALID_STATIC_FORMATS}"
+                raise ValueError(msg)
             url = url.with_path(f"{path}.{static_format}")
 
         if size is not MISSING:
             if not utils.valid_icon_size(size):
-                raise ValueError("size must be a power of 2 between 16 and 4096")
+                msg = "size must be a power of 2 between 16 and 4096"
+                raise ValueError(msg)
             url = url.with_query(size=size)
         else:
             url = url.with_query(url.raw_query_string)
@@ -478,7 +483,8 @@ class Asset(AssetMixin):
             The newly updated asset.
         """
         if not utils.valid_icon_size(size):
-            raise ValueError("size must be a power of 2 between 16 and 4096")
+            msg = "size must be a power of 2 between 16 and 4096"
+            raise ValueError(msg)
 
         url = str(yarl.URL(self._url).with_query(size=size))
         return Asset(state=self._state, url=url, key=self._key, animated=self._animated)
@@ -506,10 +512,12 @@ class Asset(AssetMixin):
         """
         if self._animated:
             if format not in VALID_ASSET_FORMATS:
-                raise ValueError(f"format must be one of {VALID_ASSET_FORMATS}")
+                msg = f"format must be one of {VALID_ASSET_FORMATS}"
+                raise ValueError(msg)
         else:
             if format not in VALID_STATIC_FORMATS:
-                raise ValueError(f"format must be one of {VALID_STATIC_FORMATS}")
+                msg = f"format must be one of {VALID_STATIC_FORMATS}"
+                raise ValueError(msg)
 
         url = yarl.URL(self._url)
         path, _ = os.path.splitext(url.path)

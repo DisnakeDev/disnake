@@ -134,7 +134,8 @@ class Button(Item[V_co]):
         if mutually_exclusive == 0:
             custom_id = os.urandom(16).hex()
         elif mutually_exclusive != 1:
-            raise TypeError("cannot mix url, sku_id and custom_id with Button")
+            msg = "cannot mix url, sku_id and custom_id with Button"
+            raise TypeError(msg)
 
         if url is not None:
             style = ButtonStyle.link
@@ -147,9 +148,8 @@ class Button(Item[V_co]):
             elif isinstance(emoji, _EmojiTag):
                 emoji = emoji._to_partial()
             else:
-                raise TypeError(
-                    f"expected emoji to be str, Emoji, or PartialEmoji not {emoji.__class__}"
-                )
+                msg = f"expected emoji to be str, Emoji, or PartialEmoji not {emoji.__class__}"
+                raise TypeError(msg)
 
         self._underlying = ButtonComponent._raw_construct(
             type=ComponentType.button,
@@ -188,7 +188,8 @@ class Button(Item[V_co]):
     @custom_id.setter
     def custom_id(self, value: Optional[str]) -> None:
         if value is not None and not isinstance(value, str):
-            raise TypeError("custom_id must be None or str")
+            msg = "custom_id must be None or str"
+            raise TypeError(msg)
 
         self._underlying.custom_id = value
 
@@ -200,7 +201,8 @@ class Button(Item[V_co]):
     @url.setter
     def url(self, value: Optional[str]) -> None:
         if value is not None and not isinstance(value, str):
-            raise TypeError("url must be None or str")
+            msg = "url must be None or str"
+            raise TypeError(msg)
         self._underlying.url = value
 
     @property
@@ -234,9 +236,8 @@ class Button(Item[V_co]):
             elif isinstance(value, _EmojiTag):
                 self._underlying.emoji = value._to_partial()
             else:
-                raise TypeError(
-                    f"expected str, Emoji, or PartialEmoji, received {value.__class__} instead"
-                )
+                msg = f"expected str, Emoji, or PartialEmoji, received {value.__class__} instead"
+                raise TypeError(msg)
         else:
             self._underlying.emoji = None
 
@@ -251,7 +252,8 @@ class Button(Item[V_co]):
     @sku_id.setter
     def sku_id(self, value: Optional[int]) -> None:
         if value is not None and not isinstance(value, int):
-            raise TypeError("sku_id must be None or int")
+            msg = "sku_id must be None or int"
+            raise TypeError(msg)
         self._underlying.sku_id = value
 
     @classmethod
@@ -351,11 +353,13 @@ def button(
         ordering. The row number must be between 0 and 4 (i.e. zero indexed).
     """
     if not callable(cls):
-        raise TypeError("cls argument must be callable")
+        msg = "cls argument must be callable"
+        raise TypeError(msg)
 
     def decorator(func: ItemCallbackType[V_co, B_co]) -> DecoratedItem[B_co]:
         if not iscoroutinefunction(func):
-            raise TypeError("button function must be a coroutine function")
+            msg = "button function must be a coroutine function"
+            raise TypeError(msg)
 
         func.__discord_ui_model_type__ = cls
         func.__discord_ui_model_kwargs__ = kwargs

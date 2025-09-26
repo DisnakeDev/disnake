@@ -291,7 +291,8 @@ class GuildChannel(ABC):
         reason: Optional[str],
     ) -> None:
         if position < 0:
-            raise ValueError("Channel position cannot be less than 0.")
+            msg = "Channel position cannot be less than 0."
+            raise ValueError(msg)
 
         http = self._state.http
         bucket = self._sorting_bucket
@@ -399,9 +400,8 @@ class GuildChannel(ABC):
             overwrites_payload = []
             for target, perm in overwrites.items():
                 if not isinstance(perm, PermissionOverwrite):
-                    raise TypeError(
-                        f"Expected PermissionOverwrite, received {perm.__class__.__name__}"
-                    )
+                    msg = f"Expected PermissionOverwrite, received {perm.__class__.__name__}"
+                    raise TypeError(msg)
 
                 allow, deny = perm.pair()
                 payload: PermissionOverwritePayload = {
@@ -415,7 +415,8 @@ class GuildChannel(ABC):
         type_payload: int
         if type is not MISSING:
             if not isinstance(type, ChannelType):
-                raise TypeError("type field must be of type ChannelType")
+                msg = "type field must be of type ChannelType"
+                raise TypeError(msg)
             type_payload = type.value
         else:
             type_payload = MISSING
@@ -423,7 +424,8 @@ class GuildChannel(ABC):
         flags_payload: int
         if flags is not MISSING:
             if not isinstance(flags, ChannelFlags):
-                raise TypeError("flags field must be of type ChannelFlags")
+                msg = "flags field must be of type ChannelFlags"
+                raise TypeError(msg)
             flags_payload = flags.value
         else:
             flags_payload = MISSING
@@ -737,7 +739,8 @@ class GuildChannel(ABC):
         # Timeouted users have only view_channel and read_message_history
         # if they already have them.
         if ignore_timeout is not MISSING and isinstance(obj, Role):
-            raise TypeError("ignore_timeout is only supported for disnake.Member objects")
+            msg = "ignore_timeout is only supported for disnake.Member objects"
+            raise TypeError(msg)
 
         if ignore_timeout is MISSING:
             ignore_timeout = False
@@ -1008,18 +1011,22 @@ class GuildChannel(ABC):
         elif isinstance(target, Role):
             perm_type = _Overwrites.ROLE
         else:
-            raise TypeError("target parameter must be either Member or Role")
+            msg = "target parameter must be either Member or Role"
+            raise TypeError(msg)
 
         if overwrite is MISSING:
             if len(permissions) == 0:
-                raise TypeError("No overwrite provided.")
+                msg = "No overwrite provided."
+                raise TypeError(msg)
             try:
                 overwrite = PermissionOverwrite(**permissions)
             except (ValueError, TypeError) as e:
-                raise TypeError("Invalid permissions given to keyword arguments.") from e
+                msg = "Invalid permissions given to keyword arguments."
+                raise TypeError(msg) from e
         else:
             if len(permissions) > 0:
-                raise TypeError("Cannot mix overwrite and keyword arguments.")
+                msg = "Cannot mix overwrite and keyword arguments."
+                raise TypeError(msg)
 
         # TODO: wait for event
 
@@ -1031,7 +1038,8 @@ class GuildChannel(ABC):
                 self.id, target.id, allow.value, deny.value, perm_type, reason=reason
             )
         else:
-            raise TypeError("Invalid overwrite type provided.")
+            msg = "Invalid overwrite type provided."
+            raise TypeError(msg)
 
     async def _clone_impl(
         self,
@@ -1047,14 +1055,14 @@ class GuildChannel(ABC):
         overwrites_payload: List[PermissionOverwritePayload]
         if overwrites is not MISSING:
             if not isinstance(overwrites, dict):
-                raise TypeError("overwrites parameter expects a dict.")
+                msg = "overwrites parameter expects a dict."
+                raise TypeError(msg)
 
             overwrites_payload = []
             for target, perm in overwrites.items():
                 if not isinstance(perm, PermissionOverwrite):
-                    raise TypeError(
-                        f"Expected PermissionOverwrite, received {perm.__class__.__name__}"
-                    )
+                    msg = f"Expected PermissionOverwrite, received {perm.__class__.__name__}"
+                    raise TypeError(msg)
 
                 allow, deny = perm.pair()
                 payload: PermissionOverwritePayload = {
@@ -1231,7 +1239,8 @@ class GuildChannel(ABC):
         before, after = kwargs.get("before"), kwargs.get("after")
         offset = kwargs.get("offset", 0)
         if sum(bool(a) for a in (beginning, end, before, after)) > 1:
-            raise TypeError("Only one of [before, after, end, beginning] can be used.")
+            msg = "Only one of [before, after, end, beginning] can be used."
+            raise TypeError(msg)
 
         bucket = self._sorting_bucket
         parent_id = kwargs.get("category", MISSING)
@@ -1270,7 +1279,8 @@ class GuildChannel(ABC):
             index = next((i + 1 for i, c in enumerate(channels) if c.id == after.id), None)
 
         if index is None:
-            raise ValueError("Could not resolve appropriate move position")
+            msg = "Could not resolve appropriate move position"
+            raise ValueError(msg)
 
         channels.insert(max((index + offset), 0), self)
         payload: List[ChannelPositionUpdatePayload] = []
@@ -1677,15 +1687,18 @@ class Messageable:
         content = str(content) if content is not None else None
 
         if file is not None and files is not None:
-            raise TypeError("cannot pass both file and files parameter to send()")
+            msg = "cannot pass both file and files parameter to send()"
+            raise TypeError(msg)
 
         if file is not None:
             if not isinstance(file, File):
-                raise TypeError("file parameter must be File")
+                msg = "file parameter must be File"
+                raise TypeError(msg)
             files = [file]
 
         if embed is not None and embeds is not None:
-            raise TypeError("cannot pass both embed and embeds parameter to send()")
+            msg = "cannot pass both embed and embeds parameter to send()"
+            raise TypeError(msg)
 
         if embed is not None:
             embeds = [embed]
@@ -1693,7 +1706,8 @@ class Messageable:
         embeds_payload = None
         if embeds is not None:
             if len(embeds) > 10:
-                raise ValueError("embeds parameter must be a list of up to 10 elements")
+                msg = "embeds parameter must be a list of up to 10 elements"
+                raise ValueError(msg)
             for embed in embeds:
                 if embed._files:
                     files = files or []
@@ -1725,16 +1739,17 @@ class Messageable:
             try:
                 reference_payload = reference.to_message_reference_dict()
             except AttributeError:
-                raise TypeError(
-                    "reference parameter must be Message, MessageReference, or PartialMessage"
-                ) from None
+                msg = "reference parameter must be Message, MessageReference, or PartialMessage"
+                raise TypeError(msg) from None
 
         is_v2 = False
         if view is not None and components is not None:
-            raise TypeError("cannot pass both view and components parameter to send()")
+            msg = "cannot pass both view and components parameter to send()"
+            raise TypeError(msg)
         elif view:
             if not hasattr(view, "__discord_ui_view__"):
-                raise TypeError(f"view parameter must be View not {view.__class__!r}")
+                msg = f"view parameter must be View not {view.__class__!r}"
+                raise TypeError(msg)
             components_payload = view.to_components()
         elif components:
             from .ui.action_row import normalize_components_to_dict
@@ -1749,7 +1764,8 @@ class Messageable:
             flags.is_components_v2 = True
         # components v2 cannot be used with other content fields
         if flags and flags.is_components_v2 and (content or embeds or stickers or poll):
-            raise ValueError("Cannot use v2 components with content, embeds, stickers, or polls")
+            msg = "Cannot use v2 components with content, embeds, stickers, or polls"
+            raise ValueError(msg)
 
         flags_payload = None
         if suppress_embeds is not None:
@@ -1760,9 +1776,11 @@ class Messageable:
 
         if files is not None:
             if len(files) > 10:
-                raise ValueError("files parameter must be a list of up to 10 elements")
+                msg = "files parameter must be a list of up to 10 elements"
+                raise ValueError(msg)
             elif not all(isinstance(file, File) for file in files):
-                raise TypeError("files parameter must be a list of File")
+                msg = "files parameter must be a list of File"
+                raise TypeError(msg)
 
             try:
                 data = await state.http.send_files(
@@ -2065,13 +2083,15 @@ class Connectable(Protocol):
         state = self._state
 
         if state._get_voice_client(key_id):
-            raise ClientException("Already connected to a voice channel.")
+            msg = "Already connected to a voice channel."
+            raise ClientException(msg)
 
         client = state._get_client()
         voice = cls(client, self)
 
         if not isinstance(voice, VoiceProtocol):
-            raise TypeError("Type must meet VoiceProtocol abstract base class.")
+            msg = "Type must meet VoiceProtocol abstract base class."
+            raise TypeError(msg)
 
         state._add_voice_client(key_id, voice)
 

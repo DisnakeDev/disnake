@@ -59,7 +59,8 @@ class PollMedia:
         self, text: Optional[str], *, emoji: Optional[Union[Emoji, PartialEmoji, str]] = None
     ) -> None:
         if text is None and emoji is None:
-            raise ValueError("At least one of `text` or `emoji` must be not None")
+            msg = "At least one of `text` or `emoji` must be not None"
+            raise ValueError(msg)
 
         self.text = text
         self.emoji: Optional[Union[Emoji, PartialEmoji]] = None
@@ -69,7 +70,8 @@ class PollMedia:
             self.emoji = emoji
         else:
             if emoji is not None:
-                raise TypeError("Emoji must be None, a str, PartialEmoji, or Emoji instance.")
+                msg = "Emoji must be None, a str, PartialEmoji, or Emoji instance."
+                raise TypeError(msg)
 
     def __repr__(self) -> str:
         return f"<{self.__class__.__name__} text={self.text!r} emoji={self.emoji!r}>"
@@ -184,9 +186,8 @@ class PollAnswer:
             if the member has left the guild.
         """
         if not (self.id is not None and self.poll and self.poll.message):
-            raise ValueError(
-                "This object was manually built. To use this method, you need to use a poll object retrieved from the Discord API."
-            )
+            msg = "This object was manually built. To use this method, you need to use a poll object retrieved from the Discord API."
+            raise ValueError(msg)
 
         return PollAnswerIterator(self.poll.message, self.id, limit=limit, after=after)
 
@@ -253,9 +254,8 @@ class Poll:
         elif isinstance(question, PollMedia):
             self.question: PollMedia = question
         else:
-            raise TypeError(
-                f"Expected 'str' or 'PollMedia' for 'question', got {question.__class__.__name__!r}."
-            )
+            msg = f"Expected 'str' or 'PollMedia' for 'question', got {question.__class__.__name__!r}."
+            raise TypeError(msg)
 
         self._answers: Dict[int, PollAnswer] = {}
         for i, answer in enumerate(answers, 1):
@@ -264,9 +264,8 @@ class Poll:
             elif isinstance(answer, str):
                 self._answers[i] = PollAnswer(PollMedia(answer))
             else:
-                raise TypeError(
-                    f"Expected 'List[str]' or 'List[PollAnswer]' for 'answers', got List[{answer.__class__.__name__!r}]."
-                )
+                msg = f"Expected 'List[str]' or 'List[PollAnswer]' for 'answers', got List[{answer.__class__.__name__!r}]."
+                raise TypeError(msg)
 
         self.duration: Optional[timedelta] = duration
         self.allow_multiselect: bool = allow_multiselect
@@ -415,9 +414,8 @@ class Poll:
             The message which contains the expired `Poll`.
         """
         if not self.message:
-            raise ValueError(
-                "This object was manually built. To use this method, you need to use a poll object retrieved from the Discord API."
-            )
+            msg = "This object was manually built. To use this method, you need to use a poll object retrieved from the Discord API."
+            raise ValueError(msg)
 
         data = await self.message._state.http.expire_poll(self.message.channel.id, self.message.id)
         return self.message._state.create_message(channel=self.message.channel, data=data)
