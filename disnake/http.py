@@ -1768,7 +1768,9 @@ class HTTPClient:
             )
         )
 
-    def create_app_emoji(self, app_id: Snowflake, name: str, image: str) -> Response[emoji.Emoji]:
+    def create_app_emoji(
+        self, app_id: Snowflake, *, name: str, image: str
+    ) -> Response[emoji.Emoji]:
         payload: dict[str, Any] = {
             "name": name,
             "image": image,
@@ -1778,7 +1780,7 @@ class HTTPClient:
         return self.request(r, json=payload)
 
     def edit_app_emoji(
-        self, app_id: Snowflake, emoji_id: Snowflake, name: str
+        self, app_id: Snowflake, emoji_id: Snowflake, *, name: str
     ) -> Response[emoji.Emoji]:
         payload: dict[str, Any] = {
             "name": name,

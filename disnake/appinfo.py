@@ -110,6 +110,9 @@ class InstallTypeConfiguration:
             else None
         )
 
+    def __repr__(self) -> str:
+        return f"<InstallTypeConfiguration install_params={self.install_params!r}>"
+
 
 class AppInfo:
     """Represents the application info for the bot provided by Discord.
