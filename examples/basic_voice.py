@@ -9,7 +9,7 @@
 
 import asyncio
 import os
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 import disnake
 import youtube_dl  # type: ignore
@@ -37,7 +37,7 @@ ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
 
 
 class YTDLSource(disnake.PCMVolumeTransformer):
-    def __init__(self, source: disnake.AudioSource, *, data: Dict[str, Any], volume: float = 0.5):
+    def __init__(self, source: disnake.AudioSource, *, data: dict[str, Any], volume: float = 0.5):
         super().__init__(source, volume)
 
         self.title = data.get("title")

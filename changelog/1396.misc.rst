@@ -1,0 +1,1 @@
+Update all type hints across the source code to use PEP 604 style (A | B instead of Union[A, B] and A | None instead of Optional[A]).
