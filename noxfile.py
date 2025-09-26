@@ -82,7 +82,7 @@ EXECUTION_GROUPS: List[ExecutionGroup] = [
             # FIXME: orjson doesn't yet support python 3.14, remove once we migrate to uv and have version-specific locks
             extras=("speed", "voice") if python not in EXPERIMENTAL_PYTHON_VERSIONS else ("voice",),
             groups=("test", "nox"),
-            dependencies=("setuptools", "pytz", "requests"),  # needed for type checking
+            dependencies=("pytz", "requests"),  # needed for type checking
         )
         for python in ALL_PYTHONS
     ),
@@ -95,7 +95,7 @@ EXECUTION_GROUPS: List[ExecutionGroup] = [
     # codemodding and pyright
     ExecutionGroup(
         sessions=("codemod", "autotyping", "pyright"),
-        pyright_paths=("scripts",),
+        pyright_paths=("scripts/codemods", "scripts/ci"),
         groups=("codemod",),
     ),
     # the other sessions, they don't need pyright, but they need to run
@@ -105,8 +105,10 @@ EXECUTION_GROUPS: List[ExecutionGroup] = [
     ),
     # build
     ExecutionGroup(
-        sessions=("build",),
+        sessions=("build", "pyright"),
+        pyright_paths=("scripts/versioning.py",),
         groups=("build",),
+        dependencies=(PYPROJECT["build-system"]["requires"]),
     ),
     ## testing
     *(
