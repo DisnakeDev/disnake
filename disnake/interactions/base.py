@@ -2147,7 +2147,7 @@ class InteractionDataResolved(Dict[str, Any]):
         if data_type is OptionType.role or data_type is ComponentType.role_select:
             return self.roles.get(int(key), default)
 
-        if data_type is OptionType.attachment:
+        if data_type is OptionType.attachment or data_type is ComponentType.file_upload:
             return self.attachments.get(int(key), default)
 
         return default
