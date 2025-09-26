@@ -2212,6 +2212,7 @@ class HTTPClient:
         entity_type: int,
         channel_id: Optional[Snowflake] = None,
         entity_metadata: Optional[Dict[str, Any]] = None,
+        recurrence_rule: Optional[Dict[str, Any]] = None,
         scheduled_end_time: Optional[str] = None,
         description: Optional[str] = None,
         image: Optional[str] = None,
@@ -2239,6 +2240,9 @@ class HTTPClient:
 
         if image is not None:
             payload["image"] = image
+
+        if recurrence_rule is not None:
+            payload["recurrence_rule"] = recurrence_rule
 
         return self.request(r, json=payload, reason=reason)
 
