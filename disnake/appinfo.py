@@ -572,12 +572,11 @@ class AppInfo:
 
         .. code-block:: python
 
-            >>> from disnake import InstallTypeConfiguration
             >>> await app_info.edit(
             ...     custom_install_url="https://example.com/install",
-            ...   # to disable user installations
+            ...     # to disable user installations
             ...     user_install_type_config=None,
-            ...   # to disable guild installations
+            ...     # to disable guild installations
             ...     guild_install_type_config=None,
             ... )
         """
