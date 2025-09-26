@@ -44,7 +44,6 @@ from ..errors import (
 )
 from ..flags import InteractionContextTypes, MessageFlags
 from ..guild import Guild
-from ..http import HTTPClient
 from ..i18n import Localized
 from ..member import Member
 from ..message import Attachment, AuthorizingIntegrationOwners, Message
@@ -52,7 +51,7 @@ from ..object import Object
 from ..permissions import Permissions
 from ..role import Role
 from ..ui.action_row import normalize_components, normalize_components_to_dict
-from ..user import ClientUser, User
+from ..user import User
 from ..webhook.async_ import Webhook, async_context, handle_message_parameters
 
 __all__ = (
@@ -73,6 +72,7 @@ if TYPE_CHECKING:
     from ..embeds import Embed
     from ..ext.commands import AutoShardedBot, Bot
     from ..file import File
+    from ..http import HTTPClient
     from ..mentions import AllowedMentions
     from ..poll import Poll
     from ..state import ConnectionState
@@ -90,6 +90,7 @@ if TYPE_CHECKING:
     from ..ui._types import MessageComponents, ModalComponents, ModalTopLevelComponent
     from ..ui.modal import Modal
     from ..ui.view import View
+    from ..user import ClientUser
     from .message import MessageInteraction
     from .modal import ModalInteraction
 
