@@ -167,8 +167,8 @@ jobs:
       - name: Run sphinx-build
         run: nox -s docs -- --keep-going -W -w $GITHUB_STEP_SUMMARY
 
-  pyright:
-    name: Pyright ${{matrix.session.name}}
+  typing:
+    name: ${{matrix.session.name}}
     runs-on: ubuntu-latest
     needs:
       - python-versions
@@ -304,8 +304,8 @@ jobs:
             exit 0;
           fi
 
-  pytest:
-    name: Pytest ${{ matrix.session.name }} on ${{ matrix.os }}
+  test:
+    name: ${{ matrix.session.name }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     needs:
       - python-versions
@@ -361,10 +361,9 @@ jobs:
     needs:
       - lint
       - docs
-      - pyright
       - misc
       - codemod
-      - pytest
+      - test
 
     runs-on: ubuntu-latest
 
