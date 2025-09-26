@@ -41,6 +41,8 @@ On Linux environments, installing voice requires getting the following dependenc
 - `libnacl <https://github.com/saltstack/libnacl>`_
 - `python3-dev <https://packages.debian.org/python3-dev>`_
 
+These dependencies are required to compile and install :pypi:`PyNaCl`.
+
 For a Debian-based system, the following command will get these dependencies:
 
 .. code-block:: shell

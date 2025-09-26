@@ -71,6 +71,7 @@ extlinks = {
     "issue": (f"{github_repo}/issues/%s", "#%s"),
     "issue-dpy": (f"{dpy_github_repo}/issues/%s", "#%s"),
     "ddocs": ("https://discord.com/developers/docs/%s", None),
+    "pypi": ("https://pypi.org/project/%s", "%s"),
 }
 
 extlinks_detect_hardcoded_links = True
