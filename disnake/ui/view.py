@@ -64,13 +64,15 @@ class _ViewWeights:
             if weight + item.width <= 5:
                 return index
 
-        raise ValueError("could not find open space for item")
+        msg = "could not find open space for item"
+        raise ValueError(msg)
 
     def add_item(self, item: Item) -> None:
         if item.row is not None:
             total = self.weights[item.row] + item.width
             if total > 5:
-                raise ValueError(f"item would not fit at row {item.row} ({total} > 5 width)")
+                msg = f"item would not fit at row {item.row} ({total} > 5 width)"
+                raise ValueError(msg)
             self.weights[item.row] = total
             item._rendered_row = item.row
         else:
@@ -124,7 +126,8 @@ class View:
                     children.append(member)
 
         if len(children) > 25:
-            raise TypeError("View cannot have more than 25 children")
+            msg = "View cannot have more than 25 children"
+            raise TypeError(msg)
 
         cls.__view_children_items__ = children
 
@@ -222,9 +225,8 @@ class View:
                 continue
             elif not isinstance(component, VALID_ACTION_ROW_MESSAGE_COMPONENT_TYPES):
                 # can happen if message uses components v2
-                raise TypeError(
-                    f"Cannot construct view from message - unexpected {type(component).__name__}"
-                )
+                msg = f"Cannot construct view from message - unexpected {type(component).__name__}"
+                raise TypeError(msg)
             view.add_item(_component_to_item(component))
         return view
 
@@ -254,10 +256,12 @@ class View:
             or the row the item is trying to be added to is full.
         """
         if len(self.children) > 25:
-            raise ValueError("maximum number of children exceeded")
+            msg = "maximum number of children exceeded"
+            raise ValueError(msg)
 
         if not isinstance(item, Item):
-            raise TypeError(f"expected Item not {item.__class__!r}")
+            msg = f"expected Item not {item.__class__!r}"
+            raise TypeError(msg)
 
         self.__weights.add_item(item)
 

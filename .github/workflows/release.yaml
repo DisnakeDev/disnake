@@ -23,7 +23,7 @@ jobs:
         id: setup
         uses: ./.github/actions/setup-env
         with:
-          python-version: 3.8
+          python-version: 3.9
 
       - name: Build package
         run: |

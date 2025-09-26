@@ -460,11 +460,12 @@ class Client:
             _log.warning("PyNaCl is not installed, voice will NOT be supported")
 
         if strict_localization and localization_provider is not None:
-            raise ValueError(
+            msg = (
                 "Providing both `localization_provider` and `strict_localization` is not supported."
                 " If strict localization is desired for a customized localization provider, this"
                 " should be implemented by that custom provider."
             )
+            raise ValueError(msg)
 
         self.i18n: LocalizationProtocol = (
             LocalizationStore(strict=strict_localization)
@@ -474,7 +475,8 @@ class Client:
 
         self.gateway_params: GatewayParams = gateway_params or GatewayParams()
         if self.gateway_params.encoding != "json":
-            raise ValueError("Gateway encodings other than `json` are currently not supported.")
+            msg = "Gateway encodings other than `json` are currently not supported."
+            raise ValueError(msg)
 
         self.extra_events: Dict[str, List[CoroFunc]] = {}
 
@@ -829,9 +831,8 @@ class Client:
             as the name.
         """
         if name is not MISSING and not isinstance(name, (str, Event)):
-            raise TypeError(
-                f"add_listener expected str or Enum but received {name.__class__.__name__!r} instead."
-            )
+            msg = f"add_listener expected str or Enum but received {name.__class__.__name__!r} instead."
+            raise TypeError(msg)
 
         name_ = (
             func.__name__
@@ -840,7 +841,8 @@ class Client:
         )
 
         if not utils.iscoroutinefunction(func):
-            raise TypeError("Listeners must be coroutines")
+            msg = "Listeners must be coroutines"
+            raise TypeError(msg)
 
         if name_ in self.extra_events:
             self.extra_events[name_].append(func)
@@ -868,9 +870,8 @@ class Client:
             The name passed was not a string or an :class:`.Event`.
         """
         if name is not MISSING and not isinstance(name, (str, Event)):
-            raise TypeError(
-                f"remove_listener expected str or Enum but received {name.__class__.__name__!r} instead."
-            )
+            msg = f"remove_listener expected str or Enum but received {name.__class__.__name__!r} instead."
+            raise TypeError(msg)
         name = (
             func.__name__
             if name is MISSING
@@ -922,9 +923,8 @@ class Client:
             as the name.
         """
         if name is not MISSING and not isinstance(name, (str, Event)):
-            raise TypeError(
-                f"listen expected str or Enum but received {name.__class__.__name__!r} instead."
-            )
+            msg = f"listen expected str or Enum but received {name.__class__.__name__!r} instead."
+            raise TypeError(msg)
 
         def decorator(func: CoroT) -> CoroT:
             self.add_listener(func, name)
@@ -1045,7 +1045,8 @@ class Client:
         """
         _log.info("logging in using static token")
         if not isinstance(token, str):
-            raise TypeError(f"token must be of type str, got {type(token).__name__} instead")
+            msg = f"token must be of type str, got {type(token).__name__} instead"
+            raise TypeError(msg)
 
         data = await self.http.static_login(token.strip())
         self._connection.user = ClientUser(state=self._connection, data=data)
@@ -1343,7 +1344,8 @@ class Client:
             # ConnectionState._activity is typehinted as ActivityPayload, we're passing Dict[str, Any]
             self._connection._activity = value.to_dict()  # type: ignore
         else:
-            raise TypeError("activity must derive from BaseActivity.")
+            msg = "activity must derive from BaseActivity."
+            raise TypeError(msg)
 
     @property
     def status(self) -> Status:
@@ -1362,7 +1364,8 @@ class Client:
         elif isinstance(value, Status):
             self._connection._status = str(value)
         else:
-            raise TypeError("status must derive from Status.")
+            msg = "status must derive from Status."
+            raise TypeError(msg)
 
     @property
     def allowed_mentions(self) -> Optional[AllowedMentions]:
@@ -1377,7 +1380,8 @@ class Client:
         if value is None or isinstance(value, AllowedMentions):
             self._connection.allowed_mentions = value
         else:
-            raise TypeError(f"allowed_mentions must be AllowedMentions not {value.__class__!r}")
+            msg = f"allowed_mentions must be AllowedMentions not {value.__class__!r}"
+            raise TypeError(msg)
 
     @property
     def intents(self) -> Intents:
@@ -1866,7 +1870,8 @@ class Client:
             The coroutine passed is not actually a coroutine.
         """
         if not utils.iscoroutinefunction(coro):
-            raise TypeError("event registered must be a coroutine function")
+            msg = "event registered must be a coroutine function"
+            raise TypeError(msg)
 
         setattr(self, coro.__name__, coro)
         _log.debug("%s has successfully been registered as an event", coro.__name__)
@@ -2418,7 +2423,7 @@ class Client:
         data = await self.http.application_info()
         return AppInfo(self._connection, data)
 
-    async def fetch_application_emoji(self, emoji_id: int) -> Emoji:
+    async def fetch_application_emoji(self, emoji_id: int, /) -> Emoji:
         """|coro|
 
         Retrieves an application level :class:`~disnake.Emoji` based on its ID.
@@ -2434,8 +2439,8 @@ class Client:
         ------
         NotFound
             The app emoji couldn't be found.
-        Forbidden
-            You are not allowed to get the app emoji.
+        HTTPException
+            An error occurred fetching the app emoji.
 
         Returns
         -------
@@ -2464,10 +2469,8 @@ class Client:
         ------
         NotFound
             The ``image`` asset couldn't be found.
-        Forbidden
-            You are not allowed to create app emojis.
         HTTPException
-            An error occurred creating an app emoji.
+            An error occurred creating the app emoji.
         TypeError
             The ``image`` asset is a lottie sticker (see :func:`Sticker.read <disnake.Sticker.read>`).
         ValueError
@@ -2479,7 +2482,7 @@ class Client:
             The newly created application emoji.
         """
         img = await utils._assetbytes_to_base64_data(image)
-        data = await self.http.create_app_emoji(self.application_id, name, img)
+        data = await self.http.create_app_emoji(self.application_id, name=name, image=img)
         return Emoji(guild=None, state=self._connection, data=data)
 
     async def fetch_application_emojis(self) -> List[Emoji]:
@@ -2491,10 +2494,8 @@ class Client:
 
         Raises
         ------
-        NotFound
-            The app emojis for this application ID couldn't be found.
-        Forbidden
-            You are not allowed to get app emojis.
+        HTTPException
+            An error occurred fetching the app emojis.
 
         Returns
         -------
@@ -2759,12 +2760,12 @@ class Client:
             and all their components have an explicitly provided custom_id.
         """
         if not isinstance(view, View):
-            raise TypeError(f"expected an instance of View not {view.__class__!r}")
+            msg = f"expected an instance of View not {view.__class__!r}"
+            raise TypeError(msg)
 
         if not view.is_persistent():
-            raise ValueError(
-                "View is not persistent. Items need to have a custom_id set and View must have no timeout"
-            )
+            msg = "View is not persistent. Items need to have a custom_id set and View must have no timeout"
+            raise ValueError(msg)
 
         self._connection.store_view(view, message_id)
 

@@ -100,7 +100,8 @@ def _workaround_set_api_version(version: Literal[9, 10]) -> None:
         This must be ran **before** connecting to the gateway.
     """
     if version not in (9, 10):
-        raise TypeError("version must be either 9 or 10")
+        msg = "version must be either 9 or 10"
+        raise TypeError(msg)
 
     global _API_VERSION  # noqa: PLW0603
     _API_VERSION = version
@@ -440,7 +441,8 @@ class HTTPClient:
 
                 raise HTTPException(response, data)
 
-            raise RuntimeError("Unreachable code in HTTP handling")
+            msg = "Unreachable code in HTTP handling"
+            raise RuntimeError(msg)
 
     async def get_from_cdn(self, url: str) -> bytes:
         async with self.__session.get(url) as resp:
@@ -474,7 +476,8 @@ class HTTPClient:
         except HTTPException as exc:
             self.token = old_token
             if exc.status == 401:
-                raise LoginFailure("Improper token has been passed.") from exc
+                msg = "Improper token has been passed."
+                raise LoginFailure(msg) from exc
             raise
 
         return data
@@ -1771,7 +1774,9 @@ class HTTPClient:
             )
         )
 
-    def create_app_emoji(self, app_id: Snowflake, name: str, image: str) -> Response[emoji.Emoji]:
+    def create_app_emoji(
+        self, app_id: Snowflake, *, name: str, image: str
+    ) -> Response[emoji.Emoji]:
         payload: Dict[str, Any] = {
             "name": name,
             "image": image,
@@ -1781,7 +1786,7 @@ class HTTPClient:
         return self.request(r, json=payload)
 
     def edit_app_emoji(
-        self, app_id: Snowflake, emoji_id: Snowflake, name: str
+        self, app_id: Snowflake, emoji_id: Snowflake, *, name: str
     ) -> Response[emoji.Emoji]:
         payload: Dict[str, Any] = {
             "name": name,
@@ -3053,6 +3058,9 @@ class HTTPClient:
 
     def application_info(self) -> Response[appinfo.AppInfo]:
         return self.request(Route("GET", "/oauth2/applications/@me"))
+
+    def edit_application_info(self, **fields: Any) -> Response[appinfo.AppInfo]:
+        return self.request(Route("PATCH", "/applications/@me"), json=fields)
 
     def get_application_role_connection_metadata_records(
         self, application_id: Snowflake

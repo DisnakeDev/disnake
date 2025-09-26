@@ -203,7 +203,8 @@ nitpick_ignore_files = [
 _spec = importlib.util.find_spec("disnake")
 if not (_spec and _spec.origin):
     # this should never happen
-    raise RuntimeError("Unable to find module spec")
+    msg = "Unable to find module spec"
+    raise RuntimeError(msg)
 _disnake_module_path = os.path.dirname(_spec.origin)
 
 
@@ -272,7 +273,8 @@ if _IS_READTHEDOCS:
     # https://docs.readthedocs.io/en/stable/reference/environment-variables.html#envvar-READTHEDOCS_CANONICAL_URL
     html_baseurl = os.environ.get("READTHEDOCS_CANONICAL_URL")
     if not html_baseurl:
-        raise RuntimeError("Expected `READTHEDOCS_CANONICAL_URL` to be set on readthedocs")
+        msg = "Expected `READTHEDOCS_CANONICAL_URL` to be set on readthedocs"
+        raise RuntimeError(msg)
 
     # enable opensearch (see description somewhere below)
     html_use_opensearch = html_baseurl.rstrip("/")
