@@ -2423,7 +2423,7 @@ class Client:
         data = await self.http.application_info()
         return AppInfo(self._connection, data)
 
-    async def fetch_application_emoji(self, emoji_id: int) -> Emoji:
+    async def fetch_application_emoji(self, emoji_id: int, /) -> Emoji:
         """|coro|
 
         Retrieves an application level :class:`~disnake.Emoji` based on its ID.
@@ -2439,8 +2439,8 @@ class Client:
         ------
         NotFound
             The app emoji couldn't be found.
-        Forbidden
-            You are not allowed to get the app emoji.
+        HTTPException
+            An error occurred fetching the app emoji.
 
         Returns
         -------
@@ -2469,10 +2469,8 @@ class Client:
         ------
         NotFound
             The ``image`` asset couldn't be found.
-        Forbidden
-            You are not allowed to create app emojis.
         HTTPException
-            An error occurred creating an app emoji.
+            An error occurred creating the app emoji.
         TypeError
             The ``image`` asset is a lottie sticker (see :func:`Sticker.read <disnake.Sticker.read>`).
         ValueError
@@ -2484,7 +2482,7 @@ class Client:
             The newly created application emoji.
         """
         img = await utils._assetbytes_to_base64_data(image)
-        data = await self.http.create_app_emoji(self.application_id, name, img)
+        data = await self.http.create_app_emoji(self.application_id, name=name, image=img)
         return Emoji(guild=None, state=self._connection, data=data)
 
     async def fetch_application_emojis(self) -> List[Emoji]:
@@ -2496,10 +2494,8 @@ class Client:
 
         Raises
         ------
-        NotFound
-            The app emojis for this application ID couldn't be found.
-        Forbidden
-            You are not allowed to get app emojis.
+        HTTPException
+            An error occurred fetching the app emojis.
 
         Returns
         -------

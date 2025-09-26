@@ -54,8 +54,8 @@ class Emoji(_EmojiTag, AssetMixin):
 
     .. versionchanged:: |vnext|
 
-        This class can now represents app emojis. Use :attr:`Emoji.is_app_emoji` to check for this.
-        To check if this is a guild emoji, use :attr:`Emoji.is_guild_emoji`.
+        This class can now represent app emojis. Use :meth:`Emoji.is_app_emoji` to check for this.
+        To check if this is a guild emoji, use :meth:`Emoji.is_guild_emoji`.
 
     Attributes
     ----------
@@ -74,9 +74,12 @@ class Emoji(_EmojiTag, AssetMixin):
     available: :class:`bool`
         Whether the emoji is available for use.
     user: Optional[:class:`User`]
-        The user that created this emoji. This can only be retrieved using
-        :meth:`Guild.fetch_emoji`/:meth:`Guild.fetch_emojis` while
+        The user that created this emoji. If this is a guild emoji, this can only be retrieved
+        using :meth:`Guild.fetch_emoji`/:meth:`Guild.fetch_emojis` while
         having the :attr:`~Permissions.manage_guild_expressions` permission.
+
+        If this is an app emoji, this is the team member that uploaded the emoji,
+        or the bot user if created using :meth:`Client.create_application_emoji`.
     """
 
     __slots__: Tuple[str, ...] = (
@@ -184,7 +187,8 @@ class Emoji(_EmojiTag, AssetMixin):
 
     @property
     def application_id(self) -> Optional[int]:
-        """Optional[:class:`int`]: The ID of the application which owns this emoji.
+        """Optional[:class:`int`]: The ID of the application which owns this emoji,
+        if this is an app emoji.
 
         .. versionadded:: |vnext|
         """
@@ -192,19 +196,21 @@ class Emoji(_EmojiTag, AssetMixin):
             return None
         return self._state.application_id
 
-    @property
     def is_guild_emoji(self) -> bool:
-        """:class:`bool`: Whether this is a guild emoji.
+        """Whether this emoji is a guild emoji.
 
         .. versionadded:: |vnext|
+
+        :return type: :class:`bool`
         """
         return self.guild_id is not None
 
-    @property
     def is_app_emoji(self) -> bool:
-        """:class:`bool`: Whether this is an application emoji.
+        """Whether this emoji is an application emoji.
 
         .. versionadded:: |vnext|
+
+        :return type: :class:`bool`
         """
         return self.guild_id is None
 
@@ -217,10 +223,8 @@ class Emoji(_EmojiTag, AssetMixin):
         """
         if not self.available:
             return False
-        if not self.guild:
-            # if we don't have a guild, this is an app emoji
-            return self.available
-        if not self._roles:
+        # if we don't have a guild, this is an app emoji
+        if not self.guild or not self._roles:
             return True
         emoji_roles, my_roles = self._roles, self.guild.me._roles
         return any(my_roles.has(role_id) for role_id in emoji_roles)
@@ -228,15 +232,17 @@ class Emoji(_EmojiTag, AssetMixin):
     async def delete(self, *, reason: Optional[str] = None) -> None:
         """|coro|
 
-        Deletes the custom emoji.
+        Deletes the emoji.
 
-        You must have :attr:`~Permissions.manage_guild_expressions` permission to
-        do this.
+        If this is not an app emoji, you must have
+        :attr:`~Permissions.manage_guild_expressions` permission to do this.
 
         Parameters
         ----------
         reason: Optional[:class:`str`]
             The reason for deleting this emoji. Shows up on the audit log.
+
+            Only applies to emojis that belong to a :class:`.Guild`.
 
         Raises
         ------
@@ -247,25 +253,28 @@ class Emoji(_EmojiTag, AssetMixin):
         InvalidData
             The emoji data is invalid and cannot be processed.
         """
-        # this is an app emoji
-        if self.guild is None:
+        if self.guild_id is None:
+            # this is an app emoji
             if self.application_id is None:
                 # should never happen
-                msg = f"guild and application_id are both None when attempting to delete emoji with ID {self.id} This may be a library bug! Open an issue on GitHub."
+                msg = (
+                    f"guild_id and application_id are both None when attempting to delete emoji with ID {self.id}."
+                    " This may be a library bug! Open an issue on GitHub."
+                )
                 raise InvalidData(msg)
 
             return await self._state.http.delete_app_emoji(self.application_id, self.id)
-        await self._state.http.delete_custom_emoji(self.guild.id, self.id, reason=reason)
+        await self._state.http.delete_custom_emoji(self.guild_id, self.id, reason=reason)
 
     async def edit(
         self, *, name: str = MISSING, roles: List[Snowflake] = MISSING, reason: Optional[str] = None
     ) -> Emoji:
         """|coro|
 
-        Edits the custom emoji.
+        Edits the emoji.
 
-        You must have :attr:`~Permissions.manage_guild_expressions` permission to
-        do this.
+        If this emoji is a guild emoji, you must have
+        :attr:`~Permissions.manage_guild_expressions` permission to do this.
 
         .. versionchanged:: 2.0
             The newly updated emoji is returned.
@@ -280,8 +289,12 @@ class Emoji(_EmojiTag, AssetMixin):
             An emoji cannot have both subscription roles (see :attr:`RoleTags.integration_id`) and
             non-subscription roles, and emojis can't be converted between premium and non-premium
             after creation.
+
+            Only applies to emojis that belong to a :class:`.Guild`.
         reason: Optional[:class:`str`]
             The reason for editing this emoji. Shows up on the audit log.
+
+            Only applies to emojis that belong to a :class:`.Guild`.
 
         Raises
         ------
@@ -297,21 +310,25 @@ class Emoji(_EmojiTag, AssetMixin):
         :class:`Emoji`
             The newly updated emoji.
         """
-        payload = {}
-        if name is not MISSING:
-            payload["name"] = name
-        if roles is not MISSING:
-            payload["roles"] = [role.id for role in roles]
-
-        if self.guild is None:
+        if self.guild_id is None:
+            # this is an app emoji
             if self.application_id is None:
                 # should never happen
-                msg = f"guild and application_id are both None when attempting to edit emoji with ID {self.id} This may be a library bug! Open an issue on GitHub."
+                msg = (
+                    f"guild_id and application_id are both None when attempting to edit emoji with ID {self.id}."
+                    " This may be a library bug! Open an issue on GitHub."
+                )
                 raise InvalidData(msg)
 
-            data = await self._state.http.edit_app_emoji(self.application_id, self.id, name)
+            data = await self._state.http.edit_app_emoji(self.application_id, self.id, name=name)
         else:
+            payload = {}
+            if name is not MISSING:
+                payload["name"] = name
+            if roles is not MISSING:
+                payload["roles"] = [role.id for role in roles]
+
             data = await self._state.http.edit_custom_emoji(
-                self.guild.id, self.id, payload=payload, reason=reason
+                self.guild_id, self.id, payload=payload, reason=reason
             )
         return Emoji(guild=self.guild, data=data, state=self._state)
