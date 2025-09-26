@@ -806,7 +806,7 @@ class Client:
 
         Parameters
         ----------
-        func: :ref:`coroutine <coroutine>`
+        func: :ref:`coroutine function <coroutine>`
             The function to call.
         name: Union[:class:`str`, :class:`.Event`]
             The name of the event to listen for. Defaults to ``func.__name__``.
@@ -827,8 +827,8 @@ class Client:
         Raises
         ------
         TypeError
-            The function is not a coroutine or a string or an :class:`.Event` was not passed
-            as the name.
+            The function is not a coroutine function,
+            or a string or an :class:`.Event` was not passed as the name.
         """
         if name is not MISSING and not isinstance(name, (str, Event)):
             msg = f"add_listener expected str or Enum but received {name.__class__.__name__!r} instead."
@@ -858,7 +858,7 @@ class Client:
 
         Parameters
         ----------
-        func
+        func: :ref:`coroutine function <coroutine>`
             The function that was used as a listener to remove.
         name: Union[:class:`str`, :class:`.Event`]
             The name of the event we want to remove. Defaults to
@@ -889,7 +889,7 @@ class Client:
         event listener. Basically this allows you to listen to multiple
         events from different places e.g. such as :func:`.on_ready`
 
-        The functions being listened to must be a :ref:`coroutine <coroutine>`.
+        The function being listened to must be a :ref:`coroutine function <coroutine>`.
 
         .. versionchanged:: 2.10
             The definition of this method was moved from :class:`.ext.commands.Bot`
@@ -919,8 +919,8 @@ class Client:
         Raises
         ------
         TypeError
-            The function being listened to is not a coroutine or a string or an :class:`.Event` was not passed
-            as the name.
+            The function being listened to is not a coroutine function,
+            or a string or an :class:`.Event` was not passed as the name.
         """
         if name is not MISSING and not isinstance(name, (str, Event)):
             msg = f"listen expected str or Enum but received {name.__class__.__name__!r} instead."
@@ -1854,8 +1854,6 @@ class Client:
 
         You can find more info about the events in the :ref:`documentation <disnake_api_events>`.
 
-        The events must be a :ref:`coroutine <coroutine>`, if not, :exc:`TypeError` is raised.
-
         Example
         -------
         .. code-block:: python3
@@ -1864,10 +1862,15 @@ class Client:
             async def on_ready():
                 print('Ready!')
 
+        Parameters
+        ----------
+        coro: :ref:`coroutine function <coroutine>`
+            The coroutine function to register as the event handler.
+
         Raises
         ------
         TypeError
-            The coroutine passed is not actually a coroutine.
+            The argument passed is not actually a coroutine function.
         """
         if not utils.iscoroutinefunction(coro):
             msg = "event registered must be a coroutine function"

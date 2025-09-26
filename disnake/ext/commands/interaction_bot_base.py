@@ -1312,7 +1312,7 @@ class InteractionBotBase(CommonBotBase):
         and it takes an :class:`.ApplicationCommandInteraction` as its only parameter.
         """
         if not iscoroutinefunction(coro):
-            msg = "The pre-invoke hook must be a coroutine."
+            msg = "The pre-invoke hook must be a coroutine function."
             raise TypeError(msg)
 
         self._before_slash_command_invoke = coro
@@ -1323,7 +1323,7 @@ class InteractionBotBase(CommonBotBase):
         and it takes an :class:`.ApplicationCommandInteraction` as its only parameter.
         """
         if not iscoroutinefunction(coro):
-            msg = "The post-invoke hook must be a coroutine."
+            msg = "The post-invoke hook must be a coroutine function."
             raise TypeError(msg)
 
         self._after_slash_command_invoke = coro
@@ -1332,7 +1332,7 @@ class InteractionBotBase(CommonBotBase):
     def before_user_command_invoke(self, coro: CFT) -> CFT:
         """Similar to :meth:`Bot.before_slash_command_invoke` but for user commands."""
         if not iscoroutinefunction(coro):
-            msg = "The pre-invoke hook must be a coroutine."
+            msg = "The pre-invoke hook must be a coroutine function."
             raise TypeError(msg)
 
         self._before_user_command_invoke = coro
@@ -1341,7 +1341,7 @@ class InteractionBotBase(CommonBotBase):
     def after_user_command_invoke(self, coro: CFT) -> CFT:
         """Similar to :meth:`Bot.after_slash_command_invoke` but for user commands."""
         if not iscoroutinefunction(coro):
-            msg = "The post-invoke hook must be a coroutine."
+            msg = "The post-invoke hook must be a coroutine function."
             raise TypeError(msg)
 
         self._after_user_command_invoke = coro
@@ -1350,7 +1350,7 @@ class InteractionBotBase(CommonBotBase):
     def before_message_command_invoke(self, coro: CFT) -> CFT:
         """Similar to :meth:`Bot.before_slash_command_invoke` but for message commands."""
         if not iscoroutinefunction(coro):
-            msg = "The pre-invoke hook must be a coroutine."
+            msg = "The pre-invoke hook must be a coroutine function."
             raise TypeError(msg)
 
         self._before_message_command_invoke = coro
@@ -1359,7 +1359,7 @@ class InteractionBotBase(CommonBotBase):
     def after_message_command_invoke(self, coro: CFT) -> CFT:
         """Similar to :meth:`Bot.after_slash_command_invoke` but for message commands."""
         if not iscoroutinefunction(coro):
-            msg = "The post-invoke hook must be a coroutine."
+            msg = "The post-invoke hook must be a coroutine function."
             raise TypeError(msg)
 
         self._after_message_command_invoke = coro

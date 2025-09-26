@@ -153,7 +153,7 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
         as its first parameter and :class:`disnake.Message` as its second
         parameter and returns the prefix. This is to facilitate "dynamic"
         command prefixes. This callable can be either a regular function or
-        a coroutine.
+        a coroutine function.
 
         An empty string as the prefix always matches, enabling prefix-less
         command invocation. While this may be useful in DMs it should be avoided

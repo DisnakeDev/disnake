@@ -117,7 +117,7 @@ class Converter(Protocol[T_co]):
     special cased ``disnake`` classes.
 
     Classes that derive from this should override the :meth:`~.Converter.convert`
-    method to do its conversion logic. This method must be a :ref:`coroutine <coroutine>`.
+    method to do its conversion logic. This method must be a :ref:`coroutine function <coroutine>`.
     """
 
     async def convert(self, ctx: AnyContext, argument: str) -> T_co:
