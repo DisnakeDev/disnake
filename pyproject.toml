@@ -11,7 +11,7 @@ readme = "README.md"
 authors = [
   { name = "Disnake Development" }
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 keywords = ["disnake", "discord", "discord api"]
 license = { text = "MIT" }
 dependencies = [
@@ -25,7 +25,6 @@ classifiers = [
     "Natural Language :: English",
     "Operating System :: OS Independent",
     # it is important that the python classifiers are sorted in the sequential order
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -68,14 +67,24 @@ docs = [
 ]
 
 [dependency-groups]
+dev   = [
+    { include-group = "tools" },
+    { include-group = "nox" },
+    { include-group = "codemod" },
+    { include-group = "typing" },
+    { include-group = "test" },
+    { include-group = "build" },
+]
 nox = [
-    "nox==2025.5.1",
+    # note: nox should be synced with nox.needs_version in noxfile.py
+    # and the pinned nox version in noxfile.py must be within these bounds
+    "nox>=2025.5.1",
 ]
 ruff = [
     "ruff==0.13.0",
 ]
 tools = [
-    "pre-commit~=3.0",
+    "prek>=0.2.0",
     "slotscheck~=0.16.4",
     "check-manifest==0.49",
     { include-group = "ruff" },
@@ -103,29 +112,16 @@ test = [
     "typing-extensions>=4.6",
 ]
 build = [
-    "build~=1.2",
-    "twine~=6.1",
+    "build>=1.2.2.post1",
+    "twine>=6.1.0",
 ]
 
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["disnake*"]
 
-[tool.nox]
-script-venv-backend = "uv|virtualenv"
-
-[tool.pdm]
-# Ignore `requires-python` warnings when locking, the latest versions of some
-# dependencies already require >=3.9
-# See also https://pdm-project.org/en/latest/usage/config/#ignore-package-warnings
-ignore_package_warnings = ["*"]
-
-[tool.pdm.scripts]
-docs = { cmd = "nox -Rs docs --", help = "Build the documentation for development" }
-lint = { cmd = "nox -Rs lint --", help = "Check all files for linting errors" }
-pyright = { cmd = "nox -Rs pyright --", help = "Run pyright" }
-setup_env = { cmd = "{pdm} run noxfile.py -s dev", help = "Set up the local environment and all dependencies" }
-test = { cmd = "nox -Rs test --", help = "Run pytest" }
+[tool.uv]
+required-version = ">=0.8.4"
 
 [tool.ruff]
 line-length = 100
@@ -154,8 +150,6 @@ ignore = [
     "FBT", # at some point we should make booleans keyword only
     ## flake8-commas
     "COM812", # mostly managed by the formatter
-    ## flake8-errmsg
-    "EM", # TODO: Enable; too noisy for this, but has autofixes
     ## flake8-fixme
     "FIX", # TODO: what the name says!
     ## flake8-no-pep420
@@ -171,13 +165,16 @@ ignore = [
     ## flake8-self
     "SLF", # private member access, this is unlikely to be enabled.
     ## flake8-simplify
-    "SIM", # TODO: enable, most have autofixes.
+    "SIM105", # TODO: enable, most have autofixes.
+    "SIM108", # too opinionated.
     ## flake8-tidy-imports
     "TID252", # we still use relative imports
     ## flake8-todos
     "TD", # similar to flake8-fixme, though they may conflict
     ## flake8-typechecking
-    "TC", # TODO: enable in typing PR
+    "TC001", # typing-only first party import # to be enabled
+    "TC002", # typing only standard library import # to be enabled
+    "TC003", # typing only third party import # to be enabled
     ## flake8-unused-arguments
     "ARG", # most unused arguments are intentional
     ## flake8-use-pathlib
@@ -213,6 +210,10 @@ ignore = [
     "TRY003", # as of 0.12.11 still has some false positives
     "TRY301", # TODO: enable
     "TRY300", # TODO: enable
+    # py3.9 bump
+    "UP006",
+    "UP035",
+    "FURB188",
 ]
 
 [tool.ruff.lint.per-file-ignores]
@@ -225,6 +226,7 @@ ignore = [
     "ANN", # missing type annotations in examples is fine
     "B008", # do not perform function calls in argument defaults, this is how most commands work
     "E741", # allow ambiguous variable names
+    "EM", # allow Exception("text") for simplicity
     "S104", # flake8-bandit: allow binding to all interfaces
     "T201", # print found, printing is okay in examples
 ]
@@ -268,6 +270,9 @@ ignorelist = [
     "globals",
     "locals",
 ]
+
+[tool.ruff.lint.flake8-errmsg]
+max-string-length = 0
 
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
 "subprocess".msg = "Consider possible security implications associated with the subprocess module." # replaces S404
@@ -370,7 +375,6 @@ reportIncompatibleVariableOverride = false
 # these were added in the upgrade from pyright 1.1.336 to 1.1.405
 reportInconsistentOverload = false
 reportInvalidTypeVarUse = false
-reportInvalidTypeForm = false
 
 # these are largely due to missing type hints, and make up most of the error count
 reportUnknownMemberType = false

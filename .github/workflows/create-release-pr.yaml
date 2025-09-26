@@ -45,10 +45,10 @@ jobs:
       - name: Set up environment
         uses: ./.github/actions/setup-env
         with:
-          python-version: 3.8
+          python-version: 3.9
 
       - name: Install dependencies
-        run: pdm install -dG changelog
+        run: uv sync --no-default-groups --group changelog
 
       - name: Update version
         run: |
@@ -57,7 +57,7 @@ jobs:
 
       - name: Build changelog
         run: |
-          pdm run towncrier build --yes --version "$VERSION_INPUT"
+          uv run towncrier build --yes --version "$VERSION_INPUT"
           git commit -a -m "docs: build changelog"
 
       - name: Create pull request

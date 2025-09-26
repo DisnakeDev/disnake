@@ -119,7 +119,8 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
     @custom_id.setter
     def custom_id(self, value: str) -> None:
         if not isinstance(value, str):
-            raise TypeError("custom_id must be None or str")
+            msg = "custom_id must be None or str"
+            raise TypeError(msg)
 
         self._underlying.custom_id = value
 
@@ -131,7 +132,8 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
     @placeholder.setter
     def placeholder(self, value: Optional[str]) -> None:
         if value is not None and not isinstance(value, str):
-            raise TypeError("placeholder must be None or str")
+            msg = "placeholder must be None or str"
+            raise TypeError(msg)
 
         self._underlying.placeholder = value
 
@@ -225,9 +227,8 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
             if isinstance(value, SelectDefaultValue):
                 if value.type not in cls._default_value_type_map:
                     allowed_types = [str(t) for t in cls._default_value_type_map]
-                    raise ValueError(
-                        f"SelectDefaultValue.type should be {humanize_list(allowed_types, 'or')}, not {value.type}"
-                    )
+                    msg = f"SelectDefaultValue.type should be {humanize_list(allowed_types, 'or')}, not {value.type}"
+                    raise ValueError(msg)
                 result.append(value)
                 continue
 
@@ -244,9 +245,8 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
                     t.__name__ for ts in cls._default_value_type_map.values() for t in ts
                 ]
                 allowed_types.append(SelectDefaultValue.__name__)
-                raise TypeError(
-                    f"Expected type of default value to be {humanize_list(allowed_types, 'or')}, not {type(value)!r}"
-                )
+                msg = f"Expected type of default value to be {humanize_list(allowed_types, 'or')}, not {type(value)!r}"
+                raise TypeError(msg)
 
             result.append(SelectDefaultValue(value.id, value_type))
 
@@ -262,14 +262,17 @@ def _create_decorator(
 ) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]:
     if args:
         # the `*args` def above is just to satisfy the typechecker
-        raise RuntimeError("expected no *args")
+        msg = "expected no *args"
+        raise RuntimeError(msg)
 
     if not callable(cls):
-        raise TypeError("cls argument must be callable")
+        msg = "cls argument must be callable"
+        raise TypeError(msg)
 
     def decorator(func: ItemCallbackType[V_co, S_co]) -> DecoratedItem[S_co]:
         if not iscoroutinefunction(func):
-            raise TypeError("select function must be a coroutine function")
+            msg = "select function must be a coroutine function"
+            raise TypeError(msg)
 
         func.__discord_ui_model_type__ = cls
         func.__discord_ui_model_kwargs__ = kwargs

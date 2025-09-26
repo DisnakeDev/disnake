@@ -1,11 +1,10 @@
-#!/usr/bin/env -S pdm run
+#!/usr/bin/env -S uv run --script
 # /// script
-# requires-python = ">=3.10"
+# requires-python = ">=3.9"
 # dependencies = [
 #     "nox==2025.5.1",
 # ]
 # ///
-
 # SPDX-License-Identifier: MIT
 
 from __future__ import annotations
@@ -13,6 +12,7 @@ from __future__ import annotations
 import dataclasses
 import os
 import pathlib
+import shutil
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -30,6 +30,7 @@ nox.needs_version = ">=2025.5.1"
 
 nox.options.error_on_external_run = True
 nox.options.reuse_venv = "yes"
+nox.options.default_venv_backend = "uv|virtualenv"
 
 PYPROJECT = nox.project.load_toml()
 
@@ -62,10 +63,11 @@ class ExecutionGroup(ExecutionGroupType):
 
     def __post_init__(self) -> None:
         if self.pyright_paths and "pyright" not in self.sessions:
-            raise TypeError("pyright_paths can only be set if pyright is in sessions")
+            msg = "pyright_paths can only be set if pyright is in sessions"
+            raise TypeError(msg)
         if self.python in EXPERIMENTAL_PYTHON_VERSIONS:
             self.experimental = True
-        for key in self.__dataclass_fields__.keys():
+        for key in self.__dataclass_fields__:
             self[key] = getattr(self, key)  # type: ignore
 
 
@@ -101,6 +103,11 @@ EXECUTION_GROUPS: List[ExecutionGroup] = [
         sessions=("lint", "slotscheck", "check-manifest"),
         groups=("tools",),
     ),
+    # build
+    ExecutionGroup(
+        sessions=("build",),
+        groups=("build",),
+    ),
     ## testing
     *(
         ExecutionGroup(
@@ -126,7 +133,8 @@ def get_groups_for_session(name: str) -> List[ExecutionGroup]:
 def get_version_for_session(name: str) -> str:
     versions = {g.python for g in get_groups_for_session(name) if g.python}
     if len(versions) != 1:
-        raise TypeError(f"not the right number of groups for session {name}")
+        msg = f"not the right number of groups for session {name}"
+        raise TypeError(msg)
     return versions.pop()
 
 
@@ -138,16 +146,18 @@ def install_deps(session: nox.Session, *, execution_group: Optional[ExecutionGro
             # try cutting the `-`
             results = get_groups_for_session(session.name.split("-")[0])
         if len(results) != 1:
-            raise TypeError(f"not a valid session name: {session.name}. results: {len(results)}")
+            msg = f"not a valid session name: {session.name}. results: {len(results)}"
+            raise TypeError(msg)
         execution_group = results[0]
 
     if not execution_group.project and execution_group.extras:
-        raise TypeError("Cannot install extras without also installing the project")
+        msg = "Cannot install extras without also installing the project"
+        raise TypeError(msg)
 
     command: List[str]
 
-    # If not using pdm, install with pip
-    if os.getenv("NO_PDM_INSTALL") is not None:
+    # If not using uv, install with pip
+    if os.getenv("INSTALL_WITH_PIP") is not None:
         command = []
         if execution_group.project:
             command.append("-e")
@@ -165,38 +175,41 @@ def install_deps(session: nox.Session, *, execution_group: Optional[ExecutionGro
 
         return
 
-    # install with pdm
+    # install with uv
     command = [
-        "pdm",
+        "uv",
         "sync",
-        "--fail-fast",
-        "--clean-unselected",
+        "--no-default-groups",
     ]
+    env: Dict[str, Any] = {}
 
-    # see https://pdm-project.org/latest/usage/advanced/#use-nox-as-the-runner
-    env: Dict[str, Any] = {
-        "PDM_IGNORE_SAVED_PYTHON": "1",
-    }
+    if session.venv_backend != "none":
+        command.append(f"--python={session.virtualenv.location}")
+        env["UV_PROJECT_ENVIRONMENT"] = str(session.virtualenv.location)
+    elif CI and "VIRTUAL_ENV" in os.environ:
+        # we're in CI and using uv, so use the existing venv
+        command.append(f"--python={os.environ['VIRTUAL_ENV']}")
+        env["UV_PROJECT_ENVIRONMENT"] = os.environ["VIRTUAL_ENV"]
 
-    command.extend([f"-G={g}" for g in (*execution_group.extras, *execution_group.groups)])
-
-    if not execution_group.groups:
-        # if no dev groups requested, make sure we don't install any
-        command.append("--prod")
-
+    if execution_group.extras:
+        for e in execution_group.extras:
+            command.append(f"--extra={e}")
+    if execution_group.groups:
+        for g in execution_group.groups:
+            command.append(f"--group={g}")
     if not execution_group.project:
-        command.append("--no-self")
+        command.append("--no-install-project")
 
     session.run_install(
         *command,
         env=env,
-        external=True,
+        silent=True,
     )
 
     if execution_group.dependencies:
         if session.venv_backend == "none" and CI:
             # we are not in a venv but we're on CI so we probably intended to do this
-            session.run_install("pip", "install", *execution_group.dependencies, env=env)
+            session.run_install("uv", "pip", "install", *execution_group.dependencies, env=env)
         else:
             session.install(*execution_group.dependencies, env=env)
 
@@ -238,7 +251,7 @@ def docs(session: nox.Session) -> None:
 def lint(session: nox.Session) -> None:
     """Check all paths for linting errors"""
     install_deps(session)
-    session.run("pre-commit", "run", "--all-files", *session.posargs)
+    session.run("prek", "run", "--all-files", *session.posargs)
 
 
 @nox.session(name="check-manifest")
@@ -253,6 +266,17 @@ def slotscheck(session: nox.Session) -> None:
     """Run slotscheck."""
     install_deps(session)
     session.run("python", "-m", "slotscheck", "--verbose", "-m", "disnake")
+
+
+@nox.session(requires=["check-manifest"])
+def build(session: nox.Session) -> None:
+    """Build a dist."""
+    install_deps(session)
+
+    dist_path = pathlib.Path("dist")
+    if dist_path.exists():
+        shutil.rmtree(dist_path)
+    session.run("python", "-m", "build", "--outdir", "dist")
 
 
 @nox.session(python=get_version_for_session("autotyping"))
@@ -424,7 +448,14 @@ def coverage(session: nox.Session) -> None:
             session.error("serve cannot be used with any other arguments.")
         session.run("coverage", "html", "--show-contexts")
         session.run(
-            "python", "-m", "http.server", "8012", "--directory", "htmlcov", "--bind", "127.0.0.1"
+            "python",
+            "-m",
+            "http.server",
+            "8012",
+            "--directory",
+            "htmlcov",
+            "--bind",
+            "127.0.0.1",
         )
         return
 
@@ -439,12 +470,12 @@ def dev(session: nox.Session) -> None:
     - lock all dependencies with pdm
     - create a .venv/ directory, overwriting the existing one,
     - install all dependencies needed for development.
-    - install the pre-commit hook
+    - install the pre-commit hook (prek)
     """
-    session.run("pdm", "lock", "-dG:all", "-G:all", external=True)
-    session.run("pdm", "venv", "create", "--force", external=True)
-    session.run("pdm", "sync", "--clean-unselected", "-dG:all", "-G:all")
-    session.run("pdm", "run", "pre-commit", "install")
+    session.run("uv", "lock", external=True)
+    session.run("uv", "venv", "--clear", external=True)
+    session.run("uv", "sync", "--all-extras", "--all-groups", external=True)
+    session.run("uv", "run", "prek", "install", "--overwrite", external=True)
 
 
 if __name__ == "__main__":

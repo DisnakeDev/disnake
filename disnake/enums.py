@@ -120,9 +120,6 @@ def _is_descriptor(obj) -> bool:
     return hasattr(obj, "__get__") or hasattr(obj, "__set__") or hasattr(obj, "__delete__")
 
 
-EnumMetaT = TypeVar("EnumMetaT", bound="EnumMeta")
-
-
 class EnumMeta(type):
     if TYPE_CHECKING:
         __name__: ClassVar[str]
@@ -169,10 +166,10 @@ class EnumMeta(type):
         value_cls._actual_enum_cls_ = actual_cls  # type: ignore
         return actual_cls
 
-    def __iter__(cls: EnumMetaT) -> Iterator[EnumMetaT]:
+    def __iter__(cls) -> Iterator[EnumMetaT]:
         return (cls._enum_member_map_[name] for name in cls._enum_member_names_)
 
-    def __reversed__(cls: EnumMetaT) -> Iterator[EnumMetaT]:
+    def __reversed__(cls) -> Iterator[EnumMetaT]:
         return (cls._enum_member_map_[name] for name in reversed(cls._enum_member_names_))
 
     def __len__(cls) -> int:
@@ -189,16 +186,19 @@ class EnumMeta(type):
         try:
             return cls._enum_value_map_[value]
         except (KeyError, TypeError):
-            raise ValueError(f"{value!r} is not a valid {cls.__name__}") from None
+            msg = f"{value!r} is not a valid {cls.__name__}"
+            raise ValueError(msg) from None
 
     def __getitem__(cls, key: str) -> Any:
         return cls._enum_member_map_[key]
 
     def __setattr__(cls, name: str, value: Any) -> NoReturn:
-        raise TypeError("Enums are immutable.")
+        msg = "Enums are immutable."
+        raise TypeError(msg)
 
     def __delattr__(cls, attr) -> NoReturn:
-        raise TypeError("Enums are immutable")
+        msg = "Enums are immutable"
+        raise TypeError(msg)
 
     def __instancecheck__(self, instance) -> bool:
         # isinstance(x, Y)

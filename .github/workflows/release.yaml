@@ -23,18 +23,15 @@ jobs:
         id: setup
         uses: ./.github/actions/setup-env
         with:
-          python-version: 3.8
-
-      - name: Install dependencies
-        run: pdm install -dG build
+          python-version: 3.9
 
       - name: Build package
         run: |
-          pdm run python -m build
+          uvx --from=build~=1.3 pyproject-build
           ls -la dist/
 
       - name: Twine check
-        run: pdm run twine check --strict dist/*
+        run: uvx twine~=6.1 check --strict dist/*
 
       - name: Show metadata
         run: |
