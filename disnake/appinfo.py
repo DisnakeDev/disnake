@@ -536,31 +536,9 @@ class AppInfo:
             The application's event webhooks URL.
         event_webhooks_status: :class:`ApplicationEventWebhookStatus`
             The application's event webhooks status.
-        event_webhook_types: Optional[List]
+        event_webhooks_types: Optional[List[:class:`str`]]
             The application's event webhook types. See `webhook event types <https://discord.com/developers/docs/events/webhook-events#event-types>`_
             for a list of valid events.
-
-        Usage
-        -----
-
-        >>> app_info = await client.application_info()
-        >>> await app_info.edit(description="A new description!")
-
-        To enable user installations while using custom install URL.
-        >>> from disnake import InstallTypeConfiguration
-        >>> await app_info.edit(
-        ...     user_install_type_config=InstallTypeConfiguration()
-        ... )
-
-        To disable user installations and guild installations. Note, both cannot be disabled simultaneously.
-        >>> from disnake import InstallTypeConfiguration
-        >>> await app_info.edit(
-        ...     custom_install_url="https://example.com/install",
-            # to disable user installations
-        ...     user_install_type_config=None,
-            # to disable guild installations
-        ...     guild_install_type_config=None,
-        ... )
 
         Raises
         ------
@@ -571,6 +549,37 @@ class AppInfo:
         -------
         :class:`.AppInfo`
             The new application information.
+
+        Examples
+        --------
+
+        .. code-block:: python
+
+            >>> app_info = await client.application_info()
+            >>> await app_info.edit(description="A new description!")
+
+        To enable user installations while using custom install URL.
+
+        .. code-block:: python
+
+            >>> from disnake import InstallTypeConfiguration
+            >>> await app_info.edit(
+            ...     user_install_type_config=InstallTypeConfiguration()
+            ... )
+
+        To disable user installations and guild installations.
+        Note, both cannot be disabled simultaneously.
+
+        .. code-block:: python
+
+            >>> from disnake import InstallTypeConfiguration
+            >>> await app_info.edit(
+            ...     custom_install_url="https://example.com/install",
+            ...   # to disable user installations
+            ...     user_install_type_config=None,
+            ...   # to disable guild installations
+            ...     guild_install_type_config=None,
+            ... )
         """
         fields: EditAppInfoPayload = {}
 
