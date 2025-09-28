@@ -361,6 +361,7 @@ jobs:
     needs:
       - lint
       - docs
+      - typing
       - misc
       - codemod
       - test
