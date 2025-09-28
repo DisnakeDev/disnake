@@ -27,7 +27,7 @@ def collect_redirects(app: Sphinx) -> dict[str, str]:
     return mapping
 
 
-def copy_redirect_script(app: Sphinx, exception: Exception) -> None:
+def copy_redirect_script(app: Sphinx, exception: Exception | None) -> None:
     if app.builder.format != "html" or exception:
         return
 
@@ -41,6 +41,7 @@ def copy_redirect_script(app: Sphinx, exception: Exception) -> None:
         SCRIPT_PATH,
         str(Path(app.outdir, "_static", "api_redirect.js")),
         context=context,
+        force=True,
     )
 
 

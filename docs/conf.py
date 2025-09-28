@@ -18,8 +18,10 @@ import os
 import re
 import subprocess  # noqa: TID251
 import sys
+import warnings
 from typing import Any
 
+import sphinx.deprecation
 from sphinx.application import Sphinx
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -27,6 +29,12 @@ from sphinx.application import Sphinx
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.insert(0, os.path.abspath(".."))
 sys.path.append(os.path.abspath("extensions"))
+
+warnings.filterwarnings(
+    "ignore",
+    category=sphinx.deprecation.RemovedInSphinx90Warning,
+    module="hoverxref.extension",
+)
 
 # -- General configuration ------------------------------------------------
 
@@ -90,7 +98,9 @@ rst_prolog = """
 templates_path = ["_templates"]
 
 # The suffix of source filenames.
-source_suffix = ".rst"
+source_suffix = {
+    ".rst": "restructuredtext",
+}
 
 # The encoding of source files.
 # source_encoding = 'utf-8-sig'
