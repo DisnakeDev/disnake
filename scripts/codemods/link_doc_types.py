@@ -1,6 +1,5 @@
-"""Update docstrings to use pep 585 and pep 602 style type hints for documentation."""
-
 # SPDX-License-Identifier: MIT
+"""Update docstrings to use pep 585 and pep 602 style type hints for documentation."""
 
 import pathlib
 import re
