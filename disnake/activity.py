@@ -288,7 +288,7 @@ class Activity(BaseActivity):
         .. versionadded:: 2.0
 
         .. versionchanged:: 2.6
-            Changed type to ``:class:`list`\\[:class:`str`]`` to match API types.
+            Changed type to ``List[str]`` to match API types.
 
     emoji: :class:`PartialEmoji` | :obj:`None`
         The emoji that belongs to this activity.

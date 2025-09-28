@@ -51,6 +51,18 @@ ANY = re.compile(r"(\||, ?|\[)Any\b")
 NONE = re.compile(r"``None``")
 
 
+def get_outside_quotes(s: str) -> list[tuple[str, bool]]:
+    """Return a list of (segment, in_quotes) tuples for segments of s.
+
+    Segments are parts of the string that are either inside or outside of quotes.
+    """
+    parts = s.split("``")
+    segments = []
+    for i, part in enumerate(parts):
+        segments.append((part, i % 2 == 1))
+    return segments
+
+
 def apply_replacements(s):
     # Replace Optional[A] with A | ``None`` using proper bracket matching
     def replace_all_optionals(text: str) -> str:
@@ -119,13 +131,22 @@ def apply_replacements(s):
 
     s = replace_all_optionals(s)
 
-    for regex, replacement in BARE_REGEXES.items():
-        s = regex.sub(rf"\1:class:`{replacement}`\2", s)
+    parts = get_outside_quotes(s)
+    s = ""
+    for part, in_quotes in parts:
+        if not in_quotes:
+            for regex, replacement in BARE_REGEXES.items():
+                part = regex.sub(rf"\1:class:`{replacement}`\2", part)
 
-    for regex, replacement in CONTAINER_REGEXES.items():
-        s = regex.sub(rf":class:`{replacement}`\\\\[", s)
+            for regex, replacement in CONTAINER_REGEXES.items():
+                part = regex.sub(rf":class:`{replacement}`\\\\[", part)
 
-    s = ANY.sub(r"\1:class:`~typing.Any`", s)
+            part = ANY.sub(r"\1:class:`~typing.Any`", part)
+            part = NONE.sub(r":obj:`None`", part)
+        s += part
+        s += "``"
+    s = s[:-2]
+
     # # reference to all None's
     s = NONE.sub(r":obj:`None`", s)
 
