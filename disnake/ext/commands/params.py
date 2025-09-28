@@ -442,7 +442,7 @@ class ParamInfo:
 
     Parameters
     ----------
-    default: Any | :class:`collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`, :class:`~typing.Any`]]
+    default: Any | :class:`collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`], :class:`~typing.Any`]
         The actual default value for the corresponding function param.
         Can be a sync/async callable taking an interaction and returning a dynamic default value,
         if the user didn't pass a value for this parameter.
@@ -458,7 +458,7 @@ class ParamInfo:
         .. versionchanged:: 2.5
             Added support for localizations.
 
-    choices: :class:`collections.abc.Sequence`\\[:class:`.OptionChoice`, :class:`collections.abc.Sequence`\\[:class:`str` | :class:`int` | :class:`float`], :class:`collections.abc.Mapping`\\[:class:`str`, :class:`str` | :class:`int` | :class:`float`]]
+    choices: :class:`collections.abc.Sequence`\\[:class:`.OptionChoice`] | :class:`collections.abc.Sequence`\\[:class:`str` | :class:`int` | :class:`float`] | :class:`collections.abc.Mapping`\\[:class:`str`, :class:`str` | :class:`int` | :class:`float`]
         The pre-defined choices for this option.
     ge: :class:`float`
         The lowest allowed value for this option.
@@ -1164,7 +1164,7 @@ def Param(
 
     Parameters
     ----------
-    default: Any | :class:`collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`, :class:`~typing.Any`]]
+    default: Any | :class:`collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`], :class:`~typing.Any`]
         The actual default value of the function parameter that should be passed instead of the :class:`ParamInfo` instance.
         Can be a sync/async callable taking an interaction and returning a dynamic default value,
         if the user didn't pass a value for this parameter.
@@ -1181,7 +1181,7 @@ def Param(
         .. versionchanged:: 2.5
             Added support for localizations.
 
-    choices: :class:`collections.abc.Sequence`\\[:class:`.OptionChoice`, :class:`collections.abc.Sequence`\\[:class:`str` | :class:`int` | :class:`float`], :class:`collections.abc.Mapping`\\[:class:`str`, :class:`str` | :class:`int` | :class:`float`]]
+    choices: :class:`collections.abc.Sequence`\\[:class:`.OptionChoice`] | :class:`collections.abc.Sequence`\\[:class:`str` | :class:`int` | :class:`float`] | :class:`collections.abc.Mapping`\\[:class:`str`, :class:`str` | :class:`int` | :class:`float`]
         The pre-defined choices for this slash command option.
     converter: :class:`collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`, :class:`~typing.Any`], :class:`~typing.Any`]
         A function that will convert the original input to a desired format.
@@ -1351,7 +1351,7 @@ def option_enum(
 
     Parameters
     ----------
-    choices: :class:`dict`\\[:class:`str` | :class:`Any`, :class:`list`\\[:class:`Any`]]
+    choices: :class:`dict`\\[:class:`str`, :class:`Any`] | :class:`list`\\[:class:`Any`]
         A name/value mapping of choices, or a list of values whose stringified representations
         will be used as the names.
     **kwargs

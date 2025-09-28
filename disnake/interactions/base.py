@@ -1416,7 +1416,7 @@ class InteractionResponse:
 
         Parameters
         ----------
-        choices: :class:`collections.abc.Sequence`\\[:class:`OptionChoice`, :class:`collections.abc.Sequence`\\[:class:`str` | :class:`int` | :class:`float`], :class:`collections.abc.Mapping`\\[:class:`str`, :class:`str` | :class:`int` | :class:`float`]]
+        choices: :class:`collections.abc.Sequence`\\[:class:`OptionChoice`] | :class:`collections.abc.Sequence`\\[:class:`str` | :class:`int` | :class:`float`] | :class:`collections.abc.Mapping`\\[:class:`str`, :class:`str` | :class:`int` | :class:`float`]
             The choices to suggest.
 
         Raises

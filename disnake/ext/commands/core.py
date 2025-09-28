@@ -206,7 +206,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         The short help text for the command.
     usage: :class:`str` | :obj:`None`
         A replacement for arguments in the default help text.
-    aliases: :class:`list`\\[:class:`str`, :class:`tuple`\\[:class:`str`]]
+    aliases: :class:`list`\\[:class:`str`] | :class:`tuple`\\[:class:`str`]
         The list of aliases the command can be invoked under.
     enabled: :class:`bool`
         Whether the command is currently enabled.
@@ -2523,7 +2523,7 @@ def cooldown(
         The number of times a command can be used before triggering a cooldown.
     per: :class:`float`
         The amount of seconds to wait for a cooldown when it's been triggered.
-    type: :class:`.BucketType` | :class:`collections.abc.Callable`\\[[:class:`.Message`, :class:`~typing.Any`]]
+    type: :class:`.BucketType` | :class:`collections.abc.Callable`\\[[:class:`.Message`], :class:`~typing.Any`]
         The type of cooldown to have. If callable, should return a key for the mapping.
 
         .. versionchanged:: 1.7

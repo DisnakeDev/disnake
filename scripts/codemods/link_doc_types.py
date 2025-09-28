@@ -31,11 +31,19 @@ CONTAINERS = {
     "Match": "re.Match",
 }
 
+# "str": "str",
+# "int": "int",
+# "float": "float",
+# "bool": "bool",
+# "bytes": "bytes",
+# "True": "True",
+# "False": "False",
+
 BARE_REGEXES = {re.compile(rf"(\[|, ]){k}(\]|, )"): v for k, v in CONTAINERS.items()}
 CONTAINER_REGEXES = {re.compile(rf"\b{k}\["): v for k, v in CONTAINERS.items()}
 
 OPTIONAL = re.compile(r"Optional\[")
-UNION = re.compile(r"Union\[(.*?)\]")
+UNION = re.compile(r"Union\[")
 ANY = re.compile(r"(\||, ?|\[)Any\b")
 NONE = re.compile(r"``None``")
 
@@ -63,13 +71,48 @@ def apply_replacements(s):
                 break
         return text
 
-    for _ in range(3):  # don't recurse forever
-        s = UNION.sub(
-            lambda m: " | ".join([x.strip() for x in m.group(1).split(",")]),
-            s,
-        )
-        if r"Union[" not in s:
-            break
+    def replace_all_unions(text: str) -> str:
+        # Find each 'Union[' and replace it with the top-level elements joined by ' | '
+        # while preserving nested brackets (do not split commas inside nested []).
+        while True:
+            m = UNION.search(text)
+            if not m:
+                break
+            start = m.end()
+            bracket_count = 1
+            found = False
+            for idx, ch in enumerate(text[start:], start=start):
+                if ch == "[":
+                    bracket_count += 1
+                elif ch == "]":
+                    bracket_count -= 1
+                if bracket_count == 0:
+                    inner = text[start:idx]
+                    # Split inner on top-level commas only
+                    parts = []
+                    curr = []
+                    depth = 0
+                    for c in inner:
+                        if c == "[":
+                            depth += 1
+                        elif c == "]":
+                            depth -= 1
+                        if c == "," and depth == 0:
+                            parts.append("".join(curr).strip())
+                            curr = []
+                        else:
+                            curr.append(c)
+                    parts.append("".join(curr).strip())
+                    new_inner = " | ".join(parts)
+                    text = text[: m.start()] + new_inner + text[idx + 1 :]
+                    found = True
+                    break
+            if not found:
+                break
+        return text
+
+    # replace Union[...] occurrences
+    s = replace_all_unions(s)
 
     s = replace_all_optionals(s)
 

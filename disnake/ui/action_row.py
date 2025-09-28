@@ -395,7 +395,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         max_values: :class:`int`
             The maximum number of items that must be chosen for this select menu.
             Defaults to 1 and must be between 1 and 25.
-        options: :class:`list`\\[:class:`disnake.SelectOption`, :class:`list`\\[:class:`str`], :class:`dict`\\[:class:`str`, :class:`str`]]
+        options: :class:`list`\\[:class:`disnake.SelectOption`] | :class:`list`\\[:class:`str`] | :class:`dict`\\[:class:`str`, :class:`str`]
             A list of options that can be selected in this menu. Use explicit :class:`.SelectOption`\\s
             for fine-grained control over the options. Alternatively, a list of strings will be treated
             as a list of labels, and a dict will be treated as a mapping of labels to values.
@@ -1102,7 +1102,7 @@ def walk_components(components: Sequence[ComponentT]) -> Iterator[ComponentT]:
 
     Parameters
     ----------
-    components: :class:`collections.abc.Sequence`\\[:class:`~disnake.Component`, :class:`collections.abc.Sequence`\\[:class:`UIComponent`]]
+    components: :class:`collections.abc.Sequence`\\[:class:`~disnake.Component`] | :class:`collections.abc.Sequence`\\[:class:`UIComponent`]
         The sequence of components to iterate over. This supports both :class:`disnake.Component`
         objects and :class:`.ui.UIComponent` objects.
 
