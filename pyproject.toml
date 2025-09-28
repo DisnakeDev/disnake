@@ -80,7 +80,7 @@ tools = [
     { include-group = "ruff" },
 ]
 changelog = [
-    "towncrier==23.6.0",
+    "towncrier==25.8.0",
 ]
 docs = [
     "sphinx==8.2.3",
