@@ -475,7 +475,7 @@ def dev(session: nox.Session) -> None:
     """
     session.run("uv", "lock", external=True)
     session.run("uv", "venv", "--clear", external=True)
-    session.run("uv", "sync", "--all-extras", "--all-groups", external=True)
+    session.run("uv", "sync", "--all-extras", external=True)
     session.run("uv", "run", "prek", "install", "--overwrite", external=True)
 
 

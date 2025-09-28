@@ -64,7 +64,6 @@ dev   = [
     { include-group = "typing" },
     { include-group = "test" },
     { include-group = "build" },
-    { include-group = "docs" },
 ]
 nox = [
     # note: nox should be synced with nox.needs_version in noxfile.py
