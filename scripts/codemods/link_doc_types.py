@@ -51,16 +51,55 @@ ANY = re.compile(r"(\||, ?|\[)Any\b")
 NONE = re.compile(r"``None``")
 
 
-def get_outside_quotes(s: str) -> list[tuple[str, bool]]:
-    """Return a list of (segment, in_quotes) tuples for segments of s.
+def get_check_sections(s: str) -> list[tuple[str, bool]]:
+    """Return a list of (segment, should_replace) tuples for segments of s.
 
-    Segments are parts of the string that are either inside or outside of quotes.
+    Segments are parts of the string that are either inside or outside of quotes, or inside
+    a code block directive.
     """
     parts = s.split("``")
     segments = []
+    # parts alternate: outside, inside, outside, inside, ...
     for i, part in enumerate(parts):
-        segments.append((part, i % 2 == 1))
-    return segments
+        if i != len(parts) - 1:
+            part += "``"
+        if i % 2 == 1:
+            # inside a double-backtick fenced span -> keep whole part and mark True
+            segments.append((part, False))
+            continue
+
+        # outside a fenced span: inspect line-by-line to detect code-blocks
+        lines = part.splitlines(keepends=True)
+        in_code_block = False
+        block_indent: int = 0
+
+        for line in lines:
+            if in_code_block:
+                if line.strip() == "" or (block_indent and line.startswith(" " * block_indent)):
+                    segments.append((line, False))
+                    continue
+                in_code_block = False
+                block_indent = 0
+
+            m = re.match(r"^([ \t]*)\.\.\s+code-block::.*\n?$", line)
+            if m:
+                in_code_block = True
+                block_indent = len(m.group(1)) + 1
+                segments.append((line, False))
+                continue
+
+            segments.append((line, True))
+
+    if not segments:
+        return []
+    merged: list[tuple[str, bool]] = [segments[0]]
+    for seg, flag in segments[1:]:
+        prev_seg, prev_flag = merged[-1]
+        if prev_flag == flag:
+            merged[-1] = (prev_seg + seg, prev_flag)
+        else:
+            merged.append((seg, flag))
+    return merged
 
 
 def apply_replacements(s):
@@ -131,10 +170,10 @@ def apply_replacements(s):
 
     s = replace_all_optionals(s)
 
-    parts = get_outside_quotes(s)
+    parts = get_check_sections(s)
     s = ""
-    for part, in_quotes in parts:
-        if not in_quotes:
+    for part, should_check in parts:
+        if should_check:
             for regex, replacement in BARE_REGEXES.items():
                 part = regex.sub(rf"\1:class:`{replacement}`\2", part)
 
@@ -143,8 +182,6 @@ def apply_replacements(s):
 
             part = ANY.sub(r"\1:data:`~typing.Any`", part)
         s += part
-        s += "``"
-    s = s[:-2]
 
     s = NONE.sub(r":data:`None`", s)
 
