@@ -37,7 +37,7 @@ assets: dict
     small_text: str (max: 128)
 party: dict
     id: str (max: 128),
-    size: :class:`list`\\[int] (max-length: 2)
+    size: List[int] (max-length: 2)
         elem: int (min: 1)
 secrets: dict
     match: str (max: 128)
