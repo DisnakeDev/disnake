@@ -377,7 +377,7 @@ else:
         .. versionadded:: 2.4
 
         .. versionchanged:: 2.9
-            Syntax changed from ``Range[5, 10]`` to ``Range[int, 5, 10]``;
+            Syntax changed from ``Range[5, 10]`` to ``Range[:class:`int`, 5, 10]``;
             the type (:class:`int` or :class:`float`) must now be specified explicitly.
         """
 
@@ -406,7 +406,7 @@ else:
         .. versionadded:: 2.6
 
         .. versionchanged:: 2.9
-            Syntax changed from ``String[5, 10]`` to ``String[str, 5, 10]``;
+            Syntax changed from ``String[5, 10]`` to ``String[:class:`str`, 5, 10]``;
             the type (:class:`str`) must now be specified explicitly.
         """
 

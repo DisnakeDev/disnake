@@ -446,7 +446,7 @@ class AutoShardedClient(Client):
 
     @property
     def shards(self) -> Dict[int, ShardInfo]:
-        """:class:`collections.abc.Mapping`\\[int, :class:`ShardInfo`]: Returns a mapping of shard IDs to their respective info object."""
+        """:class:`collections.abc.Mapping`\\[:class:`int`, :class:`ShardInfo`]: Returns a mapping of shard IDs to their respective info object."""
         return {
             shard_id: ShardInfo(parent, self.shard_count)
             for shard_id, parent in self.__shards.items()

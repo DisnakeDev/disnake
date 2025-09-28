@@ -282,13 +282,13 @@ class Activity(BaseActivity):
 
         - ``id``: A string representing the party ID.
         - ``size``: A list of two integers denoting (current_size, maximum_size).
-    buttons: :class:`list`\\[str]
+    buttons: :class:`list`\\[:class:`str`]
         A list of strings representing the labels of custom buttons shown in a rich presence.
 
         .. versionadded:: 2.0
 
         .. versionchanged:: 2.6
-            Changed type to ``:class:`list`\\[str]`` to match API types.
+            Changed type to ``:class:`list`\\[:class:`str`]`` to match API types.
 
     emoji: :class:`PartialEmoji` | :obj:`None`
         The emoji that belongs to this activity.

@@ -31,15 +31,19 @@ CONTAINERS = {
     "Match": "re.Match",
 }
 
-# "str": "str",
-# "int": "int",
-# "float": "float",
-# "bool": "bool",
-# "bytes": "bytes",
-# "True": "True",
-# "False": "False",
+BARE_REPLACE = {
+    "str": "str",
+    "int": "int",
+    "float": "float",
+    "bool": "bool",
+    "bytes": "bytes",
+    "True": "True",
+    "False": "False",
+}
 
-BARE_REGEXES = {re.compile(rf"(\[|, ]){k}(\]|, )"): v for k, v in CONTAINERS.items()}
+BARE_REGEXES = {
+    re.compile(rf"(\[|, ]){k}(\]|, )"): v for k, v in {**CONTAINERS, **BARE_REPLACE}.items()
+}
 CONTAINER_REGEXES = {re.compile(rf"\b{k}\["): v for k, v in CONTAINERS.items()}
 
 OPTIONAL = re.compile(r"Optional\[")
