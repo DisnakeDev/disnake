@@ -11,7 +11,7 @@ readme = "README.md"
 authors = [
   { name = "Disnake Development" }
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 keywords = ["disnake", "discord", "discord api"]
 license = { text = "MIT" }
 dependencies = [
@@ -25,7 +25,6 @@ classifiers = [
     "Natural Language :: English",
     "Operating System :: OS Independent",
     # it is important that the python classifiers are sorted in the sequential order
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -151,8 +150,6 @@ ignore = [
     "FBT", # at some point we should make booleans keyword only
     ## flake8-commas
     "COM812", # mostly managed by the formatter
-    ## flake8-errmsg
-    "EM", # TODO: Enable; too noisy for this, but has autofixes
     ## flake8-fixme
     "FIX", # TODO: what the name says!
     ## flake8-no-pep420
@@ -168,13 +165,16 @@ ignore = [
     ## flake8-self
     "SLF", # private member access, this is unlikely to be enabled.
     ## flake8-simplify
-    "SIM", # TODO: enable, most have autofixes.
+    "SIM105", # TODO: enable, most have autofixes.
+    "SIM108", # too opinionated.
     ## flake8-tidy-imports
     "TID252", # we still use relative imports
     ## flake8-todos
     "TD", # similar to flake8-fixme, though they may conflict
     ## flake8-typechecking
-    "TC", # TODO: enable in typing PR
+    "TC001", # typing-only first party import # to be enabled
+    "TC002", # typing only standard library import # to be enabled
+    "TC003", # typing only third party import # to be enabled
     ## flake8-unused-arguments
     "ARG", # most unused arguments are intentional
     ## flake8-use-pathlib
@@ -210,6 +210,10 @@ ignore = [
     "TRY003", # as of 0.12.11 still has some false positives
     "TRY301", # TODO: enable
     "TRY300", # TODO: enable
+    # py3.9 bump
+    "UP006",
+    "UP035",
+    "FURB188",
 ]
 
 [tool.ruff.lint.per-file-ignores]
@@ -222,6 +226,7 @@ ignore = [
     "ANN", # missing type annotations in examples is fine
     "B008", # do not perform function calls in argument defaults, this is how most commands work
     "E741", # allow ambiguous variable names
+    "EM", # allow Exception("text") for simplicity
     "S104", # flake8-bandit: allow binding to all interfaces
     "T201", # print found, printing is okay in examples
 ]
@@ -265,6 +270,9 @@ ignorelist = [
     "globals",
     "locals",
 ]
+
+[tool.ruff.lint.flake8-errmsg]
+max-string-length = 0
 
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
 "subprocess".msg = "Consider possible security implications associated with the subprocess module." # replaces S404

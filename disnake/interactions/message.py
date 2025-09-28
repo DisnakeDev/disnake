@@ -186,7 +186,8 @@ class MessageInteraction(Interaction[ClientT]):
             ):
                 return component
 
-        raise Exception("MessageInteraction is malformed - no component found")  # noqa: TRY002
+        msg = "MessageInteraction is malformed - no component found"
+        raise Exception(msg)  # noqa: TRY002
 
 
 class MessageInteractionData(Dict[str, Any]):

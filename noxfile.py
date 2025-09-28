@@ -1,6 +1,6 @@
 #!/usr/bin/env -S uv run --script
 # /// script
-# requires-python = ">=3.8"
+# requires-python = ">=3.9"
 # dependencies = [
 #     "nox==2025.5.1",
 # ]
@@ -63,10 +63,11 @@ class ExecutionGroup(ExecutionGroupType):
 
     def __post_init__(self) -> None:
         if self.pyright_paths and "pyright" not in self.sessions:
-            raise TypeError("pyright_paths can only be set if pyright is in sessions")
+            msg = "pyright_paths can only be set if pyright is in sessions"
+            raise TypeError(msg)
         if self.python in EXPERIMENTAL_PYTHON_VERSIONS:
             self.experimental = True
-        for key in self.__dataclass_fields__.keys():
+        for key in self.__dataclass_fields__:
             self[key] = getattr(self, key)  # type: ignore
 
 
@@ -132,7 +133,8 @@ def get_groups_for_session(name: str) -> List[ExecutionGroup]:
 def get_version_for_session(name: str) -> str:
     versions = {g.python for g in get_groups_for_session(name) if g.python}
     if len(versions) != 1:
-        raise TypeError(f"not the right number of groups for session {name}")
+        msg = f"not the right number of groups for session {name}"
+        raise TypeError(msg)
     return versions.pop()
 
 
@@ -144,11 +146,13 @@ def install_deps(session: nox.Session, *, execution_group: Optional[ExecutionGro
             # try cutting the `-`
             results = get_groups_for_session(session.name.split("-")[0])
         if len(results) != 1:
-            raise TypeError(f"not a valid session name: {session.name}. results: {len(results)}")
+            msg = f"not a valid session name: {session.name}. results: {len(results)}"
+            raise TypeError(msg)
         execution_group = results[0]
 
     if not execution_group.project and execution_group.extras:
-        raise TypeError("Cannot install extras without also installing the project")
+        msg = "Cannot install extras without also installing the project"
+        raise TypeError(msg)
 
     command: List[str]
 

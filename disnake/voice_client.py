@@ -200,7 +200,8 @@ class VoiceClient(VoiceProtocol):
 
     def __init__(self, client: Client, channel: abc.Connectable) -> None:
         if not has_nacl:
-            raise RuntimeError("PyNaCl library needed in order to use voice")
+            msg = "PyNaCl library needed in order to use voice"
+            raise RuntimeError(msg)
 
         super().__init__(client, channel)
         state = client._connection
@@ -569,13 +570,16 @@ class VoiceClient(VoiceProtocol):
             Source is not opus encoded and opus is not loaded.
         """
         if not self.is_connected():
-            raise ClientException("Not connected to voice.")
+            msg = "Not connected to voice."
+            raise ClientException(msg)
 
         if self.is_playing():
-            raise ClientException("Already playing audio.")
+            msg = "Already playing audio."
+            raise ClientException(msg)
 
         if not isinstance(source, AudioSource):
-            raise TypeError(f"source must be an AudioSource not {source.__class__.__name__}")
+            msg = f"source must be an AudioSource not {source.__class__.__name__}"
+            raise TypeError(msg)
 
         if not self.encoder and not source.is_opus():
             self.encoder = opus.Encoder()
@@ -618,10 +622,12 @@ class VoiceClient(VoiceProtocol):
     @source.setter
     def source(self, value: AudioSource) -> None:
         if not isinstance(value, AudioSource):
-            raise TypeError(f"expected AudioSource not {value.__class__.__name__}.")
+            msg = f"expected AudioSource not {value.__class__.__name__}."
+            raise TypeError(msg)
 
         if self._player is None:
-            raise ValueError("Not playing anything.")
+            msg = "Not playing anything."
+            raise ValueError(msg)
 
         self._player._set_source(value)
 

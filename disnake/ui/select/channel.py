@@ -198,9 +198,11 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
     def channel_types(self, value: Optional[List[ChannelType]]) -> None:
         if value is not None:
             if not isinstance(value, list):
-                raise TypeError("channel_types must be a list of ChannelType")
+                msg = "channel_types must be a list of ChannelType"
+                raise TypeError(msg)
             if not all(isinstance(obj, ChannelType) for obj in value):
-                raise TypeError("all list items must be ChannelType")
+                msg = "all list items must be ChannelType"
+                raise TypeError(msg)
 
         self._underlying.channel_types = value
 

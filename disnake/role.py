@@ -240,7 +240,8 @@ class Role(Hashable):
             return NotImplemented
 
         if self.guild != other.guild:
-            raise RuntimeError("cannot compare roles from two different guilds.")
+            msg = "cannot compare roles from two different guilds."
+            raise RuntimeError(msg)
 
         # the @everyone role is always the lowest role in hierarchy
         guild_id = self.guild.id
@@ -495,10 +496,12 @@ class Role(Hashable):
 
     async def _move(self, position: int, reason: Optional[str]) -> None:
         if position <= 0:
-            raise ValueError("Cannot move role to position 0 or below")
+            msg = "Cannot move role to position 0 or below"
+            raise ValueError(msg)
 
         if self.is_default():
-            raise TypeError("Cannot move default role")
+            msg = "Cannot move default role"
+            raise TypeError(msg)
 
         if self.position == position:
             return  # Save Discord the extra request.

@@ -206,9 +206,8 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
 
         for component in components:
             if not isinstance(component, WrappedComponent):
-                raise TypeError(
-                    f"components should be of type WrappedComponent, got {type(component).__name__}."
-                )
+                msg = f"components should be of type WrappedComponent, got {type(component).__name__}."
+                raise TypeError(msg)
             self.append_item(component)  # type: ignore
 
     def __len__(self) -> int:
@@ -280,7 +279,8 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
             The width of the action row exceeds 5.
         """
         if self.width + item.width > 5:
-            raise ValueError("Too many components in this row, can not append a new one.")
+            msg = "Too many components in this row, can not append a new one."
+            raise ValueError(msg)
 
         self._children.insert(index, item)
         return self
@@ -939,7 +939,8 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
             if not isinstance(row, ActionRowComponent):
                 # can happen if message uses components v2
                 if strict:
-                    raise TypeError(f"Unexpected top-level component type: {row.type!r}")
+                    msg = f"Unexpected top-level component type: {row.type!r}"
+                    raise TypeError(msg)
                 continue
 
             rows.append(current_row := ActionRow.with_message_components())
@@ -947,7 +948,8 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
                 if item := _message_component_to_item(component):
                     current_row.append_item(item)
                 elif strict:
-                    raise TypeError(f"Encountered unknown component type: {component.type!r}.")
+                    msg = f"Encountered unknown component type: {component.type!r}."
+                    raise TypeError(msg)
 
         return rows
 
@@ -1039,11 +1041,12 @@ def normalize_components(
 
             else:
                 assert_never(component)
-                raise TypeError(
+                msg = (
                     "`components` must be a single component, "
                     "a sequence/list of components (or action rows), "
                     "or a nested sequence/list of action row compatible components"
                 )
+                raise TypeError(msg)
 
     if auto_row.width > 0:
         result.append(auto_row)
@@ -1169,7 +1172,8 @@ def _to_ui_component(component: Component) -> UIComponent:
         ui_cls = UI_COMPONENT_LOOKUP[type(component)]
     except KeyError:
         # this should never happen
-        raise TypeError(f"unknown component type: {type(component)}") from None
+        msg = f"unknown component type: {type(component)}"
+        raise TypeError(msg) from None
     else:
         return ui_cls.from_component(component)
 

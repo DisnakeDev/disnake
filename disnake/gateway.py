@@ -712,9 +712,7 @@ class DiscordWebSocket:
         """
         try:
             msg = await self.socket.receive(timeout=self._max_heartbeat_timeout)
-            if msg.type is aiohttp.WSMsgType.TEXT:
-                await self.received_message(msg.data)
-            elif msg.type is aiohttp.WSMsgType.BINARY:
+            if msg.type is aiohttp.WSMsgType.TEXT or msg.type is aiohttp.WSMsgType.BINARY:
                 await self.received_message(msg.data)
             elif msg.type is aiohttp.WSMsgType.ERROR:
                 _log.debug("Received %s", msg)
@@ -781,7 +779,8 @@ class DiscordWebSocket:
     ) -> None:
         if activity is not None:
             if not isinstance(activity, BaseActivity):
-                raise TypeError("activity must derive from BaseActivity.")
+                msg = "activity must derive from BaseActivity."
+                raise TypeError(msg)
             activity_data = (activity.to_dict(),)
         else:
             activity_data = ()

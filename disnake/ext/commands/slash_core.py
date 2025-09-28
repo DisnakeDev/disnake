@@ -51,7 +51,8 @@ def _autocomplete(
             option.autocomplete = True
             break
     else:  # nobreak
-        raise ValueError(f"Option '{option_name}' doesn't exist in '{self.qualified_name}'")
+        msg = f"Option '{option_name}' doesn't exist in '{self.qualified_name}'"
+        raise ValueError(msg)
 
     def decorator(func: Callable) -> Callable:
         classify_autocompleter(func)
@@ -699,10 +700,12 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         elif len(chain) == 2:
             group = self.children.get(chain[0])
             if not isinstance(group, SubCommandGroup):
-                raise AssertionError("the first subcommand is not a SubCommandGroup instance")
+                msg = "the first subcommand is not a SubCommandGroup instance"
+                raise AssertionError(msg)
             subcmd = group.children.get(chain[1])
         else:
-            raise ValueError("Command chain is too long")
+            msg = "Command chain is too long"
+            raise ValueError(msg)
 
         focused_option = inter.data.focused_option
 
@@ -728,10 +731,12 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         elif len(chain) == 2:
             group = self.children.get(chain[0])
             if not isinstance(group, SubCommandGroup):
-                raise AssertionError("the first subcommand is not a SubCommandGroup instance")
+                msg = "the first subcommand is not a SubCommandGroup instance"
+                raise AssertionError(msg)
             subcmd = group.children.get(chain[1])
         else:
-            raise ValueError("Command chain is too long")
+            msg = "Command chain is too long"
+            raise ValueError(msg)
 
         if group is not None:
             try:
@@ -875,11 +880,14 @@ def slash_command(
 
     def decorator(func: CommandCallback) -> InvokableSlashCommand:
         if not utils.iscoroutinefunction(func):
-            raise TypeError(f"<{func.__qualname__}> must be a coroutine function")
+            msg = f"<{func.__qualname__}> must be a coroutine function"
+            raise TypeError(msg)
         if hasattr(func, "__command_flag__"):
-            raise TypeError("Callback is already a command.")
+            msg = "Callback is already a command."
+            raise TypeError(msg)
         if guild_ids and not all(isinstance(guild_id, int) for guild_id in guild_ids):
-            raise ValueError("guild_ids must be a sequence of int.")
+            msg = "guild_ids must be a sequence of int."
+            raise ValueError(msg)
         return InvokableSlashCommand(
             func,
             name=name,

@@ -37,7 +37,8 @@ if not TYPE_CHECKING:
                 stacklevel=2,
             )
             return None
-        raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
+        msg = f"module '{__name__}' has no attribute '{name}'"
+        raise AttributeError(msg)
 
 
 class EmbedProxy:
@@ -344,9 +345,8 @@ class Embed:
         elif value is MISSING or value is None or isinstance(value, Colour):
             self._colour = value
         else:
-            raise TypeError(
-                f"Expected disnake.Colour, int, or None but received {type(value).__name__} instead."
-            )
+            msg = f"Expected disnake.Colour, int, or None but received {type(value).__name__} instead."
+            raise TypeError(msg)
 
     @colour.deleter
     def colour(self) -> None:
@@ -367,9 +367,8 @@ class Embed:
         elif value is None:
             self._timestamp = value
         else:
-            raise TypeError(
-                f"Expected datetime.datetime or None received {type(value).__name__} instead"
-            )
+            msg = f"Expected datetime.datetime or None received {type(value).__name__} instead"
+            raise TypeError(msg)
 
     @property
     def footer(self) -> _EmbedFooterProxy:
@@ -778,11 +777,13 @@ class Embed:
             An invalid index was provided.
         """
         if not self._fields:
-            raise IndexError("field index out of range")
+            msg = "field index out of range"
+            raise IndexError(msg)
         try:
             self._fields[index]
         except IndexError:
-            raise IndexError("field index out of range") from None
+            msg = "field index out of range"
+            raise IndexError(msg) from None
 
         field: EmbedFieldPayload = {
             "inline": inline,
@@ -849,9 +850,8 @@ class Embed:
         elif isinstance(value, int):
             cls._default_colour = Colour(value=value)
         else:
-            raise TypeError(
-                f"Expected disnake.Colour, int, or None but received {type(value).__name__} instead."
-            )
+            msg = f"Expected disnake.Colour, int, or None but received {type(value).__name__} instead."
+            raise TypeError(msg)
         return cls._default_colour
 
     set_default_color = set_default_colour
@@ -877,14 +877,17 @@ class Embed:
     ) -> Optional[str]:
         if required:
             if not (url is MISSING) ^ (file is MISSING):
-                raise TypeError("Exactly one of url or file must be provided")
+                msg = "Exactly one of url or file must be provided"
+                raise TypeError(msg)
         else:
             if url is not MISSING and file is not MISSING:
-                raise TypeError("At most one of url or file may be provided, not both.")
+                msg = "At most one of url or file may be provided, not both."
+                raise TypeError(msg)
 
         if file:
             if file.filename is None:
-                raise TypeError("File must have a filename")
+                msg = "File must have a filename"
+                raise TypeError(msg)
             self._files[key] = file
             return f"attachment://{file.filename}"
         else:
@@ -923,30 +926,34 @@ class Embed:
             One or more of the embed attributes are too long.
         """
         if self.title and len(self.title.strip()) > 256:
-            raise ValueError("Embed title cannot be longer than 256 characters")
+            msg = "Embed title cannot be longer than 256 characters"
+            raise ValueError(msg)
 
         if self.description and len(self.description.strip()) > 4096:
-            raise ValueError("Embed description cannot be longer than 4096 characters")
+            msg = "Embed description cannot be longer than 4096 characters"
+            raise ValueError(msg)
 
         if self._footer and len(self._footer.get("text", "").strip()) > 2048:
-            raise ValueError("Embed footer text cannot be longer than 2048 characters")
+            msg = "Embed footer text cannot be longer than 2048 characters"
+            raise ValueError(msg)
 
         if self._author and len(self._author.get("name", "").strip()) > 256:
-            raise ValueError("Embed author name cannot be longer than 256 characters")
+            msg = "Embed author name cannot be longer than 256 characters"
+            raise ValueError(msg)
 
         if self._fields:
             if len(self._fields) > 25:
-                raise ValueError("Embeds cannot have more than 25 fields")
+                msg = "Embeds cannot have more than 25 fields"
+                raise ValueError(msg)
 
             for field_index, field in enumerate(self._fields):
                 if len(field["name"].strip()) > 256:
-                    raise ValueError(
-                        f"Embed field {field_index} name cannot be longer than 256 characters"
-                    )
+                    msg = f"Embed field {field_index} name cannot be longer than 256 characters"
+                    raise ValueError(msg)
                 if len(field["value"].strip()) > 1024:
-                    raise ValueError(
-                        f"Embed field {field_index} value cannot be longer than 1024 characters"
-                    )
+                    msg = f"Embed field {field_index} value cannot be longer than 1024 characters"
+                    raise ValueError(msg)
 
         if len(self) > 6000:
-            raise ValueError("Embed total size cannot be longer than 6000 characters")
+            msg = "Embed total size cannot be longer than 6000 characters"
+            raise ValueError(msg)
