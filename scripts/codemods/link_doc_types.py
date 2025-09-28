@@ -144,6 +144,10 @@ class DocstringTransformer(cst.CSTTransformer):
         prefix = simple_string.prefix
 
         new_inner = apply_replacements(current)
+        # TODO: enable D301 and raw docstrings
+        # if r"\\" in new_inner:
+        #     prefix = "r"
+        #     new_inner = new_inner.replace(r"\\", "\\")
         # Ensure any replacements use LF line endings
         new_value = f"{prefix}{simple_string.quote}{new_inner}{simple_string.quote}"
         return simple_string.with_changes(value=new_value)
