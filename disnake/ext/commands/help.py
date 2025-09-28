@@ -708,7 +708,7 @@ class HelpCommand:
 
         Parameters
         ----------
-        mapping: :class:`collections.abc.Mapping`\\[:class:`Cog` | :obj:`None`
+        mapping: :class:`collections.abc.Mapping`\\[:class:`Cog` | :obj:`None`, :class:`list`\\[:class:`Command`]]
             A mapping of cogs to commands that have been requested by the user for help.
             The key of the mapping is the :class:`~.commands.Cog` that the command belongs to, or
             :obj:`None` if there isn't one, and the value is a list of commands that belongs to that cog.

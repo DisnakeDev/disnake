@@ -33,8 +33,7 @@ CONTAINERS = {
 
 REGEXES = {re.compile(rf"\b{k}\["): v for k, v in CONTAINERS.items()}
 
-OPTIONAL = re.compile(r"Optional\[(.*)\]")
-OPTIONAL_GREEDY = re.compile(r"Optional\[(.*?)\]")
+OPTIONAL = re.compile(r"Optional\[")
 UNION = re.compile(r"Union\[(.*?)\]")
 ANY = re.compile(r"(\||, ?|\[)Any\b")
 NONE = re.compile(r"``None``")
@@ -42,21 +41,26 @@ NONE = re.compile(r"``None``")
 
 def apply_replacements(s):
     # Replace Optional[A] with A | ``None`` using proper bracket matching
-    def replace_optional(match):
-        content = match.group()
-        start_pos = 9
-        bracket_count = 1
-        for i, char in enumerate(content[start_pos:], start=start_pos):
-            if char == "[":
-                bracket_count += 1
-            elif char == "]":
-                bracket_count -= 1
-            if bracket_count == 0:
-                inner_content = content[start_pos:i]  # Content between Optional[ and matching ]
-                inner_content = OPTIONAL_GREEDY.sub(replace_optional, inner_content)
-                return inner_content + " | ``None``"
-        # Fallback if no matching bracket found
-        return content
+    def replace_all_optionals(text: str) -> str:
+        while True:
+            m = OPTIONAL.search(text)
+            if not m:
+                break
+            start = m.end()
+            bracket_count = 1
+            for idx, ch in enumerate(text[start:], start=start):
+                if ch == "[":
+                    bracket_count += 1
+                elif ch == "]":
+                    bracket_count -= 1
+                if bracket_count == 0:
+                    inner = text[start:idx]
+                    inner = replace_all_optionals(inner)
+                    text = text[: m.start()] + inner + " | ``None``" + text[idx + 1 :]
+                    break
+            else:
+                break
+        return text
 
     for _ in range(3):  # don't recurse forever
         s = UNION.sub(
@@ -66,7 +70,7 @@ def apply_replacements(s):
         if r"Union[" not in s:
             break
 
-    s = OPTIONAL.sub(replace_optional, s)
+    s = replace_all_optionals(s)
 
     for regex, replacement in REGEXES.items():
         s = regex.sub(rf":class:`{replacement}`\\\\[", s)

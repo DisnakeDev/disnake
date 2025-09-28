@@ -873,7 +873,7 @@ class Guild(Hashable):
 
         Returns
         -------
-        :class:`list`\\[:class:`tuple`\\[:class:`CategoryChannel` | :obj:`None`:
+        :class:`list`\\[:class:`tuple`\\[:class:`CategoryChannel` | :obj:`None`, :class:`list`\\[:class:`abc.GuildChannel`]]]:
             The categories and their associated channels.
         """
         grouped: Dict[Optional[int], List[GuildChannel]] = {}
