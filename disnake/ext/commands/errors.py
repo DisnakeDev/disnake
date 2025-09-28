@@ -814,7 +814,7 @@ class BadUnionArgument(UserInputError):
     ----------
     param: :class:`inspect.Parameter`
         The parameter that failed being converted.
-    converters: :class:`tuple`\\[Type, ``...``]
+    converters: :class:`tuple`\\[:class:`type`, ``...``]
         A tuple of converters attempted in conversion, in order of failure.
     errors: :class:`list`\\[:class:`CommandError`]
         A list of errors that were caught from failing the conversion.

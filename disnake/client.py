@@ -933,7 +933,7 @@ class Client:
         return decorator
 
     def get_listeners(self) -> Mapping[str, List[CoroFunc]]:
-        """:class:`collections.abc.Mapping`\\[:class:`str`, :class:`list`\\[Callable]]: A read-only mapping of event names to listeners.
+        """:class:`collections.abc.Mapping`\\[:class:`str`, :class:`list`\\[:class:`collections.abc.Callable`]]: A read-only mapping of event names to listeners.
 
         .. note::
             To add or remove a listener you should use :meth:`.add_listener` and

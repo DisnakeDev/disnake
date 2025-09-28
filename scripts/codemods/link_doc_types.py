@@ -31,7 +31,8 @@ CONTAINERS = {
     "Match": "re.Match",
 }
 
-REGEXES = {re.compile(rf"\b{k}\["): v for k, v in CONTAINERS.items()}
+BARE_REGEXES = {re.compile(rf"(\[|, ]){k}(\]|, )"): v for k, v in CONTAINERS.items()}
+CONTAINER_REGEXES = {re.compile(rf"\b{k}\["): v for k, v in CONTAINERS.items()}
 
 OPTIONAL = re.compile(r"Optional\[")
 UNION = re.compile(r"Union\[(.*?)\]")
@@ -72,7 +73,10 @@ def apply_replacements(s):
 
     s = replace_all_optionals(s)
 
-    for regex, replacement in REGEXES.items():
+    for regex, replacement in BARE_REGEXES.items():
+        s = regex.sub(rf"\1:class:`{replacement}`\2", s)
+
+    for regex, replacement in CONTAINER_REGEXES.items():
         s = regex.sub(rf":class:`{replacement}`\\\\[", s)
 
     s = ANY.sub(r"\1:class:`~typing.Any`", s)
