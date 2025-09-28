@@ -43,7 +43,7 @@ class Container(UIComponent):
     ----------
     *components: :class:`~.ui.ActionRow` | :class:`~.ui.Section` | :class:`~.ui.TextDisplay` | :class:`~.ui.MediaGallery` | :class:`~.ui.File` | :class:`~.ui.Separator`
         The components in this container.
-    accent_colour: :class:`.Colour` | :obj:`None`
+    accent_colour: :class:`.Colour` | :data:`None`
         The accent colour of the container.
     spoiler: :class:`bool`
         Whether the container is marked as a spoiler. Defaults to ``False``.
@@ -56,7 +56,7 @@ class Container(UIComponent):
     ----------
     children: :class:`list`\\[:class:`~.ui.ActionRow` | :class:`~.ui.Section` | :class:`~.ui.TextDisplay` | :class:`~.ui.MediaGallery` | :class:`~.ui.File` | :class:`~.ui.Separator`]
         The list of child components in this container.
-    accent_colour: :class:`.Colour` | :obj:`None`
+    accent_colour: :class:`.Colour` | :data:`None`
         The accent colour of the container.
         An alias exists under ``accent_color``.
     spoiler: :class:`bool`

@@ -36,7 +36,7 @@ class Label(UIComponent):
         The component within the label.
         Currently supports :class:`.ui.TextInput` and
         select menus (e.g. :class:`.ui.StringSelect`).
-    description: :class:`str` | :obj:`None`
+    description: :class:`str` | :data:`None`
         The description text for the label.
     id: :class:`int`
         The numeric identifier for the component. Must be unique within the message.
@@ -49,7 +49,7 @@ class Label(UIComponent):
         The label text.
     component: :class:`TextInput` | :class:`BaseSelect`
         The component within the label.
-    description: :class:`str` | :obj:`None`
+    description: :class:`str` | :data:`None`
         The description text for the label.
     """
 

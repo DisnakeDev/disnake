@@ -853,7 +853,7 @@ class BadLiteralArgument(UserInputError):
     ----------
     param: :class:`inspect.Parameter`
         The parameter that failed being converted.
-    literals: :class:`tuple`\\[:class:`~typing.Any`, ``...``]
+    literals: :class:`tuple`\\[:data:`~typing.Any`, ``...``]
         A tuple of values compared against in conversion, in order of failure.
     errors: :class:`list`\\[:class:`CommandError`]
         A list of errors that were caught from failing the conversion.

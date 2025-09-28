@@ -144,7 +144,7 @@ class User(Snowflake, Protocol):
             The value of a single zero (``"0"``) indicates that the user has been migrated to the new system.
             See the `help article <https://dis.gd/app-usernames>`__ for details.
 
-    global_name: :class:`str` | :obj:`None`
+    global_name: :class:`str` | :data:`None`
         The user's global display name, if set.
         This takes precedence over :attr:`.name` when shown.
 
@@ -173,7 +173,7 @@ class User(Snowflake, Protocol):
 
     @property
     def avatar(self) -> Optional[Asset]:
-        """:class:`~disnake.Asset` | :obj:`None`: Returns an :class:`~disnake.Asset` for
+        """:class:`~disnake.Asset` | :data:`None`: Returns an :class:`~disnake.Asset` for
         the avatar the user has.
         """
         raise NotImplementedError
@@ -599,9 +599,9 @@ class GuildChannel(ABC):
 
     @property
     def category(self) -> Optional[CategoryChannel]:
-        """:class:`~disnake.CategoryChannel` | :obj:`None`: The category this channel belongs to.
+        """:class:`~disnake.CategoryChannel` | :data:`None`: The category this channel belongs to.
 
-        If there is no category then this is :obj:`None`.
+        If there is no category then this is :data:`None`.
         """
         if isinstance(self.guild, Object):
             return None
@@ -834,7 +834,7 @@ class GuildChannel(ABC):
 
         Parameters
         ----------
-        reason: :class:`str` | :obj:`None`
+        reason: :class:`str` | :data:`None`
             The reason for deleting this channel. Shows up on the audit log.
 
         Raises
@@ -941,13 +941,13 @@ class GuildChannel(ABC):
         The ``target`` parameter should either be a :class:`.Member` or a
         :class:`.Role` that belongs to guild.
 
-        The ``overwrite`` parameter, if given, must either be :obj:`None` or
+        The ``overwrite`` parameter, if given, must either be :data:`None` or
         :class:`.PermissionOverwrite`. For convenience, you can pass in
         keyword arguments denoting :class:`.Permissions` attributes. If this is
         done, then you cannot mix the keyword arguments with the ``overwrite``
         parameter.
 
-        If the ``overwrite`` parameter is :obj:`None`, then the permission
+        If the ``overwrite`` parameter is :data:`None`, then the permission
         overwrites are deleted.
 
         You must have :attr:`.Permissions.manage_roles` permission to do this.
@@ -981,13 +981,13 @@ class GuildChannel(ABC):
         ----------
         target: :class:`.Member` | :class:`.Role`
             The member or role to overwrite permissions for.
-        overwrite: :class:`.PermissionOverwrite` | :obj:`None`
-            The permissions to allow and deny to the target, or :obj:`None` to
+        overwrite: :class:`.PermissionOverwrite` | :data:`None`
+            The permissions to allow and deny to the target, or :data:`None` to
             delete the overwrite.
         **permissions
             A keyword argument list of permissions to set for ease of use.
             Cannot be mixed with ``overwrite``.
-        reason: :class:`str` | :obj:`None`
+        reason: :class:`str` | :data:`None`
             The reason for doing this action. Shows up on the audit log.
 
         Raises
@@ -1106,9 +1106,9 @@ class GuildChannel(ABC):
 
         Parameters
         ----------
-        name: :class:`str` | :obj:`None`
+        name: :class:`str` | :data:`None`
             The name of the new channel. If not provided, defaults to this channel name.
-        reason: :class:`str` | :obj:`None`
+        reason: :class:`str` | :data:`None`
             The reason for cloning this channel. Shows up on the audit log.
 
         Raises
@@ -1212,13 +1212,13 @@ class GuildChannel(ABC):
             while a negative number moves it above. Note that this
             number is relative and computed after the ``beginning``,
             ``end``, ``before``, and ``after`` parameters.
-        category: :class:`.abc.Snowflake` | :obj:`None`
+        category: :class:`.abc.Snowflake` | :data:`None`
             The category to move this channel under.
-            If :obj:`None` is given then it moves it out of the category.
+            If :data:`None` is given then it moves it out of the category.
             This parameter is ignored if moving a category channel.
         sync_permissions: :class:`bool`
             Whether to sync the permissions with the category (if given).
-        reason: :class:`str` | :obj:`None`
+        reason: :class:`str` | :data:`None`
             The reason for moving this channel. Shows up on the audit log.
 
         Raises
@@ -1329,18 +1329,18 @@ class GuildChannel(ABC):
             Whether a unique invite URL should be created. Defaults to ``True``.
             If this is set to ``False`` then it will return a previously created
             invite.
-        target_type: :class:`.InviteTarget` | :obj:`None`
+        target_type: :class:`.InviteTarget` | :data:`None`
             The type of target for the voice channel invite, if any.
 
             .. versionadded:: 2.0
 
-        target_user: :class:`User` | :obj:`None`
+        target_user: :class:`User` | :data:`None`
             The user whose stream to display for this invite, required if ``target_type`` is :attr:`.InviteTarget.stream`.
             The user must be streaming in the channel.
 
             .. versionadded:: 2.0
 
-        target_application: :class:`.Snowflake` | :obj:`None`
+        target_application: :class:`.Snowflake` | :data:`None`
             The ID of the embedded application for the invite, required if ``target_type`` is :attr:`.InviteTarget.embedded_application`.
 
             .. versionadded:: 2.0
@@ -1348,12 +1348,12 @@ class GuildChannel(ABC):
             .. versionchanged:: 2.9
                 ``PartyType`` is deprecated, and :class:`.Snowflake` should be used instead.
 
-        guild_scheduled_event: :class:`.GuildScheduledEvent` | :obj:`None`
+        guild_scheduled_event: :class:`.GuildScheduledEvent` | :data:`None`
             The guild scheduled event to include with the invite.
 
             .. versionadded:: 2.3
 
-        reason: :class:`str` | :obj:`None`
+        reason: :class:`str` | :data:`None`
             The reason for creating this invite. Shows up on the audit log.
 
         Raises
@@ -1566,7 +1566,7 @@ class Messageable:
 
         Parameters
         ----------
-        content: :class:`str` | :obj:`None`
+        content: :class:`str` | :data:`None`
             The content of the message to send.
         tts: :class:`bool`
             Whether the message should be sent using text-to-speech.
@@ -1620,7 +1620,7 @@ class Messageable:
                 you must explicitly transform the message to a :class:`.MessageReference` using :meth:`.Message.to_reference` and specify the :class:`.MessageReferenceType`,
                 or use :meth:`.Message.forward`.
 
-        mention_author: :class:`bool` | :obj:`None`
+        mention_author: :class:`bool` | :data:`None`
             If set, overrides the :attr:`.AllowedMentions.replied_user` attribute of ``allowed_mentions``.
 
             .. versionadded:: 1.6
@@ -1918,11 +1918,11 @@ class Messageable:
 
         Parameters
         ----------
-        limit: :class:`int` | :obj:`None`
+        limit: :class:`int` | :data:`None`
             The number of pinned messages to retrieve.
-            If :obj:`None`, retrieves every pinned message in the channel. Note, however,
+            If :data:`None`, retrieves every pinned message in the channel. Note, however,
             that this would make it a slow operation.
-        before: :class:`.abc.Snowflake` | :class:`datetime.datetime` | :obj:`None`
+        before: :class:`.abc.Snowflake` | :class:`datetime.datetime` | :data:`None`
             Retrieve messages pinned before this date or message.
             If a datetime is provided, it is recommended to use a UTC aware datetime.
             If the datetime is naive, it is assumed to be local time.
@@ -1972,25 +1972,25 @@ class Messageable:
 
         Parameters
         ----------
-        limit: :class:`int` | :obj:`None`
+        limit: :class:`int` | :data:`None`
             The number of messages to retrieve.
-            If :obj:`None`, retrieves every message in the channel. Note, however,
+            If :data:`None`, retrieves every message in the channel. Note, however,
             that this would make it a slow operation.
-        before: :class:`.abc.Snowflake` | :class:`datetime.datetime` | :obj:`None`
+        before: :class:`.abc.Snowflake` | :class:`datetime.datetime` | :data:`None`
             Retrieve messages before this date or message.
             If a datetime is provided, it is recommended to use a UTC aware datetime.
             If the datetime is naive, it is assumed to be local time.
-        after: :class:`.abc.Snowflake` | :class:`datetime.datetime` | :obj:`None`
+        after: :class:`.abc.Snowflake` | :class:`datetime.datetime` | :data:`None`
             Retrieve messages after this date or message.
             If a datetime is provided, it is recommended to use a UTC aware datetime.
             If the datetime is naive, it is assumed to be local time.
-        around: :class:`.abc.Snowflake` | :class:`datetime.datetime` | :obj:`None`
+        around: :class:`.abc.Snowflake` | :class:`datetime.datetime` | :data:`None`
             Retrieve messages around this date or message.
             If a datetime is provided, it is recommended to use a UTC aware datetime.
             If the datetime is naive, it is assumed to be local time.
             When using this argument, the maximum limit is 101. Note that if the limit is an
             even number then this will return at most limit + 1 messages.
-        oldest_first: :class:`bool` | :obj:`None`
+        oldest_first: :class:`bool` | :data:`None`
             If set to ``True``, return messages in oldest->newest order. Defaults to ``True`` if
             ``after`` is specified, otherwise ``False``.
 

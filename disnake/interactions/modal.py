@@ -60,7 +60,7 @@ class ModalInteraction(Interaction[ClientT]):
     token: :class:`str`
         The token to continue the interaction.
         These are valid for 15 minutes.
-    guild_id: :class:`int` | :obj:`None`
+    guild_id: :class:`int` | :data:`None`
         The guild ID the interaction was sent from.
     channel: :class:`abc.GuildChannel` | :class:`Thread` | :class:`abc.PrivateChannel` | :class:`PartialMessageable`
         The channel the interaction was sent from.
@@ -94,10 +94,10 @@ class ModalInteraction(Interaction[ClientT]):
         .. versionchanged:: 2.5
             Changed to :class:`Locale` instead of :class:`str`.
 
-    guild_locale: :class:`Locale` | :obj:`None`
+    guild_locale: :class:`Locale` | :data:`None`
         The selected language of the interaction's guild.
         This value is only meaningful in guilds with ``COMMUNITY`` feature and receives a default value otherwise.
-        If the interaction was in a DM, then this value is :obj:`None`.
+        If the interaction was in a DM, then this value is :data:`None`.
 
         .. versionchanged:: 2.5
             Changed to :class:`Locale` instead of :class:`str`.
@@ -135,7 +135,7 @@ class ModalInteraction(Interaction[ClientT]):
 
     data: :class:`ModalInteractionData`
         The wrapped interaction data.
-    message: :class:`Message` | :obj:`None`
+    message: :class:`Message` | :data:`None`
         The message that this interaction's modal originated from,
         if the modal was sent in response to a component interaction.
 

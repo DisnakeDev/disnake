@@ -20,7 +20,7 @@ class Reaction:
     """Represents a reaction to a message.
 
     Depending on the way this object was created, some of the attributes can
-    have a value of :obj:`None`.
+    have a value of :data:`None`.
 
     .. collapse:: operations
 
@@ -173,11 +173,11 @@ class Reaction:
 
         Parameters
         ----------
-        limit: :class:`int` | :obj:`None`
+        limit: :class:`int` | :data:`None`
             The maximum number of results to return.
             If not provided, returns all the users who
             reacted to the message.
-        after: :class:`abc.Snowflake` | :obj:`None`
+        after: :class:`abc.Snowflake` | :data:`None`
             For pagination, reactions are sorted by member.
 
         Raises

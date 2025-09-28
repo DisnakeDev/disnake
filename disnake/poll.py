@@ -42,14 +42,14 @@ class PollMedia:
     ----------
     text: :class:`str`
         The text of this media.
-    emoji: :class:`Emoji` | :class:`PartialEmoji` | :class:`str` | :obj:`None`
+    emoji: :class:`Emoji` | :class:`PartialEmoji` | :class:`str` | :data:`None`
         The emoji of this media.
 
     Attributes
     ----------
-    text: :class:`str` | :obj:`None`
+    text: :class:`str` | :data:`None`
         The text of this media.
-    emoji: :class:`PartialEmoji` | :obj:`None`
+    emoji: :class:`PartialEmoji` | :data:`None`
         The emoji of this media.
     """
 
@@ -110,13 +110,13 @@ class PollAnswer:
 
     Attributes
     ----------
-    id: :class:`int` | :obj:`None`
-        The ID of this answer. This will be :obj:`None` only if this object was created manually
+    id: :class:`int` | :data:`None`
+        The ID of this answer. This will be :data:`None` only if this object was created manually
         and did not originate from the API.
     media: :class:`PollMedia`
         The media fields of this answer.
-    poll: :class:`Poll` | :obj:`None`
-        The poll associated with this answer. This will be :obj:`None` only if this object was created manually
+    poll: :class:`Poll` | :data:`None`
+        The poll associated with this answer. This will be :data:`None` only if this object was created manually
         and did not originate from the API.
     vote_count: :class:`int`
         The number of votes for this answer.
@@ -160,12 +160,12 @@ class PollAnswer:
 
         Parameters
         ----------
-        limit: :class:`int` | :obj:`None`
+        limit: :class:`int` | :data:`None`
             The maximum number of results to return.
-            If :obj:`None`, retrieves every user who voted for this answer.
+            If :data:`None`, retrieves every user who voted for this answer.
             Note, however, that this would make it a slow operation.
             Defaults to ``100``.
-        after: :class:`abc.Snowflake` | :obj:`None`
+        after: :class:`abc.Snowflake` | :data:`None`
             For pagination, votes are sorted by member.
 
         Raises
@@ -213,13 +213,13 @@ class Poll:
 
     Attributes
     ----------
-    message: :class:`Message` | :obj:`None`
-        The message which contains this poll. This will be :obj:`None` only if this object was created manually
+    message: :class:`Message` | :data:`None`
+        The message which contains this poll. This will be :data:`None` only if this object was created manually
         and did not originate from the API.
     question: :class:`PollMedia`
         The question of the poll.
-    duration: :class:`datetime.timedelta` | :obj:`None`
-        The original duration for this poll. :obj:`None` if the poll is a non-expiring poll.
+    duration: :class:`datetime.timedelta` | :data:`None`
+        The original duration for this poll. :data:`None` if the poll is a non-expiring poll.
     allow_multiselect: :class:`bool`
         Whether users are able to pick more than one answer.
     layout_type: :class:`PollLayoutType`
@@ -285,9 +285,9 @@ class Poll:
 
     @property
     def created_at(self) -> Optional[datetime]:
-        """:class:`datetime.datetime` | :obj:`None`: When this poll was created.
+        """:class:`datetime.datetime` | :data:`None`: When this poll was created.
 
-        :obj:`None` if this poll does not originate from the discord API.
+        :data:`None` if this poll does not originate from the discord API.
         """
         if not self.message:
             return
@@ -295,9 +295,9 @@ class Poll:
 
     @property
     def expires_at(self) -> Optional[datetime]:
-        """:class:`datetime.datetime` | :obj:`None`: The date when this poll will expire.
+        """:class:`datetime.datetime` | :data:`None`: The date when this poll will expire.
 
-        :obj:`None` if this poll does not originate from the discord API or if this
+        :data:`None` if this poll does not originate from the discord API or if this
         poll is non-expiring.
         """
         # non-expiring poll
@@ -312,11 +312,11 @@ class Poll:
 
     @property
     def remaining_duration(self) -> Optional[timedelta]:
-        """:class:`datetime.timedelta` | :obj:`None`: The remaining duration for this poll.
+        """:class:`datetime.timedelta` | :data:`None`: The remaining duration for this poll.
         If this poll is finalized this property will arbitrarily return a
         zero valued timedelta.
 
-        :obj:`None` if this poll does not originate from the discord API.
+        :data:`None` if this poll does not originate from the discord API.
         """
         if self.is_finalized:
             return timedelta(hours=0)
@@ -335,7 +335,7 @@ class Poll:
 
         Returns
         -------
-        :class:`PollAnswer` | :obj:`None`
+        :class:`PollAnswer` | :data:`None`
             The requested answer.
         """
         return self._answers.get(answer_id)

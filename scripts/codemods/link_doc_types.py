@@ -141,14 +141,12 @@ def apply_replacements(s):
             for regex, replacement in CONTAINER_REGEXES.items():
                 part = regex.sub(rf":class:`{replacement}`\\\\[", part)
 
-            part = ANY.sub(r"\1:class:`~typing.Any`", part)
-            part = NONE.sub(r":obj:`None`", part)
+            part = ANY.sub(r"\1:data:`~typing.Any`", part)
         s += part
         s += "``"
     s = s[:-2]
 
-    # # reference to all None's
-    s = NONE.sub(r":obj:`None`", s)
+    s = NONE.sub(r":data:`None`", s)
 
     return s
 

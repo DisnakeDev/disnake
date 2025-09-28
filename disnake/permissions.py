@@ -1123,13 +1123,13 @@ class PermissionOverwrite:
     """A type that is used to represent a channel specific permission.
 
     Unlike a regular :class:`Permissions`\\, the default value of a
-    permission is equivalent to :obj:`None` and not ``False``. Setting
+    permission is equivalent to :data:`None` and not ``False``. Setting
     a value to ``False`` is **explicitly** denying that permission,
     while setting a value to ``True`` is **explicitly** allowing
     that permission.
 
     The values supported by this are the same as :class:`Permissions`
-    with the added possibility of it being set to :obj:`None`.
+    with the added possibility of it being set to :data:`None`.
 
     .. collapse:: operations
 

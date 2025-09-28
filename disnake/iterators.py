@@ -250,14 +250,14 @@ class HistoryIterator(_AsyncIterator["Message"]):
         Messageable class to retrieve message history from.
     limit: :class:`int`
         Maximum number of messages to retrieve
-    before: :class:`abc.Snowflake` | :class:`datetime.datetime` | :obj:`None`
+    before: :class:`abc.Snowflake` | :class:`datetime.datetime` | :data:`None`
         Message before which all messages must be.
-    after: :class:`abc.Snowflake` | :class:`datetime.datetime` | :obj:`None`
+    after: :class:`abc.Snowflake` | :class:`datetime.datetime` | :data:`None`
         Message after which all messages must be.
-    around: :class:`abc.Snowflake` | :class:`datetime.datetime` | :obj:`None`
+    around: :class:`abc.Snowflake` | :class:`datetime.datetime` | :data:`None`
         Message around which all messages must be. Limit max 101. Note that if
         limit is an even number, this will return at most limit+1 messages.
-    oldest_first: :class:`bool` | :obj:`None`
+    oldest_first: :class:`bool` | :data:`None`
         If set to ``True``, return messages in oldest->newest order. Defaults to
         ``True`` if `after` is specified, otherwise ``False``.
     """
@@ -414,11 +414,11 @@ class BanIterator(_AsyncIterator["BanEntry"]):
     ----------
     guild: :class:`~disnake.Guild`
         The guild to get bans from.
-    limit: :class:`int` | :obj:`None`
+    limit: :class:`int` | :data:`None`
         Maximum number of bans to retrieve.
-    before: :class:`abc.Snowflake` | :obj:`None`
+    before: :class:`abc.Snowflake` | :data:`None`
         Object before which all bans must be.
-    after: :class:`abc.Snowflake` | :obj:`None`
+    after: :class:`abc.Snowflake` | :data:`None`
         Object after which all bans must be.
     """
 
@@ -680,9 +680,9 @@ class GuildIterator(_AsyncIterator["Guild"]):
         The client to retrieve the guilds from.
     limit: :class:`int`
         Maximum number of guilds to retrieve.
-    before: :class:`abc.Snowflake` | :class:`datetime.datetime` | :obj:`None`
+    before: :class:`abc.Snowflake` | :class:`datetime.datetime` | :data:`None`
         Object before which all guilds must be.
-    after: :class:`abc.Snowflake` | :class:`datetime.datetime` | :obj:`None`
+    after: :class:`abc.Snowflake` | :class:`datetime.datetime` | :data:`None`
         Object after which all guilds must be.
     """
 

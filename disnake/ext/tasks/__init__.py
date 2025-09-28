@@ -225,8 +225,8 @@ class Loop(Generic[LF]):
 
     @property
     def seconds(self) -> Optional[float]:
-        """:class:`float` | :obj:`None`: Read-only value for the number of seconds
-        between each iteration. :obj:`None` if an explicit ``time`` value was passed instead.
+        """:class:`float` | :data:`None`: Read-only value for the number of seconds
+        between each iteration. :data:`None` if an explicit ``time`` value was passed instead.
 
         .. versionadded:: 2.0
         """
@@ -235,8 +235,8 @@ class Loop(Generic[LF]):
 
     @property
     def minutes(self) -> Optional[float]:
-        """:class:`float` | :obj:`None`: Read-only value for the number of minutes
-        between each iteration. :obj:`None` if an explicit ``time`` value was passed instead.
+        """:class:`float` | :data:`None`: Read-only value for the number of minutes
+        between each iteration. :data:`None` if an explicit ``time`` value was passed instead.
 
         .. versionadded:: 2.0
         """
@@ -245,8 +245,8 @@ class Loop(Generic[LF]):
 
     @property
     def hours(self) -> Optional[float]:
-        """:class:`float` | :obj:`None`: Read-only value for the number of hours
-        between each iteration. :obj:`None` if an explicit ``time`` value was passed instead.
+        """:class:`float` | :data:`None`: Read-only value for the number of hours
+        between each iteration. :data:`None` if an explicit ``time`` value was passed instead.
 
         .. versionadded:: 2.0
         """
@@ -255,8 +255,8 @@ class Loop(Generic[LF]):
 
     @property
     def time(self) -> Optional[List[datetime.time]]:
-        """:class:`list`\\[:class:`datetime.time`] | :obj:`None`: Read-only list for the exact times this loop runs at.
-        :obj:`None` if relative times were passed instead.
+        """:class:`list`\\[:class:`datetime.time`] | :data:`None`: Read-only list for the exact times this loop runs at.
+        :data:`None` if relative times were passed instead.
 
         .. versionadded:: 2.0
         """
@@ -270,7 +270,7 @@ class Loop(Generic[LF]):
 
     @property
     def next_iteration(self) -> Optional[datetime.datetime]:
-        """:class:`datetime.datetime` | :obj:`None`: When the next iteration of the loop will occur.
+        """:class:`datetime.datetime` | :data:`None`: When the next iteration of the loop will occur.
 
         .. versionadded:: 1.3
         """
@@ -440,9 +440,9 @@ class Loop(Generic[LF]):
         return len(self._valid_exception) == old_length - len(exceptions)
 
     def get_task(self) -> Optional[asyncio.Task[None]]:
-        """Fetches the internal task or :obj:`None` if there isn't one running.
+        """Fetches the internal task or :data:`None` if there isn't one running.
 
-        :return type: :class:`asyncio.Task` | :obj:`None`
+        :return type: :class:`asyncio.Task` | :data:`None`
         """
         return self._task if self._task is not MISSING else None
 
@@ -770,8 +770,8 @@ def loop(
 
         .. versionadded:: 2.0
 
-    count: :class:`int` | :obj:`None`
-        The number of loops to do, :obj:`None` if it should be an
+    count: :class:`int` | :data:`None`
+        The number of loops to do, :data:`None` if it should be an
         infinite loop.
     reconnect: :class:`bool`
         Whether to handle errors and restart the task

@@ -69,11 +69,11 @@ class RawMessageDeleteEvent(_RawReprMixin):
     ----------
     channel_id: :class:`int`
         The channel ID where the deletion took place.
-    guild_id: :class:`int` | :obj:`None`
+    guild_id: :class:`int` | :data:`None`
         The guild ID where the deletion took place, if applicable.
     message_id: :class:`int`
         The message ID that got deleted.
-    cached_message: :class:`Message` | :obj:`None`
+    cached_message: :class:`Message` | :data:`None`
         The cached message, if found in the internal message cache.
     """
 
@@ -95,7 +95,7 @@ class RawBulkMessageDeleteEvent(_RawReprMixin):
         A :class:`set` of the message IDs that were deleted.
     channel_id: :class:`int`
         The channel ID where the deletion took place.
-    guild_id: :class:`int` | :obj:`None`
+    guild_id: :class:`int` | :data:`None`
         The guild ID where the deletion took place, if applicable.
     cached_messages: :class:`list`\\[:class:`Message`]
         The cached messages, if found in the internal message cache.
@@ -122,14 +122,14 @@ class RawMessageUpdateEvent(_RawReprMixin):
 
         .. versionadded:: 1.3
 
-    guild_id: :class:`int` | :obj:`None`
+    guild_id: :class:`int` | :data:`None`
         The guild ID where the update took place, if applicable.
 
         .. versionadded:: 1.7
 
     data: :class:`dict`
         The raw data given by the :ddocs:`gateway <topics/gateway-events#message-update>`.
-    cached_message: :class:`Message` | :obj:`None`
+    cached_message: :class:`Message` | :data:`None`
         The cached message, if found in the internal message cache. Represents the message before
         it is modified by the data in :attr:`RawMessageUpdateEvent.data`.
     """
@@ -159,11 +159,11 @@ class RawPollVoteActionEvent(_RawReprMixin):
         The message ID that got or lost a vote.
     user_id: :class:`int`
         The user ID who added the vote or whose vote was removed.
-    cached_member: :class:`Member` | :obj:`None`
+    cached_member: :class:`Member` | :data:`None`
         The member who added the vote. Available only when the guilds and members are cached.
     channel_id: :class:`int`
         The channel ID where the vote addition or removal took place.
-    guild_id: :class:`int` | :obj:`None`
+    guild_id: :class:`int` | :data:`None`
         The guild ID where the vote addition or removal took place, if applicable.
     answer_id: :class:`int`
         The ID of the answer that was voted or unvoted.
@@ -212,7 +212,7 @@ class RawReactionActionEvent(_RawReprMixin):
         The user ID who added the reaction or whose reaction was removed.
     channel_id: :class:`int`
         The channel ID where the reaction addition or removal took place.
-    guild_id: :class:`int` | :obj:`None`
+    guild_id: :class:`int` | :data:`None`
         The guild ID where the reaction addition or removal took place, if applicable.
     emoji: :class:`PartialEmoji`
         The custom or unicode emoji being used.
@@ -220,7 +220,7 @@ class RawReactionActionEvent(_RawReprMixin):
         .. versionchanged:: 2.9
             This now also includes the correct :attr:`~PartialEmoji.animated` value when a reaction was removed.
 
-    member: :class:`Member` | :obj:`None`
+    member: :class:`Member` | :data:`None`
         The member who added the reaction. Only available if :attr:`event_type` is ``REACTION_ADD`` and the reaction is inside a guild.
 
         .. versionadded:: 1.3
@@ -232,10 +232,10 @@ class RawReactionActionEvent(_RawReprMixin):
 
         .. versionadded:: 1.3
 
-    message_author_id: :class:`int` | :obj:`None`
+    message_author_id: :class:`int` | :data:`None`
         The ID of the author who created the message that got a reaction.
         Only available if :attr:`event_type` is ``REACTION_ADD``.
-        May also be :obj:`None` if the message was created by a webhook.
+        May also be :data:`None` if the message was created by a webhook.
 
         .. versionadded:: 2.10
     """
@@ -276,7 +276,7 @@ class RawReactionClearEvent(_RawReprMixin):
         The message ID that got its reactions cleared.
     channel_id: :class:`int`
         The channel ID where the reaction clear took place.
-    guild_id: :class:`int` | :obj:`None`
+    guild_id: :class:`int` | :data:`None`
         The guild ID where the reaction clear took place, if applicable.
     """
 
@@ -299,7 +299,7 @@ class RawReactionClearEmojiEvent(_RawReprMixin):
         The message ID that got its reactions cleared.
     channel_id: :class:`int`
         The channel ID where the reaction clear took place.
-    guild_id: :class:`int` | :obj:`None`
+    guild_id: :class:`int` | :data:`None`
         The guild ID where the reaction clear took place, if applicable.
     emoji: :class:`PartialEmoji`
         The custom or unicode emoji being removed.
@@ -326,7 +326,7 @@ class RawIntegrationDeleteEvent(_RawReprMixin):
     ----------
     integration_id: :class:`int`
         The ID of the integration that got deleted.
-    application_id: :class:`int` | :obj:`None`
+    application_id: :class:`int` | :data:`None`
         The ID of the bot/OAuth2 application for this deleted integration.
     guild_id: :class:`int`
         The guild ID where the integration deletion took place.
@@ -381,7 +381,7 @@ class RawThreadDeleteEvent(_RawReprMixin):
         The type of the deleted thread.
     parent_id: :class:`int`
         The ID of the channel the thread belonged to.
-    thread: :class:`Thread` | :obj:`None`
+    thread: :class:`Thread` | :data:`None`
         The thread, if it could be found in the internal cache.
     """
 
@@ -412,7 +412,7 @@ class RawThreadMemberRemoveEvent(_RawReprMixin):
         The Thread that the member was removed from
     member_id: :class:`int`
         The ID of the removed member.
-    cached_member: :class:`.ThreadMember` | :obj:`None`
+    cached_member: :class:`.ThreadMember` | :data:`None`
         The member, if they could be found in the internal cache.
     """
 
@@ -439,10 +439,10 @@ class RawTypingEvent(_RawReprMixin):
         The ID of the user who started typing.
     channel_id: :class:`int`
         The ID of the channel where the user started typing.
-    guild_id: :class:`int` | :obj:`None`
-        The ID of the guild where the user started typing or :obj:`None` if it was in a DM.
-    member: :class:`Member` | :obj:`None`
-        The member object of the user who started typing or :obj:`None` if it was in a DM.
+    guild_id: :class:`int` | :data:`None`
+        The ID of the guild where the user started typing or :data:`None` if it was in a DM.
+    member: :class:`Member` | :data:`None`
+        The member object of the user who started typing or :data:`None` if it was in a DM.
     timestamp: :class:`datetime.datetime`
         The UTC datetime when the user started typing.
 
@@ -527,7 +527,7 @@ class RawVoiceChannelEffectEvent(_RawReprMixin):
         The ID of the user who sent the effect.
     effect: :class:`VoiceChannelEffect`
         The effect that was sent.
-    cached_member: :class:`Member` | :obj:`None`
+    cached_member: :class:`Member` | :data:`None`
         The member who sent the effect, if they could be found in the internal cache.
     """
 

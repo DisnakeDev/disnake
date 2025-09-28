@@ -245,8 +245,8 @@ class ShardInfo:
     ----------
     id: :class:`int`
         The shard ID for this shard.
-    shard_count: :class:`int` | :obj:`None`
-        The shard count for this cluster. If this is :obj:`None` then the bot has not started yet.
+    shard_count: :class:`int` | :data:`None`
+        The shard count for this cluster. If this is :data:`None` then the bot has not started yet.
     """
 
     __slots__ = ("_parent", "id", "shard_count")
@@ -336,7 +336,7 @@ class AutoShardedClient(Client):
 
     Attributes
     ----------
-    shard_ids: :class:`list`\\[:class:`int`] | :obj:`None`
+    shard_ids: :class:`list`\\[:class:`int`] | :data:`None`
         An optional list of shard_ids to launch the shards with.
     """
 
@@ -433,9 +433,9 @@ class AutoShardedClient(Client):
         return [(shard_id, shard.ws.latency) for shard_id, shard in self.__shards.items()]
 
     def get_shard(self, shard_id: int) -> Optional[ShardInfo]:
-        """Gets the shard information of a given shard ID, or :obj:`None` if not found.
+        """Gets the shard information of a given shard ID, or :data:`None` if not found.
 
-        :return type: :class:`ShardInfo` | :obj:`None`
+        :return type: :class:`ShardInfo` | :data:`None`
         """
         try:
             parent = self.__shards[shard_id]
@@ -568,14 +568,14 @@ class AutoShardedClient(Client):
 
         Parameters
         ----------
-        activity: :class:`BaseActivity` | :obj:`None`
-            The activity being done. :obj:`None` if no currently active activity is done.
-        status: :class:`Status` | :obj:`None`
-            Indicates what status to change to. If :obj:`None`, then
+        activity: :class:`BaseActivity` | :data:`None`
+            The activity being done. :data:`None` if no currently active activity is done.
+        status: :class:`Status` | :data:`None`
+            Indicates what status to change to. If :data:`None`, then
             :attr:`Status.online` is used.
-        shard_id: :class:`int` | :obj:`None`
+        shard_id: :class:`int` | :data:`None`
             The shard_id to change the presence to. If not specified
-            or :obj:`None`, then it will change the presence of every
+            or :data:`None`, then it will change the presence of every
             shard the bot can see.
 
         Raises

@@ -43,14 +43,14 @@ class RoleTags:
 
     Attributes
     ----------
-    bot_id: :class:`int` | :obj:`None`
+    bot_id: :class:`int` | :data:`None`
         The bot's user ID that manages this role.
-    integration_id: :class:`int` | :obj:`None`
+    integration_id: :class:`int` | :data:`None`
         The integration ID that manages the role.
 
         Roles with this ID matching the guild's ``guild_subscription`` integration
         are considered subscription roles.
-    subscription_listing_id: :class:`int` | :obj:`None`
+    subscription_listing_id: :class:`int` | :data:`None`
         The ID of this role's subscription listing, if applicable.
 
         .. versionadded:: 2.9
@@ -200,7 +200,7 @@ class Role(Hashable):
         integrations such as Twitch.
     mentionable: :class:`bool`
         Indicates if the role can be mentioned by users.
-    tags: :class:`RoleTags` | :obj:`None`
+    tags: :class:`RoleTags` | :data:`None`
         The role tags associated with this role.
     """
 
@@ -410,7 +410,7 @@ class Role(Hashable):
 
     @property
     def secondary_colour(self) -> Optional[Colour]:
-        """:class:`Colour` | :obj:`None`: Returns the secondary colour for the role, if any. An alias exists under ``secondary_color``.
+        """:class:`Colour` | :data:`None`: Returns the secondary colour for the role, if any. An alias exists under ``secondary_color``.
 
         .. versionadded:: 2.11
         """
@@ -420,7 +420,7 @@ class Role(Hashable):
 
     @property
     def secondary_color(self) -> Optional[Colour]:
-        """:class:`Colour` | :obj:`None`: Returns the secondary color for the role, if any. An alias exists under ``secondary_colour``.
+        """:class:`Colour` | :data:`None`: Returns the secondary color for the role, if any. An alias exists under ``secondary_colour``.
 
         .. versionadded:: 2.11
         """
@@ -428,7 +428,7 @@ class Role(Hashable):
 
     @property
     def tertiary_colour(self) -> Optional[Colour]:
-        """:class:`Colour` | :obj:`None`: Returns the tertiary colour for the role, if any. An alias exists under ``tertiary_color``.
+        """:class:`Colour` | :data:`None`: Returns the tertiary colour for the role, if any. An alias exists under ``tertiary_color``.
 
         .. versionadded:: 2.11
         """
@@ -438,7 +438,7 @@ class Role(Hashable):
 
     @property
     def tertiary_color(self) -> Optional[Colour]:
-        """:class:`Colour` | :obj:`None`: Returns the tertiary color for the role, if any. An alias exists under ``tertiary_colour``.
+        """:class:`Colour` | :data:`None`: Returns the tertiary color for the role, if any. An alias exists under ``tertiary_colour``.
 
         .. versionadded:: 2.11
         """
@@ -446,7 +446,7 @@ class Role(Hashable):
 
     @property
     def icon(self) -> Optional[Asset]:
-        """:class:`Asset` | :obj:`None`: Returns the role's icon asset, if available.
+        """:class:`Asset` | :data:`None`: Returns the role's icon asset, if available.
 
         .. versionadded:: 2.0
         """
@@ -456,7 +456,7 @@ class Role(Hashable):
 
     @property
     def emoji(self) -> Optional[PartialEmoji]:
-        """:class:`PartialEmoji` | :obj:`None`: Returns the role's emoji, if available.
+        """:class:`PartialEmoji` | :data:`None`: Returns the role's emoji, if available.
 
         .. versionadded:: 2.0
         """
@@ -576,11 +576,11 @@ class Role(Hashable):
             The new primary_colour to change to. (aliased to ``primary_color`` as well)
 
             .. versionadded:: 2.11
-        secondary_colour: :class:`Colour` | :class:`int` | :obj:`None`
+        secondary_colour: :class:`Colour` | :class:`int` | :data:`None`
             The new secondary_colour to change to. (aliased to ``secondary_color`` as well)
 
             .. versionadded:: 2.11
-        tertiary_colour: :class:`Colour` | :class:`int` | :obj:`None`
+        tertiary_colour: :class:`Colour` | :class:`int` | :data:`None`
             The new tertiary_colour to change to. (aliased to ``tertiary_color`` as well)
 
             .. note::
@@ -590,20 +590,20 @@ class Role(Hashable):
             .. versionadded:: 2.11
         hoist: :class:`bool`
             Indicates if the role should be shown separately in the member list.
-        icon: |resource_type| | :obj:`None`
+        icon: |resource_type| | :data:`None`
             The role's new icon image (if the guild has the ``ROLE_ICONS`` feature).
 
             .. versionchanged:: 2.5
                 Now accepts various resource types in addition to :class:`bytes`.
 
-        emoji: :class:`str` | :obj:`None`
+        emoji: :class:`str` | :data:`None`
             The role's new unicode emoji.
         mentionable: :class:`bool`
             Indicates if the role should be mentionable by others.
         position: :class:`int`
             The new role's position. This must be below your top role's
             position or it will fail.
-        reason: :class:`str` | :obj:`None`
+        reason: :class:`str` | :data:`None`
             The reason for editing this role. Shows up on the audit log.
 
         Raises
@@ -707,7 +707,7 @@ class Role(Hashable):
 
         Parameters
         ----------
-        reason: :class:`str` | :obj:`None`
+        reason: :class:`str` | :data:`None`
             The reason for deleting this role. Shows up on the audit log.
 
         Raises

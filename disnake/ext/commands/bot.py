@@ -61,7 +61,7 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
     ----------
     test_guilds: :class:`list`\\[:class:`int`]
         The list of IDs of the guilds where you're going to test your application commands.
-        Defaults to :obj:`None`, which means global registration of commands across
+        Defaults to :data:`None`, which means global registration of commands across
         all guilds.
 
         .. versionadded:: 2.1
@@ -122,7 +122,7 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
 
         .. versionadded:: 2.5
 
-    default_install_types: :class:`.ApplicationInstallTypes` | :obj:`None`
+    default_install_types: :class:`.ApplicationInstallTypes` | :data:`None`
         The default installation types where application commands will be available.
         This applies to all commands added either through the respective decorators
         or directly using :meth:`.add_slash_command` (etc.).
@@ -133,7 +133,7 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
 
         .. versionadded:: 2.10
 
-    default_contexts: :class:`.InteractionContextTypes` | :obj:`None`
+    default_contexts: :class:`.InteractionContextTypes` | :data:`None`
         The default contexts where application commands will be usable.
         This applies to all commands added either through the respective decorators
         or directly using :meth:`.add_slash_command` (etc.).
@@ -166,7 +166,7 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
         :attr:`.Context.prefix`. To avoid confusion empty iterables are not
         allowed.
 
-        If the prefix is :obj:`None`, the bot won't listen to any prefixes, and prefix
+        If the prefix is :data:`None`, the bot won't listen to any prefixes, and prefix
         commands will not be processed. If you don't need prefix commands, consider
         using :class:`InteractionBot` or :class:`AutoShardedInteractionBot` instead,
         which are drop-in replacements, just without prefix command support.
@@ -194,21 +194,21 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
 
         This can be provided as a parameter at creation.
 
-    help_command: :class:`.HelpCommand` | :obj:`None`
+    help_command: :class:`.HelpCommand` | :data:`None`
         The help command implementation to use. This can be dynamically
-        set at runtime. To remove the help command pass :obj:`None`. For more
+        set at runtime. To remove the help command pass :data:`None`. For more
         information on implementing a help command, see :ref:`ext_commands_api_help_commands`.
 
         This can be provided as a parameter at creation.
 
-    owner_id: :class:`int` | :obj:`None`
+    owner_id: :class:`int` | :data:`None`
         The ID of the user that owns the bot. If this is not set and is then queried via
         :meth:`.is_owner` then it is fetched automatically using
         :meth:`~.Bot.application_info`.
 
         This can be provided as a parameter at creation.
 
-    owner_ids: :class:`collections.abc.Collection`\\[:class:`int`] | :obj:`None`
+    owner_ids: :class:`collections.abc.Collection`\\[:class:`int`] | :data:`None`
         The IDs of the users that own the bot. This is similar to :attr:`owner_id`.
         If this is not set and the application is team based, then it is
         fetched automatically using :meth:`~.Bot.application_info` (taking team roles into account).
@@ -359,7 +359,7 @@ class InteractionBot(InteractionBotBase, disnake.Client):
     ----------
     test_guilds: :class:`list`\\[:class:`int`]
         The list of IDs of the guilds where you're going to test your application commands.
-        Defaults to :obj:`None`, which means global registration of commands across
+        Defaults to :data:`None`, which means global registration of commands across
         all guilds.
 
         .. versionadded:: 2.1
@@ -420,7 +420,7 @@ class InteractionBot(InteractionBotBase, disnake.Client):
 
         .. versionadded:: 2.5
 
-    default_install_types: :class:`.ApplicationInstallTypes` | :obj:`None`
+    default_install_types: :class:`.ApplicationInstallTypes` | :data:`None`
         The default installation types where application commands will be available.
         This applies to all commands added either through the respective decorators
         or directly using :meth:`.add_slash_command` (etc.).
@@ -431,7 +431,7 @@ class InteractionBot(InteractionBotBase, disnake.Client):
 
         .. versionadded:: 2.10
 
-    default_contexts: :class:`.InteractionContextTypes` | :obj:`None`
+    default_contexts: :class:`.InteractionContextTypes` | :data:`None`
         The default contexts where application commands will be usable.
         This applies to all commands added either through the respective decorators
         or directly using :meth:`.add_slash_command` (etc.).
@@ -444,14 +444,14 @@ class InteractionBot(InteractionBotBase, disnake.Client):
 
     Attributes
     ----------
-    owner_id: :class:`int` | :obj:`None`
+    owner_id: :class:`int` | :data:`None`
         The ID of the user that owns the bot. If this is not set and is then queried via
         :meth:`.is_owner` then it is fetched automatically using
         :meth:`~.Bot.application_info`.
 
         This can be provided as a parameter at creation.
 
-    owner_ids: :class:`collections.abc.Collection`\\[:class:`int`] | :obj:`None`
+    owner_ids: :class:`collections.abc.Collection`\\[:class:`int`] | :data:`None`
         The IDs of the users that own the bot. This is similar to :attr:`owner_id`.
         If this is not set and the application is team based, then it is
         fetched automatically using :meth:`~.Bot.application_info` (taking team roles into account).

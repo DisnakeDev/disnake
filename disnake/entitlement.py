@@ -56,11 +56,11 @@ class Entitlement(Hashable):
         The entitlement's type.
     sku_id: :class:`int`
         The ID of the associated SKU.
-    user_id: :class:`int` | :obj:`None`
+    user_id: :class:`int` | :data:`None`
         The ID of the user that is granted access to the entitlement's SKU.
 
         See also :attr:`user`.
-    guild_id: :class:`int` | :obj:`None`
+    guild_id: :class:`int` | :data:`None`
         The ID of the guild that is granted access to the entitlement's SKU.
 
         See also :attr:`guild`.
@@ -71,10 +71,10 @@ class Entitlement(Hashable):
     consumed: :class:`bool`
         Whether the entitlement has been consumed. Only applies to consumable items,
         i.e. those associated with a :attr:`~SKUType.consumable` SKU.
-    starts_at: :class:`datetime.datetime` | :obj:`None`
+    starts_at: :class:`datetime.datetime` | :data:`None`
         The time at which the entitlement starts being active.
-        Set to :obj:`None` when this is a test entitlement.
-    ends_at: :class:`datetime.datetime` | :obj:`None`
+        Set to :data:`None` when this is a test entitlement.
+    ends_at: :class:`datetime.datetime` | :data:`None`
         The time at which the entitlement stops being active.
 
         You can use :meth:`is_active` to check whether this entitlement is still active.
@@ -125,14 +125,14 @@ class Entitlement(Hashable):
 
     @property
     def guild(self) -> Optional[Guild]:
-        """:class:`Guild` | :obj:`None`: The guild that is granted access to
+        """:class:`Guild` | :data:`None`: The guild that is granted access to
         this entitlement's SKU, if applicable.
         """
         return self._state._get_guild(self.guild_id)
 
     @property
     def user(self) -> Optional[User]:
-        """:class:`User` | :obj:`None`: The user that is granted access to
+        """:class:`User` | :data:`None`: The user that is granted access to
         this entitlement's SKU, if applicable.
 
         Requires the user to be cached.

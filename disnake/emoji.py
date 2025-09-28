@@ -27,7 +27,7 @@ class Emoji(_EmojiTag, AssetMixin):
     """Represents a custom emoji.
 
     Depending on the way this object was created, some of the attributes can
-    have a value of :obj:`None`.
+    have a value of :data:`None`.
 
     .. collapse:: operations
 
@@ -69,11 +69,11 @@ class Emoji(_EmojiTag, AssetMixin):
         Whether the emoji is animated or not.
     managed: :class:`bool`
         Whether the emoji is managed by a Twitch integration.
-    guild_id: :class:`int` | :obj:`None`
-        The guild ID the emoji belongs to. :obj:`None` if this is an app emoji.
+    guild_id: :class:`int` | :data:`None`
+        The guild ID the emoji belongs to. :data:`None` if this is an app emoji.
     available: :class:`bool`
         Whether the emoji is available for use.
-    user: :class:`User` | :obj:`None`
+    user: :class:`User` | :data:`None`
         The user that created this emoji. If this is a guild emoji, this can only be retrieved
         using :meth:`Guild.fetch_emoji`/:meth:`Guild.fetch_emojis` while
         having the :attr:`~Permissions.manage_guild_expressions` permission.
@@ -176,18 +176,18 @@ class Emoji(_EmojiTag, AssetMixin):
 
     @property
     def guild(self) -> Optional[Guild]:
-        """:class:`Guild` | :obj:`None`: The guild this emoji belongs to. :obj:`None` if this is an app emoji.
+        """:class:`Guild` | :data:`None`: The guild this emoji belongs to. :data:`None` if this is an app emoji.
 
         .. versionchanged:: |vnext|
 
-            This can now return :obj:`None` if the emoji is an
+            This can now return :data:`None` if the emoji is an
             application owned emoji.
         """
         return self._state._get_guild(self.guild_id)
 
     @property
     def application_id(self) -> Optional[int]:
-        """:class:`int` | :obj:`None`: The ID of the application which owns this emoji,
+        """:class:`int` | :data:`None`: The ID of the application which owns this emoji,
         if this is an app emoji.
 
         .. versionadded:: |vnext|
@@ -239,7 +239,7 @@ class Emoji(_EmojiTag, AssetMixin):
 
         Parameters
         ----------
-        reason: :class:`str` | :obj:`None`
+        reason: :class:`str` | :data:`None`
             The reason for deleting this emoji. Shows up on the audit log.
 
             Only applies to emojis that belong to a :class:`.Guild`.
@@ -283,7 +283,7 @@ class Emoji(_EmojiTag, AssetMixin):
         ----------
         name: :class:`str`
             The new emoji name.
-        roles: :class:`list`\\[:class:`~disnake.abc.Snowflake`] | :obj:`None`
+        roles: :class:`list`\\[:class:`~disnake.abc.Snowflake`] | :data:`None`
             A list of roles that can use this emoji. An empty list can be passed to make it available to everyone.
 
             An emoji cannot have both subscription roles (see :attr:`RoleTags.integration_id`) and
@@ -291,7 +291,7 @@ class Emoji(_EmojiTag, AssetMixin):
             after creation.
 
             Only applies to emojis that belong to a :class:`.Guild`.
-        reason: :class:`str` | :obj:`None`
+        reason: :class:`str` | :data:`None`
             The reason for editing this emoji. Shows up on the audit log.
 
             Only applies to emojis that belong to a :class:`.Guild`.

@@ -129,10 +129,10 @@ class AssetMixin:
         ----------
         spoiler: :class:`bool`
             Whether the file is a spoiler.
-        filename: :class:`str` | :obj:`None`
+        filename: :class:`str` | :data:`None`
             The filename to display when uploading to Discord. If this is not given, it defaults to
             the name of the asset's URL.
-        description: :class:`str` | :obj:`None`
+        description: :class:`str` | :data:`None`
             The file's description.
 
         Raises

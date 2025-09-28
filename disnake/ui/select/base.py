@@ -126,7 +126,7 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
 
     @property
     def placeholder(self) -> Optional[str]:
-        """:class:`str` | :obj:`None`: The placeholder text that is shown if nothing is selected, if any."""
+        """:class:`str` | :data:`None`: The placeholder text that is shown if nothing is selected, if any."""
         return self._underlying.placeholder
 
     @placeholder.setter

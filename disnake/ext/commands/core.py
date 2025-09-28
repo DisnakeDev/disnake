@@ -200,11 +200,11 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         The name of the command.
     callback: :ref:`coroutine <coroutine>`
         The coroutine that is executed when the command is called.
-    help: :class:`str` | :obj:`None`
+    help: :class:`str` | :data:`None`
         The long help text for the command.
-    brief: :class:`str` | :obj:`None`
+    brief: :class:`str` | :data:`None`
         The short help text for the command.
-    usage: :class:`str` | :obj:`None`
+    usage: :class:`str` | :data:`None`
         A replacement for arguments in the default help text.
     aliases: :class:`list`\\[:class:`str`] | :class:`tuple`\\[:class:`str`]
         The list of aliases the command can be invoked under.
@@ -213,10 +213,10 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         If the command is invoked while it is disabled, then
         :exc:`.DisabledCommand` is raised to the :func:`.on_command_error`
         event. Defaults to ``True``.
-    parent: :class:`Group` | :obj:`None`
-        The parent group that this command belongs to. :obj:`None` if there isn't one.
-    cog: :class:`Cog` | :obj:`None`
-        The cog that this command belongs to. :obj:`None` if there isn't one.
+    parent: :class:`Group` | :data:`None`
+        The parent group that this command belongs to. :data:`None` if there isn't one.
+    cog: :class:`Cog` | :data:`None`
+        The cog that this command belongs to. :data:`None` if there isn't one.
     checks: :class:`list`\\[:class:`collections.abc.Callable`\\[[:class:`.Context`], :class:`bool`]]
         A list of predicates that verifies if the command could be executed
         with the given :class:`.Context` as the sole parameter. If an exception
@@ -235,7 +235,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         regular matter rather than passing the rest completely raw. If ``True``
         then the keyword-only argument will pass in the rest of the arguments
         in a completely raw matter. Defaults to ``False``.
-    invoked_subcommand: :class:`Command` | :obj:`None`
+    invoked_subcommand: :class:`Command` | :data:`None`
         The subcommand that was invoked, if any.
     require_var_positional: :class:`bool`
         If ``True`` and a variadic positional argument is specified, requires
@@ -655,9 +655,9 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
 
     @property
     def root_parent(self) -> Optional[Group[CogT, ..., Any]]:
-        """:class:`Group` | :obj:`None`: Retrieves the root parent of this command.
+        """:class:`Group` | :data:`None`: Retrieves the root parent of this command.
 
-        If the command has no parents then it returns :obj:`None`.
+        If the command has no parents then it returns :data:`None`.
 
         For example in commands ``?a b c test``, the root parent is ``a``.
         """
@@ -972,7 +972,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
 
     @property
     def cog_name(self) -> Optional[str]:
-        """:class:`str` | :obj:`None`: The name of the cog this command belongs to, if any."""
+        """:class:`str` | :data:`None`: The name of the cog this command belongs to, if any."""
         return type(self.cog).__cog_name__ if self.cog is not None else None
 
     @property
@@ -1193,9 +1193,9 @@ class GroupMixin(Generic[CogT]):
 
         Returns
         -------
-        :class:`.Command` | :obj:`None`
+        :class:`.Command` | :data:`None`
             The command that was removed. If the name is not valid then
-            :obj:`None` is returned instead.
+            :data:`None` is returned instead.
         """
         command = self.all_commands.pop(name, None)
 
@@ -1241,7 +1241,7 @@ class GroupMixin(Generic[CogT]):
 
         The name could be fully qualified (e.g. ``'foo bar'``) will get
         the subcommand ``bar`` of the group command ``foo``. If a
-        subcommand is not found then :obj:`None` is returned just as usual.
+        subcommand is not found then :data:`None` is returned just as usual.
 
         Parameters
         ----------
@@ -1250,8 +1250,8 @@ class GroupMixin(Generic[CogT]):
 
         Returns
         -------
-        :class:`Command` | :obj:`None`
-            The command that was requested. If not found, returns :obj:`None`.
+        :class:`Command` | :data:`None`
+            The command that was requested. If not found, returns :data:`None`.
         """
         # fast path, no space in name.
         if " " not in name:
@@ -2541,7 +2541,7 @@ def cooldown(
         The number of times a command can be used before triggering a cooldown.
     per: :class:`float`
         The amount of seconds to wait for a cooldown when it's been triggered.
-    type: :class:`.BucketType` | :class:`collections.abc.Callable`\\[[:class:`.Message`], :class:`~typing.Any`]
+    type: :class:`.BucketType` | :class:`collections.abc.Callable`\\[[:class:`.Message`], :data:`~typing.Any`]
         The type of cooldown to have. If callable, should return a key for the mapping.
 
         .. versionchanged:: 1.7
@@ -2567,7 +2567,7 @@ def dynamic_cooldown(
 
     This differs from :func:`.cooldown` in that it takes a function that
     accepts a single parameter of type :class:`.disnake.Message` and must
-    return a :class:`.Cooldown` or :obj:`None`. If :obj:`None` is returned then
+    return a :class:`.Cooldown` or :data:`None`. If :data:`None` is returned then
     that cooldown is effectively bypassed.
 
     A cooldown allows a command to only be used a specific amount
@@ -2585,9 +2585,9 @@ def dynamic_cooldown(
 
     Parameters
     ----------
-    cooldown: :class:`collections.abc.Callable`\\[[:class:`.disnake.Message`], :class:`.Cooldown` | :obj:`None`]
+    cooldown: :class:`collections.abc.Callable`\\[[:class:`.disnake.Message`], :class:`.Cooldown` | :data:`None`]
         A function that takes a message and returns a cooldown that will
-        apply to this invocation or :obj:`None` if the cooldown should be bypassed.
+        apply to this invocation or :data:`None` if the cooldown should be bypassed.
     type: :class:`.BucketType`
         The type of cooldown to have.
     """
