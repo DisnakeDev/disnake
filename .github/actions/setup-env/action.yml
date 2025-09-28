@@ -39,7 +39,7 @@ runs:
         enableCrossOsArchive: true
         fail-on-cache-miss: ${{ inputs.update-uv-lock != 'true' }}
 
-    - name: Set up uv with python ${{ inputs.python-version }}
+    - name: Set up uv with Python ${{ inputs.python-version }}
       id: setup-python
       uses: astral-sh/setup-uv@b75a909f75acd358c2196fb9a5f1299a9a8868a4 # v6.7.0
       with:
@@ -48,7 +48,7 @@ runs:
         # this doesn't install python but pins the uv version; its the same as providing UV_PYTHON
         python-version: ${{ inputs.python-version }}
 
-    - name: Install python ${{ inputs.python-version }}
+    - name: Install Python ${{ inputs.python-version }}
       shell: bash
       env:
         UV_PYTHON_DOWNLOADS: automatic
@@ -69,7 +69,7 @@ runs:
         UV_LOCKED: 0
       run: uv lock --refresh
 
-    - name: Set python version
+    - name: Set Python version
       id: python-version
       shell: bash
       env:

@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   check-pull-labels:
-    name: Check Pull Labels for blocked labels
+    name: Check pull labels for blocked labels
     runs-on: ubuntu-latest
 
     steps:
