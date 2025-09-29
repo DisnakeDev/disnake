@@ -1774,7 +1774,9 @@ class HTTPClient:
             )
         )
 
-    def create_app_emoji(self, app_id: Snowflake, name: str, image: str) -> Response[emoji.Emoji]:
+    def create_app_emoji(
+        self, app_id: Snowflake, *, name: str, image: str
+    ) -> Response[emoji.Emoji]:
         payload: Dict[str, Any] = {
             "name": name,
             "image": image,
@@ -1784,7 +1786,7 @@ class HTTPClient:
         return self.request(r, json=payload)
 
     def edit_app_emoji(
-        self, app_id: Snowflake, emoji_id: Snowflake, name: str
+        self, app_id: Snowflake, emoji_id: Snowflake, *, name: str
     ) -> Response[emoji.Emoji]:
         payload: Dict[str, Any] = {
             "name": name,
@@ -3056,6 +3058,9 @@ class HTTPClient:
 
     def application_info(self) -> Response[appinfo.AppInfo]:
         return self.request(Route("GET", "/oauth2/applications/@me"))
+
+    def edit_application_info(self, **fields: Any) -> Response[appinfo.AppInfo]:
+        return self.request(Route("PATCH", "/applications/@me"), json=fields)
 
     def get_application_role_connection_metadata_records(
         self, application_id: Snowflake

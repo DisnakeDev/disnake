@@ -2426,7 +2426,7 @@ class Client:
         data = await self.http.application_info()
         return AppInfo(self._connection, data)
 
-    async def fetch_application_emoji(self, emoji_id: int) -> Emoji:
+    async def fetch_application_emoji(self, emoji_id: int, /) -> Emoji:
         """|coro|
 
         Retrieves an application level :class:`~disnake.Emoji` based on its ID.
@@ -2485,7 +2485,7 @@ class Client:
             The newly created application emoji.
         """
         img = await utils._assetbytes_to_base64_data(image)
-        data = await self.http.create_app_emoji(self.application_id, name, img)
+        data = await self.http.create_app_emoji(self.application_id, name=name, image=img)
         return Emoji(guild=None, state=self._connection, data=data)
 
     async def fetch_application_emojis(self) -> List[Emoji]:

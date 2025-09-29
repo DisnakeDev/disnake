@@ -17,13 +17,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
 
       - name: Set up environment
         id: setup
         uses: ./.github/actions/setup-env
         with:
-          python-version: 3.8
+          python-version: 3.9
 
       - name: Build package
         run: |
@@ -43,7 +45,7 @@ jobs:
           echo -e "\n</details>\n" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: dist
           path: dist/
@@ -63,7 +65,7 @@ jobs:
 
     steps:
       - name: Download build artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
           name: dist
           path: dist/
@@ -105,7 +107,7 @@ jobs:
 
     steps:
       - name: Download build artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
           name: dist
           path: dist/
@@ -119,7 +121,7 @@ jobs:
           echo "docs_version=${GIT_TAG//./-}" >> $GITHUB_OUTPUT
 
       - name: Create Release
-        uses: softprops/action-gh-release@9d7c94cfd0a1f3ed45544c887983e9fa900f0564  # v2.0.4
+        uses: softprops/action-gh-release@6cbd405e2c4e67a21c47fa9e383d020e4e28b836  # v2.3.3
         with:
           files: dist/*
           draft: true
@@ -145,13 +147,13 @@ jobs:
 
     steps:
       - name: Download build artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
           name: dist
           path: dist/
 
       - name: Upload to pypi
-        uses: pypa/gh-action-pypi-publish@81e9d935c883d0b210363ab89cf05f3894778450  # v1.8.14
+        uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e  # v1.13.0
         with:
           print-hash: true
 
@@ -170,12 +172,12 @@ jobs:
       # https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/making-authenticated-api-requests-with-a-github-app-in-a-github-actions-workflow
       - name: Generate app token
         id: generate_token
-        uses: actions/create-github-app-token@f2acddfb5195534d487896a656232b016a682f3c  # v1.9.0
+        uses: actions/create-github-app-token@67018539274d69449ef7c02e8e71183d1719ab42  # v2.1.4
         with:
           app-id: ${{ secrets.BOT_APP_ID }}
           private-key: ${{ secrets.BOT_PRIVATE_KEY }}
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           token: ${{ steps.generate_token.outputs.token }}
           persist-credentials: false
@@ -197,7 +199,7 @@ jobs:
           echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
 
       - name: Create pull request
-        uses: peter-evans/create-pull-request@70a41aba780001da0a30141984ae2a0c95d8704e  # v6.0.2
+        uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e  # v7.0.8
         with:
           token: ${{ steps.generate_token.outputs.token }}
           branch: auto/dev-v${{ steps.update-version.outputs.new_version }}

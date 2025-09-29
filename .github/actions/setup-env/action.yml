@@ -6,7 +6,7 @@ inputs:
   python-version:
     description: The python version to install
     required: false
-    default: '3.8'
+    default: '3.9'
   use-cached-uv-lock:
     description: Whether to download the uv lock cache.
     required: false
@@ -28,7 +28,7 @@ runs:
   using: composite
   steps:
     - name: Download uv lock
-      uses: actions/cache/restore@v4
+      uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
       if: ${{ inputs.use-cached-uv-lock != 'false' }}
       id: restore-uv-lock
       with:
@@ -39,21 +39,22 @@ runs:
         enableCrossOsArchive: true
         fail-on-cache-miss: ${{ inputs.update-uv-lock != 'true' }}
 
-    - name: Set up uv with python ${{ inputs.python-version }}
+    - name: Set up uv with Python ${{ inputs.python-version }}
       id: setup-python
-      uses: astral-sh/setup-uv@v6
+      uses: astral-sh/setup-uv@b75a909f75acd358c2196fb9a5f1299a9a8868a4 # v6.7.0
       with:
         version: '0.8.14'
         enable-cache: true
         # this doesn't install python but pins the uv version; its the same as providing UV_PYTHON
         python-version: ${{ inputs.python-version }}
 
-    - name: Install python ${{ inputs.python-version }}
+    - name: Install Python ${{ inputs.python-version }}
       shell: bash
       env:
         UV_PYTHON_DOWNLOADS: automatic
+        PYTHON_VERSION: ${{ inputs.python-version }}
       run: |
-        uv python install ${{ inputs.python-version }}
+        uv python install ${PYTHON_VERSION}
 
     - name: Install nox
       shell: bash
@@ -68,7 +69,7 @@ runs:
         UV_LOCKED: 0
       run: uv lock --refresh
 
-    - name: Set python version
+    - name: Set Python version
       id: python-version
       shell: bash
       env:
