@@ -14,7 +14,8 @@ on:
   merge_group:
     types: [checks_requested]
 
-permissions: read-all
+permissions:
+  contents: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
@@ -34,6 +35,7 @@ env:
 
 jobs:
   lock-dependencies:
+    name: Lock dependencies
     # The only purpose of this is to create a lockfile, which will be cached
     # to be used with subsequent jobs.
     # This provides somewhat of a middle ground and avoids having each job lock dependencies on its own,
@@ -43,7 +45,9 @@ jobs:
     env:
       UV_RESOLUTION: highest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
 
       - name: Set up environment
         id: setup-env
@@ -52,7 +56,7 @@ jobs:
           use-cached-uv-lock: 'false' # we don't need the lock here, we will automatically download it below
 
       - name: Restore uv lock
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         id: cache-uv-lock
         with:
           key: uv-lock-resolved-${{ env.UV_RESOLUTION }}
@@ -75,7 +79,7 @@ jobs:
           UV_LOCKED: 0
         run: uv lock --refresh
 
-      - uses: actions/cache/save@v4
+      - uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         if: steps.lock-uv-deps.outcome == 'success'
         name: upload-uv-lock
         with:
@@ -87,6 +91,7 @@ jobs:
   # noxfile.py is the source of truth, which in turn draws from
   # pyproject.toml's `project.requires-python` and `project.classifiers`.
   python-versions:
+    name: Export nox sessions
     runs-on: ubuntu-latest
     outputs:
       min-python: ${{ steps.set-matrix.outputs.min-python }}
@@ -95,7 +100,9 @@ jobs:
       pyright-sessions: ${{ steps.set-matrix.outputs.pyright-sessions }}
       test-sessions: ${{ steps.set-matrix.outputs.test-sessions }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
       - name: Set up environment
         uses: ./.github/actions/setup-env
         with:
@@ -113,27 +120,32 @@ jobs:
           echo pyright-sessions=$(nox -s pyright --list --json | jq -c '[.[] | {python: .python, name: .session, paths: .call_spec.execution_group.pyright_paths, experimental: (.call_spec.execution_group.experimental == true) }]') | tee --append $GITHUB_OUTPUT
 
   lint:
+    name: Run pre-commit hooks
     runs-on: ubuntu-latest
     env:
       RUFF_OUTPUT_FORMAT: github
     steps:
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
 
       - name: Cache pip cache
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           key: ${{ runner.os }}-prek-pip-${{ hashFiles('**/pyproject.toml') }}
           path: ~/.cache/pip
+          lookup-only: true
 
       - name: Run prek
         id: prek
-        uses: j178/prek-action@v1.0.3
+        uses: j178/prek-action@e216c4c287eb0629a8f271855e990c2548d1464a # v1.0.6
         # given the interoperability and the nature of prek, we stay unpinned for now
         # note that this action by default uses the latest version of prek
         # this is exactly how the pre-commit action worked, and we never had any issues
 
   docs:
+    name: Build documentation
     # unlike the other workflows, we explicitly use the same version as
     # readthedocs (see .readthedocs.yml) here for consistency
     runs-on: ubuntu-24.04
@@ -142,7 +154,9 @@ jobs:
       - lock-dependencies
       - lint
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
 
       - name: Set up environment
         id: setup-env
@@ -153,7 +167,8 @@ jobs:
       - name: Run sphinx-build
         run: nox -s docs -- --keep-going -W -w $GITHUB_STEP_SUMMARY
 
-  pyright:
+  typing:
+    name: ${{matrix.session.name}}
     runs-on: ubuntu-latest
     needs:
       - python-versions
@@ -165,7 +180,9 @@ jobs:
       fail-fast: false
     continue-on-error: ${{ matrix.session.experimental }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
 
       - name: Set up environment
         id: setup-env
@@ -195,7 +212,7 @@ jobs:
           nox --install-only
 
       - name: Run pyright (Linux)
-        uses: jakebailey/pyright-action@v2.3.3
+        uses: jakebailey/pyright-action@6cabc0f01c4994be48fd45cd9dbacdd6e1ee6e5e # v2.3.3
         id: pyright-linux
         with:
           version: PATH
@@ -206,7 +223,7 @@ jobs:
           extra-args: ${{join(matrix.session.paths, ' ')}}
 
       - name: Run pyright (Windows)
-        uses: jakebailey/pyright-action@v2.3.3
+        uses: jakebailey/pyright-action@6cabc0f01c4994be48fd45cd9dbacdd6e1ee6e5e # v2.3.3
         if: always() && (steps.pyright-linux.outcome == 'success' || steps.pyright-linux.outcome == 'failure')
         with:
           version: PATH
@@ -217,13 +234,16 @@ jobs:
           extra-args: ${{join(matrix.session.paths, ' ')}}
 
   misc:
+    name: Check slots and build
     runs-on: ubuntu-latest
     needs:
       - python-versions
       - lock-dependencies
       - lint
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
 
       - name: Set up environment
         id: setup
@@ -247,13 +267,16 @@ jobs:
           uvx twine~=6.1 check --strict dist/*
 
   codemod:
+    name: LibCST codemods
     runs-on: ubuntu-latest
     needs:
       - python-versions
       - lock-dependencies
       - lint
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
 
       - name: Set up environment
         id: setup
@@ -266,7 +289,7 @@ jobs:
         run: |
           nox -s codemod -- run-all
 
-      - name: Check for changes by libcst
+      - name: Check for changes by LibCST
         run: |
           if [ -n "$(git status --porcelain)" ]; then
             echo "::error::Please run 'nox -s codemod -- run-all' locally and commit the changes." >&2;
@@ -281,7 +304,8 @@ jobs:
             exit 0;
           fi
 
-  pytest:
+  test:
+    name: ${{ matrix.session.name }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     needs:
       - python-versions
@@ -296,7 +320,9 @@ jobs:
     env:
       NOXSESSION: ${{ matrix.session.name }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
 
       - name: Set up environment
         id: setup-env
@@ -318,7 +344,7 @@ jobs:
           nox --no-install -- --color=no --cov-report= | tee -a $GITHUB_STEP_SUMMARY
           echo "$GITHUB_STEP_SUMMARY_FOOTER" >> $GITHUB_STEP_SUMMARY
 
-      - name: Print Coverage Output
+      - name: Print coverage output
         if: always() && (steps.run_tests.outcome == 'success' || steps.run_tests.outcome == 'failure')
         env:
           UV_NO_SYNC: 0
@@ -330,19 +356,20 @@ jobs:
 
   # thanks to aiohttp for this part of the workflow
   check:  # This job does nothing and is only used for the branch protection
+    name: Check CI passed
     if: always()
     needs:
       - lint
       - docs
-      - pyright
+      - typing
       - misc
       - codemod
-      - pytest
+      - test
 
     runs-on: ubuntu-latest
 
     steps:
       - name: Decide whether the needed jobs succeeded or failed
-        uses: re-actors/alls-green@v1.2.2
+        uses: re-actors/alls-green@05ac9388f0aebcb5727afa17fcccfecd6f8ec5fe # v1.2.2
         with:
           jobs: ${{ toJSON(needs) }}
