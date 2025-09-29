@@ -1,0 +1,1 @@
+Add a ``__repr__`` method to :class:`.InstallTypeConfiguration`.

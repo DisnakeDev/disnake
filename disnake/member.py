@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 import datetime
 import itertools
 import sys
@@ -10,12 +9,14 @@ from operator import attrgetter
 from typing import (
     TYPE_CHECKING,
     Any,
+    Callable,
     Dict,
     List,
     Literal,
     Optional,
     Sequence,
     Tuple,
+    Type,
     Union,
     cast,
     overload,
@@ -25,14 +26,14 @@ import disnake.abc
 
 from . import utils
 from .activity import ActivityTypes, create_activity
-from .asset import Asset
+from .asset import Asset, AssetBytes
 from .colour import Colour
 from .enums import Status, try_enum
 from .flags import MemberFlags
 from .object import Object
 from .permissions import Permissions
 from .user import BaseUser, User, _UserTag
-from .utils import MISSING
+from .utils import MISSING, _assetbytes_to_base64_data
 
 __all__ = (
     "VoiceState",
@@ -63,6 +64,7 @@ if TYPE_CHECKING:
         GuildVoiceState as GuildVoiceStatePayload,
         VoiceState as VoiceStatePayload,
     )
+    from .user import Collectibles, PrimaryGuild
 
     VocalGuildChannel = Union[VoiceChannel, StageChannel]
 
@@ -164,7 +166,7 @@ class VoiceState:
         return f"<{self.__class__.__name__} {inner}>"
 
 
-def flatten_user(cls):
+def flatten_user(cls: Type[Member]) -> Type[Member]:
     for attr, value in itertools.chain(BaseUser.__dict__.items(), User.__dict__.items()):
         # ignore private/special methods
         if attr.startswith("_"):
@@ -184,9 +186,9 @@ def flatten_user(cls):
             # However I'm not sure how I feel about "functions" returning properties
             # It probably breaks something in Sphinx.
             # probably a member function by now
-            def generate_function(x):
+            def generate_function(x: str) -> Callable[..., Any]:
                 # We want sphinx to properly show coroutine functions as coroutines
-                if asyncio.iscoroutinefunction(value):  # noqa: B023
+                if utils.iscoroutinefunction(value):  # noqa: B023
 
                     async def general(self, *args, **kwargs):  # type: ignore
                         return await getattr(self._user, x)(*args, **kwargs)
@@ -295,6 +297,9 @@ class Member(disnake.abc.Messageable, _UserTag):
         banner: Optional[Asset]
         accent_color: Optional[Colour]
         accent_colour: Optional[Colour]
+        avatar_decoration: Optional[Asset]
+        collectibles: Collectibles
+        primary_guild: Optional[PrimaryGuild]
 
     @overload
     def __init__(
@@ -392,12 +397,10 @@ class Member(disnake.abc.Messageable, _UserTag):
         state: ConnectionState,
     ) -> Union[User, Self]:
         # A User object with a 'member' key
-        try:
-            member_data = data.pop("member")  # type: ignore
-        except KeyError:
-            return state.create_user(data)
-        else:
+        if "member" in data:
+            member_data: BaseMemberPayload = data["member"]
             return cls(data=member_data, user_data=data, guild=guild, state=state)
+        return state.create_user(data)
 
     @classmethod
     def _copy(cls, member: Member) -> Self:
@@ -416,28 +419,25 @@ class Member(disnake.abc.Messageable, _UserTag):
         self._banner = member._banner
         self._communication_disabled_until = member.current_timeout
         self._flags = member._flags
+        self._avatar_decoration_data = member._avatar_decoration_data
 
         # Reference will not be copied unless necessary by PRESENCE_UPDATE
         # See below
         self._user = member._user
         return self
 
-    async def _get_channel(self):
+    async def _get_channel(self) -> DMChannel:
         ch = await self.create_dm()
         return ch
 
     def _update(self, data: GuildMemberUpdateEvent) -> None:
         # the nickname change is optional,
         # if it isn't in the payload then it didn't change
-        try:
+        if "nick" in data:
             self.nick = data["nick"]
-        except KeyError:
-            pass
 
-        try:
+        if "pending" in data:
             self.pending = data["pending"]
-        except KeyError:
-            pass
 
         self.premium_since = utils.parse_time(data.get("premium_since"))
         self._roles = utils.SnowflakeList(map(int, data["roles"]))
@@ -466,30 +466,36 @@ class Member(disnake.abc.Messageable, _UserTag):
         u = self._user
         original = (
             u.name,
-            u._avatar,
             u.discriminator,
             u.global_name,
-            u._public_flags,
+            u._avatar,
             u._avatar_decoration_data,
+            u._public_flags,
+            u._collectibles,
+            u._primary_guild,
         )
         # These keys seem to always be available
         modified = (
             user["username"],
-            user["avatar"],
             user["discriminator"],
             user.get("global_name"),
+            user["avatar"],
+            user.get("avatar_decoration_data"),
             user.get("public_flags", 0),
-            user.get("avatar_decoration_data", None),
+            user.get("collectibles"),
+            user.get("primary_guild"),
         )
         if original != modified:
             to_return = User._copy(self._user)
             (
                 u.name,
-                u._avatar,
                 u.discriminator,
                 u.global_name,
-                u._public_flags,
+                u._avatar,
                 u._avatar_decoration_data,
+                u._public_flags,
+                u._collectibles,
+                u._primary_guild,
             ) = modified
             # Signal to dispatch on_user_update
             return to_return, u
@@ -575,7 +581,7 @@ class Member(disnake.abc.Messageable, _UserTag):
 
         These roles are sorted by their position in the role hierarchy.
         """
-        result = []
+        result: List[Role] = []
         g = self.guild
         for role_id in self._roles:
             role = g.get_role(role_id)
@@ -743,12 +749,11 @@ class Member(disnake.abc.Messageable, _UserTag):
 
         .. versionadded:: 2.3
         """
-        if self._communication_disabled_until is None:
-            return None
-
-        if self._communication_disabled_until < utils.utcnow():
+        if (
+            self._communication_disabled_until is not None
+            and self._communication_disabled_until < utils.utcnow()
+        ):
             self._communication_disabled_until = None
-            return None
 
         return self._communication_disabled_until
 
@@ -851,6 +856,32 @@ class Member(disnake.abc.Messageable, _UserTag):
         """
         await self.guild.kick(self, reason=reason)
 
+    async def _edit_self(
+        self,
+        *,
+        nick: Optional[str] = MISSING,
+        bio: Optional[str] = MISSING,
+        avatar: Optional[AssetBytes] = MISSING,
+        banner: Optional[AssetBytes] = MISSING,
+        reason: Optional[str] = None,
+    ) -> Optional[Member]:
+        payload: Dict[str, Any] = {}
+
+        if nick is not MISSING:
+            payload["nick"] = nick or ""
+
+        if bio is not MISSING:
+            payload["bio"] = bio
+
+        if avatar is not MISSING:
+            payload["avatar"] = await _assetbytes_to_base64_data(avatar)
+
+        if banner is not MISSING:
+            payload["banner"] = await _assetbytes_to_base64_data(banner)
+
+        data = await self._state.http.edit_my_member(self.guild.id, reason=reason, **payload)
+        return Member(data=data, guild=self.guild, state=self._state)
+
     async def edit(
         self,
         *,
@@ -863,6 +894,9 @@ class Member(disnake.abc.Messageable, _UserTag):
         timeout: Optional[Union[float, datetime.timedelta, datetime.datetime]] = MISSING,
         flags: MemberFlags = MISSING,
         bypasses_verification: bool = MISSING,
+        bio: Optional[str] = MISSING,
+        avatar: Optional[AssetBytes] = MISSING,
+        banner: Optional[AssetBytes] = MISSING,
         reason: Optional[str] = None,
     ) -> Optional[Member]:
         """|coro|
@@ -901,12 +935,15 @@ class Member(disnake.abc.Messageable, _UserTag):
             Can now pass ``None`` to ``voice_channel`` to kick a member from voice.
 
         .. versionchanged:: 2.0
-            The newly member is now optionally returned, if applicable.
+            The newly edited member is now optionally returned, if applicable.
 
         Parameters
         ----------
         nick: Optional[:class:`str`]
             The member's new nickname. Use ``None`` to remove the nickname.
+
+            To change your own nickname, :attr:`~Permissions.change_nickname`
+            permission is sufficient.
         mute: :class:`bool`
             Whether the member should be guild muted or un-muted.
         deafen: :class:`bool`
@@ -941,15 +978,39 @@ class Member(disnake.abc.Messageable, _UserTag):
 
             .. versionadded:: 2.8
 
+        bio: Optional[:class:`str`]
+            The member's new guild bio.
+            Can only be used on the bot's guild member, not other members.
+
+            .. versionadded:: 2.11
+
+        avatar: Optional[|resource_type|]
+            The member's new guild avatar.
+            Use ``None`` to remove the avatar and revert back to the member's global avatar.
+            Can only be used on the bot's guild member, not other members.
+
+            .. versionadded:: 2.11
+
+        banner: Optional[|resource_type|]
+            The member's new guild banner.
+            Use ``None`` to remove the banner and revert back to the member's global banner.
+            Can only be used on the bot's guild member, not other members.
+
+            .. versionadded:: 2.11
+
         reason: Optional[:class:`str`]
             The reason for editing this member. Shows up on the audit log.
 
         Raises
         ------
+        NotFound
+            The ``avatar`` or ``banner`` asset couldn't be found.
         Forbidden
             You do not have the proper permissions to the action requested.
         HTTPException
             The operation failed.
+        ValueError
+            Wrong image format passed for ``avatar`` or ``banner``.
 
         Returns
         -------
@@ -960,14 +1021,19 @@ class Member(disnake.abc.Messageable, _UserTag):
         http = self._state.http
         guild_id = self.guild.id
         me = self._state.self_id == self.id
+
+        member: Optional[Member] = None  # return value
         payload: Dict[str, Any] = {}
 
+        if me and any(v is not MISSING for v in (nick, bio, avatar, banner)):
+            member = await self._edit_self(
+                nick=nick, bio=bio, avatar=avatar, banner=banner, reason=reason
+            )
+            # clear used fields, avoid attempting to edit them again below
+            nick = MISSING
+
         if nick is not MISSING:
-            nick = nick or ""
-            if me:
-                await http.edit_my_member(guild_id, nick=nick, reason=reason)
-            else:
-                payload["nick"] = nick
+            payload["nick"] = nick or ""
 
         if deafen is not MISSING:
             payload["deaf"] = deafen
@@ -977,7 +1043,8 @@ class Member(disnake.abc.Messageable, _UserTag):
 
         if suppress is not MISSING:
             if self.voice is None or self.voice.channel is None:
-                raise Exception("Cannot suppress a member which isn't in a vc")  # noqa: TRY002
+                msg = "Cannot suppress a member which isn't in a vc"
+                raise Exception(msg)  # noqa: TRY002
 
             voice_state_payload: Dict[str, Any] = {
                 "channel_id": self.voice.channel.id,
@@ -1022,7 +1089,8 @@ class Member(disnake.abc.Messageable, _UserTag):
 
         if payload:
             data = await http.edit_member(guild_id, self.id, reason=reason, **payload)
-            return Member(data=data, guild=self.guild, state=self._state)
+            member = Member(data=data, guild=self.guild, state=self._state)
+        return member
 
     async def request_to_speak(self) -> None:
         """|coro|
@@ -1046,7 +1114,8 @@ class Member(disnake.abc.Messageable, _UserTag):
             The operation failed.
         """
         if self.voice is None or self.voice.channel is None:
-            raise Exception("Cannot request to speak when not in a vc")  # noqa: TRY002
+            msg = "Cannot request to speak when not in a vc"
+            raise Exception(msg)  # noqa: TRY002
 
         payload = {
             "channel_id": self.voice.channel.id,

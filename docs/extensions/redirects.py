@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 SCRIPT_PATH = "_templates/api_redirect.js_t"
 
 
-def collect_redirects(app: Sphinx):
+def collect_redirects(app: Sphinx) -> Dict[str, str]:
     # mapping of html node id (i.e., thing after "#" in URLs) to the correct page name
     # e.g, api.html#disnake.Thread => api/channels.html
     mapping: Dict[str, str] = {}

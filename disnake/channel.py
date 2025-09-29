@@ -44,6 +44,7 @@ from .file import File
 from .flags import ChannelFlags, MessageFlags
 from .iterators import ArchivedThreadIterator
 from .mixins import Hashable
+from .object import Object
 from .partial_emoji import PartialEmoji
 from .permissions import PermissionOverwrite, Permissions
 from .soundboard import GuildSoundboardSound, PartialSoundboardSound, SoundboardSound
@@ -95,7 +96,7 @@ if TYPE_CHECKING:
     from .types.soundboard import PartialSoundboardSound as PartialSoundboardSoundPayload
     from .types.threads import ThreadArchiveDurationLiteral
     from .types.voice import VoiceChannelEffect as VoiceChannelEffectPayload
-    from .ui.action_row import Components, MessageUIComponent
+    from .ui._types import MessageComponents
     from .ui.view import View
     from .user import BaseUser, ClientUser, User
     from .voice_region import VoiceRegion
@@ -305,7 +306,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         )
         self._fill_overwrites(data)
 
-    async def _get_channel(self):
+    async def _get_channel(self) -> Self:
         return self
 
     @property
@@ -341,6 +342,8 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
     @property
     def members(self) -> List[Member]:
         """List[:class:`Member`]: Returns all members that can see this channel."""
+        if isinstance(self.guild, Object):
+            return []
         return [m for m in self.guild.members if self.permissions_for(m).view_channel]
 
     @property
@@ -349,6 +352,8 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
         .. versionadded:: 2.0
         """
+        if isinstance(self.guild, Object):
+            return []
         return [thread for thread in self.guild._threads.values() if thread.parent_id == self.id]
 
     def is_nsfw(self) -> bool:
@@ -538,7 +543,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             overwrites=overwrites,
             flags=flags,
             reason=reason,
-            **kwargs,  # type: ignore
+            **kwargs,
         )
         if payload is not None:
             # the payload will always be the proper channel payload
@@ -696,7 +701,8 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             return
 
         if len(messages) > 100:
-            raise ClientException("Can only bulk delete messages up to 100 messages")
+            msg = "Can only bulk delete messages up to 100 messages"
+            raise ClientException(msg)
 
         message_ids: SnowflakeList = [m.id for m in messages]
         await self._state.http.delete_messages(self.id, message_ids)
@@ -929,10 +935,12 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             The newly created webhook.
         """
         if not self.is_news():
-            raise TypeError("This channel must be a news channel.")
+            msg = "This channel must be a news channel."
+            raise TypeError(msg)
 
         if not isinstance(destination, TextChannel):
-            raise TypeError(f"Expected TextChannel received {destination.__class__.__name__}")
+            msg = f"Expected TextChannel received {destination.__class__.__name__}"
+            raise TypeError(msg)
 
         from .webhook import Webhook
 
@@ -978,6 +986,8 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         Optional[:class:`Thread`]
             The returned thread or ``None`` if not found.
         """
+        if isinstance(self.guild, Object):
+            return None
         return self.guild.get_thread(thread_id)
 
     @overload
@@ -1085,7 +1095,8 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             The newly created thread
         """
         if not ((message is None) ^ (type is None)):
-            raise ValueError("Exactly one of message and type must be provided.")
+            msg = "Exactly one of message and type must be provided."
+            raise ValueError(msg)
 
         if auto_archive_duration is not None:
             auto_archive_duration = cast(
@@ -1217,7 +1228,10 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
     @property
     def members(self) -> List[Member]:
         """List[:class:`Member`]: Returns all members that are currently inside this voice channel."""
-        ret = []
+        if isinstance(self.guild, Object):
+            return []
+
+        ret: List[Member] = []
         for user_id, state in self.guild._voice_states.items():
             if state.channel and state.channel.id == self.id:
                 member = self.guild.get_member(user_id)
@@ -1241,6 +1255,9 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
         Mapping[:class:`int`, :class:`VoiceState`]
             The mapping of member ID to a voice state.
         """
+        if isinstance(self.guild, Object):
+            return {}
+
         return {
             key: value
             for key, value in self.guild._voice_states.items()
@@ -1379,7 +1396,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         self.slowmode_delay: int = data.get("rate_limit_per_user", 0)
         self.last_message_id: Optional[int] = utils._get_as_snowflake(data, "last_message_id")
 
-    async def _get_channel(self):
+    async def _get_channel(self: Self) -> Self:
         return self
 
     @property
@@ -1689,7 +1706,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
             slowmode_delay=slowmode_delay,
             flags=flags,
             reason=reason,
-            **kwargs,  # type: ignore
+            **kwargs,
         )
         if payload is not None:
             # the payload will always be the proper channel payload
@@ -1741,7 +1758,8 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
             return
 
         if len(messages) > 100:
-            raise ClientException("Can only bulk delete messages up to 100 messages")
+            msg = "Can only bulk delete messages up to 100 messages"
+            raise ClientException(msg)
 
         message_ids: SnowflakeList = [m.id for m in messages]
         await self._state.http.delete_messages(self.id, message_ids)
@@ -2066,7 +2084,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         self.slowmode_delay: int = data.get("rate_limit_per_user", 0)
         self.last_message_id: Optional[int] = utils._get_as_snowflake(data, "last_message_id")
 
-    async def _get_channel(self):
+    async def _get_channel(self) -> Self:
         return self
 
     @property
@@ -2277,6 +2295,8 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         .. versionadded:: 2.0
         """
+        if isinstance(self.guild, Object):
+            return None
         return utils.get(self.guild.stage_instances, channel_id=self.id)
 
     async def create_instance(
@@ -2344,7 +2364,8 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         if privacy_level is not MISSING:
             if not isinstance(privacy_level, StagePrivacyLevel):
-                raise TypeError("privacy_level field must be of type PrivacyLevel")
+                msg = "privacy_level field must be of type PrivacyLevel"
+                raise TypeError(msg)
             if privacy_level is StagePrivacyLevel.public:
                 utils.warn_deprecated(
                     "Setting privacy_level to public is deprecated and will be removed in a future version.",
@@ -2542,7 +2563,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
             flags=flags,
             slowmode_delay=slowmode_delay,
             reason=reason,
-            **kwargs,  # type: ignore
+            **kwargs,
         )
         if payload is not None:
             # the payload will always be the proper channel payload
@@ -2594,7 +2615,8 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
             return
 
         if len(messages) > 100:
-            raise ClientException("Can only bulk delete messages up to 100 messages")
+            msg = "Can only bulk delete messages up to 100 messages"
+            raise ClientException(msg)
 
         message_ids: SnowflakeList = [m.id for m in messages]
         await self._state.http.delete_messages(self.id, message_ids)
@@ -3033,7 +3055,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
             overwrites=overwrites,
             flags=flags,
             reason=reason,
-            **kwargs,  # type: ignore
+            **kwargs,
         )
         if payload is not None:
             # the payload will always be the proper channel payload
@@ -3090,8 +3112,10 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
 
         These are sorted by the official Discord UI, which places voice channels below the text channels.
         """
+        if isinstance(self.guild, Object):
+            return []
 
-        def comparator(channel):
+        def comparator(channel: GuildChannelType) -> Tuple[bool, int]:
             return (
                 not isinstance(channel, (TextChannel, ThreadOnlyGuildChannel)),
                 channel.position,
@@ -3104,6 +3128,9 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
     @property
     def text_channels(self) -> List[TextChannel]:
         """List[:class:`TextChannel`]: Returns the text channels that are under this category."""
+        if isinstance(self.guild, Object):
+            return []
+
         ret = [
             c
             for c in self.guild.channels
@@ -3115,6 +3142,9 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
     @property
     def voice_channels(self) -> List[VoiceChannel]:
         """List[:class:`VoiceChannel`]: Returns the voice channels that are under this category."""
+        if isinstance(self.guild, Object):
+            return []
+
         ret = [
             c
             for c in self.guild.channels
@@ -3129,6 +3159,9 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
 
         .. versionadded:: 1.7
         """
+        if isinstance(self.guild, Object):
+            return []
+
         ret = [
             c
             for c in self.guild.channels
@@ -3143,6 +3176,9 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
 
         .. versionadded:: 2.5
         """
+        if isinstance(self.guild, Object):
+            return []
+
         ret = [
             c
             for c in self.guild.channels
@@ -3157,6 +3193,9 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
 
         .. versionadded:: 2.10
         """
+        if isinstance(self.guild, Object):
+            return []
+
         ret = [
             c
             for c in self.guild.channels
@@ -3176,7 +3215,8 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
             The newly created text channel.
         """
         if "category" in options:
-            raise TypeError("got an unexpected keyword argument 'category'")
+            msg = "got an unexpected keyword argument 'category'"
+            raise TypeError(msg)
         return await self.guild.create_text_channel(name, category=self, **options)
 
     async def create_voice_channel(self, name: str, **options: Any) -> VoiceChannel:
@@ -3190,7 +3230,8 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
             The newly created voice channel.
         """
         if "category" in options:
-            raise TypeError("got an unexpected keyword argument 'category'")
+            msg = "got an unexpected keyword argument 'category'"
+            raise TypeError(msg)
         return await self.guild.create_voice_channel(name, category=self, **options)
 
     async def create_stage_channel(self, name: str, **options: Any) -> StageChannel:
@@ -3206,7 +3247,8 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
             The newly created stage channel.
         """
         if "category" in options:
-            raise TypeError("got an unexpected keyword argument 'category'")
+            msg = "got an unexpected keyword argument 'category'"
+            raise TypeError(msg)
         return await self.guild.create_stage_channel(name, category=self, **options)
 
     async def create_forum_channel(self, name: str, **options: Any) -> ForumChannel:
@@ -3222,7 +3264,8 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
             The newly created forum channel.
         """
         if "category" in options:
-            raise TypeError("got an unexpected keyword argument 'category'")
+            msg = "got an unexpected keyword argument 'category'"
+            raise TypeError(msg)
         return await self.guild.create_forum_channel(name, category=self, **options)
 
     async def create_media_channel(self, name: str, **options: Any) -> MediaChannel:
@@ -3238,7 +3281,8 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
             The newly created media channel.
         """
         if "category" in options:
-            raise TypeError("got an unexpected keyword argument 'category'")
+            msg = "got an unexpected keyword argument 'category'"
+            raise TypeError(msg)
         return await self.guild.create_media_channel(name, category=self, **options)
 
 
@@ -3368,11 +3412,15 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
     @property
     def members(self) -> List[Member]:
         """List[:class:`Member`]: Returns all members that can see this channel."""
+        if isinstance(self.guild, Object):
+            return []
         return [m for m in self.guild.members if self.permissions_for(m).view_channel]
 
     @property
     def threads(self) -> List[Thread]:
         """List[:class:`Thread`]: Returns all the threads that you can see."""
+        if isinstance(self.guild, Object):
+            return []
         return [thread for thread in self.guild._threads.values() if thread.parent_id == self.id]
 
     def is_nsfw(self) -> bool:
@@ -3442,7 +3490,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
     async def trigger_typing(self) -> None:
         """|coro|
 
-        Triggers a *typing* indicator to the desination.
+        Triggers a *typing* indicator to the destination.
 
         *Typing* indicator will go away after 10 seconds.
         """
@@ -3466,6 +3514,8 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         Optional[:class:`Thread`]
             The returned thread of ``None`` if not found.
         """
+        if isinstance(self.guild, Object):
+            return None
         return self.guild.get_thread(thread_id)
 
     @overload
@@ -3484,7 +3534,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
         allowed_mentions: AllowedMentions = ...,
         view: View = ...,
-        components: Components = ...,
+        components: MessageComponents = ...,
         reason: Optional[str] = None,
     ) -> ThreadWithMessage: ...
 
@@ -3504,7 +3554,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
         allowed_mentions: AllowedMentions = ...,
         view: View = ...,
-        components: Components = ...,
+        components: MessageComponents = ...,
         reason: Optional[str] = None,
     ) -> ThreadWithMessage: ...
 
@@ -3524,7 +3574,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
         allowed_mentions: AllowedMentions = ...,
         view: View = ...,
-        components: Components = ...,
+        components: MessageComponents = ...,
         reason: Optional[str] = None,
     ) -> ThreadWithMessage: ...
 
@@ -3544,7 +3594,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
         allowed_mentions: AllowedMentions = ...,
         view: View = ...,
-        components: Components = ...,
+        components: MessageComponents = ...,
         reason: Optional[str] = None,
     ) -> ThreadWithMessage: ...
 
@@ -3565,7 +3615,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         view: View = MISSING,
-        components: Components[MessageUIComponent] = MISSING,
+        components: MessageComponents = MISSING,
         reason: Optional[str] = None,
     ) -> ThreadWithMessage:
         """|coro|
@@ -3618,16 +3668,17 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
             all the embeds from the UI if set to ``True``.
         flags: :class:`MessageFlags`
             The flags to set for this message.
-            Only :attr:`~MessageFlags.suppress_embeds` is supported.
+            Only :attr:`~MessageFlags.suppress_embeds` and :attr:`~MessageFlags.is_components_v2`
+            are supported.
 
             If parameter ``suppress_embeds`` is provided,
             that will override the setting of :attr:`MessageFlags.suppress_embeds`.
 
             .. versionadded:: 2.9
 
-        file: :class:`.File`
+        file: :class:`~disnake.File`
             The file to upload. This cannot be mixed with the ``files`` parameter.
-        files: List[:class:`.File`]
+        files: List[:class:`~disnake.File`]
             A list of files to upload. Must be a maximum of 10.
             This cannot be mixed with the ``file`` parameter.
         stickers: Sequence[Union[:class:`.GuildSticker`, :class:`.StandardSticker`, :class:`.StickerItem`]]
@@ -3643,6 +3694,12 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
             A Discord UI View to add to the message. This cannot be mixed with ``components``.
         components: |components_type|
             A list of components to include in the message. This cannot be mixed with ``view``.
+
+            .. note::
+                Passing v2 components here automatically sets the :attr:`~MessageFlags.is_components_v2` flag.
+                Setting this flag cannot be reverted. Note that this also disables the
+                ``content``, ``embeds``, and ``stickers`` fields.
+
         reason: Optional[:class:`str`]
             The reason for creating the thread. Shows up on the audit log.
 
@@ -3655,11 +3712,11 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         TypeError
             Specified both ``file`` and ``files``,
             or you specified both ``embed`` and ``embeds``,
-            or you specified both ``view`` and ``components``.
+            or you specified both ``view`` and ``components``,
             or you have passed an object that is not :class:`File` to ``file`` or ``files``.
         ValueError
-            Specified more than 10 embeds,
-            or more than 10 files.
+            Specified more than 10 embeds, or more than 10 files, or
+            you tried to send v2 components together with ``content``, ``embeds``, or ``stickers``.
 
         Returns
         -------
@@ -3691,9 +3748,11 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         tag_ids = [t.id for t in applied_tags] if applied_tags else []
 
         if params.files and len(params.files) > 10:
-            raise ValueError("files parameter must be a list of up to 10 elements")
+            msg = "files parameter must be a list of up to 10 elements"
+            raise ValueError(msg)
         elif params.files and not all(isinstance(file, File) for file in params.files):
-            raise TypeError("files parameter must be a list of File")
+            msg = "files parameter must be a list of File"
+            raise TypeError(msg)
 
         channel_data = {
             "name": name,
@@ -4159,7 +4218,7 @@ class ForumChannel(ThreadOnlyGuildChannel):
             default_sort_order=default_sort_order,
             default_layout=default_layout,
             reason=reason,
-            **kwargs,  # type: ignore
+            **kwargs,
         )
         if payload is not None:
             # the payload will always be the proper channel payload
@@ -4557,7 +4616,7 @@ class MediaChannel(ThreadOnlyGuildChannel):
             default_reaction=default_reaction,
             default_sort_order=default_sort_order,
             reason=reason,
-            **kwargs,  # type: ignore
+            **kwargs,
         )
         if payload is not None:
             # the payload will always be the proper channel payload
@@ -4744,7 +4803,7 @@ class DMChannel(disnake.abc.Messageable, Hashable):
         )
         self._flags: int = data.get("flags", 0)
 
-    async def _get_channel(self):
+    async def _get_channel(self) -> Self:
         return self
 
     def __str__(self) -> str:
@@ -4917,7 +4976,7 @@ class GroupChannel(disnake.abc.Messageable, Hashable):
         else:
             self.owner = utils.find(lambda u: u.id == self.owner_id, self.recipients)
 
-    async def _get_channel(self):
+    async def _get_channel(self) -> Self:
         return self
 
     def __str__(self) -> str:
@@ -5088,7 +5147,9 @@ class PartialMessageable(disnake.abc.Messageable, Hashable):
         return PartialMessage(channel=self, id=message_id)
 
 
-def _guild_channel_factory(channel_type: int):
+def _guild_channel_factory(
+    channel_type: int,
+) -> Tuple[Optional[Type[GuildChannelType]], ChannelType]:
     value = try_enum(ChannelType, channel_type)
     if value is ChannelType.text:
         return TextChannel, value
@@ -5108,7 +5169,11 @@ def _guild_channel_factory(channel_type: int):
         return None, value
 
 
-def _channel_factory(channel_type: int):
+def _channel_factory(
+    channel_type: int,
+) -> Tuple[
+    Optional[Union[Type[GuildChannelType], Type[DMChannel], Type[GroupChannel]]], ChannelType
+]:
     cls, value = _guild_channel_factory(channel_type)
     if value is ChannelType.private:
         return DMChannel, value
@@ -5118,14 +5183,21 @@ def _channel_factory(channel_type: int):
         return cls, value
 
 
-def _threaded_channel_factory(channel_type: int):
+def _threaded_channel_factory(
+    channel_type: int,
+) -> Tuple[
+    Optional[Union[Type[GuildChannelType], Type[DMChannel], Type[GroupChannel], Type[Thread]]],
+    ChannelType,
+]:
     cls, value = _channel_factory(channel_type)
     if value in (ChannelType.private_thread, ChannelType.public_thread, ChannelType.news_thread):
         return Thread, value
     return cls, value
 
 
-def _threaded_guild_channel_factory(channel_type: int):
+def _threaded_guild_channel_factory(
+    channel_type: int,
+) -> Tuple[Optional[Union[Type[GuildChannelType], Type[Thread]]], ChannelType]:
     cls, value = _guild_channel_factory(channel_type)
     if value in (ChannelType.private_thread, ChannelType.public_thread, ChannelType.news_thread):
         return Thread, value

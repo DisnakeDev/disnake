@@ -17,6 +17,7 @@ from typing import (
     Literal,
     Optional,
     Set,
+    Type,
     TypeVar,
     Union,
     overload,
@@ -119,7 +120,8 @@ class Localized(Generic[StringT]):
         self.string: StringT = string
 
         if not (key is MISSING) ^ (data is MISSING):
-            raise TypeError("Exactly one of `key` or `data` must be provided")
+            msg = "Exactly one of `key` or `data` must be provided"
+            raise TypeError(msg)
         if isinstance(data, LocalizationValue):
             self.localizations = data
         else:
@@ -136,13 +138,16 @@ class Localized(Generic[StringT]):
     def _cast(cls, string: LocalizedRequired, required: Literal[True]) -> Localized[str]: ...
 
     @classmethod
-    def _cast(cls, string: Union[Optional[str], Localized[Any]], required: bool) -> Localized[Any]:
+    def _cast(
+        cls: Type[Localized[Any]], string: Union[Optional[str], Localized[Any]], required: bool
+    ) -> Localized[Any]:
         if not isinstance(string, Localized):
             string = cls(string, data=None)
 
         # enforce the `StringT` type at runtime
         if required and string.string is None:
-            raise ValueError("`string` parameter must be provided")
+            msg = "`string` parameter must be provided"
+            raise ValueError(msg)
         return string
 
     @overload
@@ -194,7 +199,8 @@ class LocalizationValue:
             self._key = None
             self._data = {str(k): v for k, v in localizations.items()}
         else:
-            raise TypeError(f"Invalid localizations type: {type(localizations).__name__}")
+            msg = f"Invalid localizations type: {type(localizations).__name__}"
+            raise TypeError(msg)
 
     def _upgrade(self, key: Optional[str]) -> None:
         if not key:
@@ -212,7 +218,8 @@ class LocalizationValue:
 
         # at this point, the keys don't match, which either means that they're different strings,
         # or that there is no existing `_key` but `_data` is set
-        raise ValueError("Can't specify multiple localization keys or dicts")
+        msg = "Can't specify multiple localization keys or dicts"
+        raise ValueError(msg)
 
     def _link(self, store: LocalizationProtocol) -> None:
         """Loads localizations from the specified store if this object has a key."""
@@ -283,7 +290,7 @@ class LocalizationProtocol(ABC):
         raise NotImplementedError
 
     # subtypes don't have to implement this
-    def load(self, path: Union[str, os.PathLike]) -> None:
+    def load(self, path: Union[str, os.PathLike[str]]) -> None:
         """Adds localizations from the provided path.
 
         Parameters
@@ -299,7 +306,7 @@ class LocalizationProtocol(ABC):
         raise NotImplementedError
 
     # subtypes don't have to implement this
-    def reload(self) -> None:
+    def reload(self) -> None:  # noqa: B027
         """Clears localizations and reloads all previously loaded sources again.
         If an exception occurs, the previous data gets restored and the exception is re-raised.
         """
@@ -348,7 +355,7 @@ class LocalizationStore(LocalizationProtocol):
             raise LocalizationKeyError(key)
         return data
 
-    def load(self, path: Union[str, os.PathLike]) -> None:
+    def load(self, path: Union[str, os.PathLike[str]]) -> None:
         """Adds localizations from the provided path to the store.
         If the path points to a file, the file gets loaded.
         If it's a directory, all ``.json`` files in that directory get loaded (non-recursive).
@@ -373,7 +380,8 @@ class LocalizationStore(LocalizationProtocol):
                     continue
                 self._load_file(file)
         else:
-            raise RuntimeError(f"Path '{path}' does not exist or is not a directory/file")
+            msg = f"Path '{path}' does not exist or is not a directory/file"
+            raise RuntimeError(msg)
 
         self._paths.add(path)
 
@@ -395,24 +403,28 @@ class LocalizationStore(LocalizationProtocol):
     def _load_file(self, path: Path) -> None:
         try:
             if path.suffix != ".json":
-                raise ValueError("not a .json file")
+                msg = "not a .json file"
+                raise ValueError(msg)
             locale = path.stem
 
             if not (api_locale := utils.as_valid_locale(locale)):
-                raise ValueError(f"invalid locale '{locale}'")
+                msg = f"invalid locale '{locale}'"
+                raise ValueError(msg)
             locale = api_locale
 
             data = utils._from_json(path.read_text("utf-8"))
             self._load_dict(data, locale)
             _log.debug(f"Loaded localizations from '{path}'")
         except Exception as e:
-            raise RuntimeError(f"Unable to load '{path}': {e}") from e
+            msg = f"Unable to load '{path}': {e}"
+            raise RuntimeError(msg) from e
 
     def _load_dict(self, data: Dict[str, Optional[str]], locale: str) -> None:
         if not isinstance(data, dict) or not all(
             o is None or isinstance(o, str) for o in data.values()
         ):
-            raise TypeError("data must be a flat dict with string/null values")
+            msg = "data must be a flat dict with string/null values"
+            raise TypeError(msg)
         for key, value in data.items():
             d = self._loc[key]  # always create dict, regardless of value
             if value is not None:

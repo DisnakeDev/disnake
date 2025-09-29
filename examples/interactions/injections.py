@@ -37,9 +37,9 @@ async def get_config(
 
     Parameters
     ----------
-    locale: The prefered locale, defaults to the server's locale
+    locale: The preferred locale, defaults to the server's locale
     timezone: Your current timezone, must be in the format of "US/Eastern" or "Europe/London"
-    theme: Your prefered theme, defaults to the dark theme
+    theme: Your preferred theme, defaults to the dark theme
     """
     # if a locale is not provided use the guild's locale
     if locale is None:

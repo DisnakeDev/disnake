@@ -11,6 +11,7 @@ from .enums import ChannelType, ThreadArchiveDuration, try_enum, try_enum_to_int
 from .errors import ClientException
 from .flags import ChannelFlags
 from .mixins import Hashable
+from .object import Object
 from .partial_emoji import PartialEmoji, _EmojiTag
 from .permissions import Permissions
 from .utils import MISSING, _get_as_snowflake, _unique, parse_time, snowflake_time
@@ -169,7 +170,7 @@ class Thread(Messageable, Hashable):
         self._members: Dict[int, ThreadMember] = {}
         self._from_data(data)
 
-    async def _get_channel(self):
+    async def _get_channel(self) -> Self:
         return self
 
     def __repr__(self) -> str:
@@ -200,12 +201,10 @@ class Thread(Messageable, Hashable):
         self._applied_tags: List[int] = list(map(int, data.get("applied_tags", [])))
         self._unroll_metadata(data["thread_metadata"])
 
-        try:
-            member = data["member"]
-        except KeyError:
-            self.me = None
+        if "member" in data:
+            self.me = ThreadMember(self, data["member"])
         else:
-            self.me = ThreadMember(self, member)
+            self.me = None
 
     def _unroll_metadata(self, data: ThreadMetadata) -> None:
         self.archived: bool = data["archived"]
@@ -244,12 +243,14 @@ class Thread(Messageable, Hashable):
     @property
     def parent(self) -> Optional[Union[TextChannel, ForumChannel, MediaChannel]]:
         """Optional[Union[:class:`TextChannel`, :class:`ForumChannel`, :class:`MediaChannel`]]: The parent channel this thread belongs to."""
+        if isinstance(self.guild, Object):
+            return None
         return self.guild.get_channel(self.parent_id)  # type: ignore
 
     @property
     def owner(self) -> Optional[Member]:
         """Optional[:class:`Member`]: The member this thread belongs to."""
-        if self.owner_id is None:
+        if self.owner_id is None or isinstance(self.guild, Object):
             return None
         return self.guild.get_member(self.owner_id)
 
@@ -305,7 +306,8 @@ class Thread(Messageable, Hashable):
         """
         parent = self.parent
         if parent is None:
-            raise ClientException("Parent channel not found")
+            msg = "Parent channel not found"
+            raise ClientException(msg)
         return parent.category
 
     @property
@@ -324,7 +326,8 @@ class Thread(Messageable, Hashable):
         """
         parent = self.parent
         if parent is None:
-            raise ClientException("Parent channel not found")
+            msg = "Parent channel not found"
+            raise ClientException(msg)
         return parent.category_id
 
     @property
@@ -429,6 +432,13 @@ class Thread(Messageable, Hashable):
         :attr:`GuildChannel.permissions_for <.abc.GuildChannel.permissions_for>`
         method directly.
 
+        .. note::
+            If the thread originated from an :class:`.Interaction` and
+            the :attr:`.guild` attribute is unavailable, such as with
+            user-installed applications in guilds, this method will not work
+            due to an API limitation.
+            Consider using :attr:`.Interaction.permissions` or :attr:`~.Interaction.app_permissions` instead.
+
         .. versionchanged:: 2.9
             Properly takes :attr:`Permissions.send_messages_in_threads`
             into consideration.
@@ -465,7 +475,8 @@ class Thread(Messageable, Hashable):
         """
         parent = self.parent
         if parent is None:
-            raise ClientException("Parent channel not found")
+            msg = "Parent channel not found"
+            raise ClientException(msg)
         # n.b. GuildChannel is used here so implicit overrides are not applied based on send_messages
         base = GuildChannel.permissions_for(parent, obj, ignore_timeout=ignore_timeout)
 
@@ -533,7 +544,8 @@ class Thread(Messageable, Hashable):
             return
 
         if len(messages) > 100:
-            raise ClientException("Can only bulk delete messages up to 100 messages")
+            msg = "Can only bulk delete messages up to 100 messages"
+            raise ClientException(msg)
 
         message_ids: SnowflakeList = [m.id for m in messages]
         await self._state.http.delete_messages(self.id, message_ids)
@@ -759,7 +771,8 @@ class Thread(Messageable, Hashable):
 
         if flags is not MISSING:
             if not isinstance(flags, ChannelFlags):
-                raise TypeError("flags field must be of type ChannelFlags")
+                msg = "flags field must be of type ChannelFlags"
+                raise TypeError(msg)
             payload["flags"] = flags.value
 
         if applied_tags is not MISSING:
@@ -1073,7 +1086,8 @@ class ThreadMember(Hashable):
             self.id = int(data["user_id"])
         except KeyError as err:
             if (self_id := self._state.self_id) is None:
-                raise AssertionError("self_id is None when updating our own ThreadMember.") from err
+                msg = "self_id is None when updating our own ThreadMember."
+                raise AssertionError(msg) from err
             self.id = self_id
 
         try:
@@ -1173,7 +1187,8 @@ class ForumTag(Hashable):
         elif isinstance(emoji, _EmojiTag):
             self.emoji = emoji
         else:
-            raise TypeError("emoji must be None, a str, PartialEmoji, or Emoji instance.")
+            msg = "emoji must be None, a str, PartialEmoji, or Emoji instance."
+            raise TypeError(msg)
 
     def __str__(self) -> str:
         return self.name

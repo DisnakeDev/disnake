@@ -7,7 +7,7 @@ import re
 import sys
 from enum import Enum
 from pathlib import Path
-from typing import NamedTuple, NoReturn
+from typing import List, NamedTuple, NoReturn
 
 TARGET_FILE = Path("disnake/__init__.py")
 ORIG_INIT_CONTENTS = TARGET_FILE.read_text("utf-8")
@@ -33,7 +33,8 @@ class VersionInfo(NamedTuple):
     def from_str(cls, s: str) -> VersionInfo:
         match = version_re.fullmatch(s)
         if not match:
-            raise ValueError(f"invalid version: '{s}'")
+            msg = f"invalid version: '{s}'"
+            raise ValueError(msg)
 
         major, minor, micro, releaselevel, serial = match.groups()
         return VersionInfo(
@@ -66,7 +67,7 @@ def get_current_version() -> VersionInfo:
 
 
 def replace_line(text: str, regex: str, repl: str) -> str:
-    lines = []
+    lines: List[str] = []
     found = False
 
     for line in text.split("\n"):

@@ -47,11 +47,14 @@ _log = logging.getLogger(__name__)
 if TYPE_CHECKING:
     from types import TracebackType
 
+    from typing_extensions import Self
+
     from ..abc import Snowflake
     from ..embeds import Embed
     from ..file import File
     from ..mentions import AllowedMentions
     from ..message import Attachment
+    from ..types.message import Message as MessagePayload
     from ..types.webhook import Webhook as WebhookPayload
 
     try:
@@ -67,7 +70,7 @@ class DeferredLock:
         self.lock = lock
         self.delta: Optional[float] = None
 
-    def __enter__(self):
+    def __enter__(self) -> Self:
         self.lock.acquire()
         return self
 
@@ -166,7 +169,7 @@ class WebhookAdapter:
                         if remaining == "0" and response.status_code != 429:
                             delta = utils._parse_ratelimit_header(response)
                             _log.debug(
-                                "Webhook ID %s has been pre-emptively rate limited, waiting %.2f seconds",
+                                "Webhook ID %s has been preemptively rate limited, waiting %.2f seconds",
                                 webhook_id,
                                 delta,
                             )
@@ -211,7 +214,8 @@ class WebhookAdapter:
                     raise DiscordServerError(response, data)
                 raise HTTPException(response, data)
 
-            raise RuntimeError("Unreachable code in HTTP handling.")
+            msg = "Unreachable code in HTTP handling."
+            raise RuntimeError(msg)
 
     def delete_webhook(
         self,
@@ -220,7 +224,7 @@ class WebhookAdapter:
         token: Optional[str] = None,
         session: Session,
         reason: Optional[str] = None,
-    ):
+    ) -> None:
         route = Route("DELETE", "/webhooks/{webhook_id}", webhook_id=webhook_id)
         return self.request(route, session, reason=reason, auth_token=token)
 
@@ -231,7 +235,7 @@ class WebhookAdapter:
         *,
         session: Session,
         reason: Optional[str] = None,
-    ):
+    ) -> None:
         route = Route(
             "DELETE",
             "/webhooks/{webhook_id}/{webhook_token}",
@@ -248,7 +252,7 @@ class WebhookAdapter:
         *,
         session: Session,
         reason: Optional[str] = None,
-    ):
+    ) -> WebhookPayload:
         route = Route("PATCH", "/webhooks/{webhook_id}", webhook_id=webhook_id)
         return self.request(route, session, reason=reason, payload=payload, auth_token=token)
 
@@ -260,7 +264,7 @@ class WebhookAdapter:
         *,
         session: Session,
         reason: Optional[str] = None,
-    ):
+    ) -> WebhookPayload:
         route = Route(
             "PATCH",
             "/webhooks/{webhook_id}/{webhook_token}",
@@ -268,6 +272,34 @@ class WebhookAdapter:
             webhook_token=token,
         )
         return self.request(route, session, reason=reason, payload=payload)
+
+    @overload
+    def execute_webhook(
+        self,
+        webhook_id: int,
+        token: str,
+        *,
+        session: Session,
+        payload: Optional[Dict[str, Any]] = None,
+        multipart: Optional[List[Dict[str, Any]]] = None,
+        files: Optional[List[File]] = None,
+        thread_id: Optional[int] = None,
+        wait: bool = False,
+    ) -> MessagePayload: ...
+
+    @overload
+    def execute_webhook(
+        self,
+        webhook_id: int,
+        token: str,
+        *,
+        session: Session,
+        payload: Optional[Dict[str, Any]] = None,
+        multipart: Optional[List[Dict[str, Any]]] = None,
+        files: Optional[List[File]] = None,
+        thread_id: Optional[int] = None,
+        wait: bool = False,
+    ) -> None: ...
 
     def execute_webhook(
         self,
@@ -280,7 +312,7 @@ class WebhookAdapter:
         files: Optional[List[File]] = None,
         thread_id: Optional[int] = None,
         wait: bool = False,
-    ):
+    ) -> Optional[MessagePayload]:
         params = {"wait": int(wait)}
         if thread_id:
             params["thread_id"] = thread_id
@@ -303,7 +335,7 @@ class WebhookAdapter:
         *,
         session: Session,
         thread_id: Optional[int] = None,
-    ):
+    ) -> MessagePayload:
         params: Dict[str, Any] = {}
         if thread_id is not None:
             params["thread_id"] = thread_id
@@ -328,7 +360,7 @@ class WebhookAdapter:
         multipart: Optional[List[Dict[str, Any]]] = None,
         files: Optional[List[File]] = None,
         thread_id: Optional[int] = None,
-    ):
+    ) -> MessagePayload:
         params: Dict[str, Any] = {}
         if thread_id is not None:
             params["thread_id"] = thread_id
@@ -352,7 +384,7 @@ class WebhookAdapter:
         *,
         session: Session,
         thread_id: Optional[int] = None,
-    ):
+    ) -> None:
         params: Dict[str, Any] = {}
         if thread_id is not None:
             params["thread_id"] = thread_id
@@ -372,7 +404,7 @@ class WebhookAdapter:
         token: str,
         *,
         session: Session,
-    ):
+    ) -> WebhookPayload:
         route = Route("GET", "/webhooks/{webhook_id}", webhook_id=webhook_id)
         return self.request(route, session=session, auth_token=token)
 
@@ -382,7 +414,7 @@ class WebhookAdapter:
         token: str,
         *,
         session: Session,
-    ):
+    ) -> WebhookPayload:
         route = Route(
             "GET",
             "/webhooks/{webhook_id}/{webhook_token}",
@@ -650,7 +682,8 @@ class SyncWebhook(BaseWebhook):
 
         if session is not MISSING:
             if not isinstance(session, requests.Session):
-                raise TypeError(f"expected requests.Session not {session.__class__!r}")
+                msg = f"expected requests.Session not {session.__class__!r}"
+                raise TypeError(msg)
         else:
             session = requests  # type: ignore
         return cls(data, session, token=bot_token)
@@ -693,7 +726,8 @@ class SyncWebhook(BaseWebhook):
             url,
         )
         if m is None:
-            raise ValueError("Invalid webhook URL given.")
+            msg = "Invalid webhook URL given."
+            raise ValueError(msg)
 
         data: Dict[str, Any] = m.groupdict()
         data["type"] = 1
@@ -701,7 +735,8 @@ class SyncWebhook(BaseWebhook):
 
         if session is not MISSING:
             if not isinstance(session, requests.Session):
-                raise TypeError(f"expected requests.Session not {session.__class__!r}")
+                msg = f"expected requests.Session not {session.__class__!r}"
+                raise TypeError(msg)
         else:
             session = requests  # type: ignore
         return cls(data, session, token=bot_token)  # type: ignore
@@ -747,7 +782,8 @@ class SyncWebhook(BaseWebhook):
         elif self.token:
             data = adapter.fetch_webhook_with_token(self.id, self.token, session=self.session)
         else:
-            raise WebhookTokenMissing("This webhook does not have a token associated with it")
+            msg = "This webhook does not have a token associated with it"
+            raise WebhookTokenMissing(msg)
 
         return SyncWebhook(data, self.session, token=self.auth_token, state=self._state)
 
@@ -780,7 +816,8 @@ class SyncWebhook(BaseWebhook):
             This webhook does not have a token associated with it.
         """
         if self.token is None and self.auth_token is None:
-            raise WebhookTokenMissing("This webhook does not have a token associated with it")
+            msg = "This webhook does not have a token associated with it"
+            raise WebhookTokenMissing(msg)
 
         adapter: WebhookAdapter = _get_webhook_adapter()
 
@@ -839,9 +876,10 @@ class SyncWebhook(BaseWebhook):
             The newly edited webhook.
         """
         if self.token is None and self.auth_token is None:
-            raise WebhookTokenMissing("This webhook does not have a token associated with it")
+            msg = "This webhook does not have a token associated with it"
+            raise WebhookTokenMissing(msg)
 
-        payload = {}
+        payload: Dict[str, Any] = {}
         if name is not MISSING:
             payload["name"] = str(name) if name is not None else None
 
@@ -854,7 +892,8 @@ class SyncWebhook(BaseWebhook):
         # If a channel is given, always use the authenticated endpoint
         if channel is not None:
             if self.auth_token is None:
-                raise WebhookTokenMissing("Editing channel requires authenticated webhook")
+                msg = "Editing channel requires authenticated webhook"
+                raise WebhookTokenMissing(msg)
 
             payload["channel_id"] = channel.id
             data = adapter.edit_webhook(
@@ -871,7 +910,8 @@ class SyncWebhook(BaseWebhook):
             )
 
         if data is None:
-            raise RuntimeError("Unreachable code hit: data was not assigned")
+            msg = "Unreachable code hit: data was not assigned"
+            raise RuntimeError(msg)
 
         return SyncWebhook(
             data=data, session=self.session, token=self.auth_token, state=self._state
@@ -879,7 +919,7 @@ class SyncWebhook(BaseWebhook):
 
     def _create_message(
         self, data, *, thread: Optional[Snowflake] = None, thread_name: Optional[str] = None
-    ):
+    ) -> SyncWebhookMessage:
         # see async webhook's _create_message for details
         channel_id = int(data["channel_id"])
         if self.channel_id != channel_id and thread_name:
@@ -1060,7 +1100,8 @@ class SyncWebhook(BaseWebhook):
             If ``wait`` is ``True`` then the message that was sent, otherwise ``None``.
         """
         if self.token is None:
-            raise WebhookTokenMissing("This webhook does not have a token associated with it")
+            msg = "This webhook does not have a token associated with it"
+            raise WebhookTokenMissing(msg)
 
         previous_mentions: Optional[AllowedMentions] = getattr(
             self._state, "allowed_mentions", None
@@ -1071,9 +1112,8 @@ class SyncWebhook(BaseWebhook):
         thread_id: Optional[int] = None
         if thread is not MISSING:
             if thread_name or applied_tags:
-                raise TypeError(
-                    "Cannot use `thread_name` or `applied_tags` when `thread` is provided."
-                )
+                msg = "Cannot use `thread_name` or `applied_tags` when `thread` is provided."
+                raise TypeError(msg)
             thread_id = thread.id
 
         params = handle_message_parameters(
@@ -1149,7 +1189,8 @@ class SyncWebhook(BaseWebhook):
             The message asked for.
         """
         if self.token is None:
-            raise WebhookTokenMissing("This webhook does not have a token associated with it")
+            msg = "This webhook does not have a token associated with it"
+            raise WebhookTokenMissing(msg)
 
         adapter: WebhookAdapter = _get_webhook_adapter()
         data = adapter.get_webhook_message(
@@ -1244,7 +1285,8 @@ class SyncWebhook(BaseWebhook):
             There was no token associated with this webhook.
         """
         if self.token is None:
-            raise WebhookTokenMissing("This webhook does not have a token associated with it")
+            msg = "This webhook does not have a token associated with it"
+            raise WebhookTokenMissing(msg)
 
         # if no attachment list was provided but we're uploading new files,
         # use current attachments as the base
@@ -1312,7 +1354,8 @@ class SyncWebhook(BaseWebhook):
             There is no token associated with this webhook.
         """
         if self.token is None:
-            raise WebhookTokenMissing("This webhook does not have a token associated with it")
+            msg = "This webhook does not have a token associated with it"
+            raise WebhookTokenMissing(msg)
 
         adapter: WebhookAdapter = _get_webhook_adapter()
         adapter.delete_webhook_message(

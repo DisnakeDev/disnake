@@ -15,23 +15,23 @@ class TestFlags(flags.BaseFlags):
     __test__ = False
 
     @flags.flag_value
-    def one(self):
+    def one(self) -> int:
         return 1 << 0
 
     @flags.flag_value
-    def two(self):
+    def two(self) -> int:
         return 1 << 1
 
     @flags.flag_value
-    def four(self):
+    def four(self) -> int:
         return 1 << 2
 
     @flags.alias_flag_value
-    def three(self):
+    def three(self) -> int:
         return 1 << 0 | 1 << 1
 
     @flags.flag_value
-    def sixteen(self):
+    def sixteen(self) -> int:
         return 1 << 4
 
 
@@ -39,7 +39,7 @@ class OtherTestFlags(flags.BaseFlags):
     """Another test class for flag testing."""
 
     @flags.flag_value
-    def other_one(self):
+    def other_one(self) -> int:
         return 1 << 0
 
 
@@ -62,23 +62,23 @@ def test_flag_creation() -> None:
 def test_flag_creation_inverted() -> None:
     class InvertedFlags(flags.BaseFlags, inverted=True):
         @flags.flag_value
-        def one(self):
+        def one(self) -> int:
             return 1 << 0
 
         @flags.flag_value
-        def two(self):
+        def two(self) -> int:
             return 1 << 1
 
         @flags.flag_value
-        def four(self):
+        def four(self) -> int:
             return 1 << 2
 
         @flags.alias_flag_value
-        def three(self):
+        def three(self) -> int:
             return 1 << 0 | 1 << 1
 
         @flags.flag_value
-        def sixteen(self):
+        def sixteen(self) -> int:
             return 1 << 4
 
     assert InvertedFlags.VALID_FLAGS == {
@@ -102,7 +102,7 @@ def test_flag_creation_empty() -> None:
 class TestFlagValue:
     def test_flag_value_creation(self) -> None:
         flag = flags.flag_value(lambda x: 1 << 2)
-        assert 1 << 2 == flag.flag
+        assert flag.flag == 1 << 2
 
     def test_flag_value_or(self) -> None:
         ins = TestFlags.four | TestFlags.one
@@ -160,16 +160,16 @@ class TestBaseFlags:
         assert ins.two is False
 
     def test__init__invalid_kwargs(self) -> None:
-        with pytest.raises(TypeError, match="'h' is not a valid flag name."):
+        with pytest.raises(TypeError, match=r"'h' is not a valid flag name."):
             TestFlags(h=True)
 
     def test_set_require_bool(self) -> None:
-        with pytest.raises(TypeError, match="Value to set for TestFlags must be a bool."):
+        with pytest.raises(TypeError, match=r"Value to set for TestFlags must be a bool."):
             TestFlags(one="h")  # type: ignore
 
         ins = TestFlags()
 
-        with pytest.raises(TypeError, match="Value to set for TestFlags must be a bool."):
+        with pytest.raises(TypeError, match=r"Value to set for TestFlags must be a bool."):
             ins.two = "h"  # type: ignore
 
     def test__eq__(self) -> None:
@@ -178,10 +178,8 @@ class TestBaseFlags:
 
         assert ins is not other
         assert ins == other
-        assert not ins != other
 
         ins.two = False
-        assert not ins == other
         assert ins != other
 
     def test__eq__flag_value(self) -> None:
@@ -191,7 +189,6 @@ class TestBaseFlags:
         assert ins == TestFlags.one
         assert TestFlags.one == ins
 
-        assert not ins != TestFlags.one
         assert ins != TestFlags.two
 
         assert other != TestFlags.one
@@ -420,7 +417,7 @@ class TestBaseFlags:
 
     def test_set_and_get_flag(self) -> None:
         ins = TestFlags()
-        assert ins.DEFAULT_VALUE == ins.value
+        assert ins.value == ins.DEFAULT_VALUE
 
         ins.two = True
         assert ins.two is True
@@ -451,15 +448,15 @@ class TestBaseFlags:
 
 class _ListFlags(flags.ListBaseFlags):
     @flags.flag_value
-    def flag1(self):
+    def flag1(self) -> int:
         return 1 << 0
 
     @flags.flag_value
-    def flag2(self):
+    def flag2(self) -> int:
         return 1 << 1
 
     @flags.flag_value
-    def flag3(self):
+    def flag3(self) -> int:
         return 1 << 2
 
 

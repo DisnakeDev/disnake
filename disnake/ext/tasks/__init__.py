@@ -7,7 +7,6 @@ import datetime
 import inspect
 import sys
 import traceback
-import warnings
 from collections.abc import Sequence
 from typing import (
     TYPE_CHECKING,
@@ -30,7 +29,7 @@ import aiohttp
 
 import disnake
 from disnake.backoff import ExponentialBackoff
-from disnake.utils import MISSING, utcnow
+from disnake.utils import MISSING, iscoroutinefunction, utcnow
 
 if TYPE_CHECKING:
     from typing_extensions import Concatenate, ParamSpec, Self
@@ -118,15 +117,17 @@ class Loop(Generic[LF]):
         self._stop_next_iteration = False
 
         if self.count is not None and self.count <= 0:
-            raise ValueError("count must be greater than 0 or None.")
+            msg = "count must be greater than 0 or None."
+            raise ValueError(msg)
 
         self.change_interval(seconds=seconds, minutes=minutes, hours=hours, time=time)
         self._last_iteration_failed = False
         self._last_iteration: datetime.datetime = MISSING
         self._next_iteration = None
 
-        if not asyncio.iscoroutinefunction(self.coro):
-            raise TypeError(f"Expected coroutine function, not {type(self.coro).__name__!r}.")
+        if not iscoroutinefunction(self.coro):
+            msg = f"Expected coroutine function, not {type(self.coro).__name__!r}."
+            raise TypeError(msg)
 
     async def _call_loop_function(self, name: str, *args: Any, **kwargs: Any) -> None:
         coro = getattr(self, "_" + name)
@@ -138,7 +139,7 @@ class Loop(Generic[LF]):
         else:
             await coro(*args, **kwargs)
 
-    def _try_sleep_until(self, dt: datetime.datetime):
+    def _try_sleep_until(self, dt: datetime.datetime) -> asyncio.Future[bool]:
         self._handle = SleepHandle(dt=dt, loop=self.loop)
         return self._handle.wait()
 
@@ -273,9 +274,7 @@ class Loop(Generic[LF]):
 
         .. versionadded:: 1.3
         """
-        if self._task is MISSING:
-            return None
-        elif (self._task and self._task.done()) or self._stop_next_iteration:
+        if self._task is MISSING or (self._task and self._task.done()) or self._stop_next_iteration:
             return None
         return self._next_iteration
 
@@ -319,15 +318,14 @@ class Loop(Generic[LF]):
             The task that has been created.
         """
         if self._task is not MISSING and not self._task.done():
-            raise RuntimeError("Task is already launched and is not completed.")
+            msg = "Task is already launched and is not completed."
+            raise RuntimeError(msg)
 
         if self._injected is not None:
             args = (self._injected, *args)
 
         if self.loop is MISSING:
-            with warnings.catch_warnings():
-                warnings.simplefilter("ignore", DeprecationWarning)
-                self.loop = asyncio.get_event_loop()
+            self.loop = disnake.utils.get_event_loop()
 
         self._task = self.loop.create_task(self._loop(*args, **kwargs))
         return self._task
@@ -407,9 +405,11 @@ class Loop(Generic[LF]):
         """
         for exc in exceptions:
             if not inspect.isclass(exc):
-                raise TypeError(f"{exc!r} must be a class.")
+                msg = f"{exc!r} must be a class."
+                raise TypeError(msg)
             if not issubclass(exc, BaseException):
-                raise TypeError(f"{exc!r} must inherit from BaseException.")
+                msg = f"{exc!r} must inherit from BaseException."
+                raise TypeError(msg)
 
         self._valid_exception = (*self._valid_exception, *exceptions)
 
@@ -499,8 +499,9 @@ class Loop(Generic[LF]):
         TypeError
             The function was not a coroutine.
         """
-        if not asyncio.iscoroutinefunction(coro):
-            raise TypeError(f"Expected coroutine function, received {coro.__class__.__name__!r}.")
+        if not iscoroutinefunction(coro):
+            msg = f"Expected coroutine function, received {coro.__class__.__name__!r}."
+            raise TypeError(msg)
 
         self._before_loop = coro
         return coro
@@ -526,8 +527,9 @@ class Loop(Generic[LF]):
         TypeError
             The function was not a coroutine.
         """
-        if not asyncio.iscoroutinefunction(coro):
-            raise TypeError(f"Expected coroutine function, received {coro.__class__.__name__!r}.")
+        if not iscoroutinefunction(coro):
+            msg = f"Expected coroutine function, received {coro.__class__.__name__!r}."
+            raise TypeError(msg)
 
         self._after_loop = coro
         return coro
@@ -552,8 +554,9 @@ class Loop(Generic[LF]):
         TypeError
             The function was not a coroutine.
         """
-        if not asyncio.iscoroutinefunction(coro):
-            raise TypeError(f"Expected coroutine function, received {coro.__class__.__name__!r}.")
+        if not iscoroutinefunction(coro):
+            msg = f"Expected coroutine function, received {coro.__class__.__name__!r}."
+            raise TypeError(msg)
 
         self._error = coro  # type: ignore
         return coro
@@ -614,18 +617,17 @@ class Loop(Generic[LF]):
             inner = time if time.tzinfo is not None else time.replace(tzinfo=utc)
             return [inner]
         if not isinstance(time, Sequence):
-            raise TypeError(
-                f"Expected datetime.time or a sequence of datetime.time for ``time``, received {type(time)!r} instead."
-            )
+            msg = f"Expected datetime.time or a sequence of datetime.time for ``time``, received {type(time)!r} instead."
+            raise TypeError(msg)
         if not time:
-            raise ValueError("time parameter must not be an empty sequence.")
+            msg = "time parameter must not be an empty sequence."
+            raise ValueError(msg)
 
         ret: List[datetime.time] = []
         for index, t in enumerate(time):
             if not isinstance(t, dt):
-                raise TypeError(
-                    f"Expected a sequence of {dt!r} for ``time``, received {type(t).__name__!r} at index {index} instead."
-                )
+                msg = f"Expected a sequence of {dt!r} for ``time``, received {type(t).__name__!r} at index {index} instead."
+                raise TypeError(msg)
             ret.append(t if t.tzinfo is not None else t.replace(tzinfo=utc))
 
         ret = sorted(set(ret))  # de-dupe and sort times
@@ -676,7 +678,8 @@ class Loop(Generic[LF]):
             hours = hours or 0
             sleep = seconds + (minutes * 60.0) + (hours * 3600.0)
             if sleep < 0:
-                raise ValueError("Total number of seconds cannot be less than zero.")
+                msg = "Total number of seconds cannot be less than zero."
+                raise ValueError(msg)
 
             self._sleep = sleep
             self._seconds = float(seconds)
@@ -685,11 +688,14 @@ class Loop(Generic[LF]):
             self._time: List[datetime.time] = MISSING
         else:
             if any((seconds, minutes, hours)):
-                raise TypeError("Cannot mix explicit time with relative time")
+                msg = "Cannot mix explicit time with relative time"
+                raise TypeError(msg)
             self._time = self._get_time_parameter(time)
             self._sleep = self._seconds = self._minutes = self._hours = MISSING
 
-        if self.is_running():
+        # `_last_iteration` can be missing if `change_interval` gets called in `before_loop` or
+        # before the event loop ticks after `start()`
+        if self.is_running() and self._last_iteration is not MISSING:
             if self._time is not MISSING:
                 # prepare the next time index starting from after the last iteration
                 self._prepare_time_index(now=self._last_iteration)
@@ -701,7 +707,7 @@ class Loop(Generic[LF]):
 
 
 T_co = TypeVar("T_co", covariant=True)
-L_co = TypeVar("L_co", bound=Loop, covariant=True)
+L_co = TypeVar("L_co", bound=Loop[Any], covariant=True)
 
 
 class Object(Protocol[T_co, P]):
@@ -773,7 +779,8 @@ def loop(
         one used in :meth:`disnake.Client.connect`.
     loop: :class:`asyncio.AbstractEventLoop`
         The loop to use to register the task, if not given
-        defaults to :func:`asyncio.get_event_loop`.
+        defaults to the current event loop or creates a new one
+        if there is none.
 
     Raises
     ------
@@ -788,11 +795,13 @@ def loop(
         cls = origin
 
     if not isinstance(cls, type) or not issubclass(cls, Loop):
-        raise TypeError(f"cls argument must be a subclass of Loop, got {cls!r}")
+        msg = f"cls argument must be a subclass of Loop, got {cls!r}"
+        raise TypeError(msg)
 
     def decorator(func: LF) -> L_co:
-        if not asyncio.iscoroutinefunction(func):
-            raise TypeError("decorated function must be a coroutine")
+        if not iscoroutinefunction(func):
+            msg = "decorated function must be a coroutine"
+            raise TypeError(msg)
 
         return cast("Type[L_co]", cls)(func, **kwargs)
 

@@ -11,6 +11,7 @@ from typing import (
     Callable,
     Dict,
     List,
+    Literal,
     NoReturn,
     Optional,
     Tuple,
@@ -63,9 +64,9 @@ class EventType:
 class EventItem:
     __slots__ = ("type", "shard", "error")
 
-    def __init__(self, etype: int, shard: Optional["Shard"], error: Optional[Exception]) -> None:
+    def __init__(self, etype: int, shard: Optional[Shard], error: Optional[Exception]) -> None:
         self.type: int = etype
-        self.shard: Optional["Shard"] = shard
+        self.shard: Optional[Shard] = shard
         self.error: Optional[Exception] = error
 
     def __lt__(self, other: Self) -> bool:
@@ -96,7 +97,7 @@ class Shard:
         self.loop: asyncio.AbstractEventLoop = self._client.loop
         self._disconnect: bool = False
         self._reconnect = client._reconnect
-        self._backoff: ExponentialBackoff = ExponentialBackoff()
+        self._backoff: ExponentialBackoff[Literal[False]] = ExponentialBackoff()
         self._task: Optional[asyncio.Task] = None
         self._handled_exceptions: Tuple[Type[Exception], ...] = (
             OSError,
@@ -380,11 +381,11 @@ class AutoShardedClient(Client):
 
         if self.shard_ids is not None:
             if self.shard_count is None:
-                raise ClientException(
-                    "When passing manual shard_ids, you must provide a shard_count."
-                )
+                msg = "When passing manual shard_ids, you must provide a shard_count."
+                raise ClientException(msg)
             elif not isinstance(self.shard_ids, (list, tuple)):
-                raise ClientException("shard_ids parameter must be a list or a tuple.")
+                msg = "shard_ids parameter must be a list or a tuple."
+                raise ClientException(msg)
 
         # instead of a single websocket, we have multiple
         # the key is the shard_id

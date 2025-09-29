@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-import asyncio
 from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Sequence, Tuple, Union
 
 from disnake.app_commands import MessageCommand, UserCommand
 from disnake.flags import ApplicationInstallTypes, InteractionContextTypes
 from disnake.i18n import Localized
 from disnake.permissions import Permissions
+from disnake.utils import iscoroutinefunction
 
 from .base_core import InvokableApplicationCommand, _get_overridden_method
 from .errors import CommandError
@@ -124,9 +124,8 @@ class InvokableUserCommand(InvokableApplicationCommand):
                     stop_propagation = await local(inter, error)
                     # User has an option to cancel the global error handler by returning True
         finally:
-            if stop_propagation:
-                return  # noqa: B012
-            inter.bot.dispatch("user_command_error", inter, error)
+            if not stop_propagation:
+                inter.bot.dispatch("user_command_error", inter, error)
 
     async def __call__(
         self,
@@ -136,7 +135,7 @@ class InvokableUserCommand(InvokableApplicationCommand):
         **kwargs: Any,
     ) -> None:
         # the target may just not be passed in
-        args = (target or interaction.target,) + args
+        args = (target or interaction.target, *args)
         if self.cog is not None:
             await safe_call(self.callback, self.cog, interaction, *args, **kwargs)
         else:
@@ -236,9 +235,8 @@ class InvokableMessageCommand(InvokableApplicationCommand):
                     stop_propagation = await local(inter, error)
                     # User has an option to cancel the global error handler by returning True
         finally:
-            if stop_propagation:
-                return  # noqa: B012
-            inter.bot.dispatch("message_command_error", inter, error)
+            if not stop_propagation:
+                inter.bot.dispatch("message_command_error", inter, error)
 
     async def __call__(
         self,
@@ -248,7 +246,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         **kwargs: Any,
     ) -> None:
         # the target may just not be passed in
-        args = (target or interaction.target,) + args
+        args = (target or interaction.target, *args)
         if self.cog is not None:
             await safe_call(self.callback, self.cog, interaction, *args, **kwargs)
         else:
@@ -337,12 +335,15 @@ def user_command(
     def decorator(
         func: InteractionCommandCallback[CogT, UserCommandInteraction, P],
     ) -> InvokableUserCommand:
-        if not asyncio.iscoroutinefunction(func):
-            raise TypeError(f"<{func.__qualname__}> must be a coroutine function")
+        if not iscoroutinefunction(func):
+            msg = f"<{func.__qualname__}> must be a coroutine function"
+            raise TypeError(msg)
         if hasattr(func, "__command_flag__"):
-            raise TypeError("Callback is already a command.")
+            msg = "Callback is already a command."
+            raise TypeError(msg)
         if guild_ids and not all(isinstance(guild_id, int) for guild_id in guild_ids):
-            raise ValueError("guild_ids must be a sequence of int.")
+            msg = "guild_ids must be a sequence of int."
+            raise ValueError(msg)
         return InvokableUserCommand(
             func,
             name=name,
@@ -445,12 +446,15 @@ def message_command(
     def decorator(
         func: InteractionCommandCallback[CogT, MessageCommandInteraction, P],
     ) -> InvokableMessageCommand:
-        if not asyncio.iscoroutinefunction(func):
-            raise TypeError(f"<{func.__qualname__}> must be a coroutine function")
+        if not iscoroutinefunction(func):
+            msg = f"<{func.__qualname__}> must be a coroutine function"
+            raise TypeError(msg)
         if hasattr(func, "__command_flag__"):
-            raise TypeError("Callback is already a command.")
+            msg = "Callback is already a command."
+            raise TypeError(msg)
         if guild_ids and not all(isinstance(guild_id, int) for guild_id in guild_ids):
-            raise ValueError("guild_ids must be a sequence of int.")
+            msg = "guild_ids must be a sequence of int."
+            raise ValueError(msg)
         return InvokableMessageCommand(
             func,
             name=name,

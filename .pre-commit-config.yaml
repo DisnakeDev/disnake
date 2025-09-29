@@ -1,10 +1,9 @@
 # SPDX-License-Identifier: MIT
 
-## Pre-commit setup
-
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+    # note that this version is ignored by prek when using the fastpath
+    rev: v5.0.0
     hooks:
       - id: check-case-conflict
       - id: check-toml
@@ -12,6 +11,19 @@ repos:
       - id: end-of-file-fixer
       - id: trailing-whitespace
         args: [--markdown-linebreak-ext=md]
+
+  - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
+    rev: v2.15.0
+    hooks:
+      - id: pretty-format-yaml
+        args: [--autofix, --indent, '2', --offset, '2', '--preserve-quotes']
+
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.4.1
+    hooks:
+      - id: codespell
+        additional_dependencies:
+          - tomli
 
   - repo: local
     hooks:
@@ -38,8 +50,8 @@ repos:
         exclude: 'changelog/|py.typed|disnake/bin/COPYING|.github/PULL_REQUEST_TEMPLATE.md|.github/CODEOWNERS|LICENSE|MANIFEST.in|.gitattributes'
 
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.9.3
+    rev: v0.13.0
     hooks:
       - id: ruff-format
-      - id: ruff
+      - id: ruff-check
         args: [--fix, --fixable=I]

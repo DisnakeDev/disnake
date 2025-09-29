@@ -33,12 +33,13 @@ class FlagTypings(BaseCodemodCommand):
     def transform_module(self, tree: cst.Module) -> cst.Module:
         current_module = self.context.full_module_name
         if current_module not in MODULES:
-            raise codemod.SkipFile("this module contains no definitions of flag classes.")
+            msg = "this module contains no definitions of flag classes."
+            raise codemod.SkipFile(msg)
 
         # import and load the module
         module = importlib.import_module(current_module)
         # we preformulate a list of all flag classes on the imported flags module
-        all_flag_classes = []
+        all_flag_classes: List[str] = []
         for attr_name in dir(module):
             obj = getattr(module, attr_name)
             if (
@@ -57,7 +58,7 @@ class FlagTypings(BaseCodemodCommand):
         # no reason to continue into classes
         return False
 
-    def leave_ClassDef(self, _: cst.ClassDef, node: cst.ClassDef):
+    def leave_ClassDef(self, _: cst.ClassDef, node: cst.ClassDef) -> cst.ClassDef:
         if not m.matches(node.name, m.OneOf(*map(m.Name, self.flag_classes))):
             return node
 

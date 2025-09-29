@@ -47,6 +47,7 @@ extensions = [
     "sphinxcontrib.towncrier.ext",
     "hoverxref.extension",
     "notfound.extension",
+    "sphinxext.opengraph",
     "redirects",
     "fulltoc",
     "exception_hierarchy",
@@ -55,6 +56,7 @@ extensions = [
     "collapse",
     "enumattrs",
     "nitpick_file_ignorer",
+    "versionchange",
 ]
 
 autodoc_member_order = "bysource"
@@ -78,7 +80,8 @@ rst_prolog = """
 .. |coro| replace:: This function is a |coroutine_link|_.
 .. |maybecoro| replace:: This function *could be a* |coroutine_link|_.
 .. |coroutine_link| replace:: *coroutine*
-.. |components_type| replace:: Union[:class:`disnake.ui.ActionRow`, :class:`disnake.ui.WrappedComponent`, List[Union[:class:`disnake.ui.ActionRow`, :class:`disnake.ui.WrappedComponent`, List[:class:`disnake.ui.WrappedComponent`]]]]
+.. |components_type| replace:: Union[:class:`~disnake.ui.UIComponent`, List[Union[:class:`~disnake.ui.UIComponent`, List[:class:`~disnake.ui.WrappedComponent`]]]]
+.. |modal_components_type| replace:: Union[:class:`~disnake.ui.UIComponent`, List[:class:`~disnake.ui.UIComponent`]]
 .. |resource_type| replace:: Union[:class:`bytes`, :class:`.Asset`, :class:`.Emoji`, :class:`.PartialEmoji`, :class:`.StickerItem`, :class:`.Sticker`]
 .. _coroutine_link: https://docs.python.org/3/library/asyncio-task.html#coroutine
 """
@@ -200,7 +203,8 @@ nitpick_ignore_files = [
 _spec = importlib.util.find_spec("disnake")
 if not (_spec and _spec.origin):
     # this should never happen
-    raise RuntimeError("Unable to find module spec")
+    msg = "Unable to find module spec"
+    raise RuntimeError(msg)
 _disnake_module_path = os.path.dirname(_spec.origin)
 
 
@@ -269,10 +273,21 @@ if _IS_READTHEDOCS:
     # https://docs.readthedocs.io/en/stable/reference/environment-variables.html#envvar-READTHEDOCS_CANONICAL_URL
     html_baseurl = os.environ.get("READTHEDOCS_CANONICAL_URL")
     if not html_baseurl:
-        raise RuntimeError("Expected `READTHEDOCS_CANONICAL_URL` to be set on readthedocs")
+        msg = "Expected `READTHEDOCS_CANONICAL_URL` to be set on readthedocs"
+        raise RuntimeError(msg)
 
     # enable opensearch (see description somewhere below)
     html_use_opensearch = html_baseurl.rstrip("/")
+
+
+# ogp_site_url = ""  # automatically set on readthedocs
+ogp_site_name = "disnake documentation"
+ogp_image = "https://disnake.dev/assets/disnake-logo-transparent.png"
+ogp_image_alt = "disnake icon"
+ogp_custom_meta_tags = [
+    '<meta property="og:image:width" content="64" />',
+    '<meta property="og:image:height" content="64" />',
+]
 
 
 # -- Options for HTML output ----------------------------------------------

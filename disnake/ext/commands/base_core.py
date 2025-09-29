@@ -24,7 +24,13 @@ from disnake.app_commands import ApplicationCommand
 from disnake.enums import ApplicationCommandType
 from disnake.flags import ApplicationInstallTypes, InteractionContextTypes
 from disnake.permissions import Permissions
-from disnake.utils import _generated, _overload_with_permissions, async_all, maybe_coroutine
+from disnake.utils import (
+    _generated,
+    _overload_with_permissions,
+    async_all,
+    iscoroutinefunction,
+    maybe_coroutine,
+)
 
 from .cooldowns import BucketType, CooldownMapping, MaxConcurrency
 from .errors import CheckFailure, CommandError, CommandInvokeError, CommandOnCooldown
@@ -148,20 +154,23 @@ class InvokableApplicationCommand(ABC):
         self.extras: Dict[str, Any] = kwargs.get("extras") or {}
 
         if not isinstance(self.name, str):
-            raise TypeError("Name of a command must be a string.")
+            msg = "Name of a command must be a string."
+            raise TypeError(msg)
 
         if "default_permission" in kwargs:
-            raise TypeError(
+            msg = (
                 "`default_permission` is deprecated and will always be set to `True`. "
                 "See `default_member_permissions` and `contexts` instead."
             )
+            raise TypeError(msg)
 
         # XXX: remove in next major/minor version
         # the parameter was called `integration_types` in earlier stages of the user apps PR.
         # since unknown kwargs unfortunately get silently ignored, at least try to warn users
         # in this specific case
         if "integration_types" in kwargs:
-            raise TypeError("`integration_types` has been renamed to `install_types`.")
+            msg = "`integration_types` has been renamed to `install_types`."
+            raise TypeError(msg)
 
         try:
             checks = func.__commands_checks__
@@ -182,7 +191,8 @@ class InvokableApplicationCommand(ABC):
         elif isinstance(cooldown, CooldownMapping):
             buckets = cooldown
         else:
-            raise TypeError("Cooldown must be a an instance of CooldownMapping or None.")
+            msg = "Cooldown must be a an instance of CooldownMapping or None."
+            raise TypeError(msg)
         self._buckets: CooldownMapping = buckets
 
         try:
@@ -208,7 +218,7 @@ class InvokableApplicationCommand(ABC):
             other._buckets = self._buckets.copy()
         if self._max_concurrency != other._max_concurrency:
             # _max_concurrency won't be None at this point
-            other._max_concurrency = cast(MaxConcurrency, self._max_concurrency).copy()
+            other._max_concurrency = cast("MaxConcurrency", self._max_concurrency).copy()
 
         if (
             # see https://github.com/DisnakeDev/disnake/pull/678#discussion_r938113624:
@@ -377,7 +387,8 @@ class InvokableApplicationCommand(ABC):
         inter.application_command = self
 
         if not await self.can_run(inter):
-            raise CheckFailure(f"The check functions for command {self.qualified_name!r} failed.")
+            msg = f"The check functions for command {self.qualified_name!r} failed."
+            raise CheckFailure(msg)
 
         if self._max_concurrency is not None:
             await self._max_concurrency.acquire(inter)  # type: ignore
@@ -481,8 +492,9 @@ class InvokableApplicationCommand(ABC):
         TypeError
             The coroutine passed is not actually a coroutine.
         """
-        if not asyncio.iscoroutinefunction(coro):
-            raise TypeError("The error handler must be a coroutine.")
+        if not iscoroutinefunction(coro):
+            msg = "The error handler must be a coroutine."
+            raise TypeError(msg)
 
         self.on_error: Error = coro
         return coro
@@ -597,8 +609,9 @@ class InvokableApplicationCommand(ABC):
         TypeError
             The coroutine passed is not actually a coroutine.
         """
-        if not asyncio.iscoroutinefunction(coro):
-            raise TypeError("The pre-invoke hook must be a coroutine.")
+        if not iscoroutinefunction(coro):
+            msg = "The pre-invoke hook must be a coroutine."
+            raise TypeError(msg)
 
         self._before_invoke = coro
         return coro
@@ -620,8 +633,9 @@ class InvokableApplicationCommand(ABC):
         TypeError
             The coroutine passed is not actually a coroutine.
         """
-        if not asyncio.iscoroutinefunction(coro):
-            raise TypeError("The post-invoke hook must be a coroutine.")
+        if not iscoroutinefunction(coro):
+            msg = "The post-invoke hook must be a coroutine."
+            raise TypeError(msg)
 
         self._after_invoke = coro
         return coro
@@ -667,9 +681,8 @@ class InvokableApplicationCommand(ABC):
 
         try:
             if inter.bot and not await inter.bot.application_command_can_run(inter):
-                raise CheckFailure(
-                    f"The global check functions for command {self.qualified_name} failed."
-                )
+                msg = f"The global check functions for command {self.qualified_name} failed."
+                raise CheckFailure(msg)
 
             cog = self.cog
             if cog is not None:
@@ -728,6 +741,7 @@ def default_member_permissions(
     moderate_members: bool = ...,
     move_members: bool = ...,
     mute_members: bool = ...,
+    pin_messages: bool = ...,
     priority_speaker: bool = ...,
     read_message_history: bool = ...,
     read_messages: bool = ...,
@@ -803,7 +817,8 @@ def default_member_permissions(value: int = 0, **permissions: bool) -> Callable[
         Setting a permission to ``False`` does not affect the result.
     """
     if isinstance(value, bool):
-        raise TypeError("`value` cannot be a bool value")
+        msg = "`value` cannot be a bool value"
+        raise TypeError(msg)
     perms_value = Permissions(value, **permissions).value
 
     def decorator(func: T) -> T:
@@ -811,13 +826,11 @@ def default_member_permissions(value: int = 0, **permissions: bool) -> Callable[
 
         if isinstance(func, InvokableApplicationCommand):
             if isinstance(func, (SubCommand, SubCommandGroup)):
-                raise TypeError(
-                    "Cannot set `default_member_permissions` on subcommands or subcommand groups"
-                )
+                msg = "Cannot set `default_member_permissions` on subcommands or subcommand groups"
+                raise TypeError(msg)
             if func.body._default_member_permissions is not None:
-                raise ValueError(
-                    "Cannot set `default_member_permissions` in both parameter and decorator"
-                )
+                msg = "Cannot set `default_member_permissions` in both parameter and decorator"
+                raise ValueError(msg)
             func.body._default_member_permissions = perms_value
         else:
             func.__default_member_permissions__ = perms_value  # type: ignore
@@ -850,11 +863,13 @@ def install_types(*, guild: bool = False, user: bool = False) -> Callable[[T], T
         install_types = ApplicationInstallTypes(guild=guild, user=user)
         if isinstance(func, InvokableApplicationCommand):
             if isinstance(func, (SubCommand, SubCommandGroup)):
-                raise TypeError("Cannot set `install_types` on subcommands or subcommand groups")
+                msg = "Cannot set `install_types` on subcommands or subcommand groups"
+                raise TypeError(msg)
             # special case - don't overwrite if `_guild_only` was set, since that takes priority
             if not func._guild_only:
                 if func.body.install_types is not None:
-                    raise ValueError("Cannot set `install_types` in both parameter and decorator")
+                    msg = "Cannot set `install_types` in both parameter and decorator"
+                    raise ValueError(msg)
                 func.body.install_types = install_types
         else:
             func.__install_types__ = install_types  # type: ignore
@@ -890,15 +905,16 @@ def contexts(
         )
         if isinstance(func, InvokableApplicationCommand):
             if isinstance(func, (SubCommand, SubCommandGroup)):
-                raise TypeError("Cannot set `contexts` on subcommands or subcommand groups")
+                msg = "Cannot set `contexts` on subcommands or subcommand groups"
+                raise TypeError(msg)
             # special case - don't overwrite if `_guild_only` was set, since that takes priority
             if not func._guild_only:
                 if func.body._dm_permission is not None:
-                    raise ValueError(
-                        "Cannot use both `dm_permission` and `contexts` at the same time"
-                    )
+                    msg = "Cannot use both `dm_permission` and `contexts` at the same time"
+                    raise ValueError(msg)
                 if func.body.contexts is not None:
-                    raise ValueError("Cannot set `contexts` in both parameter and decorator")
+                    msg = "Cannot set `contexts` in both parameter and decorator"
+                    raise ValueError(msg)
                 func.body.contexts = contexts
         else:
             func.__contexts__ = contexts  # type: ignore

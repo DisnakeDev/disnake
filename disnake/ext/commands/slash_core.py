@@ -51,7 +51,8 @@ def _autocomplete(
             option.autocomplete = True
             break
     else:  # nobreak
-        raise ValueError(f"Option '{option_name}' doesn't exist in '{self.qualified_name}'")
+        msg = f"Option '{option_name}' doesn't exist in '{self.qualified_name}'"
+        raise ValueError(msg)
 
     def decorator(func: Callable) -> Callable:
         classify_autocompleter(func)
@@ -172,8 +173,13 @@ class SubCommandGroup(InvokableApplicationCommand):
         super().__init__(func, name=name_loc.string, **kwargs)
         self.parent: InvokableSlashCommand = parent
         self.children: Dict[str, SubCommand] = {}
+
+        # while subcommand groups don't have a description, parse the docstring regardless to
+        # retrieve the localization key, if any
+        docstring = utils.parse_docstring(func)
+
         self.option = Option(
-            name=name_loc._upgrade(self.name),
+            name=name_loc._upgrade(self.name, key=docstring["localization_key_name"]),
             description="-",
             type=OptionType.sub_command_group,
             options=[],
@@ -207,8 +213,8 @@ class SubCommandGroup(InvokableApplicationCommand):
         self,
         name: LocalizedOptional = None,
         description: LocalizedOptional = None,
-        options: Optional[list] = None,
-        connectors: Optional[dict] = None,
+        options: Optional[List[Option]] = None,
+        connectors: Optional[Dict[str, str]] = None,
         extras: Optional[Dict[str, Any]] = None,
         **kwargs: Any,
     ) -> Callable[[CommandCallback], SubCommand]:
@@ -287,7 +293,7 @@ class SubCommand(InvokableApplicationCommand):
         *,
         name: LocalizedOptional = None,
         description: LocalizedOptional = None,
-        options: Optional[list] = None,
+        options: Optional[List[Option]] = None,
         connectors: Optional[Dict[str, str]] = None,
         **kwargs: Any,
     ) -> None:
@@ -295,7 +301,9 @@ class SubCommand(InvokableApplicationCommand):
         super().__init__(func, name=name_loc.string, **kwargs)
         self.parent: Union[InvokableSlashCommand, SubCommandGroup] = parent
         self.connectors: Dict[str, str] = connectors or {}
-        self.autocompleters: Dict[str, Any] = kwargs.get("autocompleters", {})
+        self.autocompleters: Dict[str, Union[Choices, Callable[..., Optional[Choices]]]] = (
+            kwargs.get("autocompleters", {})
+        )
 
         if options is None:
             options = expand_params(self)
@@ -460,7 +468,9 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         self.children: Dict[str, Union[SubCommand, SubCommandGroup]] = {}
         self.auto_sync: bool = True if auto_sync is None else auto_sync
         self.guild_ids: Optional[Tuple[int, ...]] = None if guild_ids is None else tuple(guild_ids)
-        self.autocompleters: Dict[str, Any] = kwargs.get("autocompleters", {})
+        self.autocompleters: Dict[str, Union[Choices, Callable[..., Optional[Choices]]]] = (
+            kwargs.get("autocompleters", {})
+        )
 
         if options is None:
             options = expand_params(self)
@@ -544,8 +554,8 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         self,
         name: LocalizedOptional = None,
         description: LocalizedOptional = None,
-        options: Optional[list] = None,
-        connectors: Optional[dict] = None,
+        options: Optional[List[Option]] = None,
+        connectors: Optional[Dict[str, str]] = None,
         extras: Optional[Dict[str, Any]] = None,
         **kwargs: Any,
     ) -> Callable[[CommandCallback], SubCommand]:
@@ -672,9 +682,8 @@ class InvokableSlashCommand(InvokableApplicationCommand):
                     stop_propagation = await local(inter, error)
                     # User has an option to cancel the global error handler by returning True
         finally:
-            if stop_propagation:
-                return  # noqa: B012
-            inter.bot.dispatch("slash_command_error", inter, error)
+            if not stop_propagation:
+                inter.bot.dispatch("slash_command_error", inter, error)
 
     async def _call_autocompleter(
         self, param: str, inter: ApplicationCommandInteraction, user_input: str
@@ -691,10 +700,12 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         elif len(chain) == 2:
             group = self.children.get(chain[0])
             if not isinstance(group, SubCommandGroup):
-                raise AssertionError("the first subcommand is not a SubCommandGroup instance")
+                msg = "the first subcommand is not a SubCommandGroup instance"
+                raise AssertionError(msg)
             subcmd = group.children.get(chain[1])
         else:
-            raise ValueError("Command chain is too long")
+            msg = "Command chain is too long"
+            raise ValueError(msg)
 
         focused_option = inter.data.focused_option
 
@@ -720,10 +731,12 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         elif len(chain) == 2:
             group = self.children.get(chain[0])
             if not isinstance(group, SubCommandGroup):
-                raise AssertionError("the first subcommand is not a SubCommandGroup instance")
+                msg = "the first subcommand is not a SubCommandGroup instance"
+                raise AssertionError(msg)
             subcmd = group.children.get(chain[1])
         else:
-            raise ValueError("Command chain is too long")
+            msg = "Command chain is too long"
+            raise ValueError(msg)
 
         if group is not None:
             try:
@@ -866,12 +879,15 @@ def slash_command(
     """
 
     def decorator(func: CommandCallback) -> InvokableSlashCommand:
-        if not asyncio.iscoroutinefunction(func):
-            raise TypeError(f"<{func.__qualname__}> must be a coroutine function")
+        if not utils.iscoroutinefunction(func):
+            msg = f"<{func.__qualname__}> must be a coroutine function"
+            raise TypeError(msg)
         if hasattr(func, "__command_flag__"):
-            raise TypeError("Callback is already a command.")
+            msg = "Callback is already a command."
+            raise TypeError(msg)
         if guild_ids and not all(isinstance(guild_id, int) for guild_id in guild_ids):
-            raise ValueError("guild_ids must be a sequence of int.")
+            msg = "guild_ids must be a sequence of int."
+            raise ValueError(msg)
         return InvokableSlashCommand(
             func,
             name=name,

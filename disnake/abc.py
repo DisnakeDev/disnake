@@ -70,7 +70,7 @@ if TYPE_CHECKING:
     from .enums import InviteTarget
     from .guild import Guild, GuildChannel as AnyGuildChannel, GuildMessageable
     from .guild_scheduled_event import GuildScheduledEvent
-    from .iterators import HistoryIterator
+    from .iterators import ChannelPinsIterator, HistoryIterator
     from .member import Member
     from .message import Message, MessageReference, PartialMessage
     from .poll import Poll
@@ -83,8 +83,9 @@ if TYPE_CHECKING:
         OverwriteType,
         PermissionOverwrite as PermissionOverwritePayload,
     )
+    from .types.guild import ChannelPositionUpdate as ChannelPositionUpdatePayload
     from .types.threads import PartialForumTag as PartialForumTagPayload
-    from .ui.action_row import Components, MessageUIComponent
+    from .ui._types import MessageComponents
     from .ui.view import View
     from .user import ClientUser
     from .voice_region import VoiceRegion
@@ -290,12 +291,13 @@ class GuildChannel(ABC):
         reason: Optional[str],
     ) -> None:
         if position < 0:
-            raise ValueError("Channel position cannot be less than 0.")
+            msg = "Channel position cannot be less than 0."
+            raise ValueError(msg)
 
         http = self._state.http
         bucket = self._sorting_bucket
         channels = [c for c in self.guild.channels if c._sorting_bucket == bucket]
-        channels = cast(List[GuildChannel], channels)
+        channels = cast("List[GuildChannel]", channels)
 
         channels.sort(key=lambda c: c.position)
 
@@ -312,9 +314,9 @@ class GuildChannel(ABC):
             # add ourselves at our designated position
             channels.insert(index, self)
 
-        payload = []
+        payload: List[ChannelPositionUpdatePayload] = []
         for index, c in enumerate(channels):
-            d: Dict[str, Any] = {"id": c.id, "position": index}
+            d: ChannelPositionUpdatePayload = {"id": c.id, "position": index}
             if parent_id is not MISSING and c.id == self.id:
                 d.update(parent_id=parent_id, lock_permissions=lock_permissions)
             payload.append(d)
@@ -398,9 +400,8 @@ class GuildChannel(ABC):
             overwrites_payload = []
             for target, perm in overwrites.items():
                 if not isinstance(perm, PermissionOverwrite):
-                    raise TypeError(
-                        f"Expected PermissionOverwrite, received {perm.__class__.__name__}"
-                    )
+                    msg = f"Expected PermissionOverwrite, received {perm.__class__.__name__}"
+                    raise TypeError(msg)
 
                 allow, deny = perm.pair()
                 payload: PermissionOverwritePayload = {
@@ -414,7 +415,8 @@ class GuildChannel(ABC):
         type_payload: int
         if type is not MISSING:
             if not isinstance(type, ChannelType):
-                raise TypeError("type field must be of type ChannelType")
+                msg = "type field must be of type ChannelType"
+                raise TypeError(msg)
             type_payload = type.value
         else:
             type_payload = MISSING
@@ -422,7 +424,8 @@ class GuildChannel(ABC):
         flags_payload: int
         if flags is not MISSING:
             if not isinstance(flags, ChannelFlags):
-                raise TypeError("flags field must be of type ChannelFlags")
+                msg = "flags field must be of type ChannelFlags"
+                raise TypeError(msg)
             flags_payload = flags.value
         else:
             flags_payload = MISSING
@@ -508,7 +511,7 @@ class GuildChannel(ABC):
         """List[:class:`.Role`]: Returns a list of roles that have been overridden from
         their default values in the :attr:`.Guild.roles` attribute.
         """
-        ret = []
+        ret: List[Role] = []
         g = self.guild
         for overwrite in filter(lambda o: o.is_role(), self._overwrites):
             role = g.get_role(overwrite.id)
@@ -600,6 +603,8 @@ class GuildChannel(ABC):
 
         If there is no category then this is ``None``.
         """
+        if isinstance(self.guild, Object):
+            return None
         return self.guild.get_channel(self.category_id)  # type: ignore
 
     @property
@@ -611,7 +616,7 @@ class GuildChannel(ABC):
 
         .. versionadded:: 1.3
         """
-        if self.category_id is None:
+        if self.category_id is None or isinstance(self.guild, Object):
             return False
 
         category = self.guild.get_channel(self.category_id)
@@ -679,6 +684,13 @@ class GuildChannel(ABC):
         - The default role permission overwrites
         - The permission overwrites of the role used as a parameter
 
+        .. note::
+            If the channel originated from an :class:`.Interaction` and
+            the :attr:`.guild` attribute is unavailable, such as with
+            user-installed applications in guilds, this method will not work
+            due to an API limitation.
+            Consider using :attr:`.Interaction.permissions` or :attr:`~.Interaction.app_permissions` instead.
+
         .. versionchanged:: 2.0
             The object passed in can now be a role object.
 
@@ -727,7 +739,8 @@ class GuildChannel(ABC):
         # Timeouted users have only view_channel and read_message_history
         # if they already have them.
         if ignore_timeout is not MISSING and isinstance(obj, Role):
-            raise TypeError("ignore_timeout is only supported for disnake.Member objects")
+            msg = "ignore_timeout is only supported for disnake.Member objects"
+            raise TypeError(msg)
 
         if ignore_timeout is MISSING:
             ignore_timeout = False
@@ -884,6 +897,7 @@ class GuildChannel(ABC):
         moderate_members: Optional[bool] = ...,
         move_members: Optional[bool] = ...,
         mute_members: Optional[bool] = ...,
+        pin_messages: Optional[bool] = ...,
         priority_speaker: Optional[bool] = ...,
         read_message_history: Optional[bool] = ...,
         read_messages: Optional[bool] = ...,
@@ -997,18 +1011,22 @@ class GuildChannel(ABC):
         elif isinstance(target, Role):
             perm_type = _Overwrites.ROLE
         else:
-            raise TypeError("target parameter must be either Member or Role")
+            msg = "target parameter must be either Member or Role"
+            raise TypeError(msg)
 
         if overwrite is MISSING:
             if len(permissions) == 0:
-                raise TypeError("No overwrite provided.")
+                msg = "No overwrite provided."
+                raise TypeError(msg)
             try:
                 overwrite = PermissionOverwrite(**permissions)
             except (ValueError, TypeError) as e:
-                raise TypeError("Invalid permissions given to keyword arguments.") from e
+                msg = "Invalid permissions given to keyword arguments."
+                raise TypeError(msg) from e
         else:
             if len(permissions) > 0:
-                raise TypeError("Cannot mix overwrite and keyword arguments.")
+                msg = "Cannot mix overwrite and keyword arguments."
+                raise TypeError(msg)
 
         # TODO: wait for event
 
@@ -1020,7 +1038,8 @@ class GuildChannel(ABC):
                 self.id, target.id, allow.value, deny.value, perm_type, reason=reason
             )
         else:
-            raise TypeError("Invalid overwrite type provided.")
+            msg = "Invalid overwrite type provided."
+            raise TypeError(msg)
 
     async def _clone_impl(
         self,
@@ -1036,14 +1055,14 @@ class GuildChannel(ABC):
         overwrites_payload: List[PermissionOverwritePayload]
         if overwrites is not MISSING:
             if not isinstance(overwrites, dict):
-                raise TypeError("overwrites parameter expects a dict.")
+                msg = "overwrites parameter expects a dict."
+                raise TypeError(msg)
 
             overwrites_payload = []
             for target, perm in overwrites.items():
                 if not isinstance(perm, PermissionOverwrite):
-                    raise TypeError(
-                        f"Expected PermissionOverwrite, received {perm.__class__.__name__}"
-                    )
+                    msg = f"Expected PermissionOverwrite, received {perm.__class__.__name__}"
+                    raise TypeError(msg)
 
                 allow, deny = perm.pair()
                 payload: PermissionOverwritePayload = {
@@ -1220,7 +1239,8 @@ class GuildChannel(ABC):
         before, after = kwargs.get("before"), kwargs.get("after")
         offset = kwargs.get("offset", 0)
         if sum(bool(a) for a in (beginning, end, before, after)) > 1:
-            raise TypeError("Only one of [before, after, end, beginning] can be used.")
+            msg = "Only one of [before, after, end, beginning] can be used."
+            raise TypeError(msg)
 
         bucket = self._sorting_bucket
         parent_id = kwargs.get("category", MISSING)
@@ -1239,7 +1259,7 @@ class GuildChannel(ABC):
             ]
 
         channels.sort(key=lambda c: (c.position, c.id))
-        channels = cast(List[GuildChannel], channels)
+        channels = cast("List[GuildChannel]", channels)
 
         try:
             # Try to remove ourselves from the channel list
@@ -1259,14 +1279,15 @@ class GuildChannel(ABC):
             index = next((i + 1 for i, c in enumerate(channels) if c.id == after.id), None)
 
         if index is None:
-            raise ValueError("Could not resolve appropriate move position")
+            msg = "Could not resolve appropriate move position"
+            raise ValueError(msg)
 
         channels.insert(max((index + offset), 0), self)
-        payload = []
+        payload: List[ChannelPositionUpdatePayload] = []
         lock_permissions = kwargs.get("sync_permissions", False)
         reason = kwargs.get("reason")
         for index, channel in enumerate(channels):
-            d = {"id": channel.id, "position": index}
+            d: ChannelPositionUpdatePayload = {"id": channel.id, "position": index}
             if parent_id is not MISSING and channel.id == self.id:
                 d.update(parent_id=parent_id, lock_permissions=lock_permissions)
             payload.append(d)
@@ -1433,7 +1454,7 @@ class Messageable:
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
         view: View = ...,
-        components: Components[MessageUIComponent] = ...,
+        components: MessageComponents = ...,
         poll: Poll = ...,
     ) -> Message: ...
 
@@ -1454,7 +1475,7 @@ class Messageable:
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
         view: View = ...,
-        components: Components[MessageUIComponent] = ...,
+        components: MessageComponents = ...,
         poll: Poll = ...,
     ) -> Message: ...
 
@@ -1475,7 +1496,7 @@ class Messageable:
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
         view: View = ...,
-        components: Components[MessageUIComponent] = ...,
+        components: MessageComponents = ...,
         poll: Poll = ...,
     ) -> Message: ...
 
@@ -1496,7 +1517,7 @@ class Messageable:
         reference: Union[Message, MessageReference, PartialMessage] = ...,
         mention_author: bool = ...,
         view: View = ...,
-        components: Components[MessageUIComponent] = ...,
+        components: MessageComponents = ...,
         poll: Poll = ...,
     ) -> Message: ...
 
@@ -1518,7 +1539,7 @@ class Messageable:
         reference: Optional[Union[Message, MessageReference, PartialMessage]] = None,
         mention_author: Optional[bool] = None,
         view: Optional[View] = None,
-        components: Optional[Components[MessageUIComponent]] = None,
+        components: Optional[MessageComponents] = None,
         poll: Optional[Poll] = None,
     ):
         """|coro|
@@ -1531,8 +1552,8 @@ class Messageable:
         ``stickers``, ``components``, ``poll`` or ``view`` must be provided.
 
         To upload a single file, the ``file`` parameter should be used with a
-        single :class:`.File` object. To upload multiple files, the ``files``
-        parameter should be used with a :class:`list` of :class:`.File` objects.
+        single :class:`~disnake.File` object. To upload multiple files, the ``files``
+        parameter should be used with a :class:`list` of :class:`~disnake.File` objects.
         **Specifying both parameters will lead to an exception**.
 
         To upload a single embed, the ``embed`` parameter should be used with a
@@ -1558,9 +1579,9 @@ class Messageable:
 
             .. versionadded:: 2.0
 
-        file: :class:`.File`
+        file: :class:`~disnake.File`
             The file to upload. This cannot be mixed with the ``files`` parameter.
-        files: List[:class:`.File`]
+        files: List[:class:`~disnake.File`]
             A list of files to upload. Must be a maximum of 10.
             This cannot be mixed with the ``file`` parameter.
         stickers: Sequence[Union[:class:`.GuildSticker`, :class:`.StandardSticker`, :class:`.StickerItem`]]
@@ -1614,6 +1635,11 @@ class Messageable:
 
             .. versionadded:: 2.4
 
+            .. note::
+                Passing v2 components here automatically sets the :attr:`~.MessageFlags.is_components_v2` flag.
+                Setting this flag cannot be reverted. Note that this also disables the
+                ``content``, ``embeds``, ``stickers``, and ``poll`` fields.
+
         suppress_embeds: :class:`bool`
             Whether to suppress embeds for the message. This hides
             all the embeds from the UI if set to ``True``.
@@ -1622,8 +1648,8 @@ class Messageable:
 
         flags: :class:`.MessageFlags`
             The flags to set for this message.
-            Only :attr:`~.MessageFlags.suppress_embeds` and :attr:`~.MessageFlags.suppress_notifications`
-            are supported.
+            Only :attr:`~.MessageFlags.suppress_embeds`, :attr:`~.MessageFlags.suppress_notifications`,
+            and :attr:`~.MessageFlags.is_components_v2` are supported.
 
             If parameter ``suppress_embeds`` is provided,
             that will override the setting of :attr:`.MessageFlags.suppress_embeds`.
@@ -1648,7 +1674,8 @@ class Messageable:
             or the ``reference`` object is not a :class:`.Message`,
             :class:`.MessageReference` or :class:`.PartialMessage`.
         ValueError
-            The ``files`` or ``embeds`` list is too large.
+            The ``files`` or ``embeds`` list is too large, or
+            you tried to send v2 components together with ``content``, ``embeds``, ``stickers``, or ``poll``.
 
         Returns
         -------
@@ -1660,15 +1687,18 @@ class Messageable:
         content = str(content) if content is not None else None
 
         if file is not None and files is not None:
-            raise TypeError("cannot pass both file and files parameter to send()")
+            msg = "cannot pass both file and files parameter to send()"
+            raise TypeError(msg)
 
         if file is not None:
             if not isinstance(file, File):
-                raise TypeError("file parameter must be File")
+                msg = "file parameter must be File"
+                raise TypeError(msg)
             files = [file]
 
         if embed is not None and embeds is not None:
-            raise TypeError("cannot pass both embed and embeds parameter to send()")
+            msg = "cannot pass both embed and embeds parameter to send()"
+            raise TypeError(msg)
 
         if embed is not None:
             embeds = [embed]
@@ -1676,7 +1706,8 @@ class Messageable:
         embeds_payload = None
         if embeds is not None:
             if len(embeds) > 10:
-                raise ValueError("embeds parameter must be a list of up to 10 elements")
+                msg = "embeds parameter must be a list of up to 10 elements"
+                raise ValueError(msg)
             for embed in embeds:
                 if embed._files:
                     files = files or []
@@ -1708,22 +1739,33 @@ class Messageable:
             try:
                 reference_payload = reference.to_message_reference_dict()
             except AttributeError:
-                raise TypeError(
-                    "reference parameter must be Message, MessageReference, or PartialMessage"
-                ) from None
+                msg = "reference parameter must be Message, MessageReference, or PartialMessage"
+                raise TypeError(msg) from None
 
+        is_v2 = False
         if view is not None and components is not None:
-            raise TypeError("cannot pass both view and components parameter to send()")
+            msg = "cannot pass both view and components parameter to send()"
+            raise TypeError(msg)
         elif view:
             if not hasattr(view, "__discord_ui_view__"):
-                raise TypeError(f"view parameter must be View not {view.__class__!r}")
+                msg = f"view parameter must be View not {view.__class__!r}"
+                raise TypeError(msg)
             components_payload = view.to_components()
         elif components:
-            from .ui.action_row import components_to_dict
+            from .ui.action_row import normalize_components_to_dict
 
-            components_payload = components_to_dict(components)
+            components_payload, is_v2 = normalize_components_to_dict(components)
         else:
             components_payload = None
+
+        # set cv2 flag automatically
+        if is_v2:
+            flags = MessageFlags._from_value(0 if flags is None else flags.value)
+            flags.is_components_v2 = True
+        # components v2 cannot be used with other content fields
+        if flags and flags.is_components_v2 and (content or embeds or stickers or poll):
+            msg = "Cannot use v2 components with content, embeds, stickers, or polls"
+            raise ValueError(msg)
 
         flags_payload = None
         if suppress_embeds is not None:
@@ -1734,9 +1776,11 @@ class Messageable:
 
         if files is not None:
             if len(files) > 10:
-                raise ValueError("files parameter must be a list of up to 10 elements")
+                msg = "files parameter must be a list of up to 10 elements"
+                raise ValueError(msg)
             elif not all(isinstance(file, File) for file in files):
-                raise TypeError("files parameter must be a list of File")
+                msg = "files parameter must be a list of File"
+                raise TypeError(msg)
 
             try:
                 data = await state.http.send_files(
@@ -1838,10 +1882,12 @@ class Messageable:
         data = await self._state.http.get_message(channel.id, id)
         return self._state.create_message(channel=channel, data=data)
 
-    async def pins(self) -> List[Message]:
-        """|coro|
+    def pins(
+        self, *, limit: Optional[int] = 50, before: Optional[SnowflakeTime] = None
+    ) -> ChannelPinsIterator:
+        """Returns an :class:`.AsyncIterator` that enables receiving the destination's pinned messages.
 
-        Retrieves all messages that are currently pinned in the channel.
+        You must have the :attr:`.Permissions.read_message_history` and :attr:`.Permissions.view_channel` permissions to use this.
 
         .. note::
 
@@ -1849,20 +1895,51 @@ class Messageable:
             objects returned by this method do not contain complete
             :attr:`.Message.reactions` data.
 
+        .. versionchanged:: 2.11
+            Now returns an :class:`.AsyncIterator` to support changes in Discord's API.
+            ``await``\\ing the result of this method remains supported, but only returns the
+            last 50 pins and is deprecated in favor of ``async for msg in channel.pins()``.
+
+        Examples
+        --------
+        Usage ::
+
+            counter = 0
+            async for message in channel.pins(limit=100):
+                if message.author == client.user:
+                    counter += 1
+
+        Flattening to a list ::
+
+            pinned_messages = await channel.pins(limit=100).flatten()
+            # pinned_messages is now a list of Message...
+
+        All parameters are optional.
+
+        Parameters
+        ----------
+        limit: Optional[:class:`int`]
+            The number of pinned messages to retrieve.
+            If ``None``, retrieves every pinned message in the channel. Note, however,
+            that this would make it a slow operation.
+        before: Optional[Union[:class:`.abc.Snowflake`, :class:`datetime.datetime`]]
+            Retrieve messages pinned before this date or message.
+            If a datetime is provided, it is recommended to use a UTC aware datetime.
+            If the datetime is naive, it is assumed to be local time.
+
         Raises
         ------
         HTTPException
             Retrieving the pinned messages failed.
 
-        Returns
-        -------
-        List[:class:`.Message`]
-            The messages that are currently pinned.
+        Yields
+        ------
+        :class:`.Message`
+            The pinned message from the parsed message data.
         """
-        channel = await self._get_channel()
-        state = self._state
-        data = await state.http.pins_from(channel.id)
-        return [state.create_message(channel=channel, data=m) for m in data]
+        from .iterators import ChannelPinsIterator  # due to cyclic imports
+
+        return ChannelPinsIterator(self, limit=limit, before=before)
 
     def history(
         self,
@@ -2006,13 +2083,15 @@ class Connectable(Protocol):
         state = self._state
 
         if state._get_voice_client(key_id):
-            raise ClientException("Already connected to a voice channel.")
+            msg = "Already connected to a voice channel."
+            raise ClientException(msg)
 
         client = state._get_client()
         voice = cls(client, self)
 
         if not isinstance(voice, VoiceProtocol):
-            raise TypeError("Type must meet VoiceProtocol abstract base class.")
+            msg = "Type must meet VoiceProtocol abstract base class."
+            raise TypeError(msg)
 
         state._add_voice_client(key_id, voice)
 

@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: MIT
 from __future__ import annotations
 
-import asyncio
 import importlib
 import inspect
 import re
@@ -63,11 +62,12 @@ def visit_attributetablebadge_node(self: HTMLTranslator, node: nodes.Element) ->
     """Add a class to each badge of the type that it is."""
     badge_type: str = node["badge-type"]
     if badge_type not in ("coroutine", "decorator", "method", "classmethod"):
-        raise RuntimeError(f"badge_type {badge_type} is currently unsupported")
+        msg = f"badge_type {badge_type} is currently unsupported"
+        raise RuntimeError(msg)
     attributes = {
         "class": f"badge-{badge_type}",
     }
-    self.body.append(self.starttag(node, "span", **attributes))
+    self.body.append(self.starttag(node, "span", **attributes))  # type: ignore[reportArgumentType]
 
 
 def visit_attributetable_item_node(self: HTMLTranslator, node: nodes.Element) -> None:
@@ -114,7 +114,8 @@ class PyAttributeTable(SphinxDirective):
             if not modulename:
                 modulename = self.env.ref_context.get("py:module")
         if modulename is None:
-            raise RuntimeError(f"modulename somehow None for {content} in {self.env.docname}.")
+            msg = f"modulename somehow None for {content} in {self.env.docname}."
+            raise RuntimeError(msg)
 
         return modulename, name
 
@@ -239,7 +240,7 @@ def get_class_results(
 
         if value is not None:
             doc = value.__doc__ or ""
-            if asyncio.iscoroutinefunction(value) or doc.startswith("|coro|"):
+            if inspect.iscoroutinefunction(value) or doc.startswith("|coro|"):
                 key = _("Methods")
                 badge = attributetablebadge("async", "async")
                 badge["badge-type"] = _("coroutine")
@@ -272,10 +273,10 @@ def class_results_to_node(key: str, elements: List[TableElement]) -> attributeta
         ref = nodes.reference(
             "",
             "",
+            *[nodes.Text(element.label)],
             internal=True,
             refuri="#" + element.fullname,
             anchorname="",
-            *[nodes.Text(element.label)],
         )
         para = addnodes.compact_paragraph("", "", ref)
         if element.badge is not None:

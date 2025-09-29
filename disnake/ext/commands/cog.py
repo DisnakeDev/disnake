@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 import inspect
 import logging
 from typing import (
@@ -16,7 +15,6 @@ from typing import (
     Optional,
     Tuple,
     Type,
-    TypeVar,
     Union,
 )
 
@@ -34,7 +32,7 @@ if TYPE_CHECKING:
 
     from disnake.interactions import ApplicationCommandInteraction
 
-    from ._types import MaybeCoro
+    from ._types import FuncT, MaybeCoro
     from .bot import AutoShardedBot, AutoShardedInteractionBot, Bot, InteractionBot
     from .context import Context
     from .core import Command
@@ -46,8 +44,6 @@ __all__ = (
     "CogMeta",
     "Cog",
 )
-
-FuncT = TypeVar("FuncT", bound=Callable[..., Any])
 
 MISSING: Any = disnake.utils.MISSING
 _log = logging.getLogger(__name__)
@@ -146,7 +142,7 @@ class CogMeta(type):
     __cog_slash_settings__: Dict[str, Any]
     __cog_user_settings__: Dict[str, Any]
     __cog_message_settings__: Dict[str, Any]
-    __cog_commands__: List[Command]
+    __cog_commands__: List[Command[Any, ..., Any]]
     __cog_app_commands__: List[InvokableApplicationCommand]
     __cog_listeners__: List[Tuple[str, str]]
 
@@ -173,33 +169,28 @@ class CogMeta(type):
         new_cls = super().__new__(cls, name, bases, attrs, **kwargs)
         for base in reversed(new_cls.__mro__):
             for elem, value in base.__dict__.items():
-                if elem in commands:
-                    del commands[elem]
-                if elem in app_commands:
-                    del app_commands[elem]
-                if elem in listeners:
-                    del listeners[elem]
+                commands.pop(elem, None)
+                app_commands.pop(elem, None)
+                listeners.pop(elem, None)
 
                 is_static_method = isinstance(value, staticmethod)
                 if is_static_method:
                     value = value.__func__
                 if isinstance(value, _BaseCommand):
                     if is_static_method:
-                        raise TypeError(
-                            f"Command in method {base}.{elem!r} must not be staticmethod."
-                        )
+                        msg = f"Command in method {base}.{elem!r} must not be staticmethod."
+                        raise TypeError(msg)
                     if elem.startswith(("cog_", "bot_")):
                         raise TypeError(no_bot_cog.format(base, elem))
                     commands[elem] = value
                 elif isinstance(value, InvokableApplicationCommand):
                     if is_static_method:
-                        raise TypeError(
-                            f"Application command in method {base}.{elem!r} must not be staticmethod."
-                        )
+                        msg = f"Application command in method {base}.{elem!r} must not be staticmethod."
+                        raise TypeError(msg)
                     if elem.startswith(("cog_", "bot_")):
                         raise TypeError(no_bot_cog.format(base, elem))
                     app_commands[elem] = value
-                elif asyncio.iscoroutinefunction(value):
+                elif disnake.utils.iscoroutinefunction(value):
                     if hasattr(value, "__cog_listener__"):
                         if elem.startswith(("cog_", "bot_")):
                             raise TypeError(no_bot_cog.format(base, elem))
@@ -239,7 +230,7 @@ class Cog(metaclass=CogMeta):
 
     __cog_name__: ClassVar[str]
     __cog_settings__: ClassVar[Dict[str, Any]]
-    __cog_commands__: ClassVar[List[Command]]
+    __cog_commands__: ClassVar[List[Command[Self, ..., Any]]]
     __cog_app_commands__: ClassVar[List[InvokableApplicationCommand]]
     __cog_listeners__: ClassVar[List[Tuple[str, str]]]
 
@@ -286,7 +277,7 @@ class Cog(metaclass=CogMeta):
 
         return self
 
-    def get_commands(self) -> List[Command]:
+    def get_commands(self) -> List[Command[Self, ..., Any]]:
         """Returns a list of commands the cog has.
 
         Returns
@@ -367,7 +358,7 @@ class Cog(metaclass=CogMeta):
     def description(self, description: str) -> None:
         self.__cog_description__ = description
 
-    def walk_commands(self) -> Generator[Command, None, None]:
+    def walk_commands(self) -> Generator[Command[Self, ..., Any], None, None]:
         """An iterator that recursively walks through this cog's commands and subcommands.
 
         Yields
@@ -417,16 +408,16 @@ class Cog(metaclass=CogMeta):
             the name.
         """
         if name is not MISSING and not isinstance(name, (str, Event)):
-            raise TypeError(
-                f"Cog.listener expected str or Enum but received {name.__class__.__name__!r} instead."
-            )
+            msg = f"Cog.listener expected str or Enum but received {name.__class__.__name__!r} instead."
+            raise TypeError(msg)
 
         def decorator(func: FuncT) -> FuncT:
             actual = func
             if isinstance(actual, staticmethod):
                 actual = actual.__func__
-            if not asyncio.iscoroutinefunction(actual):
-                raise TypeError("Listener function must be a coroutine function.")
+            if not disnake.utils.iscoroutinefunction(actual):
+                msg = "Listener function must be a coroutine function."
+                raise TypeError(msg)
             actual.__cog_listener__ = True
             to_assign = (
                 actual.__name__
@@ -736,7 +727,8 @@ class Cog(metaclass=CogMeta):
             isinstance(bot, (InteractionBot, AutoShardedInteractionBot))
             and len(self.__cog_commands__) > 0
         ):
-            raise TypeError("@commands.command is not supported for interaction bots.")
+            msg = "@commands.command is not supported for interaction bots."
+            raise TypeError(msg)
 
         # realistically, the only thing that can cause loading errors
         # is essentially just the command loading, which raises if there are
@@ -780,13 +772,15 @@ class Cog(metaclass=CogMeta):
         # check if we're overriding the default
         if cls.bot_check is not Cog.bot_check:
             if isinstance(bot, (InteractionBot, AutoShardedInteractionBot)):
-                raise TypeError("Cog.bot_check is not supported for interaction bots.")
+                msg = "Cog.bot_check is not supported for interaction bots."
+                raise TypeError(msg)
 
             bot.add_check(self.bot_check)
 
         if cls.bot_check_once is not Cog.bot_check_once:
             if isinstance(bot, (InteractionBot, AutoShardedInteractionBot)):
-                raise TypeError("Cog.bot_check_once is not supported for interaction bots.")
+                msg = "Cog.bot_check_once is not supported for interaction bots."
+                raise TypeError(msg)
 
             bot.add_check(self.bot_check_once, call_once=True)
 

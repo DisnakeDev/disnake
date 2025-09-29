@@ -54,7 +54,7 @@ class File:
 
     def __init__(
         self,
-        fp: Union[str, bytes, os.PathLike, io.BufferedIOBase],
+        fp: Union[str, bytes, os.PathLike[str], os.PathLike[bytes], io.BufferedIOBase],
         filename: Optional[str] = None,
         *,
         spoiler: bool = False,
@@ -62,12 +62,13 @@ class File:
     ) -> None:
         if isinstance(fp, io.IOBase):
             if not (fp.seekable() and fp.readable()):
-                raise ValueError(f"File buffer {fp!r} must be seekable and readable")
+                msg = f"File buffer {fp!r} must be seekable and readable"
+                raise ValueError(msg)
             self.fp = fp
             self._original_pos = fp.tell()
             self._owner = False
         else:
-            self.fp = open(fp, "rb")
+            self.fp = open(fp, "rb")  # noqa: SIM115
             self._original_pos = 0
             self._owner = True
 

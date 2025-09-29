@@ -191,6 +191,7 @@ class Permissions(BaseFlags):
         moderate_members: bool = ...,
         move_members: bool = ...,
         mute_members: bool = ...,
+        pin_messages: bool = ...,
         priority_speaker: bool = ...,
         read_message_history: bool = ...,
         read_messages: bool = ...,
@@ -228,14 +229,14 @@ class Permissions(BaseFlags):
     @_overload_with_permissions
     def __init__(self, permissions: int = 0, **kwargs: bool) -> None:
         if not isinstance(permissions, int):
-            raise TypeError(
-                f"Expected int parameter, received {permissions.__class__.__name__} instead."
-            )
+            msg = f"Expected int parameter, received {permissions.__class__.__name__} instead."
+            raise TypeError(msg)
 
         self.value = permissions
         for key, value in kwargs.items():
             if key not in self.VALID_FLAGS:
-                raise TypeError(f"{key!r} is not a valid permission name.")
+                msg = f"{key!r} is not a valid permission name."
+                raise TypeError(msg)
             setattr(self, key, value)
 
     def is_subset(self, other: Permissions) -> bool:
@@ -243,18 +244,16 @@ class Permissions(BaseFlags):
         if isinstance(other, Permissions):
             return (self.value & other.value) == self.value
         else:
-            raise TypeError(
-                f"cannot compare {self.__class__.__name__} with {other.__class__.__name__}"
-            )
+            msg = f"cannot compare {self.__class__.__name__} with {other.__class__.__name__}"
+            raise TypeError(msg)
 
     def is_superset(self, other: Permissions) -> bool:
         """Returns ``True`` if self has the same or more permissions as other."""
         if isinstance(other, Permissions):
             return (self.value | other.value) == self.value
         else:
-            raise TypeError(
-                f"cannot compare {self.__class__.__name__} with {other.__class__.__name__}"
-            )
+            msg = f"cannot compare {self.__class__.__name__} with {other.__class__.__name__}"
+            raise TypeError(msg)
 
     def is_strict_subset(self, other: Permissions) -> bool:
         """Returns ``True`` if the permissions on self are a strict subset of those on other."""
@@ -265,10 +264,10 @@ class Permissions(BaseFlags):
         return self.is_superset(other) and self != other
 
     # the parent uses `Self` for the `other` typehint but we use `Permissions` here for backwards compat.
-    __le__ = is_subset  # type: ignore
-    __ge__ = is_superset  # type: ignore
-    __lt__ = is_strict_subset  # type: ignore
-    __gt__ = is_strict_superset  # type: ignore
+    __le__ = is_subset
+    __ge__ = is_superset
+    __lt__ = is_strict_subset
+    __gt__ = is_strict_superset
 
     @classmethod
     @cached_creation
@@ -410,6 +409,9 @@ class Permissions(BaseFlags):
 
         .. versionchanged:: 2.10
             Moved :attr:`use_application_commands` permission to :attr:`apps`.
+
+        .. versionchanged:: 2.11
+            Added :attr:`pin_messages` permission.
         """
         return cls(
             send_messages=True,
@@ -427,6 +429,7 @@ class Permissions(BaseFlags):
             read_message_history=True,
             send_tts_messages=True,
             send_voice_messages=True,
+            pin_messages=True,
             send_polls=True,
         )
 
@@ -593,6 +596,7 @@ class Permissions(BaseFlags):
         moderate_members: bool = ...,
         move_members: bool = ...,
         mute_members: bool = ...,
+        pin_messages: bool = ...,
         priority_speaker: bool = ...,
         read_message_history: bool = ...,
         read_messages: bool = ...,
@@ -754,7 +758,7 @@ class Permissions(BaseFlags):
 
     @flag_value
     def manage_messages(self) -> int:
-        """:class:`bool`: Returns ``True`` if a user can delete or pin messages in a text channel.
+        """:class:`bool`: Returns ``True`` if a user can delete messages in a text channel.
 
         .. note::
 
@@ -1077,6 +1081,14 @@ class Permissions(BaseFlags):
         """
         return 1 << 50
 
+    @flag_value
+    def pin_messages(self) -> int:
+        """:class:`bool`: Returns ``True`` if a user can pin and unpin messages.
+
+        .. versionadded:: 2.11
+        """
+        return 1 << 51
+
 
 def _augment_from_permissions(cls):
     cls.VALID_NAMES = set(Permissions.VALID_FLAGS)
@@ -1093,10 +1105,10 @@ def _augment_from_permissions(cls):
             continue
 
         # god bless Python
-        def getter(self, x=key):
+        def getter(self, x: str = key) -> Optional[bool]:
             return self._values.get(x)
 
-        def setter(self, value, x=key) -> None:
+        def setter(self, value: Optional[bool], x: str = key) -> None:
             self._set(x, value)
 
         prop = property(getter, setter)
@@ -1141,7 +1153,7 @@ class PermissionOverwrite:
 
     __slots__ = ("_values",)
 
-    # n. b. this typechecking block must be first and seperate from the secondary one, due to codemodding
+    # n. b. this typechecking block must be first and separate from the secondary one, due to codemodding
     if TYPE_CHECKING:
         add_reactions: Optional[bool]
         administrator: Optional[bool]
@@ -1176,6 +1188,7 @@ class PermissionOverwrite:
         moderate_members: Optional[bool]
         move_members: Optional[bool]
         mute_members: Optional[bool]
+        pin_messages: Optional[bool]
         priority_speaker: Optional[bool]
         read_message_history: Optional[bool]
         read_messages: Optional[bool]
@@ -1244,6 +1257,7 @@ class PermissionOverwrite:
         moderate_members: Optional[bool] = ...,
         move_members: Optional[bool] = ...,
         mute_members: Optional[bool] = ...,
+        pin_messages: Optional[bool] = ...,
         priority_speaker: Optional[bool] = ...,
         read_message_history: Optional[bool] = ...,
         read_messages: Optional[bool] = ...,
@@ -1283,7 +1297,8 @@ class PermissionOverwrite:
 
         for key, value in kwargs.items():
             if key not in self.VALID_NAMES:
-                raise ValueError(f"{key!r} is not a valid permission name.")
+                msg = f"{key!r} is not a valid permission name."
+                raise ValueError(msg)
 
             setattr(self, key, value)
 
@@ -1292,7 +1307,8 @@ class PermissionOverwrite:
 
     def _set(self, key: str, value: Optional[bool]) -> None:
         if value not in (True, None, False):
-            raise TypeError(f"Expected bool or NoneType, received {value.__class__.__name__}")
+            msg = f"Expected bool or NoneType, received {value.__class__.__name__}"
+            raise TypeError(msg)
 
         if value is None:
             self._values.pop(key, None)
@@ -1377,6 +1393,7 @@ class PermissionOverwrite:
         moderate_members: Optional[bool] = ...,
         move_members: Optional[bool] = ...,
         mute_members: Optional[bool] = ...,
+        pin_messages: Optional[bool] = ...,
         priority_speaker: Optional[bool] = ...,
         read_message_history: Optional[bool] = ...,
         read_messages: Optional[bool] = ...,

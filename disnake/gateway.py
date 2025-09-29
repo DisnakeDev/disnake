@@ -199,9 +199,12 @@ class KeepAliveHandler(threading.Thread):
                     f.result()
                 except Exception:
                     _log.exception("An error occurred while stopping the gateway. Ignoring.")
-                finally:
-                    self.stop()
-                    return  # noqa: B012
+                except BaseException:
+                    # Since the thread is at the end of its lifecycle here anyway,
+                    # simply suppress any BaseException that might occur while closing the ws.
+                    pass
+                self.stop()
+                return
 
             data = self.get_payload()
             _log.debug(self.msg, self.shard_id, data["d"])
@@ -270,7 +273,8 @@ class DiscordClientWebSocketResponse(aiohttp.ClientWebSocketResponse):
 
 
 class HeartbeatWebSocket(Protocol):
-    HEARTBEAT: Final[Literal[1, 3]]
+    # assigning any value to make pyright infer this as a classvar
+    HEARTBEAT: Final[Literal[1, 3]] = 1
 
     thread_id: int
     loop: asyncio.AbstractEventLoop
@@ -708,9 +712,7 @@ class DiscordWebSocket:
         """
         try:
             msg = await self.socket.receive(timeout=self._max_heartbeat_timeout)
-            if msg.type is aiohttp.WSMsgType.TEXT:
-                await self.received_message(msg.data)
-            elif msg.type is aiohttp.WSMsgType.BINARY:
+            if msg.type is aiohttp.WSMsgType.TEXT or msg.type is aiohttp.WSMsgType.BINARY:
                 await self.received_message(msg.data)
             elif msg.type is aiohttp.WSMsgType.ERROR:
                 _log.debug("Received %s", msg)
@@ -777,7 +779,8 @@ class DiscordWebSocket:
     ) -> None:
         if activity is not None:
             if not isinstance(activity, BaseActivity):
-                raise TypeError("activity must derive from BaseActivity.")
+                msg = "activity must derive from BaseActivity."
+                raise TypeError(msg)
             activity_data = (activity.to_dict(),)
         else:
             activity_data = ()

@@ -84,6 +84,7 @@ from .welcome_screen import WelcomeScreen, WelcomeScreenChannel
 from .widget import Widget, WidgetSettings
 
 __all__ = (
+    "IncidentsData",
     "Guild",
     "GuildBuilder",
 )
@@ -100,16 +101,20 @@ if TYPE_CHECKING:
     from .state import ConnectionState
     from .template import Template
     from .threads import AnyThreadArchiveDuration, ForumTag
-    from .types.channel import PermissionOverwrite as PermissionOverwritePayload
+    from .types.channel import (
+        GuildChannel as GuildChannelPayload,
+        PermissionOverwrite as PermissionOverwritePayload,
+    )
     from .types.guild import (
         Ban as BanPayload,
         CreateGuildPlaceholderChannel,
         CreateGuildPlaceholderRole,
         Guild as GuildPayload,
         GuildFeature,
+        IncidentsData as IncidentsDataPayload,
         MFALevel,
     )
-    from .types.integration import IntegrationType
+    from .types.integration import Integration as IntegrationPayload, IntegrationType
     from .types.role import CreateRole as CreateRolePayload
     from .types.sticker import CreateGuildSticker as CreateStickerPayload
     from .types.threads import Thread as ThreadPayload, ThreadArchiveDurationLiteral
@@ -130,6 +135,94 @@ class _GuildLimit(NamedTuple):
     bitrate: float
     filesize: int
     sounds: int
+
+
+class IncidentsData:
+    """Represents data about various security incidents/actions in a guild.
+
+    .. collapse:: operations
+
+        .. describe:: x == y
+
+            Checks if two ``IncidentsData`` instances are equal.
+
+        .. describe:: x != y
+
+            Checks if two ``IncidentsData`` instances are not equal.
+
+    .. versionadded:: 2.11
+
+    Attributes
+    ----------
+    dm_spam_detected_at: Optional[:class:`datetime.datetime`]
+        The time (in UTC) at which DM spam was last detected.
+    raid_detected_at: Optional[:class:`datetime.datetime`]
+        The time (in UTC) at which a raid was last detected.
+    """
+
+    __slots__ = (
+        "_invites_disabled_until",
+        "_dms_disabled_until",
+        "dm_spam_detected_at",
+        "raid_detected_at",
+    )
+
+    def __init__(self, data: IncidentsDataPayload) -> None:
+        self._invites_disabled_until: Optional[datetime.datetime] = utils.parse_time(
+            data.get("invites_disabled_until")
+        )
+        self._dms_disabled_until: Optional[datetime.datetime] = utils.parse_time(
+            data.get("dms_disabled_until")
+        )
+        self.dm_spam_detected_at: Optional[datetime.datetime] = utils.parse_time(
+            data.get("dm_spam_detected_at")
+        )
+        self.raid_detected_at: Optional[datetime.datetime] = utils.parse_time(
+            data.get("raid_detected_at")
+        )
+
+    @property
+    def invites_disabled_until(self) -> Optional[datetime.datetime]:
+        """Optional[:class:`datetime.datetime`]: Returns the time (in UTC) until
+        which users cannot join the server via invites, if any.
+        """
+        if (
+            self._invites_disabled_until is not None
+            and self._invites_disabled_until < utils.utcnow()
+        ):
+            self._invites_disabled_until = None
+
+        return self._invites_disabled_until
+
+    @property
+    def dms_disabled_until(self) -> Optional[datetime.datetime]:
+        """Optional[:class:`datetime.datetime`]: Returns the time (in UTC) until
+        which members cannot send DMs to each other, if any.
+
+        This does not apply to moderators, bots, or members who are
+        already friends with each other.
+        """
+        if self._dms_disabled_until is not None and self._dms_disabled_until < utils.utcnow():
+            self._dms_disabled_until = None
+
+        return self._dms_disabled_until
+
+    def __eq__(self, other: Any) -> bool:
+        return (
+            isinstance(other, IncidentsData)
+            and self.invites_disabled_until == other.invites_disabled_until
+            and self.dms_disabled_until == other.dms_disabled_until
+            and self.dm_spam_detected_at == other.dm_spam_detected_at
+            and self.raid_detected_at == other.raid_detected_at
+        )
+
+    def __repr__(self) -> str:
+        return (
+            f"<IncidentsData invites_disabled_until={self.invites_disabled_until!r}"
+            f" dms_disabled_until={self.dms_disabled_until!r}"
+            f" dm_spam_detected_at={self.dm_spam_detected_at!r}"
+            f" raid_detected_at={self.raid_detected_at!r}>"
+        )
 
 
 class Guild(Hashable):
@@ -177,8 +270,9 @@ class Guild(Hashable):
         The channel that denotes the AFK channel. ``None`` if it doesn't exist.
     id: :class:`int`
         The guild's ID.
-    owner_id: :class:`int`
+    owner_id: Optional[:class:`int`]
         The guild owner's ID. Use :attr:`Guild.owner` if you need a :class:`Member` object instead.
+        This may be ``None`` if the guild is :attr:`~Guild.unavailable`.
     unavailable: :class:`bool`
         Whether the guild is unavailable. If this is ``True`` then the
         reliability of other attributes outside of :attr:`Guild.id` is slim and they might
@@ -318,6 +412,11 @@ class Guild(Hashable):
         To get a full :class:`Invite` object, see :attr:`Guild.vanity_invite`.
 
         .. versionadded:: 2.5
+
+    incidents_data: Optional[:class:`IncidentsData`]
+        Data about various security incidents/actions in this guild, like disabled invites/DMs.
+
+        .. versionadded:: 2.11
     """
 
     __slots__ = (
@@ -350,6 +449,7 @@ class Guild(Hashable):
         "widget_enabled",
         "widget_channel_id",
         "vanity_url_code",
+        "incidents_data",
         "_members",
         "_channels",
         "_icon",
@@ -467,11 +567,8 @@ class Guild(Hashable):
             self._voice_states[user_id] = after
 
         member = self.get_member(user_id)
-        if member is None:
-            try:
-                member = Member(data=data["member"], state=self._state, guild=self)
-            except KeyError:
-                member = None
+        if member is None and "member" in data:
+            member = Member(data=data["member"], state=self._state, guild=self)
 
         return member, before, after
 
@@ -596,6 +693,11 @@ class Guild(Hashable):
         self._safety_alerts_channel_id: Optional[int] = utils._get_as_snowflake(
             guild, "safety_alerts_channel_id"
         )
+        self.incidents_data: Optional[IncidentsData] = (
+            IncidentsData(incidents_data)
+            if (incidents_data := guild.get("incidents_data"))
+            else None
+        )
 
         stage_instances = guild.get("stage_instances")
         if stage_instances is not None:
@@ -632,10 +734,8 @@ class Guild(Hashable):
 
     # TODO: refactor/remove?
     def _sync(self, data: GuildPayload) -> None:
-        try:
+        if "large" in data:
             self._large = data["large"]
-        except KeyError:
-            pass
 
         empty_tuple = ()
         for presence in data.get("presences", []):
@@ -1228,12 +1328,14 @@ class Guild(Hashable):
         if overwrites is MISSING:
             overwrites = {}
         elif not isinstance(overwrites, dict):
-            raise TypeError("overwrites parameter expects a dict.")
+            msg = "overwrites parameter expects a dict."
+            raise TypeError(msg)
 
         perms = []
         for target, perm in overwrites.items():
             if not isinstance(perm, PermissionOverwrite):
-                raise TypeError(f"Expected PermissionOverwrite received {perm.__class__.__name__}")
+                msg = f"Expected PermissionOverwrite received {perm.__class__.__name__}"
+                raise TypeError(msg)
 
             allow, deny = perm.pair()
             payload = {"allow": allow.value, "deny": deny.value, "id": target.id}
@@ -2036,6 +2138,8 @@ class Guild(Hashable):
         discovery_splash: Optional[AssetBytes] = MISSING,
         community: bool = MISSING,
         invites_disabled: bool = MISSING,
+        invites_disabled_until: Optional[Union[datetime.datetime, datetime.timedelta]] = MISSING,
+        dms_disabled_until: Optional[Union[datetime.datetime, datetime.timedelta]] = MISSING,
         raid_alerts_disabled: bool = MISSING,
         afk_channel: Optional[VoiceChannel] = MISSING,
         owner: Snowflake = MISSING,
@@ -2121,7 +2225,8 @@ class Guild(Hashable):
             Whether the guild should be a Community guild. If set to ``True``\\, both ``rules_channel``
             and ``public_updates_channel`` parameters are required.
         invites_disabled: :class:`bool`
-            Whether the guild has paused invites, preventing new users from joining.
+            Whether the guild has paused invites (indefinitely), preventing new users from joining.
+            See also the ``invites_disabled_until`` parameter.
 
             This is only available to guilds that contain ``COMMUNITY``
             in :attr:`Guild.features`.
@@ -2129,6 +2234,28 @@ class Guild(Hashable):
             This cannot be changed at the same time as the ``community`` feature due a Discord API limitation.
 
             .. versionadded:: 2.6
+
+        invites_disabled_until: Optional[Union[:class:`datetime.datetime`, :class:`datetime.timedelta`]]
+            The time until/for which invites are paused, up to 24 hours in the future.
+            See also the ``invites_disabled`` parameter.
+            Can be set to ``None`` to re-enable invites.
+
+            This is only available to guilds that contain ``COMMUNITY``
+            in :attr:`Guild.features`.
+
+            .. versionadded:: 2.11
+
+        dms_disabled_until: Union[:class:`datetime.datetime`, :class:`datetime.timedelta`]
+            The time until/for which DMs between guild members are disabled, up to 24 hours in the future.
+            Can be set to ``None`` to re-enable DMs.
+
+            This does not apply to moderators, bots, or members who are
+            already friends with each other.
+
+            This is only available to guilds that contain ``COMMUNITY``
+            in :attr:`Guild.features`.
+
+            .. versionadded:: 2.11
 
         raid_alerts_disabled: :class:`bool`
             Whether the guild has disabled join raid alerts.
@@ -2216,6 +2343,30 @@ class Guild(Hashable):
         if vanity_code is not MISSING:
             await http.change_vanity_code(self.id, vanity_code, reason=reason)
 
+        if invites_disabled_until is not MISSING or dms_disabled_until is not MISSING:
+            payload: IncidentsDataPayload = {}
+
+            # we need to include the old values, otherwise Discord will consider them set to `null`
+            # (which would e.g. re-enable DMs when disabling invites)
+            if self.incidents_data:
+                if invites_disabled_until is MISSING:
+                    invites_disabled_until = self.incidents_data.invites_disabled_until
+                if dms_disabled_until is MISSING:
+                    dms_disabled_until = self.incidents_data.dms_disabled_until
+
+            if invites_disabled_until is not MISSING:
+                if isinstance(invites_disabled_until, datetime.timedelta):
+                    invites_disabled_until = utils.utcnow() + invites_disabled_until
+                payload["invites_disabled_until"] = utils.isoformat_utc(invites_disabled_until)
+
+            if dms_disabled_until is not MISSING:
+                if isinstance(dms_disabled_until, datetime.timedelta):
+                    dms_disabled_until = utils.utcnow() + dms_disabled_until
+                payload["dms_disabled_until"] = utils.isoformat_utc(dms_disabled_until)
+
+            if payload:
+                await http.edit_guild_incident_actions(self.id, payload)
+
         fields: Dict[str, Any] = {}
         if name is not MISSING:
             fields["name"] = name
@@ -2243,7 +2394,8 @@ class Guild(Hashable):
 
         if default_notifications is not MISSING:
             if not isinstance(default_notifications, NotificationLevel):
-                raise TypeError("default_notifications field must be of type NotificationLevel")
+                msg = "default_notifications field must be of type NotificationLevel"
+                raise TypeError(msg)
             fields["default_message_notifications"] = default_notifications.value
 
         if afk_channel is not MISSING:
@@ -2278,25 +2430,29 @@ class Guild(Hashable):
 
         if owner is not MISSING:
             if self.owner_id != self._state.self_id:
-                raise ValueError("To transfer ownership you must be the owner of the guild.")
+                msg = "To transfer ownership you must be the owner of the guild."
+                raise ValueError(msg)
 
             fields["owner_id"] = owner.id
 
         if verification_level is not MISSING:
             if not isinstance(verification_level, VerificationLevel):
-                raise TypeError("verification_level field must be of type VerificationLevel")
+                msg = "verification_level field must be of type VerificationLevel"
+                raise TypeError(msg)
 
             fields["verification_level"] = verification_level.value
 
         if explicit_content_filter is not MISSING:
             if not isinstance(explicit_content_filter, ContentFilter):
-                raise TypeError("explicit_content_filter field must be of type ContentFilter")
+                msg = "explicit_content_filter field must be of type ContentFilter"
+                raise TypeError(msg)
 
             fields["explicit_content_filter"] = explicit_content_filter.value
 
         if system_channel_flags is not MISSING:
             if not isinstance(system_channel_flags, SystemChannelFlags):
-                raise TypeError("system_channel_flags field must be of type SystemChannelFlags")
+                msg = "system_channel_flags field must be of type SystemChannelFlags"
+                raise TypeError(msg)
 
             fields["system_channel_flags"] = system_channel_flags.value
 
@@ -2309,31 +2465,32 @@ class Guild(Hashable):
             # it is possible to disable or enable other features that we didn't intend to touch.
             # To enable or disable a feature, we will need to provide all of the existing features in advance.
             if self.unavailable:
-                raise RuntimeError(
-                    "cannot modify features of an unavailable guild due to potentially destructive results."
-                )
+                msg = "cannot modify features of an unavailable guild due to potentially destructive results."
+                raise RuntimeError(msg)
             features = set(self.features)
             if community is not MISSING:
                 if not isinstance(community, bool):
-                    raise TypeError("community must be a bool")
+                    msg = "community must be a bool"
+                    raise TypeError(msg)
                 if community:
                     if "rules_channel_id" in fields and "public_updates_channel_id" in fields:
                         features.add("COMMUNITY")
                     else:
-                        raise ValueError(
-                            "community field requires both rules_channel and public_updates_channel fields to be provided"
-                        )
+                        msg = "community field requires both rules_channel and public_updates_channel fields to be provided"
+                        raise ValueError(msg)
                 else:
                     features.discard("COMMUNITY")
 
             if invites_disabled is not MISSING:
                 if community is not MISSING:
-                    raise ValueError(
+                    msg = (
                         "cannot modify both the COMMUNITY feature and INVITES_DISABLED feature at the "
                         "same time due to a discord limitation."
                     )
+                    raise ValueError(msg)
                 if not isinstance(invites_disabled, bool):
-                    raise TypeError("invites_disabled must be a bool")
+                    msg = "invites_disabled must be a bool"
+                    raise TypeError(msg)
                 if invites_disabled:
                     features.add("INVITES_DISABLED")
                 else:
@@ -2341,12 +2498,14 @@ class Guild(Hashable):
 
             if raid_alerts_disabled is not MISSING:
                 if community is not MISSING:
-                    raise ValueError(
+                    msg = (
                         "cannot modify both the COMMUNITY feature and RAID_ALERTS_DISABLED feature at the "
                         "same time due to a discord limitation."
                     )
+                    raise ValueError(msg)
                 if not isinstance(raid_alerts_disabled, bool):
-                    raise TypeError("raid_alerts_disabled must be a bool")
+                    msg = "raid_alerts_disabled must be a bool"
+                    raise TypeError(msg)
                 if raid_alerts_disabled:
                     features.add("RAID_ALERTS_DISABLED")
                 else:
@@ -2385,12 +2544,16 @@ class Guild(Hashable):
         """
         data = await self._state.http.get_all_guild_channels(self.id)
 
-        def convert(d):
+        def convert(d: GuildChannelPayload) -> GuildChannel:
             factory, _ = _guild_channel_factory(d["type"])
             if factory is None:
                 raise InvalidData("Unknown channel type {type} for channel ID {id}.".format_map(d))
 
-            channel = factory(guild=self, state=self._state, data=d)
+            channel = factory(
+                guild=self,
+                state=self._state,
+                data=d,  # type: ignore
+            )
             return channel
 
         return [convert(d) for d in data]
@@ -2643,19 +2806,21 @@ class Guild(Hashable):
                 elif channel_type is ChannelType.stage_voice:
                     entity_type = GuildScheduledEventEntityType.stage_instance
                 else:
-                    raise TypeError("channel type must be either 'voice' or 'stage_voice'")
+                    msg = "channel type must be either 'voice' or 'stage_voice'"
+                    raise TypeError(msg)
             else:
-                raise TypeError(
-                    "`entity_type` must be provided if it cannot be derived from `channel`"
-                )
+                msg = "`entity_type` must be provided if it cannot be derived from `channel`"
+                raise TypeError(msg)
 
         if not isinstance(entity_type, GuildScheduledEventEntityType):
-            raise TypeError("entity_type must be an instance of GuildScheduledEventEntityType")
+            msg = "entity_type must be an instance of GuildScheduledEventEntityType"
+            raise TypeError(msg)
 
         if privacy_level is MISSING:
             privacy_level = GuildScheduledEventPrivacyLevel.guild_only
         elif not isinstance(privacy_level, GuildScheduledEventPrivacyLevel):
-            raise TypeError("privacy_level must be an instance of GuildScheduledEventPrivacyLevel")
+            msg = "privacy_level must be an instance of GuildScheduledEventPrivacyLevel"
+            raise TypeError(msg)
 
         fields: Dict[str, Any] = {
             "name": name,
@@ -2666,9 +2831,8 @@ class Guild(Hashable):
 
         if entity_metadata is not MISSING:
             if not isinstance(entity_metadata, GuildScheduledEventMetadata):
-                raise TypeError(
-                    "entity_metadata must be an instance of GuildScheduledEventMetadata"
-                )
+                msg = "entity_metadata must be an instance of GuildScheduledEventMetadata"
+                raise TypeError(msg)
 
             fields["entity_metadata"] = entity_metadata.to_dict()
 
@@ -2774,9 +2938,8 @@ class Guild(Hashable):
                 welcome_channel_payload = []
                 for channel in channels:
                     if not isinstance(channel, WelcomeScreenChannel):
-                        raise TypeError(
-                            "'channels' must be a list of 'WelcomeScreenChannel' objects"
-                        )
+                        msg = "'channels' must be a list of 'WelcomeScreenChannel' objects"
+                        raise TypeError(msg)
                     welcome_channel_payload.append(channel.to_dict())
                 payload["welcome_channels"] = welcome_channel_payload
 
@@ -2841,9 +3004,8 @@ class Guild(Hashable):
         if hasattr(self._state, "application_flags"):
             flags = self._state.application_flags
             if not (flags.gateway_guild_members_limited or flags.gateway_guild_members):
-                raise ClientException(
-                    "The `members` intent must be enabled in the Developer Portal to be able to use this method."
-                )
+                msg = "The `members` intent must be enabled in the Developer Portal to be able to use this method."
+                raise ClientException(msg)
 
         return MemberIterator(self, limit=limit, after=after)
 
@@ -2944,11 +3106,13 @@ class Guild(Hashable):
             raise InvalidData("Unknown channel type {type} for channel ID {id}.".format_map(data))
 
         if ch_type in (ChannelType.group, ChannelType.private):
-            raise InvalidData("Channel ID resolved to a private channel")
+            msg = "Channel ID resolved to a private channel"
+            raise InvalidData(msg)
 
         guild_id = int(data["guild_id"])  # type: ignore
         if self.id != guild_id:
-            raise InvalidData("Guild ID resolved to a different guild")
+            msg = "Guild ID resolved to a different guild"
+            raise InvalidData(msg)
 
         channel: GuildChannel = factory(guild=self, state=self._state, data=data)  # type: ignore
         return channel
@@ -3069,9 +3233,8 @@ class Guild(Hashable):
             then this returns ``None``.
         """
         if not isinstance(days, int):
-            raise TypeError(
-                f"Expected int for ``days``, received {days.__class__.__name__} instead."
-            )
+            msg = f"Expected int for ``days``, received {days.__class__.__name__} instead."
+            raise TypeError(msg)
 
         if roles:
             role_ids = [str(role.id) for role in roles]
@@ -3166,9 +3329,8 @@ class Guild(Hashable):
             The number of members estimated to be pruned.
         """
         if not isinstance(days, int):
-            raise TypeError(
-                f"Expected int for ``days``, received {days.__class__.__name__} instead."
-            )
+            msg = f"Expected int for ``days``, received {days.__class__.__name__} instead."
+            raise TypeError(msg)
 
         if roles:
             role_ids = [str(role.id) for role in roles]
@@ -3183,8 +3345,10 @@ class Guild(Hashable):
 
         Returns a list of all active instant invites from the guild.
 
-        You must have :attr:`~Permissions.manage_guild` permission to
-        use this.
+        You must have :attr:`~Permissions.manage_guild` or :attr:`~Permissions.view_audit_log`
+        permission to use this.
+        Some attributes (see :ref:`table <invite_attr_table>`) are only available with
+        :attr:`~Permissions.manage_guild` permissions.
 
         .. note::
 
@@ -3204,7 +3368,7 @@ class Guild(Hashable):
             The list of invites that are currently active.
         """
         data = await self._state.http.invites_from(self.id)
-        result = []
+        result: List[Invite] = []
         for invite in data:
             if channel_data := invite.get("channel"):
                 channel = self.get_channel(int(channel_data["id"]))
@@ -3301,7 +3465,7 @@ class Guild(Hashable):
         """
         data = await self._state.http.get_all_integrations(self.id)
 
-        def convert(d):
+        def convert(d: IntegrationPayload) -> Integration:
             factory, _ = _integration_factory(d["type"])
             return factory(guild=self, data=d)
 
@@ -3741,6 +3905,12 @@ class Guild(Hashable):
         permissions: Permissions = MISSING,
         color: Union[Colour, int] = MISSING,
         colour: Union[Colour, int] = MISSING,
+        primary_colour: Union[Colour, int] = MISSING,
+        primary_color: Union[Colour, int] = MISSING,
+        secondary_colour: Optional[Union[Colour, int]] = None,
+        secondary_color: Optional[Union[Colour, int]] = None,
+        tertiary_colour: Optional[Union[Colour, int]] = None,
+        tertiary_color: Optional[Union[Colour, int]] = None,
         hoist: bool = MISSING,
         icon: AssetBytes = MISSING,
         emoji: str = MISSING,
@@ -3771,6 +3941,28 @@ class Guild(Hashable):
         colour: Union[:class:`Colour`, :class:`int`]
             The colour for the role. Defaults to :meth:`Colour.default`.
             This is aliased to ``color`` as well.
+
+            .. note::
+                This is equivalent to ``primary_colour``.
+        primary_colour: Union[:class:`Colour`, :class:`int`]
+            The primary_colour for the role. Defaults to :meth:`Colour.default`.
+            This is aliased to ``primary_color`` as well.
+
+            .. versionadded:: 2.11
+        secondary_colour: Optional[Union[:class:`Colour`, :class:`int`]]
+            The secondary_colour for the role. Defaults to ``None``.
+            This is aliased to ``secondary_color`` as well.
+
+            .. versionadded:: 2.11
+        tertiary_colour: Optional[Union[:class:`Colour`, :class:`int`]]
+            The tertiary_colour for the role. Defaults to ``None``.
+            This is aliased to ``tertiary_color`` as well.
+
+            .. note::
+                When passing this the only permitted values are the ones returned by
+                :meth:`Colour.holographic_style`, any other color value will get rejected.
+
+            .. versionadded:: 2.11
         hoist: :class:`bool`
             Whether the role should be shown separately in the member list.
             Defaults to ``False``.
@@ -3811,11 +4003,25 @@ class Guild(Hashable):
         else:
             fields["permissions"] = "0"
 
-        actual_colour = colour or color or Colour.default()
-        if isinstance(actual_colour, int):
-            fields["color"] = actual_colour
-        else:
-            fields["color"] = actual_colour.value
+        actual_primary_color = colour or color or primary_colour or primary_color
+        actual_secondary_color = secondary_colour or secondary_color
+        actual_tertiary_color = tertiary_colour or tertiary_color
+        if actual_primary_color is MISSING:
+            actual_primary_color = 0
+        elif isinstance(actual_primary_color, Colour):
+            actual_primary_color = actual_primary_color.value
+
+        if isinstance(actual_secondary_color, Colour):
+            actual_secondary_color = actual_secondary_color.value
+
+        if isinstance(actual_tertiary_color, Colour):
+            actual_tertiary_color = actual_tertiary_color.value
+
+        fields["colors"] = {
+            "primary_color": actual_primary_color,
+            "secondary_color": actual_secondary_color,
+            "tertiary_color": actual_tertiary_color,
+        }
 
         if hoist is not MISSING:
             fields["hoist"] = hoist
@@ -3888,7 +4094,8 @@ class Guild(Hashable):
             A list of all the roles in the guild.
         """
         if not isinstance(positions, dict):
-            raise TypeError("positions parameter expects a dict.")
+            msg = "positions parameter expects a dict."
+            raise TypeError(msg)
 
         role_positions: List[Any] = []
         for role, position in positions.items():
@@ -4006,9 +4213,8 @@ class Guild(Hashable):
             Banning failed.
         """
         if delete_message_days is not MISSING and clean_history_duration is not MISSING:
-            raise TypeError(
-                "Only one of `clean_history_duration` and `delete_message_days` may be provided."
-            )
+            msg = "Only one of `clean_history_duration` and `delete_message_days` may be provided."
+            raise TypeError(msg)
 
         if delete_message_days is not MISSING:
             utils.warn_deprecated(
@@ -4023,10 +4229,11 @@ class Guild(Hashable):
         elif isinstance(clean_history_duration, int):
             delete_message_seconds = clean_history_duration
         else:
-            raise TypeError(
+            msg = (
                 "`clean_history_duration` should be int or timedelta, "
                 f"not {type(clean_history_duration).__name__}"
             )
+            raise TypeError(msg)
 
         await self._state.http.ban(
             user.id, self.id, delete_message_seconds=delete_message_seconds, reason=reason
@@ -4111,10 +4318,11 @@ class Guild(Hashable):
         elif isinstance(clean_history_duration, int):
             delete_message_seconds = clean_history_duration
         else:
-            raise TypeError(
+            msg = (
                 "`clean_history_duration` should be int or timedelta, "
                 f"not {type(clean_history_duration).__name__}"
             )
+            raise TypeError(msg)
 
         data = await self._state.http.bulk_ban(
             [user.id for user in users],
@@ -4419,9 +4627,11 @@ class Guild(Hashable):
             You are not the owner of the guild.
         """
         if isinstance(mfa_level, bool) or not isinstance(mfa_level, int):
-            raise TypeError(f"`mfa_level` must be of type int, got {type(mfa_level).__name__}")
+            msg = f"`mfa_level` must be of type int, got {type(mfa_level).__name__}"
+            raise TypeError(msg)
         if self.owner_id != self._state.self_id:
-            raise ValueError("To edit the 2FA level, you must be the owner of the guild.")
+            msg = "To edit the 2FA level, you must be the owner of the guild."
+            raise ValueError(msg)
         # return value unused
         await self._state.http.edit_mfa_level(self.id, mfa_level, reason=reason)
 
@@ -4453,7 +4663,8 @@ class Guild(Hashable):
              Returns a list of all the members within the guild.
         """
         if not self._state._intents.members:
-            raise ClientException("Intents.members must be enabled to use this.")
+            msg = "Intents.members must be enabled to use this."
+            raise ClientException(msg)
 
         if not self._state.is_guild_evicted(self):
             return await self._state.chunk_guild(self, cache=cache)
@@ -4515,20 +4726,25 @@ class Guild(Hashable):
             The list of members that have matched the query.
         """
         if presences and not self._state._intents.presences:
-            raise ClientException("Intents.presences must be enabled to use this.")
+            msg = "Intents.presences must be enabled to use this."
+            raise ClientException(msg)
 
         if query is None:
             if user_ids is None:
-                raise ValueError("Must pass either query or user_ids")
+                msg = "Must pass either query or user_ids"
+                raise ValueError(msg)
 
         elif not query:
-            raise ValueError("Cannot pass empty query string.")
+            msg = "Cannot pass empty query string."
+            raise ValueError(msg)
 
         elif user_ids is not None:
-            raise ValueError("Cannot pass both query and user_ids")
+            msg = "Cannot pass both query and user_ids"
+            raise ValueError(msg)
 
         if user_ids is not None and not user_ids:
-            raise ValueError("user_ids must contain at least 1 value")
+            msg = "user_ids must contain at least 1 value"
+            raise ValueError(msg)
 
         limit = min(100, limit or 5)
         return await self._state.query_members(
@@ -4541,7 +4757,7 @@ class Guild(Hashable):
         *,
         limit: int = 1,
         cache: bool = True,
-    ):
+    ) -> List[Member]:
         """|coro|
 
         Retrieves members that belong to this guild whose name starts with
@@ -4575,12 +4791,14 @@ class Guild(Hashable):
             The list of members that have matched the query.
         """
         if not query:
-            raise ValueError("Cannot pass empty query string.")
+            msg = "Cannot pass empty query string."
+            raise ValueError(msg)
         if limit < 1:
-            raise ValueError("limit must be at least 1")
+            msg = "limit must be at least 1"
+            raise ValueError(msg)
         limit = min(1000, limit)
         members = await self._state.http.search_guild_members(self.id, query=query, limit=limit)
-        resp = []
+        resp: List[Member] = []
         for member in members:
             member = Member(state=self._state, data=member, guild=self)
             if cache and member.id not in self._members:
@@ -4631,7 +4849,8 @@ class Guild(Hashable):
             The list of members with the given IDs, if they exist.
         """
         if presences and not self._state._intents.presences:
-            raise ClientException("Intents.presences must be enabled to use this.")
+            msg = "Intents.presences must be enabled to use this."
+            raise ClientException(msg)
 
         members: List[Member] = []
         unresolved_ids: List[int] = []
@@ -4851,7 +5070,8 @@ class Guild(Hashable):
             The newly updated member.
         """
         if not (duration is MISSING) ^ (until is MISSING):
-            raise ValueError("Exactly one of `duration` and `until` must be provided")
+            msg = "Exactly one of `duration` and `until` must be provided"
+            raise ValueError(msg)
 
         payload: Dict[str, Any] = {}
 
@@ -5000,15 +5220,16 @@ class Guild(Hashable):
             AutoModTriggerType.keyword_preset.value,
             AutoModTriggerType.mention_spam.value,
         ):
-            raise ValueError("Specified trigger type requires `trigger_metadata` to not be empty")
+            msg = "Specified trigger type requires `trigger_metadata` to not be empty"
+            raise ValueError(msg)
 
         if not actions:
-            raise ValueError("At least one action must be provided.")
+            msg = "At least one action must be provided."
+            raise ValueError(msg)
         for action in actions:
             if not isinstance(action, AutoModAction):
-                raise TypeError(
-                    f"actions must be of type `AutoModAction` (or subtype), not {type(action)!r}"
-                )
+                msg = f"actions must be of type `AutoModAction` (or subtype), not {type(action)!r}"
+                raise TypeError(msg)
 
         data = await self._state.http.create_auto_moderation_rule(
             self.id,
@@ -5444,9 +5665,9 @@ class GuildBuilder:
 
         actual_colour = colour or color or Colour.default()
         if isinstance(actual_colour, int):
-            data["color"] = actual_colour
+            data["color"] = actual_colour  # type: ignore
         else:
-            data["color"] = actual_colour.value
+            data["color"] = actual_colour.value  # type: ignore
 
         if hoist is not MISSING:
             data["hoist"] = hoist

@@ -54,7 +54,8 @@ class Colour:
 
     def __init__(self, value: int) -> None:
         if not isinstance(value, int):
-            raise TypeError(f"Expected int parameter, received {value.__class__.__name__} instead.")
+            msg = f"Expected int parameter, received {value.__class__.__name__} instead."
+            raise TypeError(msg)
 
         self.value: int = value
 
@@ -318,6 +319,19 @@ class Colour:
         .. versionadded:: 2.10
         """
         return cls(0x2B2D31)
+
+    @classmethod
+    def holographic_style(cls) -> Tuple[Self, Self, Self]:
+        """A factory method that returns a tuple of :class:`Colour` with values of
+        ``0xA9C9FF``, ``0xFFBBEC``, ``0xFFC3A0``. This matches the holographic colour style
+        for roles.
+
+        The first value represents the ``colour`` (``primary_color``), the second and the third
+        represents the ``secondary_colour`` and ``tertiary_colour`` respectively.
+
+        .. versionadded:: 2.11
+        """
+        return cls(0xA9C9FF), cls(0xFFBBEC), cls(0xFFC3A0)
 
 
 Color = Colour

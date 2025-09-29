@@ -47,6 +47,7 @@ from .channel import (
     _guild_channel_factory,
     _threaded_channel_factory,
 )
+from .components import _SELECT_COMPONENT_TYPES
 from .emoji import Emoji
 from .entitlement import Entitlement
 from .enums import ApplicationCommandType, ChannelType, ComponentType, MessageType, Status, try_enum
@@ -96,6 +97,8 @@ from .utils import MISSING
 from .webhook import Webhook
 
 if TYPE_CHECKING:
+    from typing_extensions import Concatenate
+
     from .abc import AnyChannel, MessageableChannel, PrivateChannel
     from .app_commands import APIApplicationCommand, ApplicationCommand
     from .client import Client
@@ -187,17 +190,6 @@ async def logging_coroutine(coroutine: Coroutine[Any, Any, T], *, info: str) -> 
         _log.exception("Exception occurred during %s", info)
 
 
-_SELECT_COMPONENT_TYPES = frozenset(
-    (
-        ComponentType.string_select,
-        ComponentType.user_select,
-        ComponentType.role_select,
-        ComponentType.mentionable_select,
-        ComponentType.channel_select,
-    )
-)
-
-
 class ConnectionState:
     if TYPE_CHECKING:
         _get_websocket: Callable[..., DiscordWebSocket]
@@ -207,9 +199,9 @@ class ConnectionState:
     def __init__(
         self,
         *,
-        dispatch: Callable,
-        handlers: Dict[str, Callable],
-        hooks: Dict[str, Callable],
+        dispatch: Callable[Concatenate[str, ...], Any],
+        handlers: Dict[str, Callable[..., Any]],
+        hooks: Dict[str, Callable[..., Any]],
         http: HTTPClient,
         loop: asyncio.AbstractEventLoop,
         max_messages: Optional[int] = 1000,
@@ -229,26 +221,29 @@ class ConnectionState:
         if self.max_messages is not None and self.max_messages <= 0:
             self.max_messages = 1000
 
-        self.dispatch: Callable = dispatch
-        self.handlers: Dict[str, Callable] = handlers
-        self.hooks: Dict[str, Callable] = hooks
+        self.dispatch: Callable[Concatenate[str, ...], Any] = dispatch
+        self.handlers: Dict[str, Callable[..., Any]] = handlers
+        self.hooks: Dict[str, Callable[..., Any]] = hooks
         self.shard_count: Optional[int] = None
         self._ready_task: Optional[asyncio.Task] = None
         self.application_id: Optional[int] = None if application_id is None else int(application_id)
         self.heartbeat_timeout: float = heartbeat_timeout
         self.guild_ready_timeout: float = guild_ready_timeout
         if self.guild_ready_timeout < 0:
-            raise ValueError("guild_ready_timeout cannot be negative.")
+            msg = "guild_ready_timeout cannot be negative."
+            raise ValueError(msg)
 
         if allowed_mentions is not None and not isinstance(allowed_mentions, AllowedMentions):
-            raise TypeError("allowed_mentions parameter must be AllowedMentions.")
+            msg = "allowed_mentions parameter must be AllowedMentions."
+            raise TypeError(msg)
 
         self.allowed_mentions: Optional[AllowedMentions] = allowed_mentions
         self._chunk_requests: Dict[Union[int, str], ChunkRequest] = {}
 
         if activity:
             if not isinstance(activity, BaseActivity):
-                raise TypeError("activity parameter must derive from BaseActivity.")
+                msg = "activity parameter must derive from BaseActivity."
+                raise TypeError(msg)
 
             self._activity: Optional[ActivityPayload] = activity.to_dict()
         else:
@@ -260,7 +255,8 @@ class ConnectionState:
 
         if intents is not None:
             if not isinstance(intents, Intents):
-                raise TypeError(f"intents parameter must be Intents, not {type(intents)!r}.")
+                msg = f"intents parameter must be Intents, not {type(intents)!r}."
+                raise TypeError(msg)
 
             if not intents.guilds:
                 _log.warning(
@@ -277,16 +273,18 @@ class ConnectionState:
 
         # Ensure these two are set properly
         if not self._intents.members and self._chunk_guilds:
-            raise ValueError("Intents.members must be enabled to chunk guilds at startup.")
+            msg = "Intents.members must be enabled to chunk guilds at startup."
+            raise ValueError(msg)
 
         if member_cache_flags is None:
             member_cache_flags = MemberCacheFlags.from_intents(self._intents)
         else:
             if not isinstance(member_cache_flags, MemberCacheFlags):
-                raise TypeError(
+                msg = (
                     "member_cache_flags parameter must be MemberCacheFlags, "
                     f"not {type(member_cache_flags)!r}"
                 )
+                raise TypeError(msg)
 
             member_cache_flags._verify_intents(self._intents)
 
@@ -484,7 +482,8 @@ class ConnectionState:
         /,
     ) -> None:
         if not application_command.id:
-            raise AssertionError("The provided application command does not have an ID")
+            msg = "The provided application command does not have an ID"
+            raise AssertionError(msg)
         self._global_application_commands[application_command.id] = application_command
 
     def _remove_global_application_command(self, application_command_id: int, /) -> None:
@@ -504,7 +503,8 @@ class ConnectionState:
         self, guild_id: int, application_command: APIApplicationCommand
     ) -> None:
         if not application_command.id:
-            raise AssertionError("The provided application command does not have an ID")
+            msg = "The provided application command does not have an ID"
+            raise AssertionError(msg)
         try:
             granula = self._guild_application_commands[guild_id]
             granula[application_command.id] = application_command
@@ -633,9 +633,9 @@ class ConnectionState:
         data: Union[MessagePayload, gateway.TypingStartEvent],
     ) -> Tuple[Union[PartialChannel, Thread], Optional[Guild]]:
         channel_id = int(data["channel_id"])
-        try:
-            guild = self._get_guild(int(data["guild_id"]))
-        except KeyError:
+        guild_id = utils._get_as_snowflake(data, "guild_id")
+
+        if guild_id is None:
             # if we're here, this is a DM channel or an ephemeral message in a guild
             channel = self.get_channel(channel_id)
             if channel is None:
@@ -648,6 +648,7 @@ class ConnectionState:
                 channel = DMChannel._from_message(self, channel_id, user_id)
             guild = None
         else:
+            guild = self._get_guild(guild_id)
             channel = guild and guild._resolve_channel(channel_id)
 
         return channel or PartialMessageable(state=self, id=channel_id), guild
@@ -674,7 +675,7 @@ class ConnectionState:
         user_ids: Optional[List[int]],
         cache: bool,
         presences: bool,
-    ):
+    ) -> List[Member]:
         guild_id = guild.id
         ws = self._get_websocket(guild_id)
 
@@ -1147,13 +1148,13 @@ class ConnectionState:
 
     def parse_channel_pins_update(self, data: gateway.ChannelPinsUpdateEvent) -> None:
         channel_id = int(data["channel_id"])
-        try:
-            guild = self._get_guild(int(data["guild_id"]))
-        except KeyError:
+        guild_id = utils._get_as_snowflake(data, "guild_id")
+        if guild_id is not None:
+            guild = self._get_guild(guild_id)
+            channel = guild and guild._resolve_channel(channel_id)
+        else:
             guild = None
             channel = self._get_private_channel(channel_id)
-        else:
-            channel = guild and guild._resolve_channel(channel_id)
 
         if channel is None:
             _log.debug(
@@ -1235,15 +1236,14 @@ class ConnectionState:
             _log.debug("THREAD_LIST_SYNC referencing an unknown guild ID: %s. Discarding", guild_id)
             return
 
-        try:
+        if "channel_ids" in data:
             channel_ids = set(map(int, data["channel_ids"]))
-        except KeyError:
+            previous_threads = guild._filter_threads(channel_ids)
+        else:
             # If not provided, then the entire guild is being synced
             # So all previous thread data should be overwritten
             previous_threads = guild._threads.copy()
             guild._clear_threads()
-        else:
-            previous_threads = guild._filter_threads(channel_ids)
 
         threads = {d["id"]: guild._store_thread(d) for d in data.get("threads", [])}
 
@@ -1470,7 +1470,7 @@ class ConnectionState:
             return await request.wait()
         return request.get_future()
 
-    async def _chunk_and_dispatch(self, guild, unavailable) -> None:
+    async def _chunk_and_dispatch(self, guild: Guild, unavailable: Optional[bool]) -> None:
         try:
             await asyncio.wait_for(self.chunk_guild(guild), timeout=60.0)
         except asyncio.TimeoutError:
@@ -2035,7 +2035,7 @@ class ConnectionState:
         self._handle_soundboard_update(
             guild,
             # append new sound
-            guild.soundboard_sounds + (sound,),
+            (*guild.soundboard_sounds, sound),
         )
 
     def parse_guild_soundboard_sound_update(self, data: gateway.GuildSoundboardSoundUpdate) -> None:

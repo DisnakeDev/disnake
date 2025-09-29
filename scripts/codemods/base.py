@@ -3,7 +3,7 @@
 from abc import ABC
 from contextlib import contextmanager
 from contextvars import ContextVar
-from typing import TYPE_CHECKING, ClassVar, Optional
+from typing import TYPE_CHECKING, ClassVar, Generator, Optional
 
 import libcst as cst
 import libcst.codemod as codemod
@@ -21,7 +21,7 @@ class NoMetadataWrapperMixin(base_type):
     # deepcopying the entire module on initialization
 
     @contextmanager
-    def _handle_metadata_reference(self, tree: cst.Module):
+    def _handle_metadata_reference(self, tree: cst.Module) -> Generator[cst.Module, None, None]:
         ctx_unsafe_skip_copy.set(True)
         with super()._handle_metadata_reference(tree) as res:
             ctx_unsafe_skip_copy.set(False)
@@ -48,13 +48,12 @@ class BaseCodemodCommand(NoMetadataWrapperMixin, cst.CSTTransformer, codemod.Cod
 
             # n.b. doing it this way is faster than using `tree.code`,
             # which codegen's the entire module again
-            with open(self.context.filename, "r", encoding="utf-8") as f:
+            with open(self.context.filename, encoding="utf-8") as f:
                 code = f.read()
 
             if self.CHECK_MARKER not in code:
-                raise codemod.SkipFile(
-                    f"this module does not contain the required marker: `{self.CHECK_MARKER}`."
-                )
+                msg = f"this module does not contain the required marker: `{self.CHECK_MARKER}`."
+                raise codemod.SkipFile(msg)
 
         return super().transform_module(tree)
 

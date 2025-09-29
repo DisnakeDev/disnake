@@ -46,7 +46,6 @@ has_nacl: bool
 
 try:
     import nacl.secret
-    import nacl.utils
 
     has_nacl = True
 except ImportError:
@@ -201,7 +200,8 @@ class VoiceClient(VoiceProtocol):
 
     def __init__(self, client: Client, channel: abc.Connectable) -> None:
         if not has_nacl:
-            raise RuntimeError("PyNaCl library needed in order to use voice")
+            msg = "PyNaCl library needed in order to use voice"
+            raise RuntimeError(msg)
 
         super().__init__(client, channel)
         state = client._connection
@@ -283,7 +283,7 @@ class VoiceClient(VoiceProtocol):
             )
             return
 
-        self.endpoint, _, _ = endpoint.rpartition(":")
+        self.endpoint = endpoint
         if self.endpoint.startswith("wss://"):
             # Just in case, strip it off since we're going to add it later
             self.endpoint = self.endpoint[6:]
@@ -505,7 +505,7 @@ class VoiceClient(VoiceProtocol):
 
     # audio related
 
-    def _get_voice_packet(self, data):
+    def _get_voice_packet(self, data: bytes) -> bytes:
         header = bytearray(12)
 
         # Formulate rtp header
@@ -518,7 +518,7 @@ class VoiceClient(VoiceProtocol):
         encrypt_packet = getattr(self, f"_encrypt_{self.mode}")
         return encrypt_packet(header, data)
 
-    def _get_nonce(self, pad: int):
+    def _get_nonce(self, pad: int) -> Tuple[bytes, bytes]:
         # returns (nonce, padded_nonce).
         # n.b. all currently implemented modes use the same nonce size (192 bits / 24 bytes)
         nonce = struct.pack(">I", self._lite_nonce)
@@ -530,8 +530,8 @@ class VoiceClient(VoiceProtocol):
         return (nonce, nonce.ljust(pad, b"\0"))
 
     def _encrypt_aead_xchacha20_poly1305_rtpsize(self, header: bytes, data) -> bytes:
-        box = nacl.secret.Aead(bytes(self.secret_key))
-        nonce, padded_nonce = self._get_nonce(nacl.secret.Aead.NONCE_SIZE)
+        box = nacl.secret.Aead(bytes(self.secret_key))  # type: ignore[reportPossiblyUnboundVariable]
+        nonce, padded_nonce = self._get_nonce(nacl.secret.Aead.NONCE_SIZE)  # type: ignore[reportPossiblyUnboundVariable]
 
         return (
             header
@@ -570,13 +570,16 @@ class VoiceClient(VoiceProtocol):
             Source is not opus encoded and opus is not loaded.
         """
         if not self.is_connected():
-            raise ClientException("Not connected to voice.")
+            msg = "Not connected to voice."
+            raise ClientException(msg)
 
         if self.is_playing():
-            raise ClientException("Already playing audio.")
+            msg = "Already playing audio."
+            raise ClientException(msg)
 
         if not isinstance(source, AudioSource):
-            raise TypeError(f"source must be an AudioSource not {source.__class__.__name__}")
+            msg = f"source must be an AudioSource not {source.__class__.__name__}"
+            raise TypeError(msg)
 
         if not self.encoder and not source.is_opus():
             self.encoder = opus.Encoder()
@@ -619,10 +622,12 @@ class VoiceClient(VoiceProtocol):
     @source.setter
     def source(self, value: AudioSource) -> None:
         if not isinstance(value, AudioSource):
-            raise TypeError(f"expected AudioSource not {value.__class__.__name__}.")
+            msg = f"expected AudioSource not {value.__class__.__name__}."
+            raise TypeError(msg)
 
         if self._player is None:
-            raise ValueError("Not playing anything.")
+            msg = "Not playing anything."
+            raise ValueError(msg)
 
         self._player._set_source(value)
 

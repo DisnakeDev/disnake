@@ -9,7 +9,18 @@ import sys
 import warnings
 from dataclasses import dataclass
 from datetime import timedelta, timezone
-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, TypeVar, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Literal,
+    Optional,
+    Tuple,
+    TypeVar,
+    Union,
+)
 from unittest import mock
 
 import pytest
@@ -498,18 +509,18 @@ def test_resolve_template(url, expected) -> None:
             # it's just meant to test several combinations
             "*hi* ~~a~ |aaa~*\\``\n`py x``` __uwu__ y",
             "hi a aaa\npy x uwu y",
-            r"\*hi\* \~\~a\~ \|aaa\~\*\\\`\`" "\n" r"\`py x\`\`\` \_\_uwu\_\_ y",
+            r"\*hi\* \~\~a\~ \|aaa\~\*\\\`\`" + "\n" + r"\`py x\`\`\` \_\_uwu\_\_ y",
         ),
         (
-            "aaaaa\n> h\n>> abc \n>>> te*st_",
-            "aaaaa\nh\n>> abc \ntest",
-            "aaaaa\n\\> h\n>> abc \n\\>>> te\\*st\\_",
+            "aaaaa\n> h\n>> abc \n>>> nay*ern_",
+            "aaaaa\nh\n>> abc \nnayern",
+            "aaaaa\n\\> h\n>> abc \n\\>>> nay\\*ern\\_",
         ),
         (
             "*h*\n> [li|nk](~~url~~) xyz **https://google.com/stuff?uwu=owo",
             "h\n xyz https://google.com/stuff?uwu=owo",
             # NOTE: currently doesn't escape inside `[x](y)`, should that be changed?
-            r"\*h\*" "\n" r"\> \[li|nk](~~url~~) xyz \*\*https://google.com/stuff?uwu=owo",
+            r"\*h\*" + "\n" + r"\> \[li|nk](~~url~~) xyz \*\*https://google.com/stuff?uwu=owo",
         ),
     ],
 )
@@ -744,7 +755,7 @@ def test_as_chunks_size(max_size: int) -> None:
         ([], ()),
         ([disnake.CommandInter, int, Optional[str]], (disnake.CommandInter, int, Optional[str])),
         # check flattening + deduplication (both of these are done automatically in 3.9.1+)
-        ([float, Literal[1, 2, Literal[3, 4]], Literal["a", "bc"]], (float, 1, 2, 3, 4, "a", "bc")),
+        ([float, Literal[1, 2, Literal[3, 4]], Literal["a", "bc"]], (float, 1, 2, 3, 4, "a", "bc")),  # noqa: RUF041
         ([Literal[1, 1, 2, 3, 3]], (1, 2, 3)),
     ],
 )
@@ -772,7 +783,7 @@ def test_normalise_optional_params(params, expected) -> None:
         # complex types
         (List[int], List[int], False),
         (Dict[float, "List[yarl.URL]"], Dict[float, List[yarl.URL]], True),
-        (Literal[1, Literal[False], "hi"], Literal[1, False, "hi"], False),
+        (Literal[1, Literal[False], "hi"], Literal[1, False, "hi"], False),  # noqa: RUF041
         # unions
         (Union[timezone, float], Union[timezone, float], False),
         (Optional[int], Optional[int], False),
@@ -805,31 +816,34 @@ def test_resolve_annotation_literal() -> None:
     with pytest.raises(
         TypeError, match=r"Literal arguments must be of type str, int, bool, or NoneType."
     ):
-        utils.resolve_annotation(Literal[timezone.utc, 3], globals(), locals(), {})  # type: ignore
+        utils.resolve_annotation(Literal[timezone.utc, 3], globals(), locals(), {})
+
+
+# declared here as `TypeAliasType` is only valid in class/module scopes
+if TYPE_CHECKING or sys.version_info >= (3, 12):
+    # this is equivalent to `type CoolList = List[int]`
+    CoolList = TypeAliasType("CoolList", List[int])
+
+    # this is equivalent to `type CoolList[T] = List[T]`
+    T = TypeVar("T")
+    CoolListGeneric = TypeAliasType("CoolListGeneric", List[T], type_params=(T,))
 
 
 @pytest.mark.skipif(sys.version_info < (3, 12), reason="syntax requires py3.12")
 class TestResolveAnnotationTypeAliasType:
     def test_simple(self) -> None:
-        # this is equivalent to `type CoolList = List[int]`
-        CoolList = TypeAliasType("CoolList", List[int])
-        assert utils.resolve_annotation(CoolList, globals(), locals(), {}) == List[int]
+        annotation = CoolList
+        assert utils.resolve_annotation(annotation, globals(), locals(), {}) == List[int]
 
     def test_generic(self) -> None:
-        # this is equivalent to `type CoolList[T] = List[T]; CoolList[int]`
-        T = TypeVar("T")
-        CoolList = TypeAliasType("CoolList", List[T], type_params=(T,))
-
-        annotation = CoolList[int]
+        annotation = CoolListGeneric[int]
         assert utils.resolve_annotation(annotation, globals(), locals(), {}) == List[int]
 
     # alias and arg in local scope
     def test_forwardref_local(self) -> None:
-        T = TypeVar("T")
         IntOrStr = Union[int, str]
-        CoolList = TypeAliasType("CoolList", List[T], type_params=(T,))
 
-        annotation = CoolList["IntOrStr"]
+        annotation = CoolListGeneric["IntOrStr"]
         assert utils.resolve_annotation(annotation, globals(), locals(), {}) == List[IntOrStr]
 
     # alias and arg in other module scope
@@ -999,12 +1013,11 @@ class _Clazz:
 
             return inner
 
-    rebind = _toplevel
-
     @decorator
     def decorated(self) -> None: ...
 
-    _lambda = lambda: None
+    # we cannot stringify this file due to it testing annotation resolving
+    _lambda: Callable[["_Clazz"], None] = lambda _: None  # noqa: UP037
 
 
 @pytest.mark.parametrize(
@@ -1015,9 +1028,6 @@ class _Clazz:
         # methods in class
         (_Clazz.func, True),
         (_Clazz().func, False),
-        # unfortunately doesn't work
-        (_Clazz.rebind, False),
-        (_Clazz().rebind, False),
         # classmethod/staticmethod isn't supported, but checked to ensure consistency
         (_Clazz.cmethod, False),
         (_Clazz.smethod, True),

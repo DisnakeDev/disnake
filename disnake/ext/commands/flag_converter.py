@@ -17,6 +17,8 @@ from typing import (
     Pattern,
     Set,
     Tuple,
+    Type,
+    TypeVar,
     Union,
     get_args,
     get_origin,
@@ -45,6 +47,8 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from .context import Context
+
+FlagsMetaT = TypeVar("FlagsMetaT", bound="Type[FlagsMeta]")
 
 
 @dataclass
@@ -126,15 +130,19 @@ def flag(
 
 def validate_flag_name(name: str, forbidden: Set[str]) -> None:
     if not name:
-        raise ValueError("flag names should not be empty")
+        msg = "flag names should not be empty"
+        raise ValueError(msg)
 
     for ch in name:
         if ch.isspace():
-            raise ValueError(f"flag name {name!r} cannot have spaces")
+            msg = f"flag name {name!r} cannot have spaces"
+            raise ValueError(msg)
         if ch == "\\":
-            raise ValueError(f"flag name {name!r} cannot have backslashes")
+            msg = f"flag name {name!r} cannot have backslashes"
+            raise ValueError(msg)
         if ch in forbidden:
-            raise ValueError(f"flag name {name!r} cannot have any of {forbidden!r} within them")
+            msg = f"flag name {name!r} cannot have any of {forbidden!r} within them"
+            raise ValueError(msg)
 
 
 def get_flags(
@@ -213,9 +221,8 @@ def get_flags(
                 if flag.max_args is MISSING:
                     flag.max_args = 1
             else:
-                raise TypeError(
-                    f"Unsupported typing annotation {annotation!r} for {flag.name!r} flag"
-                )
+                msg = f"Unsupported typing annotation {annotation!r} for {flag.name!r} flag"
+                raise TypeError(msg)
 
         if flag.override is MISSING:
             flag.override = False
@@ -223,7 +230,8 @@ def get_flags(
         # Validate flag names are unique
         name = flag.name.casefold() if case_insensitive else flag.name
         if name in names:
-            raise TypeError(f"{flag.name!r} flag conflicts with previous flag or alias.")
+            msg = f"{flag.name!r} flag conflicts with previous flag or alias."
+            raise TypeError(msg)
         else:
             names.add(name)
 
@@ -231,9 +239,8 @@ def get_flags(
             # Validate alias is unique
             alias = alias.casefold() if case_insensitive else alias
             if alias in names:
-                raise TypeError(
-                    f"{flag.name!r} flag alias {alias!r} conflicts with previous flag or alias."
-                )
+                msg = f"{flag.name!r} flag alias {alias!r} conflicts with previous flag or alias."
+                raise TypeError(msg)
             else:
                 names.add(alias)
 
@@ -253,7 +260,7 @@ class FlagsMeta(type):
         __commands_flag_prefix__: str
 
     def __new__(
-        cls,
+        cls: FlagsMetaT,
         name: str,
         bases: Tuple[type, ...],
         attrs: Dict[str, Any],
@@ -261,7 +268,7 @@ class FlagsMeta(type):
         case_insensitive: bool = MISSING,
         delimiter: str = MISSING,
         prefix: str = MISSING,
-    ):
+    ) -> FlagsMetaT:
         attrs["__commands_is_flag__"] = True
 
         try:
@@ -311,7 +318,7 @@ class FlagsMeta(type):
 
         for flag_name, flag in get_flags(attrs, global_ns, local_ns).items():
             flags[flag_name] = flag
-            aliases.update({alias_name: flag_name for alias_name in flag.aliases})
+            aliases.update(dict.fromkeys(flag.aliases, flag_name))
 
         forbidden = set(delimiter).union(prefix)
         for flag_name in flags:
@@ -413,7 +420,7 @@ async def convert_flag(ctx: Context, argument: str, flag: Flag, annotation: Any 
             return await convert_flag(ctx, argument, flag, annotation)
         elif origin is Union and args[-1] is type(None):
             # typing.Optional[x]
-            annotation = Union[args[:-1]]  # type: ignore
+            annotation = Union[args[:-1]]
             return await run_converters(ctx, annotation, argument, param)
         elif origin is dict:
             # typing.Dict[K, V] -> typing.Tuple[K, V]

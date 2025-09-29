@@ -246,7 +246,8 @@ class PartialEmoji(_EmojiTag, AssetMixin):
             The content of the asset.
         """
         if self.is_unicode_emoji():
-            raise TypeError("PartialEmoji is not a custom emoji")
+            msg = "PartialEmoji is not a custom emoji"
+            raise TypeError(msg)
 
         return await super().read()
 
