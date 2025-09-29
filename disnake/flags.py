@@ -2640,7 +2640,7 @@ class AttachmentFlags(BaseFlags):
     def is_clip(self):
         """:class:`bool`: Returns ``True`` if the attachment is a clip.
 
-        .. versionadded:: 2.11
+        .. versionadded:: |vnext|
         """
         return 1 << 0
 
@@ -2648,7 +2648,7 @@ class AttachmentFlags(BaseFlags):
     def is_thumbnail(self):
         """:class:`bool`: Returns ``True`` if the attachment is the thumbnail of a thread in a media channel.
 
-        .. versionadded:: 2.11
+        .. versionadded:: |vnext|
         """
         return 1 << 1
 
@@ -2661,7 +2661,7 @@ class AttachmentFlags(BaseFlags):
     def is_spoiler(self):
         """:class:`bool`: Returns ``True`` if the attachment was marked as a spoiler.
 
-        .. versionadded:: 2.11
+        .. versionadded:: |vnext|
         """
         return 1 << 3
 
@@ -2669,7 +2669,7 @@ class AttachmentFlags(BaseFlags):
     def contains_explicit_media(self):
         """:class:`bool`: Returns ``True`` if the attachment was flagged as sensitive content.
 
-        .. versionadded:: 2.11
+        .. versionadded:: |vnext|
         """
         return 1 << 4
 
@@ -2677,7 +2677,7 @@ class AttachmentFlags(BaseFlags):
     def is_animated(self):
         """:class:`bool`: Returns ``True`` if the attachment is an animated image.
 
-        .. versionadded:: 2.11
+        .. versionadded:: |vnext|
         """
         return 1 << 5
 
@@ -3027,7 +3027,7 @@ class EmbedFlags(BaseFlags):
 
             Returns an EmbedFlags instance with all flags except ``y`` inverted from their default value.
 
-    .. versionadded:: 2.11
+    .. versionadded:: |vnext|
 
     Attributes
     ----------
@@ -3111,7 +3111,7 @@ class EmbedMediaFlags(BaseFlags):
 
             Returns an EmbedMediaFlags instance with all flags except ``y`` inverted from their default value.
 
-    .. versionadded:: 2.11
+    .. versionadded:: |vnext|
 
     Attributes
     ----------

@@ -331,17 +331,17 @@ class Attachment(Hashable):
     clip_participants: List[:class:`User`]
         If this attachment is a clip returns a list of users who were in the stream.
 
-        .. versionadded:: 2.11
+        .. versionadded:: |vnext|
 
     clip_created_at: Optional[:class:`datetime.datetime`]
         If this attachment is a clip returns the creation timestamp.
 
-        .. versionadded:: 2.11
+        .. versionadded:: |vnext|
 
     application: Optional[:class:`AppInfo`]
         If this attachment is a clip returns the application in the stream, if recognized.
 
-        .. versionadded:: 2.11
+        .. versionadded:: |vnext|
     """
 
     __slots__ = (
@@ -397,8 +397,12 @@ class Attachment(Hashable):
         """Whether this attachment contains a spoiler.
 
         :return type: :class:`bool`
+
+        .. versionchanged: |vnext|
+
+            Now considers the attachment flags as well as the filename.
         """
-        return self.filename.startswith("SPOILER_")
+        return self.filename.startswith("SPOILER_") or self.flags.is_spoiler
 
     def __repr__(self) -> str:
         return f"<Attachment id={self.id} filename={self.filename!r} url={self.url!r} ephemeral={self.ephemeral!r}>"

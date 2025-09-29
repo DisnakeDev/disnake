@@ -386,7 +386,7 @@ class Embed:
     def flags(self) -> EmbedFlags:
         """:class:`EmbedFlags`: Returns the embed's flags.
 
-        .. versionadded:: 2.11
+        .. versionadded:: |vnext|
         """
         return EmbedFlags._from_value(self._flags)
 
@@ -476,7 +476,7 @@ class Embed:
         - ``height``
         - ``flags``
 
-        .. versionchanged:: 2.11
+        .. versionchanged:: |vnext|
 
             Added the ``flags`` attribute.
 
@@ -534,7 +534,7 @@ class Embed:
         - ``height``
         - ``flags``
 
-        .. versionchanged:: 2.11
+        .. versionchanged:: |vnext|
 
             Added the ``flags`` attribute.
 
