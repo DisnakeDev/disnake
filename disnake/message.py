@@ -24,7 +24,6 @@ from typing import (
 )
 
 from . import utils
-from .appinfo import AppInfo
 from .channel import PartialMessageable
 from .components import MessageTopLevelComponent, _message_component_factory
 from .embeds import Embed
@@ -337,11 +336,6 @@ class Attachment(Hashable):
         If this attachment is a clip returns the creation timestamp.
 
         .. versionadded:: |vnext|
-
-    application: Optional[:class:`AppInfo`]
-        If this attachment is a clip returns the application in the stream, if recognized.
-
-        .. versionadded:: |vnext|
     """
 
     __slots__ = (
@@ -362,7 +356,6 @@ class Attachment(Hashable):
         "_flags",
         "clip_participants",
         "clip_created_at",
-        "application",
     )
 
     def __init__(self, *, data: AttachmentPayload, state: ConnectionState) -> None:
@@ -388,9 +381,6 @@ class Attachment(Hashable):
         ]
         self.clip_created_at: Optional[datetime.datetime] = utils.parse_time(
             data.get("clip_created_at")
-        )
-        self.application: Optional[AppInfo] = (
-            AppInfo(state=state, data=d) if (d := data.get("application")) else None
         )
 
     def is_spoiler(self) -> bool:
