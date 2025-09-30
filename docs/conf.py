@@ -14,6 +14,7 @@
 
 import importlib.util
 import inspect
+import logging
 import os
 import re
 import subprocess  # noqa: TID251
@@ -29,12 +30,6 @@ from sphinx.application import Sphinx
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.insert(0, os.path.abspath(".."))
 sys.path.append(os.path.abspath("extensions"))
-
-warnings.filterwarnings(
-    "ignore",
-    category=sphinx.deprecation.RemovedInSphinx90Warning,
-    module="hoverxref.extension",
-)
 
 # -- General configuration ------------------------------------------------
 
@@ -516,3 +511,19 @@ def setup(app: Sphinx) -> None:
     import disnake
 
     del disnake.Embed.Empty  # type: ignore
+
+    warnings.filterwarnings(
+        "ignore",
+        category=sphinx.deprecation.RemovedInSphinx90Warning,
+        module="hoverxref.extension",
+    )
+
+    # silence somewhat verbose `Writing evaluated template result to ...` log
+    logging.getLogger("sphinx.sphinx.util.fileutil").addFilter(
+        lambda r: getattr(r, "subtype", None) != "template_evaluation"
+    )
+
+    # `document is referenced in multiple toctrees:` is fine and expected
+    logging.getLogger("sphinx.sphinx.environment").addFilter(
+        lambda r: getattr(r, "subtype", None) != "multiple_toc_parents"
+    )
