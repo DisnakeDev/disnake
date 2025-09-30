@@ -230,6 +230,8 @@ def docs(session: nox.Session) -> None:
                 "sphinx-autobuild",
                 "--ignore",
                 "_build",
+                "--re-ignore",
+                "__pycache__",
                 "--watch",
                 "../disnake",
                 "--watch",
