@@ -32,6 +32,7 @@ from ..components import (
     Component,
     Container as ContainerComponent,
     FileComponent as FileComponent,
+    FileUpload as FileUploadComponent,
     Label as LabelComponent,
     MediaGallery as MediaGalleryComponent,
     MentionableSelectMenu as MentionableSelectComponent,
@@ -57,6 +58,7 @@ from ._types import (
 from .button import Button
 from .container import Container
 from .file import File
+from .file_upload import FileUpload
 from .item import UIComponent, WrappedComponent
 from .label import Label
 from .media_gallery import MediaGallery
@@ -1164,6 +1166,7 @@ UI_COMPONENT_LOOKUP: Mapping[Type[Component], Type[UIComponent]] = {
     SeparatorComponent: Separator,
     ContainerComponent: Container,
     LabelComponent: Label,
+    FileUploadComponent: FileUpload,
 }
 
 

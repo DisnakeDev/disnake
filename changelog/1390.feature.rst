@@ -1,0 +1,1 @@
+Add :class:`ui.FileUpload` component for use within modals.
