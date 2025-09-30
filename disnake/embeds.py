@@ -22,6 +22,7 @@ from typing import (
 from . import utils
 from .colour import Colour
 from .file import File
+from .flags import EmbedFlags, EmbedMediaFlags
 from .utils import MISSING, classproperty, warn_deprecated
 
 __all__ = ("Embed",)
@@ -90,6 +91,7 @@ if TYPE_CHECKING:
         proxy_url: Optional[str]
         height: Optional[int]
         width: Optional[int]
+        flags: Optional[EmbedMediaFlags]
 
     class _EmbedVideoProxy(Sized, Protocol):
         url: Optional[str]
@@ -183,6 +185,7 @@ class Embed:
         "_fields",
         "description",
         "_files",
+        "_flags",
     )
 
     _default_colour: ClassVar[Optional[Colour]] = None
@@ -221,6 +224,7 @@ class Embed:
         self._image: Optional[EmbedImagePayload] = None
         self._footer: Optional[EmbedFooterPayload] = None
         self._fields: Optional[List[EmbedFieldPayload]] = None
+        self._flags: int = 0
 
         self._files: Dict[_FileKey, File] = {}
 
@@ -268,12 +272,20 @@ class Embed:
         self.timestamp = utils.parse_time(data.get("timestamp"))
 
         self._thumbnail = data.get("thumbnail")
+        if self._thumbnail and (thumbnail_flags := self._thumbnail.get("flags")):
+            self._thumbnail["flags"] = EmbedMediaFlags._from_value(thumbnail_flags)  # type: ignore
+
         self._video = data.get("video")
         self._provider = data.get("provider")
         self._author = data.get("author")
+
         self._image = data.get("image")
+        if self._image and (image_flags := self._image.get("flags")):
+            self._image["flags"] = EmbedMediaFlags._from_value(image_flags)  # type: ignore
+
         self._footer = data.get("footer")
         self._fields = data.get("fields")
+        self._flags = data.get("flags", 0)
 
         return self
 
@@ -371,6 +383,14 @@ class Embed:
             raise TypeError(msg)
 
     @property
+    def flags(self) -> EmbedFlags:
+        """:class:`EmbedFlags`: Returns the embed's flags.
+
+        .. versionadded:: |vnext|
+        """
+        return EmbedFlags._from_value(self._flags)
+
+    @property
     def footer(self) -> _EmbedFooterProxy:
         """Returns an ``EmbedProxy`` denoting the footer contents.
 
@@ -454,6 +474,11 @@ class Embed:
         - ``proxy_url``
         - ``width``
         - ``height``
+        - ``flags``
+
+        .. versionchanged:: |vnext|
+
+            Added the ``flags`` attribute.
 
         If an attribute is not set, it will be ``None``.
         """
@@ -507,6 +532,11 @@ class Embed:
         - ``proxy_url``
         - ``width``
         - ``height``
+        - ``flags``
+
+        .. versionchanged:: |vnext|
+
+            Added the ``flags`` attribute.
 
         If an attribute is not set, it will be ``None``.
         """
