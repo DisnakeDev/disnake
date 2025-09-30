@@ -200,13 +200,14 @@ body {
 }
 
 /* all URLs only show underline on hover */
-a {
+/* (also overrides sphinx's :visited highlight) */
+a, a:visited {
   text-decoration: none;
   color: var(--link-text);
   transition: color 0.3s;
 }
 
-a:hover {
+a:hover, a:hover:visited {
   text-decoration: underline;
   color: var(--link-hover-text);
   transition: color 0.05s;
@@ -236,12 +237,12 @@ header > nav {
   line-height: 1em; /* It defaults to 1.2, pushing some icons out of vertical alignment */
 }
 
-header > nav a {
+header > nav a, header > nav a:visited {
   color: var(--nav-link-text);
   margin: 0 0.5em;
 }
 
-header > nav a:hover {
+header > nav a:hover, header > nav a:hover:visited {
   color: var(--nav-link-hover-text);
   text-decoration: none;
 }
@@ -286,7 +287,7 @@ footer {
   z-index: 5;
 }
 
-footer a {
+footer a, footer a:visited {
   text-decoration: underline;
   color: var(--footer-link);
 }
