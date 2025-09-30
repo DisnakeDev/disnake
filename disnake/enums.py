@@ -772,6 +772,9 @@ class AuditLogAction(Enum):
     automod_quarantine_user               = 146
     creator_monetization_request_created  = 150
     creator_monetization_terms_accepted   = 151
+    onboarding_prompt_create              = 163
+    onboarding_prompt_update              = 164
+    onboarding_update                     = 167
     # fmt: on
 
     @property
@@ -838,6 +841,9 @@ class AuditLogAction(Enum):
             AuditLogAction.automod_quarantine_user:               None,
             AuditLogAction.creator_monetization_request_created:  None,
             AuditLogAction.creator_monetization_terms_accepted:   None,
+            AuditLogAction.onboarding_prompt_create:              AuditLogActionCategory.create,
+            AuditLogAction.onboarding_prompt_update:              AuditLogActionCategory.update,
+            AuditLogAction.onboarding_update:                     AuditLogActionCategory.update,
         }
         # fmt: on
         return lookup[self]
@@ -877,14 +883,16 @@ class AuditLogAction(Enum):
             return "thread"
         elif v < 122:
             return "application_command_or_integration"
-        elif v < 140:
+        elif v < 140 or v < 152 or v < 160:
             return None
         elif v < 143:
             return "automod_rule"
         elif v < 147:
             return "user"
-        elif v < 152:
-            return None
+        elif v < 166:
+            return "onboarding_prompt"
+        elif v < 168:
+            return "onboarding"
         else:
             return None
 
