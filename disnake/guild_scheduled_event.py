@@ -3,14 +3,19 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, Literal, Optional, overload
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, overload
+
+from disnake import utils
 
 from .asset import Asset
 from .enums import (
     ChannelType,
     GuildScheduledEventEntityType,
+    GuildScheduledEventFrequency,
+    GuildScheduledEventMonth,
     GuildScheduledEventPrivacyLevel,
     GuildScheduledEventStatus,
+    GuildScheduledEventWeekday,
     try_enum,
 )
 from .mixins import Hashable
@@ -33,11 +38,48 @@ if TYPE_CHECKING:
     from .types.guild_scheduled_event import (
         GuildScheduledEvent as GuildScheduledEventPayload,
         GuildScheduledEventEntityMetadata as GuildScheduledEventEntityMetadataPayload,
+        GuildScheduledEventNWeekday as GuildScheduledEventNWeekdayPayload,
+        GuildScheduledEventRecurrenceRule as GuildScheduledEventRecurrenceRulePayload,
     )
     from .user import User
 
+__all__ = (
+    "GuildScheduledEventMetadata",
+    "GuildScheduledEvent",
+    "GuildScheduledEventRecurrenceRule",
+    "GuildScheduledEventNWeekday",
+)
 
-__all__ = ("GuildScheduledEventMetadata", "GuildScheduledEvent")
+
+class GuildScheduledEventNWeekday:
+    """Represents a specific weekday occurrence within a month for recurrence rules.
+
+    .. versionadded:: 2.11
+
+    Attributes
+    ----------
+    n: :class:`int`
+        The week number (1-5) that the event should occur on.
+
+    day: :class:`GuildScheduledEventWeekday`
+        The day of the week (e.g. :attr:`GuildScheduledEventWeekday.TUESDAY`) the event should occur on.
+    """
+
+    __slots__ = ("n", "day")
+
+    def __init__(self, *, n: int, day: GuildScheduledEventWeekday) -> None:
+        self.n = n
+        self.day = day
+
+    def __repr__(self) -> str:
+        return f"<GuildScheduledEventNWeekday n={self.n!r} day={self.day!r}>"
+
+    def to_dict(self) -> GuildScheduledEventNWeekdayPayload:
+        return {"n": self.n, "day": self.day.value}
+
+    @classmethod
+    def from_dict(cls, data: GuildScheduledEventNWeekdayPayload) -> GuildScheduledEventNWeekday:
+        return cls(n=data["n"], day=GuildScheduledEventWeekday(data["day"]))
 
 
 class GuildScheduledEventMetadata:
@@ -70,6 +112,157 @@ class GuildScheduledEventMetadata:
         cls, data: GuildScheduledEventEntityMetadataPayload
     ) -> GuildScheduledEventMetadata:
         return GuildScheduledEventMetadata(location=data.get("location"))
+
+
+class GuildScheduledEventRecurrenceRule:
+    """Represents the recurrence rule payload used when creating a scheduled event.
+
+    This structure defines how and when a scheduled event repeats.
+
+    Certain combinations and values are restricted by the Discord client.
+    See the `official Discord documentation on recurrence rules <https://discord.com/developers/docs/resources/guild-scheduled-event#guild-scheduled-event-recurrence-rule-object>`__
+    for detailed constraints and valid combinations.
+
+    .. versionadded:: 2.11
+
+    Attributes
+    ----------
+    start: :class:`str`
+        An ISO8601 timestamp representing the start time of the recurrence interval.
+
+    frequency: :class:`GuildScheduledEventFrequency`
+        How often the event repeats.
+
+    interval: :class:`int`
+        The spacing between each occurrence. For example, a value of ``2`` with a
+        weekly frequency would mean "every other week".
+
+        Valid only when ``frequency`` is :attr:`GuildScheduledEventFrequency.WEEKLY` if greater than ``1``.
+
+    by_weekday: Optional[List[:class:`GuildScheduledEventWeekday`]]
+        A list of :class:`GuildScheduledEventWeekday` values indicating the weekdays the event repeats on.
+
+        Valid only when ``frequency`` is :attr:`GuildScheduledEventFrequency.DAILY` or
+        :attr:`GuildScheduledEventFrequency.WEEKLY`.
+
+        - For ``DAILY`` frequency: Must match one of the allowed weekday sets.
+        - For ``WEEKLY`` frequency: May only contain one entry.
+
+    by_n_weekday: Optional[List[:class:`GuildScheduledEventNWeekday`]]
+        A list of weekday-within-week combinations, such as "2nd Tuesday".
+
+        Each item represents a specific week (1-5) and a weekday (0 = Monday, ..., 6 = Sunday),
+        indicating a recurring event like "third Friday of every month".
+
+        - Valid only when ``frequency`` is :attr:`GuildScheduledEventFrequency.MONTHLY`.
+        - Must contain exactly one item.
+
+    by_month: Optional[List[:class:`GuildScheduledEventMonth`]]
+        A list of month values, represented by :class:`GuildScheduledEventMonth`.
+
+        - Valid only when ``frequency`` is :attr:`GuildScheduledEventFrequency.YEARLY`.
+        - Must be used together with ``by_month_day``.
+        - Must contain exactly one item.
+
+    by_month_day: Optional[List[:class:`int`]]
+        A list of days in the month (1-31).
+
+        - Valid only when ``frequency`` is :attr:`GuildScheduledEventFrequency.YEARLY`.
+        - Must be used together with ``by_month``.
+        - Must contain exactly one item.
+    """
+
+    __slots__ = (
+        "start",
+        "frequency",
+        "interval",
+        "by_weekday",
+        "by_n_weekday",
+        "by_month",
+        "by_month_day",
+    )
+
+    def __repr__(self) -> str:
+        return (
+            f"<GuildScheduledEventRecurrenceRule "
+            f"start={self.start!r} frequency={self.frequency.name} interval={self.interval} "
+            f"by_weekday={self.by_weekday!r} "
+            f"by_n_weekday={self.by_n_weekday!r} "
+            f"by_month={self.by_month!r} "
+            f"by_month_day={self.by_month_day!r}>"
+        )
+
+    def __init__(
+        self,
+        *,
+        start: datetime,
+        frequency: GuildScheduledEventFrequency,
+        interval: int = 1,
+        by_weekday: Optional[List[GuildScheduledEventWeekday]] = None,
+        by_n_weekday: Optional[List[GuildScheduledEventNWeekday]] = None,
+        by_month: Optional[List[GuildScheduledEventMonth]] = None,
+        by_month_day: Optional[List[int]] = None,
+    ) -> None:
+        self.start = start
+        self.frequency = frequency
+        self.interval = interval
+        self.by_weekday = by_weekday
+        self.by_n_weekday = by_n_weekday
+        self.by_month = by_month
+        self.by_month_day = by_month_day
+
+    def to_dict(self) -> GuildScheduledEventRecurrenceRulePayload:
+        data: GuildScheduledEventRecurrenceRulePayload = {
+            "start": utils.isoformat_utc(self.start),
+            "frequency": self.frequency.value,
+            "interval": self.interval,
+        }
+
+        if self.by_weekday:
+            data["by_weekday"] = [d.value for d in self.by_weekday]
+
+        if self.by_n_weekday:
+            data["by_n_weekday"] = [{"n": n.n, "day": n.day.value} for n in self.by_n_weekday]
+
+        if self.by_month:
+            data["by_month"] = [m.value for m in self.by_month]
+
+        if self.by_month_day:
+            data["by_month_day"] = self.by_month_day
+
+        return data
+
+    @classmethod
+    def from_dict(
+        cls, data: GuildScheduledEventRecurrenceRulePayload
+    ) -> GuildScheduledEventRecurrenceRule:
+        return cls(
+            start=datetime.fromisoformat(data.get("start")),
+            frequency=GuildScheduledEventFrequency(data.get("frequency")),
+            interval=data.get("interval", 1),
+            by_weekday=(
+                [GuildScheduledEventWeekday(d) for d in data.get("by_weekday", [])]
+                if data.get("by_weekday") is not None
+                else None
+            ),
+            by_n_weekday=(
+                [
+                    GuildScheduledEventNWeekday(
+                        n=nd.get("n"),
+                        day=GuildScheduledEventWeekday(nd.get("day")),
+                    )
+                    for nd in data.get("by_n_weekday", [])
+                ]
+                if data.get("by_n_weekday") is not None
+                else None
+            ),
+            by_month=(
+                [GuildScheduledEventMonth(m) for m in data.get("by_month", [])]
+                if data.get("by_month") is not None
+                else None
+            ),
+            by_month_day=data.get("by_month_day"),
+        )
 
 
 class GuildScheduledEvent(Hashable):
@@ -124,6 +317,9 @@ class GuildScheduledEvent(Hashable):
         The ID of an entity associated with the guild scheduled event.
     entity_metadata: :class:`GuildScheduledEventMetadata`
         Additional metadata for the guild scheduled event.
+    recurrence_rule: :class:`GuildScheduledEventRecurrenceRule`
+        An optional recurrence rule that specifies how the event should repeat over time.
+        This allows for recurring scheduled events such as weekly meetings or monthly check-ins.
     user_count: Optional[:class:`int`]
         The number of users subscribed to the guild scheduled event.
         If the guild scheduled event was fetched with ``with_user_count`` set to ``False``, this field is ``None``.
@@ -135,6 +331,7 @@ class GuildScheduledEvent(Hashable):
         "guild_id",
         "channel_id",
         "creator_id",
+        "creator",
         "name",
         "description",
         "scheduled_start_time",
@@ -144,7 +341,7 @@ class GuildScheduledEvent(Hashable):
         "entity_type",
         "entity_id",
         "entity_metadata",
-        "creator",
+        "recurrence_rule",
         "user_count",
         "_image",
         "_cs_guild",
@@ -178,6 +375,13 @@ class GuildScheduledEvent(Hashable):
             None if metadata is None else GuildScheduledEventMetadata.from_dict(metadata)
         )
 
+        recurrence_rule = data.get("recurrence_rule")
+        self.recurrence_rule: Optional[GuildScheduledEventRecurrenceRule] = (
+            None
+            if recurrence_rule is None
+            else GuildScheduledEventRecurrenceRule.from_dict(recurrence_rule)
+        )
+
         creator_data = data.get("creator")
         self.creator: Optional[User]
         if creator_data is not None:
@@ -201,6 +405,7 @@ class GuildScheduledEvent(Hashable):
             ("status", self.status),
             ("entity_type", self.entity_type),
             ("entity_metadata", self.entity_metadata),
+            ("recurrence_rule", self.recurrence_rule),
             ("creator", self.creator),
         )
         inner = " ".join(f"{k!s}={v!r}" for k, v in attrs)
