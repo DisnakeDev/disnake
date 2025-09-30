@@ -367,6 +367,26 @@ class Role(Hashable):
             and (me.top_role > self or me.id == self.guild.owner_id)
         )
 
+    def has_custom_gradient(self) -> bool:
+        """
+        Whether the role has custom gradient.
+
+        .. versionadded:: 2.12
+
+        :return type: :class:`bool`
+        """
+        return self.secondary_color is not None and self.tertiary_color is None
+    
+    def has_holographic_gradient(self) -> bool:
+        """
+        Whether the role has holographic gradient.
+
+        .. versionadded:: 2.12
+
+        :return type: :class:`bool`
+        """
+        return self.tertiary_color is not None
+
     @property
     def permissions(self) -> Permissions:
         """:class:`Permissions`: Returns the role's permissions."""
