@@ -238,6 +238,16 @@ class RawReactionActionEvent(_RawReprMixin):
         May also be ``None`` if the message was created by a webhook.
 
         .. versionadded:: 2.10
+
+    burst: :class:`bool`
+        Whether the reaction is Super reaction.
+
+        .. versionadded:: |vnext|
+
+    burst_colors: List[:class:`Colour`]
+        The list of :class:`Colour` used for Super reaction.
+
+        .. versionadded:: |vnext|
     """
 
     __slots__ = (
@@ -248,6 +258,8 @@ class RawReactionActionEvent(_RawReprMixin):
         "emoji",
         "event_type",
         "member",
+        "burst",
+        "burst_colors",
         "message_author_id",
     )
 
@@ -265,6 +277,8 @@ class RawReactionActionEvent(_RawReprMixin):
         self.member: Optional[Member] = None
         self.guild_id: Optional[int] = _get_as_snowflake(data, "guild_id")
         self.message_author_id: Optional[int] = _get_as_snowflake(data, "message_author_id")
+        self.burst: bool = data["burst"]
+        self.burst_colors: List[str] = data.get("burst_colors", [])
 
 
 class RawReactionClearEvent(_RawReprMixin):
@@ -306,14 +320,20 @@ class RawReactionClearEmojiEvent(_RawReprMixin):
 
         .. versionchanged:: 2.9
             This now also includes the correct :attr:`~PartialEmoji.animated` value.
+
+    burst: :class:`bool`
+        Whether the reaction is Super reaction.
+
+        .. versionadded:: 2.10
     """
 
-    __slots__ = ("message_id", "channel_id", "guild_id", "emoji")
+    __slots__ = ("message_id", "channel_id", "guild_id", "emoji", "burst")
 
     def __init__(self, data: MessageReactionRemoveEmojiEvent, emoji: PartialEmoji) -> None:
         self.emoji: PartialEmoji = emoji
         self.message_id: int = int(data["message_id"])
         self.channel_id: int = int(data["channel_id"])
+        self.burst: bool = data.get("burst", False)
         self.guild_id: Optional[int] = _get_as_snowflake(data, "guild_id")
 
 
