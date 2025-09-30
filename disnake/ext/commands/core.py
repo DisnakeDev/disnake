@@ -391,7 +391,14 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         except AttributeError:
             globalns = {}
 
-        params = get_signature_parameters(function, globalns, skip_standard_params=True)
+        try:
+            params = get_signature_parameters(function, globalns, skip_standard_params=True)
+        except NameError as e:
+            raise NameError(
+                "Stringified params annotations must have their reference imported outside of a TYPE_CHECKING block: "
+                + e.args[0]
+            ) from None
+
         for param in params.values():
             if param.annotation is Greedy:
                 msg = "Unparameterized Greedy[...] is disallowed in signature."
