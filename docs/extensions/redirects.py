@@ -11,7 +11,7 @@ from sphinx.util.fileutil import copy_asset_file
 if TYPE_CHECKING:
     from ._types import SphinxExtensionMeta
 
-SCRIPT_PATH = "_templates/api_redirect.js_t"
+SCRIPT_PATH = "_templates/api_redirect.js.jinja"
 
 
 def collect_redirects(app: Sphinx) -> dict[str, str]:
