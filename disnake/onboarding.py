@@ -32,11 +32,11 @@ class Onboarding:
     ----------
     guild: :class:`Guild`
         The guild this onboarding is part of.
-    prompts: List[:class:`OnboardingPrompt`]
+    prompts: :class:`list`\\[:class:`OnboardingPrompt`]
         The prompts shown during onboarding and in community customization.
     enabled: :class:`bool`
         Whether onboarding is enabled.
-    default_channel_ids: FrozenSet[:class:`int`]
+    default_channel_ids: :class:`frozenset`\\[:class:`int`]
         The IDs of the channels that will be shown to new members by default.
     """
 
@@ -69,7 +69,7 @@ class Onboarding:
 
     @property
     def default_channels(self) -> List[GuildChannel]:
-        """List[:class:`abc.GuildChannel`]: The list of channels that will be shown to new members by default."""
+        """:class:`list`\\[:class:`abc.GuildChannel`]: The list of channels that will be shown to new members by default."""
         return list(filter(None, map(self.guild.get_channel, self.default_channel_ids)))
 
 
@@ -84,7 +84,7 @@ class OnboardingPrompt(Hashable):
         The onboarding prompt's ID.
     type: :class:`OnboardingPromptType`
         The onboarding prompt's type.
-    options: List[:class:`OnboardingPromptOption`]
+    options: :class:`list`\\[:class:`OnboardingPromptOption`]
         The onboarding prompt's options.
     title: :class:`str`
         The onboarding prompt's title.
@@ -141,15 +141,15 @@ class OnboardingPromptOption(Hashable):
     ----------
     id: :class:`int`
         The prompt option's ID.
-    emoji: Optional[Union[:class:`PartialEmoji`, :class:`Emoji`, :class:`str`]]
+    emoji: :class:`PartialEmoji` | :class:`Emoji` | :class:`str` | :data:`None`
         The prompt option's emoji.
     title: :class:`str`
         The prompt option's title.
-    description: Optional[:class:`str`]
+    description: :class:`str` | :data:`None`
         The prompt option's description.
-    role_ids: FrozenSet[:class:`int`]
+    role_ids: :class:`frozenset`\\[:class:`int`]
         The IDs of the roles that will be added to the user when they select this option.
-    channel_ids: FrozenSet[:class:`int`]
+    channel_ids: :class:`frozenset`\\[:class:`int`]
         The IDs of the channels that the user will see when they select this option.
     """
 
@@ -187,10 +187,10 @@ class OnboardingPromptOption(Hashable):
 
     @property
     def roles(self) -> List[Role]:
-        """List[:class:`Role`]: A list of roles that will be added to the user when they select this option."""
+        """:class:`list`\\[:class:`Role`]: A list of roles that will be added to the user when they select this option."""
         return list(filter(None, map(self.guild.get_role, self.role_ids)))
 
     @property
     def channels(self) -> List[GuildChannel]:
-        """List[:class:`abc.GuildChannel`]: A list of channels that the user will see when they select this option."""
+        """:class:`list`\\[:class:`abc.GuildChannel`]: A list of channels that the user will see when they select this option."""
         return list(filter(None, map(self.guild.get_channel, self.channel_ids)))
