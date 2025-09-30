@@ -19,15 +19,14 @@ from typing import (
     cast,
 )
 
-from . import abc, enums, flags, utils
+from . import enums, flags, utils
 from .app_commands import ApplicationCommandPermissions
 from .asset import Asset
-from .automod import AutoModAction, AutoModTriggerMetadata, _automod_action_factory
+from .automod import AutoModTriggerMetadata, _automod_action_factory
 from .colour import Colour
 from .invite import Invite
 from .mixins import Hashable
 from .object import Object
-from .partial_emoji import PartialEmoji
 from .permissions import PermissionOverwrite, Permissions
 from .threads import ForumTag, Thread
 
@@ -41,13 +40,15 @@ __all__ = (
 if TYPE_CHECKING:
     import datetime
 
+    from . import abc
     from .app_commands import APIApplicationCommand
-    from .automod import AutoModRule
+    from .automod import AutoModAction, AutoModRule
     from .emoji import Emoji
     from .guild import Guild
     from .guild_scheduled_event import GuildScheduledEvent
     from .integrations import PartialIntegration
     from .member import Member
+    from .partial_emoji import PartialEmoji
     from .role import Role
     from .stage_instance import StageInstance
     from .sticker import GuildSticker

@@ -31,7 +31,6 @@ from urllib.parse import quote as urlquote
 from .. import utils
 from ..channel import PartialMessageable
 from ..errors import DiscordServerError, Forbidden, HTTPException, NotFound, WebhookTokenMissing
-from ..flags import MessageFlags
 from ..http import Route
 from ..message import Message
 from ..object import Object
@@ -52,6 +51,7 @@ if TYPE_CHECKING:
     from ..abc import Snowflake
     from ..embeds import Embed
     from ..file import File
+    from ..flags import MessageFlags
     from ..mentions import AllowedMentions
     from ..message import Attachment
     from ..types.message import Message as MessagePayload

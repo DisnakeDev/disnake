@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-from typing import List, Optional, TypedDict
+from typing import TYPE_CHECKING, List, Optional, TypedDict
 
-from .snowflake import Snowflake
+if TYPE_CHECKING:
+    from .snowflake import Snowflake
 
 
 class WelcomeScreen(TypedDict):

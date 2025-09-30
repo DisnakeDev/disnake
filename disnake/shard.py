@@ -23,7 +23,7 @@ from typing import (
 import aiohttp
 
 from .backoff import ExponentialBackoff
-from .client import Client, GatewayParams, SessionStartLimit
+from .client import Client, SessionStartLimit
 from .enums import Status
 from .errors import (
     ClientException,
@@ -40,6 +40,7 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from .activity import BaseActivity
+    from .client import GatewayParams
     from .flags import Intents, MemberCacheFlags
     from .i18n import LocalizationProtocol
     from .mentions import AllowedMentions

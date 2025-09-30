@@ -18,18 +18,20 @@ from typing import (
     overload,
 )
 
-from ...abc import Snowflake
 from ...components import SelectOption, StringSelectMenu
-from ...enums import ComponentType, SelectDefaultValueType
+from ...enums import ComponentType
 from ...utils import MISSING
-from .base import BaseSelect, P, V_co, _create_decorator
+from .base import BaseSelect, V_co, _create_decorator
 
 if TYPE_CHECKING:
     from typing_extensions import Self
 
+    from ...abc import Snowflake
     from ...emoji import Emoji
+    from ...enums import SelectDefaultValueType
     from ...partial_emoji import PartialEmoji
     from ..item import DecoratedItem, ItemCallbackType
+    from .base import P
 
 
 __all__ = (
