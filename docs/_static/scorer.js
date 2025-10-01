@@ -61,7 +61,7 @@ Scorer = {
             // calculate new score on top of title score; we want to rank *all* API results
             // right below matching pages, and have pages with only a fulltext match appear last
             const newScore = Scorer.title - (penalty / 1000);
-            console.log(`${title}: ${score} -> ${newScore} (${penalty})`);
+            // console.log(`${title}: ${score} -> ${newScore} (${penalty})`);
             return newScore;
         }
         return score;
