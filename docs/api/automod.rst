@@ -77,6 +77,14 @@ AutoModTimeoutAction
 .. autoclass:: AutoModTimeoutAction
     :members:
 
+AutoModBlockInteractionAction
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: AutoModBlockInteractionAction
+
+.. autoclass:: AutoModBlockInteractionAction
+    :members:
+
 Enumerations
 ------------
 
