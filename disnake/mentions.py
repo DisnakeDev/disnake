@@ -74,6 +74,7 @@ class AllowedMentions:
         replied_user: bool = default,
     ) -> None:
         self.everyone = everyone
+        # TODO(3.0): annotate attributes as `Sequence` instead of copying to list
         if users is default or isinstance(users, bool):
             self.users = users
         else:
