@@ -312,7 +312,7 @@ class SubCommand(InvokableApplicationCommand):
                 raise NameError(
                     "Could not expand parameters. Please check all annotations are imported outside of TYPE_CHECKING blocks. "
                     + e.args[0]
-                ) from e
+                ) from None
 
         self.docstring = utils.parse_docstring(func)
         desc_loc = Localized._cast(description, False)
@@ -485,7 +485,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
                 raise NameError(
                     "Could not expand parameter options. Please check all annotations are imported outside of TYPE_CHECKING blocks. "
                     + e.args[0]
-                ) from e
+                ) from None
 
         self.docstring = utils.parse_docstring(func)
         desc_loc = Localized._cast(description, False)
