@@ -75,14 +75,16 @@ class AllowedMentions:
     ) -> None:
         self.everyone = everyone
         # TODO(3.0): annotate attributes as `Sequence` instead of copying to list
-        if users is default or isinstance(users, bool):
-            self.users = users
-        else:
+        self.users: Union[bool, List[Snowflake]]
+        self.roles: Union[bool, List[Snowflake]]
+        if isinstance(users, Sequence):
             self.users = list(users)
-        if roles is default or isinstance(roles, bool):
-            self.roles = roles
         else:
+            self.users = users
+        if isinstance(roles, Sequence):
             self.roles = list(roles)
+        else:
+            self.roles = roles
         self.replied_user = replied_user
 
     @classmethod
@@ -115,8 +117,8 @@ class AllowedMentions:
 
         return cls(
             everyone=message.mention_everyone,
-            users=message.mentions.copy(),
-            roles=message.role_mentions.copy(),
+            users=list(message.mentions),
+            roles=list(message.role_mentions),
             replied_user=bool(
                 message.type is MessageType.reply
                 and message.reference
