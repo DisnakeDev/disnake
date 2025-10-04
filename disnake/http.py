@@ -3053,6 +3053,9 @@ class HTTPClient:
     def application_info(self) -> Response[appinfo.AppInfo]:
         return self.request(Route("GET", "/oauth2/applications/@me"))
 
+    def edit_application_info(self, **fields: Any) -> Response[appinfo.AppInfo]:
+        return self.request(Route("PATCH", "/applications/@me"), json=fields)
+
     def get_application_role_connection_metadata_records(
         self, application_id: Snowflake
     ) -> Response[list[application_role_connection.ApplicationRoleConnectionMetadata]]:
