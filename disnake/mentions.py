@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, List, Union
+from typing import TYPE_CHECKING, Any, List, Sequence, Union
 
 from .enums import MessageType
 
@@ -69,13 +69,22 @@ class AllowedMentions:
         self,
         *,
         everyone: bool = default,
-        users: Union[bool, List[Snowflake]] = default,
-        roles: Union[bool, List[Snowflake]] = default,
+        users: Union[bool, Sequence[Snowflake]] = default,
+        roles: Union[bool, Sequence[Snowflake]] = default,
         replied_user: bool = default,
     ) -> None:
         self.everyone = everyone
-        self.users = users
-        self.roles = roles
+        # TODO(3.0): annotate attributes as `Sequence` instead of copying to list
+        self.users: Union[bool, List[Snowflake]]
+        self.roles: Union[bool, List[Snowflake]]
+        if isinstance(users, Sequence):
+            self.users = list(users)
+        else:
+            self.users = users
+        if isinstance(roles, Sequence):
+            self.roles = list(roles)
+        else:
+            self.roles = roles
         self.replied_user = replied_user
 
     @classmethod
@@ -108,8 +117,8 @@ class AllowedMentions:
 
         return cls(
             everyone=message.mention_everyone,
-            users=message.mentions.copy(),  # type: ignore # mentions is a list of Snowflakes
-            roles=message.role_mentions.copy(),  # type: ignore # mentions is a list of Snowflakes
+            users=list(message.mentions),
+            roles=list(message.role_mentions),
             replied_user=bool(
                 message.type is MessageType.reply
                 and message.reference
@@ -119,6 +128,7 @@ class AllowedMentions:
         )
 
     def to_dict(self) -> AllowedMentionsPayload:
+        # n.b. this runs nearly every time a message is sent
         parse: List[AllowedMentionTypePayload] = []
         data: AllowedMentionsPayload = {}  # type: ignore
 

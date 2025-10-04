@@ -1,0 +1,1 @@
+:class:`AllowedMentions` now takes a Sequence rather than a List for users and roles in order to support covariance.
