@@ -1,1 +1,1 @@
-|commands| Add support for ``Range[LargeInt, ...]`` in command parameters
+|commands| Add support for ``Range[LargeInt, ...]`` in slash command parameters
