@@ -108,7 +108,8 @@ class Emoji(_EmojiTag, AssetMixin):
     def _from_data(self, emoji: EmojiPayload) -> None:
         self.require_colons: bool = emoji.get("require_colons", False)
         self.managed: bool = emoji.get("managed", False)
-        self.id: int = int(emoji["id"])  # pyright: ignore[reportArgumentType]
+        assert emoji["id"] is not None
+        self.id: int = int(emoji["id"])
         self.name: str = emoji["name"]  # pyright: ignore[reportAttributeAccessIssue]
         self.animated: bool = emoji.get("animated", False)
         self.available: bool = emoji.get("available", True)

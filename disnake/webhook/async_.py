@@ -1277,11 +1277,7 @@ class Webhook(BaseWebhook):
             msg = "Invalid webhook URL given."
             raise ValueError(msg)
 
-        data: WebhookPayload = {
-            "id": m.group("id"),
-            "type": 1,
-            "token": m.group("token"),
-        }
+        data: WebhookPayload = {"id": m["id"], "type": 1, "token": m["token"]}
         return cls(data, session, token=bot_token)
 
     # FIXME: data comes from HTTPClient.follow_webhook, but is hinted as returning Response[None]?

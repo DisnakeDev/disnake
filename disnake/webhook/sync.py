@@ -730,11 +730,7 @@ class SyncWebhook(BaseWebhook):
             msg = "Invalid webhook URL given."
             raise ValueError(msg)
 
-        data: WebhookPayload = {
-            "id": m.group("id"),
-            "type": 1,
-            "token": m.group("token"),
-        }
+        data: WebhookPayload = {"id": m["id"], "type": 1, "token": m["token"]}
         import requests
 
         if session is not MISSING:

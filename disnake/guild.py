@@ -3108,7 +3108,8 @@ class Guild(Hashable):
             msg = "Channel ID resolved to a private channel"
             raise InvalidData(msg)
 
-        guild_id = int(data["guild_id"])  # pyright: ignore[reportGeneralTypeIssues]
+        assert "guild_id" in data
+        guild_id = int(data["guild_id"])
         if self.id != guild_id:
             msg = "Guild ID resolved to a different guild"
             raise InvalidData(msg)

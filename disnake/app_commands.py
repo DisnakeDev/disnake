@@ -1264,7 +1264,7 @@ class ApplicationCommandPermissions:
     def __repr__(self) -> str:
         return f"<ApplicationCommandPermissions id={self.id!r} type={self.type!r} permission={self.permission!r}>"
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: ApplicationCommandPermissions) -> bool:
         return (
             self.id == other.id and self.type == other.type and self.permission == other.permission
         )

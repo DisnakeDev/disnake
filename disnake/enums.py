@@ -2462,17 +2462,16 @@ class NameplatePalette(Enum):
     """White color palette."""
 
 
-T = TypeVar("T")
-E = TypeVar("E", bound="Enum")
+T = TypeVar("T", bound="Enum")
 
 
-def create_unknown_value(cls: Type[E], val: Any) -> E:
+def create_unknown_value(cls: Type[T], val: Any) -> T:
     value_cls = cls._enum_value_cls_  # pyright: ignore[reportAttributeAccessIssue]
     name = f"unknown_{val}"
     return value_cls(name=name, value=val)
 
 
-def try_enum(cls: Type[E], val: Any) -> E:
+def try_enum(cls: Type[T], val: Any) -> T:
     """A function that tries to turn the value into enum ``cls``.
 
     If it fails it returns a proxy invalid value instead.
@@ -2483,7 +2482,7 @@ def try_enum(cls: Type[E], val: Any) -> E:
         return create_unknown_value(cls, val)
 
 
-def enum_if_int(cls: Type[E], val: Any) -> E:
+def enum_if_int(cls: Type[T], val: Any) -> T:
     """A function that tries to turn the value into enum ``cls``.
 
     If it fails it returns a proxy invalid value instead.
