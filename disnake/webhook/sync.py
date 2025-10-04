@@ -727,11 +727,7 @@ class SyncWebhook(BaseWebhook):
         if m is None:
             raise ValueError("Invalid webhook URL given.")
 
-        data: WebhookPayload = {
-            "id": m.group("id"),
-            "type": 1,
-            "token": m.group("token"),
-        }
+        data: WebhookPayload = {"id": m["id"], "type": 1, "token": m["token"]}
         import requests
 
         if session is not MISSING:

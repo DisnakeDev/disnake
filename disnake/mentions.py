@@ -108,6 +108,7 @@ class AllowedMentions:
 
         return cls(
             everyone=message.mention_everyone,
+            # TODO: casting to list fixes those
             users=message.mentions.copy(),  # pyright: ignore[reportArgumentType]  # mentions is a list of Snowflakes
             roles=message.role_mentions.copy(),  # pyright: ignore[reportArgumentType]  # mentions is a list of Snowflakes
             replied_user=bool(
@@ -125,7 +126,7 @@ class AllowedMentions:
         if self.everyone:
             parse.append("everyone")
 
-# NOTE: not using 'is True/False' because of _FakeBool
+        # NOTE: not using 'is True/False' because of _FakeBool
         if self.users == True:  # noqa: E712
             parse.append("users")
         elif self.users != False:  # noqa: E712

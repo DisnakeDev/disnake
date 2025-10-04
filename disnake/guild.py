@@ -3099,7 +3099,8 @@ class Guild(Hashable):
         if ch_type in (ChannelType.group, ChannelType.private):
             raise InvalidData("Channel ID resolved to a private channel")
 
-        guild_id = int(data["guild_id"])  # pyright: ignore[reportGeneralTypeIssues]
+        assert "guild_id" in data
+        guild_id = int(data["guild_id"])
         if self.id != guild_id:
             raise InvalidData("Guild ID resolved to a different guild")
 
