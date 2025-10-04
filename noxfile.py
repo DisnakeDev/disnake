@@ -419,9 +419,9 @@ def test(session: nox.Session, execution_group: ExecutionGroup) -> None:
 
     pytest_args = ["--cov", "--cov-context=test"]
     if execution_group.experimental:
-        pytest_args.append(
-            "-Wonce"
-        )  # this will override what we set in pyproject, but not be overridden by the cli
+        # don't turn warnings into errors
+        # (this will override what we set in pyproject, but not be overridden by the cli)
+        pytest_args.append("-Wdefault")
     global reset_coverage  # noqa: PLW0603
     if reset_coverage:
         # don't use `--cov-append` for first run
