@@ -2063,21 +2063,16 @@ class InteractionDataResolved(Dict[str, Any]):
 
         for str_id, user in users.items():
             user_id = int(str_id)
-            member_data = members.get(str_id)
-
-            if member_data is None:
-                self.users[user_id] = User(state=state, data=user)
-                continue
-
-            if guild is not None and (member := guild.get_member(user_id)) is not None:
-                self.members[user_id] = member
-            else:
-                self.members[user_id] = Member(
-                    data=member_data,
+            member = members.get(str_id)
+            if member is not None:
+                self.members[user_id] = (guild and guild.get_member(user_id)) or Member(
+                    data=member,
                     user_data=user,
                     guild=guild_fallback,  # pyright: ignore[reportArgumentType]
                     state=state,
                 )
+            else:
+                self.users[user_id] = User(state=state, data=user)
 
         for str_id, role in roles.items():
             self.roles[int(str_id)] = Role(

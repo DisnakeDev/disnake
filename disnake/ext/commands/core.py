@@ -26,8 +26,6 @@ from typing import (
     overload,
 )
 
-from typing_extensions import get_args, get_origin
-
 import disnake
 from disnake.utils import (
     _generated,
@@ -1002,10 +1000,12 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
             return self.help.split("\n", 1)[0]
         return ""
 
-    @staticmethod
-    def _is_typing_optional(annotation: object, /) -> bool:
-        # TODO: include types.UnionType; annotation is TypeForm[object]
-        return get_origin(annotation) is Union and type(None) in get_args(annotation)
+    def _is_typing_optional(self, annotation: object, /) -> bool:
+        # TODO: include types.UnionType; 'annotation' is TypeForm[object]
+        # TODO: use typing.get_origin/typing.get_args
+        return (
+            getattr(annotation, "__origin__", None) is Union and type(None) in annotation.__args__  # pyright: ignore[reportAttributeAccessIssue]
+        )
 
     @property
     def signature(self) -> str:

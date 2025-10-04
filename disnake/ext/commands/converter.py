@@ -345,10 +345,11 @@ class UserConverter(IDConverter[disnake.User]):
                 except disnake.HTTPException:
                     raise UserNotFound(argument) from None
 
-            if not isinstance(result, disnake.User):
+            # TODO: inverting this condition somehow fixes the type ignore
+            if isinstance(result, disnake.Member):
                 return result._user
 
-            return result
+            return result  # pyright: ignore[reportReturnType]
 
         username, _, discriminator = argument.rpartition("#")
         # n.b. there's no builtin method that only matches arabic digits, `isdecimal` is the closest one.

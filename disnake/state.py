@@ -2252,14 +2252,7 @@ class ConnectionState:
 
         # the factory can't be a DMChannel or GroupChannel here
         data.setdefault("position", 0)  # pyright: ignore[reportArgumentType, reportCallIssue]
-
-        if (
-            isinstance(guild, Guild)
-            and (channel := guild.get_channel_or_thread(channel_id)) is not None
-        ):
-            return channel
-
-        return factory(
+        return (isinstance(guild, Guild) and guild.get_channel_or_thread(channel_id)) or factory(
             guild=guild,  # pyright: ignore[reportArgumentType, reportCallIssue]  # FIXME: create proper fallback guild instead of passing Object
             state=self,
             data=data,  # pyright: ignore[reportArgumentType]  # generic payload type
