@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import List, Optional, TypedDict
+from typing import Optional, TypedDict
 
 from typing_extensions import NotRequired
 
@@ -28,4 +28,4 @@ class GuildSoundboardSound(SoundboardSound):
 
 
 class ListGuildSoundboardSounds(TypedDict):
-    items: List[GuildSoundboardSound]
+    items: list[GuildSoundboardSound]

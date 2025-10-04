@@ -5,7 +5,7 @@ import importlib.metadata
 import platform
 import sys
 from pathlib import Path
-from typing import List, Tuple, Union
+from typing import Union
 
 import aiohttp
 
@@ -13,7 +13,7 @@ import disnake
 
 
 def show_version() -> None:
-    entries: List[str] = []
+    entries: list[str] = []
 
     sys_ver = sys.version_info
     entries.append(
@@ -399,7 +399,7 @@ def add_newcog_args(subparser) -> None:
     parser.add_argument("--full", help="add all special methods as well", action="store_true")
 
 
-def parse_args() -> Tuple[argparse.ArgumentParser, argparse.Namespace]:
+def parse_args() -> tuple[argparse.ArgumentParser, argparse.Namespace]:
     parser = argparse.ArgumentParser(prog="disnake", description="Tools for helping with disnake")
     parser.add_argument("-v", "--version", action="store_true", help="shows the library version")
     parser.set_defaults(func=core)
