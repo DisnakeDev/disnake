@@ -136,14 +136,14 @@ class AllowedMentions:
             parse.append("everyone")
 
         # n.b. not using is True/False on account of _FakeBool
-        if self.users is True:
+        if self.users == True:  # noqa: E712
             parse.append("users")
-        elif self.users is not False:
+        elif self.users != False:  # noqa: E712
             data["users"] = [x.id for x in self.users]
 
-        if self.roles is True:
+        if self.roles == True:  # noqa: E712
             parse.append("roles")
-        elif self.roles is not False:
+        elif self.roles != False:  # noqa: E712
             data["roles"] = [x.id for x in self.roles]
 
         if self.replied_user:
