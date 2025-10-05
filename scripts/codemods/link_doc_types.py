@@ -1,12 +1,12 @@
 # SPDX-License-Identifier: MIT
 """Update docstrings to use pep 585 and pep 602 style type hints for documentation."""
 
-import pathlib
 import re
-import sys
 
 import libcst as cst
 from libcst import matchers as m
+
+from .base import BaseCodemodCommand
 
 CONTAINERS = {
     "Dict": "dict",
@@ -188,10 +188,8 @@ def apply_replacements(s):
     return s
 
 
-class DocstringTransformer(cst.CSTTransformer):
-    """Transformer that replaces the first statement docstring in modules, classes
-    and functions using the existing regex-based replacements.
-    """
+class DocstringTransformer(BaseCodemodCommand):
+    DESCRIPTION = "Replace type hints in docstrings with PEP 585/604 style."
 
     def _replace_simple_string(self, simple_string: cst.SimpleString) -> cst.SimpleString:
         # simple_string.value is the literal including quotes and prefixes
@@ -203,7 +201,6 @@ class DocstringTransformer(cst.CSTTransformer):
         # if r"\\" in new_inner:
         #     prefix = "r"
         #     new_inner = new_inner.replace(r"\\", "\\")
-        # Ensure any replacements use LF line endings
         new_value = f"{prefix}{simple_string.quote}{new_inner}{simple_string.quote}"
         return simple_string.with_changes(value=new_value)
 
@@ -255,41 +252,3 @@ class DocstringTransformer(cst.CSTTransformer):
         if new_body is not updated.body:
             return updated.with_changes(body=new_body)
         return updated
-
-
-def process_file(file_path) -> None:
-    with open(file_path, encoding="utf-8", newline="") as f:
-        # Normalize line endings to LF for processing
-        content = f.read().replace("\r\n", "\n")
-
-    try:
-        module = cst.parse_module(content)
-    except Exception:
-        # If parsing fails, fall back to the regex approach
-        def replace_in_docstring(match):
-            s = match.group(1)
-            return '"""' + apply_replacements(s) + '"""'
-
-        new_content = re.sub(r'"""(.*?)"""', replace_in_docstring, content, flags=re.DOTALL)
-        new_content = new_content.replace("\r\n", "\n")
-        with open(file_path, "w", encoding="utf-8", newline="\n") as f:
-            f.write(new_content)
-        return
-
-    transformer = DocstringTransformer()
-    new_module = module.visit(transformer)
-    new_code = new_module.code
-    # Ensure LF line endings
-    new_code = new_code.replace("\r\n", "\n")
-    with open(file_path, "w", encoding="utf-8", newline="\n") as f:
-        f.write(new_code)
-
-
-if __name__ == "__main__":
-    if sys.argv[1:]:
-        paths = [pathlib.Path(p) for p in sys.argv[1:]]
-    else:
-        paths = [pathlib.Path("disnake")]
-    for path in paths:
-        for file_path in path.glob("**/*.py"):
-            process_file(file_path)
