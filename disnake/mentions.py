@@ -139,6 +139,7 @@ class AllowedMentions:
         if self.everyone:
             parse.append("everyone")
 
+        # n.b. not using is True/False on account of _FakeBool
         if self.users == True:  # noqa: E712
             parse.append("users")
         elif self.users != False:  # noqa: E712
