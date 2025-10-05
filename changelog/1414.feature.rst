@@ -1,0 +1,1 @@
+Add new :class:`MessageCall` object and associated :attr:`Message.call` attribute for viewing information about a call in private channels
