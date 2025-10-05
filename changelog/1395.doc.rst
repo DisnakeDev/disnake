@@ -1,1 +1,1 @@
-Update all references to typing.Union and typing.Optional in Sphinx documentation to use the PEP 604 syntax (X | Y and X | None).
+Update all references to :class:`~typing.Union` and :class:`~typing.Optional` in the documentation to use PEP 604 syntax (``X | Y`` and ``X | None`` respectively).

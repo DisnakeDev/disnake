@@ -1,1 +1,1 @@
-Update references to typing.Dict and other collections in Sphinx documentation to use lowercase built-in types with appropriate Sphinx roles.
+Update references to :class:`~typing.Dict` and other collections in the documentation to use built-in with PEP 585 syntax (``dict``, ``list``, ``set``, etc.) instead of the :mod:`typing` counterparts (``Dict``, ``List``, ``Set``, etc.).
