@@ -217,7 +217,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         The parent group that this command belongs to. :data:`None` if there isn't one.
     cog: :class:`Cog` | :data:`None`
         The cog that this command belongs to. :data:`None` if there isn't one.
-    checks: :class:`list`\\[:class:`collections.abc.Callable`\\[[:class:`.Context`], :class:`bool`]]
+    checks: :class:`list`\\[:class:`~collections.abc.Callable`\\[[:class:`.Context`], :class:`bool`]]
         A list of predicates that verifies if the command could be executed
         with the given :class:`.Context` as the sole parameter. If an exception
         is necessary to be thrown to signal failure, then one inherited from
@@ -1312,7 +1312,7 @@ class GroupMixin(Generic[CogT]):
 
         Returns
         -------
-        :class:`collections.abc.Callable`\\[..., :class:`Command`]
+        :class:`~collections.abc.Callable`\\[..., :class:`Command`]
             A decorator that converts the provided method into a Command, adds it to the bot, then returns it.
         """
 
@@ -1362,7 +1362,7 @@ class GroupMixin(Generic[CogT]):
 
         Returns
         -------
-        :class:`collections.abc.Callable`\\[..., :class:`Group`]
+        :class:`~collections.abc.Callable`\\[..., :class:`Group`]
             A decorator that converts the provided method into a Group, adds it to the bot, then returns it.
         """
 
@@ -1704,7 +1704,7 @@ def check(predicate: Check) -> Callable[[T], T]:
 
     Parameters
     ----------
-    predicate: :class:`collections.abc.Callable`\\[[:class:`Context`], :class:`bool`]
+    predicate: :class:`~collections.abc.Callable`\\[[:class:`Context`], :class:`bool`]
         The predicate to check if the command should be invoked.
     """
 
@@ -1752,7 +1752,7 @@ def check_any(*checks: Check) -> Callable[[T], T]:
 
     Parameters
     ----------
-    *checks: :class:`collections.abc.Callable`\\[[:class:`Context`], :class:`bool`]
+    *checks: :class:`~collections.abc.Callable`\\[[:class:`Context`], :class:`bool`]
         An argument list of checks that have been decorated with
         the :func:`check` decorator.
 
@@ -1812,7 +1812,7 @@ def app_check(predicate: AppCheck) -> Callable[[T], T]:
 
     Parameters
     ----------
-    predicate: :class:`collections.abc.Callable`\\[[:class:`disnake.ApplicationCommandInteraction`], :class:`bool`]
+    predicate: :class:`~collections.abc.Callable`\\[[:class:`disnake.ApplicationCommandInteraction`], :class:`bool`]
         The predicate to check if the command should be invoked.
     """
     return check(predicate)  # type: ignore  # impl is the same, typings are different
@@ -1828,7 +1828,7 @@ def app_check_any(*checks: AppCheck) -> Callable[[T], T]:
 
     Parameters
     ----------
-    *checks: :class:`collections.abc.Callable`\\[[:class:`disnake.ApplicationCommandInteraction`], :class:`bool`]
+    *checks: :class:`~collections.abc.Callable`\\[[:class:`disnake.ApplicationCommandInteraction`], :class:`bool`]
         An argument list of checks that have been decorated with
         the :func:`app_check` decorator.
 
@@ -2541,7 +2541,7 @@ def cooldown(
         The number of times a command can be used before triggering a cooldown.
     per: :class:`float`
         The amount of seconds to wait for a cooldown when it's been triggered.
-    type: :class:`.BucketType` | :class:`collections.abc.Callable`\\[[:class:`.Message`], :data:`~typing.Any`]
+    type: :class:`.BucketType` | :class:`~collections.abc.Callable`\\[[:class:`.Message`], :data:`~typing.Any`]
         The type of cooldown to have. If callable, should return a key for the mapping.
 
         .. versionchanged:: 1.7
@@ -2585,7 +2585,7 @@ def dynamic_cooldown(
 
     Parameters
     ----------
-    cooldown: :class:`collections.abc.Callable`\\[[:class:`.disnake.Message`], :class:`.Cooldown` | :data:`None`]
+    cooldown: :class:`~collections.abc.Callable`\\[[:class:`.disnake.Message`], :class:`.Cooldown` | :data:`None`]
         A function that takes a message and returns a cooldown that will
         apply to this invocation or :data:`None` if the cooldown should be bypassed.
     type: :class:`.BucketType`

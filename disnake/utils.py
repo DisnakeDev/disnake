@@ -341,7 +341,7 @@ def oauth_url(
         The guild to pre-select in the authorization screen, if available.
     redirect_uri: :class:`str`
         An optional valid redirect URI.
-    scopes: :class:`collections.abc.Iterable`\\[:class:`str`]
+    scopes: :class:`~collections.abc.Iterable`\\[:class:`str`]
         An optional valid list of scopes. Defaults to ``('bot',)``.
 
         .. versionadded:: 1.7

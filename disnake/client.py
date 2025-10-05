@@ -583,7 +583,7 @@ class Client:
 
     @property
     def cached_messages(self) -> Sequence[Message]:
-        """:class:`collections.abc.Sequence`\\[:class:`.Message`]: Read-only list of messages the connected client has cached.
+        """:class:`~collections.abc.Sequence`\\[:class:`.Message`]: Read-only list of messages the connected client has cached.
 
         .. versionadded:: 1.1
         """
@@ -933,7 +933,7 @@ class Client:
         return decorator
 
     def get_listeners(self) -> Mapping[str, List[CoroFunc]]:
-        """:class:`collections.abc.Mapping`\\[:class:`str`, :class:`list`\\[:class:`collections.abc.Callable`]]: A read-only mapping of event names to listeners.
+        """:class:`~collections.abc.Mapping`\\[:class:`str`, :class:`list`\\[:class:`~collections.abc.Callable`]]: A read-only mapping of event names to listeners.
 
         .. note::
             To add or remove a listener you should use :meth:`.add_listener` and
@@ -1810,7 +1810,7 @@ class Client:
             The event name, similar to the :ref:`event reference <disnake_api_events>`,
             but without the ``on_`` prefix, to wait for. It's recommended
             to use :class:`.Event`.
-        check: :class:`collections.abc.Callable`\\[..., :class:`bool`] | :data:`None`
+        check: :class:`~collections.abc.Callable`\\[..., :class:`bool`] | :data:`None`
             A predicate to check what to wait for. The arguments must meet the
             parameters of the event being waited for.
         timeout: :class:`float` | :data:`None`
@@ -2771,7 +2771,7 @@ class Client:
 
     @property
     def persistent_views(self) -> Sequence[View]:
-        """:class:`collections.abc.Sequence`\\[:class:`.View`]: A sequence of persistent views added to the client.
+        """:class:`~collections.abc.Sequence`\\[:class:`.View`]: A sequence of persistent views added to the client.
 
         .. versionadded:: 2.0
         """
@@ -3208,7 +3208,7 @@ class Client:
 
         Parameters
         ----------
-        records: :class:`collections.abc.Sequence`\\[:class:`.ApplicationRoleConnectionMetadata`]
+        records: :class:`~collections.abc.Sequence`\\[:class:`.ApplicationRoleConnectionMetadata`]
             The new metadata records.
 
         Raises
@@ -3300,7 +3300,7 @@ class Client:
             The user to retrieve entitlements for.
         guild: :class:`.abc.Snowflake` | :data:`None`
             The guild to retrieve entitlements for.
-        skus: :class:`collections.abc.Sequence`\\[:class:`.abc.Snowflake`] | :data:`None`
+        skus: :class:`~collections.abc.Sequence`\\[:class:`.abc.Snowflake`] | :data:`None`
             The SKUs for which entitlements are retrieved.
         exclude_ended: :class:`bool`
             Whether to exclude ended/expired entitlements. Defaults to ``False``.

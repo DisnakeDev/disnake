@@ -562,11 +562,11 @@ class HelpCommand:
 
         Parameters
         ----------
-        commands: :class:`collections.abc.Iterable`\\[:class:`Command`]
+        commands: :class:`~collections.abc.Iterable`\\[:class:`Command`]
             An iterable of commands that are getting filtered.
         sort: :class:`bool`
             Whether to sort the result.
-        key: :class:`collections.abc.Callable`\\[[:class:`Command`], :data:`~typing.Any`] | :data:`None`
+        key: :class:`~collections.abc.Callable`\\[[:class:`Command`], :data:`~typing.Any`] | :data:`None`
             An optional key function to pass to :func:`py:sorted` that
             takes a :class:`Command` as its sole parameter. If ``sort`` is
             passed as ``True`` then this will default to using the command name.
@@ -615,7 +615,7 @@ class HelpCommand:
 
         Parameters
         ----------
-        commands: :class:`collections.abc.Sequence`\\[:class:`Command`]
+        commands: :class:`~collections.abc.Sequence`\\[:class:`Command`]
             A sequence of commands to check for the largest size.
 
         Returns
@@ -709,7 +709,7 @@ class HelpCommand:
 
         Parameters
         ----------
-        mapping: :class:`collections.abc.Mapping`\\[:class:`Cog` | :data:`None`, :class:`list`\\[:class:`Command`]]
+        mapping: :class:`~collections.abc.Mapping`\\[:class:`Cog` | :data:`None`, :class:`list`\\[:class:`Command`]]
             A mapping of cogs to commands that have been requested by the user for help.
             The key of the mapping is the :class:`~.commands.Cog` that the command belongs to, or
             :data:`None` if there isn't one, and the value is a list of commands that belongs to that cog.
@@ -983,7 +983,7 @@ class DefaultHelpCommand(HelpCommand):
 
         Parameters
         ----------
-        commands: :class:`collections.abc.Sequence`\\[:class:`Command`]
+        commands: :class:`~collections.abc.Sequence`\\[:class:`Command`]
             A list of commands to indent for output.
         heading: :class:`str`
             The heading to add to the output. This is only added
@@ -1210,7 +1210,7 @@ class MinimalHelpCommand(HelpCommand):
 
         Parameters
         ----------
-        commands: :class:`collections.abc.Sequence`\\[:class:`Command`]
+        commands: :class:`~collections.abc.Sequence`\\[:class:`Command`]
             A list of commands that belong to the heading.
         heading: :class:`str`
             The heading to add to the line.
@@ -1251,7 +1251,7 @@ class MinimalHelpCommand(HelpCommand):
 
         Parameters
         ----------
-        aliases: :class:`collections.abc.Sequence`\\[:class:`str`]
+        aliases: :class:`~collections.abc.Sequence`\\[:class:`str`]
             A list of aliases to format.
         """
         self.paginator.add_line(f"**{self.aliases_heading}** {', '.join(aliases)}", empty=True)

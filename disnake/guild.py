@@ -1818,7 +1818,7 @@ class Guild(Hashable):
             A :class:`dict` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply upon creation of a channel.
             Useful for creating secret channels.
-        available_tags: :class:`collections.abc.Sequence`\\[:class:`ForumTag`] | :data:`None`
+        available_tags: :class:`~collections.abc.Sequence`\\[:class:`ForumTag`] | :data:`None`
             The tags available for threads in this channel.
 
             .. versionadded:: 2.6
@@ -1961,7 +1961,7 @@ class Guild(Hashable):
             A :class:`dict` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply upon creation of a channel.
             Useful for creating secret channels.
-        available_tags: :class:`collections.abc.Sequence`\\[:class:`ForumTag`] | :data:`None`
+        available_tags: :class:`~collections.abc.Sequence`\\[:class:`ForumTag`] | :data:`None`
             The tags available for threads in this channel.
         default_reaction: :class:`str` | :class:`Emoji` | :class:`PartialEmoji` | :data:`None`
             The default emoji shown for reacting to threads.
@@ -2539,7 +2539,7 @@ class Guild(Hashable):
 
         Returns
         -------
-        :class:`collections.abc.Sequence`\\[:class:`abc.GuildChannel`]
+        :class:`~collections.abc.Sequence`\\[:class:`abc.GuildChannel`]
             All channels that the guild has.
         """
         data = await self._state.http.get_all_guild_channels(self.id)
@@ -4285,7 +4285,7 @@ class Guild(Hashable):
 
         Parameters
         ----------
-        users: :class:`collections.abc.Iterable`\\[:class:`abc.Snowflake`]
+        users: :class:`~collections.abc.Iterable`\\[:class:`abc.Snowflake`]
             The users to ban from the guild, up to 200.
         clean_history_duration: :class:`int` | :class:`datetime.timedelta`
             The timespan (seconds or timedelta) of messages to delete from the users
@@ -5182,16 +5182,16 @@ class Guild(Hashable):
             If set to :attr:`~AutoModTriggerType.keyword`, :attr:`~AutoModTriggerType.keyword_preset`,
             or :attr:`~AutoModTriggerType.mention_spam`, ``trigger_metadata`` must be set accordingly.
             This cannot be changed after creation.
-        actions: :class:`collections.abc.Sequence`\\[:class:`AutoModBlockMessageAction` | :class:`AutoModSendAlertAction` | :class:`AutoModTimeoutAction` | :class:`AutoModAction`]
+        actions: :class:`~collections.abc.Sequence`\\[:class:`AutoModBlockMessageAction` | :class:`AutoModSendAlertAction` | :class:`AutoModTimeoutAction` | :class:`AutoModAction`]
             The list of actions that will execute if a matching event triggered this rule.
             Must contain at least one action.
         trigger_metadata: :class:`AutoModTriggerMetadata` | :data:`None`
             Additional metadata associated with the trigger type.
         enabled: :class:`bool`
             Whether to enable the rule. Defaults to ``False``.
-        exempt_roles: :class:`collections.abc.Sequence`\\[:class:`abc.Snowflake`] | :data:`None`
+        exempt_roles: :class:`~collections.abc.Sequence`\\[:class:`abc.Snowflake`] | :data:`None`
             The roles that are exempt from this rule, up to 20. By default, no roles are exempt.
-        exempt_channels: :class:`collections.abc.Sequence`\\[:class:`abc.Snowflake`] | :data:`None`
+        exempt_channels: :class:`~collections.abc.Sequence`\\[:class:`abc.Snowflake`] | :data:`None`
             The channels that are exempt from this rule, up to 50. By default, no channels are exempt.
             Can also include categories, in which case all channels inside that category will be exempt.
         reason: :class:`str` | :data:`None`

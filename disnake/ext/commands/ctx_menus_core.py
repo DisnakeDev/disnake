@@ -49,7 +49,7 @@ class InvokableUserCommand(InvokableApplicationCommand):
         The coroutine that is executed when the user command is called.
     cog: :class:`Cog` | :data:`None`
         The cog that this user command belongs to. :data:`None` if there isn't one.
-    checks: :class:`list`\\[:class:`collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
+    checks: :class:`list`\\[:class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
         A list of predicates that verifies if the command could be executed
         with the given :class:`.ApplicationCommandInteraction` as the sole parameter. If an exception
         is necessary to be thrown to signal failure, then one inherited from
@@ -160,7 +160,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         The coroutine that is executed when the message command is called.
     cog: :class:`Cog` | :data:`None`
         The cog that this message command belongs to. :data:`None` if there isn't one.
-    checks: :class:`list`\\[:class:`collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
+    checks: :class:`list`\\[:class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
         A list of predicates that verifies if the command could be executed
         with the given :class:`.ApplicationCommandInteraction` as the sole parameter. If an exception
         is necessary to be thrown to signal failure, then one inherited from
@@ -315,7 +315,7 @@ def user_command(
 
     auto_sync: :class:`bool`
         Whether to automatically register the command. Defaults to ``True``.
-    guild_ids: :class:`collections.abc.Sequence`\\[:class:`int`]
+    guild_ids: :class:`~collections.abc.Sequence`\\[:class:`int`]
         If specified, the client will register the command in these guilds.
         Otherwise, this command will be registered globally.
     extras: :class:`dict`\\[:class:`str`, :data:`~typing.Any`]
@@ -328,7 +328,7 @@ def user_command(
 
     Returns
     -------
-    :class:`collections.abc.Callable`\\[..., :class:`InvokableUserCommand`]
+    :class:`~collections.abc.Callable`\\[..., :class:`InvokableUserCommand`]
         A decorator that converts the provided method into an InvokableUserCommand and returns it.
     """
 
@@ -426,7 +426,7 @@ def message_command(
 
     auto_sync: :class:`bool`
         Whether to automatically register the command. Defaults to ``True``.
-    guild_ids: :class:`collections.abc.Sequence`\\[:class:`int`]
+    guild_ids: :class:`~collections.abc.Sequence`\\[:class:`int`]
         If specified, the client will register the command in these guilds.
         Otherwise, this command will be registered globally.
     extras: :class:`dict`\\[:class:`str`, :data:`~typing.Any`]
@@ -439,7 +439,7 @@ def message_command(
 
     Returns
     -------
-    :class:`collections.abc.Callable`\\[..., :class:`InvokableMessageCommand`]
+    :class:`~collections.abc.Callable`\\[..., :class:`InvokableMessageCommand`]
         A decorator that converts the provided method into an InvokableMessageCommand and then returns it.
     """
 

@@ -112,7 +112,7 @@ class Interaction(Generic[ClientT]):
 
     Attributes
     ----------
-    data: :class:`collections.abc.Mapping`\\[:class:`str`, :data:`~typing.Any`]
+    data: :class:`~collections.abc.Mapping`\\[:class:`str`, :data:`~typing.Any`]
         The interaction's raw data. This might be replaced with a more processed version in subclasses.
     id: :class:`int`
         The interaction's ID.
@@ -1426,7 +1426,7 @@ class InteractionResponse:
 
         Parameters
         ----------
-        choices: :class:`collections.abc.Sequence`\\[:class:`OptionChoice`] | :class:`collections.abc.Sequence`\\[:class:`str` | :class:`int` | :class:`float`] | :class:`collections.abc.Mapping`\\[:class:`str`, :class:`str` | :class:`int` | :class:`float`]
+        choices: :class:`~collections.abc.Sequence`\\[:class:`OptionChoice`] | :class:`~collections.abc.Sequence`\\[:class:`str` | :class:`int` | :class:`float`] | :class:`~collections.abc.Mapping`\\[:class:`str`, :class:`str` | :class:`int` | :class:`float`]
             The choices to suggest.
 
         Raises
