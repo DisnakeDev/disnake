@@ -313,7 +313,7 @@ jobs:
       - lint
     strategy:
       matrix:
-        os: ["windows-latest", "ubuntu-latest", "macos-latest"]
+        os: ["ubuntu-latest", "macos-latest", "windows-2022"]
         session: ${{ fromJson(needs.python-versions.outputs.test-sessions) }}
       fail-fast: true
     continue-on-error: ${{ matrix.session.experimental }}
