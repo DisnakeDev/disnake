@@ -2761,7 +2761,7 @@ class Guild(Hashable):
 
         channel: :class:`.abc.Snowflake` | :data:`None`
             The channel in which the guild scheduled event will be hosted.
-            Passing in `None` assumes the ``entity_type`` to be :class:`GuildScheduledEventEntityType.external`
+            Passing in :data:`None` assumes the ``entity_type`` to be :class:`GuildScheduledEventEntityType.external`
 
             .. versionadded:: 2.6
 

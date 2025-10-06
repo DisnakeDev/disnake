@@ -630,7 +630,7 @@ class Client:
 
     @property
     def global_application_commands(self) -> List[APIApplicationCommand]:
-        """:class:`list`\\[:class:`.APIUserCommand` | :class:`.APIMessageCommand` | :class:`.APISlashCommand`: The client's global application commands."""
+        """:class:`list`\\[:class:`.APIUserCommand` | :class:`.APIMessageCommand` | :class:`.APISlashCommand`]: The client's global application commands."""
         return list(self._connection._global_application_commands.values())
 
     @property
