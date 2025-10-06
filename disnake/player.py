@@ -481,7 +481,7 @@ class FFmpegOpusAudio(FFmpegAudio):
         ----------
         source
             Identical to the ``source`` parameter for the constructor.
-        method: Optional[Union[str, Callable[[str, str], Tuple[Optional[str], Optional[int]]]]
+        method: Optional[Union[:class:`str`, Callable[[:class:`str`, :class:`str`], Tuple[Optional[str], Optional[int]]]]
             The probing method used to determine bitrate and codec information. As a string, valid
             values are ``native`` to use ffprobe (or avprobe) and ``fallback`` to use ffmpeg
             (or avconv).  As a callable, it must take two string arguments, ``source`` and
