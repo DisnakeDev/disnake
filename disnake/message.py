@@ -79,6 +79,7 @@ if TYPE_CHECKING:
         Message as MessagePayload,
         MessageActivity as MessageActivityPayload,
         MessageApplication as MessageApplicationPayload,
+        MessageCall as MessageCallPayload,
         MessageReference as MessageReferencePayload,
         Reaction as ReactionPayload,
         RoleSubscriptionData as RoleSubscriptionDataPayload,
@@ -101,6 +102,7 @@ __all__ = (
     "AuthorizingIntegrationOwners",
     "RoleSubscriptionData",
     "ForwardedMessage",
+    "MessageCall",
 )
 
 
@@ -974,6 +976,32 @@ def flatten_handlers(cls: Type[Message]) -> Type[Message]:
     return cls
 
 
+class MessageCall:
+    """
+    Represents a call in a message.
+
+    .. versionadded:: |vnext|
+
+    Attributes
+    ----------
+    ended_timestamp: Optional[:class:`datetime.datetime`]
+        The timestamp when the call ended, or ``None`` if the call is still ongoing.
+    participant_ids: List[:class:`int`]
+        A list of user IDs of the participants in the call.
+
+        Due to API limitations, this list is simply the user IDs that were in the call.
+        It is not resolved to the user objects themselves.
+    """
+
+    def __init__(self, *, data: MessageCallPayload) -> None:
+        self.ended_timestamp: Optional[datetime.datetime] = utils.parse_time(
+            data.get("ended_timestamp")
+        )
+        self.participant_ids: List[int] = [
+            int(participant) for participant in data.get("participants", [])
+        ]
+
+
 @flatten_handlers
 class Message(Hashable):
     """Represents a message from Discord.
@@ -1116,6 +1144,12 @@ class Message(Hashable):
         The poll contained in this message.
 
         .. versionadded:: 2.10
+
+    call: Optional[:class:`MessageCall`]
+        The call contained in this message.
+        Only present when :attr:`type` is :attr:`MessageType.call`.
+
+        .. versionadded:: |vnext|
     """
 
     __slots__ = (
@@ -1154,6 +1188,7 @@ class Message(Hashable):
         "components",
         "guild",
         "poll",
+        "call",
         "_edited_timestamp",
         "_role_subscription_data",
         "_pinned_at",
@@ -1213,7 +1248,7 @@ class Message(Hashable):
         self.poll: Optional[Poll] = None
         if poll_data := data.get("poll"):
             self.poll = Poll.from_dict(message=self, data=poll_data)
-
+        self.call = MessageCall(data=call_data) if (call_data := data.get("call")) else None
         try:
             # if the channel doesn't have a guild attribute, we handle that
             self.guild = channel.guild  # type: ignore
