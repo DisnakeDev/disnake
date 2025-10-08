@@ -471,7 +471,7 @@ class ParamInfo:
         The lowest allowed value for this option.
     le: :class:`float`
         The greatest allowed value for this option.
-    type: Any
+    type: :class:`~typing.Any`
         The type of the parameter.
     channel_types: :class:`list`\\[:class:`.ChannelType`]
         The list of channel types supported by this slash command option.
