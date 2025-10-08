@@ -196,8 +196,6 @@ Converters come in a few flavours:
 
 - A custom class that inherits from :class:`~ext.commands.Converter`.
 
-.. _ext_commands_basic_converters:
-
 Basic Converters
 ++++++++++++++++
 
@@ -355,6 +353,8 @@ This can get tedious, so an inline advanced converter is possible through a :fun
             await ctx.send("Hey you're pretty new!")
         else:
             await ctx.send("Hm you're not so new.")
+
+.. _ext_commands_discord_converters:
 
 Discord Converters
 ++++++++++++++++++
