@@ -151,7 +151,7 @@ class MessageInteraction(Interaction[ClientT]):
     def resolved_values(
         self,
     ) -> Optional[Sequence[Union[str, Member, User, Role, AnyChannel]]]:
-        """Optional[Sequence[:class:`str`, :class:`Member`, :class:`User`, :class:`Role`, Union[:class:`abc.GuildChannel`, :class:`Thread`, :class:`PartialMessageable`]]]: The (resolved) values the user selected.
+        """Optional[Sequence[Union[:class:`str`, :class:`Member`, :class:`User`, :class:`Role`, :class:`abc.GuildChannel`, :class:`Thread`, :class:`PartialMessageable`]]]: The (resolved) values the user selected.
 
         For select menus of type :attr:`~ComponentType.string_select`,
         this is equivalent to :attr:`values`.
