@@ -1,1 +1,1 @@
-Update all references to :class:`~typing.Union` and :class:`~typing.Optional` in the documentation to use PEP 604 syntax (``X | Y`` and ``X | None`` respectively).
+Update all references to :py:class:`~typing.Union` and :py:class:`~typing.Optional` in the documentation to use PEP 604 syntax (``X | Y`` and ``X | None`` respectively).
