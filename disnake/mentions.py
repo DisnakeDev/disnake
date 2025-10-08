@@ -77,16 +77,12 @@ class AllowedMentions:
         # TODO(3.0): annotate attributes as `Sequence` instead of copying to list
         self.users: Union[bool, List[Snowflake]]
         self.roles: Union[bool, List[Snowflake]]
-        if users is default:
-            self.users = users  # type: ignore
-        elif isinstance(users, bool):
-            self.users = users
+        if users is default or isinstance(users, bool):
+            self.users = cast("bool", users)
         else:
             self.users = list(users)
-        if roles is default:
-            self.roles = roles  # type: ignore
-        elif isinstance(roles, bool):
-            self.roles = roles
+        if roles is default or isinstance(roles, bool):
+            self.roles = cast("bool", roles)
         else:
             self.roles = list(roles)
         self.replied_user = replied_user
