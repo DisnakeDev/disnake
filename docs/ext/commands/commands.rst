@@ -485,7 +485,7 @@ commands in an easy to use manner.
 typing.Union
 ^^^^^^^^^^^^
 
-A :data:`typing.Union` is a special type hint that allows for the command to take in any of the specific types instead of
+A :class:`typing.Union` is a special type hint that allows for the command to take in any of the specific types instead of
 a singular type. For example, given the following:
 
 .. code-block:: python3
@@ -502,7 +502,7 @@ The way this works is through a left-to-right order. It first attempts to conver
 :class:`disnake.TextChannel`, and if it fails it tries to convert it to a :class:`disnake.Member`. If all converters fail,
 then a special error is raised, :exc:`~ext.commands.BadUnionArgument`.
 
-Note that any valid converter discussed above can be passed in to the argument list of a :data:`typing.Union`.
+Note that any valid converter discussed above can be passed in to the argument list of a :class:`typing.Union`.
 
 typing.Optional
 ^^^^^^^^^^^^^^^
