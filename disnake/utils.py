@@ -1212,6 +1212,11 @@ def evaluate_annotation(
         cache[tp] = evaluated
         return evaluated
 
+    # Annotated[X, Y], where Y is the converter we need
+    if hasattr(tp, "__metadata__"):
+        tp = tp.__metadata__[0]
+        return evaluate_annotation(tp, globals, locals, cache)
+
     # GenericAlias / UnionType
     if hasattr(tp, "__args__"):
         if not hasattr(tp, "__origin__"):
