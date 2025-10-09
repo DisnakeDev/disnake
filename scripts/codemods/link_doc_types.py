@@ -16,7 +16,7 @@ class DocstringTransformer(BaseCodemodCommand):
         current = simple_string.raw_value
         prefix = simple_string.prefix
 
-        new_inner = apply_replacements(current, include_backslash=True)
+        new_inner = apply_replacements(current, include_double_backslash=True)
         # TODO: enable D301 and raw docstrings
         # if r"\\" in new_inner:
         #     prefix = "r"

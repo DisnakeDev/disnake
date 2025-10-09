@@ -97,7 +97,7 @@ def get_check_sections(s: str) -> list[tuple[str, bool]]:
     return merged
 
 
-def apply_replacements(s, *, include_backslash=False):
+def apply_replacements(s, *, include_double_backslash=False):
     # Replace Optional[A] with A | ``None`` using proper bracket matching
     def replace_all_optionals(text: str) -> str:
         while True:
@@ -173,10 +173,10 @@ def apply_replacements(s, *, include_backslash=False):
                 part = regex.sub(rf"\1:class:`{replacement}`\2", part)
 
             for regex, replacement in CONTAINER_REGEXES.items():
-                if include_backslash:
+                if include_double_backslash:
                     part = regex.sub(rf":class:`{replacement}`\\\\[", part)
                 else:
-                    part = regex.sub(rf":class:`{replacement}`[", part)
+                    part = regex.sub(rf":class:`{replacement}`\\[", part)
 
             part = ANY.sub(r"\1:data:`~typing.Any`", part)
         s += part

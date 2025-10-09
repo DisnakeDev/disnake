@@ -82,12 +82,12 @@ BulkBanResult
 
         The users that were successfully banned.
 
-        :type: :class:`~collections.abc.Sequence`[:class:`Object`]
+        :type: :class:`~collections.abc.Sequence`\[:class:`Object`]
     .. attribute:: failed
 
         The users that were not banned.
 
-        :type: :class:`~collections.abc.Sequence`[:class:`Object`]
+        :type: :class:`~collections.abc.Sequence`\[:class:`Object`]
 
 Onboarding
 ~~~~~~~~~~
