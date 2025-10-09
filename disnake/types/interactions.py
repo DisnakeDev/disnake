@@ -261,6 +261,10 @@ class ModalInteractionChannelSelectData(_BaseSnowflakeModalComponentInteractionD
     type: Literal[8]
 
 
+class ModalInteractionFileUploadData(_BaseSnowflakeModalComponentInteractionData):
+    type: Literal[19]
+
+
 # top-level modal component data
 
 ModalInteractionActionRowChildData: TypeAlias = ModalInteractionTextInputData
@@ -282,6 +286,7 @@ ModalInteractionLabelChildData = Union[
     ModalInteractionRoleSelectData,
     ModalInteractionMentionableSelectData,
     ModalInteractionChannelSelectData,
+    ModalInteractionFileUploadData,
 ]
 
 
@@ -307,7 +312,7 @@ ModalInteractionComponentData = Union[
 class ModalInteractionData(TypedDict):
     custom_id: str
     components: List[ModalInteractionComponentData]
-    # resolved: NotRequired[InteractionDataResolved]  # undocumented
+    resolved: NotRequired[InteractionDataResolved]
 
 
 ## Interactions

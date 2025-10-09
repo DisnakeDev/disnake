@@ -30,6 +30,7 @@ all_ui_component_objects: List[ui.UIComponent] = [
     ui.Separator(),
     ui.Container(),
     ui.Label("", ui.TextInput(label="", custom_id="")),
+    ui.FileUpload(),
 ]
 
 _missing = set(all_ui_component_types) ^ set(map(type, all_ui_component_objects))
