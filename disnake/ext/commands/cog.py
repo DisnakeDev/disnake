@@ -379,7 +379,7 @@ class Cog(metaclass=CogMeta):
 
         Returns
         -------
-        :class:`list`\\[:class:`tuple`\\[:class:`str`, :ref:`coroutine <coroutine>`]]
+        :class:`list`\\[:class:`tuple`\\[:class:`str`, :ref:`coroutine function <coroutine>`]]
             The listeners defined in this cog.
         """
         return [(name, getattr(self, method_name)) for name, method_name in self.__cog_listeners__]
