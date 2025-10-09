@@ -97,7 +97,7 @@ def get_check_sections(s: str) -> list[tuple[str, bool]]:
     return merged
 
 
-def apply_replacements(s, *, include_double_backslash=False):
+def apply_replacements(s: str, *, include_double_backslash: bool = False) -> str:
     # Replace Optional[A] with A | ``None`` using proper bracket matching
     def replace_all_optionals(text: str) -> str:
         while True:
