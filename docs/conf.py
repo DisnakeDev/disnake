@@ -80,8 +80,8 @@ rst_prolog = r"""
 .. |coro| replace:: This function is a |coroutine_link|_.
 .. |maybecoro| replace:: This function *could be a* |coroutine_link|_.
 .. |coroutine_link| replace:: *coroutine*
-.. |components_type| replace:: :class:`~disnake.ui.UIComponent`, :class:`list`\[:class:`~disnake.ui.UIComponent`, :class:`list`\[:class:`~disnake.ui.WrappedComponent`]]]]
-.. |modal_components_type| replace:: :class:`~disnake.ui.UIComponent`, :class:`list`\[:class:`~disnake.ui.UIComponent`]]
+.. |components_type| replace:: :class:`~disnake.ui.UIComponent` | :class:`list`\[:class:`~disnake.ui.UIComponent` | :class:`list`\[:class:`~disnake.ui.WrappedComponent`]]
+.. |modal_components_type| replace:: :class:`~disnake.ui.UIComponent` | :class:`list`\[:class:`~disnake.ui.UIComponent`]
 .. |resource_type| replace:: :class:`bytes` | :class:`.Asset` | :class:`.Emoji` | :class:`.PartialEmoji` | :class:`.StickerItem` | :class:`.Sticker`
 .. _coroutine_link: https://docs.python.org/3/library/asyncio-task.html#coroutine
 """
