@@ -1,9 +1,7 @@
 # SPDX-License-Identifier: MIT
 """Update type hints in docs files to use pep 585 and pep 602 style."""
 
-import pathlib
 import re
-import sys
 
 CONTAINERS = {
     "Dict": "dict",
@@ -99,7 +97,7 @@ def get_check_sections(s: str) -> list[tuple[str, bool]]:
     return merged
 
 
-def apply_replacements(s):
+def apply_replacements(s, *, include_backslash=False):
     # Replace Optional[A] with A | ``None`` using proper bracket matching
     def replace_all_optionals(text: str) -> str:
         while True:
@@ -175,7 +173,10 @@ def apply_replacements(s):
                 part = regex.sub(rf"\1:class:`{replacement}`\2", part)
 
             for regex, replacement in CONTAINER_REGEXES.items():
-                part = regex.sub(rf":class:`{replacement}`\\\\[", part)
+                if include_backslash:
+                    part = regex.sub(rf":class:`{replacement}`\\\\[", part)
+                else:
+                    part = regex.sub(rf":class:`{replacement}`[", part)
 
             part = ANY.sub(r"\1:data:`~typing.Any`", part)
         s += part
@@ -195,14 +196,3 @@ def process_file(file_path) -> None:
     new_content = new_content.replace("\r\n", "\n")
     with open(file_path, "w", encoding="utf-8", newline="\n") as f:
         f.write(new_content)
-
-
-if __name__ == "__main__":
-    docs_dir = pathlib.Path("docs")
-    if not docs_dir.exists():
-        sys.exit(f"docs directory not found: {docs_dir}")
-    for file_path in docs_dir.glob("**/*.rst"):
-        if file_path.name in ("whats_new.rst", "whats_new_legacy.rst", "migrating.rst"):
-            continue
-        if file_path.is_file():
-            process_file(file_path)

@@ -498,7 +498,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             The new type of this text channel. Currently, only conversion between
             :attr:`ChannelType.text` and :attr:`ChannelType.news` is supported. This
             is only available to guilds that contain ``NEWS`` in :attr:`Guild.features`.
-        overwrites: :class:`Mapping`
+        overwrites: :class:`~collections.abc.Mapping`\\[:class:`~.Member` | :class:`~.Role`, :class:`PermissionOverwrite`]
             A :class:`Mapping` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply to the channel.
         default_auto_archive_duration: :class:`int` | :class:`ThreadArchiveDuration` | :data:`None`
@@ -603,7 +603,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             to this channel's default thread slowmode delay.
         default_auto_archive_duration: :class:`int` | :class:`ThreadArchiveDuration`
             The default auto archive duration of the new channel. If not provided, defaults to this channel's default auto archive duration.
-        overwrites: :class:`Mapping`
+        overwrites: :class:`~collections.abc.Mapping`\\[:class:`~.Member` | :class:`~.Role`, :class:`PermissionOverwrite`]
             A :class:`Mapping` of target (either a role or a member) to :class:`PermissionOverwrite`
             to apply to the channel. If not provided, defaults to this channel's overwrites.
         news: :class:`bool`
@@ -1457,7 +1457,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
             The video quality mode of the new channel. If not provided, defaults to this channel's video quality mode.
         nsfw: :class:`bool`
             Whether the new channel should be nsfw or not. If not provided, defaults to this channel's NSFW value.
-        overwrites: :class:`Mapping`
+        overwrites: :class:`~collections.abc.Mapping`\\[:class:`~.Member` | :class:`~.Role`, :class:`PermissionOverwrite`]
             A :class:`Mapping` of target (either a role or a member) to :class:`PermissionOverwrite` to apply
             to the channel. If not provided, defaults to this channel's overwrites.
         slowmode_delay: :class:`int` | :data:`None`
@@ -1645,7 +1645,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
             category.
         reason: :class:`str` | :data:`None`
             The reason for editing this channel. Shows up on the audit log.
-        overwrites: :class:`Mapping`
+        overwrites: :class:`~collections.abc.Mapping`\\[:class:`~.Member` | :class:`~.Role`, :class:`PermissionOverwrite`]
             A :class:`Mapping` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply to the channel.
         rtc_region: :class:`str` | :class:`VoiceRegion` | :data:`None`
@@ -2193,7 +2193,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
             The video quality mode of the new channel. If not provided, defaults to this channel's video quality mode.
         nsfw: :class:`bool`
             Whether the new channel should be nsfw or not. If not provided, defaults to this channel's NSFW value.
-        overwrites: :class:`Mapping`
+        overwrites: :class:`~collections.abc.Mapping`\\[:class:`~.Member` | :class:`~.Role`, :class:`PermissionOverwrite`]
             A :class:`Mapping` of target (either a role or a member) to :class:`PermissionOverwrite`
             to apply to the channel. If not provided, defaults to this channel's overwrites.
         reason: :class:`str` | :data:`None`
@@ -2502,7 +2502,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         category: :class:`abc.Snowflake` | :data:`None`
             The new category for this channel. Can be :data:`None` to remove the
             category.
-        overwrites: :class:`Mapping`
+        overwrites: :class:`~collections.abc.Mapping`\\[:class:`~.Member` | :class:`~.Role`, :class:`PermissionOverwrite`]
             A :class:`Mapping` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply to the channel.
         rtc_region: :class:`str` | :class:`VoiceRegion` | :data:`None`
@@ -2937,7 +2937,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
             The name of the new channel. If not provided, defaults to this channel's name.
         position: :class:`int`
             The position of the new channel. If not provided, defaults to this channel's position.
-        overwrites: :class:`Mapping`
+        overwrites: :class:`~collections.abc.Mapping`\\[:class:`~.Member` | :class:`~.Role`, :class:`PermissionOverwrite`]
             A :class:`Mapping` of target (either a role or a member) to :class:`PermissionOverwrite`
             to apply to the channel. If not provided, defaults to this channel's overwrites.
         reason: :class:`str` | :data:`None`
@@ -3020,7 +3020,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
             The new category's position.
         nsfw: :class:`bool`
             Whether to mark the category as NSFW.
-        overwrites: :class:`Mapping`
+        overwrites: :class:`~collections.abc.Mapping`\\[:class:`~.Member` | :class:`~.Role`, :class:`PermissionOverwrite`]
             A :class:`Mapping` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply to the category.
         flags: :class:`ChannelFlags`
@@ -4133,7 +4133,7 @@ class ForumChannel(ThreadOnlyGuildChannel):
 
             .. versionadded:: 2.6
 
-        overwrites: :class:`Mapping`
+        overwrites: :class:`~collections.abc.Mapping`\\[:class:`~.Member` | :class:`~.Role`, :class:`PermissionOverwrite`]
             A :class:`Mapping` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply to the channel.
         default_auto_archive_duration: :class:`int` | :class:`ThreadArchiveDuration` | :data:`None`
@@ -4289,7 +4289,7 @@ class ForumChannel(ThreadOnlyGuildChannel):
             The default sort order of the new channel. If not provided, defaults to this channel's default sort order.
         default_layout: :class:`ThreadLayout`
             The default layout of threads in the new channel. If not provided, defaults to this channel's default layout.
-        overwrites: :class:`Mapping`
+        overwrites: :class:`~collections.abc.Mapping`\\[:class:`~.Member` | :class:`~.Role`, :class:`PermissionOverwrite`]
             A :class:`Mapping` of target (either a role or a member) to :class:`PermissionOverwrite`
             to apply to the channel. If not provided, defaults to this channel's overwrites.
         reason: :class:`str` | :data:`None`
@@ -4552,7 +4552,7 @@ class MediaChannel(ThreadOnlyGuildChannel):
             in newly created threads in this channel, in seconds.
             This does not apply retroactively to existing threads.
             A value of ``0`` or :data:`None` disables slowmode. The maximum value possible is ``21600``.
-        overwrites: :class:`Mapping`
+        overwrites: :class:`~collections.abc.Mapping`\\[:class:`~.Member` | :class:`~.Role`, :class:`PermissionOverwrite`]
             A :class:`Mapping` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply to the channel.
         default_auto_archive_duration: :class:`int` | :class:`ThreadArchiveDuration` | :data:`None`
@@ -4675,7 +4675,7 @@ class MediaChannel(ThreadOnlyGuildChannel):
             The default reaction of the new channel. If not provided, defaults to this channel's default reaction.
         default_sort_order: :class:`ThreadSortOrder` | :data:`None`
             The default sort order of the new channel. If not provided, defaults to this channel's default sort order.
-        overwrites: :class:`Mapping`
+        overwrites: :class:`~collections.abc.Mapping`\\[:class:`~.Member` | :class:`~.Role`, :class:`PermissionOverwrite`]
             A :class:`Mapping` of target (either a role or a member) to :class:`PermissionOverwrite`
             to apply to the channel. If not provided, defaults to this channel's overwrites.
         reason: :class:`str` | :data:`None`

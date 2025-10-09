@@ -675,9 +675,9 @@ Emojis
     :param guild: The guild who got their emojis updated.
     :type guild: :class:`Guild`
     :param before: A list of emojis before the update.
-    :type before: :class:`~collections.abc.Sequence`\\[:class:`Emoji`]
+    :type before: :class:`~collections.abc.Sequence`[:class:`Emoji`]
     :param after: A list of emojis after the update.
-    :type after: :class:`~collections.abc.Sequence`\\[:class:`Emoji`]
+    :type after: :class:`~collections.abc.Sequence`[:class:`Emoji`]
 
 Integrations
 ++++++++++++
@@ -992,9 +992,9 @@ Soundboard
     :param guild: The guild who got their soundboard sounds updated.
     :type guild: :class:`Guild`
     :param before: A list of soundboard sounds before the update.
-    :type before: :class:`~collections.abc.Sequence`\\[:class:`GuildSoundboardSound`]
+    :type before: :class:`~collections.abc.Sequence`[:class:`GuildSoundboardSound`]
     :param after: A list of soundboard sounds after the update.
-    :type after: :class:`~collections.abc.Sequence`\\[:class:`GuildSoundboardSound`]
+    :type after: :class:`~collections.abc.Sequence`[:class:`GuildSoundboardSound`]
 
 Stage Instances
 +++++++++++++++
@@ -1039,9 +1039,9 @@ Stickers
     :param guild: The guild who got their stickers updated.
     :type guild: :class:`Guild`
     :param before: A list of stickers before the update.
-    :type before: :class:`~collections.abc.Sequence`\\[:class:`GuildSticker`]
+    :type before: :class:`~collections.abc.Sequence`[:class:`GuildSticker`]
     :param after: A list of stickers after the update.
-    :type after: :class:`~collections.abc.Sequence`\\[:class:`GuildSticker`]
+    :type after: :class:`~collections.abc.Sequence`[:class:`GuildSticker`]
 
 Voice
 +++++
@@ -1289,7 +1289,7 @@ This section documents events related to Discord chat messages.
     This requires :attr:`Intents.messages` to be enabled.
 
     :param messages: The messages that have been deleted.
-    :type messages: :class:`list`\\[:class:`Message`]
+    :type messages: :class:`list`[:class:`Message`]
 
 .. function:: on_poll_vote_add(member, answer)
 
@@ -1459,7 +1459,7 @@ This section documents events related to Discord chat messages.
     :param message: The message that had its reactions cleared.
     :type message: :class:`Message`
     :param reactions: The reactions that were removed.
-    :type reactions: :class:`list`\\[:class:`Reaction`]
+    :type reactions: :class:`list`[:class:`Reaction`]
 
 .. function:: on_reaction_clear_emoji(reaction)
 

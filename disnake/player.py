@@ -481,7 +481,7 @@ class FFmpegOpusAudio(FFmpegAudio):
         ----------
         source
             Identical to the ``source`` parameter for the constructor.
-        method: Optional[:class:`str` | :class:`~collections.abc.Callable`\\[[:class:`str`, :class:`str`], :class:`tuple`\\[Optional[:class:`str`], Optional[:class:`int`]]]
+        method: :class:`str` | :class:`~collections.abc.Callable`\\[[:class:`str`, :class:`str`], :class:`tuple`\\[:class:`str` | :data:`None`, :class:`int` | :data:`None`]] | :data:`None`
             The probing method used to determine bitrate and codec information. As a string, valid
             values are ``native`` to use ffprobe (or avprobe) and ``fallback`` to use ffmpeg
             (or avconv).  As a callable, it must take two string arguments, ``source`` and

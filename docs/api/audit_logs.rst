@@ -308,7 +308,7 @@ AuditLogDiff
         a ``type`` attribute set to either ``'role'`` or ``'member'`` to help
         decide what type of ID it is.
 
-        :type: :class:`list`\\[:class:`tuple`\\[:class:`Member` | :class:`User` | :class:`Role` | :class:`Object`, :class:`PermissionOverwrite`]]
+        :type: :class:`list`[:class:`tuple`[:class:`Member` | :class:`User` | :class:`Role` | :class:`Object`, :class:`PermissionOverwrite`]]
 
     .. attribute:: privacy_level
 
@@ -323,7 +323,7 @@ AuditLogDiff
         If a role is not found then it is a :class:`Object` with the ID and name being
         filled in.
 
-        :type: :class:`list`\\[:class:`Role` | :class:`Object`]
+        :type: :class:`list`[:class:`Role` | :class:`Object`]
 
     .. attribute:: nick
 
@@ -620,7 +620,7 @@ AuditLogDiff
         Note that only changed permission entries are included,
         not necessarily all of the command's permissions.
 
-        :type: :class:`dict`\\[:class:`int`, :class:`ApplicationCommandPermissions`]
+        :type: :class:`dict`[:class:`int`, :class:`ApplicationCommandPermissions`]
 
     .. attribute:: application_id
 
@@ -666,7 +666,7 @@ AuditLogDiff
 
         The list of actions of an auto moderation rule being changed.
 
-        :type: :class:`list`\\[:class:`AutoModAction`]
+        :type: :class:`list`[:class:`AutoModAction`]
 
     .. attribute:: trigger_metadata
 
@@ -680,7 +680,7 @@ AuditLogDiff
 
         If a role is not found then it is an :class:`Object` with the ID being set.
 
-        :type: :class:`list`\\[:class:`Role` | :class:`Object`]
+        :type: :class:`list`[:class:`Role` | :class:`Object`]
 
     .. attribute:: exempt_channels
 
@@ -688,7 +688,7 @@ AuditLogDiff
 
         If a channel is not found then it is an :class:`Object` with the ID being set.
 
-        :type: :class:`list`\\[:class:`abc.GuildChannel` | :class:`Object`]
+        :type: :class:`list`[:class:`abc.GuildChannel` | :class:`Object`]
 
     .. attribute:: applied_tags
 
@@ -697,13 +697,13 @@ AuditLogDiff
         If a tag is not found, then it is an :class:`Object` with the ID
         being set.
 
-        :type: :class:`list`\\[:class:`ForumTag` | :class:`Object`]
+        :type: :class:`list`[:class:`ForumTag` | :class:`Object`]
 
     .. attribute:: available_tags
 
         The available tags for threads in a forum/media channel being changed.
 
-        :type: :class:`list`\\[:class:`ForumTag`]
+        :type: :class:`list`[:class:`ForumTag`]
 
     .. attribute:: default_reaction
 
