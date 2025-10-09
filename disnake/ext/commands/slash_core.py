@@ -141,8 +141,8 @@ class SubCommandGroup(InvokableApplicationCommand):
         .. versionadded:: 2.6
     option: :class:`.Option`
         API representation of this subcommand.
-    callback: :ref:`coroutine <coroutine>`
-        The coroutine that is executed when the command group is invoked.
+    callback: :ref:`coroutine function <coroutine>`
+        The coroutine function that is executed when the command group is invoked.
     cog: Optional[:class:`Cog`]
         The cog that this group belongs to. ``None`` if there isn't one.
     checks: List[Callable[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
@@ -264,8 +264,8 @@ class SubCommand(InvokableApplicationCommand):
         .. versionadded:: 2.6
     option: :class:`.Option`
         API representation of this subcommand.
-    callback: :ref:`coroutine <coroutine>`
-        The coroutine that is executed when the subcommand is called.
+    callback: :ref:`coroutine function <coroutine>`
+        The coroutine function that is executed when the subcommand is called.
     cog: Optional[:class:`Cog`]
         The cog that this subcommand belongs to. ``None`` if there isn't one.
     checks: List[Callable[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
@@ -413,8 +413,8 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         For example, the qualified name for ``/one two three`` would be ``one two three``.
     body: :class:`.SlashCommand`
         An object being registered in the API.
-    callback: :ref:`coroutine <coroutine>`
-        The coroutine that is executed when the command is called.
+    callback: :ref:`coroutine function <coroutine>`
+        The coroutine function that is executed when the command is called.
     cog: Optional[:class:`Cog`]
         The cog that this command belongs to. ``None`` if there isn't one.
     checks: List[Callable[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
