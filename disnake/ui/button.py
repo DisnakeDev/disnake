@@ -41,18 +41,18 @@ class Button(Item[V_co]):
     ----------
     style: :class:`disnake.ButtonStyle`
         The style of the button.
-    custom_id: Optional[:class:`str`]
+    custom_id: :class:`str` | :data:`None`
         The ID of the button that gets received during an interaction.
         If this button is for a URL or an SKU, it does not have a custom ID.
-    url: Optional[:class:`str`]
+    url: :class:`str` | :data:`None`
         The URL this button sends you to.
     disabled: :class:`bool`
         Whether the button is disabled.
-    label: Optional[:class:`str`]
+    label: :class:`str` | :data:`None`
         The label of the button, if any.
-    emoji: Optional[Union[:class:`.PartialEmoji`, :class:`.Emoji`, :class:`str`]]
+    emoji: :class:`.PartialEmoji` | :class:`.Emoji` | :class:`str` | :data:`None`
         The emoji of the button, if available.
-    sku_id: Optional[:class:`int`]
+    sku_id: :class:`int` | :data:`None`
         The ID of a purchasable SKU, for premium buttons.
         Premium buttons additionally cannot have a ``label``, ``url``, or ``emoji``.
 
@@ -63,11 +63,11 @@ class Button(Item[V_co]):
         sequential identifiers to the components in the message.
 
         .. versionadded:: 2.11
-    row: Optional[:class:`int`]
+    row: :class:`int` | :data:`None`
         The relative row this button belongs to. A Discord component can only have 5
         rows. By default, items are arranged automatically into those 5 rows. If you'd
         like to control the relative positioning of the row then passing an index is advised.
-        For example, row=1 will show up before row=2. Defaults to ``None``, which is automatic
+        For example, row=1 will show up before row=2. Defaults to :data:`None`, which is automatic
         ordering. The row number must be between 0 and 4 (i.e. zero indexed).
     """
 
@@ -179,7 +179,7 @@ class Button(Item[V_co]):
 
     @property
     def custom_id(self) -> Optional[str]:
-        """Optional[:class:`str`]: The ID of the button that gets received during an interaction.
+        """:class:`str` | :data:`None`: The ID of the button that gets received during an interaction.
 
         If this button is for a URL or an SKU, it does not have a custom ID.
         """
@@ -195,7 +195,7 @@ class Button(Item[V_co]):
 
     @property
     def url(self) -> Optional[str]:
-        """Optional[:class:`str`]: The URL this button sends you to."""
+        """:class:`str` | :data:`None`: The URL this button sends you to."""
         return self._underlying.url
 
     @url.setter
@@ -216,7 +216,7 @@ class Button(Item[V_co]):
 
     @property
     def label(self) -> Optional[str]:
-        """Optional[:class:`str`]: The label of the button, if available."""
+        """:class:`str` | :data:`None`: The label of the button, if available."""
         return self._underlying.label
 
     @label.setter
@@ -225,7 +225,7 @@ class Button(Item[V_co]):
 
     @property
     def emoji(self) -> Optional[PartialEmoji]:
-        """Optional[:class:`.PartialEmoji`]: The emoji of the button, if available."""
+        """:class:`.PartialEmoji` | :data:`None`: The emoji of the button, if available."""
         return self._underlying.emoji
 
     @emoji.setter
@@ -243,7 +243,7 @@ class Button(Item[V_co]):
 
     @property
     def sku_id(self) -> Optional[int]:
-        """Optional[:class:`int`]: The ID of a purchasable SKU, for premium buttons.
+        """:class:`int` | :data:`None`: The ID of a purchasable SKU, for premium buttons.
 
         .. versionadded:: 2.11
         """
@@ -321,22 +321,22 @@ def button(
 
     Parameters
     ----------
-    cls: Callable[..., :class:`Button`]
+    cls: :class:`~collections.abc.Callable`\\[..., :class:`Button`]
         A callable (may be a :class:`Button` subclass) to create a new instance of this component.
         If provided, the other parameters described below do not apply.
         Instead, this decorator will accept the same keywords as the passed callable/class does.
 
         .. versionadded:: 2.6
-    label: Optional[:class:`str`]
+    label: :class:`str` | :data:`None`
         The label of the button, if any.
-    custom_id: Optional[:class:`str`]
+    custom_id: :class:`str` | :data:`None`
         The ID of the button that gets received during an interaction.
         It is recommended not to set this parameter to prevent conflicts.
     style: :class:`.ButtonStyle`
         The style of the button. Defaults to :attr:`.ButtonStyle.grey`.
     disabled: :class:`bool`
         Whether the button is disabled. Defaults to ``False``.
-    emoji: Optional[Union[:class:`str`, :class:`.Emoji`, :class:`.PartialEmoji`]]
+    emoji: :class:`str` | :class:`.Emoji` | :class:`.PartialEmoji` | :data:`None`
         The emoji of the button. This can be in string form or a :class:`.PartialEmoji`
         or a full :class:`.Emoji`.
     id: :class:`int`
@@ -345,11 +345,11 @@ def button(
         sequential identifiers to the components in the message.
 
         .. versionadded:: 2.11
-    row: Optional[:class:`int`]
+    row: :class:`int` | :data:`None`
         The relative row this button belongs to. A Discord component can only have 5
         rows. By default, items are arranged automatically into those 5 rows. If you'd
         like to control the relative positioning of the row then passing an index is advised.
-        For example, row=1 will show up before row=2. Defaults to ``None``, which is automatic
+        For example, row=1 will show up before row=2. Defaults to :data:`None`, which is automatic
         ordering. The row number must be between 0 and 4 (i.e. zero indexed).
     """
     if not callable(cls):

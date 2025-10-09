@@ -36,7 +36,7 @@ class WelcomeScreenChannel:
         The ID of the guild channel this welcome screen channel represents.
     description: :class:`str`
         The description of this channel in the official UI.
-    emoji: Optional[Union[:class:`Emoji`, :class:`PartialEmoji`]]
+    emoji: :class:`Emoji` | :class:`PartialEmoji` | :data:`None`
         The emoji associated with this channel's welcome message, if any.
     """
 
@@ -103,9 +103,9 @@ class WelcomeScreen:
 
     Attributes
     ----------
-    description: Optional[:class:`str`]
+    description: :class:`str` | :data:`None`
         The guild description in the welcome screen.
-    channels: List[:class:`WelcomeScreenChannel`]
+    channels: :class:`list`\\[:class:`WelcomeScreenChannel`]
         The welcome screen's channels.
     """
 
@@ -162,11 +162,11 @@ class WelcomeScreen:
         ----------
         enabled: :class:`bool`
             Whether the welcome screen is enabled.
-        description: Optional[:class:`str`]
+        description: :class:`str` | :data:`None`
             The new guild description in the welcome screen.
-        channels: Optional[List[:class:`WelcomeScreenChannel`]]
+        channels: :class:`list`\\[:class:`WelcomeScreenChannel`] | :data:`None`
             The new welcome channels.
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason for editing the welcome screen. Shows up on the audit log.
 
         Raises

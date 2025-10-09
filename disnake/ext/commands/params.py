@@ -114,7 +114,7 @@ __all__ = (
 
 def issubclass_(obj: Any, tp: Union[TypeT, tuple[TypeT, ...]]) -> TypeGuard[TypeT]:
     """Similar to the builtin `issubclass`, but more lenient.
-    Can also handle unions (`issubclass(Union[int, str], int)`) and
+    Can also handle unions (`issubclass(int | str, int)`) and
     generic types (`issubclass(X[T], X)`) in the first argument.
     """
     if not isinstance(tp, (type, tuple)):
@@ -177,7 +177,7 @@ class Injection(Generic[P, T_]):
     ----------
     function: Callable
         The underlying injection function.
-    autocompleters: Dict[:class:`str`, Callable]
+    autocompleters: :class:`dict`\\[:class:`str`, Callable]
         A mapping of injection's option names to their respective autocompleters.
 
         .. versionadded:: 2.6
@@ -444,35 +444,35 @@ class ParamInfo:
 
     Parameters
     ----------
-    default: Union[Any, Callable[[:class:`.ApplicationCommandInteraction`], Any]]
+    default: Any | :class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`], :data:`~typing.Any`]
         The actual default value for the corresponding function param.
         Can be a sync/async callable taking an interaction and returning a dynamic default value,
         if the user didn't pass a value for this parameter.
-    name: Optional[Union[:class:`str`, :class:`.Localized`]]
+    name: :class:`str` | :class:`.Localized` | :data:`None`
         The name of this slash command option.
 
         .. versionchanged:: 2.5
             Added support for localizations.
 
-    description: Optional[Union[:class:`str`, :class:`.Localized`]]
+    description: :class:`str` | :class:`.Localized` | :data:`None`
         The description of this slash command option.
 
         .. versionchanged:: 2.5
             Added support for localizations.
 
-    choices: Union[Sequence[:class:`.OptionChoice`], Sequence[Union[:class:`str`, :class:`int`, :class:`float`]], Mapping[:class:`str`, Union[:class:`str`, :class:`int`, :class:`float`]]]
+    choices: :class:`~collections.abc.Sequence`\\[:class:`.OptionChoice`] | :class:`~collections.abc.Sequence`\\[:class:`str` | :class:`int` | :class:`float`] | :class:`~collections.abc.Mapping`\\[:class:`str`, :class:`str` | :class:`int` | :class:`float`]
         The pre-defined choices for this option.
     ge: :class:`float`
         The lowest allowed value for this option.
     le: :class:`float`
         The greatest allowed value for this option.
-    type: Any
+    type: :class:`~typing.Any`
         The type of the parameter.
-    channel_types: List[:class:`.ChannelType`]
+    channel_types: :class:`list`\\[:class:`.ChannelType`]
         The list of channel types supported by this slash command option.
-    autocomplete: Callable[[:class:`.ApplicationCommandInteraction`, :class:`str`], Any]
+    autocomplete: :class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`, :class:`str`], :data:`~typing.Any`]
         The function that will suggest possible autocomplete options while typing.
-    converter: Callable[[:class:`.ApplicationCommandInteraction`, Any], Any]
+    converter: :class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`, :data:`~typing.Any`], :data:`~typing.Any`]
         The function that will convert the original input to a desired format.
     min_length: :class:`int`
         The minimum length for this option, if it is a string option.
@@ -1170,26 +1170,26 @@ def Param(
 
     Parameters
     ----------
-    default: Union[Any, Callable[[:class:`.ApplicationCommandInteraction`], Any]]
+    default: Any | :class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`], :data:`~typing.Any`]
         The actual default value of the function parameter that should be passed instead of the :class:`ParamInfo` instance.
         Can be a sync/async callable taking an interaction and returning a dynamic default value,
         if the user didn't pass a value for this parameter.
-    name: Optional[Union[:class:`str`, :class:`.Localized`]]
+    name: :class:`str` | :class:`.Localized` | :data:`None`
         The name of the option. By default, the option name is the parameter name.
 
         .. versionchanged:: 2.5
             Added support for localizations.
 
-    description: Optional[Union[:class:`str`, :class:`.Localized`]]
+    description: :class:`str` | :class:`.Localized` | :data:`None`
         The description of the option. You can skip this kwarg and use docstrings. See :ref:`param_syntax`.
         Kwarg aliases: ``desc``.
 
         .. versionchanged:: 2.5
             Added support for localizations.
 
-    choices: Union[Sequence[:class:`.OptionChoice`], Sequence[Union[:class:`str`, :class:`int`, :class:`float`]], Mapping[:class:`str`, Union[:class:`str`, :class:`int`, :class:`float`]]]
+    choices: :class:`~collections.abc.Sequence`\\[:class:`.OptionChoice`] | :class:`~collections.abc.Sequence`\\[:class:`str` | :class:`int` | :class:`float`] | :class:`~collections.abc.Mapping`\\[:class:`str`, :class:`str` | :class:`int` | :class:`float`]
         The pre-defined choices for this slash command option.
-    converter: Callable[[:class:`.ApplicationCommandInteraction`, Any], Any]
+    converter: :class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`, :data:`~typing.Any`], :data:`~typing.Any`]
         A function that will convert the original input to a desired format.
         Kwarg aliases: ``conv``.
     convert_defaults: :class:`bool`
@@ -1197,10 +1197,10 @@ def Param(
         Defaults to ``False``.
 
         .. versionadded:: 2.3
-    autocomplete: Callable[[:class:`.ApplicationCommandInteraction`, :class:`str`], Any]
+    autocomplete: :class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`, :class:`str`], :data:`~typing.Any`]
         A function that will suggest possible autocomplete options while typing.
         See :ref:`param_syntax`. Kwarg aliases: ``autocomp``.
-    channel_types: Iterable[:class:`.ChannelType`]
+    channel_types: :class:`~collections.abc.Iterable`\\[:class:`.ChannelType`]
         A list of channel types that should be allowed.
         By default these are discerned from the annotation.
     lt: :class:`float`
@@ -1293,7 +1293,7 @@ def inject(
     ----------
     function: Callable
         The injection function.
-    autocompleters: Dict[:class:`str`, Callable]
+    autocompleters: :class:`dict`\\[:class:`str`, Callable]
         A mapping of the injection's option names to their respective autocompleters.
 
         See also :func:`Injection.autocomplete`.
@@ -1325,14 +1325,14 @@ def injection(
 
     Parameters
     ----------
-    autocompleters: Dict[:class:`str`, Callable]
+    autocompleters: :class:`dict`\\[:class:`str`, Callable]
         A mapping of the injection's option names to their respective autocompleters.
 
         See also :func:`Injection.autocomplete`.
 
     Returns
     -------
-    Callable[[Callable[..., Any]], :class:`Injection`]
+    :class:`~collections.abc.Callable`\\[[:class:`~collections.abc.Callable`\\[..., :data:`~typing.Any`]], :class:`Injection`]
         Decorator which turns your injection function into actual :class:`Injection`.
 
         .. note::
@@ -1358,7 +1358,7 @@ def option_enum(
 
     Parameters
     ----------
-    choices: Union[Dict[:class:`str`, :class:`Any`], List[:class:`Any`]]
+    choices: :class:`dict`\\[:class:`str`, :class:`Any`] | :class:`list`\\[:class:`Any`]
         A name/value mapping of choices, or a list of values whose stringified representations
         will be used as the names.
     **kwargs

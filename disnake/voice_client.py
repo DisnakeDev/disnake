@@ -553,7 +553,7 @@ class VoiceClient(VoiceProtocol):
         ----------
         source: :class:`AudioSource`
             The audio source we're reading from.
-        after: Callable[[Optional[:class:`Exception`]], Any]
+        after: :class:`~collections.abc.Callable`\\[[:class:`Exception` | :data:`None`], :data:`~typing.Any`]
             The finalizer that is called after the stream is exhausted.
             This function must have a single parameter, ``error``, that
             denotes an optional exception that was raised during playing.
@@ -611,7 +611,7 @@ class VoiceClient(VoiceProtocol):
 
     @property
     def source(self) -> Optional[AudioSource]:
-        """Optional[:class:`AudioSource`]: The audio source being played, if playing.
+        """:class:`AudioSource` | :data:`None`: The audio source being played, if playing.
 
         This property can also be used to change the audio source currently being played.
         """

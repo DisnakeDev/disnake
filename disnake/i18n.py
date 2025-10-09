@@ -70,13 +70,13 @@ class Localized(Generic[StringT]):
 
     Parameters
     ----------
-    string: Optional[:class:`str`]
+    string: :class:`str` | :data:`None`
         The default (non-localized) value of the string.
         Whether this is optional or not depends on the localized parameter type.
     key: :class:`str`
         A localization key used for lookups.
         Incompatible with ``data``.
-    data: Union[Dict[:class:`.Locale`, :class:`str`], Dict[:class:`str`, :class:`str`]]
+    data: :class:`dict`\\[:class:`.Locale`, :class:`str`] | :class:`dict`\\[:class:`str`, :class:`str`]
         A mapping of locales to localized values.
         Incompatible with ``key``.
     """
@@ -231,7 +231,7 @@ class LocalizationValue:
 
     @property
     def data(self) -> Optional[dict[str, str]]:
-        """Optional[Dict[:class:`str`, :class:`str`]]: A dict with a locale -> localization mapping, if available."""
+        """:class:`dict`\\[:class:`str`, :class:`str`] | :data:`None`: A dict with a locale -> localization mapping, if available."""
         if self._data is MISSING:
             # This will happen when `_link(store)` hasn't been called yet, which *shouldn't* occur under normal circumstances.
             warnings.warn(
@@ -279,9 +279,9 @@ class LocalizationProtocol(ABC):
 
         Returns
         -------
-        Optional[Dict[:class:`str`, :class:`str`]]
+        :class:`dict`\\[:class:`str`, :class:`str`] | :data:`None`
             The localizations for the provided key.
-            May return ``None`` if no localizations could be found.
+            May return :data:`None` if no localizations could be found.
         """
         raise NotImplementedError
 
@@ -291,7 +291,7 @@ class LocalizationProtocol(ABC):
 
         Parameters
         ----------
-        path: Union[:class:`str`, :class:`os.PathLike`]
+        path: :class:`str` | :class:`os.PathLike`
             The path to the file/directory to load.
 
         Raises
@@ -338,13 +338,13 @@ class LocalizationStore(LocalizationProtocol):
         ------
         LocalizationKeyError
             No localizations for the provided key were found.
-            Raised only if :attr:`strict` is enabled, returns ``None`` otherwise.
+            Raised only if :attr:`strict` is enabled, returns :data:`None` otherwise.
 
         Returns
         -------
-        Optional[Dict[:class:`str`, :class:`str`]]
+        :class:`dict`\\[:class:`str`, :class:`str`] | :data:`None`
             The localizations for the provided key.
-            Returns ``None`` if no localizations could be found and :attr:`strict` is disabled.
+            Returns :data:`None` if no localizations could be found and :attr:`strict` is disabled.
         """
         data = self._loc.get(key)
         if data is None and self.strict:
@@ -358,7 +358,7 @@ class LocalizationStore(LocalizationProtocol):
 
         Parameters
         ----------
-        path: Union[:class:`str`, :class:`os.PathLike`]
+        path: :class:`str` | :class:`os.PathLike`
             The path to the file/directory to load.
 
         Raises

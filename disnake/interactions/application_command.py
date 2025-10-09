@@ -57,9 +57,9 @@ class ApplicationCommandInteraction(Interaction[ClientT]):
         The interaction's type.
     application_id: :class:`int`
         The application ID that the interaction was for.
-    guild_id: Optional[:class:`int`]
+    guild_id: :class:`int` | :data:`None`
         The guild ID the interaction was sent from.
-    channel: Union[:class:`abc.GuildChannel`, :class:`Thread`, :class:`abc.PrivateChannel`, :class:`PartialMessageable`]
+    channel: :class:`abc.GuildChannel` | :class:`Thread` | :class:`abc.PrivateChannel` | :class:`PartialMessageable`
         The channel the interaction was sent from.
 
         Note that due to a Discord limitation, DM channels
@@ -76,7 +76,7 @@ class ApplicationCommandInteraction(Interaction[ClientT]):
             If you want to compute the interaction author's or bot's permissions in the channel,
             consider using :attr:`permissions` or :attr:`app_permissions`.
 
-    author: Union[:class:`User`, :class:`Member`]
+    author: :class:`User` | :class:`Member`
         The user or member that sent the interaction.
 
         .. note::
@@ -93,10 +93,10 @@ class ApplicationCommandInteraction(Interaction[ClientT]):
         .. versionchanged:: 2.5
             Changed to :class:`Locale` instead of :class:`str`.
 
-    guild_locale: Optional[:class:`Locale`]
+    guild_locale: :class:`Locale` | :data:`None`
         The selected language of the interaction's guild.
         This value is only meaningful in guilds with ``COMMUNITY`` feature and receives a default value otherwise.
-        If the interaction was in a DM, then this value is ``None``.
+        If the interaction was in a DM, then this value is :data:`None`.
 
         .. versionadded:: 2.4
 
@@ -107,7 +107,7 @@ class ApplicationCommandInteraction(Interaction[ClientT]):
         The token to continue the interaction. These are valid for 15 minutes.
     client: :class:`Client`
         The interaction client.
-    entitlements: List[:class:`Entitlement`]
+    entitlements: :class:`list`\\[:class:`Entitlement`]
         The entitlements for the invoking user and guild,
         representing access to an application subscription.
 
@@ -156,17 +156,17 @@ class ApplicationCommandInteraction(Interaction[ClientT]):
 
     @property
     def target(self) -> Optional[Union[User, Member, Message]]:
-        """Optional[Union[:class:`abc.User`, :class:`Message`]]: The user or message targeted by a user or message command"""
+        """:class:`abc.User` | :class:`Message` | :data:`None`: The user or message targeted by a user or message command"""
         return self.data.target
 
     @property
     def options(self) -> dict[str, Any]:
-        """Dict[:class:`str`, :class:`Any`]: The full option tree, including nestings"""
+        """:class:`dict`\\[:class:`str`, :class:`Any`]: The full option tree, including nestings"""
         return {opt.name: opt._simplified_value() for opt in self.data.options}
 
     @property
     def filled_options(self) -> dict[str, Any]:
-        """Dict[:class:`str`, :class:`Any`]: The options of the command (or sub-command) being invoked"""
+        """:class:`dict`\\[:class:`str`, :class:`Any`]: The options of the command (or sub-command) being invoked"""
         _, kwargs = self.data._get_chain_and_kwargs()
         return kwargs
 
@@ -229,11 +229,11 @@ class ApplicationCommandInteractionData(dict[str, Any]):
         The application command type.
     resolved: :class:`InteractionDataResolved`
         All resolved objects related to this interaction.
-    options: List[:class:`ApplicationCommandInteractionDataOption`]
+    options: :class:`list`\\[:class:`ApplicationCommandInteractionDataOption`]
         A list of options from the API.
     target_id: :class:`int`
         ID of the user or message targeted by a user or message command
-    target: Union[:class:`User`, :class:`Member`, :class:`Message`]
+    target: :class:`User` | :class:`Member` | :class:`Message`
         The user or message targeted by a user or message command
     """
 
@@ -317,7 +317,7 @@ class ApplicationCommandInteractionDataOption(dict[str, Any]):
         The option's type.
     value: :class:`Any`
         The option's value.
-    options: List[:class:`ApplicationCommandInteractionDataOption`]
+    options: :class:`list`\\[:class:`ApplicationCommandInteractionDataOption`]
         The list of options of this option. Only exists for subcommands and groups.
     focused: :class:`bool`
         Whether this option is focused by the user. May be ``True`` in

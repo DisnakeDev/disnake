@@ -46,7 +46,7 @@ class MediaGallery(UIComponent):
 
     @property
     def items(self) -> list[MediaGalleryItem]:
-        """List[:class:`.MediaGalleryItem`]: The images in this gallery."""
+        """:class:`list`\\[:class:`.MediaGalleryItem`]: The images in this gallery."""
         return self._underlying.items
 
     @items.setter

@@ -164,3 +164,8 @@ class AllowedMentions(TypedDict):
 class MessagePin(TypedDict):
     pinned_at: str
     message: Message
+
+
+class MessageCall(TypedDict):
+    participants: SnowflakeList
+    ended_timestamp: NotRequired[Optional[str]]

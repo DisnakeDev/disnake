@@ -322,7 +322,7 @@ def oauth_url(
 
     Parameters
     ----------
-    client_id: Union[:class:`int`, :class:`str`]
+    client_id: :class:`int` | :class:`str`
         The client ID for your bot.
     permissions: :class:`~disnake.Permissions`
         The permissions you're requesting. If not given then you won't be requesting any
@@ -331,7 +331,7 @@ def oauth_url(
         The guild to pre-select in the authorization screen, if available.
     redirect_uri: :class:`str`
         An optional valid redirect URI.
-    scopes: Iterable[:class:`str`]
+    scopes: :class:`~collections.abc.Iterable`\\[:class:`str`]
         An optional valid list of scopes. Defaults to ``('bot',)``.
 
         .. versionadded:: 1.7
@@ -414,7 +414,7 @@ def find(predicate: Callable[[T], Any], seq: Iterable[T]) -> Optional[T]:
         member = disnake.utils.find(lambda m: m.name == 'Mighty', channel.guild.members)
 
     would find the first :class:`~disnake.Member` whose name is 'Mighty' and return it.
-    If an entry is not found, then ``None`` is returned.
+    If an entry is not found, then :data:`None` is returned.
 
     This is different from :func:`py:filter` due to the fact it stops the moment it finds
     a valid entry.
@@ -445,7 +445,7 @@ def get(iterable: Iterable[T], **attrs: Any) -> Optional[T]:
     pass in ``x__y`` as the keyword argument.
 
     If nothing is found that matches the attributes passed, then
-    ``None`` is returned.
+    :data:`None` is returned.
 
     Examples
     --------
@@ -756,7 +756,7 @@ def resolve_invite(
 
     Parameters
     ----------
-    invite: Union[:class:`~disnake.Invite`, :class:`str`]
+    invite: :class:`~disnake.Invite` | :class:`str`
         The invite to resolve.
     with_params: :class:`bool`
         Whether to also return the query parameters of the invite, if it's a url.
@@ -765,7 +765,7 @@ def resolve_invite(
 
     Returns
     -------
-    Union[:class:`str`, Tuple[:class:`str`, Dict[:class:`str`, :class:`str`]]]
+    :class:`str` | :class:`tuple`\\[:class:`str`, :class:`dict`\\[:class:`str`, :class:`str`]]
         The invite code if ``with_params`` is ``False``, otherwise a tuple containing the
         invite code and the url's query parameters, if applicable.
     """
@@ -794,7 +794,7 @@ def resolve_template(code: Union[Template, str]) -> str:
 
     Parameters
     ----------
-    code: Union[:class:`~disnake.Template`, :class:`str`]
+    code: :class:`~disnake.Template` | :class:`str`
         The code.
 
     Returns
@@ -1112,7 +1112,7 @@ def as_chunks(iterator: _Iter[T], max_size: int) -> _Iter[list[T]]:
 
     Parameters
     ----------
-    iterator: Union[:class:`collections.abc.Iterator`, :class:`collections.abc.AsyncIterator`]
+    iterator: :class:`collections.abc.Iterator` | :class:`collections.abc.AsyncIterator`
         The iterator to chunk, can be sync or async.
     max_size: :class:`int`
         The maximum chunk size.
@@ -1124,7 +1124,7 @@ def as_chunks(iterator: _Iter[T], max_size: int) -> _Iter[list[T]]:
 
     Returns
     -------
-    Union[:class:`Iterator`, :class:`AsyncIterator`]
+    :class:`Iterator` | :class:`AsyncIterator`
         A new iterator which yields chunks of a given size.
     """
     if max_size <= 0:
@@ -1442,7 +1442,7 @@ def format_dt(dt: Union[datetime.datetime, float], /, style: TimestampStyle = "f
 
     Parameters
     ----------
-    dt: Union[:class:`datetime.datetime`, :class:`int`, :class:`float`]
+    dt: :class:`datetime.datetime` | :class:`int` | :class:`float`
         The datetime to format.
         If this is a naive datetime, it is assumed to be local time.
     style: :class:`str`
@@ -1500,7 +1500,7 @@ def search_directory(path: str) -> Iterator[str]:
 def as_valid_locale(locale: str) -> Optional[str]:
     """Converts the provided locale name to a name that is valid for use with the API,
     for example by returning ``en-US`` for ``en_US``.
-    Returns ``None`` for invalid names.
+    Returns :data:`None` for invalid names.
 
     .. versionadded:: 2.5
 

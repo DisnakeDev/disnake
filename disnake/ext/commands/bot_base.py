@@ -262,7 +262,7 @@ class BotBase(CommonBotBase, GroupMixin):
 
         .. note::
 
-            This function can either be a regular function or a coroutine.
+            This function can either be a regular function or a coroutine function.
 
         Similar to a command :func:`.check`\\, this takes a single parameter
         of type :class:`.Context` and can only raise exceptions inherited from
@@ -302,7 +302,7 @@ class BotBase(CommonBotBase, GroupMixin):
 
         .. note::
 
-            This function can either be a regular function or a coroutine.
+            This function can either be a regular function or a coroutine function.
 
         Similar to a command :func:`.check`\\, this takes a single parameter
         of type :class:`.Context` and can only raise exceptions inherited from
@@ -330,7 +330,7 @@ class BotBase(CommonBotBase, GroupMixin):
         return await disnake.utils.async_all(f(ctx) for f in data)  # type: ignore
 
     def before_invoke(self, coro: CFT) -> CFT:
-        """A decorator that registers a coroutine as a pre-invoke hook.
+        """A decorator that registers a coroutine function as a pre-invoke hook.
 
         This is for text commands only, and doesn't apply to application commands.
 
@@ -349,23 +349,23 @@ class BotBase(CommonBotBase, GroupMixin):
 
         Parameters
         ----------
-        coro: :ref:`coroutine <coroutine>`
-            The coroutine to register as the pre-invoke hook.
+        coro: :ref:`coroutine function <coroutine>`
+            The coroutine function to register as the pre-invoke hook.
 
         Raises
         ------
         TypeError
-            The coroutine passed is not actually a coroutine.
+            The argument passed is not actually a coroutine function.
         """
         if not iscoroutinefunction(coro):
-            msg = "The pre-invoke hook must be a coroutine."
+            msg = "The pre-invoke hook must be a coroutine function."
             raise TypeError(msg)
 
         self._before_invoke = coro
         return coro
 
     def after_invoke(self, coro: CFT) -> CFT:
-        """A decorator that registers a coroutine as a post-invoke hook.
+        """A decorator that registers a coroutine function as a post-invoke hook.
 
         This is for text commands only, and doesn't apply to application commands.
 
@@ -385,16 +385,16 @@ class BotBase(CommonBotBase, GroupMixin):
 
         Parameters
         ----------
-        coro: :ref:`coroutine <coroutine>`
-            The coroutine to register as the post-invoke hook.
+        coro: :ref:`coroutine function <coroutine>`
+            The coroutine function to register as the post-invoke hook.
 
         Raises
         ------
         TypeError
-            The coroutine passed is not actually a coroutine.
+            The argument passed is not actually a coroutine function.
         """
         if not iscoroutinefunction(coro):
-            msg = "The post-invoke hook must be a coroutine."
+            msg = "The post-invoke hook must be a coroutine function."
             raise TypeError(msg)
 
         self._after_invoke = coro
@@ -446,7 +446,7 @@ class BotBase(CommonBotBase, GroupMixin):
 
         Returns
         -------
-        Optional[Union[List[:class:`str`], :class:`str`]]
+        :class:`list`\\[:class:`str`] | :class:`str` | :data:`None`
             A list of prefixes or a single prefix that the bot is
             listening for. None if the bot isn't listening for prefixes.
         """

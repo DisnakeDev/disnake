@@ -25,7 +25,7 @@ class TextInput(WrappedComponent):
 
     Parameters
     ----------
-    label: Optional[:class:`str`]
+    label: :class:`str` | :data:`None`
         The label of the text input.
 
         .. deprecated:: 2.11
@@ -37,15 +37,15 @@ class TextInput(WrappedComponent):
         If not given then one is generated for you.
     style: :class:`.TextInputStyle`
         The style of the text input.
-    placeholder: Optional[:class:`str`]
+    placeholder: :class:`str` | :data:`None`
         The placeholder text that is shown if nothing is entered.
-    value: Optional[:class:`str`]
+    value: :class:`str` | :data:`None`
         The pre-filled value of the text input.
     required: :class:`bool`
         Whether the text input is required. Defaults to ``True``.
-    min_length: Optional[:class:`int`]
+    min_length: :class:`int` | :data:`None`
         The minimum length of the text input.
-    max_length: Optional[:class:`int`]
+    max_length: :class:`int` | :data:`None`
         The maximum length of the text input.
     id: :class:`int`
         The numeric identifier for the component. Must be unique within the message.
@@ -133,7 +133,7 @@ class TextInput(WrappedComponent):
 
     @property
     def placeholder(self) -> Optional[str]:
-        """Optional[:class:`str`]: The placeholder text that is shown if nothing is entered."""
+        """:class:`str` | :data:`None`: The placeholder text that is shown if nothing is entered."""
         return self._underlying.placeholder
 
     @placeholder.setter
@@ -142,7 +142,7 @@ class TextInput(WrappedComponent):
 
     @property
     def value(self) -> Optional[str]:
-        """Optional[:class:`str`]: The pre-filled text of the text input."""
+        """:class:`str` | :data:`None`: The pre-filled text of the text input."""
         return self._underlying.value
 
     @value.setter
@@ -160,7 +160,7 @@ class TextInput(WrappedComponent):
 
     @property
     def min_length(self) -> Optional[int]:
-        """Optional[:class:`int`]: The minimum length of the text input."""
+        """:class:`int` | :data:`None`: The minimum length of the text input."""
         return self._underlying.min_length
 
     @min_length.setter
@@ -169,7 +169,7 @@ class TextInput(WrappedComponent):
 
     @property
     def max_length(self) -> Optional[int]:
-        """Optional[:class:`int`]: The maximum length of the text input."""
+        """:class:`int` | :data:`None`: The maximum length of the text input."""
         return self._underlying.max_length
 
     @max_length.setter

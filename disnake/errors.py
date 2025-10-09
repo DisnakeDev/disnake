@@ -221,7 +221,7 @@ class ConnectionClosed(ClientException):
         The close code of the websocket.
     reason: :class:`str`
         The reason provided for the closure.
-    shard_id: Optional[:class:`int`]
+    shard_id: :class:`int` | :data:`None`
         The shard ID that got closed if applicable.
     """
 
@@ -293,7 +293,7 @@ class PrivilegedIntentsRequired(ClientException):
 
     Attributes
     ----------
-    shard_id: Optional[:class:`int`]
+    shard_id: :class:`int` | :data:`None`
         The shard ID that got closed if applicable.
     """
 
