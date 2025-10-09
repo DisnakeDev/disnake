@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, List, Sequence, Union
+from typing import TYPE_CHECKING, Any, List, Sequence, Union, cast
 
 from .enums import MessageType
 
