@@ -26,8 +26,8 @@ CONTAINERS = {
     "Iterator": "~collections.abc.Iterator",
     "Generator": "~collections.abc.Generator",
     "Type": "type",
-    "Pattern": "~re.Pattern",
-    "Match": "~re.Match",
+    "Pattern": "re.Pattern",
+    "Match": "re.Match",
 }
 
 BARE_REPLACE = {
