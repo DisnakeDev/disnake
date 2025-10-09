@@ -47,20 +47,20 @@ class InvokableUserCommand(InvokableApplicationCommand):
         An object being registered in the API.
     callback: :ref:`coroutine function <coroutine>`
         The coroutine function that is executed when the user command is called.
-    cog: Optional[:class:`Cog`]
-        The cog that this user command belongs to. ``None`` if there isn't one.
-    checks: List[Callable[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
+    cog: :class:`Cog` | :data:`None`
+        The cog that this user command belongs to. :data:`None` if there isn't one.
+    checks: :class:`list`\\[:class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
         A list of predicates that verifies if the command could be executed
         with the given :class:`.ApplicationCommandInteraction` as the sole parameter. If an exception
         is necessary to be thrown to signal failure, then one inherited from
         :exc:`.CommandError` should be used. Note that if the checks fail then
         :exc:`.CheckFailure` exception is raised to the :func:`.on_user_command_error`
         event.
-    guild_ids: Optional[Tuple[:class:`int`, ...]]
-        The list of IDs of the guilds where the command is synced. ``None`` if this command is global.
+    guild_ids: :class:`tuple`\\[:class:`int`, ...] | :data:`None`
+        The list of IDs of the guilds where the command is synced. :data:`None` if this command is global.
     auto_sync: :class:`bool`
         Whether to automatically register the command.
-    extras: Dict[:class:`str`, Any]
+    extras: :class:`dict`\\[:class:`str`, :data:`~typing.Any`]
         A dict of user provided extras to attach to the command.
 
         .. note::
@@ -158,20 +158,20 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         An object being registered in the API.
     callback: :ref:`coroutine function <coroutine>`
         The coroutine function that is executed when the message command is called.
-    cog: Optional[:class:`Cog`]
-        The cog that this message command belongs to. ``None`` if there isn't one.
-    checks: List[Callable[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
+    cog: :class:`Cog` | :data:`None`
+        The cog that this message command belongs to. :data:`None` if there isn't one.
+    checks: :class:`list`\\[:class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
         A list of predicates that verifies if the command could be executed
         with the given :class:`.ApplicationCommandInteraction` as the sole parameter. If an exception
         is necessary to be thrown to signal failure, then one inherited from
         :exc:`.CommandError` should be used. Note that if the checks fail then
         :exc:`.CheckFailure` exception is raised to the :func:`.on_message_command_error`
         event.
-    guild_ids: Optional[Tuple[:class:`int`, ...]]
-        The list of IDs of the guilds where the command is synced. ``None`` if this command is global.
+    guild_ids: :class:`tuple`\\[:class:`int`, ...] | :data:`None`
+        The list of IDs of the guilds where the command is synced. :data:`None` if this command is global.
     auto_sync: :class:`bool`
         Whether to automatically register the command.
-    extras: Dict[:class:`str`, Any]
+    extras: :class:`dict`\\[:class:`str`, :data:`~typing.Any`]
         A dict of user provided extras to attach to the command.
 
         .. note::
@@ -270,7 +270,7 @@ def user_command(
 
     Parameters
     ----------
-    name: Optional[Union[:class:`str`, :class:`.Localized`]]
+    name: :class:`str` | :class:`.Localized` | :data:`None`
         The name of the user command (defaults to the function name).
 
         .. versionchanged:: 2.5
@@ -284,7 +284,7 @@ def user_command(
             Use ``contexts`` instead.
             This is equivalent to the :attr:`.InteractionContextTypes.bot_dm` flag.
 
-    default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]
+    default_member_permissions: :class:`.Permissions` | :class:`int` | :data:`None`
         The default required permissions for this command.
         See :attr:`.ApplicationCommand.default_member_permissions` for details.
 
@@ -296,7 +296,7 @@ def user_command(
 
         .. versionadded:: 2.8
 
-    install_types: Optional[:class:`.ApplicationInstallTypes`]
+    install_types: :class:`.ApplicationInstallTypes` | :data:`None`
         The installation types where the command is available.
         Defaults to :attr:`.ApplicationInstallTypes.guild` only.
         Only available for global commands.
@@ -305,7 +305,7 @@ def user_command(
 
         .. versionadded:: 2.10
 
-    contexts: Optional[:class:`.InteractionContextTypes`]
+    contexts: :class:`.InteractionContextTypes` | :data:`None`
         The interaction contexts where the command can be used.
         Only available for global commands.
 
@@ -315,10 +315,10 @@ def user_command(
 
     auto_sync: :class:`bool`
         Whether to automatically register the command. Defaults to ``True``.
-    guild_ids: Sequence[:class:`int`]
+    guild_ids: :class:`~collections.abc.Sequence`\\[:class:`int`]
         If specified, the client will register the command in these guilds.
         Otherwise, this command will be registered globally.
-    extras: Dict[:class:`str`, Any]
+    extras: :class:`dict`\\[:class:`str`, :data:`~typing.Any`]
         A dict of user provided extras to attach to the command.
 
         .. note::
@@ -328,7 +328,7 @@ def user_command(
 
     Returns
     -------
-    Callable[..., :class:`InvokableUserCommand`]
+    :class:`~collections.abc.Callable`\\[..., :class:`InvokableUserCommand`]
         A decorator that converts the provided method into an InvokableUserCommand and returns it.
     """
 
@@ -381,7 +381,7 @@ def message_command(
 
     Parameters
     ----------
-    name: Optional[Union[:class:`str`, :class:`.Localized`]]
+    name: :class:`str` | :class:`.Localized` | :data:`None`
         The name of the message command (defaults to the function name).
 
         .. versionchanged:: 2.5
@@ -395,7 +395,7 @@ def message_command(
             Use ``contexts`` instead.
             This is equivalent to the :attr:`.InteractionContextTypes.bot_dm` flag.
 
-    default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]
+    default_member_permissions: :class:`.Permissions` | :class:`int` | :data:`None`
         The default required permissions for this command.
         See :attr:`.ApplicationCommand.default_member_permissions` for details.
 
@@ -407,7 +407,7 @@ def message_command(
 
         .. versionadded:: 2.8
 
-    install_types: Optional[:class:`.ApplicationInstallTypes`]
+    install_types: :class:`.ApplicationInstallTypes` | :data:`None`
         The installation types where the command is available.
         Defaults to :attr:`.ApplicationInstallTypes.guild` only.
         Only available for global commands.
@@ -416,7 +416,7 @@ def message_command(
 
         .. versionadded:: 2.10
 
-    contexts: Optional[:class:`.InteractionContextTypes`]
+    contexts: :class:`.InteractionContextTypes` | :data:`None`
         The interaction contexts where the command can be used.
         Only available for global commands.
 
@@ -426,10 +426,10 @@ def message_command(
 
     auto_sync: :class:`bool`
         Whether to automatically register the command. Defaults to ``True``.
-    guild_ids: Sequence[:class:`int`]
+    guild_ids: :class:`~collections.abc.Sequence`\\[:class:`int`]
         If specified, the client will register the command in these guilds.
         Otherwise, this command will be registered globally.
-    extras: Dict[:class:`str`, Any]
+    extras: :class:`dict`\\[:class:`str`, :data:`~typing.Any`]
         A dict of user provided extras to attach to the command.
 
         .. note::
@@ -439,7 +439,7 @@ def message_command(
 
     Returns
     -------
-    Callable[..., :class:`InvokableMessageCommand`]
+    :class:`~collections.abc.Callable`\\[..., :class:`InvokableMessageCommand`]
         A decorator that converts the provided method into an InvokableMessageCommand and then returns it.
     """
 

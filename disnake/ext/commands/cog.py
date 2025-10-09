@@ -96,7 +96,7 @@ class CogMeta(type):
 
         .. versionadded:: 1.6
 
-    command_attrs: Dict[:class:`str`, Any]
+    command_attrs: :class:`dict`\\[:class:`str`, :data:`~typing.Any`]
         A list of attributes to apply to every command inside this cog. The dictionary
         is passed into the :class:`Command` options at ``__init__``.
         If you specify attributes inside the command attribute in the class, it will
@@ -113,7 +113,7 @@ class CogMeta(type):
                 async def bar(self, ctx):
                     pass # hidden -> False
 
-    slash_command_attrs: Dict[:class:`str`, Any]
+    slash_command_attrs: :class:`dict`\\[:class:`str`, :data:`~typing.Any`]
         A list of attributes to apply to every slash command inside this cog. The dictionary
         is passed into the options of every :class:`InvokableSlashCommand` at ``__init__``.
         Usage of this kwarg is otherwise the same as with ``command_attrs``.
@@ -122,14 +122,14 @@ class CogMeta(type):
 
         .. versionadded:: 2.5
 
-    user_command_attrs: Dict[:class:`str`, Any]
+    user_command_attrs: :class:`dict`\\[:class:`str`, :data:`~typing.Any`]
         A list of attributes to apply to every user command inside this cog. The dictionary
         is passed into the options of every :class:`InvokableUserCommand` at ``__init__``.
         Usage of this kwarg is otherwise the same as with ``command_attrs``.
 
         .. versionadded:: 2.5
 
-    message_command_attrs: Dict[:class:`str`, Any]
+    message_command_attrs: :class:`dict`\\[:class:`str`, :data:`~typing.Any`]
         A list of attributes to apply to every message command inside this cog. The dictionary
         is passed into the options of every :class:`InvokableMessageCommand` at ``__init__``.
         Usage of this kwarg is otherwise the same as with ``command_attrs``.
@@ -282,7 +282,7 @@ class Cog(metaclass=CogMeta):
 
         Returns
         -------
-        List[:class:`.Command`]
+        :class:`list`\\[:class:`.Command`]
             A :class:`list` of :class:`.Command`\\s that are
             defined inside this cog.
 
@@ -297,7 +297,7 @@ class Cog(metaclass=CogMeta):
 
         Returns
         -------
-        List[:class:`.InvokableApplicationCommand`]
+        :class:`list`\\[:class:`.InvokableApplicationCommand`]
             A :class:`list` of :class:`.InvokableApplicationCommand`\\s that are
             defined inside this cog.
 
@@ -312,7 +312,7 @@ class Cog(metaclass=CogMeta):
 
         Returns
         -------
-        List[:class:`.InvokableSlashCommand`]
+        :class:`list`\\[:class:`.InvokableSlashCommand`]
             A :class:`list` of :class:`.InvokableSlashCommand`\\s that are
             defined inside this cog.
 
@@ -327,7 +327,7 @@ class Cog(metaclass=CogMeta):
 
         Returns
         -------
-        List[:class:`.InvokableUserCommand`]
+        :class:`list`\\[:class:`.InvokableUserCommand`]
             A :class:`list` of :class:`.InvokableUserCommand`\\s that are
             defined inside this cog.
         """
@@ -338,7 +338,7 @@ class Cog(metaclass=CogMeta):
 
         Returns
         -------
-        List[:class:`.InvokableMessageCommand`]
+        :class:`list`\\[:class:`.InvokableMessageCommand`]
             A :class:`list` of :class:`.InvokableMessageCommand`\\s that are
             defined inside this cog.
         """
@@ -363,7 +363,7 @@ class Cog(metaclass=CogMeta):
 
         Yields
         ------
-        Union[:class:`.Command`, :class:`.Group`]
+        :class:`.Command` | :class:`.Group`
             A command or group from the cog.
         """
         from .core import GroupMixin
@@ -379,7 +379,7 @@ class Cog(metaclass=CogMeta):
 
         Returns
         -------
-        List[Tuple[:class:`str`, :ref:`coroutine function <coroutine>`]]
+        :class:`list`\\[:class:`tuple`\\[:class:`str`, :ref:`coroutine function <coroutine>`]]
             The listeners defined in this cog.
         """
         return [(name, getattr(self, method_name)) for name, method_name in self.__cog_listeners__]
@@ -397,7 +397,7 @@ class Cog(metaclass=CogMeta):
 
         Parameters
         ----------
-        name: Union[:class:`str`, :class:`.Event`]
+        name: :class:`str` | :class:`.Event`
             The name of the event being listened to. If not provided, it
             defaults to the function's name.
 

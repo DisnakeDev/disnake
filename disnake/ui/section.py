@@ -30,9 +30,9 @@ class Section(UIComponent):
 
     Parameters
     ----------
-    *components: Union[:class:`str`, :class:`~.ui.TextDisplay`]
+    *components: :class:`str` | :class:`~.ui.TextDisplay`
         The text items in this section (up to 3).
-    accessory: Union[:class:`~.ui.Thumbnail`, :class:`~.ui.Button`]
+    accessory: :class:`~.ui.Thumbnail` | :class:`~.ui.Button`
         The accessory component displayed next to the section text.
     id: :class:`int`
         The numeric identifier for the component. Must be unique within the message.
@@ -41,9 +41,9 @@ class Section(UIComponent):
 
     Attributes
     ----------
-    children: List[:class:`~.ui.TextDisplay`]
+    children: :class:`list`\\[:class:`~.ui.TextDisplay`]
         The list of text items in this section.
-    accessory: Union[:class:`~.ui.Thumbnail`, :class:`~.ui.Button`]
+    accessory: :class:`~.ui.Thumbnail` | :class:`~.ui.Button`
         The accessory component displayed next to the section text.
     """
 

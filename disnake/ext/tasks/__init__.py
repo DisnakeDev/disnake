@@ -225,8 +225,8 @@ class Loop(Generic[LF]):
 
     @property
     def seconds(self) -> Optional[float]:
-        """Optional[:class:`float`]: Read-only value for the number of seconds
-        between each iteration. ``None`` if an explicit ``time`` value was passed instead.
+        """:class:`float` | :data:`None`: Read-only value for the number of seconds
+        between each iteration. :data:`None` if an explicit ``time`` value was passed instead.
 
         .. versionadded:: 2.0
         """
@@ -235,8 +235,8 @@ class Loop(Generic[LF]):
 
     @property
     def minutes(self) -> Optional[float]:
-        """Optional[:class:`float`]: Read-only value for the number of minutes
-        between each iteration. ``None`` if an explicit ``time`` value was passed instead.
+        """:class:`float` | :data:`None`: Read-only value for the number of minutes
+        between each iteration. :data:`None` if an explicit ``time`` value was passed instead.
 
         .. versionadded:: 2.0
         """
@@ -245,8 +245,8 @@ class Loop(Generic[LF]):
 
     @property
     def hours(self) -> Optional[float]:
-        """Optional[:class:`float`]: Read-only value for the number of hours
-        between each iteration. ``None`` if an explicit ``time`` value was passed instead.
+        """:class:`float` | :data:`None`: Read-only value for the number of hours
+        between each iteration. :data:`None` if an explicit ``time`` value was passed instead.
 
         .. versionadded:: 2.0
         """
@@ -255,8 +255,8 @@ class Loop(Generic[LF]):
 
     @property
     def time(self) -> Optional[List[datetime.time]]:
-        """Optional[List[:class:`datetime.time`]]: Read-only list for the exact times this loop runs at.
-        ``None`` if relative times were passed instead.
+        """:class:`list`\\[:class:`datetime.time`] | :data:`None`: Read-only list for the exact times this loop runs at.
+        :data:`None` if relative times were passed instead.
 
         .. versionadded:: 2.0
         """
@@ -270,7 +270,7 @@ class Loop(Generic[LF]):
 
     @property
     def next_iteration(self) -> Optional[datetime.datetime]:
-        """Optional[:class:`datetime.datetime`]: When the next iteration of the loop will occur.
+        """:class:`datetime.datetime` | :data:`None`: When the next iteration of the loop will occur.
 
         .. versionadded:: 1.3
         """
@@ -395,7 +395,7 @@ class Loop(Generic[LF]):
 
         Parameters
         ----------
-        *exceptions: Type[:class:`BaseException`]
+        *exceptions: :class:`type`\\[:class:`BaseException`]
             An argument list of exception classes to handle.
 
         Raises
@@ -427,7 +427,7 @@ class Loop(Generic[LF]):
 
         Parameters
         ----------
-        *exceptions: Type[:class:`BaseException`]
+        *exceptions: :class:`type`\\[:class:`BaseException`]
             An argument list of exception classes to handle.
 
         Returns
@@ -440,9 +440,9 @@ class Loop(Generic[LF]):
         return len(self._valid_exception) == old_length - len(exceptions)
 
     def get_task(self) -> Optional[asyncio.Task[None]]:
-        """Fetches the internal task or ``None`` if there isn't one running.
+        """Fetches the internal task or :data:`None` if there isn't one running.
 
-        :return type: Optional[:class:`asyncio.Task`]
+        :return type: :class:`asyncio.Task` | :data:`None`
         """
         return self._task if self._task is not MISSING else None
 
@@ -653,7 +653,7 @@ class Loop(Generic[LF]):
             The number of minutes between every iteration.
         hours: :class:`float`
             The number of hours between every iteration.
-        time: Union[:class:`datetime.time`, Sequence[:class:`datetime.time`]]
+        time: :class:`datetime.time` | :class:`~collections.abc.Sequence`\\[:class:`datetime.time`]
             The exact times to run this loop at. Either a non-empty list or a single
             value of :class:`datetime.time` should be passed.
             This cannot be used in conjunction with the relative time parameters.
@@ -744,7 +744,7 @@ def loop(
 
     Parameters
     ----------
-    cls: Type[:class:`Loop`]
+    cls: :class:`type`\\[:class:`Loop`]
         The loop subclass to create an instance of. If provided, the following parameters
         described below do not apply. Instead, this decorator will accept the same keywords
         as the passed cls does.
@@ -757,7 +757,7 @@ def loop(
         The number of minutes between every iteration.
     hours: :class:`float`
         The number of hours between every iteration.
-    time: Union[:class:`datetime.time`, Sequence[:class:`datetime.time`]]
+    time: :class:`datetime.time` | :class:`~collections.abc.Sequence`\\[:class:`datetime.time`]
         The exact times to run this loop at. Either a non-empty list or a single
         value of :class:`datetime.time` should be passed. Timezones are supported.
         If no timezone is given for the times, it is assumed to represent UTC time.
@@ -770,8 +770,8 @@ def loop(
 
         .. versionadded:: 2.0
 
-    count: Optional[:class:`int`]
-        The number of loops to do, ``None`` if it should be an
+    count: :class:`int` | :data:`None`
+        The number of loops to do, :data:`None` if it should be an
         infinite loop.
     reconnect: :class:`bool`
         Whether to handle errors and restart the task

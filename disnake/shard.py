@@ -245,8 +245,8 @@ class ShardInfo:
     ----------
     id: :class:`int`
         The shard ID for this shard.
-    shard_count: Optional[:class:`int`]
-        The shard count for this cluster. If this is ``None`` then the bot has not started yet.
+    shard_count: :class:`int` | :data:`None`
+        The shard count for this cluster. If this is :data:`None` then the bot has not started yet.
     """
 
     __slots__ = ("_parent", "id", "shard_count")
@@ -336,7 +336,7 @@ class AutoShardedClient(Client):
 
     Attributes
     ----------
-    shard_ids: Optional[List[:class:`int`]]
+    shard_ids: :class:`list`\\[:class:`int`] | :data:`None`
         An optional list of shard_ids to launch the shards with.
     """
 
@@ -426,16 +426,16 @@ class AutoShardedClient(Client):
 
     @property
     def latencies(self) -> List[Tuple[int, float]]:
-        """List[Tuple[:class:`int`, :class:`float`]]: A list of latencies between a HEARTBEAT and a HEARTBEAT_ACK in seconds.
+        """:class:`list`\\[:class:`tuple`\\[:class:`int`, :class:`float`]]: A list of latencies between a HEARTBEAT and a HEARTBEAT_ACK in seconds.
 
         This returns a list of tuples with elements ``(shard_id, latency)``.
         """
         return [(shard_id, shard.ws.latency) for shard_id, shard in self.__shards.items()]
 
     def get_shard(self, shard_id: int) -> Optional[ShardInfo]:
-        """Gets the shard information of a given shard ID, or ``None`` if not found.
+        """Gets the shard information of a given shard ID, or :data:`None` if not found.
 
-        :return type: Optional[:class:`ShardInfo`]
+        :return type: :class:`ShardInfo` | :data:`None`
         """
         try:
             parent = self.__shards[shard_id]
@@ -446,7 +446,7 @@ class AutoShardedClient(Client):
 
     @property
     def shards(self) -> Dict[int, ShardInfo]:
-        """Mapping[int, :class:`ShardInfo`]: Returns a mapping of shard IDs to their respective info object."""
+        """:class:`~collections.abc.Mapping`\\[:class:`int`, :class:`ShardInfo`]: Returns a mapping of shard IDs to their respective info object."""
         return {
             shard_id: ShardInfo(parent, self.shard_count)
             for shard_id, parent in self.__shards.items()
@@ -568,14 +568,14 @@ class AutoShardedClient(Client):
 
         Parameters
         ----------
-        activity: Optional[:class:`BaseActivity`]
-            The activity being done. ``None`` if no currently active activity is done.
-        status: Optional[:class:`Status`]
-            Indicates what status to change to. If ``None``, then
+        activity: :class:`BaseActivity` | :data:`None`
+            The activity being done. :data:`None` if no currently active activity is done.
+        status: :class:`Status` | :data:`None`
+            Indicates what status to change to. If :data:`None`, then
             :attr:`Status.online` is used.
-        shard_id: Optional[:class:`int`]
+        shard_id: :class:`int` | :data:`None`
             The shard_id to change the presence to. If not specified
-            or ``None``, then it will change the presence of every
+            or :data:`None`, then it will change the presence of every
             shard the bot can see.
 
         Raises

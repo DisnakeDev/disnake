@@ -445,7 +445,7 @@ class BotBase(CommonBotBase, GroupMixin):
 
         Returns
         -------
-        Optional[Union[List[:class:`str`], :class:`str`]]
+        :class:`list`\\[:class:`str`] | :class:`str` | :data:`None`
             A list of prefixes or a single prefix that the bot is
             listening for. None if the bot isn't listening for prefixes.
         """

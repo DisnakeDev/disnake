@@ -45,13 +45,13 @@ AuditLogChanges
         +----------------------------------------+------------------------------------------------------+
         |                Category                |                    Description                       |
         +----------------------------------------+------------------------------------------------------+
-        | :attr:`~AuditLogActionCategory.create` | All attributes are set to ``None``.                  |
+        | :attr:`~AuditLogActionCategory.create` | All attributes are set to :data:`None`.              |
         +----------------------------------------+------------------------------------------------------+
         | :attr:`~AuditLogActionCategory.delete` | All attributes are set to the value before deletion. |
         +----------------------------------------+------------------------------------------------------+
         | :attr:`~AuditLogActionCategory.update` | All attributes are set to the value before updating. |
         +----------------------------------------+------------------------------------------------------+
-        | ``None``                               | No attributes are set.                               |
+        | :data:`None`                           | No attributes are set.                               |
         +----------------------------------------+------------------------------------------------------+
 
     .. attribute:: after
@@ -67,11 +67,11 @@ AuditLogChanges
         +----------------------------------------+-----------------------------------------------------+
         | :attr:`~AuditLogActionCategory.create` | All attributes are set to the created value.        |
         +----------------------------------------+-----------------------------------------------------+
-        | :attr:`~AuditLogActionCategory.delete` | All attributes are set to ``None``.                 |
+        | :attr:`~AuditLogActionCategory.delete` | All attributes are set to :data:`None`.             |
         +----------------------------------------+-----------------------------------------------------+
         | :attr:`~AuditLogActionCategory.update` | All attributes are set to the value after updating. |
         +----------------------------------------+-----------------------------------------------------+
-        | ``None``                               | No attributes are set.                              |
+        | :data:`None`                           | No attributes are set.                              |
         +----------------------------------------+-----------------------------------------------------+
 
 AuditLogDiff
@@ -135,7 +135,7 @@ AuditLogDiff
 
         The guild's owner. See also :attr:`Guild.owner`
 
-        :type: Union[:class:`Member`, :class:`User`, :class:`Object`]
+        :type: :class:`Member` | :class:`User` | :class:`Object`
 
     .. attribute:: region
 
@@ -152,7 +152,7 @@ AuditLogDiff
 
         See :attr:`Guild.afk_channel`.
 
-        :type: Union[:class:`VoiceChannel`, :class:`Object`]
+        :type: :class:`VoiceChannel` | :class:`Object`
 
     .. attribute:: system_channel
 
@@ -163,7 +163,7 @@ AuditLogDiff
 
         See :attr:`Guild.system_channel`.
 
-        :type: Union[:class:`TextChannel`, :class:`Object`]
+        :type: :class:`TextChannel` | :class:`Object`
 
 
     .. attribute:: rules_channel
@@ -175,7 +175,7 @@ AuditLogDiff
 
         See :attr:`Guild.rules_channel`.
 
-        :type: Union[:class:`TextChannel`, :class:`Object`]
+        :type: :class:`TextChannel` | :class:`Object`
 
 
     .. attribute:: public_updates_channel
@@ -187,7 +187,7 @@ AuditLogDiff
 
         See :attr:`Guild.public_updates_channel`.
 
-        :type: Union[:class:`TextChannel`, :class:`Object`]
+        :type: :class:`TextChannel` | :class:`Object`
 
     .. attribute:: afk_timeout
 
@@ -214,7 +214,7 @@ AuditLogDiff
         If this could not be found then it falls back to a :class:`Object`
         with the ID being set.
 
-        :type: Union[:class:`abc.GuildChannel`, :class:`Object`]
+        :type: :class:`abc.GuildChannel` | :class:`Object`
 
     .. attribute:: verification_level
 
@@ -278,7 +278,7 @@ AuditLogDiff
 
         The type of channel/thread, sticker, webhook, integration (:class:`str`), or permission overwrite (:class:`int`).
 
-        :type: Union[:class:`ChannelType`, :class:`StickerType`, :class:`WebhookType`, :class:`str`, :class:`int`]
+        :type: :class:`ChannelType` | :class:`StickerType` | :class:`WebhookType` | :class:`str` | :class:`int`
 
     .. attribute:: topic
 
@@ -308,13 +308,13 @@ AuditLogDiff
         a ``type`` attribute set to either ``'role'`` or ``'member'`` to help
         decide what type of ID it is.
 
-        :type: List[Tuple[Union[:class:`Member`, :class:`User`, :class:`Role`, :class:`Object`], :class:`PermissionOverwrite`]]
+        :type: :class:`list`\[:class:`tuple`\[:class:`Member` | :class:`User` | :class:`Role` | :class:`Object`, :class:`PermissionOverwrite`]]
 
     .. attribute:: privacy_level
 
         The privacy level of the stage instance or guild scheduled event.
 
-        :type: Union[:class:`StagePrivacyLevel`, :class:`GuildScheduledEventPrivacyLevel`]
+        :type: :class:`StagePrivacyLevel` | :class:`GuildScheduledEventPrivacyLevel`
 
     .. attribute:: roles
 
@@ -323,7 +323,7 @@ AuditLogDiff
         If a role is not found then it is a :class:`Object` with the ID and name being
         filled in.
 
-        :type: List[Union[:class:`Role`, :class:`Object`]]
+        :type: :class:`list`\[:class:`Role` | :class:`Object`]
 
     .. attribute:: nick
 
@@ -331,7 +331,7 @@ AuditLogDiff
 
         See also :attr:`Member.nick`
 
-        :type: Optional[:class:`str`]
+        :type: :class:`str` | :data:`None`
 
     .. attribute:: deaf
 
@@ -397,7 +397,7 @@ AuditLogDiff
         If the channel is not found then it is a :class:`Object` with the ID
         being set. In some cases the channel name is also set.
 
-        :type: Union[:class:`abc.GuildChannel`, :class:`Object`]
+        :type: :class:`abc.GuildChannel` | :class:`Object`
 
     .. attribute:: inviter
 
@@ -405,7 +405,7 @@ AuditLogDiff
 
         See also :attr:`Invite.inviter`.
 
-        :type: Optional[:class:`User`, :class:`Object`]
+        :type: :class:`User` | :class:`Object` | :data:`None`
 
     .. attribute:: max_uses
 
@@ -485,7 +485,7 @@ AuditLogDiff
     .. attribute:: rtc_region
 
         The region for the voice or stage channel's voice communication.
-        A value of ``None`` indicates automatic voice region detection.
+        A value of :data:`None` indicates automatic voice region detection.
 
         See also :attr:`VoiceChannel.rtc_region` or :attr:`StageChannel.rtc_region`.
 
@@ -529,11 +529,11 @@ AuditLogDiff
         (this will be of type :class:`str`).
 
         For soundboard sounds, the associated emoji of the target being changed
-        (this will be of type Optional[Union[:class:`Emoji`, :class:`PartialEmoji`]]).
+        (this will be of type :class:`Emoji` | :class:`PartialEmoji` | :data:`None`).
 
         See also :attr:`GuildSticker.emoji`, :attr:`Role.emoji`, or :attr:`GuildSoundboardSound.emoji`.
 
-        :type: Union[:class:`str`, Optional[Union[:class:`Emoji`, :class:`PartialEmoji`]]]
+        :type: :class:`str` | :class:`Emoji` | :class:`PartialEmoji` | :data:`None`
 
     .. attribute:: description
 
@@ -620,7 +620,7 @@ AuditLogDiff
         Note that only changed permission entries are included,
         not necessarily all of the command's permissions.
 
-        :type: Dict[:class:`int`, :class:`ApplicationCommandPermissions`]
+        :type: :class:`dict`\[:class:`int`, :class:`ApplicationCommandPermissions`]
 
     .. attribute:: application_id
 
@@ -666,7 +666,7 @@ AuditLogDiff
 
         The list of actions of an auto moderation rule being changed.
 
-        :type: List[:class:`AutoModAction`]
+        :type: :class:`list`\[:class:`AutoModAction`]
 
     .. attribute:: trigger_metadata
 
@@ -680,7 +680,7 @@ AuditLogDiff
 
         If a role is not found then it is an :class:`Object` with the ID being set.
 
-        :type: List[Union[:class:`Role`, :class:`Object`]]
+        :type: :class:`list`\[:class:`Role` | :class:`Object`]
 
     .. attribute:: exempt_channels
 
@@ -688,7 +688,7 @@ AuditLogDiff
 
         If a channel is not found then it is an :class:`Object` with the ID being set.
 
-        :type: List[Union[:class:`abc.GuildChannel`, :class:`Object`]]
+        :type: :class:`list`\[:class:`abc.GuildChannel` | :class:`Object`]
 
     .. attribute:: applied_tags
 
@@ -697,13 +697,13 @@ AuditLogDiff
         If a tag is not found, then it is an :class:`Object` with the ID
         being set.
 
-        :type: List[Union[:class:`ForumTag`, :class:`Object`]]
+        :type: :class:`list`\[:class:`ForumTag` | :class:`Object`]
 
     .. attribute:: available_tags
 
         The available tags for threads in a forum/media channel being changed.
 
-        :type: List[:class:`ForumTag`]
+        :type: :class:`list`\[:class:`ForumTag`]
 
     .. attribute:: default_reaction
 
@@ -712,13 +712,13 @@ AuditLogDiff
         Due to a Discord limitation, this will have an empty
         :attr:`~PartialEmoji.name` if it is a custom :class:`PartialEmoji`.
 
-        :type: Optional[Union[:class:`Emoji`, :class:`PartialEmoji`]]
+        :type: :class:`Emoji` | :class:`PartialEmoji` | :data:`None`
 
     .. attribute:: default_sort_order
 
         The default sort order of threads in a forum/media channel being changed.
 
-        :type: Optional[:class:`ThreadSortOrder`]
+        :type: :class:`ThreadSortOrder` | :data:`None`
 
     .. attribute:: volume
 
@@ -941,7 +941,7 @@ AuditLogAction
         A member prune was triggered.
 
         When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        set to ``None``.
+        set to :data:`None`.
 
         When this is the action, the type of :attr:`~AuditLogEntry.extra` is
         set to an unspecified proxy object with two attributes:
@@ -1707,7 +1707,7 @@ AuditLogAction
         When this is the action, the type of :attr:`~AuditLogEntry.extra` is
         set to an unspecified proxy object with these attributes:
 
-        - ``channel``: A :class:`abc.GuildChannel`, :class:`Thread` or :class:`Object` with the channel ID where the message got blocked. May also be ``None``.
+        - ``channel``: A :class:`abc.GuildChannel`, :class:`Thread` or :class:`Object` with the channel ID where the message got blocked. May also be :data:`None`.
         - ``rule_name``: A :class:`str` with the name of the rule that matched.
         - ``rule_trigger_type``: An :class:`AutoModTriggerType` value with the trigger type of the rule.
 
