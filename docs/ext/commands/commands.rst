@@ -493,7 +493,7 @@ a singular type. For example, given the following:
     import typing
 
     @bot.command()
-    async def union(ctx, what: typing.Union[disnake.TextChannel, disnake.Member]):
+    async def union(ctx, what: typing.disnake.TextChannel | disnake.Member):
         await ctx.send(what)
 
 
@@ -508,7 +508,7 @@ typing.Optional
 ^^^^^^^^^^^^^^^
 
 A :data:`typing.Optional` is a special type hint that allows for "back-referencing" behaviour. If the converter fails to
-parse into the specified type, the parser will skip the parameter and then either ``None`` or the specified default will be
+parse into the specified type, the parser will skip the parameter and then either :data:`None` or the specified default will be
 passed into the parameter instead. The parser will then continue on to the next parameters and converters, if any.
 
 Consider the following example:
@@ -518,7 +518,7 @@ Consider the following example:
     import typing
 
     @bot.command()
-    async def bottles(ctx, amount: typing.Optional[int] = 99, *, liquid="beer"):
+    async def bottles(ctx, amount: typing.int | :data:`None` = 99, *, liquid="beer"):
         await ctx.send(f'{amount} bottles of {liquid} on the wall!')
 
 
@@ -589,7 +589,7 @@ When mixed with the :data:`typing.Optional` converter you can provide simple and
 
     @bot.command()
     async def ban(ctx, members: commands.Greedy[disnake.Member],
-                       delete_days: Optional[int] = 0, *,
+                       delete_days: int | :data:`None` = 0, *,
                        reason: str):
         """Mass bans members with an optional delete_days parameter"""
         for member in members:
@@ -615,7 +615,7 @@ This command can be invoked any of the following ways:
     unintended parsing ambiguities in your code. One technique would be to clamp down the expected syntaxes
     allowed through custom converters or reordering the parameters to minimise clashes.
 
-    To help aid with some parsing ambiguities, :class:`str`, ``None``, :data:`typing.Optional` and
+    To help aid with some parsing ambiguities, :class:`str`, :data:`None`, :data:`typing.Optional` and
     :class:`~ext.commands.Greedy` are forbidden as parameters for the :class:`~ext.commands.Greedy` converter.
 
 .. _ext_commands_flag_converter:
@@ -688,9 +688,9 @@ In order to customise the flag syntax we also have a few options that can be pas
 
     # TOPIC: not allowed nsfw: yes Slowmode: 100
     class Settings(commands.FlagConverter, case_insensitive=True):
-        topic: Optional[str]
-        nsfw: Optional[bool]
-        slowmode: Optional[int]
+        topic: str | :data:`None`
+        nsfw: bool | :data:`None`
+        slowmode: int | :data:`None`
 
 .. note::
 
