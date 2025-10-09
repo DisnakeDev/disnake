@@ -405,7 +405,7 @@ AuditLogDiff
 
         See also :attr:`Invite.inviter`.
 
-        :type: :class:`User`, :class:`Object` | :data:`None`
+        :type: :class:`User` | :class:`Object` | :data:`None`
 
     .. attribute:: max_uses
 
