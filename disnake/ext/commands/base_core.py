@@ -113,22 +113,22 @@ class InvokableApplicationCommand(ABC):
         For example, the qualified name for ``/one two three`` would be ``one two three``.
     body: :class:`.ApplicationCommand`
         An object being registered in the API.
-    callback: :ref:`coroutine <coroutine>`
-        The coroutine that is executed when the command is called.
-    cog: Optional[:class:`Cog`]
-        The cog that this command belongs to. ``None`` if there isn't one.
-    checks: List[Callable[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
+    callback: :ref:`coroutine function <coroutine>`
+        The coroutine function that is executed when the command is called.
+    cog: :class:`Cog` | :data:`None`
+        The cog that this command belongs to. :data:`None` if there isn't one.
+    checks: :class:`list`\\[:class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
         A list of predicates that verifies if the command could be executed
         with the given :class:`.ApplicationCommandInteraction` as the sole parameter. If an exception
         is necessary to be thrown to signal failure, then one inherited from
         :exc:`.CommandError` should be used. Note that if the checks fail then
         :exc:`.CheckFailure` exception is raised to the :func:`.on_slash_command_error`
         event.
-    guild_ids: Optional[Tuple[:class:`int`, ...]]
-        The list of IDs of the guilds where the command is synced. ``None`` if this command is global.
+    guild_ids: :class:`tuple`\\[:class:`int`, ...] | :data:`None`
+        The list of IDs of the guilds where the command is synced. :data:`None` if this command is global.
     auto_sync: :class:`bool`
         Whether to automatically register the command.
-    extras: Dict[:class:`str`, Any]
+    extras: :class:`dict`\\[:class:`str`, :data:`~typing.Any`]
         A dict of user provided extras to attach to the command.
 
         .. versionadded:: 2.5
@@ -290,13 +290,13 @@ class InvokableApplicationCommand(ABC):
 
     @property
     def default_member_permissions(self) -> Optional[Permissions]:
-        """Optional[:class:`.Permissions`]: The default required member permissions for this command.
+        """:class:`.Permissions` | :data:`None`: The default required member permissions for this command.
         A member must have *all* these permissions to be able to invoke the command in a guild.
 
         This is a default value, the set of users/roles that may invoke this command can be
         overridden by moderators on a guild-specific basis, disregarding this setting.
 
-        If ``None`` is returned, it means everyone can use the command by default.
+        If :data:`None` is returned, it means everyone can use the command by default.
         If an empty :class:`.Permissions` object is returned (that is, all permissions set to ``False``),
         this means no one can use the command.
 
@@ -306,7 +306,7 @@ class InvokableApplicationCommand(ABC):
 
     @property
     def install_types(self) -> Optional[ApplicationInstallTypes]:
-        """Optional[:class:`.ApplicationInstallTypes`]: The installation types
+        """:class:`.ApplicationInstallTypes` | :data:`None`: The installation types
         where the command is available. Only available for global commands.
 
         .. versionadded:: 2.10
@@ -315,7 +315,7 @@ class InvokableApplicationCommand(ABC):
 
     @property
     def contexts(self) -> Optional[InteractionContextTypes]:
-        """Optional[:class:`.InteractionContextTypes`]: The interaction contexts
+        """:class:`.InteractionContextTypes` | :data:`None`: The interaction contexts
         where the command can be used. Only available for global commands.
 
         .. versionadded:: 2.10
@@ -478,22 +478,22 @@ class InvokableApplicationCommand(ABC):
             await self.call_after_hooks(inter)
 
     def error(self, coro: ErrorT) -> ErrorT:
-        """A decorator that registers a coroutine as a local error handler.
+        """A decorator that registers a coroutine function as a local error handler.
 
         A local error handler is an error event limited to a single application command.
 
         Parameters
         ----------
-        coro: :ref:`coroutine <coroutine>`
-            The coroutine to register as the local error handler.
+        coro: :ref:`coroutine function <coroutine>`
+            The coroutine function to register as the local error handler.
 
         Raises
         ------
         TypeError
-            The coroutine passed is not actually a coroutine.
+            The argument passed is not actually a coroutine function.
         """
         if not iscoroutinefunction(coro):
-            msg = "The error handler must be a coroutine."
+            msg = "The error handler must be a coroutine function."
             raise TypeError(msg)
 
         self.on_error: Error = coro
@@ -593,7 +593,7 @@ class InvokableApplicationCommand(ABC):
             await hook(inter)
 
     def before_invoke(self, coro: HookT) -> HookT:
-        """A decorator that registers a coroutine as a pre-invoke hook.
+        """A decorator that registers a coroutine function as a pre-invoke hook.
 
         A pre-invoke hook is called directly before the command is called.
 
@@ -601,23 +601,23 @@ class InvokableApplicationCommand(ABC):
 
         Parameters
         ----------
-        coro: :ref:`coroutine <coroutine>`
-            The coroutine to register as the pre-invoke hook.
+        coro: :ref:`coroutine function <coroutine>`
+            The coroutine function to register as the pre-invoke hook.
 
         Raises
         ------
         TypeError
-            The coroutine passed is not actually a coroutine.
+            The argument passed is not a coroutine function.
         """
         if not iscoroutinefunction(coro):
-            msg = "The pre-invoke hook must be a coroutine."
+            msg = "The pre-invoke hook must be a coroutine function."
             raise TypeError(msg)
 
         self._before_invoke = coro
         return coro
 
     def after_invoke(self, coro: HookT) -> HookT:
-        """A decorator that registers a coroutine as a post-invoke hook.
+        """A decorator that registers a coroutine function as a post-invoke hook.
 
         A post-invoke hook is called directly after the command is called.
 
@@ -625,16 +625,16 @@ class InvokableApplicationCommand(ABC):
 
         Parameters
         ----------
-        coro: :ref:`coroutine <coroutine>`
-            The coroutine to register as the post-invoke hook.
+        coro: :ref:`coroutine function <coroutine>`
+            The coroutine function to register as the post-invoke hook.
 
         Raises
         ------
         TypeError
-            The coroutine passed is not actually a coroutine.
+            The argument passed is not actually a coroutine function.
         """
         if not iscoroutinefunction(coro):
-            msg = "The post-invoke hook must be a coroutine."
+            msg = "The post-invoke hook must be a coroutine function."
             raise TypeError(msg)
 
         self._after_invoke = coro
@@ -642,7 +642,7 @@ class InvokableApplicationCommand(ABC):
 
     @property
     def cog_name(self) -> Optional[str]:
-        """Optional[:class:`str`]: The name of the cog this application command belongs to, if any."""
+        """:class:`str` | :data:`None`: The name of the cog this application command belongs to, if any."""
         return type(self.cog).__cog_name__ if self.cog is not None else None
 
     async def can_run(self, inter: ApplicationCommandInteraction) -> bool:
