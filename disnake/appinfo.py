@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, List, Optional, Sequence, cast
+from collections.abc import Sequence
+from typing import TYPE_CHECKING, Optional, cast
 
 from . import utils
 from .asset import Asset, AssetBytes
@@ -60,7 +61,7 @@ class InstallParams:
     def __init__(
         self,
         *,
-        scopes: List[str],
+        scopes: list[str],
         permissions: Permissions = MISSING,
     ) -> None:
         self.scopes = scopes
@@ -332,7 +333,7 @@ class AppInfo:
         self.name: str = data["name"]
         self.description: str = data["description"]
         self._icon: Optional[str] = data["icon"]
-        self.rpc_origins: List[str] = data.get("rpc_origins") or []
+        self.rpc_origins: list[str] = data.get("rpc_origins") or []
         self.bot_public: bool = data["bot_public"]
         self.bot_require_code_grant: bool = data["bot_require_code_grant"]
         self.owner: User = state.create_user(data["owner"])
@@ -355,14 +356,14 @@ class AppInfo:
         self.flags: Optional[ApplicationFlags] = (
             ApplicationFlags._from_value(flags) if flags is not None else None
         )
-        self.tags: Optional[List[str]] = data.get("tags")
+        self.tags: Optional[list[str]] = data.get("tags")
         self.install_params: Optional[InstallParams] = (
             InstallParams._from_data(data["install_params"], parent=self)
             if "install_params" in data
             else None
         )
         self.custom_install_url: Optional[str] = data.get("custom_install_url")
-        self.redirect_uris: Optional[List[str]] = data.get("redirect_uris")
+        self.redirect_uris: Optional[list[str]] = data.get("redirect_uris")
         self.interactions_endpoint_url: Optional[str] = data.get("interactions_endpoint_url")
         self.role_connections_verification_url: Optional[str] = data.get(
             "role_connections_verification_url"
@@ -371,7 +372,7 @@ class AppInfo:
         self.event_webhooks_status: ApplicationEventWebhookStatus = try_enum(
             ApplicationEventWebhookStatus, data.get("event_webhooks_status", 1)
         )
-        self.event_webhooks_types: Optional[List[str]] = data.get("event_webhooks_types")
+        self.event_webhooks_types: Optional[list[str]] = data.get("event_webhooks_types")
         self.approximate_guild_count: int = data.get("approximate_guild_count", 0)
         self.approximate_user_install_count: int = data.get("approximate_user_install_count", 0)
         self.approximate_user_authorization_count: int = data.get(
@@ -379,7 +380,7 @@ class AppInfo:
         )
 
         # this is a bit of a mess, but there's no better way to expose this data for now
-        self._install_types_config: Dict[
+        self._install_types_config: dict[
             ApplicationIntegrationTypeLiteral, InstallTypeConfiguration
         ] = {}
         for type_str, config in (data.get("integration_types_config") or {}).items():
@@ -595,7 +596,7 @@ class AppInfo:
             fields["install_params"] = install_params.to_dict() if install_params else None
 
         if guild_install_type_config is not MISSING or user_install_type_config is not MISSING:
-            integration_types_config: Dict[str, ApplicationIntegrationTypeConfigurationPayload] = {}
+            integration_types_config: dict[str, ApplicationIntegrationTypeConfigurationPayload] = {}
 
             if guild_install_type_config is MISSING:
                 guild_install_type_config = self.guild_install_type_config
@@ -685,7 +686,7 @@ class PartialAppInfo:
         self.name: str = data["name"]
         self._icon: Optional[str] = data.get("icon")
         self.description: str = data["description"]
-        self.rpc_origins: Optional[List[str]] = data.get("rpc_origins")
+        self.rpc_origins: Optional[list[str]] = data.get("rpc_origins")
         self._summary: str = data.get("summary", "")
         self.verify_key: str = data["verify_key"]
         self.terms_of_service_url: Optional[str] = data.get("terms_of_service_url")

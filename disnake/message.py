@@ -13,11 +13,7 @@ from typing import (
     Any,
     Callable,
     ClassVar,
-    Dict,
-    List,
     Optional,
-    Tuple,
-    Type,
     Union,
     cast,
     overload,
@@ -120,8 +116,7 @@ def convert_emoji_reaction(emoji: Union[EmojiInputType, Reaction]) -> str:
 
         s = emoji.strip("<>:")
         # `str.removeprefix` is py 3.9 only
-        if s.startswith("a:"):
-            s = s[2:]
+        s = s.removeprefix("a:")
         return s
 
     assert_never(emoji)
@@ -139,10 +134,10 @@ async def _edit_handler(
     # all of which can be set to `MISSING`
     content: Optional[str],
     embed: Optional[Embed],
-    embeds: List[Embed],
+    embeds: list[Embed],
     file: File,
-    files: List[File],
-    attachments: Optional[List[Attachment]],
+    files: list[File],
+    attachments: Optional[list[Attachment]],
     suppress: bool,  # deprecated
     suppress_embeds: bool,
     flags: MessageFlags,
@@ -169,7 +164,7 @@ async def _edit_handler(
         utils.warn_deprecated(suppress_deprecated_msg, stacklevel=3)
         suppress_embeds = suppress
 
-    payload: Dict[str, Any] = {}
+    payload: dict[str, Any] = {}
     if content is not MISSING:
         if content is not None:
             payload["content"] = str(content)
@@ -961,7 +956,7 @@ class RoleSubscriptionData:
         self.is_renewal: bool = data["is_renewal"]
 
 
-def flatten_handlers(cls: Type[Message]) -> Type[Message]:
+def flatten_handlers(cls: type[Message]) -> type[Message]:
     prefix = len("_handle_")
     handlers = [
         (key[prefix:], value)
@@ -997,7 +992,7 @@ class MessageCall:
         self.ended_timestamp: Optional[datetime.datetime] = utils.parse_time(
             data.get("ended_timestamp")
         )
-        self.participant_ids: List[int] = [
+        self.participant_ids: list[int] = [
             int(participant) for participant in data.get("participants", [])
         ]
 
@@ -1195,13 +1190,13 @@ class Message(Hashable):
     )
 
     if TYPE_CHECKING:
-        _HANDLERS: ClassVar[List[Tuple[str, Callable[..., None]]]]
-        _CACHED_SLOTS: ClassVar[List[str]]
+        _HANDLERS: ClassVar[list[tuple[str, Callable[..., None]]]]
+        _CACHED_SLOTS: ClassVar[list[str]]
         guild: Optional[Guild]
         reference: Optional[MessageReference]
-        mentions: List[Union[User, Member]]
+        mentions: list[Union[User, Member]]
         author: Union[User, Member]
-        role_mentions: List[Role]
+        role_mentions: list[Role]
 
     def __init__(
         self,
@@ -1214,13 +1209,13 @@ class Message(Hashable):
         self.id: int = int(data["id"])
         self.application_id: Optional[int] = utils._get_as_snowflake(data, "application_id")
         self.webhook_id: Optional[int] = utils._get_as_snowflake(data, "webhook_id")
-        self.reactions: List[Reaction] = [
+        self.reactions: list[Reaction] = [
             Reaction(message=self, data=d) for d in data.get("reactions", [])
         ]
-        self.attachments: List[Attachment] = [
+        self.attachments: list[Attachment] = [
             Attachment(data=a, state=self._state) for a in data["attachments"]
         ]
-        self.embeds: List[Embed] = [Embed.from_dict(a) for a in data["embeds"]]
+        self.embeds: list[Embed] = [Embed.from_dict(a) for a in data["embeds"]]
         self.application: Optional[MessageApplicationPayload] = data.get("application")
         self.activity: Optional[MessageActivityPayload] = data.get("activity")
         # for user experience, on_message has no business getting partials
@@ -1238,10 +1233,10 @@ class Message(Hashable):
         self.tts: bool = data["tts"]
         self.content: str = data["content"]
         self.nonce: Optional[Union[int, str]] = data.get("nonce")
-        self.stickers: List[StickerItem] = [
+        self.stickers: list[StickerItem] = [
             StickerItem(data=d, state=state) for d in data.get("sticker_items", [])
         ]
-        self.components: List[MessageTopLevelComponent] = [
+        self.components: list[MessageTopLevelComponent] = [
             _message_component_factory(d) for d in data.get("components", [])
         ]
 
@@ -1296,7 +1291,7 @@ class Message(Hashable):
                     ref.resolved = self.__class__(channel=chan, data=resolved, state=state)  # type: ignore
 
         _ref = data.get("message_reference", {})
-        self.message_snapshots: List[ForwardedMessage] = [
+        self.message_snapshots: list[ForwardedMessage] = [
             ForwardedMessage(
                 state=self._state,
                 channel_id=utils._get_as_snowflake(_ref, "channel_id"),
@@ -1428,10 +1423,10 @@ class Message(Hashable):
     def _handle_content(self, value: str) -> None:
         self.content = value
 
-    def _handle_attachments(self, value: List[AttachmentPayload]) -> None:
+    def _handle_attachments(self, value: list[AttachmentPayload]) -> None:
         self.attachments = [Attachment(data=a, state=self._state) for a in value]
 
-    def _handle_embeds(self, value: List[EmbedPayload]) -> None:
+    def _handle_embeds(self, value: list[EmbedPayload]) -> None:
         self.embeds = [Embed.from_dict(data) for data in value]
 
     def _handle_nonce(self, value: Union[str, int]) -> None:
@@ -1461,7 +1456,7 @@ class Message(Hashable):
             self.author = Member._from_message(message=self, data=member)
 
     def _handle_mentions(
-        self, mentions: Union[List[UserPayload], List[UserWithMemberPayload]]
+        self, mentions: Union[list[UserPayload], list[UserWithMemberPayload]]
     ) -> None:
         self.mentions = r = []
         guild = self.guild
@@ -1478,7 +1473,7 @@ class Message(Hashable):
             else:
                 r.append(Member._try_upgrade(data=mention, guild=guild, state=state))
 
-    def _handle_mention_roles(self, role_mentions: List[int]) -> None:
+    def _handle_mention_roles(self, role_mentions: list[int]) -> None:
         self.role_mentions = []
         if isinstance(self.guild, Guild):
             for role_id in map(int, role_mentions):
@@ -1486,7 +1481,7 @@ class Message(Hashable):
                 if role is not None:
                     self.role_mentions.append(role)
 
-    def _handle_components(self, components: List[MessageTopLevelComponentPayload]) -> None:
+    def _handle_components(self, components: list[MessageTopLevelComponentPayload]) -> None:
         self.components = [_message_component_factory(d) for d in components]
 
     def _rebind_cached_references(self, new_guild: Guild, new_channel: GuildMessageable) -> None:
@@ -1501,7 +1496,7 @@ class Message(Hashable):
             self._interaction.user.guild = new_guild
 
     @utils.cached_slot_property("_cs_raw_mentions")
-    def raw_mentions(self) -> List[int]:
+    def raw_mentions(self) -> list[int]:
         """:class:`list`\\[:class:`int`]: A property that returns an array of user IDs matched with
         the syntax of ``<@user_id>`` in the message content.
 
@@ -1511,21 +1506,21 @@ class Message(Hashable):
         return [int(x) for x in re.findall(r"<@!?([0-9]{17,19})>", self.content)]
 
     @utils.cached_slot_property("_cs_raw_channel_mentions")
-    def raw_channel_mentions(self) -> List[int]:
+    def raw_channel_mentions(self) -> list[int]:
         """:class:`list`\\[:class:`int`]: A property that returns an array of channel IDs matched with
         the syntax of ``<#channel_id>`` in the message content.
         """
         return [int(x) for x in re.findall(r"<#([0-9]{17,19})>", self.content)]
 
     @utils.cached_slot_property("_cs_raw_role_mentions")
-    def raw_role_mentions(self) -> List[int]:
+    def raw_role_mentions(self) -> list[int]:
         """:class:`list`\\[:class:`int`]: A property that returns an array of role IDs matched with
         the syntax of ``<@&role_id>`` in the message content.
         """
         return [int(x) for x in re.findall(r"<@&([0-9]{17,19})>", self.content)]
 
     @utils.cached_slot_property("_cs_channel_mentions")
-    def channel_mentions(self) -> List[GuildChannel]:
+    def channel_mentions(self) -> list[GuildChannel]:
         """:class:`list`\\[:class:`abc.GuildChannel`]: A list of :class:`abc.GuildChannel` that were mentioned. If the message is in a private message
         then the list is always empty.
         """
@@ -1836,7 +1831,7 @@ class Message(Hashable):
                 return
 
             poll_result_embed = self.embeds[0]
-            poll_embed_fields: Dict[str, str] = {}
+            poll_embed_fields: dict[str, str] = {}
             if not poll_result_embed._fields:
                 return
 
@@ -1925,7 +1920,7 @@ class Message(Hashable):
         *,
         embed: Optional[Embed] = ...,
         file: File = ...,
-        attachments: Optional[List[Attachment]] = ...,
+        attachments: Optional[list[Attachment]] = ...,
         suppress_embeds: bool = ...,
         flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
@@ -1940,8 +1935,8 @@ class Message(Hashable):
         content: Optional[str] = ...,
         *,
         embed: Optional[Embed] = ...,
-        files: List[File] = ...,
-        attachments: Optional[List[Attachment]] = ...,
+        files: list[File] = ...,
+        attachments: Optional[list[Attachment]] = ...,
         suppress_embeds: bool = ...,
         flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
@@ -1955,9 +1950,9 @@ class Message(Hashable):
         self,
         content: Optional[str] = ...,
         *,
-        embeds: List[Embed] = ...,
+        embeds: list[Embed] = ...,
         file: File = ...,
-        attachments: Optional[List[Attachment]] = ...,
+        attachments: Optional[list[Attachment]] = ...,
         suppress_embeds: bool = ...,
         flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
@@ -1971,9 +1966,9 @@ class Message(Hashable):
         self,
         content: Optional[str] = ...,
         *,
-        embeds: List[Embed] = ...,
-        files: List[File] = ...,
-        attachments: Optional[List[Attachment]] = ...,
+        embeds: list[Embed] = ...,
+        files: list[File] = ...,
+        attachments: Optional[list[Attachment]] = ...,
         suppress_embeds: bool = ...,
         flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
@@ -1987,10 +1982,10 @@ class Message(Hashable):
         content: Optional[str] = MISSING,
         *,
         embed: Optional[Embed] = MISSING,
-        embeds: List[Embed] = MISSING,
+        embeds: list[Embed] = MISSING,
         file: File = MISSING,
-        files: List[File] = MISSING,
-        attachments: Optional[List[Attachment]] = MISSING,
+        files: list[File] = MISSING,
+        attachments: Optional[list[Attachment]] = MISSING,
         suppress: bool = MISSING,  # deprecated
         suppress_embeds: bool = MISSING,
         flags: MessageFlags = MISSING,
@@ -2699,7 +2694,7 @@ class PartialMessage(Hashable):
         *,
         embed: Optional[Embed] = ...,
         file: File = ...,
-        attachments: Optional[List[Attachment]] = ...,
+        attachments: Optional[list[Attachment]] = ...,
         suppress_embeds: bool = ...,
         flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
@@ -2714,8 +2709,8 @@ class PartialMessage(Hashable):
         content: Optional[str] = ...,
         *,
         embed: Optional[Embed] = ...,
-        files: List[File] = ...,
-        attachments: Optional[List[Attachment]] = ...,
+        files: list[File] = ...,
+        attachments: Optional[list[Attachment]] = ...,
         suppress_embeds: bool = ...,
         flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
@@ -2729,9 +2724,9 @@ class PartialMessage(Hashable):
         self,
         content: Optional[str] = ...,
         *,
-        embeds: List[Embed] = ...,
+        embeds: list[Embed] = ...,
         file: File = ...,
-        attachments: Optional[List[Attachment]] = ...,
+        attachments: Optional[list[Attachment]] = ...,
         suppress_embeds: bool = ...,
         flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
@@ -2745,9 +2740,9 @@ class PartialMessage(Hashable):
         self,
         content: Optional[str] = ...,
         *,
-        embeds: List[Embed] = ...,
-        files: List[File] = ...,
-        attachments: Optional[List[Attachment]] = ...,
+        embeds: list[Embed] = ...,
+        files: list[File] = ...,
+        attachments: Optional[list[Attachment]] = ...,
         suppress_embeds: bool = ...,
         flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
@@ -2761,10 +2756,10 @@ class PartialMessage(Hashable):
         content: Optional[str] = MISSING,
         *,
         embed: Optional[Embed] = MISSING,
-        embeds: List[Embed] = MISSING,
+        embeds: list[Embed] = MISSING,
         file: File = MISSING,
-        files: List[File] = MISSING,
-        attachments: Optional[List[Attachment]] = MISSING,
+        files: list[File] = MISSING,
+        attachments: Optional[list[Attachment]] = MISSING,
         suppress: bool = MISSING,  # deprecated
         suppress_embeds: bool = MISSING,
         flags: MessageFlags = MISSING,
@@ -2999,10 +2994,10 @@ class ForwardedMessage:
         self._state = state
         self.type: MessageType = try_enum(MessageType, data["type"])
         self.content: str = data["content"]
-        self.embeds: List[Embed] = [Embed.from_dict(a) for a in data["embeds"]]
+        self.embeds: list[Embed] = [Embed.from_dict(a) for a in data["embeds"]]
         # should never be None in message_reference(s) that are forwarding
         self.channel_id: int = channel_id  # type: ignore
-        self.attachments: List[Attachment] = [
+        self.attachments: list[Attachment] = [
             Attachment(data=a, state=state) for a in data["attachments"]
         ]
         self._timestamp: datetime.datetime = utils.parse_time(data["timestamp"])
@@ -3010,15 +3005,15 @@ class ForwardedMessage:
             data["edited_timestamp"]
         )
         self.flags: MessageFlags = MessageFlags._from_value(data.get("flags", 0))
-        self.stickers: List[StickerItem] = [
+        self.stickers: list[StickerItem] = [
             StickerItem(data=d, state=state) for d in data.get("sticker_items", [])
         ]
-        self.components: List[MessageTopLevelComponent] = [
+        self.components: list[MessageTopLevelComponent] = [
             _message_component_factory(d) for d in data.get("components", [])
         ]
         self.guild_id = guild_id
 
-        self.mentions: List[Union[User, Member]] = []
+        self.mentions: list[Union[User, Member]] = []
         if self.guild is None:
             self.mentions = [state.store_user(m) for m in data["mentions"]]
         else:
@@ -3032,7 +3027,7 @@ class ForwardedMessage:
                         Member._try_upgrade(data=mention, guild=self.guild, state=state)
                     )
 
-        self.role_mentions: List[Role] = []
+        self.role_mentions: list[Role] = []
         if self.guild is not None:
             for role_id in map(int, data.get("mention_roles", [])):
                 role = self.guild.get_role(role_id)

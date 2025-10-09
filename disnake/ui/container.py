@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, List, Optional, Tuple, Union, cast
+from typing import TYPE_CHECKING, ClassVar, Optional, Union, cast
 
 from ..colour import Colour
 from ..components import Container as ContainerComponent
@@ -63,7 +63,7 @@ class Container(UIComponent):
         Whether the container is marked as a spoiler.
     """
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (
         "children",
         "accent_colour",
         "spoiler",
@@ -79,7 +79,7 @@ class Container(UIComponent):
         self._id: int = id
         # this list can be modified without any runtime checks later on,
         # just assume the user knows what they're doing at that point
-        self.children: List[ContainerChildUIComponent] = [
+        self.children: list[ContainerChildUIComponent] = [
             ensure_ui_component(c, "components") for c in components
         ]
         self._accent_colour: Optional[Colour] = accent_colour
@@ -128,7 +128,7 @@ class Container(UIComponent):
 
         return cls(
             *cast(
-                "List[ContainerChildUIComponent]",
+                "list[ContainerChildUIComponent]",
                 [_to_ui_component(c) for c in container.children],
             ),
             accent_colour=container.accent_colour,
