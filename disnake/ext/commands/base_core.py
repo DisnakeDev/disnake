@@ -607,7 +607,7 @@ class InvokableApplicationCommand(ABC):
         Raises
         ------
         TypeError
-            The argument passed is not actually a coroutine function.
+            The argument passed is not a coroutine function.
         """
         if not iscoroutinefunction(coro):
             msg = "The pre-invoke hook must be a coroutine function."
