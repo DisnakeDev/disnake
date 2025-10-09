@@ -24,6 +24,7 @@ from .guild import (
 from .guild_scheduled_event import GuildScheduledEvent
 from .integration import IntegrationExpireBehavior, PartialIntegration
 from .interactions import ApplicationCommand, ApplicationCommandPermissions
+from .onboarding import OnboardingPrompt, OnboardingPromptOption
 from .role import Role
 from .snowflake import Snowflake
 from .threads import Thread
@@ -91,6 +92,9 @@ AuditLogEvent = Literal[
     146,
     150,
     151,
+    163,
+    164,
+    167,
 ]
 
 
@@ -106,6 +110,7 @@ class _AuditLogChange_Str(TypedDict):
         "deny",
         "permissions",
         "tags",
+        "title",
     ]
     new_value: NotRequired[str]
     old_value: NotRequired[str]
@@ -160,6 +165,9 @@ class _AuditLogChange_Bool(TypedDict):
         "locked",
         "premium_progress_bar_enabled",
         "enabled",
+        "single_select",
+        "required",
+        "in_onboarding",
     ]
     new_value: NotRequired[bool]
     old_value: NotRequired[bool]
@@ -184,7 +192,7 @@ class _AuditLogChange_Int(TypedDict):
 
 
 class _AuditLogChange_ListSnowflake(TypedDict):
-    key: Literal["exempt_roles", "exempt_channels"]
+    key: Literal["exempt_roles", "exempt_channels", "default_channel_ids"]
     new_value: NotRequired[List[Snowflake]]
     old_value: NotRequired[List[Snowflake]]
 
@@ -279,6 +287,18 @@ class _AuditLogChange_AutoModTriggerMetadata(TypedDict):
     old_value: NotRequired[AutoModTriggerMetadata]
 
 
+class _AuditLogChange_OnboardingPrompts(TypedDict):
+    key: Literal["prompts"]
+    new_value: NotRequired[List[OnboardingPrompt]]
+    old_value: NotRequired[List[OnboardingPrompt]]
+
+
+class _AuditLogChange_OnboardingPromptOptions(TypedDict):
+    key: Literal["options"]
+    new_value: NotRequired[List[OnboardingPromptOption]]
+    old_value: NotRequired[List[OnboardingPromptOption]]
+
+
 AuditLogChange = Union[
     _AuditLogChange_Str,
     _AuditLogChange_AssetHash,
@@ -301,6 +321,8 @@ AuditLogChange = Union[
     _AuditLogChange_AutoModEventType,
     _AuditLogChange_AutoModActions,
     _AuditLogChange_AutoModTriggerMetadata,
+    _AuditLogChange_OnboardingPrompts,
+    _AuditLogChange_OnboardingPromptOptions,
 ]
 
 
