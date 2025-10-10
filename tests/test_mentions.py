@@ -109,6 +109,7 @@ def test_from_message_replied_user() -> None:
     message = mock.Mock(Message)
     author = Object(123)
     message.mentions = [author]
+    message.role_mentions = []
     assert AllowedMentions.from_message(message).replied_user is False
 
     message.type = MessageType.reply
