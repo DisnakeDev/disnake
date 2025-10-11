@@ -76,11 +76,11 @@ EXECUTION_GROUPS: List[ExecutionGroup] = [
         ExecutionGroup(
             sessions=("pyright",),
             python=python,
-            pyright_paths=("disnake", "tests", "examples", "noxfile.py", "setup.py"),
+            pyright_paths=("disnake", "tests", "examples", "noxfile.py"),
             project=True,
             extras=("speed", "voice"),
             groups=("test", "nox"),
-            dependencies=("setuptools", "pytz", "requests"),  # needed for type checking
+            dependencies=("pytz", "requests"),  # needed for type checking
         )
         for python in ALL_PYTHONS
     ),
@@ -93,18 +93,20 @@ EXECUTION_GROUPS: List[ExecutionGroup] = [
     # codemodding and pyright
     ExecutionGroup(
         sessions=("codemod", "autotyping", "pyright"),
-        pyright_paths=("scripts",),
+        pyright_paths=("scripts/codemods", "scripts/ci"),
         groups=("codemod",),
     ),
     # the other sessions, they don't need pyright, but they need to run
     ExecutionGroup(
-        sessions=("lint", "slotscheck", "check-manifest"),
+        sessions=("lint", "slotscheck"),
         groups=("tools",),
     ),
     # build
     ExecutionGroup(
-        sessions=("build",),
+        sessions=("build", "pyright"),
+        pyright_paths=("scripts/versioning.py",),
         groups=("build",),
+        dependencies=(PYPROJECT["build-system"]["requires"]),
     ),
     ## testing
     *(
@@ -252,13 +254,6 @@ def lint(session: nox.Session) -> None:
     session.run("prek", "run", "--all-files", *session.posargs)
 
 
-@nox.session(name="check-manifest")
-def check_manifest(session: nox.Session) -> None:
-    """Run check-manifest."""
-    install_deps(session)
-    session.run("check-manifest", "-v")
-
-
 @nox.session(python=get_version_for_session("slotscheck"))
 def slotscheck(session: nox.Session) -> None:
     """Run slotscheck."""
@@ -266,7 +261,7 @@ def slotscheck(session: nox.Session) -> None:
     session.run("python", "-m", "slotscheck", "--verbose", "-m", "disnake")
 
 
-@nox.session(requires=["check-manifest"])
+@nox.session()
 def build(session: nox.Session) -> None:
     """Build a dist."""
     install_deps(session)

@@ -31,5 +31,6 @@ venvs/
 .coverage*
 coverage.xml
 __pypackages__/
+disnake/_version.py
 .python-version
 uv.lock
