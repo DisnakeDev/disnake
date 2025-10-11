@@ -1,14 +1,16 @@
 # SPDX-License-Identifier: MIT
+from __future__ import annotations
 
 import datetime
 import functools
 import inspect
-import types
 from typing import TYPE_CHECKING, Callable, ContextManager, Optional, Type, TypeVar
 from unittest import mock
 
 if TYPE_CHECKING:
     # for pyright
+    import types
+
     from typing_extensions import reveal_type as reveal_type
 else:
     # to avoid flake8 noqas
