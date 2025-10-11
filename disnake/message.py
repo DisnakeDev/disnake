@@ -470,8 +470,7 @@ class Attachment(Hashable):
             The contents of the attachment.
         """
         url = self.proxy_url if use_cached else self.url
-        data = await self._http.get_from_cdn(url)
-        return data
+        return await self._http.get_from_cdn(url)
 
     async def to_file(
         self,
@@ -1376,7 +1375,7 @@ class Message(Hashable):
                 break
         else:
             # didn't find anything so just return
-            return
+            return None
 
         del self.reactions[index]
         return reaction
@@ -1779,7 +1778,7 @@ class Message(Hashable):
 
         if self.type is MessageType.role_subscription_purchase:
             if not (data := self.role_subscription_data):
-                return
+                return None
 
             guild_name = f"**{self.guild.name}**" if self.guild else None
             if data.total_months_subscribed > 0:
@@ -1833,12 +1832,12 @@ class Message(Hashable):
 
         if self.type is MessageType.poll_result:
             if not self.embeds:
-                return
+                return None
 
             poll_result_embed = self.embeds[0]
             poll_embed_fields: Dict[str, str] = {}
             if not poll_result_embed._fields:
-                return
+                return None
 
             for field in poll_result_embed._fields:
                 poll_embed_fields[field["name"]] = field["value"]

@@ -232,6 +232,7 @@ class Loop(Generic[LF]):
         """
         if self._seconds is not MISSING:
             return self._seconds
+        return None
 
     @property
     def minutes(self) -> Optional[float]:
@@ -242,6 +243,7 @@ class Loop(Generic[LF]):
         """
         if self._minutes is not MISSING:
             return self._minutes
+        return None
 
     @property
     def hours(self) -> Optional[float]:
@@ -252,6 +254,7 @@ class Loop(Generic[LF]):
         """
         if self._hours is not MISSING:
             return self._hours
+        return None
 
     @property
     def time(self) -> Optional[List[datetime.time]]:
@@ -262,6 +265,7 @@ class Loop(Generic[LF]):
         """
         if self._time is not MISSING:
             return self._time.copy()
+        return None
 
     @property
     def current_loop(self) -> int:
@@ -630,8 +634,7 @@ class Loop(Generic[LF]):
                 raise TypeError(msg)
             ret.append(t if t.tzinfo is not None else t.replace(tzinfo=utc))
 
-        ret = sorted(set(ret))  # de-dupe and sort times
-        return ret
+        return sorted(set(ret))  # de-dupe and sort times
 
     def change_interval(
         self,

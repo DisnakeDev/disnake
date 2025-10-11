@@ -626,8 +626,7 @@ class User(BaseUser, disnake.abc.Messageable):
         )
 
     async def _get_channel(self) -> DMChannel:
-        ch = await self.create_dm()
-        return ch
+        return await self.create_dm()
 
     @property
     def dm_channel(self) -> Optional[DMChannel]:
