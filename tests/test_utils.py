@@ -11,6 +11,7 @@ from dataclasses import dataclass
 from datetime import timedelta, timezone
 from typing import (
     TYPE_CHECKING,
+    Annotated,
     Any,
     Callable,
     Dict,
@@ -791,6 +792,8 @@ def test_normalise_optional_params(params, expected) -> None:
         # forward refs
         ("bool", bool, True),
         ("Tuple[dict, List[Literal[42, 99]]]", Tuple[dict, List[Literal[42, 99]]], True),
+        # Annotated[X, Y] -> Y
+        (Annotated[str, str.casefold], str.casefold, False),
         # 3.10 union syntax
         pytest.param(
             "int | float",
