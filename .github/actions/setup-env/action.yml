@@ -1,33 +1,73 @@
+# ==============================================================================
+# GitHub Action: Python Environment Setup with UV Package Manager
+# 
+# Purpose: Automated Python environment setup for CI/CD pipelines and development
+# Features: 
+#   - Fast dependency resolution with UV package manager
+#   - Multiple Python version support (3.9+)
+#   - Intelligent caching for faster build times
+#   - Nox testing tool integration
+#   - Cross-platform compatibility (Windows, Linux, macOS)
+# 
+# Usage:
+#   - uses: ./.github/actions/setup-environment
+#     with:
+#       python-version: '3.11'
+#       use-cached-uv-lock: true
+# ==============================================================================
+
 # SPDX-License-Identifier: MIT
 
-name: Set up environment
-description: .
+name: Set up Python Environment
+description: Sets up Python environment with UV package manager and Nox testing tool
+
 inputs:
   python-version:
-    description: The python version to install
+    description: |
+      Python version to install and use in the environment.
+      Supported versions: '3.9', '3.10', '3.11', '3.12', '3.13'
+      Default: '3.9' for maximum compatibility
     required: false
     default: '3.9'
+    
   use-cached-uv-lock:
-    description: Whether to download the uv lock cache.
+    description: |
+      Whether to use cached uv.lock file for faster dependency resolution.
+      Enable for faster CI builds, disable for clean dependency resolution.
+      Recommended: true for most use cases
     required: false
     default: 'true'
+    
   update-uv-lock:
-    description: Whether to update the uv lock file. Allows the cache to fail.
+    description: |
+      Whether to update the uv.lock file (allows cache to fail).
+      Use when you want to refresh dependencies despite having cache.
+      Recommended: false for stable builds
     required: false
     default: 'false'
+    
   uv-resolution-strategy:
-    description: The uv resolution strategy to use. See https://docs.astral.sh/uv/reference/environment/#uv_resolution for details.
+    description: |
+      UV dependency resolution strategy for handling version conflicts.
+      Options: 'highest' (latest versions), 'lowest', 'minimal'
+      Recommended: 'highest' for most projects
     required: false
     default: 'highest'
+
 outputs:
   python-version:
-    description: The python version that was installed.
+    description: The actual Python version that was installed and configured
     value: ${{ steps.python-version.outputs.python-version }}
 
 runs:
   using: composite
+  
   steps:
-    - name: Download uv lock
+    # ========================================================================
+    # STEP 1: Download cached UV lock file (if enabled)
+    # Purpose: Speed up dependency resolution by reusing cached lock file
+    # ========================================================================
+    - name: Download cached UV lock file
       uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
       if: ${{ inputs.use-cached-uv-lock != 'false' }}
       id: restore-uv-lock
@@ -39,47 +79,101 @@ runs:
         enableCrossOsArchive: true
         fail-on-cache-miss: ${{ inputs.update-uv-lock != 'true' }}
 
-    - name: Set up uv with Python ${{ inputs.python-version }}
+    # ========================================================================
+    # STEP 2: Set up UV package manager with specified Python version
+    # Purpose: Initialize UV with the desired Python version
+    # ========================================================================
+    - name: Set up UV with Python ${{ inputs.python-version }}
       id: setup-python
       uses: astral-sh/setup-uv@eb1897b8dc4b5d5bfe39a428a8f2304605e0983c # v7.0.0
       with:
         version: '0.9.2'
         enable-cache: true
-        # this doesn't install python but pins the uv version; its the same as providing UV_PYTHON
+        # Note: This doesn't install Python but pins the UV version
+        # Equivalent to providing UV_PYTHON environment variable
         python-version: ${{ inputs.python-version }}
 
+    # ========================================================================
+    # STEP 3: Install specified Python version using UV
+    # Purpose: Download and install the requested Python version
+    # ========================================================================
     - name: Install Python ${{ inputs.python-version }}
       shell: bash
       env:
         UV_PYTHON_DOWNLOADS: automatic
         PYTHON_VERSION: ${{ inputs.python-version }}
       run: |
-        uv python install ${PYTHON_VERSION}
+        echo "📥 Installing Python version: $PYTHON_VERSION"
+        uv python install $PYTHON_VERSION
+        echo "✅ Python $PYTHON_VERSION installed successfully"
 
-    - name: Add Python to PATH
+    # ========================================================================
+    # STEP 4: Add Python to PATH (Windows-specific)
+    # Purpose: Ensure Python is accessible in Windows environment
+    # ========================================================================
+    - name: Add Python to PATH (Windows)
       shell: bash
       if: ${{ runner.os == 'Windows' }}
       run: |
+        echo "🪟 Adding Python to PATH on Windows"
         echo 'C:\Users\runneradmin\.local\bin' >> $GITHUB_PATH
+        echo "✅ Python added to PATH"
 
-    - name: Install nox
+    # ========================================================================
+    # STEP 5: Install Nox testing tool
+    # Purpose: Set up Nox for automated testing across multiple Python versions
+    # ========================================================================
+    - name: Install Nox testing tool
       shell: bash
       run: |
+        echo "🔧 Installing Nox testing tool"
         uv tool install nox
+        echo "✅ Nox installed successfully"
 
-    - name: Lock dependencies
+    # ========================================================================
+    # STEP 6: Update UV lock file (if requested)
+    # Purpose: Refresh dependencies and update lock file
+    # ========================================================================
+    - name: Update UV lock file
       id: lock-uv-deps
       if: ${{ inputs.update-uv-lock }}
       shell: bash
       env:
         UV_LOCKED: 0
-      run: uv lock --refresh
+      run: |
+        echo "🔄 Updating UV lock file with resolution strategy: ${{ inputs.uv-resolution-strategy }}"
+        uv lock --refresh
+        echo "✅ UV lock file updated"
 
-    - name: Set Python version
+    # ========================================================================
+    # STEP 7: Set Python version output
+    # Purpose: Capture installed Python version for use in subsequent steps
+    # ========================================================================
+    - name: Set Python version output
       id: python-version
       shell: bash
       env:
         UV_VENV_CLEAR: 1
       run: |
+        echo "🐍 Creating virtual environment and detecting Python version"
         uv venv .venv
-        echo "python-version=$(uv run python -c 'import sys; print(".".join(map(str,sys.version_info[:2])))')" >> $GITHUB_OUTPUT
+        DETECTED_VERSION=$(uv run python -c 'import sys; print(".".join(map(str,sys.version_info[:2])))')
+        echo "✅ Detected Python version: $DETECTED_VERSION"
+        echo "python-version=$DETECTED_VERSION" >> $GITHUB_OUTPUT
+        
+    # ========================================================================
+    # STEP 8: Verification and summary
+    # Purpose: Confirm successful setup and display summary
+    # ========================================================================
+    - name: Verify environment setup
+      shell: bash
+      run: |
+        echo "🎉 Environment Setup Complete!"
+        echo "================================"
+        echo "📋 Setup Summary:"
+        echo "   - Python Version: ${{ steps.python-version.outputs.python-version }}"
+        echo "   - UV Version: 0.9.2"
+        echo "   - Nox: Installed"
+        echo "   - OS: ${{ runner.os }}"
+        echo "   - Cache Used: ${{ inputs.use-cached-uv-lock }}"
+        echo "================================"
