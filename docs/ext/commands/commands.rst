@@ -561,7 +561,7 @@ typing.Annotated
 
 .. versionadded:: |vnext|
 
-With :data:`typing.Annotated`, you can use converters in a type-safe way.
+With :data:`typing.Annotated`, you can use converters in a more type-safe way.
 Taking the example from :ref:`ext_commands_basic_converters` above, ``content`` is annotated
 as ``to_upper`` (i.e. a converter function), while it would naturally be a :class:`str` at runtime;
 this will likely trip up type-checkers such as pyright/mypy.
