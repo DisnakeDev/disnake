@@ -82,13 +82,16 @@ outputs:
   cache-hit:
     description: Whether UV lock cache was used
     value: ${{ steps.restore-uv-lock.outputs.cache-hit }}
+  python-full-version:
+    description: The full Python version that was installed
+    value: ${{ steps.python-version.outputs.python-full-version }}
 
 runs:
   using: composite
   
   steps:
     - name: Download cached UV lock file
-      uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830
+      uses: actions/cache/restore@v4
       if: ${{ inputs.use-cached-uv-lock != 'false' }}
       id: restore-uv-lock
       with:
@@ -101,9 +104,9 @@ runs:
         enableCrossOsArchive: true
         fail-on-cache-miss: ${{ inputs.update-uv-lock != 'true' }}
 
-    - name: Set up UV with Python version
+    - name: Set up UV with Python
       id: setup-python
-      uses: astral-sh/setup-uv@eb1897b8dc4b5d5bfe39a428a8f2304605e0983c
+      uses: astral-sh/setup-uv@v7
       with:
         version: '0.9.2'
         enable-cache: true
@@ -147,7 +150,6 @@ runs:
       run: |
         echo "Adding Python to PATH on Windows"
         echo 'C:\Users\runneradmin\.local\bin' >> $GITHUB_PATH
-        echo "Python added to PATH"
 
     - name: Install Nox testing tool
       shell: bash
@@ -228,7 +230,8 @@ runs:
         DETECTED_VERSION=$(uv run python -c 'import sys; print(".".join(map(str,sys.version_info[:2])))')
         DETECTED_FULL_VERSION=$(uv run python -c 'import sys; print(sys.version.split()[0])')
         
-        echo "Detected Python version: $DETECTED_VERSION (Full: $DETECTED_FULL_VERSION)"
+        echo "Detected Python version: $DETECTED_VERSION"
+        echo "Detected full Python version: $DETECTED_FULL_VERSION"
         echo "python-version=$DETECTED_VERSION" >> $GITHUB_OUTPUT
         echo "python-full-version=$DETECTED_FULL_VERSION" >> $GITHUB_OUTPUT
         
@@ -236,23 +239,17 @@ runs:
       shell: bash
       run: |
         echo ""
-        echo "ENVIRONMENT SETUP COMPLETE"
-        echo "================================"
-        echo "SETUP SUMMARY:"
+        echo "Environment setup complete"
         echo "Python Version: ${{ steps.python-version.outputs.python-version }}"
         echo "Python Full Version: ${{ steps.python-version.outputs.python-full-version }}"
         echo "UV Version: 0.9.2"
         echo "Nox: Installed"
         echo "OS: ${{ runner.os }}"
         echo "Cache Used: ${{ inputs.use-cached-uv-lock }}"
-        echo "Cache Hit: ${{ steps.restore-uv-lock.outputs.cache-hit }}"
         echo "Security Scan: ${{ inputs.enable-security-scan }}"
-        echo "Dev Dependencies: ${{ inputs.install-dev-dependencies }}"
-        echo "================================"
+        echo "Development Dependencies: ${{ inputs.install-dev-dependencies }}"
         echo ""
         
         # Final verification
-        echo "Final verification..."
-        uv run python -c "import sys; print(f'Python {sys.version} ready!')" && \
-        uv run nox --version && \
-        echo "All systems operational!"
+        echo "Final verification completed successfully"
+        uv run python -c "import sys; print('Python environment ready')"
