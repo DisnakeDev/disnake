@@ -10,6 +10,7 @@ import disnake.abc
 import disnake.utils
 from disnake import ApplicationCommandInteraction
 from disnake.message import Message
+from disnake.permissions import Permissions
 
 if TYPE_CHECKING:
     from typing_extensions import ParamSpec
@@ -370,6 +371,14 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
     @disnake.utils.copy_doc(Message.reply)
     async def reply(self, content: Optional[str] = None, **kwargs: Any) -> Message:
         return await self.message.reply(content, **kwargs)
+
+    @property
+    def app_permissions(self) -> Permissions:
+        """:class:`.Permissions`: Returns the permissions the bot has in the context's channel.
+
+        .. versionadded: |vnext|
+        """
+        return self.channel.permissions_for((self.guild and self.guild.me) or self.bot.user)  # pyright: ignore[reportArgumentType]
 
 
 class GuildContext(Context):
