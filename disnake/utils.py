@@ -21,6 +21,7 @@ from inspect import getdoc as _getdoc, isawaitable as _isawaitable, signature as
 from operator import attrgetter
 from typing import (
     TYPE_CHECKING,
+    Annotated,
     Any,
     AsyncIterator,
     Awaitable,
@@ -1213,7 +1214,7 @@ def evaluate_annotation(
         return evaluated
 
     # Annotated[X, Y], where Y is the converter we need
-    if hasattr(tp, "__metadata__"):
+    if get_origin(tp) is Annotated:
         tp = tp.__metadata__[0]
         return evaluate_annotation(tp, globals, locals, cache)
 

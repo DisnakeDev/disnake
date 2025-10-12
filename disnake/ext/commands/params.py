@@ -369,7 +369,7 @@ class _BaseRange(ABC):
 
 if TYPE_CHECKING:
     # aliased import since mypy doesn't understand `Range = Annotated`
-    from typing_extensions import Annotated as Range, Annotated as String
+    from typing import Annotated as Range, Annotated as String
 else:
 
     @dataclass(frozen=True, repr=False)
