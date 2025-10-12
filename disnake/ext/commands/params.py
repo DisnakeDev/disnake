@@ -10,11 +10,11 @@ import copy
 import inspect
 import itertools
 import math
-import sys
 import types
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum, EnumMeta
+from types import EllipsisType, UnionType
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -86,16 +86,6 @@ if TYPE_CHECKING:
 else:
     P = TypeVar("P")
 
-
-if sys.version_info >= (3, 10):
-    from types import EllipsisType, UnionType
-elif TYPE_CHECKING:
-    EllipsisType = type(Ellipsis)
-    UnionType = NoReturn
-
-else:
-    UnionType = object()
-    EllipsisType = type(Ellipsis)
 
 T = TypeVar("T", bound=Any)
 TypeT = TypeVar("TypeT", bound=Type[Any])
@@ -361,10 +351,8 @@ class _BaseRange(ABC):
         raise NotImplementedError
 
     # support new union syntax for `Range[int, 1, 2] | None`
-    if sys.version_info >= (3, 10):
-
-        def __or__(self, other):
-            return Union[self, other]
+    def __or__(self, other):
+        return Union[self, other]
 
 
 if TYPE_CHECKING:

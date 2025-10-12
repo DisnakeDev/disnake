@@ -37,6 +37,8 @@ elif sys.version_info >= (3, 12):
     # non-3.12 tests shouldn't be using this
     from typing import TypeAliasType
 
+NoneType = type(None)
+
 
 def test_missing() -> None:
     assert utils.MISSING != utils.MISSING
@@ -747,23 +749,6 @@ async def test_as_chunks(sync, it, max_size: int, expected) -> None:
 def test_as_chunks_size(max_size: int) -> None:
     with pytest.raises(ValueError, match=r"Chunk sizes must be greater than 0."):
         utils.as_chunks(iter([]), max_size)
-
-
-@pytest.mark.parametrize(
-    ("params", "expected"),
-    [
-        ([], ()),
-        ([disnake.CommandInter, int, Optional[str]], (disnake.CommandInter, int, Optional[str])),
-        # check flattening + deduplication (both of these are done automatically in 3.9.1+)
-        ([float, Literal[1, 2, Literal[3, 4]], Literal["a", "bc"]], (float, 1, 2, 3, 4, "a", "bc")),  # noqa: RUF041
-        ([Literal[1, 1, 2, 3, 3]], (1, 2, 3)),
-    ],
-)
-def test_flatten_literal_params(params, expected) -> None:
-    assert utils.flatten_literal_params(params) == expected
-
-
-NoneType = type(None)
 
 
 @pytest.mark.parametrize(
