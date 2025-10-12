@@ -1,0 +1,1 @@
+|commands| Add :attr:`.Context.app_permissions` as a shorthand for getting the bot's permissions in the channel where the command was executed.
