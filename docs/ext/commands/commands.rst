@@ -554,6 +554,8 @@ The ``buy_sell`` parameter must be either the literal string ``"buy"`` or ``"sel
 
 Note that ``typing.Literal[True]`` and ``typing.Literal[False]`` still follow the :class:`bool` converter rules.
 
+.. _ext_commands_converters_annotated:
+
 typing.Annotated
 ^^^^^^^^^^^^^^^^
 
@@ -565,7 +567,7 @@ as ``to_upper`` (i.e. a converter function), while it would naturally be a :clas
 this will likely trip up type-checkers such as pyright/mypy.
 
 To avoid this, you can use :data:`typing.Annotated`, such that type-checkers consider the parameter
-a :class:`str`, while disnake will use the converter passed as the second argument to :data:`~typing.Annotated` at runtime:
+a :class:`str` while disnake will use the converter passed as the second argument to :data:`~typing.Annotated` at runtime:
 
 .. code-block:: python3
 
