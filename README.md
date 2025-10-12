@@ -26,7 +26,9 @@ Key Features
 Installing
 ----------
 
-**Python 3.9 or higher is required.**
+**Python 3.10 or higher is required.**
+
+(If you need python 3.8 or 3.9 support, please use `disnake<2.12`)
 
 To install the library without full voice support, you can just run the
 following command:
