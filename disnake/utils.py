@@ -1215,8 +1215,7 @@ def evaluate_annotation(
 
     # Annotated[X, Y], where Y is the converter we need
     if get_origin(tp) is Annotated:
-        tp = tp.__metadata__[0]
-        return evaluate_annotation(tp, globals, locals, cache)
+        return evaluate_annotation(tp.__metadata__[0], globals, locals, cache)
 
     # GenericAlias / UnionType
     if hasattr(tp, "__args__"):
