@@ -121,7 +121,7 @@ where = ["."]
 include = ["disnake*"]
 
 [tool.uv]
-required-version = ">=0.8.4"
+required-version = ">=0.9.2"
 
 [tool.ruff]
 line-length = 100
