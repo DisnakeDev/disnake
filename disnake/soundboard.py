@@ -79,8 +79,8 @@ class PartialSoundboardSound(Hashable, AssetMixin):
 
     @property
     def created_at(self) -> Optional[datetime.datetime]:
-        """Optional[:class:`datetime.datetime`]: Returns the sound's creation time in UTC.
-        Can be ``None`` if this is a default sound.
+        """:class:`datetime.datetime` | :data:`None`: Returns the sound's creation time in UTC.
+        Can be :data:`None` if this is a default sound.
         """
         if self.is_default():
             return None
@@ -128,7 +128,7 @@ class SoundboardSound(PartialSoundboardSound):
         The sound's volume (from ``0.0`` to ``1.0``).
     name: :class:`str`
         The sound's name.
-    emoji: Optional[Union[:class:`Emoji`, :class:`PartialEmoji`]]
+    emoji: :class:`Emoji` | :class:`PartialEmoji` | :data:`None`
         The sound's emoji, if any.
         Due to a Discord limitation, this will have an empty
         :attr:`~PartialEmoji.name` if it is a custom :class:`PartialEmoji`.
@@ -186,7 +186,7 @@ class GuildSoundboardSound(SoundboardSound):
         The sound's volume (from ``0.0`` to ``1.0``).
     name: :class:`str`
         The sound's name.
-    emoji: Optional[Union[:class:`Emoji`, :class:`PartialEmoji`]]
+    emoji: :class:`Emoji` | :class:`PartialEmoji` | :data:`None`
         The sound's emoji, if any.
         Due to a Discord limitation, this will have an empty
         :attr:`~PartialEmoji.name` if it is a custom :class:`PartialEmoji`.
@@ -194,7 +194,7 @@ class GuildSoundboardSound(SoundboardSound):
         The ID of the guild this sound belongs to.
     available: :class:`bool`
         Whether this sound is available for use.
-    user: Optional[:class:`User`]
+    user: :class:`User` | :data:`None`
         The user that created this sound. This can only be retrieved using
         :meth:`Guild.fetch_soundboard_sound`/:meth:`Guild.fetch_soundboard_sounds` while
         having the :attr:`~Permissions.create_guild_expressions` or
@@ -255,9 +255,9 @@ class GuildSoundboardSound(SoundboardSound):
             The sounds's new name. Must be at least 2 characters.
         volume: :class:`float`
             The sound's new volume (from ``0.0`` to ``1.0``).
-        emoji: Optional[Union[:class:`str`, :class:`Emoji`, :class:`PartialEmoji`]]
-            The sound's new emoji. Can be ``None``.
-        reason: Optional[:class:`str`]
+        emoji: :class:`str` | :class:`Emoji` | :class:`PartialEmoji` | :data:`None`
+            The sound's new emoji. Can be :data:`None`.
+        reason: :class:`str` | :data:`None`
             The reason for editing this sound. Shows up on the audit log.
 
         Raises
@@ -300,7 +300,7 @@ class GuildSoundboardSound(SoundboardSound):
 
         Parameters
         ----------
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason for deleting this sound. Shows up on the audit log.
 
         Raises

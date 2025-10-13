@@ -2163,7 +2163,7 @@ class ConnectionState:
         animated: Optional[bool] = False,
     ) -> Optional[Union[Emoji, PartialEmoji]]:
         """Convert partial emoji fields to proper emoji, if possible.
-        If both `id` and `name` are nullish, returns `None`.
+        If both ``id`` and ``name`` are nullish, returns :data:`None`.
 
         Unlike _get_emoji_from_data, this returns `PartialEmoji`s instead of strings
         for unicode emojis, and falls back to "" for the emoji name.

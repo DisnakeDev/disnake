@@ -79,7 +79,7 @@ class PartialIntegration:
         The integration type (i.e. ``twitch``).
     account: :class:`IntegrationAccount`
         The account linked to this integration.
-    application_id: Optional[:class:`int`]
+    application_id: :class:`int` | :data:`None`
         The ID of the application tied to this integration.
     """
 
@@ -135,7 +135,7 @@ class Integration(PartialIntegration):
         Whether the integration is currently enabled.
     account: :class:`IntegrationAccount`
         The account linked to this integration.
-    user: Optional[:class:`User`]
+    user: :class:`User` | :data:`None`
         The user that added this integration.
     """
 
@@ -168,7 +168,7 @@ class Integration(PartialIntegration):
 
         Parameters
         ----------
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason the integration was deleted. Shows up on the audit log.
 
             .. versionadded:: 2.0
@@ -202,7 +202,7 @@ class StreamIntegration(Integration):
         Whether the integration is currently enabled.
     syncing: :class:`bool`
         Whether the integration is currently syncing.
-    enable_emoticons: Optional[:class:`bool`]
+    enable_emoticons: :class:`bool` | :data:`None`
         Whether emoticons should be synced for this integration (currently twitch only).
     expire_behaviour: :class:`ExpireBehaviour`
         The behaviour of expiring subscribers. Aliased to ``expire_behavior`` as well.
@@ -245,7 +245,7 @@ class StreamIntegration(Integration):
 
     @property
     def role(self) -> Optional[Role]:
-        """Optional[:class:`Role`] The role which the integration uses for subscribers."""
+        """:class:`Role` | :data:`None` The role which the integration uses for subscribers."""
         return self.guild.get_role(self._role_id)  # type: ignore
 
     @deprecated()
@@ -339,11 +339,11 @@ class IntegrationApplication:
         The application's ID.
     name: :class:`str`
         The application's name.
-    icon: Optional[:class:`str`]
+    icon: :class:`str` | :data:`None`
         The application's icon hash.
     description: :class:`str`
         The application's description. Can be an empty string.
-    user: Optional[:class:`User`]
+    user: :class:`User` | :data:`None`
         The bot user associated with this application.
     """
 
@@ -403,7 +403,7 @@ class BotIntegration(Integration):
         The integration account information.
     application: :class:`IntegrationApplication`
         The application tied to this integration.
-    scopes: List[:class:`str`]
+    scopes: :class:`list`\\[:class:`str`]
         The OAuth2 scopes the application has been authorized for.
 
         .. versionadded:: 2.6

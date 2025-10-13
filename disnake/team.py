@@ -32,7 +32,7 @@ class Team:
         The team name.
     owner_id: :class:`int`
         The team owner's ID.
-    members: List[:class:`TeamMember`]
+    members: :class:`list`\\[:class:`TeamMember`]
         A list of the members in the team.
 
         .. versionadded:: 1.3
@@ -64,14 +64,14 @@ class Team:
 
     @property
     def icon(self) -> Optional[Asset]:
-        """Optional[:class:`.Asset`]: Retrieves the team's icon asset, if any."""
+        """:class:`.Asset` | :data:`None`: Retrieves the team's icon asset, if any."""
         if self._icon is None:
             return None
         return Asset._from_icon(self._state, self.id, self._icon, path="team")
 
     @property
     def owner(self) -> Optional[TeamMember]:
-        """Optional[:class:`TeamMember`]: The team's owner."""
+        """:class:`TeamMember` | :data:`None`: The team's owner."""
         return utils.get(self.members, id=self.owner_id)
 
 
@@ -113,7 +113,7 @@ class TeamMember(BaseUser):
             The value of a single zero (``"0"``) indicates that the user has been migrated to the new system.
             See the `help article <https://dis.gd/app-usernames>`__ for details.
 
-    global_name: Optional[:class:`str`]
+    global_name: :class:`str` | :data:`None`
         The team member's global display name, if set.
         This takes precedence over :attr:`.name` when shown.
 

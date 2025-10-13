@@ -112,7 +112,7 @@ class Interaction(Generic[ClientT]):
 
     Attributes
     ----------
-    data: Mapping[:class:`str`, Any]
+    data: :class:`~collections.abc.Mapping`\\[:class:`str`, :data:`~typing.Any`]
         The interaction's raw data. This might be replaced with a more processed version in subclasses.
     id: :class:`int`
         The interaction's ID.
@@ -120,19 +120,19 @@ class Interaction(Generic[ClientT]):
         The interaction's type.
     application_id: :class:`int`
         The application ID that the interaction was for.
-    guild_id: Optional[:class:`int`]
+    guild_id: :class:`int` | :data:`None`
         The guild ID the interaction was sent from.
-    guild_locale: Optional[:class:`Locale`]
+    guild_locale: :class:`Locale` | :data:`None`
         The selected language of the interaction's guild.
         This value is only meaningful in guilds with ``COMMUNITY`` feature and receives a default value otherwise.
-        If the interaction was in a DM, then this value is ``None``.
+        If the interaction was in a DM, then this value is :data:`None`.
 
         .. versionadded:: 2.4
 
         .. versionchanged:: 2.5
             Changed to :class:`Locale` instead of :class:`str`.
 
-    channel: Union[:class:`abc.GuildChannel`, :class:`Thread`, :class:`abc.PrivateChannel`, :class:`PartialMessageable`]
+    channel: :class:`abc.GuildChannel` | :class:`Thread` | :class:`abc.PrivateChannel` | :class:`PartialMessageable`
         The channel the interaction was sent from.
 
         Note that due to a Discord limitation, DM channels
@@ -149,7 +149,7 @@ class Interaction(Generic[ClientT]):
             If you want to compute the interaction author's or bot's permissions in the channel,
             consider using :attr:`permissions` or :attr:`app_permissions`.
 
-    author: Union[:class:`User`, :class:`Member`]
+    author: :class:`User` | :class:`Member`
         The user or member that sent the interaction.
 
         .. note::
@@ -170,7 +170,7 @@ class Interaction(Generic[ClientT]):
         The token to continue the interaction. These are valid for 15 minutes.
     client: :class:`Client`
         The interaction client.
-    entitlements: List[:class:`Entitlement`]
+    entitlements: :class:`list`\\[:class:`Entitlement`]
         The entitlements for the invoking user and guild,
         representing access to an application subscription.
 
@@ -305,18 +305,18 @@ class Interaction(Generic[ClientT]):
 
     @property
     def user(self) -> Union[User, Member]:
-        """Union[:class:`.User`, :class:`.Member`]: The user or member that sent the interaction.
+        """:class:`.User` | :class:`.Member`: The user or member that sent the interaction.
         There is an alias for this named :attr:`author`.
         """
         return self.author
 
     @property
     def guild(self) -> Optional[Guild]:
-        """Optional[:class:`Guild`]: The guild the interaction was sent from.
+        """:class:`Guild` | :data:`None`: The guild the interaction was sent from.
 
         .. note::
             In some scenarios, e.g. for user-installed applications, this will usually be
-            ``None``, despite the interaction originating from a guild.
+            :data:`None`, despite the interaction originating from a guild.
             This will only return a full :class:`Guild` for cached guilds,
             i.e. those the bot is already a member of.
 
@@ -327,7 +327,7 @@ class Interaction(Generic[ClientT]):
 
     @utils.cached_slot_property("_cs_me")
     def me(self) -> Union[Member, ClientUser]:
-        """Union[:class:`.Member`, :class:`.ClientUser`]: Similar to :attr:`.Guild.me`,
+        """:class:`.Member` | :class:`.ClientUser`: Similar to :attr:`.Guild.me`,
         except it may return the :class:`.ClientUser` in private message contexts or
         when the bot is not a member of the guild (e.g. in the case of user-installed applications).
         """
@@ -479,13 +479,13 @@ class Interaction(Generic[ClientT]):
 
         Parameters
         ----------
-        content: Optional[:class:`str`]
-            The content to edit the message with, or ``None`` to clear it.
-        embed: Optional[:class:`Embed`]
+        content: :class:`str` | :data:`None`
+            The content to edit the message with, or :data:`None` to clear it.
+        embed: :class:`Embed` | :data:`None`
             The new embed to replace the original with. This cannot be mixed with the
             ``embeds`` parameter.
-            Could be ``None`` to remove the embed.
-        embeds: List[:class:`Embed`]
+            Could be :data:`None` to remove the embed.
+        embeds: :class:`list`\\[:class:`Embed`]
             The new embeds to replace the original with. Must be a maximum of 10.
             This cannot be mixed with the ``embed`` parameter.
             To remove all embeds ``[]`` should be passed.
@@ -493,26 +493,26 @@ class Interaction(Generic[ClientT]):
             The file to upload. This cannot be mixed with the ``files`` parameter.
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
-        files: List[:class:`File`]
+        files: :class:`list`\\[:class:`File`]
             A list of files to upload. This cannot be mixed with the ``file`` parameter.
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
-        attachments: Optional[List[:class:`Attachment`]]
+        attachments: :class:`list`\\[:class:`Attachment`] | :data:`None`
             A list of attachments to keep in the message.
-            If ``[]`` or ``None`` is passed then all existing attachments are removed.
+            If ``[]`` or :data:`None` is passed then all existing attachments are removed.
             Keeps existing attachments if not provided.
 
             .. versionadded:: 2.2
 
             .. versionchanged:: 2.5
-                Supports passing ``None`` to clear attachments.
+                Supports passing :data:`None` to clear attachments.
 
-        view: Optional[:class:`~disnake.ui.View`]
+        view: :class:`~disnake.ui.View` | :data:`None`
             The updated view to update this message with. This cannot be mixed with ``components``.
-            If ``None`` is passed then the view is removed.
-        components: Optional[|components_type|]
+            If :data:`None` is passed then the view is removed.
+        components: |components_type| | :data:`None`
             A list of components to update this message with. This cannot be mixed with ``view``.
-            If ``None`` is passed then the components are removed.
+            If :data:`None` is passed then the components are removed.
 
             .. versionadded:: 2.4
 
@@ -520,7 +520,7 @@ class Interaction(Generic[ClientT]):
                 Passing v2 components here automatically sets the :attr:`~MessageFlags.is_components_v2` flag.
                 Setting this flag cannot be reverted. Note that this also disables the
                 ``content`` and ``embeds`` fields.
-                If the message previously had any of these fields set, you must set them to ``None``.
+                If the message previously had any of these fields set, you must set them to :data:`None`.
 
         poll: :class:`Poll`
             A poll. This can only be sent after a defer. If not used after a defer the
@@ -550,7 +550,7 @@ class Interaction(Generic[ClientT]):
 
             .. versionadded:: 2.9
 
-        delete_after: Optional[:class:`float`]
+        delete_after: :class:`float` | :data:`None`
             If provided, the number of seconds to wait in the background
             before deleting the message we just edited. If the deletion fails,
             then it is silently ignored.
@@ -643,7 +643,7 @@ class Interaction(Generic[ClientT]):
 
         Parameters
         ----------
-        delay: Optional[:class:`float`]
+        delay: :class:`float` | :data:`None`
             If provided, the number of seconds to wait in the background
             before deleting the original response message. If the deletion fails,
             then it is silently ignored.
@@ -723,17 +723,17 @@ class Interaction(Generic[ClientT]):
 
         Parameters
         ----------
-        content: Optional[:class:`str`]
+        content: :class:`str` | :data:`None`
             The content of the message to send.
         embed: :class:`Embed`
             The rich embed for the content to send. This cannot be mixed with the
             ``embeds`` parameter.
-        embeds: List[:class:`Embed`]
+        embeds: :class:`list`\\[:class:`Embed`]
             A list of embeds to send with the content. Must be a maximum of 10.
             This cannot be mixed with the ``embed`` parameter.
         file: :class:`File`
             The file to upload. This cannot be mixed with the ``files`` parameter.
-        files: List[:class:`File`]
+        files: :class:`list`\\[:class:`File`]
             A list of files to upload. Must be a maximum of 10.
             This cannot be mixed with the ``file`` parameter.
         allowed_mentions: :class:`AllowedMentions`
@@ -845,7 +845,7 @@ class InteractionResponse:
 
     @property
     def type(self) -> Optional[InteractionResponseType]:
-        """Optional[:class:`InteractionResponseType`]: If a response was successfully made, this is the type of the response.
+        """:class:`InteractionResponseType` | :data:`None`: If a response was successfully made, this is the type of the response.
 
         .. versionadded:: 2.6
         """
@@ -1004,17 +1004,17 @@ class InteractionResponse:
 
         Parameters
         ----------
-        content: Optional[:class:`str`]
+        content: :class:`str` | :data:`None`
             The content of the message to send.
         embed: :class:`Embed`
             The rich embed for the content to send. This cannot be mixed with the
             ``embeds`` parameter.
-        embeds: List[:class:`Embed`]
+        embeds: :class:`list`\\[:class:`Embed`]
             A list of embeds to send with the content. Must be a maximum of 10.
             This cannot be mixed with the ``embed`` parameter.
         file: :class:`File`
             The file to upload. This cannot be mixed with the ``files`` parameter.
-        files: List[:class:`File`]
+        files: :class:`list`\\[:class:`File`]
             A list of files to upload. Must be a maximum of 10.
             This cannot be mixed with the ``file`` parameter.
         allowed_mentions: :class:`AllowedMentions`
@@ -1228,13 +1228,13 @@ class InteractionResponse:
 
         Parameters
         ----------
-        content: Optional[:class:`str`]
-            The new content to replace the message with. ``None`` removes the content.
-        embed: Optional[:class:`Embed`]
+        content: :class:`str` | :data:`None`
+            The new content to replace the message with. :data:`None` removes the content.
+        embed: :class:`Embed` | :data:`None`
             The new embed to replace the original with. This cannot be mixed with the
             ``embeds`` parameter.
-            Could be ``None`` to remove the embed.
-        embeds: List[:class:`Embed`]
+            Could be :data:`None` to remove the embed.
+        embeds: :class:`list`\\[:class:`Embed`]
             The new embeds to replace the original with. Must be a maximum of 10.
             This cannot be mixed with the ``embed`` parameter.
             To remove all embeds ``[]`` should be passed.
@@ -1244,28 +1244,28 @@ class InteractionResponse:
 
             .. versionadded:: 2.2
 
-        files: List[:class:`File`]
+        files: :class:`list`\\[:class:`File`]
             A list of files to upload. This cannot be mixed with the ``file`` parameter.
             Files will be appended to the message.
 
             .. versionadded:: 2.2
 
-        attachments: Optional[List[:class:`Attachment`]]
+        attachments: :class:`list`\\[:class:`Attachment`] | :data:`None`
             A list of attachments to keep in the message.
-            If ``[]`` or ``None`` is passed then all existing attachments are removed.
+            If ``[]`` or :data:`None` is passed then all existing attachments are removed.
             Keeps existing attachments if not provided.
 
             .. versionadded:: 2.4
 
             .. versionchanged:: 2.5
-                Supports passing ``None`` to clear attachments.
+                Supports passing :data:`None` to clear attachments.
 
-        view: Optional[:class:`~disnake.ui.View`]
+        view: :class:`~disnake.ui.View` | :data:`None`
             The updated view to update this message with. This cannot be mixed with ``components``.
-            If ``None`` is passed then the view is removed.
-        components: Optional[|components_type|]
+            If :data:`None` is passed then the view is removed.
+        components: |components_type| | :data:`None`
             A list of components to update this message with. This cannot be mixed with ``view``.
-            If ``None`` is passed then the components are removed.
+            If :data:`None` is passed then the components are removed.
 
             .. versionadded:: 2.4
 
@@ -1273,7 +1273,7 @@ class InteractionResponse:
                 Passing v2 components here automatically sets the :attr:`~MessageFlags.is_components_v2` flag.
                 Setting this flag cannot be reverted. Note that this also disables the
                 ``content`` and ``embeds`` fields.
-                If the message previously had any of these fields set, you must set them to ``None``.
+                If the message previously had any of these fields set, you must set them to :data:`None`.
 
         flags: :class:`MessageFlags`
             The new flags to set for this message. Overrides existing flags.
@@ -1285,7 +1285,7 @@ class InteractionResponse:
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
 
-        delete_after: Optional[:class:`float`]
+        delete_after: :class:`float` | :data:`None`
             If provided, the number of seconds to wait in the background
             before deleting the message we just edited. If the deletion fails,
             then it is silently ignored.
@@ -1426,7 +1426,7 @@ class InteractionResponse:
 
         Parameters
         ----------
-        choices: Union[Sequence[:class:`OptionChoice`], Sequence[Union[:class:`str`, :class:`int`, :class:`float`]], Mapping[:class:`str`, Union[:class:`str`, :class:`int`, :class:`float`]]]
+        choices: :class:`~collections.abc.Sequence`\\[:class:`OptionChoice`] | :class:`~collections.abc.Sequence`\\[:class:`str` | :class:`int` | :class:`float`] | :class:`~collections.abc.Mapping`\\[:class:`str`, :class:`str` | :class:`int` | :class:`float`]
             The choices to suggest.
 
         Raises
@@ -1673,19 +1673,19 @@ class InteractionMessage(Message):
     ----------
     type: :class:`MessageType`
         The type of message.
-    author: Union[:class:`Member`, :class:`abc.User`]
+    author: :class:`Member` | :class:`abc.User`
         A :class:`Member` that sent the message. If :attr:`channel` is a
         private channel, then it is a :class:`User` instead.
     content: :class:`str`
         The actual contents of the message.
-    embeds: List[:class:`Embed`]
+    embeds: :class:`list`\\[:class:`Embed`]
         A list of embeds the message has.
-    channel: Union[:class:`TextChannel`, :class:`VoiceChannel`, :class:`StageChannel`, :class:`Thread`, :class:`DMChannel`, :class:`GroupChannel`, :class:`PartialMessageable`]
+    channel: :class:`TextChannel` | :class:`VoiceChannel` | :class:`StageChannel` | :class:`Thread` | :class:`DMChannel` | :class:`GroupChannel` | :class:`PartialMessageable`
         The channel that the message was sent from.
         Could be a :class:`DMChannel` or :class:`GroupChannel` if it's a private message.
-    reference: Optional[:class:`~disnake.MessageReference`]
+    reference: :class:`~disnake.MessageReference` | :data:`None`
         The message that this message references. This is only applicable to message replies.
-    interaction_metadata: Optional[:class:`InteractionMetadata`]
+    interaction_metadata: :class:`InteractionMetadata` | :data:`None`
         The metadata about the interaction that caused this message, if any.
 
         .. versionadded:: 2.10
@@ -1698,7 +1698,7 @@ class InteractionMessage(Message):
             This does not check if the ``@everyone`` or the ``@here`` text is in the message itself.
             Rather this boolean indicates if either the ``@everyone`` or the ``@here`` text is in the message
             **and** it did end up mentioning.
-    mentions: List[:class:`abc.User`]
+    mentions: :class:`list`\\[:class:`abc.User`]
         A list of :class:`Member` that were mentioned. If the message is in a private message
         then the list will be of :class:`User` instead.
 
@@ -1706,28 +1706,28 @@ class InteractionMessage(Message):
 
             The order of the mentions list is not in any particular order so you should
             not rely on it. This is a Discord limitation, not one with the library.
-    role_mentions: List[:class:`Role`]
+    role_mentions: :class:`list`\\[:class:`Role`]
         A list of :class:`Role` that were mentioned. If the message is in a private message
         then the list is always empty.
     id: :class:`int`
         The message ID.
-    webhook_id: Optional[:class:`int`]
+    webhook_id: :class:`int` | :data:`None`
         The ID of the application that sent this message.
-    attachments: List[:class:`Attachment`]
+    attachments: :class:`list`\\[:class:`Attachment`]
         A list of attachments given to a message.
     pinned: :class:`bool`
         Specifies if the message is currently pinned.
     flags: :class:`MessageFlags`
         Extra features of the message.
-    reactions : List[:class:`Reaction`]
+    reactions : :class:`list`\\[:class:`Reaction`]
         Reactions to a message. Reactions can be either custom emoji or standard unicode emoji.
-    stickers: List[:class:`StickerItem`]
+    stickers: :class:`list`\\[:class:`StickerItem`]
         A list of sticker items given to the message.
-    components: List[:class:`Component`]
+    components: :class:`list`\\[:class:`Component`]
         A list of components in the message.
-    guild: Optional[:class:`Guild`]
+    guild: :class:`Guild` | :data:`None`
         The guild that the message belongs to, if applicable.
-    poll: Optional[:class:`Poll`]
+    poll: :class:`Poll` | :data:`None`
         The poll contained in this message.
 
         .. versionadded:: 2.10
@@ -1828,13 +1828,13 @@ class InteractionMessage(Message):
 
         Parameters
         ----------
-        content: Optional[:class:`str`]
-            The content to edit the message with, or ``None`` to clear it.
-        embed: Optional[:class:`Embed`]
+        content: :class:`str` | :data:`None`
+            The content to edit the message with, or :data:`None` to clear it.
+        embed: :class:`Embed` | :data:`None`
             The new embed to replace the original with. This cannot be mixed with the
             ``embeds`` parameter.
-            Could be ``None`` to remove the embed.
-        embeds: List[:class:`Embed`]
+            Could be :data:`None` to remove the embed.
+        embeds: :class:`list`\\[:class:`Embed`]
             The new embeds to replace the original with. Must be a maximum of 10.
             This cannot be mixed with the ``embed`` parameter.
             To remove all embeds ``[]`` should be passed.
@@ -1842,26 +1842,26 @@ class InteractionMessage(Message):
             The file to upload. This cannot be mixed with the ``files`` parameter.
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
-        files: List[:class:`File`]
+        files: :class:`list`\\[:class:`File`]
             A list of files to upload. This cannot be mixed with the ``file`` parameter.
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
-        attachments: Optional[List[:class:`Attachment`]]
+        attachments: :class:`list`\\[:class:`Attachment`] | :data:`None`
             A list of attachments to keep in the message.
-            If ``[]`` or ``None`` is passed then all existing attachments are removed.
+            If ``[]`` or :data:`None` is passed then all existing attachments are removed.
             Keeps existing attachments if not provided.
 
             .. versionadded:: 2.2
 
             .. versionchanged:: 2.5
-                Supports passing ``None`` to clear attachments.
+                Supports passing :data:`None` to clear attachments.
 
-        view: Optional[:class:`~disnake.ui.View`]
+        view: :class:`~disnake.ui.View` | :data:`None`
             The updated view to update this message with. This cannot be mixed with ``components``.
-            If ``None`` is passed then the view is removed.
-        components: Optional[|components_type|]
+            If :data:`None` is passed then the view is removed.
+        components: |components_type| | :data:`None`
             A list of components to update this message with. This cannot be mixed with ``view``.
-            If ``None`` is passed then the components are removed.
+            If :data:`None` is passed then the components are removed.
 
             .. versionadded:: 2.4
 
@@ -1869,7 +1869,7 @@ class InteractionMessage(Message):
                 Passing v2 components here automatically sets the :attr:`~MessageFlags.is_components_v2` flag.
                 Setting this flag cannot be reverted. Note that this also disables the
                 ``content`` and ``embeds`` fields.
-                If the message previously had any of these fields set, you must set them to ``None``.
+                If the message previously had any of these fields set, you must set them to :data:`None`.
 
         suppress_embeds: :class:`bool`
             Whether to suppress embeds for the message. This hides
@@ -1892,7 +1892,7 @@ class InteractionMessage(Message):
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
             See :meth:`.abc.Messageable.send` for more information.
-        delete_after: Optional[:class:`float`]
+        delete_after: :class:`float` | :data:`None`
             If provided, the number of seconds to wait in the background
             before deleting the message we just edited. If the deletion fails,
             then it is silently ignored.
@@ -1967,7 +1967,7 @@ class InteractionMessage(Message):
 
         Parameters
         ----------
-        delay: Optional[:class:`float`]
+        delay: :class:`float` | :data:`None`
             If provided, the number of seconds to wait before deleting the message.
             The waiting is done in the background and deletion failures are ignored.
 
@@ -2006,18 +2006,18 @@ class InteractionDataResolved(Dict[str, Any]):
 
     Attributes
     ----------
-    members: Dict[:class:`int`, :class:`Member`]
+    members: :class:`dict`\\[:class:`int`, :class:`Member`]
         A mapping of IDs to partial members (``deaf`` and ``mute`` attributes are missing).
-    users: Dict[:class:`int`, :class:`User`]
+    users: :class:`dict`\\[:class:`int`, :class:`User`]
         A mapping of IDs to users.
-    roles: Dict[:class:`int`, :class:`Role`]
+    roles: :class:`dict`\\[:class:`int`, :class:`Role`]
         A mapping of IDs to roles.
-    channels: Dict[:class:`int`, Union[:class:`abc.GuildChannel`, :class:`Thread`, :class:`abc.PrivateChannel`, :class:`PartialMessageable`]]
+    channels: :class:`dict`\\[:class:`int`, :class:`abc.GuildChannel` | :class:`Thread` | :class:`abc.PrivateChannel` | :class:`PartialMessageable`]
         A mapping of IDs to partial channels (only ``id``, ``name`` and ``permissions`` are included,
         threads also have ``thread_metadata`` and ``parent_id``).
-    messages: Dict[:class:`int`, :class:`Message`]
+    messages: :class:`dict`\\[:class:`int`, :class:`Message`]
         A mapping of IDs to messages.
-    attachments: Dict[:class:`int`, :class:`Attachment`]
+    attachments: :class:`dict`\\[:class:`int`, :class:`Attachment`]
         A mapping of IDs to attachments.
 
         .. versionadded:: 2.4

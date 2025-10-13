@@ -40,7 +40,7 @@ AsyncIterator
 
         Similar to :func:`utils.get` except run over the async iterator.
 
-        Getting the last message by a user named 'Dave' or ``None``: ::
+        Getting the last message by a user named 'Dave' or :data:`None`: ::
 
             msg = await channel.history().get(author__name='Dave')
 
@@ -54,7 +54,7 @@ AsyncIterator
         Unlike :func:`utils.find`\, the predicate provided can be a
         |coroutine_link|_.
 
-        Getting the last audit log with a reason or ``None``: ::
+        Getting the last audit log with a reason or :data:`None`: ::
 
             def predicate(event):
                 return event.reason is not None
@@ -62,7 +62,7 @@ AsyncIterator
             event = await guild.audit_logs().find(predicate)
 
         :param predicate: The predicate to use. Could be a |coroutine_link|_.
-        :return: The first element that returns ``True`` for the predicate or ``None``.
+        :return: The first element that returns ``True`` for the predicate or :data:`None`.
 
     .. method:: flatten()
         :async:

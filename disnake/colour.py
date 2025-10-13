@@ -96,7 +96,7 @@ class Colour:
         return self._get_byte(0)
 
     def to_rgb(self) -> Tuple[int, int, int]:
-        """Tuple[:class:`int`, :class:`int`, :class:`int`]: Returns an (r, g, b) tuple representing the colour."""
+        """:class:`tuple`\\[:class:`int`, :class:`int`, :class:`int`]: Returns an (r, g, b) tuple representing the colour."""
         return (self.r, self.g, self.b)
 
     @classmethod
@@ -128,8 +128,8 @@ class Colour:
 
         Parameters
         ----------
-        seed: Optional[Union[:class:`int`, :class:`str`, :class:`float`, :class:`bytes`, :class:`bytearray`]]
-            The seed to initialize the RNG with. If ``None`` is passed the default RNG is used.
+        seed: :class:`int` | :class:`str` | :class:`float` | :class:`bytes` | :class:`bytearray` | :data:`None`
+            The seed to initialize the RNG with. If :data:`None` is passed the default RNG is used.
 
             .. versionadded:: 1.7
         """

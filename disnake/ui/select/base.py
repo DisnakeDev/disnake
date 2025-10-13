@@ -126,7 +126,7 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
 
     @property
     def placeholder(self) -> Optional[str]:
-        """Optional[:class:`str`]: The placeholder text that is shown if nothing is selected, if any."""
+        """:class:`str` | :data:`None`: The placeholder text that is shown if nothing is selected, if any."""
         return self._underlying.placeholder
 
     @placeholder.setter
@@ -166,7 +166,7 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
 
     @property
     def default_values(self) -> List[SelectDefaultValue]:
-        """List[:class:`.SelectDefaultValue`]: The list of values that are selected by default.
+        """:class:`list`\\[:class:`.SelectDefaultValue`]: The list of values that are selected by default.
         Only available for auto-populated select menus.
         """
         return self._underlying.default_values

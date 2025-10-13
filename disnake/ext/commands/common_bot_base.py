@@ -209,7 +209,7 @@ class CommonBotBase(Generic[CogT]):
     def get_cog(self, name: str) -> Optional[Cog]:
         """Gets the cog instance requested.
 
-        If the cog is not found, ``None`` is returned instead.
+        If the cog is not found, :data:`None` is returned instead.
 
         Parameters
         ----------
@@ -220,8 +220,8 @@ class CommonBotBase(Generic[CogT]):
 
         Returns
         -------
-        Optional[:class:`Cog`]
-            The cog that was requested. If not found, returns ``None``.
+        :class:`Cog` | :data:`None`
+            The cog that was requested. If not found, returns :data:`None`.
         """
         return self.__cogs.get(name)
 
@@ -244,8 +244,8 @@ class CommonBotBase(Generic[CogT]):
 
         Returns
         -------
-        Optional[:class:`.Cog`]
-            The cog that was removed. Returns ``None`` if not found.
+        :class:`.Cog` | :data:`None`
+            The cog that was removed. Returns :data:`None` if not found.
         """
         cog = self.__cogs.pop(name, None)
         if cog is None:
@@ -261,7 +261,7 @@ class CommonBotBase(Generic[CogT]):
 
     @property
     def cogs(self) -> Mapping[str, Cog]:
-        """Mapping[:class:`str`, :class:`Cog`]: A read-only mapping of cog name to cog."""
+        """:class:`~collections.abc.Mapping`\\[:class:`str`, :class:`Cog`]: A read-only mapping of cog name to cog."""
         return types.MappingProxyType(self.__cogs)
 
     # extensions
@@ -350,10 +350,10 @@ class CommonBotBase(Generic[CogT]):
             The extension name to load. It must be dot separated like
             regular Python imports if accessing a sub-module. e.g.
             ``foo.test`` if you want to import ``foo/test.py``.
-        package: Optional[:class:`str`]
+        package: :class:`str` | :data:`None`
             The package name to resolve relative imports with.
             This is required when loading an extension using a relative path, e.g ``.foo.test``.
-            Defaults to ``None``.
+            Defaults to :data:`None`.
 
             .. versionadded:: 1.7
 
@@ -397,10 +397,10 @@ class CommonBotBase(Generic[CogT]):
             The extension name to unload. It must be dot separated like
             regular Python imports if accessing a sub-module. e.g.
             ``foo.test`` if you want to import ``foo/test.py``.
-        package: Optional[:class:`str`]
+        package: :class:`str` | :data:`None`
             The package name to resolve relative imports with.
             This is required when unloading an extension using a relative path, e.g ``.foo.test``.
-            Defaults to ``None``.
+            Defaults to :data:`None`.
 
             .. versionadded:: 1.7
 
@@ -434,10 +434,10 @@ class CommonBotBase(Generic[CogT]):
             The extension name to reload. It must be dot separated like
             regular Python imports if accessing a sub-module. e.g.
             ``foo.test`` if you want to import ``foo/test.py``.
-        package: Optional[:class:`str`]
+        package: :class:`str` | :data:`None`
             The package name to resolve relative imports with.
             This is required when reloading an extension using a relative path, e.g ``.foo.test``.
-            Defaults to ``None``.
+            Defaults to :data:`None`.
 
             .. versionadded:: 1.7
 
@@ -497,7 +497,7 @@ class CommonBotBase(Generic[CogT]):
 
     @property
     def extensions(self) -> Mapping[str, types.ModuleType]:
-        """Mapping[:class:`str`, :class:`py:types.ModuleType`]: A read-only mapping of extension name to extension."""
+        """:class:`~collections.abc.Mapping`\\[:class:`str`, :class:`py:types.ModuleType`]: A read-only mapping of extension name to extension."""
         return types.MappingProxyType(self.__extensions)
 
     async def _watchdog(self) -> None:

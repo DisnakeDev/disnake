@@ -13,14 +13,14 @@ authors = [
 ]
 requires-python = ">=3.9"
 keywords = ["disnake", "discord", "discord api"]
-license = { text = "MIT" }
+license = "MIT"
+license-files = ["LICENSE"]
 dependencies = [
     "aiohttp>=3.7.0,<4.0",
     "typing-extensions>=4.1",
 ]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
-    "License :: OSI Approved :: MIT License",
     "Intended Audience :: Developers",
     "Natural Language :: English",
     "Operating System :: OS Independent",
@@ -117,7 +117,7 @@ build = [
 ]
 
 [tool.uv]
-required-version = ">=0.8.4"
+required-version = ">=0.9.2"
 
 [tool.hatch.build]
 include = [

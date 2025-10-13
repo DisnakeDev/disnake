@@ -26,10 +26,10 @@ class Thumbnail(UIComponent):
 
     Parameters
     ----------
-    media: Union[:class:`str`, :class:`.Asset`, :class:`.Attachment`, :class:`.UnfurledMediaItem`]
+    media: :class:`str` | :class:`.Asset` | :class:`.Attachment` | :class:`.UnfurledMediaItem`
         The media item to display. Can be an arbitrary URL or attachment
         reference (``attachment://<filename>``).
-    description: Optional[:class:`str`]
+    description: :class:`str` | :data:`None`
         The thumbnail's description ("alt text"), if any.
     spoiler: :class:`bool`
         Whether the thumbnail is marked as a spoiler. Defaults to ``False``.
@@ -74,7 +74,7 @@ class Thumbnail(UIComponent):
 
     @property
     def description(self) -> Optional[str]:
-        """Optional[:class:`str`]: The thumbnail's description ("alt text"), if any."""
+        """:class:`str` | :data:`None`: The thumbnail's description ("alt text"), if any."""
         return self._underlying.description
 
     @description.setter

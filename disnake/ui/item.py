@@ -207,7 +207,7 @@ class Item(WrappedComponent, Generic[V_co]):
 
     @property
     def view(self) -> V_co:
-        """Optional[:class:`View`]: The underlying view for this item."""
+        """:class:`View` | :data:`None`: The underlying view for this item."""
         return self._view
 
     async def callback(self, interaction: MessageInteraction[ClientT], /) -> None:
