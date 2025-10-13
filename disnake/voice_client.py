@@ -283,8 +283,7 @@ class VoiceClient(VoiceProtocol):
             )
             return
 
-        self.endpoint = endpoint
-        self.endpoint = self.endpoint.removeprefix("wss://")
+        self.endpoint = endpoint.removeprefix("wss://")
 
         # This gets set later
         self.endpoint_ip = MISSING
