@@ -194,19 +194,17 @@ def get_flags(
                     # typing.Optional
                     flag.default = None
             elif origin is tuple:
-                # typing.Tuple
                 # tuple parsing is e.g. `flag: peter 20`
                 # for Tuple[str, int] would give you flag: ('peter', 20)
                 if flag.max_args is MISSING:
                     flag.max_args = 1
             elif origin is list:
-                # typing.List
                 if flag.max_args is MISSING:
                     flag.max_args = -1
             elif origin is dict:
-                # typing.Dict[K, V]
+                # dict[K, V]
                 # Equivalent to:
-                # typing.List[typing.Tuple[K, V]]
+                # list[tuple[K, V]]
                 flag.cast_to_dict = True
                 if flag.max_args is MISSING:
                     flag.max_args = -1
@@ -410,7 +408,7 @@ async def convert_flag(ctx: Context, argument: str, flag: Flag, annotation: Any 
             else:
                 return await tuple_convert_flag(ctx, argument, flag, args)
         elif origin is list:
-            # typing.List[x]
+            # list[x]
             annotation = args[0]
             return await convert_flag(ctx, argument, flag, annotation)
         elif origin is Union and args[-1] is type(None):
@@ -418,7 +416,7 @@ async def convert_flag(ctx: Context, argument: str, flag: Flag, annotation: Any 
             annotation = Union[args[:-1]]
             return await run_converters(ctx, annotation, argument, param)
         elif origin is dict:
-            # typing.Dict[K, V] -> typing.Tuple[K, V]
+            # dict[K, V] -> tuple[K, V]
             return await tuple_convert_flag(ctx, argument, flag, args)
 
     try:
