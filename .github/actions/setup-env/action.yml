@@ -56,12 +56,6 @@ runs:
       run: |
         uv python install ${PYTHON_VERSION}
 
-    - name: Add Python to PATH
-      shell: bash
-      if: ${{ runner.os == 'Windows' }}
-      run: |
-        echo 'C:\Users\runneradmin\.local\bin' >> $GITHUB_PATH
-
     - name: Install nox
       shell: bash
       run: |
