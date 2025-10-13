@@ -16,7 +16,7 @@ Prerequisites
 -------------
 
 disnake works with Python 3.10 or higher. Support for earlier versions of Python
-is not provided. Python 2.7 or lower is not supported. Python 3.8 or lower is not supported.
+is not provided. Python 2.7 or lower is not supported. Python 3.9 or lower is not supported.
 
 .. _installing:
 
