@@ -36,9 +36,9 @@ class FileUpload(UIComponent):
         Whether the file upload is required.
         Defaults to ``True``.
     id: :class:`int`
-        The numeric identifier for the component. Must be unique within the message.
+        The numeric identifier for the component. Must be unique within the modal.
         If set to ``0`` (the default) when sending a component, the API will assign
-        sequential identifiers to the components in the message.
+        sequential identifiers to the components in the modal.
     """
 
     __repr_attributes__: ClassVar[Tuple[str, ...]] = ("min_values", "max_values", "required")

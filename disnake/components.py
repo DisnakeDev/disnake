@@ -1574,7 +1574,7 @@ class FileUpload(Component):
     id: :class:`int`
         The numeric identifier for the component.
         This is always present in components received from the API,
-        and unique within a message.
+        and unique within a modal.
     """
 
     __slots__: Tuple[str, ...] = (
