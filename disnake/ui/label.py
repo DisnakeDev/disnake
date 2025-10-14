@@ -33,11 +33,11 @@ class Label(UIComponent):
     ----------
     text: :class:`str`
         The label text.
-    component: Union[:class:`TextInput`, :class:`FileUpload`, :class:`BaseSelect`]
+    component: :class:`TextInput` | :class:`FileUpload` | :class:`BaseSelect`
         The component within the label.
         Currently supports :class:`.ui.TextInput`, :class:`.ui.FileUpload`,
         and select menus (e.g. :class:`.ui.StringSelect`).
-    description: Optional[:class:`str`]
+    description: :class:`str` | :data:`None`
         The description text for the label.
     id: :class:`int`
         The numeric identifier for the component. Must be unique within the message.
@@ -48,7 +48,7 @@ class Label(UIComponent):
     ----------
     text: :class:`str`
         The label text.
-    component: Union[:class:`TextInput`, :class:`FileUpload`, :class:`BaseSelect`]
+    component: :class:`TextInput` | :class:`FileUpload` | :class:`BaseSelect`
         The component within the label.
     description: :class:`str` | :data:`None`
         The description text for the label.

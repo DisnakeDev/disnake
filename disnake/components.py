@@ -1507,7 +1507,7 @@ class Label(Component):
         The label text.
     description: :class:`str` | :data:`None`
         The description text for the label.
-    component: Union[:class:`TextInput`, :class:`FileUpload`, :class:`StringSelectMenu`]
+    component: :class:`TextInput` | :class:`FileUpload` | :class:`StringSelectMenu`
         The component within the label.
     id: :class:`int`
         The numeric identifier for the component.
