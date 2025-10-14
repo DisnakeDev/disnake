@@ -64,20 +64,20 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
         A dictionary of transformed arguments that were passed into the command.
         Similar to :attr:`args`\\, if this is accessed in the
         :func:`.on_command_error` event then this dict could be incomplete.
-    current_parameter: Optional[:class:`inspect.Parameter`]
+    current_parameter: :class:`inspect.Parameter` | :data:`None`
         The parameter that is currently being inspected and converted.
         This is only of use for within converters.
 
         .. versionadded:: 2.0
 
-    prefix: Optional[:class:`str`]
+    prefix: :class:`str` | :data:`None`
         The prefix that was used to invoke the command.
-    command: Optional[:class:`Command`]
+    command: :class:`Command` | :data:`None`
         The command that is being invoked currently.
-    invoked_with: Optional[:class:`str`]
+    invoked_with: :class:`str` | :data:`None`
         The command name that triggered this invocation. Useful for finding out
         which alias called the command.
-    invoked_parents: List[:class:`str`]
+    invoked_parents: :class:`list`\\[:class:`str`]
         The command names of the parents that triggered this invocation. Useful for
         finding out which aliases called the command.
 
@@ -85,14 +85,14 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
 
         .. versionadded:: 1.7
 
-    invoked_subcommand: Optional[:class:`Command`]
+    invoked_subcommand: :class:`Command` | :data:`None`
         The subcommand that was invoked.
-        If no valid subcommand was invoked then this is equal to ``None``.
-    subcommand_passed: Optional[:class:`str`]
+        If no valid subcommand was invoked then this is equal to :data:`None`.
+    subcommand_passed: :class:`str` | :data:`None`
         The string that was attempted to call a subcommand. This does not have
         to point to a valid registered subcommand and could just point to a
         nonsense string. If nothing was passed to attempt a call to a
-        subcommand then this is set to ``None``.
+        subcommand then this is set to :data:`None`.
     command_failed: :class:`bool`
         Whether the command failed to be parsed, checked, or invoked.
     """
@@ -195,7 +195,8 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
         cmd = self.command
         view = self.view
         if cmd is None:
-            raise ValueError("This context is not valid.")
+            msg = "This context is not valid."
+            raise ValueError(msg)
 
         # some state to revert to when we're done
         index, previous = view.index, view.previous
@@ -251,33 +252,33 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
 
     @property
     def cog(self) -> Optional[Cog]:
-        """Optional[:class:`.Cog`]: Returns the cog associated with this context's command. Returns ``None`` if it does not exist."""
+        """:class:`.Cog` | :data:`None`: Returns the cog associated with this context's command. Returns :data:`None` if it does not exist."""
         if self.command is None:
             return None
         return self.command.cog
 
     @disnake.utils.cached_property
     def guild(self) -> Optional[Guild]:
-        """Optional[:class:`.Guild`]: Returns the guild associated with this context's command. Returns ``None`` if not available."""
+        """:class:`.Guild` | :data:`None`: Returns the guild associated with this context's command. Returns :data:`None` if not available."""
         return self.message.guild
 
     @disnake.utils.cached_property
     def channel(self) -> Union[GuildMessageable, DMChannel, GroupChannel]:
-        """Union[:class:`.abc.Messageable`]: Returns the channel associated with this context's command.
+        """:class:`.abc.Messageable`: Returns the channel associated with this context's command.
         Shorthand for :attr:`.Message.channel`.
         """
         return self.message.channel
 
     @disnake.utils.cached_property
     def author(self) -> Union[User, Member]:
-        """Union[:class:`~disnake.User`, :class:`.Member`]:
+        """:class:`~disnake.User` | :class:`.Member`:
         Returns the author associated with this context's command. Shorthand for :attr:`.Message.author`
         """
         return self.message.author
 
     @disnake.utils.cached_property
     def me(self) -> Union[Member, ClientUser]:
-        """Union[:class:`.Member`, :class:`.ClientUser`]:
+        """:class:`.Member` | :class:`.ClientUser`:
         Similar to :attr:`.Guild.me` except it may return the :class:`.ClientUser` in private message contexts.
         """
         # bot.user will never be None at this point.
@@ -285,7 +286,7 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
 
     @property
     def voice_client(self) -> Optional[VoiceProtocol]:
-        r"""Optional[:class:`.VoiceProtocol`]: A shortcut to :attr:`.Guild.voice_client`\, if applicable."""
+        r""":class:`.VoiceProtocol` | :data:`None`: A shortcut to :attr:`.Guild.voice_client`\, if applicable."""
         g = self.guild
         return g.voice_client if g else None
 
@@ -305,11 +306,11 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
 
             Due to the way this function works, instead of returning
             something similar to :meth:`~.commands.HelpCommand.command_not_found`
-            this returns :class:`None` on bad input or no help command.
+            this returns :data:`None` on bad input or no help command.
 
         Parameters
         ----------
-        entity: Optional[Union[:class:`Command`, :class:`Cog`, :class:`str`]]
+        entity: :class:`Command` | :class:`Cog` | :class:`str` | :data:`None`
             The entity to show help for.
 
         Returns

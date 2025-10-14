@@ -94,7 +94,7 @@ class Cooldown:
 
         Parameters
         ----------
-        current: Optional[:class:`float`]
+        current: :class:`float` | :data:`None`
             The time in seconds since Unix epoch to calculate tokens at.
             If not supplied then :func:`time.time()` is used.
 
@@ -117,7 +117,7 @@ class Cooldown:
 
         Parameters
         ----------
-        current: Optional[:class:`float`]
+        current: :class:`float` | :data:`None`
             The current time in seconds since Unix epoch.
             If not supplied, then :func:`time.time()` is used.
 
@@ -139,13 +139,13 @@ class Cooldown:
 
         Parameters
         ----------
-        current: Optional[:class:`float`]
+        current: :class:`float` | :data:`None`
             The time in seconds since Unix epoch to update the rate limit at.
             If not supplied, then :func:`time.time()` is used.
 
         Returns
         -------
-        Optional[:class:`float`]
+        :class:`float` | :data:`None`
             The retry-after time in seconds if rate limited.
         """
         current = current or time.time()
@@ -190,7 +190,8 @@ class CooldownMapping:
         type: Callable[[Message], Any],
     ) -> None:
         if not callable(type):
-            raise TypeError("Cooldown type must be a BucketType or callable")
+            msg = "Cooldown type must be a BucketType or callable"
+            raise TypeError(msg)
 
         self._cache: Dict[Any, Cooldown] = {}
         self._cooldown: Optional[Cooldown] = original
@@ -348,10 +349,12 @@ class MaxConcurrency:
         self.wait: bool = wait
 
         if number <= 0:
-            raise ValueError("max_concurrency 'number' cannot be less than 1")
+            msg = "max_concurrency 'number' cannot be less than 1"
+            raise ValueError(msg)
 
         if not isinstance(per, BucketType):
-            raise TypeError(f"max_concurrency 'per' must be of type BucketType not {type(per)!r}")
+            msg = f"max_concurrency 'per' must be of type BucketType not {type(per)!r}"
+            raise TypeError(msg)
 
     def copy(self) -> Self:
         return self.__class__(self.number, per=self.per, wait=self.wait)

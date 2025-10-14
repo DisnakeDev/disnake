@@ -109,7 +109,8 @@ class _AsyncIterator(AsyncIterator[T]):
 
     def chunk(self, max_size: int) -> _ChunkedAsyncIterator[T]:
         if max_size <= 0:
-            raise ValueError("async iterator chunk sizes must be greater than 0.")
+            msg = "async iterator chunk sizes must be greater than 0."
+            raise ValueError(msg)
         return _ChunkedAsyncIterator(self, max_size)
 
     def map(self, func: _Func[T, OT]) -> _MappedAsyncIterator[OT]:
@@ -249,14 +250,14 @@ class HistoryIterator(_AsyncIterator["Message"]):
         Messageable class to retrieve message history from.
     limit: :class:`int`
         Maximum number of messages to retrieve
-    before: Optional[Union[:class:`abc.Snowflake`, :class:`datetime.datetime`]]
+    before: :class:`abc.Snowflake` | :class:`datetime.datetime` | :data:`None`
         Message before which all messages must be.
-    after: Optional[Union[:class:`abc.Snowflake`, :class:`datetime.datetime`]]
+    after: :class:`abc.Snowflake` | :class:`datetime.datetime` | :data:`None`
         Message after which all messages must be.
-    around: Optional[Union[:class:`abc.Snowflake`, :class:`datetime.datetime`]]
+    around: :class:`abc.Snowflake` | :class:`datetime.datetime` | :data:`None`
         Message around which all messages must be. Limit max 101. Note that if
         limit is an even number, this will return at most limit+1 messages.
-    oldest_first: Optional[:class:`bool`]
+    oldest_first: :class:`bool` | :data:`None`
         If set to ``True``, return messages in oldest->newest order. Defaults to
         ``True`` if `after` is specified, otherwise ``False``.
     """
@@ -296,9 +297,11 @@ class HistoryIterator(_AsyncIterator["Message"]):
 
         if self.around:
             if self.limit is None:
-                raise ValueError("history does not support around with limit=None")
+                msg = "history does not support around with limit=None"
+                raise ValueError(msg)
             if self.limit > 101:
-                raise ValueError("history max limit 101 when specifying around parameter")
+                msg = "history max limit 101 when specifying around parameter"
+                raise ValueError(msg)
             elif self.limit == 101:
                 self.limit = 100  # Thanks Discord
 
@@ -411,11 +414,11 @@ class BanIterator(_AsyncIterator["BanEntry"]):
     ----------
     guild: :class:`~disnake.Guild`
         The guild to get bans from.
-    limit: Optional[:class:`int`]
+    limit: :class:`int` | :data:`None`
         Maximum number of bans to retrieve.
-    before: Optional[:class:`abc.Snowflake`]
+    before: :class:`abc.Snowflake` | :data:`None`
         Object before which all bans must be.
-    after: Optional[:class:`abc.Snowflake`]
+    after: :class:`abc.Snowflake` | :data:`None`
         Object after which all bans must be.
     """
 
@@ -677,9 +680,9 @@ class GuildIterator(_AsyncIterator["Guild"]):
         The client to retrieve the guilds from.
     limit: :class:`int`
         Maximum number of guilds to retrieve.
-    before: Optional[Union[:class:`abc.Snowflake`, :class:`datetime.datetime`]]
+    before: :class:`abc.Snowflake` | :class:`datetime.datetime` | :data:`None`
         Object before which all guilds must be.
-    after: Optional[Union[:class:`abc.Snowflake`, :class:`datetime.datetime`]]
+    after: :class:`abc.Snowflake` | :class:`datetime.datetime` | :data:`None`
         Object after which all guilds must be.
     """
 
@@ -851,7 +854,8 @@ class ArchivedThreadIterator(_AsyncIterator["Thread"]):
         self.http = guild._state.http
 
         if joined and not private:
-            raise ValueError("Cannot iterate over joined public archived threads")
+            msg = "Cannot iterate over joined public archived threads"
+            raise ValueError(msg)
 
         self.before: Optional[str]
         if before is None:
@@ -1334,9 +1338,8 @@ class ChannelPinsIterator(_AsyncIterator["Message"]):
             elif isinstance(before, Object):
                 before_ = snowflake_time(before.id).isoformat()
             else:
-                raise TypeError(
-                    f"Expected either `disnake.Snowflake` or `datetime.datetime` for `before`. Got `{before.__class__.__name__!r}`."
-                )
+                msg = f"Expected either `disnake.Snowflake` or `datetime.datetime` for `before`. Got `{before.__class__.__name__!r}`."
+                raise TypeError(msg)
 
         self.messageable = messageable
         self._state = messageable._state

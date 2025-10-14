@@ -1,6 +1,6 @@
 #!/usr/bin/env -S uv run --script
 # /// script
-# requires-python = ">=3.8"
+# requires-python = ">=3.9"
 # dependencies = [
 #     "nox==2025.5.1",
 # ]
@@ -35,8 +35,7 @@ nox.options.default_venv_backend = "uv|virtualenv"
 PYPROJECT = nox.project.load_toml()
 
 SUPPORTED_PYTHONS: Final[List[str]] = nox.project.python_versions(PYPROJECT)
-# TODO(onerandomusername): add 3.14 once CI supports 3.14.
-EXPERIMENTAL_PYTHON_VERSIONS: Final[List[str]] = []
+EXPERIMENTAL_PYTHON_VERSIONS: Final[List[str]] = ["3.14"]
 ALL_PYTHONS: Final[List[str]] = [*SUPPORTED_PYTHONS, *EXPERIMENTAL_PYTHON_VERSIONS]
 MIN_PYTHON: Final[str] = SUPPORTED_PYTHONS[0]
 CI: Final[bool] = "CI" in os.environ
@@ -63,10 +62,11 @@ class ExecutionGroup(ExecutionGroupType):
 
     def __post_init__(self) -> None:
         if self.pyright_paths and "pyright" not in self.sessions:
-            raise TypeError("pyright_paths can only be set if pyright is in sessions")
+            msg = "pyright_paths can only be set if pyright is in sessions"
+            raise TypeError(msg)
         if self.python in EXPERIMENTAL_PYTHON_VERSIONS:
             self.experimental = True
-        for key in self.__dataclass_fields__.keys():
+        for key in self.__dataclass_fields__:
             self[key] = getattr(self, key)  # type: ignore
 
 
@@ -78,8 +78,7 @@ EXECUTION_GROUPS: List[ExecutionGroup] = [
             python=python,
             pyright_paths=("disnake", "tests", "examples", "noxfile.py", "setup.py"),
             project=True,
-            # FIXME: orjson doesn't yet support python 3.14, remove once we migrate to uv and have version-specific locks
-            extras=("speed", "voice") if python not in EXPERIMENTAL_PYTHON_VERSIONS else ("voice",),
+            extras=("speed", "voice"),
             groups=("test", "nox"),
             dependencies=("setuptools", "pytz", "requests"),  # needed for type checking
         )
@@ -132,7 +131,8 @@ def get_groups_for_session(name: str) -> List[ExecutionGroup]:
 def get_version_for_session(name: str) -> str:
     versions = {g.python for g in get_groups_for_session(name) if g.python}
     if len(versions) != 1:
-        raise TypeError(f"not the right number of groups for session {name}")
+        msg = f"not the right number of groups for session {name}"
+        raise TypeError(msg)
     return versions.pop()
 
 
@@ -144,11 +144,13 @@ def install_deps(session: nox.Session, *, execution_group: Optional[ExecutionGro
             # try cutting the `-`
             results = get_groups_for_session(session.name.split("-")[0])
         if len(results) != 1:
-            raise TypeError(f"not a valid session name: {session.name}. results: {len(results)}")
+            msg = f"not a valid session name: {session.name}. results: {len(results)}"
+            raise TypeError(msg)
         execution_group = results[0]
 
     if not execution_group.project and execution_group.extras:
-        raise TypeError("Cannot install extras without also installing the project")
+        msg = "Cannot install extras without also installing the project"
+        raise TypeError(msg)
 
     command: List[str]
 
@@ -416,6 +418,10 @@ def test(session: nox.Session, execution_group: ExecutionGroup) -> None:
     install_deps(session, execution_group=execution_group)
 
     pytest_args = ["--cov", "--cov-context=test"]
+    if execution_group.experimental:
+        # don't turn warnings into errors
+        # (this will override what we set in pyproject, but not be overridden by the cli)
+        pytest_args.append("-Wdefault")
     global reset_coverage  # noqa: PLW0603
     if reset_coverage:
         # don't use `--cov-append` for first run

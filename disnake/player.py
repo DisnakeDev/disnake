@@ -149,9 +149,8 @@ class FFmpegAudio(AudioSource):
     ) -> None:
         piping = subprocess_kwargs.get("stdin") == subprocess.PIPE
         if piping and isinstance(source, str):
-            raise TypeError(
-                "parameter conflict: 'source' parameter cannot be a string when piping to stdin"
-            )
+            msg = "parameter conflict: 'source' parameter cannot be a string when piping to stdin"
+            raise TypeError(msg)
 
         args = [executable, *args]
         kwargs = {"stdout": subprocess.PIPE}
@@ -175,9 +174,11 @@ class FFmpegAudio(AudioSource):
             return subprocess.Popen(args, creationflags=CREATE_NO_WINDOW, **subprocess_kwargs)  # type: ignore
         except FileNotFoundError:
             executable = args.partition(" ")[0] if isinstance(args, str) else args[0]
-            raise ClientException(f"{executable} was not found.") from None
+            msg = f"{executable} was not found."
+            raise ClientException(msg) from None
         except subprocess.SubprocessError as exc:
-            raise ClientException(f"Popen failed: {exc.__class__.__name__}: {exc}") from exc
+            msg = f"Popen failed: {exc.__class__.__name__}: {exc}"
+            raise ClientException(msg) from exc
 
     def _kill_process(self) -> None:
         try:
@@ -231,7 +232,8 @@ class FFmpegAudio(AudioSource):
 
     def check_streams(self) -> None:
         if self._process is MISSING or self._stdout is MISSING or self._stdin is MISSING:
-            raise ValueError("FFmpegAudio cannot be read more than once")
+            msg = "FFmpegAudio cannot be read more than once"
+            raise ValueError(msg)
 
     def cleanup(self) -> None:
         self._kill_process()
@@ -250,7 +252,7 @@ class FFmpegPCMAudio(FFmpegAudio):
 
     Parameters
     ----------
-    source: Union[:class:`str`, :class:`io.BufferedIOBase`]
+    source: :class:`str` | :class:`io.BufferedIOBase`
         The input that ffmpeg will take and convert to PCM bytes.
         If ``pipe`` is ``True`` then this is a file-like object that is
         passed to the stdin of ffmpeg.
@@ -264,12 +266,12 @@ class FFmpegPCMAudio(FFmpegAudio):
     pipe: :class:`bool`
         If ``True``, denotes that ``source`` parameter will be passed
         to the stdin of ffmpeg. Defaults to ``False``.
-    stderr: Optional[:term:`py:file object`]
+    stderr: :term:`py:file object` | :data:`None`
         A file-like object to pass to the Popen constructor.
         Could also be an instance of ``subprocess.PIPE``.
-    before_options: Optional[:class:`str`]
+    before_options: :class:`str` | :data:`None`
         Extra command line arguments to pass to ffmpeg before the ``-i`` flag.
-    options: Optional[:class:`str`]
+    options: :class:`str` | :data:`None`
         Extra command line arguments to pass to ffmpeg after the ``-i`` flag.
 
     Raises
@@ -342,13 +344,13 @@ class FFmpegOpusAudio(FFmpegAudio):
 
     Parameters
     ----------
-    source: Union[:class:`str`, :class:`io.BufferedIOBase`]
+    source: :class:`str` | :class:`io.BufferedIOBase`
         The input that ffmpeg will take and convert to Opus bytes.
         If ``pipe`` is ``True`` then this is a file-like object that is
         passed to the stdin of ffmpeg.
     bitrate: :class:`int`
         The bitrate in kbps to encode the output to.  Defaults to ``128``.
-    codec: Optional[:class:`str`]
+    codec: :class:`str` | :data:`None`
         The codec to use to encode the audio data.  Normally this would be
         just ``libopus``, but is used by :meth:`FFmpegOpusAudio.from_probe` to
         opportunistically skip pointlessly re-encoding Opus audio data by passing
@@ -371,12 +373,12 @@ class FFmpegOpusAudio(FFmpegAudio):
     pipe: :class:`bool`
         If ``True``, denotes that ``source`` parameter will be passed
         to the stdin of ffmpeg. Defaults to ``False``.
-    stderr: Optional[:term:`py:file object`]
+    stderr: :term:`py:file object` | :data:`None`
         A file-like object to pass to the Popen constructor.
         Could also be an instance of ``subprocess.PIPE``.
-    before_options: Optional[:class:`str`]
+    before_options: :class:`str` | :data:`None`
         Extra command line arguments to pass to ffmpeg before the ``-i`` flag.
-    options: Optional[:class:`str`]
+    options: :class:`str` | :data:`None`
         Extra command line arguments to pass to ffmpeg after the ``-i`` flag.
 
     Raises
@@ -479,7 +481,7 @@ class FFmpegOpusAudio(FFmpegAudio):
         ----------
         source
             Identical to the ``source`` parameter for the constructor.
-        method: Optional[Union[:class:`str`, Callable[:class:`str`, :class:`str`]]]
+        method: :class:`str` | :class:`~collections.abc.Callable`\\[[:class:`str`, :class:`str`], :class:`tuple`\\[:class:`str` | :data:`None`, :class:`int` | :data:`None`]] | :data:`None`
             The probing method used to determine bitrate and codec information. As a string, valid
             values are ``native`` to use ffprobe (or avprobe) and ``fallback`` to use ffmpeg
             (or avconv).  As a callable, it must take two string arguments, ``source`` and
@@ -537,7 +539,7 @@ class FFmpegOpusAudio(FFmpegAudio):
 
         Returns
         -------
-        Optional[Tuple[Optional[:class:`str`], Optional[:class:`int`]]]
+        :class:`tuple`\\[:class:`str` | :data:`None`, :class:`int` | :data:`None`] | :data:`None`
             A 2-tuple with the codec and bitrate of the input source.
         """
         method = method or "native"
@@ -547,7 +549,8 @@ class FFmpegOpusAudio(FFmpegAudio):
         if isinstance(method, str):
             probefunc = getattr(cls, f"_probe_codec_{method}", None)
             if probefunc is None:
-                raise AttributeError(f"Invalid probe method {method!r}")
+                msg = f"Invalid probe method {method!r}"
+                raise AttributeError(msg)
 
             if probefunc is cls._probe_codec_native:
                 fallback = cls._probe_codec_fallback
@@ -556,9 +559,10 @@ class FFmpegOpusAudio(FFmpegAudio):
             probefunc = method
             fallback = cls._probe_codec_fallback
         else:
-            raise TypeError(
+            msg = (
                 f"Expected str or callable for parameter 'probe', not '{method.__class__.__name__}'"
             )
+            raise TypeError(msg)
 
         codec = bitrate = None
         loop = asyncio.get_running_loop()
@@ -664,15 +668,18 @@ class PCMVolumeTransformer(AudioSource, Generic[AT]):
 
     def __init__(self, original: AT, volume: float = 1.0) -> None:
         if not has_audioop:
-            raise RuntimeError(
+            msg = (
                 f"audioop-lts library needed in Python >=3.13 in order to use {type(self).__name__}"
             )
+            raise RuntimeError(msg)
 
         if not isinstance(original, AudioSource):
-            raise TypeError(f"expected AudioSource not {original.__class__.__name__}.")
+            msg = f"expected AudioSource not {original.__class__.__name__}."
+            raise TypeError(msg)
 
         if original.is_opus():
-            raise ClientException("AudioSource must not be Opus encoded.")
+            msg = "AudioSource must not be Opus encoded."
+            raise ClientException(msg)
 
         self.original: AT = original
         self.volume = volume
@@ -712,7 +719,8 @@ class AudioPlayer(threading.Thread):
         self._lock: threading.Lock = threading.Lock()
 
         if after is not None and not callable(after):
-            raise TypeError('Expected a callable for the "after" parameter.')
+            msg = 'Expected a callable for the "after" parameter.'
+            raise TypeError(msg)
 
     def _do_run(self) -> None:
         self._reset_state(speak=True)

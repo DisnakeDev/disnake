@@ -66,13 +66,13 @@ class StickerPack(Hashable):
         The description of the sticker pack.
     id: :class:`int`
         The id of the sticker pack.
-    stickers: List[:class:`StandardSticker`]
+    stickers: :class:`list`\\[:class:`StandardSticker`]
         The stickers of this sticker pack.
     sku_id: :class:`int`
         The SKU ID of the sticker pack.
-    cover_sticker_id: Optional[:class:`int`]
+    cover_sticker_id: :class:`int` | :data:`None`
          The ID of the sticker used for the cover of the sticker pack, if any.
-    cover_sticker: Optional[:class:`StandardSticker`]
+    cover_sticker: :class:`StandardSticker` | :data:`None`
         The sticker used for the cover of the sticker pack, if any.
     """
 
@@ -107,7 +107,7 @@ class StickerPack(Hashable):
 
     @property
     def banner(self) -> Optional[Asset]:
-        """Optional[:class:`Asset`]: The banner asset of the sticker pack, if any."""
+        """:class:`Asset` | :data:`None`: The banner asset of the sticker pack, if any."""
         if not self._banner:
             return None
         return Asset._from_sticker_banner(self._state, self._banner)
@@ -156,7 +156,8 @@ class _StickerTag(Hashable, AssetMixin):
             The content of the asset.
         """
         if self.format is StickerFormatType.lottie:
-            raise TypeError('Cannot read stickers of format "lottie".')
+            msg = 'Cannot read stickers of format "lottie".'
+            raise TypeError(msg)
         return await super().read()
 
 
@@ -215,7 +216,7 @@ class StickerItem(_StickerTag):
 
         Returns
         -------
-        Union[:class:`StandardSticker`, :class:`GuildSticker`]
+        :class:`StandardSticker` | :class:`GuildSticker`
             The retrieved sticker.
         """
         data: StickerPayload = await self._state.http.get_sticker(self.id)
@@ -311,7 +312,7 @@ class StandardSticker(Sticker):
         The ID of the sticker's pack.
     format: :class:`StickerFormatType`
         The format for the sticker's image.
-    tags: List[:class:`str`]
+    tags: :class:`list`\\[:class:`str`]
         A list of tags for the sticker.
     sort_value: :class:`int`
         The sticker's sort order within its pack.
@@ -356,7 +357,8 @@ class StandardSticker(Sticker):
 
         if pack:
             return StickerPack(state=self._state, data=pack)
-        raise InvalidData(f"Could not find corresponding sticker pack for {self!r}")
+        msg = f"Could not find corresponding sticker pack for {self!r}"
+        raise InvalidData(msg)
 
 
 class GuildSticker(Sticker):
@@ -392,7 +394,7 @@ class GuildSticker(Sticker):
         Whether this sticker is available for use.
     guild_id: :class:`int`
         The ID of the guild that this sticker is from.
-    user: Optional[:class:`User`]
+    user: :class:`User` | :data:`None`
         The user that created this sticker. This can only be retrieved using
         :meth:`Guild.fetch_sticker`/:meth:`Guild.fetch_stickers` while
         having the :attr:`~Permissions.manage_guild_expressions` permission.
@@ -416,8 +418,8 @@ class GuildSticker(Sticker):
 
     @cached_slot_property("_cs_guild")
     def guild(self) -> Optional[Guild]:
-        """Optional[:class:`Guild`]: The guild that this sticker is from.
-        Could be ``None`` if the bot is not in the guild.
+        """:class:`Guild` | :data:`None`: The guild that this sticker is from.
+        Could be :data:`None` if the bot is not in the guild.
 
         .. versionadded:: 2.0
         """
@@ -442,11 +444,11 @@ class GuildSticker(Sticker):
         ----------
         name: :class:`str`
             The sticker's new name. Must be at least 2 characters.
-        description: Optional[:class:`str`]
-            The sticker's new description. Can be ``None``.
+        description: :class:`str` | :data:`None`
+            The sticker's new description. Can be :data:`None`.
         emoji: :class:`str`
             The name of a unicode emoji that represents the sticker's expression.
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason for editing this sticker. Shows up on the audit log.
 
         Raises
@@ -494,7 +496,7 @@ class GuildSticker(Sticker):
 
         Parameters
         ----------
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason for deleting this sticker. Shows up on the audit log.
 
         Raises

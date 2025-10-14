@@ -58,13 +58,13 @@ class PartialEmoji(_EmojiTag, AssetMixin):
 
     Attributes
     ----------
-    name: Optional[:class:`str`]
+    name: :class:`str` | :data:`None`
         The custom emoji name, if applicable, or the unicode codepoint
-        of the non-custom emoji. This can be ``None`` if the emoji
+        of the non-custom emoji. This can be :data:`None` if the emoji
         got deleted (e.g. removing a reaction with a deleted emoji).
     animated: :class:`bool`
         Whether the emoji is animated or not.
-    id: Optional[:class:`int`]
+    id: :class:`int` | :data:`None`
         The ID of the custom emoji, if applicable.
     """
 
@@ -200,7 +200,7 @@ class PartialEmoji(_EmojiTag, AssetMixin):
 
     @property
     def created_at(self) -> Optional[datetime]:
-        """Optional[:class:`datetime.datetime`]: Returns the emoji's creation time in UTC, or None if it's a Unicode emoji.
+        """:class:`datetime.datetime` | :data:`None`: Returns the emoji's creation time in UTC, or None if it's a Unicode emoji.
 
         .. versionadded:: 1.6
         """
@@ -246,7 +246,8 @@ class PartialEmoji(_EmojiTag, AssetMixin):
             The content of the asset.
         """
         if self.is_unicode_emoji():
-            raise TypeError("PartialEmoji is not a custom emoji")
+            msg = "PartialEmoji is not a custom emoji"
+            raise TypeError(msg)
 
         return await super().read()
 

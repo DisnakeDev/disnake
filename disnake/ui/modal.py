@@ -95,11 +95,13 @@ class Modal:
         timeout: float = 600,
     ) -> None:
         if timeout is None:  # pyright: ignore[reportUnnecessaryComparison]
-            raise ValueError("Timeout may not be None")
+            msg = "Timeout may not be None"
+            raise ValueError(msg)
 
         items = normalize_components(components)
         if len(items) > 5:
-            raise ValueError("Maximum number of components exceeded.")
+            msg = "Maximum number of components exceeded."
+            raise ValueError(msg)
 
         self.title: str = title
         self.custom_id: str = os.urandom(16).hex() if custom_id is MISSING else custom_id
@@ -146,7 +148,8 @@ class Modal:
             component = [component]
 
         if len(self.components) + len(component) >= 5:
-            raise ValueError("Maximum number of components exceeded.")
+            msg = "Maximum number of components exceeded."
+            raise ValueError(msg)
 
         for c in component:
             c = ensure_ui_component(c)
@@ -182,15 +185,15 @@ class Modal:
             If not given then one is generated for you.
         style: :class:`.TextInputStyle`
             The style of the text input.
-        placeholder: Optional[:class:`str`]
+        placeholder: :class:`str` | :data:`None`
             The placeholder text that is shown if nothing is entered.
-        value: Optional[:class:`str`]
+        value: :class:`str` | :data:`None`
             The pre-filled value of the text input.
         required: :class:`bool`
             Whether the text input is required. Defaults to ``True``.
-        min_length: Optional[:class:`int`]
+        min_length: :class:`int` | :data:`None`
             The minimum length of the text input.
-        max_length: Optional[:class:`int`]
+        max_length: :class:`int` | :data:`None`
             The maximum length of the text input.
 
         Raises

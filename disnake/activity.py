@@ -95,7 +95,7 @@ class _BaseActivity:
 
     @property
     def created_at(self) -> Optional[datetime.datetime]:
-        """Optional[:class:`datetime.datetime`]: When the user started doing this activity in UTC.
+        """:class:`datetime.datetime` | :data:`None`: When the user started doing this activity in UTC.
 
         .. versionadded:: 1.3
         """
@@ -106,10 +106,10 @@ class _BaseActivity:
 
     @property
     def start(self) -> Optional[datetime.datetime]:
-        """Optional[:class:`datetime.datetime`]: When the user started doing this activity in UTC, if applicable.
+        """:class:`datetime.datetime` | :data:`None`: When the user started doing this activity in UTC, if applicable.
 
         .. versionchanged:: 2.6
-            This attribute can now be ``None``.
+            This attribute can now be :data:`None`.
         """
         if "start" not in self._timestamps:
             return None
@@ -118,10 +118,10 @@ class _BaseActivity:
 
     @property
     def end(self) -> Optional[datetime.datetime]:
-        """Optional[:class:`datetime.datetime`]: When the user will stop doing this activity in UTC, if applicable.
+        """:class:`datetime.datetime` | :data:`None`: When the user will stop doing this activity in UTC, if applicable.
 
         .. versionchanged:: 2.6
-            This attribute can now be ``None``.
+            This attribute can now be :data:`None`.
         """
         if "end" not in self._timestamps:
             return None
@@ -142,7 +142,7 @@ class _BaseActivity:
 
     @property
     def large_image_url(self) -> Optional[str]:
-        """Optional[:class:`str`]: Returns a URL pointing to the large image asset of this activity, if applicable.
+        """:class:`str` | :data:`None`: Returns a URL pointing to the large image asset of this activity, if applicable.
 
         .. versionchanged:: 2.10
             Moved from :class:`Activity` to base type, making this available to all activity types.
@@ -154,7 +154,7 @@ class _BaseActivity:
 
     @property
     def small_image_url(self) -> Optional[str]:
-        """Optional[:class:`str`]: Returns a URL pointing to the small image asset of this activity, if applicable.
+        """:class:`str` | :data:`None`: Returns a URL pointing to the small image asset of this activity, if applicable.
 
         .. versionchanged:: 2.10
             Moved from :class:`Activity` to base type, making this available to all activity types.
@@ -166,7 +166,7 @@ class _BaseActivity:
 
     @property
     def large_image_text(self) -> Optional[str]:
-        """Optional[:class:`str`]: Returns the large image asset hover text of this activity, if applicable.
+        """:class:`str` | :data:`None`: Returns the large image asset hover text of this activity, if applicable.
 
         .. versionchanged:: 2.10
             Moved from :class:`Activity` to base type, making this available to all activity types.
@@ -175,7 +175,7 @@ class _BaseActivity:
 
     @property
     def small_image_text(self) -> Optional[str]:
-        """Optional[:class:`str`]: Returns the small image asset hover text of this activity, if applicable.
+        """:class:`str` | :data:`None`: Returns the small image asset hover text of this activity, if applicable.
 
         .. versionchanged:: 2.10
             Moved from :class:`Activity` to base type, making this available to all activity types.
@@ -184,7 +184,7 @@ class _BaseActivity:
 
     @property
     def large_image_link(self) -> Optional[str]:
-        """Optional[:class:`str`]: Returns the large image asset URL of this activity, if applicable.
+        """:class:`str` | :data:`None`: Returns the large image asset URL of this activity, if applicable.
 
         .. versionadded:: 2.11
         """
@@ -192,7 +192,7 @@ class _BaseActivity:
 
     @property
     def small_image_link(self) -> Optional[str]:
-        """Optional[:class:`str`]: Returns the small image asset URL of this activity, if applicable.
+        """:class:`str` | :data:`None`: Returns the small image asset URL of this activity, if applicable.
 
         .. versionadded:: 2.11
         """
@@ -246,26 +246,26 @@ class Activity(BaseActivity):
 
     Parameters
     ----------
-    name: Optional[:class:`str`]
+    name: :class:`str` | :data:`None`
         The name of the activity.
-    url: Optional[:class:`str`]
+    url: :class:`str` | :data:`None`
         A stream URL that the activity could be doing.
     type: :class:`ActivityType`
         The type of activity currently being done.
 
     Attributes
     ----------
-    application_id: Optional[:class:`int`]
+    application_id: :class:`int` | :data:`None`
         The application ID of the game.
-    name: Optional[:class:`str`]
+    name: :class:`str` | :data:`None`
         The name of the activity.
-    url: Optional[:class:`str`]
+    url: :class:`str` | :data:`None`
         A stream URL that the activity could be doing.
     type: :class:`ActivityType`
         The type of activity currently being done.
-    state: Optional[:class:`str`]
+    state: :class:`str` | :data:`None`
         The user's current state. For example, "In Game".
-    details: Optional[:class:`str`]
+    details: :class:`str` | :data:`None`
         The detail of the user's current activity.
     assets: :class:`dict`
         A dictionary representing the images and their hover text of an activity.
@@ -282,7 +282,7 @@ class Activity(BaseActivity):
 
         - ``id``: A string representing the party ID.
         - ``size``: A list of two integers denoting (current_size, maximum_size).
-    buttons: List[str]
+    buttons: :class:`list`\\[:class:`str`]
         A list of strings representing the labels of custom buttons shown in a rich presence.
 
         .. versionadded:: 2.0
@@ -290,17 +290,17 @@ class Activity(BaseActivity):
         .. versionchanged:: 2.6
             Changed type to ``List[str]`` to match API types.
 
-    emoji: Optional[:class:`PartialEmoji`]
+    emoji: :class:`PartialEmoji` | :data:`None`
         The emoji that belongs to this activity.
-    details_url: Optional[:class:`str`]
+    details_url: :class:`str` | :data:`None`
         An URL that is linked when clicking on the details text of an activity.
 
         .. versionadded:: 2.11
-    state_url: Optional[:class:`str`]
+    state_url: :class:`str` | :data:`None`
         An URL that is linked when clicking on the state text of an activity.
 
         .. versionadded:: 2.11
-    status_display_type: Optional[:class:`StatusDisplayType`]
+    status_display_type: :class:`StatusDisplayType` | :data:`None`
         Controls which field is displayed in the user's status activity text in the member list.
 
         .. versionadded:: 2.11
@@ -544,16 +544,16 @@ class Streaming(BaseActivity):
 
     Attributes
     ----------
-    platform: Optional[:class:`str`]
+    platform: :class:`str` | :data:`None`
         Where the user is streaming from (ie. YouTube, Twitch).
 
         .. versionadded:: 1.3
 
-    name: Optional[:class:`str`]
+    name: :class:`str` | :data:`None`
         The stream's name.
-    details: Optional[:class:`str`]
+    details: :class:`str` | :data:`None`
         An alias for :attr:`name`
-    game: Optional[:class:`str`]
+    game: :class:`str` | :data:`None`
         The game being streamed.
 
         .. versionadded:: 1.3
@@ -598,7 +598,7 @@ class Streaming(BaseActivity):
 
     @property
     def twitch_name(self) -> Optional[str]:
-        """Optional[:class:`str`]: If provided, the twitch name of the user streaming.
+        """:class:`str` | :data:`None`: If provided, the twitch name of the user streaming.
 
         This corresponds to the ``large_image`` key of the :attr:`Streaming.assets`
         dictionary if it starts with ``twitch:``. Typically set by the Discord client.
@@ -745,7 +745,7 @@ class Spotify(_BaseActivity):
 
     @property
     def artists(self) -> List[str]:
-        """List[:class:`str`]: The artists of the song being played."""
+        """:class:`list`\\[:class:`str`]: The artists of the song being played."""
         return self._state.split("; ")
 
     @property
@@ -786,10 +786,10 @@ class Spotify(_BaseActivity):
 
     @property
     def duration(self) -> Optional[datetime.timedelta]:
-        """Optional[:class:`datetime.timedelta`]: The duration of the song being played, if applicable.
+        """:class:`datetime.timedelta` | :data:`None`: The duration of the song being played, if applicable.
 
         .. versionchanged:: 2.6
-            This attribute can now be ``None``.
+            This attribute can now be :data:`None`.
         """
         start, end = self.start, self.end
         if start and end:
@@ -827,9 +827,9 @@ class CustomActivity(BaseActivity):
 
     Attributes
     ----------
-    name: Optional[:class:`str`]
+    name: :class:`str` | :data:`None`
         The custom activity's name.
-    emoji: Optional[:class:`PartialEmoji`]
+    emoji: :class:`PartialEmoji` | :data:`None`
         The emoji to pass to the activity, if any.
 
         This currently cannot be set by bots.
@@ -864,9 +864,8 @@ class CustomActivity(BaseActivity):
         elif isinstance(emoji, PartialEmoji):
             self.emoji = emoji
         else:
-            raise TypeError(
-                f"Expected str, PartialEmoji, or None, received {type(emoji)!r} instead."
-            )
+            msg = f"Expected str, PartialEmoji, or None, received {type(emoji)!r} instead."
+            raise TypeError(msg)
 
     @property
     def type(self) -> Literal[ActivityType.custom]:

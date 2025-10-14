@@ -46,7 +46,8 @@ UIComponentT = TypeVar("UIComponentT", bound="UIComponent")
 
 def ensure_ui_component(obj: UIComponentT, name: str = "component") -> UIComponentT:
     if not isinstance(obj, UIComponent):
-        raise TypeError(f"{name} should be a valid UI component, got {type(obj).__name__}.")
+        msg = f"{name} should be a valid UI component, got {type(obj).__name__}."
+        raise TypeError(msg)
     return obj
 
 
@@ -202,11 +203,12 @@ class Item(WrappedComponent, Generic[V_co]):
         elif 5 > value >= 0:
             self._row = value
         else:
-            raise ValueError("row cannot be negative or greater than or equal to 5")
+            msg = "row cannot be negative or greater than or equal to 5"
+            raise ValueError(msg)
 
     @property
     def view(self) -> V_co:
-        """Optional[:class:`View`]: The underlying view for this item."""
+        """:class:`View` | :data:`None`: The underlying view for this item."""
         return self._view
 
     async def callback(self, interaction: MessageInteraction[ClientT], /) -> None:

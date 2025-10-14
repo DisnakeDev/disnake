@@ -47,9 +47,9 @@ class GuildScheduledEventMetadata:
 
     Attributes
     ----------
-    location: Optional[:class:`str`]
+    location: :class:`str` | :data:`None`
         The location of the guild scheduled event. If :attr:`GuildScheduledEvent.entity_type` is
-        :class:`GuildScheduledEventEntityType.external`, this value is not ``None``.
+        :class:`GuildScheduledEventEntityType.external`, this value is not :data:`None`.
     """
 
     __slots__ = ("location",)
@@ -97,36 +97,36 @@ class GuildScheduledEvent(Hashable):
         The ID of the guild scheduled event.
     guild_id: :class:`int`
         The guild ID which the guild scheduled event belongs to.
-    channel_id: Optional[:class:`int`]
+    channel_id: :class:`int` | :data:`None`
         The channel ID in which the guild scheduled event will be hosted.
-        This field is ``None`` if :attr:`entity_type` is :class:`GuildScheduledEventEntityType.external`.
-    creator_id: Optional[:class:`int`]
+        This field is :data:`None` if :attr:`entity_type` is :class:`GuildScheduledEventEntityType.external`.
+    creator_id: :class:`int` | :data:`None`
         The ID of the user that created the guild scheduled event.
-        This field is ``None`` for events created before October 25th, 2021.
-    creator: Optional[:class:`User`]
+        This field is :data:`None` for events created before October 25th, 2021.
+    creator: :class:`User` | :data:`None`
         The user that created the guild scheduled event.
-        This field is ``None`` for events created before October 25th, 2021.
+        This field is :data:`None` for events created before October 25th, 2021.
     name: :class:`str`
         The name of the guild scheduled event (1-100 characters).
     description: :class:`str`
         The description of the guild scheduled event (1-1000 characters).
     scheduled_start_time: :class:`datetime.datetime`
         The time when the guild scheduled event will start.
-    scheduled_end_time: Optional[:class:`datetime.datetime`]
-        The time when the guild scheduled event will end, or ``None`` if the event does not have a scheduled time to end.
+    scheduled_end_time: :class:`datetime.datetime` | :data:`None`
+        The time when the guild scheduled event will end, or :data:`None` if the event does not have a scheduled time to end.
     privacy_level: :class:`GuildScheduledEventPrivacyLevel`
         The privacy level of the guild scheduled event.
     status: :class:`GuildScheduledEventStatus`
         The status of the guild scheduled event.
     entity_type: :class:`GuildScheduledEventEntityType`
         The type of the guild scheduled event.
-    entity_id: Optional[:class:`int`]
+    entity_id: :class:`int` | :data:`None`
         The ID of an entity associated with the guild scheduled event.
     entity_metadata: :class:`GuildScheduledEventMetadata`
         Additional metadata for the guild scheduled event.
-    user_count: Optional[:class:`int`]
+    user_count: :class:`int` | :data:`None`
         The number of users subscribed to the guild scheduled event.
-        If the guild scheduled event was fetched with ``with_user_count`` set to ``False``, this field is ``None``.
+        If the guild scheduled event was fetched with ``with_user_count`` set to ``False``, this field is :data:`None`.
     """
 
     __slots__ = (
@@ -227,14 +227,14 @@ class GuildScheduledEvent(Hashable):
 
     @cached_slot_property("_cs_guild")
     def guild(self) -> Optional[Guild]:
-        """Optional[:class:`Guild`]: The guild which the guild scheduled event belongs to."""
+        """:class:`Guild` | :data:`None`: The guild which the guild scheduled event belongs to."""
         return self._state._get_guild(self.guild_id)
 
     @cached_slot_property("_cs_channel")
     def channel(self) -> Optional[GuildChannel]:
-        """Optional[:class:`abc.GuildChannel`]: The channel in which the guild scheduled event will be hosted.
+        """:class:`abc.GuildChannel` | :data:`None`: The channel in which the guild scheduled event will be hosted.
 
-        This will be ``None`` if :attr:`entity_type` is :class:`GuildScheduledEventEntityType.external`.
+        This will be :data:`None` if :attr:`entity_type` is :class:`GuildScheduledEventEntityType.external`.
         """
         if self.channel_id is None:
             return None
@@ -243,7 +243,7 @@ class GuildScheduledEvent(Hashable):
 
     @property
     def image(self) -> Optional[Asset]:
-        """Optional[:class:`Asset`]: The cover image asset of the guild scheduled event, if available."""
+        """:class:`Asset` | :data:`None`: The cover image asset of the guild scheduled event, if available."""
         if self._image is None:
             return None
         return Asset._from_guild_scheduled_event_image(self._state, self.id, self._image)
@@ -397,19 +397,19 @@ class GuildScheduledEvent(Hashable):
         ----------
         name: :class:`str`
             The name of the guild scheduled event.
-        description: Optional[:class:`str`]
+        description: :class:`str` | :data:`None`
             The description of the guild scheduled event.
-        image: Optional[|resource_type|]
-            The cover image of the guild scheduled event. Set to ``None`` to remove the image.
+        image: |resource_type| | :data:`None`
+            The cover image of the guild scheduled event. Set to :data:`None` to remove the image.
 
             .. versionadded:: 2.4
 
             .. versionchanged:: 2.5
                 Now accepts various resource types in addition to :class:`bytes`.
 
-        channel: Optional[:class:`.abc.Snowflake`]
+        channel: :class:`.abc.Snowflake` | :data:`None`
             The channel in which the guild scheduled event will be hosted.
-            Set to ``None`` if changing ``entity_type`` to :class:`GuildScheduledEventEntityType.external`.
+            Set to :data:`None` if changing ``entity_type`` to :class:`GuildScheduledEventEntityType.external`.
 
             .. versionadded:: 2.6
 
@@ -418,18 +418,18 @@ class GuildScheduledEvent(Hashable):
         scheduled_start_time: :class:`datetime.datetime`
             The time to schedule the guild scheduled event.
             If the datetime is naive, it is assumed to be local time.
-        scheduled_end_time: Optional[:class:`datetime.datetime`]
+        scheduled_end_time: :class:`datetime.datetime` | :data:`None`
             The time when the guild scheduled event is scheduled to end.
             If the datetime is naive, it is assumed to be local time.
         entity_type: :class:`GuildScheduledEventEntityType`
             The entity type of the guild scheduled event.
-        entity_metadata: Optional[:class:`GuildScheduledEventMetadata`]
+        entity_metadata: :class:`GuildScheduledEventMetadata` | :data:`None`
             The entity metadata of the guild scheduled event.
         status: :class:`GuildScheduledEventStatus`
             The status of the guild scheduled event.
 
             See also :func:`start`, :func:`end`, and :func:`cancel`.
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason for editing the guild scheduled event. Shows up on the audit log.
 
         Raises
@@ -464,19 +464,20 @@ class GuildScheduledEvent(Hashable):
                 elif channel_type is ChannelType.stage_voice:
                     entity_type = GuildScheduledEventEntityType.stage_instance
                 else:
-                    raise TypeError("channel type must be either 'voice' or 'stage_voice'")
+                    msg = "channel type must be either 'voice' or 'stage_voice'"
+                    raise TypeError(msg)
 
         if privacy_level is not MISSING:
             if not isinstance(privacy_level, GuildScheduledEventPrivacyLevel):
-                raise TypeError(
-                    "privacy_level must be an instance of GuildScheduledEventPrivacyLevel"
-                )
+                msg = "privacy_level must be an instance of GuildScheduledEventPrivacyLevel"
+                raise TypeError(msg)
 
             fields["privacy_level"] = privacy_level.value
 
         if entity_type is not MISSING:
             if not isinstance(entity_type, GuildScheduledEventEntityType):
-                raise TypeError("entity_type must be an instance of GuildScheduledEventEntityType")
+                msg = "entity_type must be an instance of GuildScheduledEventEntityType"
+                raise TypeError(msg)
 
             fields["entity_type"] = entity_type.value
 
@@ -488,13 +489,13 @@ class GuildScheduledEvent(Hashable):
                 fields["entity_metadata"] = entity_metadata.to_dict()
 
             else:
-                raise TypeError(
-                    "entity_metadata must be an instance of GuildScheduledEventMetadata"
-                )
+                msg = "entity_metadata must be an instance of GuildScheduledEventMetadata"
+                raise TypeError(msg)
 
         if status is not MISSING:
             if not isinstance(status, GuildScheduledEventStatus):
-                raise TypeError("status must be an instance of GuildScheduledEventStatus")
+                msg = "status must be an instance of GuildScheduledEventStatus"
+                raise TypeError(msg)
 
             fields["status"] = status.value
 
@@ -537,7 +538,7 @@ class GuildScheduledEvent(Hashable):
 
         Parameters
         ----------
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason for starting the guild scheduled event. Shows up on the audit log.
 
         Raises
@@ -555,7 +556,8 @@ class GuildScheduledEvent(Hashable):
             The started guild scheduled event instance.
         """
         if self.status is not GuildScheduledEventStatus.scheduled:
-            raise ValueError("This event is not scheduled")
+            msg = "This event is not scheduled"
+            raise ValueError(msg)
         return await self._edit_status(GuildScheduledEventStatus.active, reason=reason)
 
     async def end(self, *, reason: Optional[str] = None) -> GuildScheduledEvent:
@@ -571,7 +573,7 @@ class GuildScheduledEvent(Hashable):
 
         Parameters
         ----------
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason for ending the guild scheduled event. Shows up on the audit log.
 
         Raises
@@ -589,7 +591,8 @@ class GuildScheduledEvent(Hashable):
             The ended guild scheduled event instance.
         """
         if self.status is not GuildScheduledEventStatus.active:
-            raise ValueError("This event is not active")
+            msg = "This event is not active"
+            raise ValueError(msg)
         return await self._edit_status(GuildScheduledEventStatus.completed, reason=reason)
 
     async def cancel(self, *, reason: Optional[str] = None) -> GuildScheduledEvent:
@@ -605,7 +608,7 @@ class GuildScheduledEvent(Hashable):
 
         Parameters
         ----------
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason for cancelling the guild scheduled event. Shows up on the audit log.
 
         Raises
@@ -623,7 +626,8 @@ class GuildScheduledEvent(Hashable):
             The cancelled guild scheduled event instance.
         """
         if self.status is not GuildScheduledEventStatus.scheduled:
-            raise ValueError("This event is not scheduled")
+            msg = "This event is not scheduled"
+            raise ValueError(msg)
         return await self._edit_status(GuildScheduledEventStatus.cancelled, reason=reason)
 
     # shortcut for editing just the event status, bypasses other edit logic
@@ -658,13 +662,13 @@ class GuildScheduledEvent(Hashable):
 
         Parameters
         ----------
-        limit: Optional[:class:`int`]
+        limit: :class:`int` | :data:`None`
             The number of users to retrieve.
         with_members: :class:`bool`
             Whether to include some users as members. Defaults to ``True``.
-        before: Optional[:class:`abc.Snowflake`]
+        before: :class:`abc.Snowflake` | :data:`None`
             Retrieve users before this object.
-        after: Optional[:class:`abc.Snowflake`]
+        after: :class:`abc.Snowflake` | :data:`None`
             Retrieve users after this object.
 
         Raises
@@ -678,7 +682,7 @@ class GuildScheduledEvent(Hashable):
 
         Yields
         ------
-        Union[:class:`User`, :class:`Member`]
+        :class:`User` | :class:`Member`
             The member (if retrievable) or user subscribed to the guild scheduled event.
 
         Examples

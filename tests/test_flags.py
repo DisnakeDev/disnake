@@ -102,7 +102,7 @@ def test_flag_creation_empty() -> None:
 class TestFlagValue:
     def test_flag_value_creation(self) -> None:
         flag = flags.flag_value(lambda x: 1 << 2)
-        assert 1 << 2 == flag.flag
+        assert flag.flag == 1 << 2
 
     def test_flag_value_or(self) -> None:
         ins = TestFlags.four | TestFlags.one
@@ -178,10 +178,8 @@ class TestBaseFlags:
 
         assert ins is not other
         assert ins == other
-        assert not ins != other
 
         ins.two = False
-        assert not ins == other
         assert ins != other
 
     def test__eq__flag_value(self) -> None:
@@ -191,7 +189,6 @@ class TestBaseFlags:
         assert ins == TestFlags.one
         assert TestFlags.one == ins
 
-        assert not ins != TestFlags.one
         assert ins != TestFlags.two
 
         assert other != TestFlags.one
@@ -420,7 +417,7 @@ class TestBaseFlags:
 
     def test_set_and_get_flag(self) -> None:
         ins = TestFlags()
-        assert ins.DEFAULT_VALUE == ins.value
+        assert ins.value == ins.DEFAULT_VALUE
 
         ins.two = True
         assert ins.two is True

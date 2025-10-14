@@ -468,12 +468,12 @@ class DiscordWebSocket:
         ----------
         event: :class:`str`
             The event name in all upper case to wait for.
-        predicate: Callable[[Dict[:class:`str`, Any]], :class:`bool`]
+        predicate: :class:`~collections.abc.Callable`\\[[:class:`dict`\\[:class:`str`, :data:`~typing.Any`]], :class:`bool`]
             A function that takes a data parameter to check for event
             properties. The data parameter is the 'd' key in the JSON message.
-        result: Optional[Callable[[Dict[:class:`str`, Any]], T]]
+        result: :class:`~collections.abc.Callable`\\[[:class:`dict`\\[:class:`str`, :data:`~typing.Any`]], T] | :data:`None`
             A function that takes the same data parameter and executes to send
-            the result to the future. If ``None``, returns the data.
+            the result to the future. If :data:`None`, returns the data.
 
         Returns
         -------
@@ -712,9 +712,7 @@ class DiscordWebSocket:
         """
         try:
             msg = await self.socket.receive(timeout=self._max_heartbeat_timeout)
-            if msg.type is aiohttp.WSMsgType.TEXT:
-                await self.received_message(msg.data)
-            elif msg.type is aiohttp.WSMsgType.BINARY:
+            if msg.type is aiohttp.WSMsgType.TEXT or msg.type is aiohttp.WSMsgType.BINARY:
                 await self.received_message(msg.data)
             elif msg.type is aiohttp.WSMsgType.ERROR:
                 _log.debug("Received %s", msg)
@@ -781,7 +779,8 @@ class DiscordWebSocket:
     ) -> None:
         if activity is not None:
             if not isinstance(activity, BaseActivity):
-                raise TypeError("activity must derive from BaseActivity.")
+                msg = "activity must derive from BaseActivity."
+                raise TypeError(msg)
             activity_data = (activity.to_dict(),)
         else:
             activity_data = ()

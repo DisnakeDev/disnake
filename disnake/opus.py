@@ -238,7 +238,8 @@ def _load_default() -> bool:
         else:
             path = ctypes.util.find_library("opus")
             if not path:
-                raise AssertionError("could not find the opus library")
+                msg = "could not find the opus library"
+                raise AssertionError(msg)
             _lib = libopus_loader(path)
     except Exception:
         _lib = MISSING
@@ -370,18 +371,16 @@ class Encoder(_OpusStruct):
 
     def set_bandwidth(self, req: BAND_CTL) -> None:
         if req not in band_ctl:
-            raise KeyError(
-                f"{req!r} is not a valid bandwidth setting. Try one of: {','.join(band_ctl)}"
-            )
+            msg = f"{req!r} is not a valid bandwidth setting. Try one of: {','.join(band_ctl)}"
+            raise KeyError(msg)
 
         k = band_ctl[req]
         _lib.opus_encoder_ctl(self._state, CTL_SET_BANDWIDTH, k)
 
     def set_signal_type(self, req: SIGNAL_CTL) -> None:
         if req not in signal_ctl:
-            raise KeyError(
-                f"{req!r} is not a valid bandwidth setting. Try one of: {','.join(signal_ctl)}"
-            )
+            msg = f"{req!r} is not a valid bandwidth setting. Try one of: {','.join(signal_ctl)}"
+            raise KeyError(msg)
 
         k = signal_ctl[req]
         _lib.opus_encoder_ctl(self._state, CTL_SET_SIGNAL, k)
@@ -469,7 +468,8 @@ class Decoder(_OpusStruct):
 
     def decode(self, data: Optional[bytes], *, fec: bool = False) -> bytes:
         if data is None and fec:
-            raise TypeError("Invalid arguments: FEC cannot be used with null data")
+            msg = "Invalid arguments: FEC cannot be used with null data"
+            raise TypeError(msg)
 
         if data is None:
             frame_size = self._get_last_packet_duration() or self.SAMPLES_PER_FRAME

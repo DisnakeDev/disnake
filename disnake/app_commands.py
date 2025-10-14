@@ -74,7 +74,8 @@ def application_command_factory(data: ApplicationCommandPayload) -> APIApplicati
     if cmd_type is ApplicationCommandType.message:
         return APIMessageCommand.from_dict(data)
 
-    raise TypeError(f"Application command of type {cmd_type} is not valid")
+    msg = f"Application command of type {cmd_type} is not valid"
+    raise TypeError(msg)
 
 
 def _validate_name(name: str) -> None:
@@ -82,16 +83,16 @@ def _validate_name(name: str) -> None:
     # see https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-naming
 
     if not isinstance(name, str):
-        raise TypeError(
-            f"Slash command name and option names must be an instance of class 'str', received '{name.__class__}'"
-        )
+        msg = f"Slash command name and option names must be an instance of class 'str', received '{name.__class__}'"
+        raise TypeError(msg)
 
     if name != name.lower() or not re.fullmatch(r"[\w-]{1,32}", name):
-        raise ValueError(
+        msg = (
             f"Slash command or option name '{name}' should be lowercase, "
             "between 1 and 32 characters long, and only consist of "
             "these symbols: a-z, 0-9, -, _, and other languages'/scripts' symbols"
         )
+        raise ValueError(msg)
 
 
 class OptionChoice:
@@ -99,13 +100,13 @@ class OptionChoice:
 
     Parameters
     ----------
-    name: Union[:class:`str`, :class:`.Localized`]
+    name: :class:`str` | :class:`.Localized`
         The name of the option choice (visible to users).
 
         .. versionchanged:: 2.5
             Added support for localizations.
 
-    value: Union[:class:`str`, :class:`int`]
+    value: :class:`str` | :class:`int`
         The value of the option choice.
     """
 
@@ -166,13 +167,13 @@ class Option:
 
     Parameters
     ----------
-    name: Union[:class:`str`, :class:`.Localized`]
+    name: :class:`str` | :class:`.Localized`
         The option's name.
 
         .. versionchanged:: 2.5
             Added support for localizations.
 
-    description: Optional[Union[:class:`str`, :class:`.Localized`]]
+    description: :class:`str` | :class:`.Localized` | :data:`None`
         The option's description.
 
         .. versionchanged:: 2.5
@@ -182,19 +183,19 @@ class Option:
         The option type, e.g. :class:`OptionType.user`.
     required: :class:`bool`
         Whether this option is required.
-    choices: Union[Sequence[:class:`OptionChoice`], Sequence[Union[:class:`str`, :class:`int`, :class:`float`]], Mapping[:class:`str`, Union[:class:`str`, :class:`int`, :class:`float`]]]
+    choices: :class:`~collections.abc.Sequence`\\[:class:`OptionChoice`] | :class:`~collections.abc.Sequence`\\[:class:`str` | :class:`int` | :class:`float`] | :class:`~collections.abc.Mapping`\\[:class:`str`, :class:`str` | :class:`int` | :class:`float`]
         The pre-defined choices for this option.
-    options: List[:class:`Option`]
+    options: :class:`list`\\[:class:`Option`]
         The list of sub options. Normally you don't have to specify it directly,
         instead consider using ``@main_cmd.sub_command`` or ``@main_cmd.sub_command_group`` decorators.
-    channel_types: List[:class:`ChannelType`]
+    channel_types: :class:`list`\\[:class:`ChannelType`]
         The list of channel types that your option supports, if the type is :class:`OptionType.channel`.
         By default, it supports all channel types.
     autocomplete: :class:`bool`
         Whether this option can be autocompleted.
-    min_value: Union[:class:`int`, :class:`float`]
+    min_value: :class:`int` | :class:`float`
         The minimum value permitted.
-    max_value: Union[:class:`int`, :class:`float`]
+    max_value: :class:`int` | :class:`float`
         The maximum value permitted.
     min_length: :class:`int`
         The minimum length for this option if this is a string option.
@@ -216,19 +217,19 @@ class Option:
         The option type, e.g. :class:`OptionType.user`.
     required: :class:`bool`
         Whether this option is required.
-    choices: List[:class:`OptionChoice`]
+    choices: :class:`list`\\[:class:`OptionChoice`]
         The list of pre-defined choices.
-    options: List[:class:`Option`]
+    options: :class:`list`\\[:class:`Option`]
         The list of sub options. Normally you don't have to specify it directly,
         instead consider using ``@main_cmd.sub_command`` or ``@main_cmd.sub_command_group`` decorators.
-    channel_types: List[:class:`ChannelType`]
+    channel_types: :class:`list`\\[:class:`ChannelType`]
         The list of channel types that your option supports, if the type is :class:`OptionType.channel`.
         By default, it supports all channel types.
     autocomplete: :class:`bool`
         Whether this option can be autocompleted.
-    min_value: Union[:class:`int`, :class:`float`]
+    min_value: :class:`int` | :class:`float`
         The minimum value permitted.
-    max_value: Union[:class:`int`, :class:`float`]
+    max_value: :class:`int` | :class:`float`
         The maximum value permitted.
     min_length: :class:`int`
         The minimum length for this option if this is a string option.
@@ -298,17 +299,20 @@ class Option:
         self.max_length: Optional[int] = max_length
 
         if channel_types is not None and not all(isinstance(t, ChannelType) for t in channel_types):
-            raise TypeError("channel_types must be a list of `ChannelType`s")
+            msg = "channel_types must be a list of `ChannelType`s"
+            raise TypeError(msg)
 
         self.channel_types: List[ChannelType] = channel_types or []
 
         self.choices: List[OptionChoice] = []
         if choices is not None:
             if autocomplete:
-                raise TypeError("can not specify both choices and autocomplete args")
+                msg = "can not specify both choices and autocomplete args"
+                raise TypeError(msg)
 
             if isinstance(choices, str):  # str matches `Sequence[str]`, but isn't meant to be used
-                raise TypeError("choices argument should be a list/sequence or dict, not str")
+                msg = "choices argument should be a list/sequence or dict, not str"
+                raise TypeError(msg)
 
             if isinstance(choices, Mapping):
                 self.choices = [OptionChoice(name, value) for name, value in choices.items()]
@@ -494,14 +498,14 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
 
         .. versionadded:: 2.8
 
-    install_types: Optional[:class:`ApplicationInstallTypes`]
+    install_types: :class:`ApplicationInstallTypes` | :data:`None`
         The installation types where the command is available.
         Defaults to :attr:`ApplicationInstallTypes.guild` only.
         Only available for global commands.
 
         .. versionadded:: 2.10
 
-    contexts: Optional[:class:`InteractionContextTypes`]
+    contexts: :class:`InteractionContextTypes` | :data:`None`
         The interaction contexts where the command can be used.
         Only available for global commands.
 
@@ -539,7 +543,8 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
             # allow everyone to use the command if its not supplied
             self._default_member_permissions = None
         elif isinstance(default_member_permissions, bool):
-            raise TypeError("`default_member_permissions` cannot be a bool")
+            msg = "`default_member_permissions` cannot be a bool"
+            raise TypeError(msg)
         elif isinstance(default_member_permissions, int):
             self._default_member_permissions = default_member_permissions
         else:
@@ -575,17 +580,18 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
             # (n.b. these can be assigned to later, in which case no exception will be raised.
             # assume the user knows what they're doing, in that case)
             if self.contexts is not None:
-                raise ValueError("Cannot use both `dm_permission` and `contexts` at the same time")
+                msg = "Cannot use both `dm_permission` and `contexts` at the same time"
+                raise ValueError(msg)
 
     @property
     def default_member_permissions(self) -> Optional[Permissions]:
-        """Optional[:class:`Permissions`]: The default required member permissions for this command.
+        """:class:`Permissions` | :data:`None`: The default required member permissions for this command.
         A member must have *all* these permissions to be able to invoke the command in a guild.
 
         This is a default value, the set of users/roles that may invoke this command can be
         overridden by moderators on a guild-specific basis, disregarding this setting.
 
-        If ``None`` is returned, it means everyone can use the command by default.
+        If :data:`None` is returned, it means everyone can use the command by default.
         If an empty :class:`Permissions` object is returned (that is, all permissions set to ``False``),
         this means no one can use the command.
 
@@ -734,7 +740,8 @@ class _APIApplicationCommandMixin:
 
     def _update_common(self, data: ApplicationCommandPayload) -> None:
         if not isinstance(self, ApplicationCommand):
-            raise TypeError("_APIApplicationCommandMixin must be used with ApplicationCommand")
+            msg = "_APIApplicationCommandMixin must be used with ApplicationCommand"
+            raise TypeError(msg)
 
         self.id: int = int(data["id"])
         self.application_id: int = int(data["application_id"])
@@ -766,14 +773,14 @@ class UserCommand(ApplicationCommand):
 
         .. versionadded:: 2.8
 
-    install_types: Optional[:class:`ApplicationInstallTypes`]
+    install_types: :class:`ApplicationInstallTypes` | :data:`None`
         The installation types where the command is available.
         Defaults to :attr:`ApplicationInstallTypes.guild` only.
         Only available for global commands.
 
         .. versionadded:: 2.10
 
-    contexts: Optional[:class:`InteractionContextTypes`]
+    contexts: :class:`InteractionContextTypes` | :data:`None`
         The interaction contexts where the command can be used.
         Only available for global commands.
 
@@ -823,14 +830,14 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
 
         .. versionadded:: 2.8
 
-    install_types: Optional[:class:`ApplicationInstallTypes`]
+    install_types: :class:`ApplicationInstallTypes` | :data:`None`
         The installation types where the command is available.
         Defaults to :attr:`ApplicationInstallTypes.guild` only.
         Only available for global commands.
 
         .. versionadded:: 2.10
 
-    contexts: Optional[:class:`InteractionContextTypes`]
+    contexts: :class:`InteractionContextTypes` | :data:`None`
         The interaction contexts where the command can be used.
         Only available for global commands.
 
@@ -840,8 +847,8 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
         The user command's ID.
     application_id: :class:`int`
         The application ID this command belongs to.
-    guild_id: Optional[:class:`int`]
-        The ID of the guild this user command is enabled in, or ``None`` if it's global.
+    guild_id: :class:`int` | :data:`None`
+        The ID of the guild this user command is enabled in, or :data:`None` if it's global.
     version: :class:`int`
         Autoincrementing version identifier updated during substantial record changes.
     """
@@ -855,7 +862,8 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
     def from_dict(cls, data: ApplicationCommandPayload) -> Self:
         cmd_type = data.get("type", 0)
         if cmd_type != ApplicationCommandType.user.value:
-            raise ValueError(f"Invalid payload type for UserCommand: {cmd_type}")
+            msg = f"Invalid payload type for UserCommand: {cmd_type}"
+            raise ValueError(msg)
 
         self = cls(
             name=Localized(data["name"], data=data.get("name_localizations")),
@@ -894,14 +902,14 @@ class MessageCommand(ApplicationCommand):
 
         .. versionadded:: 2.8
 
-    install_types: Optional[:class:`ApplicationInstallTypes`]
+    install_types: :class:`ApplicationInstallTypes` | :data:`None`
         The installation types where the command is available.
         Defaults to :attr:`ApplicationInstallTypes.guild` only.
         Only available for global commands.
 
         .. versionadded:: 2.10
 
-    contexts: Optional[:class:`InteractionContextTypes`]
+    contexts: :class:`InteractionContextTypes` | :data:`None`
         The interaction contexts where the command can be used.
         Only available for global commands.
 
@@ -951,14 +959,14 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
 
         .. versionadded:: 2.8
 
-    install_types: Optional[:class:`ApplicationInstallTypes`]
+    install_types: :class:`ApplicationInstallTypes` | :data:`None`
         The installation types where the command is available.
         Defaults to :attr:`ApplicationInstallTypes.guild` only.
         Only available for global commands.
 
         .. versionadded:: 2.10
 
-    contexts: Optional[:class:`InteractionContextTypes`]
+    contexts: :class:`InteractionContextTypes` | :data:`None`
         The interaction contexts where the command can be used.
         Only available for global commands.
 
@@ -968,8 +976,8 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
         The message command's ID.
     application_id: :class:`int`
         The application ID this command belongs to.
-    guild_id: Optional[:class:`int`]
-        The ID of the guild this message command is enabled in, or ``None`` if it's global.
+    guild_id: :class:`int` | :data:`None`
+        The ID of the guild this message command is enabled in, or :data:`None` if it's global.
     version: :class:`int`
         Autoincrementing version identifier updated during substantial record changes.
     """
@@ -983,7 +991,8 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
     def from_dict(cls, data: ApplicationCommandPayload) -> Self:
         cmd_type = data.get("type", 0)
         if cmd_type != ApplicationCommandType.message.value:
-            raise ValueError(f"Invalid payload type for MessageCommand: {cmd_type}")
+            msg = f"Invalid payload type for MessageCommand: {cmd_type}"
+            raise ValueError(msg)
 
         self = cls(
             name=Localized(data["name"], data=data.get("name_localizations")),
@@ -1029,20 +1038,20 @@ class SlashCommand(ApplicationCommand):
 
         .. versionadded:: 2.8
 
-    install_types: Optional[:class:`ApplicationInstallTypes`]
+    install_types: :class:`ApplicationInstallTypes` | :data:`None`
         The installation types where the command is available.
         Defaults to :attr:`ApplicationInstallTypes.guild` only.
         Only available for global commands.
 
         .. versionadded:: 2.10
 
-    contexts: Optional[:class:`InteractionContextTypes`]
+    contexts: :class:`InteractionContextTypes` | :data:`None`
         The interaction contexts where the command can be used.
         Only available for global commands.
 
         .. versionadded:: 2.10
 
-    options: List[:class:`Option`]
+    options: :class:`list`\\[:class:`Option`]
         The list of options the slash command has.
     """
 
@@ -1169,14 +1178,14 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
 
         .. versionadded:: 2.8
 
-    install_types: Optional[:class:`ApplicationInstallTypes`]
+    install_types: :class:`ApplicationInstallTypes` | :data:`None`
         The installation types where the command is available.
         Defaults to :attr:`ApplicationInstallTypes.guild` only.
         Only available for global commands.
 
         .. versionadded:: 2.10
 
-    contexts: Optional[:class:`InteractionContextTypes`]
+    contexts: :class:`InteractionContextTypes` | :data:`None`
         The interaction contexts where the command can be used.
         Only available for global commands.
 
@@ -1184,12 +1193,12 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
 
     id: :class:`int`
         The slash command's ID.
-    options: List[:class:`Option`]
+    options: :class:`list`\\[:class:`Option`]
         The list of options the slash command has.
     application_id: :class:`int`
         The application ID this command belongs to.
-    guild_id: Optional[:class:`int`]
-        The ID of the guild this slash command is enabled in, or ``None`` if it's global.
+    guild_id: :class:`int` | :data:`None`
+        The ID of the guild this slash command is enabled in, or :data:`None` if it's global.
     version: :class:`int`
         Autoincrementing version identifier updated during substantial record changes.
     """
@@ -1203,7 +1212,8 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
     def from_dict(cls, data: ApplicationCommandPayload) -> Self:
         cmd_type = data.get("type", 0)
         if cmd_type != ApplicationCommandType.chat_input.value:
-            raise ValueError(f"Invalid payload type for SlashCommand: {cmd_type}")
+            msg = f"Invalid payload type for SlashCommand: {cmd_type}"
+            raise ValueError(msg)
 
         self = cls(
             name=Localized(data["name"], data=data.get("name_localizations")),
@@ -1295,7 +1305,7 @@ class GuildApplicationCommandPermissions:
         The application ID this command belongs to.
     guild_id: :class:`int`
         The ID of the guild where these permissions are applied.
-    permissions: List[:class:`ApplicationCommandPermissions`]
+    permissions: :class:`list`\\[:class:`ApplicationCommandPermissions`]
         A list of :class:`ApplicationCommandPermissions`.
     """
 

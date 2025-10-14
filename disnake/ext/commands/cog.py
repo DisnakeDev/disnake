@@ -96,7 +96,7 @@ class CogMeta(type):
 
         .. versionadded:: 1.6
 
-    command_attrs: Dict[:class:`str`, Any]
+    command_attrs: :class:`dict`\\[:class:`str`, :data:`~typing.Any`]
         A list of attributes to apply to every command inside this cog. The dictionary
         is passed into the :class:`Command` options at ``__init__``.
         If you specify attributes inside the command attribute in the class, it will
@@ -113,7 +113,7 @@ class CogMeta(type):
                 async def bar(self, ctx):
                     pass # hidden -> False
 
-    slash_command_attrs: Dict[:class:`str`, Any]
+    slash_command_attrs: :class:`dict`\\[:class:`str`, :data:`~typing.Any`]
         A list of attributes to apply to every slash command inside this cog. The dictionary
         is passed into the options of every :class:`InvokableSlashCommand` at ``__init__``.
         Usage of this kwarg is otherwise the same as with ``command_attrs``.
@@ -122,14 +122,14 @@ class CogMeta(type):
 
         .. versionadded:: 2.5
 
-    user_command_attrs: Dict[:class:`str`, Any]
+    user_command_attrs: :class:`dict`\\[:class:`str`, :data:`~typing.Any`]
         A list of attributes to apply to every user command inside this cog. The dictionary
         is passed into the options of every :class:`InvokableUserCommand` at ``__init__``.
         Usage of this kwarg is otherwise the same as with ``command_attrs``.
 
         .. versionadded:: 2.5
 
-    message_command_attrs: Dict[:class:`str`, Any]
+    message_command_attrs: :class:`dict`\\[:class:`str`, :data:`~typing.Any`]
         A list of attributes to apply to every message command inside this cog. The dictionary
         is passed into the options of every :class:`InvokableMessageCommand` at ``__init__``.
         Usage of this kwarg is otherwise the same as with ``command_attrs``.
@@ -178,17 +178,15 @@ class CogMeta(type):
                     value = value.__func__
                 if isinstance(value, _BaseCommand):
                     if is_static_method:
-                        raise TypeError(
-                            f"Command in method {base}.{elem!r} must not be staticmethod."
-                        )
+                        msg = f"Command in method {base}.{elem!r} must not be staticmethod."
+                        raise TypeError(msg)
                     if elem.startswith(("cog_", "bot_")):
                         raise TypeError(no_bot_cog.format(base, elem))
                     commands[elem] = value
                 elif isinstance(value, InvokableApplicationCommand):
                     if is_static_method:
-                        raise TypeError(
-                            f"Application command in method {base}.{elem!r} must not be staticmethod."
-                        )
+                        msg = f"Application command in method {base}.{elem!r} must not be staticmethod."
+                        raise TypeError(msg)
                     if elem.startswith(("cog_", "bot_")):
                         raise TypeError(no_bot_cog.format(base, elem))
                     app_commands[elem] = value
@@ -284,7 +282,7 @@ class Cog(metaclass=CogMeta):
 
         Returns
         -------
-        List[:class:`.Command`]
+        :class:`list`\\[:class:`.Command`]
             A :class:`list` of :class:`.Command`\\s that are
             defined inside this cog.
 
@@ -299,7 +297,7 @@ class Cog(metaclass=CogMeta):
 
         Returns
         -------
-        List[:class:`.InvokableApplicationCommand`]
+        :class:`list`\\[:class:`.InvokableApplicationCommand`]
             A :class:`list` of :class:`.InvokableApplicationCommand`\\s that are
             defined inside this cog.
 
@@ -314,7 +312,7 @@ class Cog(metaclass=CogMeta):
 
         Returns
         -------
-        List[:class:`.InvokableSlashCommand`]
+        :class:`list`\\[:class:`.InvokableSlashCommand`]
             A :class:`list` of :class:`.InvokableSlashCommand`\\s that are
             defined inside this cog.
 
@@ -329,7 +327,7 @@ class Cog(metaclass=CogMeta):
 
         Returns
         -------
-        List[:class:`.InvokableUserCommand`]
+        :class:`list`\\[:class:`.InvokableUserCommand`]
             A :class:`list` of :class:`.InvokableUserCommand`\\s that are
             defined inside this cog.
         """
@@ -340,7 +338,7 @@ class Cog(metaclass=CogMeta):
 
         Returns
         -------
-        List[:class:`.InvokableMessageCommand`]
+        :class:`list`\\[:class:`.InvokableMessageCommand`]
             A :class:`list` of :class:`.InvokableMessageCommand`\\s that are
             defined inside this cog.
         """
@@ -365,7 +363,7 @@ class Cog(metaclass=CogMeta):
 
         Yields
         ------
-        Union[:class:`.Command`, :class:`.Group`]
+        :class:`.Command` | :class:`.Group`
             A command or group from the cog.
         """
         from .core import GroupMixin
@@ -381,7 +379,7 @@ class Cog(metaclass=CogMeta):
 
         Returns
         -------
-        List[Tuple[:class:`str`, :ref:`coroutine <coroutine>`]]
+        :class:`list`\\[:class:`tuple`\\[:class:`str`, :ref:`coroutine function <coroutine>`]]
             The listeners defined in this cog.
         """
         return [(name, getattr(self, method_name)) for name, method_name in self.__cog_listeners__]
@@ -399,7 +397,7 @@ class Cog(metaclass=CogMeta):
 
         Parameters
         ----------
-        name: Union[:class:`str`, :class:`.Event`]
+        name: :class:`str` | :class:`.Event`
             The name of the event being listened to. If not provided, it
             defaults to the function's name.
 
@@ -410,16 +408,16 @@ class Cog(metaclass=CogMeta):
             the name.
         """
         if name is not MISSING and not isinstance(name, (str, Event)):
-            raise TypeError(
-                f"Cog.listener expected str or Enum but received {name.__class__.__name__!r} instead."
-            )
+            msg = f"Cog.listener expected str or Enum but received {name.__class__.__name__!r} instead."
+            raise TypeError(msg)
 
         def decorator(func: FuncT) -> FuncT:
             actual = func
             if isinstance(actual, staticmethod):
                 actual = actual.__func__
             if not disnake.utils.iscoroutinefunction(actual):
-                raise TypeError("Listener function must be a coroutine function.")
+                msg = "Listener function must be a coroutine function."
+                raise TypeError(msg)
             actual.__cog_listener__ = True
             to_assign = (
                 actual.__name__
@@ -729,7 +727,8 @@ class Cog(metaclass=CogMeta):
             isinstance(bot, (InteractionBot, AutoShardedInteractionBot))
             and len(self.__cog_commands__) > 0
         ):
-            raise TypeError("@commands.command is not supported for interaction bots.")
+            msg = "@commands.command is not supported for interaction bots."
+            raise TypeError(msg)
 
         # realistically, the only thing that can cause loading errors
         # is essentially just the command loading, which raises if there are
@@ -773,13 +772,15 @@ class Cog(metaclass=CogMeta):
         # check if we're overriding the default
         if cls.bot_check is not Cog.bot_check:
             if isinstance(bot, (InteractionBot, AutoShardedInteractionBot)):
-                raise TypeError("Cog.bot_check is not supported for interaction bots.")
+                msg = "Cog.bot_check is not supported for interaction bots."
+                raise TypeError(msg)
 
             bot.add_check(self.bot_check)
 
         if cls.bot_check_once is not Cog.bot_check_once:
             if isinstance(bot, (InteractionBot, AutoShardedInteractionBot)):
-                raise TypeError("Cog.bot_check_once is not supported for interaction bots.")
+                msg = "Cog.bot_check_once is not supported for interaction bots."
+                raise TypeError(msg)
 
             bot.add_check(self.bot_check_once, call_once=True)
 

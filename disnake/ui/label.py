@@ -50,7 +50,7 @@ class Label(UIComponent):
         The label text.
     component: Union[:class:`TextInput`, :class:`FileUpload`, :class:`BaseSelect`]
         The component within the label.
-    description: Optional[:class:`str`]
+    description: :class:`str` | :data:`None`
         The description text for the label.
     """
 

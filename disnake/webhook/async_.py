@@ -224,7 +224,8 @@ class AsyncWebhookAdapter:
                     raise DiscordServerError(response, data)
                 raise HTTPException(response, data)
 
-            raise RuntimeError("Unreachable code in HTTP handling.")
+            msg = "Unreachable code in HTTP handling."
+            raise RuntimeError(msg)
 
     def delete_webhook(
         self,
@@ -521,11 +522,14 @@ def handle_message_parameters_dict(
     applied_tags: Sequence[Snowflake] = MISSING,
 ) -> DictPayloadParameters:
     if files is not MISSING and file is not MISSING:
-        raise TypeError("Cannot mix file and files keyword arguments.")
+        msg = "Cannot mix file and files keyword arguments."
+        raise TypeError(msg)
     if embeds is not MISSING and embed is not MISSING:
-        raise TypeError("Cannot mix embed and embeds keyword arguments.")
+        msg = "Cannot mix embed and embeds keyword arguments."
+        raise TypeError(msg)
     if view is not MISSING and components is not MISSING:
-        raise TypeError("Cannot mix view and components keyword arguments.")
+        msg = "Cannot mix view and components keyword arguments."
+        raise TypeError(msg)
 
     if file is not MISSING:
         files = [file]
@@ -535,7 +539,8 @@ def handle_message_parameters_dict(
         embeds = [embed] if embed else []
     if embeds is not MISSING:
         if len(embeds) > 10:
-            raise ValueError("embeds has a maximum of 10 elements.")
+            msg = "embeds has a maximum of 10 elements."
+            raise ValueError(msg)
         payload["embeds"] = [e.to_dict() for e in embeds]
         for embed in embeds:
             if embed._files:
@@ -560,7 +565,8 @@ def handle_message_parameters_dict(
         flags.is_components_v2 = True
     # components v2 cannot be used with other content fields
     if flags and flags.is_components_v2 and (content or embeds or stickers or poll):
-        raise ValueError("Cannot use v2 components with content, embeds, stickers, or polls")
+        msg = "Cannot use v2 components with content, embeds, stickers, or polls"
+        raise ValueError(msg)
 
     if attachments is not MISSING:
         payload["attachments"] = [] if attachments is None else [a.to_dict() for a in attachments]
@@ -715,7 +721,7 @@ class PartialWebhookGuild(Hashable):
 
     @property
     def icon(self) -> Optional[Asset]:
-        """Optional[:class:`Asset`]: Returns the guild's icon asset, if available."""
+        """:class:`Asset` | :data:`None`: Returns the guild's icon asset, if available."""
         if self._icon is None:
             return None
         return Asset._from_guild_icon(self._state, self.id, self._icon)
@@ -725,7 +731,8 @@ class _FriendlyHttpAttributeErrorHelper:
     __slots__ = ()
 
     def __getattr__(self, attr) -> NoReturn:
-        raise AttributeError("PartialWebhookState does not support http methods.")
+        msg = "PartialWebhookState does not support http methods."
+        raise AttributeError(msg)
 
 
 WebhookT = TypeVar("WebhookT", bound="BaseWebhook")
@@ -779,7 +786,8 @@ class _WebhookState(Generic[WebhookT]):
         if self._parent is not None:
             return getattr(self._parent, attr)
 
-        raise AttributeError(f"PartialWebhookState does not support {attr!r}.")
+        msg = f"PartialWebhookState does not support {attr!r}."
+        raise AttributeError(msg)
 
 
 class WebhookMessage(Message):
@@ -826,12 +834,12 @@ class WebhookMessage(Message):
 
         Parameters
         ----------
-        content: Optional[:class:`str`]
-            The content to edit the message with, or ``None`` to clear it.
-        embed: Optional[:class:`Embed`]
+        content: :class:`str` | :data:`None`
+            The content to edit the message with, or :data:`None` to clear it.
+        embed: :class:`Embed` | :data:`None`
             The new embed to replace the original with. This cannot be mixed with the ``embeds`` parameter.
-            Could be ``None`` to remove the embed.
-        embeds: List[:class:`Embed`]
+            Could be :data:`None` to remove the embed.
+        embeds: :class:`list`\\[:class:`Embed`]
             The new embeds to replace the original with. Must be a maximum of 10.
             This cannot be mixed with the ``embed`` parameter.
             To remove all embeds ``[]`` should be passed.
@@ -842,32 +850,32 @@ class WebhookMessage(Message):
 
             .. versionadded:: 2.0
 
-        files: List[:class:`File`]
+        files: :class:`list`\\[:class:`File`]
             A list of files to upload. This cannot be mixed with the ``file`` parameter.
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
 
             .. versionadded:: 2.0
 
-        attachments: Optional[List[:class:`Attachment`]]
+        attachments: :class:`list`\\[:class:`Attachment`] | :data:`None`
             A list of attachments to keep in the message.
-            If ``[]`` or ``None`` is passed then all existing attachments are removed.
+            If ``[]`` or :data:`None` is passed then all existing attachments are removed.
             Keeps existing attachments if not provided.
 
             .. versionadded:: 2.2
 
             .. versionchanged:: 2.5
-                Supports passing ``None`` to clear attachments.
+                Supports passing :data:`None` to clear attachments.
 
-        view: Optional[:class:`~disnake.ui.View`]
+        view: :class:`~disnake.ui.View` | :data:`None`
             The view to update this message with. This cannot be mixed with ``components``.
-            If ``None`` is passed then the view is removed.
+            If :data:`None` is passed then the view is removed.
 
             .. versionadded:: 2.0
 
-        components: Optional[|components_type|]
+        components: |components_type| | :data:`None`
             A list of components to update the message with. This cannot be mixed with ``view``.
-            If ``None`` is passed then the components are removed.
+            If :data:`None` is passed then the components are removed.
 
             .. versionadded:: 2.4
 
@@ -875,7 +883,7 @@ class WebhookMessage(Message):
                 Passing v2 components here automatically sets the :attr:`~MessageFlags.is_components_v2` flag.
                 Setting this flag cannot be reverted. Note that this also disables the
                 ``content`` and ``embeds`` fields.
-                If the message previously had any of these fields set, you must set them to ``None``.
+                If the message previously had any of these fields set, you must set them to :data:`None`.
 
         flags: :class:`MessageFlags`
             The new flags to set for this message. Overrides existing flags.
@@ -934,7 +942,7 @@ class WebhookMessage(Message):
 
         Parameters
         ----------
-        delay: Optional[:class:`float`]
+        delay: :class:`float` | :data:`None`
             If provided, the number of seconds to wait before deleting the message.
             The waiting is done in the background and deletion failures are ignored.
 
@@ -1039,9 +1047,9 @@ class BaseWebhook(Hashable):
 
     @property
     def guild(self) -> Optional[Guild]:
-        """Optional[:class:`Guild`]: The guild this webhook belongs to.
+        """:class:`Guild` | :data:`None`: The guild this webhook belongs to.
 
-        If this is a partial webhook, then this will always return ``None``.
+        If this is a partial webhook, then this will always return :data:`None`.
         """
         return self._state and self._state._get_guild(self.guild_id)
 
@@ -1049,9 +1057,9 @@ class BaseWebhook(Hashable):
     def channel(
         self,
     ) -> Optional[Union[TextChannel, VoiceChannel, StageChannel, ForumChannel, MediaChannel]]:
-        """Optional[Union[:class:`TextChannel`, :class:`VoiceChannel`, :class:`StageChannel`, :class:`ForumChannel`, :class:`MediaChannel`]]: The channel this webhook belongs to.
+        """:class:`TextChannel` | :class:`VoiceChannel` | :class:`StageChannel` | :class:`ForumChannel` | :class:`MediaChannel` | :data:`None`: The channel this webhook belongs to.
 
-        If this is a partial webhook, then this will always return ``None``.
+        If this is a partial webhook, then this will always return :data:`None`.
 
         Webhooks in a :class:`ForumChannel` or :class:`MediaChannel` can not send messages directly.
         They can only create new threads (see ``thread_name`` for :attr:`Webhook.send`)
@@ -1133,31 +1141,31 @@ class Webhook(BaseWebhook):
 
         .. versionadded:: 1.3
 
-    token: Optional[:class:`str`]
-        The authentication token of the webhook. If this is ``None``
+    token: :class:`str` | :data:`None`
+        The authentication token of the webhook. If this is :data:`None`
         then the webhook cannot be used to make requests.
-    guild_id: Optional[:class:`int`]
+    guild_id: :class:`int` | :data:`None`
         The guild ID this webhook belongs to.
-    channel_id: Optional[:class:`int`]
+    channel_id: :class:`int` | :data:`None`
         The channel ID this webhook belongs to.
-    user: Optional[:class:`abc.User`]
+    user: :class:`abc.User` | :data:`None`
         The user this webhook was created by. If the webhook was
-        received without authentication then this will be ``None``.
-    name: Optional[:class:`str`]
+        received without authentication then this will be :data:`None`.
+    name: :class:`str` | :data:`None`
         The default name of the webhook.
-    source_guild: Optional[:class:`PartialWebhookGuild`]
+    source_guild: :class:`PartialWebhookGuild` | :data:`None`
         The guild of the channel that this webhook is following.
         Only given if :attr:`type` is :attr:`WebhookType.channel_follower`.
 
         .. versionadded:: 2.0
 
-    source_channel: Optional[:class:`PartialWebhookChannel`]
+    source_channel: :class:`PartialWebhookChannel` | :data:`None`
         The channel that this webhook is following.
         Only given if :attr:`type` is :attr:`WebhookType.channel_follower`.
 
         .. versionadded:: 2.0
 
-    application_id: Optional[:class:`int`]
+    application_id: :class:`int` | :data:`None`
         The ID of the application associated with this webhook, if it was created by an application.
 
         .. versionadded:: 2.6
@@ -1202,7 +1210,7 @@ class Webhook(BaseWebhook):
 
             .. versionadded:: 2.0
 
-        bot_token: Optional[:class:`str`]
+        bot_token: :class:`str` | :data:`None`
             The bot authentication token for authenticated requests
             involving the webhook.
 
@@ -1242,7 +1250,7 @@ class Webhook(BaseWebhook):
 
             .. versionadded:: 2.0
 
-        bot_token: Optional[:class:`str`]
+        bot_token: :class:`str` | :data:`None`
             The bot authentication token for authenticated requests
             involving the webhook.
 
@@ -1264,7 +1272,8 @@ class Webhook(BaseWebhook):
             url,
         )
         if m is None:
-            raise ValueError("Invalid webhook URL given.")
+            msg = "Invalid webhook URL given."
+            raise ValueError(msg)
 
         data: Dict[str, Any] = m.groupdict()
         data["type"] = 1
@@ -1342,7 +1351,8 @@ class Webhook(BaseWebhook):
         elif self.token:
             data = await adapter.fetch_webhook_with_token(self.id, self.token, session=self.session)
         else:
-            raise WebhookTokenMissing("This webhook does not have a token associated with it")
+            msg = "This webhook does not have a token associated with it"
+            raise WebhookTokenMissing(msg)
 
         return Webhook(data, self.session, token=self.auth_token, state=self._state)
 
@@ -1356,7 +1366,7 @@ class Webhook(BaseWebhook):
 
         Parameters
         ----------
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason for deleting this webhook. Shows up on the audit log.
 
             .. versionadded:: 1.4
@@ -1379,7 +1389,8 @@ class Webhook(BaseWebhook):
             This webhook does not have a token associated with it.
         """
         if self.token is None and self.auth_token is None:
-            raise WebhookTokenMissing("This webhook does not have a token associated with it")
+            msg = "This webhook does not have a token associated with it"
+            raise WebhookTokenMissing(msg)
 
         adapter = async_context.get()
 
@@ -1410,15 +1421,15 @@ class Webhook(BaseWebhook):
 
         Parameters
         ----------
-        name: Optional[:class:`str`]
+        name: :class:`str` | :data:`None`
             The webhook's new default name.
-        avatar: Optional[|resource_type|]
+        avatar: |resource_type| | :data:`None`
             The webhook's new default avatar.
 
             .. versionchanged:: 2.5
                 Now accepts various resource types in addition to :class:`bytes`.
 
-        channel: Optional[:class:`abc.Snowflake`]
+        channel: :class:`abc.Snowflake` | :data:`None`
             The webhook's new channel. This requires an authenticated webhook.
 
             .. versionadded:: 2.0
@@ -1429,7 +1440,7 @@ class Webhook(BaseWebhook):
 
             .. versionadded:: 2.0
 
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason for editing this webhook. Shows up on the audit log.
 
             .. versionadded:: 1.4
@@ -1452,7 +1463,8 @@ class Webhook(BaseWebhook):
             The newly edited webhook.
         """
         if self.token is None and self.auth_token is None:
-            raise WebhookTokenMissing("This webhook does not have a token associated with it")
+            msg = "This webhook does not have a token associated with it"
+            raise WebhookTokenMissing(msg)
 
         payload: Dict[str, Any] = {}
         if name is not MISSING:
@@ -1467,7 +1479,8 @@ class Webhook(BaseWebhook):
         # If a channel is given, always use the authenticated endpoint
         if channel is not None:
             if self.auth_token is None:
-                raise WebhookTokenMissing("Editing channel requires authenticated webhook")
+                msg = "Editing channel requires authenticated webhook"
+                raise WebhookTokenMissing(msg)
 
             payload["channel_id"] = channel.id
             data = await adapter.edit_webhook(
@@ -1484,7 +1497,8 @@ class Webhook(BaseWebhook):
             )
 
         if data is None:
-            raise RuntimeError("Unreachable code hit: data was not assigned")
+            msg = "Unreachable code hit: data was not assigned"
+            raise RuntimeError(msg)
 
         return Webhook(data=data, session=self.session, token=self.auth_token, state=self._state)
 
@@ -1617,7 +1631,7 @@ class Webhook(BaseWebhook):
 
         Parameters
         ----------
-        content: Optional[:class:`str`]
+        content: :class:`str` | :data:`None`
             The content of the message to send.
         username: :class:`str`
             The username to send with this message. If no username is provided
@@ -1638,12 +1652,12 @@ class Webhook(BaseWebhook):
 
         file: :class:`File`
             The file to upload. This cannot be mixed with the ``files`` parameter.
-        files: List[:class:`File`]
+        files: :class:`list`\\[:class:`File`]
             A list of files to upload. Must be a maximum of 10.
             This cannot be mixed with the ``file`` parameter.
         embed: :class:`Embed`
             The rich embed for the content to send. This cannot be mixed with the ``embeds`` parameter.
-        embeds: List[:class:`Embed`]
+        embeds: :class:`list`\\[:class:`Embed`]
             A list of embeds to send with the content. Must be a maximum of 10.
             This cannot be mixed with the ``embed`` parameter.
         allowed_mentions: :class:`AllowedMentions`
@@ -1692,7 +1706,7 @@ class Webhook(BaseWebhook):
                 representing the created thread, may be a :class:`PartialMessageable`.
 
             .. versionadded:: 2.6
-        applied_tags: Sequence[:class:`abc.Snowflake`]
+        applied_tags: :class:`~collections.abc.Sequence`\\[:class:`abc.Snowflake`]
             If in a forum/media channel and creating a new thread (see ``thread_name`` above),
             the tags to apply to the new thread. Maximum of 5.
 
@@ -1700,7 +1714,7 @@ class Webhook(BaseWebhook):
 
         wait: :class:`bool`
             Whether the server should wait before sending a response. This essentially
-            means that the return type of this function changes from ``None`` to
+            means that the return type of this function changes from :data:`None` to
             a :class:`WebhookMessage` if set to ``True``. If the type of webhook
             is :attr:`WebhookType.application` then this is always set to ``True``.
         delete_after: :class:`float`
@@ -1757,11 +1771,12 @@ class Webhook(BaseWebhook):
 
         Returns
         -------
-        Optional[:class:`WebhookMessage`]
-            If ``wait`` is ``True`` then the message that was sent, otherwise ``None``.
+        :class:`WebhookMessage` | :data:`None`
+            If ``wait`` is ``True`` then the message that was sent, otherwise :data:`None`.
         """
         if self.token is None:
-            raise WebhookTokenMissing("This webhook does not have a token associated with it")
+            msg = "This webhook does not have a token associated with it"
+            raise WebhookTokenMissing(msg)
 
         previous_mentions: Optional[AllowedMentions] = getattr(
             self._state, "allowed_mentions", None
@@ -1771,23 +1786,24 @@ class Webhook(BaseWebhook):
 
         application_webhook = self.type is WebhookType.application
         if ephemeral and not application_webhook:
-            raise TypeError("ephemeral messages can only be sent from application webhooks")
+            msg = "ephemeral messages can only be sent from application webhooks"
+            raise TypeError(msg)
 
         if application_webhook or delete_after is not MISSING:
             wait = True
 
         if view is not MISSING:
             if isinstance(self._state, _WebhookState):
-                raise TypeError("Webhook views require an associated state with the webhook")
+                msg = "Webhook views require an associated state with the webhook"
+                raise TypeError(msg)
             if ephemeral is True and view.timeout is None:
                 view.timeout = 15 * 60.0
 
         thread_id: Optional[int] = None
         if thread is not MISSING:
             if thread_name or applied_tags:
-                raise TypeError(
-                    "Cannot use `thread_name` or `applied_tags` when `thread` is provided."
-                )
+                msg = "Cannot use `thread_name` or `applied_tags` when `thread` is provided."
+                raise TypeError(msg)
             thread_id = thread.id
 
         params = handle_message_parameters(
@@ -1859,7 +1875,7 @@ class Webhook(BaseWebhook):
         ----------
         id: :class:`int`
             The message ID to look for.
-        thread: Optional[:class:`~disnake.abc.Snowflake`]
+        thread: :class:`~disnake.abc.Snowflake` | :data:`None`
             The thread the message is in, if any.
 
             .. versionadded:: 2.10
@@ -1881,7 +1897,8 @@ class Webhook(BaseWebhook):
             The message asked for.
         """
         if self.token is None:
-            raise WebhookTokenMissing("This webhook does not have a token associated with it")
+            msg = "This webhook does not have a token associated with it"
+            raise WebhookTokenMissing(msg)
 
         adapter = async_context.get()
         data = await adapter.get_webhook_message(
@@ -1934,13 +1951,13 @@ class Webhook(BaseWebhook):
         ----------
         message_id: :class:`int`
             The ID of the message to edit.
-        content: Optional[:class:`str`]
-            The content to edit the message with, or ``None`` to clear it.
-        embed: Optional[:class:`Embed`]
+        content: :class:`str` | :data:`None`
+            The content to edit the message with, or :data:`None` to clear it.
+        embed: :class:`Embed` | :data:`None`
             The new embed to replace the original with. This cannot be mixed with the
             ``embeds`` parameter.
-            Could be ``None`` to remove the embed.
-        embeds: List[:class:`Embed`]
+            Could be :data:`None` to remove the embed.
+        embeds: :class:`list`\\[:class:`Embed`]
             The new embeds to replace the original with. Must be a maximum of 10.
             This cannot be mixed with the ``embed`` parameter.
             To remove all embeds ``[]`` should be passed.
@@ -1951,33 +1968,33 @@ class Webhook(BaseWebhook):
 
             .. versionadded:: 2.0
 
-        files: List[:class:`File`]
+        files: :class:`list`\\[:class:`File`]
             A list of files to upload. This cannot be mixed with the ``file`` parameter.
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
 
             .. versionadded:: 2.0
 
-        attachments: Optional[List[:class:`Attachment`]]
+        attachments: :class:`list`\\[:class:`Attachment`] | :data:`None`
             A list of attachments to keep in the message.
-            If ``[]`` or ``None`` is passed then all existing attachments are removed.
+            If ``[]`` or :data:`None` is passed then all existing attachments are removed.
             Keeps existing attachments if not provided.
 
             .. versionadded:: 2.2
 
             .. versionchanged:: 2.5
-                Supports passing ``None`` to clear attachments.
+                Supports passing :data:`None` to clear attachments.
 
-        view: Optional[:class:`~disnake.ui.View`]
-            The updated view to update this message with. If ``None`` is passed then
+        view: :class:`~disnake.ui.View` | :data:`None`
+            The updated view to update this message with. If :data:`None` is passed then
             the view is removed. The webhook must have state attached, similar to
             :meth:`send`. This cannot be mixed with ``components``.
 
             .. versionadded:: 2.0
 
-        components: Optional[|components_type|]
+        components: |components_type| | :data:`None`
             A list of components to update this message with. This cannot be mixed with ``view``.
-            If ``None`` is passed then the components are removed.
+            If :data:`None` is passed then the components are removed.
 
             .. versionadded:: 2.4
 
@@ -1985,7 +2002,7 @@ class Webhook(BaseWebhook):
                 Passing v2 components here automatically sets the :attr:`~MessageFlags.is_components_v2` flag.
                 Setting this flag cannot be reverted. Note that this also disables the
                 ``content`` and ``embeds`` fields.
-                If the message previously had any of these fields set, you must set them to ``None``.
+                If the message previously had any of these fields set, you must set them to :data:`None`.
 
         flags: :class:`MessageFlags`
             The new flags to set for this message. Overrides existing flags.
@@ -1998,7 +2015,7 @@ class Webhook(BaseWebhook):
             Controls the mentions being processed in this message.
             See :meth:`.abc.Messageable.send` for more information.
 
-        thread: Optional[:class:`~disnake.abc.Snowflake`]
+        thread: :class:`~disnake.abc.Snowflake` | :data:`None`
             The thread the message is in, if any.
 
             .. versionadded:: 2.10
@@ -2024,11 +2041,13 @@ class Webhook(BaseWebhook):
             The newly edited webhook message.
         """
         if self.token is None:
-            raise WebhookTokenMissing("This webhook does not have a token associated with it")
+            msg = "This webhook does not have a token associated with it"
+            raise WebhookTokenMissing(msg)
 
         if view is not MISSING:
             if isinstance(self._state, _WebhookState):
-                raise TypeError("This webhook does not have state associated with it")
+                msg = "This webhook does not have state associated with it"
+                raise TypeError(msg)
 
             self._state.prevent_view_updates_for(message_id)
 
@@ -2094,7 +2113,7 @@ class Webhook(BaseWebhook):
         ----------
         message_id: :class:`int`
             The ID of the message to delete.
-        thread: Optional[:class:`~disnake.abc.Snowflake`]
+        thread: :class:`~disnake.abc.Snowflake` | :data:`None`
             The thread the message is in, if any.
 
             .. versionadded:: 2.10
@@ -2109,7 +2128,8 @@ class Webhook(BaseWebhook):
             There was no token associated with this webhook
         """
         if self.token is None:
-            raise WebhookTokenMissing("This webhook does not have a token associated with it")
+            msg = "This webhook does not have a token associated with it"
+            raise WebhookTokenMissing(msg)
 
         adapter = async_context.get()
         await adapter.delete_webhook_message(

@@ -51,7 +51,8 @@ def _autocomplete(
             option.autocomplete = True
             break
     else:  # nobreak
-        raise ValueError(f"Option '{option_name}' doesn't exist in '{self.qualified_name}'")
+        msg = f"Option '{option_name}' doesn't exist in '{self.qualified_name}'"
+        raise ValueError(msg)
 
     def decorator(func: Callable) -> Callable:
         classify_autocompleter(func)
@@ -140,18 +141,18 @@ class SubCommandGroup(InvokableApplicationCommand):
         .. versionadded:: 2.6
     option: :class:`.Option`
         API representation of this subcommand.
-    callback: :ref:`coroutine <coroutine>`
-        The coroutine that is executed when the command group is invoked.
-    cog: Optional[:class:`Cog`]
-        The cog that this group belongs to. ``None`` if there isn't one.
-    checks: List[Callable[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
+    callback: :ref:`coroutine function <coroutine>`
+        The coroutine function that is executed when the command group is invoked.
+    cog: :class:`Cog` | :data:`None`
+        The cog that this group belongs to. :data:`None` if there isn't one.
+    checks: :class:`list`\\[:class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
         A list of predicates that verifies if the group could be executed
         with the given :class:`.ApplicationCommandInteraction` as the sole parameter. If an exception
         is necessary to be thrown to signal failure, then one inherited from
         :exc:`.CommandError` should be used. Note that if the checks fail then
         :exc:`.CheckFailure` exception is raised to the :func:`.on_slash_command_error`
         event.
-    extras: Dict[:class:`str`, Any]
+    extras: :class:`dict`\\[:class:`str`, :data:`~typing.Any`]
         A dict of user provided extras to attach to the subcommand group.
 
         .. note::
@@ -198,7 +199,7 @@ class SubCommandGroup(InvokableApplicationCommand):
 
     @property
     def parents(self) -> Tuple[InvokableSlashCommand]:
-        """Tuple[:class:`InvokableSlashCommand`]: Returns all parents of this group.
+        """:class:`tuple`\\[:class:`InvokableSlashCommand`]: Returns all parents of this group.
 
         .. versionadded:: 2.6
         """
@@ -222,7 +223,7 @@ class SubCommandGroup(InvokableApplicationCommand):
 
         Returns
         -------
-        Callable[..., :class:`SubCommand`]
+        :class:`~collections.abc.Callable`\\[..., :class:`SubCommand`]
             A decorator that converts the provided method into a SubCommand, adds it to the bot, then returns it.
         """
 
@@ -257,26 +258,26 @@ class SubCommand(InvokableApplicationCommand):
     qualified_name: :class:`str`
         The full command name, including parent names in the case of slash subcommands or groups.
         For example, the qualified name for ``/one two three`` would be ``one two three``.
-    parent: Union[:class:`InvokableSlashCommand`, :class:`SubCommandGroup`]
+    parent: :class:`InvokableSlashCommand` | :class:`SubCommandGroup`
         The parent command or group this subcommand belongs to.
 
         .. versionadded:: 2.6
     option: :class:`.Option`
         API representation of this subcommand.
-    callback: :ref:`coroutine <coroutine>`
-        The coroutine that is executed when the subcommand is called.
-    cog: Optional[:class:`Cog`]
-        The cog that this subcommand belongs to. ``None`` if there isn't one.
-    checks: List[Callable[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
+    callback: :ref:`coroutine function <coroutine>`
+        The coroutine function that is executed when the subcommand is called.
+    cog: :class:`Cog` | :data:`None`
+        The cog that this subcommand belongs to. :data:`None` if there isn't one.
+    checks: :class:`list`\\[:class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
         A list of predicates that verifies if the subcommand could be executed
         with the given :class:`.ApplicationCommandInteraction` as the sole parameter. If an exception
         is necessary to be thrown to signal failure, then one inherited from
         :exc:`.CommandError` should be used. Note that if the checks fail then
         :exc:`.CheckFailure` exception is raised to the :func:`.on_slash_command_error`
         event.
-    connectors: Dict[:class:`str`, :class:`str`]
+    connectors: :class:`dict`\\[:class:`str`, :class:`str`]
         A mapping of option names to function parameter names, mainly for internal processes.
-    extras: Dict[:class:`str`, Any]
+    extras: :class:`dict`\\[:class:`str`, :data:`~typing.Any`]
         A dict of user provided extras to attach to the subcommand.
 
         .. note::
@@ -335,7 +336,7 @@ class SubCommand(InvokableApplicationCommand):
     def parents(
         self,
     ) -> Union[Tuple[InvokableSlashCommand], Tuple[SubCommandGroup, InvokableSlashCommand]]:
-        """Union[Tuple[:class:`InvokableSlashCommand`], Tuple[:class:`SubCommandGroup`, :class:`InvokableSlashCommand`]]:
+        """:class:`tuple`\\[:class:`InvokableSlashCommand`] | :class:`tuple`\\[:class:`SubCommandGroup`, :class:`InvokableSlashCommand`]:
         Returns all parents of this subcommand.
 
         For example, the parents of the ``c`` subcommand in ``/a b c`` are ``(b, a)``.
@@ -412,24 +413,24 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         For example, the qualified name for ``/one two three`` would be ``one two three``.
     body: :class:`.SlashCommand`
         An object being registered in the API.
-    callback: :ref:`coroutine <coroutine>`
-        The coroutine that is executed when the command is called.
-    cog: Optional[:class:`Cog`]
-        The cog that this command belongs to. ``None`` if there isn't one.
-    checks: List[Callable[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
+    callback: :ref:`coroutine function <coroutine>`
+        The coroutine function that is executed when the command is called.
+    cog: :class:`Cog` | :data:`None`
+        The cog that this command belongs to. :data:`None` if there isn't one.
+    checks: :class:`list`\\[:class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
         A list of predicates that verifies if the command could be executed
         with the given :class:`.ApplicationCommandInteraction` as the sole parameter. If an exception
         is necessary to be thrown to signal failure, then one inherited from
         :exc:`.CommandError` should be used. Note that if the checks fail then
         :exc:`.CheckFailure` exception is raised to the :func:`.on_slash_command_error`
         event.
-    guild_ids: Optional[Tuple[:class:`int`, ...]]
-        The list of IDs of the guilds where the command is synced. ``None`` if this command is global.
-    connectors: Dict[:class:`str`, :class:`str`]
+    guild_ids: :class:`tuple`\\[:class:`int`, ...] | :data:`None`
+        The list of IDs of the guilds where the command is synced. :data:`None` if this command is global.
+    connectors: :class:`dict`\\[:class:`str`, :class:`str`]
         A mapping of option names to function parameter names, mainly for internal processes.
     auto_sync: :class:`bool`
         Whether to automatically register the command.
-    extras: Dict[:class:`str`, Any]
+    extras: :class:`dict`\\[:class:`str`, :data:`~typing.Any`]
         A dict of user provided extras to attach to the command.
 
         .. note::
@@ -437,8 +438,8 @@ class InvokableSlashCommand(InvokableApplicationCommand):
 
         .. versionadded:: 2.5
 
-    parent: ``None``
-        This exists for consistency with :class:`SubCommand` and :class:`SubCommandGroup`. Always ``None``.
+    parent: :data:`None`
+        This exists for consistency with :class:`SubCommand` and :class:`SubCommandGroup`. Always :data:`None`.
 
         .. versionadded:: 2.6
     """
@@ -507,7 +508,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
 
     @property
     def root_parent(self) -> None:
-        """``None``: This is for consistency with :class:`SubCommand` and :class:`SubCommandGroup`.
+        """:data:`None`: This is for consistency with :class:`SubCommand` and :class:`SubCommandGroup`.
 
         .. versionadded:: 2.6
         """
@@ -515,7 +516,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
 
     @property
     def parents(self) -> Tuple[()]:
-        """Tuple[()]: This is mainly for consistency with :class:`SubCommand`, and is equivalent to an empty tuple.
+        """:class:`tuple`\\[()]: This is mainly for consistency with :class:`SubCommand`, and is equivalent to an empty tuple.
 
         .. versionadded:: 2.6
         """
@@ -546,7 +547,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
 
     @property
     def options(self) -> List[Option]:
-        """List[:class:`.Option`]: The list of options the slash command has. Shorthand for :attr:`self.body.options <.SlashCommand.options>`."""
+        """:class:`list`\\[:class:`.Option`]: The list of options the slash command has. Shorthand for :attr:`self.body.options <.SlashCommand.options>`."""
         return self.body.options
 
     def sub_command(
@@ -562,26 +563,26 @@ class InvokableSlashCommand(InvokableApplicationCommand):
 
         Parameters
         ----------
-        name: Optional[Union[:class:`str`, :class:`.Localized`]]
+        name: :class:`str` | :class:`.Localized` | :data:`None`
             The name of the subcommand (defaults to function name).
 
             .. versionchanged:: 2.5
                 Added support for localizations.
 
-        description: Optional[Union[:class:`str`, :class:`.Localized`]]
+        description: :class:`str` | :class:`.Localized` | :data:`None`
             The description of the subcommand.
 
             .. versionchanged:: 2.5
                 Added support for localizations.
 
-        options: List[:class:`.Option`]
+        options: :class:`list`\\[:class:`.Option`]
             the options of the subcommand for registration in API
-        connectors: Dict[:class:`str`, :class:`str`]
+        connectors: :class:`dict`\\[:class:`str`, :class:`str`]
             which function param states for each option. If the name
             of an option already matches the corresponding function param,
             you don't have to specify the connectors. Connectors template:
             ``{"option-name": "param_name", ...}``
-        extras: Dict[:class:`str`, Any]
+        extras: :class:`dict`\\[:class:`str`, :data:`~typing.Any`]
             A dict of user provided extras to attach to the subcommand.
 
             .. note::
@@ -591,7 +592,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
 
         Returns
         -------
-        Callable[..., :class:`SubCommand`]
+        :class:`~collections.abc.Callable`\\[..., :class:`SubCommand`]
             A decorator that converts the provided method into a :class:`SubCommand`, adds it to the bot, then returns it.
         """
 
@@ -624,12 +625,12 @@ class InvokableSlashCommand(InvokableApplicationCommand):
 
         Parameters
         ----------
-        name: Optional[Union[:class:`str`, :class:`.Localized`]]
+        name: :class:`str` | :class:`.Localized` | :data:`None`
             The name of the subcommand group (defaults to function name).
 
             .. versionchanged:: 2.5
                 Added support for localizations.
-        extras: Dict[:class:`str`, Any]
+        extras: :class:`dict`\\[:class:`str`, :data:`~typing.Any`]
             A dict of user provided extras to attach to the subcommand group.
 
             .. note::
@@ -639,7 +640,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
 
         Returns
         -------
-        Callable[..., :class:`SubCommandGroup`]
+        :class:`~collections.abc.Callable`\\[..., :class:`SubCommandGroup`]
             A decorator that converts the provided method into a :class:`SubCommandGroup`, adds it to the bot, then returns it.
         """
 
@@ -699,10 +700,12 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         elif len(chain) == 2:
             group = self.children.get(chain[0])
             if not isinstance(group, SubCommandGroup):
-                raise AssertionError("the first subcommand is not a SubCommandGroup instance")
+                msg = "the first subcommand is not a SubCommandGroup instance"
+                raise AssertionError(msg)
             subcmd = group.children.get(chain[1])
         else:
-            raise ValueError("Command chain is too long")
+            msg = "Command chain is too long"
+            raise ValueError(msg)
 
         focused_option = inter.data.focused_option
 
@@ -728,10 +731,12 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         elif len(chain) == 2:
             group = self.children.get(chain[0])
             if not isinstance(group, SubCommandGroup):
-                raise AssertionError("the first subcommand is not a SubCommandGroup instance")
+                msg = "the first subcommand is not a SubCommandGroup instance"
+                raise AssertionError(msg)
             subcmd = group.children.get(chain[1])
         else:
-            raise ValueError("Command chain is too long")
+            msg = "Command chain is too long"
+            raise ValueError(msg)
 
         if group is not None:
             try:
@@ -798,13 +803,13 @@ def slash_command(
     ----------
     auto_sync: :class:`bool`
         Whether to automatically register the command. Defaults to ``True``.
-    name: Optional[Union[:class:`str`, :class:`.Localized`]]
+    name: :class:`str` | :class:`.Localized` | :data:`None`
         The name of the slash command (defaults to function name).
 
         .. versionchanged:: 2.5
             Added support for localizations.
 
-    description: Optional[Union[:class:`str`, :class:`.Localized`]]
+    description: :class:`str` | :class:`.Localized` | :data:`None`
         The description of the slash command. It will be visible in Discord.
 
         .. versionchanged:: 2.5
@@ -816,7 +821,7 @@ def slash_command(
 
         .. versionadded:: 2.8
 
-    install_types: Optional[:class:`.ApplicationInstallTypes`]
+    install_types: :class:`.ApplicationInstallTypes` | :data:`None`
         The installation types where the command is available.
         Defaults to :attr:`.ApplicationInstallTypes.guild` only.
         Only available for global commands.
@@ -825,7 +830,7 @@ def slash_command(
 
         .. versionadded:: 2.10
 
-    contexts: Optional[:class:`.InteractionContextTypes`]
+    contexts: :class:`.InteractionContextTypes` | :data:`None`
         The interaction contexts where the command can be used.
         Only available for global commands.
 
@@ -833,7 +838,7 @@ def slash_command(
 
         .. versionadded:: 2.10
 
-    options: List[:class:`.Option`]
+    options: :class:`list`\\[:class:`.Option`]
         The list of slash command options. The options will be visible in Discord.
         This is the old way of specifying options. Consider using :ref:`param_syntax` instead.
     dm_permission: :class:`bool`
@@ -844,22 +849,22 @@ def slash_command(
             Use ``contexts`` instead.
             This is equivalent to the :attr:`.InteractionContextTypes.bot_dm` flag.
 
-    default_member_permissions: Optional[Union[:class:`.Permissions`, :class:`int`]]
+    default_member_permissions: :class:`.Permissions` | :class:`int` | :data:`None`
         The default required permissions for this command.
         See :attr:`.ApplicationCommand.default_member_permissions` for details.
 
         .. versionadded:: 2.5
 
-    guild_ids: List[:class:`int`]
+    guild_ids: :class:`list`\\[:class:`int`]
         If specified, the client will register the command in these guilds.
         Otherwise, this command will be registered globally.
-    connectors: Dict[:class:`str`, :class:`str`]
+    connectors: :class:`dict`\\[:class:`str`, :class:`str`]
         Binds function names to option names. If the name
         of an option already matches the corresponding function param,
         you don't have to specify the connectors. Connectors template:
         ``{"option-name": "param_name", ...}``.
         If you're using :ref:`param_syntax`, you don't need to specify this.
-    extras: Dict[:class:`str`, Any]
+    extras: :class:`dict`\\[:class:`str`, :data:`~typing.Any`]
         A dict of user provided extras to attach to the command.
 
         .. note::
@@ -869,17 +874,20 @@ def slash_command(
 
     Returns
     -------
-    Callable[..., :class:`InvokableSlashCommand`]
+    :class:`~collections.abc.Callable`\\[..., :class:`InvokableSlashCommand`]
         A decorator that converts the provided method into an InvokableSlashCommand and returns it.
     """
 
     def decorator(func: CommandCallback) -> InvokableSlashCommand:
         if not utils.iscoroutinefunction(func):
-            raise TypeError(f"<{func.__qualname__}> must be a coroutine function")
+            msg = f"<{func.__qualname__}> must be a coroutine function"
+            raise TypeError(msg)
         if hasattr(func, "__command_flag__"):
-            raise TypeError("Callback is already a command.")
+            msg = "Callback is already a command."
+            raise TypeError(msg)
         if guild_ids and not all(isinstance(guild_id, int) for guild_id in guild_ids):
-            raise ValueError("guild_ids must be a sequence of int.")
+            msg = "guild_ids must be a sequence of int."
+            raise ValueError(msg)
         return InvokableSlashCommand(
             func,
             name=name,
