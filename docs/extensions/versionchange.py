@@ -18,7 +18,7 @@ class VersionAddedNext(sphinx.domains.changeset.VersionChange):
         # If the argument is |vnext|, replace with config version
         if self.arguments and self.arguments[0] == "|vnext|":
             # Get the version from the Sphinx config
-            version = self.env.config.version
+            version = self.env.config.next_version
             self.arguments[0] = version
         return super().run()
 
