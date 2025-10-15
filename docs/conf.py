@@ -116,7 +116,7 @@ version = ".".join(release.split(".")[:2])
 next_version = versioningit.get_next_version(os.path.abspath(".."))
 
 rst_prolog += f"""
-.. |next_version| replace:: {next_version}
+.. |vnext| replace:: {next_version}
 """
 
 _IS_READTHEDOCS = bool(os.getenv("READTHEDOCS"))
