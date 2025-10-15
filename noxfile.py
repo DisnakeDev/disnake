@@ -106,7 +106,6 @@ EXECUTION_GROUPS: List[ExecutionGroup] = [
         sessions=("build", "pyright"),
         pyright_paths=("scripts/versioning.py",),
         groups=("build",),
-        dependencies=(PYPROJECT["build-system"]["requires"]),
     ),
     ## testing
     *(

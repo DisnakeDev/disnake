@@ -114,6 +114,7 @@ test = [
 build = [
     "build>=1.2.2.post1",
     "twine>=6.1.0",
+    "versioningit>=3.3.0",
 ]
 
 [tool.uv]

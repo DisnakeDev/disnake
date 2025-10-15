@@ -21,9 +21,9 @@ import logging
 
 from . import abc as abc, opus as opus, ui as ui, utils as utils  # explicitly re-export modules
 from ._version import (
-    VersionInfo,  # pyright: ignore[reportUnusedImport] # noqa: F401
-    __version__,  # noqa: F401
-    version_info,  # pyright: ignore[reportUnusedImport] # noqa: F401
+    VersionInfo as VersionInfo,
+    __version__ as __version__,
+    version_info as version_info,
 )
 from .activity import *
 from .app_commands import *
