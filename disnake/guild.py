@@ -3821,7 +3821,7 @@ class Guild(Hashable):
         data = await self._state.http.get_roles(self.id)
         return [Role(guild=self, state=self._state, data=d) for d in data]
 
-    async def fetch_role_member_counts(self) -> Dict[int, int]:
+    async def fetch_role_member_counts(self) -> Dict[Union[Role, Object], int]:
         """|coro|
 
         Retrieves the member counts of all :class:`Role`\\s that the guild has.
@@ -3839,11 +3839,23 @@ class Guild(Hashable):
 
         Returns
         -------
-        :class:`dict`\\[:class:`int`, :class:`int`]
+        :class:`dict`\\[:class:`Role` | :class:`Object`, :class:`int`]
             The member counts of the roles.
+            Roles that could not be found in the bot's cache are
+            :class:`Object` with the corresponding ID instead.
         """
         data = await self._state.http.get_role_member_counts(self.id)
-        return {int(id): count for id, count in data.items()}
+        counts: Dict[Union[Role, Object], int] = {}
+        for id_str, count in data.items():
+            id = int(id_str)
+            if id == self.id:
+                # skip @everyone role, since it's a synthetic role and always has a member count of 0
+                continue
+
+            obj = self.get_role(id) or Object(id)
+            counts[obj] = count
+
+        return counts
 
     @overload
     async def get_or_fetch_member(
