@@ -3835,7 +3835,7 @@ class Guild(Hashable):
         Raises
         ------
         HTTPException
-            Retrieving the roles failed.
+            Retrieving the role member counts failed.
 
         Returns
         -------
