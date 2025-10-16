@@ -3821,6 +3821,30 @@ class Guild(Hashable):
         data = await self._state.http.get_roles(self.id)
         return [Role(guild=self, state=self._state, data=d) for d in data]
 
+    async def fetch_role_member_counts(self) -> Dict[int, int]:
+        """|coro|
+
+        Retrieves the member counts of all :class:`Role`\\s that the guild has.
+
+        .. note::
+
+            This method is an API call. For general usage, consider :attr:`roles` instead.
+
+        .. versionadded:: |vnext|
+
+        Raises
+        ------
+        HTTPException
+            Retrieving the roles failed.
+
+        Returns
+        -------
+        :class:`dict`\\[:class:`int`, :class:`int`]
+            The member counts of the roles.
+        """
+        data = await self._state.http.get_role_member_counts(self.id)
+        return {int(id): count for id, count in data.items()}
+
     @overload
     async def get_or_fetch_member(
         self, member_id: int, *, strict: Literal[False] = ...
