@@ -2,7 +2,7 @@
 # /// script
 # requires-python = ">=3.10"
 # dependencies = [
-#     "nox==2025.5.1",
+#     "nox==2025.10.14",
 # ]
 # ///
 # SPDX-License-Identifier: MIT

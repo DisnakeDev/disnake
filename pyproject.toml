@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
 
 [build-system]
-requires = ["setuptools>=61"]
+requires = ["setuptools>=77.0.3"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -13,14 +13,14 @@ authors = [
 ]
 requires-python = ">=3.10"
 keywords = ["disnake", "discord", "discord api"]
-license = { text = "MIT" }
+license = "MIT"
+license-files = ["LICENSE"]
 dependencies = [
     "aiohttp>=3.7.0,<4.0",
     "typing-extensions>=4.1",
 ]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
-    "License :: OSI Approved :: MIT License",
     "Intended Audience :: Developers",
     "Natural Language :: English",
     "Operating System :: OS Independent",
@@ -120,7 +120,7 @@ where = ["."]
 include = ["disnake*"]
 
 [tool.uv]
-required-version = ">=0.8.4"
+required-version = ">=0.9.2"
 
 [tool.ruff]
 line-length = 100
