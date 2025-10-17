@@ -113,36 +113,6 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
         Mapping[SelectDefaultValueType, tuple[type[Snowflake], ...]]
     ] = {}
 
-    @overload
-    def __init__(
-        self: StringSelect[None],
-        *,
-        custom_id: str = ...,
-        placeholder: Optional[str] = None,
-        min_values: int = 1,
-        max_values: int = 1,
-        disabled: bool = False,
-        options: SelectOptionInput = ...,
-        required: bool = True,
-        id: int = 0,
-        row: Optional[int] = None,
-    ) -> None: ...
-
-    @overload
-    def __init__(
-        self: StringSelect[V_co],
-        *,
-        custom_id: str = ...,
-        placeholder: Optional[str] = None,
-        min_values: int = 1,
-        max_values: int = 1,
-        disabled: bool = False,
-        options: SelectOptionInput = ...,
-        required: bool = True,
-        id: int = 0,
-        row: Optional[int] = None,
-    ) -> None: ...
-
     def __init__(
         self,
         *,

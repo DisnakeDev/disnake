@@ -94,36 +94,6 @@ class UserSelect(BaseSelect[UserSelectMenu, "Union[User, Member]", V_co]):
         SelectDefaultValueType.user: (Member, User, ClientUser, Object),
     }
 
-    @overload
-    def __init__(
-        self: UserSelect[None],
-        *,
-        custom_id: str = ...,
-        placeholder: Optional[str] = None,
-        min_values: int = 1,
-        max_values: int = 1,
-        disabled: bool = False,
-        default_values: Optional[Sequence[SelectDefaultValueInputType[Union[User, Member]]]] = None,
-        required: bool = True,
-        id: int = 0,
-        row: Optional[int] = None,
-    ) -> None: ...
-
-    @overload
-    def __init__(
-        self: UserSelect[V_co],
-        *,
-        custom_id: str = ...,
-        placeholder: Optional[str] = None,
-        min_values: int = 1,
-        max_values: int = 1,
-        disabled: bool = False,
-        default_values: Optional[Sequence[SelectDefaultValueInputType[Union[User, Member]]]] = None,
-        required: bool = True,
-        id: int = 0,
-        row: Optional[int] = None,
-    ) -> None: ...
-
     def __init__(
         self,
         *,

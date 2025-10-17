@@ -84,14 +84,14 @@ class Localized(Generic[StringT]):
     __slots__ = ("string", "localizations")
 
     @overload
-    def __init__(self: Localized[StringT], string: StringT, *, key: str) -> None: ...
+    def __init__(self, string: StringT, *, key: str) -> None: ...
 
     @overload
-    def __init__(self: Localized[Optional[str]], *, key: str) -> None: ...
+    def __init__(self, *, key: str) -> None: ...
 
     @overload
     def __init__(
-        self: Localized[StringT],
+        self,
         string: StringT,
         *,
         data: Union[Optional[LocalizationsDict], LocalizationValue],
@@ -99,7 +99,7 @@ class Localized(Generic[StringT]):
 
     @overload
     def __init__(
-        self: Localized[Optional[str]],
+        self,
         *,
         data: Union[Optional[LocalizationsDict], LocalizationValue],
     ) -> None: ...
@@ -108,12 +108,12 @@ class Localized(Generic[StringT]):
     # as it's only meant to be used internally
     def __init__(
         self,
-        string: StringT = None,
+        string: Optional[StringT] = None,
         *,
         key: str = MISSING,
         data: Union[Optional[LocalizationsDict], LocalizationValue] = MISSING,
     ) -> None:
-        self.string: StringT = string
+        self.string: StringT = string  # pyright: ignore[reportAttributeAccessIssue]
 
         if not (key is MISSING) ^ (data is MISSING):
             msg = "Exactly one of `key` or `data` must be provided"
