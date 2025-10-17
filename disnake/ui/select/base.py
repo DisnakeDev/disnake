@@ -20,10 +20,9 @@ from typing import (
 )
 
 from ...components import AnySelectMenu, SelectDefaultValue
-from ...enums import ComponentType, SelectDefaultValueType
 from ...object import Object
 from ...utils import MISSING, humanize_list, iscoroutinefunction
-from ..item import DecoratedItem, Item
+from ..item import Item
 
 __all__ = ("BaseSelect",)
 
@@ -31,8 +30,9 @@ if TYPE_CHECKING:
     from typing_extensions import ParamSpec, Self
 
     from ...abc import Snowflake
+    from ...enums import ComponentType, SelectDefaultValueType
     from ...interactions import MessageInteraction
-    from ..item import ItemCallbackType
+    from ..item import DecoratedItem, ItemCallbackType
     from ..view import View
 
 else:

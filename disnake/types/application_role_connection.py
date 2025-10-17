@@ -1,10 +1,12 @@
 # SPDX-License-Identifier: MIT
+from __future__ import annotations
 
-from typing import Literal, TypedDict
+from typing import TYPE_CHECKING, Literal, TypedDict
 
 from typing_extensions import NotRequired
 
-from .i18n import LocalizationDict
+if TYPE_CHECKING:
+    from .i18n import LocalizationDict
 
 ApplicationRoleConnectionMetadataType = Literal[1, 2, 3, 4, 5, 6, 7, 8]
 
