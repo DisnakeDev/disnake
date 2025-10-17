@@ -170,7 +170,7 @@ class View:
             await asyncio.sleep(self.__timeout_expiry - now)
 
     def to_components(self) -> List[ActionRowPayload]:
-        def key(item: Item) -> int:
+        def key(item: Item[View]) -> int:
             return item._rendered_row or 0
 
         children = sorted(self.children, key=key)

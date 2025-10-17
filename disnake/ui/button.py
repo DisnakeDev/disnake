@@ -83,36 +83,6 @@ class Button(Item[V_co]):
     # We have to set this to MISSING in order to overwrite the abstract property from UIComponent
     _underlying: ButtonComponent = MISSING
 
-    @overload
-    def __init__(
-        self: Button[None],
-        *,
-        style: ButtonStyle = ButtonStyle.secondary,
-        label: Optional[str] = None,
-        disabled: bool = False,
-        custom_id: Optional[str] = None,
-        url: Optional[str] = None,
-        emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
-        sku_id: Optional[int] = None,
-        id: int = 0,
-        row: Optional[int] = None,
-    ) -> None: ...
-
-    @overload
-    def __init__(
-        self: Button[V_co],
-        *,
-        style: ButtonStyle = ButtonStyle.secondary,
-        label: Optional[str] = None,
-        disabled: bool = False,
-        custom_id: Optional[str] = None,
-        url: Optional[str] = None,
-        emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
-        sku_id: Optional[int] = None,
-        id: int = 0,
-        row: Optional[int] = None,
-    ) -> None: ...
-
     def __init__(
         self,
         *,
