@@ -751,6 +751,7 @@ def default_member_permissions(
     send_polls: bool = ...,
     send_tts_messages: bool = ...,
     send_voice_messages: bool = ...,
+    set_voice_channel_status: bool = ...,
     speak: bool = ...,
     start_embedded_activities: bool = ...,
     stream: bool = ...,
