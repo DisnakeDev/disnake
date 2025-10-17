@@ -1,0 +1,1 @@
+Enable `reportInconsistentOverload` and `reportInvalidTypeVarUse` pyright rules.
