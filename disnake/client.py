@@ -1321,7 +1321,6 @@ class Client:
             except KeyboardInterrupt:
                 # I am unsure why this gets raised here but suppress it anyway
                 pass
-        return
 
     # properties
 
