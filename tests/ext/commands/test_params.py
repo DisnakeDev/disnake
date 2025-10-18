@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: MIT
 
 import math
-import sys
 from typing import Any, Optional, Union
 from unittest import mock
 
