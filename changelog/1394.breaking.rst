@@ -1,1 +1,1 @@
-Drop support for Python 3.8 and 3.9 as they reached end of life and no longer receive security updates.
+Drop support for Python 3.8 as it reached end of life in October 2024 and no longer receives security updates.
