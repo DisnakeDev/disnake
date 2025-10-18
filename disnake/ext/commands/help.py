@@ -714,7 +714,7 @@ class HelpCommand:
             The key of the mapping is the :class:`~.commands.Cog` that the command belongs to, or
             :data:`None` if there isn't one, and the value is a list of commands that belongs to that cog.
         """
-        return None
+        return
 
     async def send_cog_help(self, cog: Cog) -> None:
         """|coro|
@@ -742,7 +742,7 @@ class HelpCommand:
         cog: :class:`Cog`
             The cog that was requested for help.
         """
-        return None
+        return
 
     async def send_group_help(self, group: Group[Any, ..., Any]) -> None:
         """|coro|
@@ -770,7 +770,7 @@ class HelpCommand:
         group: :class:`Group`
             The group that was requested for help.
         """
-        return None
+        return
 
     async def send_command_help(self, command: Command[Any, ..., Any]) -> None:
         """|coro|
@@ -808,7 +808,7 @@ class HelpCommand:
         command: :class:`Command`
             The command that was requested for help.
         """
-        return None
+        return
 
     async def prepare_help_command(self, ctx: Context[BotT], command: Optional[str] = None) -> None:
         """|coro|

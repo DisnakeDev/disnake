@@ -159,12 +159,14 @@ class View:
                 return
 
             if self.__timeout_expiry is None:
-                return self._dispatch_timeout()
+                self._dispatch_timeout()
+                return
 
             # Check if we've elapsed our currently set timeout
             now = time.monotonic()
             if now >= self.__timeout_expiry:
-                return self._dispatch_timeout()
+                self._dispatch_timeout()
+                return
 
             # Wait N seconds to see if timeout data has been refreshed
             await asyncio.sleep(self.__timeout_expiry - now)
@@ -223,7 +225,7 @@ class View:
         for component in walk_components(message.components):
             if isinstance(component, ActionRowComponent):
                 continue
-            elif not isinstance(component, VALID_ACTION_ROW_MESSAGE_COMPONENT_TYPES):
+            if not isinstance(component, VALID_ACTION_ROW_MESSAGE_COMPONENT_TYPES):
                 # can happen if message uses components v2
                 msg = f"Cannot construct view from message - unexpected {type(component).__name__}"
                 raise TypeError(msg)
@@ -360,7 +362,7 @@ class View:
 
             allow = await self.interaction_check(interaction)
             if not allow:
-                return
+                return None
 
             await item.callback(interaction)
         except Exception as e:

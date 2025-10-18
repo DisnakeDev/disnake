@@ -159,7 +159,7 @@ ignore = [
     ## flake8-pyi
     "PYI", # TODO: enable, in separate PR (most have autofixes)
     ## flake8-return
-    "RET", # TODO: enable, most have autofixes.
+    "RET505", "RET506", # not likely to be enabled
     ## flake8-self
     "SLF", # private member access, this is unlikely to be enabled.
     ## flake8-simplify
