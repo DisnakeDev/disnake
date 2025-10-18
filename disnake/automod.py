@@ -393,7 +393,7 @@ class AutoModTriggerMetadata:
         if self.regex_patterns is not None:
             data["regex_patterns"] = list(self.regex_patterns)
         if self.presets is not None:
-            data["presets"] = self.presets.values  # pyright: ignore[reportGeneralTypeIssues]  # `values` contains ints instead of preset literal values
+            data["presets"] = self.presets.values
         if self.allow_list is not None:
             data["allow_list"] = list(self.allow_list)
         if self.mention_total_limit is not None:

@@ -5,7 +5,7 @@ from __future__ import annotations
 import math
 import re
 from abc import ABC
-from typing import TYPE_CHECKING, ClassVar, List, Mapping, Optional, Sequence, Tuple, Union, cast
+from typing import TYPE_CHECKING, ClassVar, List, Mapping, Optional, Sequence, Tuple, Union
 
 from .enums import (
     ApplicationCommandPermissionType,
@@ -709,16 +709,14 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
         }
 
         install_types: Optional[List[ApplicationIntegrationTypePayload]] = (
-            cast("List[ApplicationIntegrationTypePayload]", self._install_types_with_default.values)
+            self._install_types_with_default.values
             if self._install_types_with_default is not None
             else None
         )
         data["integration_types"] = install_types
 
         contexts: Optional[List[InteractionContextTypePayload]] = (
-            cast("List[InteractionContextTypePayload]", self._contexts_with_default.values)
-            if self._contexts_with_default is not None
-            else None
+            self._contexts_with_default.values if self._contexts_with_default is not None else None
         )
         data["contexts"] = contexts
 
