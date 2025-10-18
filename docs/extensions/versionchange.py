@@ -1,9 +1,11 @@
 # SPDX-License-Identifier: MIT
 from __future__ import annotations
 
+import pathlib
 from typing import TYPE_CHECKING
 
 import sphinx.domains.changeset
+import versioningit
 
 if TYPE_CHECKING:
     from sphinx.application import Sphinx
@@ -18,8 +20,9 @@ class VersionAddedNext(sphinx.domains.changeset.VersionChange):
         # If the argument is |vnext|, replace with config version
         if self.arguments and self.arguments[0] == "|vnext|":
             # Get the version from the Sphinx config
-            version = self.env.config.version
-            self.arguments[0] = version
+            self.arguments[0] = versioningit.get_next_version(
+                pathlib.Path(__file__).parent.parent.parent
+            )
         return super().run()
 
 
