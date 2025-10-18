@@ -777,12 +777,7 @@ def test_normalise_optional_params(params, expected) -> None:
         ("bool", bool, True),
         ("Tuple[dict, List[Literal[42, 99]]]", Tuple[dict, List[Literal[42, 99]]], True),
         # 3.10 union syntax
-        pytest.param(
-            "int | float",
-            Union[int, float],
-            True,
-            marks=pytest.mark.skipif(sys.version_info < (3, 10), reason="syntax requires py3.10"),
-        ),
+        ("int | float", Union[int, float], True),
     ],
 )
 def test_resolve_annotation(tp, expected, expected_cache) -> None:
