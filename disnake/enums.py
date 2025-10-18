@@ -1278,6 +1278,11 @@ class ComponentType(Enum):
 
     .. versionadded:: 2.11
     """
+    file_upload = 19
+    """Represents a file upload component.
+
+    .. versionadded:: |vnext|
+    """
 
     def __int__(self) -> int:
         return self.value

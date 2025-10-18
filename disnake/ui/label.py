@@ -13,9 +13,10 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from ._types import AnySelect
+    from .file_upload import FileUpload
     from .text_input import TextInput
 
-    LabelChildUIComponent = Union[TextInput, AnySelect[Any]]
+    LabelChildUIComponent = Union[TextInput, FileUpload, AnySelect[Any]]
 
 __all__ = ("Label",)
 
@@ -32,10 +33,10 @@ class Label(UIComponent):
     ----------
     text: :class:`str`
         The label text.
-    component: :class:`TextInput` | :class:`BaseSelect`
+    component: :class:`TextInput` | :class:`FileUpload` | :class:`BaseSelect`
         The component within the label.
-        Currently supports :class:`.ui.TextInput` and
-        select menus (e.g. :class:`.ui.StringSelect`).
+        Currently supports :class:`.ui.TextInput`, :class:`.ui.FileUpload`,
+        and select menus (e.g. :class:`.ui.StringSelect`).
     description: :class:`str` | :data:`None`
         The description text for the label.
     id: :class:`int`
@@ -47,7 +48,7 @@ class Label(UIComponent):
     ----------
     text: :class:`str`
         The label text.
-    component: :class:`TextInput` | :class:`BaseSelect`
+    component: :class:`TextInput` | :class:`FileUpload` | :class:`BaseSelect`
         The component within the label.
     description: :class:`str` | :data:`None`
         The description text for the label.

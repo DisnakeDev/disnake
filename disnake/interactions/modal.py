@@ -14,7 +14,7 @@ from typing import (
 
 from ..components import _SELECT_COMPONENT_TYPE_VALUES
 from ..enums import ComponentType
-from ..message import Message
+from ..message import Attachment, Message
 from ..utils import cached_slot_property
 from .base import ClientT, Interaction, InteractionDataResolved
 
@@ -37,7 +37,7 @@ __all__ = ("ModalInteraction", "ModalInteractionData")
 
 T = TypeVar("T")
 
-# {custom_id: text_input_value | select_values}
+# {custom_id: text_input_value | select_values | attachments}
 ResolvedValues = dict[str, Union[str, Sequence[T]]]
 
 
@@ -191,7 +191,10 @@ class ModalInteraction(Interaction[ClientT]):
                 value = component.get("value")
             elif component["type"] == ComponentType.string_select.value:
                 value = component.get("values")
-            elif component["type"] in _SELECT_COMPONENT_TYPE_VALUES:
+            elif (
+                component["type"] in _SELECT_COMPONENT_TYPE_VALUES
+                or component["type"] == ComponentType.file_upload.value
+            ):
                 # auto-populated selects
                 component_type = ComponentType(component["type"])
                 value = [resolve(v, component_type) for v in component.get("values") or []]
@@ -217,14 +220,18 @@ class ModalInteraction(Interaction[ClientT]):
         return self._resolve_values(lambda id, type: str(id))
 
     @cached_slot_property("_cs_resolved_values")
-    def resolved_values(self) -> ResolvedValues[Union[str, Member, User, Role, AnyChannel]]:
-        """:class:`dict`\\[:class:`str`, :class:`str` | :class:`~collections.abc.Sequence`\\[:class:`str`, :class:`Member`, :class:`User`, :class:`Role`, :class:`abc.GuildChannel` | :class:`Thread` | :class:`PartialMessageable`]]: The (resolved) values the user entered in the modal.
+    def resolved_values(
+        self,
+    ) -> ResolvedValues[Union[str, Member, User, Role, AnyChannel, Attachment]]:
+        """:class:`dict`\\[:class:`str`, :class:`str` | :class:`~collections.abc.Sequence`\\[:class:`str` | :class:`Member` | :class:`User` | :class:`Role` | :class:`abc.GuildChannel` | :class:`Thread` | :class:`PartialMessageable` | :class:`Attachment`]]: The (resolved) values the user entered in the modal.
         This is a dict of the form ``{custom_id: value}``.
 
         For select menus, the corresponding dict value is a list of the values the user has selected.
         For select menus of type :attr:`~ComponentType.string_select`,
         this is equivalent to :attr:`values`;
         for other select menu types, these are full objects corresponding to the selected entities.
+
+        For file uploads, the corresponding dict value is a list of files the user has uploaded.
 
         .. versionadded:: 2.11
         """

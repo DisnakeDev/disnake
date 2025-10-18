@@ -4,13 +4,13 @@ from __future__ import annotations
 
 from typing import Literal, Optional, TypedDict, Union
 
-from typing_extensions import NotRequired, Required, TypeAlias
+from typing_extensions import NotRequired, ReadOnly, Required, TypeAlias
 
 from .channel import ChannelType
 from .emoji import PartialEmoji
 from .snowflake import Snowflake
 
-ComponentType = Literal[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 17, 18]
+ComponentType = Literal[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 17, 18, 19]
 ButtonStyle = Literal[1, 2, 3, 4, 5, 6]
 TextInputStyle = Literal[1, 2]
 SeparatorSpacing = Literal[1, 2]
@@ -34,6 +34,7 @@ Component = Union[
     "SeparatorComponent",
     "ContainerComponent",
     "LabelComponent",
+    "FileUploadComponent",
 ]
 
 ActionRowChildComponent = Union[
@@ -45,6 +46,7 @@ ActionRowChildComponent = Union[
 LabelChildComponent = Union[
     "TextInput",
     "AnySelectMenu",
+    "FileUploadComponent",
 ]
 
 # valid message component types (v1/v2)
@@ -72,7 +74,7 @@ ModalTopLevelComponent = Union[
 
 
 class _BaseComponent(TypedDict):
-    # type: ComponentType  # FIXME: current version of pyright only supports PEP 705 experimentally, this can be re-enabled in 1.1.353+
+    type: ReadOnly[ComponentType]
     id: int  # note: technically optional when sending, we just default to 0 for simplicity, which is equivalent (https://discord.com/developers/docs/components/reference#anatomy-of-a-component)
 
 
@@ -183,6 +185,14 @@ class LabelComponent(_BaseComponent):
     label: str
     description: NotRequired[str]
     component: LabelChildComponent
+
+
+class FileUploadComponent(_BaseComponent):
+    type: Literal[19]
+    custom_id: str
+    min_values: NotRequired[int]
+    max_values: NotRequired[int]
+    required: NotRequired[bool]
 
 
 # components v2

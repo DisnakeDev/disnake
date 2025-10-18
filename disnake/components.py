@@ -45,6 +45,7 @@ if TYPE_CHECKING:
         ComponentType as ComponentTypeLiteral,
         ContainerComponent as ContainerComponentPayload,
         FileComponent as FileComponentPayload,
+        FileUploadComponent as FileUploadComponentPayload,
         LabelComponent as LabelComponentPayload,
         MediaGalleryComponent as MediaGalleryComponentPayload,
         MediaGalleryItem as MediaGalleryItemPayload,
@@ -87,6 +88,7 @@ __all__ = (
     "Separator",
     "Container",
     "Label",
+    "FileUpload",
 )
 
 # miscellaneous components-related type aliases
@@ -136,6 +138,7 @@ ContainerChildComponent = Union[
 # valid `Label.component` types
 LabelChildComponent = Union[
     "TextInput",
+    "FileUpload",
     "AnySelectMenu",
 ]
 
@@ -191,6 +194,7 @@ class Component:
     - :class:`Separator`
     - :class:`Container`
     - :class:`Label`
+    - :class:`FileUpload`
 
     This class is abstract and cannot be instantiated.
 
@@ -1499,7 +1503,7 @@ class Label(Component):
         The label text.
     description: :class:`str` | :data:`None`
         The description text for the label.
-    component: :class:`TextInput` | :class:`StringSelectMenu`
+    component: :class:`TextInput` | :class:`FileUpload` | :class:`BaseSelectMenu`
         The component within the label.
     id: :class:`int`
         The numeric identifier for the component.
@@ -1537,6 +1541,65 @@ class Label(Component):
             payload["description"] = self.description
 
         return payload
+
+
+class FileUpload(Component):
+    """Represents a file upload component from the Discord Bot UI Kit.
+
+    This allows you to receive files from users, and can only be used in modals.
+
+    .. note::
+        The user constructible and usable type to create a
+        file upload is :class:`disnake.ui.FileUpload`.
+
+    .. versionadded:: |vnext|
+
+    Attributes
+    ----------
+    custom_id: :class:`str`
+        The ID of the file upload that gets received during an interaction.
+    min_values: :class:`int`
+        The minimum number of files that must be uploaded.
+        Defaults to 1 and must be between 0 and 10.
+    max_values: :class:`int`
+        The maximum number of files that must be uploaded.
+        Defaults to 1 and must be between 1 and 10.
+    required: :class:`bool`
+        Whether the file upload is required.
+        Defaults to ``True``.
+    id: :class:`int`
+        The numeric identifier for the component.
+        This is always present in components received from the API,
+        and unique within a modal.
+    """
+
+    __slots__: tuple[str, ...] = (
+        "custom_id",
+        "min_values",
+        "max_values",
+        "required",
+    )
+
+    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
+
+    def __init__(self, data: FileUploadComponentPayload) -> None:
+        self.type: Literal[ComponentType.file_upload] = ComponentType.file_upload
+        self.id = data.get("id", 0)
+
+        self.custom_id: str = data["custom_id"]
+        self.min_values: int = data.get("min_values", 1)
+        self.max_values: int = data.get("max_values", 1)
+        self.required: bool = data.get("required", True)
+
+    def to_dict(self) -> FileUploadComponentPayload:
+        return {
+            "type": self.type.value,
+            "id": self.id,
+            "custom_id": self.custom_id,
+            "min_values": self.min_values,
+            "max_values": self.max_values,
+            "required": self.required,
+        }
 
 
 # types of components that are allowed in a message's action rows;
@@ -1588,6 +1651,7 @@ COMPONENT_LOOKUP: Mapping[ComponentTypeLiteral, type[Component]] = {
     ComponentType.separator.value: Separator,
     ComponentType.container.value: Container,
     ComponentType.label.value: Label,
+    ComponentType.file_upload.value: FileUpload,
 }
 
 
