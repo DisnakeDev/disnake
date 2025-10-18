@@ -32,13 +32,21 @@ MISSING: Any = disnake.utils.MISSING
 
 
 T = TypeVar("T")
-BotT = TypeVar("BotT", bound="Union[Bot, AutoShardedBot]")
 CogT = TypeVar("CogT", bound="Cog")
 
 if TYPE_CHECKING:
+    from typing_extensions import TypeVar  # noqa: TC004
+
     P = ParamSpec("P")
+    BotT = TypeVar(
+        "BotT",
+        bound="Union[Bot, AutoShardedBot]",
+        covariant=True,
+        default=Union[Bot, AutoShardedBot],
+    )
 else:
     P = TypeVar("P")
+    BotT = TypeVar("BotT", bound="Union[Bot, AutoShardedBot]")
 
 
 class Context(disnake.abc.Messageable, Generic[BotT]):

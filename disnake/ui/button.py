@@ -17,18 +17,23 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
-    from typing_extensions import ParamSpec, Self
+    from typing_extensions import (
+        ParamSpec,
+        Self,
+        TypeVar,  # noqa: TC004
+    )
 
     from ..emoji import Emoji
     from .item import ItemCallbackType
     from .view import View
 
+    V_co = TypeVar("V_co", bound="Optional[View]", covariant=True, default=Optional[View])
 else:
     ParamSpec = TypeVar
+    V_co = TypeVar("V_co", bound="Optional[View]", covariant=True)
 
 B = TypeVar("B", bound="Button")
 B_co = TypeVar("B_co", bound="Button", covariant=True)
-V_co = TypeVar("V_co", bound="Optional[View]", covariant=True)
 P = ParamSpec("P")
 
 
