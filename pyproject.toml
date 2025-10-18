@@ -48,7 +48,6 @@ speed = [
     # taken from aiohttp[speedups]
     "aiodns>=1.1",
     "Brotli",
-    'cchardet; python_version < "3.10"',
 ]
 voice = [
     "PyNaCl>=1.5.0,<1.6",
