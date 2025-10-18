@@ -6,17 +6,8 @@ import copy
 import functools
 import itertools
 import re
-from collections.abc import Generator, Iterable, Mapping, Sequence
-from re import Match
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    ClassVar,
-    Optional,
-    TypeVar,
-    Union,
-)
+from collections.abc import Callable, Generator, Iterable, Mapping, Sequence
+from typing import TYPE_CHECKING, Any, ClassVar, Optional, TypeVar, Union
 
 import disnake.abc
 import disnake.utils
@@ -245,7 +236,7 @@ class _HelpCommandImpl(Command[Optional[CogT], Any, None]):
             return ret
 
         # Ditto here
-        def wrapped_walk_commands() -> Generator[Command[Any, ..., Any], None, None]:
+        def wrapped_walk_commands() -> Generator[Command[Any, ..., Any]]:
             yield from original_walk_commands()
             yield self
 
@@ -458,7 +449,7 @@ class HelpCommand:
         """
 
         def replace(
-            obj: Match[str], *, transforms: Mapping[str, str] = self.MENTION_TRANSFORMS
+            obj: re.Match[str], *, transforms: Mapping[str, str] = self.MENTION_TRANSFORMS
         ) -> str:
             return transforms.get(obj.group(0), "@invalid")
 

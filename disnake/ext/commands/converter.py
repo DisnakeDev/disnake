@@ -5,11 +5,10 @@ from __future__ import annotations
 import functools
 import inspect
 import re
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     Generic,
     Literal,
     Optional,
@@ -1132,7 +1131,7 @@ class clean_content(Converter[str]):
             "@&": resolve_role,
         }
 
-        def repl(match: re.Match) -> str:
+        def repl(match: re.Match[str]) -> str:
             type = match[1]
             id = int(match[2])
             return transforms[type](id)

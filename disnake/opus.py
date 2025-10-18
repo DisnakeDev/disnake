@@ -10,16 +10,8 @@ import math
 import os.path
 import struct
 import sys
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Literal,
-    Optional,
-    TypedDict,
-    TypeVar,
-    overload,
-)
+from collections.abc import Callable
+from typing import TYPE_CHECKING, Any, Literal, Optional, TypedDict, TypeVar, overload
 
 from .errors import DiscordException
 from .utils import MISSING

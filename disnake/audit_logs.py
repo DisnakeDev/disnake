@@ -2,17 +2,8 @@
 
 from __future__ import annotations
 
-from collections.abc import Generator, Mapping
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    ClassVar,
-    Optional,
-    TypeVar,
-    Union,
-    cast,
-)
+from collections.abc import Callable, Generator, Mapping
+from typing import TYPE_CHECKING, Any, ClassVar, Optional, TypeVar, Union, cast
 
 from . import abc, enums, flags, utils
 from .app_commands import ApplicationCommandPermissions
@@ -289,7 +280,7 @@ class AuditLogDiff:
     def __len__(self) -> int:
         return len(self.__dict__)
 
-    def __iter__(self) -> Generator[tuple[str, Any], None, None]:
+    def __iter__(self) -> Generator[tuple[str, Any]]:
         yield from self.__dict__.items()
 
     def __repr__(self) -> str:

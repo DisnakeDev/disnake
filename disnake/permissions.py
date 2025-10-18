@@ -2,16 +2,9 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from functools import wraps
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    ClassVar,
-    Optional,
-    overload,
-)
+from typing import TYPE_CHECKING, Any, ClassVar, Optional, overload
 
 from .flags import BaseFlags, alias_flag_value, flag_value
 from .utils import _generated, _overload_with_permissions

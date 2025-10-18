@@ -11,18 +11,8 @@ import logging
 import os
 import weakref
 from collections import OrderedDict, deque
-from collections.abc import Coroutine, Sequence
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Generic,
-    Literal,
-    Optional,
-    TypeVar,
-    Union,
-    overload,
-)
+from collections.abc import Callable, Coroutine, Sequence
+from typing import TYPE_CHECKING, Any, Generic, Literal, Optional, TypeVar, Union, overload
 
 from . import utils
 from .activity import BaseActivity

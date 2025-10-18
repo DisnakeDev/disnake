@@ -14,14 +14,7 @@ import threading
 import time
 from collections.abc import Sequence
 from errno import ECONNRESET
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Literal,
-    Optional,
-    Union,
-    overload,
-)
+from typing import TYPE_CHECKING, Any, Literal, Optional, Union, overload
 from urllib.parse import quote as urlquote
 
 from .. import utils

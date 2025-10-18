@@ -8,13 +8,12 @@ import signal
 import sys
 import traceback
 import types
-from collections.abc import Coroutine, Generator, Mapping, Sequence
+from collections.abc import Callable, Coroutine, Generator, Mapping, Sequence
 from datetime import datetime, timedelta
 from errno import ECONNRESET
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     Literal,
     NamedTuple,
     Optional,
@@ -1335,7 +1334,7 @@ class Client:
         if value is None:
             self._connection._activity = None
         elif isinstance(value, BaseActivity):
-            # ConnectionState._activity is typehinted as ActivityPayload, we're passing Dict[str, Any]
+            # ConnectionState._activity is typehinted as ActivityPayload, we're passing dict[str, Any]
             self._connection._activity = value.to_dict()  # type: ignore
         else:
             msg = "activity must derive from BaseActivity."
@@ -1532,7 +1531,7 @@ class Client:
         """
         return self._connection.get_soundboard_sound(id)
 
-    def get_all_channels(self) -> Generator[GuildChannel, None, None]:
+    def get_all_channels(self) -> Generator[GuildChannel]:
         """A generator that retrieves every :class:`.abc.GuildChannel` the client can 'access'.
 
         This is equivalent to: ::
@@ -1555,7 +1554,7 @@ class Client:
         for guild in self.guilds:
             yield from guild.channels
 
-    def get_all_members(self) -> Generator[Member, None, None]:
+    def get_all_members(self) -> Generator[Member]:
         """Returns a generator with every :class:`.Member` the client can see.
 
         This is equivalent to: ::
@@ -1930,7 +1929,7 @@ class Client:
                 # may happen if guild is unavailable
                 continue
 
-            # Member.activities is typehinted as Tuple[ActivityType, ...], we may be setting it as Tuple[BaseActivity, ...]
+            # Member.activities is typehinted as tuple[ActivityType, ...], we may be setting it as tuple[BaseActivity, ...]
             me.activities = activities  # type: ignore
             me.status = status
 

@@ -4,16 +4,8 @@ from __future__ import annotations
 
 import asyncio
 import datetime
-from collections.abc import AsyncIterator, Awaitable, Generator
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Optional,
-    TypeVar,
-    Union,
-    cast,
-)
+from collections.abc import AsyncIterator, Awaitable, Callable, Generator
+from typing import TYPE_CHECKING, Any, Optional, TypeVar, Union, cast
 
 from .app_commands import application_command_factory
 from .audit_logs import AuditLogEntry

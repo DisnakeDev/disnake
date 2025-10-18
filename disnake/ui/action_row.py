@@ -951,7 +951,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
     @staticmethod
     def walk_components(
         action_rows: Sequence[ActionRow[ActionRowChildT]],
-    ) -> Generator[tuple[ActionRow[ActionRowChildT], ActionRowChildT], None, None]:
+    ) -> Generator[tuple[ActionRow[ActionRowChildT], ActionRowChildT]]:
         """Iterate over the components in a sequence of action rows, yielding each
         individual component together with the action row of which it is a child.
 

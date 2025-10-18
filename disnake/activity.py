@@ -37,7 +37,7 @@ assets: dict
     small_text: str (max: 128)
 party: dict
     id: str (max: 128),
-    size: List[int] (max-length: 2)
+    size: list[int] (max-length: 2)
         elem: int (min: 1)
 secrets: dict
     match: str (max: 128)
@@ -289,7 +289,7 @@ class Activity(BaseActivity):
         .. versionadded:: 2.0
 
         .. versionchanged:: 2.6
-            Changed type to ``List[str]`` to match API types.
+            Changed type to ``list[str]`` to match API types.
 
     emoji: :class:`PartialEmoji` | :data:`None`
         The emoji that belongs to this activity.

@@ -4,16 +4,8 @@ from __future__ import annotations
 
 import os
 from abc import ABC, abstractmethod
-from collections.abc import Mapping, Sequence
-from typing import (
-    TYPE_CHECKING,
-    Callable,
-    ClassVar,
-    Generic,
-    Optional,
-    TypeVar,
-    Union,
-)
+from collections.abc import Callable, Mapping, Sequence
+from typing import TYPE_CHECKING, ClassVar, Generic, Optional, TypeVar, Union
 
 from ...components import AnySelectMenu, SelectDefaultValue
 from ...enums import ComponentType, SelectDefaultValueType
