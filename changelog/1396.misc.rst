@@ -1,1 +1,1 @@
-Update all type hints across the source code to use PEP 604 style (``A | B`` instead of ``Union[A, B]``, and ``A | None`` instead of ``Optional[A]``).
+Update all standard library types to use built-in generics (such as ``list[int]`` instead of ``List[int]``) where applicable.
