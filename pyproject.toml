@@ -371,11 +371,6 @@ reportImportCycles = false
 reportIncompatibleMethodOverride = false
 reportIncompatibleVariableOverride = false
 
-# TODO: re-enable
-# these were added in the upgrade from pyright 1.1.336 to 1.1.405
-reportInconsistentOverload = false
-reportInvalidTypeVarUse = false
-
 # these are largely due to missing type hints, and make up most of the error count
 reportUnknownMemberType = false
 reportUnknownParameterType = false
