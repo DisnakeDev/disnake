@@ -42,14 +42,14 @@ class PollMedia:
     ----------
     text: :class:`str`
         The text of this media.
-    emoji: Optional[Union[:class:`Emoji`, :class:`PartialEmoji`, :class:`str`]]
+    emoji: :class:`Emoji` | :class:`PartialEmoji` | :class:`str` | :data:`None`
         The emoji of this media.
 
     Attributes
     ----------
-    text: Optional[:class:`str`]
+    text: :class:`str` | :data:`None`
         The text of this media.
-    emoji: Optional[:class:`PartialEmoji`]
+    emoji: :class:`PartialEmoji` | :data:`None`
         The emoji of this media.
     """
 
@@ -110,13 +110,13 @@ class PollAnswer:
 
     Attributes
     ----------
-    id: Optional[:class:`int`]
-        The ID of this answer. This will be ``None`` only if this object was created manually
+    id: :class:`int` | :data:`None`
+        The ID of this answer. This will be :data:`None` only if this object was created manually
         and did not originate from the API.
     media: :class:`PollMedia`
         The media fields of this answer.
-    poll: Optional[:class:`Poll`]
-        The poll associated with this answer. This will be ``None`` only if this object was created manually
+    poll: :class:`Poll` | :data:`None`
+        The poll associated with this answer. This will be :data:`None` only if this object was created manually
         and did not originate from the API.
     vote_count: :class:`int`
         The number of votes for this answer.
@@ -160,12 +160,12 @@ class PollAnswer:
 
         Parameters
         ----------
-        limit: Optional[:class:`int`]
+        limit: :class:`int` | :data:`None`
             The maximum number of results to return.
-            If ``None``, retrieves every user who voted for this answer.
+            If :data:`None`, retrieves every user who voted for this answer.
             Note, however, that this would make it a slow operation.
             Defaults to ``100``.
-        after: Optional[:class:`abc.Snowflake`]
+        after: :class:`abc.Snowflake` | :data:`None`
             For pagination, votes are sorted by member.
 
         Raises
@@ -179,7 +179,7 @@ class PollAnswer:
 
         Yields
         ------
-        Union[:class:`User`, :class:`Member`]
+        :class:`User` | :class:`Member`
             The member (if retrievable) or the user that has voted
             for this answer. The case where it can be a :class:`Member` is
             in a guild message context. Sometimes it can be a :class:`User`
@@ -199,9 +199,9 @@ class Poll:
 
     Parameters
     ----------
-    question: Union[:class:`str`, :class:`PollMedia`]
+    question: :class:`str` | :class:`PollMedia`
         The question of the poll. Currently, emojis are not supported in poll questions.
-    answers: List[Union[:class:`str`, :class:`PollAnswer`]]
+    answers: :class:`list`\\[:class:`str` | :class:`PollAnswer`]
         The answers for this poll, up to 10.
     duration: :class:`datetime.timedelta`
         The total duration of the poll, up to 32 days. Defaults to 1 day.
@@ -213,13 +213,13 @@ class Poll:
 
     Attributes
     ----------
-    message: Optional[:class:`Message`]
-        The message which contains this poll. This will be ``None`` only if this object was created manually
+    message: :class:`Message` | :data:`None`
+        The message which contains this poll. This will be :data:`None` only if this object was created manually
         and did not originate from the API.
     question: :class:`PollMedia`
         The question of the poll.
-    duration: Optional[:class:`datetime.timedelta`]
-        The original duration for this poll. ``None`` if the poll is a non-expiring poll.
+    duration: :class:`datetime.timedelta` | :data:`None`
+        The original duration for this poll. :data:`None` if the poll is a non-expiring poll.
     allow_multiselect: :class:`bool`
         Whether users are able to pick more than one answer.
     layout_type: :class:`PollLayoutType`
@@ -277,7 +277,7 @@ class Poll:
 
     @property
     def answers(self) -> List[PollAnswer]:
-        """List[:class:`PollAnswer`]: The list of answers for this poll.
+        """:class:`list`\\[:class:`PollAnswer`]: The list of answers for this poll.
 
         See also :meth:`get_answer` to get specific answers by ID.
         """
@@ -285,43 +285,43 @@ class Poll:
 
     @property
     def created_at(self) -> Optional[datetime]:
-        """Optional[:class:`datetime.datetime`]: When this poll was created.
+        """:class:`datetime.datetime` | :data:`None`: When this poll was created.
 
-        ``None`` if this poll does not originate from the discord API.
+        :data:`None` if this poll does not originate from the discord API.
         """
         if not self.message:
-            return
+            return None
         return utils.snowflake_time(self.message.id)
 
     @property
     def expires_at(self) -> Optional[datetime]:
-        """Optional[:class:`datetime.datetime`]: The date when this poll will expire.
+        """:class:`datetime.datetime` | :data:`None`: The date when this poll will expire.
 
-        ``None`` if this poll does not originate from the discord API or if this
+        :data:`None` if this poll does not originate from the discord API or if this
         poll is non-expiring.
         """
         # non-expiring poll
         if not self.duration:
-            return
+            return None
 
         created_at = self.created_at
         # manually built object
         if not created_at:
-            return
+            return None
         return created_at + self.duration
 
     @property
     def remaining_duration(self) -> Optional[timedelta]:
-        """Optional[:class:`datetime.timedelta`]: The remaining duration for this poll.
+        """:class:`datetime.timedelta` | :data:`None`: The remaining duration for this poll.
         If this poll is finalized this property will arbitrarily return a
         zero valued timedelta.
 
-        ``None`` if this poll does not originate from the discord API.
+        :data:`None` if this poll does not originate from the discord API.
         """
         if self.is_finalized:
             return timedelta(hours=0)
         if not self.expires_at or not self.message:
-            return
+            return None
 
         return self.expires_at - utils.utcnow()
 
@@ -335,7 +335,7 @@ class Poll:
 
         Returns
         -------
-        Optional[:class:`PollAnswer`]
+        :class:`PollAnswer` | :data:`None`
             The requested answer.
         """
         return self._answers.get(answer_id)

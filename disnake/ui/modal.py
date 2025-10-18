@@ -50,6 +50,7 @@ class Modal:
         Currently supports the following components:
             - :class:`.ui.TextDisplay`
             - :class:`.ui.TextInput`, in a :class:`.ui.Label`
+            - :class:`.ui.FileUpload`, in a :class:`.ui.Label`
             - select menus (e.g. :class:`.ui.StringSelect`), in a :class:`.ui.Label`
 
         .. versionchanged:: 2.11
@@ -184,15 +185,15 @@ class Modal:
             If not given then one is generated for you.
         style: :class:`.TextInputStyle`
             The style of the text input.
-        placeholder: Optional[:class:`str`]
+        placeholder: :class:`str` | :data:`None`
             The placeholder text that is shown if nothing is entered.
-        value: Optional[:class:`str`]
+        value: :class:`str` | :data:`None`
             The pre-filled value of the text input.
         required: :class:`bool`
             Whether the text input is required. Defaults to ``True``.
-        min_length: Optional[:class:`int`]
+        min_length: :class:`int` | :data:`None`
             The minimum length of the text input.
-        max_length: Optional[:class:`int`]
+        max_length: :class:`int` | :data:`None`
             The maximum length of the text input.
 
         Raises

@@ -485,7 +485,7 @@ commands in an easy to use manner.
 typing.Union
 ^^^^^^^^^^^^
 
-A :data:`typing.Union` is a special type hint that allows for the command to take in any of the specific types instead of
+A :class:`typing.Union` is a special type hint that allows for the command to take in any of the specific types instead of
 a singular type. For example, given the following:
 
 .. code-block:: python3
@@ -502,7 +502,7 @@ The way this works is through a left-to-right order. It first attempts to conver
 :class:`disnake.TextChannel`, and if it fails it tries to convert it to a :class:`disnake.Member`. If all converters fail,
 then a special error is raised, :exc:`~ext.commands.BadUnionArgument`.
 
-Note that any valid converter discussed above can be passed in to the argument list of a :data:`typing.Union`.
+Note that any valid converter discussed above can be passed in to the argument list of a :class:`typing.Union`.
 
 typing.Optional
 ^^^^^^^^^^^^^^^
@@ -615,7 +615,7 @@ This command can be invoked any of the following ways:
     unintended parsing ambiguities in your code. One technique would be to clamp down the expected syntaxes
     allowed through custom converters or reordering the parameters to minimise clashes.
 
-    To help aid with some parsing ambiguities, :class:`str`, ``None``, :data:`typing.Optional` and
+    To help aid with some parsing ambiguities, :class:`str`, :data:`None`, :data:`typing.Optional` and
     :class:`~ext.commands.Greedy` are forbidden as parameters for the :class:`~ext.commands.Greedy` converter.
 
 .. _ext_commands_flag_converter:

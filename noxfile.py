@@ -2,7 +2,7 @@
 # /// script
 # requires-python = ">=3.9"
 # dependencies = [
-#     "nox==2025.5.1",
+#     "nox==2025.10.16",
 # ]
 # ///
 # SPDX-License-Identifier: MIT
@@ -35,8 +35,7 @@ nox.options.default_venv_backend = "uv|virtualenv"
 PYPROJECT = nox.project.load_toml()
 
 SUPPORTED_PYTHONS: Final[List[str]] = nox.project.python_versions(PYPROJECT)
-# TODO(onerandomusername): add 3.14 once CI supports 3.14.
-EXPERIMENTAL_PYTHON_VERSIONS: Final[List[str]] = []
+EXPERIMENTAL_PYTHON_VERSIONS: Final[List[str]] = ["3.14"]
 ALL_PYTHONS: Final[List[str]] = [*SUPPORTED_PYTHONS, *EXPERIMENTAL_PYTHON_VERSIONS]
 MIN_PYTHON: Final[str] = SUPPORTED_PYTHONS[0]
 CI: Final[bool] = "CI" in os.environ
@@ -79,8 +78,7 @@ EXECUTION_GROUPS: List[ExecutionGroup] = [
             python=python,
             pyright_paths=("disnake", "tests", "examples", "noxfile.py", "setup.py"),
             project=True,
-            # FIXME: orjson doesn't yet support python 3.14, remove once we migrate to uv and have version-specific locks
-            extras=("speed", "voice") if python not in EXPERIMENTAL_PYTHON_VERSIONS else ("voice",),
+            extras=("speed", "voice"),
             groups=("test", "nox"),
             dependencies=("setuptools", "pytz", "requests"),  # needed for type checking
         )
@@ -420,6 +418,10 @@ def test(session: nox.Session, execution_group: ExecutionGroup) -> None:
     install_deps(session, execution_group=execution_group)
 
     pytest_args = ["--cov", "--cov-context=test"]
+    if execution_group.experimental:
+        # don't turn warnings into errors
+        # (this will override what we set in pyproject, but not be overridden by the cli)
+        pytest_args.append("-Wdefault")
     global reset_coverage  # noqa: PLW0603
     if reset_coverage:
         # don't use `--cov-append` for first run

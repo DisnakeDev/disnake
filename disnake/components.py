@@ -49,6 +49,7 @@ if TYPE_CHECKING:
         ComponentType as ComponentTypeLiteral,
         ContainerComponent as ContainerComponentPayload,
         FileComponent as FileComponentPayload,
+        FileUploadComponent as FileUploadComponentPayload,
         LabelComponent as LabelComponentPayload,
         MediaGalleryComponent as MediaGalleryComponentPayload,
         MediaGalleryItem as MediaGalleryItemPayload,
@@ -91,6 +92,7 @@ __all__ = (
     "Separator",
     "Container",
     "Label",
+    "FileUpload",
 )
 
 # miscellaneous components-related type aliases
@@ -140,6 +142,7 @@ ContainerChildComponent = Union[
 # valid `Label.component` types
 LabelChildComponent = Union[
     "TextInput",
+    "FileUpload",
     "AnySelectMenu",
 ]
 
@@ -195,6 +198,7 @@ class Component:
     - :class:`Separator`
     - :class:`Container`
     - :class:`Label`
+    - :class:`FileUpload`
 
     This class is abstract and cannot be instantiated.
 
@@ -255,7 +259,7 @@ class ActionRow(Component, Generic[ActionRowChildComponentT]):
 
     Attributes
     ----------
-    children: List[Union[:class:`Button`, :class:`BaseSelectMenu`, :class:`TextInput`]]
+    children: :class:`list`\\[:class:`Button` | :class:`BaseSelectMenu` | :class:`TextInput`]
         The children components that this holds, if any.
     id: :class:`int`
         The numeric identifier for the component.
@@ -300,18 +304,18 @@ class Button(Component):
     ----------
     style: :class:`.ButtonStyle`
         The style of the button.
-    custom_id: Optional[:class:`str`]
+    custom_id: :class:`str` | :data:`None`
         The ID of the button that gets received during an interaction.
         If this button is for a URL or an SKU, it does not have a custom ID.
-    url: Optional[:class:`str`]
+    url: :class:`str` | :data:`None`
         The URL this button sends you to.
     disabled: :class:`bool`
         Whether the button is disabled or not.
-    label: Optional[:class:`str`]
+    label: :class:`str` | :data:`None`
         The label of the button, if any.
-    emoji: Optional[:class:`PartialEmoji`]
+    emoji: :class:`PartialEmoji` | :data:`None`
         The emoji of the button, if available.
-    sku_id: Optional[:class:`int`]
+    sku_id: :class:`int` | :data:`None`
         The ID of a purchasable SKU, for premium buttons.
         Premium buttons additionally cannot have a ``label``, ``url``, or ``emoji``.
 
@@ -395,9 +399,9 @@ class BaseSelectMenu(Component):
 
     Attributes
     ----------
-    custom_id: Optional[:class:`str`]
+    custom_id: :class:`str` | :data:`None`
         The ID of the select menu that gets received during an interaction.
-    placeholder: Optional[:class:`str`]
+    placeholder: :class:`str` | :data:`None`
         The placeholder text that is shown if nothing is selected, if any.
     min_values: :class:`int`
         The minimum number of items that must be chosen for this select menu.
@@ -405,11 +409,11 @@ class BaseSelectMenu(Component):
     max_values: :class:`int`
         The maximum number of items that must be chosen for this select menu.
         Defaults to 1 and must be between 1 and 25.
-    options: List[:class:`SelectOption`]
+    options: :class:`list`\\[:class:`SelectOption`]
         A list of options that can be selected in this select menu.
     disabled: :class:`bool`
         Whether the select menu is disabled or not.
-    default_values: List[:class:`SelectDefaultValue`]
+    default_values: :class:`list`\\[:class:`SelectDefaultValue`]
         The list of values (users/roles/channels) that are selected by default.
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
         Only available for auto-populated select menus.
@@ -495,9 +499,9 @@ class StringSelectMenu(BaseSelectMenu):
 
     Attributes
     ----------
-    custom_id: Optional[:class:`str`]
+    custom_id: :class:`str` | :data:`None`
         The ID of the select menu that gets received during an interaction.
-    placeholder: Optional[:class:`str`]
+    placeholder: :class:`str` | :data:`None`
         The placeholder text that is shown if nothing is selected, if any.
     min_values: :class:`int`
         The minimum number of items that must be chosen for this select menu.
@@ -507,7 +511,7 @@ class StringSelectMenu(BaseSelectMenu):
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select menu is disabled or not.
-    options: List[:class:`SelectOption`]
+    options: :class:`list`\\[:class:`SelectOption`]
         A list of options that can be selected in this select menu.
     required: :class:`bool`
         Whether the select menu is required. Only applies to components in modals.
@@ -556,9 +560,9 @@ class UserSelectMenu(BaseSelectMenu):
 
     Attributes
     ----------
-    custom_id: Optional[:class:`str`]
+    custom_id: :class:`str` | :data:`None`
         The ID of the select menu that gets received during an interaction.
-    placeholder: Optional[:class:`str`]
+    placeholder: :class:`str` | :data:`None`
         The placeholder text that is shown if nothing is selected, if any.
     min_values: :class:`int`
         The minimum number of items that must be chosen for this select menu.
@@ -568,7 +572,7 @@ class UserSelectMenu(BaseSelectMenu):
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select menu is disabled or not.
-    default_values: List[:class:`SelectDefaultValue`]
+    default_values: :class:`list`\\[:class:`SelectDefaultValue`]
         The list of values (users/members) that are selected by default.
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
@@ -607,9 +611,9 @@ class RoleSelectMenu(BaseSelectMenu):
 
     Attributes
     ----------
-    custom_id: Optional[:class:`str`]
+    custom_id: :class:`str` | :data:`None`
         The ID of the select menu that gets received during an interaction.
-    placeholder: Optional[:class:`str`]
+    placeholder: :class:`str` | :data:`None`
         The placeholder text that is shown if nothing is selected, if any.
     min_values: :class:`int`
         The minimum number of items that must be chosen for this select menu.
@@ -619,7 +623,7 @@ class RoleSelectMenu(BaseSelectMenu):
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select menu is disabled or not.
-    default_values: List[:class:`SelectDefaultValue`]
+    default_values: :class:`list`\\[:class:`SelectDefaultValue`]
         The list of values (roles) that are selected by default.
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
@@ -658,9 +662,9 @@ class MentionableSelectMenu(BaseSelectMenu):
 
     Attributes
     ----------
-    custom_id: Optional[:class:`str`]
+    custom_id: :class:`str` | :data:`None`
         The ID of the select menu that gets received during an interaction.
-    placeholder: Optional[:class:`str`]
+    placeholder: :class:`str` | :data:`None`
         The placeholder text that is shown if nothing is selected, if any.
     min_values: :class:`int`
         The minimum number of items that must be chosen for this select menu.
@@ -670,7 +674,7 @@ class MentionableSelectMenu(BaseSelectMenu):
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select menu is disabled or not.
-    default_values: List[:class:`SelectDefaultValue`]
+    default_values: :class:`list`\\[:class:`SelectDefaultValue`]
         The list of values (users/roles) that are selected by default.
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
@@ -709,9 +713,9 @@ class ChannelSelectMenu(BaseSelectMenu):
 
     Attributes
     ----------
-    custom_id: Optional[:class:`str`]
+    custom_id: :class:`str` | :data:`None`
         The ID of the select menu that gets received during an interaction.
-    placeholder: Optional[:class:`str`]
+    placeholder: :class:`str` | :data:`None`
         The placeholder text that is shown if nothing is selected, if any.
     min_values: :class:`int`
         The minimum number of items that must be chosen for this select menu.
@@ -721,10 +725,10 @@ class ChannelSelectMenu(BaseSelectMenu):
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select menu is disabled or not.
-    channel_types: Optional[List[:class:`ChannelType`]]
+    channel_types: :class:`list`\\[:class:`ChannelType`] | :data:`None`
         A list of channel types that can be selected in this select menu.
-        If ``None``, channels of all types may be selected.
-    default_values: List[:class:`SelectDefaultValue`]
+        If :data:`None`, channels of all types may be selected.
+    default_values: :class:`list`\\[:class:`SelectDefaultValue`]
         The list of values (channels) that are selected by default.
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
@@ -781,10 +785,10 @@ class SelectOption:
         The value of the option. This is not displayed to users.
         If not provided when constructed then it defaults to the
         label. Can only be up to 100 characters.
-    description: Optional[:class:`str`]
+    description: :class:`str` | :data:`None`
         An additional description of the option, if any.
         Can only be up to 100 characters.
-    emoji: Optional[Union[:class:`str`, :class:`Emoji`, :class:`PartialEmoji`]]
+    emoji: :class:`str` | :class:`Emoji` | :class:`PartialEmoji` | :data:`None`
         The emoji of the option, if available.
     default: :class:`bool`
         Whether this option is selected by default.
@@ -919,7 +923,7 @@ class TextInput(Component):
     ----------
     style: :class:`TextInputStyle`
         The style of the text input.
-    label: Optional[:class:`str`]
+    label: :class:`str` | :data:`None`
         The label of the text input.
 
         .. deprecated:: 2.11
@@ -927,15 +931,15 @@ class TextInput(Component):
 
     custom_id: :class:`str`
         The ID of the text input that gets received during an interaction.
-    placeholder: Optional[:class:`str`]
+    placeholder: :class:`str` | :data:`None`
         The placeholder text that is shown if nothing is entered.
-    value: Optional[:class:`str`]
+    value: :class:`str` | :data:`None`
         The pre-filled text of the text input.
     required: :class:`bool`
         Whether the text input is required. Defaults to ``True``.
-    min_length: Optional[:class:`int`]
+    min_length: :class:`int` | :data:`None`
         The minimum length of the text input.
-    max_length: Optional[:class:`int`]
+    max_length: :class:`int` | :data:`None`
         The maximum length of the text input.
     id: :class:`int`
         The numeric identifier for the component.
@@ -1011,9 +1015,9 @@ class Section(Component):
 
     Attributes
     ----------
-    children: List[:class:`TextDisplay`]
+    children: :class:`list`\\[:class:`TextDisplay`]
         The text items in this section.
-    accessory: Union[:class:`Thumbnail`, :class:`Button`]
+    accessory: :class:`Thumbnail` | :class:`Button`
         The accessory component displayed next to the section text.
     id: :class:`int`
         The numeric identifier for the component.
@@ -1102,13 +1106,13 @@ class UnfurledMediaItem:
     proxy_url: :class:`str`
         The proxied URL of this media item. This is a cached version of
         the :attr:`url` in the case of images.
-    height: Optional[:class:`int`]
+    height: :class:`int` | :data:`None`
         The height of this media item, if applicable.
-    width: Optional[:class:`int`]
+    width: :class:`int` | :data:`None`
         The width of this media item, if applicable.
-    content_type: Optional[:class:`str`]
+    content_type: :class:`str` | :data:`None`
         The `media type <https://en.wikipedia.org/wiki/Media_type>`_ of this media item.
-    attachment_id: Optional[:class:`int`]
+    attachment_id: :class:`int` | :data:`None`
         The ID of the uploaded attachment. Only present if the media item was
         uploaded as an attachment.
     """
@@ -1166,7 +1170,7 @@ class Thumbnail(Component):
     media: :class:`UnfurledMediaItem`
         The media item to display. Can be an arbitrary URL or attachment
         reference (``attachment://<filename>``).
-    description: Optional[:class:`str`]
+    description: :class:`str` | :data:`None`
         The thumbnail's description ("alt text"), if any.
     spoiler: :class:`bool`
         Whether the thumbnail is marked as a spoiler. Defaults to ``False``.
@@ -1223,7 +1227,7 @@ class MediaGallery(Component):
 
     Attributes
     ----------
-    items: List[:class:`MediaGalleryItem`]
+    items: :class:`list`\\[:class:`MediaGalleryItem`]
         The images in this gallery.
     id: :class:`int`
         The numeric identifier for the component.
@@ -1260,10 +1264,10 @@ class MediaGalleryItem:
 
     Parameters
     ----------
-    media: Union[:class:`str`, :class:`.Asset`, :class:`.Attachment`, :class:`.UnfurledMediaItem`]
+    media: :class:`str` | :class:`.Asset` | :class:`.Attachment` | :class:`.UnfurledMediaItem`
         The media item to display. Can be an arbitrary URL or attachment
         reference (``attachment://<filename>``).
-    description: Optional[:class:`str`]
+    description: :class:`str` | :data:`None`
         The item's description ("alt text"), if any.
     spoiler: :class:`bool`
         Whether the item is marked as a spoiler. Defaults to ``False``.
@@ -1327,10 +1331,10 @@ class FileComponent(Component):
         using the ``attachment://<filename>`` syntax), not arbitrary URLs.
     spoiler: :class:`bool`
         Whether the file is marked as a spoiler. Defaults to ``False``.
-    name: Optional[:class:`str`]
+    name: :class:`str` | :data:`None`
         The name of the file.
         This is available in objects from the API, and ignored when sending.
-    size: Optional[:class:`int`]
+    size: :class:`int` | :data:`None`
         The size of the file.
         This is available in objects from the API, and ignored when sending.
     id: :class:`int`
@@ -1427,9 +1431,9 @@ class Container(Component):
 
     Attributes
     ----------
-    children: List[Union[:class:`ActionRow`, :class:`Section`, :class:`TextDisplay`, :class:`MediaGallery`, :class:`FileComponent`, :class:`Separator`]]
+    children: :class:`list`\\[:class:`ActionRow` | :class:`Section` | :class:`TextDisplay` | :class:`MediaGallery` | :class:`FileComponent` | :class:`Separator`]
         The child components in this container.
-    accent_colour: Optional[:class:`Colour`]
+    accent_colour: :class:`Colour` | :data:`None`
         The accent colour of the container. An alias exists under ``accent_color``.
     spoiler: :class:`bool`
         Whether the container is marked as a spoiler. Defaults to ``False``.
@@ -1478,7 +1482,7 @@ class Container(Component):
 
     @property
     def accent_color(self) -> Optional[Colour]:
-        """Optional[:class:`Colour`]: The accent color of the container.
+        """:class:`Colour` | :data:`None`: The accent color of the container.
         An alias exists under ``accent_colour``.
         """
         return self.accent_colour
@@ -1501,9 +1505,9 @@ class Label(Component):
     ----------
     text: :class:`str`
         The label text.
-    description: Optional[:class:`str`]
+    description: :class:`str` | :data:`None`
         The description text for the label.
-    component: Union[:class:`TextInput`, :class:`StringSelectMenu`]
+    component: :class:`TextInput` | :class:`FileUpload` | :class:`BaseSelectMenu`
         The component within the label.
     id: :class:`int`
         The numeric identifier for the component.
@@ -1541,6 +1545,65 @@ class Label(Component):
             payload["description"] = self.description
 
         return payload
+
+
+class FileUpload(Component):
+    """Represents a file upload component from the Discord Bot UI Kit.
+
+    This allows you to receive files from users, and can only be used in modals.
+
+    .. note::
+        The user constructible and usable type to create a
+        file upload is :class:`disnake.ui.FileUpload`.
+
+    .. versionadded:: |vnext|
+
+    Attributes
+    ----------
+    custom_id: :class:`str`
+        The ID of the file upload that gets received during an interaction.
+    min_values: :class:`int`
+        The minimum number of files that must be uploaded.
+        Defaults to 1 and must be between 0 and 10.
+    max_values: :class:`int`
+        The maximum number of files that must be uploaded.
+        Defaults to 1 and must be between 1 and 10.
+    required: :class:`bool`
+        Whether the file upload is required.
+        Defaults to ``True``.
+    id: :class:`int`
+        The numeric identifier for the component.
+        This is always present in components received from the API,
+        and unique within a modal.
+    """
+
+    __slots__: Tuple[str, ...] = (
+        "custom_id",
+        "min_values",
+        "max_values",
+        "required",
+    )
+
+    __repr_attributes__: ClassVar[Tuple[str, ...]] = __slots__
+
+    def __init__(self, data: FileUploadComponentPayload) -> None:
+        self.type: Literal[ComponentType.file_upload] = ComponentType.file_upload
+        self.id = data.get("id", 0)
+
+        self.custom_id: str = data["custom_id"]
+        self.min_values: int = data.get("min_values", 1)
+        self.max_values: int = data.get("max_values", 1)
+        self.required: bool = data.get("required", True)
+
+    def to_dict(self) -> FileUploadComponentPayload:
+        return {
+            "type": self.type.value,
+            "id": self.id,
+            "custom_id": self.custom_id,
+            "min_values": self.min_values,
+            "max_values": self.max_values,
+            "required": self.required,
+        }
 
 
 # types of components that are allowed in a message's action rows;
@@ -1592,6 +1655,7 @@ COMPONENT_LOOKUP: Mapping[ComponentTypeLiteral, Type[Component]] = {
     ComponentType.separator.value: Separator,
     ComponentType.container.value: Container,
     ComponentType.label.value: Label,
+    ComponentType.file_upload.value: FileUpload,
 }
 
 

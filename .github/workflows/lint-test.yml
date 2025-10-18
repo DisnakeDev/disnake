@@ -139,7 +139,7 @@ jobs:
 
       - name: Run prek
         id: prek
-        uses: j178/prek-action@d26c975c4b1a6d0a99add6d5e46f330167356ece # v1.0.7
+        uses: j178/prek-action@91fd7d7cf70ae1dee9f4f44e7dfa5d1073fe6623 # v1.0.11
         # given the interoperability and the nature of prek, we stay unpinned for now
         # note that this action by default uses the latest version of prek
         # this is exactly how the pre-commit action worked, and we never had any issues
@@ -313,7 +313,7 @@ jobs:
       - lint
     strategy:
       matrix:
-        os: ["windows-latest", "ubuntu-latest", "macos-latest"]
+        os: ["ubuntu-latest", "macos-latest", "windows-latest"]
         session: ${{ fromJson(needs.python-versions.outputs.test-sessions) }}
       fail-fast: true
     continue-on-error: ${{ matrix.session.experimental }}

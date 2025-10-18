@@ -198,26 +198,26 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
     ----------
     name: :class:`str`
         The name of the command.
-    callback: :ref:`coroutine <coroutine>`
-        The coroutine that is executed when the command is called.
-    help: Optional[:class:`str`]
+    callback: :ref:`coroutine function <coroutine>`
+        The coroutine function that is executed when the command is called.
+    help: :class:`str` | :data:`None`
         The long help text for the command.
-    brief: Optional[:class:`str`]
+    brief: :class:`str` | :data:`None`
         The short help text for the command.
-    usage: Optional[:class:`str`]
+    usage: :class:`str` | :data:`None`
         A replacement for arguments in the default help text.
-    aliases: Union[List[:class:`str`], Tuple[:class:`str`]]
+    aliases: :class:`list`\\[:class:`str`] | :class:`tuple`\\[:class:`str`]
         The list of aliases the command can be invoked under.
     enabled: :class:`bool`
         Whether the command is currently enabled.
         If the command is invoked while it is disabled, then
         :exc:`.DisabledCommand` is raised to the :func:`.on_command_error`
         event. Defaults to ``True``.
-    parent: Optional[:class:`Group`]
-        The parent group that this command belongs to. ``None`` if there isn't one.
-    cog: Optional[:class:`Cog`]
-        The cog that this command belongs to. ``None`` if there isn't one.
-    checks: List[Callable[[:class:`.Context`], :class:`bool`]]
+    parent: :class:`Group` | :data:`None`
+        The parent group that this command belongs to. :data:`None` if there isn't one.
+    cog: :class:`Cog` | :data:`None`
+        The cog that this command belongs to. :data:`None` if there isn't one.
+    checks: :class:`list`\\[:class:`~collections.abc.Callable`\\[[:class:`.Context`], :class:`bool`]]
         A list of predicates that verifies if the command could be executed
         with the given :class:`.Context` as the sole parameter. If an exception
         is necessary to be thrown to signal failure, then one inherited from
@@ -235,7 +235,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         regular matter rather than passing the rest completely raw. If ``True``
         then the keyword-only argument will pass in the rest of the arguments
         in a completely raw matter. Defaults to ``False``.
-    invoked_subcommand: Optional[:class:`Command`]
+    invoked_subcommand: :class:`Command` | :data:`None`
         The subcommand that was invoked, if any.
     require_var_positional: :class:`bool`
         If ``True`` and a variadic positional argument is specified, requires
@@ -285,7 +285,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         **kwargs: Any,
     ) -> None:
         if not iscoroutinefunction(func):
-            msg = "Callback must be a coroutine."
+            msg = "Callback must be a coroutine function."
             raise TypeError(msg)
 
         name = kwargs.get("name") or func.__name__
@@ -621,7 +621,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
 
     @property
     def clean_params(self) -> Dict[str, inspect.Parameter]:
-        """Dict[:class:`str`, :class:`inspect.Parameter`]:
+        """:class:`dict`\\[:class:`str`, :class:`inspect.Parameter`]:
         Retrieves the parameter dictionary without the context or self parameters.
 
         Useful for inspecting signature.
@@ -646,7 +646,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
 
     @property
     def parents(self) -> List[Group[CogT, ..., Any]]:
-        """List[:class:`Group`]: Retrieves the parents of this command.
+        """:class:`list`\\[:class:`Group`]: Retrieves the parents of this command.
 
         If the command has no parents then it returns an empty :class:`list`.
 
@@ -664,9 +664,9 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
 
     @property
     def root_parent(self) -> Optional[Group[CogT, ..., Any]]:
-        """Optional[:class:`Group`]: Retrieves the root parent of this command.
+        """:class:`Group` | :data:`None`: Retrieves the root parent of this command.
 
-        If the command has no parents then it returns ``None``.
+        If the command has no parents then it returns :data:`None`.
 
         For example in commands ``?a b c test``, the root parent is ``a``.
         """
@@ -891,7 +891,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
                 await self.call_after_hooks(ctx)
 
     def error(self, coro: ErrorT) -> ErrorT:
-        """A decorator that registers a coroutine as a local error handler.
+        """A decorator that registers a coroutine function as a local error handler.
 
         A local error handler is an :func:`.on_command_error` event limited to
         a single command. However, the :func:`.on_command_error` is still
@@ -899,16 +899,16 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
 
         Parameters
         ----------
-        coro: :ref:`coroutine <coroutine>`
-            The coroutine to register as the local error handler.
+        coro: :ref:`coroutine function <coroutine>`
+            The coroutine function to register as the local error handler.
 
         Raises
         ------
         TypeError
-            The coroutine passed is not actually a coroutine.
+            The argument passed is not actually a coroutine function.
         """
         if not iscoroutinefunction(coro):
-            msg = "The error handler must be a coroutine."
+            msg = "The error handler must be a coroutine function."
             raise TypeError(msg)
 
         self.on_error: Error = coro
@@ -924,7 +924,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         return hasattr(self, "on_error")
 
     def before_invoke(self, coro: HookT) -> HookT:
-        """A decorator that registers a coroutine as a pre-invoke hook.
+        """A decorator that registers a coroutine function as a pre-invoke hook.
 
         A pre-invoke hook is called directly before the command is
         called. This makes it a useful function to set up database
@@ -936,23 +936,23 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
 
         Parameters
         ----------
-        coro: :ref:`coroutine <coroutine>`
-            The coroutine to register as the pre-invoke hook.
+        coro: :ref:`coroutine function <coroutine>`
+            The coroutine function to register as the pre-invoke hook.
 
         Raises
         ------
         TypeError
-            The coroutine passed is not actually a coroutine.
+            The argument passed is not actually a coroutine function.
         """
         if not iscoroutinefunction(coro):
-            msg = "The pre-invoke hook must be a coroutine."
+            msg = "The pre-invoke hook must be a coroutine function."
             raise TypeError(msg)
 
         self._before_invoke = coro
         return coro
 
     def after_invoke(self, coro: HookT) -> HookT:
-        """A decorator that registers a coroutine as a post-invoke hook.
+        """A decorator that registers a coroutine function as a post-invoke hook.
 
         A post-invoke hook is called directly after the command is
         called. This makes it a useful function to clean-up database
@@ -964,16 +964,16 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
 
         Parameters
         ----------
-        coro: :ref:`coroutine <coroutine>`
-            The coroutine to register as the post-invoke hook.
+        coro: :ref:`coroutine function <coroutine>`
+            The coroutine function to register as the post-invoke hook.
 
         Raises
         ------
         TypeError
-            The coroutine passed is not actually a coroutine.
+            The argument passed is not actually a coroutine function.
         """
         if not iscoroutinefunction(coro):
-            msg = "The post-invoke hook must be a coroutine."
+            msg = "The post-invoke hook must be a coroutine function."
             raise TypeError(msg)
 
         self._after_invoke = coro
@@ -981,7 +981,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
 
     @property
     def cog_name(self) -> Optional[str]:
-        """Optional[:class:`str`]: The name of the cog this command belongs to, if any."""
+        """:class:`str` | :data:`None`: The name of the cog this command belongs to, if any."""
         return type(self.cog).__cog_name__ if self.cog is not None else None
 
     @property
@@ -1047,8 +1047,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
                         else f"[{name}={param.default}]..."
                     )
                     continue
-                else:
-                    result.append(f"[{name}]")
+                result.append(f"[{name}]")
 
             elif param.kind == param.VAR_POSITIONAL:
                 if self.require_var_positional:
@@ -1142,7 +1141,7 @@ class GroupMixin(Generic[CogT]):
 
     @property
     def commands(self) -> Set[Command[CogT, Any, Any]]:
-        """Set[:class:`.Command`]: A unique set of commands without aliases that are registered."""
+        """:class:`set`\\[:class:`.Command`]: A unique set of commands without aliases that are registered."""
         return set(self.all_commands.values())
 
     def recursively_remove_all_commands(self) -> None:
@@ -1202,9 +1201,9 @@ class GroupMixin(Generic[CogT]):
 
         Returns
         -------
-        Optional[:class:`.Command`]
+        :class:`.Command` | :data:`None`
             The command that was removed. If the name is not valid then
-            ``None`` is returned instead.
+            :data:`None` is returned instead.
         """
         command = self.all_commands.pop(name, None)
 
@@ -1234,7 +1233,7 @@ class GroupMixin(Generic[CogT]):
 
         Yields
         ------
-        Union[:class:`.Command`, :class:`.Group`]
+        :class:`.Command` | :class:`.Group`
             A command or group from the internal list of commands.
         """
         for command in self.commands:
@@ -1250,7 +1249,7 @@ class GroupMixin(Generic[CogT]):
 
         The name could be fully qualified (e.g. ``'foo bar'``) will get
         the subcommand ``bar`` of the group command ``foo``. If a
-        subcommand is not found then ``None`` is returned just as usual.
+        subcommand is not found then :data:`None` is returned just as usual.
 
         Parameters
         ----------
@@ -1259,8 +1258,8 @@ class GroupMixin(Generic[CogT]):
 
         Returns
         -------
-        Optional[:class:`Command`]
-            The command that was requested. If not found, returns ``None``.
+        :class:`Command` | :data:`None`
+            The command that was requested. If not found, returns :data:`None`.
         """
         # fast path, no space in name.
         if " " not in name:
@@ -1321,7 +1320,7 @@ class GroupMixin(Generic[CogT]):
 
         Returns
         -------
-        Callable[..., :class:`Command`]
+        :class:`~collections.abc.Callable`\\[..., :class:`Command`]
             A decorator that converts the provided method into a Command, adds it to the bot, then returns it.
         """
 
@@ -1371,7 +1370,7 @@ class GroupMixin(Generic[CogT]):
 
         Returns
         -------
-        Callable[..., :class:`Group`]
+        :class:`~collections.abc.Callable`\\[..., :class:`Group`]
             A decorator that converts the provided method into a Group, adds it to the bot, then returns it.
         """
 
@@ -1713,7 +1712,7 @@ def check(predicate: Check) -> Callable[[T], T]:
 
     Parameters
     ----------
-    predicate: Callable[[:class:`Context`], :class:`bool`]
+    predicate: :class:`~collections.abc.Callable`\\[[:class:`Context`], :class:`bool`]
         The predicate to check if the command should be invoked.
     """
 
@@ -1761,7 +1760,7 @@ def check_any(*checks: Check) -> Callable[[T], T]:
 
     Parameters
     ----------
-    *checks: Callable[[:class:`Context`], :class:`bool`]
+    *checks: :class:`~collections.abc.Callable`\\[[:class:`Context`], :class:`bool`]
         An argument list of checks that have been decorated with
         the :func:`check` decorator.
 
@@ -1821,7 +1820,7 @@ def app_check(predicate: AppCheck) -> Callable[[T], T]:
 
     Parameters
     ----------
-    predicate: Callable[[:class:`disnake.ApplicationCommandInteraction`], :class:`bool`]
+    predicate: :class:`~collections.abc.Callable`\\[[:class:`disnake.ApplicationCommandInteraction`], :class:`bool`]
         The predicate to check if the command should be invoked.
     """
     return check(predicate)  # type: ignore  # impl is the same, typings are different
@@ -1837,7 +1836,7 @@ def app_check_any(*checks: AppCheck) -> Callable[[T], T]:
 
     Parameters
     ----------
-    *checks: Callable[[:class:`disnake.ApplicationCommandInteraction`], :class:`bool`]
+    *checks: :class:`~collections.abc.Callable`\\[[:class:`disnake.ApplicationCommandInteraction`], :class:`bool`]
         An argument list of checks that have been decorated with
         the :func:`app_check` decorator.
 
@@ -1877,7 +1876,7 @@ def has_role(item: Union[int, str]) -> Callable[[T], T]:
 
     Parameters
     ----------
-    item: Union[:class:`int`, :class:`str`]
+    item: :class:`int` | :class:`str`
         The name or ID of the role to check.
     """
 
@@ -1915,7 +1914,7 @@ def has_any_role(*items: Union[int, str]) -> Callable[[T], T]:
 
     Parameters
     ----------
-    items: List[Union[:class:`str`, :class:`int`]]
+    items: :class:`list`\\[:class:`str` | :class:`int`]
         An argument list of names or IDs to check that the member has roles wise.
 
     Example
@@ -2550,7 +2549,7 @@ def cooldown(
         The number of times a command can be used before triggering a cooldown.
     per: :class:`float`
         The amount of seconds to wait for a cooldown when it's been triggered.
-    type: Union[:class:`.BucketType`, Callable[[:class:`.Message`], Any]]
+    type: :class:`.BucketType` | :class:`~collections.abc.Callable`\\[[:class:`.Message`], :data:`~typing.Any`]
         The type of cooldown to have. If callable, should return a key for the mapping.
 
         .. versionchanged:: 1.7
@@ -2576,7 +2575,7 @@ def dynamic_cooldown(
 
     This differs from :func:`.cooldown` in that it takes a function that
     accepts a single parameter of type :class:`.disnake.Message` and must
-    return a :class:`.Cooldown` or ``None``. If ``None`` is returned then
+    return a :class:`.Cooldown` or :data:`None`. If :data:`None` is returned then
     that cooldown is effectively bypassed.
 
     A cooldown allows a command to only be used a specific amount
@@ -2594,9 +2593,9 @@ def dynamic_cooldown(
 
     Parameters
     ----------
-    cooldown: Callable[[:class:`.disnake.Message`], Optional[:class:`.Cooldown`]]
+    cooldown: :class:`~collections.abc.Callable`\\[[:class:`.disnake.Message`], :class:`.Cooldown` | :data:`None`]
         A function that takes a message and returns a cooldown that will
-        apply to this invocation or ``None`` if the cooldown should be bypassed.
+        apply to this invocation or :data:`None` if the cooldown should be bypassed.
     type: :class:`.BucketType`
         The type of cooldown to have.
     """

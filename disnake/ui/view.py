@@ -102,16 +102,16 @@ class View:
 
     Parameters
     ----------
-    timeout: Optional[:class:`float`]
+    timeout: :class:`float` | :data:`None`
         Timeout in seconds from last interaction with the UI before no longer accepting input.
-        If ``None`` then there is no timeout.
+        If :data:`None` then there is no timeout.
 
     Attributes
     ----------
-    timeout: Optional[:class:`float`]
+    timeout: :class:`float` | :data:`None`
         Timeout from last interaction with the UI before no longer accepting input.
-        If ``None`` then there is no timeout.
-    children: List[:class:`Item`]
+        If :data:`None` then there is no timeout.
+    children: :class:`list`\\[:class:`Item`]
         The list of children attached to this view.
     """
 
@@ -159,12 +159,14 @@ class View:
                 return
 
             if self.__timeout_expiry is None:
-                return self._dispatch_timeout()
+                self._dispatch_timeout()
+                return
 
             # Check if we've elapsed our currently set timeout
             now = time.monotonic()
             if now >= self.__timeout_expiry:
-                return self._dispatch_timeout()
+                self._dispatch_timeout()
+                return
 
             # Wait N seconds to see if timeout data has been refreshed
             await asyncio.sleep(self.__timeout_expiry - now)
@@ -203,7 +205,7 @@ class View:
         ----------
         message: :class:`disnake.Message`
             The message with components to convert into a view.
-        timeout: Optional[:class:`float`]
+        timeout: :class:`float` | :data:`None`
             The timeout of the converted view.
 
         Raises
@@ -223,7 +225,7 @@ class View:
         for component in walk_components(message.components):
             if isinstance(component, ActionRowComponent):
                 continue
-            elif not isinstance(component, VALID_ACTION_ROW_MESSAGE_COMPONENT_TYPES):
+            if not isinstance(component, VALID_ACTION_ROW_MESSAGE_COMPONENT_TYPES):
                 # can happen if message uses components v2
                 msg = f"Cannot construct view from message - unexpected {type(component).__name__}"
                 raise TypeError(msg)
@@ -360,7 +362,7 @@ class View:
 
             allow = await self.interaction_check(interaction)
             if not allow:
-                return
+                return None
 
             await item.callback(interaction)
         except Exception as e:
@@ -463,7 +465,7 @@ class View:
 
         A persistent view only has components with a set ``custom_id``
         (or non-interactive components such as :attr:`~.ButtonStyle.link` or :attr:`~.ButtonStyle.premium` buttons),
-        and a :attr:`timeout` set to ``None``.
+        and a :attr:`timeout` set to :data:`None`.
 
         :return type: :class:`bool`
         """
