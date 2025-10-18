@@ -19,6 +19,7 @@ from base64 import b64encode
 from bisect import bisect_left
 from inspect import getdoc as _getdoc, isawaitable as _isawaitable, signature as _signature
 from operator import attrgetter
+from types import UnionType
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -43,7 +44,6 @@ from typing import (
     TypedDict,
     TypeVar,
     Union,
-    get_origin,
     overload,
 )
 from urllib.parse import parse_qs, urlencode
@@ -1146,24 +1146,6 @@ def as_chunks(iterator: _Iter[T], max_size: int) -> _Iter[List[T]]:
     return _chunk(iterator, max_size)
 
 
-if sys.version_info >= (3, 10):
-    PY_310 = True
-    from types import UnionType
-else:
-    PY_310 = False
-    UnionType = object()
-
-
-def flatten_literal_params(parameters: Iterable[Any]) -> Tuple[Any, ...]:
-    params = []
-    for p in parameters:
-        if get_origin(p) is Literal:
-            params.extend(_unique(flatten_literal_params(p.__args__)))
-        else:
-            params.append(p)
-    return tuple(params)
-
-
 def normalise_optional_params(parameters: Iterable[Any]) -> Tuple[Any, ...]:
     none_cls = type(None)
     return (*tuple(p for p in parameters if p is not none_cls), none_cls)
@@ -1237,8 +1219,6 @@ def evaluate_annotation(
             except ValueError:
                 pass
         if origin is Literal:
-            if not PY_310:
-                args = flatten_literal_params(tp.__args__)
             implicit_str = False
             is_literal = True
 

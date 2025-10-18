@@ -53,7 +53,9 @@ def test_from_rgb(value: int, parts: Tuple[int, int, int]) -> None:
 def test_from_hsv(value: int, parts: Tuple[float, float, float]) -> None:
     expected = Colour(value)
     col = Colour.from_hsv(*parts)
-    assert all(math.isclose(a, b, abs_tol=1) for a, b in zip(expected.to_rgb(), col.to_rgb()))
+    assert all(
+        math.isclose(a, b, abs_tol=1) for a, b in zip(expected.to_rgb(), col.to_rgb(), strict=True)
+    )
 
 
 def test_alias() -> None:
