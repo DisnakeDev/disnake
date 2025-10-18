@@ -375,7 +375,7 @@ class AuditLogChanges:
             if attr == "$add":
                 self._handle_role(self.before, self.after, entry, elem["new_value"])  # type: ignore
                 continue
-            elif attr == "$remove":
+            if attr == "$remove":
                 self._handle_role(self.after, self.before, entry, elem["new_value"])  # type: ignore
                 continue
 

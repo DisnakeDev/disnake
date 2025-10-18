@@ -41,6 +41,4 @@ class EllipsisOverloads(BaseCodemodCommand):
                     new_params.append(param)
             kw[param_type] = new_params
 
-        node = node.with_deep_changes(node.params, **kw)
-
-        return node
+        return node.with_deep_changes(node.params, **kw)

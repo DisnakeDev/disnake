@@ -895,7 +895,7 @@ class Guild(Hashable):
 
     def _resolve_channel(self, id: Optional[int], /) -> Optional[Union[GuildChannel, Thread]]:
         if id is None:
-            return
+            return None
 
         return self._channels.get(id) or self._threads.get(id)
 
@@ -2544,12 +2544,11 @@ class Guild(Hashable):
             if factory is None:
                 raise InvalidData("Unknown channel type {type} for channel ID {id}.".format_map(d))
 
-            channel = factory(
+            return factory(
                 guild=self,
                 state=self._state,
                 data=d,  # type: ignore
             )
-            return channel
 
         return [convert(d) for d in data]
 
@@ -4034,10 +4033,9 @@ class Guild(Hashable):
             fields["unicode_emoji"] = emoji
 
         data = await self._state.http.create_role(self.id, reason=reason, **fields)
-        role = Role(guild=self, data=data, state=self._state)
 
         # TODO: add to cache
-        return role
+        return Role(guild=self, data=data, state=self._state)
 
     async def edit_role_positions(
         self, positions: dict[Snowflake, int], *, reason: Optional[str] = None
@@ -4663,6 +4661,7 @@ class Guild(Hashable):
 
         if not self._state.is_guild_evicted(self):
             return await self._state.chunk_guild(self, cache=cache)
+        return None
 
     async def query_members(
         self,

@@ -1148,6 +1148,7 @@ class SyncWebhook(BaseWebhook):
                     f.close()
         if wait:
             return self._create_message(data, thread=thread, thread_name=thread_name)
+        return None
 
     def fetch_message(
         self, id: int, /, *, thread: Optional[Snowflake] = None

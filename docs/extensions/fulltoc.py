@@ -96,8 +96,7 @@ def get_rendered_toctree(builder: StandaloneHTMLBuilder, docname: str, index: st
         index,
         **kwargs,
     )
-    rendered_toc = builder.render_partial(fulltoc)["fragment"]
-    return rendered_toc
+    return builder.render_partial(fulltoc)["fragment"]
 
 
 def build_full_toctree(

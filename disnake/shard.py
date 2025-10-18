@@ -457,7 +457,8 @@ class AutoShardedClient(Client):
         except Exception:
             _log.exception("Failed to connect for shard_id: %s. Retrying...", shard_id)
             await asyncio.sleep(5.0)
-            return await self.launch_shard(gateway, shard_id)
+            await self.launch_shard(gateway, shard_id)
+            return
 
         # keep reading the shard while others connect
         self.__shards[shard_id] = ret = Shard(ws, self, self.__queue.put_nowait)

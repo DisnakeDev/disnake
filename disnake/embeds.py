@@ -33,7 +33,7 @@ if not TYPE_CHECKING:
                 "`EmptyEmbed` is deprecated and will be removed in a future version. Use `None` instead.",
                 stacklevel=2,
             )
-            return None
+            return None  # noqa: RET501
         msg = f"module '{__name__}' has no attribute '{name}'"
         raise AttributeError(msg)
 
@@ -230,7 +230,7 @@ class Embed:
                 "`Embed.Empty` is deprecated and will be removed in a future version. Use `None` instead.",
                 stacklevel=3,
             )
-            return None
+            return None  # noqa: RET501
 
     @classmethod
     def from_dict(cls, data: EmbedData) -> Self:

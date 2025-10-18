@@ -1977,7 +1977,8 @@ class InteractionMessage(Message):
             Deleting the message failed.
         """
         if self._state._interaction.is_expired():
-            return await super().delete(delay=delay)
+            await super().delete(delay=delay)
+            return
         if delay is not None:
 
             async def inner_call(delay: float = delay) -> None:

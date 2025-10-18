@@ -64,6 +64,7 @@ class BucketType(Enum):
             return (
                 msg.author.top_role if msg.guild and isinstance(msg.author, Member) else msg.channel
             ).id
+        return None
 
     def __call__(self, msg: Message) -> Any:
         return self.get_key(msg)
@@ -163,6 +164,7 @@ class Cooldown:
 
         # we're not so decrement our tokens
         self._tokens -= 1
+        return None
 
     def reset(self) -> None:
         """Reset the cooldown to its initial state."""

@@ -87,8 +87,7 @@ def when_mentioned_or(*prefixes: str) -> Callable[[BotBase, Message], list[str]]
 
     def inner(bot: BotBase, msg: Message) -> list[str]:
         r = list(prefixes)
-        r = when_mentioned(bot, msg) + r
-        return r
+        return when_mentioned(bot, msg) + r
 
     return inner
 

@@ -542,6 +542,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         if payload is not None:
             # the payload will always be the proper channel payload
             return self.__class__(state=self._state, guild=self.guild, data=payload)  # type: ignore
+        return None
 
     async def clone(
         self,
@@ -1705,6 +1706,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         if payload is not None:
             # the payload will always be the proper channel payload
             return self.__class__(state=self._state, guild=self.guild, data=payload)  # type: ignore
+        return None
 
     async def delete_messages(self, messages: Iterable[Snowflake]) -> None:
         """|coro|
@@ -2562,6 +2564,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         if payload is not None:
             # the payload will always be the proper channel payload
             return self.__class__(state=self._state, guild=self.guild, data=payload)  # type: ignore
+        return None
 
     async def delete_messages(self, messages: Iterable[Snowflake]) -> None:
         """|coro|
@@ -3054,6 +3057,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         if payload is not None:
             # the payload will always be the proper channel payload
             return self.__class__(state=self._state, guild=self.guild, data=payload)  # type: ignore
+        return None
 
     @overload
     async def move(
@@ -4217,6 +4221,7 @@ class ForumChannel(ThreadOnlyGuildChannel):
         if payload is not None:
             # the payload will always be the proper channel payload
             return self.__class__(state=self._state, guild=self.guild, data=payload)  # type: ignore
+        return None
 
     async def clone(
         self,
@@ -4615,6 +4620,7 @@ class MediaChannel(ThreadOnlyGuildChannel):
         if payload is not None:
             # the payload will always be the proper channel payload
             return self.__class__(state=self._state, guild=self.guild, data=payload)  # type: ignore
+        return None
 
     async def clone(
         self,

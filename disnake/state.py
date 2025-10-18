@@ -493,6 +493,7 @@ class ConnectionState:
         granula = self._guild_application_commands.get(guild_id)
         if granula is not None:
             return granula.get(application_command_id)
+        return None
 
     def _add_guild_application_command(
         self, guild_id: int, application_command: APIApplicationCommand
@@ -524,6 +525,7 @@ class ConnectionState:
         for cmd in self._global_application_commands.values():
             if cmd.name == name and (cmd_type is None or cmd.type is cmd_type):
                 return cmd
+        return None
 
     def _get_guild_command_named(
         self, guild_id: int, name: str, cmd_type: Optional[ApplicationCommandType] = None
@@ -532,6 +534,7 @@ class ConnectionState:
         for cmd in granula.values():
             if cmd.name == name and (cmd_type is None or cmd.type is cmd_type):
                 return cmd
+        return None
 
     @property
     def emojis(self) -> list[Emoji]:
@@ -2256,6 +2259,7 @@ class ConnectionState:
             channel = guild._resolve_channel(id)
             if channel is not None:
                 return channel
+        return None
 
     def create_message(
         self,
