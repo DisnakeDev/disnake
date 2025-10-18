@@ -7,7 +7,7 @@ import os
 import sys
 import traceback
 from functools import partial
-from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Tuple, TypeVar, Union, cast
+from typing import TYPE_CHECKING, Callable, Optional, TypeVar, Union, cast
 
 from ..enums import TextInputStyle
 from ..utils import MISSING
@@ -105,7 +105,7 @@ class Modal:
 
         self.title: str = title
         self.custom_id: str = os.urandom(16).hex() if custom_id is MISSING else custom_id
-        self.components: List[ModalTopLevelComponent] = list(items)
+        self.components: list[ModalTopLevelComponent] = list(items)
         self.timeout: float = timeout
 
         # function for the modal to remove itself from the store, if any
@@ -120,7 +120,7 @@ class Modal:
         )
 
     def append_component(
-        self, component: Union[ModalTopLevelComponentInput, List[ModalTopLevelComponentInput]]
+        self, component: Union[ModalTopLevelComponentInput, list[ModalTopLevelComponentInput]]
     ) -> None:
         """Adds one or multiple component(s) to the modal.
 
@@ -259,7 +259,7 @@ class Modal:
             "title": self.title,
             "custom_id": self.custom_id,
             "components": cast(
-                "List[ModalTopLevelComponentPayload]",
+                "list[ModalTopLevelComponentPayload]",
                 [component.to_component_dict() for component in self.components],
             ),
         }
@@ -319,7 +319,7 @@ class ModalStore:
     def __init__(self, state: ConnectionState) -> None:
         self._state = state
         # (user_id, Modal.custom_id): Modal
-        self._modals: Dict[Tuple[int, str], Modal] = {}
+        self._modals: dict[tuple[int, str], Modal] = {}
 
     def add_modal(self, user_id: int, modal: Modal) -> None:
         key = (user_id, modal.custom_id)

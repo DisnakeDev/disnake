@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, Literal, Optional, overload
+from typing import TYPE_CHECKING, Any, Literal, Optional, overload
 
 from .asset import Asset
 from .enums import (
@@ -451,7 +451,7 @@ class GuildScheduledEvent(Hashable):
         :class:`GuildScheduledEvent`
             The newly updated guild scheduled event instance.
         """
-        fields: Dict[str, Any] = {}
+        fields: dict[str, Any] = {}
 
         if entity_type is MISSING:
             if channel is None:

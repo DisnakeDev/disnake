@@ -2,21 +2,14 @@
 
 from __future__ import annotations
 
+from collections.abc import Generator, Iterator, Mapping, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
     ClassVar,
-    Generator,
     Generic,
-    Iterator,
-    List,
-    Mapping,
     NoReturn,
     Optional,
-    Sequence,
-    Set,
-    Tuple,
-    Type,
     TypeVar,
     Union,
     cast,
@@ -172,7 +165,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         .. versionadded:: 2.11
     """
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = ("_children",)
+    __repr_attributes__: ClassVar[tuple[str, ...]] = ("_children",)
 
     # When unspecified and called empty, default to an ActionRow that takes any kind of component.
 
@@ -204,7 +197,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
     # n.b. this should be `*components: ActionRowChildT`, but pyright does not like it
     def __init__(self, *components: WrappedComponent, id: int = 0) -> None:
         self._id: int = id
-        self._children: List[ActionRowChildT] = []
+        self._children: list[ActionRowChildT] = []
 
         for component in components:
             if not isinstance(component, WrappedComponent):
@@ -640,7 +633,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
-        channel_types: Optional[List[ChannelType]] = None,
+        channel_types: Optional[list[ChannelType]] = None,
         default_values: Optional[Sequence[SelectDefaultValueInputType[AnyChannel]]] = None,
         id: int = 0,
     ) -> SelectCompatibleActionRowT:
@@ -841,7 +834,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
     def from_component(cls, action_row: ActionRowComponent) -> Self:
         return cls(
             *cast(
-                "List[ActionRowChildT]",
+                "list[ActionRowChildT]",
                 [_to_ui_component(c) for c in action_row.children],
             ),
             id=action_row.id,
@@ -905,7 +898,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         message: Message,
         *,
         strict: bool = True,
-    ) -> List[ActionRow[ActionRowMessageComponent]]:
+    ) -> list[ActionRow[ActionRowMessageComponent]]:
         """Create a list of up to 5 action rows from the components on an existing message.
 
         This will abide by existing component format on the message, including component
@@ -936,7 +929,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         :class:`list`\\[:class:`ActionRow`]:
             The action rows parsed from the components on the message.
         """
-        rows: List[ActionRow[ActionRowMessageComponent]] = []
+        rows: list[ActionRow[ActionRowMessageComponent]] = []
         for row in message.components:
             if not isinstance(row, ActionRowComponent):
                 # can happen if message uses components v2
@@ -958,7 +951,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
     @staticmethod
     def walk_components(
         action_rows: Sequence[ActionRow[ActionRowChildT]],
-    ) -> Generator[Tuple[ActionRow[ActionRowChildT], ActionRowChildT], None, None]:
+    ) -> Generator[tuple[ActionRow[ActionRowChildT], ActionRowChildT], None, None]:
         """Iterate over the components in a sequence of action rows, yielding each
         individual component together with the action row of which it is a child.
 
@@ -1014,7 +1007,7 @@ def normalize_components(
     if not isinstance(components, Sequence):
         components = [components]
 
-    result: List[Union[ActionRow[ActionRowChildT], NonActionRowChildT]] = []
+    result: list[Union[ActionRow[ActionRowChildT], NonActionRowChildT]] = []
     auto_row: ActionRow[ActionRowChildT] = ActionRow[ActionRowChildT]()
 
     wrap_types = TextInput if modal else WrappedComponent
@@ -1058,24 +1051,24 @@ def normalize_components(
 
 def normalize_components_to_dict(
     components: ComponentInput[ActionRowChildT, NonActionRowChildT],
-) -> Tuple[List[MessageTopLevelComponentPayload], bool]:
+) -> tuple[list[MessageTopLevelComponentPayload], bool]:
     """`normalize_components`, but also turns components into dicts.
     Returns ([d1, d2, ...], has_v2_component).
     """
-    component_payloads: List[Mapping[str, Any]] = []
+    component_payloads: list[Mapping[str, Any]] = []
     is_v2 = False
 
     for c in normalize_components(components):
         component_payloads.append(c.to_component_dict())
         is_v2 |= c.is_v2
 
-    return cast("List[MessageTopLevelComponentPayload]", component_payloads), is_v2
+    return cast("list[MessageTopLevelComponentPayload]", component_payloads), is_v2
 
 
 ComponentT = TypeVar("ComponentT", Component, UIComponent)
 
 
-def _walk_internal(component: ComponentT, seen: Set[ComponentT]) -> Iterator[ComponentT]:
+def _walk_internal(component: ComponentT, seen: set[ComponentT]) -> Iterator[ComponentT]:
     if component in seen:
         # prevent infinite recursion in case anyone manages to nest a component in itself
         return
@@ -1116,12 +1109,12 @@ def walk_components(components: Sequence[ComponentT]) -> Iterator[ComponentT]:
     :class:`~disnake.Component` | :class:`UIComponent`
         A component from the given sequence or child component thereof.
     """
-    seen: Set[ComponentT] = set()
+    seen: set[ComponentT] = set()
     for item in components:
         yield from _walk_internal(item, seen)
 
 
-def components_from_message(message: Message) -> List[MessageTopLevelComponent]:
+def components_from_message(message: Message) -> list[MessageTopLevelComponent]:
     """Create a list of :class:`UIComponent`\\s from the components of an existing message.
 
     This will abide by existing component format on the message, including component
@@ -1145,11 +1138,11 @@ def components_from_message(message: Message) -> List[MessageTopLevelComponent]:
     :class:`list`\\[:class:`UIComponent`]:
         The ui components parsed from the components on the message.
     """
-    components: List[UIComponent] = [_to_ui_component(c) for c in message.components]
-    return cast("List[MessageTopLevelComponent]", components)
+    components: list[UIComponent] = [_to_ui_component(c) for c in message.components]
+    return cast("list[MessageTopLevelComponent]", components)
 
 
-UI_COMPONENT_LOOKUP: Mapping[Type[Component], Type[UIComponent]] = {
+UI_COMPONENT_LOOKUP: Mapping[type[Component], type[UIComponent]] = {
     ActionRowComponent: ActionRow,
     ButtonComponent: Button,
     StringSelectComponent: StringSelect,
