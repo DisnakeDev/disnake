@@ -5,18 +5,8 @@ from __future__ import annotations
 import asyncio
 import datetime
 import time
-from collections.abc import Iterable, Mapping, Sequence
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Literal,
-    NamedTuple,
-    Optional,
-    Union,
-    cast,
-    overload,
-)
+from collections.abc import Callable, Iterable, Mapping, Sequence
+from typing import TYPE_CHECKING, Any, Literal, NamedTuple, Optional, Union, cast, overload
 
 import disnake.abc
 

@@ -4,15 +4,8 @@ from __future__ import annotations
 
 import asyncio
 import inspect
-from collections.abc import Sequence
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Optional,
-    TypeVar,
-    Union,
-)
+from collections.abc import Callable, Sequence
+from typing import TYPE_CHECKING, Any, Optional, TypeVar, Union
 
 from disnake import utils
 from disnake.app_commands import Option, SlashCommand

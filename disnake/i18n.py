@@ -8,16 +8,7 @@ import warnings
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from pathlib import Path
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Generic,
-    Literal,
-    Optional,
-    TypeVar,
-    Union,
-    overload,
-)
+from typing import TYPE_CHECKING, Any, Generic, Literal, Optional, TypeVar, Union, overload
 
 from . import utils
 from .custom_warnings import LocalizationWarning

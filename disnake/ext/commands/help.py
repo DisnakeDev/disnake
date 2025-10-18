@@ -6,16 +6,8 @@ import copy
 import functools
 import itertools
 import re
-from collections.abc import Generator, Iterable, Mapping, Sequence
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    ClassVar,
-    Optional,
-    TypeVar,
-    Union,
-)
+from collections.abc import Callable, Generator, Iterable, Mapping, Sequence
+from typing import TYPE_CHECKING, Any, ClassVar, Optional, TypeVar, Union
 
 import disnake.abc
 import disnake.utils

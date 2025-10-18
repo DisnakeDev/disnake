@@ -2,17 +2,8 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    ClassVar,
-    Optional,
-    TypeVar,
-    Union,
-    overload,
-)
+from collections.abc import Callable, Mapping, Sequence
+from typing import TYPE_CHECKING, Any, ClassVar, Optional, TypeVar, Union, overload
 
 from ...abc import Snowflake
 from ...components import UserSelectMenu

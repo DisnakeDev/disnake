@@ -4,11 +4,10 @@ from __future__ import annotations
 
 import functools
 import operator
-from collections.abc import Iterator, Sequence
+from collections.abc import Callable, Iterator, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     ClassVar,
     Generic,
     NoReturn,

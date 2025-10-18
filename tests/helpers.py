@@ -4,8 +4,9 @@ import datetime
 import functools
 import inspect
 import types
+from collections.abc import Callable
 from contextlib import AbstractContextManager
-from typing import TYPE_CHECKING, Callable, Optional, TypeVar
+from typing import TYPE_CHECKING, Optional, TypeVar
 from unittest import mock
 
 if TYPE_CHECKING:

@@ -7,17 +7,9 @@ import datetime
 import io
 import re
 from base64 import b64decode, b64encode
+from collections.abc import Callable
 from os import PathLike
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    ClassVar,
-    Optional,
-    Union,
-    cast,
-    overload,
-)
+from typing import TYPE_CHECKING, Any, ClassVar, Optional, Union, cast, overload
 
 from . import utils
 from .channel import PartialMessageable

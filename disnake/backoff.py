@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import random
 import time
-from typing import Callable, Generic, Literal, TypeVar, Union, overload
+from collections.abc import Callable
+from typing import Generic, Literal, TypeVar, Union, overload
 
 T = TypeVar("T", bool, Literal[True], Literal[False])
 

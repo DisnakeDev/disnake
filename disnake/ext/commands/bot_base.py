@@ -9,8 +9,8 @@ import logging
 import sys
 import traceback
 import warnings
-from collections.abc import Iterable
-from typing import TYPE_CHECKING, Any, Callable, Optional, TypeVar, Union
+from collections.abc import Callable, Iterable
+from typing import TYPE_CHECKING, Any, Optional, TypeVar, Union
 
 import disnake
 from disnake.utils import iscoroutinefunction

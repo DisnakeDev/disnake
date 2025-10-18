@@ -4,15 +4,7 @@ from __future__ import annotations
 import types
 from collections.abc import Iterator
 from functools import total_ordering
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    ClassVar,
-    NamedTuple,
-    NoReturn,
-    Optional,
-    TypeVar,
-)
+from typing import TYPE_CHECKING, Any, ClassVar, NamedTuple, NoReturn, Optional, TypeVar
 
 if TYPE_CHECKING:
     from typing_extensions import Self

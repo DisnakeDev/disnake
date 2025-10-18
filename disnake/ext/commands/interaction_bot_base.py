@@ -7,17 +7,9 @@ import logging
 import sys
 import traceback
 import warnings
-from collections.abc import Iterable, Sequence
+from collections.abc import Callable, Iterable, Sequence
 from itertools import chain
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Optional,
-    TypedDict,
-    TypeVar,
-    Union,
-)
+from typing import TYPE_CHECKING, Any, Optional, TypedDict, TypeVar, Union
 
 import disnake
 from disnake.app_commands import ApplicationCommand, Option

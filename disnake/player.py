@@ -13,7 +13,8 @@ import threading
 import time
 import traceback
 import warnings
-from typing import IO, TYPE_CHECKING, Any, Callable, Generic, Optional, TypeVar, Union
+from collections.abc import Callable
+from typing import IO, TYPE_CHECKING, Any, Generic, Optional, TypeVar, Union
 
 from . import utils
 from .errors import ClientException

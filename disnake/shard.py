@@ -4,17 +4,9 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from collections.abc import Callable
 from errno import ECONNRESET
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Literal,
-    NoReturn,
-    Optional,
-    Union,
-    overload,
-)
+from typing import TYPE_CHECKING, Any, Literal, NoReturn, Optional, Union, overload
 
 import aiohttp
 

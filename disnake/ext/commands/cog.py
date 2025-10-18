@@ -4,15 +4,8 @@ from __future__ import annotations
 
 import inspect
 import logging
-from collections.abc import Generator
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    ClassVar,
-    Optional,
-    Union,
-)
+from collections.abc import Callable, Generator
+from typing import TYPE_CHECKING, Any, ClassVar, Optional, Union
 
 import disnake
 import disnake.utils

@@ -17,13 +17,20 @@ import unicodedata
 import warnings
 from base64 import b64encode
 from bisect import bisect_left
-from collections.abc import AsyncIterator, Awaitable, Iterable, Iterator, Mapping, Sequence
+from collections.abc import (
+    AsyncIterator,
+    Awaitable,
+    Callable,
+    Iterable,
+    Iterator,
+    Mapping,
+    Sequence,
+)
 from inspect import getdoc as _getdoc, isawaitable as _isawaitable, signature as _signature
 from operator import attrgetter
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     ForwardRef,
     Generic,
     Literal,

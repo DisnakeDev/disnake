@@ -5,11 +5,10 @@ from __future__ import annotations
 import functools
 import inspect
 import re
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     Generic,
     Literal,
     Optional,

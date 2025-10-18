@@ -7,16 +7,7 @@ import re
 import sys
 from collections.abc import Iterator
 from dataclasses import dataclass, field
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Literal,
-    Optional,
-    TypeVar,
-    Union,
-    get_args,
-    get_origin,
-)
+from typing import TYPE_CHECKING, Any, Literal, Optional, TypeVar, Union, get_args, get_origin
 
 from disnake.utils import MISSING, maybe_coroutine, resolve_annotation
 
