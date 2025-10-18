@@ -394,10 +394,12 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         try:
             params = get_signature_parameters(function, globalns, skip_standard_params=True)
         except NameError as e:
-            raise NameError(
-                "Stringified params annotations must have their reference imported outside of a TYPE_CHECKING block: "
-                + e.args[0]
-            ) from None
+            msg = (
+                str(e)
+                + ", please check all annotations are defined outside of TYPE_CHECKING blocks."
+            )
+            # todo: add name kw only argument once we use py310+
+            raise NameError(msg) from None
 
         for param in params.values():
             if param.annotation is Greedy:

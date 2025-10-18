@@ -309,10 +309,12 @@ class SubCommand(InvokableApplicationCommand):
             try:
                 options = expand_params(self)
             except NameError as e:
-                raise NameError(
-                    "Could not expand parameters. Please check all annotations are imported outside of TYPE_CHECKING blocks. "
-                    + e.args[0]
-                ) from None
+                msg = (
+                    str(e)
+                    + ", please check all annotations are defined outside of TYPE_CHECKING blocks."
+                )
+                # todo: add name kw only argument once we use py310+
+                raise NameError(msg) from None
 
         self.docstring = utils.parse_docstring(func)
         desc_loc = Localized._cast(description, False)
@@ -482,10 +484,12 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             try:
                 options = expand_params(self)
             except NameError as e:
-                raise NameError(
-                    "Could not expand parameter options. Please check all annotations are imported outside of TYPE_CHECKING blocks. "
-                    + e.args[0]
-                ) from None
+                msg = (
+                    str(e)
+                    + ", please check all annotations are defined outside of TYPE_CHECKING blocks."
+                )
+                # todo: add name kw only argument once we use py310+
+                raise NameError(msg) from None
 
         self.docstring = utils.parse_docstring(func)
         desc_loc = Localized._cast(description, False)
