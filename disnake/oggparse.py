@@ -55,7 +55,7 @@ class OggPage:
             msg = "bad data stream"
             raise OggError(msg) from None
 
-    def iter_packets(self) -> Generator[tuple[bytes, bool], None, None]:
+    def iter_packets(self) -> Generator[tuple[bytes, bool]]:
         packetlen = offset = 0
         partial = True
 
@@ -88,13 +88,13 @@ class OggStream:
             msg = "invalid header magic"
             raise OggError(msg)
 
-    def _iter_pages(self) -> Generator[OggPage, None, None]:
+    def _iter_pages(self) -> Generator[OggPage]:
         page = self._next_page()
         while page:
             yield page
             page = self._next_page()
 
-    def iter_packets(self) -> Generator[bytes, None, None]:
+    def iter_packets(self) -> Generator[bytes]:
         partial = b""
         for page in self._iter_pages():
             for data, complete in page.iter_packets():

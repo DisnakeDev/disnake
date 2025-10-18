@@ -1531,7 +1531,7 @@ class Client:
         """
         return self._connection.get_soundboard_sound(id)
 
-    def get_all_channels(self) -> Generator[GuildChannel, None, None]:
+    def get_all_channels(self) -> Generator[GuildChannel]:
         """A generator that retrieves every :class:`.abc.GuildChannel` the client can 'access'.
 
         This is equivalent to: ::
@@ -1554,7 +1554,7 @@ class Client:
         for guild in self.guilds:
             yield from guild.channels
 
-    def get_all_members(self) -> Generator[Member, None, None]:
+    def get_all_members(self) -> Generator[Member]:
         """Returns a generator with every :class:`.Member` the client can see.
 
         This is equivalent to: ::

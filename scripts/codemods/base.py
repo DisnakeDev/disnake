@@ -22,7 +22,7 @@ class NoMetadataWrapperMixin(base_type):
     # deepcopying the entire module on initialization
 
     @contextmanager
-    def _handle_metadata_reference(self, tree: cst.Module) -> Generator[cst.Module, None, None]:
+    def _handle_metadata_reference(self, tree: cst.Module) -> Generator[cst.Module]:
         ctx_unsafe_skip_copy.set(True)
         with super()._handle_metadata_reference(tree) as res:
             ctx_unsafe_skip_copy.set(False)
