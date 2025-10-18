@@ -1335,7 +1335,7 @@ class Client:
         if value is None:
             self._connection._activity = None
         elif isinstance(value, BaseActivity):
-            # ConnectionState._activity is typehinted as ActivityPayload, we're passing Dict[str, Any]
+            # ConnectionState._activity is typehinted as ActivityPayload, we're passing dict[str, Any]
             self._connection._activity = value.to_dict()  # type: ignore
         else:
             msg = "activity must derive from BaseActivity."
@@ -1930,7 +1930,7 @@ class Client:
                 # may happen if guild is unavailable
                 continue
 
-            # Member.activities is typehinted as Tuple[ActivityType, ...], we may be setting it as Tuple[BaseActivity, ...]
+            # Member.activities is typehinted as tuple[ActivityType, ...], we may be setting it as tuple[BaseActivity, ...]
             me.activities = activities  # type: ignore
             me.status = status
 

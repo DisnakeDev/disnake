@@ -1132,7 +1132,7 @@ class clean_content(Converter[str]):
             "@&": resolve_role,
         }
 
-        def repl(match: re.Match) -> str:
+        def repl(match: re.Match[str]) -> str:
             type = match[1]
             id = int(match[2])
             return transforms[type](id)

@@ -7,7 +7,6 @@ import re
 import sys
 from collections.abc import Iterator
 from dataclasses import dataclass, field
-from re import Pattern
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -173,9 +172,9 @@ def get_flags(
 
         # Add sensible defaults based off of the type annotation
         # <type> -> (max_args=1)
-        # List[str] -> (max_args=-1)
-        # Tuple[int, ...] -> (max_args=1)
-        # Dict[K, V] -> (max_args=-1, override=True)
+        # list[str] -> (max_args=-1)
+        # tuple[int, ...] -> (max_args=1)
+        # dict[K, V] -> (max_args=-1, override=True)
         # Union[str, int] -> (max_args=1)
         # Optional[str] -> (default=None, max_args=1)
 
@@ -195,7 +194,7 @@ def get_flags(
                     flag.default = None
             elif origin is tuple:
                 # tuple parsing is e.g. `flag: peter 20`
-                # for Tuple[str, int] would give you flag: ('peter', 20)
+                # for tuple[str, int] would give you flag: ('peter', 20)
                 if flag.max_args is MISSING:
                     flag.max_args = 1
             elif origin is list:
@@ -247,7 +246,7 @@ class FlagsMeta(type):
         __commands_is_flag__: bool
         __commands_flags__: dict[str, Flag]
         __commands_flag_aliases__: dict[str, str]
-        __commands_flag_regex__: Pattern[str]
+        __commands_flag_regex__: re.Pattern[str]
         __commands_flag_case_insensitive__: bool
         __commands_flag_delimiter__: str
         __commands_flag_prefix__: str
@@ -602,7 +601,7 @@ class FlagConverter(metaclass=FlagsMeta):
 
             # Another special case, tuple parsing.
             # Tuple parsing is basically converting arguments within the flag
-            # So, given flag: hello 20 as the input and Tuple[str, int] as the type hint
+            # So, given flag: hello 20 as the input and tuple[str, int] as the type hint
             # We would receive ('hello', 20) as the resulting value
             # This uses the same whitespace and quoting rules as regular parameters.
             values = [await convert_flag(ctx, value, flag) for value in values]

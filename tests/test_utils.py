@@ -818,10 +818,10 @@ def test_resolve_annotation_literal() -> None:
 
 # declared here as `TypeAliasType` is only valid in class/module scopes
 if TYPE_CHECKING or sys.version_info >= (3, 12):
-    # this is equivalent to `type CoolList = List[int]`
+    # this is equivalent to `type CoolList = list[int]`
     CoolList = TypeAliasType("CoolList", list[int])
 
-    # this is equivalent to `type CoolList[T] = List[T]`
+    # this is equivalent to `type CoolList[T] = list[T]`
     T = TypeVar("T")
     CoolListGeneric = TypeAliasType("CoolListGeneric", list[T], type_params=(T,))
 
@@ -869,7 +869,7 @@ class TestResolveAnnotationTypeAliasType:
         )
 
         # then, resolve an annotation where the globalns changes and `DuplicateAlias` resolves to something else
-        # (i.e. this should not resolve to `List[int]` despite {"DuplicateAlias": int} in the cache)
+        # (i.e. this should not resolve to `list[int]` despite {"DuplicateAlias": int} in the cache)
         assert (
             utils.resolve_annotation(
                 utils_helper_module.ListWithDuplicateAlias, globals(), locals(), cache

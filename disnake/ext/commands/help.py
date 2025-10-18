@@ -7,7 +7,6 @@ import functools
 import itertools
 import re
 from collections.abc import Generator, Iterable, Mapping, Sequence
-from re import Match
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -458,7 +457,7 @@ class HelpCommand:
         """
 
         def replace(
-            obj: Match[str], *, transforms: Mapping[str, str] = self.MENTION_TRANSFORMS
+            obj: re.Match[str], *, transforms: Mapping[str, str] = self.MENTION_TRANSFORMS
         ) -> str:
             return transforms.get(obj.group(0), "@invalid")
 

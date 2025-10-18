@@ -607,7 +607,7 @@ class AutoShardedClient(Client):
                 # may happen if guild is unavailable
                 continue
 
-            # Member.activities is typehinted as Tuple[ActivityType, ...], we may be setting it as Tuple[BaseActivity, ...]
+            # Member.activities is typehinted as tuple[ActivityType, ...], we may be setting it as tuple[BaseActivity, ...]
             me.activities = activities  # type: ignore
             me.status = status_enum
 
