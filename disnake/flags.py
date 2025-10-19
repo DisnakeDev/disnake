@@ -4,20 +4,15 @@ from __future__ import annotations
 
 import functools
 import operator
+from collections.abc import Iterator, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
     ClassVar,
-    Dict,
     Generic,
-    Iterator,
-    List,
     NoReturn,
     Optional,
-    Sequence,
-    Tuple,
-    Type,
     TypeVar,
     Union,
     overload,
@@ -59,7 +54,7 @@ class flag_value(Generic[T]):
     def __init__(self, func: Callable[[Any], int]) -> None:
         self.flag = func(None)
         self.__doc__ = func.__doc__
-        self._parent: Type[T] = MISSING
+        self._parent: type[T] = MISSING
 
     def __eq__(self, other: Any) -> bool:
         if isinstance(other, flag_value):
@@ -89,12 +84,12 @@ class flag_value(Generic[T]):
         return ~self._parent._from_value(self.flag)
 
     @overload
-    def __get__(self, instance: None, owner: Type[BF]) -> flag_value[BF]: ...
+    def __get__(self, instance: None, owner: type[BF]) -> flag_value[BF]: ...
 
     @overload
-    def __get__(self, instance: BF, owner: Type[BF]) -> bool: ...
+    def __get__(self, instance: BF, owner: type[BF]) -> bool: ...
 
-    def __get__(self, instance: Optional[BF], owner: Type[BF]) -> Any:
+    def __get__(self, instance: Optional[BF], owner: type[BF]) -> Any:
         if instance is None:
             return self
         return instance._has_flag(self.flag)
@@ -110,12 +105,12 @@ class alias_flag_value(flag_value[T]):
     pass
 
 
-def all_flags_value(flags: Dict[str, int]) -> int:
+def all_flags_value(flags: dict[str, int]) -> int:
     return functools.reduce(operator.or_, flags.values())
 
 
 class BaseFlags:
-    VALID_FLAGS: ClassVar[Dict[str, int]]
+    VALID_FLAGS: ClassVar[dict[str, int]]
     DEFAULT_VALUE: ClassVar[int]
 
     value: int
@@ -131,7 +126,7 @@ class BaseFlags:
             setattr(self, key, value)
 
     @classmethod
-    def __init_subclass__(cls, inverted: bool = False, no_fill_flags: bool = False) -> Type[Self]:
+    def __init_subclass__(cls, inverted: bool = False, no_fill_flags: bool = False) -> type[Self]:
         # add a way to bypass filling flags, eg for ListBaseFlags.
         if no_fill_flags:
             return cls
@@ -266,7 +261,7 @@ class BaseFlags:
     def __repr__(self) -> str:
         return f"<{self.__class__.__name__} value={self.value}>"
 
-    def __iter__(self) -> Iterator[Tuple[str, bool]]:
+    def __iter__(self) -> Iterator[tuple[str, bool]]:
         for name, value in self.__class__.__dict__.items():
             if isinstance(value, alias_flag_value):
                 continue
@@ -310,7 +305,7 @@ class ListBaseFlags(BaseFlags, no_fill_flags=True):
         return self
 
     @property
-    def values(self) -> List[int]:
+    def values(self) -> list[int]:
         # This essentially converts an int like `0b100110` into `[1, 2, 5]`,
         # i.e. the exponents of set bits in `self.value`.
         # This may look weird but interestingly it's by far the
@@ -947,7 +942,7 @@ class PublicUserFlags(BaseFlags):
         """
         return UserFlags.active_developer.value
 
-    def all(self) -> List[UserFlags]:
+    def all(self) -> list[UserFlags]:
         """:class:`list`\\[:class:`UserFlags`]: Returns all public flags the user has."""
         return [public_flag for public_flag in UserFlags if self._has_flag(public_flag.value)]
 
@@ -2287,7 +2282,7 @@ class AutoModKeywordPresets(ListBaseFlags):
         ) -> None: ...
 
         @property
-        def values(self) -> List[AutoModPresetType]: ...
+        def values(self) -> list[AutoModPresetType]: ...
 
     @classmethod
     def all(cls) -> Self:
@@ -2809,7 +2804,7 @@ class ApplicationInstallTypes(ListBaseFlags):
         def __init__(self, *, guild: bool = ..., user: bool = ...) -> None: ...
 
         @property
-        def values(self) -> List[ApplicationIntegrationType]: ...
+        def values(self) -> list[ApplicationIntegrationType]: ...
 
     @classmethod
     def all(cls) -> Self:
@@ -2907,7 +2902,7 @@ class InteractionContextTypes(ListBaseFlags):
         ) -> None: ...
 
         @property
-        def values(self) -> List[InteractionContextType]: ...
+        def values(self) -> list[InteractionContextType]: ...
 
     @classmethod
     def all(cls) -> Self:

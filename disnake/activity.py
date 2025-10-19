@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union, overload
+from typing import TYPE_CHECKING, Any, Literal, Optional, Union, overload
 
 from .asset import Asset
 from .colour import Colour
@@ -37,7 +37,7 @@ assets: dict
     small_text: str (max: 128)
 party: dict
     id: str (max: 128),
-    size: List[int] (max-length: 2)
+    size: list[int] (max-length: 2)
         elem: int (min: 1)
 secrets: dict
     match: str (max: 128)
@@ -289,7 +289,7 @@ class Activity(BaseActivity):
         .. versionadded:: 2.0
 
         .. versionchanged:: 2.6
-            Changed type to ``List[str]`` to match API types.
+            Changed type to ``list[str]`` to match API types.
 
     emoji: :class:`PartialEmoji` | :data:`None`
         The emoji that belongs to this activity.
@@ -340,7 +340,7 @@ class Activity(BaseActivity):
         party: Optional[ActivityParty] = None,
         application_id: Optional[Union[str, int]] = None,
         flags: Optional[int] = None,
-        buttons: Optional[List[str]] = None,
+        buttons: Optional[list[str]] = None,
         emoji: Optional[Union[PartialEmojiPayload, ActivityEmojiPayload]] = None,
         id: Optional[str] = None,
         platform: Optional[str] = None,
@@ -361,7 +361,7 @@ class Activity(BaseActivity):
         self.name: Optional[str] = name
         self.url: Optional[str] = url
         self.flags: int = flags or 0
-        self.buttons: List[str] = buttons or []
+        self.buttons: list[str] = buttons or []
 
         # undocumented fields:
         self.id: Optional[str] = id
@@ -701,7 +701,7 @@ class Spotify(_BaseActivity):
         """
         return self.colour
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "flags": 48,  # SYNC | PLAY
             "name": "Spotify",
@@ -745,7 +745,7 @@ class Spotify(_BaseActivity):
         return self._details
 
     @property
-    def artists(self) -> List[str]:
+    def artists(self) -> list[str]:
         """:class:`list`\\[:class:`str`]: The artists of the song being played."""
         return self._state.split("; ")
 

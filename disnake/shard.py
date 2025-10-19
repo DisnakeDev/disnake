@@ -9,13 +9,9 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    Dict,
-    List,
     Literal,
     NoReturn,
     Optional,
-    Tuple,
-    Type,
     Union,
     overload,
 )
@@ -99,7 +95,7 @@ class Shard:
         self._reconnect = client._reconnect
         self._backoff: ExponentialBackoff[Literal[False]] = ExponentialBackoff()
         self._task: Optional[asyncio.Task] = None
-        self._handled_exceptions: Tuple[Type[Exception], ...] = (
+        self._handled_exceptions: tuple[type[Exception], ...] = (
             OSError,
             HTTPException,
             GatewayNotFound,
@@ -350,7 +346,7 @@ class AutoShardedClient(Client):
         *,
         asyncio_debug: bool = False,
         loop: Optional[asyncio.AbstractEventLoop] = None,
-        shard_ids: Optional[List[int]] = None,  # instead of Client's shard_id: Optional[int]
+        shard_ids: Optional[list[int]] = None,  # instead of Client's shard_id: Optional[int]
         shard_count: Optional[int] = None,
         enable_debug_events: bool = False,
         enable_gateway_error_handler: bool = True,
@@ -376,7 +372,7 @@ class AutoShardedClient(Client):
     @overload
     def __init__(self: NoReturn) -> None: ...
 
-    def __init__(self, *args: Any, shard_ids: Optional[List[int]] = None, **kwargs: Any) -> None:
+    def __init__(self, *args: Any, shard_ids: Optional[list[int]] = None, **kwargs: Any) -> None:
         self.shard_ids = shard_ids
         super().__init__(*args, **kwargs)
 
@@ -428,7 +424,7 @@ class AutoShardedClient(Client):
         return sum(latency for _, latency in self.latencies) / len(self.__shards)
 
     @property
-    def latencies(self) -> List[Tuple[int, float]]:
+    def latencies(self) -> list[tuple[int, float]]:
         """:class:`list`\\[:class:`tuple`\\[:class:`int`, :class:`float`]]: A list of latencies between a HEARTBEAT and a HEARTBEAT_ACK in seconds.
 
         This returns a list of tuples with elements ``(shard_id, latency)``.
@@ -448,7 +444,7 @@ class AutoShardedClient(Client):
             return ShardInfo(parent, self.shard_count)
 
     @property
-    def shards(self) -> Dict[int, ShardInfo]:
+    def shards(self) -> dict[int, ShardInfo]:
         """:class:`~collections.abc.Mapping`\\[:class:`int`, :class:`ShardInfo`]: Returns a mapping of shard IDs to their respective info object."""
         return {
             shard_id: ShardInfo(parent, self.shard_count)
@@ -614,7 +610,7 @@ class AutoShardedClient(Client):
                 # may happen if guild is unavailable
                 continue
 
-            # Member.activities is typehinted as Tuple[ActivityType, ...], we may be setting it as Tuple[BaseActivity, ...]
+            # Member.activities is typehinted as tuple[ActivityType, ...], we may be setting it as tuple[BaseActivity, ...]
             me.activities = activities  # pyright: ignore[reportAttributeAccessIssue]
             me.status = status_enum
 

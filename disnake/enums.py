@@ -2,19 +2,15 @@
 from __future__ import annotations
 
 import types
+from collections.abc import Iterator
 from functools import total_ordering
 from typing import (
     TYPE_CHECKING,
     Any,
     ClassVar,
-    Dict,
-    Iterator,
-    List,
     NamedTuple,
     NoReturn,
     Optional,
-    Tuple,
-    Type,
     TypeVar,
 )
 
@@ -110,7 +106,7 @@ class _EnumValueComparable(_EnumValueBase):
         return isinstance(other, self.__class__) and self.value < other.value
 
 
-def _create_value_cls(name: str, comparable: bool) -> Type[_EnumValueBase]:
+def _create_value_cls(name: str, comparable: bool) -> type[_EnumValueBase]:
     parent = _EnumValueComparable if comparable else _EnumValueBase
     return type(f"{parent.__name__}_{name}", (parent,), {"_cls_name": name})  # pyright: ignore[reportReturnType]
 
@@ -122,16 +118,16 @@ def _is_descriptor(obj) -> bool:
 class EnumMeta(type):
     if TYPE_CHECKING:
         __name__: ClassVar[str]
-        _enum_member_names_: ClassVar[List[str]]
-        _enum_member_map_: ClassVar[Dict[str, Any]]
-        _enum_value_map_: ClassVar[Dict[Any, Any]]
-        _enum_value_cls_: ClassVar[Type[_EnumValueBase]]
+        _enum_member_names_: ClassVar[list[str]]
+        _enum_member_map_: ClassVar[dict[str, Any]]
+        _enum_value_map_: ClassVar[dict[Any, Any]]
+        _enum_value_cls_: ClassVar[type[_EnumValueBase]]
 
     def __new__(
-        cls: Type[EnumMetaT],
+        cls: type[EnumMetaT],
         name: str,
-        bases: Tuple[Type, ...],
-        attrs: Dict[str, Any],
+        bases: tuple[type, ...],
+        attrs: dict[str, Any],
         *,
         comparable: bool = False,
     ) -> EnumMetaT:
@@ -785,7 +781,7 @@ class AuditLogAction(Enum):
     @property
     def category(self) -> Optional[AuditLogActionCategory]:
         # fmt: off
-        lookup: Dict[AuditLogAction, Optional[AuditLogActionCategory]] = {
+        lookup: dict[AuditLogAction, Optional[AuditLogActionCategory]] = {
             AuditLogAction.guild_update:                          AuditLogActionCategory.update,
             AuditLogAction.channel_create:                        AuditLogActionCategory.create,
             AuditLogAction.channel_update:                        AuditLogActionCategory.update,
@@ -1084,7 +1080,7 @@ class StickerFormatType(Enum):
         return STICKER_FORMAT_LOOKUP[self]
 
 
-STICKER_FORMAT_LOOKUP: Dict[StickerFormatType, str] = {
+STICKER_FORMAT_LOOKUP: dict[StickerFormatType, str] = {
     StickerFormatType.png: "png",
     StickerFormatType.apng: "png",
     StickerFormatType.lottie: "json",
@@ -2465,13 +2461,13 @@ class NameplatePalette(Enum):
 T = TypeVar("T", bound="Enum")
 
 
-def create_unknown_value(cls: Type[T], val: Any) -> T:
+def create_unknown_value(cls: type[T], val: Any) -> T:
     value_cls = cls._enum_value_cls_  # pyright: ignore[reportAttributeAccessIssue]
     name = f"unknown_{val}"
     return value_cls(name=name, value=val)
 
 
-def try_enum(cls: Type[T], val: Any) -> T:
+def try_enum(cls: type[T], val: Any) -> T:
     """A function that tries to turn the value into enum ``cls``.
 
     If it fails it returns a proxy invalid value instead.
@@ -2482,7 +2478,7 @@ def try_enum(cls: Type[T], val: Any) -> T:
         return create_unknown_value(cls, val)
 
 
-def enum_if_int(cls: Type[T], val: Any) -> T:
+def enum_if_int(cls: type[T], val: Any) -> T:
     """A function that tries to turn the value into enum ``cls``.
 
     If it fails it returns a proxy invalid value instead.

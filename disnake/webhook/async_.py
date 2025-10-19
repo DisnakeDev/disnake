@@ -5,21 +5,17 @@ from __future__ import annotations
 import asyncio
 import logging
 import re
+from collections.abc import Sequence
 from contextvars import ContextVar
 from errno import ECONNRESET
 from typing import (
     TYPE_CHECKING,
     Any,
-    Dict,
     Generic,
-    List,
     Literal,
     NamedTuple,
     NoReturn,
     Optional,
-    Sequence,
-    Tuple,
-    Type,
     TypeVar,
     Union,
     overload,
@@ -90,7 +86,7 @@ class AsyncDeferredLock:
 
     async def __aexit__(
         self,
-        type: Optional[Type[BaseException]],
+        type: Optional[type[BaseException]],
         value: Optional[BaseException],
         traceback: Optional[TracebackType],
     ) -> None:
@@ -101,21 +97,21 @@ class AsyncDeferredLock:
 
 class AsyncWebhookAdapter:
     def __init__(self) -> None:
-        self._locks: Dict[Any, asyncio.Lock] = {}
+        self._locks: dict[Any, asyncio.Lock] = {}
 
     async def request(
         self,
         route: Route,
         session: aiohttp.ClientSession,
         *,
-        payload: Optional[Dict[str, Any]] = None,
-        multipart: Optional[List[Dict[str, Any]]] = None,
-        files: Optional[List[File]] = None,
+        payload: Optional[dict[str, Any]] = None,
+        multipart: Optional[list[dict[str, Any]]] = None,
+        files: Optional[list[File]] = None,
         reason: Optional[str] = None,
         auth_token: Optional[str] = None,
-        params: Optional[Dict[str, Any]] = None,
+        params: Optional[dict[str, Any]] = None,
     ) -> Any:
-        headers: Dict[str, str] = {}
+        headers: dict[str, str] = {}
         files = files or []
         to_send: Optional[Union[str, aiohttp.FormData]] = None
         bucket = (route.webhook_id, route.webhook_token)
@@ -136,7 +132,7 @@ class AsyncWebhookAdapter:
             headers["X-Audit-Log-Reason"] = urlquote(reason, safe="/ ")
 
         response: Optional[aiohttp.ClientResponse] = None
-        data: Optional[Union[Dict[str, Any], str]] = None
+        data: Optional[Union[dict[str, Any], str]] = None
         method = route.method
         url = route.url
         webhook_id = route.webhook_id
@@ -259,7 +255,7 @@ class AsyncWebhookAdapter:
         self,
         webhook_id: int,
         token: str,
-        payload: Dict[str, Any],
+        payload: dict[str, Any],
         *,
         session: aiohttp.ClientSession,
         reason: Optional[str] = None,
@@ -271,7 +267,7 @@ class AsyncWebhookAdapter:
         self,
         webhook_id: int,
         token: str,
-        payload: Dict[str, Any],
+        payload: dict[str, Any],
         *,
         session: aiohttp.ClientSession,
         reason: Optional[str] = None,
@@ -290,9 +286,9 @@ class AsyncWebhookAdapter:
         token: str,
         *,
         session: aiohttp.ClientSession,
-        payload: Optional[Dict[str, Any]] = None,
-        multipart: Optional[List[Dict[str, Any]]] = None,
-        files: Optional[List[File]] = None,
+        payload: Optional[dict[str, Any]] = None,
+        multipart: Optional[list[dict[str, Any]]] = None,
+        files: Optional[list[File]] = None,
         thread_id: Optional[int] = None,
         wait: bool = False,
         with_components: bool = True,
@@ -320,7 +316,7 @@ class AsyncWebhookAdapter:
         session: aiohttp.ClientSession,
         thread_id: Optional[int] = None,
     ) -> Response[MessagePayload]:
-        params: Dict[str, Any] = {}
+        params: dict[str, Any] = {}
         if thread_id is not None:
             params["thread_id"] = thread_id
 
@@ -340,12 +336,12 @@ class AsyncWebhookAdapter:
         message_id: int,
         *,
         session: aiohttp.ClientSession,
-        payload: Optional[Dict[str, Any]] = None,
-        multipart: Optional[List[Dict[str, Any]]] = None,
-        files: Optional[List[File]] = None,
+        payload: Optional[dict[str, Any]] = None,
+        multipart: Optional[list[dict[str, Any]]] = None,
+        files: Optional[list[File]] = None,
         thread_id: Optional[int] = None,
     ) -> Response[MessagePayload]:
-        params: Dict[str, Any] = {}
+        params: dict[str, Any] = {}
         if thread_id is not None:
             params["thread_id"] = thread_id
 
@@ -369,7 +365,7 @@ class AsyncWebhookAdapter:
         session: aiohttp.ClientSession,
         thread_id: Optional[int] = None,
     ) -> Response[None]:
-        params: Dict[str, Any] = {}
+        params: dict[str, Any] = {}
         if thread_id is not None:
             params["thread_id"] = thread_id
 
@@ -414,8 +410,8 @@ class AsyncWebhookAdapter:
         *,
         session: aiohttp.ClientSession,
         type: int,
-        data: Optional[Dict[str, Any]] = None,
-        files: Optional[List[File]] = None,
+        data: Optional[dict[str, Any]] = None,
+        files: Optional[list[File]] = None,
     ) -> Response[None]:
         route = Route(
             "POST",
@@ -424,7 +420,7 @@ class AsyncWebhookAdapter:
             webhook_token=token,
         )
 
-        payload: Dict[str, Any] = {
+        payload: dict[str, Any] = {
             "type": type,
         }
 
@@ -459,9 +455,9 @@ class AsyncWebhookAdapter:
         token: str,
         *,
         session: aiohttp.ClientSession,
-        payload: Optional[Dict[str, Any]] = None,
-        multipart: Optional[List[Dict[str, Any]]] = None,
-        files: Optional[List[File]] = None,
+        payload: Optional[dict[str, Any]] = None,
+        multipart: Optional[list[dict[str, Any]]] = None,
+        files: Optional[list[File]] = None,
     ) -> Response[MessagePayload]:
         r = Route(
             "PATCH",
@@ -488,14 +484,14 @@ class AsyncWebhookAdapter:
 
 
 class DictPayloadParameters(NamedTuple):
-    payload: Dict[str, Any]
-    files: Optional[List[File]]
+    payload: dict[str, Any]
+    files: Optional[list[File]]
 
 
 class PayloadParameters(NamedTuple):
-    payload: Optional[Dict[str, Any]]
-    multipart: Optional[List[Dict[str, Any]]]
-    files: Optional[List[File]]
+    payload: Optional[dict[str, Any]]
+    multipart: Optional[list[dict[str, Any]]]
+    files: Optional[list[File]]
 
 
 def handle_message_parameters_dict(
@@ -508,10 +504,10 @@ def handle_message_parameters_dict(
     suppress_embeds: Optional[bool] = MISSING,
     flags: MessageFlags = MISSING,
     file: File = MISSING,
-    files: List[File] = MISSING,
-    attachments: Optional[List[Attachment]] = MISSING,
+    files: list[File] = MISSING,
+    attachments: Optional[list[Attachment]] = MISSING,
     embed: Optional[Embed] = MISSING,
-    embeds: List[Embed] = MISSING,
+    embeds: list[Embed] = MISSING,
     view: Optional[View] = MISSING,
     components: Optional[MessageComponents] = MISSING,
     allowed_mentions: Optional[AllowedMentions] = MISSING,
@@ -620,10 +616,10 @@ def handle_message_parameters(
     suppress_embeds: Optional[bool] = MISSING,
     flags: MessageFlags = MISSING,
     file: File = MISSING,
-    files: List[File] = MISSING,
-    attachments: Optional[List[Attachment]] = MISSING,
+    files: list[File] = MISSING,
+    attachments: Optional[list[Attachment]] = MISSING,
     embed: Optional[Embed] = MISSING,
-    embeds: List[Embed] = MISSING,
+    embeds: list[Embed] = MISSING,
     view: Optional[View] = MISSING,
     components: Optional[MessageComponents] = MISSING,
     allowed_mentions: Optional[AllowedMentions] = MISSING,
@@ -809,10 +805,10 @@ class WebhookMessage(Message):
         self,
         content: Optional[str] = MISSING,
         embed: Optional[Embed] = MISSING,
-        embeds: List[Embed] = MISSING,
+        embeds: list[Embed] = MISSING,
         file: File = MISSING,
-        files: List[File] = MISSING,
-        attachments: Optional[List[Attachment]] = MISSING,
+        files: list[File] = MISSING,
+        attachments: Optional[list[Attachment]] = MISSING,
         view: Optional[View] = MISSING,
         components: Optional[MessageComponents] = MISSING,
         flags: MessageFlags = MISSING,
@@ -971,7 +967,7 @@ class WebhookMessage(Message):
 
 
 class BaseWebhook(Hashable):
-    __slots__: Tuple[str, ...] = (
+    __slots__: tuple[str, ...] = (
         "id",
         "type",
         "guild_id",
@@ -1173,7 +1169,7 @@ class Webhook(BaseWebhook):
         .. versionadded:: 2.6
     """
 
-    __slots__: Tuple[str, ...] = ("session",)
+    __slots__: tuple[str, ...] = ("session",)
 
     def __init__(
         self,
@@ -1468,7 +1464,7 @@ class Webhook(BaseWebhook):
             msg = "This webhook does not have a token associated with it"
             raise WebhookTokenMissing(msg)
 
-        payload: Dict[str, Any] = {}
+        payload: dict[str, Any] = {}
         if name is not MISSING:
             payload["name"] = str(name) if name is not None else None
 
@@ -1547,9 +1543,9 @@ class Webhook(BaseWebhook):
         suppress_embeds: bool = ...,
         flags: MessageFlags = ...,
         file: File = ...,
-        files: List[File] = ...,
+        files: list[File] = ...,
         embed: Embed = ...,
-        embeds: List[Embed] = ...,
+        embeds: list[Embed] = ...,
         allowed_mentions: AllowedMentions = ...,
         view: View = ...,
         components: MessageComponents = ...,
@@ -1573,9 +1569,9 @@ class Webhook(BaseWebhook):
         suppress_embeds: bool = ...,
         flags: MessageFlags = ...,
         file: File = ...,
-        files: List[File] = ...,
+        files: list[File] = ...,
         embed: Embed = ...,
-        embeds: List[Embed] = ...,
+        embeds: list[Embed] = ...,
         allowed_mentions: AllowedMentions = ...,
         view: View = ...,
         components: MessageComponents = ...,
@@ -1598,9 +1594,9 @@ class Webhook(BaseWebhook):
         suppress_embeds: bool = MISSING,
         flags: MessageFlags = MISSING,
         file: File = MISSING,
-        files: List[File] = MISSING,
+        files: list[File] = MISSING,
         embed: Embed = MISSING,
-        embeds: List[Embed] = MISSING,
+        embeds: list[Embed] = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         view: View = MISSING,
         components: MessageComponents = MISSING,
@@ -1915,10 +1911,10 @@ class Webhook(BaseWebhook):
         *,
         content: Optional[str] = MISSING,
         embed: Optional[Embed] = MISSING,
-        embeds: List[Embed] = MISSING,
+        embeds: list[Embed] = MISSING,
         file: File = MISSING,
-        files: List[File] = MISSING,
-        attachments: Optional[List[Attachment]] = MISSING,
+        files: list[File] = MISSING,
+        attachments: Optional[list[Attachment]] = MISSING,
         view: Optional[View] = MISSING,
         components: Optional[MessageComponents] = MISSING,
         flags: MessageFlags = MISSING,

@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: MIT
 
 import math
-import sys
 from typing import Any, Optional, Union
 from unittest import mock
 
@@ -194,12 +193,7 @@ class TestRangeStringParam:
         [
             "Optional[commands.Range[int, 1, 2]]",
             # 3.10 union syntax
-            pytest.param(
-                "commands.Range[int, 1, 2] | None",
-                marks=pytest.mark.skipif(
-                    sys.version_info < (3, 10), reason="syntax requires py3.10"
-                ),
-            ),
+            "commands.Range[int, 1, 2] | None",
         ],
     )
     def test_optional(self, annotation_str) -> None:

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Optional, Union
 
 from .asset import Asset, AssetMixin
 from .mixins import Hashable
@@ -272,7 +272,7 @@ class GuildSoundboardSound(SoundboardSound):
         :class:`GuildSoundboardSound`
             The newly modified soundboard sound.
         """
-        payload: Dict[str, Any] = {}
+        payload: dict[str, Any] = {}
 
         if name is not MISSING:
             payload["name"] = name

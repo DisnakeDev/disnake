@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, List, Sequence, Union, cast
+from collections.abc import Sequence
+from typing import TYPE_CHECKING, Any, Union, cast
 
 from .enums import MessageType
 
@@ -75,8 +76,8 @@ class AllowedMentions:
     ) -> None:
         self.everyone = everyone
         # TODO(3.0): annotate attributes as `Sequence` instead of copying to list
-        self.users: Union[bool, List[Snowflake]]
-        self.roles: Union[bool, List[Snowflake]]
+        self.users: Union[bool, list[Snowflake]]
+        self.roles: Union[bool, list[Snowflake]]
         if users is default or isinstance(users, bool):
             self.users = cast("bool", users)
         else:
@@ -129,7 +130,7 @@ class AllowedMentions:
 
     def to_dict(self) -> AllowedMentionsPayload:
         # n.b. this runs nearly every time a message is sent
-        parse: List[AllowedMentionTypePayload] = []
+        parse: list[AllowedMentionTypePayload] = []
         data: AllowedMentionsPayload = {"parse": parse}  # pyright: ignore[reportAssignmentType]
 
         if self.everyone:

@@ -1,6 +1,6 @@
 #!/usr/bin/env -S uv run --script
 # /// script
-# requires-python = ">=3.9"
+# requires-python = ">=3.10"
 # dependencies = [
 #     "nox==2025.10.16",
 # ]
@@ -16,12 +16,9 @@ import shutil
 from typing import (
     TYPE_CHECKING,
     Any,
-    Dict,
     Final,
-    List,
     Optional,
     Sequence,
-    Tuple,
 )
 
 import nox
@@ -47,19 +44,19 @@ reset_coverage = True
 if TYPE_CHECKING:
     ExecutionGroupType = object
 else:
-    ExecutionGroupType = Dict[str, Any]
+    ExecutionGroupType = dict[str, Any]
 
 
 @dataclasses.dataclass
 class ExecutionGroup(ExecutionGroupType):
-    sessions: Tuple[str, ...] = ()
+    sessions: tuple[str, ...] = ()
     python: str = MIN_PYTHON
     project: bool = True
-    extras: Tuple[str, ...] = ()
-    groups: Tuple[str, ...] = ()
-    dependencies: Tuple[str, ...] = ()
+    extras: tuple[str, ...] = ()
+    groups: tuple[str, ...] = ()
+    dependencies: tuple[str, ...] = ()
     experimental: bool = False
-    pyright_paths: Tuple[str, ...] = ()
+    pyright_paths: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         if self.pyright_paths and "pyright" not in self.sessions:
@@ -153,7 +150,7 @@ def install_deps(session: nox.Session, *, execution_group: Optional[ExecutionGro
         msg = "Cannot install extras without also installing the project"
         raise TypeError(msg)
 
-    command: List[str]
+    command: list[str]
 
     # If not using uv, install with pip
     if os.getenv("INSTALL_WITH_PIP") is not None:
@@ -180,7 +177,7 @@ def install_deps(session: nox.Session, *, execution_group: Optional[ExecutionGro
         "sync",
         "--no-default-groups",
     ]
-    env: Dict[str, Any] = {}
+    env: dict[str, Any] = {}
 
     if session.venv_backend != "none":
         command.append(f"--python={session.virtualenv.location}")
@@ -290,7 +287,7 @@ def autotyping(session: nox.Session) -> None:
     if not session.interactive:
         base_command += ["--hide-progress"]
 
-    dir_options: Dict[Tuple[str, ...], Tuple[str, ...]] = {
+    dir_options: dict[tuple[str, ...], tuple[str, ...]] = {
         (
             "disnake",
             "scripts",

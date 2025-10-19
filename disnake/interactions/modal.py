@@ -2,15 +2,12 @@
 
 from __future__ import annotations
 
+from collections.abc import Generator, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    Dict,
-    Generator,
-    List,
     Optional,
-    Sequence,
     TypeVar,
     Union,
 )
@@ -41,7 +38,7 @@ __all__ = ("ModalInteraction", "ModalInteractionData")
 T = TypeVar("T")
 
 # {custom_id: text_input_value | select_values | attachments}
-ResolvedValues = Dict[str, Union[str, Sequence[T]]]
+ResolvedValues = dict[str, Union[str, Sequence[T]]]
 
 
 class ModalInteraction(Interaction[ClientT]):
@@ -243,7 +240,7 @@ class ModalInteraction(Interaction[ClientT]):
         return self._resolve_values(lambda id, type: resolved_data.get_with_type(id, type, str(id)))  # pyright: ignore[reportReturnType]
 
     @cached_slot_property("_cs_text_values")
-    def text_values(self) -> Dict[str, str]:
+    def text_values(self) -> dict[str, str]:
         """:class:`dict`\\[:class:`str`, :class:`str`]: Returns the text values the user has entered in the modal.
         This is a dict of the form ``{custom_id: value}``.
         """
@@ -260,7 +257,7 @@ class ModalInteraction(Interaction[ClientT]):
         return self.data.custom_id
 
 
-class ModalInteractionData(Dict[str, Any]):
+class ModalInteractionData(dict[str, Any]):
     """Represents the data of an interaction with a modal.
 
     .. versionadded:: 2.4
@@ -293,7 +290,7 @@ class ModalInteractionData(Dict[str, Any]):
         # This uses stripped-down component dicts, as we only receive
         # partial data from the API, generally only containing `type`, `custom_id`, `id`,
         # and relevant fields like a select's `values`.
-        self.components: List[ModalInteractionComponentDataPayload] = data["components"]
+        self.components: list[ModalInteractionComponentDataPayload] = data["components"]
         self.resolved: InteractionDataResolved = InteractionDataResolved(
             data=data.get("resolved", {}), parent=parent
         )
