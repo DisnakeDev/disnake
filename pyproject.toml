@@ -11,7 +11,7 @@ readme = "README.md"
 authors = [
   { name = "Disnake Development" }
 ]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 keywords = ["disnake", "discord", "discord api"]
 license = "MIT"
 license-files = ["LICENSE"]
@@ -25,7 +25,6 @@ classifiers = [
     "Natural Language :: English",
     "Operating System :: OS Independent",
     # it is important that the python classifiers are sorted in the sequential order
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -49,7 +48,6 @@ speed = [
     # taken from aiohttp[speedups]
     "aiodns>=1.1",
     "Brotli",
-    'cchardet; python_version < "3.10"',
 ]
 voice = [
     "PyNaCl>=1.5.0,<1.6",
@@ -210,6 +208,10 @@ ignore = [
     "TRY003", # as of 0.12.11 still has some false positives
     "TRY301", # TODO: enable
     "TRY300", # TODO: enable
+    # py 3.10 bump
+    "UP007",
+    "UP035",
+    "UP045",
 ]
 
 [tool.ruff.lint.per-file-ignores]

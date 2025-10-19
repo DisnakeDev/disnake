@@ -310,8 +310,7 @@ class SubCommand(InvokableApplicationCommand):
                     str(e)
                     + ", please check all annotations are defined outside of TYPE_CHECKING blocks."
                 )
-                # todo: add name kw only argument once we use py310+
-                raise NameError(msg) from None
+                raise NameError(msg, name=e.name) from None
 
         self.docstring = utils.parse_docstring(func)
         desc_loc = Localized._cast(description, False)
@@ -485,8 +484,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
                     str(e)
                     + ", please check all annotations are defined outside of TYPE_CHECKING blocks."
                 )
-                # todo: add name kw only argument once we use py310+
-                raise NameError(msg) from None
+                raise NameError(msg, name=e.name) from None
 
         self.docstring = utils.parse_docstring(func)
         desc_loc = Localized._cast(description, False)

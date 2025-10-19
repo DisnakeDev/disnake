@@ -393,8 +393,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
                 str(e)
                 + ", please check all annotations are defined outside of TYPE_CHECKING blocks."
             )
-            # todo: add name kw only argument once we use py310+
-            raise NameError(msg) from None
+            raise NameError(msg, name=e.name) from None
 
         for param in params.values():
             if param.annotation is Greedy:

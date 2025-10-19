@@ -160,7 +160,7 @@ class TestActionRow:
 
         assert len(result) == len(rows)
         # compare component types and IDs
-        for actual, expected in zip(result, rows):
+        for actual, expected in zip(result, rows, strict=True):
             assert [(type(c), c.custom_id) for c in actual] == [
                 (type(c), c.custom_id) for c in expected
             ]
@@ -188,7 +188,7 @@ class TestActionRow:
 
         expected = [(row, component) for row in rows for component in row.children]
         for (act_row, act_cmp), (exp_row, exp_cmp) in zip(
-            ActionRow.walk_components(rows), expected
+            ActionRow.walk_components(rows), expected, strict=True
         ):
             # test mutation (rows)
             # (remove row below the one containing select1)

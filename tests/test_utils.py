@@ -34,6 +34,8 @@ elif sys.version_info >= (3, 12):
     # non-3.12 tests shouldn't be using this
     from typing import TypeAliasType
 
+NoneType = type(None)
+
 
 def test_missing() -> None:
     assert utils.MISSING != utils.MISSING
@@ -748,23 +750,6 @@ def test_as_chunks_size(max_size: int) -> None:
 
 @pytest.mark.parametrize(
     ("params", "expected"),
-    [
-        ([], ()),
-        ([disnake.CommandInter, int, Optional[str]], (disnake.CommandInter, int, Optional[str])),
-        # check flattening + deduplication (both of these are done automatically in 3.9.1+)
-        ([float, Literal[1, 2, Literal[3, 4]], Literal["a", "bc"]], (float, 1, 2, 3, 4, "a", "bc")),  # noqa: RUF041
-        ([Literal[1, 1, 2, 3, 3]], (1, 2, 3)),
-    ],
-)
-def test_flatten_literal_params(params, expected) -> None:
-    assert utils.flatten_literal_params(params) == expected
-
-
-NoneType = type(None)
-
-
-@pytest.mark.parametrize(
-    ("params", "expected"),
     [([NoneType], (NoneType,)), ([NoneType, int, NoneType, float], (int, float, NoneType))],
 )
 def test_normalise_optional_params(params, expected) -> None:
@@ -789,12 +774,7 @@ def test_normalise_optional_params(params, expected) -> None:
         ("bool", bool, True),
         ("tuple[dict, list[Literal[42, 99]]]", tuple[dict, list[Literal[42, 99]]], True),
         # 3.10 union syntax
-        pytest.param(
-            "int | float",
-            Union[int, float],
-            True,
-            marks=pytest.mark.skipif(sys.version_info < (3, 10), reason="syntax requires py3.10"),
-        ),
+        ("int | float", Union[int, float], True),
     ],
 )
 def test_resolve_annotation(tp, expected, expected_cache) -> None:
