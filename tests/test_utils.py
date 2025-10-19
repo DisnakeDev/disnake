@@ -767,14 +767,17 @@ def test_normalise_optional_params(params, expected) -> None:
         (dict[float, "list[yarl.URL]"], dict[float, list[yarl.URL]], True),
         (Literal[1, Literal[False], "hi"], Literal[1, False, "hi"], False),  # noqa: RUF041
         # unions
-        (Union[timezone, float], Union[timezone, float], False),
-        (Optional[int], Optional[int], False),
-        (Union["tuple", None, int], Union[tuple, int, None], True),
+        (Union[timezone, float], Union[timezone, float], False),  # noqa: UP007
+        (timezone | float, timezone | float, False),
+        (Optional[int], Optional[int], False),  # noqa: UP045
+        (int | None, int | None, False),
+        (Union["tuple", None, int], Union[tuple, int, None], True),  # noqa: UP007
         # forward refs
         ("bool", bool, True),
         ("tuple[dict, list[Literal[42, 99]]]", tuple[dict, list[Literal[42, 99]]], True),
         # 3.10 union syntax
-        ("int | float", Union[int, float], True),
+        ("int | float", Union[int, float], True),  # noqa: UP007
+        ("int | float", int | float, True),
     ],
 )
 def test_resolve_annotation(tp, expected, expected_cache) -> None:
@@ -817,8 +820,15 @@ class TestResolveAnnotationTypeAliasType:
         assert utils.resolve_annotation(annotation, globals(), locals(), {}) == list[int]
 
     # alias and arg in local scope
-    def test_forwardref_local(self) -> None:
-        IntOrStr = Union[int, str]
+    @pytest.mark.parametrize(
+        "typehint",
+        [
+            Union[int, str],  # noqa: UP007
+            int | str,
+        ],
+    )
+    def test_forwardref_local(self, typehint) -> None:
+        IntOrStr = typehint
 
         annotation = CoolListGeneric["IntOrStr"]
         assert utils.resolve_annotation(annotation, globals(), locals(), {}) == list[IntOrStr]
@@ -831,8 +841,15 @@ class TestResolveAnnotationTypeAliasType:
         assert resolved == list[int | str]
 
     # combination of the previous two, alias in other module scope and arg in local scope
-    def test_forwardref_mixed(self) -> None:
-        LocalIntOrStr = Union[int, str]
+    @pytest.mark.parametrize(
+        "typehint",
+        [
+            Union[int, str],  # noqa: UP007
+            int | str,
+        ],
+    )
+    def test_forwardref_mixed(self, typehint) -> None:
+        LocalIntOrStr = typehint
 
         annotation = utils_helper_module.GenericListAlias["LocalIntOrStr"]
         assert utils.resolve_annotation(annotation, globals(), locals(), {}) == list[LocalIntOrStr]
