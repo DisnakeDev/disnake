@@ -386,7 +386,16 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         except AttributeError:
             globalns = {}
 
-        params = get_signature_parameters(function, globalns, skip_standard_params=True)
+        try:
+            params = get_signature_parameters(function, globalns, skip_standard_params=True)
+        except NameError as e:
+            msg = (
+                str(e)
+                + ", please check all annotations are defined outside of TYPE_CHECKING blocks."
+            )
+            # todo: add name kw only argument once we use py310+
+            raise NameError(msg) from None
+
         for param in params.values():
             if param.annotation is Greedy:
                 msg = "Unparameterized Greedy[...] is disallowed in signature."
