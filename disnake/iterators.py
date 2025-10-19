@@ -4,15 +4,11 @@ from __future__ import annotations
 
 import asyncio
 import datetime
+from collections.abc import AsyncIterator, Awaitable, Generator
 from typing import (
     TYPE_CHECKING,
     Any,
-    AsyncIterator,
-    Awaitable,
     Callable,
-    Dict,
-    Generator,
-    List,
     Optional,
     TypeVar,
     Union,
@@ -119,7 +115,7 @@ class _AsyncIterator(AsyncIterator[T]):
     def filter(self, predicate: Optional[_Func[T, bool]]) -> _FilteredAsyncIterator[T]:
         return _FilteredAsyncIterator(self, predicate)
 
-    async def flatten(self) -> List[T]:
+    async def flatten(self) -> list[T]:
         return [element async for element in self]
 
     async def __anext__(self) -> T:
@@ -129,13 +125,13 @@ class _AsyncIterator(AsyncIterator[T]):
             raise StopAsyncIteration from None
 
 
-class _ChunkedAsyncIterator(_AsyncIterator[List[T]]):
+class _ChunkedAsyncIterator(_AsyncIterator[list[T]]):
     def __init__(self, iterator: _AsyncIterator[T], max_size: int) -> None:
         self.iterator = iterator
         self.max_size = max_size
 
-    async def next(self) -> List[T]:
-        ret: List[T] = []
+    async def next(self) -> list[T]:
+        ret: list[T] = []
         n = 0
         while n < self.max_size:
             try:
@@ -208,7 +204,7 @@ class ReactionIterator(_AsyncIterator[Union["User", "Member"]]):
             retrieve = min(self.limit, 100)
 
             after = self.after.id if self.after else None
-            data: List[PartialUserPayload] = await self.getter(
+            data: list[PartialUserPayload] = await self.getter(
                 self.channel_id, self.message.id, self.emoji, retrieve, after=after
             )
 
@@ -360,35 +356,35 @@ class HistoryIterator(_AsyncIterator["Message"]):
             for element in data:
                 await self.messages.put(self.state.create_message(channel=channel, data=element))
 
-    async def _retrieve_messages(self, retrieve: int) -> List[MessagePayload]:
+    async def _retrieve_messages(self, retrieve: int) -> list[MessagePayload]:
         """Retrieve messages and update next parameters."""
         raise NotImplementedError
 
-    async def _retrieve_messages_before_strategy(self, retrieve: int) -> List[MessagePayload]:
+    async def _retrieve_messages_before_strategy(self, retrieve: int) -> list[MessagePayload]:
         """Retrieve messages using before parameter."""
         before = self.before.id if self.before else None
-        data: List[MessagePayload] = await self.logs_from(self.channel.id, retrieve, before=before)
+        data: list[MessagePayload] = await self.logs_from(self.channel.id, retrieve, before=before)
         if len(data):
             if self.limit is not None:
                 self.limit -= retrieve
             self.before = Object(id=int(data[-1]["id"]))
         return data
 
-    async def _retrieve_messages_after_strategy(self, retrieve: int) -> List[MessagePayload]:
+    async def _retrieve_messages_after_strategy(self, retrieve: int) -> list[MessagePayload]:
         """Retrieve messages using after parameter."""
         after = self.after.id if self.after else None
-        data: List[MessagePayload] = await self.logs_from(self.channel.id, retrieve, after=after)
+        data: list[MessagePayload] = await self.logs_from(self.channel.id, retrieve, after=after)
         if len(data):
             if self.limit is not None:
                 self.limit -= retrieve
             self.after = Object(id=int(data[0]["id"]))
         return data
 
-    async def _retrieve_messages_around_strategy(self, retrieve: int) -> List[MessagePayload]:
+    async def _retrieve_messages_around_strategy(self, retrieve: int) -> list[MessagePayload]:
         """Retrieve messages using around parameter."""
         if self.around:
             around = self.around.id if self.around else None
-            data: List[MessagePayload] = await self.logs_from(
+            data: list[MessagePayload] = await self.logs_from(
                 self.channel.id, retrieve, around=around
             )
             self.around = None
@@ -477,20 +473,20 @@ class BanIterator(_AsyncIterator["BanEntry"]):
                     )
                 )
 
-    async def _retrieve_bans_before_strategy(self, retrieve: int) -> List[BanPayload]:
+    async def _retrieve_bans_before_strategy(self, retrieve: int) -> list[BanPayload]:
         """Retrieve bans using before parameter."""
         before = self.before.id if self.before else None
-        data: List[BanPayload] = await self.get_bans(self.guild.id, retrieve, before=before)
+        data: list[BanPayload] = await self.get_bans(self.guild.id, retrieve, before=before)
         if len(data):
             if self.limit is not None:
                 self.limit -= len(data)
             self.before = Object(id=int(data[0]["user"]["id"]))
         return data
 
-    async def _retrieve_bans_after_strategy(self, retrieve: int) -> List[BanPayload]:
+    async def _retrieve_bans_after_strategy(self, retrieve: int) -> list[BanPayload]:
         """Retrieve bans using after parameter."""
         after = self.after.id if self.after else None
-        data: List[BanPayload] = await self.get_bans(self.guild.id, retrieve, after=after)
+        data: list[BanPayload] = await self.get_bans(self.guild.id, retrieve, after=after)
         if len(data):
             if self.limit is not None:
                 self.limit -= len(data)
@@ -602,7 +598,7 @@ class AuditLogIterator(_AsyncIterator["AuditLogEntry"]):
 
             state = self._state
 
-            appcmds: Dict[int, APIApplicationCommand] = {}
+            appcmds: dict[int, APIApplicationCommand] = {}
             for data in log_data.get("application_commands", []):
                 try:
                     cmd = application_command_factory(data)
@@ -752,14 +748,14 @@ class GuildIterator(_AsyncIterator["Guild"]):
             for element in data:
                 await self.guilds.put(self.create_guild(element))
 
-    async def _retrieve_guilds(self, retrieve: int) -> List[GuildPayload]:
+    async def _retrieve_guilds(self, retrieve: int) -> list[GuildPayload]:
         """Retrieve guilds and update next parameters."""
         raise NotImplementedError
 
-    async def _retrieve_guilds_before_strategy(self, retrieve: int) -> List[GuildPayload]:
+    async def _retrieve_guilds_before_strategy(self, retrieve: int) -> list[GuildPayload]:
         """Retrieve guilds using before parameter."""
         before = self.before.id if self.before else None
-        data: List[GuildPayload] = await self.get_guilds(
+        data: list[GuildPayload] = await self.get_guilds(
             retrieve, before=before, with_counts=self.with_counts
         )
         if len(data):
@@ -768,10 +764,10 @@ class GuildIterator(_AsyncIterator["Guild"]):
             self.before = Object(id=int(data[0]["id"]))
         return data
 
-    async def _retrieve_guilds_after_strategy(self, retrieve: int) -> List[GuildPayload]:
+    async def _retrieve_guilds_after_strategy(self, retrieve: int) -> list[GuildPayload]:
         """Retrieve guilds using after parameter."""
         after = self.after.id if self.after else None
-        data: List[GuildPayload] = await self.get_guilds(
+        data: list[GuildPayload] = await self.get_guilds(
             retrieve, after=after, with_counts=self.with_counts
         )
         if len(data):
@@ -909,7 +905,7 @@ class ArchivedThreadIterator(_AsyncIterator["Thread"]):
         # endpoint requires at least 2, for unknown reasons
         data = await self.endpoint(self.channel_id, before=self.before, limit=max(2, limit))
 
-        threads: List[ThreadPayload] = data.get("threads", [])
+        threads: list[ThreadPayload] = data.get("threads", [])
         # special case: since the minimum limit the endpoint accepts is 2,
         # we request 2 threads when only needing 1, so slice the list before yielding
         if limit == 1:
@@ -1010,7 +1006,7 @@ class GuildScheduledEventUserIterator(_AsyncIterator[Union["User", "Member"]]):
         for user in data:
             await self.users.put(self.create_user(user))
 
-    async def _before_strategy(self, retrieve: int) -> List[GuildScheduledEventUserPayload]:
+    async def _before_strategy(self, retrieve: int) -> list[GuildScheduledEventUserPayload]:
         before = self.before.id if self.before else None
         data = await self.get_event_users(
             self.event.guild_id,
@@ -1027,7 +1023,7 @@ class GuildScheduledEventUserIterator(_AsyncIterator[Union["User", "Member"]]):
             self.before = Object(id=int(data[0]["user"]["id"]))
         return data
 
-    async def _after_strategy(self, retrieve: int) -> List[GuildScheduledEventUserPayload]:
+    async def _after_strategy(self, retrieve: int) -> list[GuildScheduledEventUserPayload]:
         after = self.after.id if self.after else None
         data = await self.get_event_users(
             self.event.guild_id,
@@ -1056,7 +1052,7 @@ class EntitlementIterator(_AsyncIterator["Entitlement"]):
         limit: Optional[int],
         user_id: Optional[int] = None,
         guild_id: Optional[int] = None,
-        sku_ids: Optional[List[int]] = None,
+        sku_ids: Optional[list[int]] = None,
         before: Optional[Union[Snowflake, datetime.datetime]] = None,
         after: Optional[Union[Snowflake, datetime.datetime]] = None,
         exclude_ended: bool = False,
@@ -1074,7 +1070,7 @@ class EntitlementIterator(_AsyncIterator["Entitlement"]):
         self.after: Snowflake = after or OLDEST_OBJECT
         self.user_id: Optional[int] = user_id
         self.guild_id: Optional[int] = guild_id
-        self.sku_ids: Optional[List[int]] = sku_ids
+        self.sku_ids: Optional[list[int]] = sku_ids
         self.exclude_ended: bool = exclude_ended
         self.exclude_deleted: bool = exclude_deleted
 
@@ -1125,7 +1121,7 @@ class EntitlementIterator(_AsyncIterator["Entitlement"]):
         for entitlement in data:
             await self.entitlements.put(Entitlement(data=entitlement, state=self.state))
 
-    async def _before_strategy(self, retrieve: int) -> List[EntitlementPayload]:
+    async def _before_strategy(self, retrieve: int) -> list[EntitlementPayload]:
         before = self.before.id if self.before else None
         data = await self.request(
             self.application_id,
@@ -1143,7 +1139,7 @@ class EntitlementIterator(_AsyncIterator["Entitlement"]):
             self.before = Object(id=int(data[-1]["id"]))
         return data
 
-    async def _after_strategy(self, retrieve: int) -> List[EntitlementPayload]:
+    async def _after_strategy(self, retrieve: int) -> list[EntitlementPayload]:
         after = self.after.id
         data = await self.request(
             self.application_id,
@@ -1229,7 +1225,7 @@ class SubscriptionIterator(_AsyncIterator["Subscription"]):
         for subscription in data:
             await self.subscriptions.put(Subscription(data=subscription, state=self._state))
 
-    async def _before_strategy(self, retrieve: int) -> List[SubscriptionPayload]:
+    async def _before_strategy(self, retrieve: int) -> list[SubscriptionPayload]:
         before = self.before.id if self.before else None
         data = await self.request(
             self.sku_id,
@@ -1245,7 +1241,7 @@ class SubscriptionIterator(_AsyncIterator["Subscription"]):
             self.before = Object(id=min(int(data[0]["id"]), int(data[-1]["id"])))
         return data
 
-    async def _after_strategy(self, retrieve: int) -> List[SubscriptionPayload]:
+    async def _after_strategy(self, retrieve: int) -> list[SubscriptionPayload]:
         after = self.after.id
         data = await self.request(
             self.sku_id,
@@ -1351,7 +1347,7 @@ class ChannelPinsIterator(_AsyncIterator["Message"]):
 
     # defined to maintain backward compatibility with the old `pins` method
     @deprecated("async for msg in channel.pins()")
-    def __await__(self) -> Generator[None, None, List[Message]]:
+    def __await__(self) -> Generator[None, None, list[Message]]:
         return self.flatten().__await__()
 
     async def next(self) -> Message:

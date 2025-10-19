@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional, Tuple
+from typing import TYPE_CHECKING, Optional
 
 from .asset import Asset
 from .emoji import Emoji
@@ -74,19 +74,19 @@ class GuildPreview:
 
         emojis = data.get("emojis")
         if emojis:
-            self.emojis: Tuple[Emoji, ...] = tuple(
+            self.emojis: tuple[Emoji, ...] = tuple(
                 Emoji(guild=self, state=self._state, data=emoji) for emoji in emojis
             )
         else:
-            self.emojis: Tuple[Emoji, ...] = ()
+            self.emojis: tuple[Emoji, ...] = ()
 
         stickers = data.get("stickers")
         if stickers:
-            self.stickers: Tuple[GuildSticker, ...] = tuple(
+            self.stickers: tuple[GuildSticker, ...] = tuple(
                 GuildSticker(state=self._state, data=sticker) for sticker in stickers
             )
         else:
-            self.stickers: Tuple[GuildSticker, ...] = ()
+            self.stickers: tuple[GuildSticker, ...] = ()
 
     def __repr__(self) -> str:
         return f"<GuildPreview id={self.id!r} name={self.name!r}>"

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING, ClassVar, Tuple
+from typing import TYPE_CHECKING, ClassVar
 
 from ..components import FileUpload as FileUploadComponent
 from ..enums import ComponentType
@@ -41,7 +41,7 @@ class FileUpload(UIComponent):
         sequential identifiers to the components in the modal.
     """
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = ("min_values", "max_values", "required")
+    __repr_attributes__: ClassVar[tuple[str, ...]] = ("min_values", "max_values", "required")
     # We have to set this to MISSING in order to overwrite the abstract property from UIComponent
     _underlying: FileUploadComponent = MISSING
 

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, Optional, Tuple
+from typing import TYPE_CHECKING, ClassVar, Optional
 
 from ..components import Thumbnail as ThumbnailComponent, UnfurledMediaItem, handle_media_item_input
 from ..enums import ComponentType
@@ -39,7 +39,7 @@ class Thumbnail(UIComponent):
         sequential identifiers to the components in the message.
     """
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (
         "media",
         "description",
         "spoiler",

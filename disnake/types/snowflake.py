@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-from typing import List, Union
+from typing import Union
 
 Snowflake = Union[str, int]
-SnowflakeList = Union[List[str], List[int]]  # keep separate for variance
+SnowflakeList = Union[list[str], list[int]]  # keep separate for variance

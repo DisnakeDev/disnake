@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import timedelta
-from typing import TYPE_CHECKING, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 
 from . import utils
 from .abc import Snowflake
@@ -242,7 +242,7 @@ class Poll:
         self,
         question: Union[str, PollMedia],
         *,
-        answers: List[Union[str, PollAnswer]],
+        answers: list[Union[str, PollAnswer]],
         duration: timedelta = timedelta(hours=24),
         allow_multiselect: bool = False,
         layout_type: PollLayoutType = PollLayoutType.default,
@@ -257,14 +257,14 @@ class Poll:
             msg = f"Expected 'str' or 'PollMedia' for 'question', got {question.__class__.__name__!r}."
             raise TypeError(msg)
 
-        self._answers: Dict[int, PollAnswer] = {}
+        self._answers: dict[int, PollAnswer] = {}
         for i, answer in enumerate(answers, 1):
             if isinstance(answer, PollAnswer):
                 self._answers[i] = answer
             elif isinstance(answer, str):
                 self._answers[i] = PollAnswer(PollMedia(answer))
             else:
-                msg = f"Expected 'List[str]' or 'List[PollAnswer]' for 'answers', got List[{answer.__class__.__name__!r}]."
+                msg = f"Expected 'list[str]' or 'list[PollAnswer]' for 'answers', got list[{answer.__class__.__name__!r}]."
                 raise TypeError(msg)
 
         self.duration: Optional[timedelta] = duration
@@ -276,7 +276,7 @@ class Poll:
         return f"<{self.__class__.__name__} question={self.question!r} answers={self.answers!r}>"
 
     @property
-    def answers(self) -> List[PollAnswer]:
+    def answers(self) -> list[PollAnswer]:
         """:class:`list`\\[:class:`PollAnswer`]: The list of answers for this poll.
 
         See also :meth:`get_answer` to get specific answers by ID.

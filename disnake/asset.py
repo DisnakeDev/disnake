@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import io
 import os
-from typing import TYPE_CHECKING, Any, Literal, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Literal, Optional, Union
 
 import yarl
 
@@ -37,7 +37,7 @@ class AssetMixin:
     url: str
     _state: Optional[AnyState]
 
-    __slots__: Tuple[str, ...] = ("_state",)
+    __slots__: tuple[str, ...] = ("_state",)
 
     async def read(self) -> bytes:
         """|coro|
@@ -191,7 +191,7 @@ class Asset(AssetMixin):
             Returns the hash of the asset.
     """
 
-    __slots__: Tuple[str, ...] = (
+    __slots__: tuple[str, ...] = (
         "_url",
         "_animated",
         "_key",

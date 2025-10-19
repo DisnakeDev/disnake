@@ -13,7 +13,7 @@ import threading
 import time
 import traceback
 import warnings
-from typing import IO, TYPE_CHECKING, Any, Callable, Generic, Optional, Tuple, TypeVar, Union
+from typing import IO, TYPE_CHECKING, Any, Callable, Generic, Optional, TypeVar, Union
 
 from . import utils
 from .errors import ClientException
@@ -446,7 +446,7 @@ class FFmpegOpusAudio(FFmpegAudio):
         source: str,
         *,
         method: Optional[
-            Union[str, Callable[[str, str], Tuple[Optional[str], Optional[int]]]]
+            Union[str, Callable[[str, str], tuple[Optional[str], Optional[int]]]]
         ] = None,
         **kwargs: Any,
     ) -> Self:
@@ -513,10 +513,10 @@ class FFmpegOpusAudio(FFmpegAudio):
         source: str,
         *,
         method: Optional[
-            Union[str, Callable[[str, str], Tuple[Optional[str], Optional[int]]]]
+            Union[str, Callable[[str, str], tuple[Optional[str], Optional[int]]]]
         ] = None,
         executable: Optional[str] = None,
-    ) -> Tuple[Optional[str], Optional[int]]:
+    ) -> tuple[Optional[str], Optional[int]]:
         """|coro|
 
         Probes the input source for bitrate and codec information.
@@ -589,7 +589,7 @@ class FFmpegOpusAudio(FFmpegAudio):
     @staticmethod
     def _probe_codec_native(
         source, executable: str = "ffmpeg"
-    ) -> Tuple[Optional[str], Optional[int]]:
+    ) -> tuple[Optional[str], Optional[int]]:
         exe = executable[:2] + "probe" if executable in ("ffmpeg", "avconv") else executable
         args = [
             exe,
@@ -618,7 +618,7 @@ class FFmpegOpusAudio(FFmpegAudio):
     @staticmethod
     def _probe_codec_fallback(
         source, executable: str = "ffmpeg"
-    ) -> Tuple[Optional[str], Optional[int]]:
+    ) -> tuple[Optional[str], Optional[int]]:
         args = [executable, "-hide_banner", "-i", source]
         proc = subprocess.Popen(
             args, creationflags=CREATE_NO_WINDOW, stdout=subprocess.PIPE, stderr=subprocess.STDOUT

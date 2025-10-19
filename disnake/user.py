@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Optional, Union
 
 import disnake.abc
 
@@ -468,7 +468,7 @@ class ClientUser(BaseUser):
         :class:`ClientUser`
             The newly edited client user.
         """
-        payload: Dict[str, Any] = {}
+        payload: dict[str, Any] = {}
         if username is not MISSING:
             payload["username"] = username
 
@@ -638,7 +638,7 @@ class User(BaseUser, disnake.abc.Messageable):
         return self._state._get_private_channel_by_user(self.id)
 
     @property
-    def mutual_guilds(self) -> List[Guild]:
+    def mutual_guilds(self) -> list[Guild]:
         """:class:`list`\\[:class:`Guild`]: The guilds that the user shares with the client.
 
         .. note::
