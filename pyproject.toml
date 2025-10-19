@@ -94,7 +94,7 @@ changelog = [
 ]
 codemod = [
     # run codemods on the repository (mostly automated typing)
-    "libcst==1.8.4",
+    "libcst==1.8.5",
     "autotyping==24.9.0",
     { include-group = "ruff" },
 ]
