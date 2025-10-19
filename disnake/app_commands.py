@@ -5,7 +5,8 @@ from __future__ import annotations
 import math
 import re
 from abc import ABC
-from typing import TYPE_CHECKING, ClassVar, Mapping, Optional, Sequence, Union
+from collections.abc import Mapping, Sequence
+from typing import TYPE_CHECKING, ClassVar, Optional, Union
 
 from .enums import (
     ApplicationCommandPermissionType,
