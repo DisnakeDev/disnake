@@ -115,8 +115,7 @@ def convert_emoji_reaction(emoji: Union[EmojiInputType, Reaction]) -> str:
         # No existing emojis start/end with `<>` or `:`, so this should be okay.
 
         s = emoji.strip("<>:")
-        s = s.removeprefix("a:")
-        return s
+        return s.removeprefix("a:")
 
     assert_never(emoji)
     msg = f"emoji argument must be str, Emoji, PartialEmoji, or Reaction, not {emoji.__class__.__name__}."
