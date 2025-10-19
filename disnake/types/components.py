@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from typing import Literal, Optional, TypedDict, Union
+from typing import Literal, TypeAlias, TypedDict, Union
 
-from typing_extensions import NotRequired, ReadOnly, Required, TypeAlias
+from typing_extensions import NotRequired, ReadOnly, Required
 
 from .channel import ChannelType
 from .emoji import PartialEmoji
@@ -172,7 +172,7 @@ class TextInput(_BaseComponent):
     type: Literal[4]
     custom_id: str
     style: TextInputStyle
-    label: NotRequired[Optional[str]]
+    label: NotRequired[str | None]
     min_length: NotRequired[int]
     max_length: NotRequired[int]
     required: NotRequired[bool]
@@ -201,8 +201,8 @@ class FileUploadComponent(_BaseComponent):
 class UnfurledMediaItem(TypedDict, total=False):
     url: Required[str]  # this is the only field required for sending
     proxy_url: str
-    height: Optional[int]
-    width: Optional[int]
+    height: int | None
+    width: int | None
     content_type: str
     attachment_id: Snowflake
 
@@ -215,7 +215,7 @@ class SectionComponent(_BaseComponent):
     # note: this may be expanded to more component types in the future
     components: list[TextDisplayComponent]
     # note: same as above
-    accessory: Union[ThumbnailComponent, ButtonComponent]
+    accessory: ThumbnailComponent | ButtonComponent
 
 
 class TextDisplayComponent(_BaseComponent):
@@ -261,12 +261,10 @@ class ContainerComponent(_BaseComponent):
     accent_color: NotRequired[int]
     spoiler: NotRequired[bool]
     components: list[
-        Union[
-            ActionRow,
-            SectionComponent,
-            TextDisplayComponent,
-            MediaGalleryComponent,
-            FileComponent,
-            SeparatorComponent,
-        ]
+        ActionRow
+        | SectionComponent
+        | TextDisplayComponent
+        | MediaGalleryComponent
+        | FileComponent
+        | SeparatorComponent
     ]

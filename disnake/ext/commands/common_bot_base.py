@@ -12,7 +12,7 @@ import sys
 import time
 import types
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, Generic, Optional, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Generic, TypeVar
 
 import disnake
 import disnake.utils
@@ -44,8 +44,8 @@ class CommonBotBase(Generic[CogT]):
     def __init__(
         self,
         *args: Any,
-        owner_id: Optional[int] = None,
-        owner_ids: Optional[set[int]] = None,
+        owner_id: int | None = None,
+        owner_ids: set[int] | None = None,
         reload: bool = False,
         **kwargs: Any,
     ) -> None:
@@ -53,9 +53,9 @@ class CommonBotBase(Generic[CogT]):
         self.__extensions: dict[str, types.ModuleType] = {}
         self._is_closed: bool = False
 
-        self.owner_id: Optional[int] = owner_id
+        self.owner_id: int | None = owner_id
         self.owner_ids: set[int] = owner_ids or set()
-        self.owner: Optional[disnake.User] = None
+        self.owner: disnake.User | None = None
         self.owners: set[disnake.TeamMember] = set()
 
         if self.owner_id and self.owner_ids:
@@ -122,7 +122,7 @@ class CommonBotBase(Generic[CogT]):
         # prefetch
         loop.create_task(self._fill_owners())
 
-    async def is_owner(self, user: Union[disnake.User, disnake.Member]) -> bool:
+    async def is_owner(self, user: disnake.User | disnake.Member) -> bool:
         """|coro|
 
         Checks if a :class:`~disnake.User` or :class:`~disnake.Member` is the owner of
@@ -207,7 +207,7 @@ class CommonBotBase(Generic[CogT]):
         cog = cog._inject(self)  # pyright: ignore[reportArgumentType]
         self.__cogs[cog_name] = cog
 
-    def get_cog(self, name: str) -> Optional[Cog]:
+    def get_cog(self, name: str) -> Cog | None:
         """Gets the cog instance requested.
 
         If the cog is not found, :data:`None` is returned instead.
@@ -226,7 +226,7 @@ class CommonBotBase(Generic[CogT]):
         """
         return self.__cogs.get(name)
 
-    def remove_cog(self, name: str) -> Optional[Cog]:
+    def remove_cog(self, name: str) -> Cog | None:
         """Removes a cog from the bot and returns it.
 
         All registered commands and event listeners that the
@@ -252,7 +252,7 @@ class CommonBotBase(Generic[CogT]):
         if cog is None:
             return None
 
-        help_command: Optional[HelpCommand] = getattr(self, "_help_command", None)
+        help_command: HelpCommand | None = getattr(self, "_help_command", None)
         if help_command and help_command.cog is cog:
             help_command.cog = None
         # NOTE: Should be covariant
@@ -330,13 +330,13 @@ class CommonBotBase(Generic[CogT]):
         else:
             self.__extensions[key] = lib
 
-    def _resolve_name(self, name: str, package: Optional[str]) -> str:
+    def _resolve_name(self, name: str, package: str | None) -> str:
         try:
             return importlib.util.resolve_name(name, package)
         except ImportError as e:
             raise errors.ExtensionNotFound(name) from e
 
-    def load_extension(self, name: str, *, package: Optional[str] = None) -> None:
+    def load_extension(self, name: str, *, package: str | None = None) -> None:
         """Loads an extension.
 
         An extension is a python module that contains commands, cogs, or
@@ -382,7 +382,7 @@ class CommonBotBase(Generic[CogT]):
 
         self._load_from_module_spec(spec, name)
 
-    def unload_extension(self, name: str, *, package: Optional[str] = None) -> None:
+    def unload_extension(self, name: str, *, package: str | None = None) -> None:
         """Unloads an extension.
 
         When the extension is unloaded, all commands, listeners, and cogs are
@@ -422,7 +422,7 @@ class CommonBotBase(Generic[CogT]):
         self._remove_module_references(lib.__name__)
         self._call_module_finalizers(lib, name)
 
-    def reload_extension(self, name: str, *, package: Optional[str] = None) -> None:
+    def reload_extension(self, name: str, *, package: str | None = None) -> None:
         """Atomically reloads an extension.
 
         This replaces the extension with the same extension, only refreshed. This is

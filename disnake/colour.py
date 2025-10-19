@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import colorsys
 import random
-from typing import TYPE_CHECKING, Any, Optional, Union
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -116,7 +116,7 @@ class Colour:
         return cls(0)
 
     @classmethod
-    def random(cls, *, seed: Optional[Union[int, str, float, bytes, bytearray]] = None) -> Self:
+    def random(cls, *, seed: int | str | float | bytes | bytearray | None = None) -> Self:
         """A factory method that returns a :class:`Colour` with a random hue.
 
         .. note::

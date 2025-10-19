@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
-from typing import TYPE_CHECKING, Any, Callable, Optional, Union
+from collections.abc import Callable, Sequence
+from typing import TYPE_CHECKING, Any
 
 from disnake.app_commands import MessageCommand, UserCommand
 from disnake.flags import ApplicationInstallTypes, InteractionContextTypes
@@ -75,18 +75,18 @@ class InvokableUserCommand(InvokableApplicationCommand):
         func: InteractionCommandCallback[CogT, UserCommandInteraction, P],
         *,
         name: LocalizedOptional = None,
-        dm_permission: Optional[bool] = None,  # deprecated
-        default_member_permissions: Optional[Union[Permissions, int]] = None,
-        nsfw: Optional[bool] = None,
-        install_types: Optional[ApplicationInstallTypes] = None,
-        contexts: Optional[InteractionContextTypes] = None,
-        guild_ids: Optional[Sequence[int]] = None,
-        auto_sync: Optional[bool] = None,
+        dm_permission: bool | None = None,  # deprecated
+        default_member_permissions: Permissions | int | None = None,
+        nsfw: bool | None = None,
+        install_types: ApplicationInstallTypes | None = None,
+        contexts: InteractionContextTypes | None = None,
+        guild_ids: Sequence[int] | None = None,
+        auto_sync: bool | None = None,
         **kwargs: Any,
     ) -> None:
         name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
-        self.guild_ids: Optional[tuple[int, ...]] = None if guild_ids is None else tuple(guild_ids)
+        self.guild_ids: tuple[int, ...] | None = None if guild_ids is None else tuple(guild_ids)
         self.auto_sync: bool = True if auto_sync is None else auto_sync
 
         try:
@@ -186,18 +186,18 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         func: InteractionCommandCallback[CogT, MessageCommandInteraction, P],
         *,
         name: LocalizedOptional = None,
-        dm_permission: Optional[bool] = None,  # deprecated
-        default_member_permissions: Optional[Union[Permissions, int]] = None,
-        nsfw: Optional[bool] = None,
-        install_types: Optional[ApplicationInstallTypes] = None,
-        contexts: Optional[InteractionContextTypes] = None,
-        guild_ids: Optional[Sequence[int]] = None,
-        auto_sync: Optional[bool] = None,
+        dm_permission: bool | None = None,  # deprecated
+        default_member_permissions: Permissions | int | None = None,
+        nsfw: bool | None = None,
+        install_types: ApplicationInstallTypes | None = None,
+        contexts: InteractionContextTypes | None = None,
+        guild_ids: Sequence[int] | None = None,
+        auto_sync: bool | None = None,
         **kwargs: Any,
     ) -> None:
         name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
-        self.guild_ids: Optional[tuple[int, ...]] = None if guild_ids is None else tuple(guild_ids)
+        self.guild_ids: tuple[int, ...] | None = None if guild_ids is None else tuple(guild_ids)
         self.auto_sync: bool = True if auto_sync is None else auto_sync
 
         try:
@@ -257,14 +257,14 @@ class InvokableMessageCommand(InvokableApplicationCommand):
 def user_command(
     *,
     name: LocalizedOptional = None,
-    dm_permission: Optional[bool] = None,  # deprecated
-    default_member_permissions: Optional[Union[Permissions, int]] = None,
-    nsfw: Optional[bool] = None,
-    install_types: Optional[ApplicationInstallTypes] = None,
-    contexts: Optional[InteractionContextTypes] = None,
-    guild_ids: Optional[Sequence[int]] = None,
-    auto_sync: Optional[bool] = None,
-    extras: Optional[dict[str, Any]] = None,
+    dm_permission: bool | None = None,  # deprecated
+    default_member_permissions: Permissions | int | None = None,
+    nsfw: bool | None = None,
+    install_types: ApplicationInstallTypes | None = None,
+    contexts: InteractionContextTypes | None = None,
+    guild_ids: Sequence[int] | None = None,
+    auto_sync: bool | None = None,
+    extras: dict[str, Any] | None = None,
     **kwargs: Any,
 ) -> Callable[[InteractionCommandCallback[CogT, UserCommandInteraction, P]], InvokableUserCommand]:
     """A shortcut decorator that builds a user command.
@@ -365,14 +365,14 @@ def user_command(
 def message_command(
     *,
     name: LocalizedOptional = None,
-    dm_permission: Optional[bool] = None,  # deprecated
-    default_member_permissions: Optional[Union[Permissions, int]] = None,
-    nsfw: Optional[bool] = None,
-    install_types: Optional[ApplicationInstallTypes] = None,
-    contexts: Optional[InteractionContextTypes] = None,
-    guild_ids: Optional[Sequence[int]] = None,
-    auto_sync: Optional[bool] = None,
-    extras: Optional[dict[str, Any]] = None,
+    dm_permission: bool | None = None,  # deprecated
+    default_member_permissions: Permissions | int | None = None,
+    nsfw: bool | None = None,
+    install_types: ApplicationInstallTypes | None = None,
+    contexts: InteractionContextTypes | None = None,
+    guild_ids: Sequence[int] | None = None,
+    auto_sync: bool | None = None,
+    extras: dict[str, Any] | None = None,
     **kwargs: Any,
 ) -> Callable[
     [InteractionCommandCallback[CogT, MessageCommandInteraction, P]],

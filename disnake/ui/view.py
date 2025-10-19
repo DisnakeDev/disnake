@@ -8,10 +8,10 @@ import os
 import sys
 import time
 import traceback
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from functools import partial
 from itertools import groupby
-from typing import TYPE_CHECKING, Callable, ClassVar, Optional
+from typing import TYPE_CHECKING, ClassVar
 
 from ..components import (
     VALID_ACTION_ROW_MESSAGE_COMPONENT_TYPES,
@@ -132,7 +132,7 @@ class View:
 
         cls.__view_children_items__ = children
 
-    def __init__(self, *, timeout: Optional[float] = 180.0) -> None:
+    def __init__(self, *, timeout: float | None = 180.0) -> None:
         self.timeout = timeout
         self.children: list[Item[Self]] = []
         for func in self.__view_children_items__:
@@ -145,9 +145,9 @@ class View:
         self.__weights = _ViewWeights(self.children)
         loop = asyncio.get_running_loop()
         self.id: str = os.urandom(16).hex()
-        self.__cancel_callback: Optional[Callable[[View], None]] = None
-        self.__timeout_expiry: Optional[float] = None
-        self.__timeout_task: Optional[asyncio.Task[None]] = None
+        self.__cancel_callback: Callable[[View], None] | None = None
+        self.__timeout_expiry: float | None = None
+        self.__timeout_task: asyncio.Task[None] | None = None
         self.__stopped: asyncio.Future[bool] = loop.create_future()
 
     def __repr__(self) -> str:
@@ -194,7 +194,7 @@ class View:
         return components
 
     @classmethod
-    def from_message(cls, message: Message, /, *, timeout: Optional[float] = 180.0) -> View:
+    def from_message(cls, message: Message, /, *, timeout: float | None = 180.0) -> View:
         """Converts a message's components into a :class:`View`.
 
         The :attr:`.Message.components` of a message are read-only
@@ -234,7 +234,7 @@ class View:
         return view
 
     @property
-    def _expires_at(self) -> Optional[float]:
+    def _expires_at(self) -> float | None:
         if self.timeout:
             return time.monotonic() + self.timeout
         return None
@@ -404,7 +404,7 @@ class View:
 
         children: list[Item] = []
         for component in (c for row in components for c in row.children):
-            older: Optional[Item] = None
+            older: Item | None = None
             try:
                 older = old_state[component.type.value, component.custom_id]  # pyright: ignore[reportArgumentType]
             except (KeyError, AttributeError):
@@ -490,7 +490,7 @@ class View:
 class ViewStore:
     def __init__(self, state: ConnectionState) -> None:
         # (component_type, message_id, custom_id): (View, Item)
-        self._views: dict[tuple[int, Optional[int], str], tuple[View, Item]] = {}
+        self._views: dict[tuple[int, int | None, str], tuple[View, Item]] = {}
         # message_id: View
         self._synced_message_views: dict[int, View] = {}
         self._state: ConnectionState = state
@@ -501,7 +501,7 @@ class ViewStore:
         return list(views.values())
 
     def __verify_integrity(self) -> None:
-        to_remove: list[tuple[int, Optional[int], str]] = []
+        to_remove: list[tuple[int, int | None, str]] = []
         for k, (view, _) in self._views.items():
             if view.is_finished():
                 to_remove.append(k)
@@ -509,7 +509,7 @@ class ViewStore:
         for k in to_remove:
             del self._views[k]
 
-    def add_view(self, view: View, message_id: Optional[int] = None) -> None:
+    def add_view(self, view: View, message_id: int | None = None) -> None:
         self.__verify_integrity()
 
         view._start_listening_from_store(self)
@@ -535,7 +535,7 @@ class ViewStore:
 
     def dispatch(self, interaction: MessageInteraction) -> None:
         self.__verify_integrity()
-        message_id: Optional[int] = interaction.message and interaction.message.id
+        message_id: int | None = interaction.message and interaction.message.id
         component_type = try_enum_to_int(interaction.data.component_type)
         custom_id = interaction.data.custom_id
         key = (component_type, message_id, custom_id)
@@ -552,7 +552,7 @@ class ViewStore:
     def is_message_tracked(self, message_id: int) -> bool:
         return message_id in self._synced_message_views
 
-    def remove_message_tracking(self, message_id: int) -> Optional[View]:
+    def remove_message_tracking(self, message_id: int) -> View | None:
         return self._synced_message_views.pop(message_id, None)
 
     def update_from_message(self, message_id: int, components: Sequence[ComponentPayload]) -> None:

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Optional, Union
+from typing import TYPE_CHECKING, Any
 
 from .iterators import ReactionIterator
 
@@ -61,11 +61,11 @@ class Reaction:
         *,
         message: Message,
         data: ReactionPayload,
-        emoji: Optional[Union[PartialEmoji, Emoji, str]] = None,
+        emoji: PartialEmoji | Emoji | str | None = None,
     ) -> None:
         self.message: Message = message
         # _get_emoji_from_data won't return None
-        self.emoji: Union[PartialEmoji, Emoji, str] = emoji or message._state._get_emoji_from_data(
+        self.emoji: PartialEmoji | Emoji | str = emoji or message._state._get_emoji_from_data(
             data["emoji"]
         )  # pyright: ignore[reportAttributeAccessIssue]
         self.count: int = data.get("count", 1)
@@ -149,7 +149,7 @@ class Reaction:
         await self.message.clear_reaction(self.emoji)
 
     def users(
-        self, *, limit: Optional[int] = None, after: Optional[Snowflake] = None
+        self, *, limit: int | None = None, after: Snowflake | None = None
     ) -> ReactionIterator:
         """Returns an :class:`AsyncIterator` representing the users that have reacted to the message.
 

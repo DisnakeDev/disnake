@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Literal, Optional, TypedDict, Union
+from typing import Literal, TypedDict, Union
 
 from typing_extensions import NotRequired
 
@@ -13,7 +13,7 @@ from .user import User
 class IntegrationApplication(TypedDict):
     id: Snowflake
     name: str
-    icon: Optional[str]
+    icon: str | None
     description: str
     summary: str
     bot: NotRequired[User]
@@ -49,7 +49,7 @@ class BaseIntegration(PartialIntegration):
 
 
 class StreamIntegration(BaseIntegration):
-    role_id: Optional[Snowflake]
+    role_id: Snowflake | None
     enable_emoticons: bool
     subscriber_count: int
     revoked: bool

@@ -19,7 +19,7 @@ import os
 import re
 import subprocess  # noqa: TID251
 import sys
-from typing import Any, Optional
+from typing import Any
 
 from sphinx.application import Sphinx
 
@@ -205,7 +205,7 @@ if not (_spec and _spec.origin):
 _disnake_module_path = os.path.dirname(_spec.origin)
 
 
-def linkcode_resolve(domain: str, info: dict[str, Any]) -> Optional[str]:
+def linkcode_resolve(domain: str, info: dict[str, Any]) -> str | None:
     if domain != "py":
         return None
 

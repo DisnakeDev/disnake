@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import TYPE_CHECKING, Any, Optional, Union
+from typing import TYPE_CHECKING, Any
 
 from ..components import VALID_ACTION_ROW_MESSAGE_COMPONENT_TYPES, ActionRowMessageComponent
 from ..enums import ComponentType, try_enum
@@ -137,7 +137,7 @@ class MessageInteraction(Interaction[ClientT]):
         self.message = Message(state=self._state, channel=self.channel, data=data["message"])
 
     @property
-    def values(self) -> Optional[list[str]]:
+    def values(self) -> list[str] | None:
         """:class:`list`\\[:class:`str`] | :data:`None`: The values the user selected.
 
         For select menus of type :attr:`~ComponentType.string_select`,
@@ -151,7 +151,7 @@ class MessageInteraction(Interaction[ClientT]):
     @cached_slot_property("_cs_resolved_values")
     def resolved_values(
         self,
-    ) -> Optional[Sequence[Union[str, Member, User, Role, AnyChannel]]]:
+    ) -> Sequence[str | Member | User | Role | AnyChannel] | None:
         """:class:`~collections.abc.Sequence`\\[:class:`str` | :class:`Member` | :class:`User` | :class:`Role` | :class:`abc.GuildChannel` | :class:`Thread` | :class:`PartialMessageable`] | :data:`None`: The (resolved) values the user selected.
 
         For select menus of type :attr:`~ComponentType.string_select`,
@@ -169,7 +169,7 @@ class MessageInteraction(Interaction[ClientT]):
             return self.data.values
 
         resolved = self.data.resolved
-        values: list[Union[Member, User, Role, AnyChannel]] = []
+        values: list[Member | User | Role | AnyChannel] = []
         for key in self.data.values:
             # force upcast to avoid typing issues; we expect the api to only provide valid values
             value: Any = resolved.get_with_type(key, component_type, key)
@@ -222,7 +222,7 @@ class MessageInteractionData(dict[str, Any]):
         super().__init__(data)
         self.custom_id: str = data["custom_id"]
         self.component_type: ComponentType = try_enum(ComponentType, data["component_type"])
-        self.values: Optional[list[str]] = (
+        self.values: list[str] | None = (
             list(map(str, values)) if (values := data.get("values")) else None
         )
 

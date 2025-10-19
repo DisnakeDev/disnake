@@ -7,16 +7,13 @@ import logging
 import sys
 import traceback
 import warnings
-from collections.abc import Iterable, Sequence
+from collections.abc import Callable, Iterable, Sequence
 from itertools import chain
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
-    Optional,
     TypedDict,
     TypeVar,
-    Union,
 )
 
 import disnake
@@ -139,13 +136,13 @@ class InteractionBotBase(CommonBotBase):
     def __init__(
         self,
         *,
-        command_sync_flags: Optional[CommandSyncFlags] = None,
+        command_sync_flags: CommandSyncFlags | None = None,
         sync_commands: bool = MISSING,
         sync_commands_debug: bool = MISSING,
         sync_commands_on_cog_unload: bool = MISSING,
-        test_guilds: Optional[Sequence[int]] = None,
-        default_install_types: Optional[ApplicationInstallTypes] = None,
-        default_contexts: Optional[InteractionContextTypes] = None,
+        test_guilds: Sequence[int] | None = None,
+        default_install_types: ApplicationInstallTypes | None = None,
+        default_contexts: InteractionContextTypes | None = None,
         **options: Any,
     ) -> None:
         if test_guilds and not all(isinstance(guild_id, int) for guild_id in test_guilds):
@@ -155,7 +152,7 @@ class InteractionBotBase(CommonBotBase):
         super().__init__(**options)
 
         test_guilds = None if test_guilds is None else tuple(test_guilds)
-        self._test_guilds: Optional[tuple[int, ...]] = test_guilds
+        self._test_guilds: tuple[int, ...] | None = test_guilds
 
         if command_sync_flags is not None and (
             sync_commands is not MISSING
@@ -358,7 +355,7 @@ class InteractionBotBase(CommonBotBase):
         message_command.body.localize(self.i18n)
         self.all_message_commands[message_command.name] = message_command
 
-    def remove_slash_command(self, name: str) -> Optional[InvokableSlashCommand]:
+    def remove_slash_command(self, name: str) -> InvokableSlashCommand | None:
         """Removes an :class:`InvokableSlashCommand` from the internal list
         of slash commands.
 
@@ -377,7 +374,7 @@ class InteractionBotBase(CommonBotBase):
             return None
         return command
 
-    def remove_user_command(self, name: str) -> Optional[InvokableUserCommand]:
+    def remove_user_command(self, name: str) -> InvokableUserCommand | None:
         """Removes an :class:`InvokableUserCommand` from the internal list
         of user commands.
 
@@ -396,7 +393,7 @@ class InteractionBotBase(CommonBotBase):
             return None
         return command
 
-    def remove_message_command(self, name: str) -> Optional[InvokableMessageCommand]:
+    def remove_message_command(self, name: str) -> InvokableMessageCommand | None:
         """Removes an :class:`InvokableMessageCommand` from the internal list
         of message commands.
 
@@ -417,7 +414,7 @@ class InteractionBotBase(CommonBotBase):
 
     def get_slash_command(
         self, name: str
-    ) -> Optional[Union[InvokableSlashCommand, SubCommandGroup, SubCommand]]:
+    ) -> InvokableSlashCommand | SubCommandGroup | SubCommand | None:
         """Works like ``Bot.get_command``, but for slash commands.
 
         If the name contains spaces, then it will assume that you are looking for a :class:`SubCommand` or
@@ -459,7 +456,7 @@ class InteractionBotBase(CommonBotBase):
                 return group.children.get(chain[2])
         return None
 
-    def get_user_command(self, name: str) -> Optional[InvokableUserCommand]:
+    def get_user_command(self, name: str) -> InvokableUserCommand | None:
         """Gets an :class:`InvokableUserCommand` from the internal list
         of user commands.
 
@@ -475,7 +472,7 @@ class InteractionBotBase(CommonBotBase):
         """
         return self.all_user_commands.get(name)
 
-    def get_message_command(self, name: str) -> Optional[InvokableMessageCommand]:
+    def get_message_command(self, name: str) -> InvokableMessageCommand | None:
         """Gets an :class:`InvokableMessageCommand` from the internal list
         of message commands.
 
@@ -496,16 +493,16 @@ class InteractionBotBase(CommonBotBase):
         *,
         name: LocalizedOptional = None,
         description: LocalizedOptional = None,
-        dm_permission: Optional[bool] = None,  # deprecated
-        default_member_permissions: Optional[Union[Permissions, int]] = None,
-        nsfw: Optional[bool] = None,
-        install_types: Optional[ApplicationInstallTypes] = None,
-        contexts: Optional[InteractionContextTypes] = None,
-        options: Optional[list[Option]] = None,
-        guild_ids: Optional[Sequence[int]] = None,
-        connectors: Optional[dict[str, str]] = None,
-        auto_sync: Optional[bool] = None,
-        extras: Optional[dict[str, Any]] = None,
+        dm_permission: bool | None = None,  # deprecated
+        default_member_permissions: Permissions | int | None = None,
+        nsfw: bool | None = None,
+        install_types: ApplicationInstallTypes | None = None,
+        contexts: InteractionContextTypes | None = None,
+        options: list[Option] | None = None,
+        guild_ids: Sequence[int] | None = None,
+        connectors: dict[str, str] | None = None,
+        auto_sync: bool | None = None,
+        extras: dict[str, Any] | None = None,
         **kwargs: Any,
     ) -> Callable[[CommandCallback], InvokableSlashCommand]:
         """A shortcut decorator that invokes :func:`~disnake.ext.commands.slash_command` and adds it to
@@ -615,14 +612,14 @@ class InteractionBotBase(CommonBotBase):
         self,
         *,
         name: LocalizedOptional = None,
-        dm_permission: Optional[bool] = None,  # deprecated
-        default_member_permissions: Optional[Union[Permissions, int]] = None,
-        nsfw: Optional[bool] = None,
-        install_types: Optional[ApplicationInstallTypes] = None,
-        contexts: Optional[InteractionContextTypes] = None,
-        guild_ids: Optional[Sequence[int]] = None,
-        auto_sync: Optional[bool] = None,
-        extras: Optional[dict[str, Any]] = None,
+        dm_permission: bool | None = None,  # deprecated
+        default_member_permissions: Permissions | int | None = None,
+        nsfw: bool | None = None,
+        install_types: ApplicationInstallTypes | None = None,
+        contexts: InteractionContextTypes | None = None,
+        guild_ids: Sequence[int] | None = None,
+        auto_sync: bool | None = None,
+        extras: dict[str, Any] | None = None,
         **kwargs: Any,
     ) -> Callable[
         [InteractionCommandCallback[CogT, UserCommandInteraction, P]], InvokableUserCommand
@@ -718,14 +715,14 @@ class InteractionBotBase(CommonBotBase):
         self,
         *,
         name: LocalizedOptional = None,
-        dm_permission: Optional[bool] = None,  # deprecated
-        default_member_permissions: Optional[Union[Permissions, int]] = None,
-        nsfw: Optional[bool] = None,
-        install_types: Optional[ApplicationInstallTypes] = None,
-        contexts: Optional[InteractionContextTypes] = None,
-        guild_ids: Optional[Sequence[int]] = None,
-        auto_sync: Optional[bool] = None,
-        extras: Optional[dict[str, Any]] = None,
+        dm_permission: bool | None = None,  # deprecated
+        default_member_permissions: Permissions | int | None = None,
+        nsfw: bool | None = None,
+        install_types: ApplicationInstallTypes | None = None,
+        contexts: InteractionContextTypes | None = None,
+        guild_ids: Sequence[int] | None = None,
+        auto_sync: bool | None = None,
+        extras: dict[str, Any] | None = None,
         **kwargs: Any,
     ) -> Callable[
         [InteractionCommandCallback[CogT, MessageCommandInteraction, P]], InvokableMessageCommand
@@ -820,7 +817,7 @@ class InteractionBotBase(CommonBotBase):
     # command synchronisation
 
     def _ordered_unsynced_commands(
-        self, test_guilds: Optional[Sequence[int]] = None
+        self, test_guilds: Sequence[int] | None = None
     ) -> tuple[list[ApplicationCommand], dict[int, list[ApplicationCommand]]]:
         global_cmds: list[ApplicationCommand] = []
         guilds: dict[int, list[ApplicationCommand]] = {}

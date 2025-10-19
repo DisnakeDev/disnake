@@ -3,7 +3,6 @@
 """Shhhh! It's a secret."""
 
 import os
-from typing import Union
 
 import disnake
 from disnake.ext import commands
@@ -19,7 +18,7 @@ async def secret(ctx: commands.Context):
         await ctx.send("Shh!", delete_after=5)
 
 
-def create_overwrites(ctx: commands.GuildContext, *objects: Union[disnake.Role, disnake.Member]):
+def create_overwrites(ctx: commands.GuildContext, *objects: disnake.Role | disnake.Member):
     """A helper function that creates the overwrites for the voice/text channels.
 
     A `disnake.PermissionOverwrite` allows you to determine the permissions
@@ -47,9 +46,7 @@ def create_overwrites(ctx: commands.GuildContext, *objects: Union[disnake.Role, 
 # it is best to lock it to be guild-only.
 @secret.command()
 @commands.guild_only()
-async def text(
-    ctx: commands.GuildContext, name: str, *objects: Union[disnake.Role, disnake.Member]
-):
+async def text(ctx: commands.GuildContext, name: str, *objects: disnake.Role | disnake.Member):
     """Creates a text channel with the specified name
     that is only visible to the specified roles and/or members.
     """
@@ -65,9 +62,7 @@ async def text(
 
 @secret.command()
 @commands.guild_only()
-async def voice(
-    ctx: commands.GuildContext, name: str, *objects: Union[disnake.Role, disnake.Member]
-):
+async def voice(ctx: commands.GuildContext, name: str, *objects: disnake.Role | disnake.Member):
     """Does the same thing as the `text` subcommand but instead creates a voice channel."""
     overwrites = create_overwrites(ctx, *objects)
 

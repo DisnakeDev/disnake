@@ -2,14 +2,11 @@
 
 from __future__ import annotations
 
-from collections.abc import Generator, Sequence
+from collections.abc import Callable, Generator, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
-    Optional,
     TypeVar,
-    Union,
 )
 
 from ..components import _SELECT_COMPONENT_TYPE_VALUES
@@ -38,7 +35,7 @@ __all__ = ("ModalInteraction", "ModalInteractionData")
 T = TypeVar("T")
 
 # {custom_id: text_input_value | select_values | attachments}
-ResolvedValues = dict[str, Union[str, Sequence[T]]]
+ResolvedValues = dict[str, str | Sequence[T]]
 
 
 class ModalInteraction(Interaction[ClientT]):
@@ -149,12 +146,12 @@ class ModalInteraction(Interaction[ClientT]):
             message = Message(state=self._state, channel=self.channel, data=message_data)
         else:
             message = None
-        self.message: Optional[Message] = message
+        self.message: Message | None = message
 
     def _walk_components(
         self,
         components: Sequence[
-            Union[ModalInteractionComponentDataPayload, ModalInteractionInnerComponentDataPayload]
+            ModalInteractionComponentDataPayload | ModalInteractionInnerComponentDataPayload
         ],
     ) -> Generator[ModalInteractionInnerComponentDataPayload, None, None]:
         for component in components:
@@ -184,8 +181,8 @@ class ModalInteraction(Interaction[ClientT]):
 
     def _resolve_values(
         self, resolve: Callable[[Snowflake, ComponentType], T]
-    ) -> ResolvedValues[Union[str, T]]:
-        values: ResolvedValues[Union[str, T]] = {}
+    ) -> ResolvedValues[str | T]:
+        values: ResolvedValues[str | T] = {}
         for component in self.walk_raw_components():
             if component["type"] == ComponentType.text_input.value:
                 value = component.get("value")
@@ -222,7 +219,7 @@ class ModalInteraction(Interaction[ClientT]):
     @cached_slot_property("_cs_resolved_values")
     def resolved_values(
         self,
-    ) -> ResolvedValues[Union[str, Member, User, Role, AnyChannel, Attachment]]:
+    ) -> ResolvedValues[str | Member | User | Role | AnyChannel | Attachment]:
         """:class:`dict`\\[:class:`str`, :class:`str` | :class:`~collections.abc.Sequence`\\[:class:`str` | :class:`Member` | :class:`User` | :class:`Role` | :class:`abc.GuildChannel` | :class:`Thread` | :class:`PartialMessageable` | :class:`Attachment`]]: The (resolved) values the user entered in the modal.
         This is a dict of the form ``{custom_id: value}``.
 

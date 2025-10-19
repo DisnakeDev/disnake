@@ -54,7 +54,7 @@ class Section(UIComponent):
 
     def __init__(
         self,
-        *components: Union[str, TextDisplay],
+        *components: str | TextDisplay,
         accessory: SectionAccessoryUIComponent,
         id: int = 0,
     ) -> None:

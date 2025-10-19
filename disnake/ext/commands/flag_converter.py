@@ -12,7 +12,6 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Literal,
-    Optional,
     TypeVar,
     Union,
     get_args,
@@ -502,7 +501,7 @@ class FlagConverter(metaclass=FlagsMeta):
         flags = cls.__commands_flags__
         aliases = cls.__commands_flag_aliases__
         last_position = 0
-        last_flag: Optional[Flag] = None
+        last_flag: Flag | None = None
 
         case_insensitive = cls.__commands_flag_case_insensitive__
         for match in cls.__commands_flag_regex__.finditer(argument):

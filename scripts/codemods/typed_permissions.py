@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: MIT
 
 import itertools
-from typing import Optional, Union
 
 import libcst as cst
 import libcst.codemod.visitors as codevisitors
@@ -68,7 +67,7 @@ class PermissionTypings(BaseCodemodCommand):
     DESCRIPTION: str = "Adds overloads for all permissions."
     CHECK_MARKER: str = "@_overload_with_permissions"
 
-    def leave_ClassDef(self, _: cst.ClassDef, node: cst.ClassDef) -> Union[cst.ClassDef, cst.If]:
+    def leave_ClassDef(self, _: cst.ClassDef, node: cst.ClassDef) -> cst.ClassDef | cst.If:
         # this method manages where PermissionOverwrite defines the typed augmented permissions.
         # in order to type these properly, we destroy that node and recreate it with the proper permissions.
         if not m.matches(node.name, m.Name("PermissionOverwrite")):
@@ -106,13 +105,13 @@ class PermissionTypings(BaseCodemodCommand):
 
         return node.deep_replace(og_type_check, new_type_check)
 
-    def visit_FunctionDef(self, node: cst.FunctionDef) -> Optional[bool]:
+    def visit_FunctionDef(self, node: cst.FunctionDef) -> bool | None:
         # don't recurse into the body of a function
         return False
 
     def leave_FunctionDef(
         self, _: cst.FunctionDef, node: cst.FunctionDef
-    ) -> Union[cst.FlattenSentinel[cst.FunctionDef], cst.FunctionDef, cst.RemovalSentinel]:
+    ) -> cst.FlattenSentinel[cst.FunctionDef] | cst.FunctionDef | cst.RemovalSentinel:
         # we don't care about the original node
         has_overload_deco = False
         is_overload = False

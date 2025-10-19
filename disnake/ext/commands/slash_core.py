@@ -4,14 +4,11 @@ from __future__ import annotations
 
 import asyncio
 import inspect
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
-    Optional,
     TypeVar,
-    Union,
 )
 
 from disnake import utils
@@ -41,7 +38,7 @@ SlashCommandT = TypeVar("SlashCommandT", bound="InvokableSlashCommand")
 
 
 def _autocomplete(
-    self: Union[SubCommand, InvokableSlashCommand], option_name: str
+    self: SubCommand | InvokableSlashCommand, option_name: str
 ) -> Callable[[Callable], Callable]:
     for option in self.body.options:
         if option.name == option_name:
@@ -60,11 +57,11 @@ def _autocomplete(
 
 
 async def _call_autocompleter(
-    self: Union[InvokableSlashCommand, SubCommand],
+    self: InvokableSlashCommand | SubCommand,
     param: str,
     inter: ApplicationCommandInteraction,
     user_input: str,
-) -> Optional[Choices]:
+) -> Choices | None:
     autocomp = self.autocompleters.get(param)
     if autocomp is None:
         return None
@@ -210,9 +207,9 @@ class SubCommandGroup(InvokableApplicationCommand):
         self,
         name: LocalizedOptional = None,
         description: LocalizedOptional = None,
-        options: Optional[list[Option]] = None,
-        connectors: Optional[dict[str, str]] = None,
-        extras: Optional[dict[str, Any]] = None,
+        options: list[Option] | None = None,
+        connectors: dict[str, str] | None = None,
+        extras: dict[str, Any] | None = None,
         **kwargs: Any,
     ) -> Callable[[CommandCallback], SubCommand]:
         """A decorator that creates a subcommand in the subcommand group.
@@ -286,20 +283,20 @@ class SubCommand(InvokableApplicationCommand):
     def __init__(
         self,
         func: CommandCallback,
-        parent: Union[InvokableSlashCommand, SubCommandGroup],
+        parent: InvokableSlashCommand | SubCommandGroup,
         *,
         name: LocalizedOptional = None,
         description: LocalizedOptional = None,
-        options: Optional[list[Option]] = None,
-        connectors: Optional[dict[str, str]] = None,
+        options: list[Option] | None = None,
+        connectors: dict[str, str] | None = None,
         **kwargs: Any,
     ) -> None:
         name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
-        self.parent: Union[InvokableSlashCommand, SubCommandGroup] = parent
+        self.parent: InvokableSlashCommand | SubCommandGroup = parent
         self.connectors: dict[str, str] = connectors or {}
-        self.autocompleters: dict[str, Union[Choices, Callable[..., Optional[Choices]]]] = (
-            kwargs.get("autocompleters", {})
+        self.autocompleters: dict[str, Choices | Callable[..., Choices | None]] = kwargs.get(
+            "autocompleters", {}
         )
 
         if options is None:
@@ -339,7 +336,7 @@ class SubCommand(InvokableApplicationCommand):
     @property
     def parents(
         self,
-    ) -> Union[tuple[InvokableSlashCommand], tuple[SubCommandGroup, InvokableSlashCommand]]:
+    ) -> tuple[InvokableSlashCommand] | tuple[SubCommandGroup, InvokableSlashCommand]:
         """:class:`tuple`\\[:class:`InvokableSlashCommand`] | :class:`tuple`\\[:class:`SubCommandGroup`, :class:`InvokableSlashCommand`]:
         Returns all parents of this subcommand.
 
@@ -364,7 +361,7 @@ class SubCommand(InvokableApplicationCommand):
 
     async def _call_autocompleter(
         self, param: str, inter: ApplicationCommandInteraction, user_input: str
-    ) -> Optional[Choices]:
+    ) -> Choices | None:
         return await _call_autocompleter(self, param, inter, user_input)
 
     async def invoke(self, inter: ApplicationCommandInteraction, *args: Any, **kwargs: Any) -> None:
@@ -454,26 +451,26 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         *,
         name: LocalizedOptional = None,
         description: LocalizedOptional = None,
-        options: Optional[list[Option]] = None,
-        dm_permission: Optional[bool] = None,  # deprecated
-        default_member_permissions: Optional[Union[Permissions, int]] = None,
-        nsfw: Optional[bool] = None,
-        install_types: Optional[ApplicationInstallTypes] = None,
-        contexts: Optional[InteractionContextTypes] = None,
-        guild_ids: Optional[Sequence[int]] = None,
-        connectors: Optional[dict[str, str]] = None,
-        auto_sync: Optional[bool] = None,
+        options: list[Option] | None = None,
+        dm_permission: bool | None = None,  # deprecated
+        default_member_permissions: Permissions | int | None = None,
+        nsfw: bool | None = None,
+        install_types: ApplicationInstallTypes | None = None,
+        contexts: InteractionContextTypes | None = None,
+        guild_ids: Sequence[int] | None = None,
+        connectors: dict[str, str] | None = None,
+        auto_sync: bool | None = None,
         **kwargs: Any,
     ) -> None:
         name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
         self.parent = None
         self.connectors: dict[str, str] = connectors or {}
-        self.children: dict[str, Union[SubCommand, SubCommandGroup]] = {}
+        self.children: dict[str, SubCommand | SubCommandGroup] = {}
         self.auto_sync: bool = True if auto_sync is None else auto_sync
-        self.guild_ids: Optional[tuple[int, ...]] = None if guild_ids is None else tuple(guild_ids)
-        self.autocompleters: dict[str, Union[Choices, Callable[..., Optional[Choices]]]] = (
-            kwargs.get("autocompleters", {})
+        self.guild_ids: tuple[int, ...] | None = None if guild_ids is None else tuple(guild_ids)
+        self.autocompleters: dict[str, Choices | Callable[..., Choices | None]] = kwargs.get(
+            "autocompleters", {}
         )
 
         if options is None:
@@ -565,9 +562,9 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         self,
         name: LocalizedOptional = None,
         description: LocalizedOptional = None,
-        options: Optional[list[Option]] = None,
-        connectors: Optional[dict[str, str]] = None,
-        extras: Optional[dict[str, Any]] = None,
+        options: list[Option] | None = None,
+        connectors: dict[str, str] | None = None,
+        extras: dict[str, Any] | None = None,
         **kwargs: Any,
     ) -> Callable[[CommandCallback], SubCommand]:
         """A decorator that creates a subcommand under the base command.
@@ -629,7 +626,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
     def sub_command_group(
         self,
         name: LocalizedOptional = None,
-        extras: Optional[dict[str, Any]] = None,
+        extras: dict[str, Any] | None = None,
         **kwargs: Any,
     ) -> Callable[[CommandCallback], SubCommandGroup]:
         """A decorator that creates a subcommand group under the base command.
@@ -698,7 +695,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
 
     async def _call_autocompleter(
         self, param: str, inter: ApplicationCommandInteraction, user_input: str
-    ) -> Optional[Choices]:
+    ) -> Choices | None:
         return await _call_autocompleter(self, param, inter, user_input)
 
     async def _call_relevant_autocompleter(self, inter: ApplicationCommandInteraction) -> None:
@@ -796,16 +793,16 @@ def slash_command(
     *,
     name: LocalizedOptional = None,
     description: LocalizedOptional = None,
-    dm_permission: Optional[bool] = None,  # deprecated
-    default_member_permissions: Optional[Union[Permissions, int]] = None,
-    nsfw: Optional[bool] = None,
-    install_types: Optional[ApplicationInstallTypes] = None,
-    contexts: Optional[InteractionContextTypes] = None,
-    options: Optional[list[Option]] = None,
-    guild_ids: Optional[Sequence[int]] = None,
-    connectors: Optional[dict[str, str]] = None,
-    auto_sync: Optional[bool] = None,
-    extras: Optional[dict[str, Any]] = None,
+    dm_permission: bool | None = None,  # deprecated
+    default_member_permissions: Permissions | int | None = None,
+    nsfw: bool | None = None,
+    install_types: ApplicationInstallTypes | None = None,
+    contexts: InteractionContextTypes | None = None,
+    options: list[Option] | None = None,
+    guild_ids: Sequence[int] | None = None,
+    connectors: dict[str, str] | None = None,
+    auto_sync: bool | None = None,
+    extras: dict[str, Any] | None = None,
     **kwargs: Any,
 ) -> Callable[[CommandCallback], InvokableSlashCommand]:
     """A decorator that builds a slash command.

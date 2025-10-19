@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, ClassVar, Optional, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Union
 
 if TYPE_CHECKING:
     from aiohttp import ClientResponse, ClientWebSocketResponse
@@ -107,9 +107,7 @@ class HTTPException(DiscordException):
         The Discord specific error code for the failure.
     """
 
-    def __init__(
-        self, response: _ResponseType, message: Optional[Union[str, dict[str, Any]]]
-    ) -> None:
+    def __init__(self, response: _ResponseType, message: str | dict[str, Any] | None) -> None:
         self.response: _ResponseType = response
         self.status: int = response.status  # pyright: ignore[reportAttributeAccessIssue]
         self.code: int
@@ -262,8 +260,8 @@ class ConnectionClosed(ClientException):
         self,
         socket: ClientWebSocketResponse,
         *,
-        shard_id: Optional[int],
-        code: Optional[int] = None,
+        shard_id: int | None,
+        code: int | None = None,
         voice: bool = False,
     ) -> None:
         # This exception is just the same exception except
@@ -274,7 +272,7 @@ class ConnectionClosed(ClientException):
         if voice:
             self.reason = self.GATEWAY_VOICE_CLOSE_EVENT_REASONS.get(self.code, "Unknown reason")
 
-        self.shard_id: Optional[int] = shard_id
+        self.shard_id: int | None = shard_id
         super().__init__(
             f"Shard ID {self.shard_id} WebSocket closed with {self.code}: {self.reason}"
         )
@@ -297,8 +295,8 @@ class PrivilegedIntentsRequired(ClientException):
         The shard ID that got closed if applicable.
     """
 
-    def __init__(self, shard_id: Optional[int]) -> None:
-        self.shard_id: Optional[int] = shard_id
+    def __init__(self, shard_id: int | None) -> None:
+        self.shard_id: int | None = shard_id
         msg = (
             f"Shard ID {shard_id} is requesting privileged intents that have not been explicitly enabled in the "
             "developer portal. It is recommended to go to https://discord.com/developers/applications/ "
