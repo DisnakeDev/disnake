@@ -328,6 +328,16 @@ class Attachment(Hashable):
         (see :attr:`MessageFlags.is_voice_message`).
 
         .. versionadded:: 2.9
+
+    clip_participants: List[:class:`User`]
+        If this attachment is a clip returns a list of users who were in the stream.
+
+        .. versionadded:: |vnext|
+
+    clip_created_at: Optional[:class:`datetime.datetime`]
+        If this attachment is a clip returns the creation timestamp.
+
+        .. versionadded:: |vnext|
     """
 
     __slots__ = (
@@ -346,6 +356,8 @@ class Attachment(Hashable):
         "duration",
         "waveform",
         "_flags",
+        "clip_participants",
+        "clip_created_at",
     )
 
     def __init__(self, *, data: AttachmentPayload, state: ConnectionState) -> None:
@@ -366,13 +378,23 @@ class Attachment(Hashable):
             b64decode(waveform_data) if (waveform_data := data.get("waveform")) else None
         )
         self._flags: int = data.get("flags", 0)
+        self.clip_participants: List[User] = [
+            User(state=state, data=d) for d in data.get("clip_participants", [])
+        ]
+        self.clip_created_at: Optional[datetime.datetime] = utils.parse_time(
+            data.get("clip_created_at")
+        )
 
     def is_spoiler(self) -> bool:
         """Whether this attachment contains a spoiler.
 
         :return type: :class:`bool`
+
+        .. versionchanged: |vnext|
+
+            Now considers the attachment flags as well as the filename.
         """
-        return self.filename.startswith("SPOILER_")
+        return self.filename.startswith("SPOILER_") or self.flags.is_spoiler
 
     def __repr__(self) -> str:
         return f"<Attachment id={self.id} filename={self.filename!r} url={self.url!r} ephemeral={self.ephemeral!r}>"
