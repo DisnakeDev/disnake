@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
 
 [build-system]
-requires = ["setuptools>=61"]
+requires = ["setuptools>=77.0.3"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -11,21 +11,20 @@ readme = "README.md"
 authors = [
   { name = "Disnake Development" }
 ]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 keywords = ["disnake", "discord", "discord api"]
-license = { text = "MIT" }
+license = "MIT"
+license-files = ["LICENSE"]
 dependencies = [
     "aiohttp>=3.7.0,<4.0",
     "typing-extensions>=4.1",
 ]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
-    "License :: OSI Approved :: MIT License",
     "Intended Audience :: Developers",
     "Natural Language :: English",
     "Operating System :: OS Independent",
     # it is important that the python classifiers are sorted in the sequential order
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -49,7 +48,6 @@ speed = [
     # taken from aiohttp[speedups]
     "aiodns>=1.1",
     "Brotli",
-    'cchardet; python_version < "3.10"',
 ]
 voice = [
     "PyNaCl>=1.5.0,<1.6",
@@ -121,7 +119,7 @@ where = ["."]
 include = ["disnake*"]
 
 [tool.uv]
-required-version = ">=0.8.4"
+required-version = ">=0.9.2"
 
 [tool.ruff]
 line-length = 100
@@ -140,6 +138,7 @@ ignore = [
     "ANN0",
     "ANN4",
     ## flake8-bandit
+    "S101", # use of assert is fine
     "S311", # use of random is fine in most cases
     "S603", # calling subprocess with dynamic arguments is generally fine, the only way to avoid this is ignoring it
     "S607", # partial executable paths (i.e. "git" instead of "/usr/bin/git") are fine
@@ -161,7 +160,7 @@ ignore = [
     ## flake8-pyi
     "PYI", # TODO: enable, in separate PR (most have autofixes)
     ## flake8-return
-    "RET", # TODO: enable, most have autofixes.
+    "RET505", "RET506", # not likely to be enabled
     ## flake8-self
     "SLF", # private member access, this is unlikely to be enabled.
     ## flake8-simplify
@@ -191,8 +190,6 @@ ignore = [
     "E731", # lambda expression assigned
     ## pydocstyle
     "D1", "D205", "D301", "D400", "D401",
-    ## pygrep-hooks
-    "PGH003", # blanket type ignores
     ## Pylint
     # PLC
     "PLC0105",
@@ -210,10 +207,10 @@ ignore = [
     "TRY003", # as of 0.12.11 still has some false positives
     "TRY301", # TODO: enable
     "TRY300", # TODO: enable
-    # py3.9 bump
-    "UP006",
+    # py 3.10 bump
+    "UP007",
     "UP035",
-    "FURB188",
+    "UP045",
 ]
 
 [tool.ruff.lint.per-file-ignores]
@@ -357,6 +354,9 @@ ignore = [
 
 # this is one of the diagnostics that aren't enabled by default, even in strict mode
 reportUnnecessaryTypeIgnoreComment = true
+
+# prefer "# pyright: ignore[ruleName]" over "# type: ignore"
+enableTypeIgnoreComments = false
 
 # it's unlikely that these will ever be enabled
 reportOverlappingOverload = false

@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, List, Optional, Sequence, cast
+from collections.abc import Sequence
+from typing import TYPE_CHECKING, Optional, cast
 
 from . import utils
 from .asset import Asset, AssetBytes
@@ -44,7 +45,7 @@ class InstallParams:
 
     Attributes
     ----------
-    scopes: List[:class:`str`]
+    scopes: :class:`list`\\[:class:`str`]
         The scopes requested by the application.
     permissions: :class:`Permissions`
         The permissions requested for the bot role.
@@ -60,7 +61,7 @@ class InstallParams:
     def __init__(
         self,
         *,
-        scopes: List[str],
+        scopes: list[str],
         permissions: Permissions = MISSING,
     ) -> None:
         self.scopes = scopes
@@ -126,7 +127,7 @@ class InstallTypeConfiguration:
 
     Attributes
     ----------
-    install_params: Optional[:class:`InstallParams`]
+    install_params: :class:`InstallParams` | :data:`None`
         The parameters for this installation type.
     """
 
@@ -172,7 +173,7 @@ class AppInfo:
         The application's name.
     owner: :class:`User`
         The application's owner.
-    team: Optional[:class:`Team`]
+    team: :class:`Team` | :data:`None`
         The application's team.
 
         .. versionadded:: 1.3
@@ -185,7 +186,7 @@ class AppInfo:
     bot_require_code_grant: :class:`bool`
         Whether the bot requires the completion of the full oauth2 code
         grant flow to join.
-    rpc_origins: Optional[List[:class:`str`]]
+    rpc_origins: :class:`list`\\[:class:`str`] | :data:`None`
         A list of RPC origin URLs, if RPC is enabled.
     verify_key: :class:`str`
         The hex encoded key for verification in interactions and the
@@ -193,45 +194,45 @@ class AppInfo:
 
         .. versionadded:: 1.3
 
-    guild_id: Optional[:class:`int`]
+    guild_id: :class:`int` | :data:`None`
         The ID of the guild associated with the application, if any.
 
         .. versionadded:: 1.3
 
-    primary_sku_id: Optional[:class:`int`]
+    primary_sku_id: :class:`int` | :data:`None`
         If this application is a game sold on Discord,
         this field will be the ID of the "Game SKU" that is created,
         if it exists.
 
         .. versionadded:: 1.3
 
-    slug: Optional[:class:`str`]
+    slug: :class:`str` | :data:`None`
         If this application is a game sold on Discord,
         this field will be the URL slug that links to the store page.
 
         .. versionadded:: 1.3
 
-    terms_of_service_url: Optional[:class:`str`]
+    terms_of_service_url: :class:`str` | :data:`None`
         The application's terms of service URL, if set.
 
         .. versionadded:: 2.0
 
-    privacy_policy_url: Optional[:class:`str`]
+    privacy_policy_url: :class:`str` | :data:`None`
         The application's privacy policy URL, if set.
 
         .. versionadded:: 2.0
 
-    flags: Optional[:class:`ApplicationFlags`]
+    flags: :class:`ApplicationFlags` | :data:`None`
         The application's public flags.
 
         .. versionadded:: 2.3
 
-    tags: Optional[List[:class:`str`]]
+    tags: :class:`list`\\[:class:`str`] | :data:`None`
         The application's tags.
 
         .. versionadded:: 2.5
 
-    install_params: Optional[:class:`InstallParams`]
+    install_params: :class:`InstallParams` | :data:`None`
         The installation parameters for this application.
 
         See also :attr:`guild_install_type_config`/:attr:`user_install_type_config`
@@ -239,11 +240,11 @@ class AppInfo:
 
         .. versionadded:: 2.5
 
-    custom_install_url: Optional[:class:`str`]
+    custom_install_url: :class:`str` | :data:`None`
         The custom installation url for this application.
 
         .. versionadded:: 2.5
-    role_connections_verification_url: Optional[:class:`str`]
+    role_connections_verification_url: :class:`str` | :data:`None`
         The application's role connection verification entry point,
         which when configured will render the app as a verification method
         in the guild role verification configuration.
@@ -263,17 +264,17 @@ class AppInfo:
         The approximate number of users that have authorized the app with OAuth2.
 
         .. versionadded:: 2.11
-    redirect_uris: Optional[List[:class:`str`]]
+    redirect_uris: :class:`list`\\[:class:`str`] | :data:`None`
         The application's OAuth2 redirect URIs.
 
         .. versionadded:: 2.11
 
-    interactions_endpoint_url: Optional[:class:`str`]
+    interactions_endpoint_url: :class:`str` | :data:`None`
         The application's interactions endpoint URL.
 
         .. versionadded:: 2.11
 
-    event_webhooks_url: Optional[:class:`str`]
+    event_webhooks_url: :class:`str` | :data:`None`
         The application's event webhooks URL.
 
         .. versionadded:: 2.11
@@ -283,7 +284,7 @@ class AppInfo:
 
         .. versionadded:: 2.11
 
-    event_webhooks_types: Optional[List[:class:`str`]]
+    event_webhooks_types: :class:`list`\\[:class:`str`] | :data:`None`
         The application's event webhook types, if any.
 
         .. versionadded:: 2.11
@@ -332,7 +333,7 @@ class AppInfo:
         self.name: str = data["name"]
         self.description: str = data["description"]
         self._icon: Optional[str] = data["icon"]
-        self.rpc_origins: List[str] = data.get("rpc_origins") or []
+        self.rpc_origins: list[str] = data.get("rpc_origins") or []
         self.bot_public: bool = data["bot_public"]
         self.bot_require_code_grant: bool = data["bot_require_code_grant"]
         self.owner: User = state.create_user(data["owner"])
@@ -355,14 +356,14 @@ class AppInfo:
         self.flags: Optional[ApplicationFlags] = (
             ApplicationFlags._from_value(flags) if flags is not None else None
         )
-        self.tags: Optional[List[str]] = data.get("tags")
+        self.tags: Optional[list[str]] = data.get("tags")
         self.install_params: Optional[InstallParams] = (
             InstallParams._from_data(data["install_params"], parent=self)
             if "install_params" in data
             else None
         )
         self.custom_install_url: Optional[str] = data.get("custom_install_url")
-        self.redirect_uris: Optional[List[str]] = data.get("redirect_uris")
+        self.redirect_uris: Optional[list[str]] = data.get("redirect_uris")
         self.interactions_endpoint_url: Optional[str] = data.get("interactions_endpoint_url")
         self.role_connections_verification_url: Optional[str] = data.get(
             "role_connections_verification_url"
@@ -371,7 +372,7 @@ class AppInfo:
         self.event_webhooks_status: ApplicationEventWebhookStatus = try_enum(
             ApplicationEventWebhookStatus, data.get("event_webhooks_status", 1)
         )
-        self.event_webhooks_types: Optional[List[str]] = data.get("event_webhooks_types")
+        self.event_webhooks_types: Optional[list[str]] = data.get("event_webhooks_types")
         self.approximate_guild_count: int = data.get("approximate_guild_count", 0)
         self.approximate_user_install_count: int = data.get("approximate_user_install_count", 0)
         self.approximate_user_authorization_count: int = data.get(
@@ -379,7 +380,7 @@ class AppInfo:
         )
 
         # this is a bit of a mess, but there's no better way to expose this data for now
-        self._install_types_config: Dict[
+        self._install_types_config: dict[
             ApplicationIntegrationTypeLiteral, InstallTypeConfiguration
         ] = {}
         for type_str, config in (data.get("integration_types_config") or {}).items():
@@ -399,21 +400,21 @@ class AppInfo:
 
     @property
     def icon(self) -> Optional[Asset]:
-        """Optional[:class:`.Asset`]: Retrieves the application's icon asset, if any."""
+        """:class:`.Asset` | :data:`None`: Retrieves the application's icon asset, if any."""
         if self._icon is None:
             return None
         return Asset._from_icon(self._state, self.id, self._icon, path="app")
 
     @property
     def cover_image(self) -> Optional[Asset]:
-        """Optional[:class:`.Asset`]: Retrieves the rich presence cover image asset, if any."""
+        """:class:`.Asset` | :data:`None`: Retrieves the rich presence cover image asset, if any."""
         if self._cover_image is None:
             return None
         return Asset._from_cover_image(self._state, self.id, self._cover_image)
 
     @property
     def guild(self) -> Optional[Guild]:
-        """Optional[:class:`Guild`]: The guild associated with the application, if any.
+        """:class:`Guild` | :data:`None`: The guild associated with the application, if any.
 
         .. versionadded:: 1.3
         """
@@ -438,8 +439,8 @@ class AppInfo:
 
     @property
     def guild_install_type_config(self) -> Optional[InstallTypeConfiguration]:
-        """Optional[:class:`InstallTypeConfiguration`]: The guild installation parameters for
-        this application. If this application cannot be installed to guilds, returns ``None``.
+        """:class:`InstallTypeConfiguration` | :data:`None`: The guild installation parameters for
+        this application. If this application cannot be installed to guilds, returns :data:`None`.
 
         .. versionadded:: 2.10
         """
@@ -447,8 +448,8 @@ class AppInfo:
 
     @property
     def user_install_type_config(self) -> Optional[InstallTypeConfiguration]:
-        """Optional[:class:`InstallTypeConfiguration`]: The user installation parameters for
-        this application. If this application cannot be installed to users, returns ``None``.
+        """:class:`InstallTypeConfiguration` | :data:`None`: The user installation parameters for
+        this application. If this application cannot be installed to users, returns :data:`None`.
 
         .. versionadded:: 2.10
         """
@@ -482,33 +483,33 @@ class AppInfo:
 
         Parameters
         ----------
-        custom_install_url: Optional[:class:`str`]
+        custom_install_url: :class:`str` | :data:`None`
             The custom installation url for this application.
-        description: Optional[:class:`str`]
+        description: :class:`str` | :data:`None`
             The application's description.
-        role_connections_verification_url: Optional[:class:`str`]
+        role_connections_verification_url: :class:`str` | :data:`None`
             The application's role connection verification entry point,
             which when configured will render the app as a verification method
             in the guild role verification configuration.
-        install_params: Optional[:class:`InstallParams`]
+        install_params: :class:`InstallParams` | :data:`None`
             The installation parameters for this application.
 
-            If provided with ``custom_install_url``, must be set to ``None``.
+            If provided with ``custom_install_url``, must be set to :data:`None`.
 
             It's recommended to use :attr:`guild_install_type_config` and :attr:`user_install_type_config`
             instead of this parameter, as this parameter is soft-deprecated by Discord.
 
             :attr:`bot_public` **must** be ``True`` if this parameter is provided.
-        guild_install_type_config: Optional[:class:`InstallTypeConfiguration`]
+        guild_install_type_config: :class:`InstallTypeConfiguration` | :data:`None`
             The guild installation type configuration for this application.
-            If set to ``None``, guild installations will be disabled.
+            If set to :data:`None`, guild installations will be disabled.
             You cannot disable both user and guild installations.
 
             Note the only valid scopes for guild installations are ``applications.commands`` and ``bot``.
 
-        user_install_type_config: Optional[:class:`InstallTypeConfiguration`]
+        user_install_type_config: :class:`InstallTypeConfiguration` | :data:`None`
             The user installation type configuration for this application.
-            If set to ``None``, user installations will be disabled.
+            If set to :data:`None`, user installations will be disabled.
             You cannot disable both user and guild installations.
 
             Note the only valid scopes for user installations are ``applications.commands``.
@@ -524,19 +525,19 @@ class AppInfo:
                 Disabling an intent that you are currently requesting during your current session
                 will cause you to be disconnected from the gateway. Take caution when providing this parameter.
 
-        icon: Optional[|resource_type|]
+        icon: |resource_type| | :data:`None`
             Update the application's icon asset, if any.
-        cover_image: Optional[|resource_type|]
+        cover_image: |resource_type| | :data:`None`
             Update the cover_image for rich presence integrations.
-        interactions_endpoint_url: Optional[:class:`str`]
+        interactions_endpoint_url: :class:`str` | :data:`None`
             The application's interactions endpoint URL.
-        tags: List[:class:`str`]
+        tags: :class:`list`\\[:class:`str`]
             The application's tags.
-        event_webhooks_url: Optional[:class:`str`]
+        event_webhooks_url: :class:`str` | :data:`None`
             The application's event webhooks URL.
         event_webhooks_status: :class:`ApplicationEventWebhookStatus`
             The application's event webhooks status.
-        event_webhooks_types: Optional[List[:class:`str`]]
+        event_webhooks_types: :class:`list`\\[:class:`str`] | :data:`None`
             The application's event webhook types. See `webhook event types <https://discord.com/developers/docs/events/webhook-events#event-types>`_
             for a list of valid events.
 
@@ -595,7 +596,7 @@ class AppInfo:
             fields["install_params"] = install_params.to_dict() if install_params else None
 
         if guild_install_type_config is not MISSING or user_install_type_config is not MISSING:
-            integration_types_config: Dict[str, ApplicationIntegrationTypeConfigurationPayload] = {}
+            integration_types_config: dict[str, ApplicationIntegrationTypeConfigurationPayload] = {}
 
             if guild_install_type_config is MISSING:
                 guild_install_type_config = self.guild_install_type_config
@@ -655,14 +656,14 @@ class PartialAppInfo:
         The application's name.
     description: :class:`str`
         The application's description.
-    rpc_origins: Optional[List[:class:`str`]]
+    rpc_origins: :class:`list`\\[:class:`str`] | :data:`None`
         A list of RPC origin URLs, if RPC is enabled.
     verify_key: :class:`str`
         The hex encoded key for verification in interactions and the
         GameSDK's :ddocs:`GetTicket <game-sdk/applications#getticket>`.
-    terms_of_service_url: Optional[:class:`str`]
+    terms_of_service_url: :class:`str` | :data:`None`
         The application's terms of service URL, if set.
-    privacy_policy_url: Optional[:class:`str`]
+    privacy_policy_url: :class:`str` | :data:`None`
         The application's privacy policy URL, if set.
     """
 
@@ -685,7 +686,7 @@ class PartialAppInfo:
         self.name: str = data["name"]
         self._icon: Optional[str] = data.get("icon")
         self.description: str = data["description"]
-        self.rpc_origins: Optional[List[str]] = data.get("rpc_origins")
+        self.rpc_origins: Optional[list[str]] = data.get("rpc_origins")
         self._summary: str = data.get("summary", "")
         self.verify_key: str = data["verify_key"]
         self.terms_of_service_url: Optional[str] = data.get("terms_of_service_url")
@@ -696,7 +697,7 @@ class PartialAppInfo:
 
     @property
     def icon(self) -> Optional[Asset]:
-        """Optional[:class:`.Asset`]: Retrieves the application's icon asset, if any."""
+        """:class:`.Asset` | :data:`None`: Retrieves the application's icon asset, if any."""
         if self._icon is None:
             return None
         return Asset._from_icon(self._state, self.id, self._icon, path="app")

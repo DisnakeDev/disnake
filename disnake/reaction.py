@@ -20,7 +20,7 @@ class Reaction:
     """Represents a reaction to a message.
 
     Depending on the way this object was created, some of the attributes can
-    have a value of ``None``.
+    have a value of :data:`None`.
 
     .. collapse:: operations
 
@@ -44,7 +44,7 @@ class Reaction:
 
     Attributes
     ----------
-    emoji: Union[:class:`Emoji`, :class:`PartialEmoji`, :class:`str`]
+    emoji: :class:`Emoji` | :class:`PartialEmoji` | :class:`str`
         The reaction emoji. May be a custom emoji, or a unicode emoji.
     count: :class:`int`
         Number of times this reaction was made
@@ -65,9 +65,9 @@ class Reaction:
     ) -> None:
         self.message: Message = message
         # _get_emoji_from_data won't return None
-        self.emoji: Union[PartialEmoji, Emoji, str] = emoji or message._state._get_emoji_from_data(  # type: ignore
+        self.emoji: Union[PartialEmoji, Emoji, str] = emoji or message._state._get_emoji_from_data(
             data["emoji"]
-        )
+        )  # pyright: ignore[reportAttributeAccessIssue]
         self.count: int = data.get("count", 1)
         self.me: bool = data["me"]
 
@@ -173,11 +173,11 @@ class Reaction:
 
         Parameters
         ----------
-        limit: Optional[:class:`int`]
+        limit: :class:`int` | :data:`None`
             The maximum number of results to return.
             If not provided, returns all the users who
             reacted to the message.
-        after: Optional[:class:`abc.Snowflake`]
+        after: :class:`abc.Snowflake` | :data:`None`
             For pagination, reactions are sorted by member.
 
         Raises
@@ -187,7 +187,7 @@ class Reaction:
 
         Yields
         ------
-        Union[:class:`User`, :class:`Member`]
+        :class:`User` | :class:`Member`
             The member (if retrievable) or the user that has reacted
             to this message. The case where it can be a :class:`Member` is
             in a guild message context. Sometimes it can be a :class:`User`

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import unicodedata
-from typing import TYPE_CHECKING, List, Literal, Optional, Tuple, Type, Union
+from typing import TYPE_CHECKING, Literal, Optional, Union
 
 from .asset import Asset, AssetMixin
 from .enums import StickerFormatType, StickerType, try_enum
@@ -66,13 +66,13 @@ class StickerPack(Hashable):
         The description of the sticker pack.
     id: :class:`int`
         The id of the sticker pack.
-    stickers: List[:class:`StandardSticker`]
+    stickers: :class:`list`\\[:class:`StandardSticker`]
         The stickers of this sticker pack.
     sku_id: :class:`int`
         The SKU ID of the sticker pack.
-    cover_sticker_id: Optional[:class:`int`]
+    cover_sticker_id: :class:`int` | :data:`None`
          The ID of the sticker used for the cover of the sticker pack, if any.
-    cover_sticker: Optional[:class:`StandardSticker`]
+    cover_sticker: :class:`StandardSticker` | :data:`None`
         The sticker used for the cover of the sticker pack, if any.
     """
 
@@ -95,7 +95,7 @@ class StickerPack(Hashable):
     def _from_data(self, data: StickerPackPayload) -> None:
         self.id: int = int(data["id"])
         stickers = data["stickers"]
-        self.stickers: List[StandardSticker] = [
+        self.stickers: list[StandardSticker] = [
             StandardSticker(state=self._state, data=sticker) for sticker in stickers
         ]
         self.name: str = data["name"]
@@ -107,7 +107,7 @@ class StickerPack(Hashable):
 
     @property
     def banner(self) -> Optional[Asset]:
-        """Optional[:class:`Asset`]: The banner asset of the sticker pack, if any."""
+        """:class:`Asset` | :data:`None`: The banner asset of the sticker pack, if any."""
         if not self._banner:
             return None
         return Asset._from_sticker_banner(self._state, self._banner)
@@ -216,11 +216,11 @@ class StickerItem(_StickerTag):
 
         Returns
         -------
-        Union[:class:`StandardSticker`, :class:`GuildSticker`]
+        :class:`StandardSticker` | :class:`GuildSticker`
             The retrieved sticker.
         """
         data: StickerPayload = await self._state.http.get_sticker(self.id)
-        cls, _ = _sticker_factory(data["type"])  # type: ignore
+        cls, _ = _sticker_factory(data["type"])  # pyright: ignore[reportGeneralTypeIssues]
         return cls(state=self._state, data=data)
 
 
@@ -312,7 +312,7 @@ class StandardSticker(Sticker):
         The ID of the sticker's pack.
     format: :class:`StickerFormatType`
         The format for the sticker's image.
-    tags: List[:class:`str`]
+    tags: :class:`list`\\[:class:`str`]
         A list of tags for the sticker.
     sort_value: :class:`int`
         The sticker's sort order within its pack.
@@ -327,7 +327,7 @@ class StandardSticker(Sticker):
         self.type: StickerType = StickerType.standard
 
         try:
-            self.tags: List[str] = [tag.strip() for tag in data["tags"].split(",")]
+            self.tags: list[str] = [tag.strip() for tag in data["tags"].split(",")]
         except KeyError:
             self.tags = []
 
@@ -394,7 +394,7 @@ class GuildSticker(Sticker):
         Whether this sticker is available for use.
     guild_id: :class:`int`
         The ID of the guild that this sticker is from.
-    user: Optional[:class:`User`]
+    user: :class:`User` | :data:`None`
         The user that created this sticker. This can only be retrieved using
         :meth:`Guild.fetch_sticker`/:meth:`Guild.fetch_stickers` while
         having the :attr:`~Permissions.manage_guild_expressions` permission.
@@ -418,8 +418,8 @@ class GuildSticker(Sticker):
 
     @cached_slot_property("_cs_guild")
     def guild(self) -> Optional[Guild]:
-        """Optional[:class:`Guild`]: The guild that this sticker is from.
-        Could be ``None`` if the bot is not in the guild.
+        """:class:`Guild` | :data:`None`: The guild that this sticker is from.
+        Could be :data:`None` if the bot is not in the guild.
 
         .. versionadded:: 2.0
         """
@@ -444,11 +444,11 @@ class GuildSticker(Sticker):
         ----------
         name: :class:`str`
             The sticker's new name. Must be at least 2 characters.
-        description: Optional[:class:`str`]
-            The sticker's new description. Can be ``None``.
+        description: :class:`str` | :data:`None`
+            The sticker's new description. Can be :data:`None`.
         emoji: :class:`str`
             The name of a unicode emoji that represents the sticker's expression.
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason for editing this sticker. Shows up on the audit log.
 
         Raises
@@ -496,7 +496,7 @@ class GuildSticker(Sticker):
 
         Parameters
         ----------
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason for deleting this sticker. Shows up on the audit log.
 
         Raises
@@ -511,7 +511,7 @@ class GuildSticker(Sticker):
 
 def _sticker_factory(
     sticker_type: Literal[1, 2],
-) -> Tuple[Type[Union[StandardSticker, GuildSticker, Sticker]], StickerType]:
+) -> tuple[type[Union[StandardSticker, GuildSticker, Sticker]], StickerType]:
     value = try_enum(StickerType, sticker_type)
     if value == StickerType.standard:
         return StandardSticker, value

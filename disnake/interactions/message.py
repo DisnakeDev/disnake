@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Union
+from collections.abc import Sequence
+from typing import TYPE_CHECKING, Any, Optional, Union
 
 from ..components import VALID_ACTION_ROW_MESSAGE_COMPONENT_TYPES, ActionRowMessageComponent
 from ..enums import ComponentType, try_enum
@@ -45,9 +46,9 @@ class MessageInteraction(Interaction[ClientT]):
         The application ID that the interaction was for.
     token: :class:`str`
         The token to continue the interaction. These are valid for 15 minutes.
-    guild_id: Optional[:class:`int`]
+    guild_id: :class:`int` | :data:`None`
         The guild ID the interaction was sent from.
-    channel: Union[:class:`abc.GuildChannel`, :class:`Thread`, :class:`abc.PrivateChannel`, :class:`PartialMessageable`]
+    channel: :class:`abc.GuildChannel` | :class:`Thread` | :class:`abc.PrivateChannel` | :class:`PartialMessageable`
         The channel the interaction was sent from.
 
         Note that due to a Discord limitation, DM channels
@@ -64,7 +65,7 @@ class MessageInteraction(Interaction[ClientT]):
             If you want to compute the interaction author's or bot's permissions in the channel,
             consider using :attr:`permissions` or :attr:`app_permissions`.
 
-    author: Union[:class:`User`, :class:`Member`]
+    author: :class:`User` | :class:`Member`
         The user or member that sent the interaction.
 
         .. note::
@@ -81,10 +82,10 @@ class MessageInteraction(Interaction[ClientT]):
         .. versionchanged:: 2.5
             Changed to :class:`Locale` instead of :class:`str`.
 
-    guild_locale: Optional[:class:`Locale`]
+    guild_locale: :class:`Locale` | :data:`None`
         The selected language of the interaction's guild.
         This value is only meaningful in guilds with ``COMMUNITY`` feature and receives a default value otherwise.
-        If the interaction was in a DM, then this value is ``None``.
+        If the interaction was in a DM, then this value is :data:`None`.
 
         .. versionadded:: 2.4
 
@@ -93,7 +94,7 @@ class MessageInteraction(Interaction[ClientT]):
 
     client: :class:`Client`
         The interaction client.
-    entitlements: List[:class:`Entitlement`]
+    entitlements: :class:`list`\\[:class:`Entitlement`]
         The entitlements for the invoking user and guild,
         representing access to an application subscription.
 
@@ -124,7 +125,7 @@ class MessageInteraction(Interaction[ClientT]):
 
     data: :class:`MessageInteractionData`
         The wrapped interaction data.
-    message: Optional[:class:`Message`]
+    message: :class:`Message` | :data:`None`
         The message that this interaction's component is attached to.
     """
 
@@ -136,8 +137,8 @@ class MessageInteraction(Interaction[ClientT]):
         self.message = Message(state=self._state, channel=self.channel, data=data["message"])
 
     @property
-    def values(self) -> Optional[List[str]]:
-        """Optional[List[:class:`str`]]: The values the user selected.
+    def values(self) -> Optional[list[str]]:
+        """:class:`list`\\[:class:`str`] | :data:`None`: The values the user selected.
 
         For select menus of type :attr:`~ComponentType.string_select`,
         these are just the string values the user selected.
@@ -151,7 +152,7 @@ class MessageInteraction(Interaction[ClientT]):
     def resolved_values(
         self,
     ) -> Optional[Sequence[Union[str, Member, User, Role, AnyChannel]]]:
-        """Optional[Sequence[:class:`str`, :class:`Member`, :class:`User`, :class:`Role`, Union[:class:`abc.GuildChannel`, :class:`Thread`, :class:`PartialMessageable`]]]: The (resolved) values the user selected.
+        """:class:`~collections.abc.Sequence`\\[:class:`str` | :class:`Member` | :class:`User` | :class:`Role` | :class:`abc.GuildChannel` | :class:`Thread` | :class:`PartialMessageable`] | :data:`None`: The (resolved) values the user selected.
 
         For select menus of type :attr:`~ComponentType.string_select`,
         this is equivalent to :attr:`values`.
@@ -168,7 +169,7 @@ class MessageInteraction(Interaction[ClientT]):
             return self.data.values
 
         resolved = self.data.resolved
-        values: List[Union[Member, User, Role, AnyChannel]] = []
+        values: list[Union[Member, User, Role, AnyChannel]] = []
         for key in self.data.values:
             # force upcast to avoid typing issues; we expect the api to only provide valid values
             value: Any = resolved.get_with_type(key, component_type, key)
@@ -177,7 +178,7 @@ class MessageInteraction(Interaction[ClientT]):
 
     @cached_slot_property("_cs_component")
     def component(self) -> ActionRowMessageComponent:
-        """Union[:class:`Button`, :class:`BaseSelectMenu`]: The component the user interacted with."""
+        """:class:`Button` | :class:`BaseSelectMenu`: The component the user interacted with."""
         # FIXME(3.0?): introduce common base type for components with `custom_id`
         for component in walk_components(self.message.components):
             if (
@@ -190,7 +191,7 @@ class MessageInteraction(Interaction[ClientT]):
         raise Exception(msg)  # noqa: TRY002
 
 
-class MessageInteractionData(Dict[str, Any]):
+class MessageInteractionData(dict[str, Any]):
     """Represents the data of an interaction with a message component.
 
     .. versionadded:: 2.1
@@ -201,7 +202,7 @@ class MessageInteractionData(Dict[str, Any]):
         The custom ID of the component.
     component_type: :class:`ComponentType`
         The type of the component.
-    values: Optional[List[:class:`str`]]
+    values: :class:`list`\\[:class:`str`] | :data:`None`
         The values the user has selected in a select menu.
         For non-string select menus, this contains IDs for use with :attr:`resolved`.
     resolved: :class:`InteractionDataResolved`
@@ -221,7 +222,7 @@ class MessageInteractionData(Dict[str, Any]):
         super().__init__(data)
         self.custom_id: str = data["custom_id"]
         self.component_type: ComponentType = try_enum(ComponentType, data["component_type"])
-        self.values: Optional[List[str]] = (
+        self.values: Optional[list[str]] = (
             list(map(str, values)) if (values := data.get("values")) else None
         )
 

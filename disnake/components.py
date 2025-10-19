@@ -2,19 +2,15 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from typing import (
     TYPE_CHECKING,
     Any,
     ClassVar,
-    Dict,
     Final,
     Generic,
-    List,
     Literal,
-    Mapping,
     Optional,
-    Tuple,
-    Type,
     TypeVar,
     Union,
     cast,
@@ -49,6 +45,7 @@ if TYPE_CHECKING:
         ComponentType as ComponentTypeLiteral,
         ContainerComponent as ContainerComponentPayload,
         FileComponent as FileComponentPayload,
+        FileUploadComponent as FileUploadComponentPayload,
         LabelComponent as LabelComponentPayload,
         MediaGalleryComponent as MediaGalleryComponentPayload,
         MediaGalleryItem as MediaGalleryItemPayload,
@@ -91,6 +88,7 @@ __all__ = (
     "Separator",
     "Container",
     "Label",
+    "FileUpload",
 )
 
 # miscellaneous components-related type aliases
@@ -140,6 +138,7 @@ ContainerChildComponent = Union[
 # valid `Label.component` types
 LabelChildComponent = Union[
     "TextInput",
+    "FileUpload",
     "AnySelectMenu",
 ]
 
@@ -195,6 +194,7 @@ class Component:
     - :class:`Separator`
     - :class:`Container`
     - :class:`Label`
+    - :class:`FileUpload`
 
     This class is abstract and cannot be instantiated.
 
@@ -214,9 +214,9 @@ class Component:
         .. versionadded:: 2.11
     """
 
-    __slots__: Tuple[str, ...] = ("type", "id")
+    __slots__: tuple[str, ...] = ("type", "id")
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]]
+    __repr_attributes__: ClassVar[tuple[str, ...]]
 
     # subclasses are expected to overwrite this if they're only usable with `MessageFlags.is_components_v2`
     is_v2: ClassVar[bool] = False
@@ -240,7 +240,7 @@ class Component:
                 setattr(self, slot, value)
         return self
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         raise NotImplementedError
 
 
@@ -255,7 +255,7 @@ class ActionRow(Component, Generic[ActionRowChildComponentT]):
 
     Attributes
     ----------
-    children: List[Union[:class:`Button`, :class:`BaseSelectMenu`, :class:`TextInput`]]
+    children: :class:`list`\\[:class:`Button` | :class:`BaseSelectMenu` | :class:`TextInput`]
         The children components that this holds, if any.
     id: :class:`int`
         The numeric identifier for the component.
@@ -265,16 +265,16 @@ class ActionRow(Component, Generic[ActionRowChildComponentT]):
         .. versionadded:: 2.11
     """
 
-    __slots__: Tuple[str, ...] = ("children",)
+    __slots__: tuple[str, ...] = ("children",)
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
 
     def __init__(self, data: ActionRowPayload) -> None:
         self.type: Literal[ComponentType.action_row] = ComponentType.action_row
         self.id = data.get("id", 0)
 
         children = [_component_factory(d) for d in data.get("components", [])]
-        self.children: List[ActionRowChildComponentT] = children  # type: ignore
+        self.children: list[ActionRowChildComponentT] = children  # pyright: ignore[reportAttributeAccessIssue]
 
     def to_dict(self) -> ActionRowPayload:
         return {
@@ -300,18 +300,18 @@ class Button(Component):
     ----------
     style: :class:`.ButtonStyle`
         The style of the button.
-    custom_id: Optional[:class:`str`]
+    custom_id: :class:`str` | :data:`None`
         The ID of the button that gets received during an interaction.
         If this button is for a URL or an SKU, it does not have a custom ID.
-    url: Optional[:class:`str`]
+    url: :class:`str` | :data:`None`
         The URL this button sends you to.
     disabled: :class:`bool`
         Whether the button is disabled or not.
-    label: Optional[:class:`str`]
+    label: :class:`str` | :data:`None`
         The label of the button, if any.
-    emoji: Optional[:class:`PartialEmoji`]
+    emoji: :class:`PartialEmoji` | :data:`None`
         The emoji of the button, if available.
-    sku_id: Optional[:class:`int`]
+    sku_id: :class:`int` | :data:`None`
         The ID of a purchasable SKU, for premium buttons.
         Premium buttons additionally cannot have a ``label``, ``url``, or ``emoji``.
 
@@ -324,7 +324,7 @@ class Button(Component):
         .. versionadded:: 2.11
     """
 
-    __slots__: Tuple[str, ...] = (
+    __slots__: tuple[str, ...] = (
         "style",
         "custom_id",
         "url",
@@ -334,7 +334,7 @@ class Button(Component):
         "sku_id",
     )
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
 
     def __init__(self, data: ButtonComponentPayload) -> None:
         self.type: Literal[ComponentType.button] = ComponentType.button
@@ -395,9 +395,9 @@ class BaseSelectMenu(Component):
 
     Attributes
     ----------
-    custom_id: Optional[:class:`str`]
+    custom_id: :class:`str` | :data:`None`
         The ID of the select menu that gets received during an interaction.
-    placeholder: Optional[:class:`str`]
+    placeholder: :class:`str` | :data:`None`
         The placeholder text that is shown if nothing is selected, if any.
     min_values: :class:`int`
         The minimum number of items that must be chosen for this select menu.
@@ -405,11 +405,11 @@ class BaseSelectMenu(Component):
     max_values: :class:`int`
         The maximum number of items that must be chosen for this select menu.
         Defaults to 1 and must be between 1 and 25.
-    options: List[:class:`SelectOption`]
+    options: :class:`list`\\[:class:`SelectOption`]
         A list of options that can be selected in this select menu.
     disabled: :class:`bool`
         Whether the select menu is disabled or not.
-    default_values: List[:class:`SelectDefaultValue`]
+    default_values: :class:`list`\\[:class:`SelectDefaultValue`]
         The list of values (users/roles/channels) that are selected by default.
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
         Only available for auto-populated select menus.
@@ -428,7 +428,7 @@ class BaseSelectMenu(Component):
         .. versionadded:: 2.11
     """
 
-    __slots__: Tuple[str, ...] = (
+    __slots__: tuple[str, ...] = (
         "custom_id",
         "placeholder",
         "min_values",
@@ -439,7 +439,7 @@ class BaseSelectMenu(Component):
     )
 
     # FIXME: this isn't pretty; we should decouple __repr__ from slots
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = tuple(
+    __repr_attributes__: ClassVar[tuple[str, ...]] = tuple(
         s for s in __slots__ if s != "default_values"
     )
 
@@ -448,7 +448,7 @@ class BaseSelectMenu(Component):
     # fully support readonly items yet (which would help avoid this)
     def __init__(self, data: AnySelectMenuPayload) -> None:
         component_type = try_enum(ComponentType, data["type"])
-        self.type: SelectMenuType = component_type  # type: ignore
+        self.type: SelectMenuType = component_type  # pyright: ignore[reportAttributeAccessIssue]
         self.id = data.get("id", 0)
 
         self.custom_id: str = data["custom_id"]
@@ -456,7 +456,7 @@ class BaseSelectMenu(Component):
         self.min_values: int = data.get("min_values", 1)
         self.max_values: int = data.get("max_values", 1)
         self.disabled: bool = data.get("disabled", False)
-        self.default_values: List[SelectDefaultValue] = [
+        self.default_values: list[SelectDefaultValue] = [
             SelectDefaultValue._from_dict(d) for d in (data.get("default_values") or [])
         ]
         self.required: bool = data.get("required", True)
@@ -495,9 +495,9 @@ class StringSelectMenu(BaseSelectMenu):
 
     Attributes
     ----------
-    custom_id: Optional[:class:`str`]
+    custom_id: :class:`str` | :data:`None`
         The ID of the select menu that gets received during an interaction.
-    placeholder: Optional[:class:`str`]
+    placeholder: :class:`str` | :data:`None`
         The placeholder text that is shown if nothing is selected, if any.
     min_values: :class:`int`
         The minimum number of items that must be chosen for this select menu.
@@ -507,7 +507,7 @@ class StringSelectMenu(BaseSelectMenu):
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select menu is disabled or not.
-    options: List[:class:`SelectOption`]
+    options: :class:`list`\\[:class:`SelectOption`]
         A list of options that can be selected in this select menu.
     required: :class:`bool`
         Whether the select menu is required. Only applies to components in modals.
@@ -522,9 +522,9 @@ class StringSelectMenu(BaseSelectMenu):
         .. versionadded:: 2.11
     """
 
-    __slots__: Tuple[str, ...] = ("options",)
+    __slots__: tuple[str, ...] = ("options",)
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (
         *BaseSelectMenu.__repr_attributes__,
         *__slots__,
     )
@@ -532,7 +532,7 @@ class StringSelectMenu(BaseSelectMenu):
 
     def __init__(self, data: StringSelectMenuPayload) -> None:
         super().__init__(data)
-        self.options: List[SelectOption] = [
+        self.options: list[SelectOption] = [
             SelectOption.from_dict(option) for option in data.get("options", [])
         ]
 
@@ -556,9 +556,9 @@ class UserSelectMenu(BaseSelectMenu):
 
     Attributes
     ----------
-    custom_id: Optional[:class:`str`]
+    custom_id: :class:`str` | :data:`None`
         The ID of the select menu that gets received during an interaction.
-    placeholder: Optional[:class:`str`]
+    placeholder: :class:`str` | :data:`None`
         The placeholder text that is shown if nothing is selected, if any.
     min_values: :class:`int`
         The minimum number of items that must be chosen for this select menu.
@@ -568,7 +568,7 @@ class UserSelectMenu(BaseSelectMenu):
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select menu is disabled or not.
-    default_values: List[:class:`SelectDefaultValue`]
+    default_values: :class:`list`\\[:class:`SelectDefaultValue`]
         The list of values (users/members) that are selected by default.
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
@@ -586,7 +586,7 @@ class UserSelectMenu(BaseSelectMenu):
         .. versionadded:: 2.11
     """
 
-    __slots__: Tuple[str, ...] = ()
+    __slots__: tuple[str, ...] = ()
 
     type: Literal[ComponentType.user_select]
 
@@ -607,9 +607,9 @@ class RoleSelectMenu(BaseSelectMenu):
 
     Attributes
     ----------
-    custom_id: Optional[:class:`str`]
+    custom_id: :class:`str` | :data:`None`
         The ID of the select menu that gets received during an interaction.
-    placeholder: Optional[:class:`str`]
+    placeholder: :class:`str` | :data:`None`
         The placeholder text that is shown if nothing is selected, if any.
     min_values: :class:`int`
         The minimum number of items that must be chosen for this select menu.
@@ -619,7 +619,7 @@ class RoleSelectMenu(BaseSelectMenu):
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select menu is disabled or not.
-    default_values: List[:class:`SelectDefaultValue`]
+    default_values: :class:`list`\\[:class:`SelectDefaultValue`]
         The list of values (roles) that are selected by default.
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
@@ -637,7 +637,7 @@ class RoleSelectMenu(BaseSelectMenu):
         .. versionadded:: 2.11
     """
 
-    __slots__: Tuple[str, ...] = ()
+    __slots__: tuple[str, ...] = ()
 
     type: Literal[ComponentType.role_select]
 
@@ -658,9 +658,9 @@ class MentionableSelectMenu(BaseSelectMenu):
 
     Attributes
     ----------
-    custom_id: Optional[:class:`str`]
+    custom_id: :class:`str` | :data:`None`
         The ID of the select menu that gets received during an interaction.
-    placeholder: Optional[:class:`str`]
+    placeholder: :class:`str` | :data:`None`
         The placeholder text that is shown if nothing is selected, if any.
     min_values: :class:`int`
         The minimum number of items that must be chosen for this select menu.
@@ -670,7 +670,7 @@ class MentionableSelectMenu(BaseSelectMenu):
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select menu is disabled or not.
-    default_values: List[:class:`SelectDefaultValue`]
+    default_values: :class:`list`\\[:class:`SelectDefaultValue`]
         The list of values (users/roles) that are selected by default.
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
@@ -688,7 +688,7 @@ class MentionableSelectMenu(BaseSelectMenu):
         .. versionadded:: 2.11
     """
 
-    __slots__: Tuple[str, ...] = ()
+    __slots__: tuple[str, ...] = ()
 
     type: Literal[ComponentType.mentionable_select]
 
@@ -709,9 +709,9 @@ class ChannelSelectMenu(BaseSelectMenu):
 
     Attributes
     ----------
-    custom_id: Optional[:class:`str`]
+    custom_id: :class:`str` | :data:`None`
         The ID of the select menu that gets received during an interaction.
-    placeholder: Optional[:class:`str`]
+    placeholder: :class:`str` | :data:`None`
         The placeholder text that is shown if nothing is selected, if any.
     min_values: :class:`int`
         The minimum number of items that must be chosen for this select menu.
@@ -721,10 +721,10 @@ class ChannelSelectMenu(BaseSelectMenu):
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select menu is disabled or not.
-    channel_types: Optional[List[:class:`ChannelType`]]
+    channel_types: :class:`list`\\[:class:`ChannelType`] | :data:`None`
         A list of channel types that can be selected in this select menu.
-        If ``None``, channels of all types may be selected.
-    default_values: List[:class:`SelectDefaultValue`]
+        If :data:`None`, channels of all types may be selected.
+    default_values: :class:`list`\\[:class:`SelectDefaultValue`]
         The list of values (channels) that are selected by default.
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
@@ -742,9 +742,9 @@ class ChannelSelectMenu(BaseSelectMenu):
         .. versionadded:: 2.11
     """
 
-    __slots__: Tuple[str, ...] = ("channel_types",)
+    __slots__: tuple[str, ...] = ("channel_types",)
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (
         *BaseSelectMenu.__repr_attributes__,
         *__slots__,
     )
@@ -754,7 +754,7 @@ class ChannelSelectMenu(BaseSelectMenu):
         super().__init__(data)
         # on the API side, an empty list is (currently) equivalent to no value
         channel_types = data.get("channel_types")
-        self.channel_types: Optional[List[ChannelType]] = (
+        self.channel_types: Optional[list[ChannelType]] = (
             [try_enum(ChannelType, t) for t in channel_types] if channel_types else None
         )
 
@@ -781,16 +781,16 @@ class SelectOption:
         The value of the option. This is not displayed to users.
         If not provided when constructed then it defaults to the
         label. Can only be up to 100 characters.
-    description: Optional[:class:`str`]
+    description: :class:`str` | :data:`None`
         An additional description of the option, if any.
         Can only be up to 100 characters.
-    emoji: Optional[Union[:class:`str`, :class:`Emoji`, :class:`PartialEmoji`]]
+    emoji: :class:`str` | :class:`Emoji` | :class:`PartialEmoji` | :data:`None`
         The emoji of the option, if available.
     default: :class:`bool`
         Whether this option is selected by default.
     """
 
-    __slots__: Tuple[str, ...] = (
+    __slots__: tuple[str, ...] = (
         "label",
         "value",
         "description",
@@ -885,7 +885,7 @@ class SelectDefaultValue:
         The type of the target object.
     """
 
-    __slots__: Tuple[str, ...] = ("id", "type")
+    __slots__: tuple[str, ...] = ("id", "type")
 
     def __init__(self, id: int, type: SelectDefaultValueType) -> None:
         self.id: int = id
@@ -919,7 +919,7 @@ class TextInput(Component):
     ----------
     style: :class:`TextInputStyle`
         The style of the text input.
-    label: Optional[:class:`str`]
+    label: :class:`str` | :data:`None`
         The label of the text input.
 
         .. deprecated:: 2.11
@@ -927,15 +927,15 @@ class TextInput(Component):
 
     custom_id: :class:`str`
         The ID of the text input that gets received during an interaction.
-    placeholder: Optional[:class:`str`]
+    placeholder: :class:`str` | :data:`None`
         The placeholder text that is shown if nothing is entered.
-    value: Optional[:class:`str`]
+    value: :class:`str` | :data:`None`
         The pre-filled text of the text input.
     required: :class:`bool`
         Whether the text input is required. Defaults to ``True``.
-    min_length: Optional[:class:`int`]
+    min_length: :class:`int` | :data:`None`
         The minimum length of the text input.
-    max_length: Optional[:class:`int`]
+    max_length: :class:`int` | :data:`None`
         The maximum length of the text input.
     id: :class:`int`
         The numeric identifier for the component.
@@ -945,7 +945,7 @@ class TextInput(Component):
         .. versionadded:: 2.11
     """
 
-    __slots__: Tuple[str, ...] = (
+    __slots__: tuple[str, ...] = (
         "style",
         "custom_id",
         "label",
@@ -956,7 +956,7 @@ class TextInput(Component):
         "min_length",
     )
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
 
     def __init__(self, data: TextInputPayload) -> None:
         self.type: Literal[ComponentType.text_input] = ComponentType.text_input
@@ -1011,9 +1011,9 @@ class Section(Component):
 
     Attributes
     ----------
-    children: List[:class:`TextDisplay`]
+    children: :class:`list`\\[:class:`TextDisplay`]
         The text items in this section.
-    accessory: Union[:class:`Thumbnail`, :class:`Button`]
+    accessory: :class:`Thumbnail` | :class:`Button`
         The accessory component displayed next to the section text.
     id: :class:`int`
         The numeric identifier for the component.
@@ -1023,9 +1023,9 @@ class Section(Component):
         .. versionadded:: 2.11
     """
 
-    __slots__: Tuple[str, ...] = ("children", "accessory")
+    __slots__: tuple[str, ...] = ("children", "accessory")
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
 
     is_v2 = True
 
@@ -1033,12 +1033,12 @@ class Section(Component):
         self.type: Literal[ComponentType.section] = ComponentType.section
         self.id = data.get("id", 0)
 
-        self.children: List[SectionChildComponent] = [
+        self.children: list[SectionChildComponent] = [
             _component_factory(d, type=SectionChildComponent) for d in data.get("components", [])
         ]
 
         accessory = _component_factory(data["accessory"])
-        self.accessory: SectionAccessoryComponent = accessory  # type: ignore
+        self.accessory: SectionAccessoryComponent = accessory  # pyright: ignore[reportAttributeAccessIssue]
 
     def to_dict(self) -> SectionComponentPayload:
         return {
@@ -1070,9 +1070,9 @@ class TextDisplay(Component):
         .. versionadded:: 2.11
     """
 
-    __slots__: Tuple[str, ...] = ("content",)
+    __slots__: tuple[str, ...] = ("content",)
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
 
     is_v2 = True
 
@@ -1102,18 +1102,18 @@ class UnfurledMediaItem:
     proxy_url: :class:`str`
         The proxied URL of this media item. This is a cached version of
         the :attr:`url` in the case of images.
-    height: Optional[:class:`int`]
+    height: :class:`int` | :data:`None`
         The height of this media item, if applicable.
-    width: Optional[:class:`int`]
+    width: :class:`int` | :data:`None`
         The width of this media item, if applicable.
-    content_type: Optional[:class:`str`]
+    content_type: :class:`str` | :data:`None`
         The `media type <https://en.wikipedia.org/wiki/Media_type>`_ of this media item.
-    attachment_id: Optional[:class:`int`]
+    attachment_id: :class:`int` | :data:`None`
         The ID of the uploaded attachment. Only present if the media item was
         uploaded as an attachment.
     """
 
-    __slots__: Tuple[str, ...] = (
+    __slots__: tuple[str, ...] = (
         "url",
         "proxy_url",
         "height",
@@ -1166,7 +1166,7 @@ class Thumbnail(Component):
     media: :class:`UnfurledMediaItem`
         The media item to display. Can be an arbitrary URL or attachment
         reference (``attachment://<filename>``).
-    description: Optional[:class:`str`]
+    description: :class:`str` | :data:`None`
         The thumbnail's description ("alt text"), if any.
     spoiler: :class:`bool`
         Whether the thumbnail is marked as a spoiler. Defaults to ``False``.
@@ -1178,13 +1178,13 @@ class Thumbnail(Component):
         .. versionadded:: 2.11
     """
 
-    __slots__: Tuple[str, ...] = (
+    __slots__: tuple[str, ...] = (
         "media",
         "description",
         "spoiler",
     )
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
 
     is_v2 = True
 
@@ -1223,7 +1223,7 @@ class MediaGallery(Component):
 
     Attributes
     ----------
-    items: List[:class:`MediaGalleryItem`]
+    items: :class:`list`\\[:class:`MediaGalleryItem`]
         The images in this gallery.
     id: :class:`int`
         The numeric identifier for the component.
@@ -1233,9 +1233,9 @@ class MediaGallery(Component):
         .. versionadded:: 2.11
     """
 
-    __slots__: Tuple[str, ...] = ("items",)
+    __slots__: tuple[str, ...] = ("items",)
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
 
     is_v2 = True
 
@@ -1243,7 +1243,7 @@ class MediaGallery(Component):
         self.type: Literal[ComponentType.media_gallery] = ComponentType.media_gallery
         self.id = data.get("id", 0)
 
-        self.items: List[MediaGalleryItem] = [MediaGalleryItem.from_dict(i) for i in data["items"]]
+        self.items: list[MediaGalleryItem] = [MediaGalleryItem.from_dict(i) for i in data["items"]]
 
     def to_dict(self) -> MediaGalleryComponentPayload:
         return {
@@ -1260,16 +1260,16 @@ class MediaGalleryItem:
 
     Parameters
     ----------
-    media: Union[:class:`str`, :class:`.Asset`, :class:`.Attachment`, :class:`.UnfurledMediaItem`]
+    media: :class:`str` | :class:`.Asset` | :class:`.Attachment` | :class:`.UnfurledMediaItem`
         The media item to display. Can be an arbitrary URL or attachment
         reference (``attachment://<filename>``).
-    description: Optional[:class:`str`]
+    description: :class:`str` | :data:`None`
         The item's description ("alt text"), if any.
     spoiler: :class:`bool`
         Whether the item is marked as a spoiler. Defaults to ``False``.
     """
 
-    __slots__: Tuple[str, ...] = (
+    __slots__: tuple[str, ...] = (
         "media",
         "description",
         "spoiler",
@@ -1327,10 +1327,10 @@ class FileComponent(Component):
         using the ``attachment://<filename>`` syntax), not arbitrary URLs.
     spoiler: :class:`bool`
         Whether the file is marked as a spoiler. Defaults to ``False``.
-    name: Optional[:class:`str`]
+    name: :class:`str` | :data:`None`
         The name of the file.
         This is available in objects from the API, and ignored when sending.
-    size: Optional[:class:`int`]
+    size: :class:`int` | :data:`None`
         The size of the file.
         This is available in objects from the API, and ignored when sending.
     id: :class:`int`
@@ -1341,9 +1341,9 @@ class FileComponent(Component):
         .. versionadded:: 2.11
     """
 
-    __slots__: Tuple[str, ...] = ("file", "spoiler", "name", "size")
+    __slots__: tuple[str, ...] = ("file", "spoiler", "name", "size")
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
 
     is_v2 = True
 
@@ -1392,9 +1392,9 @@ class Separator(Component):
         .. versionadded:: 2.11
     """
 
-    __slots__: Tuple[str, ...] = ("divider", "spacing")
+    __slots__: tuple[str, ...] = ("divider", "spacing")
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
 
     is_v2 = True
 
@@ -1427,9 +1427,9 @@ class Container(Component):
 
     Attributes
     ----------
-    children: List[Union[:class:`ActionRow`, :class:`Section`, :class:`TextDisplay`, :class:`MediaGallery`, :class:`FileComponent`, :class:`Separator`]]
+    children: :class:`list`\\[:class:`ActionRow` | :class:`Section` | :class:`TextDisplay` | :class:`MediaGallery` | :class:`FileComponent` | :class:`Separator`]
         The child components in this container.
-    accent_colour: Optional[:class:`Colour`]
+    accent_colour: :class:`Colour` | :data:`None`
         The accent colour of the container. An alias exists under ``accent_color``.
     spoiler: :class:`bool`
         Whether the container is marked as a spoiler. Defaults to ``False``.
@@ -1441,13 +1441,13 @@ class Container(Component):
         .. versionadded:: 2.11
     """
 
-    __slots__: Tuple[str, ...] = (
+    __slots__: tuple[str, ...] = (
         "children",
         "accent_colour",
         "spoiler",
     )
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
 
     is_v2 = True
 
@@ -1456,7 +1456,7 @@ class Container(Component):
         self.id = data.get("id", 0)
 
         components = [_component_factory(d) for d in data.get("components", [])]
-        self.children: List[ContainerChildComponent] = components  # type: ignore
+        self.children: list[ContainerChildComponent] = components  # pyright: ignore[reportAttributeAccessIssue]
 
         self.accent_colour: Optional[Colour] = (
             Colour(accent_color) if (accent_color := data.get("accent_color")) is not None else None
@@ -1478,7 +1478,7 @@ class Container(Component):
 
     @property
     def accent_color(self) -> Optional[Colour]:
-        """Optional[:class:`Colour`]: The accent color of the container.
+        """:class:`Colour` | :data:`None`: The accent color of the container.
         An alias exists under ``accent_colour``.
         """
         return self.accent_colour
@@ -1501,9 +1501,9 @@ class Label(Component):
     ----------
     text: :class:`str`
         The label text.
-    description: Optional[:class:`str`]
+    description: :class:`str` | :data:`None`
         The description text for the label.
-    component: Union[:class:`TextInput`, :class:`StringSelectMenu`]
+    component: :class:`TextInput` | :class:`FileUpload` | :class:`BaseSelectMenu`
         The component within the label.
     id: :class:`int`
         The numeric identifier for the component.
@@ -1511,13 +1511,13 @@ class Label(Component):
         and unique within a message.
     """
 
-    __slots__: Tuple[str, ...] = (
+    __slots__: tuple[str, ...] = (
         "text",
         "description",
         "component",
     )
 
-    __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
+    __repr_info__: ClassVar[tuple[str, ...]] = __slots__
 
     def __init__(self, data: LabelComponentPayload) -> None:
         self.type: Literal[ComponentType.label] = ComponentType.label
@@ -1527,7 +1527,7 @@ class Label(Component):
         self.description: Optional[str] = data.get("description")
 
         component = _component_factory(data["component"])
-        self.component: LabelChildComponent = component  # type: ignore
+        self.component: LabelChildComponent = component  # pyright: ignore[reportAttributeAccessIssue]
 
     def to_dict(self) -> LabelComponentPayload:
         payload: LabelComponentPayload = {
@@ -1541,6 +1541,65 @@ class Label(Component):
             payload["description"] = self.description
 
         return payload
+
+
+class FileUpload(Component):
+    """Represents a file upload component from the Discord Bot UI Kit.
+
+    This allows you to receive files from users, and can only be used in modals.
+
+    .. note::
+        The user constructible and usable type to create a
+        file upload is :class:`disnake.ui.FileUpload`.
+
+    .. versionadded:: |vnext|
+
+    Attributes
+    ----------
+    custom_id: :class:`str`
+        The ID of the file upload that gets received during an interaction.
+    min_values: :class:`int`
+        The minimum number of files that must be uploaded.
+        Defaults to 1 and must be between 0 and 10.
+    max_values: :class:`int`
+        The maximum number of files that must be uploaded.
+        Defaults to 1 and must be between 1 and 10.
+    required: :class:`bool`
+        Whether the file upload is required.
+        Defaults to ``True``.
+    id: :class:`int`
+        The numeric identifier for the component.
+        This is always present in components received from the API,
+        and unique within a modal.
+    """
+
+    __slots__: tuple[str, ...] = (
+        "custom_id",
+        "min_values",
+        "max_values",
+        "required",
+    )
+
+    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
+
+    def __init__(self, data: FileUploadComponentPayload) -> None:
+        self.type: Literal[ComponentType.file_upload] = ComponentType.file_upload
+        self.id = data.get("id", 0)
+
+        self.custom_id: str = data["custom_id"]
+        self.min_values: int = data.get("min_values", 1)
+        self.max_values: int = data.get("max_values", 1)
+        self.required: bool = data.get("required", True)
+
+    def to_dict(self) -> FileUploadComponentPayload:
+        return {
+            "type": self.type.value,
+            "id": self.id,
+            "custom_id": self.custom_id,
+            "min_values": self.min_values,
+            "max_values": self.max_values,
+            "required": self.required,
+        }
 
 
 # types of components that are allowed in a message's action rows;
@@ -1575,7 +1634,7 @@ def handle_media_item_input(value: MediaItemInput) -> UnfurledMediaItem:
 C = TypeVar("C", bound="Component")
 
 
-COMPONENT_LOOKUP: Mapping[ComponentTypeLiteral, Type[Component]] = {
+COMPONENT_LOOKUP: Mapping[ComponentTypeLiteral, type[Component]] = {
     ComponentType.action_row.value: ActionRow,
     ComponentType.button.value: Button,
     ComponentType.string_select.value: StringSelectMenu,
@@ -1592,12 +1651,13 @@ COMPONENT_LOOKUP: Mapping[ComponentTypeLiteral, Type[Component]] = {
     ComponentType.separator.value: Separator,
     ComponentType.container.value: Container,
     ComponentType.label.value: Label,
+    ComponentType.file_upload.value: FileUpload,
 }
 
 
 # NOTE: The type param is purely for type-checking, it has no implications on runtime behavior.
 # FIXME: could be improved with https://peps.python.org/pep-0747/
-def _component_factory(data: ComponentPayload, *, type: Type[C] = Component) -> C:
+def _component_factory(data: ComponentPayload, *, type: type[C] = Component) -> C:
     component_type = data["type"]
 
     try:
@@ -1605,9 +1665,9 @@ def _component_factory(data: ComponentPayload, *, type: Type[C] = Component) -> 
     except KeyError:
         # if we encounter an unknown component type, just construct a placeholder component for it
         as_enum = try_enum(ComponentType, component_type)
-        return Component._raw_construct(type=as_enum)  # type: ignore
+        return Component._raw_construct(type=as_enum)  # pyright: ignore[reportReturnType]
     else:
-        return component_cls(data)  # type: ignore
+        return component_cls(data)  # pyright: ignore[reportCallIssue, reportReturnType]
 
 
 # this is just a rebranded _component_factory, as a workaround to Python not supporting typescript-like mapped types

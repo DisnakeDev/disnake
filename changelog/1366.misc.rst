@@ -1,0 +1,1 @@
+Update minimum required setuptools version to ``>=77.0.3``.

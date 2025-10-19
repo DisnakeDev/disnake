@@ -3,15 +3,10 @@
 from __future__ import annotations
 
 import datetime
+from collections.abc import Iterable, Sequence
 from typing import (
     TYPE_CHECKING,
-    Dict,
-    FrozenSet,
-    Iterable,
-    List,
     Optional,
-    Sequence,
-    Type,
     Union,
     overload,
 )
@@ -116,7 +111,7 @@ class AutoModBlockMessageAction(AutoModAction):
 
     Parameters
     ----------
-    custom_message: Optional[:class:`str`]
+    custom_message: :class:`str` | :data:`None`
         The custom message to show to the user when the rule is triggered.
         Maximum length is 150 characters.
 
@@ -141,7 +136,7 @@ class AutoModBlockMessageAction(AutoModAction):
 
     @property
     def custom_message(self) -> Optional[str]:
-        """Optional[:class:`str`]: The custom message to show to the user when the rule is triggered.
+        """:class:`str` | :data:`None`: The custom message to show to the user when the rule is triggered.
 
         .. versionadded:: 2.9
         """
@@ -193,7 +188,7 @@ class AutoModTimeoutAction(AutoModAction):
 
     Parameters
     ----------
-    duration: Union[:class:`int`, :class:`datetime.timedelta`]
+    duration: :class:`int` | :class:`datetime.timedelta`
         The duration (seconds or timedelta) for which to timeout the user when the rule is triggered.
 
     Attributes
@@ -242,14 +237,14 @@ class AutoModTriggerMetadata:
 
     Attributes
     ----------
-    keyword_filter: Optional[Sequence[:class:`str`]]
+    keyword_filter: :class:`~collections.abc.Sequence`\\[:class:`str`] | :data:`None`
         The list of keywords to check for, up to 1000 keywords. Used with :attr:`AutoModTriggerType.keyword`.
 
         See :ddocs:`api docs <resources/auto-moderation#auto-moderation-rule-object-keyword-matching-strategies>`
         for details about how keyword matching works.
         Each keyword must be 60 characters or less.
 
-    regex_patterns: Optional[Sequence[:class:`str`]]
+    regex_patterns: :class:`~collections.abc.Sequence`\\[:class:`str`] | :data:`None`
         The list of regular expressions to check for. Used with :attr:`AutoModTriggerType.keyword`.
 
         A maximum of 10 regexes can be added, each with up to 260 characters.
@@ -260,19 +255,19 @@ class AutoModTriggerMetadata:
 
         .. versionadded:: 2.7
 
-    presets: Optional[:class:`AutoModKeywordPresets`]
+    presets: :class:`AutoModKeywordPresets` | :data:`None`
         The keyword presets. Used with :attr:`AutoModTriggerType.keyword_preset`.
 
-    allow_list: Optional[Sequence[:class:`str`]]
+    allow_list: :class:`~collections.abc.Sequence`\\[:class:`str`] | :data:`None`
         The keywords that should be exempt from a preset.
         Used with :attr:`AutoModTriggerType.keyword` (up to 100 exemptions) and :attr:`AutoModTriggerType.keyword_preset` (up to 1000 exemptions).
 
         Each keyword must be 60 characters or less.
 
-    mention_total_limit: Optional[:class:`int`]
+    mention_total_limit: :class:`int` | :data:`None`
         The maximum number of mentions (members + roles) allowed, between 1 and 50. Used with :attr:`AutoModTriggerType.mention_spam`.
 
-    mention_raid_protection_enabled: Optional[:class:`bool`]
+    mention_raid_protection_enabled: :class:`bool` | :data:`None`
         Whether to automatically detect mention raids. Used with :attr:`AutoModTriggerType.mention_spam`.
 
         Defaults to ``False``.
@@ -355,7 +350,7 @@ class AutoModTriggerMetadata:
         :class:`AutoModTriggerMetadata`
             The new metadata instance.
         """
-        return self.__class__(  # type: ignore  # call doesn't match any overloads
+        return self.__class__(
             keyword_filter=self.keyword_filter if keyword_filter is MISSING else keyword_filter,
             regex_patterns=self.regex_patterns if regex_patterns is MISSING else regex_patterns,
             presets=self.presets if presets is MISSING else presets,
@@ -368,7 +363,7 @@ class AutoModTriggerMetadata:
                 if mention_raid_protection_enabled is MISSING
                 else mention_raid_protection_enabled
             ),
-        )
+        )  # pyright: ignore[reportCallIssue]  # call doesn't match any overloads
 
     @classmethod
     def _from_dict(cls, data: AutoModTriggerMetadataPayload) -> Self:
@@ -377,14 +372,14 @@ class AutoModTriggerMetadata:
         else:
             presets = None
 
-        return cls(  # type: ignore  # call doesn't match any overloads
+        return cls(
             keyword_filter=data.get("keyword_filter"),
             regex_patterns=data.get("regex_patterns"),
             presets=presets,
             allow_list=data.get("allow_list"),
             mention_total_limit=data.get("mention_total_limit"),
             mention_raid_protection_enabled=data.get("mention_raid_protection_enabled"),
-        )
+        )  # pyright: ignore[reportCallIssue]  # call doesn't match any overloads
 
     def to_dict(self) -> AutoModTriggerMetadataPayload:
         data: AutoModTriggerMetadataPayload = {}
@@ -393,7 +388,7 @@ class AutoModTriggerMetadata:
         if self.regex_patterns is not None:
             data["regex_patterns"] = list(self.regex_patterns)
         if self.presets is not None:
-            data["presets"] = self.presets.values  # type: ignore  # `values` contains ints instead of preset literal values
+            data["presets"] = self.presets.values
         if self.allow_list is not None:
             data["allow_list"] = list(self.allow_list)
         if self.mention_total_limit is not None:
@@ -442,9 +437,9 @@ class AutoModRule:
         The type of trigger that determines whether this rule's actions should run for a specific event.
     trigger_metadata: :class:`AutoModTriggerMetadata`
         Additional metadata associated with this rule's :attr:`.trigger_type`.
-    exempt_role_ids: FrozenSet[:class:`int`]
+    exempt_role_ids: :class:`frozenset`\\[:class:`int`]
         The role IDs that are exempt from this rule.
-    exempt_channel_ids: FrozenSet[:class:`int`]
+    exempt_channel_ids: :class:`frozenset`\\[:class:`int`]
         The channel IDs that are exempt from this rule.
     """
 
@@ -471,18 +466,18 @@ class AutoModRule:
         self.creator_id: int = int(data["creator_id"])
         self.event_type: AutoModEventType = try_enum(AutoModEventType, data["event_type"])
         self.trigger_type: AutoModTriggerType = try_enum(AutoModTriggerType, data["trigger_type"])
-        self._actions: List[AutoModAction] = [
+        self._actions: list[AutoModAction] = [
             _automod_action_factory(action) for action in data["actions"]
         ]
         self.trigger_metadata: AutoModTriggerMetadata = AutoModTriggerMetadata._from_dict(
             data.get("trigger_metadata", {})
         )
-        self.exempt_role_ids: FrozenSet[int] = (
+        self.exempt_role_ids: frozenset[int] = (
             frozenset(map(int, exempt_roles))
             if (exempt_roles := data.get("exempt_roles"))
             else frozenset()
         )
-        self.exempt_channel_ids: FrozenSet[int] = (
+        self.exempt_channel_ids: frozenset[int] = (
             frozenset(map(int, exempt_channels))
             if (exempt_channels := data.get("exempt_channels"))
             else frozenset()
@@ -497,27 +492,27 @@ class AutoModRule:
         return snowflake_time(self.id)
 
     @property
-    def actions(self) -> List[AutoModAction]:
-        """List[Union[:class:`AutoModBlockMessageAction`, :class:`AutoModSendAlertAction`, :class:`AutoModTimeoutAction`, :class:`AutoModAction`]]:
+    def actions(self) -> list[AutoModAction]:
+        """:class:`list`\\[:class:`AutoModBlockMessageAction` | :class:`AutoModSendAlertAction` | :class:`AutoModTimeoutAction` | :class:`AutoModAction`]:
         The list of actions that will execute if a matching event triggered this rule.
         """
         return list(self._actions)  # return a copy
 
     @property
     def creator(self) -> Optional[Member]:
-        """Optional[:class:`Member`]: The guild member that created this rule.
-        May be ``None`` if the member cannot be found. See also :attr:`.creator_id`.
+        """:class:`Member` | :data:`None`: The guild member that created this rule.
+        May be :data:`None` if the member cannot be found. See also :attr:`.creator_id`.
         """
         return self.guild.get_member(self.creator_id)
 
     @property
-    def exempt_roles(self) -> List[Role]:
-        """List[:class:`Role`]: The list of roles that are exempt from this rule."""
+    def exempt_roles(self) -> list[Role]:
+        """:class:`list`\\[:class:`Role`]: The list of roles that are exempt from this rule."""
         return list(filter(None, map(self.guild.get_role, self.exempt_role_ids)))
 
     @property
-    def exempt_channels(self) -> List[GuildChannel]:
-        """List[:class:`abc.GuildChannel`]: The list of channels that are exempt from this rule."""
+    def exempt_channels(self) -> list[GuildChannel]:
+        """:class:`list`\\[:class:`abc.GuildChannel`]: The list of channels that are exempt from this rule."""
         return list(filter(None, map(self.guild.get_channel, self.exempt_channel_ids)))
 
     def __repr__(self) -> str:
@@ -586,19 +581,19 @@ class AutoModRule:
             The rule's new event type.
         trigger_metadata: :class:`AutoModTriggerMetadata`
             The rule's new associated trigger metadata.
-        actions: Sequence[Union[:class:`AutoModBlockMessageAction`, :class:`AutoModSendAlertAction`, :class:`AutoModTimeoutAction`, :class:`AutoModAction`]]
+        actions: :class:`~collections.abc.Sequence`\\[:class:`AutoModBlockMessageAction` | :class:`AutoModSendAlertAction` | :class:`AutoModTimeoutAction` | :class:`AutoModAction`]
             The rule's new actions.
             If provided, must contain at least one action.
         enabled: :class:`bool`
             Whether to enable the rule.
-        exempt_roles: Optional[Iterable[:class:`abc.Snowflake`]]
+        exempt_roles: :class:`~collections.abc.Iterable`\\[:class:`abc.Snowflake`] | :data:`None`
             The rule's new exempt roles, up to 20.
-            If ``[]`` or ``None`` is passed then all role exemptions are removed.
-        exempt_channels: Optional[Iterable[:class:`abc.Snowflake`]]
+            If ``[]`` or :data:`None` is passed then all role exemptions are removed.
+        exempt_channels: :class:`~collections.abc.Iterable`\\[:class:`abc.Snowflake`] | :data:`None`
             The rule's new exempt channels, up to 50.
             Can also include categories, in which case all channels inside that category will be exempt.
-            If ``[]`` or ``None`` is passed then all channel exemptions are removed.
-        reason: Optional[:class:`str`]
+            If ``[]`` or :data:`None` is passed then all channel exemptions are removed.
+        reason: :class:`str` | :data:`None`
             The reason for editing the rule. Shows up on the audit log.
 
         Raises
@@ -661,7 +656,7 @@ class AutoModRule:
 
         Parameters
         ----------
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason for deleting this rule. Shows up on the audit log.
 
         Raises
@@ -685,7 +680,7 @@ class AutoModActionExecution:
 
     Attributes
     ----------
-    action: Union[:class:`AutoModBlockMessageAction`, :class:`AutoModSendAlertAction`, :class:`AutoModTimeoutAction`, :class:`AutoModAction`]
+    action: :class:`AutoModBlockMessageAction` | :class:`AutoModSendAlertAction` | :class:`AutoModTimeoutAction` | :class:`AutoModAction`
         The action that was executed.
     guild: :class:`Guild`
         The guild this action was executed in.
@@ -696,14 +691,14 @@ class AutoModActionExecution:
     user_id: :class:`int`
         The ID of the user that triggered this action.
         See also :attr:`.user`.
-    channel_id: Optional[:class:`int`]
+    channel_id: :class:`int` | :data:`None`
         The channel or thread ID in which the event occurred, if any.
         See also :attr:`.channel`.
-    message_id: Optional[:class:`int`]
-        The ID of the message that matched. ``None`` if the message was blocked,
+    message_id: :class:`int` | :data:`None`
+        The ID of the message that matched. :data:`None` if the message was blocked,
         or if the content was not part of a message.
         See also :attr:`.message`.
-    alert_message_id: Optional[:class:`int`]
+    alert_message_id: :class:`int` | :data:`None`
         The ID of the alert message sent as a result of this action, if any.
         See also :attr:`.alert_message`.
     content: :class:`str`
@@ -712,10 +707,10 @@ class AutoModActionExecution:
         Requires :attr:`Intents.message_content` to be enabled,
         otherwise this field will be empty.
 
-    matched_keyword: Optional[:class:`str`]
+    matched_keyword: :class:`str` | :data:`None`
         The keyword or regex that matched.
 
-    matched_content: Optional[:class:`str`]
+    matched_content: :class:`str` | :data:`None`
         The substring of :attr:`.content` that matched the rule/keyword.
 
         Requires :attr:`Intents.message_content` to be enabled,
@@ -762,21 +757,21 @@ class AutoModActionExecution:
 
     @property
     def user(self) -> Optional[Member]:
-        """Optional[:class:`Member`]: The guild member that triggered this action.
-        May be ``None`` if the member cannot be found. See also :attr:`.user_id`.
+        """:class:`Member` | :data:`None`: The guild member that triggered this action.
+        May be :data:`None` if the member cannot be found. See also :attr:`.user_id`.
         """
         return self.guild.get_member(self.user_id)
 
     @property
     def channel(self) -> Optional[Union[GuildChannel, Thread]]:
-        """Optional[Union[:class:`abc.GuildChannel`, :class:`Thread`]]:
+        """:class:`abc.GuildChannel` | :class:`Thread` | :data:`None`:
         The channel or thread in which the event occurred, if any.
         """
         return self.guild._resolve_channel(self.channel_id)
 
     @property
     def message(self) -> Optional[Message]:
-        """Optional[:class:`Message`]: The message that matched, if any.
+        """:class:`Message` | :data:`None`: The message that matched, if any.
         Not available if the message was blocked, if the content was not part of a message,
         or if the message was not found in the message cache.
         """
@@ -784,14 +779,14 @@ class AutoModActionExecution:
 
     @property
     def alert_message(self) -> Optional[Message]:
-        """Optional[:class:`Message`]: The alert message sent as a result of this action, if any.
+        """:class:`Message` | :data:`None`: The alert message sent as a result of this action, if any.
         Only available if :attr:`action.type <AutoModAction.type>` is :attr:`~AutoModActionType.send_alert_message`
         and the message was found in the message cache.
         """
         return self.guild._state._get_message(self.alert_message_id)
 
 
-_action_map: Dict[int, Type[AutoModAction]] = {
+_action_map: dict[int, type[AutoModAction]] = {
     AutoModActionType.block_message.value: AutoModBlockMessageAction,
     AutoModActionType.send_alert_message.value: AutoModSendAlertAction,
     AutoModActionType.timeout.value: AutoModTimeoutAction,

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union, overload
+from typing import TYPE_CHECKING, Any, Literal, Optional, Union, overload
 
 from .asset import Asset
 from .colour import Colour
@@ -37,7 +37,7 @@ assets: dict
     small_text: str (max: 128)
 party: dict
     id: str (max: 128),
-    size: List[int] (max-length: 2)
+    size: list[int] (max-length: 2)
         elem: int (min: 1)
 secrets: dict
     match: str (max: 128)
@@ -95,7 +95,7 @@ class _BaseActivity:
 
     @property
     def created_at(self) -> Optional[datetime.datetime]:
-        """Optional[:class:`datetime.datetime`]: When the user started doing this activity in UTC.
+        """:class:`datetime.datetime` | :data:`None`: When the user started doing this activity in UTC.
 
         .. versionadded:: 1.3
         """
@@ -103,13 +103,14 @@ class _BaseActivity:
             return datetime.datetime.fromtimestamp(
                 self._created_at / 1000, tz=datetime.timezone.utc
             )
+        return None
 
     @property
     def start(self) -> Optional[datetime.datetime]:
-        """Optional[:class:`datetime.datetime`]: When the user started doing this activity in UTC, if applicable.
+        """:class:`datetime.datetime` | :data:`None`: When the user started doing this activity in UTC, if applicable.
 
         .. versionchanged:: 2.6
-            This attribute can now be ``None``.
+            This attribute can now be :data:`None`.
         """
         if "start" not in self._timestamps:
             return None
@@ -118,10 +119,10 @@ class _BaseActivity:
 
     @property
     def end(self) -> Optional[datetime.datetime]:
-        """Optional[:class:`datetime.datetime`]: When the user will stop doing this activity in UTC, if applicable.
+        """:class:`datetime.datetime` | :data:`None`: When the user will stop doing this activity in UTC, if applicable.
 
         .. versionchanged:: 2.6
-            This attribute can now be ``None``.
+            This attribute can now be :data:`None`.
         """
         if "end" not in self._timestamps:
             return None
@@ -142,7 +143,7 @@ class _BaseActivity:
 
     @property
     def large_image_url(self) -> Optional[str]:
-        """Optional[:class:`str`]: Returns a URL pointing to the large image asset of this activity, if applicable.
+        """:class:`str` | :data:`None`: Returns a URL pointing to the large image asset of this activity, if applicable.
 
         .. versionchanged:: 2.10
             Moved from :class:`Activity` to base type, making this available to all activity types.
@@ -154,7 +155,7 @@ class _BaseActivity:
 
     @property
     def small_image_url(self) -> Optional[str]:
-        """Optional[:class:`str`]: Returns a URL pointing to the small image asset of this activity, if applicable.
+        """:class:`str` | :data:`None`: Returns a URL pointing to the small image asset of this activity, if applicable.
 
         .. versionchanged:: 2.10
             Moved from :class:`Activity` to base type, making this available to all activity types.
@@ -166,7 +167,7 @@ class _BaseActivity:
 
     @property
     def large_image_text(self) -> Optional[str]:
-        """Optional[:class:`str`]: Returns the large image asset hover text of this activity, if applicable.
+        """:class:`str` | :data:`None`: Returns the large image asset hover text of this activity, if applicable.
 
         .. versionchanged:: 2.10
             Moved from :class:`Activity` to base type, making this available to all activity types.
@@ -175,7 +176,7 @@ class _BaseActivity:
 
     @property
     def small_image_text(self) -> Optional[str]:
-        """Optional[:class:`str`]: Returns the small image asset hover text of this activity, if applicable.
+        """:class:`str` | :data:`None`: Returns the small image asset hover text of this activity, if applicable.
 
         .. versionchanged:: 2.10
             Moved from :class:`Activity` to base type, making this available to all activity types.
@@ -184,7 +185,7 @@ class _BaseActivity:
 
     @property
     def large_image_link(self) -> Optional[str]:
-        """Optional[:class:`str`]: Returns the large image asset URL of this activity, if applicable.
+        """:class:`str` | :data:`None`: Returns the large image asset URL of this activity, if applicable.
 
         .. versionadded:: 2.11
         """
@@ -192,7 +193,7 @@ class _BaseActivity:
 
     @property
     def small_image_link(self) -> Optional[str]:
-        """Optional[:class:`str`]: Returns the small image asset URL of this activity, if applicable.
+        """:class:`str` | :data:`None`: Returns the small image asset URL of this activity, if applicable.
 
         .. versionadded:: 2.11
         """
@@ -246,26 +247,26 @@ class Activity(BaseActivity):
 
     Parameters
     ----------
-    name: Optional[:class:`str`]
+    name: :class:`str` | :data:`None`
         The name of the activity.
-    url: Optional[:class:`str`]
+    url: :class:`str` | :data:`None`
         A stream URL that the activity could be doing.
     type: :class:`ActivityType`
         The type of activity currently being done.
 
     Attributes
     ----------
-    application_id: Optional[:class:`int`]
+    application_id: :class:`int` | :data:`None`
         The application ID of the game.
-    name: Optional[:class:`str`]
+    name: :class:`str` | :data:`None`
         The name of the activity.
-    url: Optional[:class:`str`]
+    url: :class:`str` | :data:`None`
         A stream URL that the activity could be doing.
     type: :class:`ActivityType`
         The type of activity currently being done.
-    state: Optional[:class:`str`]
+    state: :class:`str` | :data:`None`
         The user's current state. For example, "In Game".
-    details: Optional[:class:`str`]
+    details: :class:`str` | :data:`None`
         The detail of the user's current activity.
     assets: :class:`dict`
         A dictionary representing the images and their hover text of an activity.
@@ -282,25 +283,25 @@ class Activity(BaseActivity):
 
         - ``id``: A string representing the party ID.
         - ``size``: A list of two integers denoting (current_size, maximum_size).
-    buttons: List[str]
+    buttons: :class:`list`\\[:class:`str`]
         A list of strings representing the labels of custom buttons shown in a rich presence.
 
         .. versionadded:: 2.0
 
         .. versionchanged:: 2.6
-            Changed type to ``List[str]`` to match API types.
+            Changed type to ``list[str]`` to match API types.
 
-    emoji: Optional[:class:`PartialEmoji`]
+    emoji: :class:`PartialEmoji` | :data:`None`
         The emoji that belongs to this activity.
-    details_url: Optional[:class:`str`]
+    details_url: :class:`str` | :data:`None`
         An URL that is linked when clicking on the details text of an activity.
 
         .. versionadded:: 2.11
-    state_url: Optional[:class:`str`]
+    state_url: :class:`str` | :data:`None`
         An URL that is linked when clicking on the state text of an activity.
 
         .. versionadded:: 2.11
-    status_display_type: Optional[:class:`StatusDisplayType`]
+    status_display_type: :class:`StatusDisplayType` | :data:`None`
         Controls which field is displayed in the user's status activity text in the member list.
 
         .. versionadded:: 2.11
@@ -339,7 +340,7 @@ class Activity(BaseActivity):
         party: Optional[ActivityParty] = None,
         application_id: Optional[Union[str, int]] = None,
         flags: Optional[int] = None,
-        buttons: Optional[List[str]] = None,
+        buttons: Optional[list[str]] = None,
         emoji: Optional[Union[PartialEmojiPayload, ActivityEmojiPayload]] = None,
         id: Optional[str] = None,
         platform: Optional[str] = None,
@@ -360,7 +361,7 @@ class Activity(BaseActivity):
         self.name: Optional[str] = name
         self.url: Optional[str] = url
         self.flags: int = flags or 0
-        self.buttons: List[str] = buttons or []
+        self.buttons: list[str] = buttons or []
 
         # undocumented fields:
         self.id: Optional[str] = id
@@ -398,8 +399,8 @@ class Activity(BaseActivity):
         inner = " ".join(f"{k!s}={v!r}" for k, v in attrs)
         return f"<Activity {inner}>"
 
-    def to_dict(self) -> Dict[str, Any]:
-        ret: Dict[str, Any] = {}
+    def to_dict(self) -> ActivityPayload:
+        ret: ActivityPayload = {}  # pyright: ignore[reportAssignmentType]
         for attr in self.__slots__:
             value = getattr(self, attr, None)
             if value is None:
@@ -408,16 +409,16 @@ class Activity(BaseActivity):
             if isinstance(value, dict) and len(value) == 0:
                 continue
 
-            ret[attr] = value
+            ret[attr] = value  # pyright: ignore[reportGeneralTypeIssues]
 
         # fix type field
-        ret["type"] = int(self.type)
+        ret["type"] = int(self.type)  # pyright: ignore[reportGeneralTypeIssues]  # ActivityPayload.type does not include -1
 
         if self.status_display_type:
-            ret["status_display_type"] = int(self.status_display_type)
+            ret["status_display_type"] = int(self.status_display_type)  # pyright: ignore[reportGeneralTypeIssues]
 
         if self.emoji:
-            ret["emoji"] = self.emoji.to_dict()
+            ret["emoji"] = self.emoji.to_dict()  # pyright: ignore[reportGeneralTypeIssues]
         # defined in base class slots
         if self._timestamps:
             ret["timestamps"] = self._timestamps
@@ -544,16 +545,16 @@ class Streaming(BaseActivity):
 
     Attributes
     ----------
-    platform: Optional[:class:`str`]
+    platform: :class:`str` | :data:`None`
         Where the user is streaming from (ie. YouTube, Twitch).
 
         .. versionadded:: 1.3
 
-    name: Optional[:class:`str`]
+    name: :class:`str` | :data:`None`
         The stream's name.
-    details: Optional[:class:`str`]
+    details: :class:`str` | :data:`None`
         An alias for :attr:`name`
-    game: Optional[:class:`str`]
+    game: :class:`str` | :data:`None`
         The game being streamed.
 
         .. versionadded:: 1.3
@@ -598,7 +599,7 @@ class Streaming(BaseActivity):
 
     @property
     def twitch_name(self) -> Optional[str]:
-        """Optional[:class:`str`]: If provided, the twitch name of the user streaming.
+        """:class:`str` | :data:`None`: If provided, the twitch name of the user streaming.
 
         This corresponds to the ``large_image`` key of the :attr:`Streaming.assets`
         dictionary if it starts with ``twitch:``. Typically set by the Discord client.
@@ -608,8 +609,8 @@ class Streaming(BaseActivity):
         name = self.assets["large_image"]
         return name[7:] if name[:7] == "twitch:" else None
 
-    def to_dict(self) -> Dict[str, Any]:
-        ret: Dict[str, Any] = {
+    def to_dict(self) -> ActivityPayload:
+        ret: ActivityPayload = {
             "type": ActivityType.streaming.value,
             "name": str(self.name),
             "url": str(self.url),
@@ -700,7 +701,7 @@ class Spotify(_BaseActivity):
         """
         return self.colour
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "flags": 48,  # SYNC | PLAY
             "name": "Spotify",
@@ -744,8 +745,8 @@ class Spotify(_BaseActivity):
         return self._details
 
     @property
-    def artists(self) -> List[str]:
-        """List[:class:`str`]: The artists of the song being played."""
+    def artists(self) -> list[str]:
+        """:class:`list`\\[:class:`str`]: The artists of the song being played."""
         return self._state.split("; ")
 
     @property
@@ -786,10 +787,10 @@ class Spotify(_BaseActivity):
 
     @property
     def duration(self) -> Optional[datetime.timedelta]:
-        """Optional[:class:`datetime.timedelta`]: The duration of the song being played, if applicable.
+        """:class:`datetime.timedelta` | :data:`None`: The duration of the song being played, if applicable.
 
         .. versionchanged:: 2.6
-            This attribute can now be ``None``.
+            This attribute can now be :data:`None`.
         """
         start, end = self.start, self.end
         if start and end:
@@ -827,9 +828,9 @@ class CustomActivity(BaseActivity):
 
     Attributes
     ----------
-    name: Optional[:class:`str`]
+    name: :class:`str` | :data:`None`
         The custom activity's name.
-    emoji: Optional[:class:`PartialEmoji`]
+    emoji: :class:`PartialEmoji` | :data:`None`
         The emoji to pass to the activity, if any.
 
         This currently cannot be set by bots.
@@ -890,7 +891,7 @@ class CustomActivity(BaseActivity):
             }
 
         if self.emoji:
-            o["emoji"] = self.emoji.to_dict()  # type: ignore
+            o["emoji"] = self.emoji.to_dict()  # pyright: ignore[reportGeneralTypeIssues]
         return o
 
     def __eq__(self, other: Any) -> bool:
@@ -944,16 +945,16 @@ def create_activity(
     if game_type is ActivityType.playing and not (
         "application_id" in data or "session_id" in data or "state" in data
     ):
-        activity = Game(**data)  # type: ignore  # pyright bug(?)
+        activity = Game(**data)  # pyright: ignore[reportArgumentType]  # pyright bug(?)
     elif game_type is ActivityType.custom and "name" in data:
-        activity = CustomActivity(**data)  # type: ignore
+        activity = CustomActivity(**data)  # pyright: ignore[reportArgumentType]
     elif game_type is ActivityType.streaming and "url" in data:
         # url won't be None here
-        activity = Streaming(**data)  # type: ignore
+        activity = Streaming(**data)  # pyright: ignore[reportArgumentType]
     elif game_type is ActivityType.listening and "sync_id" in data and "session_id" in data:
         activity = Spotify(**data)
     else:
-        activity = Activity(**data)  # type: ignore
+        activity = Activity(**data)  # pyright: ignore[reportArgumentType]
 
     if isinstance(activity, (Activity, CustomActivity)) and activity.emoji and state:
         activity.emoji._state = state

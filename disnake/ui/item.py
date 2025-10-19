@@ -3,18 +3,15 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from collections.abc import Coroutine
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
     ClassVar,
-    Coroutine,
-    Dict,
     Generic,
     Optional,
     Protocol,
-    Tuple,
-    Type,
     TypeVar,
     overload,
 )
@@ -68,11 +65,12 @@ class UIComponent(ABC):
     - :class:`disnake.ui.Separator`
     - :class:`disnake.ui.Container`
     - :class:`disnake.ui.Label`
+    - :class:`disnake.ui.FileUpload`
 
     .. versionadded:: 2.11
     """
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]]
+    __repr_attributes__: ClassVar[tuple[str, ...]]
 
     @property
     @abstractmethod
@@ -106,7 +104,7 @@ class UIComponent(ABC):
     def id(self, value: int) -> None:
         self._underlying.id = value
 
-    def to_component_dict(self) -> Dict[str, Any]:
+    def to_component_dict(self) -> dict[str, Any]:
         return self._underlying.to_dict()
 
     @classmethod
@@ -159,7 +157,7 @@ class Item(WrappedComponent, Generic[V_co]):
     .. versionadded:: 2.0
     """
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = ("row",)
+    __repr_attributes__: ClassVar[tuple[str, ...]] = ("row",)
 
     @overload
     def __init__(self: Item[None]) -> None: ...
@@ -168,7 +166,7 @@ class Item(WrappedComponent, Generic[V_co]):
     def __init__(self: Item[V_co]) -> None: ...
 
     def __init__(self) -> None:
-        self._view: V_co = None  # type: ignore
+        self._view: V_co = None  # pyright: ignore[reportAttributeAccessIssue]
         self._row: Optional[int] = None
         self._rendered_row: Optional[int] = None
         # This works mostly well but there is a gotcha with
@@ -207,7 +205,7 @@ class Item(WrappedComponent, Generic[V_co]):
 
     @property
     def view(self) -> V_co:
-        """Optional[:class:`View`]: The underlying view for this item."""
+        """:class:`View` | :data:`None`: The underlying view for this item."""
         return self._view
 
     async def callback(self, interaction: MessageInteraction[ClientT], /) -> None:
@@ -233,7 +231,7 @@ SelfViewT = TypeVar("SelfViewT", bound="Optional[View]")
 # which work as `View.__init__` replaces the handler with the item.
 class DecoratedItem(Protocol[I]):
     @overload
-    def __get__(self, obj: None, objtype: Type[SelfViewT]) -> ItemCallbackType[SelfViewT, I]: ...
+    def __get__(self, obj: None, objtype: type[SelfViewT]) -> ItemCallbackType[SelfViewT, I]: ...
 
     @overload
     def __get__(self, obj: Any, objtype: Any) -> I: ...

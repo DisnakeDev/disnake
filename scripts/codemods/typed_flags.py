@@ -3,7 +3,7 @@
 import importlib
 import textwrap
 import types
-from typing import List, Optional, cast
+from typing import Optional, cast
 
 import libcst as cst
 import libcst.codemod.visitors as codevisitors
@@ -27,7 +27,7 @@ class FlagTypings(BaseCodemodCommand):
         "Types every flag classes's init method, using overloads or if typechecking blocks."
     )
 
-    flag_classes: List[str]
+    flag_classes: list[str]
     imported_module: types.ModuleType
 
     def transform_module(self, tree: cst.Module) -> cst.Module:
@@ -39,7 +39,7 @@ class FlagTypings(BaseCodemodCommand):
         # import and load the module
         module = importlib.import_module(current_module)
         # we preformulate a list of all flag classes on the imported flags module
-        all_flag_classes: List[str] = []
+        all_flag_classes: list[str] = []
         for attr_name in dir(module):
             obj = getattr(module, attr_name)
             if (
@@ -145,7 +145,7 @@ class FlagTypings(BaseCodemodCommand):
             codevisitors.AddImportsVisitor.add_needed_import(
                 self.context, "disnake.utils", "_generated"
             )
-            node = node.deep_replace(old_init, init)  # type: ignore
+            node = node.deep_replace(old_init, init)  # pyright: ignore[reportAssignmentType]
 
         else:
             # the init exists, so we need to make overloads

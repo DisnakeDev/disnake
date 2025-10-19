@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 import time
 from collections import deque
-from typing import TYPE_CHECKING, Any, Callable, Deque, Dict, Optional
+from typing import TYPE_CHECKING, Any, Callable, Optional
 
 from disnake.enums import Enum
 from disnake.member import Member
@@ -57,13 +57,16 @@ class BucketType(Enum):
         elif self is BucketType.member:
             return ((msg.guild and msg.guild.id), msg.author.id)
         elif self is BucketType.category:
-            return (msg.channel.category or msg.channel).id  # type: ignore
+            return (msg.channel.category or msg.channel).id  # pyright: ignore[reportAttributeAccessIssue]
         elif self is BucketType.role:
             # if author is not a Member we are in a private-channel context; returning its id
             # yields the same result as for a guild with only the @everyone role
             return (
-                msg.author.top_role if msg.guild and isinstance(msg.author, Member) else msg.channel
+                msg.author.top_role
+                if msg.guild is not None and isinstance(msg.author, Member)
+                else msg.channel
             ).id
+        return None
 
     def __call__(self, msg: Message) -> Any:
         return self.get_key(msg)
@@ -94,7 +97,7 @@ class Cooldown:
 
         Parameters
         ----------
-        current: Optional[:class:`float`]
+        current: :class:`float` | :data:`None`
             The time in seconds since Unix epoch to calculate tokens at.
             If not supplied then :func:`time.time()` is used.
 
@@ -117,7 +120,7 @@ class Cooldown:
 
         Parameters
         ----------
-        current: Optional[:class:`float`]
+        current: :class:`float` | :data:`None`
             The current time in seconds since Unix epoch.
             If not supplied, then :func:`time.time()` is used.
 
@@ -139,13 +142,13 @@ class Cooldown:
 
         Parameters
         ----------
-        current: Optional[:class:`float`]
+        current: :class:`float` | :data:`None`
             The time in seconds since Unix epoch to update the rate limit at.
             If not supplied, then :func:`time.time()` is used.
 
         Returns
         -------
-        Optional[:class:`float`]
+        :class:`float` | :data:`None`
             The retry-after time in seconds if rate limited.
         """
         current = current or time.time()
@@ -163,6 +166,7 @@ class Cooldown:
 
         # we're not so decrement our tokens
         self._tokens -= 1
+        return None
 
     def reset(self) -> None:
         """Reset the cooldown to its initial state."""
@@ -193,7 +197,7 @@ class CooldownMapping:
             msg = "Cooldown type must be a BucketType or callable"
             raise TypeError(msg)
 
-        self._cache: Dict[Any, Cooldown] = {}
+        self._cache: dict[Any, Cooldown] = {}
         self._cooldown: Optional[Cooldown] = original
         self._type: Callable[[Message], Any] = type
 
@@ -231,11 +235,13 @@ class CooldownMapping:
         return self._type is BucketType.default
 
     def create_bucket(self, message: Message) -> Cooldown:
-        return self._cooldown.copy()  # type: ignore
+        assert self._cooldown is not None
+        return self._cooldown.copy()
 
     def get_bucket(self, message: Message, current: Optional[float] = None) -> Cooldown:
         if self._is_default():
-            return self._cooldown  # type: ignore
+            assert self._cooldown is not None
+            return self._cooldown
 
         self._verify_cache_integrity(current)
         key = self._bucket_key(message)
@@ -297,7 +303,7 @@ class _Semaphore:
     def __init__(self, number: int) -> None:
         self.value: int = number
         self.loop: asyncio.AbstractEventLoop = asyncio.get_running_loop()
-        self._waiters: Deque[asyncio.Future] = deque()
+        self._waiters: deque[asyncio.Future] = deque()
 
     def __repr__(self) -> str:
         return f"<_Semaphore value={self.value} waiters={len(self._waiters)}>"
@@ -343,7 +349,7 @@ class MaxConcurrency:
     __slots__ = ("number", "per", "wait", "_mapping")
 
     def __init__(self, number: int, *, per: BucketType, wait: bool) -> None:
-        self._mapping: Dict[Any, _Semaphore] = {}
+        self._mapping: dict[Any, _Semaphore] = {}
         self.per: BucketType = per
         self.number: int = number
         self.wait: bool = wait
