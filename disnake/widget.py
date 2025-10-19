@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Optional, Union
 
 from .activity import BaseActivity, Spotify, create_activity
 from .asset import Asset
@@ -309,14 +309,14 @@ class Widget:
         self.id: int = int(data["id"])
         self.presence_count: int = data["presence_count"]
 
-        self.channels: List[WidgetChannel] = []
+        self.channels: list[WidgetChannel] = []
         for channel in data.get("channels", []):
             _id = int(channel["id"])
             self.channels.append(
                 WidgetChannel(id=_id, name=channel["name"], position=channel["position"])
             )
 
-        self.members: List[WidgetMember] = []
+        self.members: list[WidgetMember] = []
         channels = {channel.id: channel for channel in self.channels}
         for member in data.get("members", []):
             connected_channel = _get_as_snowflake(member, "channel_id")
@@ -420,7 +420,7 @@ class Widget:
         HTTPException
             Editing the widget failed.
         """
-        payload: Dict[str, Any] = {}
+        payload: dict[str, Any] = {}
         if enabled is not MISSING:
             payload["enabled"] = enabled
         if channel is not MISSING:

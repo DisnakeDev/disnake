@@ -7,17 +7,14 @@ import datetime
 import inspect
 import sys
 import traceback
-from collections.abc import Sequence
+from collections.abc import Coroutine, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    Coroutine,
     Generic,
-    List,
     Optional,
     Protocol,
-    Type,
     TypeVar,
     Union,
     cast,
@@ -198,7 +195,7 @@ class Loop(Generic[LF]):
             self._stop_next_iteration = False
             self._has_failed = False
 
-    def __get__(self, obj: T, objtype: Type[T]) -> Self:
+    def __get__(self, obj: T, objtype: type[T]) -> Self:
         if obj is None:
             return self
         clone = self.clone()
@@ -257,7 +254,7 @@ class Loop(Generic[LF]):
         return None
 
     @property
-    def time(self) -> Optional[List[datetime.time]]:
+    def time(self) -> Optional[list[datetime.time]]:
         """:class:`list`\\[:class:`datetime.time`] | :data:`None`: Read-only list for the exact times this loop runs at.
         :data:`None` if relative times were passed instead.
 
@@ -387,7 +384,7 @@ class Loop(Generic[LF]):
             self._task.add_done_callback(restart_when_over)
             self._task.cancel()
 
-    def add_exception_type(self, *exceptions: Type[BaseException]) -> None:
+    def add_exception_type(self, *exceptions: type[BaseException]) -> None:
         """Adds exception types to be handled during the reconnect logic.
 
         By default the exception types handled are those handled by
@@ -426,7 +423,7 @@ class Loop(Generic[LF]):
         """
         self._valid_exception = ()
 
-    def remove_exception_type(self, *exceptions: Type[BaseException]) -> bool:
+    def remove_exception_type(self, *exceptions: type[BaseException]) -> bool:
         """Removes exception types from being handled during the reconnect logic.
 
         Parameters
@@ -614,9 +611,9 @@ class Loop(Generic[LF]):
         self,
         time: Union[datetime.time, Sequence[datetime.time]],
         *,
-        dt: Type[datetime.time] = datetime.time,
+        dt: type[datetime.time] = datetime.time,
         utc: datetime.timezone = datetime.timezone.utc,
-    ) -> List[datetime.time]:
+    ) -> list[datetime.time]:
         if isinstance(time, dt):
             inner = time if time.tzinfo is not None else time.replace(tzinfo=utc)
             return [inner]
@@ -627,7 +624,7 @@ class Loop(Generic[LF]):
             msg = "time parameter must not be an empty sequence."
             raise ValueError(msg)
 
-        ret: List[datetime.time] = []
+        ret: list[datetime.time] = []
         for index, t in enumerate(time):
             if not isinstance(t, dt):
                 msg = f"Expected a sequence of {dt!r} for ``time``, received {type(t).__name__!r} at index {index} instead."
@@ -688,7 +685,7 @@ class Loop(Generic[LF]):
             self._seconds = float(seconds)
             self._hours = float(hours)
             self._minutes = float(minutes)
-            self._time: List[datetime.time] = MISSING
+            self._time: list[datetime.time] = MISSING
         else:
             if any((seconds, minutes, hours)):
                 msg = "Cannot mix explicit time with relative time"
@@ -734,12 +731,12 @@ def loop(
 
 @overload
 def loop(
-    cls: Type[Object[L_co, Concatenate[LF, P]]], *_: P.args, **kwargs: P.kwargs
+    cls: type[Object[L_co, Concatenate[LF, P]]], *_: P.args, **kwargs: P.kwargs
 ) -> Callable[[LF], L_co]: ...
 
 
 def loop(
-    cls: Type[Object[L_co, Concatenate[LF, P]]] = Loop[Any],
+    cls: type[Object[L_co, Concatenate[LF, P]]] = Loop[Any],
     **kwargs: Any,
 ) -> Callable[[LF], L_co]:
     """A decorator that schedules a task in the background for you with
@@ -806,6 +803,6 @@ def loop(
             msg = "The decorated function must be a coroutine function."
             raise TypeError(msg)
 
-        return cast("Type[L_co]", cls)(func, **kwargs)
+        return cast("type[L_co]", cls)(func, **kwargs)
 
     return decorator

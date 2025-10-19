@@ -208,12 +208,9 @@ ignore = [
     "TRY003", # as of 0.12.11 still has some false positives
     "TRY301", # TODO: enable
     "TRY300", # TODO: enable
-    # py3.9 bump
-    "UP006",
-    "UP035",
-    "FURB188",
     # py 3.10 bump
     "UP007",
+    "UP035",
     "UP045",
 ]
 

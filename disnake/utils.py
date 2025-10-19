@@ -17,30 +17,20 @@ import unicodedata
 import warnings
 from base64 import b64encode
 from bisect import bisect_left
+from collections.abc import AsyncIterator, Awaitable, Iterable, Iterator, Mapping, Sequence
 from inspect import getdoc as _getdoc, isawaitable as _isawaitable, signature as _signature
 from operator import attrgetter
 from types import UnionType
 from typing import (
     TYPE_CHECKING,
     Any,
-    AsyncIterator,
-    Awaitable,
     Callable,
-    Dict,
     ForwardRef,
     Generic,
-    Iterable,
-    Iterator,
-    List,
     Literal,
-    Mapping,
     NoReturn,
     Optional,
     Protocol,
-    Sequence,
-    Set,
-    Tuple,
-    Type,
     TypedDict,
     TypeVar,
     Union,
@@ -173,12 +163,12 @@ class CachedSlotProperty(Generic[T, T_co]):
         self.__doc__ = function.__doc__
 
     @overload
-    def __get__(self, instance: None, owner: Type[Any]) -> Self: ...
+    def __get__(self, instance: None, owner: type[Any]) -> Self: ...
 
     @overload
-    def __get__(self, instance: T, owner: Type[Any]) -> T_co: ...
+    def __get__(self, instance: T, owner: type[Any]) -> T_co: ...
 
-    def __get__(self, instance: Optional[T], owner: Type[Any]) -> Any:
+    def __get__(self, instance: Optional[T], owner: type[Any]) -> Any:
         if instance is None:
             return self
 
@@ -194,7 +184,7 @@ class classproperty(Generic[T_co]):
     def __init__(self, fget: Callable[[Any], T_co]) -> None:
         self.fget = fget
 
-    def __get__(self, instance: Optional[Any], owner: Type[Any]) -> T_co:
+    def __get__(self, instance: Optional[Any], owner: type[Any]) -> T_co:
         return self.fget(owner)
 
     def __set__(self, instance, value) -> NoReturn:
@@ -505,7 +495,7 @@ def get(iterable: Iterable[T], **attrs: Any) -> Optional[T]:
     return None
 
 
-def _unique(iterable: Iterable[T]) -> List[T]:
+def _unique(iterable: Iterable[T]) -> list[T]:
     return list(dict.fromkeys(iterable))
 
 
@@ -633,7 +623,7 @@ async def async_all(gen: Iterable[Union[Awaitable[bool], bool]]) -> bool:
     return True
 
 
-async def sane_wait_for(futures: Iterable[Awaitable[T]], *, timeout: float) -> Set[asyncio.Task[T]]:
+async def sane_wait_for(futures: Iterable[Awaitable[T]], *, timeout: float) -> set[asyncio.Task[T]]:
     ensured = [asyncio.ensure_future(fut) for fut in futures]
     done, pending = await asyncio.wait(ensured, timeout=timeout, return_when=asyncio.ALL_COMPLETED)
 
@@ -643,7 +633,7 @@ async def sane_wait_for(futures: Iterable[Awaitable[T]], *, timeout: float) -> S
     return done
 
 
-def get_slots(cls: Type[Any]) -> Iterator[str]:
+def get_slots(cls: type[Any]) -> Iterator[str]:
     for mro in reversed(cls.__mro__):
         slots = getattr(mro, "__slots__", [])
         if isinstance(slots, str):
@@ -756,12 +746,12 @@ def resolve_invite(invite: Union[Invite, str], *, with_params: Literal[False] = 
 @overload
 def resolve_invite(
     invite: Union[Invite, str], *, with_params: Literal[True]
-) -> Tuple[str, Dict[str, str]]: ...
+) -> tuple[str, dict[str, str]]: ...
 
 
 def resolve_invite(
     invite: Union[Invite, str], *, with_params: bool = False
-) -> Union[str, Tuple[str, Dict[str, str]]]:
+) -> Union[str, tuple[str, dict[str, str]]]:
     """Resolves an invite from a :class:`~disnake.Invite`, URL or code.
 
     Parameters
@@ -957,7 +947,7 @@ class _DocstringParam(_DocstringLocalizationsMixin):
 
 class _ParsedDocstring(_DocstringLocalizationsMixin):
     description: str
-    params: Dict[str, _DocstringParam]
+    params: dict[str, _DocstringParam]
 
 
 def _count_left_spaces(string: str) -> int:
@@ -969,7 +959,7 @@ def _count_left_spaces(string: str) -> int:
     return res
 
 
-def _get_header_line(lines: List[str], header: str, underline: str) -> int:
+def _get_header_line(lines: list[str], header: str, underline: str) -> int:
     underlining = len(header) * underline
     for i, line in enumerate(lines):
         if line.rstrip() == header and i + 1 < len(lines) and lines[i + 1].startswith(underlining):
@@ -977,7 +967,7 @@ def _get_header_line(lines: List[str], header: str, underline: str) -> int:
     return len(lines)
 
 
-def _get_next_header_line(lines: List[str], underline: str, start: int = 0) -> int:
+def _get_next_header_line(lines: list[str], underline: str, start: int = 0) -> int:
     for idx, line in enumerate(lines[start:]):
         i = start + idx
         clean_line = line.rstrip()
@@ -992,12 +982,12 @@ def _get_next_header_line(lines: List[str], underline: str, start: int = 0) -> i
     return len(lines)
 
 
-def _get_description(lines: List[str]) -> str:
+def _get_description(lines: list[str]) -> str:
     end = _get_next_header_line(lines, "-")
     return "\n".join(lines[:end]).strip()
 
 
-def _extract_localization_key(desc: str) -> Tuple[str, Tuple[Optional[str], Optional[str]]]:
+def _extract_localization_key(desc: str) -> tuple[str, tuple[Optional[str], Optional[str]]]:
     match = re.search(r"\{\{(.*?)\}\}", desc)
     if match:
         desc = desc.replace(match.group(0), "").strip()
@@ -1006,15 +996,15 @@ def _extract_localization_key(desc: str) -> Tuple[str, Tuple[Optional[str], Opti
     return desc, (None, None)
 
 
-def _get_option_desc(lines: List[str]) -> Dict[str, _DocstringParam]:
+def _get_option_desc(lines: list[str]) -> dict[str, _DocstringParam]:
     start = _get_header_line(lines, "Parameters", "-") + 2
     end = _get_next_header_line(lines, "-", start)
     if start >= len(lines):
         return {}
     # Read option descriptions
-    options: Dict[str, _DocstringParam] = {}
+    options: dict[str, _DocstringParam] = {}
 
-    def add_param(param: Optional[str], desc_lines: List[str], maybe_type: Optional[str]) -> None:
+    def add_param(param: Optional[str], desc_lines: list[str], maybe_type: Optional[str]) -> None:
         if param is None:
             return
         desc: Optional[str] = None
@@ -1033,7 +1023,7 @@ def _get_option_desc(lines: List[str]) -> Dict[str, _DocstringParam]:
                 "localization_key_desc": loc_key_desc,
             }
 
-    desc_lines: List[str] = []
+    desc_lines: list[str] = []
     param: Optional[str] = None
     maybe_type: Optional[str] = None
     for line in lines[start:end]:
@@ -1079,7 +1069,7 @@ def parse_docstring(func: Callable[..., Any]) -> _ParsedDocstring:
 # Chunkers
 
 
-def _chunk(iterator: Iterator[T], max_size: int) -> Iterator[List[T]]:
+def _chunk(iterator: Iterator[T], max_size: int) -> Iterator[list[T]]:
     ret = []
     n = 0
     for item in iterator:
@@ -1093,7 +1083,7 @@ def _chunk(iterator: Iterator[T], max_size: int) -> Iterator[List[T]]:
         yield ret
 
 
-async def _achunk(iterator: AsyncIterator[T], max_size: int) -> AsyncIterator[List[T]]:
+async def _achunk(iterator: AsyncIterator[T], max_size: int) -> AsyncIterator[list[T]]:
     ret = []
     n = 0
     async for item in iterator:
@@ -1108,14 +1098,14 @@ async def _achunk(iterator: AsyncIterator[T], max_size: int) -> AsyncIterator[Li
 
 
 @overload
-def as_chunks(iterator: Iterator[T], max_size: int) -> Iterator[List[T]]: ...
+def as_chunks(iterator: Iterator[T], max_size: int) -> Iterator[list[T]]: ...
 
 
 @overload
-def as_chunks(iterator: AsyncIterator[T], max_size: int) -> AsyncIterator[List[T]]: ...
+def as_chunks(iterator: AsyncIterator[T], max_size: int) -> AsyncIterator[list[T]]: ...
 
 
-def as_chunks(iterator: _Iter[T], max_size: int) -> _Iter[List[T]]:
+def as_chunks(iterator: _Iter[T], max_size: int) -> _Iter[list[T]]:
     """A helper function that collects an iterator into chunks of a given size.
 
     .. versionadded:: 2.0
@@ -1146,13 +1136,13 @@ def as_chunks(iterator: _Iter[T], max_size: int) -> _Iter[List[T]]:
     return _chunk(iterator, max_size)
 
 
-def normalise_optional_params(parameters: Iterable[Any]) -> Tuple[Any, ...]:
+def normalise_optional_params(parameters: Iterable[Any]) -> tuple[Any, ...]:
     none_cls = type(None)
     return (*tuple(p for p in parameters if p is not none_cls), none_cls)
 
 
 def _resolve_typealiastype(
-    tp: Any, globals: Dict[str, Any], locals: Dict[str, Any], cache: Dict[str, Any]
+    tp: Any, globals: dict[str, Any], locals: dict[str, Any], cache: dict[str, Any]
 ) -> Any:
     # Use __module__ to get the (global) namespace in which the type alias was defined.
     if mod := sys.modules.get(tp.__module__):
@@ -1171,9 +1161,9 @@ def _resolve_typealiastype(
 # FIXME: this should be split up into smaller functions for clarity and easier maintenance
 def evaluate_annotation(
     tp: Any,
-    globals: Dict[str, Any],
-    locals: Dict[str, Any],
-    cache: Dict[str, Any],
+    globals: dict[str, Any],
+    locals: dict[str, Any],
+    cache: dict[str, Any],
     *,
     implicit_str: bool = True,
 ) -> Any:
@@ -1254,9 +1244,9 @@ def evaluate_annotation(
 
 def resolve_annotation(
     annotation: Any,
-    globalns: Dict[str, Any],
-    localns: Optional[Dict[str, Any]],
-    cache: Optional[Dict[str, Any]],
+    globalns: dict[str, Any],
+    localns: Optional[dict[str, Any]],
+    cache: Optional[dict[str, Any]],
 ) -> Any:
     if annotation is None:
         return type(None)
@@ -1280,7 +1270,7 @@ def unwrap_function(function: Callable[..., Any]) -> Callable[..., Any]:
             return function
 
 
-def _get_function_globals(function: Callable[..., Any]) -> Dict[str, Any]:
+def _get_function_globals(function: Callable[..., Any]) -> dict[str, Any]:
     unwrap = unwrap_function(function)
     try:
         return unwrap.__globals__
@@ -1293,16 +1283,16 @@ _inspect_empty = inspect.Parameter.empty
 
 def get_signature_parameters(
     function: Callable[..., Any],
-    globalns: Optional[Dict[str, Any]] = None,
+    globalns: Optional[dict[str, Any]] = None,
     *,
     skip_standard_params: bool = False,
-) -> Dict[str, inspect.Parameter]:
+) -> dict[str, inspect.Parameter]:
     # if no globalns provided, unwrap (where needed) and get global namespace from there
     if globalns is None:
         globalns = _get_function_globals(function)
 
-    params: Dict[str, inspect.Parameter] = {}
-    cache: Dict[str, Any] = {}
+    params: dict[str, inspect.Parameter] = {}
+    cache: dict[str, Any] = {}
 
     signature = inspect.signature(function)
     iterator = iter(signature.parameters.items())
@@ -1518,7 +1508,7 @@ def as_valid_locale(locale: str) -> Optional[str]:
     return None
 
 
-def humanize_list(values: List[str], combine: str) -> str:
+def humanize_list(values: list[str], combine: str) -> str:
     if len(values) > 2:
         return f"{', '.join(values[:-1])}, {combine} {values[-1]}"
     elif len(values) == 0:

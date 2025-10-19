@@ -13,11 +13,8 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    Dict,
-    List,
     Literal,
     Optional,
-    Tuple,
     TypeVar,
     Union,
 )
@@ -766,8 +763,8 @@ def test_normalise_optional_params(params, expected) -> None:
         (None, NoneType, False),
         (int, int, False),
         # complex types
-        (List[int], List[int], False),
-        (Dict[float, "List[yarl.URL]"], Dict[float, List[yarl.URL]], True),
+        (list[int], list[int], False),
+        (dict[float, "list[yarl.URL]"], dict[float, list[yarl.URL]], True),
         (Literal[1, Literal[False], "hi"], Literal[1, False, "hi"], False),  # noqa: RUF041
         # unions
         (Union[timezone, float], Union[timezone, float], False),
@@ -775,7 +772,7 @@ def test_normalise_optional_params(params, expected) -> None:
         (Union["tuple", None, int], Union[tuple, int, None], True),
         # forward refs
         ("bool", bool, True),
-        ("Tuple[dict, List[Literal[42, 99]]]", Tuple[dict, List[Literal[42, 99]]], True),
+        ("tuple[dict, list[Literal[42, 99]]]", tuple[dict, list[Literal[42, 99]]], True),
         # 3.10 union syntax
         ("int | float", Union[int, float], True),
     ],
@@ -802,43 +799,43 @@ def test_resolve_annotation_literal() -> None:
 # declared here as `TypeAliasType` is only valid in class/module scopes
 if TYPE_CHECKING or sys.version_info >= (3, 12):
     # this is equivalent to `type CoolList = List[int]`
-    CoolList = TypeAliasType("CoolList", List[int])
+    CoolList = TypeAliasType("CoolList", list[int])
 
     # this is equivalent to `type CoolList[T] = List[T]`
     T = TypeVar("T")
-    CoolListGeneric = TypeAliasType("CoolListGeneric", List[T], type_params=(T,))
+    CoolListGeneric = TypeAliasType("CoolListGeneric", list[T], type_params=(T,))
 
 
 @pytest.mark.skipif(sys.version_info < (3, 12), reason="syntax requires py3.12")
 class TestResolveAnnotationTypeAliasType:
     def test_simple(self) -> None:
         annotation = CoolList
-        assert utils.resolve_annotation(annotation, globals(), locals(), {}) == List[int]
+        assert utils.resolve_annotation(annotation, globals(), locals(), {}) == list[int]
 
     def test_generic(self) -> None:
         annotation = CoolListGeneric[int]
-        assert utils.resolve_annotation(annotation, globals(), locals(), {}) == List[int]
+        assert utils.resolve_annotation(annotation, globals(), locals(), {}) == list[int]
 
     # alias and arg in local scope
     def test_forwardref_local(self) -> None:
         IntOrStr = Union[int, str]
 
         annotation = CoolListGeneric["IntOrStr"]
-        assert utils.resolve_annotation(annotation, globals(), locals(), {}) == List[IntOrStr]
+        assert utils.resolve_annotation(annotation, globals(), locals(), {}) == list[IntOrStr]
 
     # alias and arg in other module scope
     def test_forwardref_module(self) -> None:
         resolved = utils.resolve_annotation(
             utils_helper_module.ListWithForwardRefAlias, globals(), locals(), {}
         )
-        assert resolved == List[Union[int, str]]
+        assert resolved == list[Union[int, str]]
 
     # combination of the previous two, alias in other module scope and arg in local scope
     def test_forwardref_mixed(self) -> None:
         LocalIntOrStr = Union[int, str]
 
         annotation = utils_helper_module.GenericListAlias["LocalIntOrStr"]
-        assert utils.resolve_annotation(annotation, globals(), locals(), {}) == List[LocalIntOrStr]
+        assert utils.resolve_annotation(annotation, globals(), locals(), {}) == list[LocalIntOrStr]
 
     # two different forwardrefs with same name
     def test_forwardref_duplicate(self) -> None:
@@ -847,8 +844,8 @@ class TestResolveAnnotationTypeAliasType:
         # first, resolve an annotation where `DuplicateAlias` resolves to the local int
         cache = {}
         assert (
-            utils.resolve_annotation(List["DuplicateAlias"], globals(), locals(), cache)
-            == List[int]
+            utils.resolve_annotation(list["DuplicateAlias"], globals(), locals(), cache)
+            == list[int]
         )
 
         # then, resolve an annotation where the globalns changes and `DuplicateAlias` resolves to something else
@@ -857,7 +854,7 @@ class TestResolveAnnotationTypeAliasType:
             utils.resolve_annotation(
                 utils_helper_module.ListWithDuplicateAlias, globals(), locals(), cache
             )
-            == List[str]
+            == list[str]
         )
 
 
