@@ -9,6 +9,7 @@ from .channel import ChannelType
 from .components import MessageTopLevelComponent, Modal
 from .embed import Embed
 from .entitlement import Entitlement
+from .guild import PartialGuild
 from .i18n import LocalizationDict
 from .member import Member, MemberWithUser
 from .role import Role
@@ -340,6 +341,7 @@ class _BaseUserInteraction(_BaseInteraction):
     channel: InteractionChannel
     locale: str
     guild_id: NotRequired[Snowflake]
+    guild: NotRequired[PartialGuild]
     guild_locale: NotRequired[str]
     entitlements: NotRequired[list[Entitlement]]
     authorizing_integration_owners: NotRequired[AuthorizingIntegrationOwners]

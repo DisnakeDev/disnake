@@ -161,6 +161,10 @@ class Guild(_BaseGuildPreview):
     soundboard_sounds: NotRequired[list[GuildSoundboardSound]]
 
 
+class PartialGuild(Guild, total=False):
+    pass
+
+
 class InviteGuild(Guild, total=False):
     welcome_screen: WelcomeScreen
 
