@@ -92,7 +92,7 @@ else:
     UnionType = object()
     EllipsisType = type(Ellipsis)
 
-T = TypeVar("T", bound=Any)
+T = TypeVar("T")
 TypeT = TypeVar("TypeT", bound=type[Any])
 BotT = TypeVar("BotT", bound="disnake.Client", covariant=True)
 

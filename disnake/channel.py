@@ -5171,9 +5171,7 @@ def _guild_channel_factory(
 
 def _channel_factory(
     channel_type: int,
-) -> tuple[
-    Optional[Union[type[GuildChannelType], type[DMChannel], type[GroupChannel]]], ChannelType
-]:
+) -> tuple[Optional[type[Union[GuildChannelType, DMChannel, GroupChannel]]], ChannelType]:
     cls, value = _guild_channel_factory(channel_type)
     if value is ChannelType.private:
         return DMChannel, value
@@ -5185,10 +5183,7 @@ def _channel_factory(
 
 def _threaded_channel_factory(
     channel_type: int,
-) -> tuple[
-    Optional[Union[type[GuildChannelType], type[DMChannel], type[GroupChannel], type[Thread]]],
-    ChannelType,
-]:
+) -> tuple[Optional[type[Union[GuildChannelType, DMChannel, GroupChannel, Thread]]], ChannelType]:
     cls, value = _channel_factory(channel_type)
     if value in (ChannelType.private_thread, ChannelType.public_thread, ChannelType.news_thread):
         return Thread, value
@@ -5197,16 +5192,14 @@ def _threaded_channel_factory(
 
 def _threaded_guild_channel_factory(
     channel_type: int,
-) -> tuple[Optional[Union[type[GuildChannelType], type[Thread]]], ChannelType]:
+) -> tuple[Optional[type[Union[GuildChannelType, Thread]]], ChannelType]:
     cls, value = _guild_channel_factory(channel_type)
     if value in (ChannelType.private_thread, ChannelType.public_thread, ChannelType.news_thread):
         return Thread, value
     return cls, value
 
 
-def _channel_type_factory(
-    cls: Union[type[disnake.abc.GuildChannel], type[Thread]],
-) -> list[ChannelType]:
+def _channel_type_factory(cls: type[Union[disnake.abc.GuildChannel, Thread]]) -> list[ChannelType]:
     return {
         # FIXME: this includes private channels; improve this once there's a common base type for all channels
         disnake.abc.GuildChannel: list(ChannelType.__members__.values()),

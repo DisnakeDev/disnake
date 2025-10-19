@@ -264,7 +264,7 @@ class Poll:
             elif isinstance(answer, str):
                 self._answers[i] = PollAnswer(PollMedia(answer))
             else:
-                msg = f"Expected 'List[str]' or 'List[PollAnswer]' for 'answers', got List[{answer.__class__.__name__!r}]."
+                msg = f"Expected 'list[str]' or 'list[PollAnswer]' for 'answers', got list[{answer.__class__.__name__!r}]."
                 raise TypeError(msg)
 
         self.duration: Optional[timedelta] = duration

@@ -408,7 +408,7 @@ async def convert_flag(ctx: Context, argument: str, flag: Flag, annotation: Any 
             else:
                 return await tuple_convert_flag(ctx, argument, flag, args)
         elif origin is list:
-            # list[x]
+            # typing.List[x]
             annotation = args[0]
             return await convert_flag(ctx, argument, flag, annotation)
         elif origin is Union and args[-1] is type(None):
@@ -416,7 +416,7 @@ async def convert_flag(ctx: Context, argument: str, flag: Flag, annotation: Any 
             annotation = Union[args[:-1]]
             return await run_converters(ctx, annotation, argument, param)
         elif origin is dict:
-            # dict[K, V] -> tuple[K, V]
+            # typing.Dict[K, V] -> typing.Tuple[K, V]
             return await tuple_convert_flag(ctx, argument, flag, args)
 
     try:
