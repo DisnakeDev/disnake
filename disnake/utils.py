@@ -263,7 +263,7 @@ def copy_doc(original: Union[Callable[..., Any], property]) -> Callable[[T], T]:
     def decorator(overridden: T) -> T:
         overridden.__doc__ = original.__doc__
         if callable(original):
-            overridden.__signature__ = _signature(original)  # type: ignore
+            overridden.__signature__ = _signature(original)  # pyright: ignore[reportAttributeAccessIssue]
         return overridden
 
     return decorator
@@ -305,7 +305,8 @@ def warn_deprecated(
         warnings.simplefilter("always", DeprecationWarning)
         warnings.warn(*args, stacklevel=stacklevel + 1, category=DeprecationWarning, **kwargs)
     finally:
-        warnings.filters[:] = old_filters  # type: ignore
+        assert isinstance(warnings.filters, list)
+        warnings.filters[:] = old_filters
 
 
 def oauth_url(
@@ -580,9 +581,9 @@ async def _assetbytes_to_base64_data(data: Optional[AssetBytes]) -> Optional[str
 if HAS_ORJSON:
 
     def _to_json(obj: Any) -> str:
-        return orjson.dumps(obj).decode("utf-8")  # type: ignore
+        return orjson.dumps(obj).decode("utf-8")  # pyright: ignore[reportPossiblyUnboundVariable]
 
-    _from_json = orjson.loads  # type: ignore
+    _from_json = orjson.loads  # pyright: ignore[reportPossiblyUnboundVariable]
 
 else:
 
@@ -710,7 +711,7 @@ class SnowflakeList(array.array):
         def __init__(self, data: Iterable[int], *, is_sorted: bool = False) -> None: ...
 
     def __new__(cls, data: Iterable[int], *, is_sorted: bool = False) -> Self:
-        return array.array.__new__(cls, "Q", data if is_sorted else sorted(data))  # type: ignore
+        return array.array.__new__(cls, "Q", data if is_sorted else sorted(data))  # pyright: ignore[reportReturnType]
 
     def add(self, element: int) -> None:
         i = bisect_left(self, element)

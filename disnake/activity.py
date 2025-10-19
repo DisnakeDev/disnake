@@ -399,8 +399,8 @@ class Activity(BaseActivity):
         inner = " ".join(f"{k!s}={v!r}" for k, v in attrs)
         return f"<Activity {inner}>"
 
-    def to_dict(self) -> dict[str, Any]:
-        ret: dict[str, Any] = {}
+    def to_dict(self) -> ActivityPayload:
+        ret: ActivityPayload = {}  # pyright: ignore[reportAssignmentType]
         for attr in self.__slots__:
             value = getattr(self, attr, None)
             if value is None:
@@ -409,16 +409,16 @@ class Activity(BaseActivity):
             if isinstance(value, dict) and len(value) == 0:
                 continue
 
-            ret[attr] = value
+            ret[attr] = value  # pyright: ignore[reportGeneralTypeIssues]
 
         # fix type field
-        ret["type"] = int(self.type)
+        ret["type"] = int(self.type)  # pyright: ignore[reportGeneralTypeIssues]  # ActivityPayload.type does not include -1
 
         if self.status_display_type:
-            ret["status_display_type"] = int(self.status_display_type)
+            ret["status_display_type"] = int(self.status_display_type)  # pyright: ignore[reportGeneralTypeIssues]
 
         if self.emoji:
-            ret["emoji"] = self.emoji.to_dict()
+            ret["emoji"] = self.emoji.to_dict()  # pyright: ignore[reportGeneralTypeIssues]
         # defined in base class slots
         if self._timestamps:
             ret["timestamps"] = self._timestamps
@@ -609,8 +609,8 @@ class Streaming(BaseActivity):
         name = self.assets["large_image"]
         return name[7:] if name[:7] == "twitch:" else None
 
-    def to_dict(self) -> dict[str, Any]:
-        ret: dict[str, Any] = {
+    def to_dict(self) -> ActivityPayload:
+        ret: ActivityPayload = {
             "type": ActivityType.streaming.value,
             "name": str(self.name),
             "url": str(self.url),
@@ -891,7 +891,7 @@ class CustomActivity(BaseActivity):
             }
 
         if self.emoji:
-            o["emoji"] = self.emoji.to_dict()  # type: ignore
+            o["emoji"] = self.emoji.to_dict()  # pyright: ignore[reportGeneralTypeIssues]
         return o
 
     def __eq__(self, other: Any) -> bool:
@@ -945,16 +945,16 @@ def create_activity(
     if game_type is ActivityType.playing and not (
         "application_id" in data or "session_id" in data or "state" in data
     ):
-        activity = Game(**data)  # type: ignore  # pyright bug(?)
+        activity = Game(**data)  # pyright: ignore[reportArgumentType]  # pyright bug(?)
     elif game_type is ActivityType.custom and "name" in data:
-        activity = CustomActivity(**data)  # type: ignore
+        activity = CustomActivity(**data)  # pyright: ignore[reportArgumentType]
     elif game_type is ActivityType.streaming and "url" in data:
         # url won't be None here
-        activity = Streaming(**data)  # type: ignore
+        activity = Streaming(**data)  # pyright: ignore[reportArgumentType]
     elif game_type is ActivityType.listening and "sync_id" in data and "session_id" in data:
         activity = Spotify(**data)
     else:
-        activity = Activity(**data)  # type: ignore
+        activity = Activity(**data)  # pyright: ignore[reportArgumentType]
 
     if isinstance(activity, (Activity, CustomActivity)) and activity.emoji and state:
         activity.emoji._state = state

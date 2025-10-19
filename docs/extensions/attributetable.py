@@ -67,7 +67,7 @@ def visit_attributetablebadge_node(self: HTMLTranslator, node: nodes.Element) ->
     attributes = {
         "class": f"badge-{badge_type}",
     }
-    self.body.append(self.starttag(node, "span", **attributes))  # type: ignore[reportArgumentType]
+    self.body.append(self.starttag(node, "span", **attributes))  # pyright: ignore[reportArgumentType]
 
 
 def visit_attributetable_item_node(self: HTMLTranslator, node: nodes.Element) -> None:

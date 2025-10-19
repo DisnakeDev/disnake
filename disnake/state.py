@@ -377,7 +377,7 @@ class ConnectionState:
 
     def _get_voice_client(self, guild_id: Optional[int]) -> Optional[VoiceProtocol]:
         # the keys of self._voice_clients are ints
-        return self._voice_clients.get(guild_id)  # type: ignore
+        return self._voice_clients.get(guild_id)  # pyright: ignore[reportArgumentType]
 
     def _add_voice_client(self, guild_id: int, voice: VoiceProtocol) -> None:
         self._voice_clients[guild_id] = voice
@@ -387,7 +387,7 @@ class ConnectionState:
 
     def _update_references(self, ws: DiscordWebSocket) -> None:
         for vc in self.voice_clients:
-            vc.main_ws = ws  # type: ignore
+            vc.main_ws = ws  # pyright: ignore[reportAttributeAccessIssue]
 
     def store_user(self, data: UserPayload) -> User:
         user_id = int(data["id"])
@@ -404,11 +404,12 @@ class ConnectionState:
 
     def get_user(self, id: Optional[int]) -> Optional[User]:
         # the keys of self._users are ints
-        return self._users.get(id)  # type: ignore
+        return self._users.get(id)  # pyright: ignore[reportArgumentType]
 
     def store_emoji(self, guild: Guild, data: EmojiPayload) -> Emoji:
         # the id will be present here
-        emoji_id = int(data["id"])  # type: ignore
+        assert data["id"] is not None
+        emoji_id = int(data["id"])
         self._emojis[emoji_id] = emoji = Emoji(guild=guild, state=self, data=data)
         return emoji
 
@@ -550,15 +551,15 @@ class ConnectionState:
 
     def get_emoji(self, emoji_id: Optional[int]) -> Optional[Emoji]:
         # the keys of self._emojis are ints
-        return self._emojis.get(emoji_id)  # type: ignore
+        return self._emojis.get(emoji_id)  # pyright: ignore[reportArgumentType]
 
     def get_sticker(self, sticker_id: Optional[int]) -> Optional[GuildSticker]:
         # the keys of self._stickers are ints
-        return self._stickers.get(sticker_id)  # type: ignore
+        return self._stickers.get(sticker_id)  # pyright: ignore[reportArgumentType]
 
     def get_soundboard_sound(self, sound_id: Optional[int]) -> Optional[GuildSoundboardSound]:
         # the keys of self._soundboard_sounds are ints
-        return self._soundboard_sounds.get(sound_id)  # type: ignore
+        return self._soundboard_sounds.get(sound_id)  # pyright: ignore[reportArgumentType]
 
     @property
     def private_channels(self) -> list[PrivateChannel]:
@@ -567,16 +568,16 @@ class ConnectionState:
     def _get_private_channel(self, channel_id: Optional[int]) -> Optional[PrivateChannel]:
         try:
             # the keys of self._private_channels are ints
-            value = self._private_channels[channel_id]  # type: ignore
+            value = self._private_channels[channel_id]  # pyright: ignore[reportArgumentType]
         except KeyError:
             return None
         else:
-            self._private_channels.move_to_end(channel_id)  # type: ignore
+            self._private_channels.move_to_end(channel_id)  # pyright: ignore[reportArgumentType]
             return value
 
     def _get_private_channel_by_user(self, user_id: Optional[int]) -> Optional[DMChannel]:
         # the keys of self._private_channels are ints
-        return self._private_channels_by_user.get(user_id)  # type: ignore
+        return self._private_channels_by_user.get(user_id)  # pyright: ignore[reportArgumentType]
 
     def _add_private_channel(self, channel: PrivateChannel) -> None:
         channel_id = channel.id
@@ -612,7 +613,7 @@ class ConnectionState:
 
     def _add_guild_from_data(self, data: Union[GuildPayload, UnavailableGuildPayload]) -> Guild:
         guild = Guild(
-            data=data,  # type: ignore  # may be unavailable guild
+            data=data,  # pyright: ignore[reportArgumentType]  # may be unavailable guild
             state=self,
         )
         self._add_guild(guild)
@@ -760,7 +761,7 @@ class ConnectionState:
         self.clear(views=False, application_commands=False, modals=False)
         self.user = ClientUser(state=self, data=data["user"])
         # self._users is a list of Users, we're setting a ClientUser
-        self._users[self.user.id] = self.user  # type: ignore
+        self._users[self.user.id] = self.user  # pyright: ignore[reportArgumentType]
 
         try:
             application = data["application"]
@@ -790,7 +791,7 @@ class ConnectionState:
     def parse_message_create(self, data: gateway.MessageCreateEvent) -> None:
         channel, _ = self._get_guild_channel(data)
         # channel would be the correct type here
-        message = Message(channel=channel, data=data, state=self)  # type: ignore
+        message = Message(channel=channel, data=data, state=self)  # pyright: ignore[reportArgumentType]
         self.dispatch("message", message)
         if self._messages is not None:
             self._messages.append(message)
@@ -798,7 +799,7 @@ class ConnectionState:
         if channel:
             # we ensure that the channel is a type that implements last_message_id
             if channel.__class__ in (TextChannel, Thread, VoiceChannel, StageChannel):
-                channel.last_message_id = message.id  # type: ignore
+                channel.last_message_id = message.id  # pyright: ignore[reportAttributeAccessIssue]
             # Essentially, messages *don't* count towards message_count, if:
             # - they're the thread starter message
             # - or, they're the initial message of a forum channel thread (which uses MessageType.default)
@@ -806,12 +807,12 @@ class ConnectionState:
             if channel.__class__ is Thread and not (
                 message.type is MessageType.thread_starter_message
                 or (
-                    type(channel.parent) in (ForumChannel, MediaChannel)  # type: ignore
+                    type(channel.parent) in (ForumChannel, MediaChannel)  # pyright: ignore[reportAttributeAccessIssue]
                     and channel.id == message.id
                 )
             ):
-                channel.total_message_sent += 1  # type: ignore
-                channel.message_count += 1  # type: ignore
+                channel.total_message_sent += 1  # pyright: ignore[reportAttributeAccessIssue]
+                channel.message_count += 1  # pyright: ignore[reportAttributeAccessIssue]
 
     def parse_message_delete(self, data: gateway.MessageDeleteEvent) -> None:
         raw = RawMessageDeleteEvent(data)
@@ -850,9 +851,10 @@ class ConnectionState:
             thread.message_count = max(0, thread.message_count - to_subtract)
         if found_messages:
             self.dispatch("bulk_message_delete", found_messages)
+            # self._messages won't be None here
+            assert self._messages is not None
             for msg in found_messages:
-                # self._messages won't be None here
-                self._messages.remove(msg)  # type: ignore
+                self._messages.remove(msg)
 
     def parse_message_update(self, data: gateway.MessageUpdateEvent) -> None:
         raw = RawMessageUpdateEvent(data)
@@ -879,7 +881,7 @@ class ConnectionState:
             self,
             id=emoji_id,
             animated=emoji.get("animated", False),
-            name=emoji["name"],  # type: ignore
+            name=emoji["name"],  # pyright: ignore[reportArgumentType]
         )
         raw = RawReactionActionEvent(data, emoji, "REACTION_ADD")
 
@@ -925,7 +927,7 @@ class ConnectionState:
             animated=emoji.get("animated", False),
             # may be `None` in gateway events if custom emoji data isn't available anymore
             # https://discord.com/developers/docs/resources/emoji#emoji-object-custom-emoji-examples
-            name=emoji["name"],  # type: ignore
+            name=emoji["name"],  # pyright: ignore[reportArgumentType]
         )
         raw = RawReactionActionEvent(data, emoji, "REACTION_REMOVE")
         self.dispatch("raw_reaction_remove", raw)
@@ -953,7 +955,7 @@ class ConnectionState:
             animated=emoji.get("animated", False),
             # may be `None` in gateway events if custom emoji data isn't available anymore
             # https://discord.com/developers/docs/resources/emoji#emoji-object-custom-emoji-examples
-            name=emoji["name"],  # type: ignore
+            name=emoji["name"],  # pyright: ignore[reportArgumentType]
         )
         raw = RawReactionClearEmojiEvent(data, emoji)
         self.dispatch("raw_reaction_clear_emoji", raw)
@@ -1100,7 +1102,7 @@ class ConnectionState:
             channel = self._get_private_channel(channel_id)
             old_channel = copy.copy(channel)
             # the channel is a GroupChannel
-            channel._update_group(data)  # type: ignore
+            channel._update_group(data)  # pyright: ignore[reportOptionalMemberAccess, reportAttributeAccessIssue]
             self.dispatch("private_channel_update", old_channel, channel)
             return
 
@@ -1112,7 +1114,7 @@ class ConnectionState:
                 old_channel = copy.copy(channel)
                 channel._update(
                     guild,
-                    data,  # type: ignore  # data type will always match channel type
+                    data,  # pyright: ignore[reportArgumentType]  # data type will always match channel type
                 )
                 self.dispatch("guild_channel_update", old_channel, channel)
             else:
@@ -1136,7 +1138,7 @@ class ConnectionState:
             channel = factory(
                 guild=guild,
                 state=self,
-                data=data,  # type: ignore  # data type will always match channel type
+                data=data,  # pyright: ignore[reportArgumentType]  # data type will always match channel type
             )
             guild._add_channel(channel)
             self.dispatch("guild_channel_create", channel)
@@ -1184,8 +1186,8 @@ class ConnectionState:
         guild._add_thread(thread)
         if not has_thread:
             if data.get("newly_created"):
-                if type(thread.parent) in (ForumChannel, MediaChannel):
-                    thread.parent.last_thread_id = thread.id  # type: ignore
+                if isinstance(thread.parent, (ForumChannel, MediaChannel)):
+                    thread.parent.last_thread_id = thread.id
 
                 self.dispatch("thread_create", thread)
             else:
@@ -1435,7 +1437,7 @@ class ConnectionState:
             guild = self._get_guild(int(data["id"]))
             if guild is not None:
                 guild.unavailable = False
-                guild._from_data(data)  # type: ignore  # data type not narrowed correctly to full guild
+                guild._from_data(data)  # pyright: ignore[reportArgumentType]  # data type not narrowed correctly to full guild
                 return guild
 
         return self._add_guild_from_data(data)
@@ -2145,7 +2147,7 @@ class ConnectionState:
             self,
             # This may be `None` when custom emoji data in reactions isn't available.
             # Should generally be fine, since we have an id at this point.
-            name=data["name"],  # type: ignore
+            name=data["name"],  # pyright: ignore[reportArgumentType]
             id=emoji_id,
             animated=data.get("animated", False),
         )
@@ -2233,18 +2235,22 @@ class ConnectionState:
             )
 
         if ch_type in (ChannelType.group, ChannelType.private):
-            return (
+            return (  # pyright: ignore[reportReturnType]
                 self._get_private_channel(channel_id)
                 # the factory will be a DMChannel or GroupChannel here
-                or factory(me=self.user, data=data, state=self)  # type: ignore
+                or factory(  # pyright: ignore[reportCallIssue]
+                    me=self.user,  # pyright: ignore[reportCallIssue]
+                    data=data,  # pyright: ignore[reportArgumentType]
+                    state=self,
+                )
             )
 
         # the factory can't be a DMChannel or GroupChannel here
-        data.setdefault("position", 0)  # type: ignore
+        data.setdefault("position", 0)  # pyright: ignore[reportArgumentType, reportCallIssue]
         return (isinstance(guild, Guild) and guild.get_channel_or_thread(channel_id)) or factory(
-            guild=guild,  # type: ignore  # FIXME: create proper fallback guild instead of passing Object
+            guild=guild,  # pyright: ignore[reportArgumentType, reportCallIssue]  # FIXME: create proper fallback guild instead of passing Object
             state=self,
-            data=data,  # type: ignore  # generic payload type
+            data=data,  # pyright: ignore[reportArgumentType]  # generic payload type
         )
 
     def get_channel(self, id: Optional[int]) -> Optional[Union[Channel, Thread]]:
@@ -2281,22 +2287,23 @@ class ConnectionState:
         *,
         with_localizations: bool = True,
     ) -> list[APIApplicationCommand]:
+        assert self.application_id is not None
         results = await self.http.get_global_commands(
-            self.application_id,  # type: ignore
-            with_localizations=with_localizations,
+            self.application_id, with_localizations=with_localizations
         )
         return [application_command_factory(data) for data in results]
 
     async def fetch_global_command(self, command_id: int) -> APIApplicationCommand:
-        result = await self.http.get_global_command(self.application_id, command_id)  # type: ignore
+        assert self.application_id is not None
+        result = await self.http.get_global_command(self.application_id, command_id)
         return application_command_factory(result)
 
     async def create_global_command(
         self, application_command: ApplicationCommand
     ) -> APIApplicationCommand:
+        assert self.application_id is not None
         result = await self.http.upsert_global_command(
-            self.application_id,  # type: ignore
-            application_command.to_dict(),
+            self.application_id, application_command.to_dict()
         )
         cmd = application_command_factory(result)
         self._add_global_application_command(cmd)
@@ -2305,24 +2312,25 @@ class ConnectionState:
     async def edit_global_command(
         self, command_id: int, new_command: ApplicationCommand
     ) -> APIApplicationCommand:
+        assert self.application_id is not None
         result = await self.http.edit_global_command(
-            self.application_id,  # type: ignore
-            command_id,
-            new_command.to_dict(),
+            self.application_id, command_id, new_command.to_dict()
         )
         cmd = application_command_factory(result)
         self._add_global_application_command(cmd)
         return cmd
 
     async def delete_global_command(self, command_id: int) -> None:
-        await self.http.delete_global_command(self.application_id, command_id)  # type: ignore
+        assert self.application_id is not None
+        await self.http.delete_global_command(self.application_id, command_id)
         self._remove_global_application_command(command_id)
 
     async def bulk_overwrite_global_commands(
         self, application_commands: list[ApplicationCommand]
     ) -> list[APIApplicationCommand]:
+        assert self.application_id is not None
         payload = [cmd.to_dict() for cmd in application_commands]
-        results = await self.http.bulk_upsert_global_commands(self.application_id, payload)  # type: ignore
+        results = await self.http.bulk_upsert_global_commands(self.application_id, payload)
         commands = [application_command_factory(data) for data in results]
         self._global_application_commands = {cmd.id: cmd for cmd in commands}
         return commands
@@ -2335,24 +2343,23 @@ class ConnectionState:
         *,
         with_localizations: bool = True,
     ) -> list[APIApplicationCommand]:
+        assert self.application_id is not None
         results = await self.http.get_guild_commands(
-            self.application_id,  # type: ignore
-            guild_id,
-            with_localizations=with_localizations,
+            self.application_id, guild_id, with_localizations=with_localizations
         )
         return [application_command_factory(data) for data in results]
 
     async def fetch_guild_command(self, guild_id: int, command_id: int) -> APIApplicationCommand:
-        result = await self.http.get_guild_command(self.application_id, guild_id, command_id)  # type: ignore
+        assert self.application_id is not None
+        result = await self.http.get_guild_command(self.application_id, guild_id, command_id)
         return application_command_factory(result)
 
     async def create_guild_command(
         self, guild_id: int, application_command: ApplicationCommand
     ) -> APIApplicationCommand:
+        assert self.application_id is not None
         result = await self.http.upsert_guild_command(
-            self.application_id,  # type: ignore
-            guild_id,
-            application_command.to_dict(),
+            self.application_id, guild_id, application_command.to_dict()
         )
         cmd = application_command_factory(result)
         self._add_guild_application_command(guild_id, cmd)
@@ -2361,33 +2368,25 @@ class ConnectionState:
     async def edit_guild_command(
         self, guild_id: int, command_id: int, new_command: ApplicationCommand
     ) -> APIApplicationCommand:
+        assert self.application_id is not None
         result = await self.http.edit_guild_command(
-            self.application_id,  # type: ignore
-            guild_id,
-            command_id,
-            new_command.to_dict(),
+            self.application_id, guild_id, command_id, new_command.to_dict()
         )
         cmd = application_command_factory(result)
         self._add_guild_application_command(guild_id, cmd)
         return cmd
 
     async def delete_guild_command(self, guild_id: int, command_id: int) -> None:
-        await self.http.delete_guild_command(
-            self.application_id,  # type: ignore
-            guild_id,
-            command_id,
-        )
+        assert self.application_id is not None
+        await self.http.delete_guild_command(self.application_id, guild_id, command_id)
         self._remove_guild_application_command(guild_id, command_id)
 
     async def bulk_overwrite_guild_commands(
         self, guild_id: int, application_commands: list[ApplicationCommand]
     ) -> list[APIApplicationCommand]:
+        assert self.application_id is not None
         payload = [cmd.to_dict() for cmd in application_commands]
-        results = await self.http.bulk_upsert_guild_commands(
-            self.application_id,  # type: ignore
-            guild_id,
-            payload,
-        )
+        results = await self.http.bulk_upsert_guild_commands(self.application_id, guild_id, payload)
         commands = [application_command_factory(data) for data in results]
         self._guild_application_commands[guild_id] = {cmd.id: cmd for cmd in commands}
         return commands
@@ -2397,19 +2396,18 @@ class ConnectionState:
     async def bulk_fetch_command_permissions(
         self, guild_id: int
     ) -> list[GuildApplicationCommandPermissions]:
+        assert self.application_id is not None
         array = await self.http.get_guild_application_command_permissions(
-            self.application_id,  # type: ignore
-            guild_id,
+            self.application_id, guild_id
         )
         return [GuildApplicationCommandPermissions(state=self, data=obj) for obj in array]
 
     async def fetch_command_permissions(
         self, guild_id: int, command_id: int
     ) -> GuildApplicationCommandPermissions:
+        assert self.application_id is not None
         data = await self.http.get_application_command_permissions(
-            self.application_id,  # type: ignore
-            guild_id,
-            command_id,
+            self.application_id, guild_id, command_id
         )
         return GuildApplicationCommandPermissions(state=self, data=data)
 
@@ -2432,7 +2430,7 @@ class AutoShardedConnectionState(ConnectionState):
                 channel_id = msg.channel.id
                 channel = new_guild._resolve_channel(channel_id) or Object(id=channel_id)
                 # channel will either be a TextChannel, VoiceChannel, Thread, StageChannel, or Object
-                msg._rebind_cached_references(new_guild, channel)  # type: ignore
+                msg._rebind_cached_references(new_guild, channel)  # pyright: ignore[reportArgumentType]
 
         # these generally get deallocated once the voice reconnect times out
         # (it never succeeds after gateway reconnects)
@@ -2448,7 +2446,7 @@ class AutoShardedConnectionState(ConnectionState):
             # TODO: use PartialMessageable instead of Object (3.0)
             new_channel = new_guild._resolve_channel(vc.channel.id) or Object(id=vc.channel.id)
             if new_channel is not vc.channel:
-                vc.channel = new_channel  # type: ignore
+                vc.channel = new_channel  # pyright: ignore[reportAttributeAccessIssue]
 
     def _update_member_references(self) -> None:
         messages: Sequence[Message] = self._messages or []
@@ -2579,7 +2577,7 @@ class AutoShardedConnectionState(ConnectionState):
 
         self.user = user = ClientUser(state=self, data=data["user"])
         # self._users is a list of Users, we're setting a ClientUser
-        self._users[user.id] = user  # type: ignore
+        self._users[user.id] = user  # pyright: ignore[reportArgumentType]
 
         try:
             application = data["application"]
@@ -2594,7 +2592,7 @@ class AutoShardedConnectionState(ConnectionState):
             self._add_guild_from_data(guild_data)
 
         self.dispatch("connect")
-        self.dispatch("shard_connect", data["__shard_id__"])  # type: ignore  # set in websocket receive
+        self.dispatch("shard_connect", data["__shard_id__"])  # pyright: ignore[reportGeneralTypeIssues]  # set in websocket receive
         self.call_handlers("connect_internal")
 
         if self._ready_task is None:
@@ -2602,4 +2600,4 @@ class AutoShardedConnectionState(ConnectionState):
 
     def parse_resumed(self, data: gateway.ResumedEvent) -> None:
         self.dispatch("resumed")
-        self.dispatch("shard_resumed", data["__shard_id__"])  # type: ignore  # set in websocket receive
+        self.dispatch("shard_resumed", data["__shard_id__"])  # pyright: ignore[reportGeneralTypeIssues]  # set in websocket receive

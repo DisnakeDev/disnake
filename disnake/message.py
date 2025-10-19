@@ -573,7 +573,8 @@ class DeletedReferencedMessage:
     def id(self) -> int:
         """:class:`int`: The message ID of the deleted referenced message."""
         # the parent's message id won't be None here
-        return self._parent.message_id  # type: ignore
+        assert self._parent.message_id is not None
+        return self._parent.message_id
 
     @property
     def channel_id(self) -> int:
@@ -1217,7 +1218,7 @@ class Message(Hashable):
         self.activity: Optional[MessageActivityPayload] = data.get("activity")
         # for user experience, on_message has no business getting partials
         # TODO: Subscripted message to include the channel
-        self.channel: Union[GuildMessageable, DMChannel, GroupChannel] = channel  # type: ignore
+        self.channel: Union[GuildMessageable, DMChannel, GroupChannel] = channel  # pyright: ignore[reportAttributeAccessIssue]
         self.position: Optional[int] = data.get("position", None)
         self._edited_timestamp: Optional[datetime.datetime] = utils.parse_time(
             data["edited_timestamp"]
@@ -1243,7 +1244,7 @@ class Message(Hashable):
         self.call = MessageCall(data=call_data) if (call_data := data.get("call")) else None
         try:
             # if the channel doesn't have a guild attribute, we handle that
-            self.guild = channel.guild  # type: ignore
+            self.guild = channel.guild  # pyright: ignore[reportAttributeAccessIssue]
         except AttributeError:
             self.guild = state._get_guild(utils._get_as_snowflake(data, "guild_id"))
 
@@ -1285,7 +1286,11 @@ class Message(Hashable):
                         chan, _ = state._get_guild_channel(resolved)
 
                     # the channel will be the correct type here
-                    ref.resolved = self.__class__(channel=chan, data=resolved, state=state)  # type: ignore
+                    ref.resolved = self.__class__(
+                        channel=chan,  # pyright: ignore[reportArgumentType]
+                        data=resolved,
+                        state=state,
+                    )
 
         _ref = data.get("message_reference", {})
         self.message_snapshots: list[ForwardedMessage] = [
@@ -1300,7 +1305,7 @@ class Message(Hashable):
 
         for handler in ("author", "member", "mentions", "mention_roles"):
             if handler in data:
-                getattr(self, f"_handle_{handler}")(data[handler])  # type: ignore
+                getattr(self, f"_handle_{handler}")(data[handler])  # pyright: ignore[reportTypedDictNotRequiredAccess]
 
     def __repr__(self) -> str:
         name = self.__class__.__name__
@@ -1446,7 +1451,7 @@ class Message(Hashable):
         author = self.author
         try:
             # Update member reference
-            author._update_from_message(member)  # type: ignore
+            author._update_from_message(member)  # pyright: ignore[reportAttributeAccessIssue]
         except AttributeError:
             # It's a user here
             # TODO: consider adding to cache here
@@ -1730,7 +1735,7 @@ class Message(Hashable):
 
         if self.type is MessageType.guild_stream:
             # the author will be a Member
-            return f"{self.author.name} is live! Now streaming {self.author.activity.name}."  # type: ignore
+            return f"{self.author.name} is live! Now streaming {self.author.activity.name}."  # pyright: ignore[reportOptionalMemberAccess, reportAttributeAccessIssue]
 
         if self.type is MessageType.guild_discovery_disqualified:
             return "This server has been removed from Server Discovery because it no longer passes all the requirements. Check Server Settings for more details."
@@ -1757,7 +1762,7 @@ class Message(Hashable):
                 return "Sorry, we couldn't load the first message in this thread"
 
             # the resolved message for the reference will be a Message
-            return self.reference.resolved.content  # type: ignore
+            return self.reference.resolved.content  # pyright: ignore[reportAttributeAccessIssue]
 
         if self.type is MessageType.guild_invite_reminder:
             # todo: determine if this should be the owner content or the user content
@@ -2604,7 +2609,7 @@ class PartialMessage(Hashable):
 
     __slots__ = ("channel", "id", "_cs_guild", "_state")
 
-    jump_url: str = Message.jump_url  # type: ignore
+    jump_url = Message.jump_url
     delete = Message.delete
     publish = Message.publish
     pin = Message.pin
@@ -2640,7 +2645,7 @@ class PartialMessage(Hashable):
         self._state: ConnectionState = channel._state
         self.id: int = id
 
-    def _update(self, data) -> None:
+    def _update(self, data: Any) -> None:
         # This is used for duck typing purposes.
         # Just do nothing with the data.
         pass
@@ -2993,7 +2998,7 @@ class ForwardedMessage:
         self.content: str = data["content"]
         self.embeds: list[Embed] = [Embed.from_dict(a) for a in data["embeds"]]
         # should never be None in message_reference(s) that are forwarding
-        self.channel_id: int = channel_id  # type: ignore
+        self.channel_id: int = channel_id  # pyright: ignore[reportAttributeAccessIssue]
         self.attachments: list[Attachment] = [
             Attachment(data=a, state=state) for a in data["attachments"]
         ]

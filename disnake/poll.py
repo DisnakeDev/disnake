@@ -379,10 +379,12 @@ class Poll:
 
         return poll
 
+    # TODO: why is this private? other models' to_dict is not
     def _to_dict(self) -> PollCreatePayload:
+        assert self.duration is not None
         payload: PollCreatePayload = {
             "question": self.question._to_dict(),
-            "duration": (int(self.duration.total_seconds()) // 3600),  # type: ignore
+            "duration": int(self.duration.total_seconds()) // 3600,
             "allow_multiselect": self.allow_multiselect,
             "layout_type": self.layout_type.value,
             "answers": [answer._to_dict() for answer in self._answers.values()],

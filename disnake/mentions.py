@@ -131,7 +131,7 @@ class AllowedMentions:
     def to_dict(self) -> AllowedMentionsPayload:
         # n.b. this runs nearly every time a message is sent
         parse: list[AllowedMentionTypePayload] = []
-        data: AllowedMentionsPayload = {}  # type: ignore
+        data: AllowedMentionsPayload = {"parse": parse}  # pyright: ignore[reportAssignmentType]
 
         if self.everyone:
             parse.append("everyone")
@@ -150,7 +150,6 @@ class AllowedMentions:
         if self.replied_user:
             data["replied_user"] = True
 
-        data["parse"] = parse
         return data
 
     def merge(self, other: AllowedMentions) -> AllowedMentions:

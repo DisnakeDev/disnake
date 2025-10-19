@@ -35,7 +35,7 @@ from ..message import Message
 from ..mixins import Hashable
 from ..object import Object
 from ..ui.action_row import normalize_components_to_dict
-from ..user import BaseUser, User
+from ..user import BaseUser, ClientUser, User
 
 __all__ = (
     "Webhook",
@@ -189,7 +189,8 @@ class AsyncWebhookAdapter:
                             if not response.headers.get("Via"):
                                 raise HTTPException(response, data)
 
-                            retry_after: float = data["retry_after"]  # type: ignore
+                            assert isinstance(data, dict)
+                            retry_after: float = data["retry_after"]
                             _log.warning(
                                 "Webhook ID %s is rate limited. Retrying in %.2f seconds",
                                 webhook_id,
@@ -763,11 +764,11 @@ class _WebhookState(Generic[WebhookT]):
         if self._parent is not None:
             return self._parent.store_user(data)
         # state parameter is artificial
-        return BaseUser(state=self, data=data)  # type: ignore
+        return BaseUser(state=self, data=data)  # pyright: ignore[reportArgumentType]
 
     def create_user(self, data) -> BaseUser:
         # state parameter is artificial
-        return BaseUser(state=self, data=data)  # type: ignore
+        return BaseUser(state=self, data=data)  # pyright: ignore[reportArgumentType]
 
     @property
     def http(self) -> HTTPClient:
@@ -776,7 +777,7 @@ class _WebhookState(Generic[WebhookT]):
 
         # Some data classes assign state.http and that should be kosher
         # however, using it should result in a late-binding error.
-        return _FriendlyHttpAttributeErrorHelper()  # type: ignore
+        return _FriendlyHttpAttributeErrorHelper()  # pyright: ignore[reportReturnType]
 
     def __getattr__(self, attr) -> Any:
         if self._parent is not None:
@@ -1007,7 +1008,7 @@ class BaseWebhook(Hashable):
         self.user: Optional[Union[BaseUser, User]] = None
         if user is not None:
             # state parameter may be _WebhookState
-            self.user = User(state=self._state, data=user)  # type: ignore
+            self.user = User(state=self._state, data=user)  # pyright: ignore[reportArgumentType]
 
         source_channel = data.get("source_channel")
         if source_channel:
@@ -1061,8 +1062,9 @@ class BaseWebhook(Hashable):
         They can only create new threads (see ``thread_name`` for :attr:`Webhook.send`)
         and interact with existing threads.
         """
-        guild = self.guild
-        return guild and guild.get_channel(self.channel_id)  # type: ignore
+        if self.guild is None or self.channel_id is None:
+            return None
+        return self.guild.get_channel(self.channel_id)  # pyright: ignore[reportReturnType]
 
     @property
     def created_at(self) -> datetime.datetime:
@@ -1271,12 +1273,12 @@ class Webhook(BaseWebhook):
             msg = "Invalid webhook URL given."
             raise ValueError(msg)
 
-        data: dict[str, Any] = m.groupdict()
-        data["type"] = 1
-        return cls(data, session, token=bot_token)  # type: ignore
+        data: WebhookPayload = {"id": m["id"], "type": 1, "token": m["token"]}
+        return cls(data, session, token=bot_token)
 
+    # FIXME: data comes from HTTPClient.follow_webhook, but is hinted as returning Response[None]?
     @classmethod
-    def _as_follower(cls, data, *, channel, user) -> Webhook:
+    def _as_follower(cls, data: Any, *, channel: TextChannel, user: ClientUser) -> Webhook:
         name = f"{channel.guild} #{channel}"
         feed: WebhookPayload = {
             "id": data["webhook_id"],
@@ -1294,12 +1296,12 @@ class Webhook(BaseWebhook):
         }
 
         state = channel._state
-        session = channel._state.http._HTTPClient__session
+        session = channel._state.http._HTTPClient__session  # pyright: ignore[reportAttributeAccessIssue]
         return cls(feed, session=session, state=state, token=state.http.token)
 
     @classmethod
-    def from_state(cls, data, state) -> Webhook:
-        session = state.http._HTTPClient__session
+    def from_state(cls, data: WebhookPayload, state: ConnectionState) -> Webhook:
+        session = state.http._HTTPClient__session  # pyright: ignore[reportAttributeAccessIssue]
         return cls(data, session=session, state=state, token=state.http.token)
 
     async def fetch(self, *, prefer_auth: bool = True) -> Webhook:
@@ -1522,12 +1524,12 @@ class Webhook(BaseWebhook):
         else:
             msg_channel = self.channel
 
-        if not msg_channel:
+        if msg_channel is None:
             # state may be artificial (unlikely at this point...)
-            msg_channel = PartialMessageable(state=self._state, id=channel_id)  # type: ignore
+            msg_channel = PartialMessageable(state=self._state, id=channel_id)  # pyright: ignore[reportArgumentType]
 
         # state is artificial
-        return WebhookMessage(data=data, state=state, channel=msg_channel)  # type: ignore
+        return WebhookMessage(data=data, state=state, channel=msg_channel)  # pyright: ignore[reportArgumentType]
 
     @overload
     async def send(
@@ -1843,11 +1845,8 @@ class Webhook(BaseWebhook):
 
         msg = None
         if wait:
-            msg = self._create_message(
-                data,  # type: ignore
-                thread=thread,
-                thread_name=thread_name,
-            )
+            assert data is not None
+            msg = self._create_message(data, thread=thread, thread_name=thread_name)
             if delete_after is not MISSING:
                 await msg.delete(delay=delete_after)
 

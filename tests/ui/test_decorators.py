@@ -68,5 +68,5 @@ class TestDecorator:
     def _test_typing_cls(self) -> None:
         ui.button(
             cls=_CustomButton,
-            this_should_not_work="h",  # type: ignore
+            this_should_not_work="h",  # pyright: ignore[reportCallIssue]
         )

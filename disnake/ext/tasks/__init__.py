@@ -559,7 +559,7 @@ class Loop(Generic[LF]):
             msg = f"Expected coroutine function, received {coro.__class__.__name__!r}."
             raise TypeError(msg)
 
-        self._error = coro  # type: ignore
+        self._error = coro  # pyright: ignore[reportAttributeAccessIssue]
         return coro
 
     def _get_next_sleep_time(self) -> datetime.datetime:

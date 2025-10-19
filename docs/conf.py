@@ -110,7 +110,7 @@ copyright = "2015-2021, Rapptz, 2021-present, Disnake Development"
 
 version = ""
 with open("../disnake/__init__.py") as f:
-    version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE).group(1)  # type: ignore
+    version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE).group(1)  # pyright: ignore[reportOptionalMemberAccess]
 
 # The full version, including alpha/beta/rc tags.
 release = version
@@ -219,9 +219,13 @@ def linkcode_resolve(domain: str, info: dict[str, Any]) -> Optional[str]:
         obj = inspect.unwrap(obj)
 
         if isinstance(obj, property):
-            obj = inspect.unwrap(obj.fget)  # type: ignore
+            assert obj.fget is not None
+            obj = inspect.unwrap(obj.fget)
 
-        path = os.path.relpath(inspect.getsourcefile(obj), start=_disnake_module_path)  # type: ignore
+        path = os.path.relpath(  # pyright: ignore[reportCallIssue]
+            inspect.getsourcefile(obj),  # pyright: ignore[reportArgumentType]
+            start=_disnake_module_path,
+        )
         src, lineno = inspect.getsourcelines(obj)
     except Exception:
         return None
@@ -505,4 +509,4 @@ def setup(app: Sphinx) -> None:
     # HACK: avoid deprecation warnings caused by sphinx always iterating over all class attributes
     import disnake
 
-    del disnake.Embed.Empty  # type: ignore
+    del disnake.Embed.Empty  # pyright: ignore[reportAttributeAccessIssue]

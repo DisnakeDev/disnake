@@ -274,7 +274,7 @@ class ActionRow(Component, Generic[ActionRowChildComponentT]):
         self.id = data.get("id", 0)
 
         children = [_component_factory(d) for d in data.get("components", [])]
-        self.children: list[ActionRowChildComponentT] = children  # type: ignore
+        self.children: list[ActionRowChildComponentT] = children  # pyright: ignore[reportAttributeAccessIssue]
 
     def to_dict(self) -> ActionRowPayload:
         return {
@@ -448,7 +448,7 @@ class BaseSelectMenu(Component):
     # fully support readonly items yet (which would help avoid this)
     def __init__(self, data: AnySelectMenuPayload) -> None:
         component_type = try_enum(ComponentType, data["type"])
-        self.type: SelectMenuType = component_type  # type: ignore
+        self.type: SelectMenuType = component_type  # pyright: ignore[reportAttributeAccessIssue]
         self.id = data.get("id", 0)
 
         self.custom_id: str = data["custom_id"]
@@ -1038,7 +1038,7 @@ class Section(Component):
         ]
 
         accessory = _component_factory(data["accessory"])
-        self.accessory: SectionAccessoryComponent = accessory  # type: ignore
+        self.accessory: SectionAccessoryComponent = accessory  # pyright: ignore[reportAttributeAccessIssue]
 
     def to_dict(self) -> SectionComponentPayload:
         return {
@@ -1456,7 +1456,7 @@ class Container(Component):
         self.id = data.get("id", 0)
 
         components = [_component_factory(d) for d in data.get("components", [])]
-        self.children: list[ContainerChildComponent] = components  # type: ignore
+        self.children: list[ContainerChildComponent] = components  # pyright: ignore[reportAttributeAccessIssue]
 
         self.accent_colour: Optional[Colour] = (
             Colour(accent_color) if (accent_color := data.get("accent_color")) is not None else None
@@ -1527,7 +1527,7 @@ class Label(Component):
         self.description: Optional[str] = data.get("description")
 
         component = _component_factory(data["component"])
-        self.component: LabelChildComponent = component  # type: ignore
+        self.component: LabelChildComponent = component  # pyright: ignore[reportAttributeAccessIssue]
 
     def to_dict(self) -> LabelComponentPayload:
         payload: LabelComponentPayload = {
@@ -1665,9 +1665,9 @@ def _component_factory(data: ComponentPayload, *, type: type[C] = Component) -> 
     except KeyError:
         # if we encounter an unknown component type, just construct a placeholder component for it
         as_enum = try_enum(ComponentType, component_type)
-        return Component._raw_construct(type=as_enum)  # type: ignore
+        return Component._raw_construct(type=as_enum)  # pyright: ignore[reportReturnType]
     else:
-        return component_cls(data)  # type: ignore
+        return component_cls(data)  # pyright: ignore[reportCallIssue, reportReturnType]
 
 
 # this is just a rebranded _component_factory, as a workaround to Python not supporting typescript-like mapped types

@@ -84,9 +84,10 @@ class WelcomeScreenChannel:
         return cls(id=int(data["channel_id"]), description=data["description"], emoji=emoji)
 
     def to_dict(self) -> WelcomeScreenChannelPayload:
-        result: WelcomeScreenChannelPayload = {}  # type: ignore
-        result["channel_id"] = self.id
-        result["description"] = self.description
+        result: WelcomeScreenChannelPayload = {
+            "channel_id": self.id,
+            "description": self.description,
+        }  # pyright: ignore[reportAssignmentType]
 
         if self.emoji is not None:
             if self.emoji.id:

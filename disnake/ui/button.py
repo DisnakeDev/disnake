@@ -363,6 +363,6 @@ def button(
 
         func.__discord_ui_model_type__ = cls
         func.__discord_ui_model_kwargs__ = kwargs
-        return func  # type: ignore
+        return func  # pyright: ignore[reportReturnType]
 
     return decorator

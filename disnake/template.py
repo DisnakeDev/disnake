@@ -138,7 +138,7 @@ class Template:
             source_serialised["id"] = guild_id
             state = _PartialTemplateState(state=self._state)
             # Guild expects a ConnectionState, we're passing a _PartialTemplateState
-            self.source_guild = Guild(data=source_serialised, state=state)  # type: ignore
+            self.source_guild = Guild(data=source_serialised, state=state)  # pyright: ignore[reportArgumentType]
         else:
             self.source_guild = guild
 

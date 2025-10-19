@@ -12,7 +12,7 @@ import os
 from typing import Any, Optional
 
 import disnake
-import youtube_dl  # type: ignore
+import youtube_dl  # pyright: ignore[reportMissingImports]
 from disnake.ext import commands
 
 # Suppress noise about console usage from errors

@@ -205,9 +205,9 @@ class Injection(Generic[P, T_]):
         .. versionadded:: 2.6
         """
         if self._injected is not None:
-            return self.function(self._injected, *args, **kwargs)  # type: ignore
+            return self.function(self._injected, *args, **kwargs)  # pyright: ignore[reportCallIssue]
         else:
-            return self.function(*args, **kwargs)  # type: ignore
+            return self.function(*args, **kwargs)  # pyright: ignore[reportCallIssue]
 
     @classmethod
     def register(
@@ -675,7 +675,7 @@ class ParamInfo:
     def _parse_enum(self, annotation: Any) -> None:
         if isinstance(annotation, (EnumMeta, disnake.enums.EnumMeta)):
             self.choices = [
-                OptionChoice(name, value.value)  # type: ignore
+                OptionChoice(name, value.value)  # pyright: ignore[reportAttributeAccessIssue]
                 for name, value in annotation.__members__.items()
             ]
         else:
@@ -1357,7 +1357,7 @@ def option_enum(
 
     choices = choices or kwargs
     first, *_ = choices.values()
-    return Enum("", choices, type=type(first))  # type: ignore
+    return Enum("", choices, type=type(first))  # pyright: ignore[reportReturnType]
 
 
 class ConverterMethod(classmethod):

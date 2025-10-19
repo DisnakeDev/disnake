@@ -24,6 +24,10 @@ from .utils import MISSING, _generated
 if TYPE_CHECKING:
     from typing_extensions import Self
 
+    from disnake.types.appinfo import ApplicationIntegrationType
+    from disnake.types.automod import AutoModPresetType
+    from disnake.types.interactions import InteractionContextType
+
 
 __all__ = (
     "SystemChannelFlags",
@@ -2277,6 +2281,9 @@ class AutoModKeywordPresets(ListBaseFlags):
             self, *, profanity: bool = ..., sexual_content: bool = ..., slurs: bool = ...
         ) -> None: ...
 
+        @property
+        def values(self) -> list[AutoModPresetType]: ...
+
     @classmethod
     def all(cls) -> Self:
         """A factory method that creates an :class:`AutoModKeywordPresets` instance with everything enabled."""
@@ -2796,6 +2803,9 @@ class ApplicationInstallTypes(ListBaseFlags):
         @_generated
         def __init__(self, *, guild: bool = ..., user: bool = ...) -> None: ...
 
+        @property
+        def values(self) -> list[ApplicationIntegrationType]: ...
+
     @classmethod
     def all(cls) -> Self:
         """A factory method that creates an :class:`ApplicationInstallTypes` instance with everything enabled."""
@@ -2890,6 +2900,9 @@ class InteractionContextTypes(ListBaseFlags):
         def __init__(
             self, *, bot_dm: bool = ..., guild: bool = ..., private_channel: bool = ...
         ) -> None: ...
+
+        @property
+        def values(self) -> list[InteractionContextType]: ...
 
     @classmethod
     def all(cls) -> Self:

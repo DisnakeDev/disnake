@@ -350,7 +350,7 @@ class AutoModTriggerMetadata:
         :class:`AutoModTriggerMetadata`
             The new metadata instance.
         """
-        return self.__class__(  # type: ignore  # call doesn't match any overloads
+        return self.__class__(
             keyword_filter=self.keyword_filter if keyword_filter is MISSING else keyword_filter,
             regex_patterns=self.regex_patterns if regex_patterns is MISSING else regex_patterns,
             presets=self.presets if presets is MISSING else presets,
@@ -363,7 +363,7 @@ class AutoModTriggerMetadata:
                 if mention_raid_protection_enabled is MISSING
                 else mention_raid_protection_enabled
             ),
-        )
+        )  # pyright: ignore[reportCallIssue]  # call doesn't match any overloads
 
     @classmethod
     def _from_dict(cls, data: AutoModTriggerMetadataPayload) -> Self:
@@ -372,14 +372,14 @@ class AutoModTriggerMetadata:
         else:
             presets = None
 
-        return cls(  # type: ignore  # call doesn't match any overloads
+        return cls(
             keyword_filter=data.get("keyword_filter"),
             regex_patterns=data.get("regex_patterns"),
             presets=presets,
             allow_list=data.get("allow_list"),
             mention_total_limit=data.get("mention_total_limit"),
             mention_raid_protection_enabled=data.get("mention_raid_protection_enabled"),
-        )
+        )  # pyright: ignore[reportCallIssue]  # call doesn't match any overloads
 
     def to_dict(self) -> AutoModTriggerMetadataPayload:
         data: AutoModTriggerMetadataPayload = {}
@@ -388,7 +388,7 @@ class AutoModTriggerMetadata:
         if self.regex_patterns is not None:
             data["regex_patterns"] = list(self.regex_patterns)
         if self.presets is not None:
-            data["presets"] = self.presets.values  # type: ignore  # `values` contains ints instead of preset literal values
+            data["presets"] = self.presets.values
         if self.allow_list is not None:
             data["allow_list"] = list(self.allow_list)
         if self.mention_total_limit is not None:

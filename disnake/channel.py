@@ -147,7 +147,7 @@ class VoiceChannelEffect:
             else:
                 sound_data: PartialSoundboardSoundPayload = {
                     "sound_id": sound_id,
-                    "volume": data.get("sound_volume"),  # type: ignore  # assume this exists if sound_id is set
+                    "volume": data.get("sound_volume"),  # pyright: ignore[reportAssignmentType]  # assume this exists if sound_id is set
                 }
                 self.sound = PartialSoundboardSound(data=sound_data, state=state)
 
@@ -541,7 +541,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         )
         if payload is not None:
             # the payload will always be the proper channel payload
-            return self.__class__(state=self._state, guild=self.guild, data=payload)  # type: ignore
+            return self.__class__(state=self._state, guild=self.guild, data=payload)  # pyright: ignore[reportArgumentType]
         return None
 
     async def clone(
@@ -1089,26 +1089,22 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         :class:`Thread`
             The newly created thread
         """
-        if not ((message is None) ^ (type is None)):
-            msg = "Exactly one of message and type must be provided."
-            raise ValueError(msg)
-
         if auto_archive_duration is not None:
             auto_archive_duration = cast(
                 "ThreadArchiveDurationLiteral", try_enum_to_int(auto_archive_duration)
             )
 
-        if message is None:
+        if message is None and type is not None:
             data = await self._state.http.start_thread_without_message(
                 self.id,
                 name=name,
                 auto_archive_duration=auto_archive_duration or self.default_auto_archive_duration,
-                type=type.value,  # type: ignore
+                type=type.value,
                 invitable=invitable if invitable is not None else True,
                 rate_limit_per_user=slowmode_delay,
                 reason=reason,
             )
-        else:
+        elif message is not None and type is None:
             data = await self._state.http.start_thread_with_message(
                 self.id,
                 message.id,
@@ -1117,6 +1113,9 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
                 rate_limit_per_user=slowmode_delay,
                 reason=reason,
             )
+        else:
+            msg = "Exactly one of message and type must be provided."
+            raise ValueError(msg)
 
         return Thread(guild=self.guild, state=self._state, data=data)
 
@@ -1705,7 +1704,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         )
         if payload is not None:
             # the payload will always be the proper channel payload
-            return self.__class__(state=self._state, guild=self.guild, data=payload)  # type: ignore
+            return self.__class__(state=self._state, guild=self.guild, data=payload)  # pyright: ignore[reportArgumentType]
         return None
 
     async def delete_messages(self, messages: Iterable[Snowflake]) -> None:
@@ -2563,7 +2562,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         )
         if payload is not None:
             # the payload will always be the proper channel payload
-            return self.__class__(state=self._state, guild=self.guild, data=payload)  # type: ignore
+            return self.__class__(state=self._state, guild=self.guild, data=payload)  # pyright: ignore[reportArgumentType]
         return None
 
     async def delete_messages(self, messages: Iterable[Snowflake]) -> None:
@@ -3056,7 +3055,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         )
         if payload is not None:
             # the payload will always be the proper channel payload
-            return self.__class__(state=self._state, guild=self.guild, data=payload)  # type: ignore
+            return self.__class__(state=self._state, guild=self.guild, data=payload)  # pyright: ignore[reportArgumentType]
         return None
 
     @overload
@@ -3472,7 +3471,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         :class:`Thread` | :data:`None`
             The last created thread in this channel or :data:`None` if not found.
         """
-        return self._state.get_channel(self.last_thread_id) if self.last_thread_id else None  # type: ignore
+        return self._state.get_channel(self.last_thread_id) if self.last_thread_id else None  # pyright: ignore[reportReturnType]
 
     @property
     def available_tags(self) -> list[ForumTag]:
@@ -4220,7 +4219,7 @@ class ForumChannel(ThreadOnlyGuildChannel):
         )
         if payload is not None:
             # the payload will always be the proper channel payload
-            return self.__class__(state=self._state, guild=self.guild, data=payload)  # type: ignore
+            return self.__class__(state=self._state, guild=self.guild, data=payload)  # pyright: ignore[reportArgumentType]
         return None
 
     async def clone(
@@ -4619,7 +4618,7 @@ class MediaChannel(ThreadOnlyGuildChannel):
         )
         if payload is not None:
             # the payload will always be the proper channel payload
-            return self.__class__(state=self._state, guild=self.guild, data=payload)  # type: ignore
+            return self.__class__(state=self._state, guild=self.guild, data=payload)  # pyright: ignore[reportArgumentType]
         return None
 
     async def clone(
@@ -4794,7 +4793,7 @@ class DMChannel(disnake.abc.Messageable, Hashable):
         self._state: ConnectionState = state
         self.recipient: Optional[User] = None
         if recipients := data.get("recipients"):
-            self.recipient = state.store_user(recipients[0])  # type: ignore
+            self.recipient = state.store_user(recipients[0])  # pyright: ignore[reportArgumentType]
 
         self.me: ClientUser = me
         self.id: int = int(data["id"])

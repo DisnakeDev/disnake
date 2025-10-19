@@ -145,7 +145,7 @@ class FlagTypings(BaseCodemodCommand):
             codevisitors.AddImportsVisitor.add_needed_import(
                 self.context, "disnake.utils", "_generated"
             )
-            node = node.deep_replace(old_init, init)  # type: ignore
+            node = node.deep_replace(old_init, init)  # pyright: ignore[reportAssignmentType]
 
         else:
             # the init exists, so we need to make overloads

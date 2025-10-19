@@ -18,6 +18,7 @@ from typing import (
     Any,
     Final,
     Optional,
+    Sequence,
 )
 
 import nox
@@ -31,9 +32,9 @@ nox.options.default_venv_backend = "uv|virtualenv"
 
 PYPROJECT = nox.project.load_toml()
 
-SUPPORTED_PYTHONS: Final[list[str]] = nox.project.python_versions(PYPROJECT)
-EXPERIMENTAL_PYTHON_VERSIONS: Final[list[str]] = ["3.14"]
-ALL_PYTHONS: Final[list[str]] = [*SUPPORTED_PYTHONS, *EXPERIMENTAL_PYTHON_VERSIONS]
+SUPPORTED_PYTHONS: Final[Sequence[str]] = nox.project.python_versions(PYPROJECT)
+EXPERIMENTAL_PYTHON_VERSIONS: Final[Sequence[str]] = ["3.14"]
+ALL_PYTHONS: Final[Sequence[str]] = [*SUPPORTED_PYTHONS, *EXPERIMENTAL_PYTHON_VERSIONS]
 MIN_PYTHON: Final[str] = SUPPORTED_PYTHONS[0]
 CI: Final[bool] = "CI" in os.environ
 
@@ -64,10 +65,10 @@ class ExecutionGroup(ExecutionGroupType):
         if self.python in EXPERIMENTAL_PYTHON_VERSIONS:
             self.experimental = True
         for key in self.__dataclass_fields__:
-            self[key] = getattr(self, key)  # type: ignore
+            self[key] = getattr(self, key)  # pyright: ignore[reportIndexIssue]
 
 
-EXECUTION_GROUPS: list[ExecutionGroup] = [
+EXECUTION_GROUPS: Sequence[ExecutionGroup] = [
     ## pyright
     *(
         ExecutionGroup(
@@ -121,7 +122,7 @@ EXECUTION_GROUPS: list[ExecutionGroup] = [
 ]
 
 
-def get_groups_for_session(name: str) -> list[ExecutionGroup]:
+def get_groups_for_session(name: str) -> Sequence[ExecutionGroup]:
     return [g for g in EXECUTION_GROUPS if name in g.sessions]
 
 

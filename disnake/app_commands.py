@@ -6,7 +6,7 @@ import math
 import re
 from abc import ABC
 from collections.abc import Mapping, Sequence
-from typing import TYPE_CHECKING, ClassVar, Optional, Union, cast
+from typing import TYPE_CHECKING, ClassVar, Optional, Union
 
 from .enums import (
     ApplicationCommandPermissionType,
@@ -710,16 +710,14 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
         }
 
         install_types: Optional[list[ApplicationIntegrationTypePayload]] = (
-            cast("list[ApplicationIntegrationTypePayload]", self._install_types_with_default.values)
+            self._install_types_with_default.values
             if self._install_types_with_default is not None
             else None
         )
         data["integration_types"] = install_types
 
         contexts: Optional[list[InteractionContextTypePayload]] = (
-            cast("list[InteractionContextTypePayload]", self._contexts_with_default.values)
-            if self._contexts_with_default is not None
-            else None
+            self._contexts_with_default.values if self._contexts_with_default is not None else None
         )
         data["contexts"] = contexts
 
@@ -1265,13 +1263,13 @@ class ApplicationCommandPermissions:
     def __repr__(self) -> str:
         return f"<ApplicationCommandPermissions id={self.id!r} type={self.type!r} permission={self.permission!r}>"
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: ApplicationCommandPermissions) -> bool:
         return (
             self.id == other.id and self.type == other.type and self.permission == other.permission
         )
 
     def to_dict(self) -> ApplicationCommandPermissionsPayload:
-        return {"id": self.id, "type": int(self.type), "permission": self.permission}  # type: ignore
+        return {"id": self.id, "type": self.type.value, "permission": self.permission}
 
     def is_everyone(self) -> bool:
         """Whether this permission object is affecting the @everyone role.

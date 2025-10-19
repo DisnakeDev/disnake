@@ -44,6 +44,7 @@ __all__ = (
 if TYPE_CHECKING:
     from .abc import Messageable, Snowflake
     from .app_commands import APIApplicationCommand
+    from .client import Client
     from .guild import Guild
     from .member import Member
     from .message import Message
@@ -302,17 +303,17 @@ class HistoryIterator(_AsyncIterator["Message"]):
                 self.limit = 100  # Thanks Discord
 
             self._retrieve_messages = self._retrieve_messages_around_strategy
-            if self.before and self.after:
-                self._filter = lambda m: self.after.id < int(m["id"]) < self.before.id  # type: ignore
-            elif self.before:
-                self._filter = lambda m: int(m["id"]) < self.before.id  # type: ignore
+            if before and self.after:
+                self._filter = lambda m: self.after.id < int(m["id"]) < before.id
+            elif before:
+                self._filter = lambda m: int(m["id"]) < before.id
             elif self.after:
                 self._filter = lambda m: self.after.id < int(m["id"])
         else:
             if self.reverse:
                 self._retrieve_messages = self._retrieve_messages_after_strategy
-                if self.before:
-                    self._filter = lambda m: int(m["id"]) < self.before.id  # type: ignore
+                if before:
+                    self._filter = lambda m: int(m["id"]) < before.id
             else:
                 self._retrieve_messages = self._retrieve_messages_before_strategy
                 if self.after and self.after != OLDEST_OBJECT:
@@ -525,8 +526,8 @@ class AuditLogIterator(_AsyncIterator["AuditLogEntry"]):
         self._filter: Optional[Callable[[AuditLogEntryPayload], bool]] = None
         if oldest_first:
             self._strategy = self._after_strategy
-            if self.before:
-                self._filter = lambda m: int(m["id"]) < self.before.id  # type: ignore
+            if before:
+                self._filter = lambda m: int(m["id"]) < before.id
         else:
             self._strategy = self._before_strategy
             if self.after and self.after != OLDEST_OBJECT:
@@ -683,7 +684,12 @@ class GuildIterator(_AsyncIterator["Guild"]):
     """
 
     def __init__(
-        self, bot, limit: Optional[int], before=None, after=None, with_counts: bool = True
+        self,
+        bot: Client,
+        limit: Optional[int],
+        before: Optional[Union[Snowflake, datetime.datetime]] = None,
+        after: Optional[Union[Snowflake, datetime.datetime]] = None,
+        with_counts: bool = True,
     ) -> None:
         if isinstance(before, datetime.datetime):
             before = Object(id=time_snowflake(before, high=False))
@@ -696,17 +702,17 @@ class GuildIterator(_AsyncIterator["Guild"]):
         self.after = after
         self.with_counts = with_counts
 
-        self._filter = None
+        self._filter: Optional[Callable[[GuildPayload], bool]] = None
 
         self.state = self.bot._connection
         self.get_guilds = self.bot.http.get_guilds
-        self.guilds = asyncio.Queue()
+        self.guilds: asyncio.Queue[Guild] = asyncio.Queue()
 
         if self.before:
             self.reverse = True
             self._retrieve_guilds = self._retrieve_guilds_before_strategy
-            if self.after:
-                self._filter = lambda m: int(m["id"]) > self.after.id  # type: ignore
+            if after:
+                self._filter = lambda m: int(m["id"]) > after.id
         else:
             self.reverse = False
             self._retrieve_guilds = self._retrieve_guilds_after_strategy
@@ -778,7 +784,12 @@ class GuildIterator(_AsyncIterator["Guild"]):
 
 
 class MemberIterator(_AsyncIterator["Member"]):
-    def __init__(self, guild, limit: Optional[int] = 1000, after=None) -> None:
+    def __init__(
+        self,
+        guild: Guild,
+        limit: Optional[int] = 1000,
+        after: Optional[Union[Snowflake, datetime.datetime]] = None,
+    ) -> None:
         if isinstance(after, datetime.datetime):
             after = Object(id=time_snowflake(after, high=True))
 
@@ -895,7 +906,7 @@ class ArchivedThreadIterator(_AsyncIterator["Thread"]):
 
     @staticmethod
     def get_thread_id(data: ThreadPayload) -> str:
-        return data["id"]  # type: ignore
+        return data["id"]  # pyright: ignore[reportReturnType]
 
     async def fill_queue(self) -> None:
         if not self.has_more:
@@ -1082,8 +1093,8 @@ class EntitlementIterator(_AsyncIterator["Entitlement"]):
         self._filter: Optional[Callable[[EntitlementPayload], bool]] = None
         if oldest_first:
             self._strategy = self._after_strategy
-            if self.before:
-                self._filter = lambda m: int(m["id"]) < self.before.id  # type: ignore
+            if before:
+                self._filter = lambda m: int(m["id"]) < before.id
         else:
             self._strategy = self._before_strategy
             if self.after and self.after != OLDEST_OBJECT:

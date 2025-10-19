@@ -111,7 +111,7 @@ class HTTPException(DiscordException):
         self, response: _ResponseType, message: Optional[Union[str, dict[str, Any]]]
     ) -> None:
         self.response: _ResponseType = response
-        self.status: int = response.status  # type: ignore
+        self.status: int = response.status  # pyright: ignore[reportAttributeAccessIssue]
         self.code: int
         self.text: str
         if isinstance(message, dict):

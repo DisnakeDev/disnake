@@ -189,12 +189,12 @@ def test_time_snowflake(dt, expected) -> None:
 
 
 def test_find() -> None:
-    pred = lambda i: i == 42  # type: ignore
+    pred: Callable[[Any], bool] = lambda i: i == 42
     assert utils.find(pred, []) is None
     assert utils.find(pred, [42]) == 42
     assert utils.find(pred, [1, 2, 42, 3, 4]) == 42
 
-    pred = lambda i: i.id == 42  # type: ignore
+    pred = lambda i: i.id == 42
     lst = list(map(disnake.Object, [1, 42, 42, 2]))
     assert utils.find(pred, lst) is lst[1]
 
@@ -255,7 +255,7 @@ def test_get_as_snowflake(data, expected) -> None:
 
 
 def test_maybe_cast() -> None:
-    convert = lambda v: v + 1  # type: ignore
+    convert: Callable[[int], int] = lambda v: v + 1
     default = object()
 
     assert utils._maybe_cast(utils.MISSING, convert) is None

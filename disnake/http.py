@@ -216,7 +216,7 @@ class MaybeUnlock:
 
 # For some reason, the Discord voice websocket expects this header to be
 # completely lowercase while aiohttp respects spec and does it as case-insensitive
-aiohttp.hdrs.WEBSOCKET = "websocket"  # type: ignore
+aiohttp.hdrs.WEBSOCKET = "websocket"  # pyright: ignore[reportAttributeAccessIssue]
 
 
 class HTTPClient:
@@ -255,7 +255,9 @@ class HTTPClient:
     async def ws_connect(self, url: str, *, compress: int = 0) -> aiohttp.ClientWebSocketResponse:
         timeout = cast(
             "Any",
-            aiohttp.ClientWSTimeout(ws_close=30.0) if hasattr(aiohttp, "ClientWSTimeout") else 30.0,  # type: ignore
+            aiohttp.ClientWSTimeout(ws_close=30.0)  # pyright: ignore[reportCallIssue]
+            if hasattr(aiohttp, "ClientWSTimeout")
+            else 30.0,
         )
         return await self.__session.ws_connect(
             url,

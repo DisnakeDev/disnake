@@ -417,7 +417,7 @@ class DiscordWebSocket:
         ws = cls(socket, loop=client.loop)
 
         # dynamically add attributes needed
-        ws.token = client.http.token  # type: ignore
+        ws.token = client.http.token  # pyright: ignore[reportAttributeAccessIssue]
         ws._connection = client._connection
         ws._discord_parsers = client._connection.parsers
         ws._dispatch = client.dispatch
@@ -519,8 +519,8 @@ class DiscordWebSocket:
         """Sends the RESUME packet."""
         # these should never be None if resuming, but instead of asserting
         # we just send those values and handle the INVALIDATE_SESSION
-        seq: int = self.sequence  # type: ignore
-        session_id: str = self.session_id  # type: ignore
+        seq: int = self.sequence  # pyright: ignore[reportAssignmentType]
+        session_id: str = self.session_id  # pyright: ignore[reportAssignmentType]
 
         payload: ResumeCommand = {
             "op": self.RESUME,
@@ -630,7 +630,7 @@ class DiscordWebSocket:
             )
 
         try:
-            func = self._discord_parsers[event]  # type: ignore
+            func = self._discord_parsers[event]  # pyright: ignore[reportArgumentType]
         except KeyError:
             _log.debug("Unknown event %s.", event)
         else:
@@ -644,7 +644,7 @@ class DiscordWebSocket:
                 if event in {"READY", "RESUMED"}:  # exceptions in these events are fatal
                     raise
 
-                event_name: str = event  # type: ignore  # event can't be None here
+                event_name: str = event  # pyright: ignore[reportAssignmentType]  # event can't be None here
                 asyncio.create_task(
                     self._dispatch_gateway_error(event_name, data, self.shard_id, e)
                 )

@@ -35,7 +35,7 @@ def copy_redirect_script(app: Sphinx, exception: Exception) -> None:
     context = {"redirect_data": json.dumps(redirect_mapping)}
 
     # sanity check
-    assert Path(SCRIPT_PATH).exists()  # noqa: S101
+    assert Path(SCRIPT_PATH).exists()
 
     copy_asset_file(
         SCRIPT_PATH,

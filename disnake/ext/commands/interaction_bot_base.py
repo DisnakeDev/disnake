@@ -1188,7 +1188,7 @@ class InteractionBotBase(CommonBotBase):
     def slash_command_check(self, func: T) -> T:
         """Similar to :meth:`.check` but for slash commands."""
         # T was used instead of Check to ensure the type matches on return
-        self.add_app_command_check(func, slash_commands=True)  # type: ignore
+        self.add_app_command_check(func, slash_commands=True)  # pyright: ignore[reportArgumentType]
         return func
 
     def slash_command_check_once(self, func: CFT) -> CFT:
@@ -1199,7 +1199,7 @@ class InteractionBotBase(CommonBotBase):
     def user_command_check(self, func: T) -> T:
         """Similar to :meth:`.check` but for user commands."""
         # T was used instead of Check to ensure the type matches on return
-        self.add_app_command_check(func, user_commands=True)  # type: ignore
+        self.add_app_command_check(func, user_commands=True)  # pyright: ignore[reportArgumentType]
         return func
 
     def user_command_check_once(self, func: CFT) -> CFT:
@@ -1210,7 +1210,7 @@ class InteractionBotBase(CommonBotBase):
     def message_command_check(self, func: T) -> T:
         """Similar to :meth:`.check` but for message commands."""
         # T was used instead of Check to ensure the type matches on return
-        self.add_app_command_check(func, message_commands=True)  # type: ignore
+        self.add_app_command_check(func, message_commands=True)  # pyright: ignore[reportArgumentType]
         return func
 
     def message_command_check_once(self, func: CFT) -> CFT:
@@ -1418,12 +1418,12 @@ class InteractionBotBase(CommonBotBase):
             # and the current command was registered to a guild
             and interaction.data.get("guild_id")
             # and we don't know the command
-            and not self.get_guild_command(interaction.guild_id, interaction.data.id)  # type: ignore
+            and not self.get_guild_command(interaction.guild_id, interaction.data.id)  # pyright: ignore[reportAttributeAccessIssue]
         ):
             # don't do anything if we aren't allowed to disable them
             if self._command_sync_flags.allow_command_deletion:
                 try:
-                    await self.bulk_overwrite_guild_commands(interaction.guild_id, [])  # type: ignore
+                    await self.bulk_overwrite_guild_commands(interaction.guild_id, [])  # pyright: ignore[reportAttributeAccessIssue]
                 except disnake.HTTPException:
                     # for some reason we were unable to sync the command
                     # either malformed API request, or some other error
