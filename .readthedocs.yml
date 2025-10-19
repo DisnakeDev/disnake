@@ -16,7 +16,15 @@ build:
     install:
       - "true"
     post_checkout:
-      - git fetch --tags || true
+      - |
+        while true; do
+          TAG=$(git tag --merged HEAD --sort=-committerdate 'v*' | head -n 1)
+          if [ -n "$TAG" ]; then
+              echo "✅ Found first reachable tag: $TAG"
+              break
+          fi
+          git fetch --deepen=50
+        done
 
 sphinx:
   configuration: docs/conf.py
