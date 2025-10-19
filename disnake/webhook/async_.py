@@ -1298,7 +1298,7 @@ class Webhook(BaseWebhook):
         return cls(feed, session=session, state=state, token=state.http.token)
 
     @classmethod
-    def from_state(cls, data, state) -> Webhook:
+    def from_state(cls, data, state) -> Self:
         session = state.http._HTTPClient__session
         return cls(data, session=session, state=state, token=state.http.token)
 
