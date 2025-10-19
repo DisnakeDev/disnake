@@ -14,12 +14,15 @@
 
 import importlib.util
 import inspect
+import logging
 import os
 import re
 import subprocess  # noqa: TID251
 import sys
-from typing import Any, Dict, Optional
+import warnings
+from typing import Any
 
+import sphinx.deprecation
 from sphinx.application import Sphinx
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -90,7 +93,9 @@ rst_prolog = r"""
 templates_path = ["_templates"]
 
 # The suffix of source filenames.
-source_suffix = ".rst"
+source_suffix = {
+    ".rst": "restructuredtext",
+}
 
 # The encoding of source files.
 # source_encoding = 'utf-8-sig'
@@ -208,7 +213,7 @@ if not (_spec and _spec.origin):
 _disnake_module_path = os.path.dirname(_spec.origin)
 
 
-def linkcode_resolve(domain: str, info: Dict[str, Any]) -> Optional[str]:
+def linkcode_resolve(domain: str, info: dict[str, Any]) -> str | None:
     if domain != "py":
         return None
 
@@ -506,3 +511,19 @@ def setup(app: Sphinx) -> None:
     import disnake
 
     del disnake.Embed.Empty  # type: ignore
+
+    warnings.filterwarnings(
+        "ignore",
+        category=sphinx.deprecation.RemovedInSphinx90Warning,
+        module="hoverxref.extension",
+    )
+
+    # silence somewhat verbose `Writing evaluated template result to ...` log
+    logging.getLogger("sphinx.sphinx.util.fileutil").addFilter(
+        lambda r: getattr(r, "subtype", None) != "template_evaluation"
+    )
+
+    # `document is referenced in multiple toctrees:` is fine and expected
+    logging.getLogger("sphinx.sphinx.environment").addFilter(
+        lambda r: getattr(r, "subtype", None) != "multiple_toc_parents"
+    )
