@@ -1,1 +1,1 @@
-Class properites of :class:`BaseFlag` now return instances of :class:`BaseFlag` rather than :class:`flag_value`. If you are accessing :attr:`flag_value.flag`, change to :attr:`BaseFlag.value`.
+Class properties of :class:`BaseFlag` now return instances of :class:`BaseFlag` rather than :class:`flag_value`. If you are accessing :attr:`flag_value.flag`, change to :attr:`BaseFlag.value`.

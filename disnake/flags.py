@@ -86,6 +86,7 @@ class BaseFlags:
     __slots__ = ("value",)
 
     if not TYPE_CHECKING:
+
         @property
         @deprecated("BaseFlags.value")
         def flag(self) -> int:
