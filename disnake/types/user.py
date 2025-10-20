@@ -4,7 +4,7 @@ from typing import Literal, Optional, TypedDict
 
 from typing_extensions import NotRequired
 
-from .snowflake import Snowflake
+from disnake.types.snowflake import Snowflake
 
 PaletteType = Literal[
     "crimson",

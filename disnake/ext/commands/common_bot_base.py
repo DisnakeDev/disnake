@@ -17,12 +17,12 @@ from typing import TYPE_CHECKING, Any, Generic, Optional, TypeVar, Union
 import disnake
 import disnake.utils
 
-from . import errors
-from .cog import Cog
+from disnake.ext.commands import errors
+from disnake.ext.commands.cog import Cog
 
 if TYPE_CHECKING:
-    from ._types import CoroFunc
-    from .help import HelpCommand
+    from disnake.ext.commands._types import CoroFunc
+    from disnake.ext.commands.help import HelpCommand
 
 __all__ = ("CommonBotBase",)
 _log = logging.getLogger(__name__)

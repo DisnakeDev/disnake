@@ -30,12 +30,18 @@ from disnake.utils import (
     unwrap_function,
 )
 
-from ._types import _BaseCommand
-from .cog import Cog
-from .context import AnyContext, Context
-from .converter import Greedy, get_converter, run_converters
-from .cooldowns import BucketType, Cooldown, CooldownMapping, DynamicCooldownMapping, MaxConcurrency
-from .errors import (
+from disnake.ext.commands._types import _BaseCommand
+from disnake.ext.commands.cog import Cog
+from disnake.ext.commands.context import AnyContext, Context
+from disnake.ext.commands.converter import Greedy, get_converter, run_converters
+from disnake.ext.commands.cooldowns import (
+    BucketType,
+    Cooldown,
+    CooldownMapping,
+    DynamicCooldownMapping,
+    MaxConcurrency,
+)
+from disnake.ext.commands.errors import (
     ArgumentParsingError,
     BotMissingAnyRole,
     BotMissingPermissions,
@@ -63,7 +69,7 @@ if TYPE_CHECKING:
 
     from disnake.message import Message
 
-    from ._types import AppCheck, Check, Coro, CoroFunc, Error, Hook
+    from disnake.ext.commands._types import AppCheck, Check, Coro, CoroFunc, Error, Hook
 
 
 __all__ = (

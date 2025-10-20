@@ -25,8 +25,7 @@ import yarl
 
 import disnake
 from disnake import utils
-
-from . import helpers, utils_helper_module
+from tests import helpers, utils_helper_module
 
 if TYPE_CHECKING:
     from typing_extensions import TypeAliasType

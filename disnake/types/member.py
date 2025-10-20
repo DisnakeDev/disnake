@@ -4,8 +4,8 @@ from typing import Optional, TypedDict
 
 from typing_extensions import NotRequired
 
-from .snowflake import SnowflakeList
-from .user import AvatarDecorationData, User
+from disnake.types.snowflake import SnowflakeList
+from disnake.types.user import AvatarDecorationData, User
 
 
 class BaseMember(TypedDict):

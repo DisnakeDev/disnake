@@ -12,25 +12,25 @@ from typing import (
     Union,
 )
 
-from ..components import _SELECT_COMPONENT_TYPE_VALUES
-from ..enums import ComponentType
-from ..message import Attachment, Message
-from ..utils import cached_slot_property
-from .base import ClientT, Interaction, InteractionDataResolved
+from disnake.components import _SELECT_COMPONENT_TYPE_VALUES
+from disnake.enums import ComponentType
+from disnake.interactions.base import ClientT, Interaction, InteractionDataResolved
+from disnake.message import Attachment, Message
+from disnake.utils import cached_slot_property
 
 if TYPE_CHECKING:
-    from ..abc import AnyChannel
-    from ..member import Member
-    from ..role import Role
-    from ..state import ConnectionState
-    from ..types.interactions import (
+    from disnake.abc import AnyChannel
+    from disnake.member import Member
+    from disnake.role import Role
+    from disnake.state import ConnectionState
+    from disnake.types.interactions import (
         ModalInteraction as ModalInteractionPayload,
         ModalInteractionComponentData as ModalInteractionComponentDataPayload,
         ModalInteractionData as ModalInteractionDataPayload,
         ModalInteractionInnerComponentData as ModalInteractionInnerComponentDataPayload,
     )
-    from ..types.snowflake import Snowflake
-    from ..user import User
+    from disnake.types.snowflake import Snowflake
+    from disnake.user import User
 
 __all__ = ("ModalInteraction", "ModalInteractionData")
 

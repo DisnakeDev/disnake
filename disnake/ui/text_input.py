@@ -5,10 +5,10 @@ from __future__ import annotations
 import os
 from typing import TYPE_CHECKING, ClassVar, Optional
 
-from ..components import TextInput as TextInputComponent
-from ..enums import ComponentType, TextInputStyle
-from ..utils import MISSING, deprecated
-from .item import WrappedComponent
+from disnake.components import TextInput as TextInputComponent
+from disnake.enums import ComponentType, TextInputStyle
+from disnake.ui.item import WrappedComponent
+from disnake.utils import MISSING, deprecated
 
 if TYPE_CHECKING:
     from typing_extensions import Self

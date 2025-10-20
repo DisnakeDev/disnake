@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from .types.voice import VoiceRegion as VoiceRegionPayload
+    from disnake.types.voice import VoiceRegion as VoiceRegionPayload
 
 
 __all__ = ("VoiceRegion",)

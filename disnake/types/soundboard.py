@@ -6,8 +6,8 @@ from typing import Optional, TypedDict
 
 from typing_extensions import NotRequired
 
-from .snowflake import Snowflake
-from .user import User
+from disnake.types.snowflake import Snowflake
+from disnake.types.user import User
 
 
 class PartialSoundboardSound(TypedDict):

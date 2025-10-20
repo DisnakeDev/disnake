@@ -9,8 +9,8 @@ if TYPE_CHECKING:
     from aiohttp import ClientResponse, ClientWebSocketResponse
     from requests import Response
 
-    from .client import SessionStartLimit
-    from .interactions import Interaction, ModalInteraction
+    from disnake.client import SessionStartLimit
+    from disnake.interactions import Interaction, ModalInteraction
 
     _ResponseType = Union[ClientResponse, Response]
 

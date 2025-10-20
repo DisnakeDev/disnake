@@ -5,11 +5,18 @@ from __future__ import annotations
 import unicodedata
 from typing import TYPE_CHECKING, Literal, Optional, Union
 
-from .asset import Asset, AssetMixin
-from .enums import StickerFormatType, StickerType, try_enum
-from .errors import InvalidData
-from .mixins import Hashable
-from .utils import MISSING, _get_as_snowflake, cached_slot_property, find, get, snowflake_time
+from disnake.asset import Asset, AssetMixin
+from disnake.enums import StickerFormatType, StickerType, try_enum
+from disnake.errors import InvalidData
+from disnake.mixins import Hashable
+from disnake.utils import (
+    MISSING,
+    _get_as_snowflake,
+    cached_slot_property,
+    find,
+    get,
+    snowflake_time,
+)
 
 __all__ = (
     "StickerPack",
@@ -22,9 +29,9 @@ __all__ = (
 if TYPE_CHECKING:
     import datetime
 
-    from .guild import Guild
-    from .state import ConnectionState
-    from .types.sticker import (
+    from disnake.guild import Guild
+    from disnake.state import ConnectionState
+    from disnake.types.sticker import (
         EditGuildSticker,
         GuildSticker as GuildStickerPayload,
         ListStickerPacks as ListStickerPacksPayload,
@@ -33,7 +40,7 @@ if TYPE_CHECKING:
         StickerItem as StickerItemPayload,
         StickerPack as StickerPackPayload,
     )
-    from .user import User
+    from disnake.user import User
 
 
 class StickerPack(Hashable):

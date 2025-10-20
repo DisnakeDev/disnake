@@ -16,11 +16,11 @@ from typing import (
     overload,
 )
 
-from .. import utils
-from ..app_commands import OptionChoice
-from ..channel import PartialMessageable
-from ..entitlement import Entitlement
-from ..enums import (
+from disnake import utils
+from disnake.app_commands import OptionChoice
+from disnake.channel import PartialMessageable
+from disnake.entitlement import Entitlement
+from disnake.enums import (
     ComponentType,
     InteractionResponseType,
     InteractionType,
@@ -29,7 +29,7 @@ from ..enums import (
     WebhookType,
     try_enum,
 )
-from ..errors import (
+from disnake.errors import (
     HTTPException,
     InteractionNotEditable,
     InteractionNotResponded,
@@ -38,18 +38,18 @@ from ..errors import (
     ModalChainNotSupported,
     NotFound,
 )
-from ..flags import InteractionContextTypes, MessageFlags
-from ..guild import Guild
-from ..http import HTTPClient
-from ..i18n import Localized
-from ..member import Member
-from ..message import Attachment, AuthorizingIntegrationOwners, Message
-from ..object import Object
-from ..permissions import Permissions
-from ..role import Role
-from ..ui.action_row import normalize_components, normalize_components_to_dict
-from ..user import ClientUser, User
-from ..webhook.async_ import Webhook, async_context, handle_message_parameters
+from disnake.flags import InteractionContextTypes, MessageFlags
+from disnake.guild import Guild
+from disnake.http import HTTPClient
+from disnake.i18n import Localized
+from disnake.member import Member
+from disnake.message import Attachment, AuthorizingIntegrationOwners, Message
+from disnake.object import Object
+from disnake.permissions import Permissions
+from disnake.role import Role
+from disnake.ui.action_row import normalize_components, normalize_components_to_dict
+from disnake.user import ClientUser, User
+from disnake.webhook.async_ import Webhook, async_context, handle_message_parameters
 
 __all__ = (
     "Interaction",
@@ -63,32 +63,33 @@ if TYPE_CHECKING:
 
     from aiohttp import ClientSession
 
-    from ..abc import AnyChannel, MessageableChannel
-    from ..app_commands import Choices
-    from ..client import Client
-    from ..embeds import Embed
-    from ..ext.commands import AutoShardedBot, Bot
-    from ..file import File
-    from ..mentions import AllowedMentions
-    from ..poll import Poll
-    from ..state import ConnectionState
-    from ..types.components import (
+    from disnake.abc import AnyChannel, MessageableChannel
+    from disnake.app_commands import Choices
+    from disnake.client import Client
+    from disnake.embeds import Embed
+    from disnake.file import File
+    from disnake.interactions.message import MessageInteraction
+    from disnake.interactions.modal import ModalInteraction
+    from disnake.mentions import AllowedMentions
+    from disnake.poll import Poll
+    from disnake.state import ConnectionState
+    from disnake.types.components import (
         Modal as ModalPayload,
         ModalTopLevelComponent as ModalTopLevelComponentPayload,
     )
-    from ..types.interactions import (
+    from disnake.types.interactions import (
         ApplicationCommandOptionChoice as ApplicationCommandOptionChoicePayload,
         Interaction as InteractionPayload,
         InteractionDataResolved as InteractionDataResolvedPayload,
     )
-    from ..types.snowflake import Snowflake
-    from ..types.user import User as UserPayload
-    from ..types.webhook import Webhook as WebhookPayload
-    from ..ui._types import MessageComponents, ModalComponents, ModalTopLevelComponent
-    from ..ui.modal import Modal
-    from ..ui.view import View
-    from .message import MessageInteraction
-    from .modal import ModalInteraction
+    from disnake.types.snowflake import Snowflake
+    from disnake.types.user import User as UserPayload
+    from disnake.types.webhook import Webhook as WebhookPayload
+    from disnake.ui._types import MessageComponents, ModalComponents, ModalTopLevelComponent
+    from disnake.ui.modal import Modal
+    from disnake.ui.view import View
+
+    from disnake.ext.commands import AutoShardedBot, Bot
 
     AnyBot = Union[Bot, AutoShardedBot]
 

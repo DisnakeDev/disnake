@@ -24,18 +24,24 @@ from urllib.parse import quote as urlquote
 
 import aiohttp
 
-from .. import utils
-from ..asset import Asset
-from ..channel import PartialMessageable
-from ..enums import WebhookType, try_enum
-from ..errors import DiscordServerError, Forbidden, HTTPException, NotFound, WebhookTokenMissing
-from ..flags import MessageFlags
-from ..http import Route, set_attachments, to_multipart, to_multipart_with_attachments
-from ..message import Message
-from ..mixins import Hashable
-from ..object import Object
-from ..ui.action_row import normalize_components_to_dict
-from ..user import BaseUser, ClientUser, User
+from disnake import utils
+from disnake.asset import Asset
+from disnake.channel import PartialMessageable
+from disnake.enums import WebhookType, try_enum
+from disnake.errors import (
+    DiscordServerError,
+    Forbidden,
+    HTTPException,
+    NotFound,
+    WebhookTokenMissing,
+)
+from disnake.flags import MessageFlags
+from disnake.http import Route, set_attachments, to_multipart, to_multipart_with_attachments
+from disnake.message import Message
+from disnake.mixins import Hashable
+from disnake.object import Object
+from disnake.ui.action_row import normalize_components_to_dict
+from disnake.user import BaseUser, ClientUser, User
 
 __all__ = (
     "Webhook",
@@ -52,22 +58,22 @@ if TYPE_CHECKING:
 
     from typing_extensions import Self
 
-    from ..abc import Snowflake
-    from ..asset import AssetBytes
-    from ..channel import ForumChannel, MediaChannel, StageChannel, TextChannel, VoiceChannel
-    from ..embeds import Embed
-    from ..file import File
-    from ..guild import Guild
-    from ..http import HTTPClient, Response
-    from ..mentions import AllowedMentions
-    from ..message import Attachment
-    from ..poll import Poll
-    from ..state import ConnectionState
-    from ..sticker import GuildSticker, StandardSticker, StickerItem
-    from ..types.message import Message as MessagePayload
-    from ..types.webhook import Webhook as WebhookPayload
-    from ..ui._types import MessageComponents
-    from ..ui.view import View
+    from disnake.abc import Snowflake
+    from disnake.asset import AssetBytes
+    from disnake.channel import ForumChannel, MediaChannel, StageChannel, TextChannel, VoiceChannel
+    from disnake.embeds import Embed
+    from disnake.file import File
+    from disnake.guild import Guild
+    from disnake.http import HTTPClient, Response
+    from disnake.mentions import AllowedMentions
+    from disnake.message import Attachment
+    from disnake.poll import Poll
+    from disnake.state import ConnectionState
+    from disnake.sticker import GuildSticker, StandardSticker, StickerItem
+    from disnake.types.message import Message as MessagePayload
+    from disnake.types.webhook import Webhook as WebhookPayload
+    from disnake.ui._types import MessageComponents
+    from disnake.ui.view import View
 
 MISSING = utils.MISSING
 

@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Any, Optional, TypeVar, Union
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
-    from . import (
+    from disnake.ui import (
         ActionRow,
         Button,
         Container,
@@ -20,9 +20,15 @@ if TYPE_CHECKING:
         TextDisplay,
         TextInput,
     )
-    from .item import WrappedComponent
-    from .select import ChannelSelect, MentionableSelect, RoleSelect, StringSelect, UserSelect
-    from .view import View
+    from disnake.ui.item import WrappedComponent
+    from disnake.ui.select import (
+        ChannelSelect,
+        MentionableSelect,
+        RoleSelect,
+        StringSelect,
+        UserSelect,
+    )
+    from disnake.ui.view import View
 
 V_co = TypeVar("V_co", bound="Optional[View]", covariant=True)
 

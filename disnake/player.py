@@ -15,15 +15,15 @@ import traceback
 import warnings
 from typing import IO, TYPE_CHECKING, Any, Callable, Generic, Optional, TypeVar, Union
 
-from . import utils
-from .errors import ClientException
-from .oggparse import OggStream
-from .opus import Encoder as OpusEncoder
+from disnake import utils
+from disnake.errors import ClientException
+from disnake.oggparse import OggStream
+from disnake.opus import Encoder as OpusEncoder
 
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from .voice_client import VoiceClient
+    from disnake.voice_client import VoiceClient
 
 try:
     with warnings.catch_warnings():

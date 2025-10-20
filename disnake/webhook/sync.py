@@ -24,14 +24,20 @@ from typing import (
 )
 from urllib.parse import quote as urlquote
 
-from .. import utils
-from ..channel import PartialMessageable
-from ..errors import DiscordServerError, Forbidden, HTTPException, NotFound, WebhookTokenMissing
-from ..flags import MessageFlags
-from ..http import Route
-from ..message import Message
-from ..object import Object
-from .async_ import BaseWebhook, _WebhookState, handle_message_parameters
+from disnake import utils
+from disnake.channel import PartialMessageable
+from disnake.errors import (
+    DiscordServerError,
+    Forbidden,
+    HTTPException,
+    NotFound,
+    WebhookTokenMissing,
+)
+from disnake.flags import MessageFlags
+from disnake.http import Route
+from disnake.message import Message
+from disnake.object import Object
+from disnake.webhook.async_ import BaseWebhook, _WebhookState, handle_message_parameters
 
 __all__ = (
     "SyncWebhook",
@@ -45,13 +51,13 @@ if TYPE_CHECKING:
 
     from typing_extensions import Self
 
-    from ..abc import Snowflake
-    from ..embeds import Embed
-    from ..file import File
-    from ..mentions import AllowedMentions
-    from ..message import Attachment
-    from ..types.message import Message as MessagePayload
-    from ..types.webhook import Webhook as WebhookPayload
+    from disnake.abc import Snowflake
+    from disnake.embeds import Embed
+    from disnake.file import File
+    from disnake.mentions import AllowedMentions
+    from disnake.message import Attachment
+    from disnake.types.message import Message as MessagePayload
+    from disnake.types.webhook import Webhook as WebhookPayload
 
     try:
         from requests import Response, Session

@@ -5,12 +5,12 @@ from __future__ import annotations
 from collections.abc import Sequence
 from typing import TYPE_CHECKING, Any, Optional, Union
 
-from ..components import VALID_ACTION_ROW_MESSAGE_COMPONENT_TYPES, ActionRowMessageComponent
-from ..enums import ComponentType, try_enum
-from ..message import Message
-from ..ui.action_row import walk_components
-from ..utils import cached_slot_property
-from .base import ClientT, Interaction, InteractionDataResolved
+from disnake.components import VALID_ACTION_ROW_MESSAGE_COMPONENT_TYPES, ActionRowMessageComponent
+from disnake.enums import ComponentType, try_enum
+from disnake.interactions.base import ClientT, Interaction, InteractionDataResolved
+from disnake.message import Message
+from disnake.ui.action_row import walk_components
+from disnake.utils import cached_slot_property
 
 __all__ = (
     "MessageInteraction",
@@ -18,15 +18,15 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
-    from ..abc import AnyChannel
-    from ..member import Member
-    from ..role import Role
-    from ..state import ConnectionState
-    from ..types.interactions import (
+    from disnake.abc import AnyChannel
+    from disnake.member import Member
+    from disnake.role import Role
+    from disnake.state import ConnectionState
+    from disnake.types.interactions import (
         MessageComponentInteractionData as MessageComponentInteractionDataPayload,
         MessageInteraction as MessageInteractionPayload,
     )
-    from ..user import User
+    from disnake.user import User
 
 
 class MessageInteraction(Interaction[ClientT]):
