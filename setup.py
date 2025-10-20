@@ -5,7 +5,7 @@ import re
 from setuptools import setup
 
 version = ""
-with open("disnake/__init__.py", encoding="utf-8") as f:
+with open("src/disnake/__init__.py", encoding="utf-8") as f:
     version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE).group(1)  # pyright: ignore[reportOptionalMemberAccess]
 
 if not version:

@@ -115,7 +115,7 @@ build = [
 ]
 
 [tool.setuptools.packages.find]
-where = ["."]
+where = ["src"]
 include = ["disnake*"]
 
 [tool.uv]
@@ -214,10 +214,10 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"disnake/*.py" = [
+"src/disnake/*.py" = [
     "F403", # Pyflakes: allow star imports
 ]
-"disnake/client.py" = ["T201"]
+"src/disnake/client.py" = ["T201"]
 ## examples
 "examples/*.py" = [
     "ANN", # missing type annotations in examples is fine
@@ -341,7 +341,7 @@ exclude-modules = '''
 [tool.pyright]
 typeCheckingMode = "strict"
 include = [
-    "disnake",
+    "src",
     "docs",
     "examples",
     "scripts",
@@ -349,7 +349,7 @@ include = [
     "*.py",
 ]
 ignore = [
-    "disnake/ext/mypy_plugin",
+    "src/disnake/ext/mypy_plugin",
 ]
 
 # this is one of the diagnostics that aren't enabled by default, even in strict mode
