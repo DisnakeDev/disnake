@@ -85,10 +85,11 @@ class BaseFlags:
 
     __slots__ = ("value",)
 
-    @property
-    @deprecated("BaseFlags.value")
-    def flag(self) -> int:
-        return self.value
+    if not TYPE_CHECKING:
+        @property
+        @deprecated("BaseFlags.value")
+        def flag(self) -> int:
+            return self.value
 
     def __init__(self, **kwargs: bool) -> None:
         self.value = self.DEFAULT_VALUE
