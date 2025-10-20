@@ -4,15 +4,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from collections.abc import Callable, Coroutine
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    ClassVar,
-    Generic,
-    Protocol,
-    TypeVar,
-    overload,
-)
+from typing import TYPE_CHECKING, Any, ClassVar, Generic, Protocol, TypeVar, overload
 
 __all__ = (
     "UIComponent",

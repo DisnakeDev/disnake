@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: MIT
 
+
 from mypy.plugin import Plugin
 
 

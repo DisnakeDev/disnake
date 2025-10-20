@@ -5,15 +5,7 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Mapping, Sequence
 from datetime import timedelta
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Generic,
-    TypeVar,
-    Union,
-    cast,
-    overload,
-)
+from typing import TYPE_CHECKING, Any, Generic, TypeAlias, TypeVar, cast, overload
 
 from .. import utils
 from ..app_commands import OptionChoice
@@ -89,7 +81,7 @@ if TYPE_CHECKING:
     from .message import MessageInteraction
     from .modal import ModalInteraction
 
-    AnyBot = Union[Bot, AutoShardedBot]
+    AnyBot: TypeAlias = Bot | AutoShardedBot
 
 
 MISSING: Any = utils.MISSING

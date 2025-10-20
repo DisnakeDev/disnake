@@ -13,7 +13,7 @@ from typing import (
     Literal,
     NamedTuple,
     NewType,
-    Union,
+    TypeAlias,
     cast,
     overload,
 )
@@ -83,7 +83,7 @@ __all__ = (
     "GuildBuilder",
 )
 
-VocalGuildChannel = Union[VoiceChannel, StageChannel]
+VocalGuildChannel: TypeAlias = VoiceChannel | StageChannel
 MISSING = utils.MISSING
 
 if TYPE_CHECKING:
@@ -116,11 +116,11 @@ if TYPE_CHECKING:
     from .voice_client import VoiceProtocol
     from .webhook import Webhook
 
-    GuildMessageable = Union[TextChannel, Thread, VoiceChannel, StageChannel]
-    GuildChannel = Union[
-        VoiceChannel, StageChannel, TextChannel, CategoryChannel, ForumChannel, MediaChannel
-    ]
-    ByCategoryItem = tuple[CategoryChannel | None, list[GuildChannel]]
+    GuildMessageable: TypeAlias = TextChannel | Thread | VoiceChannel | StageChannel
+    GuildChannel: TypeAlias = (
+        VoiceChannel | StageChannel | TextChannel | CategoryChannel | ForumChannel | MediaChannel
+    )
+    ByCategoryItem: TypeAlias = tuple[CategoryChannel | None, list[GuildChannel]]
 
 
 class _GuildLimit(NamedTuple):
@@ -665,9 +665,7 @@ class Guild(Hashable):
         self.max_presences: int | None = guild.get("max_presences")
         self.max_members: int | None = guild.get("max_members")
         self.max_video_channel_users: int | None = guild.get("max_video_channel_users")
-        self.max_stage_video_channel_users: int | None = guild.get(
-            "max_stage_video_channel_users"
-        )
+        self.max_stage_video_channel_users: int | None = guild.get("max_stage_video_channel_users")
         self.premium_tier: int = guild.get("premium_tier", 0)
         self.premium_subscription_count: int = guild.get("premium_subscription_count") or 0
         self._system_channel_flags: int = guild.get("system_channel_flags", 0)
@@ -3827,9 +3825,7 @@ class Guild(Hashable):
     @overload
     async def get_or_fetch_member(self, member_id: int, *, strict: Literal[True]) -> Member: ...
 
-    async def get_or_fetch_member(
-        self, member_id: int, *, strict: bool = False
-    ) -> Member | None:
+    async def get_or_fetch_member(self, member_id: int, *, strict: bool = False) -> Member | None:
         """|coro|
 
         Tries to get the member from the cache. If it fails,

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import io
 import os
-from typing import TYPE_CHECKING, Any, Literal, Union
+from typing import TYPE_CHECKING, Any, Literal, TypeAlias, Union
 
 import yarl
 
@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 
     ValidStaticFormatTypes = Literal["webp", "jpeg", "jpg", "png"]
     ValidAssetFormatTypes = Literal["webp", "jpeg", "jpg", "png", "gif"]
-    AnyState = Union[ConnectionState, _WebhookState[BaseWebhook]]
+    AnyState: TypeAlias = ConnectionState | _WebhookState[BaseWebhook]
 
 AssetBytes = Union[utils._BytesLike, "AssetMixin"]
 

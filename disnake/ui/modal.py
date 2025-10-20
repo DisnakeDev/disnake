@@ -8,7 +8,7 @@ import sys
 import traceback
 from collections.abc import Callable
 from functools import partial
-from typing import TYPE_CHECKING, TypeVar, Union, cast
+from typing import TYPE_CHECKING, TypeAlias, TypeVar, cast
 
 from ..enums import TextInputStyle
 from ..utils import MISSING
@@ -28,7 +28,7 @@ if TYPE_CHECKING:
     from ..ui._types import ModalComponents, ModalTopLevelComponent
 
     # backwards compatibility, `TextInput` internally gets wrapped in an action row (deprecated)
-    ModalTopLevelComponentInput = Union[ModalTopLevelComponent, TextInput]
+    ModalTopLevelComponentInput: TypeAlias = ModalTopLevelComponent | TextInput
 
 
 __all__ = ("Modal",)

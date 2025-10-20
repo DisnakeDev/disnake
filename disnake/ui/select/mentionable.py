@@ -3,13 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Mapping, Sequence
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    ClassVar,
-    TypeVar,
-    overload,
-)
+from typing import TYPE_CHECKING, Any, ClassVar, TypeVar, overload
 
 from ...abc import Snowflake
 from ...components import MentionableSelectMenu
@@ -32,7 +26,7 @@ __all__ = (
 )
 
 
-class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, Role]", V_co]):
+class MentionableSelect(BaseSelect[MentionableSelectMenu, User | Member | Role, V_co]):
     """Represents a UI mentionable (user/member/role) select menu.
 
     This is usually represented as a drop down menu.

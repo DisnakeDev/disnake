@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, TypeAlias
 
 from .appinfo import PartialAppInfo
 from .asset import Asset
@@ -36,9 +36,9 @@ if TYPE_CHECKING:
     from .types.invite import Invite as InvitePayload, InviteGuild as InviteGuildPayload
     from .user import User
 
-    GatewayInvitePayload = Union[InviteCreateEvent, InviteDeleteEvent]
-    InviteGuildType = Union[Guild, "PartialInviteGuild", Object]
-    InviteChannelType = Union[GuildChannel, "PartialInviteChannel", Object]
+    GatewayInvitePayload: TypeAlias = InviteCreateEvent | InviteDeleteEvent
+    InviteGuildType: TypeAlias = "Guild | PartialInviteGuild | Object"
+    InviteChannelType: TypeAlias = "GuildChannel | PartialInviteChannel | Object"
 
 
 class PartialInviteChannel:
@@ -432,18 +432,14 @@ class Invite(Hashable):
         self.approximate_member_count: int | None = data.get("approximate_member_count")
 
         expires_at = data.get("expires_at", None)
-        self.expires_at: datetime.datetime | None = (
-            parse_time(expires_at) if expires_at else None
-        )
+        self.expires_at: datetime.datetime | None = parse_time(expires_at) if expires_at else None
 
         inviter_data = data.get("inviter")
         self.inviter: User | None = (
             None if inviter_data is None else self._state.create_user(inviter_data)  # pyright: ignore[reportArgumentType]
         )
 
-        self.channel: InviteChannelType | None = self._resolve_channel(
-            data.get("channel"), channel
-        )
+        self.channel: InviteChannelType | None = self._resolve_channel(data.get("channel"), channel)
 
         # this is stored here due to disnake.Guild not storing a welcome screen
         # if it was stored on the Guild object, we would be throwing away this data from the api request

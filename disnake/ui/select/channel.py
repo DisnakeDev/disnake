@@ -3,13 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Mapping, Sequence
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    ClassVar,
-    TypeVar,
-    overload,
-)
+from typing import TYPE_CHECKING, Any, ClassVar, TypeVar, overload
 
 from ...abc import GuildChannel, Snowflake
 from ...channel import DMChannel, GroupChannel, PartialMessageable

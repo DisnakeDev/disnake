@@ -5,13 +5,7 @@ from __future__ import annotations
 import os
 from abc import ABC, abstractmethod
 from collections.abc import Callable, Mapping, Sequence
-from typing import (
-    TYPE_CHECKING,
-    ClassVar,
-    Generic,
-    TypeVar,
-    Union,
-)
+from typing import TYPE_CHECKING, ClassVar, Generic, TypeAlias, TypeVar
 
 from ...components import AnySelectMenu, SelectDefaultValue
 from ...enums import ComponentType, SelectDefaultValueType
@@ -39,9 +33,9 @@ SelectMenuT = TypeVar("SelectMenuT", bound=AnySelectMenu)
 SelectValueT = TypeVar("SelectValueT")
 P = ParamSpec("P")
 
-SelectDefaultValueMultiInputType = Union[SelectValueT, SelectDefaultValue]
+SelectDefaultValueMultiInputType: TypeAlias = SelectValueT | SelectDefaultValue
 # almost the same as above, but with `Object`; used for selects where the type isn't ambiguous (i.e. all except mentionable select)
-SelectDefaultValueInputType = Union[SelectDefaultValueMultiInputType[SelectValueT], Object]
+SelectDefaultValueInputType: TypeAlias = SelectDefaultValueMultiInputType[SelectValueT] | Object
 
 
 class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):

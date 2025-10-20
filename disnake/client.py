@@ -11,15 +11,7 @@ import types
 from collections.abc import Callable, Coroutine, Generator, Mapping, Sequence
 from datetime import datetime, timedelta
 from errno import ECONNRESET
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Literal,
-    NamedTuple,
-    TypedDict,
-    TypeVar,
-    overload,
-)
+from typing import TYPE_CHECKING, Any, Literal, NamedTuple, TypedDict, TypeVar, overload
 
 import aiohttp
 

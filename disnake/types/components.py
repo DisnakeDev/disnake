@@ -52,7 +52,7 @@ LabelChildComponent = Union[
 # valid message component types (v1/v2)
 MessageTopLevelComponentV1: TypeAlias = "ActionRow"
 # currently, all v2 components except Thumbnail
-MessageTopLevelComponentV2 = Union[
+MessageTopLevelComponentV2: TypeAlias = Union[
     "SectionComponent",
     "TextDisplayComponent",
     "MediaGalleryComponent",
@@ -60,10 +60,10 @@ MessageTopLevelComponentV2 = Union[
     "SeparatorComponent",
     "ContainerComponent",
 ]
-MessageTopLevelComponent = Union[MessageTopLevelComponentV1, MessageTopLevelComponentV2]
+MessageTopLevelComponent: TypeAlias = MessageTopLevelComponentV1 | MessageTopLevelComponentV2
 
 # valid modal component types
-ModalTopLevelComponent = Union[
+ModalTopLevelComponent: TypeAlias = Union[
     "ActionRow",  # deprecated
     "TextDisplayComponent",
     "LabelComponent",
@@ -150,13 +150,9 @@ class ChannelSelectMenu(_SelectMenu):
     channel_types: NotRequired[list[ChannelType]]
 
 
-AnySelectMenu = Union[
-    StringSelectMenu,
-    UserSelectMenu,
-    RoleSelectMenu,
-    MentionableSelectMenu,
-    ChannelSelectMenu,
-]
+AnySelectMenu: TypeAlias = (
+    StringSelectMenu | UserSelectMenu | RoleSelectMenu | MentionableSelectMenu | ChannelSelectMenu
+)
 
 
 # modal

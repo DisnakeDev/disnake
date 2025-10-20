@@ -4,15 +4,7 @@ from __future__ import annotations
 
 import datetime
 from collections.abc import Mapping, Sized
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    ClassVar,
-    Literal,
-    Protocol,
-    cast,
-    overload,
-)
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, Protocol, cast, overload
 
 from . import utils
 from .colour import Colour

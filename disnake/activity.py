@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING, Any, Literal, Union, overload
+from typing import TYPE_CHECKING, Any, Literal, TypeAlias, overload
 
 from .asset import Asset
 from .colour import Colour
@@ -919,7 +919,7 @@ class CustomActivity(BaseActivity):
         return f"<CustomActivity name={self.name!r} emoji={self.emoji!r}>"
 
 
-ActivityTypes = Union[Activity, Game, CustomActivity, Streaming, Spotify]
+ActivityTypes: TypeAlias = Activity | Game | CustomActivity | Streaming | Spotify
 
 
 @overload

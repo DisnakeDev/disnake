@@ -10,6 +10,7 @@ from typing import (
     Final,
     Generic,
     Literal,
+    TypeAlias,
     TypeVar,
     Union,
     cast,
@@ -114,20 +115,20 @@ SelectMenuType = Literal[
 ]
 
 # valid `ActionRow.components` item types in a message/modal
-ActionRowMessageComponent = Union["Button", "AnySelectMenu"]
+ActionRowMessageComponent: TypeAlias = Union["Button", "AnySelectMenu"]
 ActionRowModalComponent: TypeAlias = "TextInput"
 
 # any child component type of action rows
-ActionRowChildComponent = Union[ActionRowMessageComponent, ActionRowModalComponent]
+ActionRowChildComponent: TypeAlias = ActionRowMessageComponent | ActionRowModalComponent
 ActionRowChildComponentT = TypeVar("ActionRowChildComponentT", bound=ActionRowChildComponent)
 
 # valid `Section.accessory` types
-SectionAccessoryComponent = Union["Thumbnail", "Button"]
+SectionAccessoryComponent: TypeAlias = Union["Thumbnail", "Button"]
 # valid `Section.components` item types
 SectionChildComponent: TypeAlias = "TextDisplay"
 
 # valid `Container.components` item types
-ContainerChildComponent = Union[
+ContainerChildComponent: TypeAlias = Union[
     "ActionRow[ActionRowMessageComponent]",
     "Section",
     "TextDisplay",
@@ -137,7 +138,7 @@ ContainerChildComponent = Union[
 ]
 
 # valid `Label.component` types
-LabelChildComponent = Union[
+LabelChildComponent: TypeAlias = Union[
     "TextInput",
     "FileUpload",
     "AnySelectMenu",
@@ -145,7 +146,7 @@ LabelChildComponent = Union[
 
 # valid `Message.components` item types (v1/v2)
 MessageTopLevelComponentV1: TypeAlias = "ActionRow[ActionRowMessageComponent]"
-MessageTopLevelComponentV2 = Union[
+MessageTopLevelComponentV2: TypeAlias = Union[
     "Section",
     "TextDisplay",
     "MediaGallery",
@@ -153,7 +154,7 @@ MessageTopLevelComponentV2 = Union[
     "Separator",
     "Container",
 ]
-MessageTopLevelComponent = Union[MessageTopLevelComponentV1, MessageTopLevelComponentV2]
+MessageTopLevelComponent: TypeAlias = MessageTopLevelComponentV1 | MessageTopLevelComponentV2
 
 
 _SELECT_COMPONENT_TYPES = frozenset(

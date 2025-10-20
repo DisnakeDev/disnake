@@ -13,15 +13,7 @@ import traceback
 import zlib
 from collections import deque
 from collections.abc import Callable
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Final,
-    Literal,
-    NamedTuple,
-    Protocol,
-    TypeVar,
-)
+from typing import TYPE_CHECKING, Any, Final, Literal, NamedTuple, Protocol, TypeVar
 
 import aiohttp
 

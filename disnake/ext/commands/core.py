@@ -13,6 +13,7 @@ from typing import (
     Generic,
     Literal,
     Protocol,
+    TypeAlias,
     TypeVar,
     Union,
     cast,
@@ -110,10 +111,10 @@ ErrorT = TypeVar("ErrorT", bound="Error")
 if TYPE_CHECKING:
     P = ParamSpec("P")
 
-    CommandCallback = Union[
-        Callable[Concatenate[CogT, ContextT, P], Coro[T]],
-        Callable[Concatenate[ContextT, P], Coro[T]],
-    ]
+    CommandCallback: TypeAlias = (
+        Callable[Concatenate[CogT, ContextT, P], Coro[T]]
+        | Callable[Concatenate[ContextT, P], Coro[T]]
+    )
 else:
     P = TypeVar("P")
 

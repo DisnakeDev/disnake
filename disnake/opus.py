@@ -11,14 +11,7 @@ import os.path
 import struct
 import sys
 from collections.abc import Callable
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Literal,
-    TypedDict,
-    TypeVar,
-    overload,
-)
+from typing import TYPE_CHECKING, Any, Literal, TypedDict, TypeVar, overload
 
 from .errors import DiscordException
 from .utils import MISSING

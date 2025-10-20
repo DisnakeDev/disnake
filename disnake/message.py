@@ -9,14 +9,7 @@ import re
 from base64 import b64decode, b64encode
 from collections.abc import Callable
 from os import PathLike
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    ClassVar,
-    Union,
-    cast,
-    overload,
-)
+from typing import TYPE_CHECKING, Any, ClassVar, TypeAlias, cast, overload
 
 from . import utils
 from .channel import PartialMessageable
@@ -84,7 +77,7 @@ if TYPE_CHECKING:
     from .ui._types import MessageComponents
     from .ui.view import View
 
-    EmojiInputType = Union[Emoji, PartialEmoji, str]
+    EmojiInputType: TypeAlias = Emoji | PartialEmoji | str
 
 __all__ = (
     "Attachment",
@@ -1456,9 +1449,7 @@ class Message(Hashable):
             # TODO: consider adding to cache here
             self.author = Member._from_message(message=self, data=member)
 
-    def _handle_mentions(
-        self, mentions: list[UserPayload] | list[UserWithMemberPayload]
-    ) -> None:
+    def _handle_mentions(self, mentions: list[UserPayload] | list[UserWithMemberPayload]) -> None:
         self.mentions = r = []
         guild = self.guild
         state = self._state
@@ -2264,9 +2255,7 @@ class Message(Hashable):
         emoji = convert_emoji_reaction(emoji)
         await self._state.http.add_reaction(self.channel.id, self.id, emoji)
 
-    async def remove_reaction(
-        self, emoji: EmojiInputType | Reaction, member: Snowflake
-    ) -> None:
+    async def remove_reaction(self, emoji: EmojiInputType | Reaction, member: Snowflake) -> None:
         """|coro|
 
         Removes a reaction by the member from the message.

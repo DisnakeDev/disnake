@@ -14,12 +14,7 @@ import threading
 import time
 from collections.abc import Sequence
 from errno import ECONNRESET
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Literal,
-    overload,
-)
+from typing import TYPE_CHECKING, Any, Literal, overload
 from urllib.parse import quote as urlquote
 
 from .. import utils
@@ -1101,9 +1096,7 @@ class SyncWebhook(BaseWebhook):
             msg = "This webhook does not have a token associated with it"
             raise WebhookTokenMissing(msg)
 
-        previous_mentions: AllowedMentions | None = getattr(
-            self._state, "allowed_mentions", None
-        )
+        previous_mentions: AllowedMentions | None = getattr(self._state, "allowed_mentions", None)
         if content is None:
             content = MISSING
 
@@ -1152,9 +1145,7 @@ class SyncWebhook(BaseWebhook):
             return self._create_message(data, thread=thread, thread_name=thread_name)
         return None
 
-    def fetch_message(
-        self, id: int, /, *, thread: Snowflake | None = None
-    ) -> SyncWebhookMessage:
+    def fetch_message(self, id: int, /, *, thread: Snowflake | None = None) -> SyncWebhookMessage:
         """Retrieves a single :class:`SyncWebhookMessage` owned by this webhook.
 
         .. versionadded:: 2.0
@@ -1292,9 +1283,7 @@ class SyncWebhook(BaseWebhook):
         if attachments is MISSING and (file or files):
             attachments = self.fetch_message(message_id, thread=thread).attachments
 
-        previous_mentions: AllowedMentions | None = getattr(
-            self._state, "allowed_mentions", None
-        )
+        previous_mentions: AllowedMentions | None = getattr(self._state, "allowed_mentions", None)
         params = handle_message_parameters(
             content=content,
             file=file,

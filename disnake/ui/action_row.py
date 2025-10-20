@@ -9,6 +9,7 @@ from typing import (
     ClassVar,
     Generic,
     NoReturn,
+    TypeAlias,
     TypeVar,
     cast,
     overload,

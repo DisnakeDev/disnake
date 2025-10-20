@@ -3,11 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Generator, Sequence
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    TypeVar,
-)
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from ..components import _SELECT_COMPONENT_TYPE_VALUES
 from ..enums import ComponentType

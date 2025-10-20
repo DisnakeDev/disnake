@@ -586,9 +586,7 @@ class FFmpegOpusAudio(FFmpegAudio):
         return codec, bitrate
 
     @staticmethod
-    def _probe_codec_native(
-        source, executable: str = "ffmpeg"
-    ) -> tuple[str | None, int | None]:
+    def _probe_codec_native(source, executable: str = "ffmpeg") -> tuple[str | None, int | None]:
         exe = executable[:2] + "probe" if executable in ("ffmpeg", "avconv") else executable
         args = [
             exe,
@@ -615,9 +613,7 @@ class FFmpegOpusAudio(FFmpegAudio):
         return codec, bitrate
 
     @staticmethod
-    def _probe_codec_fallback(
-        source, executable: str = "ffmpeg"
-    ) -> tuple[str | None, int | None]:
+    def _probe_codec_fallback(source, executable: str = "ffmpeg") -> tuple[str | None, int | None]:
         args = [executable, "-hide_banner", "-i", source]
         proc = subprocess.Popen(
             args, creationflags=CREATE_NO_WINDOW, stdout=subprocess.PIPE, stderr=subprocess.STDOUT

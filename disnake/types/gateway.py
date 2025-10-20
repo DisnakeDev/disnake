@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import Any, Literal, TypedDict, Union
+from typing import Any, Literal, TypeAlias, TypedDict
 
 from typing_extensions import NotRequired
 
@@ -478,15 +478,15 @@ class GuildStickersUpdateEvent(TypedDict):
 
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-create
-GuildCreateEvent = Union[Guild, UnavailableGuild]
+GuildCreateEvent: TypeAlias = Guild | UnavailableGuild
 
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-update
-GuildUpdateEvent = Guild
+GuildUpdateEvent: TypeAlias = Guild
 
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-delete
-GuildDeleteEvent = UnavailableGuild
+GuildDeleteEvent: TypeAlias = UnavailableGuild
 
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-audit-log-entry-create

@@ -5,15 +5,7 @@ from __future__ import annotations
 import functools
 import operator
 from collections.abc import Callable, Iterator, Sequence
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    ClassVar,
-    Generic,
-    NoReturn,
-    TypeVar,
-    overload,
-)
+from typing import TYPE_CHECKING, Any, ClassVar, Generic, NoReturn, TypeVar, overload
 
 from .enums import UserFlags
 from .utils import MISSING, _generated

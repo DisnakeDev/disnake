@@ -3,13 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Mapping, Sequence
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    ClassVar,
-    TypeVar,
-    overload,
-)
+from typing import TYPE_CHECKING, Any, ClassVar, TypeVar, overload
 
 from ...abc import Snowflake
 from ...components import UserSelectMenu
@@ -32,7 +26,7 @@ __all__ = (
 )
 
 
-class UserSelect(BaseSelect[UserSelectMenu, "Union[User, Member]", V_co]):
+class UserSelect(BaseSelect[UserSelectMenu, User | Member, V_co]):
     """Represents a UI user select menu.
 
     This is usually represented as a drop down menu.

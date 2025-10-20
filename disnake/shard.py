@@ -6,13 +6,7 @@ import asyncio
 import logging
 from collections.abc import Callable
 from errno import ECONNRESET
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Literal,
-    NoReturn,
-    overload,
-)
+from typing import TYPE_CHECKING, Any, Literal, NoReturn, overload
 
 import aiohttp
 

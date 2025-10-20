@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, ClassVar, Union
+from typing import TYPE_CHECKING, Any, ClassVar, TypeAlias
 
 if TYPE_CHECKING:
     from aiohttp import ClientResponse, ClientWebSocketResponse
@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from .client import SessionStartLimit
     from .interactions import Interaction, ModalInteraction
 
-    _ResponseType = Union[ClientResponse, Response]
+    _ResponseType: TypeAlias = ClientResponse | Response
 
 __all__ = (
     "DiscordException",

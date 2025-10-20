@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, ClassVar, Union, cast
+from typing import TYPE_CHECKING, Any, ClassVar, TypeAlias, cast
 
 from ..components import Label as LabelComponent
 from ..enums import ComponentType
@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from .file_upload import FileUpload
     from .text_input import TextInput
 
-    LabelChildUIComponent = Union[TextInput, FileUpload, AnySelect[Any]]
+    LabelChildUIComponent: TypeAlias = TextInput | FileUpload | AnySelect[Any]
 
 __all__ = ("Label",)
 

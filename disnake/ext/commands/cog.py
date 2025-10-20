@@ -5,12 +5,7 @@ from __future__ import annotations
 import inspect
 import logging
 from collections.abc import Callable, Generator
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    ClassVar,
-    Union,
-)
+from typing import TYPE_CHECKING, Any, ClassVar, TypeAlias
 
 import disnake
 import disnake.utils
@@ -31,7 +26,7 @@ if TYPE_CHECKING:
     from .context import Context
     from .core import Command
 
-    AnyBot = Union[Bot, AutoShardedBot, InteractionBot, AutoShardedInteractionBot]
+    AnyBot: TypeAlias = Bot | AutoShardedBot | InteractionBot | AutoShardedInteractionBot
 
 
 __all__ = (

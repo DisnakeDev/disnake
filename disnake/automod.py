@@ -4,10 +4,7 @@ from __future__ import annotations
 
 import datetime
 from collections.abc import Iterable, Sequence
-from typing import (
-    TYPE_CHECKING,
-    overload,
-)
+from typing import TYPE_CHECKING, overload
 
 from .enums import (
     AutoModActionType,

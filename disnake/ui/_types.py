@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import TYPE_CHECKING, Any, TypeVar, Union
+from typing import TYPE_CHECKING, Any, TypeAlias, TypeVar, Union
 
 if TYPE_CHECKING:
     from typing import TypeAlias
@@ -40,7 +40,7 @@ ActionRowModalComponent: TypeAlias = "TextInput"  # deprecated
 
 # valid message component types (v1/v2)
 MessageTopLevelComponentV1: TypeAlias = "ActionRow[ActionRowMessageComponent]"
-MessageTopLevelComponentV2 = Union[
+MessageTopLevelComponentV2: TypeAlias = Union[
     "Section",
     "TextDisplay",
     "MediaGallery",
@@ -48,14 +48,14 @@ MessageTopLevelComponentV2 = Union[
     "Separator",
     "Container",
 ]
-MessageTopLevelComponent = Union[MessageTopLevelComponentV1, MessageTopLevelComponentV2]
+MessageTopLevelComponent: TypeAlias = MessageTopLevelComponentV1 | MessageTopLevelComponentV2
 
 # valid modal component types (separate type with ActionRow until fully deprecated)
-ModalTopLevelComponent_ = Union[
+ModalTopLevelComponent_: TypeAlias = Union[
     "TextDisplay",
     "Label",
 ]
-ModalTopLevelComponent = Union[
+ModalTopLevelComponent: TypeAlias = Union[
     ModalTopLevelComponent_,
     "ActionRow[ActionRowModalComponent]",  # deprecated
 ]
@@ -67,7 +67,7 @@ NonActionRowChildT = TypeVar(
 )
 
 # generic utility type for any single ui component (within some generic bounds)
-AnyUIComponentInput = Union[
+AnyUIComponentInput: TypeAlias = Union[
     ActionRowChildT,  # action row child component
     "ActionRow[ActionRowChildT]",  # action row with given child types
     NonActionRowChildT,  # some subset of (v2) components that work outside of action rows
@@ -76,16 +76,14 @@ AnyUIComponentInput = Union[
 # The generic to end all generics.
 # This represents valid input types where components are expected,
 # providing some shortcuts/quality-of-life input shapes.
-ComponentInput = Union[
-    AnyUIComponentInput[ActionRowChildT, NonActionRowChildT],  # any single component
-    Sequence[  # or, a sequence of either -
-        AnyUIComponentInput[ActionRowChildT, NonActionRowChildT] | Sequence[ActionRowChildT]
-    ],
-]
+ComponentInput: TypeAlias = (
+    AnyUIComponentInput[ActionRowChildT, NonActionRowChildT]
+    | Sequence[AnyUIComponentInput[ActionRowChildT, NonActionRowChildT] | Sequence[ActionRowChildT]]
+)
 
-MessageComponents = ComponentInput[ActionRowMessageComponent, MessageTopLevelComponentV2]
+MessageComponents: TypeAlias = ComponentInput[ActionRowMessageComponent, MessageTopLevelComponentV2]
 
-ModalComponents = ComponentInput[
+ModalComponents: TypeAlias = ComponentInput[
     ActionRowModalComponent,  # deprecated
     ModalTopLevelComponent_,
 ]

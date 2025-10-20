@@ -94,9 +94,7 @@ CT = TypeVar("CT", bound=disnake.abc.GuildChannel)
 TT = TypeVar("TT", bound=disnake.Thread)
 
 
-def _get_from_guilds(
-    client: disnake.Client, func: Callable[[disnake.Guild], T | None]
-) -> T | None:
+def _get_from_guilds(client: disnake.Client, func: Callable[[disnake.Guild], T | None]) -> T | None:
     for guild in client.guilds:
         if result := func(guild):
             return result

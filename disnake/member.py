@@ -7,14 +7,7 @@ import itertools
 import sys
 from collections.abc import Callable, Sequence
 from operator import attrgetter
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Literal,
-    Union,
-    cast,
-    overload,
-)
+from typing import TYPE_CHECKING, Any, Literal, TypeAlias, cast, overload
 
 import disnake.abc
 
@@ -60,7 +53,7 @@ if TYPE_CHECKING:
     )
     from .user import Collectibles, PrimaryGuild
 
-    VocalGuildChannel = Union[VoiceChannel, StageChannel]
+    VocalGuildChannel: TypeAlias = VoiceChannel | StageChannel
 
 
 class VoiceState:

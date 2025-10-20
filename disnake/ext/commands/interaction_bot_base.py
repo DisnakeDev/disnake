@@ -9,12 +9,7 @@ import traceback
 import warnings
 from collections.abc import Callable, Iterable, Sequence
 from itertools import chain
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    TypedDict,
-    TypeVar,
-)
+from typing import TYPE_CHECKING, Any, TypedDict, TypeVar
 
 import disnake
 from disnake.app_commands import ApplicationCommand, Option

@@ -12,15 +12,7 @@ import os
 import weakref
 from collections import OrderedDict, deque
 from collections.abc import Callable, Coroutine, Sequence
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Generic,
-    Literal,
-    TypeVar,
-    Union,
-    overload,
-)
+from typing import TYPE_CHECKING, Any, Generic, Literal, TypeAlias, TypeVar, overload
 
 from . import utils
 from .activity import BaseActivity
@@ -111,8 +103,8 @@ if TYPE_CHECKING:
     from .types.webhook import Webhook as WebhookPayload
     from .voice_client import VoiceProtocol
 
-    Channel = Union[GuildChannel, VocalGuildChannel, PrivateChannel]
-    PartialChannel = Union[Channel, PartialMessageable]
+    Channel: TypeAlias = GuildChannel | VocalGuildChannel | PrivateChannel
+    PartialChannel: TypeAlias = Channel | PartialMessageable
 
 T = TypeVar("T")
 

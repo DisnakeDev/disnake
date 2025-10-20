@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: MIT
 
+
 from disnake import DiscordWarning
 
 __all__ = ("MessageContentPrefixWarning",)

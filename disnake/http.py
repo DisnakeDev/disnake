@@ -9,14 +9,7 @@ import sys
 import weakref
 from collections.abc import Coroutine, Iterable, Sequence
 from errno import ECONNRESET
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    ClassVar,
-    Literal,
-    TypeVar,
-    cast,
-)
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, TypeVar, cast
 from urllib.parse import quote as _uriquote
 
 import aiohttp

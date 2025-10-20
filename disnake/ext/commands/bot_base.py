@@ -10,7 +10,7 @@ import sys
 import traceback
 import warnings
 from collections.abc import Callable, Iterable
-from typing import TYPE_CHECKING, Any, TypeVar, Union
+from typing import TYPE_CHECKING, Any, TypeAlias, TypeVar
 
 import disnake
 from disnake.utils import iscoroutinefunction
@@ -42,7 +42,7 @@ T = TypeVar("T")
 CFT = TypeVar("CFT", bound="CoroFunc")
 CXT = TypeVar("CXT", bound="Context")
 
-PrefixType = Union[str, Iterable[str]]
+PrefixType: TypeAlias = str | Iterable[str]
 
 _log = logging.getLogger(__name__)
 

@@ -3,14 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Mapping
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    ClassVar,
-    TypeVar,
-    Union,
-    overload,
-)
+from typing import TYPE_CHECKING, Any, ClassVar, TypeAlias, TypeVar, overload
 
 from ...abc import Snowflake
 from ...components import SelectOption, StringSelectMenu
@@ -34,7 +27,7 @@ __all__ = (
 )
 
 
-SelectOptionInput = Union[list[SelectOption], list[str], dict[str, str]]
+SelectOptionInput: TypeAlias = list[SelectOption] | list[str] | dict[str, str]
 
 
 def _parse_select_options(options: SelectOptionInput) -> list[SelectOption]:

@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 import time
 from collections.abc import Callable, Iterable, Sequence
-from typing import TYPE_CHECKING, Literal, Union
+from typing import TYPE_CHECKING, Literal, TypeAlias
 
 from .abc import GuildChannel, Messageable
 from .enums import ChannelType, ThreadArchiveDuration, try_enum, try_enum_to_int
@@ -46,7 +46,7 @@ if TYPE_CHECKING:
         ThreadMetadata,
     )
 
-    AnyThreadArchiveDuration = Union[ThreadArchiveDuration, ThreadArchiveDurationLiteral]
+    AnyThreadArchiveDuration: TypeAlias = ThreadArchiveDuration | ThreadArchiveDurationLiteral
 
     ThreadType = Literal[
         ChannelType.news_thread, ChannelType.public_thread, ChannelType.private_thread
@@ -213,9 +213,7 @@ class Thread(Messageable, Hashable):
         self.archive_timestamp: datetime.datetime = parse_time(data["archive_timestamp"])
         self.locked: bool = data.get("locked", False)
         self.invitable: bool = data.get("invitable", True)
-        self.create_timestamp: datetime.datetime | None = parse_time(
-            data.get("create_timestamp")
-        )
+        self.create_timestamp: datetime.datetime | None = parse_time(data.get("create_timestamp"))
 
     def _update(self, data: ThreadPayload) -> None:
         try:
