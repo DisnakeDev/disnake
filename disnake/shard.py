@@ -344,7 +344,7 @@ class AutoShardedClient(Client):
         *,
         asyncio_debug: bool = False,
         loop: asyncio.AbstractEventLoop | None = None,
-        shard_ids: list[int] | None = None,  # instead of Client's shard_id: Optional[int]
+        shard_ids: list[int] | None = None,  # instead of Client's shard_id: int | None
         shard_count: int | None = None,
         enable_debug_events: bool = False,
         enable_gateway_error_handler: bool = True,
