@@ -4,13 +4,12 @@ from __future__ import annotations
 
 import functools
 import operator
-from collections.abc import Iterator, Sequence
+from collections.abc import Iterator, Mapping, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
     ClassVar,
-    Generic,
     NoReturn,
     Optional,
     TypeVar,
@@ -19,7 +18,7 @@ from typing import (
 )
 
 from .enums import UserFlags
-from .utils import MISSING, _generated
+from .utils import _generated, deprecated
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -46,52 +45,21 @@ __all__ = (
     "InteractionContextTypes",
 )
 
-BF = TypeVar("BF", bound="BaseFlags")
 T = TypeVar("T", bound="BaseFlags")
 
 
-class flag_value(Generic[T]):
+class flag_value:
     def __init__(self, func: Callable[[Any], int]) -> None:
-        self.flag = func(None)
+        self.flag: int = func(None)
         self.__doc__ = func.__doc__
-        self._parent: type[T] = MISSING
-
-    def __eq__(self, other: Any) -> bool:
-        if isinstance(other, flag_value):
-            return self.flag == other.flag
-        if isinstance(other, BaseFlags):
-            return self._parent is other.__class__ and self.flag == other.value
-        return False
-
-    def __ne__(self, other: Any) -> bool:
-        return not self.__eq__(other)
-
-    def __or__(self, other: Union[flag_value[T], T]) -> T:
-        if isinstance(other, BaseFlags):
-            if self._parent is not other.__class__:
-                msg = f"unsupported operand type(s) for |: flags of '{self._parent.__name__}' and flags of '{other.__class__.__name__}'"
-                raise TypeError(msg)
-            return other._from_value(self.flag | other.value)
-        if not isinstance(other, flag_value):
-            msg = f"unsupported operand type(s) for |: flags of '{self._parent.__name__}' and {other.__class__}"
-            raise TypeError(msg)
-        if self._parent is not other._parent:
-            msg = f"unsupported operand type(s) for |: flags of '{self._parent.__name__}' and flags of '{other._parent.__name__}'"
-            raise TypeError(msg)
-        return self._parent._from_value(self.flag | other.flag)
-
-    def __invert__(self: flag_value[T]) -> T:
-        return ~self._parent._from_value(self.flag)
 
     @overload
-    def __get__(self, instance: None, owner: type[BF]) -> flag_value[BF]: ...
-
+    def __get__(self, instance: None, owner: type[T]) -> T: ...
     @overload
-    def __get__(self, instance: BF, owner: type[BF]) -> bool: ...
-
-    def __get__(self, instance: Optional[BF], owner: type[BF]) -> Any:
+    def __get__(self, instance: T, owner: type[T]) -> bool: ...
+    def __get__(self, instance: Optional[T], owner: type[T]) -> Union[bool, T]:
         if instance is None:
-            return self
+            return owner._from_value(self.flag)
         return instance._has_flag(self.flag)
 
     def __set__(self, instance: BaseFlags, value: bool) -> None:
@@ -101,21 +69,26 @@ class flag_value(Generic[T]):
         return f"<flag_value flag={self.flag!r}>"
 
 
-class alias_flag_value(flag_value[T]):
+class alias_flag_value(flag_value):
     pass
 
 
-def all_flags_value(flags: dict[str, int]) -> int:
+def all_flags_value(flags: Mapping[str, int]) -> int:
     return functools.reduce(operator.or_, flags.values())
 
 
 class BaseFlags:
-    VALID_FLAGS: ClassVar[dict[str, int]]
-    DEFAULT_VALUE: ClassVar[int]
+    VALID_FLAGS: ClassVar[Mapping[str, int]] = {}
+    DEFAULT_VALUE: ClassVar[int] = 0
 
     value: int
 
     __slots__ = ("value",)
+
+    @property
+    @deprecated("BaseFlags.value")
+    def flag(self) -> int:
+        return self.value
 
     def __init__(self, **kwargs: bool) -> None:
         self.value = self.DEFAULT_VALUE
@@ -126,17 +99,16 @@ class BaseFlags:
             setattr(self, key, value)
 
     @classmethod
-    def __init_subclass__(cls, inverted: bool = False, no_fill_flags: bool = False) -> type[Self]:
+    def __init_subclass__(cls, inverted: bool = False, no_fill_flags: bool = False) -> None:
         # add a way to bypass filling flags, eg for ListBaseFlags.
         if no_fill_flags:
-            return cls
+            return
 
-        # use the parent's current flags as a base if they exist
-        cls.VALID_FLAGS = getattr(cls, "VALID_FLAGS", {}).copy()
+        # use a copy of the parent's current flags as a base if they exist
+        cls.VALID_FLAGS = dict(getattr(cls, "VALID_FLAGS", ()))
 
         for name, value in cls.__dict__.items():
             if isinstance(value, flag_value):
-                value._parent = cls
                 cls.VALID_FLAGS[name] = value.flag
 
         if not cls.VALID_FLAGS:
@@ -145,107 +117,68 @@ class BaseFlags:
 
         cls.DEFAULT_VALUE = all_flags_value(cls.VALID_FLAGS) if inverted else 0
 
-        return cls
-
     @classmethod
     def _from_value(cls, value: int) -> Self:
         self = cls.__new__(cls)
         self.value = value
         return self
 
-    def __eq__(self, other: Any) -> bool:
-        if isinstance(other, self.__class__):
-            return self.value == other.value
-        if isinstance(other, flag_value):
-            return self.__class__ is other._parent and self.value == other.flag
-        return False
-
-    def __ne__(self, other: Any) -> bool:
-        return not self.__eq__(other)
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, self.__class__):
+            return NotImplemented
+        return self.value == other.value
 
     def __and__(self, other: Self) -> Self:
         if not isinstance(other, self.__class__):
-            msg = f"unsupported operand type(s) for &: '{self.__class__.__name__}' and '{other.__class__.__name__}'"
-            raise TypeError(msg)
+            return NotImplemented
         return self._from_value(self.value & other.value)
 
     def __iand__(self, other: Self) -> Self:
         if not isinstance(other, self.__class__):
-            msg = f"unsupported operand type(s) for &=: '{self.__class__.__name__}' and '{other.__class__.__name__}'"
-            raise TypeError(msg)
+            return NotImplemented
         self.value &= other.value
         return self
 
-    def __or__(self, other: Union[Self, flag_value[Self]]) -> Self:
-        if isinstance(other, flag_value):
-            if self.__class__ is not other._parent:
-                msg = f"unsupported operand type(s) for |: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
-                raise TypeError(msg)
-            return self._from_value(self.value | other.flag)
+    def __or__(self, other: Self) -> Self:
         if not isinstance(other, self.__class__):
-            msg = f"unsupported operand type(s) for |: '{self.__class__.__name__}' and '{other.__class__.__name__}'"
-            raise TypeError(msg)
+            return NotImplemented
         return self._from_value(self.value | other.value)
 
-    def __ior__(self, other: Union[Self, flag_value[Self]]) -> Self:
-        if isinstance(other, flag_value):
-            if self.__class__ is not other._parent:
-                msg = f"unsupported operand type(s) for |=: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
-                raise TypeError(msg)
-            self.value |= other.flag
-            return self
+    def __ior__(self, other: Self) -> Self:
         if not isinstance(other, self.__class__):
-            msg = f"unsupported operand type(s) for |=: '{self.__class__.__name__}' and '{other.__class__.__name__}'"
-            raise TypeError(msg)
+            return NotImplemented
         self.value |= other.value
         return self
 
-    def __xor__(self, other: Union[Self, flag_value[Self]]) -> Self:
-        if isinstance(other, flag_value):
-            if self.__class__ is not other._parent:
-                msg = f"unsupported operand type(s) for ^: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
-                raise TypeError(msg)
-            return self._from_value(self.value ^ other.flag)
+    def __xor__(self, other: Self) -> Self:
         if not isinstance(other, self.__class__):
-            msg = f"unsupported operand type(s) for ^: '{self.__class__.__name__}' and '{other.__class__.__name__}'"
-            raise TypeError(msg)
+            return NotImplemented
         return self._from_value(self.value ^ other.value)
 
-    def __ixor__(self, other: Union[Self, flag_value[Self]]) -> Self:
-        if isinstance(other, flag_value):
-            if self.__class__ is not other._parent:
-                msg = f"unsupported operand type(s) for ^=: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
-                raise TypeError(msg)
-            self.value ^= other.flag
-            return self
+    def __ixor__(self, other: Self) -> Self:
         if not isinstance(other, self.__class__):
-            msg = f"unsupported operand type(s) for ^=: '{self.__class__.__name__}' and '{other.__class__.__name__}'"
-            raise TypeError(msg)
+            return NotImplemented
         self.value ^= other.value
         return self
 
     def __le__(self, other: Self) -> bool:
         if not isinstance(other, self.__class__):
-            msg = f"'<=' not supported between instances of '{self.__class__.__name__}' and '{other.__class__.__name__}'"
-            raise TypeError(msg)
+            return NotImplemented
         return (self.value & other.value) == self.value
 
     def __ge__(self, other: Self) -> bool:
         if not isinstance(other, self.__class__):
-            msg = f"'>=' not supported between instances of '{self.__class__.__name__}' and '{other.__class__.__name__}'"
-            raise TypeError(msg)
+            return NotImplemented
         return (self.value | other.value) == self.value
 
     def __lt__(self, other: Self) -> bool:
         if not isinstance(other, self.__class__):
-            msg = f"'<' not supported between instances of '{self.__class__.__name__}' and '{other.__class__.__name__}'"
-            raise TypeError(msg)
+            return NotImplemented
         return (self.value & other.value) == self.value and self.value != other.value
 
     def __gt__(self, other: Self) -> bool:
         if not isinstance(other, self.__class__):
-            msg = f"'>' not supported between instances of '{self.__class__.__name__}' and '{other.__class__.__name__}'"
-            raise TypeError(msg)
+            return NotImplemented
         return (self.value | other.value) == self.value and self.value != other.value
 
     def __invert__(self) -> Self:

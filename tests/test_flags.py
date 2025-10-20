@@ -111,7 +111,7 @@ class TestFlagValue:
         assert ins.value == 5
         assert (TestFlags.two | ins).value == 7
 
-        assert not ins.value & TestFlags.sixteen.flag
+        assert not ins.value & TestFlags.sixteen.value
         ins |= TestFlags.sixteen
         assert ins.value == 21
 
@@ -421,7 +421,7 @@ class TestBaseFlags:
 
         ins.two = True
         assert ins.two is True
-        assert ins.value == TestFlags.two.flag == 1 << 1
+        assert ins.value == TestFlags.two.value == 1 << 1
 
     def test_alias_flag_value(self) -> None:
         ins = TestFlags(three=True)
