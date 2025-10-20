@@ -116,7 +116,7 @@ def build_full_toctree(
     env: BuildEnvironment = builder.env
     doctree = env.get_doctree(index)
     toctrees: list[nodes.Element] = []
-    for toctreenode in doctree.traverse(addnodes.toctree):
+    for toctreenode in doctree.findall(addnodes.toctree):
         toctree = env.resolve_toctree(
             docname,
             builder,
