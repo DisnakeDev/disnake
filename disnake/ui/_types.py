@@ -48,7 +48,7 @@ MessageTopLevelComponentV2 = Union[
     "Separator",
     "Container",
 ]
-MessageTopLevelComponent = Union[MessageTopLevelComponentV1, MessageTopLevelComponentV2]
+MessageTopLevelComponent: TypeAlias = Union[MessageTopLevelComponentV1, MessageTopLevelComponentV2]  # noqa: UP007
 
 # valid modal component types (separate type with ActionRow until fully deprecated)
 ModalTopLevelComponent_ = Union[
