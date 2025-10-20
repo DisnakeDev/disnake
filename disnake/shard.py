@@ -70,7 +70,7 @@ class EventItem:
             return NotImplemented
         return self.type < other.type
 
-    def __eq__(self, other: Self) -> bool:
+    def __eq__(self, other: object) -> bool:
         if not isinstance(other, EventItem):
             return NotImplemented
         return self.type == other.type

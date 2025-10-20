@@ -4857,7 +4857,7 @@ class DMChannel(disnake.abc.Messageable, Hashable):
 
     def permissions_for(
         self,
-        obj: Any = None,
+        obj: object = None,
         /,
         *,
         ignore_timeout: bool = MISSING,

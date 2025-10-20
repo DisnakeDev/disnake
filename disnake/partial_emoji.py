@@ -163,7 +163,7 @@ class PartialEmoji(_EmojiTag, AssetMixin):
             f"<{self.__class__.__name__} animated={self.animated} name={self.name!r} id={self.id}>"
         )
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         if self.is_unicode_emoji():
             return isinstance(other, PartialEmoji) and self.name == other.name
 
@@ -171,7 +171,7 @@ class PartialEmoji(_EmojiTag, AssetMixin):
             return self.id == other.id
         return False
 
-    def __ne__(self, other: Any) -> bool:
+    def __ne__(self, other: object) -> bool:
         return not self.__eq__(other)
 
     def __hash__(self) -> int:
