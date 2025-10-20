@@ -244,7 +244,7 @@ class _HelpCommandImpl(Command[CogT | None, Any, None]):
             return ret
 
         # Ditto here
-        def wrapped_walk_commands() -> Generator[Command[Any, ..., Any], None, None]:
+        def wrapped_walk_commands() -> Generator[Command[Any, ..., Any]]:
             yield from original_walk_commands()
             yield self
 
