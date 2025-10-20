@@ -177,7 +177,7 @@ def install_deps(session: nox.Session, *, execution_group: Optional[ExecutionGro
         "sync",
         "--no-default-groups",
     ]
-    env: dict[str, Any] = {}
+    env: dict[str, str] = {}
 
     if session.venv_backend != "none":
         command.append(f"--python={session.virtualenv.location}")

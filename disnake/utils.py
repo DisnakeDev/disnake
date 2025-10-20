@@ -104,7 +104,7 @@ DISCORD_EPOCH = 1420070400000
 
 
 class _MissingSentinel:
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         return False
 
     def __hash__(self) -> int:
@@ -170,12 +170,12 @@ class CachedSlotProperty(Generic[T, T_co]):
         self.__doc__ = function.__doc__
 
     @overload
-    def __get__(self, instance: None, owner: type[Any]) -> Self: ...
+    def __get__(self, instance: None, owner: type[object]) -> Self: ...
 
     @overload
-    def __get__(self, instance: T, owner: type[Any]) -> T_co: ...
+    def __get__(self, instance: T, owner: type[object]) -> T_co: ...
 
-    def __get__(self, instance: Optional[T], owner: type[Any]) -> Any:
+    def __get__(self, instance: Optional[T], owner: type[object]) -> Any:
         if instance is None:
             return self
 
@@ -191,7 +191,7 @@ class classproperty(Generic[T_co]):
     def __init__(self, fget: Callable[[Any], T_co]) -> None:
         self.fget = fget
 
-    def __get__(self, instance: Optional[Any], owner: type[Any]) -> T_co:
+    def __get__(self, instance: Optional[Any], owner: type[object]) -> T_co:
         return self.fget(owner)
 
     def __set__(self, instance, value) -> NoReturn:
@@ -641,7 +641,7 @@ async def sane_wait_for(futures: Iterable[Awaitable[T]], *, timeout: float) -> s
     return done
 
 
-def get_slots(cls: type[Any]) -> Iterator[str]:
+def get_slots(cls: type[object]) -> Iterator[str]:
     for mro in reversed(cls.__mro__):
         slots = getattr(mro, "__slots__", [])
         if isinstance(slots, str):
