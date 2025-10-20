@@ -12,14 +12,13 @@ import itertools
 import math
 import types
 from abc import ABC, abstractmethod
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from enum import Enum, EnumMeta
 from types import EllipsisType, UnionType
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     ClassVar,
     Final,
     Generic,

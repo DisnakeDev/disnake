@@ -2,12 +2,11 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from functools import wraps
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     ClassVar,
     Optional,
     overload,

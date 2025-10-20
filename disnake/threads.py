@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import asyncio
 import time
-from collections.abc import Iterable, Sequence
-from typing import TYPE_CHECKING, Callable, Literal, Optional, Union
+from collections.abc import Callable, Iterable, Sequence
+from typing import TYPE_CHECKING, Literal, Optional, Union
 
 from .abc import GuildChannel, Messageable
 from .enums import ChannelType, ThreadArchiveDuration, try_enum, try_enum_to_int

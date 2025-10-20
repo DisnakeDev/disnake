@@ -4,11 +4,10 @@ from __future__ import annotations
 
 import asyncio
 import datetime
-from collections.abc import AsyncIterator, Awaitable, Generator
+from collections.abc import AsyncIterator, Awaitable, Callable, Generator
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     Optional,
     TypeVar,
     Union,

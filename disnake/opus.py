@@ -10,10 +10,10 @@ import math
 import os.path
 import struct
 import sys
+from collections.abc import Callable
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     Literal,
     Optional,
     TypedDict,

@@ -5,12 +5,11 @@ from __future__ import annotations
 import datetime
 import itertools
 import sys
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from operator import attrgetter
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     Literal,
     Optional,
     Union,

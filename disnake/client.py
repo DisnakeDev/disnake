@@ -8,13 +8,12 @@ import signal
 import sys
 import traceback
 import types
-from collections.abc import Coroutine, Generator, Mapping, Sequence
+from collections.abc import Callable, Coroutine, Generator, Mapping, Sequence
 from datetime import datetime, timedelta
 from errno import ECONNRESET
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     Literal,
     NamedTuple,
     Optional,

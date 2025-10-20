@@ -6,10 +6,10 @@ import asyncio
 import datetime
 import functools
 from abc import ABC
+from collections.abc import Callable
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     Optional,
     TypeVar,
     Union,
