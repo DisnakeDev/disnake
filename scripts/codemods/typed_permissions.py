@@ -90,9 +90,10 @@ class PermissionTypings(BaseCodemodCommand):
                     cst.AnnAssign(
                         cst.Name(perm),
                         cst.Annotation(
-                            cst.Subscript(
-                                cst.Name("Optional"),
-                                [cst.SubscriptElement(cst.Index(cst.Name("bool")))],
+                            cst.BinaryOperation(
+                                cst.Name("bool"),
+                                cst.BitOr(),
+                                cst.Name("None"),
                             )
                         ),
                     )
