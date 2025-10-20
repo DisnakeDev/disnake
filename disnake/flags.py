@@ -212,7 +212,7 @@ class BaseFlags:
         elif toggle is False:
             self.value &= ~o
         else:
-            msg = f"Value to set for {self.__class__.__name__} must be a bool."
+            msg = f"Value to set for {self.__class__.__name__} must be a bool, got {toggle!r}."
             raise TypeError(msg)
 
 

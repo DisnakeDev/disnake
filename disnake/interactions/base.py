@@ -934,7 +934,7 @@ class InteractionResponse:
 
         if defer_type is InteractionResponseType.deferred_channel_message:
             # we only want to set flags if we are sending a message
-            data["flags"] = MessageFlags(ephemeral=ephemeral).value
+            data["flags"] = MessageFlags(ephemeral=ephemeral is True).value
 
         adapter = async_context.get()
         await adapter.create_interaction_response(
