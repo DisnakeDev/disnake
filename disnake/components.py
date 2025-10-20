@@ -119,7 +119,7 @@ ActionRowMessageComponent: TypeAlias = Union["Button", "AnySelectMenu"]
 ActionRowModalComponent: TypeAlias = "TextInput"
 
 # any child component type of action rows
-ActionRowChildComponent: TypeAlias = ActionRowMessageComponent | ActionRowModalComponent
+ActionRowChildComponent: TypeAlias = Union[ActionRowMessageComponent, ActionRowModalComponent]  # noqa: UP007
 ActionRowChildComponentT = TypeVar("ActionRowChildComponentT", bound=ActionRowChildComponent)
 
 # valid `Section.accessory` types
@@ -154,7 +154,7 @@ MessageTopLevelComponentV2: TypeAlias = Union[
     "Separator",
     "Container",
 ]
-MessageTopLevelComponent: TypeAlias = MessageTopLevelComponentV1 | MessageTopLevelComponentV2
+MessageTopLevelComponent: TypeAlias = Union[MessageTopLevelComponentV1, MessageTopLevelComponentV2]  # noqa: UP007
 
 
 _SELECT_COMPONENT_TYPES = frozenset(
