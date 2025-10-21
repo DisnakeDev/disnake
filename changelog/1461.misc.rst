@@ -1,0 +1,1 @@
+Explicitly use ``aiohttp[speedups]`` for ``speed`` extra. Simplifying the dependency chain.
