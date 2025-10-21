@@ -107,7 +107,7 @@ class BaseFlags:
             return
 
         # use a copy of the parent's current flags as a base if they exist
-        cls.VALID_FLAGS = dict(getattr(cls, "VALID_FLAGS", ()))
+        cls.VALID_FLAGS = dict(cls.VALID_FLAGS)
 
         for name, value in cls.__dict__.items():
             if isinstance(value, flag_value):
@@ -980,7 +980,7 @@ class Intents(BaseFlags):
 
         .. versionchanged:: 2.6
 
-            This can be now be provided on initialisation.
+            This can be now be provided on initialization.
     """
 
     __slots__ = ()
