@@ -86,7 +86,7 @@ EXECUTION_GROUPS: Sequence[ExecutionGroup] = [
     ExecutionGroup(
         sessions=("docs", "pyright"),
         pyright_paths=("docs",),
-        extras=("docs",),
+        groups=("docs",),
     ),
     # codemodding and pyright
     ExecutionGroup(
