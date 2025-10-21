@@ -4,20 +4,15 @@ from __future__ import annotations
 
 import functools
 import operator
+from collections.abc import Iterator, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
     ClassVar,
-    Dict,
     Generic,
-    Iterator,
-    List,
     NoReturn,
     Optional,
-    Sequence,
-    Tuple,
-    Type,
     TypeVar,
     Union,
     overload,
@@ -28,6 +23,10 @@ from .utils import MISSING, _generated
 
 if TYPE_CHECKING:
     from typing_extensions import Self
+
+    from disnake.types.appinfo import ApplicationIntegrationType
+    from disnake.types.automod import AutoModPresetType
+    from disnake.types.interactions import InteractionContextType
 
 
 __all__ = (
@@ -55,7 +54,7 @@ class flag_value(Generic[T]):
     def __init__(self, func: Callable[[Any], int]) -> None:
         self.flag = func(None)
         self.__doc__ = func.__doc__
-        self._parent: Type[T] = MISSING
+        self._parent: type[T] = MISSING
 
     def __eq__(self, other: Any) -> bool:
         if isinstance(other, flag_value):
@@ -70,30 +69,27 @@ class flag_value(Generic[T]):
     def __or__(self, other: Union[flag_value[T], T]) -> T:
         if isinstance(other, BaseFlags):
             if self._parent is not other.__class__:
-                raise TypeError(
-                    f"unsupported operand type(s) for |: flags of '{self._parent.__name__}' and flags of '{other.__class__.__name__}'"
-                )
+                msg = f"unsupported operand type(s) for |: flags of '{self._parent.__name__}' and flags of '{other.__class__.__name__}'"
+                raise TypeError(msg)
             return other._from_value(self.flag | other.value)
         if not isinstance(other, flag_value):
-            raise TypeError(
-                f"unsupported operand type(s) for |: flags of '{self._parent.__name__}' and {other.__class__}"
-            )
+            msg = f"unsupported operand type(s) for |: flags of '{self._parent.__name__}' and {other.__class__}"
+            raise TypeError(msg)
         if self._parent is not other._parent:
-            raise TypeError(
-                f"unsupported operand type(s) for |: flags of '{self._parent.__name__}' and flags of '{other._parent.__name__}'"
-            )
+            msg = f"unsupported operand type(s) for |: flags of '{self._parent.__name__}' and flags of '{other._parent.__name__}'"
+            raise TypeError(msg)
         return self._parent._from_value(self.flag | other.flag)
 
     def __invert__(self: flag_value[T]) -> T:
         return ~self._parent._from_value(self.flag)
 
     @overload
-    def __get__(self, instance: None, owner: Type[BF]) -> flag_value[BF]: ...
+    def __get__(self, instance: None, owner: type[BF]) -> flag_value[BF]: ...
 
     @overload
-    def __get__(self, instance: BF, owner: Type[BF]) -> bool: ...
+    def __get__(self, instance: BF, owner: type[BF]) -> bool: ...
 
-    def __get__(self, instance: Optional[BF], owner: Type[BF]) -> Any:
+    def __get__(self, instance: Optional[BF], owner: type[BF]) -> Any:
         if instance is None:
             return self
         return instance._has_flag(self.flag)
@@ -109,12 +105,12 @@ class alias_flag_value(flag_value[T]):
     pass
 
 
-def all_flags_value(flags: Dict[str, int]) -> int:
+def all_flags_value(flags: dict[str, int]) -> int:
     return functools.reduce(operator.or_, flags.values())
 
 
 class BaseFlags:
-    VALID_FLAGS: ClassVar[Dict[str, int]]
+    VALID_FLAGS: ClassVar[dict[str, int]]
     DEFAULT_VALUE: ClassVar[int]
 
     value: int
@@ -125,11 +121,12 @@ class BaseFlags:
         self.value = self.DEFAULT_VALUE
         for key, value in kwargs.items():
             if key not in self.VALID_FLAGS:
-                raise TypeError(f"{key!r} is not a valid flag name.")
+                msg = f"{key!r} is not a valid flag name."
+                raise TypeError(msg)
             setattr(self, key, value)
 
     @classmethod
-    def __init_subclass__(cls, inverted: bool = False, no_fill_flags: bool = False) -> Type[Self]:
+    def __init_subclass__(cls, inverted: bool = False, no_fill_flags: bool = False) -> type[Self]:
         # add a way to bypass filling flags, eg for ListBaseFlags.
         if no_fill_flags:
             return cls
@@ -143,9 +140,8 @@ class BaseFlags:
                 cls.VALID_FLAGS[name] = value.flag
 
         if not cls.VALID_FLAGS:
-            raise RuntimeError(
-                "At least one flag must be defined in a BaseFlags subclass, or 'no_fill_flags' must be set to True"
-            )
+            msg = "At least one flag must be defined in a BaseFlags subclass, or 'no_fill_flags' must be set to True"
+            raise RuntimeError(msg)
 
         cls.DEFAULT_VALUE = all_flags_value(cls.VALID_FLAGS) if inverted else 0
 
@@ -169,101 +165,87 @@ class BaseFlags:
 
     def __and__(self, other: Self) -> Self:
         if not isinstance(other, self.__class__):
-            raise TypeError(
-                f"unsupported operand type(s) for &: '{self.__class__.__name__}' and '{other.__class__.__name__}'"
-            )
+            msg = f"unsupported operand type(s) for &: '{self.__class__.__name__}' and '{other.__class__.__name__}'"
+            raise TypeError(msg)
         return self._from_value(self.value & other.value)
 
     def __iand__(self, other: Self) -> Self:
         if not isinstance(other, self.__class__):
-            raise TypeError(
-                f"unsupported operand type(s) for &=: '{self.__class__.__name__}' and '{other.__class__.__name__}'"
-            )
+            msg = f"unsupported operand type(s) for &=: '{self.__class__.__name__}' and '{other.__class__.__name__}'"
+            raise TypeError(msg)
         self.value &= other.value
         return self
 
     def __or__(self, other: Union[Self, flag_value[Self]]) -> Self:
         if isinstance(other, flag_value):
             if self.__class__ is not other._parent:
-                raise TypeError(
-                    f"unsupported operand type(s) for |: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
-                )
+                msg = f"unsupported operand type(s) for |: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
+                raise TypeError(msg)
             return self._from_value(self.value | other.flag)
         if not isinstance(other, self.__class__):
-            raise TypeError(
-                f"unsupported operand type(s) for |: '{self.__class__.__name__}' and '{other.__class__.__name__}'"
-            )
+            msg = f"unsupported operand type(s) for |: '{self.__class__.__name__}' and '{other.__class__.__name__}'"
+            raise TypeError(msg)
         return self._from_value(self.value | other.value)
 
     def __ior__(self, other: Union[Self, flag_value[Self]]) -> Self:
         if isinstance(other, flag_value):
             if self.__class__ is not other._parent:
-                raise TypeError(
-                    f"unsupported operand type(s) for |=: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
-                )
+                msg = f"unsupported operand type(s) for |=: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
+                raise TypeError(msg)
             self.value |= other.flag
             return self
         if not isinstance(other, self.__class__):
-            raise TypeError(
-                f"unsupported operand type(s) for |=: '{self.__class__.__name__}' and '{other.__class__.__name__}'"
-            )
+            msg = f"unsupported operand type(s) for |=: '{self.__class__.__name__}' and '{other.__class__.__name__}'"
+            raise TypeError(msg)
         self.value |= other.value
         return self
 
     def __xor__(self, other: Union[Self, flag_value[Self]]) -> Self:
         if isinstance(other, flag_value):
             if self.__class__ is not other._parent:
-                raise TypeError(
-                    f"unsupported operand type(s) for ^: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
-                )
+                msg = f"unsupported operand type(s) for ^: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
+                raise TypeError(msg)
             return self._from_value(self.value ^ other.flag)
         if not isinstance(other, self.__class__):
-            raise TypeError(
-                f"unsupported operand type(s) for ^: '{self.__class__.__name__}' and '{other.__class__.__name__}'"
-            )
+            msg = f"unsupported operand type(s) for ^: '{self.__class__.__name__}' and '{other.__class__.__name__}'"
+            raise TypeError(msg)
         return self._from_value(self.value ^ other.value)
 
     def __ixor__(self, other: Union[Self, flag_value[Self]]) -> Self:
         if isinstance(other, flag_value):
             if self.__class__ is not other._parent:
-                raise TypeError(
-                    f"unsupported operand type(s) for ^=: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
-                )
+                msg = f"unsupported operand type(s) for ^=: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
+                raise TypeError(msg)
             self.value ^= other.flag
             return self
         if not isinstance(other, self.__class__):
-            raise TypeError(
-                f"unsupported operand type(s) for ^=: '{self.__class__.__name__}' and '{other.__class__.__name__}'"
-            )
+            msg = f"unsupported operand type(s) for ^=: '{self.__class__.__name__}' and '{other.__class__.__name__}'"
+            raise TypeError(msg)
         self.value ^= other.value
         return self
 
     def __le__(self, other: Self) -> bool:
         if not isinstance(other, self.__class__):
-            raise TypeError(
-                f"'<=' not supported between instances of '{self.__class__.__name__}' and '{other.__class__.__name__}'"
-            )
+            msg = f"'<=' not supported between instances of '{self.__class__.__name__}' and '{other.__class__.__name__}'"
+            raise TypeError(msg)
         return (self.value & other.value) == self.value
 
     def __ge__(self, other: Self) -> bool:
         if not isinstance(other, self.__class__):
-            raise TypeError(
-                f"'>=' not supported between instances of '{self.__class__.__name__}' and '{other.__class__.__name__}'"
-            )
+            msg = f"'>=' not supported between instances of '{self.__class__.__name__}' and '{other.__class__.__name__}'"
+            raise TypeError(msg)
         return (self.value | other.value) == self.value
 
     def __lt__(self, other: Self) -> bool:
         if not isinstance(other, self.__class__):
-            raise TypeError(
-                f"'<' not supported between instances of '{self.__class__.__name__}' and '{other.__class__.__name__}'"
-            )
+            msg = f"'<' not supported between instances of '{self.__class__.__name__}' and '{other.__class__.__name__}'"
+            raise TypeError(msg)
         return (self.value & other.value) == self.value and self.value != other.value
 
     def __gt__(self, other: Self) -> bool:
         if not isinstance(other, self.__class__):
-            raise TypeError(
-                f"'>' not supported between instances of '{self.__class__.__name__}' and '{other.__class__.__name__}'"
-            )
+            msg = f"'>' not supported between instances of '{self.__class__.__name__}' and '{other.__class__.__name__}'"
+            raise TypeError(msg)
         return (self.value | other.value) == self.value and self.value != other.value
 
     def __invert__(self) -> Self:
@@ -279,7 +261,7 @@ class BaseFlags:
     def __repr__(self) -> str:
         return f"<{self.__class__.__name__} value={self.value}>"
 
-    def __iter__(self) -> Iterator[Tuple[str, bool]]:
+    def __iter__(self) -> Iterator[tuple[str, bool]]:
         for name, value in self.__class__.__dict__.items():
             if isinstance(value, alias_flag_value):
                 continue
@@ -296,7 +278,8 @@ class BaseFlags:
         elif toggle is False:
             self.value &= ~o
         else:
-            raise TypeError(f"Value to set for {self.__class__.__name__} must be a bool.")
+            msg = f"Value to set for {self.__class__.__name__} must be a bool."
+            raise TypeError(msg)
 
 
 class ListBaseFlags(BaseFlags, no_fill_flags=True):
@@ -315,13 +298,14 @@ class ListBaseFlags(BaseFlags, no_fill_flags=True):
             # protect against DoS with large shift values
             # n.b. performance overhead of this is negligible
             if not (0 <= n < 64):
-                raise ValueError("Flag values must be within [0, 64)")
+                msg = "Flag values must be within [0, 64)"
+                raise ValueError(msg)
             value += 1 << n
         self.value = value
         return self
 
     @property
-    def values(self) -> List[int]:
+    def values(self) -> list[int]:
         # This essentially converts an int like `0b100110` into `[1, 2, 5]`,
         # i.e. the exponents of set bits in `self.value`.
         # This may look weird but interestingly it's by far the
@@ -453,7 +437,8 @@ class SystemChannelFlags(BaseFlags, inverted=True):
         elif toggle is False:
             self.value |= o
         else:
-            raise TypeError("Value to set for SystemChannelFlags must be a bool.")
+            msg = "Value to set for SystemChannelFlags must be a bool."
+            raise TypeError(msg)
 
     @flag_value
     def join_notifications(self) -> int:
@@ -957,8 +942,8 @@ class PublicUserFlags(BaseFlags):
         """
         return UserFlags.active_developer.value
 
-    def all(self) -> List[UserFlags]:
-        """List[:class:`UserFlags`]: Returns all public flags the user has."""
+    def all(self) -> list[UserFlags]:
+        """:class:`list`\\[:class:`UserFlags`]: Returns all public flags the user has."""
         return [public_flag for public_flag in UserFlags if self._has_flag(public_flag.value)]
 
 
@@ -1109,17 +1094,18 @@ class Intents(BaseFlags):
     def __init__(self, value: Optional[int] = None, **kwargs: bool) -> None:
         if value is not None:
             if not isinstance(value, int):
-                raise TypeError(
-                    f"Expected int, received {type(value).__name__} for argument 'value'."
-                )
+                msg = f"Expected int, received {type(value).__name__} for argument 'value'."
+                raise TypeError(msg)
             if value < 0:
-                raise ValueError("Expected a non-negative value.")
+                msg = "Expected a non-negative value."
+                raise ValueError(msg)
             self.value = value
         else:
             self.value = self.DEFAULT_VALUE
         for key, value in kwargs.items():
             if key not in self.VALID_FLAGS:
-                raise TypeError(f"{key!r} is not a valid flag name.")
+                msg = f"{key!r} is not a valid flag name."
+                raise TypeError(msg)
             setattr(self, key, value)
 
     @classmethod
@@ -1837,7 +1823,8 @@ class MemberCacheFlags(BaseFlags):
         self.value = all_flags_value(self.VALID_FLAGS)
         for key, value in kwargs.items():
             if key not in self.VALID_FLAGS:
-                raise TypeError(f"{key!r} is not a valid flag name.")
+                msg = f"{key!r} is not a valid flag name."
+                raise TypeError(msg)
             setattr(self, key, value)
 
     @classmethod
@@ -1904,10 +1891,12 @@ class MemberCacheFlags(BaseFlags):
 
     def _verify_intents(self, intents: Intents) -> None:
         if self.voice and not intents.voice_states:
-            raise ValueError("MemberCacheFlags.voice requires Intents.voice_states")
+            msg = "MemberCacheFlags.voice requires Intents.voice_states"
+            raise ValueError(msg)
 
         if self.joined and not intents.members:
-            raise ValueError("MemberCacheFlags.joined requires Intents.members")
+            msg = "MemberCacheFlags.joined requires Intents.members"
+            raise ValueError(msg)
 
     @property
     def _voice_only(self) -> bool:
@@ -2291,6 +2280,9 @@ class AutoModKeywordPresets(ListBaseFlags):
         def __init__(
             self, *, profanity: bool = ..., sexual_content: bool = ..., slurs: bool = ...
         ) -> None: ...
+
+        @property
+        def values(self) -> list[AutoModPresetType]: ...
 
     @classmethod
     def all(cls) -> Self:
@@ -2811,6 +2803,9 @@ class ApplicationInstallTypes(ListBaseFlags):
         @_generated
         def __init__(self, *, guild: bool = ..., user: bool = ...) -> None: ...
 
+        @property
+        def values(self) -> list[ApplicationIntegrationType]: ...
+
     @classmethod
     def all(cls) -> Self:
         """A factory method that creates an :class:`ApplicationInstallTypes` instance with everything enabled."""
@@ -2905,6 +2900,9 @@ class InteractionContextTypes(ListBaseFlags):
         def __init__(
             self, *, bot_dm: bool = ..., guild: bool = ..., private_channel: bool = ...
         ) -> None: ...
+
+        @property
+        def values(self) -> list[InteractionContextType]: ...
 
     @classmethod
     def all(cls) -> Self:

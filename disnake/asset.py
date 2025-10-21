@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import io
 import os
-from typing import TYPE_CHECKING, Any, Literal, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Literal, Optional, Union
 
 import yarl
 
@@ -37,7 +37,7 @@ class AssetMixin:
     url: str
     _state: Optional[AnyState]
 
-    __slots__: Tuple[str, ...] = ("_state",)
+    __slots__: tuple[str, ...] = ("_state",)
 
     async def read(self) -> bytes:
         """|coro|
@@ -59,7 +59,8 @@ class AssetMixin:
             The content of the asset.
         """
         if self._state is None:
-            raise DiscordException("Invalid state (no ConnectionState provided)")
+            msg = "Invalid state (no ConnectionState provided)"
+            raise DiscordException(msg)
 
         return await self._state.http.get_from_cdn(self.url)
 
@@ -75,7 +76,7 @@ class AssetMixin:
 
         Parameters
         ----------
-        fp: Union[:class:`io.BufferedIOBase`, :class:`os.PathLike`]
+        fp: :class:`io.BufferedIOBase` | :class:`os.PathLike`
             The file-like object to save this asset to or the filename
             to use. If a filename is passed then a file is created with that
             filename and used instead.
@@ -128,10 +129,10 @@ class AssetMixin:
         ----------
         spoiler: :class:`bool`
             Whether the file is a spoiler.
-        filename: Optional[:class:`str`]
+        filename: :class:`str` | :data:`None`
             The filename to display when uploading to Discord. If this is not given, it defaults to
             the name of the asset's URL.
-        description: Optional[:class:`str`]
+        description: :class:`str` | :data:`None`
             The file's description.
 
         Raises
@@ -190,7 +191,7 @@ class Asset(AssetMixin):
             Returns the hash of the asset.
     """
 
-    __slots__: Tuple[str, ...] = (
+    __slots__: tuple[str, ...] = (
         "_url",
         "_animated",
         "_key",
@@ -435,20 +436,24 @@ class Asset(AssetMixin):
         if format is not MISSING:
             if self._animated:
                 if format not in VALID_ASSET_FORMATS:
-                    raise ValueError(f"format must be one of {VALID_ASSET_FORMATS}")
+                    msg = f"format must be one of {VALID_ASSET_FORMATS}"
+                    raise ValueError(msg)
             else:
                 if format not in VALID_STATIC_FORMATS:
-                    raise ValueError(f"format must be one of {VALID_STATIC_FORMATS}")
+                    msg = f"format must be one of {VALID_STATIC_FORMATS}"
+                    raise ValueError(msg)
             url = url.with_path(f"{path}.{format}")
 
         if static_format is not MISSING and not self._animated:
             if static_format not in VALID_STATIC_FORMATS:
-                raise ValueError(f"static_format must be one of {VALID_STATIC_FORMATS}")
+                msg = f"static_format must be one of {VALID_STATIC_FORMATS}"
+                raise ValueError(msg)
             url = url.with_path(f"{path}.{static_format}")
 
         if size is not MISSING:
             if not utils.valid_icon_size(size):
-                raise ValueError("size must be a power of 2 between 16 and 4096")
+                msg = "size must be a power of 2 between 16 and 4096"
+                raise ValueError(msg)
             url = url.with_query(size=size)
         else:
             url = url.with_query(url.raw_query_string)
@@ -478,7 +483,8 @@ class Asset(AssetMixin):
             The newly updated asset.
         """
         if not utils.valid_icon_size(size):
-            raise ValueError("size must be a power of 2 between 16 and 4096")
+            msg = "size must be a power of 2 between 16 and 4096"
+            raise ValueError(msg)
 
         url = str(yarl.URL(self._url).with_query(size=size))
         return Asset(state=self._state, url=url, key=self._key, animated=self._animated)
@@ -506,10 +512,12 @@ class Asset(AssetMixin):
         """
         if self._animated:
             if format not in VALID_ASSET_FORMATS:
-                raise ValueError(f"format must be one of {VALID_ASSET_FORMATS}")
+                msg = f"format must be one of {VALID_ASSET_FORMATS}"
+                raise ValueError(msg)
         else:
             if format not in VALID_STATIC_FORMATS:
-                raise ValueError(f"format must be one of {VALID_STATIC_FORMATS}")
+                msg = f"format must be one of {VALID_STATIC_FORMATS}"
+                raise ValueError(msg)
 
         url = yarl.URL(self._url)
         path, _ = os.path.splitext(url.path)

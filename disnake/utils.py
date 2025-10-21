@@ -17,33 +17,23 @@ import unicodedata
 import warnings
 from base64 import b64encode
 from bisect import bisect_left
+from collections.abc import AsyncIterator, Awaitable, Iterable, Iterator, Mapping, Sequence
 from inspect import getdoc as _getdoc, isawaitable as _isawaitable, signature as _signature
 from operator import attrgetter
+from types import UnionType
 from typing import (
     TYPE_CHECKING,
     Any,
-    AsyncIterator,
-    Awaitable,
     Callable,
-    Dict,
     ForwardRef,
     Generic,
-    Iterable,
-    Iterator,
-    List,
     Literal,
-    Mapping,
     NoReturn,
     Optional,
     Protocol,
-    Sequence,
-    Set,
-    Tuple,
-    Type,
     TypedDict,
     TypeVar,
     Union,
-    get_origin,
     overload,
 )
 from urllib.parse import parse_qs, urlencode
@@ -173,12 +163,12 @@ class CachedSlotProperty(Generic[T, T_co]):
         self.__doc__ = function.__doc__
 
     @overload
-    def __get__(self, instance: None, owner: Type[Any]) -> Self: ...
+    def __get__(self, instance: None, owner: type[Any]) -> Self: ...
 
     @overload
-    def __get__(self, instance: T, owner: Type[Any]) -> T_co: ...
+    def __get__(self, instance: T, owner: type[Any]) -> T_co: ...
 
-    def __get__(self, instance: Optional[T], owner: Type[Any]) -> Any:
+    def __get__(self, instance: Optional[T], owner: type[Any]) -> Any:
         if instance is None:
             return self
 
@@ -194,11 +184,12 @@ class classproperty(Generic[T_co]):
     def __init__(self, fget: Callable[[Any], T_co]) -> None:
         self.fget = fget
 
-    def __get__(self, instance: Optional[Any], owner: Type[Any]) -> T_co:
+    def __get__(self, instance: Optional[Any], owner: type[Any]) -> T_co:
         return self.fget(owner)
 
     def __set__(self, instance, value) -> NoReturn:
-        raise AttributeError("cannot set attribute")
+        msg = "cannot set attribute"
+        raise AttributeError(msg)
 
 
 def cached_slot_property(name: str) -> Callable[[Callable[[T], T_co]], CachedSlotProperty[T, T_co]]:
@@ -272,7 +263,7 @@ def copy_doc(original: Union[Callable[..., Any], property]) -> Callable[[T], T]:
     def decorator(overridden: T) -> T:
         overridden.__doc__ = original.__doc__
         if callable(original):
-            overridden.__signature__ = _signature(original)  # type: ignore
+            overridden.__signature__ = _signature(original)  # pyright: ignore[reportAttributeAccessIssue]
         return overridden
 
     return decorator
@@ -314,7 +305,8 @@ def warn_deprecated(
         warnings.simplefilter("always", DeprecationWarning)
         warnings.warn(*args, stacklevel=stacklevel + 1, category=DeprecationWarning, **kwargs)
     finally:
-        warnings.filters[:] = old_filters  # type: ignore
+        assert isinstance(warnings.filters, list)
+        warnings.filters[:] = old_filters
 
 
 def oauth_url(
@@ -331,7 +323,7 @@ def oauth_url(
 
     Parameters
     ----------
-    client_id: Union[:class:`int`, :class:`str`]
+    client_id: :class:`int` | :class:`str`
         The client ID for your bot.
     permissions: :class:`~disnake.Permissions`
         The permissions you're requesting. If not given then you won't be requesting any
@@ -340,7 +332,7 @@ def oauth_url(
         The guild to pre-select in the authorization screen, if available.
     redirect_uri: :class:`str`
         An optional valid redirect URI.
-    scopes: Iterable[:class:`str`]
+    scopes: :class:`~collections.abc.Iterable`\\[:class:`str`]
         An optional valid list of scopes. Defaults to ``('bot',)``.
 
         .. versionadded:: 1.7
@@ -423,7 +415,7 @@ def find(predicate: Callable[[T], Any], seq: Iterable[T]) -> Optional[T]:
         member = disnake.utils.find(lambda m: m.name == 'Mighty', channel.guild.members)
 
     would find the first :class:`~disnake.Member` whose name is 'Mighty' and return it.
-    If an entry is not found, then ``None`` is returned.
+    If an entry is not found, then :data:`None` is returned.
 
     This is different from :func:`py:filter` due to the fact it stops the moment it finds
     a valid entry.
@@ -454,7 +446,7 @@ def get(iterable: Iterable[T], **attrs: Any) -> Optional[T]:
     pass in ``x__y`` as the keyword argument.
 
     If nothing is found that matches the attributes passed, then
-    ``None`` is returned.
+    :data:`None` is returned.
 
     Examples
     --------
@@ -504,7 +496,7 @@ def get(iterable: Iterable[T], **attrs: Any) -> Optional[T]:
     return None
 
 
-def _unique(iterable: Iterable[T]) -> List[T]:
+def _unique(iterable: Iterable[T]) -> list[T]:
     return list(dict.fromkeys(iterable))
 
 
@@ -551,7 +543,8 @@ def _get_mime_type_for_data(data: _BytesLike) -> str:
     elif data[0:4] == b"OggS":
         return "audio/ogg"
     else:
-        raise ValueError("Unsupported file type provided")
+        msg = "Unsupported file type provided"
+        raise ValueError(msg)
 
 
 def _bytes_to_base64_data(data: _BytesLike) -> str:
@@ -588,9 +581,9 @@ async def _assetbytes_to_base64_data(data: Optional[AssetBytes]) -> Optional[str
 if HAS_ORJSON:
 
     def _to_json(obj: Any) -> str:
-        return orjson.dumps(obj).decode("utf-8")  # type: ignore
+        return orjson.dumps(obj).decode("utf-8")  # pyright: ignore[reportPossiblyUnboundVariable]
 
-    _from_json = orjson.loads  # type: ignore
+    _from_json = orjson.loads  # pyright: ignore[reportPossiblyUnboundVariable]
 
 else:
 
@@ -631,7 +624,7 @@ async def async_all(gen: Iterable[Union[Awaitable[bool], bool]]) -> bool:
     return True
 
 
-async def sane_wait_for(futures: Iterable[Awaitable[T]], *, timeout: float) -> Set[asyncio.Task[T]]:
+async def sane_wait_for(futures: Iterable[Awaitable[T]], *, timeout: float) -> set[asyncio.Task[T]]:
     ensured = [asyncio.ensure_future(fut) for fut in futures]
     done, pending = await asyncio.wait(ensured, timeout=timeout, return_when=asyncio.ALL_COMPLETED)
 
@@ -641,7 +634,7 @@ async def sane_wait_for(futures: Iterable[Awaitable[T]], *, timeout: float) -> S
     return done
 
 
-def get_slots(cls: Type[Any]) -> Iterator[str]:
+def get_slots(cls: type[Any]) -> Iterator[str]:
     for mro in reversed(cls.__mro__):
         slots = getattr(mro, "__slots__", [])
         if isinstance(slots, str):
@@ -718,7 +711,7 @@ class SnowflakeList(array.array):
         def __init__(self, data: Iterable[int], *, is_sorted: bool = False) -> None: ...
 
     def __new__(cls, data: Iterable[int], *, is_sorted: bool = False) -> Self:
-        return array.array.__new__(cls, "Q", data if is_sorted else sorted(data))  # type: ignore
+        return array.array.__new__(cls, "Q", data if is_sorted else sorted(data))  # pyright: ignore[reportReturnType]
 
     def add(self, element: int) -> None:
         i = bisect_left(self, element)
@@ -754,17 +747,17 @@ def resolve_invite(invite: Union[Invite, str], *, with_params: Literal[False] = 
 @overload
 def resolve_invite(
     invite: Union[Invite, str], *, with_params: Literal[True]
-) -> Tuple[str, Dict[str, str]]: ...
+) -> tuple[str, dict[str, str]]: ...
 
 
 def resolve_invite(
     invite: Union[Invite, str], *, with_params: bool = False
-) -> Union[str, Tuple[str, Dict[str, str]]]:
+) -> Union[str, tuple[str, dict[str, str]]]:
     """Resolves an invite from a :class:`~disnake.Invite`, URL or code.
 
     Parameters
     ----------
-    invite: Union[:class:`~disnake.Invite`, :class:`str`]
+    invite: :class:`~disnake.Invite` | :class:`str`
         The invite to resolve.
     with_params: :class:`bool`
         Whether to also return the query parameters of the invite, if it's a url.
@@ -773,7 +766,7 @@ def resolve_invite(
 
     Returns
     -------
-    Union[:class:`str`, Tuple[:class:`str`, Dict[:class:`str`, :class:`str`]]]
+    :class:`str` | :class:`tuple`\\[:class:`str`, :class:`dict`\\[:class:`str`, :class:`str`]]
         The invite code if ``with_params`` is ``False``, otherwise a tuple containing the
         invite code and the url's query parameters, if applicable.
     """
@@ -802,7 +795,7 @@ def resolve_template(code: Union[Template, str]) -> str:
 
     Parameters
     ----------
-    code: Union[:class:`~disnake.Template`, :class:`str`]
+    code: :class:`~disnake.Template` | :class:`str`
         The code.
 
     Returns
@@ -955,7 +948,7 @@ class _DocstringParam(_DocstringLocalizationsMixin):
 
 class _ParsedDocstring(_DocstringLocalizationsMixin):
     description: str
-    params: Dict[str, _DocstringParam]
+    params: dict[str, _DocstringParam]
 
 
 def _count_left_spaces(string: str) -> int:
@@ -967,7 +960,7 @@ def _count_left_spaces(string: str) -> int:
     return res
 
 
-def _get_header_line(lines: List[str], header: str, underline: str) -> int:
+def _get_header_line(lines: list[str], header: str, underline: str) -> int:
     underlining = len(header) * underline
     for i, line in enumerate(lines):
         if line.rstrip() == header and i + 1 < len(lines) and lines[i + 1].startswith(underlining):
@@ -975,7 +968,7 @@ def _get_header_line(lines: List[str], header: str, underline: str) -> int:
     return len(lines)
 
 
-def _get_next_header_line(lines: List[str], underline: str, start: int = 0) -> int:
+def _get_next_header_line(lines: list[str], underline: str, start: int = 0) -> int:
     for idx, line in enumerate(lines[start:]):
         i = start + idx
         clean_line = line.rstrip()
@@ -990,12 +983,12 @@ def _get_next_header_line(lines: List[str], underline: str, start: int = 0) -> i
     return len(lines)
 
 
-def _get_description(lines: List[str]) -> str:
+def _get_description(lines: list[str]) -> str:
     end = _get_next_header_line(lines, "-")
     return "\n".join(lines[:end]).strip()
 
 
-def _extract_localization_key(desc: str) -> Tuple[str, Tuple[Optional[str], Optional[str]]]:
+def _extract_localization_key(desc: str) -> tuple[str, tuple[Optional[str], Optional[str]]]:
     match = re.search(r"\{\{(.*?)\}\}", desc)
     if match:
         desc = desc.replace(match.group(0), "").strip()
@@ -1004,15 +997,15 @@ def _extract_localization_key(desc: str) -> Tuple[str, Tuple[Optional[str], Opti
     return desc, (None, None)
 
 
-def _get_option_desc(lines: List[str]) -> Dict[str, _DocstringParam]:
+def _get_option_desc(lines: list[str]) -> dict[str, _DocstringParam]:
     start = _get_header_line(lines, "Parameters", "-") + 2
     end = _get_next_header_line(lines, "-", start)
     if start >= len(lines):
         return {}
     # Read option descriptions
-    options: Dict[str, _DocstringParam] = {}
+    options: dict[str, _DocstringParam] = {}
 
-    def add_param(param: Optional[str], desc_lines: List[str], maybe_type: Optional[str]) -> None:
+    def add_param(param: Optional[str], desc_lines: list[str], maybe_type: Optional[str]) -> None:
         if param is None:
             return
         desc: Optional[str] = None
@@ -1031,7 +1024,7 @@ def _get_option_desc(lines: List[str]) -> Dict[str, _DocstringParam]:
                 "localization_key_desc": loc_key_desc,
             }
 
-    desc_lines: List[str] = []
+    desc_lines: list[str] = []
     param: Optional[str] = None
     maybe_type: Optional[str] = None
     for line in lines[start:end]:
@@ -1077,7 +1070,7 @@ def parse_docstring(func: Callable[..., Any]) -> _ParsedDocstring:
 # Chunkers
 
 
-def _chunk(iterator: Iterator[T], max_size: int) -> Iterator[List[T]]:
+def _chunk(iterator: Iterator[T], max_size: int) -> Iterator[list[T]]:
     ret = []
     n = 0
     for item in iterator:
@@ -1091,7 +1084,7 @@ def _chunk(iterator: Iterator[T], max_size: int) -> Iterator[List[T]]:
         yield ret
 
 
-async def _achunk(iterator: AsyncIterator[T], max_size: int) -> AsyncIterator[List[T]]:
+async def _achunk(iterator: AsyncIterator[T], max_size: int) -> AsyncIterator[list[T]]:
     ret = []
     n = 0
     async for item in iterator:
@@ -1106,21 +1099,21 @@ async def _achunk(iterator: AsyncIterator[T], max_size: int) -> AsyncIterator[Li
 
 
 @overload
-def as_chunks(iterator: Iterator[T], max_size: int) -> Iterator[List[T]]: ...
+def as_chunks(iterator: Iterator[T], max_size: int) -> Iterator[list[T]]: ...
 
 
 @overload
-def as_chunks(iterator: AsyncIterator[T], max_size: int) -> AsyncIterator[List[T]]: ...
+def as_chunks(iterator: AsyncIterator[T], max_size: int) -> AsyncIterator[list[T]]: ...
 
 
-def as_chunks(iterator: _Iter[T], max_size: int) -> _Iter[List[T]]:
+def as_chunks(iterator: _Iter[T], max_size: int) -> _Iter[list[T]]:
     """A helper function that collects an iterator into chunks of a given size.
 
     .. versionadded:: 2.0
 
     Parameters
     ----------
-    iterator: Union[:class:`collections.abc.Iterator`, :class:`collections.abc.AsyncIterator`]
+    iterator: :class:`collections.abc.Iterator` | :class:`collections.abc.AsyncIterator`
         The iterator to chunk, can be sync or async.
     max_size: :class:`int`
         The maximum chunk size.
@@ -1132,42 +1125,25 @@ def as_chunks(iterator: _Iter[T], max_size: int) -> _Iter[List[T]]:
 
     Returns
     -------
-    Union[:class:`Iterator`, :class:`AsyncIterator`]
+    :class:`Iterator` | :class:`AsyncIterator`
         A new iterator which yields chunks of a given size.
     """
     if max_size <= 0:
-        raise ValueError("Chunk sizes must be greater than 0.")
+        msg = "Chunk sizes must be greater than 0."
+        raise ValueError(msg)
 
     if isinstance(iterator, AsyncIterator):
         return _achunk(iterator, max_size)
     return _chunk(iterator, max_size)
 
 
-if sys.version_info >= (3, 10):
-    PY_310 = True
-    from types import UnionType
-else:
-    PY_310 = False
-    UnionType = object()
-
-
-def flatten_literal_params(parameters: Iterable[Any]) -> Tuple[Any, ...]:
-    params = []
-    for p in parameters:
-        if get_origin(p) is Literal:
-            params.extend(_unique(flatten_literal_params(p.__args__)))
-        else:
-            params.append(p)
-    return tuple(params)
-
-
-def normalise_optional_params(parameters: Iterable[Any]) -> Tuple[Any, ...]:
+def normalise_optional_params(parameters: Iterable[Any]) -> tuple[Any, ...]:
     none_cls = type(None)
     return (*tuple(p for p in parameters if p is not none_cls), none_cls)
 
 
 def _resolve_typealiastype(
-    tp: Any, globals: Dict[str, Any], locals: Dict[str, Any], cache: Dict[str, Any]
+    tp: Any, globals: dict[str, Any], locals: dict[str, Any], cache: dict[str, Any]
 ) -> Any:
     # Use __module__ to get the (global) namespace in which the type alias was defined.
     if mod := sys.modules.get(tp.__module__):
@@ -1186,9 +1162,9 @@ def _resolve_typealiastype(
 # FIXME: this should be split up into smaller functions for clarity and easier maintenance
 def evaluate_annotation(
     tp: Any,
-    globals: Dict[str, Any],
-    locals: Dict[str, Any],
-    cache: Dict[str, Any],
+    globals: dict[str, Any],
+    locals: dict[str, Any],
+    cache: dict[str, Any],
     *,
     implicit_str: bool = True,
 ) -> Any:
@@ -1234,8 +1210,6 @@ def evaluate_annotation(
             except ValueError:
                 pass
         if origin is Literal:
-            if not PY_310:
-                args = flatten_literal_params(tp.__args__)
             implicit_str = False
             is_literal = True
 
@@ -1247,7 +1221,8 @@ def evaluate_annotation(
         if is_literal and not all(
             isinstance(x, (str, int, bool, type(None))) for x in evaluated_args
         ):
-            raise TypeError("Literal arguments must be of type str, int, bool, or NoneType.")
+            msg = "Literal arguments must be of type str, int, bool, or NoneType."
+            raise TypeError(msg)
 
         if origin != orig_origin:
             # we can't use `copy_with` in this case, so just skip all of the following logic
@@ -1270,9 +1245,9 @@ def evaluate_annotation(
 
 def resolve_annotation(
     annotation: Any,
-    globalns: Dict[str, Any],
-    localns: Optional[Dict[str, Any]],
-    cache: Optional[Dict[str, Any]],
+    globalns: dict[str, Any],
+    localns: Optional[dict[str, Any]],
+    cache: Optional[dict[str, Any]],
 ) -> Any:
     if annotation is None:
         return type(None)
@@ -1296,7 +1271,7 @@ def unwrap_function(function: Callable[..., Any]) -> Callable[..., Any]:
             return function
 
 
-def _get_function_globals(function: Callable[..., Any]) -> Dict[str, Any]:
+def _get_function_globals(function: Callable[..., Any]) -> dict[str, Any]:
     unwrap = unwrap_function(function)
     try:
         return unwrap.__globals__
@@ -1309,16 +1284,16 @@ _inspect_empty = inspect.Parameter.empty
 
 def get_signature_parameters(
     function: Callable[..., Any],
-    globalns: Optional[Dict[str, Any]] = None,
+    globalns: Optional[dict[str, Any]] = None,
     *,
     skip_standard_params: bool = False,
-) -> Dict[str, inspect.Parameter]:
+) -> dict[str, inspect.Parameter]:
     # if no globalns provided, unwrap (where needed) and get global namespace from there
     if globalns is None:
         globalns = _get_function_globals(function)
 
-    params: Dict[str, inspect.Parameter] = {}
-    cache: Dict[str, Any] = {}
+    params: dict[str, inspect.Parameter] = {}
+    cache: dict[str, Any] = {}
 
     signature = inspect.signature(function)
     iterator = iter(signature.parameters.items())
@@ -1332,9 +1307,8 @@ def get_signature_parameters(
             try:
                 next(iterator)
             except StopIteration:
-                raise ValueError(
-                    f"Expected command callback to have at least {skip} parameter(s)"
-                ) from None
+                msg = f"Expected command callback to have at least {skip} parameter(s)"
+                raise ValueError(msg) from None
 
     # eval all parameter annotations
     for name, parameter in iterator:
@@ -1449,7 +1423,7 @@ def format_dt(dt: Union[datetime.datetime, float], /, style: TimestampStyle = "f
 
     Parameters
     ----------
-    dt: Union[:class:`datetime.datetime`, :class:`int`, :class:`float`]
+    dt: :class:`datetime.datetime` | :class:`int` | :class:`float`
         The datetime to format.
         If this is a naive datetime, it is assumed to be local time.
     style: :class:`str`
@@ -1480,13 +1454,16 @@ def search_directory(path: str) -> Iterator[str]:
     """
     relpath = os.path.relpath(path)  # relative and normalized
     if ".." in relpath:
-        raise ValueError("Modules outside the cwd require a package to be specified")
+        msg = "Modules outside the cwd require a package to be specified"
+        raise ValueError(msg)
 
     abspath = os.path.abspath(path)
     if not os.path.exists(relpath):
-        raise ValueError(f"Provided path '{abspath}' does not exist")
+        msg = f"Provided path '{abspath}' does not exist"
+        raise ValueError(msg)
     if not os.path.isdir(relpath):
-        raise ValueError(f"Provided path '{abspath}' is not a directory")
+        msg = f"Provided path '{abspath}' is not a directory"
+        raise ValueError(msg)
 
     prefix = relpath.replace(os.sep, ".")
     if prefix in ("", "."):
@@ -1504,7 +1481,7 @@ def search_directory(path: str) -> Iterator[str]:
 def as_valid_locale(locale: str) -> Optional[str]:
     """Converts the provided locale name to a name that is valid for use with the API,
     for example by returning ``en-US`` for ``en_US``.
-    Returns ``None`` for invalid names.
+    Returns :data:`None` for invalid names.
 
     .. versionadded:: 2.5
 
@@ -1532,7 +1509,7 @@ def as_valid_locale(locale: str) -> Optional[str]:
     return None
 
 
-def humanize_list(values: List[str], combine: str) -> str:
+def humanize_list(values: list[str], combine: str) -> str:
     if len(values) > 2:
         return f"{', '.join(values[:-1])}, {combine} {values[-1]}"
     elif len(values) == 0:

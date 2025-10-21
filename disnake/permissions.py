@@ -2,17 +2,14 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from functools import wraps
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
     ClassVar,
-    Dict,
-    Iterator,
     Optional,
-    Set,
-    Tuple,
     overload,
 )
 
@@ -229,14 +226,14 @@ class Permissions(BaseFlags):
     @_overload_with_permissions
     def __init__(self, permissions: int = 0, **kwargs: bool) -> None:
         if not isinstance(permissions, int):
-            raise TypeError(
-                f"Expected int parameter, received {permissions.__class__.__name__} instead."
-            )
+            msg = f"Expected int parameter, received {permissions.__class__.__name__} instead."
+            raise TypeError(msg)
 
         self.value = permissions
         for key, value in kwargs.items():
             if key not in self.VALID_FLAGS:
-                raise TypeError(f"{key!r} is not a valid permission name.")
+                msg = f"{key!r} is not a valid permission name."
+                raise TypeError(msg)
             setattr(self, key, value)
 
     def is_subset(self, other: Permissions) -> bool:
@@ -244,18 +241,16 @@ class Permissions(BaseFlags):
         if isinstance(other, Permissions):
             return (self.value & other.value) == self.value
         else:
-            raise TypeError(
-                f"cannot compare {self.__class__.__name__} with {other.__class__.__name__}"
-            )
+            msg = f"cannot compare {self.__class__.__name__} with {other.__class__.__name__}"
+            raise TypeError(msg)
 
     def is_superset(self, other: Permissions) -> bool:
         """Returns ``True`` if self has the same or more permissions as other."""
         if isinstance(other, Permissions):
             return (self.value | other.value) == self.value
         else:
-            raise TypeError(
-                f"cannot compare {self.__class__.__name__} with {other.__class__.__name__}"
-            )
+            msg = f"cannot compare {self.__class__.__name__} with {other.__class__.__name__}"
+            raise TypeError(msg)
 
     def is_strict_subset(self, other: Permissions) -> bool:
         """Returns ``True`` if the permissions on self are a strict subset of those on other."""
@@ -1125,13 +1120,13 @@ class PermissionOverwrite:
     """A type that is used to represent a channel specific permission.
 
     Unlike a regular :class:`Permissions`\\, the default value of a
-    permission is equivalent to ``None`` and not ``False``. Setting
+    permission is equivalent to :data:`None` and not ``False``. Setting
     a value to ``False`` is **explicitly** denying that permission,
     while setting a value to ``True`` is **explicitly** allowing
     that permission.
 
     The values supported by this are the same as :class:`Permissions`
-    with the added possibility of it being set to ``None``.
+    with the added possibility of it being set to :data:`None`.
 
     .. collapse:: operations
 
@@ -1218,8 +1213,8 @@ class PermissionOverwrite:
         view_guild_insights: Optional[bool]
 
     if TYPE_CHECKING:
-        VALID_NAMES: ClassVar[Set[str]]
-        PURE_FLAGS: ClassVar[Set[str]]
+        VALID_NAMES: ClassVar[set[str]]
+        PURE_FLAGS: ClassVar[set[str]]
 
     @overload
     @_generated
@@ -1295,11 +1290,12 @@ class PermissionOverwrite:
 
     @_overload_with_permissions
     def __init__(self, **kwargs: Optional[bool]) -> None:
-        self._values: Dict[str, Optional[bool]] = {}
+        self._values: dict[str, Optional[bool]] = {}
 
         for key, value in kwargs.items():
             if key not in self.VALID_NAMES:
-                raise ValueError(f"{key!r} is not a valid permission name.")
+                msg = f"{key!r} is not a valid permission name."
+                raise ValueError(msg)
 
             setattr(self, key, value)
 
@@ -1308,15 +1304,16 @@ class PermissionOverwrite:
 
     def _set(self, key: str, value: Optional[bool]) -> None:
         if value not in (True, None, False):
-            raise TypeError(f"Expected bool or NoneType, received {value.__class__.__name__}")
+            msg = f"Expected bool or NoneType, received {value.__class__.__name__}"
+            raise TypeError(msg)
 
         if value is None:
             self._values.pop(key, None)
         else:
             self._values[key] = value
 
-    def pair(self) -> Tuple[Permissions, Permissions]:
-        """Tuple[:class:`Permissions`, :class:`Permissions`]: Returns the (allow, deny) pair from this overwrite."""
+    def pair(self) -> tuple[Permissions, Permissions]:
+        """:class:`tuple`\\[:class:`Permissions`, :class:`Permissions`]: Returns the (allow, deny) pair from this overwrite."""
         allow = Permissions.none()
         deny = Permissions.none()
 
@@ -1446,6 +1443,6 @@ class PermissionOverwrite:
 
             setattr(self, key, value)
 
-    def __iter__(self) -> Iterator[Tuple[str, Optional[bool]]]:
+    def __iter__(self) -> Iterator[tuple[str, Optional[bool]]]:
         for key in self.PURE_FLAGS:
             yield key, self._values.get(key)

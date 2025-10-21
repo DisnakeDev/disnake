@@ -9,13 +9,9 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    Dict,
-    List,
     Literal,
     NoReturn,
     Optional,
-    Tuple,
-    Type,
     Union,
     overload,
 )
@@ -99,7 +95,7 @@ class Shard:
         self._reconnect = client._reconnect
         self._backoff: ExponentialBackoff[Literal[False]] = ExponentialBackoff()
         self._task: Optional[asyncio.Task] = None
-        self._handled_exceptions: Tuple[Type[Exception], ...] = (
+        self._handled_exceptions: tuple[type[Exception], ...] = (
             OSError,
             HTTPException,
             GatewayNotFound,
@@ -111,7 +107,8 @@ class Shard:
     @property
     def id(self) -> int:
         # DiscordWebSocket.shard_id is set in the from_client classmethod
-        return self.ws.shard_id  # type: ignore
+        assert self.ws.shard_id is not None
+        return self.ws.shard_id
 
     def launch(self) -> None:
         self._task = self.loop.create_task(self.worker())
@@ -245,8 +242,8 @@ class ShardInfo:
     ----------
     id: :class:`int`
         The shard ID for this shard.
-    shard_count: Optional[:class:`int`]
-        The shard count for this cluster. If this is ``None`` then the bot has not started yet.
+    shard_count: :class:`int` | :data:`None`
+        The shard count for this cluster. If this is :data:`None` then the bot has not started yet.
     """
 
     __slots__ = ("_parent", "id", "shard_count")
@@ -336,7 +333,7 @@ class AutoShardedClient(Client):
 
     Attributes
     ----------
-    shard_ids: Optional[List[:class:`int`]]
+    shard_ids: :class:`list`\\[:class:`int`] | :data:`None`
         An optional list of shard_ids to launch the shards with.
     """
 
@@ -349,7 +346,7 @@ class AutoShardedClient(Client):
         *,
         asyncio_debug: bool = False,
         loop: Optional[asyncio.AbstractEventLoop] = None,
-        shard_ids: Optional[List[int]] = None,  # instead of Client's shard_id: Optional[int]
+        shard_ids: Optional[list[int]] = None,  # instead of Client's shard_id: Optional[int]
         shard_count: Optional[int] = None,
         enable_debug_events: bool = False,
         enable_gateway_error_handler: bool = True,
@@ -375,17 +372,17 @@ class AutoShardedClient(Client):
     @overload
     def __init__(self: NoReturn) -> None: ...
 
-    def __init__(self, *args: Any, shard_ids: Optional[List[int]] = None, **kwargs: Any) -> None:
+    def __init__(self, *args: Any, shard_ids: Optional[list[int]] = None, **kwargs: Any) -> None:
         self.shard_ids = shard_ids
         super().__init__(*args, **kwargs)
 
         if self.shard_ids is not None:
             if self.shard_count is None:
-                raise ClientException(
-                    "When passing manual shard_ids, you must provide a shard_count."
-                )
+                msg = "When passing manual shard_ids, you must provide a shard_count."
+                raise ClientException(msg)
             elif not isinstance(self.shard_ids, (list, tuple)):
-                raise ClientException("shard_ids parameter must be a list or a tuple.")
+                msg = "shard_ids parameter must be a list or a tuple."
+                raise ClientException(msg)
 
         # instead of a single websocket, we have multiple
         # the key is the shard_id
@@ -398,8 +395,10 @@ class AutoShardedClient(Client):
         self, guild_id: Optional[int] = None, *, shard_id: Optional[int] = None
     ) -> DiscordWebSocket:
         if shard_id is None:
-            # guild_id won't be None if shard_id is None and shard_count won't be None here
-            shard_id = (guild_id >> 22) % self.shard_count  # type: ignore
+            # guild_id and shard_count won't be None if shard_id is None here
+            assert guild_id is not None
+            assert self.shard_count is not None
+            shard_id = (guild_id >> 22) % self.shard_count
         return self.__shards[shard_id].ws
 
     def _get_state(self, **options: Any) -> AutoShardedConnectionState:
@@ -425,17 +424,17 @@ class AutoShardedClient(Client):
         return sum(latency for _, latency in self.latencies) / len(self.__shards)
 
     @property
-    def latencies(self) -> List[Tuple[int, float]]:
-        """List[Tuple[:class:`int`, :class:`float`]]: A list of latencies between a HEARTBEAT and a HEARTBEAT_ACK in seconds.
+    def latencies(self) -> list[tuple[int, float]]:
+        """:class:`list`\\[:class:`tuple`\\[:class:`int`, :class:`float`]]: A list of latencies between a HEARTBEAT and a HEARTBEAT_ACK in seconds.
 
         This returns a list of tuples with elements ``(shard_id, latency)``.
         """
         return [(shard_id, shard.ws.latency) for shard_id, shard in self.__shards.items()]
 
     def get_shard(self, shard_id: int) -> Optional[ShardInfo]:
-        """Gets the shard information of a given shard ID, or ``None`` if not found.
+        """Gets the shard information of a given shard ID, or :data:`None` if not found.
 
-        :return type: Optional[:class:`ShardInfo`]
+        :return type: :class:`ShardInfo` | :data:`None`
         """
         try:
             parent = self.__shards[shard_id]
@@ -445,8 +444,8 @@ class AutoShardedClient(Client):
             return ShardInfo(parent, self.shard_count)
 
     @property
-    def shards(self) -> Dict[int, ShardInfo]:
-        """Mapping[int, :class:`ShardInfo`]: Returns a mapping of shard IDs to their respective info object."""
+    def shards(self) -> dict[int, ShardInfo]:
+        """:class:`~collections.abc.Mapping`\\[:class:`int`, :class:`ShardInfo`]: Returns a mapping of shard IDs to their respective info object."""
         return {
             shard_id: ShardInfo(parent, self.shard_count)
             for shard_id, parent in self.__shards.items()
@@ -461,7 +460,8 @@ class AutoShardedClient(Client):
         except Exception:
             _log.exception("Failed to connect for shard_id: %s. Retrying...", shard_id)
             await asyncio.sleep(5.0)
-            return await self.launch_shard(gateway, shard_id)
+            await self.launch_shard(gateway, shard_id)
+            return
 
         # keep reading the shard while others connect
         self.__shards[shard_id] = ret = Shard(ws, self, self.__queue.put_nowait)
@@ -568,14 +568,14 @@ class AutoShardedClient(Client):
 
         Parameters
         ----------
-        activity: Optional[:class:`BaseActivity`]
-            The activity being done. ``None`` if no currently active activity is done.
-        status: Optional[:class:`Status`]
-            Indicates what status to change to. If ``None``, then
+        activity: :class:`BaseActivity` | :data:`None`
+            The activity being done. :data:`None` if no currently active activity is done.
+        status: :class:`Status` | :data:`None`
+            Indicates what status to change to. If :data:`None`, then
             :attr:`Status.online` is used.
-        shard_id: Optional[:class:`int`]
+        shard_id: :class:`int` | :data:`None`
             The shard_id to change the presence to. If not specified
-            or ``None``, then it will change the presence of every
+            or :data:`None`, then it will change the presence of every
             shard the bot can see.
 
         Raises
@@ -610,8 +610,8 @@ class AutoShardedClient(Client):
                 # may happen if guild is unavailable
                 continue
 
-            # Member.activities is typehinted as Tuple[ActivityType, ...], we may be setting it as Tuple[BaseActivity, ...]
-            me.activities = activities  # type: ignore
+            # Member.activities is typehinted as tuple[ActivityType, ...], we may be setting it as tuple[BaseActivity, ...]
+            me.activities = activities  # pyright: ignore[reportAttributeAccessIssue]
             me.status = status_enum
 
     def is_ws_ratelimited(self) -> bool:

@@ -22,7 +22,7 @@ import logging
 import socket
 import struct
 import threading
-from typing import TYPE_CHECKING, Any, Callable, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Callable, Optional
 
 from . import opus, utils
 from .backoff import ExponentialBackoff
@@ -193,14 +193,15 @@ class VoiceClient(VoiceProtocol):
 
     endpoint_ip: str
     voice_port: int
-    secret_key: List[int]
+    secret_key: list[int]
     ssrc: int
     ip: str
     port: int
 
     def __init__(self, client: Client, channel: abc.Connectable) -> None:
         if not has_nacl:
-            raise RuntimeError("PyNaCl library needed in order to use voice")
+            msg = "PyNaCl library needed in order to use voice"
+            raise RuntimeError(msg)
 
         super().__init__(client, channel)
         state = client._connection
@@ -228,7 +229,7 @@ class VoiceClient(VoiceProtocol):
         self.ws: DiscordVoiceWebSocket = MISSING
 
     warn_nacl = not has_nacl
-    supported_modes: Tuple[SupportedModes, ...] = ("aead_xchacha20_poly1305_rtpsize",)
+    supported_modes: tuple[SupportedModes, ...] = ("aead_xchacha20_poly1305_rtpsize",)
 
     @property
     def guild(self) -> Guild:
@@ -260,9 +261,10 @@ class VoiceClient(VoiceProtocol):
             if channel_id is None:
                 # We're being disconnected so cleanup
                 await self.disconnect()
+            elif self.guild is None:  # pyright: ignore[reportUnnecessaryComparison]
+                self.channel = None  # pyright: ignore[reportAttributeAccessIssue]
             else:
-                guild = self.guild
-                self.channel = channel_id and guild and guild.get_channel(int(channel_id))  # type: ignore
+                self.channel = self.guild.get_channel(int(channel_id))  # pyright: ignore[reportAttributeAccessIssue]
         else:
             self._voice_state_complete.set()
 
@@ -282,10 +284,7 @@ class VoiceClient(VoiceProtocol):
             )
             return
 
-        self.endpoint = endpoint
-        if self.endpoint.startswith("wss://"):
-            # Just in case, strip it off since we're going to add it later
-            self.endpoint = self.endpoint[6:]
+        self.endpoint = endpoint.removeprefix("wss://")
 
         # This gets set later
         self.endpoint_ip = MISSING
@@ -368,8 +367,7 @@ class VoiceClient(VoiceProtocol):
                     await asyncio.sleep(1 + i * 2.0)
                     await self.voice_disconnect()
                     continue
-                else:
-                    raise
+                raise
 
         if self._runner is MISSING:
             self._runner = self.loop.create_task(self.poll_voice_ws(reconnect))
@@ -446,8 +444,7 @@ class VoiceClient(VoiceProtocol):
                             )
                             await self.disconnect()
                             break
-                        else:
-                            continue
+                        continue
 
                 if not reconnect:
                     await self.disconnect()
@@ -517,7 +514,7 @@ class VoiceClient(VoiceProtocol):
         encrypt_packet = getattr(self, f"_encrypt_{self.mode}")
         return encrypt_packet(header, data)
 
-    def _get_nonce(self, pad: int) -> Tuple[bytes, bytes]:
+    def _get_nonce(self, pad: int) -> tuple[bytes, bytes]:
         # returns (nonce, padded_nonce).
         # n.b. all currently implemented modes use the same nonce size (192 bits / 24 bytes)
         nonce = struct.pack(">I", self._lite_nonce)
@@ -529,8 +526,8 @@ class VoiceClient(VoiceProtocol):
         return (nonce, nonce.ljust(pad, b"\0"))
 
     def _encrypt_aead_xchacha20_poly1305_rtpsize(self, header: bytes, data) -> bytes:
-        box = nacl.secret.Aead(bytes(self.secret_key))  # type: ignore[reportPossiblyUnboundVariable]
-        nonce, padded_nonce = self._get_nonce(nacl.secret.Aead.NONCE_SIZE)  # type: ignore[reportPossiblyUnboundVariable]
+        box = nacl.secret.Aead(bytes(self.secret_key))  # pyright: ignore[reportPossiblyUnboundVariable]
+        nonce, padded_nonce = self._get_nonce(nacl.secret.Aead.NONCE_SIZE)  # pyright: ignore[reportPossiblyUnboundVariable]
 
         return (
             header
@@ -554,7 +551,7 @@ class VoiceClient(VoiceProtocol):
         ----------
         source: :class:`AudioSource`
             The audio source we're reading from.
-        after: Callable[[Optional[:class:`Exception`]], Any]
+        after: :class:`~collections.abc.Callable`\\[[:class:`Exception` | :data:`None`], :data:`~typing.Any`]
             The finalizer that is called after the stream is exhausted.
             This function must have a single parameter, ``error``, that
             denotes an optional exception that was raised during playing.
@@ -569,13 +566,16 @@ class VoiceClient(VoiceProtocol):
             Source is not opus encoded and opus is not loaded.
         """
         if not self.is_connected():
-            raise ClientException("Not connected to voice.")
+            msg = "Not connected to voice."
+            raise ClientException(msg)
 
         if self.is_playing():
-            raise ClientException("Already playing audio.")
+            msg = "Already playing audio."
+            raise ClientException(msg)
 
         if not isinstance(source, AudioSource):
-            raise TypeError(f"source must be an AudioSource not {source.__class__.__name__}")
+            msg = f"source must be an AudioSource not {source.__class__.__name__}"
+            raise TypeError(msg)
 
         if not self.encoder and not source.is_opus():
             self.encoder = opus.Encoder()
@@ -609,7 +609,7 @@ class VoiceClient(VoiceProtocol):
 
     @property
     def source(self) -> Optional[AudioSource]:
-        """Optional[:class:`AudioSource`]: The audio source being played, if playing.
+        """:class:`AudioSource` | :data:`None`: The audio source being played, if playing.
 
         This property can also be used to change the audio source currently being played.
         """
@@ -618,10 +618,12 @@ class VoiceClient(VoiceProtocol):
     @source.setter
     def source(self, value: AudioSource) -> None:
         if not isinstance(value, AudioSource):
-            raise TypeError(f"expected AudioSource not {value.__class__.__name__}.")
+            msg = f"expected AudioSource not {value.__class__.__name__}."
+            raise TypeError(msg)
 
         if self._player is None:
-            raise ValueError("Not playing anything.")
+            msg = "Not playing anything."
+            raise ValueError(msg)
 
         self._player._set_source(value)
 

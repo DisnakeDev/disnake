@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
 
 import itertools
-from typing import List, Optional, Union
+from typing import Optional, Union
 
 import libcst as cst
 import libcst.codemod.visitors as codevisitors
@@ -16,7 +16,7 @@ ALL_PERMISSIONS = sorted(Permissions.VALID_FLAGS.keys())
 PERMISSION_MATCHERS = m.OneOf(*map(m.Name, ALL_PERMISSIONS))
 
 
-def get_perm_kwargs(annotation: cst.Annotation) -> List[cst.Param]:
+def get_perm_kwargs(annotation: cst.Annotation) -> list[cst.Param]:
     return [
         cst.Param(
             cst.Name(perm),
@@ -31,10 +31,11 @@ def remove_existing_permissions(params: cst.Parameters, *, is_overload: bool) ->
     """Remove all of the existing permissions from the kwargs of the provided cst.Parameters."""
     for param in params.params:
         if m.matches(param, PERMISSION_MATCHERS):
-            raise RuntimeError(
+            msg = (
                 f"an existing permission '{param.name.value}' is defined as a "
                 "non-keyword argument in a permission overloaded method."
             )
+            raise RuntimeError(msg)
 
     # unlike params, these may contain generated objects
     # we only have to do this for overloads, as we only change overloads directly
@@ -79,9 +80,10 @@ class PermissionTypings(BaseCodemodCommand):
             if m.matches(b, m.If(test=m.Name("TYPE_CHECKING"))):
                 break
         else:
-            raise RuntimeError("could not find TYPE_CHECKING block in PermissionOverwrite.")
+            msg = "could not find TYPE_CHECKING block in PermissionOverwrite."
+            raise RuntimeError(msg)
 
-        og_type_check: cst.If = b  # type: ignore
+        og_type_check: cst.If = b  # pyright: ignore[reportAssignmentType]
 
         body = [
             cst.SimpleStatementLine(
@@ -133,17 +135,15 @@ class PermissionTypings(BaseCodemodCommand):
             return node
 
         if not node.params.star_kwarg and not is_overload:
-            raise RuntimeError(
-                'a function cannot be decorated with "_overload_with_permissions" and not take any kwargs unless it is an overload.'
-            )
+            msg = 'a function cannot be decorated with "_overload_with_permissions" and not take any kwargs unless it is an overload.'
+            raise RuntimeError(msg)
         # always true if this isn't an overload
-        elif node.params.star_kwarg:
+        if node.params.star_kwarg:
             # use the existing annotation if one exists
             annotation = node.params.star_kwarg.annotation
             if annotation is None:
-                raise RuntimeError(
-                    f"parameter {node.params.star_kwarg.name.value} must be annotated."
-                )
+                msg = f"parameter {node.params.star_kwarg.name.value} must be annotated."
+                raise RuntimeError(msg)
         # only possible in the case of an overload
         else:
             # use the first permission annotation if it exists, otherwise default to `bool`
@@ -166,8 +166,7 @@ class PermissionTypings(BaseCodemodCommand):
         params = params.with_changes(kwonly_params=kwonly_params)
 
         if is_overload:
-            node = node.with_changes(params=params)
-            return node
+            return node.with_changes(params=params)
 
         # make an overload before permissions
         empty_overload = node.deep_clone().with_changes(params=empty_overload_params)

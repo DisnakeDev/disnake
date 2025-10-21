@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Dict, List, Literal, Optional, TypedDict
+from typing import Literal, Optional, TypedDict
 
 from typing_extensions import NotRequired
 
@@ -12,6 +12,7 @@ from .user import User
 
 # (also called "installation context", which seems more accurate)
 ApplicationIntegrationType = Literal[0, 1]  # GUILD_INSTALL, USER_INSTALL
+ApplicationEventWebhookStatus = Literal[0, 1, 2]  # disabled, enabled, disabled by Discord
 
 
 class BaseAppInfo(TypedDict):
@@ -28,7 +29,7 @@ class BaseAppInfo(TypedDict):
 
 
 class InstallParams(TypedDict):
-    scopes: List[str]
+    scopes: list[str]
     permissions: str
 
 
@@ -37,7 +38,7 @@ class ApplicationIntegrationTypeConfiguration(TypedDict, total=False):
 
 
 class AppInfo(BaseAppInfo):
-    rpc_origins: NotRequired[List[str]]
+    rpc_origins: NotRequired[list[str]]
     bot_public: bool
     bot_require_code_grant: bool
     bot: NotRequired[User]
@@ -47,24 +48,24 @@ class AppInfo(BaseAppInfo):
     guild_id: NotRequired[Snowflake]
     primary_sku_id: NotRequired[Snowflake]
     slug: NotRequired[str]
-    tags: NotRequired[List[str]]
+    tags: NotRequired[list[str]]
     install_params: NotRequired[InstallParams]
     custom_install_url: NotRequired[str]
     role_connections_verification_url: NotRequired[str]
     approximate_guild_count: NotRequired[int]
     approximate_user_install_count: NotRequired[int]
     approximate_user_authorization_count: NotRequired[int]
-    redirect_uris: NotRequired[List[str]]
+    redirect_uris: NotRequired[list[str]]
     interactions_endpoint_url: NotRequired[Optional[str]]
     event_webhooks_url: NotRequired[Optional[str]]
-    event_webhooks_status: NotRequired[str]
-    event_webhooks_type: NotRequired[List[str]]
+    event_webhooks_status: NotRequired[ApplicationEventWebhookStatus]
+    event_webhooks_type: NotRequired[list[str]]
     # values in this dict generally shouldn't be null, but they can be empty dicts
-    integration_types_config: NotRequired[Dict[str, ApplicationIntegrationTypeConfiguration]]
+    integration_types_config: NotRequired[dict[str, ApplicationIntegrationTypeConfiguration]]
 
 
 class PartialAppInfo(BaseAppInfo, total=False):
-    rpc_origins: List[str]
+    rpc_origins: list[str]
     cover_image: str
     flags: int
 
@@ -73,3 +74,19 @@ class PartialAppInfo(BaseAppInfo, total=False):
 class PartialGatewayAppInfo(TypedDict):
     id: Snowflake
     flags: int
+
+
+class EditAppInfo(TypedDict, total=False):
+    custom_install_url: Optional[str]
+    description: str
+    role_connections_verification_url: Optional[str]
+    install_params: Optional[InstallParams]
+    integration_types_config: dict[str, ApplicationIntegrationTypeConfiguration]
+    flags: int
+    icon: Optional[str]
+    cover_image: Optional[str]
+    interactions_endpoint_url: Optional[str]
+    tags: Optional[list[str]]
+    event_webhooks_url: Optional[str]
+    event_webhooks_status: ApplicationEventWebhookStatus
+    event_webhooks_types: Optional[list[str]]

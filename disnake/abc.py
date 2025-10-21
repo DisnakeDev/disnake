@@ -5,17 +5,13 @@ from __future__ import annotations
 import asyncio
 import copy
 from abc import ABC
+from collections.abc import Mapping, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    Dict,
-    List,
-    Mapping,
     Optional,
     Protocol,
-    Sequence,
-    Tuple,
     TypeVar,
     Union,
     cast,
@@ -144,7 +140,7 @@ class User(Snowflake, Protocol):
             The value of a single zero (``"0"``) indicates that the user has been migrated to the new system.
             See the `help article <https://dis.gd/app-usernames>`__ for details.
 
-    global_name: Optional[:class:`str`]
+    global_name: :class:`str` | :data:`None`
         The user's global display name, if set.
         This takes precedence over :attr:`.name` when shown.
 
@@ -173,7 +169,7 @@ class User(Snowflake, Protocol):
 
     @property
     def avatar(self) -> Optional[Asset]:
-        """Optional[:class:`~disnake.Asset`]: Returns an :class:`~disnake.Asset` for
+        """:class:`~disnake.Asset` | :data:`None`: Returns an :class:`~disnake.Asset` for
         the avatar the user has.
         """
         raise NotImplementedError
@@ -264,7 +260,7 @@ class GuildChannel(ABC):
     category_id: Optional[int]
     _flags: int
     _state: ConnectionState
-    _overwrites: List[_Overwrites]
+    _overwrites: list[_Overwrites]
 
     if TYPE_CHECKING:
 
@@ -279,7 +275,7 @@ class GuildChannel(ABC):
     def _sorting_bucket(self) -> int:
         raise NotImplementedError
 
-    def _update(self, guild: Guild, data: Dict[str, Any]) -> None:
+    def _update(self, guild: Guild, data: dict[str, Any]) -> None:
         raise NotImplementedError
 
     async def _move(
@@ -291,12 +287,13 @@ class GuildChannel(ABC):
         reason: Optional[str],
     ) -> None:
         if position < 0:
-            raise ValueError("Channel position cannot be less than 0.")
+            msg = "Channel position cannot be less than 0."
+            raise ValueError(msg)
 
         http = self._state.http
         bucket = self._sorting_bucket
         channels = [c for c in self.guild.channels if c._sorting_bucket == bucket]
-        channels = cast("List[GuildChannel]", channels)
+        channels = cast("list[GuildChannel]", channels)
 
         channels.sort(key=lambda c: c.position)
 
@@ -313,7 +310,7 @@ class GuildChannel(ABC):
             # add ourselves at our designated position
             channels.insert(index, self)
 
-        payload: List[ChannelPositionUpdatePayload] = []
+        payload: list[ChannelPositionUpdatePayload] = []
         for index, c in enumerate(channels):
             d: ChannelPositionUpdatePayload = {"id": c.id, "position": index}
             if parent_id is not MISSING and c.id == self.id:
@@ -379,7 +376,7 @@ class GuildChannel(ABC):
 
         lock_permissions: bool = bool(sync_permissions)
 
-        overwrites_payload: List[PermissionOverwritePayload] = MISSING
+        overwrites_payload: list[PermissionOverwritePayload] = MISSING
 
         if position is not MISSING:
             await self._move(
@@ -399,9 +396,8 @@ class GuildChannel(ABC):
             overwrites_payload = []
             for target, perm in overwrites.items():
                 if not isinstance(perm, PermissionOverwrite):
-                    raise TypeError(
-                        f"Expected PermissionOverwrite, received {perm.__class__.__name__}"
-                    )
+                    msg = f"Expected PermissionOverwrite, received {perm.__class__.__name__}"
+                    raise TypeError(msg)
 
                 allow, deny = perm.pair()
                 payload: PermissionOverwritePayload = {
@@ -415,7 +411,8 @@ class GuildChannel(ABC):
         type_payload: int
         if type is not MISSING:
             if not isinstance(type, ChannelType):
-                raise TypeError("type field must be of type ChannelType")
+                msg = "type field must be of type ChannelType"
+                raise TypeError(msg)
             type_payload = type.value
         else:
             type_payload = MISSING
@@ -423,12 +420,13 @@ class GuildChannel(ABC):
         flags_payload: int
         if flags is not MISSING:
             if not isinstance(flags, ChannelFlags):
-                raise TypeError("flags field must be of type ChannelFlags")
+                msg = "flags field must be of type ChannelFlags"
+                raise TypeError(msg)
             flags_payload = flags.value
         else:
             flags_payload = MISSING
 
-        available_tags_payload: List[PartialForumTagPayload] = MISSING
+        available_tags_payload: list[PartialForumTagPayload] = MISSING
         if available_tags is not MISSING:
             available_tags_payload = [tag.to_dict() for tag in available_tags]
 
@@ -453,7 +451,7 @@ class GuildChannel(ABC):
         if default_layout is not MISSING:
             default_layout_payload = try_enum_to_int(default_layout)
 
-        options: Dict[str, Any] = {
+        options: dict[str, Any] = {
             "name": name,
             "parent_id": parent_id,
             "topic": topic,
@@ -478,6 +476,7 @@ class GuildChannel(ABC):
 
         if options:
             return await self._state.http.edit_channel(self.id, reason=reason, **options)
+        return None
 
     def _fill_overwrites(self, data: GuildChannelPayload) -> None:
         self._overwrites = []
@@ -505,11 +504,11 @@ class GuildChannel(ABC):
             tmp[everyone_index], tmp[0] = tmp[0], tmp[everyone_index]
 
     @property
-    def changed_roles(self) -> List[Role]:
-        """List[:class:`.Role`]: Returns a list of roles that have been overridden from
+    def changed_roles(self) -> list[Role]:
+        """:class:`list`\\[:class:`.Role`]: Returns a list of roles that have been overridden from
         their default values in the :attr:`.Guild.roles` attribute.
         """
-        ret: List[Role] = []
+        ret: list[Role] = []
         g = self.guild
         for overwrite in filter(lambda o: o.is_role(), self._overwrites):
             role = g.get_role(overwrite.id)
@@ -536,7 +535,7 @@ class GuildChannel(ABC):
 
         Parameters
         ----------
-        obj: Union[:class:`.Role`, :class:`.abc.User`]
+        obj: :class:`.Role` | :class:`.abc.User`
             The role or user denoting
             whose overwrite to get.
 
@@ -562,7 +561,7 @@ class GuildChannel(ABC):
         return PermissionOverwrite()
 
     @property
-    def overwrites(self) -> Dict[Union[Role, Member], PermissionOverwrite]:
+    def overwrites(self) -> dict[Union[Role, Member], PermissionOverwrite]:
         """Returns all of the channel's overwrites.
 
         This is returned as a dictionary where the key contains the target which
@@ -571,7 +570,7 @@ class GuildChannel(ABC):
 
         Returns
         -------
-        Dict[Union[:class:`~disnake.Role`, :class:`~disnake.Member`], :class:`~disnake.PermissionOverwrite`]
+        :class:`dict`\\[:class:`~disnake.Role` | :class:`~disnake.Member`, :class:`~disnake.PermissionOverwrite`]
             The channel's permission overwrites.
         """
         ret = {}
@@ -597,13 +596,13 @@ class GuildChannel(ABC):
 
     @property
     def category(self) -> Optional[CategoryChannel]:
-        """Optional[:class:`~disnake.CategoryChannel`]: The category this channel belongs to.
+        """:class:`~disnake.CategoryChannel` | :data:`None`: The category this channel belongs to.
 
-        If there is no category then this is ``None``.
+        If there is no category then this is :data:`None`.
         """
         if isinstance(self.guild, Object):
             return None
-        return self.guild.get_channel(self.category_id)  # type: ignore
+        return self.guild.get_channel(self.category_id)  # pyright: ignore[reportArgumentType, reportReturnType]
 
     @property
     def permissions_synced(self) -> bool:
@@ -694,7 +693,7 @@ class GuildChannel(ABC):
 
         Parameters
         ----------
-        obj: Union[:class:`~disnake.Member`, :class:`~disnake.Role`]
+        obj: :class:`~disnake.Member` | :class:`~disnake.Role`
             The object to resolve permissions for. This could be either
             a member or a role. If it's a role then member overwrites
             are not computed.
@@ -737,7 +736,8 @@ class GuildChannel(ABC):
         # Timeouted users have only view_channel and read_message_history
         # if they already have them.
         if ignore_timeout is not MISSING and isinstance(obj, Role):
-            raise TypeError("ignore_timeout is only supported for disnake.Member objects")
+            msg = "ignore_timeout is only supported for disnake.Member objects"
+            raise TypeError(msg)
 
         if ignore_timeout is MISSING:
             ignore_timeout = False
@@ -831,7 +831,7 @@ class GuildChannel(ABC):
 
         Parameters
         ----------
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason for deleting this channel. Shows up on the audit log.
 
         Raises
@@ -938,13 +938,13 @@ class GuildChannel(ABC):
         The ``target`` parameter should either be a :class:`.Member` or a
         :class:`.Role` that belongs to guild.
 
-        The ``overwrite`` parameter, if given, must either be ``None`` or
+        The ``overwrite`` parameter, if given, must either be :data:`None` or
         :class:`.PermissionOverwrite`. For convenience, you can pass in
         keyword arguments denoting :class:`.Permissions` attributes. If this is
         done, then you cannot mix the keyword arguments with the ``overwrite``
         parameter.
 
-        If the ``overwrite`` parameter is ``None``, then the permission
+        If the ``overwrite`` parameter is :data:`None`, then the permission
         overwrites are deleted.
 
         You must have :attr:`.Permissions.manage_roles` permission to do this.
@@ -976,15 +976,15 @@ class GuildChannel(ABC):
 
         Parameters
         ----------
-        target: Union[:class:`.Member`, :class:`.Role`]
+        target: :class:`.Member` | :class:`.Role`
             The member or role to overwrite permissions for.
-        overwrite: Optional[:class:`.PermissionOverwrite`]
-            The permissions to allow and deny to the target, or ``None`` to
+        overwrite: :class:`.PermissionOverwrite` | :data:`None`
+            The permissions to allow and deny to the target, or :data:`None` to
             delete the overwrite.
         **permissions
             A keyword argument list of permissions to set for ease of use.
             Cannot be mixed with ``overwrite``.
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason for doing this action. Shows up on the audit log.
 
         Raises
@@ -1008,18 +1008,22 @@ class GuildChannel(ABC):
         elif isinstance(target, Role):
             perm_type = _Overwrites.ROLE
         else:
-            raise TypeError("target parameter must be either Member or Role")
+            msg = "target parameter must be either Member or Role"
+            raise TypeError(msg)
 
         if overwrite is MISSING:
             if len(permissions) == 0:
-                raise TypeError("No overwrite provided.")
+                msg = "No overwrite provided."
+                raise TypeError(msg)
             try:
                 overwrite = PermissionOverwrite(**permissions)
             except (ValueError, TypeError) as e:
-                raise TypeError("Invalid permissions given to keyword arguments.") from e
+                msg = "Invalid permissions given to keyword arguments."
+                raise TypeError(msg) from e
         else:
             if len(permissions) > 0:
-                raise TypeError("Cannot mix overwrite and keyword arguments.")
+                msg = "Cannot mix overwrite and keyword arguments."
+                raise TypeError(msg)
 
         # TODO: wait for event
 
@@ -1031,11 +1035,12 @@ class GuildChannel(ABC):
                 self.id, target.id, allow.value, deny.value, perm_type, reason=reason
             )
         else:
-            raise TypeError("Invalid overwrite type provided.")
+            msg = "Invalid overwrite type provided."
+            raise TypeError(msg)
 
     async def _clone_impl(
         self,
-        base_attrs: Dict[str, Any],
+        base_attrs: dict[str, Any],
         *,
         name: Optional[str] = None,
         category: Optional[Snowflake] = MISSING,
@@ -1044,17 +1049,17 @@ class GuildChannel(ABC):
     ) -> Self:
         # if the overwrites are MISSING, defaults to the
         # original permissions of the channel
-        overwrites_payload: List[PermissionOverwritePayload]
+        overwrites_payload: list[PermissionOverwritePayload]
         if overwrites is not MISSING:
             if not isinstance(overwrites, dict):
-                raise TypeError("overwrites parameter expects a dict.")
+                msg = "overwrites parameter expects a dict."
+                raise TypeError(msg)
 
             overwrites_payload = []
             for target, perm in overwrites.items():
                 if not isinstance(perm, PermissionOverwrite):
-                    raise TypeError(
-                        f"Expected PermissionOverwrite, received {perm.__class__.__name__}"
-                    )
+                    msg = f"Expected PermissionOverwrite, received {perm.__class__.__name__}"
+                    raise TypeError(msg)
 
                 allow, deny = perm.pair()
                 payload: PermissionOverwritePayload = {
@@ -1082,7 +1087,7 @@ class GuildChannel(ABC):
         obj = cls(state=self._state, guild=self.guild, data=data)
 
         # temporarily add it to the cache
-        self.guild._channels[obj.id] = obj  # type: ignore
+        self.guild._channels[obj.id] = obj  # pyright: ignore[reportArgumentType]
         return obj
 
     async def clone(self, *, name: Optional[str] = None, reason: Optional[str] = None) -> Self:
@@ -1098,9 +1103,9 @@ class GuildChannel(ABC):
 
         Parameters
         ----------
-        name: Optional[:class:`str`]
+        name: :class:`str` | :data:`None`
             The name of the new channel. If not provided, defaults to this channel name.
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason for cloning this channel. Shows up on the audit log.
 
         Raises
@@ -1204,13 +1209,13 @@ class GuildChannel(ABC):
             while a negative number moves it above. Note that this
             number is relative and computed after the ``beginning``,
             ``end``, ``before``, and ``after`` parameters.
-        category: Optional[:class:`.abc.Snowflake`]
+        category: :class:`.abc.Snowflake` | :data:`None`
             The category to move this channel under.
-            If ``None`` is given then it moves it out of the category.
+            If :data:`None` is given then it moves it out of the category.
             This parameter is ignored if moving a category channel.
         sync_permissions: :class:`bool`
             Whether to sync the permissions with the category (if given).
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason for moving this channel. Shows up on the audit log.
 
         Raises
@@ -1231,7 +1236,8 @@ class GuildChannel(ABC):
         before, after = kwargs.get("before"), kwargs.get("after")
         offset = kwargs.get("offset", 0)
         if sum(bool(a) for a in (beginning, end, before, after)) > 1:
-            raise TypeError("Only one of [before, after, end, beginning] can be used.")
+            msg = "Only one of [before, after, end, beginning] can be used."
+            raise TypeError(msg)
 
         bucket = self._sorting_bucket
         parent_id = kwargs.get("category", MISSING)
@@ -1250,7 +1256,7 @@ class GuildChannel(ABC):
             ]
 
         channels.sort(key=lambda c: (c.position, c.id))
-        channels = cast("List[GuildChannel]", channels)
+        channels = cast("list[GuildChannel]", channels)
 
         try:
             # Try to remove ourselves from the channel list
@@ -1270,10 +1276,11 @@ class GuildChannel(ABC):
             index = next((i + 1 for i, c in enumerate(channels) if c.id == after.id), None)
 
         if index is None:
-            raise ValueError("Could not resolve appropriate move position")
+            msg = "Could not resolve appropriate move position"
+            raise ValueError(msg)
 
         channels.insert(max((index + offset), 0), self)
-        payload: List[ChannelPositionUpdatePayload] = []
+        payload: list[ChannelPositionUpdatePayload] = []
         lock_permissions = kwargs.get("sync_permissions", False)
         reason = kwargs.get("reason")
         for index, channel in enumerate(channels):
@@ -1319,18 +1326,18 @@ class GuildChannel(ABC):
             Whether a unique invite URL should be created. Defaults to ``True``.
             If this is set to ``False`` then it will return a previously created
             invite.
-        target_type: Optional[:class:`.InviteTarget`]
+        target_type: :class:`.InviteTarget` | :data:`None`
             The type of target for the voice channel invite, if any.
 
             .. versionadded:: 2.0
 
-        target_user: Optional[:class:`User`]
+        target_user: :class:`User` | :data:`None`
             The user whose stream to display for this invite, required if ``target_type`` is :attr:`.InviteTarget.stream`.
             The user must be streaming in the channel.
 
             .. versionadded:: 2.0
 
-        target_application: Optional[:class:`.Snowflake`]
+        target_application: :class:`.Snowflake` | :data:`None`
             The ID of the embedded application for the invite, required if ``target_type`` is :attr:`.InviteTarget.embedded_application`.
 
             .. versionadded:: 2.0
@@ -1338,12 +1345,12 @@ class GuildChannel(ABC):
             .. versionchanged:: 2.9
                 ``PartyType`` is deprecated, and :class:`.Snowflake` should be used instead.
 
-        guild_scheduled_event: Optional[:class:`.GuildScheduledEvent`]
+        guild_scheduled_event: :class:`.GuildScheduledEvent` | :data:`None`
             The guild scheduled event to include with the invite.
 
             .. versionadded:: 2.3
 
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason for creating this invite. Shows up on the audit log.
 
         Raises
@@ -1379,7 +1386,7 @@ class GuildChannel(ABC):
         invite.guild_scheduled_event = guild_scheduled_event
         return invite
 
-    async def invites(self) -> List[Invite]:
+    async def invites(self) -> list[Invite]:
         """|coro|
 
         Returns a list of all active instant invites from this channel.
@@ -1395,7 +1402,7 @@ class GuildChannel(ABC):
 
         Returns
         -------
-        List[:class:`.Invite`]
+        :class:`list`\\[:class:`.Invite`]
             The list of invites that are currently active.
         """
         state = self._state
@@ -1455,7 +1462,7 @@ class Messageable:
         *,
         tts: bool = ...,
         embed: Embed = ...,
-        files: List[File] = ...,
+        files: list[File] = ...,
         stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
         delete_after: float = ...,
         nonce: Union[str, int] = ...,
@@ -1475,7 +1482,7 @@ class Messageable:
         content: Optional[str] = ...,
         *,
         tts: bool = ...,
-        embeds: List[Embed] = ...,
+        embeds: list[Embed] = ...,
         file: File = ...,
         stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
         delete_after: float = ...,
@@ -1496,8 +1503,8 @@ class Messageable:
         content: Optional[str] = ...,
         *,
         tts: bool = ...,
-        embeds: List[Embed] = ...,
-        files: List[File] = ...,
+        embeds: list[Embed] = ...,
+        files: list[File] = ...,
         stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
         delete_after: float = ...,
         nonce: Union[str, int] = ...,
@@ -1517,9 +1524,9 @@ class Messageable:
         *,
         tts: bool = False,
         embed: Optional[Embed] = None,
-        embeds: Optional[List[Embed]] = None,
+        embeds: Optional[list[Embed]] = None,
         file: Optional[File] = None,
-        files: Optional[List[File]] = None,
+        files: Optional[list[File]] = None,
         stickers: Optional[Sequence[Union[GuildSticker, StandardSticker, StickerItem]]] = None,
         delete_after: Optional[float] = None,
         nonce: Optional[Union[str, int]] = None,
@@ -1556,14 +1563,14 @@ class Messageable:
 
         Parameters
         ----------
-        content: Optional[:class:`str`]
+        content: :class:`str` | :data:`None`
             The content of the message to send.
         tts: :class:`bool`
             Whether the message should be sent using text-to-speech.
         embed: :class:`.Embed`
             The rich embed for the content to send. This cannot be mixed with the
             ``embeds`` parameter.
-        embeds: List[:class:`.Embed`]
+        embeds: :class:`list`\\[:class:`.Embed`]
             A list of embeds to send with the content. Must be a maximum of 10.
             This cannot be mixed with the ``embed`` parameter.
 
@@ -1571,15 +1578,15 @@ class Messageable:
 
         file: :class:`~disnake.File`
             The file to upload. This cannot be mixed with the ``files`` parameter.
-        files: List[:class:`~disnake.File`]
+        files: :class:`list`\\[:class:`~disnake.File`]
             A list of files to upload. Must be a maximum of 10.
             This cannot be mixed with the ``file`` parameter.
-        stickers: Sequence[Union[:class:`.GuildSticker`, :class:`.StandardSticker`, :class:`.StickerItem`]]
+        stickers: :class:`~collections.abc.Sequence`\\[:class:`.GuildSticker` | :class:`.StandardSticker` | :class:`.StickerItem`]
             A list of stickers to upload. Must be a maximum of 3.
 
             .. versionadded:: 2.0
 
-        nonce: Union[:class:`str`, :class:`int`]
+        nonce: :class:`str` | :class:`int`
             The nonce to use for sending this message. If the message was successfully sent,
             then the message will have a nonce with this value.
         delete_after: :class:`float`
@@ -1596,7 +1603,7 @@ class Messageable:
 
             .. versionadded:: 1.4
 
-        reference: Union[:class:`.Message`, :class:`.MessageReference`, :class:`.PartialMessage`]
+        reference: :class:`.Message` | :class:`.MessageReference` | :class:`.PartialMessage`
             A reference to the :class:`.Message` to which you are replying, this can be created using
             :meth:`.Message.to_reference` or passed directly as a :class:`.Message`. You can control
             whether this mentions the author of the referenced message using the :attr:`.AllowedMentions.replied_user`
@@ -1610,7 +1617,7 @@ class Messageable:
                 you must explicitly transform the message to a :class:`.MessageReference` using :meth:`.Message.to_reference` and specify the :class:`.MessageReferenceType`,
                 or use :meth:`.Message.forward`.
 
-        mention_author: Optional[:class:`bool`]
+        mention_author: :class:`bool` | :data:`None`
             If set, overrides the :attr:`.AllowedMentions.replied_user` attribute of ``allowed_mentions``.
 
             .. versionadded:: 1.6
@@ -1677,15 +1684,18 @@ class Messageable:
         content = str(content) if content is not None else None
 
         if file is not None and files is not None:
-            raise TypeError("cannot pass both file and files parameter to send()")
+            msg = "cannot pass both file and files parameter to send()"
+            raise TypeError(msg)
 
         if file is not None:
             if not isinstance(file, File):
-                raise TypeError("file parameter must be File")
+                msg = "file parameter must be File"
+                raise TypeError(msg)
             files = [file]
 
         if embed is not None and embeds is not None:
-            raise TypeError("cannot pass both embed and embeds parameter to send()")
+            msg = "cannot pass both embed and embeds parameter to send()"
+            raise TypeError(msg)
 
         if embed is not None:
             embeds = [embed]
@@ -1693,7 +1703,8 @@ class Messageable:
         embeds_payload = None
         if embeds is not None:
             if len(embeds) > 10:
-                raise ValueError("embeds parameter must be a list of up to 10 elements")
+                msg = "embeds parameter must be a list of up to 10 elements"
+                raise ValueError(msg)
             for embed in embeds:
                 if embed._files:
                     files = files or []
@@ -1725,16 +1736,17 @@ class Messageable:
             try:
                 reference_payload = reference.to_message_reference_dict()
             except AttributeError:
-                raise TypeError(
-                    "reference parameter must be Message, MessageReference, or PartialMessage"
-                ) from None
+                msg = "reference parameter must be Message, MessageReference, or PartialMessage"
+                raise TypeError(msg) from None
 
         is_v2 = False
         if view is not None and components is not None:
-            raise TypeError("cannot pass both view and components parameter to send()")
+            msg = "cannot pass both view and components parameter to send()"
+            raise TypeError(msg)
         elif view:
             if not hasattr(view, "__discord_ui_view__"):
-                raise TypeError(f"view parameter must be View not {view.__class__!r}")
+                msg = f"view parameter must be View not {view.__class__!r}"
+                raise TypeError(msg)
             components_payload = view.to_components()
         elif components:
             from .ui.action_row import normalize_components_to_dict
@@ -1749,7 +1761,8 @@ class Messageable:
             flags.is_components_v2 = True
         # components v2 cannot be used with other content fields
         if flags and flags.is_components_v2 and (content or embeds or stickers or poll):
-            raise ValueError("Cannot use v2 components with content, embeds, stickers, or polls")
+            msg = "Cannot use v2 components with content, embeds, stickers, or polls"
+            raise ValueError(msg)
 
         flags_payload = None
         if suppress_embeds is not None:
@@ -1760,9 +1773,11 @@ class Messageable:
 
         if files is not None:
             if len(files) > 10:
-                raise ValueError("files parameter must be a list of up to 10 elements")
+                msg = "files parameter must be a list of up to 10 elements"
+                raise ValueError(msg)
             elif not all(isinstance(file, File) for file in files):
-                raise TypeError("files parameter must be a list of File")
+                msg = "files parameter must be a list of File"
+                raise TypeError(msg)
 
             try:
                 data = await state.http.send_files(
@@ -1900,11 +1915,11 @@ class Messageable:
 
         Parameters
         ----------
-        limit: Optional[:class:`int`]
+        limit: :class:`int` | :data:`None`
             The number of pinned messages to retrieve.
-            If ``None``, retrieves every pinned message in the channel. Note, however,
+            If :data:`None`, retrieves every pinned message in the channel. Note, however,
             that this would make it a slow operation.
-        before: Optional[Union[:class:`.abc.Snowflake`, :class:`datetime.datetime`]]
+        before: :class:`.abc.Snowflake` | :class:`datetime.datetime` | :data:`None`
             Retrieve messages pinned before this date or message.
             If a datetime is provided, it is recommended to use a UTC aware datetime.
             If the datetime is naive, it is assumed to be local time.
@@ -1954,25 +1969,25 @@ class Messageable:
 
         Parameters
         ----------
-        limit: Optional[:class:`int`]
+        limit: :class:`int` | :data:`None`
             The number of messages to retrieve.
-            If ``None``, retrieves every message in the channel. Note, however,
+            If :data:`None`, retrieves every message in the channel. Note, however,
             that this would make it a slow operation.
-        before: Optional[Union[:class:`.abc.Snowflake`, :class:`datetime.datetime`]]
+        before: :class:`.abc.Snowflake` | :class:`datetime.datetime` | :data:`None`
             Retrieve messages before this date or message.
             If a datetime is provided, it is recommended to use a UTC aware datetime.
             If the datetime is naive, it is assumed to be local time.
-        after: Optional[Union[:class:`.abc.Snowflake`, :class:`datetime.datetime`]]
+        after: :class:`.abc.Snowflake` | :class:`datetime.datetime` | :data:`None`
             Retrieve messages after this date or message.
             If a datetime is provided, it is recommended to use a UTC aware datetime.
             If the datetime is naive, it is assumed to be local time.
-        around: Optional[Union[:class:`.abc.Snowflake`, :class:`datetime.datetime`]]
+        around: :class:`.abc.Snowflake` | :class:`datetime.datetime` | :data:`None`
             Retrieve messages around this date or message.
             If a datetime is provided, it is recommended to use a UTC aware datetime.
             If the datetime is naive, it is assumed to be local time.
             When using this argument, the maximum limit is 101. Note that if the limit is an
             even number then this will return at most limit + 1 messages.
-        oldest_first: Optional[:class:`bool`]
+        oldest_first: :class:`bool` | :data:`None`
             If set to ``True``, return messages in oldest->newest order. Defaults to ``True`` if
             ``after`` is specified, otherwise ``False``.
 
@@ -2015,10 +2030,10 @@ class Connectable(Protocol):
     guild: Guild
     id: int
 
-    def _get_voice_client_key(self) -> Tuple[int, str]:
+    def _get_voice_client_key(self) -> tuple[int, str]:
         raise NotImplementedError
 
-    def _get_voice_state_pair(self) -> Tuple[int, int]:
+    def _get_voice_state_pair(self) -> tuple[int, int]:
         raise NotImplementedError
 
     async def connect(
@@ -2043,7 +2058,7 @@ class Connectable(Protocol):
             Whether the bot should automatically attempt
             a reconnect if a part of the handshake fails
             or the gateway goes down.
-        cls: Type[:class:`VoiceProtocol`]
+        cls: :class:`type`\\[:class:`VoiceProtocol`]
             A type that subclasses :class:`VoiceProtocol` to connect with.
             Defaults to :class:`VoiceClient`.
 
@@ -2065,13 +2080,15 @@ class Connectable(Protocol):
         state = self._state
 
         if state._get_voice_client(key_id):
-            raise ClientException("Already connected to a voice channel.")
+            msg = "Already connected to a voice channel."
+            raise ClientException(msg)
 
         client = state._get_client()
         voice = cls(client, self)
 
         if not isinstance(voice, VoiceProtocol):
-            raise TypeError("Type must meet VoiceProtocol abstract base class.")
+            msg = "Type must meet VoiceProtocol abstract base class."
+            raise TypeError(msg)
 
         state._add_voice_client(key_id, voice)
 

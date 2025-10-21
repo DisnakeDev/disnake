@@ -93,7 +93,7 @@ def test_eq() -> None:
     # color tests
     embed_1, embed_2 = Embed(), Embed()
     embed_1.color = Color(123456)
-    assert not embed_1 == embed_2
+    assert embed_1 != embed_2
 
     embed_1.color = MISSING
     assert embed_1 == embed_2
@@ -103,7 +103,7 @@ def test_eq() -> None:
 
     try:
         Embed.set_default_color(123456)
-        assert not embed_1 == embed_2
+        assert embed_1 != embed_2
     finally:
         Embed.set_default_color(None)
 
@@ -111,7 +111,7 @@ def test_eq() -> None:
     embed_1, embed_2 = Embed(), Embed()
     embed_1.add_field(name="This is a test field", value="69 test 69")
     embed_2.add_field(name="This is a test field", value="69 test 69", inline=False)
-    assert not embed_1 == embed_2
+    assert embed_1 != embed_2
 
     embed_1, embed_2 = Embed(), Embed()
     embed_1._fields = []
@@ -124,7 +124,7 @@ def test_embed_proxy_eq() -> None:
 
     embed_1.set_image("https://disnake.dev/assets/disnake-logo.png")
     embed_2.set_image(None)
-    assert not embed_1.image == embed_2.image
+    assert embed_1.image != embed_2.image
 
     embed_2.set_image("https://disnake.dev/assets/disnake-logo.png")
     assert embed_1.image == embed_2.image
@@ -246,7 +246,7 @@ def test_image_remove(file: File) -> None:
 def test_file_params(file: File) -> None:
     embed = Embed()
     with pytest.raises(TypeError):
-        embed.set_image("https://disnake.dev/assets/disnake-logo.png", file=file)  # type: ignore
+        embed.set_image("https://disnake.dev/assets/disnake-logo.png", file=file)  # pyright: ignore[reportCallIssue]
 
     assert embed._files == {}
     assert embed.to_dict() == _BASE
@@ -471,12 +471,12 @@ def test_copy_fields(embed: Embed) -> None:
 # backwards compatibility
 def test_emptyembed() -> None:
     with pytest.warns(DeprecationWarning):
-        assert embeds.EmptyEmbed is None  # type: ignore
+        assert embeds.EmptyEmbed is None  # pyright: ignore[reportAttributeAccessIssue]
     with pytest.warns(DeprecationWarning):
-        assert Embed.Empty is None  # type: ignore
+        assert Embed.Empty is None  # pyright: ignore[reportAttributeAccessIssue]
     with pytest.warns(DeprecationWarning):
-        assert Embed().Empty is None  # type: ignore
+        assert Embed().Empty is None  # pyright: ignore[reportAttributeAccessIssue]
 
     # make sure unknown module attrs continue to raise
     with pytest.raises(AttributeError):
-        _ = embeds.this_does_not_exist  # type: ignore
+        _ = embeds.this_does_not_exist  # pyright: ignore[reportAttributeAccessIssue]

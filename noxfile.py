@@ -1,8 +1,8 @@
 #!/usr/bin/env -S uv run --script
 # /// script
-# requires-python = ">=3.8"
+# requires-python = ">=3.10"
 # dependencies = [
-#     "nox==2025.5.1",
+#     "nox==2025.10.16",
 # ]
 # ///
 # SPDX-License-Identifier: MIT
@@ -16,11 +16,9 @@ import shutil
 from typing import (
     TYPE_CHECKING,
     Any,
-    Dict,
     Final,
-    List,
     Optional,
-    Tuple,
+    Sequence,
 )
 
 import nox
@@ -34,10 +32,9 @@ nox.options.default_venv_backend = "uv|virtualenv"
 
 PYPROJECT = nox.project.load_toml()
 
-SUPPORTED_PYTHONS: Final[List[str]] = nox.project.python_versions(PYPROJECT)
-# TODO(onerandomusername): add 3.14 once CI supports 3.14.
-EXPERIMENTAL_PYTHON_VERSIONS: Final[List[str]] = []
-ALL_PYTHONS: Final[List[str]] = [*SUPPORTED_PYTHONS, *EXPERIMENTAL_PYTHON_VERSIONS]
+SUPPORTED_PYTHONS: Final[Sequence[str]] = nox.project.python_versions(PYPROJECT)
+EXPERIMENTAL_PYTHON_VERSIONS: Final[Sequence[str]] = ["3.14"]
+ALL_PYTHONS: Final[Sequence[str]] = [*SUPPORTED_PYTHONS, *EXPERIMENTAL_PYTHON_VERSIONS]
 MIN_PYTHON: Final[str] = SUPPORTED_PYTHONS[0]
 CI: Final[bool] = "CI" in os.environ
 
@@ -47,30 +44,31 @@ reset_coverage = True
 if TYPE_CHECKING:
     ExecutionGroupType = object
 else:
-    ExecutionGroupType = Dict[str, Any]
+    ExecutionGroupType = dict[str, Any]
 
 
 @dataclasses.dataclass
 class ExecutionGroup(ExecutionGroupType):
-    sessions: Tuple[str, ...] = ()
+    sessions: tuple[str, ...] = ()
     python: str = MIN_PYTHON
     project: bool = True
-    extras: Tuple[str, ...] = ()
-    groups: Tuple[str, ...] = ()
-    dependencies: Tuple[str, ...] = ()
+    extras: tuple[str, ...] = ()
+    groups: tuple[str, ...] = ()
+    dependencies: tuple[str, ...] = ()
     experimental: bool = False
-    pyright_paths: Tuple[str, ...] = ()
+    pyright_paths: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         if self.pyright_paths and "pyright" not in self.sessions:
-            raise TypeError("pyright_paths can only be set if pyright is in sessions")
+            msg = "pyright_paths can only be set if pyright is in sessions"
+            raise TypeError(msg)
         if self.python in EXPERIMENTAL_PYTHON_VERSIONS:
             self.experimental = True
-        for key in self.__dataclass_fields__.keys():
-            self[key] = getattr(self, key)  # type: ignore
+        for key in self.__dataclass_fields__:
+            self[key] = getattr(self, key)  # pyright: ignore[reportIndexIssue]
 
 
-EXECUTION_GROUPS: List[ExecutionGroup] = [
+EXECUTION_GROUPS: Sequence[ExecutionGroup] = [
     ## pyright
     *(
         ExecutionGroup(
@@ -78,8 +76,7 @@ EXECUTION_GROUPS: List[ExecutionGroup] = [
             python=python,
             pyright_paths=("disnake", "tests", "examples", "noxfile.py", "setup.py"),
             project=True,
-            # FIXME: orjson doesn't yet support python 3.14, remove once we migrate to uv and have version-specific locks
-            extras=("speed", "voice") if python not in EXPERIMENTAL_PYTHON_VERSIONS else ("voice",),
+            extras=("speed", "voice"),
             groups=("test", "nox"),
             dependencies=("setuptools", "pytz", "requests"),  # needed for type checking
         )
@@ -125,14 +122,15 @@ EXECUTION_GROUPS: List[ExecutionGroup] = [
 ]
 
 
-def get_groups_for_session(name: str) -> List[ExecutionGroup]:
+def get_groups_for_session(name: str) -> Sequence[ExecutionGroup]:
     return [g for g in EXECUTION_GROUPS if name in g.sessions]
 
 
 def get_version_for_session(name: str) -> str:
     versions = {g.python for g in get_groups_for_session(name) if g.python}
     if len(versions) != 1:
-        raise TypeError(f"not the right number of groups for session {name}")
+        msg = f"not the right number of groups for session {name}"
+        raise TypeError(msg)
     return versions.pop()
 
 
@@ -144,13 +142,15 @@ def install_deps(session: nox.Session, *, execution_group: Optional[ExecutionGro
             # try cutting the `-`
             results = get_groups_for_session(session.name.split("-")[0])
         if len(results) != 1:
-            raise TypeError(f"not a valid session name: {session.name}. results: {len(results)}")
+            msg = f"not a valid session name: {session.name}. results: {len(results)}"
+            raise TypeError(msg)
         execution_group = results[0]
 
     if not execution_group.project and execution_group.extras:
-        raise TypeError("Cannot install extras without also installing the project")
+        msg = "Cannot install extras without also installing the project"
+        raise TypeError(msg)
 
-    command: List[str]
+    command: list[str]
 
     # If not using uv, install with pip
     if os.getenv("INSTALL_WITH_PIP") is not None:
@@ -177,7 +177,7 @@ def install_deps(session: nox.Session, *, execution_group: Optional[ExecutionGro
         "sync",
         "--no-default-groups",
     ]
-    env: Dict[str, Any] = {}
+    env: dict[str, Any] = {}
 
     if session.venv_backend != "none":
         command.append(f"--python={session.virtualenv.location}")
@@ -287,7 +287,7 @@ def autotyping(session: nox.Session) -> None:
     if not session.interactive:
         base_command += ["--hide-progress"]
 
-    dir_options: Dict[Tuple[str, ...], Tuple[str, ...]] = {
+    dir_options: dict[tuple[str, ...], tuple[str, ...]] = {
         (
             "disnake",
             "scripts",
@@ -416,6 +416,10 @@ def test(session: nox.Session, execution_group: ExecutionGroup) -> None:
     install_deps(session, execution_group=execution_group)
 
     pytest_args = ["--cov", "--cov-context=test"]
+    if execution_group.experimental:
+        # don't turn warnings into errors
+        # (this will override what we set in pyproject, but not be overridden by the cli)
+        pytest_args.append("-Wdefault")
     global reset_coverage  # noqa: PLW0603
     if reset_coverage:
         # don't use `--cov-append` for first run

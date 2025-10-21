@@ -1,9 +1,10 @@
 # SPDX-License-Identifier: MIT
 
 from abc import ABC
+from collections.abc import Generator
 from contextlib import contextmanager
 from contextvars import ContextVar
-from typing import TYPE_CHECKING, ClassVar, Generator, Optional
+from typing import TYPE_CHECKING, ClassVar, Optional
 
 import libcst as cst
 import libcst.codemod as codemod
@@ -52,9 +53,8 @@ class BaseCodemodCommand(NoMetadataWrapperMixin, cst.CSTTransformer, codemod.Cod
                 code = f.read()
 
             if self.CHECK_MARKER not in code:
-                raise codemod.SkipFile(
-                    f"this module does not contain the required marker: `{self.CHECK_MARKER}`."
-                )
+                msg = f"this module does not contain the required marker: `{self.CHECK_MARKER}`."
+                raise codemod.SkipFile(msg)
 
         return super().transform_module(tree)
 

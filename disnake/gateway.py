@@ -16,10 +16,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    Deque,
-    Dict,
     Final,
-    List,
     Literal,
     NamedTuple,
     Optional,
@@ -101,9 +98,9 @@ class WebSocketClosure(Exception):
 
 
 class EventListener(NamedTuple):
-    predicate: Callable[[Dict[str, Any]], bool]
+    predicate: Callable[[dict[str, Any]], bool]
     event: str
-    result: Optional[Callable[[Dict[str, Any]], Any]]
+    result: Optional[Callable[[dict[str, Any]], Any]]
     future: asyncio.Future[Any]
 
 
@@ -254,7 +251,7 @@ class KeepAliveHandler(threading.Thread):
 class VoiceKeepAliveHandler(KeepAliveHandler):
     def __init__(self, *args: Any, ws: HeartbeatWebSocket, interval: float, **kwargs: Any) -> None:
         super().__init__(*args, ws=ws, interval=interval, **kwargs)
-        self.recent_ack_latencies: Deque[float] = deque(maxlen=20)
+        self.recent_ack_latencies: deque[float] = deque(maxlen=20)
         self.msg = "Keeping shard ID %s voice websocket alive with timestamp %s."
         self.block_msg = "Shard ID %s voice heartbeat blocked for more than %s seconds"
         self.behind_msg = "High socket latency, shard ID %s heartbeat is %.1fs behind"
@@ -351,7 +348,7 @@ class DiscordWebSocket:
         self._dispatch: DispatchFunc = lambda event, *args: None
         self._dispatch_gateway_error: Optional[GatewayErrorFunc] = None
         # generic event listeners
-        self._dispatch_listeners: List[EventListener] = []
+        self._dispatch_listeners: list[EventListener] = []
         # the keep alive
         self._keep_alive: Optional[KeepAliveHandler] = None
         self.thread_id: int = threading.get_ident()
@@ -369,7 +366,7 @@ class DiscordWebSocket:
         # set in `from_client`
         self.token: str
         self._connection: ConnectionState
-        self._discord_parsers: Dict[str, Callable[[Dict[str, Any]], Any]]
+        self._discord_parsers: dict[str, Callable[[dict[str, Any]], Any]]
         self.gateway: str
         self.call_hooks: CallHooksFunc
         self._initial_identify: bool
@@ -420,7 +417,7 @@ class DiscordWebSocket:
         ws = cls(socket, loop=client.loop)
 
         # dynamically add attributes needed
-        ws.token = client.http.token  # type: ignore
+        ws.token = client.http.token  # pyright: ignore[reportAttributeAccessIssue]
         ws._connection = client._connection
         ws._discord_parsers = client._connection.parsers
         ws._dispatch = client.dispatch
@@ -459,8 +456,8 @@ class DiscordWebSocket:
     def wait_for(
         self,
         event: str,
-        predicate: Callable[[Dict[str, Any]], bool],
-        result: Optional[Callable[[Dict[str, Any]], T]] = None,
+        predicate: Callable[[dict[str, Any]], bool],
+        result: Optional[Callable[[dict[str, Any]], T]] = None,
     ) -> asyncio.Future[T]:
         """Waits for a DISPATCH'd event that meets the predicate.
 
@@ -468,12 +465,12 @@ class DiscordWebSocket:
         ----------
         event: :class:`str`
             The event name in all upper case to wait for.
-        predicate: Callable[[Dict[:class:`str`, Any]], :class:`bool`]
+        predicate: :class:`~collections.abc.Callable`\\[[:class:`dict`\\[:class:`str`, :data:`~typing.Any`]], :class:`bool`]
             A function that takes a data parameter to check for event
             properties. The data parameter is the 'd' key in the JSON message.
-        result: Optional[Callable[[Dict[:class:`str`, Any]], T]]
+        result: :class:`~collections.abc.Callable`\\[[:class:`dict`\\[:class:`str`, :data:`~typing.Any`]], T] | :data:`None`
             A function that takes the same data parameter and executes to send
-            the result to the future. If ``None``, returns the data.
+            the result to the future. If :data:`None`, returns the data.
 
         Returns
         -------
@@ -522,8 +519,8 @@ class DiscordWebSocket:
         """Sends the RESUME packet."""
         # these should never be None if resuming, but instead of asserting
         # we just send those values and handle the INVALIDATE_SESSION
-        seq: int = self.sequence  # type: ignore
-        session_id: str = self.session_id  # type: ignore
+        seq: int = self.sequence  # pyright: ignore[reportAssignmentType]
+        session_id: str = self.session_id  # pyright: ignore[reportAssignmentType]
 
         payload: ResumeCommand = {
             "op": self.RESUME,
@@ -633,7 +630,7 @@ class DiscordWebSocket:
             )
 
         try:
-            func = self._discord_parsers[event]  # type: ignore
+            func = self._discord_parsers[event]  # pyright: ignore[reportArgumentType]
         except KeyError:
             _log.debug("Unknown event %s.", event)
         else:
@@ -647,13 +644,13 @@ class DiscordWebSocket:
                 if event in {"READY", "RESUMED"}:  # exceptions in these events are fatal
                     raise
 
-                event_name: str = event  # type: ignore  # event can't be None here
+                event_name: str = event  # pyright: ignore[reportAssignmentType]  # event can't be None here
                 asyncio.create_task(
                     self._dispatch_gateway_error(event_name, data, self.shard_id, e)
                 )
 
         # remove the dispatched listeners
-        removed: List[int] = []
+        removed: list[int] = []
         for index, entry in enumerate(self._dispatch_listeners):
             if entry.event != event:
                 continue
@@ -712,9 +709,7 @@ class DiscordWebSocket:
         """
         try:
             msg = await self.socket.receive(timeout=self._max_heartbeat_timeout)
-            if msg.type is aiohttp.WSMsgType.TEXT:
-                await self.received_message(msg.data)
-            elif msg.type is aiohttp.WSMsgType.BINARY:
+            if msg.type is aiohttp.WSMsgType.TEXT or msg.type is aiohttp.WSMsgType.BINARY:
                 await self.received_message(msg.data)
             elif msg.type is aiohttp.WSMsgType.ERROR:
                 _log.debug("Received %s", msg)
@@ -781,7 +776,8 @@ class DiscordWebSocket:
     ) -> None:
         if activity is not None:
             if not isinstance(activity, BaseActivity):
-                raise TypeError("activity must derive from BaseActivity.")
+                msg = "activity must derive from BaseActivity."
+                raise TypeError(msg)
             activity_data = (activity.to_dict(),)
         else:
             activity_data = ()
@@ -809,7 +805,7 @@ class DiscordWebSocket:
         query: Optional[str] = None,
         *,
         limit: int,
-        user_ids: Optional[List[int]] = None,
+        user_ids: Optional[list[int]] = None,
         presences: bool = False,
         nonce: Optional[str] = None,
     ) -> None:
@@ -910,7 +906,7 @@ class DiscordVoiceWebSocket:
         self.loop: asyncio.AbstractEventLoop = loop
         self._keep_alive: Optional[VoiceKeepAliveHandler] = None
         self._close_code: Optional[int] = None
-        self.secret_key: Optional[List[int]] = None
+        self.secret_key: Optional[list[int]] = None
         self.thread_id: int = threading.get_ident()
         if hook:
             self._hook = hook
@@ -1051,7 +1047,7 @@ class DiscordVoiceWebSocket:
         _log.debug("detected ip: %s port: %s", state.ip, state.port)
 
         # there *should* always be at least one supported mode
-        modes: List[SupportedModes] = [
+        modes: list[SupportedModes] = [
             mode for mode in data["modes"] if mode in self._connection.supported_modes
         ]
         _log.debug("received supported encryption modes: %s", ", ".join(modes))
