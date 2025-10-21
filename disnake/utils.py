@@ -194,10 +194,10 @@ class classproperty(Generic[T_co]):
     def __init__(self, fget: Callable[[Any], T_co]) -> None:
         self.fget = fget
 
-    def __get__(self, instance: Any | None, owner: type[object]) -> T_co:
+    def __get__(self, instance: object, owner: type[object]) -> T_co:
         return self.fget(owner)
 
-    def __set__(self, instance, value) -> NoReturn:
+    def __set__(self, instance: object, value: object) -> NoReturn:
         msg = "cannot set attribute"
         raise AttributeError(msg)
 
@@ -221,7 +221,7 @@ class SequenceProxy(Sequence[T_co]):
     def __len__(self) -> int:
         return len(self.__proxied)
 
-    def __contains__(self, item: Any) -> bool:
+    def __contains__(self, item: object) -> bool:
         return item in self.__proxied
 
     def __iter__(self) -> Iterator[T_co]:

@@ -224,7 +224,7 @@ class Embed:
 
     # see `EmptyEmbed` above
     if not TYPE_CHECKING:
-
+        # n.b. this is the only use site of classproperty
         @classproperty
         def Empty(self) -> None:
             warn_deprecated(
