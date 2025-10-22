@@ -189,7 +189,7 @@ def process_attributetable(app: Sphinx, doctree: nodes.document, docname: str) -
     env = app.builder.env
 
     lookup = build_lookup_table(env)
-    for node in doctree.traverse(attributetableplaceholder):
+    for node in doctree.findall(attributetableplaceholder):
         modulename, classname, fullname = (
             node["python-module"],
             node["python-class"],
