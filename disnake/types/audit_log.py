@@ -3,32 +3,35 @@
 from __future__ import annotations
 
 import datetime
-from typing import Literal, Optional, TypedDict, Union
+from typing import TYPE_CHECKING, Literal, Optional, TypedDict, Union
 
 from typing_extensions import NotRequired
 
-from .automod import (
-    AutoModAction,
-    AutoModEventType,
-    AutoModRule,
-    AutoModTriggerMetadata,
-    AutoModTriggerType,
-)
-from .channel import ChannelType, PermissionOverwrite, VideoQualityMode
-from .guild import (
-    DefaultMessageNotificationLevel,
-    ExplicitContentFilterLevel,
-    MFALevel,
-    VerificationLevel,
-)
-from .guild_scheduled_event import GuildScheduledEvent
-from .integration import IntegrationExpireBehavior, PartialIntegration
-from .interactions import ApplicationCommand, ApplicationCommandPermissions
-from .role import Role
-from .snowflake import Snowflake
-from .threads import Thread
-from .user import User
-from .webhook import Webhook
+if TYPE_CHECKING:
+    import datetime
+
+    from .automod import (
+        AutoModAction,
+        AutoModEventType,
+        AutoModRule,
+        AutoModTriggerMetadata,
+        AutoModTriggerType,
+    )
+    from .channel import ChannelType, PermissionOverwrite, VideoQualityMode
+    from .guild import (
+        DefaultMessageNotificationLevel,
+        ExplicitContentFilterLevel,
+        MFALevel,
+        VerificationLevel,
+    )
+    from .guild_scheduled_event import GuildScheduledEvent
+    from .integration import IntegrationExpireBehavior, PartialIntegration
+    from .interactions import ApplicationCommand, ApplicationCommandPermissions
+    from .role import Role
+    from .snowflake import Snowflake
+    from .threads import Thread
+    from .user import User
+    from .webhook import Webhook
 
 AuditLogEvent = Literal[
     1,

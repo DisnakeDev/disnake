@@ -4,22 +4,23 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Literal, Optional, TypedDict, Union
 
-from .appinfo import ApplicationIntegrationType
-from .channel import ChannelType
-from .components import MessageTopLevelComponent, Modal
-from .embed import Embed
-from .entitlement import Entitlement
-from .i18n import LocalizationDict
-from .member import Member, MemberWithUser
-from .role import Role
+from .components import Modal
 from .snowflake import Snowflake
-from .threads import ThreadMetadata
-from .user import User
 
 if TYPE_CHECKING:
     from typing_extensions import NotRequired, TypeAlias
 
+    from .appinfo import ApplicationIntegrationType
+    from .channel import ChannelType
+    from .components import MessageTopLevelComponent
+    from .embed import Embed
+    from .entitlement import Entitlement
+    from .i18n import LocalizationDict
+    from .member import Member, MemberWithUser
     from .message import AllowedMentions, Attachment, Message
+    from .role import Role
+    from .threads import ThreadMetadata
+    from .user import User
 
 
 ApplicationCommandType = Literal[1, 2, 3]

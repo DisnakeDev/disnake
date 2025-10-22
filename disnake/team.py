@@ -11,6 +11,8 @@ from .enums import TeamMemberRole, TeamMembershipState, try_enum
 from .user import BaseUser
 
 if TYPE_CHECKING:
+    import datetime
+
     from .state import ConnectionState
     from .types.team import Team as TeamPayload, TeamMember as TeamMemberPayload
 

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import datetime
-from collections.abc import Iterable, Sequence
 from typing import (
     TYPE_CHECKING,
     Optional,
@@ -23,6 +22,8 @@ from .flags import AutoModKeywordPresets
 from .utils import MISSING, _get_as_snowflake, snowflake_time
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable, Sequence
+
     from typing_extensions import Self
 
     from .abc import Snowflake

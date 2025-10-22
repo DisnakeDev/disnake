@@ -25,6 +25,8 @@ from .utils import (
 )
 
 if TYPE_CHECKING:
+    from datetime import datetime
+
     from .abc import GuildChannel, Snowflake
     from .asset import AssetBytes
     from .guild import Guild

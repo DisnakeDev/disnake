@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
-from typing import Optional, TypedDict
+from typing import TYPE_CHECKING, Optional, TypedDict
 
 from typing_extensions import NotRequired
 
-from .snowflake import Snowflake
-from .user import User
+if TYPE_CHECKING:
+    from .snowflake import Snowflake
+    from .user import User
 
 
 class PartialSoundboardSound(TypedDict):
