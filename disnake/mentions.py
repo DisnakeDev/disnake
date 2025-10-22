@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import TYPE_CHECKING, Any, Union, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from .enums import MessageType
 
@@ -70,14 +70,14 @@ class AllowedMentions:
         self,
         *,
         everyone: bool = default,
-        users: Union[bool, Sequence[Snowflake]] = default,
-        roles: Union[bool, Sequence[Snowflake]] = default,
+        users: bool | Sequence[Snowflake] = default,
+        roles: bool | Sequence[Snowflake] = default,
         replied_user: bool = default,
     ) -> None:
         self.everyone = everyone
         # TODO(3.0): annotate attributes as `Sequence` instead of copying to list
-        self.users: Union[bool, list[Snowflake]]
-        self.roles: Union[bool, list[Snowflake]]
+        self.users: bool | list[Snowflake]
+        self.roles: bool | list[Snowflake]
         if users is default or isinstance(users, bool):
             self.users = cast("bool", users)
         else:

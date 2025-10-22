@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, ClassVar, Union, cast
+from typing import TYPE_CHECKING, Any, ClassVar, TypeAlias, cast
 
 from ..components import Section as SectionComponent
 from ..enums import ComponentType
@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from .button import Button
     from .thumbnail import Thumbnail
 
-    SectionAccessoryUIComponent = Union[Thumbnail, Button[Any]]
+    SectionAccessoryUIComponent: TypeAlias = Thumbnail | Button[Any]
 
 __all__ = ("Section",)
 
@@ -54,7 +54,7 @@ class Section(UIComponent):
 
     def __init__(
         self,
-        *components: Union[str, TextDisplay],
+        *components: str | TextDisplay,
         accessory: SectionAccessoryUIComponent,
         id: int = 0,
     ) -> None:

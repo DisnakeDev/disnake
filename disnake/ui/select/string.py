@@ -2,17 +2,8 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    ClassVar,
-    Optional,
-    TypeVar,
-    Union,
-    overload,
-)
+from collections.abc import Callable, Mapping
+from typing import TYPE_CHECKING, Any, ClassVar, TypeAlias, TypeVar, overload
 
 from ...abc import Snowflake
 from ...components import SelectOption, StringSelectMenu
@@ -36,7 +27,7 @@ __all__ = (
 )
 
 
-SelectOptionInput = Union[list[SelectOption], list[str], dict[str, str]]
+SelectOptionInput: TypeAlias = list[SelectOption] | list[str] | dict[str, str]
 
 
 def _parse_select_options(options: SelectOptionInput) -> list[SelectOption]:
@@ -118,14 +109,14 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
         self: StringSelect[None],
         *,
         custom_id: str = ...,
-        placeholder: Optional[str] = None,
+        placeholder: str | None = None,
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
         options: SelectOptionInput = ...,
         required: bool = True,
         id: int = 0,
-        row: Optional[int] = None,
+        row: int | None = None,
     ) -> None: ...
 
     @overload
@@ -133,28 +124,28 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
         self: StringSelect[V_co],
         *,
         custom_id: str = ...,
-        placeholder: Optional[str] = None,
+        placeholder: str | None = None,
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
         options: SelectOptionInput = ...,
         required: bool = True,
         id: int = 0,
-        row: Optional[int] = None,
+        row: int | None = None,
     ) -> None: ...
 
     def __init__(
         self,
         *,
         custom_id: str = MISSING,
-        placeholder: Optional[str] = None,
+        placeholder: str | None = None,
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
         options: SelectOptionInput = MISSING,
         required: bool = True,
         id: int = 0,
-        row: Optional[int] = None,
+        row: int | None = None,
     ) -> None:
         super().__init__(
             StringSelectMenu,
@@ -206,8 +197,8 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
         *,
         label: str,
         value: str = MISSING,
-        description: Optional[str] = None,
-        emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
+        description: str | None = None,
+        emoji: str | Emoji | PartialEmoji | None = None,
         default: bool = False,
     ) -> None:
         """Adds an option to the select menu.
@@ -276,14 +267,14 @@ S_co = TypeVar("S_co", bound="StringSelect", covariant=True)
 @overload
 def string_select(
     *,
-    placeholder: Optional[str] = None,
+    placeholder: str | None = None,
     custom_id: str = ...,
     min_values: int = 1,
     max_values: int = 1,
     options: SelectOptionInput = ...,
     disabled: bool = False,
     id: int = 0,
-    row: Optional[int] = None,
+    row: int | None = None,
 ) -> Callable[[ItemCallbackType[V_co, StringSelect[V_co]]], DecoratedItem[StringSelect[V_co]]]: ...
 
 

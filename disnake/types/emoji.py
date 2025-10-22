@@ -1,14 +1,14 @@
 # SPDX-License-Identifier: MIT
 
-from typing import Optional, TypedDict
+from typing import TypedDict
 
 from .snowflake import Snowflake, SnowflakeList
 from .user import User
 
 
 class PartialEmoji(TypedDict):
-    id: Optional[Snowflake]
-    name: Optional[str]
+    id: Snowflake | None
+    name: str | None
 
 
 class Emoji(PartialEmoji, total=False):
@@ -22,7 +22,7 @@ class Emoji(PartialEmoji, total=False):
 
 class EditEmoji(TypedDict):
     name: str
-    roles: Optional[SnowflakeList]
+    roles: SnowflakeList | None
 
 
 class ListAppEmoji(TypedDict):

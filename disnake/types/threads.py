@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Literal, Optional, TypedDict
+from typing import Literal, TypedDict
 
 from typing_extensions import NotRequired
 
@@ -25,7 +25,7 @@ class ThreadMember(TypedDict):
 class ThreadMemberWithPresence(ThreadMember):
     # currently unused, also not really documented properly
     member: Member
-    presence: Optional[PresenceData]
+    presence: PresenceData | None
 
 
 class ThreadMetadata(TypedDict):
@@ -34,7 +34,7 @@ class ThreadMetadata(TypedDict):
     archive_timestamp: str
     locked: bool
     invitable: NotRequired[bool]
-    create_timestamp: NotRequired[Optional[str]]
+    create_timestamp: NotRequired[str | None]
 
 
 class Thread(TypedDict):
@@ -42,11 +42,11 @@ class Thread(TypedDict):
     type: ThreadType
     guild_id: Snowflake
     name: str
-    last_message_id: NotRequired[Optional[Snowflake]]
+    last_message_id: NotRequired[Snowflake | None]
     rate_limit_per_user: int
     owner_id: NotRequired[Snowflake]
     parent_id: Snowflake
-    last_pin_timestamp: NotRequired[Optional[str]]
+    last_pin_timestamp: NotRequired[str | None]
     message_count: NotRequired[int]
     member_count: NotRequired[int]
     thread_metadata: ThreadMetadata
@@ -69,8 +69,8 @@ class ThreadPaginationPayload(TypedDict):
 class PartialForumTag(TypedDict):
     id: NotRequired[Snowflake]
     name: str
-    emoji_id: Optional[Snowflake]
-    emoji_name: Optional[str]
+    emoji_id: Snowflake | None
+    emoji_name: str | None
     moderated: bool
 
 

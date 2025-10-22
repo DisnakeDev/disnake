@@ -1,0 +1,1 @@
+Update all typehints to use Python 3.10 union syntax, eg ``int | str``.

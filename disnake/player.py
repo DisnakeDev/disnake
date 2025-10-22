@@ -13,7 +13,8 @@ import threading
 import time
 import traceback
 import warnings
-from typing import IO, TYPE_CHECKING, Any, Callable, Generic, Optional, TypeVar, Union
+from collections.abc import Callable
+from typing import IO, TYPE_CHECKING, Any, Generic, TypeVar
 
 from . import utils
 from .errors import ClientException
@@ -141,7 +142,7 @@ class FFmpegAudio(AudioSource):
 
     def __init__(
         self,
-        source: Union[str, io.BufferedIOBase],
+        source: str | io.BufferedIOBase,
         *,
         executable: str = "ffmpeg",
         args: Any,
@@ -159,8 +160,8 @@ class FFmpegAudio(AudioSource):
         self._process: subprocess.Popen[bytes] = self._spawn_process(args, **kwargs)
         assert self._process.stdout is not None
         self._stdout: IO[bytes] = self._process.stdout
-        self._stdin: Optional[IO[bytes]] = None
-        self._pipe_thread: Optional[threading.Thread] = None
+        self._stdin: IO[bytes] | None = None
+        self._pipe_thread: threading.Thread | None = None
 
         if piping:
             n = f"popen-stdin-writer:{id(self):#x}"
@@ -283,13 +284,13 @@ class FFmpegPCMAudio(FFmpegAudio):
 
     def __init__(
         self,
-        source: Union[str, io.BufferedIOBase],
+        source: str | io.BufferedIOBase,
         *,
         executable: str = "ffmpeg",
         pipe: bool = False,
-        stderr: Optional[IO[str]] = None,
-        before_options: Optional[str] = None,
-        options: Optional[str] = None,
+        stderr: IO[str] | None = None,
+        before_options: str | None = None,
+        options: str | None = None,
     ) -> None:
         args = []
         subprocess_kwargs = {
@@ -390,10 +391,10 @@ class FFmpegOpusAudio(FFmpegAudio):
 
     def __init__(
         self,
-        source: Union[str, io.BufferedIOBase],
+        source: str | io.BufferedIOBase,
         *,
         bitrate: int = 128,
-        codec: Optional[str] = None,
+        codec: str | None = None,
         executable: str = "ffmpeg",
         pipe: bool = False,
         stderr=None,
@@ -446,9 +447,7 @@ class FFmpegOpusAudio(FFmpegAudio):
         cls,
         source: str,
         *,
-        method: Optional[
-            Union[str, Callable[[str, str], tuple[Optional[str], Optional[int]]]]
-        ] = None,
+        method: str | Callable[[str, str], tuple[str | None, int | None]] | None = None,
         **kwargs: Any,
     ) -> Self:
         """|coro|
@@ -514,11 +513,9 @@ class FFmpegOpusAudio(FFmpegAudio):
         cls,
         source: str,
         *,
-        method: Optional[
-            Union[str, Callable[[str, str], tuple[Optional[str], Optional[int]]]]
-        ] = None,
-        executable: Optional[str] = None,
-    ) -> tuple[Optional[str], Optional[int]]:
+        method: str | Callable[[str, str], tuple[str | None, int | None]] | None = None,
+        executable: str | None = None,
+    ) -> tuple[str | None, int | None]:
         """|coro|
 
         Probes the input source for bitrate and codec information.
@@ -589,9 +586,7 @@ class FFmpegOpusAudio(FFmpegAudio):
         return codec, bitrate
 
     @staticmethod
-    def _probe_codec_native(
-        source, executable: str = "ffmpeg"
-    ) -> tuple[Optional[str], Optional[int]]:
+    def _probe_codec_native(source, executable: str = "ffmpeg") -> tuple[str | None, int | None]:
         exe = executable[:2] + "probe" if executable in ("ffmpeg", "avconv") else executable
         args = [
             exe,
@@ -618,9 +613,7 @@ class FFmpegOpusAudio(FFmpegAudio):
         return codec, bitrate
 
     @staticmethod
-    def _probe_codec_fallback(
-        source, executable: str = "ffmpeg"
-    ) -> tuple[Optional[str], Optional[int]]:
+    def _probe_codec_fallback(source, executable: str = "ffmpeg") -> tuple[str | None, int | None]:
         args = [executable, "-hide_banner", "-i", source]
         proc = subprocess.Popen(
             args, creationflags=CREATE_NO_WINDOW, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
@@ -711,12 +704,12 @@ class AudioPlayer(threading.Thread):
         self.daemon: bool = True
         self.source: AudioSource = source
         self.client: VoiceClient = client
-        self.after: Optional[Callable[[Optional[Exception]], Any]] = after
+        self.after: Callable[[Exception | None], Any] | None = after
 
         self._end: threading.Event = threading.Event()
         self._resumed: threading.Event = threading.Event()
         self._resumed.set()  # we are not paused
-        self._current_error: Optional[Exception] = None
+        self._current_error: Exception | None = None
         self._connected: threading.Event = client._connected
         self._lock: threading.Lock = threading.Lock()
 

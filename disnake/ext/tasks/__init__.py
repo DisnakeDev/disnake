@@ -7,16 +7,13 @@ import datetime
 import inspect
 import sys
 import traceback
-from collections.abc import Coroutine, Sequence
+from collections.abc import Callable, Coroutine, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     Generic,
-    Optional,
     Protocol,
     TypeVar,
-    Union,
     cast,
     get_origin,
     overload,
@@ -29,7 +26,9 @@ from disnake.backoff import ExponentialBackoff
 from disnake.utils import MISSING, iscoroutinefunction, utcnow
 
 if TYPE_CHECKING:
-    from typing_extensions import Concatenate, ParamSpec, Self
+    from typing import Concatenate
+
+    from typing_extensions import ParamSpec, Self
 
     P = ParamSpec("P")
 
@@ -83,8 +82,8 @@ class Loop(Generic[LF]):
         seconds: float = 0,
         minutes: float = 0,
         hours: float = 0,
-        time: Union[datetime.time, Sequence[datetime.time]] = MISSING,
-        count: Optional[int] = None,
+        time: datetime.time | Sequence[datetime.time] = MISSING,
+        count: int | None = None,
         reconnect: bool = True,
         loop: asyncio.AbstractEventLoop = MISSING,
     ) -> None:
@@ -94,7 +93,7 @@ class Loop(Generic[LF]):
         self.coro: LF = coro
         self.reconnect: bool = reconnect
         self.loop: asyncio.AbstractEventLoop = loop
-        self.count: Optional[int] = count
+        self.count: int | None = count
         self._current_loop = 0
         self._handle: SleepHandle = MISSING
         self._task: asyncio.Task[None] = MISSING
@@ -221,7 +220,7 @@ class Loop(Generic[LF]):
         return instance
 
     @property
-    def seconds(self) -> Optional[float]:
+    def seconds(self) -> float | None:
         """:class:`float` | :data:`None`: Read-only value for the number of seconds
         between each iteration. :data:`None` if an explicit ``time`` value was passed instead.
 
@@ -232,7 +231,7 @@ class Loop(Generic[LF]):
         return None
 
     @property
-    def minutes(self) -> Optional[float]:
+    def minutes(self) -> float | None:
         """:class:`float` | :data:`None`: Read-only value for the number of minutes
         between each iteration. :data:`None` if an explicit ``time`` value was passed instead.
 
@@ -243,7 +242,7 @@ class Loop(Generic[LF]):
         return None
 
     @property
-    def hours(self) -> Optional[float]:
+    def hours(self) -> float | None:
         """:class:`float` | :data:`None`: Read-only value for the number of hours
         between each iteration. :data:`None` if an explicit ``time`` value was passed instead.
 
@@ -254,7 +253,7 @@ class Loop(Generic[LF]):
         return None
 
     @property
-    def time(self) -> Optional[list[datetime.time]]:
+    def time(self) -> list[datetime.time] | None:
         """:class:`list`\\[:class:`datetime.time`] | :data:`None`: Read-only list for the exact times this loop runs at.
         :data:`None` if relative times were passed instead.
 
@@ -270,7 +269,7 @@ class Loop(Generic[LF]):
         return self._current_loop
 
     @property
-    def next_iteration(self) -> Optional[datetime.datetime]:
+    def next_iteration(self) -> datetime.datetime | None:
         """:class:`datetime.datetime` | :data:`None`: When the next iteration of the loop will occur.
 
         .. versionadded:: 1.3
@@ -440,7 +439,7 @@ class Loop(Generic[LF]):
         self._valid_exception = tuple(x for x in self._valid_exception if x not in exceptions)
         return len(self._valid_exception) == old_length - len(exceptions)
 
-    def get_task(self) -> Optional[asyncio.Task[None]]:
+    def get_task(self) -> asyncio.Task[None] | None:
         """Fetches the internal task or :data:`None` if there isn't one running.
 
         :return type: :class:`asyncio.Task` | :data:`None`
@@ -609,7 +608,7 @@ class Loop(Generic[LF]):
 
     def _get_time_parameter(
         self,
-        time: Union[datetime.time, Sequence[datetime.time]],
+        time: datetime.time | Sequence[datetime.time],
         *,
         dt: type[datetime.time] = datetime.time,
         utc: datetime.timezone = datetime.timezone.utc,
@@ -639,7 +638,7 @@ class Loop(Generic[LF]):
         seconds: float = 0,
         minutes: float = 0,
         hours: float = 0,
-        time: Union[datetime.time, Sequence[datetime.time]] = MISSING,
+        time: datetime.time | Sequence[datetime.time] = MISSING,
     ) -> None:
         """Changes the interval for the sleep time.
 
@@ -722,8 +721,8 @@ def loop(
     seconds: float = ...,
     minutes: float = ...,
     hours: float = ...,
-    time: Union[datetime.time, Sequence[datetime.time]] = ...,
-    count: Optional[int] = None,
+    time: datetime.time | Sequence[datetime.time] = ...,
+    count: int | None = None,
     reconnect: bool = True,
     loop: asyncio.AbstractEventLoop = ...,
 ) -> Callable[[LF], Loop[LF]]: ...

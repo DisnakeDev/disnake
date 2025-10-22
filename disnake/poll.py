@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import timedelta
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING
 
 from . import utils
 from .abc import Snowflake
@@ -56,14 +56,14 @@ class PollMedia:
     __slots__ = ("text", "emoji")
 
     def __init__(
-        self, text: Optional[str], *, emoji: Optional[Union[Emoji, PartialEmoji, str]] = None
+        self, text: str | None, *, emoji: Emoji | PartialEmoji | str | None = None
     ) -> None:
         if text is None and emoji is None:
             msg = "At least one of `text` or `emoji` must be not None"
             raise ValueError(msg)
 
         self.text = text
-        self.emoji: Optional[Union[Emoji, PartialEmoji]] = None
+        self.emoji: Emoji | PartialEmoji | None = None
         if isinstance(emoji, str):
             self.emoji = PartialEmoji.from_str(emoji)
         elif isinstance(emoji, _EmojiTag):
@@ -127,8 +127,8 @@ class PollAnswer:
     __slots__ = ("id", "media", "poll", "vote_count", "self_voted")
 
     def __init__(self, media: PollMedia) -> None:
-        self.id: Optional[int] = None
-        self.poll: Optional[Poll] = None
+        self.id: int | None = None
+        self.poll: Poll | None = None
         self.media = media
         self.vote_count: int = 0
         self.self_voted: bool = False
@@ -148,7 +148,7 @@ class PollAnswer:
         return {"poll_media": self.media._to_dict()}
 
     def voters(
-        self, *, limit: Optional[int] = 100, after: Optional[Snowflake] = None
+        self, *, limit: int | None = 100, after: Snowflake | None = None
     ) -> PollAnswerIterator:
         """Returns an :class:`AsyncIterator` representing the users that have voted for this answer.
 
@@ -240,14 +240,14 @@ class Poll:
 
     def __init__(
         self,
-        question: Union[str, PollMedia],
+        question: str | PollMedia,
         *,
-        answers: list[Union[str, PollAnswer]],
+        answers: list[str | PollAnswer],
         duration: timedelta = timedelta(hours=24),
         allow_multiselect: bool = False,
         layout_type: PollLayoutType = PollLayoutType.default,
     ) -> None:
-        self.message: Optional[Message] = None
+        self.message: Message | None = None
 
         if isinstance(question, str):
             self.question = PollMedia(question)
@@ -267,7 +267,7 @@ class Poll:
                 msg = f"Expected 'list[str]' or 'list[PollAnswer]' for 'answers', got list[{answer.__class__.__name__!r}]."
                 raise TypeError(msg)
 
-        self.duration: Optional[timedelta] = duration
+        self.duration: timedelta | None = duration
         self.allow_multiselect: bool = allow_multiselect
         self.layout_type: PollLayoutType = layout_type
         self.is_finalized: bool = False
@@ -284,7 +284,7 @@ class Poll:
         return list(self._answers.values())
 
     @property
-    def created_at(self) -> Optional[datetime]:
+    def created_at(self) -> datetime | None:
         """:class:`datetime.datetime` | :data:`None`: When this poll was created.
 
         :data:`None` if this poll does not originate from the discord API.
@@ -294,7 +294,7 @@ class Poll:
         return utils.snowflake_time(self.message.id)
 
     @property
-    def expires_at(self) -> Optional[datetime]:
+    def expires_at(self) -> datetime | None:
         """:class:`datetime.datetime` | :data:`None`: The date when this poll will expire.
 
         :data:`None` if this poll does not originate from the discord API or if this
@@ -311,7 +311,7 @@ class Poll:
         return created_at + self.duration
 
     @property
-    def remaining_duration(self) -> Optional[timedelta]:
+    def remaining_duration(self) -> timedelta | None:
         """:class:`datetime.timedelta` | :data:`None`: The remaining duration for this poll.
         If this poll is finalized this property will arbitrarily return a
         zero valued timedelta.
@@ -325,7 +325,7 @@ class Poll:
 
         return self.expires_at - utils.utcnow()
 
-    def get_answer(self, answer_id: int, /) -> Optional[PollAnswer]:
+    def get_answer(self, answer_id: int, /) -> PollAnswer | None:
         """Return the requested poll answer.
 
         Parameters

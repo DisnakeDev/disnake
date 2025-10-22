@@ -4,15 +4,7 @@ from __future__ import annotations
 import types
 from collections.abc import Iterator
 from functools import total_ordering
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    ClassVar,
-    NamedTuple,
-    NoReturn,
-    Optional,
-    TypeVar,
-)
+from typing import TYPE_CHECKING, Any, ClassVar, NamedTuple, NoReturn, TypeVar
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -779,9 +771,9 @@ class AuditLogAction(Enum):
     # fmt: on
 
     @property
-    def category(self) -> Optional[AuditLogActionCategory]:
+    def category(self) -> AuditLogActionCategory | None:
         # fmt: off
-        lookup: dict[AuditLogAction, Optional[AuditLogActionCategory]] = {
+        lookup: dict[AuditLogAction, AuditLogActionCategory | None] = {
             AuditLogAction.guild_update:                          AuditLogActionCategory.update,
             AuditLogAction.channel_create:                        AuditLogActionCategory.create,
             AuditLogAction.channel_update:                        AuditLogActionCategory.update,
@@ -847,7 +839,7 @@ class AuditLogAction(Enum):
         return lookup[self]
 
     @property
-    def target_type(self) -> Optional[str]:
+    def target_type(self) -> str | None:
         v = self.value
         if v == -1:  # pyright: ignore[reportUnnecessaryComparison]
             return "all"

@@ -6,7 +6,7 @@ import math
 import re
 from abc import ABC
 from collections.abc import Mapping, Sequence
-from typing import TYPE_CHECKING, ClassVar, Optional, Union
+from typing import TYPE_CHECKING, ClassVar, TypeAlias
 
 from .enums import (
     ApplicationCommandPermissionType,
@@ -40,14 +40,14 @@ if TYPE_CHECKING:
         InteractionContextType as InteractionContextTypePayload,
     )
 
-    Choices = Union[
-        Sequence["OptionChoice"],
-        Sequence[ApplicationCommandOptionChoiceValue],
-        Mapping[str, ApplicationCommandOptionChoiceValue],
-        Sequence[Localized[str]],
-    ]
+    Choices: TypeAlias = (
+        Sequence["OptionChoice"]
+        | Sequence[ApplicationCommandOptionChoiceValue]
+        | Mapping[str, ApplicationCommandOptionChoiceValue]
+        | Sequence[Localized[str]]
+    )
 
-    APIApplicationCommand = Union["APIUserCommand", "APIMessageCommand", "APISlashCommand"]
+    APIApplicationCommand: TypeAlias = "APIUserCommand | APIMessageCommand | APISlashCommand"
 
 
 __all__ = (
@@ -131,10 +131,10 @@ class OptionChoice:
             and self.name_localizations == other.name_localizations
         )
 
-    def to_dict(self, *, locale: Optional[Locale] = None) -> ApplicationCommandOptionChoicePayload:
+    def to_dict(self, *, locale: Locale | None = None) -> ApplicationCommandOptionChoicePayload:
         localizations = self.name_localizations.data
 
-        name: Optional[str] = None
+        name: str | None = None
         # if `locale` provided, get localized name from dict
         if locale is not None and localizations:
             name = localizations.get(str(locale))
@@ -264,16 +264,16 @@ class Option:
         self,
         name: LocalizedRequired,
         description: LocalizedOptional = None,
-        type: Optional[Union[OptionType, int]] = None,
+        type: OptionType | int | None = None,
         required: bool = False,
-        choices: Optional[Choices] = None,
-        options: Optional[list[Option]] = None,
-        channel_types: Optional[list[ChannelType]] = None,
+        choices: Choices | None = None,
+        options: list[Option] | None = None,
+        channel_types: list[ChannelType] | None = None,
         autocomplete: bool = False,
-        min_value: Optional[float] = None,
-        max_value: Optional[float] = None,
-        min_length: Optional[int] = None,
-        max_length: Optional[int] = None,
+        min_value: float | None = None,
+        max_value: float | None = None,
+        min_length: int | None = None,
+        max_length: int | None = None,
     ) -> None:
         name_loc = Localized._cast(name, True)
         _validate_name(name_loc.string)
@@ -293,11 +293,11 @@ class Option:
         if max_value and self.type is OptionType.integer:
             max_value = math.floor(max_value)
 
-        self.min_value: Optional[float] = min_value
-        self.max_value: Optional[float] = max_value
+        self.min_value: float | None = min_value
+        self.max_value: float | None = max_value
 
-        self.min_length: Optional[int] = min_length
-        self.max_length: Optional[int] = max_length
+        self.min_length: int | None = min_length
+        self.max_length: int | None = max_length
 
         if channel_types is not None and not all(isinstance(t, ChannelType) for t in channel_types):
             msg = "channel_types must be a list of `ChannelType`s"
@@ -397,16 +397,16 @@ class Option:
         self,
         name: LocalizedRequired,
         description: LocalizedOptional = None,
-        type: Optional[OptionType] = None,
+        type: OptionType | None = None,
         required: bool = False,
-        choices: Optional[Choices] = None,
-        options: Optional[list[Option]] = None,
-        channel_types: Optional[list[ChannelType]] = None,
+        choices: Choices | None = None,
+        options: list[Option] | None = None,
+        channel_types: list[ChannelType] | None = None,
         autocomplete: bool = False,
-        min_value: Optional[float] = None,
-        max_value: Optional[float] = None,
-        min_length: Optional[int] = None,
-        max_length: Optional[int] = None,
+        min_value: float | None = None,
+        max_value: float | None = None,
+        min_length: int | None = None,
+        max_length: int | None = None,
     ) -> None:
         """Adds an option to the current list of options,
         parameters are the same as for :class:`Option`.
@@ -526,11 +526,11 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
         self,
         type: ApplicationCommandType,
         name: LocalizedRequired,
-        dm_permission: Optional[bool] = None,  # deprecated
-        default_member_permissions: Optional[Union[Permissions, int]] = None,
-        nsfw: Optional[bool] = None,
-        install_types: Optional[ApplicationInstallTypes] = None,
-        contexts: Optional[InteractionContextTypes] = None,
+        dm_permission: bool | None = None,  # deprecated
+        default_member_permissions: Permissions | int | None = None,
+        nsfw: bool | None = None,
+        install_types: ApplicationInstallTypes | None = None,
+        contexts: InteractionContextTypes | None = None,
     ) -> None:
         self.type: ApplicationCommandType = enum_if_int(ApplicationCommandType, type)
 
@@ -539,7 +539,7 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
         self.name_localizations: LocalizationValue = name_loc.localizations
         self.nsfw: bool = False if nsfw is None else nsfw
 
-        self._default_member_permissions: Optional[int]
+        self._default_member_permissions: int | None
         if default_member_permissions is None:
             # allow everyone to use the command if its not supplied
             self._default_member_permissions = None
@@ -552,22 +552,22 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
             self._default_member_permissions = default_member_permissions.value
 
         # note: this defaults to `[0]` for syncing purposes only
-        self.install_types: Optional[ApplicationInstallTypes] = install_types
-        self.contexts: Optional[InteractionContextTypes] = contexts
+        self.install_types: ApplicationInstallTypes | None = install_types
+        self.contexts: InteractionContextTypes | None = contexts
 
         # TODO(3.0): refactor
         # These are for ext.commands defaults. It's quite ugly to do it this way,
         # but since __eq__ and to_dict functionality is encapsulated here and can't be moved trivially,
         # it'll do until the presumably soon-ish refactor of the entire commands framework.
-        self._default_install_types: Optional[ApplicationInstallTypes] = None
-        self._default_contexts: Optional[InteractionContextTypes] = None
+        self._default_install_types: ApplicationInstallTypes | None = None
+        self._default_contexts: InteractionContextTypes | None = None
 
         self._always_synced: bool = False
 
         # reset `default_permission` if set before
         self._default_permission: bool = True
 
-        self._dm_permission: Optional[bool] = dm_permission
+        self._dm_permission: bool | None = dm_permission
         if self._dm_permission is not None:
             warn_deprecated(
                 "dm_permission is deprecated, use contexts instead.",
@@ -585,7 +585,7 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
                 raise ValueError(msg)
 
     @property
-    def default_member_permissions(self) -> Optional[Permissions]:
+    def default_member_permissions(self) -> Permissions | None:
         """:class:`Permissions` | :data:`None`: The default required member permissions for this command.
         A member must have *all* these permissions to be able to invoke the command in a guild.
 
@@ -666,7 +666,7 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
         return True
 
     @property
-    def _install_types_with_default(self) -> Optional[ApplicationInstallTypes]:
+    def _install_types_with_default(self) -> ApplicationInstallTypes | None:
         # if this is an api-provided command object, keep things as-is
         if self.install_types is None and not isinstance(self, _APIApplicationCommandMixin):
             if self._default_install_types is not None:
@@ -683,7 +683,7 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
         return self.install_types
 
     @property
-    def _contexts_with_default(self) -> Optional[InteractionContextTypes]:
+    def _contexts_with_default(self) -> InteractionContextTypes | None:
         # (basically the same logic as `_install_types_with_default`, but without a fallback)
         if (
             self.contexts is None
@@ -709,14 +709,14 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
             "nsfw": self.nsfw,
         }
 
-        install_types: Optional[list[ApplicationIntegrationTypePayload]] = (
+        install_types: list[ApplicationIntegrationTypePayload] | None = (
             self._install_types_with_default.values
             if self._install_types_with_default is not None
             else None
         )
         data["integration_types"] = install_types
 
-        contexts: Optional[list[InteractionContextTypePayload]] = (
+        contexts: list[InteractionContextTypePayload] | None = (
             self._contexts_with_default.values if self._contexts_with_default is not None else None
         )
         data["contexts"] = contexts
@@ -744,7 +744,7 @@ class _APIApplicationCommandMixin:
 
         self.id: int = int(data["id"])
         self.application_id: int = int(data["application_id"])
-        self.guild_id: Optional[int] = _get_as_snowflake(data, "guild_id")
+        self.guild_id: int | None = _get_as_snowflake(data, "guild_id")
         self.version: int = int(data["version"])
 
         # deprecated, but kept until API stops returning this field
@@ -793,11 +793,11 @@ class UserCommand(ApplicationCommand):
     def __init__(
         self,
         name: LocalizedRequired,
-        dm_permission: Optional[bool] = None,  # deprecated
-        default_member_permissions: Optional[Union[Permissions, int]] = None,
-        nsfw: Optional[bool] = None,
-        install_types: Optional[ApplicationInstallTypes] = None,
-        contexts: Optional[InteractionContextTypes] = None,
+        dm_permission: bool | None = None,  # deprecated
+        default_member_permissions: Permissions | int | None = None,
+        nsfw: bool | None = None,
+        install_types: ApplicationInstallTypes | None = None,
+        contexts: InteractionContextTypes | None = None,
     ) -> None:
         super().__init__(
             type=ApplicationCommandType.user,
@@ -922,11 +922,11 @@ class MessageCommand(ApplicationCommand):
     def __init__(
         self,
         name: LocalizedRequired,
-        dm_permission: Optional[bool] = None,  # deprecated
-        default_member_permissions: Optional[Union[Permissions, int]] = None,
-        nsfw: Optional[bool] = None,
-        install_types: Optional[ApplicationInstallTypes] = None,
-        contexts: Optional[InteractionContextTypes] = None,
+        dm_permission: bool | None = None,  # deprecated
+        default_member_permissions: Permissions | int | None = None,
+        nsfw: bool | None = None,
+        install_types: ApplicationInstallTypes | None = None,
+        contexts: InteractionContextTypes | None = None,
     ) -> None:
         super().__init__(
             type=ApplicationCommandType.message,
@@ -1064,12 +1064,12 @@ class SlashCommand(ApplicationCommand):
         self,
         name: LocalizedRequired,
         description: LocalizedRequired,
-        options: Optional[list[Option]] = None,
-        dm_permission: Optional[bool] = None,  # deprecated
-        default_member_permissions: Optional[Union[Permissions, int]] = None,
-        nsfw: Optional[bool] = None,
-        install_types: Optional[ApplicationInstallTypes] = None,
-        contexts: Optional[InteractionContextTypes] = None,
+        options: list[Option] | None = None,
+        dm_permission: bool | None = None,  # deprecated
+        default_member_permissions: Permissions | int | None = None,
+        nsfw: bool | None = None,
+        install_types: ApplicationInstallTypes | None = None,
+        contexts: InteractionContextTypes | None = None,
     ) -> None:
         super().__init__(
             type=ApplicationCommandType.chat_input,
@@ -1100,16 +1100,16 @@ class SlashCommand(ApplicationCommand):
         self,
         name: LocalizedRequired,
         description: LocalizedOptional = None,
-        type: Optional[OptionType] = None,
+        type: OptionType | None = None,
         required: bool = False,
-        choices: Optional[Choices] = None,
-        options: Optional[list] = None,
-        channel_types: Optional[list[ChannelType]] = None,
+        choices: Choices | None = None,
+        options: list | None = None,
+        channel_types: list[ChannelType] | None = None,
         autocomplete: bool = False,
-        min_value: Optional[float] = None,
-        max_value: Optional[float] = None,
-        min_length: Optional[int] = None,
-        max_length: Optional[int] = None,
+        min_value: float | None = None,
+        max_value: float | None = None,
+        min_length: int | None = None,
+        max_length: int | None = None,
     ) -> None:
         """Adds an option to the current list of options,
         parameters are the same as for :class:`Option`

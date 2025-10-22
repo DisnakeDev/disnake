@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from .enums import SubscriptionStatus, try_enum
 from .mixins import Hashable
@@ -91,7 +91,7 @@ class Subscription(Hashable):
         self.user_id: int = int(data["user_id"])
         self.sku_ids: list[int] = list(map(int, data["sku_ids"]))
         self.entitlement_ids: list[int] = list(map(int, data["entitlement_ids"]))
-        self.renewal_sku_ids: Optional[list[int]] = (
+        self.renewal_sku_ids: list[int] | None = (
             list(map(int, renewal_sku_ids))
             if (renewal_sku_ids := data.get("renewal_sku_ids")) is not None
             else None
@@ -99,7 +99,7 @@ class Subscription(Hashable):
         self.current_period_start: datetime.datetime = parse_time(data["current_period_start"])
         self.current_period_end: datetime.datetime = parse_time(data["current_period_end"])
         self.status: SubscriptionStatus = try_enum(SubscriptionStatus, data["status"])
-        self.canceled_at: Optional[datetime.datetime] = parse_time(data["canceled_at"])
+        self.canceled_at: datetime.datetime | None = parse_time(data["canceled_at"])
 
     @property
     def created_at(self) -> datetime.datetime:
@@ -107,7 +107,7 @@ class Subscription(Hashable):
         return snowflake_time(self.id)
 
     @property
-    def user(self) -> Optional[User]:
+    def user(self) -> User | None:
         """:class:`User` | :data:`None`: The user who is subscribed to the :attr:`sku_ids`.
 
         Requires the user to be cached.

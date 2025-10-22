@@ -5,14 +5,12 @@ from __future__ import annotations
 import functools
 import inspect
 import re
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     Generic,
     Literal,
-    Optional,
     Protocol,
     TypeVar,
     Union,
@@ -96,9 +94,7 @@ CT = TypeVar("CT", bound=disnake.abc.GuildChannel)
 TT = TypeVar("TT", bound=disnake.Thread)
 
 
-def _get_from_guilds(
-    client: disnake.Client, func: Callable[[disnake.Guild], Optional[T]]
-) -> Optional[T]:
+def _get_from_guilds(client: disnake.Client, func: Callable[[disnake.Guild], T | None]) -> T | None:
     for guild in client.guilds:
         if result := func(guild):
             return result
@@ -149,7 +145,7 @@ _ID_REGEX = re.compile(r"([0-9]{17,19})$")
 
 class IDConverter(Converter[T_co]):
     @staticmethod
-    def _get_id_match(argument: str) -> Optional[re.Match[str]]:
+    def _get_id_match(argument: str) -> re.Match[str] | None:
         return _ID_REGEX.match(argument)
 
 
@@ -211,7 +207,7 @@ class MemberConverter(IDConverter[disnake.Member]):
 
     async def query_member_named(
         self, guild: disnake.Guild, argument: str
-    ) -> Optional[disnake.Member]:
+    ) -> disnake.Member | None:
         cache = guild._state.member_cache_flags.joined
 
         username, _, discriminator = argument.rpartition("#")
@@ -230,7 +226,7 @@ class MemberConverter(IDConverter[disnake.Member]):
 
     async def query_member_by_id(
         self, bot: disnake.Client, guild: disnake.Guild, user_id: int
-    ) -> Optional[disnake.Member]:
+    ) -> disnake.Member | None:
         ws = bot._get_websocket(shard_id=guild.shard_id)
         cache = guild._state.member_cache_flags.joined
         if ws.is_ratelimited():
@@ -255,8 +251,8 @@ class MemberConverter(IDConverter[disnake.Member]):
         bot: disnake.Client = ctx.bot
         match = self._get_id_match(argument) or re.match(r"<@!?([0-9]{17,19})>$", argument)
         guild = ctx.guild
-        result: Optional[disnake.Member] = None
-        user_id: Optional[int] = None
+        result: disnake.Member | None = None
+        user_id: int | None = None
 
         if match is None:
             # not a mention...
@@ -323,12 +319,12 @@ class UserConverter(IDConverter[disnake.User]):
         match = self._get_id_match(argument) or re.match(r"<@!?([0-9]{17,19})>$", argument)
         state = ctx._state
         bot: disnake.Client = cast("disnake.Client", ctx.bot)
-        result: Optional[Union[disnake.User, disnake.Member]] = None
+        result: disnake.User | disnake.Member | None = None
 
         if match is not None:
             user_id = int(match.group(1))
 
-            mentions: Iterable[Union[disnake.User, disnake.Member]]
+            mentions: Iterable[disnake.User | disnake.Member]
             if isinstance(ctx, Context):
                 mentions = ctx.message.mentions
             else:
@@ -382,7 +378,7 @@ class PartialMessageConverter(Converter[disnake.PartialMessage]):
     """
 
     @staticmethod
-    def _get_id_matches(ctx: AnyContext, argument: str) -> tuple[Optional[int], int, int]:
+    def _get_id_matches(ctx: AnyContext, argument: str) -> tuple[int | None, int, int]:
         id_regex = re.compile(r"(?:(?P<channel_id>[0-9]{17,19})-)?(?P<message_id>[0-9]{17,19})$")
         link_regex = re.compile(
             r"https?://(?:(ptb|canary|www)\.)?discord(?:app)?\.com/channels/"
@@ -395,7 +391,7 @@ class PartialMessageConverter(Converter[disnake.PartialMessage]):
         data = match.groupdict()
         channel_id = disnake.utils._get_as_snowflake(data, "channel_id") or ctx.channel.id
         message_id = int(data["message_id"])
-        guild_id_str: Optional[str] = data.get("guild_id")
+        guild_id_str: str | None = data.get("guild_id")
         if guild_id_str is None:
             guild_id = ctx.guild and ctx.guild.id
         elif guild_id_str == "@me":
@@ -406,8 +402,8 @@ class PartialMessageConverter(Converter[disnake.PartialMessage]):
 
     @staticmethod
     def _resolve_channel(
-        ctx: AnyContext, guild_id: Optional[int], channel_id: int
-    ) -> Optional[MessageableChannel]:
+        ctx: AnyContext, guild_id: int | None, channel_id: int
+    ) -> MessageableChannel | None:
         bot: disnake.Client = cast("disnake.Client", ctx.bot)
         if guild_id is None:
             return bot.get_channel(channel_id) if channel_id else ctx.channel  # pyright: ignore[reportReturnType]
@@ -480,7 +476,7 @@ class GuildChannelConverter(IDConverter[disnake.abc.GuildChannel]):
         bot: disnake.Client = ctx.bot
 
         match = IDConverter._get_id_match(argument) or re.match(r"<#([0-9]{17,19})>$", argument)
-        result: Optional[disnake.abc.GuildChannel] = None
+        result: disnake.abc.GuildChannel | None = None
         guild = ctx.guild
 
         if match is None:
@@ -507,7 +503,7 @@ class GuildChannelConverter(IDConverter[disnake.abc.GuildChannel]):
     @staticmethod
     def _resolve_thread(ctx: AnyContext, argument: str, attribute: str, type: type[TT]) -> TT:
         match = IDConverter._get_id_match(argument) or re.match(r"<#([0-9]{17,19})>$", argument)
-        result: Optional[disnake.Thread] = None
+        result: disnake.Thread | None = None
         guild = ctx.guild
 
         if match is None:
@@ -830,7 +826,7 @@ class GuildConverter(IDConverter[disnake.Guild]):
     async def convert(self, ctx: AnyContext, argument: str) -> disnake.Guild:
         match = self._get_id_match(argument)
         bot: disnake.Client = ctx.bot
-        result: Optional[disnake.Guild] = None
+        result: disnake.Guild | None = None
 
         if match is not None:
             guild_id = int(match.group(1))
@@ -864,7 +860,7 @@ class EmojiConverter(IDConverter[disnake.Emoji]):
         match = self._get_id_match(argument) or re.match(
             r"<a?:[a-zA-Z0-9\_]{1,32}:([0-9]{17,19})>$", argument
         )
-        result: Optional[disnake.Emoji] = None
+        result: disnake.Emoji | None = None
         bot = ctx.bot
         guild = ctx.guild
 
@@ -1047,7 +1043,7 @@ class GuildScheduledEventConverter(IDConverter[disnake.GuildScheduledEvent]):
             r"([0-9]{17,19})/([0-9]{17,19})/?$"
         )
         bot: disnake.Client = ctx.bot
-        result: Optional[disnake.GuildScheduledEvent] = None
+        result: disnake.GuildScheduledEvent | None = None
         guild = ctx.guild
 
         # 1.
@@ -1181,7 +1177,7 @@ class Greedy(list[T]):
         converter = getattr(self.converter, "__name__", repr(self.converter))
         return f"Greedy[{converter}]"
 
-    def __class_getitem__(cls, params: Union[tuple[T], T]) -> Greedy[T]:
+    def __class_getitem__(cls, params: tuple[T] | T) -> Greedy[T]:
         if not isinstance(params, tuple):
             params = (params,)
         if len(params) != 1:
@@ -1264,7 +1260,7 @@ CONVERTER_MAPPING: dict[type[Any], type[Converter]] = {
 
 async def _actual_conversion(
     ctx: Context,
-    converter: Union[type[T], type[Converter[T]], Converter[T], Callable[[str], T]],
+    converter: type[T] | type[Converter[T]] | Converter[T] | Callable[[str], T],
     argument: str,
     param: inspect.Parameter,
 ) -> T:

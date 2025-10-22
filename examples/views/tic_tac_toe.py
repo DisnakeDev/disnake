@@ -4,7 +4,6 @@
 
 import os
 from enum import IntEnum
-from typing import Optional
 
 import disnake
 from disnake.ext import commands
@@ -98,7 +97,7 @@ class TicTacToe(disnake.ui.View):
 
     # This method checks for the board winner -- it is used by the TicTacToeButton
     def check_board_winner(self):
-        def check_winner(value: int) -> Optional[Player]:
+        def check_winner(value: int) -> Player | None:
             if value == Player.O * 3:
                 return Player.O
             if value == Player.X * 3:

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Optional, Union
+from typing import TYPE_CHECKING, Any
 
 import disnake.abc
 
@@ -65,9 +65,7 @@ class BaseUser(_UserTag):
         "_state",
     )
 
-    def __init__(
-        self, *, state: ConnectionState, data: Union[UserPayload, PartialUserPayload]
-    ) -> None:
+    def __init__(self, *, state: ConnectionState, data: UserPayload | PartialUserPayload) -> None:
         self._state: ConnectionState = state
         self._update(data)
 
@@ -93,20 +91,20 @@ class BaseUser(_UserTag):
     def __hash__(self) -> int:
         return self.id >> 22
 
-    def _update(self, data: Union[UserPayload, PartialUserPayload]) -> None:
+    def _update(self, data: UserPayload | PartialUserPayload) -> None:
         self.name: str = data["username"]
         self.id: int = int(data["id"])
         self.discriminator: str = data["discriminator"]
-        self.global_name: Optional[str] = data.get("global_name")
-        self._avatar: Optional[str] = data["avatar"]
-        self._banner: Optional[str] = data.get("banner")
-        self._avatar_decoration_data: Optional[AvatarDecorationDataPayload] = data.get(
+        self.global_name: str | None = data.get("global_name")
+        self._avatar: str | None = data["avatar"]
+        self._banner: str | None = data.get("banner")
+        self._avatar_decoration_data: AvatarDecorationDataPayload | None = data.get(
             "avatar_decoration_data"
         )
-        self._accent_colour: Optional[int] = data.get("accent_color")
+        self._accent_colour: int | None = data.get("accent_color")
         self._public_flags: int = data.get("public_flags", 0)
-        self._collectibles: Optional[CollectiblesPayload] = data.get("collectibles")
-        self._primary_guild: Optional[UserPrimaryGuildPayload] = data.get("primary_guild")
+        self._collectibles: CollectiblesPayload | None = data.get("collectibles")
+        self._primary_guild: UserPrimaryGuildPayload | None = data.get("primary_guild")
         self.bot: bool = data.get("bot", False)
         self.system: bool = data.get("system", False)
 
@@ -151,7 +149,7 @@ class BaseUser(_UserTag):
         return PublicUserFlags._from_value(self._public_flags)
 
     @property
-    def avatar(self) -> Optional[Asset]:
+    def avatar(self) -> Asset | None:
         """:class:`Asset` | :data:`None`: Returns an :class:`Asset` for the avatar the user has.
 
         If the user does not have a traditional avatar, :data:`None` is returned.
@@ -186,7 +184,7 @@ class BaseUser(_UserTag):
         return self.avatar or self.default_avatar
 
     @property
-    def banner(self) -> Optional[Asset]:
+    def banner(self) -> Asset | None:
         """:class:`Asset` | :data:`None`: Returns the user's banner asset, if available.
 
         .. versionadded:: 2.0
@@ -200,7 +198,7 @@ class BaseUser(_UserTag):
         return Asset._from_banner(self._state, self.id, self._banner)
 
     @property
-    def avatar_decoration(self) -> Optional[Asset]:
+    def avatar_decoration(self) -> Asset | None:
         """:class:`Asset` | :data:`None`: Returns the user's avatar decoration asset, if available.
 
         .. versionadded:: 2.10
@@ -230,7 +228,7 @@ class BaseUser(_UserTag):
         )
 
     @property
-    def accent_colour(self) -> Optional[Colour]:
+    def accent_colour(self) -> Colour | None:
         """:class:`Colour` | :data:`None`: Returns the user's accent colour, if applicable.
 
         There is an alias for this named :attr:`accent_color`.
@@ -246,7 +244,7 @@ class BaseUser(_UserTag):
         return Colour(int(self._accent_colour))
 
     @property
-    def accent_color(self) -> Optional[Colour]:
+    def accent_color(self) -> Colour | None:
         """:class:`Colour` | :data:`None`: Returns the user's accent color, if applicable.
 
         There is an alias for this named :attr:`accent_colour`.
@@ -303,7 +301,7 @@ class BaseUser(_UserTag):
         return self.global_name or self.name
 
     @property
-    def primary_guild(self) -> Optional[PrimaryGuild]:
+    def primary_guild(self) -> PrimaryGuild | None:
         """:class:`PrimaryGuild` | :data:`None`: Returns the user's primary guild, if any.
 
         .. versionadded:: 2.11
@@ -393,7 +391,7 @@ class ClientUser(BaseUser):
 
     if TYPE_CHECKING:
         verified: bool
-        locale: Optional[Locale]
+        locale: Locale | None
         mfa_enabled: bool
         _flags: int
 
@@ -418,8 +416,8 @@ class ClientUser(BaseUser):
         self,
         *,
         username: str = MISSING,
-        avatar: Optional[AssetBytes] = MISSING,
-        banner: Optional[AssetBytes] = MISSING,
+        avatar: AssetBytes | None = MISSING,
+        banner: AssetBytes | None = MISSING,
     ) -> ClientUser:
         """|coro|
 
@@ -559,7 +557,7 @@ class Collectibles:
     __slots__ = ("nameplate",)
 
     def __init__(self, state: ConnectionState, data: CollectiblesPayload) -> None:
-        self.nameplate: Optional[Nameplate] = (
+        self.nameplate: Nameplate | None = (
             Nameplate(state=state, data=nameplate_data)
             if (nameplate_data := data.get("nameplate"))
             else None
@@ -629,7 +627,7 @@ class User(BaseUser, disnake.abc.Messageable):
         return await self.create_dm()
 
     @property
-    def dm_channel(self) -> Optional[DMChannel]:
+    def dm_channel(self) -> DMChannel | None:
         """:class:`DMChannel` | :data:`None`: Returns the channel associated with this user if it exists.
 
         If this returns :data:`None`, you can create a DM channel by calling the
@@ -698,16 +696,16 @@ class PrimaryGuild:
 
     def __init__(self, *, state: ConnectionState, data: UserPrimaryGuildPayload) -> None:
         self._state = state
-        self.guild_id: Optional[int] = _get_as_snowflake(data, "identity_guild_id")
-        self.identity_enabled: Optional[bool] = data.get("identity_enabled")
-        self.tag: Optional[str] = data.get("tag")
-        self._badge: Optional[str] = data.get("badge")
+        self.guild_id: int | None = _get_as_snowflake(data, "identity_guild_id")
+        self.identity_enabled: bool | None = data.get("identity_enabled")
+        self.tag: str | None = data.get("tag")
+        self._badge: str | None = data.get("badge")
 
     def __repr__(self) -> str:
         return f"<PrimaryGuild guild_id={self.guild_id} identity_enabled={self.identity_enabled} tag={self.tag}>"
 
     @property
-    def badge(self) -> Optional[Asset]:
+    def badge(self) -> Asset | None:
         """:class:`Asset` | :data:`None`: Returns the server tag badge, if any."""
         # if badge is not None identity_guild_id won't be None either
         if self._badge is not None and self.guild_id is not None:
