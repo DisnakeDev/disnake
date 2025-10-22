@@ -5,12 +5,11 @@ from __future__ import annotations
 import datetime
 import itertools
 import sys
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from operator import attrgetter
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     Literal,
     Optional,
     Union,
@@ -357,10 +356,10 @@ class Member(disnake.abc.Messageable, _UserTag):
             f" bot={self._user.bot} nick={self.nick!r} guild={self.guild!r}>"
         )
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         return isinstance(other, _UserTag) and other.id == self.id
 
-    def __ne__(self, other: Any) -> bool:
+    def __ne__(self, other: object) -> bool:
         return not self.__eq__(other)
 
     def __hash__(self) -> int:

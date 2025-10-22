@@ -2,12 +2,11 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from functools import wraps
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     ClassVar,
     Optional,
     overload,
@@ -1299,7 +1298,7 @@ class PermissionOverwrite:
 
             setattr(self, key, value)
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         return isinstance(other, PermissionOverwrite) and self._values == other._values
 
     def _set(self, key: str, value: Optional[bool]) -> None:

@@ -12,10 +12,10 @@ import time
 import traceback
 import zlib
 from collections import deque
+from collections.abc import Callable
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     Final,
     Literal,
     NamedTuple,

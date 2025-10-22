@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable, Optional, Union
+from collections.abc import Callable
+from typing import TYPE_CHECKING, Any, Optional, Union
 
 from disnake.errors import ClientException, DiscordException
 from disnake.utils import humanize_list

@@ -1,0 +1,2 @@
+Update ``Callable`` to be imported from ``collections.abc`` rather than ``typing``.
+Reduce the usage of ``typing.Any`` by replacing it with ``object`` where applicable.

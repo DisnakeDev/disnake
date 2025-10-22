@@ -5,11 +5,10 @@ from __future__ import annotations
 import functools
 import inspect
 import re
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     Generic,
     Literal,
     Optional,
@@ -1234,7 +1233,7 @@ def is_generic_type(tp: Any, *, _GenericAlias: type = _GenericAlias) -> bool:
     return (isinstance(tp, type) and issubclass(tp, Generic)) or isinstance(tp, _GenericAlias)
 
 
-CONVERTER_MAPPING: dict[type[Any], type[Converter]] = {
+CONVERTER_MAPPING: dict[type[object], type[Converter]] = {
     disnake.Object: ObjectConverter,
     disnake.Member: MemberConverter,
     disnake.User: UserConverter,
