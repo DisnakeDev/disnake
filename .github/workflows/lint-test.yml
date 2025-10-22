@@ -256,7 +256,6 @@ jobs:
           nox --tags misc
 
       - name: List built files
-        if: (success() || failure()) && steps.setup.outcome == 'success'
         run: |
           ls -la dist/
 
