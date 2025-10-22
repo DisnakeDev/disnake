@@ -24,19 +24,24 @@ from ..item import DecoratedItem, Item
 __all__ = ("BaseSelect",)
 
 if TYPE_CHECKING:
-    from typing_extensions import ParamSpec, Self
+    from typing_extensions import (
+        ParamSpec,
+        Self,
+        TypeVar,  # noqa: TC004
+    )
 
     from ...abc import Snowflake
     from ...interactions import MessageInteraction
     from ..item import ItemCallbackType
     from ..view import View
 
+    V_co = TypeVar("V_co", bound="Optional[View]", covariant=True, default=Optional[View])
 else:
     ParamSpec = TypeVar
+    V_co = TypeVar("V_co", bound="Optional[View]", covariant=True)
 
 
 S_co = TypeVar("S_co", bound="BaseSelect", covariant=True)
-V_co = TypeVar("V_co", bound="Optional[View]", covariant=True)
 SelectMenuT = TypeVar("SelectMenuT", bound=AnySelectMenu)
 SelectValueT = TypeVar("SelectValueT")
 P = ParamSpec("P")

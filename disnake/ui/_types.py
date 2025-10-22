@@ -6,7 +6,10 @@ from collections.abc import Sequence
 from typing import TYPE_CHECKING, Any, Optional, TypeVar, Union
 
 if TYPE_CHECKING:
-    from typing_extensions import TypeAlias
+    from typing_extensions import (
+        TypeAlias,
+        TypeVar,  # noqa: TC004
+    )
 
     from . import (
         ActionRow,
@@ -24,7 +27,9 @@ if TYPE_CHECKING:
     from .select import ChannelSelect, MentionableSelect, RoleSelect, StringSelect, UserSelect
     from .view import View
 
-V_co = TypeVar("V_co", bound="Optional[View]", covariant=True)
+    V_co = TypeVar("V_co", bound="Optional[View]", covariant=True, default=Optional[View])
+else:
+    V_co = TypeVar("V_co", bound="Optional[View]", covariant=True)
 
 AnySelect = Union[
     "ChannelSelect[V_co]",

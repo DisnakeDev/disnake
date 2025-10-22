@@ -10,7 +10,7 @@ import sys
 import traceback
 import warnings
 from collections.abc import Iterable
-from typing import TYPE_CHECKING, Any, Callable, Optional, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Callable, Optional, TypeVar, Union, cast
 
 import disnake
 from disnake.utils import iscoroutinefunction
@@ -26,6 +26,7 @@ from .view import StringView
 if TYPE_CHECKING:
     from typing_extensions import Self
 
+    from disnake.ext.commands.bot import AutoShardedBot, Bot
     from disnake.message import Message
 
     from ._types import Check, CoroFunc, MaybeCoro
@@ -507,7 +508,9 @@ class BotBase(CommonBotBase, GroupMixin):
             ``cls`` parameter.
         """
         view = StringView(message.content)
-        ctx = cls(prefix=None, view=view, bot=self, message=message)
+        ctx = cls(
+            prefix=None, view=view, bot=cast("Union[Bot, AutoShardedBot]", self), message=message
+        )
 
         if message.author.id == self.user.id:  # pyright: ignore[reportAttributeAccessIssue]
             return ctx

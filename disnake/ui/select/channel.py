@@ -109,38 +109,6 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
         ),
     }
 
-    @overload
-    def __init__(
-        self: ChannelSelect[None],
-        *,
-        custom_id: str = ...,
-        placeholder: Optional[str] = None,
-        min_values: int = 1,
-        max_values: int = 1,
-        disabled: bool = False,
-        channel_types: Optional[list[ChannelType]] = None,
-        default_values: Optional[Sequence[SelectDefaultValueInputType[AnyChannel]]] = None,
-        required: bool = True,
-        id: int = 0,
-        row: Optional[int] = None,
-    ) -> None: ...
-
-    @overload
-    def __init__(
-        self: ChannelSelect[V_co],
-        *,
-        custom_id: str = ...,
-        placeholder: Optional[str] = None,
-        min_values: int = 1,
-        max_values: int = 1,
-        disabled: bool = False,
-        channel_types: Optional[list[ChannelType]] = None,
-        default_values: Optional[Sequence[SelectDefaultValueInputType[AnyChannel]]] = None,
-        required: bool = True,
-        id: int = 0,
-        row: Optional[int] = None,
-    ) -> None: ...
-
     def __init__(
         self,
         *,

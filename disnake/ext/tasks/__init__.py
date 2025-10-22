@@ -737,7 +737,8 @@ def loop(
 
 def loop(
     cls: type[Object[L_co, Concatenate[LF, P]]] = Loop[Any],
-    **kwargs: Any,
+    *_: P.args,
+    **kwargs: P.kwargs,
 ) -> Callable[[LF], L_co]:
     """A decorator that schedules a task in the background for you with
     optional reconnect logic. The decorator returns a :class:`Loop`.

@@ -92,36 +92,6 @@ class RoleSelect(BaseSelect[RoleSelectMenu, "Role", V_co]):
         SelectDefaultValueType.role: (Role, Object),
     }
 
-    @overload
-    def __init__(
-        self: RoleSelect[None],
-        *,
-        custom_id: str = ...,
-        placeholder: Optional[str] = None,
-        min_values: int = 1,
-        max_values: int = 1,
-        disabled: bool = False,
-        default_values: Optional[Sequence[SelectDefaultValueInputType[Role]]] = None,
-        required: bool = True,
-        id: int = 0,
-        row: Optional[int] = None,
-    ) -> None: ...
-
-    @overload
-    def __init__(
-        self: RoleSelect[V_co],
-        *,
-        custom_id: str = ...,
-        placeholder: Optional[str] = None,
-        min_values: int = 1,
-        max_values: int = 1,
-        disabled: bool = False,
-        default_values: Optional[Sequence[SelectDefaultValueInputType[Role]]] = None,
-        required: bool = True,
-        id: int = 0,
-        row: Optional[int] = None,
-    ) -> None: ...
-
     def __init__(
         self,
         *,
