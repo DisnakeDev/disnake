@@ -4,15 +4,15 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Optional, Union
 
-from . import utils
-from .partial_emoji import PartialEmoji, _EmojiTag
+from disnake import utils
+from disnake.partial_emoji import PartialEmoji, _EmojiTag
 
 if TYPE_CHECKING:
-    from .emoji import Emoji
-    from .guild import Guild
-    from .invite import PartialInviteGuild
-    from .state import ConnectionState
-    from .types.welcome_screen import (
+    from disnake.emoji import Emoji
+    from disnake.guild import Guild
+    from disnake.invite import PartialInviteGuild
+    from disnake.state import ConnectionState
+    from disnake.types.welcome_screen import (
         WelcomeScreen as WelcomeScreenPayload,
         WelcomeScreenChannel as WelcomeScreenChannelPayload,
     )
@@ -185,7 +185,7 @@ class WelcomeScreen:
         :class:`WelcomeScreen`
             The newly edited welcome screen.
         """
-        from .guild import Guild
+        from disnake.guild import Guild
 
         if not isinstance(self._guild, Guild):
             msg = "May not edit a WelcomeScreen from a PartialInviteGuild."

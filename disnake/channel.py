@@ -19,11 +19,10 @@ from typing import (
 )
 
 import disnake.abc
-
-from . import utils
-from .asset import Asset
-from .context_managers import Typing
-from .enums import (
+from disnake import utils
+from disnake.asset import Asset
+from disnake.context_managers import Typing
+from disnake.enums import (
     ChannelType,
     StagePrivacyLevel,
     ThreadLayout,
@@ -33,18 +32,18 @@ from .enums import (
     try_enum,
     try_enum_to_int,
 )
-from .errors import ClientException
-from .file import File
-from .flags import ChannelFlags, MessageFlags
-from .iterators import ArchivedThreadIterator
-from .mixins import Hashable
-from .object import Object
-from .partial_emoji import PartialEmoji
-from .permissions import PermissionOverwrite, Permissions
-from .soundboard import GuildSoundboardSound, PartialSoundboardSound, SoundboardSound
-from .stage_instance import StageInstance
-from .threads import ForumTag, Thread
-from .utils import MISSING
+from disnake.errors import ClientException
+from disnake.file import File
+from disnake.flags import ChannelFlags, MessageFlags
+from disnake.iterators import ArchivedThreadIterator
+from disnake.mixins import Hashable
+from disnake.object import Object
+from disnake.partial_emoji import PartialEmoji
+from disnake.permissions import PermissionOverwrite, Permissions
+from disnake.soundboard import GuildSoundboardSound, PartialSoundboardSound, SoundboardSound
+from disnake.stage_instance import StageInstance
+from disnake.threads import ForumTag, Thread
+from disnake.utils import MISSING
 
 __all__ = (
     "VoiceChannelEffect",
@@ -64,18 +63,18 @@ __all__ = (
 if TYPE_CHECKING:
     from typing_extensions import Never, Self
 
-    from .abc import Snowflake, SnowflakeTime
-    from .asset import AssetBytes
-    from .embeds import Embed
-    from .emoji import Emoji
-    from .guild import Guild, GuildChannel as GuildChannelType
-    from .member import Member, VoiceState
-    from .message import AllowedMentions, Message, PartialMessage
-    from .role import Role
-    from .state import ConnectionState
-    from .sticker import GuildSticker, StandardSticker, StickerItem
-    from .threads import AnyThreadArchiveDuration, ThreadType
-    from .types.channel import (
+    from disnake.abc import Snowflake, SnowflakeTime
+    from disnake.asset import AssetBytes
+    from disnake.embeds import Embed
+    from disnake.emoji import Emoji
+    from disnake.guild import Guild, GuildChannel as GuildChannelType
+    from disnake.member import Member, VoiceState
+    from disnake.message import AllowedMentions, Message, PartialMessage
+    from disnake.role import Role
+    from disnake.state import ConnectionState
+    from disnake.sticker import GuildSticker, StandardSticker, StickerItem
+    from disnake.threads import AnyThreadArchiveDuration, ThreadType
+    from disnake.types.channel import (
         CategoryChannel as CategoryChannelPayload,
         DefaultReaction as DefaultReactionPayload,
         DMChannel as DMChannelPayload,
@@ -86,15 +85,15 @@ if TYPE_CHECKING:
         TextChannel as TextChannelPayload,
         VoiceChannel as VoiceChannelPayload,
     )
-    from .types.snowflake import SnowflakeList
-    from .types.soundboard import PartialSoundboardSound as PartialSoundboardSoundPayload
-    from .types.threads import ThreadArchiveDurationLiteral
-    from .types.voice import VoiceChannelEffect as VoiceChannelEffectPayload
-    from .ui._types import MessageComponents
-    from .ui.view import View
-    from .user import BaseUser, ClientUser, User
-    from .voice_region import VoiceRegion
-    from .webhook import Webhook
+    from disnake.types.snowflake import SnowflakeList
+    from disnake.types.soundboard import PartialSoundboardSound as PartialSoundboardSoundPayload
+    from disnake.types.threads import ThreadArchiveDurationLiteral
+    from disnake.types.voice import VoiceChannelEffect as VoiceChannelEffectPayload
+    from disnake.ui._types import MessageComponents
+    from disnake.ui.view import View
+    from disnake.user import BaseUser, ClientUser, User
+    from disnake.voice_region import VoiceRegion
+    from disnake.webhook import Webhook
 
 
 class VoiceChannelEffect:
@@ -832,7 +831,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         :class:`list`\\[:class:`Webhook`]
             The list of webhooks this channel has.
         """
-        from .webhook import Webhook
+        from disnake.webhook import Webhook
 
         data = await self._state.http.channel_webhooks(self.id)
         return [Webhook.from_state(d, state=self._state) for d in data]
@@ -880,7 +879,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         :class:`Webhook`
             The newly created webhook.
         """
-        from .webhook import Webhook
+        from disnake.webhook import Webhook
 
         avatar_data = await utils._assetbytes_to_base64_data(avatar)
 
@@ -937,7 +936,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             msg = f"Expected TextChannel received {destination.__class__.__name__}"
             raise TypeError(msg)
 
-        from .webhook import Webhook
+        from disnake.webhook import Webhook
 
         data = await self._state.http.follow_webhook(
             self.id, webhook_channel_id=destination.id, reason=reason
@@ -962,7 +961,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         :class:`PartialMessage`
             The partial message object.
         """
-        from .message import PartialMessage
+        from disnake.message import PartialMessage
 
         return PartialMessage(channel=self, id=message_id)
 
@@ -1543,7 +1542,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         :class:`PartialMessage`
             The partial message object.
         """
-        from .message import PartialMessage
+        from disnake.message import PartialMessage
 
         return PartialMessage(channel=self, id=message_id)
 
@@ -1887,7 +1886,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         :class:`list`\\[:class:`Webhook`]
             The list of webhooks this channel has.
         """
-        from .webhook import Webhook
+        from disnake.webhook import Webhook
 
         data = await self._state.http.channel_webhooks(self.id)
         return [Webhook.from_state(d, state=self._state) for d in data]
@@ -1930,7 +1929,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         :class:`Webhook`
             The newly created webhook.
         """
-        from .webhook import Webhook
+        from disnake.webhook import Webhook
 
         avatar_data = await utils._assetbytes_to_base64_data(avatar)
 
@@ -2280,7 +2279,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         :class:`PartialMessage`
             The partial message object.
         """
-        from .message import PartialMessage
+        from disnake.message import PartialMessage
 
         return PartialMessage(channel=self, id=message_id)
 
@@ -2745,7 +2744,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         :class:`list`\\[:class:`Webhook`]
             The list of webhooks this channel has.
         """
-        from .webhook import Webhook
+        from disnake.webhook import Webhook
 
         data = await self._state.http.channel_webhooks(self.id)
         return [Webhook.from_state(d, state=self._state) for d in data]
@@ -2788,7 +2787,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         :class:`Webhook`
             The newly created webhook.
         """
-        from .webhook import Webhook
+        from disnake.webhook import Webhook
 
         avatar_data = await utils._assetbytes_to_base64_data(avatar)
 
@@ -3720,8 +3719,8 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         :class:`ThreadWithMessage`
             A :class:`~typing.NamedTuple` with the newly created thread and the message sent in it.
         """
-        from .message import Message
-        from .webhook.async_ import handle_message_parameters_dict
+        from disnake.message import Message
+        from disnake.webhook.async_ import handle_message_parameters_dict
 
         params = handle_message_parameters_dict(
             content,
@@ -3836,7 +3835,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         :class:`list`\\[:class:`Webhook`]
             The list of webhooks this channel has.
         """
-        from .webhook import Webhook
+        from disnake.webhook import Webhook
 
         data = await self._state.http.channel_webhooks(self.id)
         return [Webhook.from_state(d, state=self._state) for d in data]
@@ -3879,7 +3878,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         :class:`Webhook`
             The newly created webhook.
         """
-        from .webhook import Webhook
+        from disnake.webhook import Webhook
 
         avatar_data = await utils._assetbytes_to_base64_data(avatar)
 
@@ -4904,7 +4903,7 @@ class DMChannel(disnake.abc.Messageable, Hashable):
         :class:`PartialMessage`
             The partial message object.
         """
-        from .message import PartialMessage
+        from disnake.message import PartialMessage
 
         return PartialMessage(channel=self, id=message_id)
 
@@ -5066,7 +5065,7 @@ class GroupChannel(disnake.abc.Messageable, Hashable):
         :class:`PartialMessage`
             The partial message object.
         """
-        from .message import PartialMessage
+        from disnake.message import PartialMessage
 
         return PartialMessage(channel=self, id=message_id)
 
@@ -5141,7 +5140,7 @@ class PartialMessageable(disnake.abc.Messageable, Hashable):
         :class:`PartialMessage`
             The partial message object.
         """
-        from .message import PartialMessage
+        from disnake.message import PartialMessage
 
         return PartialMessage(channel=self, id=message_id)
 

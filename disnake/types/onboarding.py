@@ -2,8 +2,8 @@
 
 from typing import Literal, Optional, TypedDict
 
-from .emoji import Emoji
-from .snowflake import Snowflake, SnowflakeList
+from disnake.types.emoji import Emoji
+from disnake.types.snowflake import Snowflake, SnowflakeList
 
 OnboardingPromptType = Literal[0, 1]
 

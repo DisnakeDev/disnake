@@ -5,11 +5,11 @@ from __future__ import annotations
 import os
 from typing import TYPE_CHECKING, Any, Callable, ClassVar, Optional, TypeVar, Union, overload
 
-from ..components import Button as ButtonComponent
-from ..enums import ButtonStyle, ComponentType
-from ..partial_emoji import PartialEmoji, _EmojiTag
-from ..utils import MISSING, iscoroutinefunction
-from .item import DecoratedItem, Item
+from disnake.components import Button as ButtonComponent
+from disnake.enums import ButtonStyle, ComponentType
+from disnake.partial_emoji import PartialEmoji, _EmojiTag
+from disnake.ui.item import DecoratedItem, Item
+from disnake.utils import MISSING, iscoroutinefunction
 
 __all__ = (
     "Button",
@@ -19,9 +19,9 @@ __all__ = (
 if TYPE_CHECKING:
     from typing_extensions import ParamSpec, Self
 
-    from ..emoji import Emoji
-    from .item import ItemCallbackType
-    from .view import View
+    from disnake.emoji import Emoji
+    from disnake.ui.item import ItemCallbackType
+    from disnake.ui.view import View
 
 else:
     ParamSpec = TypeVar

@@ -19,12 +19,12 @@ from typing import (
     overload,
 )
 
-from . import utils
-from .channel import PartialMessageable
-from .components import MessageTopLevelComponent, _message_component_factory
-from .embeds import Embed
-from .emoji import Emoji
-from .enums import (
+from disnake import utils
+from disnake.channel import PartialMessageable
+from disnake.components import MessageTopLevelComponent, _message_component_factory
+from disnake.embeds import Embed
+from disnake.emoji import Emoji
+from disnake.enums import (
     ChannelType,
     InteractionType,
     MessageReferenceType,
@@ -32,44 +32,47 @@ from .enums import (
     try_enum,
     try_enum_to_int,
 )
-from .errors import HTTPException
-from .file import File
-from .flags import AttachmentFlags, MessageFlags
-from .guild import Guild
-from .member import Member
-from .mixins import Hashable
-from .partial_emoji import PartialEmoji
-from .poll import Poll
-from .reaction import Reaction
-from .sticker import StickerItem
-from .threads import Thread
-from .user import User
-from .utils import MISSING, _get_as_snowflake, assert_never, deprecated, escape_mentions
+from disnake.errors import HTTPException
+from disnake.file import File
+from disnake.flags import AttachmentFlags, MessageFlags
+from disnake.guild import Guild
+from disnake.member import Member
+from disnake.mixins import Hashable
+from disnake.partial_emoji import PartialEmoji
+from disnake.poll import Poll
+from disnake.reaction import Reaction
+from disnake.sticker import StickerItem
+from disnake.threads import Thread
+from disnake.user import User
+from disnake.utils import MISSING, _get_as_snowflake, assert_never, deprecated, escape_mentions
 
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from .abc import GuildChannel, MessageableChannel, Snowflake
-    from .channel import DMChannel, GroupChannel
-    from .guild import GuildMessageable
-    from .mentions import AllowedMentions
-    from .role import Role
-    from .state import ConnectionState
-    from .threads import AnyThreadArchiveDuration
-    from .types.components import MessageTopLevelComponent as MessageTopLevelComponentPayload
-    from .types.embed import Embed as EmbedPayload
-    from .types.gateway import (
+    from disnake.abc import GuildChannel, MessageableChannel, Snowflake
+    from disnake.channel import DMChannel, GroupChannel
+    from disnake.guild import GuildMessageable
+    from disnake.mentions import AllowedMentions
+    from disnake.role import Role
+    from disnake.state import ConnectionState
+    from disnake.threads import AnyThreadArchiveDuration
+    from disnake.types.components import MessageTopLevelComponent as MessageTopLevelComponentPayload
+    from disnake.types.embed import Embed as EmbedPayload
+    from disnake.types.gateway import (
         MessageReactionAddEvent,
         MessageReactionRemoveEvent,
         MessageUpdateEvent,
     )
-    from .types.interactions import (
+    from disnake.types.interactions import (
         AuthorizingIntegrationOwners as AuthorizingIntegrationOwnersPayload,
         InteractionMessageReference as InteractionMessageReferencePayload,
         InteractionMetadata as InteractionMetadataPayload,
     )
-    from .types.member import Member as MemberPayload, UserWithMember as UserWithMemberPayload
-    from .types.message import (
+    from disnake.types.member import (
+        Member as MemberPayload,
+        UserWithMember as UserWithMemberPayload,
+    )
+    from disnake.types.message import (
         Attachment as AttachmentPayload,
         ForwardedMessage as ForwardedMessagePayload,
         Message as MessagePayload,
@@ -80,10 +83,10 @@ if TYPE_CHECKING:
         Reaction as ReactionPayload,
         RoleSubscriptionData as RoleSubscriptionDataPayload,
     )
-    from .types.threads import ThreadArchiveDurationLiteral
-    from .types.user import User as UserPayload
-    from .ui._types import MessageComponents
-    from .ui.view import View
+    from disnake.types.threads import ThreadArchiveDurationLiteral
+    from disnake.types.user import User as UserPayload
+    from disnake.ui._types import MessageComponents
+    from disnake.ui.view import View
 
     EmojiInputType = Union[Emoji, PartialEmoji, str]
 
@@ -205,7 +208,7 @@ async def _edit_handler(
 
     is_v2 = False
     if components is not MISSING:
-        from .ui.action_row import normalize_components_to_dict
+        from disnake.ui.action_row import normalize_components_to_dict
 
         if components:
             payload["components"], is_v2 = normalize_components_to_dict(components)

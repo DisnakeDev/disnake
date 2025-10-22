@@ -7,8 +7,8 @@ from typing import TYPE_CHECKING, Any, Callable, Optional, Union
 
 import disnake
 
-from .bot_base import BotBase, when_mentioned, when_mentioned_or
-from .interaction_bot_base import InteractionBotBase
+from disnake.ext.commands.bot_base import BotBase, when_mentioned, when_mentioned_or
+from disnake.ext.commands.interaction_bot_base import InteractionBotBase
 
 if TYPE_CHECKING:
     import asyncio
@@ -29,10 +29,10 @@ if TYPE_CHECKING:
     from disnake.mentions import AllowedMentions
     from disnake.message import Message
 
-    from ._types import MaybeCoro
-    from .bot_base import PrefixType
-    from .flags import CommandSyncFlags
-    from .help import HelpCommand
+    from disnake.ext.commands._types import MaybeCoro
+    from disnake.ext.commands.bot_base import PrefixType
+    from disnake.ext.commands.flags import CommandSyncFlags
+    from disnake.ext.commands.help import HelpCommand
 
 
 __all__ = (

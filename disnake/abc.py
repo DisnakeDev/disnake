@@ -19,9 +19,9 @@ from typing import (
     runtime_checkable,
 )
 
-from . import utils
-from .context_managers import Typing
-from .enums import (
+from disnake import utils
+from disnake.context_managers import Typing
+from disnake.enums import (
     ChannelType,
     PartyType,
     ThreadLayout,
@@ -29,18 +29,18 @@ from .enums import (
     VideoQualityMode,
     try_enum_to_int,
 )
-from .errors import ClientException
-from .file import File
-from .flags import ChannelFlags, MessageFlags
-from .invite import Invite
-from .mentions import AllowedMentions
-from .object import Object
-from .partial_emoji import PartialEmoji
-from .permissions import PermissionOverwrite, Permissions
-from .role import Role
-from .sticker import GuildSticker, StandardSticker, StickerItem
-from .utils import _overload_with_permissions
-from .voice_client import VoiceClient, VoiceProtocol
+from disnake.errors import ClientException
+from disnake.file import File
+from disnake.flags import ChannelFlags, MessageFlags
+from disnake.invite import Invite
+from disnake.mentions import AllowedMentions
+from disnake.object import Object
+from disnake.partial_emoji import PartialEmoji
+from disnake.permissions import PermissionOverwrite, Permissions
+from disnake.role import Role
+from disnake.sticker import GuildSticker, StandardSticker, StickerItem
+from disnake.utils import _overload_with_permissions
+from disnake.voice_client import VoiceClient, VoiceProtocol
 
 __all__ = (
     "Snowflake",
@@ -58,33 +58,33 @@ if TYPE_CHECKING:
 
     from typing_extensions import Self
 
-    from .asset import Asset
-    from .channel import CategoryChannel, DMChannel, GroupChannel, PartialMessageable
-    from .client import Client
-    from .embeds import Embed
-    from .emoji import Emoji
-    from .enums import InviteTarget
-    from .guild import Guild, GuildChannel as AnyGuildChannel, GuildMessageable
-    from .guild_scheduled_event import GuildScheduledEvent
-    from .iterators import ChannelPinsIterator, HistoryIterator
-    from .member import Member
-    from .message import Message, MessageReference, PartialMessage
-    from .poll import Poll
-    from .state import ConnectionState
-    from .threads import AnyThreadArchiveDuration, ForumTag
-    from .types.channel import (
+    from disnake.asset import Asset
+    from disnake.channel import CategoryChannel, DMChannel, GroupChannel, PartialMessageable
+    from disnake.client import Client
+    from disnake.embeds import Embed
+    from disnake.emoji import Emoji
+    from disnake.enums import InviteTarget
+    from disnake.guild import Guild, GuildChannel as AnyGuildChannel, GuildMessageable
+    from disnake.guild_scheduled_event import GuildScheduledEvent
+    from disnake.iterators import ChannelPinsIterator, HistoryIterator
+    from disnake.member import Member
+    from disnake.message import Message, MessageReference, PartialMessage
+    from disnake.poll import Poll
+    from disnake.state import ConnectionState
+    from disnake.threads import AnyThreadArchiveDuration, ForumTag
+    from disnake.types.channel import (
         Channel as ChannelPayload,
         DefaultReaction as DefaultReactionPayload,
         GuildChannel as GuildChannelPayload,
         OverwriteType,
         PermissionOverwrite as PermissionOverwritePayload,
     )
-    from .types.guild import ChannelPositionUpdate as ChannelPositionUpdatePayload
-    from .types.threads import PartialForumTag as PartialForumTagPayload
-    from .ui._types import MessageComponents
-    from .ui.view import View
-    from .user import ClientUser
-    from .voice_region import VoiceRegion
+    from disnake.types.guild import ChannelPositionUpdate as ChannelPositionUpdatePayload
+    from disnake.types.threads import PartialForumTag as PartialForumTagPayload
+    from disnake.ui._types import MessageComponents
+    from disnake.ui.view import View
+    from disnake.user import ClientUser
+    from disnake.voice_region import VoiceRegion
 
     MessageableChannel = Union[GuildMessageable, DMChannel, GroupChannel, PartialMessageable]
     # include non-messageable channels, e.g. category/forum
@@ -1749,7 +1749,7 @@ class Messageable:
                 raise TypeError(msg)
             components_payload = view.to_components()
         elif components:
-            from .ui.action_row import normalize_components_to_dict
+            from disnake.ui.action_row import normalize_components_to_dict
 
             components_payload, is_v2 = normalize_components_to_dict(components)
         else:
@@ -1934,7 +1934,7 @@ class Messageable:
         :class:`.Message`
             The pinned message from the parsed message data.
         """
-        from .iterators import ChannelPinsIterator  # due to cyclic imports
+        from disnake.iterators import ChannelPinsIterator  # due to cyclic imports
 
         return ChannelPinsIterator(self, limit=limit, before=before)
 
@@ -2003,7 +2003,7 @@ class Messageable:
         :class:`.Message`
             The message with the message data parsed.
         """
-        from .iterators import HistoryIterator  # cyclic import
+        from disnake.iterators import HistoryIterator  # cyclic import
 
         return HistoryIterator(
             self, limit=limit, before=before, after=after, around=around, oldest_first=oldest_first

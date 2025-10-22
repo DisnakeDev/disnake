@@ -46,8 +46,8 @@ from disnake.utils import (
     signature_has_self_param,
 )
 
-from . import errors
-from .converter import CONVERTER_MAPPING
+from disnake.ext.commands import errors
+from disnake.ext.commands.converter import CONVERTER_MAPPING
 
 T_ = TypeVar("T_")
 
@@ -58,10 +58,10 @@ if TYPE_CHECKING:
     from disnake.i18n import LocalizationValue, LocalizedOptional
     from disnake.types.interactions import ApplicationCommandOptionChoiceValue
 
-    from ._types import FuncT
-    from .base_core import CogT
-    from .cog import Cog
-    from .slash_core import InvokableSlashCommand, SubCommand
+    from disnake.ext.commands._types import FuncT
+    from disnake.ext.commands.base_core import CogT
+    from disnake.ext.commands.cog import Cog
+    from disnake.ext.commands.slash_core import InvokableSlashCommand, SubCommand
 
     AnySlashCommand = Union[InvokableSlashCommand, SubCommand]
 

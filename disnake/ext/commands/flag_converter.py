@@ -21,15 +21,15 @@ from typing import (
 
 from disnake.utils import MISSING, maybe_coroutine, resolve_annotation
 
-from .converter import run_converters
-from .errors import (
+from disnake.ext.commands.converter import run_converters
+from disnake.ext.commands.errors import (
     BadFlagArgument,
     CommandError,
     MissingFlagArgument,
     MissingRequiredFlag,
     TooManyFlags,
 )
-from .view import StringView
+from disnake.ext.commands.view import StringView
 
 __all__ = (
     "Flag",
@@ -41,7 +41,7 @@ __all__ = (
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from .context import Context
+    from disnake.ext.commands.context import Context
 
 FlagsMetaT = TypeVar("FlagsMetaT", bound="type[FlagsMeta]")
 

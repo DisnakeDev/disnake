@@ -5,19 +5,19 @@ from __future__ import annotations
 from datetime import timedelta
 from typing import TYPE_CHECKING, Optional, Union
 
-from . import utils
-from .abc import Snowflake
-from .emoji import Emoji, _EmojiTag
-from .enums import PollLayoutType, try_enum
-from .iterators import PollAnswerIterator
-from .partial_emoji import PartialEmoji
+from disnake import utils
+from disnake.abc import Snowflake
+from disnake.emoji import Emoji, _EmojiTag
+from disnake.enums import PollLayoutType, try_enum
+from disnake.iterators import PollAnswerIterator
+from disnake.partial_emoji import PartialEmoji
 
 if TYPE_CHECKING:
     from datetime import datetime
 
-    from .message import Message
-    from .state import ConnectionState
-    from .types.poll import (
+    from disnake.message import Message
+    from disnake.state import ConnectionState
+    from disnake.types.poll import (
         Poll as PollPayload,
         PollAnswer as PollAnswerPayload,
         PollCreateAnswerPayload,

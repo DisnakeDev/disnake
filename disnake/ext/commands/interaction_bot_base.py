@@ -26,18 +26,23 @@ from disnake.enums import ApplicationCommandType
 from disnake.flags import ApplicationInstallTypes, InteractionContextTypes
 from disnake.utils import iscoroutinefunction, warn_deprecated
 
-from . import errors
-from .base_core import InvokableApplicationCommand
-from .common_bot_base import CommonBotBase
-from .ctx_menus_core import (
+from disnake.ext.commands import errors
+from disnake.ext.commands.base_core import InvokableApplicationCommand
+from disnake.ext.commands.common_bot_base import CommonBotBase
+from disnake.ext.commands.ctx_menus_core import (
     InvokableMessageCommand,
     InvokableUserCommand,
     message_command,
     user_command,
 )
-from .errors import CommandRegistrationError
-from .flags import CommandSyncFlags
-from .slash_core import InvokableSlashCommand, SubCommand, SubCommandGroup, slash_command
+from disnake.ext.commands.errors import CommandRegistrationError
+from disnake.ext.commands.flags import CommandSyncFlags
+from disnake.ext.commands.slash_core import (
+    InvokableSlashCommand,
+    SubCommand,
+    SubCommandGroup,
+    slash_command,
+)
 
 if TYPE_CHECKING:
     from typing_extensions import NotRequired, ParamSpec
@@ -50,8 +55,8 @@ if TYPE_CHECKING:
     )
     from disnake.permissions import Permissions
 
-    from ._types import AppCheck, CoroFunc
-    from .base_core import CogT, CommandCallback, InteractionCommandCallback
+    from disnake.ext.commands._types import AppCheck, CoroFunc
+    from disnake.ext.commands.base_core import CogT, CommandCallback, InteractionCommandCallback
 
     P = ParamSpec("P")
 

@@ -29,17 +29,22 @@ from disnake.utils import (
     maybe_coroutine,
 )
 
-from .cooldowns import BucketType, CooldownMapping, MaxConcurrency
-from .errors import CheckFailure, CommandError, CommandInvokeError, CommandOnCooldown
+from disnake.ext.commands.cooldowns import BucketType, CooldownMapping, MaxConcurrency
+from disnake.ext.commands.errors import (
+    CheckFailure,
+    CommandError,
+    CommandInvokeError,
+    CommandOnCooldown,
+)
 
 if TYPE_CHECKING:
     from typing_extensions import Concatenate, ParamSpec, Self
 
     from disnake.interactions import ApplicationCommandInteraction
 
-    from ._types import AppCheck, Coro, Error, Hook
-    from .cog import Cog
-    from .interaction_bot_base import InteractionBotBase
+    from disnake.ext.commands._types import AppCheck, Coro, Error, Hook
+    from disnake.ext.commands.cog import Cog
+    from disnake.ext.commands.interaction_bot_base import InteractionBotBase
 
     ApplicationCommandInteractionT = TypeVar(
         "ApplicationCommandInteractionT", bound=ApplicationCommandInteraction, covariant=True
@@ -819,7 +824,7 @@ def default_member_permissions(value: int = 0, **permissions: bool) -> Callable[
     perms_value = Permissions(value, **permissions).value
 
     def decorator(func: T) -> T:
-        from .slash_core import SubCommand, SubCommandGroup
+        from disnake.ext.commands.slash_core import SubCommand, SubCommandGroup
 
         if isinstance(func, InvokableApplicationCommand):
             if isinstance(func, (SubCommand, SubCommandGroup)):
@@ -855,7 +860,7 @@ def install_types(*, guild: bool = False, user: bool = False) -> Callable[[T], T
     """
 
     def decorator(func: T) -> T:
-        from .slash_core import SubCommand, SubCommandGroup
+        from disnake.ext.commands.slash_core import SubCommand, SubCommandGroup
 
         install_types = ApplicationInstallTypes(guild=guild, user=user)
         if isinstance(func, InvokableApplicationCommand):
@@ -895,7 +900,7 @@ def contexts(
     """
 
     def decorator(func: T) -> T:
-        from .slash_core import SubCommand, SubCommandGroup
+        from disnake.ext.commands.slash_core import SubCommand, SubCommandGroup
 
         contexts = InteractionContextTypes(
             guild=guild, bot_dm=bot_dm, private_channel=private_channel

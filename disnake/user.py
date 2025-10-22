@@ -5,25 +5,24 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Optional, Union
 
 import disnake.abc
-
-from .asset import Asset
-from .colour import Colour
-from .enums import Locale, NameplatePalette, try_enum
-from .flags import PublicUserFlags
-from .utils import MISSING, _assetbytes_to_base64_data, _get_as_snowflake, snowflake_time
+from disnake.asset import Asset
+from disnake.colour import Colour
+from disnake.enums import Locale, NameplatePalette, try_enum
+from disnake.flags import PublicUserFlags
+from disnake.utils import MISSING, _assetbytes_to_base64_data, _get_as_snowflake, snowflake_time
 
 if TYPE_CHECKING:
     from datetime import datetime
 
     from typing_extensions import Self
 
-    from .asset import AssetBytes
-    from .channel import DMChannel
-    from .guild import Guild
-    from .message import Message
-    from .state import ConnectionState
-    from .types.channel import DMChannel as DMChannelPayload
-    from .types.user import (
+    from disnake.asset import AssetBytes
+    from disnake.channel import DMChannel
+    from disnake.guild import Guild
+    from disnake.message import Message
+    from disnake.state import ConnectionState
+    from disnake.types.channel import DMChannel as DMChannelPayload
+    from disnake.types.user import (
         AvatarDecorationData as AvatarDecorationDataPayload,
         Collectibles as CollectiblesPayload,
         Nameplate as NameplatePayload,

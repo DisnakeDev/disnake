@@ -5,13 +5,13 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any, Optional, Union
 
-from .. import utils
-from ..enums import ApplicationCommandType, Locale, OptionType, try_enum
-from ..guild import Guild
-from ..member import Member
-from ..message import Message
-from ..user import User
-from .base import ClientT, Interaction, InteractionDataResolved
+from disnake import utils
+from disnake.enums import ApplicationCommandType, Locale, OptionType, try_enum
+from disnake.guild import Guild
+from disnake.interactions.base import ClientT, Interaction, InteractionDataResolved
+from disnake.member import Member
+from disnake.message import Message
+from disnake.user import User
 
 __all__ = (
     "ApplicationCommandInteraction",
@@ -34,12 +34,13 @@ __all__ = (
 MISSING = utils.MISSING
 
 if TYPE_CHECKING:
-    from ..ext.commands import InvokableApplicationCommand
-    from ..state import ConnectionState
-    from ..types.interactions import (
+    from disnake.state import ConnectionState
+    from disnake.types.interactions import (
         ApplicationCommandInteraction as ApplicationCommandInteractionPayload,
         ApplicationCommandInteractionData as ApplicationCommandInteractionDataPayload,
     )
+
+    from disnake.ext.commands import InvokableApplicationCommand
 
 
 class ApplicationCommandInteraction(Interaction[ClientT]):

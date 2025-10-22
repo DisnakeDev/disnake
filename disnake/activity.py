@@ -5,10 +5,10 @@ from __future__ import annotations
 import datetime
 from typing import TYPE_CHECKING, Any, Literal, Optional, Union, overload
 
-from .asset import Asset
-from .colour import Colour
-from .enums import ActivityType, StatusDisplayType, try_enum
-from .partial_emoji import PartialEmoji
+from disnake.asset import Asset
+from disnake.colour import Colour
+from disnake.enums import ActivityType, StatusDisplayType, try_enum
+from disnake.partial_emoji import PartialEmoji
 
 __all__ = (
     "BaseActivity",
@@ -66,16 +66,16 @@ t.ActivityFlags = {
 """
 
 if TYPE_CHECKING:
-    from .state import ConnectionState
-    from .types.activity import (
+    from disnake.state import ConnectionState
+    from disnake.types.activity import (
         Activity as ActivityPayload,
         ActivityAssets,
         ActivityEmoji as ActivityEmojiPayload,
         ActivityParty,
         ActivityTimestamps,
     )
-    from .types.emoji import PartialEmoji as PartialEmojiPayload
-    from .types.widget import WidgetActivity as WidgetActivityPayload
+    from disnake.types.emoji import PartialEmoji as PartialEmojiPayload
+    from disnake.types.widget import WidgetActivity as WidgetActivityPayload
 
 
 class _BaseActivity:

@@ -8,7 +8,7 @@ from abc import ABC
 from collections.abc import Mapping, Sequence
 from typing import TYPE_CHECKING, ClassVar, Optional, Union
 
-from .enums import (
+from disnake.enums import (
     ApplicationCommandPermissionType,
     ApplicationCommandType,
     ChannelType,
@@ -18,17 +18,22 @@ from .enums import (
     try_enum,
     try_enum_to_int,
 )
-from .flags import ApplicationInstallTypes, InteractionContextTypes
-from .i18n import Localized
-from .permissions import Permissions
-from .utils import MISSING, _get_as_snowflake, _maybe_cast, deprecated, warn_deprecated
+from disnake.flags import ApplicationInstallTypes, InteractionContextTypes
+from disnake.i18n import Localized
+from disnake.permissions import Permissions
+from disnake.utils import MISSING, _get_as_snowflake, _maybe_cast, deprecated, warn_deprecated
 
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from .i18n import LocalizationProtocol, LocalizationValue, LocalizedOptional, LocalizedRequired
-    from .state import ConnectionState
-    from .types.interactions import (
+    from disnake.i18n import (
+        LocalizationProtocol,
+        LocalizationValue,
+        LocalizedOptional,
+        LocalizedRequired,
+    )
+    from disnake.state import ConnectionState
+    from disnake.types.interactions import (
         ApplicationCommand as ApplicationCommandPayload,
         ApplicationCommandOption as ApplicationCommandOptionPayload,
         ApplicationCommandOptionChoice as ApplicationCommandOptionChoicePayload,

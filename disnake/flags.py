@@ -18,8 +18,8 @@ from typing import (
     overload,
 )
 
-from .enums import UserFlags
-from .utils import MISSING, _generated
+from disnake.enums import UserFlags
+from disnake.utils import MISSING, _generated
 
 if TYPE_CHECKING:
     from typing_extensions import Self

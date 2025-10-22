@@ -26,23 +26,23 @@ from typing import (
 
 import aiohttp
 
-from . import abc, utils
-from .activity import ActivityTypes, BaseActivity, create_activity
-from .app_commands import (
+from disnake import abc, utils
+from disnake.activity import ActivityTypes, BaseActivity, create_activity
+from disnake.app_commands import (
     APIMessageCommand,
     APISlashCommand,
     APIUserCommand,
     ApplicationCommand,
     GuildApplicationCommandPermissions,
 )
-from .appinfo import AppInfo
-from .application_role_connection import ApplicationRoleConnectionMetadata
-from .backoff import ExponentialBackoff
-from .channel import PartialMessageable, _threaded_channel_factory
-from .emoji import Emoji
-from .entitlement import Entitlement
-from .enums import ApplicationCommandType, ChannelType, Event, Status
-from .errors import (
+from disnake.appinfo import AppInfo
+from disnake.application_role_connection import ApplicationRoleConnectionMetadata
+from disnake.backoff import ExponentialBackoff
+from disnake.channel import PartialMessageable, _threaded_channel_factory
+from disnake.emoji import Emoji
+from disnake.entitlement import Entitlement
+from disnake.enums import ApplicationCommandType, ChannelType, Event, Status
+from disnake.errors import (
     ConnectionClosed,
     GatewayNotFound,
     HTTPException,
@@ -50,45 +50,50 @@ from .errors import (
     PrivilegedIntentsRequired,
     SessionStartLimitReached,
 )
-from .flags import ApplicationFlags, Intents, MemberCacheFlags
-from .gateway import DiscordWebSocket, ReconnectWebSocket
-from .guild import Guild, GuildBuilder
-from .guild_preview import GuildPreview
-from .http import HTTPClient
-from .i18n import LocalizationProtocol, LocalizationStore
-from .invite import Invite
-from .iterators import EntitlementIterator, GuildIterator
-from .mentions import AllowedMentions
-from .object import Object
-from .sku import SKU
-from .soundboard import GuildSoundboardSound, SoundboardSound
-from .stage_instance import StageInstance
-from .state import ConnectionState
-from .sticker import GuildSticker, StandardSticker, StickerPack, _sticker_factory
-from .template import Template
-from .threads import Thread
-from .ui.view import View
-from .user import ClientUser, User
-from .utils import MISSING, deprecated
-from .voice_client import VoiceClient
-from .voice_region import VoiceRegion
-from .webhook import Webhook
-from .widget import Widget
+from disnake.flags import ApplicationFlags, Intents, MemberCacheFlags
+from disnake.gateway import DiscordWebSocket, ReconnectWebSocket
+from disnake.guild import Guild, GuildBuilder
+from disnake.guild_preview import GuildPreview
+from disnake.http import HTTPClient
+from disnake.i18n import LocalizationProtocol, LocalizationStore
+from disnake.invite import Invite
+from disnake.iterators import EntitlementIterator, GuildIterator
+from disnake.mentions import AllowedMentions
+from disnake.object import Object
+from disnake.sku import SKU
+from disnake.soundboard import GuildSoundboardSound, SoundboardSound
+from disnake.stage_instance import StageInstance
+from disnake.state import ConnectionState
+from disnake.sticker import GuildSticker, StandardSticker, StickerPack, _sticker_factory
+from disnake.template import Template
+from disnake.threads import Thread
+from disnake.ui.view import View
+from disnake.user import ClientUser, User
+from disnake.utils import MISSING, deprecated
+from disnake.voice_client import VoiceClient
+from disnake.voice_region import VoiceRegion
+from disnake.webhook import Webhook
+from disnake.widget import Widget
 
 if TYPE_CHECKING:
     from typing_extensions import NotRequired
 
-    from .abc import GuildChannel, PrivateChannel, Snowflake, SnowflakeTime
-    from .app_commands import APIApplicationCommand, MessageCommand, SlashCommand, UserCommand
-    from .asset import AssetBytes
-    from .channel import DMChannel
-    from .member import Member
-    from .message import Message
-    from .types.application_role_connection import (
+    from disnake.abc import GuildChannel, PrivateChannel, Snowflake, SnowflakeTime
+    from disnake.app_commands import (
+        APIApplicationCommand,
+        MessageCommand,
+        SlashCommand,
+        UserCommand,
+    )
+    from disnake.asset import AssetBytes
+    from disnake.channel import DMChannel
+    from disnake.member import Member
+    from disnake.message import Message
+    from disnake.types.application_role_connection import (
         ApplicationRoleConnectionMetadata as ApplicationRoleConnectionMetadataPayload,
     )
-    from .types.gateway import SessionStartLimit as SessionStartLimitPayload
-    from .voice_client import VoiceProtocol
+    from disnake.types.gateway import SessionStartLimit as SessionStartLimitPayload
+    from disnake.voice_client import VoiceProtocol
 
 
 __all__ = (
@@ -1445,7 +1450,7 @@ class Client:
         :class:`.StageInstance` | :data:`None`
             The returns stage instance or :data:`None` if not found.
         """
-        from .channel import StageChannel
+        from disnake.channel import StageChannel
 
         channel = self._connection.get_channel(id)
 

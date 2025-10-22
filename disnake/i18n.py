@@ -19,10 +19,10 @@ from typing import (
     overload,
 )
 
-from . import utils
-from .custom_warnings import LocalizationWarning
-from .enums import Locale
-from .errors import LocalizationKeyError
+from disnake import utils
+from disnake.custom_warnings import LocalizationWarning
+from disnake.enums import Locale
+from disnake.errors import LocalizationKeyError
 
 if TYPE_CHECKING:
     from typing_extensions import Self

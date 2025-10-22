@@ -4,16 +4,16 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Optional, Union
 
-from .iterators import ReactionIterator
+from disnake.iterators import ReactionIterator
 
 __all__ = ("Reaction",)
 
 if TYPE_CHECKING:
-    from .abc import Snowflake
-    from .emoji import Emoji
-    from .message import Message
-    from .partial_emoji import PartialEmoji
-    from .types.message import Reaction as ReactionPayload
+    from disnake.abc import Snowflake
+    from disnake.emoji import Emoji
+    from disnake.message import Message
+    from disnake.partial_emoji import PartialEmoji
+    from disnake.types.message import Reaction as ReactionPayload
 
 
 class Reaction:

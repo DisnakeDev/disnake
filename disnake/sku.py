@@ -5,17 +5,17 @@ from __future__ import annotations
 import datetime
 from typing import TYPE_CHECKING, Optional
 
-from .enums import SKUType, try_enum
-from .flags import SKUFlags
-from .iterators import SubscriptionIterator
-from .mixins import Hashable
-from .subscription import Subscription
-from .utils import snowflake_time
+from disnake.enums import SKUType, try_enum
+from disnake.flags import SKUFlags
+from disnake.iterators import SubscriptionIterator
+from disnake.mixins import Hashable
+from disnake.subscription import Subscription
+from disnake.utils import snowflake_time
 
 if TYPE_CHECKING:
-    from .abc import Snowflake, SnowflakeTime
-    from .state import ConnectionState
-    from .types.sku import SKU as SKUPayload
+    from disnake.abc import Snowflake, SnowflakeTime
+    from disnake.state import ConnectionState
+    from disnake.types.sku import SKU as SKUPayload
 
 
 __all__ = ("SKU",)

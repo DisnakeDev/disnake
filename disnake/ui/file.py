@@ -5,15 +5,15 @@ from __future__ import annotations
 import copy
 from typing import TYPE_CHECKING, ClassVar, Optional
 
-from ..components import FileComponent, UnfurledMediaItem, handle_media_item_input
-from ..enums import ComponentType
-from ..utils import MISSING
-from .item import UIComponent
+from disnake.components import FileComponent, UnfurledMediaItem, handle_media_item_input
+from disnake.enums import ComponentType
+from disnake.ui.item import UIComponent
+from disnake.utils import MISSING
 
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from ..components import LocalMediaItemInput
+    from disnake.components import LocalMediaItemInput
 
 __all__ = ("File",)
 

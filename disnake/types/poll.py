@@ -6,9 +6,9 @@ from typing import Literal, Optional, TypedDict
 
 from typing_extensions import NotRequired
 
-from .emoji import PartialEmoji
-from .snowflake import Snowflake
-from .user import User
+from disnake.types.emoji import PartialEmoji
+from disnake.types.snowflake import Snowflake
+from disnake.types.user import User
 
 
 class PollMedia(TypedDict):

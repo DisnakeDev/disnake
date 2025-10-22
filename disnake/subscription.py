@@ -5,14 +5,14 @@ from __future__ import annotations
 import datetime
 from typing import TYPE_CHECKING, Optional
 
-from .enums import SubscriptionStatus, try_enum
-from .mixins import Hashable
-from .utils import parse_time, snowflake_time
+from disnake.enums import SubscriptionStatus, try_enum
+from disnake.mixins import Hashable
+from disnake.utils import parse_time, snowflake_time
 
 if TYPE_CHECKING:
-    from .state import ConnectionState
-    from .types.subscription import Subscription as SubscriptionPayload
-    from .user import User
+    from disnake.state import ConnectionState
+    from disnake.types.subscription import Subscription as SubscriptionPayload
+    from disnake.user import User
 
 __all__ = ("Subscription",)
 

@@ -13,20 +13,26 @@ from typing import (
     overload,
 )
 
-from ...abc import GuildChannel, Snowflake
-from ...channel import DMChannel, GroupChannel, PartialMessageable
-from ...components import ChannelSelectMenu
-from ...enums import ChannelType, ComponentType, SelectDefaultValueType
-from ...object import Object
-from ...threads import Thread
-from ...utils import MISSING
-from .base import BaseSelect, P, SelectDefaultValueInputType, V_co, _create_decorator
+from disnake.abc import GuildChannel, Snowflake
+from disnake.channel import DMChannel, GroupChannel, PartialMessageable
+from disnake.components import ChannelSelectMenu
+from disnake.enums import ChannelType, ComponentType, SelectDefaultValueType
+from disnake.object import Object
+from disnake.threads import Thread
+from disnake.ui.select.base import (
+    BaseSelect,
+    P,
+    SelectDefaultValueInputType,
+    V_co,
+    _create_decorator,
+)
+from disnake.utils import MISSING
 
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from ...abc import AnyChannel
-    from ..item import DecoratedItem, ItemCallbackType
+    from disnake.abc import AnyChannel
+    from disnake.ui.item import DecoratedItem, ItemCallbackType
 
 
 __all__ = (

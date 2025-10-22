@@ -6,7 +6,7 @@ import struct
 from collections.abc import Generator
 from typing import IO, TYPE_CHECKING, ClassVar, Optional
 
-from .errors import DiscordException
+from disnake.errors import DiscordException
 
 __all__ = (
     "OggError",

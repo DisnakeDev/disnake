@@ -7,28 +7,28 @@ from typing import Any, Literal, Optional, TypedDict, Union
 
 from typing_extensions import NotRequired
 
-from .activity import PartialPresenceUpdate, PresenceData, SendableActivity
-from .appinfo import PartialAppInfo, PartialGatewayAppInfo
-from .audit_log import AuditLogEntry
-from .automod import AutoModAction, AutoModRule, AutoModTriggerType
-from .channel import Channel, GuildChannel, StageInstance
-from .emoji import Emoji, PartialEmoji
-from .entitlement import Entitlement
-from .guild import Guild, UnavailableGuild
-from .guild_scheduled_event import GuildScheduledEvent
-from .integration import BaseIntegration
-from .interactions import BaseInteraction, GuildApplicationCommandPermissions
-from .invite import InviteTargetType, InviteType
-from .member import MemberWithUser
-from .message import Message
-from .role import Role
-from .snowflake import Snowflake, SnowflakeList
-from .soundboard import GuildSoundboardSound
-from .sticker import GuildSticker
-from .subscription import Subscription
-from .threads import Thread, ThreadMember, ThreadMemberWithPresence, ThreadType
-from .user import AvatarDecorationData, User
-from .voice import GuildVoiceState, SupportedModes, VoiceChannelEffect
+from disnake.types.activity import PartialPresenceUpdate, PresenceData, SendableActivity
+from disnake.types.appinfo import PartialAppInfo, PartialGatewayAppInfo
+from disnake.types.audit_log import AuditLogEntry
+from disnake.types.automod import AutoModAction, AutoModRule, AutoModTriggerType
+from disnake.types.channel import Channel, GuildChannel, StageInstance
+from disnake.types.emoji import Emoji, PartialEmoji
+from disnake.types.entitlement import Entitlement
+from disnake.types.guild import Guild, UnavailableGuild
+from disnake.types.guild_scheduled_event import GuildScheduledEvent
+from disnake.types.integration import BaseIntegration
+from disnake.types.interactions import BaseInteraction, GuildApplicationCommandPermissions
+from disnake.types.invite import InviteTargetType, InviteType
+from disnake.types.member import MemberWithUser
+from disnake.types.message import Message
+from disnake.types.role import Role
+from disnake.types.snowflake import Snowflake, SnowflakeList
+from disnake.types.soundboard import GuildSoundboardSound
+from disnake.types.sticker import GuildSticker
+from disnake.types.subscription import Subscription
+from disnake.types.threads import Thread, ThreadMember, ThreadMemberWithPresence, ThreadType
+from disnake.types.user import AvatarDecorationData, User
+from disnake.types.voice import GuildVoiceState, SupportedModes, VoiceChannelEffect
 
 
 class SessionStartLimit(TypedDict):

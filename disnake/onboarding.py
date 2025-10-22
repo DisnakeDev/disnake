@@ -3,14 +3,14 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Optional, Union
 
-from .enums import OnboardingPromptType, try_enum
-from .mixins import Hashable
+from disnake.enums import OnboardingPromptType, try_enum
+from disnake.mixins import Hashable
 
 if TYPE_CHECKING:
-    from .emoji import Emoji, PartialEmoji
-    from .guild import Guild, GuildChannel
-    from .role import Role
-    from .types.onboarding import (
+    from disnake.emoji import Emoji, PartialEmoji
+    from disnake.guild import Guild, GuildChannel
+    from disnake.role import Role
+    from disnake.types.onboarding import (
         Onboarding as OnboardingPayload,
         OnboardingPrompt as OnboardingPromptPayload,
         OnboardingPromptOption as OnboardingPromptOptionPayload,

@@ -10,12 +10,12 @@ from typing import TYPE_CHECKING, Any, Callable, Optional
 from disnake.enums import Enum
 from disnake.member import Member
 
-from .errors import MaxConcurrencyReached
+from disnake.ext.commands.errors import MaxConcurrencyReached
 
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from ...message import Message
+    from disnake.message import Message
 
 __all__ = (
     "BucketType",

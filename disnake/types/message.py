@@ -6,17 +6,21 @@ from typing import Literal, Optional, TypedDict, Union
 
 from typing_extensions import NotRequired
 
-from .channel import ChannelType
-from .components import MessageTopLevelComponent
-from .embed import Embed
-from .emoji import PartialEmoji
-from .interactions import InteractionDataResolved, InteractionMessageReference, InteractionMetadata
-from .member import Member, UserWithMember
-from .poll import Poll
-from .snowflake import Snowflake, SnowflakeList
-from .sticker import StickerItem
-from .threads import Thread
-from .user import User
+from disnake.types.channel import ChannelType
+from disnake.types.components import MessageTopLevelComponent
+from disnake.types.embed import Embed
+from disnake.types.emoji import PartialEmoji
+from disnake.types.interactions import (
+    InteractionDataResolved,
+    InteractionMessageReference,
+    InteractionMetadata,
+)
+from disnake.types.member import Member, UserWithMember
+from disnake.types.poll import Poll
+from disnake.types.snowflake import Snowflake, SnowflakeList
+from disnake.types.sticker import StickerItem
+from disnake.types.threads import Thread
+from disnake.types.user import User
 
 
 class ChannelMention(TypedDict):

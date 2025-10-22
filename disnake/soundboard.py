@@ -5,21 +5,21 @@ from __future__ import annotations
 import datetime
 from typing import TYPE_CHECKING, Any, Optional, Union
 
-from .asset import Asset, AssetMixin
-from .mixins import Hashable
-from .partial_emoji import PartialEmoji
-from .utils import MISSING, _get_as_snowflake, snowflake_time
+from disnake.asset import Asset, AssetMixin
+from disnake.mixins import Hashable
+from disnake.partial_emoji import PartialEmoji
+from disnake.utils import MISSING, _get_as_snowflake, snowflake_time
 
 if TYPE_CHECKING:
-    from .emoji import Emoji
-    from .guild import Guild
-    from .state import ConnectionState
-    from .types.soundboard import (
+    from disnake.emoji import Emoji
+    from disnake.guild import Guild
+    from disnake.state import ConnectionState
+    from disnake.types.soundboard import (
         GuildSoundboardSound as GuildSoundboardSoundPayload,
         PartialSoundboardSound as PartialSoundboardSoundPayload,
         SoundboardSound as SoundboardSoundPayload,
     )
-    from .user import User
+    from disnake.user import User
 
 
 __all__ = (

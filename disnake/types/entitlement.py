@@ -4,7 +4,7 @@ from typing import Literal, TypedDict
 
 from typing_extensions import NotRequired
 
-from .snowflake import Snowflake
+from disnake.types.snowflake import Snowflake
 
 EntitlementType = Literal[1, 2, 3, 4, 5, 6, 7, 8]
 

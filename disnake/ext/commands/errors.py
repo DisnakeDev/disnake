@@ -14,9 +14,9 @@ if TYPE_CHECKING:
     from disnake.threads import Thread
     from disnake.types.snowflake import Snowflake, SnowflakeList
 
-    from .context import AnyContext
-    from .cooldowns import BucketType, Cooldown
-    from .flag_converter import Flag
+    from disnake.ext.commands.context import AnyContext
+    from disnake.ext.commands.cooldowns import BucketType, Cooldown
+    from disnake.ext.commands.flag_converter import Flag
 
 
 __all__ = (

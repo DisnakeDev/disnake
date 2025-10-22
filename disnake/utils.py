@@ -41,7 +41,7 @@ from urllib.parse import parse_qs, urlencode
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-from .enums import Locale
+from disnake.enums import Locale
 
 if sys.version_info >= (3, 14):
     import threading
@@ -133,12 +133,14 @@ if TYPE_CHECKING:
 
     from typing_extensions import Never, ParamSpec, Self
 
-    from .abc import Snowflake
-    from .asset import AssetBytes
-    from .invite import Invite
-    from .permissions import Permissions
-    from .template import Template
-    from .types.appinfo import ApplicationIntegrationType as ApplicationIntegrationTypeLiteral
+    from disnake.abc import Snowflake
+    from disnake.asset import AssetBytes
+    from disnake.invite import Invite
+    from disnake.permissions import Permissions
+    from disnake.template import Template
+    from disnake.types.appinfo import (
+        ApplicationIntegrationType as ApplicationIntegrationTypeLiteral,
+    )
 
     class _RequestLike(Protocol):
         headers: Mapping[str, Any]
@@ -770,7 +772,7 @@ def resolve_invite(
         The invite code if ``with_params`` is ``False``, otherwise a tuple containing the
         invite code and the url's query parameters, if applicable.
     """
-    from .invite import Invite  # circular import
+    from disnake.invite import Invite  # circular import
 
     code = None
     params = {}
@@ -803,7 +805,7 @@ def resolve_template(code: Union[Template, str]) -> str:
     :class:`str`
         The template code.
     """
-    from .template import Template  # circular import
+    from disnake.template import Template  # circular import
 
     if isinstance(code, Template):
         return code.code

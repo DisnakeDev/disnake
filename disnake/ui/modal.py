@@ -9,22 +9,22 @@ import traceback
 from functools import partial
 from typing import TYPE_CHECKING, Callable, Optional, TypeVar, Union, cast
 
-from ..enums import TextInputStyle
-from ..utils import MISSING
-from .action_row import ActionRow, normalize_components
-from .item import ensure_ui_component
-from .label import Label
-from .text_input import TextInput
+from disnake.enums import TextInputStyle
+from disnake.ui.action_row import ActionRow, normalize_components
+from disnake.ui.item import ensure_ui_component
+from disnake.ui.label import Label
+from disnake.ui.text_input import TextInput
+from disnake.utils import MISSING
 
 if TYPE_CHECKING:
-    from ..client import Client
-    from ..interactions.modal import ModalInteraction
-    from ..state import ConnectionState
-    from ..types.components import (
+    from disnake.client import Client
+    from disnake.interactions.modal import ModalInteraction
+    from disnake.state import ConnectionState
+    from disnake.types.components import (
         Modal as ModalPayload,
         ModalTopLevelComponent as ModalTopLevelComponentPayload,
     )
-    from ..ui._types import ModalComponents, ModalTopLevelComponent
+    from disnake.ui._types import ModalComponents, ModalTopLevelComponent
 
     # backwards compatibility, `TextInput` internally gets wrapped in an action row (deprecated)
     ModalTopLevelComponentInput = Union[ModalTopLevelComponent, TextInput]

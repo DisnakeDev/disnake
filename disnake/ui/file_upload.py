@@ -5,10 +5,10 @@ from __future__ import annotations
 import os
 from typing import TYPE_CHECKING, ClassVar
 
-from ..components import FileUpload as FileUploadComponent
-from ..enums import ComponentType
-from ..utils import MISSING
-from .item import UIComponent
+from disnake.components import FileUpload as FileUploadComponent
+from disnake.enums import ComponentType
+from disnake.ui.item import UIComponent
+from disnake.utils import MISSING
 
 if TYPE_CHECKING:
     from typing_extensions import Self

@@ -4,10 +4,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, ClassVar
 
-from ..components import TextDisplay as TextDisplayComponent
-from ..enums import ComponentType
-from ..utils import MISSING
-from .item import UIComponent
+from disnake.components import TextDisplay as TextDisplayComponent
+from disnake.enums import ComponentType
+from disnake.ui.item import UIComponent
+from disnake.utils import MISSING
 
 if TYPE_CHECKING:
     from typing_extensions import Self

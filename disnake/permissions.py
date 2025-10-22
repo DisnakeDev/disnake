@@ -13,8 +13,8 @@ from typing import (
     overload,
 )
 
-from .flags import BaseFlags, alias_flag_value, flag_value
-from .utils import _generated, _overload_with_permissions
+from disnake.flags import BaseFlags, alias_flag_value, flag_value
+from disnake.utils import _generated, _overload_with_permissions
 
 if TYPE_CHECKING:
     from typing_extensions import Self

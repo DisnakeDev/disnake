@@ -16,9 +16,9 @@ from typing import (
     cast,
 )
 
-from .asset import AssetMixin
-from .colour import Colour
-from .enums import (
+from disnake.asset import AssetMixin
+from disnake.colour import Colour
+from disnake.enums import (
     ButtonStyle,
     ChannelType,
     ComponentType,
@@ -27,15 +27,15 @@ from .enums import (
     TextInputStyle,
     try_enum,
 )
-from .partial_emoji import PartialEmoji, _EmojiTag
-from .utils import MISSING, _get_as_snowflake, assert_never, get_slots
+from disnake.partial_emoji import PartialEmoji, _EmojiTag
+from disnake.utils import MISSING, _get_as_snowflake, assert_never, get_slots
 
 if TYPE_CHECKING:
     from typing_extensions import Self, TypeAlias
 
-    from .emoji import Emoji
-    from .message import Attachment
-    from .types.components import (
+    from disnake.emoji import Emoji
+    from disnake.message import Attachment
+    from disnake.types.components import (
         ActionRow as ActionRowPayload,
         AnySelectMenu as AnySelectMenuPayload,
         BaseSelectMenu as BaseSelectMenuPayload,
@@ -1621,7 +1621,7 @@ def handle_media_item_input(value: MediaItemInput) -> UnfurledMediaItem:
         return UnfurledMediaItem(value)
 
     # circular import
-    from .message import Attachment
+    from disnake.message import Attachment
 
     if isinstance(value, (AssetMixin, Attachment)):
         return UnfurledMediaItem(value.url)

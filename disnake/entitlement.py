@@ -5,15 +5,15 @@ from __future__ import annotations
 import datetime
 from typing import TYPE_CHECKING, Optional
 
-from .enums import EntitlementType, try_enum
-from .mixins import Hashable
-from .utils import _get_as_snowflake, parse_time, snowflake_time, utcnow
+from disnake.enums import EntitlementType, try_enum
+from disnake.mixins import Hashable
+from disnake.utils import _get_as_snowflake, parse_time, snowflake_time, utcnow
 
 if TYPE_CHECKING:
-    from .guild import Guild
-    from .state import ConnectionState
-    from .types.entitlement import Entitlement as EntitlementPayload
-    from .user import User
+    from disnake.guild import Guild
+    from disnake.state import ConnectionState
+    from disnake.types.entitlement import Entitlement as EntitlementPayload
+    from disnake.user import User
 
 
 __all__ = ("Entitlement",)

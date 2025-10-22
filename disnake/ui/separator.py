@@ -4,10 +4,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, ClassVar
 
-from ..components import Separator as SeparatorComponent
-from ..enums import ComponentType, SeparatorSpacing
-from ..utils import MISSING
-from .item import UIComponent
+from disnake.components import Separator as SeparatorComponent
+from disnake.enums import ComponentType, SeparatorSpacing
+from disnake.ui.item import UIComponent
+from disnake.utils import MISSING
 
 if TYPE_CHECKING:
     from typing_extensions import Self

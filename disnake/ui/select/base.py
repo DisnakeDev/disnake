@@ -15,21 +15,21 @@ from typing import (
     Union,
 )
 
-from ...components import AnySelectMenu, SelectDefaultValue
-from ...enums import ComponentType, SelectDefaultValueType
-from ...object import Object
-from ...utils import MISSING, humanize_list, iscoroutinefunction
-from ..item import DecoratedItem, Item
+from disnake.components import AnySelectMenu, SelectDefaultValue
+from disnake.enums import ComponentType, SelectDefaultValueType
+from disnake.object import Object
+from disnake.ui.item import DecoratedItem, Item
+from disnake.utils import MISSING, humanize_list, iscoroutinefunction
 
 __all__ = ("BaseSelect",)
 
 if TYPE_CHECKING:
     from typing_extensions import ParamSpec, Self
 
-    from ...abc import Snowflake
-    from ...interactions import MessageInteraction
-    from ..item import ItemCallbackType
-    from ..view import View
+    from disnake.abc import Snowflake
+    from disnake.interactions import MessageInteraction
+    from disnake.ui.item import ItemCallbackType
+    from disnake.ui.view import View
 
 else:
     ParamSpec = TypeVar

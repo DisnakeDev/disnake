@@ -19,17 +19,16 @@ from typing import (
 )
 
 import disnake.abc
-
-from . import utils
-from .activity import ActivityTypes, create_activity
-from .asset import Asset, AssetBytes
-from .colour import Colour
-from .enums import Status, try_enum
-from .flags import MemberFlags
-from .object import Object
-from .permissions import Permissions
-from .user import BaseUser, User, _UserTag
-from .utils import MISSING, _assetbytes_to_base64_data
+from disnake import utils
+from disnake.activity import ActivityTypes, create_activity
+from disnake.asset import Asset, AssetBytes
+from disnake.colour import Colour
+from disnake.enums import Status, try_enum
+from disnake.flags import MemberFlags
+from disnake.object import Object
+from disnake.permissions import Permissions
+from disnake.user import BaseUser, User, _UserTag
+from disnake.utils import MISSING, _assetbytes_to_base64_data
 
 __all__ = (
     "VoiceState",
@@ -39,28 +38,31 @@ __all__ = (
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from .abc import Snowflake
-    from .channel import DMChannel, StageChannel, VoiceChannel
-    from .flags import PublicUserFlags
-    from .guild import Guild
-    from .message import Message
-    from .partial_emoji import PartialEmoji
-    from .role import Role
-    from .state import ConnectionState
-    from .types.activity import PresenceData
-    from .types.gateway import GuildMemberUpdateEvent
-    from .types.member import (
+    from disnake.abc import Snowflake
+    from disnake.channel import DMChannel, StageChannel, VoiceChannel
+    from disnake.flags import PublicUserFlags
+    from disnake.guild import Guild
+    from disnake.message import Message
+    from disnake.partial_emoji import PartialEmoji
+    from disnake.role import Role
+    from disnake.state import ConnectionState
+    from disnake.types.activity import PresenceData
+    from disnake.types.gateway import GuildMemberUpdateEvent
+    from disnake.types.member import (
         BaseMember as BaseMemberPayload,
         Member as MemberPayload,
         MemberWithUser as MemberWithUserPayload,
         UserWithMember as UserWithMemberPayload,
     )
-    from .types.user import AvatarDecorationData as AvatarDecorationDataPayload, User as UserPayload
-    from .types.voice import (
+    from disnake.types.user import (
+        AvatarDecorationData as AvatarDecorationDataPayload,
+        User as UserPayload,
+    )
+    from disnake.types.voice import (
         GuildVoiceState as GuildVoiceStatePayload,
         VoiceState as VoiceStatePayload,
     )
-    from .user import Collectibles, PrimaryGuild
+    from disnake.user import Collectibles, PrimaryGuild
 
     VocalGuildChannel = Union[VoiceChannel, StageChannel]
 

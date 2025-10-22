@@ -2,8 +2,8 @@
 
 from typing import Optional, TypedDict
 
-from .snowflake import Snowflake, SnowflakeList
-from .user import User
+from disnake.types.snowflake import Snowflake, SnowflakeList
+from disnake.types.user import User
 
 
 class PartialEmoji(TypedDict):

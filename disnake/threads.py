@@ -7,15 +7,15 @@ import time
 from collections.abc import Iterable, Sequence
 from typing import TYPE_CHECKING, Callable, Literal, Optional, Union
 
-from .abc import GuildChannel, Messageable
-from .enums import ChannelType, ThreadArchiveDuration, try_enum, try_enum_to_int
-from .errors import ClientException
-from .flags import ChannelFlags
-from .mixins import Hashable
-from .object import Object
-from .partial_emoji import PartialEmoji, _EmojiTag
-from .permissions import Permissions
-from .utils import MISSING, _get_as_snowflake, _unique, parse_time, snowflake_time
+from disnake.abc import GuildChannel, Messageable
+from disnake.enums import ChannelType, ThreadArchiveDuration, try_enum, try_enum_to_int
+from disnake.errors import ClientException
+from disnake.flags import ChannelFlags
+from disnake.mixins import Hashable
+from disnake.object import Object
+from disnake.partial_emoji import PartialEmoji, _EmojiTag
+from disnake.permissions import Permissions
+from disnake.utils import MISSING, _get_as_snowflake, _unique, parse_time, snowflake_time
 
 __all__ = (
     "Thread",
@@ -28,16 +28,16 @@ if TYPE_CHECKING:
 
     from typing_extensions import Self
 
-    from .abc import Snowflake, SnowflakeTime
-    from .channel import CategoryChannel, ForumChannel, MediaChannel, TextChannel
-    from .emoji import Emoji
-    from .guild import Guild
-    from .member import Member
-    from .message import Message, PartialMessage
-    from .role import Role
-    from .state import ConnectionState
-    from .types.snowflake import SnowflakeList
-    from .types.threads import (
+    from disnake.abc import Snowflake, SnowflakeTime
+    from disnake.channel import CategoryChannel, ForumChannel, MediaChannel, TextChannel
+    from disnake.emoji import Emoji
+    from disnake.guild import Guild
+    from disnake.member import Member
+    from disnake.message import Message, PartialMessage
+    from disnake.role import Role
+    from disnake.state import ConnectionState
+    from disnake.types.snowflake import SnowflakeList
+    from disnake.types.threads import (
         ForumTag as ForumTagPayload,
         PartialForumTag as PartialForumTagPayload,
         Thread as ThreadPayload,
@@ -407,7 +407,7 @@ class Thread(Messageable, Hashable):
 
         .. versionadded:: 2.6
         """
-        from .channel import ThreadOnlyGuildChannel  # cyclic import
+        from disnake.channel import ThreadOnlyGuildChannel  # cyclic import
 
         parent = self.parent
         if not isinstance(parent, ThreadOnlyGuildChannel):
@@ -1019,7 +1019,7 @@ class Thread(Messageable, Hashable):
         :class:`PartialMessage`
             The partial message.
         """
-        from .message import PartialMessage
+        from disnake.message import PartialMessage
 
         return PartialMessage(channel=self, id=message_id)
 

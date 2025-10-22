@@ -15,20 +15,20 @@ from typing import TYPE_CHECKING, Any, Callable, Optional, TypeVar, Union
 import disnake
 from disnake.utils import iscoroutinefunction
 
-from . import errors
-from .common_bot_base import CommonBotBase
-from .context import Context
-from .core import GroupMixin
-from .custom_warnings import MessageContentPrefixWarning
-from .help import DefaultHelpCommand, HelpCommand
-from .view import StringView
+from disnake.ext.commands import errors
+from disnake.ext.commands.common_bot_base import CommonBotBase
+from disnake.ext.commands.context import Context
+from disnake.ext.commands.core import GroupMixin
+from disnake.ext.commands.custom_warnings import MessageContentPrefixWarning
+from disnake.ext.commands.help import DefaultHelpCommand, HelpCommand
+from disnake.ext.commands.view import StringView
 
 if TYPE_CHECKING:
     from typing_extensions import Self
 
     from disnake.message import Message
 
-    from ._types import Check, CoroFunc, MaybeCoro
+    from disnake.ext.commands._types import Check, CoroFunc, MaybeCoro
 
 __all__ = (
     "when_mentioned",

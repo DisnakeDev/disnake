@@ -18,10 +18,10 @@ from typing import (
 
 import aiohttp
 
-from .backoff import ExponentialBackoff
-from .client import Client, GatewayParams, SessionStartLimit
-from .enums import Status
-from .errors import (
+from disnake.backoff import ExponentialBackoff
+from disnake.client import Client, GatewayParams, SessionStartLimit
+from disnake.enums import Status
+from disnake.errors import (
     ClientException,
     ConnectionClosed,
     GatewayNotFound,
@@ -29,16 +29,16 @@ from .errors import (
     PrivilegedIntentsRequired,
     SessionStartLimitReached,
 )
-from .gateway import DiscordWebSocket, ReconnectWebSocket
-from .state import AutoShardedConnectionState
+from disnake.gateway import DiscordWebSocket, ReconnectWebSocket
+from disnake.state import AutoShardedConnectionState
 
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from .activity import BaseActivity
-    from .flags import Intents, MemberCacheFlags
-    from .i18n import LocalizationProtocol
-    from .mentions import AllowedMentions
+    from disnake.activity import BaseActivity
+    from disnake.flags import Intents, MemberCacheFlags
+    from disnake.i18n import LocalizationProtocol
+    from disnake.mentions import AllowedMentions
 
 __all__ = (
     "AutoShardedClient",

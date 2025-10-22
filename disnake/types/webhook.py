@@ -6,9 +6,9 @@ from typing import Literal, Optional, TypedDict
 
 from typing_extensions import NotRequired
 
-from .channel import PartialChannel
-from .snowflake import Snowflake
-from .user import User
+from disnake.types.channel import PartialChannel
+from disnake.types.snowflake import Snowflake
+from disnake.types.user import User
 
 
 class SourceGuild(TypedDict):

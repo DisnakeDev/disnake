@@ -4,17 +4,17 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, ClassVar, Optional, Union, cast
 
-from ..components import Label as LabelComponent
-from ..enums import ComponentType
-from ..utils import copy_doc
-from .item import UIComponent, ensure_ui_component
+from disnake.components import Label as LabelComponent
+from disnake.enums import ComponentType
+from disnake.ui.item import UIComponent, ensure_ui_component
+from disnake.utils import copy_doc
 
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from ._types import AnySelect
-    from .file_upload import FileUpload
-    from .text_input import TextInput
+    from disnake.ui._types import AnySelect
+    from disnake.ui.file_upload import FileUpload
+    from disnake.ui.text_input import TextInput
 
     LabelChildUIComponent = Union[TextInput, FileUpload, AnySelect[Any]]
 
@@ -97,7 +97,7 @@ class Label(UIComponent):
 
     @classmethod
     def from_component(cls, label: LabelComponent) -> Self:
-        from .action_row import _to_ui_component
+        from disnake.ui.action_row import _to_ui_component
 
         return cls(
             text=label.text,

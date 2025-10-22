@@ -4,22 +4,22 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Literal, Optional, TypedDict, Union
 
-from .appinfo import ApplicationIntegrationType
-from .channel import ChannelType
-from .components import MessageTopLevelComponent, Modal
-from .embed import Embed
-from .entitlement import Entitlement
-from .i18n import LocalizationDict
-from .member import Member, MemberWithUser
-from .role import Role
-from .snowflake import Snowflake
-from .threads import ThreadMetadata
-from .user import User
+from disnake.types.appinfo import ApplicationIntegrationType
+from disnake.types.channel import ChannelType
+from disnake.types.components import MessageTopLevelComponent, Modal
+from disnake.types.embed import Embed
+from disnake.types.entitlement import Entitlement
+from disnake.types.i18n import LocalizationDict
+from disnake.types.member import Member, MemberWithUser
+from disnake.types.role import Role
+from disnake.types.snowflake import Snowflake
+from disnake.types.threads import ThreadMetadata
+from disnake.types.user import User
 
 if TYPE_CHECKING:
     from typing_extensions import NotRequired, TypeAlias
 
-    from .message import AllowedMentions, Attachment, Message
+    from disnake.types.message import AllowedMentions, Attachment, Message
 
 
 ApplicationCommandType = Literal[1, 2, 3]

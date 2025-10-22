@@ -4,17 +4,17 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, ClassVar, Union, cast
 
-from ..components import Section as SectionComponent
-from ..enums import ComponentType
-from ..utils import copy_doc
-from .item import UIComponent, ensure_ui_component
-from .text_display import TextDisplay
+from disnake.components import Section as SectionComponent
+from disnake.enums import ComponentType
+from disnake.ui.item import UIComponent, ensure_ui_component
+from disnake.ui.text_display import TextDisplay
+from disnake.utils import copy_doc
 
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from .button import Button
-    from .thumbnail import Thumbnail
+    from disnake.ui.button import Button
+    from disnake.ui.thumbnail import Thumbnail
 
     SectionAccessoryUIComponent = Union[Thumbnail, Button[Any]]
 
@@ -89,7 +89,7 @@ class Section(UIComponent):
 
     @classmethod
     def from_component(cls, section: SectionComponent) -> Self:
-        from .action_row import _to_ui_component
+        from disnake.ui.action_row import _to_ui_component
 
         return cls(
             *cast(

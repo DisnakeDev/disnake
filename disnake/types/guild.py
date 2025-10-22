@@ -4,19 +4,19 @@ from typing import Literal, Optional, TypedDict
 
 from typing_extensions import NotRequired
 
-from .activity import PartialPresenceUpdate
-from .channel import CreateGuildChannel, GuildChannel, StageInstance
-from .emoji import Emoji
-from .guild_scheduled_event import GuildScheduledEvent
-from .member import Member
-from .role import CreateRole, Role
-from .snowflake import Snowflake
-from .soundboard import GuildSoundboardSound
-from .sticker import GuildSticker
-from .threads import Thread
-from .user import User
-from .voice import GuildVoiceState
-from .welcome_screen import WelcomeScreen
+from disnake.types.activity import PartialPresenceUpdate
+from disnake.types.channel import CreateGuildChannel, GuildChannel, StageInstance
+from disnake.types.emoji import Emoji
+from disnake.types.guild_scheduled_event import GuildScheduledEvent
+from disnake.types.member import Member
+from disnake.types.role import CreateRole, Role
+from disnake.types.snowflake import Snowflake
+from disnake.types.soundboard import GuildSoundboardSound
+from disnake.types.sticker import GuildSticker
+from disnake.types.threads import Thread
+from disnake.types.user import User
+from disnake.types.voice import GuildVoiceState
+from disnake.types.welcome_screen import WelcomeScreen
 
 
 class Ban(TypedDict):

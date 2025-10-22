@@ -16,7 +16,7 @@ from typing import (
     overload,
 )
 
-from ..components import (
+from disnake.components import (
     ActionRow as ActionRowComponent,
     ActionRowChildComponent,
     ActionRowMessageComponent as ActionRowMessageComponentRaw,
@@ -38,9 +38,8 @@ from ..components import (
     Thumbnail as ThumbnailComponent,
     UserSelectMenu as UserSelectComponent,
 )
-from ..enums import ButtonStyle, ChannelType, ComponentType, TextInputStyle
-from ..utils import MISSING, SequenceProxy, assert_never, copy_doc, deprecated
-from ._types import (
+from disnake.enums import ButtonStyle, ChannelType, ComponentType, TextInputStyle
+from disnake.ui._types import (
     ActionRowChildT,
     ActionRowMessageComponent,
     ActionRowModalComponent,
@@ -48,36 +47,37 @@ from ._types import (
     MessageTopLevelComponent,
     NonActionRowChildT,
 )
-from .button import Button
-from .container import Container
-from .file import File
-from .file_upload import FileUpload
-from .item import UIComponent, WrappedComponent
-from .label import Label
-from .media_gallery import MediaGallery
-from .section import Section
-from .select import ChannelSelect, MentionableSelect, RoleSelect, StringSelect, UserSelect
-from .separator import Separator
-from .text_display import TextDisplay
-from .text_input import TextInput
-from .thumbnail import Thumbnail
+from disnake.ui.button import Button
+from disnake.ui.container import Container
+from disnake.ui.file import File
+from disnake.ui.file_upload import FileUpload
+from disnake.ui.item import UIComponent, WrappedComponent
+from disnake.ui.label import Label
+from disnake.ui.media_gallery import MediaGallery
+from disnake.ui.section import Section
+from disnake.ui.select import ChannelSelect, MentionableSelect, RoleSelect, StringSelect, UserSelect
+from disnake.ui.separator import Separator
+from disnake.ui.text_display import TextDisplay
+from disnake.ui.text_input import TextInput
+from disnake.ui.thumbnail import Thumbnail
+from disnake.utils import MISSING, SequenceProxy, assert_never, copy_doc, deprecated
 
 if TYPE_CHECKING:
     from typing_extensions import Self, TypeAlias
 
-    from ..abc import AnyChannel
-    from ..emoji import Emoji
-    from ..member import Member
-    from ..message import Message
-    from ..partial_emoji import PartialEmoji
-    from ..role import Role
-    from ..types.components import (
+    from disnake.abc import AnyChannel
+    from disnake.emoji import Emoji
+    from disnake.member import Member
+    from disnake.message import Message
+    from disnake.partial_emoji import PartialEmoji
+    from disnake.role import Role
+    from disnake.types.components import (
         ActionRow as ActionRowPayload,
         MessageTopLevelComponent as MessageTopLevelComponentPayload,
     )
-    from ..user import User
-    from .select.base import SelectDefaultValueInputType, SelectDefaultValueMultiInputType
-    from .select.string import SelectOptionInput
+    from disnake.ui.select.base import SelectDefaultValueInputType, SelectDefaultValueMultiInputType
+    from disnake.ui.select.string import SelectOptionInput
+    from disnake.user import User
 
 __all__ = (
     "ActionRow",

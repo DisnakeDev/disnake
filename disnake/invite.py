@@ -4,14 +4,21 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Optional, Union
 
-from .appinfo import PartialAppInfo
-from .asset import Asset
-from .enums import ChannelType, InviteTarget, InviteType, NSFWLevel, VerificationLevel, try_enum
-from .guild_scheduled_event import GuildScheduledEvent
-from .mixins import Hashable
-from .object import Object
-from .utils import _get_as_snowflake, parse_time, snowflake_time
-from .welcome_screen import WelcomeScreen
+from disnake.appinfo import PartialAppInfo
+from disnake.asset import Asset
+from disnake.enums import (
+    ChannelType,
+    InviteTarget,
+    InviteType,
+    NSFWLevel,
+    VerificationLevel,
+    try_enum,
+)
+from disnake.guild_scheduled_event import GuildScheduledEvent
+from disnake.mixins import Hashable
+from disnake.object import Object
+from disnake.utils import _get_as_snowflake, parse_time, snowflake_time
+from disnake.welcome_screen import WelcomeScreen
 
 __all__ = (
     "PartialInviteChannel",
@@ -24,17 +31,17 @@ if TYPE_CHECKING:
 
     from typing_extensions import Self
 
-    from .abc import GuildChannel
-    from .guild import Guild
-    from .state import ConnectionState
-    from .types.channel import (
+    from disnake.abc import GuildChannel
+    from disnake.guild import Guild
+    from disnake.state import ConnectionState
+    from disnake.types.channel import (
         GroupInviteRecipient as GroupInviteRecipientPayload,
         InviteChannel as InviteChannelPayload,
     )
-    from .types.gateway import InviteCreateEvent, InviteDeleteEvent
-    from .types.guild import GuildFeature
-    from .types.invite import Invite as InvitePayload, InviteGuild as InviteGuildPayload
-    from .user import User
+    from disnake.types.gateway import InviteCreateEvent, InviteDeleteEvent
+    from disnake.types.guild import GuildFeature
+    from disnake.types.invite import Invite as InvitePayload, InviteGuild as InviteGuildPayload
+    from disnake.user import User
 
     GatewayInvitePayload = Union[InviteCreateEvent, InviteDeleteEvent]
     InviteGuildType = Union[Guild, "PartialInviteGuild", Object]
