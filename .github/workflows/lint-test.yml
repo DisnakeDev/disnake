@@ -252,7 +252,6 @@ jobs:
           python-version: ${{ needs.python-versions.outputs.min-python }}
 
       - name: Run misc checks
-        if: (success() || failure()) && steps.setup.outcome == 'success'
         run: |
           nox --tags misc
 
