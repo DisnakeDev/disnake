@@ -364,7 +364,9 @@ class Embed:
         elif value is None:
             self._timestamp = value
         else:
-            msg = f"Expected datetime.datetime or None, received {value.__class__.__name__} instead."
+            msg = (
+                f"Expected datetime.datetime or None, received {value.__class__.__name__} instead."
+            )
             raise TypeError(msg)
 
     @property
