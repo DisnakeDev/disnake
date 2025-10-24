@@ -4228,7 +4228,7 @@ class Guild(Hashable):
         else:
             msg = (
                 "`clean_history_duration` should be int or timedelta, "
-                f"not {type(clean_history_duration).__name__}"
+                f"not {clean_history_duration.__class__.__name__}"
             )
             raise TypeError(msg)
 
@@ -4317,7 +4317,7 @@ class Guild(Hashable):
         else:
             msg = (
                 "`clean_history_duration` should be int or timedelta, "
-                f"not {type(clean_history_duration).__name__}"
+                f"not {clean_history_duration.__class__.__name__}"
             )
             raise TypeError(msg)
 
