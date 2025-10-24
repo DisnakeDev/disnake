@@ -195,7 +195,7 @@ class LocalizationValue:
             self._key = None
             self._data = {str(k): v for k, v in localizations.items()}
         else:
-            msg = f"Invalid localizations type: {type(localizations).__name__}"
+            msg = f"Invalid localizations type: {localizations.__class__.__name__}"
             raise TypeError(msg)
 
     def _upgrade(self, key: Optional[str]) -> None:

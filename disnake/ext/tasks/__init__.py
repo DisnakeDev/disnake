@@ -91,6 +91,10 @@ class Loop(Generic[LF]):
         """.. note:
         If you overwrite ``__init__`` arguments, make sure to redefine .clone too.
         """
+        if not iscoroutinefunction(coro):
+            msg = f"Expected a coroutine function, got {coro.__class__.__name__!r} instead."
+            raise TypeError(msg)
+
         self.coro: LF = coro
         self.reconnect: bool = reconnect
         self.loop: asyncio.AbstractEventLoop = loop
@@ -121,10 +125,6 @@ class Loop(Generic[LF]):
         self._last_iteration_failed = False
         self._last_iteration: datetime.datetime = MISSING
         self._next_iteration = None
-
-        if not iscoroutinefunction(self.coro):
-            msg = f"Expected coroutine function, not {type(self.coro).__name__!r}."
-            raise TypeError(msg)
 
     async def _call_loop_function(self, name: str, *args: Any, **kwargs: Any) -> None:
         coro = getattr(self, "_" + name)
@@ -627,7 +627,7 @@ class Loop(Generic[LF]):
         ret: list[datetime.time] = []
         for index, t in enumerate(time):
             if not isinstance(t, dt):
-                msg = f"Expected a sequence of {dt!r} for ``time``, received {type(t).__name__!r} at index {index} instead."
+                msg = f"Expected a sequence of {dt!r} for ``time``, received {t.__class__.__name__!r} at index {index} instead."
                 raise TypeError(msg)
             ret.append(t if t.tzinfo is not None else t.replace(tzinfo=utc))
 

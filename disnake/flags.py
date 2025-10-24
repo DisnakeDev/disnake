@@ -1094,7 +1094,7 @@ class Intents(BaseFlags):
     def __init__(self, value: Optional[int] = None, **kwargs: bool) -> None:
         if value is not None:
             if not isinstance(value, int):
-                msg = f"Expected int, received {type(value).__name__} for argument 'value'."
+                msg = f"Expected int, received {value.__class__.__name__} for parameter 'value'."
                 raise TypeError(msg)
             if value < 0:
                 msg = "Expected a non-negative value."
