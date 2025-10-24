@@ -1627,7 +1627,7 @@ def handle_media_item_input(value: MediaItemInput) -> UnfurledMediaItem:
         return UnfurledMediaItem(value.url)
 
     assert_never(value)
-    msg = f"{type(value).__name__} cannot be converted to UnfurledMediaItem"
+    msg = f"{value.__class__.__name__} cannot be converted to UnfurledMediaItem"
     raise TypeError(msg)
 
 

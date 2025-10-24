@@ -342,7 +342,7 @@ class Embed:
         elif value is MISSING or value is None or isinstance(value, Colour):
             self._colour = value
         else:
-            msg = f"Expected disnake.Colour, int, or None but received {type(value).__name__} instead."
+            msg = f"Expected disnake.Colour, int or None, received {value.__class__.__name__} instead."
             raise TypeError(msg)
 
     @colour.deleter
@@ -364,7 +364,7 @@ class Embed:
         elif value is None:
             self._timestamp = value
         else:
-            msg = f"Expected datetime.datetime or None received {type(value).__name__} instead"
+            msg = f"Expected datetime.datetime or None, received {value.__class__.__name__} instead."
             raise TypeError(msg)
 
     @property
@@ -847,7 +847,7 @@ class Embed:
         elif isinstance(value, int):
             cls._default_colour = Colour(value=value)
         else:
-            msg = f"Expected disnake.Colour, int, or None but received {type(value).__name__} instead."
+            msg = f"Expected disnake.Colour, int or None, received {value.__class__.__name__} instead."
             raise TypeError(msg)
         return cls._default_colour
 

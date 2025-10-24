@@ -107,7 +107,7 @@ class Container(UIComponent):
         elif value is None or isinstance(value, Colour):
             self._accent_colour = value
         else:
-            msg = f"Expected Colour, int, or None but received {type(value).__name__} instead."
+            msg = f"Expected Colour, int or None, received {value.__class__.__name__} instead."
             raise TypeError(msg)
 
     accent_color = accent_colour
