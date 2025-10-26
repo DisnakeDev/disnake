@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import asyncio
 import time
-from typing import TYPE_CHECKING, Callable, Dict, Iterable, List, Literal, Optional, Sequence, Union
+from collections.abc import Iterable, Sequence
+from typing import TYPE_CHECKING, Callable, Literal, Optional, Union
 
 from .abc import GuildChannel, Messageable
 from .enums import ChannelType, ThreadArchiveDuration, try_enum, try_enum_to_int
@@ -85,9 +86,9 @@ class Thread(Messageable, Hashable):
         The thread ID.
     parent_id: :class:`int`
         The parent :class:`TextChannel`, :class:`ForumChannel`, or :class:`MediaChannel` ID this thread belongs to.
-    owner_id: Optional[:class:`int`]
+    owner_id: :class:`int` | :data:`None`
         The user's ID that created this thread.
-    last_message_id: Optional[:class:`int`]
+    last_message_id: :class:`int` | :data:`None`
         The last message ID of the message sent to this thread. It may
         *not* point to an existing or valid message.
     slowmode_delay: :class:`int`
@@ -95,15 +96,15 @@ class Thread(Messageable, Hashable):
         in this thread. A value of `0` denotes that it is disabled.
         Bots, and users with :attr:`~Permissions.manage_channels` or
         :attr:`~Permissions.manage_messages`, bypass slowmode.
-    message_count: Optional[:class:`int`]
+    message_count: :class:`int` | :data:`None`
         An approximate number of messages in this thread.
 
         .. note::
 
             If the thread was created before July 1, 2022, this could be inaccurate.
-    member_count: Optional[:class:`int`]
+    member_count: :class:`int` | :data:`None`
         An approximate number of members in this thread. This caps at 50.
-    total_message_sent: Optional[:class:`int`]
+    total_message_sent: :class:`int` | :data:`None`
         The total number of messages sent in the thread, including deleted messages.
 
         .. versionadded:: 2.6
@@ -111,7 +112,7 @@ class Thread(Messageable, Hashable):
         .. note::
 
             If the thread was created before July 1, 2022, this could be inaccurate.
-    me: Optional[:class:`ThreadMember`]
+    me: :class:`ThreadMember` | :data:`None`
         A thread member representing yourself, if you've joined the thread.
         This could not be available.
     archived: :class:`bool`
@@ -126,14 +127,14 @@ class Thread(Messageable, Hashable):
         Usually a value of 60, 1440, 4320 and 10080.
     archive_timestamp: :class:`datetime.datetime`
         An aware timestamp of when the thread's archived status was last updated in UTC.
-    create_timestamp: Optional[:class:`datetime.datetime`]
+    create_timestamp: :class:`datetime.datetime` | :data:`None`
         An aware timestamp of when the thread was created in UTC.
         This is only available for threads created after 2022-01-09.
 
         .. versionadded:: 2.4
 
-    last_pin_timestamp: Optional[:class:`datetime.datetime`]
-        The time the most recent message was pinned, or ``None`` if no message is currently pinned.
+    last_pin_timestamp: :class:`datetime.datetime` | :data:`None`
+        The time the most recent message was pinned, or :data:`None` if no message is currently pinned.
 
         .. versionadded:: 2.5
     """
@@ -167,7 +168,7 @@ class Thread(Messageable, Hashable):
     def __init__(self, *, guild: Guild, state: ConnectionState, data: ThreadPayload) -> None:
         self._state: ConnectionState = state
         self.guild: Guild = guild
-        self._members: Dict[int, ThreadMember] = {}
+        self._members: dict[int, ThreadMember] = {}
         self._from_data(data)
 
     async def _get_channel(self) -> Self:
@@ -188,7 +189,7 @@ class Thread(Messageable, Hashable):
         self.parent_id: int = int(data["parent_id"])
         self.owner_id: Optional[int] = _get_as_snowflake(data, "owner_id")
         self.name: str = data["name"]
-        self._type: ThreadType = try_enum(ChannelType, data["type"])  # type: ignore
+        self._type: ThreadType = try_enum(ChannelType, data["type"])  # pyright: ignore[reportAttributeAccessIssue]
         self.last_message_id: Optional[int] = _get_as_snowflake(data, "last_message_id")
         self.slowmode_delay: int = data.get("rate_limit_per_user", 0)
         self.message_count: int = data.get("message_count") or 0
@@ -198,7 +199,7 @@ class Thread(Messageable, Hashable):
             data.get("last_pin_timestamp")
         )
         self._flags: int = data.get("flags", 0)
-        self._applied_tags: List[int] = list(map(int, data.get("applied_tags", [])))
+        self._applied_tags: list[int] = list(map(int, data.get("applied_tags", [])))
         self._unroll_metadata(data["thread_metadata"])
 
         if "member" in data:
@@ -242,14 +243,14 @@ class Thread(Messageable, Hashable):
 
     @property
     def parent(self) -> Optional[Union[TextChannel, ForumChannel, MediaChannel]]:
-        """Optional[Union[:class:`TextChannel`, :class:`ForumChannel`, :class:`MediaChannel`]]: The parent channel this thread belongs to."""
+        """:class:`TextChannel` | :class:`ForumChannel` | :class:`MediaChannel` | :data:`None`: The parent channel this thread belongs to."""
         if isinstance(self.guild, Object):
             return None
-        return self.guild.get_channel(self.parent_id)  # type: ignore
+        return self.guild.get_channel(self.parent_id)  # pyright: ignore[reportReturnType]
 
     @property
     def owner(self) -> Optional[Member]:
-        """Optional[:class:`Member`]: The member this thread belongs to."""
+        """:class:`Member` | :data:`None`: The member this thread belongs to."""
         if self.owner_id is None or isinstance(self.guild, Object):
             return None
         return self.guild.get_member(self.owner_id)
@@ -260,8 +261,8 @@ class Thread(Messageable, Hashable):
         return f"<#{self.id}>"
 
     @property
-    def members(self) -> List[ThreadMember]:
-        """List[:class:`ThreadMember`]: A list of thread members in this thread.
+    def members(self) -> list[ThreadMember]:
+        """:class:`list`\\[:class:`ThreadMember`]: A list of thread members in this thread.
 
         This requires :attr:`Intents.members` to be properly filled. Most of the time however,
         this data is not provided by the gateway and a call to :meth:`fetch_members` is
@@ -285,8 +286,8 @@ class Thread(Messageable, Hashable):
 
         Returns
         -------
-        Optional[:class:`Message`]
-            The last message in this channel or ``None`` if not found.
+        :class:`Message` | :data:`None`
+            The last message in this channel or :data:`None` if not found.
         """
         return self._state._get_message(self.last_message_id) if self.last_message_id else None
 
@@ -297,11 +298,11 @@ class Thread(Messageable, Hashable):
         Raises
         ------
         ClientException
-            The parent channel was not cached and returned ``None``.
+            The parent channel was not cached and returned :data:`None`.
 
         Returns
         -------
-        Optional[:class:`CategoryChannel`]
+        :class:`CategoryChannel` | :data:`None`
             The parent channel's category.
         """
         parent = self.parent
@@ -317,11 +318,11 @@ class Thread(Messageable, Hashable):
         Raises
         ------
         ClientException
-            The parent channel was not cached and returned ``None``.
+            The parent channel was not cached and returned :data:`None`.
 
         Returns
         -------
-        Optional[:class:`int`]
+        :class:`int` | :data:`None`
             The parent channel's category ID.
         """
         parent = self.parent
@@ -400,8 +401,8 @@ class Thread(Messageable, Hashable):
         return self.flags.pinned
 
     @property
-    def applied_tags(self) -> List[ForumTag]:
-        """List[:class:`ForumTag`]: The tags currently applied to this thread.
+    def applied_tags(self) -> list[ForumTag]:
+        """:class:`list`\\[:class:`ForumTag`]: The tags currently applied to this thread.
         Only applicable to threads in channels of type :class:`ForumChannel` or :class:`MediaChannel`.
 
         .. versionadded:: 2.6
@@ -445,7 +446,7 @@ class Thread(Messageable, Hashable):
 
         Parameters
         ----------
-        obj: Union[:class:`~disnake.Member`, :class:`~disnake.Role`]
+        obj: :class:`~disnake.Member` | :class:`~disnake.Role`
             The object to resolve permissions for. This could be either
             a member or a role. If it's a role then member overwrites
             are not computed.
@@ -466,7 +467,7 @@ class Thread(Messageable, Hashable):
         Raises
         ------
         ClientException
-            The parent channel was not cached and returned ``None``
+            The parent channel was not cached and returned :data:`None`
 
         Returns
         -------
@@ -517,7 +518,7 @@ class Thread(Messageable, Hashable):
 
         Parameters
         ----------
-        messages: Iterable[:class:`abc.Snowflake`]
+        messages: :class:`~collections.abc.Iterable`\\[:class:`abc.Snowflake`]
             An iterable of messages denoting which ones to bulk delete.
 
         Raises
@@ -560,7 +561,7 @@ class Thread(Messageable, Hashable):
         around: Optional[SnowflakeTime] = None,
         oldest_first: Optional[bool] = False,
         bulk: bool = True,
-    ) -> List[Message]:
+    ) -> list[Message]:
         """|coro|
 
         Purges a list of messages that meet the criteria given by the predicate
@@ -584,19 +585,19 @@ class Thread(Messageable, Hashable):
 
         Parameters
         ----------
-        limit: Optional[:class:`int`]
+        limit: :class:`int` | :data:`None`
             The number of messages to search through. This is not the number
             of messages that will be deleted, though it can be.
-        check: Callable[[:class:`Message`], :class:`bool`]
+        check: :class:`~collections.abc.Callable`\\[[:class:`Message`], :class:`bool`]
             The function used to check if a message should be deleted.
             It must take a :class:`Message` as its sole parameter.
-        before: Optional[Union[:class:`abc.Snowflake`, :class:`datetime.datetime`]]
+        before: :class:`abc.Snowflake` | :class:`datetime.datetime` | :data:`None`
             Same as ``before`` in :meth:`history`.
-        after: Optional[Union[:class:`abc.Snowflake`, :class:`datetime.datetime`]]
+        after: :class:`abc.Snowflake` | :class:`datetime.datetime` | :data:`None`
             Same as ``after`` in :meth:`history`.
-        around: Optional[Union[:class:`abc.Snowflake`, :class:`datetime.datetime`]]
+        around: :class:`abc.Snowflake` | :class:`datetime.datetime` | :data:`None`
             Same as ``around`` in :meth:`history`.
-        oldest_first: Optional[:class:`bool`]
+        oldest_first: :class:`bool` | :data:`None`
             Same as ``oldest_first`` in :meth:`history`.
         bulk: :class:`bool`
             If ``True``, use bulk delete. Setting this to ``False`` is useful for mass-deleting
@@ -612,7 +613,7 @@ class Thread(Messageable, Hashable):
 
         Returns
         -------
-        List[:class:`.Message`]
+        :class:`list`\\[:class:`.Message`]
             The list of messages that were deleted.
         """
         if check is MISSING:
@@ -621,7 +622,7 @@ class Thread(Messageable, Hashable):
         iterator = self.history(
             limit=limit, before=before, after=after, oldest_first=oldest_first, around=around
         )
-        ret: List[Message] = []
+        ret: list[Message] = []
         count = 0
 
         minimum_time = int((time.time() - 14 * 24 * 60 * 60) * 1000.0 - 1420070400000) << 22
@@ -703,7 +704,7 @@ class Thread(Messageable, Hashable):
         invitable: :class:`bool`
             Whether non-moderators can add other non-moderators to this thread.
             Only available for private threads.
-        auto_archive_duration: Union[:class:`int`, :class:`ThreadArchiveDuration`]
+        auto_archive_duration: :class:`int` | :class:`ThreadArchiveDuration`
             The new duration in minutes before a thread is automatically archived for inactivity.
             Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
         slowmode_delay: :class:`int`
@@ -720,7 +721,7 @@ class Thread(Messageable, Hashable):
 
             .. versionadded:: 2.6
 
-        applied_tags: Sequence[:class:`abc.Snowflake`]
+        applied_tags: :class:`~collections.abc.Sequence`\\[:class:`abc.Snowflake`]
             The new tags of the thread. Maximum of 5.
             Can also be used to reorder existing tags.
 
@@ -733,7 +734,7 @@ class Thread(Messageable, Hashable):
 
             .. versionadded:: 2.6
 
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason for editing this thread. Shows up on the audit log.
 
             .. versionadded:: 2.5
@@ -780,7 +781,7 @@ class Thread(Messageable, Hashable):
 
         data = await self._state.http.edit_channel(self.id, **payload, reason=reason)
         # The data payload will always be a Thread payload
-        return Thread(data=data, state=self._state, guild=self.guild)  # type: ignore
+        return Thread(data=data, state=self._state, guild=self.guild)  # pyright: ignore[reportArgumentType]
 
     async def join(self) -> None:
         """|coro|
@@ -881,7 +882,7 @@ class Thread(Messageable, Hashable):
         member_data = await self._state.http.get_thread_member(self.id, member_id)
         return ThreadMember(parent=self, data=member_data)
 
-    async def fetch_members(self) -> List[ThreadMember]:
+    async def fetch_members(self) -> list[ThreadMember]:
         """|coro|
 
         Retrieves all :class:`ThreadMember` that are in this thread.
@@ -896,7 +897,7 @@ class Thread(Messageable, Hashable):
 
         Returns
         -------
-        List[:class:`ThreadMember`]
+        :class:`list`\\[:class:`ThreadMember`]
             All thread members in the thread.
         """
         members = await self._state.http.get_thread_members(self.id)
@@ -913,7 +914,7 @@ class Thread(Messageable, Hashable):
 
         Parameters
         ----------
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason for deleting this thread. Shows up on the audit log.
 
             .. versionadded:: 2.5
@@ -945,7 +946,7 @@ class Thread(Messageable, Hashable):
         *tags: :class:`abc.Snowflake`
             An argument list of :class:`abc.Snowflake` representing the :class:`ForumTag`\\s
             to add to the thread.
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason for editing this thread. Shows up on the audit log.
 
         Raises
@@ -958,7 +959,7 @@ class Thread(Messageable, Hashable):
         if not tags:
             return
 
-        new_tags: List[int] = self._applied_tags.copy()
+        new_tags: list[int] = self._applied_tags.copy()
         new_tags.extend(t.id for t in tags)
         new_tags = _unique(new_tags)
 
@@ -982,7 +983,7 @@ class Thread(Messageable, Hashable):
         *tags: :class:`abc.Snowflake`
             An argument list of :class:`abc.Snowflake` representing the :class:`ForumTag`\\s
             to remove from the thread.
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason for editing this thread. Shows up on the audit log.
 
         Raises
@@ -996,7 +997,7 @@ class Thread(Messageable, Hashable):
             return
 
         to_remove = {t.id for t in tags}
-        new_tags: List[int] = [tag_id for tag_id in self._applied_tags if tag_id not in to_remove]
+        new_tags: list[int] = [tag_id for tag_id in self._applied_tags if tag_id not in to_remove]
 
         await self._state.http.edit_channel(self.id, applied_tags=new_tags, reason=reason)
 
@@ -1160,7 +1161,7 @@ class ForumTag(Hashable):
     moderated: :class:`bool`
         Whether only moderators can add this tag to threads or remove it.
         Defaults to ``False``.
-    emoji: Optional[Union[:class:`Emoji`, :class:`PartialEmoji`]]
+    emoji: :class:`Emoji` | :class:`PartialEmoji` | :data:`None`
         The emoji associated with this tag, if any.
         Due to a Discord limitation, this will have an empty
         :attr:`~PartialEmoji.name` if it is a custom :class:`PartialEmoji`.

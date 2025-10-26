@@ -20,7 +20,7 @@ class File:
 
     Attributes
     ----------
-    fp: Union[:class:`os.PathLike`, :class:`io.BufferedIOBase`]
+    fp: :class:`os.PathLike` | :class:`io.BufferedIOBase`
         A file-like object opened in binary mode and read mode
         or a filename representing a file in the hard drive to
         open.
@@ -32,13 +32,13 @@ class File:
 
             To pass binary data, consider usage of ``io.BytesIO``.
 
-    filename: Optional[:class:`str`]
+    filename: :class:`str` | :data:`None`
         The filename to display when uploading to Discord.
         If this is not given then it defaults to ``fp.name`` or if ``fp`` is
         a string then the ``filename`` will default to the string given.
     spoiler: :class:`bool`
         Whether the attachment is a spoiler.
-    description: Optional[:class:`str`]
+    description: :class:`str` | :data:`None`
         The file's description.
 
         .. versionadded:: 2.3
@@ -68,7 +68,7 @@ class File:
             self._original_pos = fp.tell()
             self._owner = False
         else:
-            self.fp = open(fp, "rb")
+            self.fp = open(fp, "rb")  # noqa: SIM115
             self._original_pos = 0
             self._owner = True
 

@@ -2,18 +2,15 @@
 from __future__ import annotations
 
 import types
+from collections.abc import Iterator
 from functools import total_ordering
 from typing import (
     TYPE_CHECKING,
     Any,
     ClassVar,
-    Dict,
-    Iterator,
-    List,
     NamedTuple,
     NoReturn,
     Optional,
-    Type,
     TypeVar,
 )
 
@@ -82,12 +79,13 @@ __all__ = (
     "NameplatePalette",
 )
 
-EnumMetaT = TypeVar("EnumMetaT", bound="Type[EnumMeta]")
+EnumMetaT = TypeVar("EnumMetaT", bound="EnumMeta")
 
 
 class _EnumValueBase(NamedTuple):
     if TYPE_CHECKING:
-        _cls_name: ClassVar[str]  # type: ignore
+        _cls_name: ClassVar[str]  # pyright: ignore[reportGeneralTypeIssues, reportInvalidTypeForm]
+        _actual_enum_cls_: ClassVar[EnumMeta]  # pyright: ignore[reportGeneralTypeIssues, reportInvalidTypeForm]
 
     name: str
     value: Any
@@ -108,9 +106,9 @@ class _EnumValueComparable(_EnumValueBase):
         return isinstance(other, self.__class__) and self.value < other.value
 
 
-def _create_value_cls(name: str, comparable: bool) -> Type[_EnumValueBase]:
+def _create_value_cls(name: str, comparable: bool) -> type[_EnumValueBase]:
     parent = _EnumValueComparable if comparable else _EnumValueBase
-    return type(f"{parent.__name__}_{name}", (parent,), {"_cls_name": name})  # type: ignore
+    return type(f"{parent.__name__}_{name}", (parent,), {"_cls_name": name})  # pyright: ignore[reportReturnType]
 
 
 def _is_descriptor(obj) -> bool:
@@ -120,12 +118,19 @@ def _is_descriptor(obj) -> bool:
 class EnumMeta(type):
     if TYPE_CHECKING:
         __name__: ClassVar[str]
-        _enum_member_names_: ClassVar[List[str]]
-        _enum_member_map_: ClassVar[Dict[str, Any]]
-        _enum_value_map_: ClassVar[Dict[Any, Any]]
-        _enum_value_cls_: ClassVar[Type[_EnumValueBase]]
+        _enum_member_names_: ClassVar[list[str]]
+        _enum_member_map_: ClassVar[dict[str, Any]]
+        _enum_value_map_: ClassVar[dict[Any, Any]]
+        _enum_value_cls_: ClassVar[type[_EnumValueBase]]
 
-    def __new__(cls: EnumMetaT, name: str, bases, attrs, *, comparable: bool = False) -> EnumMetaT:
+    def __new__(
+        cls: type[EnumMetaT],
+        name: str,
+        bases: tuple[type, ...],
+        attrs: dict[str, Any],
+        *,
+        comparable: bool = False,
+    ) -> EnumMetaT:
         value_mapping = {}
         member_mapping = {}
         member_names = []
@@ -159,8 +164,7 @@ class EnumMeta(type):
         attrs["_enum_member_map_"] = member_mapping
         attrs["_enum_member_names_"] = member_names
         attrs["_enum_value_cls_"] = value_cls
-        actual_cls = super().__new__(cls, name, bases, attrs)
-        value_cls._actual_enum_cls_ = actual_cls  # type: ignore
+        value_cls._actual_enum_cls_ = actual_cls = super().__new__(cls, name, bases, attrs)
         return actual_cls
 
     def __iter__(cls) -> Iterator[EnumMetaT]:
@@ -193,15 +197,15 @@ class EnumMeta(type):
         msg = "Enums are immutable."
         raise TypeError(msg)
 
-    def __delattr__(cls, attr) -> NoReturn:
-        msg = "Enums are immutable"
+    def __delattr__(cls, attr: str) -> NoReturn:
+        msg = "Enums are immutable."
         raise TypeError(msg)
 
-    def __instancecheck__(self, instance) -> bool:
+    def __instancecheck__(self, instance: object) -> bool:
         # isinstance(x, Y)
         # -> __instancecheck__(Y, x)
         try:
-            return instance._actual_enum_cls_ is self
+            return instance._actual_enum_cls_ is self  # pyright: ignore[reportAttributeAccessIssue]
         except AttributeError:
             return False
 
@@ -623,7 +627,7 @@ class StatusDisplayType(Enum):
     .. versionadded:: 2.11
     """
 
-    name = 0  # type: ignore[reportAssignmentType]
+    name = 0  # pyright: ignore[reportAssignmentType]
     """The name of the activity is displayed, e.g: ``Listening to Spotify``."""
     state = 1
     """The state of the activity is displayed, e.g: ``Listening to Rick Astley``."""
@@ -777,7 +781,7 @@ class AuditLogAction(Enum):
     @property
     def category(self) -> Optional[AuditLogActionCategory]:
         # fmt: off
-        lookup: Dict[AuditLogAction, Optional[AuditLogActionCategory]] = {
+        lookup: dict[AuditLogAction, Optional[AuditLogActionCategory]] = {
             AuditLogAction.guild_update:                          AuditLogActionCategory.update,
             AuditLogAction.channel_create:                        AuditLogActionCategory.create,
             AuditLogAction.channel_update:                        AuditLogActionCategory.update,
@@ -1076,7 +1080,7 @@ class StickerFormatType(Enum):
         return STICKER_FORMAT_LOOKUP[self]
 
 
-STICKER_FORMAT_LOOKUP: Dict[StickerFormatType, str] = {
+STICKER_FORMAT_LOOKUP: dict[StickerFormatType, str] = {
     StickerFormatType.png: "png",
     StickerFormatType.apng: "png",
     StickerFormatType.lottie: "json",
@@ -1280,6 +1284,11 @@ class ComponentType(Enum):
     """Represents a label component.
 
     .. versionadded:: 2.11
+    """
+    file_upload = 19
+    """Represents a file upload component.
+
+    .. versionadded:: |vnext|
     """
 
     def __int__(self) -> int:
@@ -2449,27 +2458,27 @@ class NameplatePalette(Enum):
     """White color palette."""
 
 
-T = TypeVar("T")
+T = TypeVar("T", bound="Enum")
 
 
-def create_unknown_value(cls: Type[T], val: Any) -> T:
-    value_cls = cls._enum_value_cls_  # type: ignore
+def create_unknown_value(cls: type[T], val: Any) -> T:
+    value_cls = cls._enum_value_cls_  # pyright: ignore[reportAttributeAccessIssue]
     name = f"unknown_{val}"
     return value_cls(name=name, value=val)
 
 
-def try_enum(cls: Type[T], val: Any) -> T:
+def try_enum(cls: type[T], val: Any) -> T:
     """A function that tries to turn the value into enum ``cls``.
 
     If it fails it returns a proxy invalid value instead.
     """
     try:
-        return cls._enum_value_map_[val]  # type: ignore
+        return cls._enum_value_map_[val]  # pyright: ignore[reportAttributeAccessIssue]
     except (KeyError, TypeError, AttributeError):
         return create_unknown_value(cls, val)
 
 
-def enum_if_int(cls: Type[T], val: Any) -> T:
+def enum_if_int(cls: type[T], val: Any) -> T:
     """A function that tries to turn the value into enum ``cls``.
 
     If it fails it returns a proxy invalid value instead.

@@ -4,7 +4,8 @@ import datetime
 import functools
 import inspect
 import types
-from typing import TYPE_CHECKING, Callable, ContextManager, Optional, Type, TypeVar
+from contextlib import AbstractContextManager
+from typing import TYPE_CHECKING, Callable, Optional, TypeVar
 from unittest import mock
 
 if TYPE_CHECKING:
@@ -20,15 +21,15 @@ if TYPE_CHECKING:
     # NOTE: using undocumented `expected_text` parameter of pyright instead of `assert_type`,
     # as `assert_type` can't handle bound ParamSpecs
     reveal_type(
-        42,  # type: ignore  # suppress "revealed type is ..." output
-        expected_text="str",  # type: ignore  # ensure the functionality we want still works as expected
+        42,  # pyright: ignore  # noqa: PGH003  # suppress "revealed type is ..." output
+        expected_text="str",  # pyright: ignore[reportGeneralTypeIssues]  # ensure the functionality we want still works as expected
     )
 
 
 CallableT = TypeVar("CallableT", bound=Callable)
 
 
-class freeze_time(ContextManager):
+class freeze_time(AbstractContextManager):
     """Helper class that freezes time at the given datetime by patching `datetime.now`.
     If no datetime is provided, defaults to the current time.
     Can be used as a sync context manager or decorator for sync/async functions.
@@ -53,7 +54,7 @@ class freeze_time(ContextManager):
 
     def __exit__(
         self,
-        typ: Optional[Type[BaseException]],
+        typ: Optional[type[BaseException]],
         value: Optional[BaseException],
         tb: Optional[types.TracebackType],
     ) -> Optional[bool]:
@@ -67,13 +68,11 @@ class freeze_time(ContextManager):
                 with self:
                     return await func(*args, **kwargs)
 
-            return wrap_async  # type: ignore
+            return wrap_async  # pyright: ignore[reportReturnType]
 
-        else:
+        @functools.wraps(func)
+        def wrap_sync(*args, **kwargs):
+            with self:
+                return func(*args, **kwargs)
 
-            @functools.wraps(func)
-            def wrap_sync(*args, **kwargs):
-                with self:
-                    return func(*args, **kwargs)
-
-            return wrap_sync  # type: ignore
+        return wrap_sync  # pyright: ignore[reportReturnType]

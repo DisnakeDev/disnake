@@ -14,6 +14,7 @@ from .action_row import *
 from .button import *
 from .container import *
 from .file import *
+from .file_upload import *
 from .item import *
 from .label import *
 from .media_gallery import *
