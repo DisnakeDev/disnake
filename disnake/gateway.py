@@ -1269,7 +1269,7 @@ class DaveState:
         if user_id != self._self_id:
             return  # decryption is not implemented, ignore
 
-        if version != dave.kDisabledVersion:
+        if version != dave.k_disabled_version:
             ratchet = self._session.get_key_ratchet(str(user_id))
         else:
             ratchet = None
@@ -1290,7 +1290,7 @@ class DaveState:
 
         _log.debug("re-initializing with DAVE version %d", version)
 
-        if version > dave.kDisabledVersion:
+        if version > dave.k_disabled_version:
             await self.prepare_epoch(self.NEW_MLS_GROUP_EPOCH, version)
             # TODO: consider race conditions if encryptor is set up too late here
             self._encryptor = dave.Encryptor()
@@ -1299,7 +1299,7 @@ class DaveState:
             _log.debug("created new encryptor")
         else:
             # `INIT_TRANSITION_ID` is executed immediately, no need to `.execute_transition()` here
-            await self.prepare_transition(self.INIT_TRANSITION_ID, dave.kDisabledVersion)
+            await self.prepare_transition(self.INIT_TRANSITION_ID, dave.k_disabled_version)
 
     def add_recognized_user(self, user_id: int) -> None:
         if user_id == self._self_id:
@@ -1409,7 +1409,7 @@ class DaveState:
         _log.debug("executing transition ID %d to version %d", transition_id, version)
 
         # https://daveprotocol.com/#downgrade-to-transport-only-encryption
-        if version == dave.kDisabledVersion:
+        if version == dave.k_disabled_version:
             self._session.reset()
 
         self._setup_ratchet_for_user(self._self_id, version)
