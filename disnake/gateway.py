@@ -22,7 +22,6 @@ from typing import (
     NamedTuple,
     Optional,
     Protocol,
-    Set,
     TypeVar,
     Union,
 )
@@ -1245,8 +1244,8 @@ class DaveState:
             self.MAX_SUPPORTED_VERSION, dave.get_max_supported_protocol_version()
         )
 
-        self._prepared_transitions: Dict[int, int] = {}
-        self._recognized_users: Set[int] = set()
+        self._prepared_transitions: dict[int, int] = {}
+        self._recognized_users: set[int] = set()
 
         self.ws: DiscordVoiceWebSocket = ws
         self._session: dave.Session = dave.Session(
