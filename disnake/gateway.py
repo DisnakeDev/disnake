@@ -958,8 +958,6 @@ class DiscordVoiceWebSocket:
 
         self._close_code: int | None = None
         self.thread_id: int = threading.get_ident()
-        # FIXME: this isn't preserved across resumes
-        self.dave: DaveState = DaveState(self)
         if hook:
             self._hook = hook
 
@@ -1006,7 +1004,7 @@ class DiscordVoiceWebSocket:
                 "user_id": str(state.user.id),
                 "session_id": state.session_id,
                 "token": state.token,
-                "max_dave_protocol_version": self.dave.max_version,
+                "max_dave_protocol_version": self._connection.dave.max_version,
             },
         }
         await self.send_as_json(payload)
@@ -1108,7 +1106,7 @@ class DiscordVoiceWebSocket:
             self._connection.mode = data["mode"]
             await self.load_secret_key(data)
             if (dave_version := data.get("dave_protocol_version")) is not None:
-                await self.dave.reinit_state(dave_version)
+                await self._connection.dave.reinit_state(dave_version)
             self._ready.set()
         elif op == self.HELLO:
             interval: float = data["heartbeat_interval"] / 1000.0
@@ -1116,15 +1114,17 @@ class DiscordVoiceWebSocket:
             self._keep_alive.start()
         elif op == self.CLIENTS_CONNECT:
             for user_id in map(int, data["user_ids"]):
-                self.dave.add_recognized_user(user_id)
+                self._connection.dave.add_recognized_user(user_id)
         elif op == self.CLIENT_DISCONNECT:
-            self.dave.remove_recognized_user(int(data["user_id"]))
+            self._connection.dave.remove_recognized_user(int(data["user_id"]))
         elif op == self.DAVE_PREPARE_TRANSITION:
-            await self.dave.prepare_transition(data["transition_id"], data["protocol_version"])
+            await self._connection.dave.prepare_transition(
+                data["transition_id"], data["protocol_version"]
+            )
         elif op == self.DAVE_EXECUTE_TRANSITION:
-            self.dave.execute_transition(data["transition_id"])
+            self._connection.dave.execute_transition(data["transition_id"])
         elif op == self.DAVE_MLS_PREPARE_EPOCH:
-            await self.dave.prepare_epoch(data["epoch"], data["protocol_version"])
+            await self._connection.dave.prepare_epoch(data["epoch"], data["protocol_version"])
 
         await self._hook(self, msg)
 
@@ -1137,15 +1137,17 @@ class DiscordVoiceWebSocket:
         op = msg[2]
         # TODO: consider memoryviews
         if op == self.DAVE_MLS_EXTERNAL_SENDER:
-            self.dave.handle_mls_external_sender(msg[3:])
+            self._connection.dave.handle_mls_external_sender(msg[3:])
         elif op == self.DAVE_MLS_PROPOSALS:
-            await self.dave.handle_mls_proposals(msg[3:])
+            await self._connection.dave.handle_mls_proposals(msg[3:])
         elif op == self.DAVE_MLS_ANNOUNCE_COMMIT_TRANSITION:
             transition_id = int.from_bytes(msg[3:5], "big", signed=False)
-            await self.dave.handle_mls_announce_commit_transition(transition_id, msg[5:])
+            await self._connection.dave.handle_mls_announce_commit_transition(
+                transition_id, msg[5:]
+            )
         elif op == self.DAVE_MLS_WELCOME:
             transition_id = int.from_bytes(msg[3:5], "big", signed=False)
-            await self.dave.handle_mls_welcome(transition_id, msg[5:])
+            await self._connection.dave.handle_mls_welcome(transition_id, msg[5:])
 
     async def initial_connection(self, data: VoiceReadyPayload) -> None:
         state = self._connection
@@ -1238,7 +1240,7 @@ class DaveState:
     NEW_MLS_GROUP_EPOCH: Final[Literal[1]] = 1
     INIT_TRANSITION_ID: Final[Literal[0]] = 0
 
-    def __init__(self, ws: DiscordVoiceWebSocket) -> None:
+    def __init__(self, vc: VoiceClient) -> None:
         self.max_version: Final[int] = min(
             self.MAX_SUPPORTED_VERSION, dave.get_max_supported_protocol_version()
         )
@@ -1246,7 +1248,7 @@ class DaveState:
         self._prepared_transitions: dict[int, int] = {}
         self._recognized_users: set[int] = set()
 
-        self.ws: DiscordVoiceWebSocket = ws
+        self.vc: VoiceClient = vc
         self._session: dave.Session = dave.Session(
             "",  # `context`, unused without persistent keys
             "",  # auth_session_id, same thing
@@ -1256,7 +1258,7 @@ class DaveState:
 
     @property
     def _self_id(self) -> int:
-        return self.ws._connection.user.id
+        return self.vc.user.id
 
     def _get_recognized_users(self, *, with_self: bool) -> AbstractSet[int]:
         if with_self:
@@ -1293,7 +1295,7 @@ class DaveState:
             # TODO: consider race conditions if encryptor is set up too late here
             self._encryptor = dave.Encryptor()
             # FIXME: move this somewhere else(?)
-            self._encryptor.assign_ssrc_to_codec(self.ws._connection.ssrc, dave.Codec.opus)
+            self._encryptor.assign_ssrc_to_codec(self.vc.ssrc, dave.Codec.opus)
             _log.debug("created new encryptor")
         else:
             # `INIT_TRANSITION_ID` is executed immediately, no need to `.execute_transition()` here
@@ -1319,7 +1321,7 @@ class DaveState:
         )
         if commit_welcome is not None:
             _log.debug("sending commit + welcome message")
-            await self.ws.send_dave_mls_commit_welcome(commit_welcome)
+            await self.vc.ws.send_dave_mls_commit_welcome(commit_welcome)
 
     async def handle_mls_announce_commit_transition(self, transition_id: int, data: bytes) -> None:
         _log.debug("group participants are changing with transition ID %d", transition_id)
@@ -1332,7 +1334,7 @@ class DaveState:
             # "If the client receives a welcome or commit they cannot process, they send the dave_mls_invalid_commit_welcome opcode (31) to the voice gateway to flag the invalid message."
             # "The client receiving the invalid commit or welcome locally resets their MLS state and generates a new key package to be delivered to the voice gateway via dave_mls_key_package opcode (26)."
             _log.error("failed to process commit")
-            await self.ws.send_dave_mls_invalid_commit_welcome(transition_id)
+            await self.vc.ws.send_dave_mls_invalid_commit_welcome(transition_id)
             await self.reinit_state(self._session.get_protocol_version())
         else:
             # joined group
@@ -1349,7 +1351,7 @@ class DaveState:
 
         if roster is None:
             _log.error("failed to process welcome")
-            await self.ws.send_dave_mls_invalid_commit_welcome(transition_id)
+            await self.vc.ws.send_dave_mls_invalid_commit_welcome(transition_id)
             await self.reinit_state(self._session.get_protocol_version())
         else:
             # joined group
@@ -1364,11 +1366,11 @@ class DaveState:
             _log.info(
                 "re-initializing MLS session with version %d, group ID %d",
                 version,
-                self.ws._connection.channel.id,
+                self.vc.channel.id,
             )
             self._session.init(
                 version,
-                self.ws._connection.channel.id,
+                self.vc.channel.id,
                 str(self._self_id),
                 # XXX: retain key between resets?
                 None,
@@ -1378,7 +1380,7 @@ class DaveState:
             #  - The voice gateway sends a select_protocol_ack opcode (4) that includes a non-zero protocol version [in which case we call `prepare_epoch(1)`]
             #  - The voice gateway announces that a group is being created or re-created via the dave_protocol_prepare_epoch opcode (24) with epoch_id = 1"
             key_package = self._session.get_marshalled_key_package()
-            await self.ws.send_dave_mls_key_package(key_package)
+            await self.vc.ws.send_dave_mls_key_package(key_package)
 
             _log.debug("finished re-initializing MLS session")
 
@@ -1395,7 +1397,7 @@ class DaveState:
             self.execute_transition(transition_id)
         else:
             _log.debug("sending ready for transition ID %d", transition_id)
-            await self.ws.send_dave_transition_ready(transition_id)
+            await self.vc.ws.send_dave_transition_ready(transition_id)
 
     def execute_transition(self, transition_id: int) -> None:
         if (version := self._prepared_transitions.pop(transition_id, None)) is None:

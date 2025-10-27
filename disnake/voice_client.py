@@ -29,7 +29,7 @@ import dave
 from . import opus, utils
 from .backoff import ExponentialBackoff
 from .errors import ClientException, ConnectionClosed
-from .gateway import DiscordVoiceWebSocket
+from .gateway import DaveState, DiscordVoiceWebSocket
 from .player import AudioPlayer, AudioSource
 from .utils import MISSING
 
@@ -231,6 +231,8 @@ class VoiceClient(VoiceProtocol):
         self.encoder: Encoder = MISSING
         self._lite_nonce: int = 0
         self.ws: DiscordVoiceWebSocket = MISSING
+        # TODO: consider not initializing until actually needed?
+        self.dave: DaveState = DaveState(self)
 
     warn_nacl = not has_nacl
     supported_modes: tuple[SupportedModes, ...] = ("aead_xchacha20_poly1305_rtpsize",)
@@ -529,7 +531,7 @@ class VoiceClient(VoiceProtocol):
 
     def _get_voice_packet(self, data: bytes) -> bytes:
         # TODO: very temporary test setup
-        if self.ws and (encryptor := self.ws.dave._encryptor) and encryptor.has_key_ratchet():
+        if self.ws and (encryptor := self.dave._encryptor) and encryptor.has_key_ratchet():
             e2ee_data = encryptor.encrypt(dave.MediaType.audio, self.ssrc, data)
             if e2ee_data is not None:
                 data = e2ee_data
