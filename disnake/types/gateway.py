@@ -219,7 +219,7 @@ VoiceResumedPayload = None
 
 
 class VoiceClientsConnectPayload(TypedDict):
-    user_ids: List[Snowflake]
+    user_ids: list[Snowflake]
 
 
 # voice opcode 13
