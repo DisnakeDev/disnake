@@ -330,16 +330,15 @@ class VoiceClient(VoiceProtocol):
         self._voice_server_complete.clear()
         self._voice_state_complete.clear()
 
-    async def connect_websocket(self, *, resume: bool = False) -> DiscordVoiceWebSocket:
+    async def connect_websocket(self, *, resume: bool = False) -> None:
         seq = self.ws.sequence if resume and self.ws is not MISSING else None
-        ws = await DiscordVoiceWebSocket.from_client(self, sequence=seq, resume=resume)
+        self.ws = ws = await DiscordVoiceWebSocket.from_client(self, sequence=seq, resume=resume)
 
         self._connected.clear()
         event = ws._resumed if resume else ws._ready
         while not event.is_set():
             await ws.poll_event()
         self._connected.set()
-        return ws
 
     async def connect(self, *, reconnect: bool, timeout: float) -> None:
         _log.info("Connecting to voice...")
@@ -366,7 +365,7 @@ class VoiceClient(VoiceProtocol):
             self.finish_handshake()
 
             try:
-                self.ws = await self.connect_websocket()
+                await self.connect_websocket()
                 break
             except (ConnectionClosed, asyncio.TimeoutError):
                 if reconnect:
@@ -395,7 +394,7 @@ class VoiceClient(VoiceProtocol):
         self.finish_handshake()
         self._potentially_reconnecting = False
         try:
-            self.ws = await self.connect_websocket()
+            await self.connect_websocket()
         except (ConnectionClosed, asyncio.TimeoutError):
             return False
         else:
@@ -456,7 +455,7 @@ class VoiceClient(VoiceProtocol):
                         _log.info("Disconnected from voice, trying to resume session...")
                         self._connected.clear()
                         try:
-                            self.ws = await self.connect_websocket(resume=True)
+                            await self.connect_websocket(resume=True)
                         except (ConnectionClosed, asyncio.TimeoutError) as e:
                             # .connect() re-raises errors, fall back to reconnecting (or disconnecting) below as usual
                             if isinstance(e, ConnectionClosed):
