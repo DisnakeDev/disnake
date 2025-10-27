@@ -1309,6 +1309,13 @@ class DaveState:
     def remove_recognized_user(self, user_id: int) -> None:
         self._recognized_users.discard(user_id)
 
+    # TODO: should be publicly accessible/documented on VoiceClient
+    # FIXME: don't print and raise error if called before MLS group is established
+    @property
+    def voice_privacy_code(self) -> str:
+        authenticator = self._session.get_last_epoch_authenticator()
+        return dave.generate_displayable_code(authenticator, 30, 5)
+
     def handle_mls_external_sender(self, data: bytes) -> None:
         _log.debug("received MLS external sender")
         self._session.set_external_sender(data)
