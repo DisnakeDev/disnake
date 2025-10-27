@@ -1316,6 +1316,12 @@ class DaveState:
         authenticator = self._session.get_last_epoch_authenticator()
         return dave.generate_displayable_code(authenticator, 30, 5)
 
+    # TODO: see voice_privacy_code
+    async def get_user_verification_code(self, user_id: int) -> str:
+        # version is currently always 0
+        d = await self._session.get_pairwise_fingerprint(0, str(user_id))
+        return dave.generate_displayable_code(d, 45, 5)
+
     def handle_mls_external_sender(self, data: bytes) -> None:
         _log.debug("received MLS external sender")
         self._session.set_external_sender(data)
