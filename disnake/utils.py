@@ -1394,7 +1394,7 @@ TimestampStyle = Literal["t", "T", "d", "D", "f", "F", "s", "S", "R"]
 
 
 def format_dt(dt: Union[datetime.datetime, float], /, style: TimestampStyle = "f") -> str:
-    """A helper function to format a :class:`datetime.datetime`, :class:`int` or :class:`float` for presentation within Discord.
+    """A helper function to format a :class:`datetime.datetime`, :class:`int` or :class:`float` (seconds) for presentation within Discord.
 
     This allows for a locale-independent way of presenting data using Discord specific Markdown.
 
