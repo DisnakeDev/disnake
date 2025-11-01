@@ -432,7 +432,7 @@ class AutoShardedClient(Client):
         return [(shard_id, shard.ws.latency) for shard_id, shard in self.__shards.items()]
 
     def get_shard(self, shard_id: int) -> Optional[ShardInfo]:
-        """Gets the shard information of a given shard ID, or :data:`None` if not found.
+        """Get the shard information of a given shard ID, or :data:`None` if not found.
 
         :return type: :class:`ShardInfo` | :data:`None`
         """

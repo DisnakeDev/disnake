@@ -149,7 +149,7 @@ class VoiceProtocol:
         raise NotImplementedError
 
     def cleanup(self) -> None:
-        """Cleans up the internal state.
+        """Clean up the internal state.
 
         **This method *must* be called to ensure proper clean-up during a disconnect.**
 
@@ -519,7 +519,7 @@ class VoiceClient(VoiceProtocol):
         await self.channel.guild.change_voice_state(channel=channel)
 
     def is_connected(self) -> bool:
-        """Indicates if the voice client is connected to voice."""
+        """Indicate if the voice client is connected to voice."""
         return self._connected.is_set()
 
     # audio related
@@ -607,15 +607,15 @@ class VoiceClient(VoiceProtocol):
         self._player.start()
 
     def is_playing(self) -> bool:
-        """Indicates if we're currently playing audio."""
+        """Indicate if we're currently playing audio."""
         return self._player is not None and self._player.is_playing()
 
     def is_paused(self) -> bool:
-        """Indicates if we're playing audio, but if we're paused."""
+        """Indicate if we're playing audio, but if we're paused."""
         return self._player is not None and self._player.is_paused()
 
     def stop(self) -> None:
-        """Stops playing audio."""
+        """Stop playing audio."""
         if self._player:
             self._player.stop()
             self._player = None
@@ -651,7 +651,7 @@ class VoiceClient(VoiceProtocol):
         self._player._set_source(value)
 
     def send_audio_packet(self, data: bytes, *, encode: bool = True) -> None:
-        """Sends an audio packet composed of the data.
+        """Send an audio packet composed of the data.
 
         You must be connected to play audio.
 

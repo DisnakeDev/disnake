@@ -342,7 +342,7 @@ class AutoModTriggerMetadata:
         mention_total_limit: Optional[int] = MISSING,
         mention_raid_protection_enabled: Optional[bool] = MISSING,
     ) -> Self:
-        """Returns a new instance with the given changes applied.
+        """Return a new instance with the given changes applied.
         All other fields will be kept intact.
 
         Returns

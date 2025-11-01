@@ -115,7 +115,7 @@ async def json_or_text(response: aiohttp.ClientResponse) -> Union[dict[str, Any]
 
 
 def set_attachments(payload: dict[str, Any], files: Sequence[File]) -> None:
-    """Updates the payload's attachments list based on the provided files
+    """Update the payload's attachments list based on the provided files
 
     note: this method modifies the provided ``payload`` and ``payload["attachments"]`` collections
     """
@@ -135,7 +135,7 @@ def set_attachments(payload: dict[str, Any], files: Sequence[File]) -> None:
 
 
 def to_multipart(payload: dict[str, Any], files: Sequence[File]) -> list[dict[str, Any]]:
-    """Converts the payload and list of files to a multipart payload,
+    """Convert the payload and list of files to a multipart payload,
     as specified by https://discord.com/developers/docs/reference#uploading-files
     """
     multipart: list[dict[str, Any]] = []
@@ -156,7 +156,7 @@ def to_multipart(payload: dict[str, Any], files: Sequence[File]) -> list[dict[st
 def to_multipart_with_attachments(
     payload: dict[str, Any], files: Sequence[File]
 ) -> list[dict[str, Any]]:
-    """Updates the payload's attachments and converts it to a multipart payload
+    """Update the payload's attachments and convert it to a multipart payload
 
     Shorthand for ``set_attachments`` + ``to_multipart``
     """

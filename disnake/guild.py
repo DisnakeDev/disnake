@@ -591,7 +591,7 @@ class Guild(Hashable):
         return role
 
     def get_command(self, application_command_id: int, /) -> Optional[APIApplicationCommand]:
-        """Gets a cached application command matching the specified ID.
+        """Get a cached application command matching the specified ID.
 
         Parameters
         ----------
@@ -606,7 +606,7 @@ class Guild(Hashable):
         return self._state._get_guild_application_command(self.id, application_command_id)
 
     def get_command_named(self, name: str, /) -> Optional[APIApplicationCommand]:
-        """Gets a cached application command matching the specified name.
+        """Get a cached application command matching the specified name.
 
         Parameters
         ----------
@@ -859,7 +859,7 @@ class Guild(Hashable):
         return r
 
     def by_category(self) -> list[ByCategoryItem]:
-        """Returns every :class:`CategoryChannel` and their associated channels.
+        """Return every :class:`CategoryChannel` and their associated channels.
 
         These channels and categories are sorted in the official Discord UI order.
 
@@ -900,7 +900,7 @@ class Guild(Hashable):
         return self._channels.get(id) or self._threads.get(id)
 
     def get_channel_or_thread(self, channel_id: int, /) -> Optional[Union[Thread, GuildChannel]]:
-        """Returns a channel or thread with the given ID.
+        """Return a channel or thread with the given ID.
 
         .. versionadded:: 2.0
 
@@ -917,7 +917,7 @@ class Guild(Hashable):
         return self._channels.get(channel_id) or self._threads.get(channel_id)
 
     def get_channel(self, channel_id: int, /) -> Optional[GuildChannel]:
-        """Returns a channel with the given ID.
+        """Return a channel with the given ID.
 
         .. note::
 
@@ -936,7 +936,7 @@ class Guild(Hashable):
         return self._channels.get(channel_id)
 
     def get_thread(self, thread_id: int, /) -> Optional[Thread]:
-        """Returns a thread with the given ID.
+        """Return a thread with the given ID.
 
         .. versionadded:: 2.0
 
@@ -1051,7 +1051,7 @@ class Guild(Hashable):
         return list(self._members.values())
 
     def get_member(self, user_id: int, /) -> Optional[Member]:
-        """Returns a member with the given ID.
+        """Return a member with the given ID.
 
         Parameters
         ----------
@@ -1080,7 +1080,7 @@ class Guild(Hashable):
         return sorted(self._roles.values())
 
     def get_role(self, role_id: int, /) -> Optional[Role]:
-        """Returns a role with the given ID.
+        """Return a role with the given ID.
 
         Parameters
         ----------
@@ -1134,7 +1134,7 @@ class Guild(Hashable):
         return list(self._stage_instances.values())
 
     def get_stage_instance(self, stage_instance_id: int, /) -> Optional[StageInstance]:
-        """Returns a stage instance with the given ID.
+        """Return a stage instance with the given ID.
 
         .. versionadded:: 2.0
 
@@ -1159,7 +1159,7 @@ class Guild(Hashable):
         return list(self._scheduled_events.values())
 
     def get_scheduled_event(self, event_id: int, /) -> Optional[GuildScheduledEvent]:
-        """Returns a guild scheduled event with the given ID.
+        """Return a guild scheduled event with the given ID.
 
         .. versionadded:: 2.3
 
@@ -1270,7 +1270,7 @@ class Guild(Hashable):
         return utils.snowflake_time(self.id)
 
     def get_member_named(self, name: str, /) -> Optional[Member]:
-        """Returns the first member found that matches the name provided.
+        """Return the first member found that matches the name provided.
 
         The lookup strategy is as follows (in order):
 
@@ -2944,7 +2944,7 @@ class Guild(Hashable):
     def fetch_members(
         self, *, limit: Optional[int] = 1000, after: Optional[SnowflakeTime] = None
     ) -> MemberIterator:
-        """Retrieves an :class:`.AsyncIterator` that enables receiving the guild's members.
+        """Retrieve an :class:`.AsyncIterator` that enables receiving the guild's members.
 
         In order to use this, the :attr:`~Intents.members` intent must be
         enabled in the developer portal.
@@ -3123,7 +3123,7 @@ class Guild(Hashable):
         before: Optional[Snowflake] = None,
         after: Optional[Snowflake] = None,
     ) -> BanIterator:
-        """Returns an :class:`~disnake.AsyncIterator` that enables receiving the destination's bans.
+        """Return an :class:`~disnake.AsyncIterator` that enables receiving the destination's bans.
 
         You must have the :attr:`~Permissions.ban_members` permission to get this information.
 
@@ -4407,7 +4407,7 @@ class Guild(Hashable):
         action: Optional[AuditLogAction] = None,
         oldest_first: bool = False,
     ) -> AuditLogIterator:
-        """Returns an :class:`AsyncIterator` that enables receiving the guild's audit logs.
+        """Return an :class:`AsyncIterator` that enables receiving the guild's audit logs.
 
         You must have :attr:`~Permissions.view_audit_log` permission to use this.
 
@@ -4583,7 +4583,7 @@ class Guild(Hashable):
         return WidgetSettings(state=self._state, guild=self, data=data)
 
     def widget_image_url(self, style: WidgetStyle = WidgetStyle.shield) -> str:
-        """Returns an URL to the widget's .png image.
+        """Return an URL to the widget's .png image.
 
         .. versionadded:: 2.5
 
@@ -5589,7 +5589,7 @@ class GuildBuilder:
         return Guild(data=data, state=self._state)
 
     def update_everyone_role(self, *, permissions: Permissions = MISSING) -> PlaceholderID:
-        """Updates attributes of the ``@everyone`` role.
+        """Update attributes of the ``@everyone`` role.
 
         Parameters
         ----------
@@ -5621,7 +5621,7 @@ class GuildBuilder:
         hoist: bool = MISSING,
         mentionable: bool = MISSING,
     ) -> PlaceholderID:
-        """Adds a role to the guild builder.
+        """Add a role to the guild builder.
 
         The default (``@everyone``) role can be referenced using :attr:`everyone`
         and configured through :func:`update_everyone_role`.
@@ -5683,7 +5683,7 @@ class GuildBuilder:
         *,
         overwrites: dict[PlaceholderID, PermissionOverwrite] = MISSING,
     ) -> PlaceholderID:
-        """Adds a category channel to the guild builder.
+        """Add a category channel to the guild builder.
 
         There is an alias for this named ``add_category_channel``.
 
@@ -5715,7 +5715,7 @@ class GuildBuilder:
         nsfw: bool = MISSING,
         default_auto_archive_duration: AnyThreadArchiveDuration = MISSING,
     ) -> PlaceholderID:
-        """Adds a text channel to the guild builder.
+        """Add a text channel to the guild builder.
 
         Parameters
         ----------
@@ -5777,7 +5777,7 @@ class GuildBuilder:
         rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
         video_quality_mode: VideoQualityMode = MISSING,
     ) -> PlaceholderID:
-        """Adds a voice channel to the guild builder.
+        """Add a voice channel to the guild builder.
 
         Parameters
         ----------

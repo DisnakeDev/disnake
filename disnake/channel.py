@@ -945,7 +945,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         return Webhook._as_follower(data, channel=destination, user=self._state.user)
 
     def get_partial_message(self, message_id: int, /) -> PartialMessage:
-        """Creates a :class:`PartialMessage` from the given message ID.
+        """Create a :class:`PartialMessage` from the given message ID.
 
         This is useful if you want to work with a message and only have its ID without
         doing an unnecessary API call.
@@ -967,7 +967,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         return PartialMessage(channel=self, id=message_id)
 
     def get_thread(self, thread_id: int, /) -> Optional[Thread]:
-        """Returns a thread with the given ID.
+        """Return a thread with the given ID.
 
         .. versionadded:: 2.0
 
@@ -1127,7 +1127,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         limit: Optional[int] = 50,
         before: Optional[Union[Snowflake, datetime.datetime]] = None,
     ) -> ArchivedThreadIterator:
-        """Returns an :class:`~disnake.AsyncIterator` that iterates over all archived threads in the channel.
+        """Return an :class:`~disnake.AsyncIterator` that iterates over all archived threads in the channel.
 
         You must have :attr:`~Permissions.read_message_history` permission to use this. If iterating over private threads
         then :attr:`~Permissions.manage_threads` permission is also required.
@@ -1526,7 +1526,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         return self._state._get_message(self.last_message_id) if self.last_message_id else None
 
     def get_partial_message(self, message_id: int, /) -> PartialMessage:
-        """Creates a :class:`PartialMessage` from the given message ID.
+        """Create a :class:`PartialMessage` from the given message ID.
 
         This is useful if you want to work with a message and only have its ID without
         doing an unnecessary API call.
@@ -2263,7 +2263,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         return self._state._get_message(self.last_message_id) if self.last_message_id else None
 
     def get_partial_message(self, message_id: int, /) -> PartialMessage:
-        """Creates a :class:`PartialMessage` from the given message ID.
+        """Create a :class:`PartialMessage` from the given message ID.
 
         This is useful if you want to work with a message and only have its ID without
         doing an unnecessary API call.
@@ -3499,7 +3499,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         return Typing(self)
 
     def get_thread(self, thread_id: int, /) -> Optional[Thread]:
-        """Returns a thread with the given ID.
+        """Return a thread with the given ID.
 
         Parameters
         ----------
@@ -3787,7 +3787,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         limit: Optional[int] = 50,
         before: Optional[Union[Snowflake, datetime.datetime]] = None,
     ) -> ArchivedThreadIterator:
-        """Returns an :class:`~disnake.AsyncIterator` that iterates over all archived threads in the channel.
+        """Return an :class:`~disnake.AsyncIterator` that iterates over all archived threads in the channel.
 
         You must have :attr:`~Permissions.read_message_history` permission to use this.
 
@@ -3889,7 +3889,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         return Webhook.from_state(data, state=self._state)
 
     def get_tag(self, tag_id: int, /) -> Optional[ForumTag]:
-        """Returns a thread tag with the given ID.
+        """Return a thread tag with the given ID.
 
         .. versionadded:: 2.6
 
@@ -3906,7 +3906,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         return self._available_tags.get(tag_id)
 
     def get_tag_by_name(self, name: str, /) -> Optional[ForumTag]:
-        """Returns a thread tag with the given name.
+        """Return a thread tag with the given name.
 
         Tags can be uniquely identified based on the name, as tag names
         in a channel must be unique.
@@ -4861,7 +4861,7 @@ class DMChannel(disnake.abc.Messageable, Hashable):
         *,
         ignore_timeout: bool = MISSING,
     ) -> Permissions:
-        """Handles permission resolution for a :class:`User`.
+        """Handle permission resolution for a :class:`User`.
 
         This function is there for compatibility with other channel types.
 
@@ -4887,7 +4887,7 @@ class DMChannel(disnake.abc.Messageable, Hashable):
         return Permissions.private_channel()
 
     def get_partial_message(self, message_id: int, /) -> PartialMessage:
-        """Creates a :class:`PartialMessage` from the given message ID.
+        """Create a :class:`PartialMessage` from the given message ID.
 
         This is useful if you want to work with a message and only have its ID without
         doing an unnecessary API call.
@@ -5017,7 +5017,7 @@ class GroupChannel(disnake.abc.Messageable, Hashable):
         *,
         ignore_timeout: bool = MISSING,
     ) -> Permissions:
-        """Handles permission resolution for a :class:`User`.
+        """Handle permission resolution for a :class:`User`.
 
         This function is there for compatibility with other channel types.
 
@@ -5049,7 +5049,7 @@ class GroupChannel(disnake.abc.Messageable, Hashable):
         return base
 
     def get_partial_message(self, message_id: int, /) -> PartialMessage:
-        """Creates a :class:`PartialMessage` from the given message ID.
+        """Create a :class:`PartialMessage` from the given message ID.
 
         This is useful if you want to work with a message and only have its ID without
         doing an unnecessary API call.
@@ -5126,7 +5126,7 @@ class PartialMessageable(disnake.abc.Messageable, Hashable):
         return self
 
     def get_partial_message(self, message_id: int, /) -> PartialMessage:
-        """Creates a :class:`PartialMessage` from the given message ID.
+        """Create a :class:`PartialMessage` from the given message ID.
 
         This is useful if you want to work with a message and only have its ID without
         doing an unnecessary API call.

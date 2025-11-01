@@ -423,7 +423,7 @@ class Thread(Messageable, Hashable):
         *,
         ignore_timeout: bool = MISSING,
     ) -> Permissions:
-        """Handles permission resolution for the :class:`~disnake.Member`
+        """Handle permission resolution for the :class:`~disnake.Member`
         or :class:`~disnake.Role`.
 
         Since threads do not have their own permissions, they inherit them
@@ -1002,7 +1002,7 @@ class Thread(Messageable, Hashable):
         await self._state.http.edit_channel(self.id, applied_tags=new_tags, reason=reason)
 
     def get_partial_message(self, message_id: int, /) -> PartialMessage:
-        """Creates a :class:`PartialMessage` from the message ID.
+        """Create a :class:`PartialMessage` from the message ID.
 
         This is useful if you want to work with a message and only have its ID without
         doing an unnecessary API call.
@@ -1245,7 +1245,7 @@ class ForumTag(Hashable):
         emoji: Optional[Union[str, Emoji, PartialEmoji]] = MISSING,
         moderated: bool = MISSING,
     ) -> Self:
-        """Returns a new instance with the given changes applied,
+        """Return a new instance with the given changes applied,
         for easy use with :func:`ForumChannel.edit` or :func:`MediaChannel.edit`.
         All other fields will be kept intact.
 

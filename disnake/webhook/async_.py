@@ -1193,7 +1193,7 @@ class Webhook(BaseWebhook):
     def partial(
         cls, id: int, token: str, *, session: aiohttp.ClientSession, bot_token: Optional[str] = None
     ) -> Webhook:
-        """Creates a partial :class:`Webhook`.
+        """Create a partial :class:`Webhook`.
 
         Parameters
         ----------
@@ -1232,7 +1232,7 @@ class Webhook(BaseWebhook):
     def from_url(
         cls, url: str, *, session: aiohttp.ClientSession, bot_token: Optional[str] = None
     ) -> Webhook:
-        """Creates a partial :class:`Webhook` from a webhook URL.
+        """Create a partial :class:`Webhook` from a webhook URL.
 
         .. versionchanged:: 2.6
             Raises :exc:`ValueError` instead of ``InvalidArgument``.

@@ -237,7 +237,7 @@ class Permissions(BaseFlags):
             setattr(self, key, value)
 
     def is_subset(self, other: Permissions) -> bool:
-        """Returns ``True`` if self has the same or fewer permissions as other."""
+        """Return ``True`` if self has the same or fewer permissions as other."""
         if isinstance(other, Permissions):
             return (self.value & other.value) == self.value
         else:
@@ -245,7 +245,7 @@ class Permissions(BaseFlags):
             raise TypeError(msg)
 
     def is_superset(self, other: Permissions) -> bool:
-        """Returns ``True`` if self has the same or more permissions as other."""
+        """Return ``True`` if self has the same or more permissions as other."""
         if isinstance(other, Permissions):
             return (self.value | other.value) == self.value
         else:
@@ -253,11 +253,11 @@ class Permissions(BaseFlags):
             raise TypeError(msg)
 
     def is_strict_subset(self, other: Permissions) -> bool:
-        """Returns ``True`` if the permissions on self are a strict subset of those on other."""
+        """Return ``True`` if the permissions on self are a strict subset of those on other."""
         return self.is_subset(other) and self != other
 
     def is_strict_superset(self, other: Permissions) -> bool:
-        """Returns ``True`` if the permissions on self are a strict superset of those on other."""
+        """Return ``True`` if the permissions on self are a strict superset of those on other."""
         return self.is_superset(other) and self != other
 
     # the parent uses `Self` for the `other` typehint but we use `Permissions` here for backwards compat.
@@ -269,7 +269,7 @@ class Permissions(BaseFlags):
     @classmethod
     @cached_creation
     def none(cls) -> Self:
-        """A factory method that creates a :class:`Permissions` with all
+        """Create a :class:`Permissions` with all
         permissions set to ``False``.
         """
         return cls(0)
@@ -277,7 +277,7 @@ class Permissions(BaseFlags):
     @classmethod
     @cached_creation
     def all(cls) -> Self:
-        """A factory method that creates a :class:`Permissions` with all
+        """Create a :class:`Permissions` with all
         permissions set to ``True``.
         """
         return cls(**dict.fromkeys(cls.VALID_FLAGS.keys(), True))
@@ -285,7 +285,7 @@ class Permissions(BaseFlags):
     @classmethod
     @cached_creation
     def all_channel(cls) -> Self:
-        """A :class:`Permissions` with all channel-specific permissions set to
+        """Create a :class:`Permissions` with all channel-specific permissions set to
         ``True`` and the guild-specific ones set to ``False``. The guild-specific
         permissions are currently:
 
@@ -339,7 +339,7 @@ class Permissions(BaseFlags):
     @classmethod
     @cached_creation
     def general(cls) -> Self:
-        """A factory method that creates a :class:`Permissions` with all
+        """Create a :class:`Permissions` with all
         "General" permissions from the official Discord UI set to ``True``.
 
         .. versionchanged:: 1.7
@@ -370,7 +370,7 @@ class Permissions(BaseFlags):
     @classmethod
     @cached_creation
     def membership(cls) -> Self:
-        """A factory method that creates a :class:`Permissions` with all
+        """Create a :class:`Permissions` with all
         "Membership" permissions from the official Discord UI set to ``True``.
 
         .. versionadded:: 1.7
@@ -390,7 +390,7 @@ class Permissions(BaseFlags):
     @classmethod
     @cached_creation
     def text(cls) -> Self:
-        """A factory method that creates a :class:`Permissions` with all
+        """Create a :class:`Permissions` with all
         "Text" permissions from the official Discord UI set to ``True``.
 
         .. versionchanged:: 1.7
@@ -433,7 +433,7 @@ class Permissions(BaseFlags):
     @classmethod
     @cached_creation
     def voice(cls) -> Self:
-        """A factory method that creates a :class:`Permissions` with all
+        """Create a :class:`Permissions` with all
         "Voice" permissions from the official Discord UI set to ``True``.
 
         .. versionchanged:: 2.3
@@ -461,7 +461,7 @@ class Permissions(BaseFlags):
     @classmethod
     @cached_creation
     def stage(cls) -> Self:
-        """A factory method that creates a :class:`Permissions` with all
+        """Create a :class:`Permissions` with all
         "Stage Channel" permissions from the official Discord UI set to ``True``.
 
         .. versionadded:: 1.7
@@ -473,7 +473,7 @@ class Permissions(BaseFlags):
     @classmethod
     @cached_creation
     def stage_moderator(cls) -> Self:
-        """A factory method that creates a :class:`Permissions` with all
+        """Create a :class:`Permissions` with all
         "Stage Moderator" permissions from the official Discord UI set to ``True``.
 
         .. versionadded:: 1.7
@@ -487,7 +487,7 @@ class Permissions(BaseFlags):
     @classmethod
     @cached_creation
     def apps(cls) -> Self:
-        """A factory method that creates a :class:`Permissions` with all
+        """Create a :class:`Permissions` with all
         "Apps" permissions from the official Discord UI set to ``True``.
 
         .. versionadded:: 2.10
@@ -501,7 +501,7 @@ class Permissions(BaseFlags):
     @classmethod
     @cached_creation
     def events(cls) -> Self:
-        """A factory method that creates a :class:`Permissions` with all
+        """Create a :class:`Permissions` with all
         "Events" permissions from the official Discord UI set to ``True``.
 
         .. versionadded:: 2.4
@@ -517,7 +517,7 @@ class Permissions(BaseFlags):
     @classmethod
     @cached_creation
     def advanced(cls) -> Self:
-        """A factory method that creates a :class:`Permissions` with all
+        """Create a :class:`Permissions` with all
         "Advanced" permissions from the official Discord UI set to ``True``.
 
         .. versionadded:: 1.7
@@ -529,7 +529,7 @@ class Permissions(BaseFlags):
     @classmethod
     @cached_creation
     def private_channel(cls) -> Self:
-        """A factory method that creates a :class:`Permissions` with the
+        """Create a :class:`Permissions` with the
         best representation of a PrivateChannel's permissions.
 
         This exists to maintain compatibility with other channel types.
@@ -1327,7 +1327,7 @@ class PermissionOverwrite:
 
     @classmethod
     def from_pair(cls, allow: Permissions, deny: Permissions) -> Self:
-        """Creates an overwrite from an allow/deny pair of :class:`Permissions`."""
+        """Create an overwrite from an allow/deny pair of :class:`Permissions`."""
         ret = cls()
         for key, value in allow:
             if value is True:
@@ -1340,7 +1340,7 @@ class PermissionOverwrite:
         return ret
 
     def is_empty(self) -> bool:
-        """Checks if the permission overwrite is currently empty.
+        """Check if the permission overwrite is currently empty.
 
         An empty permission overwrite is one that has no overwrites set
         to ``True`` or ``False``.

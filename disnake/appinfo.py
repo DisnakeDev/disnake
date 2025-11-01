@@ -88,7 +88,7 @@ class InstallParams:
         return f"<InstallParams scopes={self.scopes!r} permissions={self.permissions!r}>"
 
     def to_url(self) -> str:
-        """Returns a string that can be used to install this application.
+        """Return a string that can be used to install this application.
 
         .. note:: This method can only be used on InstallParams that have been created by :meth:`.Client.application_info`
 

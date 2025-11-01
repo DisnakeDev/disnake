@@ -655,7 +655,7 @@ class Client:
         ]
 
     def get_message(self, id: int) -> Optional[Message]:
-        """Gets the message with the given ID from the bot's message cache.
+        """Get the message with the given ID from the bot's message cache.
 
         Parameters
         ----------
@@ -792,7 +792,7 @@ class Client:
             self._schedule_event(event_, method, *args, **kwargs)
 
     def add_listener(self, func: CoroFunc, name: Union[str, Event] = MISSING) -> None:
-        """The non decorator alternative to :meth:`.listen`.
+        """Non-decorator alternative to :meth:`.listen`.
 
         .. versionchanged:: 2.10
             The definition of this method was moved from :class:`.ext.commands.Bot`
@@ -844,7 +844,7 @@ class Client:
             self.extra_events[name_] = [func]
 
     def remove_listener(self, func: CoroFunc, name: Union[str, Event] = MISSING) -> None:
-        """Removes a listener from the pool of listeners.
+        """Remove a listener from the pool of listeners.
 
         .. versionchanged:: 2.10
             The definition of this method was moved from :class:`.ext.commands.Bot`
@@ -879,7 +879,7 @@ class Client:
                 pass
 
     def listen(self, name: Union[str, Event] = MISSING) -> Callable[[CoroT], CoroT]:
-        """A decorator that registers another function as an external
+        """Register another function as an external
         event listener. Basically this allows you to listen to multiple
         events from different places e.g. such as :func:`.on_ready`
 
@@ -1223,7 +1223,7 @@ class Client:
         self._ready.clear()
 
     def clear(self) -> None:
-        """Clears the internal state of the bot.
+        """Clear the internal state of the bot.
 
         After this, the bot can be considered "re-opened", i.e. :meth:`is_closed`
         and :meth:`is_ready` both return ``False`` along with the bot's internal
@@ -1252,7 +1252,7 @@ class Client:
         )
 
     def run(self, *args: Any, **kwargs: Any) -> None:
-        """A blocking call that abstracts away the event loop
+        """Blocking call that abstracts away the event loop
         initialisation from you.
 
         If you want more control over the event loop then this
@@ -1392,7 +1392,7 @@ class Client:
         return list(self._connection._users.values())
 
     def get_channel(self, id: int, /) -> Optional[Union[GuildChannel, Thread, PrivateChannel]]:
-        """Returns a channel or thread with the given ID.
+        """Return a channel or thread with the given ID.
 
         Parameters
         ----------
@@ -1409,7 +1409,7 @@ class Client:
     def get_partial_messageable(
         self, id: int, *, type: Optional[ChannelType] = None
     ) -> PartialMessageable:
-        """Returns a partial messageable with the given channel ID.
+        """Return a partial messageable with the given channel ID.
 
         This is useful if you have a channel_id but don't want to do an API call
         to send messages to it.
@@ -1431,7 +1431,7 @@ class Client:
         return PartialMessageable(state=self._connection, id=id, type=type)
 
     def get_stage_instance(self, id: int, /) -> Optional[StageInstance]:
-        """Returns a stage instance with the given stage channel ID.
+        """Return a stage instance with the given stage channel ID.
 
         .. versionadded:: 2.0
 
@@ -1454,7 +1454,7 @@ class Client:
         return None
 
     def get_guild(self, id: int, /) -> Optional[Guild]:
-        """Returns a guild with the given ID.
+        """Return a guild with the given ID.
 
         Parameters
         ----------
@@ -1469,7 +1469,7 @@ class Client:
         return self._connection._get_guild(id)
 
     def get_user(self, id: int, /) -> Optional[User]:
-        """Returns a user with the given ID.
+        """Return a user with the given ID.
 
         Parameters
         ----------
@@ -1484,7 +1484,7 @@ class Client:
         return self._connection.get_user(id)
 
     def get_emoji(self, id: int, /) -> Optional[Emoji]:
-        """Returns an emoji with the given ID.
+        """Return an emoji with the given ID.
 
         Parameters
         ----------
@@ -1499,7 +1499,7 @@ class Client:
         return self._connection.get_emoji(id)
 
     def get_sticker(self, id: int, /) -> Optional[GuildSticker]:
-        """Returns a guild sticker with the given ID.
+        """Return a guild sticker with the given ID.
 
         .. versionadded:: 2.0
 
@@ -1516,7 +1516,7 @@ class Client:
         return self._connection.get_sticker(id)
 
     def get_soundboard_sound(self, id: int, /) -> Optional[GuildSoundboardSound]:
-        """Returns a guild soundboard sound with the given ID.
+        """Return a guild soundboard sound with the given ID.
 
         .. versionadded:: 2.10
 
@@ -1532,7 +1532,7 @@ class Client:
         return self._connection.get_soundboard_sound(id)
 
     def get_all_channels(self) -> Generator[GuildChannel, None, None]:
-        """A generator that retrieves every :class:`.abc.GuildChannel` the client can 'access'.
+        """Return a generator that retrieves every :class:`.abc.GuildChannel` the client can 'access'.
 
         This is equivalent to: ::
 
@@ -1555,7 +1555,7 @@ class Client:
             yield from guild.channels
 
     def get_all_members(self) -> Generator[Member, None, None]:
-        """Returns a generator with every :class:`.Member` the client can see.
+        """Return a generator with every :class:`.Member` the client can see.
 
         This is equivalent to: ::
 
@@ -1572,7 +1572,7 @@ class Client:
             yield from guild.members
 
     def get_guild_application_commands(self, guild_id: int) -> list[APIApplicationCommand]:
-        """Returns a list of all application commands in the guild with the given ID.
+        """Return a list of all application commands in the guild with the given ID.
 
         Parameters
         ----------
@@ -1588,7 +1588,7 @@ class Client:
         return list(data.values())
 
     def get_guild_slash_commands(self, guild_id: int) -> list[APISlashCommand]:
-        """Returns a list of all slash commands in the guild with the given ID.
+        """Return a list of all slash commands in the guild with the given ID.
 
         Parameters
         ----------
@@ -1604,7 +1604,7 @@ class Client:
         return [cmd for cmd in data.values() if isinstance(cmd, APISlashCommand)]
 
     def get_guild_user_commands(self, guild_id: int) -> list[APIUserCommand]:
-        """Returns a list of all user commands in the guild with the given ID.
+        """Return a list of all user commands in the guild with the given ID.
 
         Parameters
         ----------
@@ -1620,7 +1620,7 @@ class Client:
         return [cmd for cmd in data.values() if isinstance(cmd, APIUserCommand)]
 
     def get_guild_message_commands(self, guild_id: int) -> list[APIMessageCommand]:
-        """Returns a list of all message commands in the guild with the given ID.
+        """Return a list of all message commands in the guild with the given ID.
 
         Parameters
         ----------
@@ -1636,7 +1636,7 @@ class Client:
         return [cmd for cmd in data.values() if isinstance(cmd, APIMessageCommand)]
 
     def get_global_command(self, id: int) -> Optional[APIApplicationCommand]:
-        """Returns a global application command with the given ID.
+        """Return a global application command with the given ID.
 
         Parameters
         ----------
@@ -1651,7 +1651,7 @@ class Client:
         return self._connection._get_global_application_command(id)
 
     def get_guild_command(self, guild_id: int, id: int) -> Optional[APIApplicationCommand]:
-        """Returns a guild application command with the given guild ID and application command ID.
+        """Return a guild application command with the given guild ID and application command ID.
 
         Parameters
         ----------
@@ -1670,7 +1670,7 @@ class Client:
     def get_global_command_named(
         self, name: str, cmd_type: Optional[ApplicationCommandType] = None
     ) -> Optional[APIApplicationCommand]:
-        """Returns a global application command matching the given name.
+        """Return a global application command matching the given name.
 
         Parameters
         ----------
@@ -1689,7 +1689,7 @@ class Client:
     def get_guild_command_named(
         self, guild_id: int, name: str, cmd_type: Optional[ApplicationCommandType] = None
     ) -> Optional[APIApplicationCommand]:
-        """Returns a guild application command matching the given name.
+        """Return a guild application command matching the given name.
 
         Parameters
         ----------
@@ -1844,7 +1844,7 @@ class Client:
     # event registration
 
     def event(self, coro: CoroT) -> CoroT:
-        """A decorator that registers an event to listen to.
+        """Register an event to listen to.
 
         You can find more info about the events in the :ref:`documentation <disnake_api_events>`.
 
@@ -1943,7 +1943,7 @@ class Client:
         after: Optional[SnowflakeTime] = None,
         with_counts: bool = True,
     ) -> GuildIterator:
-        """Retrieves an :class:`.AsyncIterator` that enables receiving your guilds.
+        """Retrieve an :class:`.AsyncIterator` that enables receiving your guilds.
 
         .. note::
 
@@ -2170,7 +2170,7 @@ class Client:
         return Guild(data=data, state=self._connection)
 
     def guild_builder(self, name: str) -> GuildBuilder:
-        """Creates a builder object that can be used to create more complex guilds.
+        """Create a builder object that can be used to create more complex guilds.
 
         This is a more comprehensive alternative to :func:`create_guild`.
         See :class:`.GuildBuilder` for details and examples.
@@ -2331,7 +2331,7 @@ class Client:
     # Voice region stuff
 
     async def fetch_voice_regions(self, guild_id: Optional[int] = None) -> list[VoiceRegion]:
-        """Retrieves a list of :class:`.VoiceRegion`\\s.
+        """Retrieve a list of :class:`.VoiceRegion`\\s.
 
         Retrieves voice regions for the user, or a guild if provided.
 
@@ -2709,7 +2709,7 @@ class Client:
 
     @deprecated("fetch_sticker_packs")
     async def fetch_premium_sticker_packs(self) -> list[StickerPack]:
-        """An alias of :meth:`fetch_sticker_packs`.
+        """Alias of :meth:`fetch_sticker_packs`.
 
         .. deprecated:: 2.10
         """
@@ -2744,7 +2744,7 @@ class Client:
         return state.add_dm_channel(data)
 
     def add_view(self, view: View, *, message_id: Optional[int] = None) -> None:
-        """Registers a :class:`~disnake.ui.View` for persistent listening.
+        """Register a :class:`~disnake.ui.View` for persistent listening.
 
         This method should be used for when a view is comprised of components
         that last longer than the lifecycle of the program.
@@ -3276,7 +3276,7 @@ class Client:
         exclude_deleted: bool = True,
         oldest_first: bool = False,
     ) -> EntitlementIterator:
-        """Retrieves an :class:`.AsyncIterator` that enables receiving entitlements for the application.
+        """Retrieve an :class:`.AsyncIterator` that enables receiving entitlements for the application.
 
         .. note::
 

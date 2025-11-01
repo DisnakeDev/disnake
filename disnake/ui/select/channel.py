@@ -232,7 +232,7 @@ def channel_select(
 def channel_select(
     cls: Callable[..., S_co] = ChannelSelect[Any], **kwargs: Any
 ) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]:
-    """A decorator that attaches a channel select menu to a component.
+    """Attach a channel select menu to a component.
 
     The function being decorated should have three parameters, ``self`` representing
     the :class:`disnake.ui.View`, the :class:`disnake.ui.ChannelSelect` that was

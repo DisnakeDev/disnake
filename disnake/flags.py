@@ -1110,21 +1110,21 @@ class Intents(BaseFlags):
 
     @classmethod
     def all(cls) -> Self:
-        """A factory method that creates an :class:`Intents` instance with everything enabled."""
+        """Return an :class:`Intents` instance with everything enabled."""
         self = cls.__new__(cls)
         self.value = all_flags_value(cls.VALID_FLAGS)
         return self
 
     @classmethod
     def none(cls) -> Self:
-        """A factory method that creates an :class:`Intents` instance with everything disabled."""
+        """Return an :class:`Intents` instance with everything disabled."""
         self = cls.__new__(cls)
         self.value = self.DEFAULT_VALUE
         return self
 
     @classmethod
     def default(cls) -> Self:
-        """A factory method that creates an :class:`Intents` instance with everything enabled
+        """Return an :class:`Intents` instance with everything enabled
         except :attr:`presences`, :attr:`members`, and :attr:`message_content`.
         """
         self = cls.all()
@@ -1829,14 +1829,14 @@ class MemberCacheFlags(BaseFlags):
 
     @classmethod
     def all(cls) -> Self:
-        """A factory method that creates a :class:`MemberCacheFlags` instance with everything enabled."""
+        """Return a :class:`MemberCacheFlags` instance with everything enabled."""
         self = cls.__new__(cls)
         self.value = all_flags_value(cls.VALID_FLAGS)
         return self
 
     @classmethod
     def none(cls) -> Self:
-        """A factory method that creates a :class:`MemberCacheFlags` instance with everything disabled."""
+        """Return a :class:`MemberCacheFlags` instance with everything disabled."""
         self = cls.__new__(cls)
         self.value = self.DEFAULT_VALUE
         return self
@@ -1868,7 +1868,7 @@ class MemberCacheFlags(BaseFlags):
 
     @classmethod
     def from_intents(cls, intents: Intents) -> Self:
-        """A factory method that creates a :class:`MemberCacheFlags` instance based on
+        """Return a :class:`MemberCacheFlags` instance based on
         the currently selected :class:`Intents`.
 
         Parameters
@@ -2286,14 +2286,14 @@ class AutoModKeywordPresets(ListBaseFlags):
 
     @classmethod
     def all(cls) -> Self:
-        """A factory method that creates an :class:`AutoModKeywordPresets` instance with everything enabled."""
+        """Return an :class:`AutoModKeywordPresets` instance with everything enabled."""
         self = cls.__new__(cls)
         self.value = all_flags_value(cls.VALID_FLAGS)
         return self
 
     @classmethod
     def none(cls) -> Self:
-        """A factory method that creates an :class:`AutoModKeywordPresets` instance with everything disabled."""
+        """Return an :class:`AutoModKeywordPresets` instance with everything disabled."""
         self = cls.__new__(cls)
         self.value = self.DEFAULT_VALUE
         return self
@@ -2808,7 +2808,7 @@ class ApplicationInstallTypes(ListBaseFlags):
 
     @classmethod
     def all(cls) -> Self:
-        """A factory method that creates an :class:`ApplicationInstallTypes` instance with everything enabled."""
+        """Return an :class:`ApplicationInstallTypes` instance with everything enabled."""
         self = cls.__new__(cls)
         self.value = all_flags_value(cls.VALID_FLAGS)
         return self
@@ -2906,7 +2906,7 @@ class InteractionContextTypes(ListBaseFlags):
 
     @classmethod
     def all(cls) -> Self:
-        """A factory method that creates an :class:`InteractionContextTypes` instance with everything enabled."""
+        """Return an :class:`InteractionContextTypes` instance with everything enabled."""
         self = cls.__new__(cls)
         self.value = all_flags_value(cls.VALID_FLAGS)
         return self

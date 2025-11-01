@@ -95,7 +95,7 @@ class SKU(Hashable):
         before: Optional[SnowflakeTime] = None,
         after: Optional[SnowflakeTime] = None,
     ) -> SubscriptionIterator:
-        """Retrieves an :class:`.AsyncIterator` that enables receiving subscriptions for the SKU.
+        """Retrieve an :class:`.AsyncIterator` that enables receiving subscriptions for the SKU.
 
         All parameters, except ``user``, are optional.
 

@@ -234,7 +234,7 @@ class Embed:
 
     @classmethod
     def from_dict(cls, data: EmbedData) -> Self:
-        """Converts a :class:`dict` to a :class:`Embed` provided it is in the
+        """Convert a :class:`dict` to a :class:`Embed` provided it is in the
         format that Discord expects it to be in.
 
         You can find out about this format in the
@@ -275,7 +275,7 @@ class Embed:
         return self
 
     def copy(self) -> Self:
-        """Returns a shallow copy of the embed."""
+        """Return a shallow copy of the embed."""
         embed = type(self).from_dict(self.to_dict())
 
         # assign manually to keep behavior of default colors
@@ -390,7 +390,7 @@ class Embed:
     def set_footer(
         self, *, text: Any, icon_url: Optional[Any] = MISSING, icon_file: File = MISSING
     ) -> Self:
-        """Sets the footer for the embed content.
+        """Set the footer for the embed content.
 
         This function returns the class instance to allow for fluent-style
         chaining.
@@ -431,7 +431,7 @@ class Embed:
         return self
 
     def remove_footer(self) -> Self:
-        """Clears embed's footer information.
+        """Clear embed's footer information.
 
         This function returns the class instance to allow for fluent-style
         chaining.
@@ -463,7 +463,7 @@ class Embed:
     def set_image(self, *, file: File) -> Self: ...
 
     def set_image(self, url: Optional[Any] = MISSING, *, file: File = MISSING) -> Self:
-        """Sets the image for the embed content.
+        """Set the image for the embed content.
 
         This function returns the class instance to allow for fluent-style
         chaining.
@@ -516,7 +516,7 @@ class Embed:
     def set_thumbnail(self, *, file: File) -> Self: ...
 
     def set_thumbnail(self, url: Optional[Any] = MISSING, *, file: File = MISSING) -> Self:
-        """Sets the thumbnail for the embed content.
+        """Set the thumbnail for the embed content.
 
         This function returns the class instance to allow for fluent-style
         chaining.
@@ -598,7 +598,7 @@ class Embed:
         icon_url: Optional[Any] = MISSING,
         icon_file: File = MISSING,
     ) -> Self:
-        """Sets the author for the embed content.
+        """Set the author for the embed content.
 
         This function returns the class instance to allow for fluent-style
         chaining.
@@ -640,7 +640,7 @@ class Embed:
         return self
 
     def remove_author(self) -> Self:
-        """Clears embed's author information.
+        """Clear embed's author information.
 
         This function returns the class instance to allow for fluent-style
         chaining.
@@ -661,7 +661,7 @@ class Embed:
         return cast("list[_EmbedFieldProxy]", [EmbedProxy(d) for d in (self._fields or [])])
 
     def add_field(self, name: Any, value: Any, *, inline: bool = True) -> Self:
-        """Adds a field to the embed object.
+        """Add a field to the embed object.
 
         This function returns the class instance to allow for fluent-style
         chaining.
@@ -690,7 +690,7 @@ class Embed:
         return self
 
     def insert_field_at(self, index: int, name: Any, value: Any, *, inline: bool = True) -> Self:
-        """Inserts a field before a specified index to the embed.
+        """Insert a field before a specified index to the embed.
 
         This function returns the class instance to allow for fluent-style
         chaining.
@@ -723,11 +723,11 @@ class Embed:
         return self
 
     def clear_fields(self) -> None:
-        """Removes all fields from this embed."""
+        """Remove all fields from this embed."""
         self._fields = None
 
     def remove_field(self, index: int) -> None:
-        """Removes a field at a specified index.
+        """Remove a field at a specified index.
 
         If the index is invalid or out of bounds then the error is
         silently swallowed.
@@ -749,7 +749,7 @@ class Embed:
                 pass
 
     def set_field_at(self, index: int, name: Any, value: Any, *, inline: bool = True) -> Self:
-        """Modifies a field to the embed object.
+        """Modify a field in the embed object.
 
         The index must point to a valid pre-existing field.
 
@@ -791,7 +791,7 @@ class Embed:
         return self
 
     def to_dict(self) -> EmbedData:
-        """Converts this embed object into a dict."""
+        """Convert this embed object into a dict."""
         # add in the raw data into the dict
         result: EmbedData = {}
         if self._footer is not None:
@@ -892,7 +892,7 @@ class Embed:
             return str(url) if url else None
 
     def check_limits(self) -> None:
-        """Checks if this embed fits within the limits dictated by Discord.
+        """Check if this embed fits within the limits dictated by Discord.
         There is also a 6000 character limit across all embeds in a message.
 
         Returns nothing on success, raises :exc:`ValueError` if an attribute exceeds the limits.

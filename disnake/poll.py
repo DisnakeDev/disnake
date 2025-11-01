@@ -150,7 +150,7 @@ class PollAnswer:
     def voters(
         self, *, limit: Optional[int] = 100, after: Optional[Snowflake] = None
     ) -> PollAnswerIterator:
-        """Returns an :class:`AsyncIterator` representing the users that have voted for this answer.
+        """Return an :class:`AsyncIterator` representing the users that have voted for this answer.
 
         The ``after`` parameter must represent a member and meet the :class:`abc.Snowflake` abc.
 

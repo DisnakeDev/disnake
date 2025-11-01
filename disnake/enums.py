@@ -2468,7 +2468,7 @@ def create_unknown_value(cls: type[T], val: Any) -> T:
 
 
 def try_enum(cls: type[T], val: Any) -> T:
-    """A function that tries to turn the value into enum ``cls``.
+    """Try to turn the value into enum ``cls``.
 
     If it fails it returns a proxy invalid value instead.
     """
@@ -2479,7 +2479,7 @@ def try_enum(cls: type[T], val: Any) -> T:
 
 
 def enum_if_int(cls: type[T], val: Any) -> T:
-    """A function that tries to turn the value into enum ``cls``.
+    """Return an enum value from class ``cls`` if val is an int, otherwise return val.
 
     If it fails it returns a proxy invalid value instead.
     """

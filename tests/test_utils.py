@@ -46,7 +46,7 @@ def test_cached_property() -> None:
     class Test:
         @utils.cached_property
         def prop(self) -> object:
-            """Does things"""
+            """Do things"""
             return object()
 
     inst = Test()
@@ -61,7 +61,7 @@ def test_cached_slot_property() -> None:
 
         @utils.cached_slot_property("_cs_prop")
         def prop(self) -> object:
-            """Does things"""
+            """Do things"""
             return object()
 
     inst = Test()
@@ -79,7 +79,7 @@ def test_parse_time() -> None:
 
 def test_copy_doc() -> None:
     def func(num: int, *, arg: str) -> float:
-        """Returns the best number"""
+        """Return the best number"""
         ...
 
     @utils.copy_doc(func)
@@ -687,7 +687,7 @@ def test_parse_docstring_param(docstring: str, expected) -> None:
 
 def test_parse_docstring_localizations() -> None:
     def f() -> None:
-        """Does stuff. {{cool_key}}
+        """Do stuff. {{cool_key}}
 
         Parameters
         ----------

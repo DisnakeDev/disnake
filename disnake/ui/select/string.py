@@ -210,7 +210,7 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
         emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
         default: bool = False,
     ) -> None:
-        """Adds an option to the select menu.
+        """Add an option to the select menu.
 
         To append a pre-existing :class:`.SelectOption` use the
         :meth:`append_option` method instead.
@@ -248,7 +248,7 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
         self.append_option(option)
 
     def append_option(self, option: SelectOption) -> None:
-        """Appends an option to the select menu.
+        """Append an option to the select menu.
 
         Parameters
         ----------
@@ -296,7 +296,7 @@ def string_select(
 def string_select(
     cls: Callable[..., S_co] = StringSelect[Any], **kwargs: Any
 ) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]:
-    """A decorator that attaches a string select menu to a component.
+    """Attach a string select menu to a component.
 
     The function being decorated should have three parameters, ``self`` representing
     the :class:`disnake.ui.View`, the :class:`disnake.ui.StringSelect` that was

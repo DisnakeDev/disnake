@@ -245,7 +245,7 @@ def _load_default() -> bool:
 
 
 def load_opus(name: str) -> None:
-    """Loads the libopus shared library for use with voice.
+    """Load the libopus shared library for use with voice.
 
     If this function is not called then the library uses the function
     :func:`ctypes.util.find_library` and then loads that one if available.
@@ -284,7 +284,7 @@ def load_opus(name: str) -> None:
 
 
 def is_loaded() -> bool:
-    """Function to check if opus lib is successfully loaded either
+    """Check if opus lib is successfully loaded either
     via the :func:`ctypes.util.find_library` call of :func:`load_opus`.
 
     This must return ``True`` for voice to work.
@@ -417,21 +417,21 @@ class Decoder(_OpusStruct):
 
     @staticmethod
     def packet_get_nb_frames(data: bytes) -> int:
-        """Gets the number of frames in an Opus packet"""
+        """Get the number of frames in an Opus packet"""
         return _lib.opus_packet_get_nb_frames(data, len(data))
 
     @staticmethod
     def packet_get_nb_channels(data: bytes) -> int:
-        """Gets the number of channels in an Opus packet"""
+        """Get the number of channels in an Opus packet"""
         return _lib.opus_packet_get_nb_channels(data)
 
     @classmethod
     def packet_get_samples_per_frame(cls, data: bytes) -> int:
-        """Gets the number of samples per frame from an Opus packet"""
+        """Get the number of samples per frame from an Opus packet"""
         return _lib.opus_packet_get_samples_per_frame(data, cls.SAMPLING_RATE)
 
     def _set_gain(self, adjustment: int) -> int:
-        """Configures decoder gain adjustment.
+        """Configure decoder gain adjustment.
 
         Scales the decoded output by a factor specified in Q8 dB units.
         This has a maximum range of -32768 to 32767 inclusive, and returns
@@ -443,16 +443,16 @@ class Decoder(_OpusStruct):
         return _lib.opus_decoder_ctl(self._state, CTL_SET_GAIN, adjustment)
 
     def set_gain(self, dB: float) -> int:
-        """Sets the decoder gain in dB, from -128 to 128."""
+        """Set the decoder gain in dB, from -128 to 128."""
         dB_Q8 = max(-32768, min(32767, round(dB * 256)))  # dB * 2^n where n is 8 (Q8)
         return self._set_gain(dB_Q8)
 
     def set_volume(self, mult: float) -> int:
-        """Sets the output volume as a float percent, i.e. 0.5 for 50%, 1.75 for 175%, etc."""
+        """Set the output volume as a float percent, i.e. 0.5 for 50%, 1.75 for 175%, etc."""
         return self.set_gain(20 * math.log10(mult))  # amplitude ratio
 
     def _get_last_packet_duration(self) -> int:
-        """Gets the duration (in samples) of the last packet successfully decoded or concealed."""
+        """Get the duration (in samples) of the last packet successfully decoded or concealed."""
         ret = ctypes.c_int32()
         _lib.opus_decoder_ctl(self._state, CTL_LAST_PACKET_DURATION, ctypes.byref(ret))
         return ret.value

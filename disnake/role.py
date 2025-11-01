@@ -293,7 +293,7 @@ class Role(Hashable):
         self._flags: int = data.get("flags", 0)
 
     def is_default(self) -> bool:
-        """Checks if the role is the default role.
+        """Check if the role is the default role.
 
         :return type: :class:`bool`
         """

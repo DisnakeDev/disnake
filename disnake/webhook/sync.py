@@ -539,7 +539,7 @@ class SyncWebhookMessage(Message):
         )
 
     def delete(self, *, delay: Optional[float] = None) -> None:
-        """Deletes the message.
+        """Delete the message.
 
         .. versionchanged:: 2.6
             Raises :exc:`WebhookTokenMissing` instead of ``InvalidArgument``.
@@ -647,7 +647,7 @@ class SyncWebhook(BaseWebhook):
     def partial(
         cls, id: int, token: str, *, session: Session = MISSING, bot_token: Optional[str] = None
     ) -> SyncWebhook:
-        """Creates a partial :class:`SyncWebhook`.
+        """Create a partial :class:`SyncWebhook`.
 
         Parameters
         ----------
@@ -689,7 +689,7 @@ class SyncWebhook(BaseWebhook):
     def from_url(
         cls, url: str, *, session: Session = MISSING, bot_token: Optional[str] = None
     ) -> SyncWebhook:
-        """Creates a partial :class:`SyncWebhook` from a webhook URL.
+        """Create a partial :class:`SyncWebhook` from a webhook URL.
 
         .. versionchanged:: 2.6
             Raises :exc:`ValueError` instead of ``InvalidArgument``.
@@ -738,7 +738,7 @@ class SyncWebhook(BaseWebhook):
         return cls(data, session, token=bot_token)
 
     def fetch(self, *, prefer_auth: bool = True) -> SyncWebhook:
-        """Fetches the current webhook.
+        """Fetch the current webhook.
 
         This could be used to get a full webhook from a partial webhook.
 
@@ -784,7 +784,7 @@ class SyncWebhook(BaseWebhook):
         return SyncWebhook(data, self.session, token=self.auth_token, state=self._state)
 
     def delete(self, *, reason: Optional[str] = None, prefer_auth: bool = True) -> None:
-        """Deletes this Webhook.
+        """Delete this Webhook.
 
         .. versionchanged:: 2.6
             Raises :exc:`WebhookTokenMissing` instead of ``InvalidArgument``.
@@ -993,7 +993,7 @@ class SyncWebhook(BaseWebhook):
         applied_tags: Sequence[Snowflake] = MISSING,
         wait: bool = False,
     ) -> Optional[SyncWebhookMessage]:
-        """Sends a message using the webhook.
+        """Send a message using the webhook.
 
         The content must be a type that can convert to a string through ``str(content)``.
 
@@ -1157,7 +1157,7 @@ class SyncWebhook(BaseWebhook):
     def fetch_message(
         self, id: int, /, *, thread: Optional[Snowflake] = None
     ) -> SyncWebhookMessage:
-        """Retrieves a single :class:`SyncWebhookMessage` owned by this webhook.
+        """Retrieve a single :class:`SyncWebhookMessage` owned by this webhook.
 
         .. versionadded:: 2.0
 
@@ -1326,7 +1326,7 @@ class SyncWebhook(BaseWebhook):
         return self._create_message(data, thread=thread)
 
     def delete_message(self, message_id: int, /, *, thread: Optional[Snowflake] = None) -> None:
-        """Deletes a message owned by this webhook.
+        """Delete a message owned by this webhook.
 
         This is a lower level interface to :meth:`WebhookMessage.delete` in case
         you only have an ID.

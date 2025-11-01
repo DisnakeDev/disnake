@@ -316,7 +316,7 @@ class BaseUser(_UserTag):
         return None
 
     def mentioned_in(self, message: Message) -> bool:
-        """Checks if the user is mentioned in the specified message.
+        """Check if the user is mentioned in the specified message.
 
         Parameters
         ----------

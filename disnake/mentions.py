@@ -90,7 +90,7 @@ class AllowedMentions:
 
     @classmethod
     def all(cls) -> Self:
-        """A factory method that returns a :class:`AllowedMentions` with all fields explicitly set to ``True``
+        """Return a :class:`AllowedMentions` with all fields explicitly set to ``True``
 
         .. versionadded:: 1.5
         """
@@ -98,7 +98,7 @@ class AllowedMentions:
 
     @classmethod
     def none(cls) -> Self:
-        """A factory method that returns a :class:`AllowedMentions` with all fields set to ``False``
+        """Return a :class:`AllowedMentions` with all fields set to ``False``
 
         .. versionadded:: 1.5
         """
@@ -106,7 +106,7 @@ class AllowedMentions:
 
     @classmethod
     def from_message(cls, message: Message) -> Self:
-        """A factory method that returns a :class:`AllowedMentions` derived from the current :class:`.Message` state.
+        """Return a :class:`AllowedMentions` derived from the current :class:`.Message` state.
 
         Note that this is not what AllowedMentions the message was sent with, but what the message actually mentioned.
         For example, a message that successfully mentioned everyone will have :attr:`~AllowedMentions.everyone` set to ``True``.

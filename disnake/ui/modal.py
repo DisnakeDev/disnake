@@ -122,7 +122,7 @@ class Modal:
     def append_component(
         self, component: Union[ModalTopLevelComponentInput, list[ModalTopLevelComponentInput]]
     ) -> None:
-        """Adds one or multiple component(s) to the modal.
+        """Add one or multiple component(s) to the modal.
 
         Parameters
         ----------
@@ -172,7 +172,7 @@ class Modal:
         min_length: Optional[int] = None,
         max_length: Optional[int] = None,
     ) -> None:
-        """Creates and adds a text input component to the modal.
+        """Create and adds a text input component to the modal.
 
         To append an existing component instance, use :meth:`append_component`.
 

@@ -429,7 +429,7 @@ class Widget:
         await self._state.http.edit_widget(self.id, payload, reason=reason)
 
     def image_url(self, style: WidgetStyle = WidgetStyle.shield) -> str:
-        """Returns an URL to the widget's .png image.
+        """Return an URL to the widget's .png image.
 
         .. versionadded:: 2.5
 

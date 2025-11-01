@@ -95,7 +95,7 @@ class PartialEmoji(_EmojiTag, AssetMixin):
 
     @classmethod
     def from_str(cls, value: str) -> Self:
-        """Converts a Discord string representation of an emoji to a :class:`PartialEmoji`.
+        """Convert a Discord string representation of an emoji to a :class:`PartialEmoji`.
 
         The formats accepted are:
 

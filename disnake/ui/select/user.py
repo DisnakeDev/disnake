@@ -192,7 +192,7 @@ def user_select(
 def user_select(
     cls: Callable[..., S_co] = UserSelect[Any], **kwargs: Any
 ) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]:
-    """A decorator that attaches a user select menu to a component.
+    """Attach a user select menu to a component.
 
     The function being decorated should have three parameters, ``self`` representing
     the :class:`disnake.ui.View`, the :class:`disnake.ui.UserSelect` that was

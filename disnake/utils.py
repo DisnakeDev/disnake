@@ -319,7 +319,7 @@ def oauth_url(
     disable_guild_select: bool = False,
     integration_type: ApplicationIntegrationTypeLiteral = MISSING,
 ) -> str:
-    """A helper function that returns the OAuth2 URL for authorizing the application.
+    """Return the OAuth2 URL for authorizing the application.
 
     Parameters
     ----------
@@ -383,7 +383,7 @@ def snowflake_time(id: int) -> datetime.datetime:
 
 
 def time_snowflake(dt: datetime.datetime, high: bool = False) -> int:
-    """Returns a numeric snowflake pretending to be created at the given date.
+    """Return a numeric snowflake pretending to be created at the given date.
 
     When using as the lower end of a range, use ``time_snowflake(high=False) - 1``
     to be inclusive, ``high=True`` to be exclusive.
@@ -409,7 +409,7 @@ def time_snowflake(dt: datetime.datetime, high: bool = False) -> int:
 
 
 def find(predicate: Callable[[T], Any], seq: Iterable[T]) -> Optional[T]:
-    """A helper to return the first element found in the sequence
+    """Return the first element found in the sequence
     that meets the predicate. For example: ::
 
         member = disnake.utils.find(lambda m: m.name == 'Mighty', channel.guild.members)
@@ -434,7 +434,7 @@ def find(predicate: Callable[[T], Any], seq: Iterable[T]) -> Optional[T]:
 
 
 def get(iterable: Iterable[T], **attrs: Any) -> Optional[T]:
-    """A helper that returns the first element in the iterable that meets
+    """Return the first element in the iterable that meets
     all the traits passed in ``attrs``. This is an alternative for
     :func:`~disnake.utils.find`.
 
@@ -672,7 +672,7 @@ async def sleep_until(when: datetime.datetime, result: Optional[T] = None) -> Op
 
 
 def utcnow() -> datetime.datetime:
-    """A helper function to return an aware UTC datetime representing the current time.
+    """Return an aware UTC datetime representing the current time.
 
     This should be preferred to :meth:`datetime.datetime.utcnow` since it is an aware
     datetime, compared to the naive datetime in the standard library.
@@ -730,7 +730,7 @@ _IS_ASCII = re.compile(r"^[\x00-\x7f]+$")
 
 
 def _string_width(string: str, *, _IS_ASCII=_IS_ASCII) -> int:
-    """Returns string's width."""
+    """Return string's width."""
     match = _IS_ASCII.match(string)
     if match:
         return match.endpos
@@ -753,7 +753,7 @@ def resolve_invite(
 def resolve_invite(
     invite: Union[Invite, str], *, with_params: bool = False
 ) -> Union[str, tuple[str, dict[str, str]]]:
-    """Resolves an invite from a :class:`~disnake.Invite`, URL or code.
+    """Resolve an invite from a :class:`~disnake.Invite`, URL or code.
 
     Parameters
     ----------
@@ -789,7 +789,7 @@ def resolve_invite(
 
 
 def resolve_template(code: Union[Template, str]) -> str:
-    """Resolves a template code from a :class:`~disnake.Template`, URL or code.
+    """Resolve a template code from a :class:`~disnake.Template`, URL or code.
 
     .. versionadded:: 1.4
 
@@ -831,7 +831,7 @@ _MARKDOWN_STOCK_REGEX = rf"(?P<markdown>[_\\~|\*`]|{_MARKDOWN_ESCAPE_COMMON})"
 
 
 def remove_markdown(text: str, *, ignore_links: bool = True) -> str:
-    """A helper function that removes markdown characters.
+    """Remove markdown characters.
 
     .. versionadded:: 1.7
 
@@ -865,7 +865,7 @@ def remove_markdown(text: str, *, ignore_links: bool = True) -> str:
 
 
 def escape_markdown(text: str, *, as_needed: bool = False, ignore_links: bool = True) -> str:
-    """A helper function that escapes Discord's markdown.
+    """Escape Discord's markdown.
 
     Parameters
     ----------
@@ -907,7 +907,7 @@ def escape_markdown(text: str, *, as_needed: bool = False, ignore_links: bool = 
 
 
 def escape_mentions(text: str) -> str:
-    """A helper function that escapes everyone, here, role, and user mentions.
+    """Escape everyone, here, role, and user mentions.
 
     .. note::
 
@@ -1107,7 +1107,7 @@ def as_chunks(iterator: AsyncIterator[T], max_size: int) -> AsyncIterator[list[T
 
 
 def as_chunks(iterator: _Iter[T], max_size: int) -> _Iter[list[T]]:
-    """A helper function that collects an iterator into chunks of a given size.
+    """Collect an iterator into chunks of a given size.
 
     .. versionadded:: 2.0
 
@@ -1394,7 +1394,7 @@ TimestampStyle = Literal["f", "F", "d", "D", "t", "T", "R"]
 
 
 def format_dt(dt: Union[datetime.datetime, float], /, style: TimestampStyle = "f") -> str:
-    """A helper function to format a :class:`datetime.datetime`, :class:`int` or :class:`float` for presentation within Discord.
+    """Format a :class:`datetime.datetime`, :class:`int` or :class:`float` for presentation within Discord.
 
     This allows for a locale-independent way of presenting data using Discord specific Markdown.
 
@@ -1479,7 +1479,7 @@ def search_directory(path: str) -> Iterator[str]:
 
 
 def as_valid_locale(locale: str) -> Optional[str]:
-    """Converts the provided locale name to a name that is valid for use with the API,
+    """Convert the provided locale name to a name that is valid for use with the API,
     for example by returning ``en-US`` for ``en_US``.
     Returns :data:`None` for invalid names.
 

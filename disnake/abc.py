@@ -531,7 +531,7 @@ class GuildChannel(ABC):
         return utils.snowflake_time(self.id)
 
     def overwrites_for(self, obj: Union[Role, User]) -> PermissionOverwrite:
-        """Returns the channel-specific overwrites for a member or a role.
+        """Return the channel-specific overwrites for a member or a role.
 
         Parameters
         ----------
@@ -662,7 +662,7 @@ class GuildChannel(ABC):
         *,
         ignore_timeout: bool = MISSING,
     ) -> Permissions:
-        """Handles permission resolution for the :class:`~disnake.Member`
+        """Handle permission resolution for the :class:`~disnake.Member`
         or :class:`~disnake.Role`.
 
         This function takes into consideration the following cases:
@@ -1831,7 +1831,7 @@ class Messageable:
         await self._state.http.send_typing(channel.id)
 
     def typing(self) -> Typing:
-        """Returns a context manager that allows you to type for an indefinite period of time.
+        """Return a context manager that allows you to type for an indefinite period of time.
 
         This is useful for denoting long computations in your bot.
 
@@ -1882,7 +1882,7 @@ class Messageable:
     def pins(
         self, *, limit: Optional[int] = 50, before: Optional[SnowflakeTime] = None
     ) -> ChannelPinsIterator:
-        """Returns an :class:`.AsyncIterator` that enables receiving the destination's pinned messages.
+        """Return an :class:`.AsyncIterator` that enables receiving the destination's pinned messages.
 
         You must have the :attr:`.Permissions.read_message_history` and :attr:`.Permissions.view_channel` permissions to use this.
 
@@ -1947,7 +1947,7 @@ class Messageable:
         around: Optional[SnowflakeTime] = None,
         oldest_first: Optional[bool] = None,
     ) -> HistoryIterator:
-        """Returns an :class:`.AsyncIterator` that enables receiving the destination's message history.
+        """Return an :class:`.AsyncIterator` that enables receiving the destination's message history.
 
         You must have :attr:`.Permissions.read_message_history` permission to use this.
 

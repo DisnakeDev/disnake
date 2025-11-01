@@ -998,7 +998,7 @@ def normalize_components(
 def normalize_components(
     components: ComponentInput[ActionRowChildT, NonActionRowChildT], /, modal: bool = False
 ) -> Sequence[Union[ActionRow[ActionRowChildT], NonActionRowChildT]]:
-    """Wraps consecutive actionrow-compatible components or lists in `ActionRow`s,
+    """Wrap consecutive actionrow-compatible components or lists in `ActionRow`s,
     while respecting the width limit. Other components are returned as-is.
 
     If `modal` is `True`, only wraps `TextInput`s in action rows, and returns other (otherwise

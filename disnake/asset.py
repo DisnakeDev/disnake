@@ -404,7 +404,7 @@ class Asset(AssetMixin):
         format: ValidAssetFormatTypes = MISSING,
         static_format: ValidStaticFormatTypes = MISSING,
     ) -> Asset:
-        """Returns a new asset with the passed components replaced.
+        """Return a new asset with the passed components replaced.
 
         .. versionchanged:: 2.6
             Raises :exc:`ValueError` instead of ``InvalidArgument``.
@@ -462,7 +462,7 @@ class Asset(AssetMixin):
         return Asset(state=self._state, url=url_str, key=self._key, animated=self._animated)
 
     def with_size(self, size: int, /) -> Asset:
-        """Returns a new asset with the specified size.
+        """Return a new asset with the specified size.
 
         .. versionchanged:: 2.6
             Raises :exc:`ValueError` instead of ``InvalidArgument``.
@@ -490,7 +490,7 @@ class Asset(AssetMixin):
         return Asset(state=self._state, url=url, key=self._key, animated=self._animated)
 
     def with_format(self, format: ValidAssetFormatTypes, /) -> Asset:
-        """Returns a new asset with the specified format.
+        """Return a new asset with the specified format.
 
         .. versionchanged:: 2.6
             Raises :exc:`ValueError` instead of ``InvalidArgument``.
@@ -525,7 +525,7 @@ class Asset(AssetMixin):
         return Asset(state=self._state, url=url_str, key=self._key, animated=self._animated)
 
     def with_static_format(self, format: ValidStaticFormatTypes, /) -> Asset:
-        """Returns a new asset with the specified static format.
+        """Return a new asset with the specified static format.
 
         This only changes the format if the underlying asset is
         not animated. Otherwise, the asset is not changed.

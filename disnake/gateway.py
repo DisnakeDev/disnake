@@ -402,7 +402,7 @@ class DiscordWebSocket:
         sequence: Optional[int] = None,
         resume: bool = False,
     ) -> Self:
-        """Creates a main websocket for Discord from a :class:`Client`.
+        """Create a main websocket for Discord from a :class:`Client`.
 
         This is for internal use only.
         """
@@ -462,7 +462,7 @@ class DiscordWebSocket:
         predicate: Callable[[dict[str, Any]], bool],
         result: Optional[Callable[[dict[str, Any]], T]] = None,
     ) -> asyncio.Future[T]:
-        """Waits for a DISPATCH'd event that meets the predicate.
+        """Wait for a DISPATCH'd event that meets the predicate.
 
         Parameters
         ----------
@@ -486,7 +486,7 @@ class DiscordWebSocket:
         return future
 
     async def identify(self) -> None:
-        """Sends the IDENTIFY packet."""
+        """Send the IDENTIFY packet."""
         state = self._connection
 
         payload: IdentifyCommand = {
@@ -519,7 +519,7 @@ class DiscordWebSocket:
         _log.info("Shard ID %s has sent the IDENTIFY payload.", self.shard_id)
 
     async def resume(self) -> None:
-        """Sends the RESUME packet."""
+        """Send the RESUME packet."""
         # these should never be None if resuming, but instead of asserting
         # we just send those values and handle the INVALIDATE_SESSION
         seq: int = self.sequence  # pyright: ignore[reportAssignmentType]
@@ -703,7 +703,7 @@ class DiscordWebSocket:
         return code not in (1000, 4004, 4010, 4011, 4012, 4013, 4014)
 
     async def poll_event(self) -> None:
-        """Polls for a DISPATCH event and handles the general gateway loop.
+        """Poll for a DISPATCH event and handles the general gateway loop.
 
         Raises
         ------
@@ -971,7 +971,7 @@ class DiscordVoiceWebSocket:
         sequence: Optional[int] = None,
         hook: Optional[HookFunc] = None,
     ) -> Self:
-        """Creates a voice websocket for the :class:`VoiceClient`."""
+        """Create a voice websocket for the :class:`VoiceClient`."""
         gateway = f"wss://{client.endpoint}/?v={_VOICE_VERSION}"
         http = client._state.http
         socket = await http.ws_connect(gateway, compress=15)

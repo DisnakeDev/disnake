@@ -195,7 +195,7 @@ class View:
 
     @classmethod
     def from_message(cls, message: Message, /, *, timeout: Optional[float] = 180.0) -> View:
-        """Converts a message's components into a :class:`View`.
+        """Convert a message's components into a :class:`View`.
 
         The :attr:`.Message.components` of a message are read-only
         and separate types from those in the ``disnake.ui`` namespace.
@@ -240,7 +240,7 @@ class View:
         return None
 
     def add_item(self, item: Item) -> Self:
-        """Adds an item to the view.
+        """Add an item to the view.
 
         This function returns the class instance to allow for fluent-style
         chaining.
@@ -273,7 +273,7 @@ class View:
         return self
 
     def remove_item(self, item: Item) -> Self:
-        """Removes an item from the view.
+        """Remove an item from the view.
 
         This function returns the class instance to allow for fluent-style
         chaining.
@@ -292,7 +292,7 @@ class View:
         return self
 
     def clear_items(self) -> Self:
-        """Removes all items from the view.
+        """Remove all items from the view.
 
         This function returns the class instance to allow for fluent-style
         chaining.
@@ -431,7 +431,7 @@ class View:
         self.children = children
 
     def stop(self) -> None:
-        """Stops listening to interaction events from this view.
+        """Stop listening to interaction events from this view.
 
         This operation cannot be undone.
         """
@@ -473,7 +473,7 @@ class View:
         return self.timeout is None and all(item.is_persistent() for item in self.children)
 
     async def wait(self) -> bool:
-        """Waits until the view has finished interacting.
+        """Wait until the view has finished interacting.
 
         A view is considered finished when :meth:`stop` is called
         or it times out.

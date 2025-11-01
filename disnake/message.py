@@ -675,7 +675,7 @@ class MessageReference:
         type: MessageReferenceType = MessageReferenceType.default,
         fail_if_not_exists: bool = True,
     ) -> Self:
-        """Creates a :class:`MessageReference` from an existing :class:`~disnake.Message`.
+        """Create a :class:`MessageReference` from an existing :class:`~disnake.Message`.
 
         .. versionadded:: 1.6
 
@@ -2522,7 +2522,7 @@ class Message(Hashable):
         type: MessageReferenceType = MessageReferenceType.default,
         fail_if_not_exists: bool = True,
     ) -> MessageReference:
-        """Creates a :class:`~disnake.MessageReference` from the current message.
+        """Create a :class:`~disnake.MessageReference` from the current message.
 
         .. versionadded:: 1.6
 

@@ -383,7 +383,7 @@ class Option:
         name: LocalizedRequired,
         value: ApplicationCommandOptionChoiceValue,
     ) -> None:
-        """Adds an OptionChoice to the list of current choices,
+        """Add an OptionChoice to the list of current choices,
         parameters are the same as for :class:`OptionChoice`.
         """
         self.choices.append(
@@ -408,7 +408,7 @@ class Option:
         min_length: Optional[int] = None,
         max_length: Optional[int] = None,
     ) -> None:
-        """Adds an option to the current list of options,
+        """Add an option to the current list of options,
         parameters are the same as for :class:`Option`.
         """
         type = type or OptionType.string
@@ -1111,7 +1111,7 @@ class SlashCommand(ApplicationCommand):
         min_length: Optional[int] = None,
         max_length: Optional[int] = None,
     ) -> None:
-        """Adds an option to the current list of options,
+        """Add an option to the current list of options,
         parameters are the same as for :class:`Option`
         """
         self.options.append(

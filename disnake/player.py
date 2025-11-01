@@ -70,7 +70,7 @@ class AudioSource:
     """
 
     def read(self) -> bytes:
-        """Reads 20ms worth of audio.
+        """Read 20ms worth of audio.
 
         Subclasses must implement this.
 
@@ -90,11 +90,11 @@ class AudioSource:
         raise NotImplementedError
 
     def is_opus(self) -> bool:
-        """Checks if the audio source is already encoded in Opus."""
+        """Check if the audio source is already encoded in Opus."""
         return False
 
     def cleanup(self) -> None:
-        """Called when clean-up is needed to be done.
+        """Call when clean-up is needed to be done.
 
         Useful for clearing buffer data or processes after
         it is done playing audio.

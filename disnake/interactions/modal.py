@@ -170,7 +170,7 @@ class ModalInteraction(Interaction[ClientT]):
     def walk_raw_components(
         self,
     ) -> Generator[ModalInteractionInnerComponentDataPayload, None, None]:
-        """Returns a generator that yields raw component data of the innermost/non-layout
+        """Return a generator that yields raw component data of the innermost/non-layout
         components one by one, as provided by Discord.
         This does not contain all fields of the components due to API limitations.
 

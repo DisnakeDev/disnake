@@ -218,7 +218,7 @@ class LocalizationValue:
         raise ValueError(msg)
 
     def _link(self, store: LocalizationProtocol) -> None:
-        """Loads localizations from the specified store if this object has a key."""
+        """Load localizations from the specified store if this object has a key."""
         if self._key is not None:
             self._data = store.get(self._key)
 
@@ -264,7 +264,7 @@ class LocalizationProtocol(ABC):
 
     @abstractmethod
     def get(self, key: str) -> Optional[dict[str, str]]:
-        """Returns localizations for the specified key.
+        """Return localizations for the specified key.
 
         Parameters
         ----------
@@ -287,7 +287,7 @@ class LocalizationProtocol(ABC):
 
     # subtypes don't have to implement this
     def load(self, path: Union[str, os.PathLike[str]]) -> None:
-        """Adds localizations from the provided path.
+        """Add localizations from the provided path.
 
         Parameters
         ----------
@@ -303,7 +303,7 @@ class LocalizationProtocol(ABC):
 
     # subtypes don't have to implement this
     def reload(self) -> None:  # noqa: B027
-        """Clears localizations and reloads all previously loaded sources again.
+        """Clear localizations and reloads all previously loaded sources again.
         If an exception occurs, the previous data gets restored and the exception is re-raised.
         """
         pass
@@ -327,7 +327,7 @@ class LocalizationStore(LocalizationProtocol):
         self._paths: set[Path] = set()
 
     def get(self, key: str) -> Optional[dict[str, str]]:
-        """Returns localizations for the specified key.
+        """Return localizations for the specified key.
 
         Parameters
         ----------
@@ -352,7 +352,7 @@ class LocalizationStore(LocalizationProtocol):
         return data
 
     def load(self, path: Union[str, os.PathLike[str]]) -> None:
-        """Adds localizations from the provided path to the store.
+        """Add localizations from the provided path to the store.
         If the path points to a file, the file gets loaded.
         If it's a directory, all ``.json`` files in that directory get loaded (non-recursive).
 
@@ -382,7 +382,7 @@ class LocalizationStore(LocalizationProtocol):
         self._paths.add(path)
 
     def reload(self) -> None:
-        """Clears localizations and reloads all previously loaded files/directories again.
+        """Clear localizations and reloads all previously loaded files/directories again.
         If an exception occurs, the previous data gets restored and the exception is re-raised.
         See :func:`~LocalizationStore.load` for possible raised exceptions.
         """
