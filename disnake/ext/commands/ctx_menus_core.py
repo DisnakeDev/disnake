@@ -33,7 +33,7 @@ __all__ = ("InvokableUserCommand", "InvokableMessageCommand", "user_command", "m
 
 
 class InvokableUserCommand(InvokableApplicationCommand):
-    """A class that implements the protocol for a bot user command (context menu).
+    r"""A class that implements the protocol for a bot user command (context menu).
 
     These are not created manually, instead they are created via the
     decorator or functional interface.
@@ -50,18 +50,18 @@ class InvokableUserCommand(InvokableApplicationCommand):
         The coroutine function that is executed when the user command is called.
     cog: :class:`Cog` | :data:`None`
         The cog that this user command belongs to. :data:`None` if there isn't one.
-    checks: :class:`list`\\[:class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
+    checks: :class:`list`\[:class:`~collections.abc.Callable`\[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
         A list of predicates that verifies if the command could be executed
         with the given :class:`.ApplicationCommandInteraction` as the sole parameter. If an exception
         is necessary to be thrown to signal failure, then one inherited from
         :exc:`.CommandError` should be used. Note that if the checks fail then
         :exc:`.CheckFailure` exception is raised to the :func:`.on_user_command_error`
         event.
-    guild_ids: :class:`tuple`\\[:class:`int`, ...] | :data:`None`
+    guild_ids: :class:`tuple`\[:class:`int`, ...] | :data:`None`
         The list of IDs of the guilds where the command is synced. :data:`None` if this command is global.
     auto_sync: :class:`bool`
         Whether to automatically register the command.
-    extras: :class:`dict`\\[:class:`str`, :data:`~typing.Any`]
+    extras: :class:`dict`\[:class:`str`, :data:`~typing.Any`]
         A dict of user provided extras to attach to the command.
 
         .. note::
@@ -144,7 +144,7 @@ class InvokableUserCommand(InvokableApplicationCommand):
 
 
 class InvokableMessageCommand(InvokableApplicationCommand):
-    """A class that implements the protocol for a bot message command (context menu).
+    r"""A class that implements the protocol for a bot message command (context menu).
 
     These are not created manually, instead they are created via the
     decorator or functional interface.
@@ -161,18 +161,18 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         The coroutine function that is executed when the message command is called.
     cog: :class:`Cog` | :data:`None`
         The cog that this message command belongs to. :data:`None` if there isn't one.
-    checks: :class:`list`\\[:class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
+    checks: :class:`list`\[:class:`~collections.abc.Callable`\[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
         A list of predicates that verifies if the command could be executed
         with the given :class:`.ApplicationCommandInteraction` as the sole parameter. If an exception
         is necessary to be thrown to signal failure, then one inherited from
         :exc:`.CommandError` should be used. Note that if the checks fail then
         :exc:`.CheckFailure` exception is raised to the :func:`.on_message_command_error`
         event.
-    guild_ids: :class:`tuple`\\[:class:`int`, ...] | :data:`None`
+    guild_ids: :class:`tuple`\[:class:`int`, ...] | :data:`None`
         The list of IDs of the guilds where the command is synced. :data:`None` if this command is global.
     auto_sync: :class:`bool`
         Whether to automatically register the command.
-    extras: :class:`dict`\\[:class:`str`, :data:`~typing.Any`]
+    extras: :class:`dict`\[:class:`str`, :data:`~typing.Any`]
         A dict of user provided extras to attach to the command.
 
         .. note::
@@ -267,7 +267,7 @@ def user_command(
     extras: dict[str, Any] | None = None,
     **kwargs: Any,
 ) -> Callable[[InteractionCommandCallback[CogT, UserCommandInteraction, P]], InvokableUserCommand]:
-    """A shortcut decorator that builds a user command.
+    r"""A shortcut decorator that builds a user command.
 
     Parameters
     ----------
@@ -316,10 +316,10 @@ def user_command(
 
     auto_sync: :class:`bool`
         Whether to automatically register the command. Defaults to ``True``.
-    guild_ids: :class:`~collections.abc.Sequence`\\[:class:`int`]
+    guild_ids: :class:`~collections.abc.Sequence`\[:class:`int`]
         If specified, the client will register the command in these guilds.
         Otherwise, this command will be registered globally.
-    extras: :class:`dict`\\[:class:`str`, :data:`~typing.Any`]
+    extras: :class:`dict`\[:class:`str`, :data:`~typing.Any`]
         A dict of user provided extras to attach to the command.
 
         .. note::
@@ -329,7 +329,7 @@ def user_command(
 
     Returns
     -------
-    :class:`~collections.abc.Callable`\\[..., :class:`InvokableUserCommand`]
+    :class:`~collections.abc.Callable`\[..., :class:`InvokableUserCommand`]
         A decorator that converts the provided method into an InvokableUserCommand and returns it.
     """
 
@@ -378,7 +378,7 @@ def message_command(
     [InteractionCommandCallback[CogT, MessageCommandInteraction, P]],
     InvokableMessageCommand,
 ]:
-    """A shortcut decorator that builds a message command.
+    r"""A shortcut decorator that builds a message command.
 
     Parameters
     ----------
@@ -427,10 +427,10 @@ def message_command(
 
     auto_sync: :class:`bool`
         Whether to automatically register the command. Defaults to ``True``.
-    guild_ids: :class:`~collections.abc.Sequence`\\[:class:`int`]
+    guild_ids: :class:`~collections.abc.Sequence`\[:class:`int`]
         If specified, the client will register the command in these guilds.
         Otherwise, this command will be registered globally.
-    extras: :class:`dict`\\[:class:`str`, :data:`~typing.Any`]
+    extras: :class:`dict`\[:class:`str`, :data:`~typing.Any`]
         A dict of user provided extras to attach to the command.
 
         .. note::
@@ -440,7 +440,7 @@ def message_command(
 
     Returns
     -------
-    :class:`~collections.abc.Callable`\\[..., :class:`InvokableMessageCommand`]
+    :class:`~collections.abc.Callable`\[..., :class:`InvokableMessageCommand`]
         A decorator that converts the provided method into an InvokableMessageCommand and then returns it.
     """
 

@@ -87,17 +87,17 @@ class RawMessageDeleteEvent(_RawReprMixin):
 
 
 class RawBulkMessageDeleteEvent(_RawReprMixin):
-    """Represents the event payload for an :func:`on_raw_bulk_message_delete` event.
+    r"""Represents the event payload for an :func:`on_raw_bulk_message_delete` event.
 
     Attributes
     ----------
-    message_ids: :class:`set`\\[:class:`int`]
+    message_ids: :class:`set`\[:class:`int`]
         A :class:`set` of the message IDs that were deleted.
     channel_id: :class:`int`
         The channel ID where the deletion took place.
     guild_id: :class:`int` | :data:`None`
         The guild ID where the deletion took place, if applicable.
-    cached_messages: :class:`list`\\[:class:`Message`]
+    cached_messages: :class:`list`\[:class:`Message`]
         The cached messages, if found in the internal message cache.
     """
 

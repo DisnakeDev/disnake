@@ -91,7 +91,7 @@ def wrap_callback(coro):
 
 
 class InvokableApplicationCommand(ABC):
-    """A base class that implements the protocol for a bot application command.
+    r"""A base class that implements the protocol for a bot application command.
 
     These are not created manually, instead they are created via the
     decorator or functional interface.
@@ -115,18 +115,18 @@ class InvokableApplicationCommand(ABC):
         The coroutine function that is executed when the command is called.
     cog: :class:`Cog` | :data:`None`
         The cog that this command belongs to. :data:`None` if there isn't one.
-    checks: :class:`list`\\[:class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
+    checks: :class:`list`\[:class:`~collections.abc.Callable`\[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
         A list of predicates that verifies if the command could be executed
         with the given :class:`.ApplicationCommandInteraction` as the sole parameter. If an exception
         is necessary to be thrown to signal failure, then one inherited from
         :exc:`.CommandError` should be used. Note that if the checks fail then
         :exc:`.CheckFailure` exception is raised to the :func:`.on_slash_command_error`
         event.
-    guild_ids: :class:`tuple`\\[:class:`int`, ...] | :data:`None`
+    guild_ids: :class:`tuple`\[:class:`int`, ...] | :data:`None`
         The list of IDs of the guilds where the command is synced. :data:`None` if this command is global.
     auto_sync: :class:`bool`
         Whether to automatically register the command.
-    extras: :class:`dict`\\[:class:`str`, :data:`~typing.Any`]
+    extras: :class:`dict`\[:class:`str`, :data:`~typing.Any`]
         A dict of user provided extras to attach to the command.
 
         .. versionadded:: 2.5

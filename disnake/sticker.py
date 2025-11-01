@@ -37,7 +37,7 @@ if TYPE_CHECKING:
 
 
 class StickerPack(Hashable):
-    """Represents a sticker pack.
+    r"""Represents a sticker pack.
 
     .. versionadded:: 2.0
 
@@ -66,7 +66,7 @@ class StickerPack(Hashable):
         The description of the sticker pack.
     id: :class:`int`
         The id of the sticker pack.
-    stickers: :class:`list`\\[:class:`StandardSticker`]
+    stickers: :class:`list`\[:class:`StandardSticker`]
         The stickers of this sticker pack.
     sku_id: :class:`int`
         The SKU ID of the sticker pack.
@@ -282,7 +282,7 @@ class Sticker(_StickerTag):
 
 
 class StandardSticker(Sticker):
-    """Represents a sticker that is found in a standard sticker pack.
+    r"""Represents a sticker that is found in a standard sticker pack.
 
     .. versionadded:: 2.0
 
@@ -312,7 +312,7 @@ class StandardSticker(Sticker):
         The ID of the sticker's pack.
     format: :class:`StickerFormatType`
         The format for the sticker's image.
-    tags: :class:`list`\\[:class:`str`]
+    tags: :class:`list`\[:class:`str`]
         A list of tags for the sticker.
     sort_value: :class:`int`
         The sticker's sort order within its pack.

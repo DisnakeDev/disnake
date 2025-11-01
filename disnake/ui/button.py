@@ -307,7 +307,7 @@ def button(
 def button(
     cls: Callable[..., B_co] = Button[Any], **kwargs: Any
 ) -> Callable[[ItemCallbackType[V_co, B_co]], DecoratedItem[B_co]]:
-    """A decorator that attaches a button to a component.
+    r"""A decorator that attaches a button to a component.
 
     The function being decorated should have three parameters, ``self`` representing
     the :class:`disnake.ui.View`, the :class:`disnake.ui.Button` that was
@@ -322,7 +322,7 @@ def button(
 
     Parameters
     ----------
-    cls: :class:`~collections.abc.Callable`\\[..., :class:`Button`]
+    cls: :class:`~collections.abc.Callable`\[..., :class:`Button`]
         A callable (may be a :class:`Button` subclass) to create a new instance of this component.
         If provided, the other parameters described below do not apply.
         Instead, this decorator will accept the same keywords as the passed callable/class does.

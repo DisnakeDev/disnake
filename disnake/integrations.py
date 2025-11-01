@@ -381,7 +381,7 @@ class IntegrationApplication:
 
 
 class BotIntegration(Integration):
-    """Represents a bot integration on Discord.
+    r"""Represents a bot integration on Discord.
 
     .. versionadded:: 2.0
 
@@ -403,7 +403,7 @@ class BotIntegration(Integration):
         The integration account information.
     application: :class:`IntegrationApplication`
         The application tied to this integration.
-    scopes: :class:`list`\\[:class:`str`]
+    scopes: :class:`list`\[:class:`str`]
         The OAuth2 scopes the application has been authorized for.
 
         .. versionadded:: 2.6

@@ -112,7 +112,7 @@ class UIComponent(ABC):
 
 # Essentially the same as the base `UIComponent`, with the addition of `width`.
 class WrappedComponent(UIComponent):
-    """Represents the base UI component that all :class:`ActionRow`\\-compatible
+    r"""Represents the base UI component that all :class:`ActionRow`\-compatible
     UI components inherit from.
 
     This class adds more functionality on top of the :class:`UIComponent` base class,

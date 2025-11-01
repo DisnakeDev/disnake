@@ -315,9 +315,9 @@ class ListBaseFlags(BaseFlags, no_fill_flags=True):
 
 
 class SystemChannelFlags(BaseFlags, inverted=True):
-    """Wraps up a Discord system channel flag value.
+    r"""Wraps up a Discord system channel flag value.
 
-    Similar to :class:`Permissions`\\, the properties provided are two way.
+    Similar to :class:`Permissions`\, the properties provided are two way.
     You can set and retrieve individual bits using the properties as if they
     were regular bools. This allows you to edit the system flags easily.
 
@@ -940,14 +940,14 @@ class PublicUserFlags(BaseFlags):
         return UserFlags.active_developer.value
 
     def all(self) -> list[UserFlags]:
-        """:class:`list`\\[:class:`UserFlags`]: Returns all public flags the user has."""
+        r""":class:`list`\[:class:`UserFlags`]: Returns all public flags the user has."""
         return [public_flag for public_flag in UserFlags if self._has_flag(public_flag.value)]
 
 
 class Intents(BaseFlags):
-    """Wraps up a Discord gateway intent flag.
+    r"""Wraps up a Discord gateway intent flag.
 
-    Similar to :class:`Permissions`\\, the properties provided are two way.
+    Similar to :class:`Permissions`\, the properties provided are two way.
     You can set and retrieve individual bits using the properties as if they
     were regular bools.
 

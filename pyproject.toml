@@ -235,7 +235,7 @@ ignore = [
     "E501", # lines too long
     "E731", # lambda expression assigned
     ## pydocstyle
-    "D1", "D205", "D301", "D400", "D401",
+    "D1", "D205", "D400", "D401",
     ## Pylint
     # PLC
     "PLC0105",

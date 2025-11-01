@@ -39,7 +39,7 @@ ResolvedValues = dict[str, str | Sequence[T]]
 
 
 class ModalInteraction(Interaction[ClientT]):
-    """Represents an interaction with a modal.
+    r"""Represents an interaction with a modal.
 
     .. versionadded:: 2.4
 
@@ -78,7 +78,7 @@ class ModalInteraction(Interaction[ClientT]):
 
         .. note::
             In scenarios where an interaction occurs in a guild but :attr:`.guild` is unavailable,
-            such as with user-installed applications in guilds, some attributes of :class:`Member`\\s
+            such as with user-installed applications in guilds, some attributes of :class:`Member`\s
             that depend on the guild/role cache will not work due to an API limitation.
             This includes :attr:`~Member.roles`, :attr:`~Member.top_role`, :attr:`~Member.role_icon`,
             and :attr:`~Member.guild_permissions`.
@@ -98,7 +98,7 @@ class ModalInteraction(Interaction[ClientT]):
 
     client: :class:`Client`
         The interaction client.
-    entitlements: :class:`list`\\[:class:`Entitlement`]
+    entitlements: :class:`list`\[:class:`Entitlement`]
         The entitlements for the invoking user and guild,
         representing access to an application subscription.
 
@@ -167,7 +167,7 @@ class ModalInteraction(Interaction[ClientT]):
     def walk_raw_components(
         self,
     ) -> Generator[ModalInteractionInnerComponentDataPayload, None, None]:
-        """Returns a generator that yields raw component data of the innermost/non-layout
+        r"""Returns a generator that yields raw component data of the innermost/non-layout
         components one by one, as provided by Discord.
         This does not contain all fields of the components due to API limitations.
 
@@ -175,7 +175,7 @@ class ModalInteraction(Interaction[ClientT]):
 
         Returns
         -------
-        :class:`~collections.abc.Generator`\\[:class:`dict`, None, None]
+        :class:`~collections.abc.Generator`\[:class:`dict`, None, None]
         """
         yield from self._walk_components(self.data.components)
 
@@ -202,7 +202,7 @@ class ModalInteraction(Interaction[ClientT]):
 
     @cached_slot_property("_cs_values")
     def values(self) -> ResolvedValues[str]:
-        """:class:`dict`\\[:class:`str`, :class:`str` | :class:`~collections.abc.Sequence`\\[:class:`str`]]: Returns all raw values the user has entered in the modal.
+        r""":class:`dict`\[:class:`str`, :class:`str` | :class:`~collections.abc.Sequence`\[:class:`str`]]: Returns all raw values the user has entered in the modal.
         This is a dict of the form ``{custom_id: value}``.
 
         For select menus, the corresponding dict value is a list of the values the user has selected.
@@ -220,7 +220,7 @@ class ModalInteraction(Interaction[ClientT]):
     def resolved_values(
         self,
     ) -> ResolvedValues[str | Member | User | Role | AnyChannel | Attachment]:
-        """:class:`dict`\\[:class:`str`, :class:`str` | :class:`~collections.abc.Sequence`\\[:class:`str` | :class:`Member` | :class:`User` | :class:`Role` | :class:`abc.GuildChannel` | :class:`Thread` | :class:`PartialMessageable` | :class:`Attachment`]]: The (resolved) values the user entered in the modal.
+        r""":class:`dict`\[:class:`str`, :class:`str` | :class:`~collections.abc.Sequence`\[:class:`str` | :class:`Member` | :class:`User` | :class:`Role` | :class:`abc.GuildChannel` | :class:`Thread` | :class:`PartialMessageable` | :class:`Attachment`]]: The (resolved) values the user entered in the modal.
         This is a dict of the form ``{custom_id: value}``.
 
         For select menus, the corresponding dict value is a list of the values the user has selected.
@@ -238,7 +238,7 @@ class ModalInteraction(Interaction[ClientT]):
 
     @cached_slot_property("_cs_text_values")
     def text_values(self) -> dict[str, str]:
-        """:class:`dict`\\[:class:`str`, :class:`str`]: Returns the text values the user has entered in the modal.
+        r""":class:`dict`\[:class:`str`, :class:`str`]: Returns the text values the user has entered in the modal.
         This is a dict of the form ``{custom_id: value}``.
         """
         text_input_type = ComponentType.text_input.value
@@ -255,7 +255,7 @@ class ModalInteraction(Interaction[ClientT]):
 
 
 class ModalInteractionData(dict[str, Any]):
-    """Represents the data of an interaction with a modal.
+    r"""Represents the data of an interaction with a modal.
 
     .. versionadded:: 2.4
 
@@ -263,7 +263,7 @@ class ModalInteractionData(dict[str, Any]):
     ----------
     custom_id: :class:`str`
         The custom ID of the modal.
-    components: :class:`list`\\[:class:`dict`]
+    components: :class:`list`\[:class:`dict`]
         The raw component data of the modal interaction, as provided by Discord.
         This does not contain all fields of the components due to API limitations.
 

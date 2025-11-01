@@ -35,7 +35,7 @@ default: Any = _FakeBool()
 
 
 class AllowedMentions:
-    """A class that represents what mentions are allowed in a message.
+    r"""A class that represents what mentions are allowed in a message.
 
     This class can be set during :class:`Client` initialisation to apply
     to every message sent. It can also be applied on a per message basis
@@ -45,13 +45,13 @@ class AllowedMentions:
     ----------
     everyone: :class:`bool`
         Whether to allow everyone and here mentions. Defaults to ``True``.
-    users: :class:`bool` | :class:`list`\\[:class:`abc.Snowflake`]
+    users: :class:`bool` | :class:`list`\[:class:`abc.Snowflake`]
         Controls the users being mentioned. If ``True`` (the default) then
         users are mentioned based on the message content. If ``False`` then
         users are not mentioned at all. If a list of :class:`abc.Snowflake`
         is given then only the users provided will be mentioned, provided those
         users are in the message content.
-    roles: :class:`bool` | :class:`list`\\[:class:`abc.Snowflake`]
+    roles: :class:`bool` | :class:`list`\[:class:`abc.Snowflake`]
         Controls the roles being mentioned. If ``True`` (the default) then
         roles are mentioned based on the message content. If ``False`` then
         roles are not mentioned at all. If a list of :class:`abc.Snowflake`

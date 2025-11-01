@@ -1115,9 +1115,9 @@ def _augment_from_permissions(cls):
 
 @_augment_from_permissions
 class PermissionOverwrite:
-    """A type that is used to represent a channel specific permission.
+    r"""A type that is used to represent a channel specific permission.
 
-    Unlike a regular :class:`Permissions`\\, the default value of a
+    Unlike a regular :class:`Permissions`\, the default value of a
     permission is equivalent to :data:`None` and not ``False``. Setting
     a value to ``False`` is **explicitly** denying that permission,
     while setting a value to ``True`` is **explicitly** allowing
@@ -1311,7 +1311,7 @@ class PermissionOverwrite:
             self._values[key] = value
 
     def pair(self) -> tuple[Permissions, Permissions]:
-        """:class:`tuple`\\[:class:`Permissions`, :class:`Permissions`]: Returns the (allow, deny) pair from this overwrite."""
+        r""":class:`tuple`\[:class:`Permissions`, :class:`Permissions`]: Returns the (allow, deny) pair from this overwrite."""
         allow = Permissions.none()
         deny = Permissions.none()
 

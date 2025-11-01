@@ -33,7 +33,7 @@ __all__ = (
 
 
 class MentionableSelect(BaseSelect[MentionableSelectMenu, User | Member | Role, V_co]):
-    """Represents a UI mentionable (user/member/role) select menu.
+    r"""Represents a UI mentionable (user/member/role) select menu.
 
     This is usually represented as a drop down menu.
 
@@ -56,11 +56,11 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, User | Member | Role, 
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select is disabled.
-    default_values: :class:`~collections.abc.Sequence`\\[:class:`~disnake.User` | :class:`.Member` | :class:`.Role` | :class:`.SelectDefaultValue`] | :data:`None`
+    default_values: :class:`~collections.abc.Sequence`\[:class:`~disnake.User` | :class:`.Member` | :class:`.Role` | :class:`.SelectDefaultValue`] | :data:`None`
         The list of values (users/roles) that are selected by default.
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
-        Note that unlike other select menu types, this does not support :class:`.Object`\\s due to ambiguities.
+        Note that unlike other select menu types, this does not support :class:`.Object`\s due to ambiguities.
 
         .. versionadded:: 2.10
     required: :class:`bool`
@@ -83,7 +83,7 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, User | Member | Role, 
 
     Attributes
     ----------
-    values: :class:`list`\\[:class:`~disnake.User` | :class:`.Member` | :class:`.Role`]
+    values: :class:`list`\[:class:`~disnake.User` | :class:`.Member` | :class:`.Role`]
         A list of users, members and/or roles that have been selected by the user.
     """
 
@@ -197,7 +197,7 @@ def mentionable_select(
 def mentionable_select(
     cls: Callable[..., S_co] = MentionableSelect[Any], **kwargs: Any
 ) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]:
-    """A decorator that attaches a mentionable (user/member/role) select menu to a component.
+    r"""A decorator that attaches a mentionable (user/member/role) select menu to a component.
 
     The function being decorated should have three parameters, ``self`` representing
     the :class:`disnake.ui.View`, the :class:`disnake.ui.MentionableSelect` that was
@@ -210,7 +210,7 @@ def mentionable_select(
 
     Parameters
     ----------
-    cls: :class:`~collections.abc.Callable`\\[..., :class:`MentionableSelect`]
+    cls: :class:`~collections.abc.Callable`\[..., :class:`MentionableSelect`]
         A callable (may be a :class:`MentionableSelect` subclass) to create a new instance of this component.
         If provided, the other parameters described below do not apply.
         Instead, this decorator will accept the same keywords as the passed callable/class does.
@@ -227,11 +227,11 @@ def mentionable_select(
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select is disabled. Defaults to ``False``.
-    default_values: :class:`~collections.abc.Sequence`\\[:class:`~disnake.User` | :class:`.Member` | :class:`.Role` | :class:`.SelectDefaultValue`] | :data:`None`
+    default_values: :class:`~collections.abc.Sequence`\[:class:`~disnake.User` | :class:`.Member` | :class:`.Role` | :class:`.SelectDefaultValue`] | :data:`None`
         The list of values (users/roles) that are selected by default.
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
-        Note that unlike other select menu types, this does not support :class:`.Object`\\s due to ambiguities.
+        Note that unlike other select menu types, this does not support :class:`.Object`\s due to ambiguities.
 
         .. versionadded:: 2.10
     id: :class:`int`

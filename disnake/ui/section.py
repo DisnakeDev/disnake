@@ -22,7 +22,7 @@ __all__ = ("Section",)
 
 
 class Section(UIComponent):
-    """Represents a UI section.
+    r"""Represents a UI section.
 
     This allows displaying an accessory (thumbnail or button) next to a block of text.
 
@@ -41,7 +41,7 @@ class Section(UIComponent):
 
     Attributes
     ----------
-    children: :class:`list`\\[:class:`~.ui.TextDisplay`]
+    children: :class:`list`\[:class:`~.ui.TextDisplay`]
         The list of text items in this section.
     accessory: :class:`~.ui.Thumbnail` | :class:`~.ui.Button`
         The accessory component displayed next to the section text.

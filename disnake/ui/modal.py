@@ -37,7 +37,7 @@ ClientT = TypeVar("ClientT", bound="Client")
 
 
 class Modal:
-    """Represents a UI Modal.
+    r"""Represents a UI Modal.
 
     .. versionadded:: 2.4
 
@@ -64,7 +64,7 @@ class Modal:
         If not given, then a unique one is generated for you.
 
         .. note::
-            :class:`Modal`\\s are identified based on the user ID that triggered the
+            :class:`Modal`\s are identified based on the user ID that triggered the
             modal, and this ``custom_id``.
             This can result in collisions when a user opens a modal with the same ``custom_id`` on
             two separate devices, for example.

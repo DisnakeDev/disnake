@@ -309,7 +309,7 @@ class ShardInfo:
 
 
 class AutoShardedClient(Client):
-    """A client similar to :class:`Client` except it handles the complications
+    r"""A client similar to :class:`Client` except it handles the complications
     of sharding for the user into a more manageable and transparent single
     process bot.
 
@@ -331,7 +331,7 @@ class AutoShardedClient(Client):
 
     Attributes
     ----------
-    shard_ids: :class:`list`\\[:class:`int`] | :data:`None`
+    shard_ids: :class:`list`\[:class:`int`] | :data:`None`
         An optional list of shard_ids to launch the shards with.
     """
 
@@ -423,7 +423,7 @@ class AutoShardedClient(Client):
 
     @property
     def latencies(self) -> list[tuple[int, float]]:
-        """:class:`list`\\[:class:`tuple`\\[:class:`int`, :class:`float`]]: A list of latencies between a HEARTBEAT and a HEARTBEAT_ACK in seconds.
+        r""":class:`list`\[:class:`tuple`\[:class:`int`, :class:`float`]]: A list of latencies between a HEARTBEAT and a HEARTBEAT_ACK in seconds.
 
         This returns a list of tuples with elements ``(shard_id, latency)``.
         """
@@ -443,7 +443,7 @@ class AutoShardedClient(Client):
 
     @property
     def shards(self) -> dict[int, ShardInfo]:
-        """:class:`~collections.abc.Mapping`\\[:class:`int`, :class:`ShardInfo`]: Returns a mapping of shard IDs to their respective info object."""
+        r""":class:`~collections.abc.Mapping`\[:class:`int`, :class:`ShardInfo`]: Returns a mapping of shard IDs to their respective info object."""
         return {
             shard_id: ShardInfo(parent, self.shard_count)
             for shard_id, parent in self.__shards.items()

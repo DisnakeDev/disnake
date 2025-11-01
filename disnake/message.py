@@ -969,7 +969,7 @@ def flatten_handlers(cls: type[Message]) -> type[Message]:
 
 
 class MessageCall:
-    """
+    r"""
     Represents a call in a message.
 
     .. versionadded:: |vnext|
@@ -978,7 +978,7 @@ class MessageCall:
     ----------
     ended_timestamp: :class:`datetime.datetime` | :data:`None`
         The timestamp when the call ended, or :data:`None` if the call is still ongoing.
-    participant_ids: :class:`list`\\[:class:`int`]
+    participant_ids: :class:`list`\[:class:`int`]
         A list of user IDs of the participants in the call.
 
         Due to API limitations, this list is simply the user IDs that were in the call.
@@ -996,7 +996,7 @@ class MessageCall:
 
 @flatten_handlers
 class Message(Hashable):
-    """Represents a message from Discord.
+    r"""Represents a message from Discord.
 
     .. collapse:: operations
 
@@ -1029,7 +1029,7 @@ class Message(Hashable):
     nonce: :class:`str` | :class:`int` | :data:`None`
         The value used by the Discord guild and the client to verify that the message is successfully sent.
         This is not stored long term within Discord's servers and is only used ephemerally.
-    embeds: :class:`list`\\[:class:`Embed`]
+    embeds: :class:`list`\[:class:`Embed`]
         A list of embeds the message has.
     channel: :class:`TextChannel` | :class:`VoiceChannel` | :class:`StageChannel` | :class:`Thread` | :class:`DMChannel` | :class:`GroupChannel` | :class:`PartialMessageable`
         The channel that the message was sent from.
@@ -1061,17 +1061,17 @@ class Message(Hashable):
             This does not check if the ``@everyone`` or the ``@here`` text is in the message itself.
             Rather this boolean indicates if either the ``@everyone`` or the ``@here`` text is in the message
             **and** it did end up mentioning.
-    mentions: :class:`list`\\[:class:`abc.User`]
+    mentions: :class:`list`\[:class:`abc.User`]
         A list of :class:`Member` that were mentioned. If the message is in a private message
         then the list will be of :class:`User` instead. For messages that are not of type
-        :attr:`MessageType.default`\\, this array can be used to aid in system messages.
+        :attr:`MessageType.default`\, this array can be used to aid in system messages.
         For more information, see :attr:`system_content`.
 
         .. warning::
 
             The order of the mentions list is not in any particular order so you should
             not rely on it. This is a Discord limitation, not one with the library.
-    role_mentions: :class:`list`\\[:class:`Role`]
+    role_mentions: :class:`list`\[:class:`Role`]
         A list of :class:`Role` that were mentioned. If the message is in a private message
         then the list is always empty.
     id: :class:`int`
@@ -1085,7 +1085,7 @@ class Message(Hashable):
     webhook_id: :class:`int` | :data:`None`
         If this message was sent by a webhook, then this is the webhook ID's that sent this
         message.
-    attachments: :class:`list`\\[:class:`Attachment`]
+    attachments: :class:`list`\[:class:`Attachment`]
         A list of attachments given to a message.
     pinned: :class:`bool`
         Specifies if the message is currently pinned.
@@ -1094,7 +1094,7 @@ class Message(Hashable):
 
         .. versionadded:: 1.3
 
-    reactions : :class:`list`\\[:class:`Reaction`]
+    reactions : :class:`list`\[:class:`Reaction`]
         Reactions to a message. Reactions can be either custom emoji or standard unicode emoji.
     activity: :class:`dict` | :data:`None`
         The activity associated with this message. Sent with Rich-Presence related messages that for
@@ -1114,17 +1114,17 @@ class Message(Hashable):
         - ``description``: A string representing the application's description.
         - ``icon``: A string representing the icon ID of the application.
         - ``cover_image``: A string representing the embed's image asset ID.
-    stickers: :class:`list`\\[:class:`StickerItem`]
+    stickers: :class:`list`\[:class:`StickerItem`]
         A list of sticker items given to the message.
 
         .. versionadded:: 1.6
 
-    components: :class:`list`\\[:class:`Component`]
+    components: :class:`list`\[:class:`Component`]
         A list of components in the message.
 
         .. versionadded:: 2.0
 
-    message_snapshots: :class:`list`\\[:class:`ForwardedMessage`]
+    message_snapshots: :class:`list`\[:class:`ForwardedMessage`]
         A list of forwarded messages.
 
         .. versionadded:: 2.10
@@ -1496,7 +1496,7 @@ class Message(Hashable):
 
     @utils.cached_slot_property("_cs_raw_mentions")
     def raw_mentions(self) -> list[int]:
-        """:class:`list`\\[:class:`int`]: A property that returns an array of user IDs matched with
+        r""":class:`list`\[:class:`int`]: A property that returns an array of user IDs matched with
         the syntax of ``<@user_id>`` in the message content.
 
         This allows you to receive the user IDs of mentioned users
@@ -1506,21 +1506,21 @@ class Message(Hashable):
 
     @utils.cached_slot_property("_cs_raw_channel_mentions")
     def raw_channel_mentions(self) -> list[int]:
-        """:class:`list`\\[:class:`int`]: A property that returns an array of channel IDs matched with
+        r""":class:`list`\[:class:`int`]: A property that returns an array of channel IDs matched with
         the syntax of ``<#channel_id>`` in the message content.
         """
         return [int(x) for x in re.findall(r"<#([0-9]{17,19})>", self.content)]
 
     @utils.cached_slot_property("_cs_raw_role_mentions")
     def raw_role_mentions(self) -> list[int]:
-        """:class:`list`\\[:class:`int`]: A property that returns an array of role IDs matched with
+        r""":class:`list`\[:class:`int`]: A property that returns an array of role IDs matched with
         the syntax of ``<@&role_id>`` in the message content.
         """
         return [int(x) for x in re.findall(r"<@&([0-9]{17,19})>", self.content)]
 
     @utils.cached_slot_property("_cs_channel_mentions")
     def channel_mentions(self) -> list[GuildChannel]:
-        """:class:`list`\\[:class:`abc.GuildChannel`]: A list of :class:`abc.GuildChannel` that were mentioned. If the message is in a private message
+        r""":class:`list`\[:class:`abc.GuildChannel`]: A list of :class:`abc.GuildChannel` that were mentioned. If the message is in a private message
         then the list is always empty.
         """
         if self.guild is None:
@@ -1642,10 +1642,10 @@ class Message(Hashable):
 
     @utils.cached_slot_property("_cs_system_content")
     def system_content(self) -> str | None:
-        """:class:`str` | :data:`None`: A property that returns the content that is rendered
+        r""":class:`str` | :data:`None`: A property that returns the content that is rendered
         regardless of the :attr:`Message.type`.
 
-        In the case of :attr:`MessageType.default` and :attr:`MessageType.reply`\\,
+        In the case of :attr:`MessageType.default` and :attr:`MessageType.reply`\,
         this just returns the regular :attr:`Message.content`. Otherwise this
         returns an English message denoting the contents of the system message.
 
@@ -1993,7 +1993,7 @@ class Message(Hashable):
         components: MessageComponents | None = MISSING,
         delete_after: float | None = None,
     ) -> Message:
-        """|coro|
+        r"""|coro|
 
         Edits the message.
 
@@ -2030,7 +2030,7 @@ class Message(Hashable):
             The new embed to replace the original with. This cannot be mixed with the
             ``embeds`` parameter.
             Could be :data:`None` to remove the embed.
-        embeds: :class:`list`\\[:class:`Embed`]
+        embeds: :class:`list`\[:class:`Embed`]
             The new embeds to replace the original with. Must be a maximum of 10.
             This cannot be mixed with the ``embed`` parameter.
             To remove all embeds ``[]`` should be passed.
@@ -2044,14 +2044,14 @@ class Message(Hashable):
 
             .. versionadded:: 2.1
 
-        files: :class:`list`\\[:class:`File`]
+        files: :class:`list`\[:class:`File`]
             A list of files to upload. This cannot be mixed with the ``file`` parameter.
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
 
             .. versionadded:: 2.1
 
-        attachments: :class:`list`\\[:class:`Attachment`] | :data:`None`
+        attachments: :class:`list`\[:class:`Attachment`] | :data:`None`
             A list of attachments to keep in the message.
             If ``[]`` or :data:`None` is passed then all existing attachments are removed.
             Keeps existing attachments if not provided.
@@ -2765,7 +2765,7 @@ class PartialMessage(Hashable):
         components: MessageComponents | None = MISSING,
         delete_after: float | None = None,
     ) -> Message:
-        """|coro|
+        r"""|coro|
 
         Edits the message.
 
@@ -2802,7 +2802,7 @@ class PartialMessage(Hashable):
             The new embed to replace the original with. This cannot be mixed with the
             ``embeds`` parameter.
             Could be :data:`None` to remove the embed.
-        embeds: :class:`list`\\[:class:`Embed`]
+        embeds: :class:`list`\[:class:`Embed`]
             The new embeds to replace the original with. Must be a maximum of 10.
             This cannot be mixed with the ``embed`` parameter.
             To remove all embeds ``[]`` should be passed.
@@ -2816,14 +2816,14 @@ class PartialMessage(Hashable):
 
             .. versionadded:: 2.1
 
-        files: :class:`list`\\[:class:`File`]
+        files: :class:`list`\[:class:`File`]
             A list of files to upload. This cannot be mixed with the ``file`` parameter.
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
 
             .. versionadded:: 2.1
 
-        attachments: :class:`list`\\[:class:`Attachment`] | :data:`None`
+        attachments: :class:`list`\[:class:`Attachment`] | :data:`None`
             A list of attachments to keep in the message.
             If ``[]`` or :data:`None` is passed then all existing attachments are removed.
             Keeps existing attachments if not provided.
@@ -2924,7 +2924,7 @@ class PartialMessage(Hashable):
 
 
 class ForwardedMessage:
-    """Represents a forwarded :class:`Message`.
+    r"""Represents a forwarded :class:`Message`.
 
     .. versionadded:: 2.10
 
@@ -2934,30 +2934,30 @@ class ForwardedMessage:
         The type of message.
     content: :class:`str`
         The actual contents of the message.
-    embeds: :class:`list`\\[:class:`Embed`]
+    embeds: :class:`list`\[:class:`Embed`]
         A list of embeds the message has.
     channel_id: :class:`int`
         The ID of the channel where the message was forwarded from.
-    attachments: :class:`list`\\[:class:`Attachment`]
+    attachments: :class:`list`\[:class:`Attachment`]
         A list of attachments given to a message.
     flags: :class:`MessageFlags`
         Extra features of the message.
-    mentions: :class:`list`\\[:class:`abc.User`]
+    mentions: :class:`list`\[:class:`abc.User`]
         A list of :class:`Member` that were mentioned. If the message is in a private message
         then the list will be of :class:`User` instead. For messages that are not of type
-        :attr:`MessageType.default`\\, this array can be used to aid in system messages.
+        :attr:`MessageType.default`\, this array can be used to aid in system messages.
         For more information, see :attr:`Message.system_content`.
 
         .. warning::
 
             The order of the mentions list is not in any particular order so you should
             not rely on it. This is a Discord limitation, not one with the library.
-    role_mentions: :class:`list`\\[:class:`Role`]
+    role_mentions: :class:`list`\[:class:`Role`]
         A list of :class:`Role` that were mentioned. If the message is in a private message
         then the list is always empty.
-    stickers: :class:`list`\\[:class:`StickerItem`]
+    stickers: :class:`list`\[:class:`StickerItem`]
         A list of sticker items given to the message.
-    components: :class:`list`\\[:class:`Component`]
+    components: :class:`list`\[:class:`Component`]
         A list of components in the message.
     guild_id: :class:`int` | :data:`None`
         The guild ID where the message was forwarded from, if applicable.

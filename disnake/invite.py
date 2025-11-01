@@ -132,7 +132,7 @@ class PartialInviteChannel:
 
 
 class PartialInviteGuild:
-    """Represents a "partial" invite guild.
+    r"""Represents a "partial" invite guild.
 
     This model will be given when the user is not part of the
     guild the :class:`Invite` resolves to.
@@ -163,7 +163,7 @@ class PartialInviteGuild:
         The partial guild's ID.
     description: :class:`str` | :data:`None`
         The partial guild's description.
-    features: :class:`list`\\[:class:`str`]
+    features: :class:`list`\[:class:`str`]
         A list of features the partial guild has. See :attr:`Guild.features` for more information.
     nsfw_level: :class:`NSFWLevel`
         The partial guild's nsfw level.

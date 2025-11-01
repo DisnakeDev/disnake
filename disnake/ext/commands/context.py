@@ -43,7 +43,7 @@ else:
 
 
 class Context(disnake.abc.Messageable, Generic[BotT]):
-    """Represents the context in which a command is being invoked under.
+    r"""Represents the context in which a command is being invoked under.
 
     This class contains a lot of meta data to help you understand more about
     the invocation context. This class is not created manually and is instead
@@ -63,7 +63,7 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
         then this list could be incomplete.
     kwargs: :class:`dict`
         A dictionary of transformed arguments that were passed into the command.
-        Similar to :attr:`args`\\, if this is accessed in the
+        Similar to :attr:`args`\, if this is accessed in the
         :func:`.on_command_error` event then this dict could be incomplete.
     current_parameter: :class:`inspect.Parameter` | :data:`None`
         The parameter that is currently being inspected and converted.
@@ -78,7 +78,7 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
     invoked_with: :class:`str` | :data:`None`
         The command name that triggered this invocation. Useful for finding out
         which alias called the command.
-    invoked_parents: :class:`list`\\[:class:`str`]
+    invoked_parents: :class:`list`\[:class:`str`]
         The command names of the parents that triggered this invocation. Useful for
         finding out which aliases called the command.
 
