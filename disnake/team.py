@@ -21,7 +21,7 @@ __all__ = (
 
 
 class Team:
-    """Represents an application team.
+    r"""Represents an application team.
     Teams are groups of users who share access to an application's configuration.
 
     Attributes
@@ -32,7 +32,7 @@ class Team:
         The team name.
     owner_id: :class:`int`
         The team owner's ID.
-    members: :class:`list`\\[:class:`TeamMember`]
+    members: :class:`list`\[:class:`TeamMember`]
         A list of the members in the team.
 
         .. versionadded:: 1.3

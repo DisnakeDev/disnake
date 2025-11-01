@@ -164,7 +164,7 @@ class OptionChoice:
 
 
 class Option:
-    """Represents a slash command option.
+    r"""Represents a slash command option.
 
     Parameters
     ----------
@@ -184,12 +184,12 @@ class Option:
         The option type, e.g. :class:`OptionType.user`.
     required: :class:`bool`
         Whether this option is required.
-    choices: :class:`~collections.abc.Sequence`\\[:class:`OptionChoice`] | :class:`~collections.abc.Sequence`\\[:class:`str` | :class:`int` | :class:`float`] | :class:`~collections.abc.Mapping`\\[:class:`str`, :class:`str` | :class:`int` | :class:`float`]
+    choices: :class:`~collections.abc.Sequence`\[:class:`OptionChoice`] | :class:`~collections.abc.Sequence`\[:class:`str` | :class:`int` | :class:`float`] | :class:`~collections.abc.Mapping`\[:class:`str`, :class:`str` | :class:`int` | :class:`float`]
         The pre-defined choices for this option.
-    options: :class:`list`\\[:class:`Option`]
+    options: :class:`list`\[:class:`Option`]
         The list of sub options. Normally you don't have to specify it directly,
         instead consider using ``@main_cmd.sub_command`` or ``@main_cmd.sub_command_group`` decorators.
-    channel_types: :class:`list`\\[:class:`ChannelType`]
+    channel_types: :class:`list`\[:class:`ChannelType`]
         The list of channel types that your option supports, if the type is :class:`OptionType.channel`.
         By default, it supports all channel types.
     autocomplete: :class:`bool`
@@ -218,12 +218,12 @@ class Option:
         The option type, e.g. :class:`OptionType.user`.
     required: :class:`bool`
         Whether this option is required.
-    choices: :class:`list`\\[:class:`OptionChoice`]
+    choices: :class:`list`\[:class:`OptionChoice`]
         The list of pre-defined choices.
-    options: :class:`list`\\[:class:`Option`]
+    options: :class:`list`\[:class:`Option`]
         The list of sub options. Normally you don't have to specify it directly,
         instead consider using ``@main_cmd.sub_command`` or ``@main_cmd.sub_command_group`` decorators.
-    channel_types: :class:`list`\\[:class:`ChannelType`]
+    channel_types: :class:`list`\[:class:`ChannelType`]
         The list of channel types that your option supports, if the type is :class:`OptionType.channel`.
         By default, it supports all channel types.
     autocomplete: :class:`bool`
@@ -1013,7 +1013,7 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
 
 
 class SlashCommand(ApplicationCommand):
-    """The base class for building slash commands.
+    r"""The base class for building slash commands.
 
     Attributes
     ----------
@@ -1050,7 +1050,7 @@ class SlashCommand(ApplicationCommand):
 
         .. versionadded:: 2.10
 
-    options: :class:`list`\\[:class:`Option`]
+    options: :class:`list`\[:class:`Option`]
         The list of options the slash command has.
     """
 
@@ -1152,7 +1152,7 @@ class SlashCommand(ApplicationCommand):
 
 
 class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
-    """A slash command returned by the API.
+    r"""A slash command returned by the API.
 
     .. versionadded:: 2.4
 
@@ -1192,7 +1192,7 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
 
     id: :class:`int`
         The slash command's ID.
-    options: :class:`list`\\[:class:`Option`]
+    options: :class:`list`\[:class:`Option`]
         The list of options the slash command has.
     application_id: :class:`int`
         The application ID this command belongs to.
@@ -1291,7 +1291,7 @@ class ApplicationCommandPermissions:
 
 
 class GuildApplicationCommandPermissions:
-    """Represents application command permissions in a guild.
+    r"""Represents application command permissions in a guild.
 
     .. versionchanged:: 2.5
         Can now also represent application-wide permissions that apply to every command by default.
@@ -1304,7 +1304,7 @@ class GuildApplicationCommandPermissions:
         The application ID this command belongs to.
     guild_id: :class:`int`
         The ID of the guild where these permissions are applied.
-    permissions: :class:`list`\\[:class:`ApplicationCommandPermissions`]
+    permissions: :class:`list`\[:class:`ApplicationCommandPermissions`]
         A list of :class:`ApplicationCommandPermissions`.
     """
 

@@ -561,7 +561,7 @@ class VoiceClient(VoiceProtocol):
     def play(
         self, source: AudioSource, *, after: Optional[Callable[[Optional[Exception]], Any]] = None
     ) -> None:
-        """Plays an :class:`AudioSource`.
+        r"""Plays an :class:`AudioSource`.
 
         The finalizer, ``after`` is called after the source has been exhausted
         or an error occurred.
@@ -574,7 +574,7 @@ class VoiceClient(VoiceProtocol):
         ----------
         source: :class:`AudioSource`
             The audio source we're reading from.
-        after: :class:`~collections.abc.Callable`\\[[:class:`Exception` | :data:`None`], :data:`~typing.Any`]
+        after: :class:`~collections.abc.Callable`\[[:class:`Exception` | :data:`None`], :data:`~typing.Any`]
             The finalizer that is called after the stream is exhausted.
             This function must have a single parameter, ``error``, that
             denotes an optional exception that was raised during playing.

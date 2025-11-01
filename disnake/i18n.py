@@ -60,7 +60,7 @@ StringT = TypeVar("StringT", str, Optional[str], covariant=True)
 
 
 class Localized(Generic[StringT]):
-    """A container type used for localized parameters.
+    r"""A container type used for localized parameters.
 
     Exactly one of ``key`` or ``data`` must be provided.
 
@@ -76,7 +76,7 @@ class Localized(Generic[StringT]):
     key: :class:`str`
         A localization key used for lookups.
         Incompatible with ``data``.
-    data: :class:`dict`\\[:class:`.Locale`, :class:`str`] | :class:`dict`\\[:class:`str`, :class:`str`]
+    data: :class:`dict`\[:class:`.Locale`, :class:`str`] | :class:`dict`\[:class:`str`, :class:`str`]
         A mapping of locales to localized values.
         Incompatible with ``key``.
     """
@@ -231,7 +231,7 @@ class LocalizationValue:
 
     @property
     def data(self) -> Optional[dict[str, str]]:
-        """:class:`dict`\\[:class:`str`, :class:`str`] | :data:`None`: A dict with a locale -> localization mapping, if available."""
+        r""":class:`dict`\[:class:`str`, :class:`str`] | :data:`None`: A dict with a locale -> localization mapping, if available."""
         if self._data is MISSING:
             # This will happen when `_link(store)` hasn't been called yet, which *shouldn't* occur under normal circumstances.
             warnings.warn(
@@ -264,7 +264,7 @@ class LocalizationProtocol(ABC):
 
     @abstractmethod
     def get(self, key: str) -> Optional[dict[str, str]]:
-        """Returns localizations for the specified key.
+        r"""Returns localizations for the specified key.
 
         Parameters
         ----------
@@ -279,7 +279,7 @@ class LocalizationProtocol(ABC):
 
         Returns
         -------
-        :class:`dict`\\[:class:`str`, :class:`str`] | :data:`None`
+        :class:`dict`\[:class:`str`, :class:`str`] | :data:`None`
             The localizations for the provided key.
             May return :data:`None` if no localizations could be found.
         """
@@ -327,7 +327,7 @@ class LocalizationStore(LocalizationProtocol):
         self._paths: set[Path] = set()
 
     def get(self, key: str) -> Optional[dict[str, str]]:
-        """Returns localizations for the specified key.
+        r"""Returns localizations for the specified key.
 
         Parameters
         ----------
@@ -342,7 +342,7 @@ class LocalizationStore(LocalizationProtocol):
 
         Returns
         -------
-        :class:`dict`\\[:class:`str`, :class:`str`] | :data:`None`
+        :class:`dict`\[:class:`str`, :class:`str`] | :data:`None`
             The localizations for the provided key.
             Returns :data:`None` if no localizations could be found and :attr:`strict` is disabled.
         """

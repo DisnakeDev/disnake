@@ -22,7 +22,7 @@ __all__ = ("SKU",)
 
 
 class SKU(Hashable):
-    """Represents an SKU.
+    r"""Represents an SKU.
 
     This can be retrieved using :meth:`Client.skus`.
 
@@ -30,11 +30,11 @@ class SKU(Hashable):
 
         .. describe:: x == y
 
-            Checks if two :class:`SKU`\\s are equal.
+            Checks if two :class:`SKU`\s are equal.
 
         .. describe:: x != y
 
-            Checks if two :class:`SKU`\\s are not equal.
+            Checks if two :class:`SKU`\s are not equal.
 
         .. describe:: hash(x)
 

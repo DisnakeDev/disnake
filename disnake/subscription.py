@@ -18,13 +18,13 @@ __all__ = ("Subscription",)
 
 
 class Subscription(Hashable):
-    """Represents a subscription.
+    r"""Represents a subscription.
 
     This can only be retrieved using :meth:`SKU.subscriptions` or :meth:`SKU.fetch_subscription`,
     or provided by events (e.g. :func:`on_subscription_create`).
 
     .. warning::
-        :class:`Subscription`\\s should not be used to grant perks. Use :class:`Entitlement`\\s as a way of determining whether a user should have access to a specific :class:`SKU`.
+        :class:`Subscription`\s should not be used to grant perks. Use :class:`Entitlement`\s as a way of determining whether a user should have access to a specific :class:`SKU`.
 
     .. note::
         Some subscriptions may have been canceled already; consider using :meth:`is_canceled` to check whether a given subscription was canceled.
@@ -33,11 +33,11 @@ class Subscription(Hashable):
 
         .. describe:: x == y
 
-            Checks if two :class:`Subscription`\\s are equal.
+            Checks if two :class:`Subscription`\s are equal.
 
         .. describe:: x != y
 
-            Checks if two :class:`Subscription`\\s are not equal.
+            Checks if two :class:`Subscription`\s are not equal.
 
         .. describe:: hash(x)
 
@@ -53,11 +53,11 @@ class Subscription(Hashable):
         The ID of the user who is subscribed to the :attr:`sku_ids`.
 
         See also :attr:`user`.
-    sku_ids: :class:`list`\\[:class:`int`]
+    sku_ids: :class:`list`\[:class:`int`]
         The ID of the SKUs the user is subscribed to.
-    renewal_sku_ids: :class:`list`\\[:class:`int`]
+    renewal_sku_ids: :class:`list`\[:class:`int`]
         The IDs of the SKUs that will be renewed at the start of the new period.
-    entitlement_ids: :class:`list`\\[:class:`int`]
+    entitlement_ids: :class:`list`\[:class:`int`]
         The IDs of the entitlements the user has as part of this subscription.
     current_period_start: :class:`datetime.datetime`
         The time at which the current period for the given subscription started.

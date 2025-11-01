@@ -262,7 +262,7 @@ class Thread(Messageable, Hashable):
 
     @property
     def members(self) -> list[ThreadMember]:
-        """:class:`list`\\[:class:`ThreadMember`]: A list of thread members in this thread.
+        r""":class:`list`\[:class:`ThreadMember`]: A list of thread members in this thread.
 
         This requires :attr:`Intents.members` to be properly filled. Most of the time however,
         this data is not provided by the gateway and a call to :meth:`fetch_members` is
@@ -402,7 +402,7 @@ class Thread(Messageable, Hashable):
 
     @property
     def applied_tags(self) -> list[ForumTag]:
-        """:class:`list`\\[:class:`ForumTag`]: The tags currently applied to this thread.
+        r""":class:`list`\[:class:`ForumTag`]: The tags currently applied to this thread.
         Only applicable to threads in channels of type :class:`ForumChannel` or :class:`MediaChannel`.
 
         .. versionadded:: 2.6
@@ -499,7 +499,7 @@ class Thread(Messageable, Hashable):
         return base
 
     async def delete_messages(self, messages: Iterable[Snowflake]) -> None:
-        """|coro|
+        r"""|coro|
 
         Deletes a list of messages. This is similar to :meth:`Message.delete`
         except it bulk deletes multiple messages.
@@ -518,7 +518,7 @@ class Thread(Messageable, Hashable):
 
         Parameters
         ----------
-        messages: :class:`~collections.abc.Iterable`\\[:class:`abc.Snowflake`]
+        messages: :class:`~collections.abc.Iterable`\[:class:`abc.Snowflake`]
             An iterable of messages denoting which ones to bulk delete.
 
         Raises
@@ -562,7 +562,7 @@ class Thread(Messageable, Hashable):
         oldest_first: Optional[bool] = False,
         bulk: bool = True,
     ) -> list[Message]:
-        """|coro|
+        r"""|coro|
 
         Purges a list of messages that meet the criteria given by the predicate
         ``check``. If a ``check`` is not provided then all messages are deleted
@@ -588,7 +588,7 @@ class Thread(Messageable, Hashable):
         limit: :class:`int` | :data:`None`
             The number of messages to search through. This is not the number
             of messages that will be deleted, though it can be.
-        check: :class:`~collections.abc.Callable`\\[[:class:`Message`], :class:`bool`]
+        check: :class:`~collections.abc.Callable`\[[:class:`Message`], :class:`bool`]
             The function used to check if a message should be deleted.
             It must take a :class:`Message` as its sole parameter.
         before: :class:`abc.Snowflake` | :class:`datetime.datetime` | :data:`None`
@@ -613,7 +613,7 @@ class Thread(Messageable, Hashable):
 
         Returns
         -------
-        :class:`list`\\[:class:`.Message`]
+        :class:`list`\[:class:`.Message`]
             The list of messages that were deleted.
         """
         if check is MISSING:
@@ -682,7 +682,7 @@ class Thread(Messageable, Hashable):
         applied_tags: Sequence[Snowflake] = MISSING,
         reason: Optional[str] = None,
     ) -> Thread:
-        """|coro|
+        r"""|coro|
 
         Edits the thread.
 
@@ -721,7 +721,7 @@ class Thread(Messageable, Hashable):
 
             .. versionadded:: 2.6
 
-        applied_tags: :class:`~collections.abc.Sequence`\\[:class:`abc.Snowflake`]
+        applied_tags: :class:`~collections.abc.Sequence`\[:class:`abc.Snowflake`]
             The new tags of the thread. Maximum of 5.
             Can also be used to reorder existing tags.
 
@@ -883,7 +883,7 @@ class Thread(Messageable, Hashable):
         return ThreadMember(parent=self, data=member_data)
 
     async def fetch_members(self) -> list[ThreadMember]:
-        """|coro|
+        r"""|coro|
 
         Retrieves all :class:`ThreadMember` that are in this thread.
 
@@ -897,7 +897,7 @@ class Thread(Messageable, Hashable):
 
         Returns
         -------
-        :class:`list`\\[:class:`ThreadMember`]
+        :class:`list`\[:class:`ThreadMember`]
             All thread members in the thread.
         """
         members = await self._state.http.get_thread_members(self.id)
@@ -929,7 +929,7 @@ class Thread(Messageable, Hashable):
         await self._state.http.delete_channel(self.id, reason=reason)
 
     async def add_tags(self, *tags: Snowflake, reason: Optional[str] = None) -> None:
-        """|coro|
+        r"""|coro|
 
         Adds the given tags to this thread, up to 5 in total.
 
@@ -944,7 +944,7 @@ class Thread(Messageable, Hashable):
         Parameters
         ----------
         *tags: :class:`abc.Snowflake`
-            An argument list of :class:`abc.Snowflake` representing the :class:`ForumTag`\\s
+            An argument list of :class:`abc.Snowflake` representing the :class:`ForumTag`\s
             to add to the thread.
         reason: :class:`str` | :data:`None`
             The reason for editing this thread. Shows up on the audit log.
@@ -966,7 +966,7 @@ class Thread(Messageable, Hashable):
         await self._state.http.edit_channel(self.id, applied_tags=new_tags, reason=reason)
 
     async def remove_tags(self, *tags: Snowflake, reason: Optional[str] = None) -> None:
-        """|coro|
+        r"""|coro|
 
         Removes the given tags from this thread.
 
@@ -981,7 +981,7 @@ class Thread(Messageable, Hashable):
         Parameters
         ----------
         *tags: :class:`abc.Snowflake`
-            An argument list of :class:`abc.Snowflake` representing the :class:`ForumTag`\\s
+            An argument list of :class:`abc.Snowflake` representing the :class:`ForumTag`\s
             to remove from the thread.
         reason: :class:`str` | :data:`None`
             The reason for editing this thread. Shows up on the audit log.

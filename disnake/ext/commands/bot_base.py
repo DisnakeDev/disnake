@@ -251,7 +251,7 @@ class BotBase(CommonBotBase, GroupMixin):
             pass
 
     def check(self, func: T) -> T:
-        """A decorator that adds a global check to the bot.
+        r"""A decorator that adds a global check to the bot.
 
         This is for text commands only, and doesn't apply to application commands.
 
@@ -263,7 +263,7 @@ class BotBase(CommonBotBase, GroupMixin):
 
             This function can either be a regular function or a coroutine function.
 
-        Similar to a command :func:`.check`\\, this takes a single parameter
+        Similar to a command :func:`.check`\, this takes a single parameter
         of type :class:`.Context` and can only raise exceptions inherited from
         :exc:`.CommandError`.
 
@@ -281,7 +281,7 @@ class BotBase(CommonBotBase, GroupMixin):
         return func
 
     def check_once(self, func: CFT) -> CFT:
-        """A decorator that adds a "call once" global check to the bot.
+        r"""A decorator that adds a "call once" global check to the bot.
 
         This is for text commands only, and doesn't apply to application commands.
 
@@ -303,7 +303,7 @@ class BotBase(CommonBotBase, GroupMixin):
 
             This function can either be a regular function or a coroutine function.
 
-        Similar to a command :func:`.check`\\, this takes a single parameter
+        Similar to a command :func:`.check`\, this takes a single parameter
         of type :class:`.Context` and can only raise exceptions inherited from
         :exc:`.CommandError`.
 
@@ -364,7 +364,7 @@ class BotBase(CommonBotBase, GroupMixin):
         return coro
 
     def after_invoke(self, coro: CFT) -> CFT:
-        """A decorator that registers a coroutine function as a post-invoke hook.
+        r"""A decorator that registers a coroutine function as a post-invoke hook.
 
         This is for text commands only, and doesn't apply to application commands.
 
@@ -376,10 +376,10 @@ class BotBase(CommonBotBase, GroupMixin):
 
         .. note::
 
-            Similar to :meth:`~.Bot.before_invoke`\\, this is not called unless
+            Similar to :meth:`~.Bot.before_invoke`\, this is not called unless
             checks and argument parsing procedures succeed. This hook is,
             however, **always** called regardless of the internal command
-            callback raising an error (i.e. :exc:`.CommandInvokeError`\\).
+            callback raising an error (i.e. :exc:`.CommandInvokeError`\).
             This makes it ideal for clean-up scenarios.
 
         Parameters
@@ -433,7 +433,7 @@ class BotBase(CommonBotBase, GroupMixin):
     # command processing
 
     async def get_prefix(self, message: Message) -> Optional[Union[list[str], str]]:
-        """|coro|
+        r"""|coro|
 
         Retrieves the prefix the bot is listening to
         with the message as a context.
@@ -445,7 +445,7 @@ class BotBase(CommonBotBase, GroupMixin):
 
         Returns
         -------
-        :class:`list`\\[:class:`str`] | :class:`str` | :data:`None`
+        :class:`list`\[:class:`str`] | :class:`str` | :data:`None`
             A list of prefixes or a single prefix that the bot is
             listening for. None if the bot isn't listening for prefixes.
         """
@@ -478,7 +478,7 @@ class BotBase(CommonBotBase, GroupMixin):
         return ret
 
     async def get_context(self, message: Message, *, cls: type[CXT] = Context) -> CXT:
-        """|coro|
+        r"""|coro|
 
         Returns the invocation context from the message.
 

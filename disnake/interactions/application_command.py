@@ -43,7 +43,7 @@ if TYPE_CHECKING:
 
 
 class ApplicationCommandInteraction(Interaction[ClientT]):
-    """Represents an interaction with an application command.
+    r"""Represents an interaction with an application command.
 
     Current examples are slash commands, user commands and message commands.
 
@@ -81,7 +81,7 @@ class ApplicationCommandInteraction(Interaction[ClientT]):
 
         .. note::
             In scenarios where an interaction occurs in a guild but :attr:`.guild` is unavailable,
-            such as with user-installed applications in guilds, some attributes of :class:`Member`\\s
+            such as with user-installed applications in guilds, some attributes of :class:`Member`\s
             that depend on the guild/role cache will not work due to an API limitation.
             This includes :attr:`~Member.roles`, :attr:`~Member.top_role`, :attr:`~Member.role_icon`,
             and :attr:`~Member.guild_permissions`.
@@ -107,7 +107,7 @@ class ApplicationCommandInteraction(Interaction[ClientT]):
         The token to continue the interaction. These are valid for 15 minutes.
     client: :class:`Client`
         The interaction client.
-    entitlements: :class:`list`\\[:class:`Entitlement`]
+    entitlements: :class:`list`\[:class:`Entitlement`]
         The entitlements for the invoking user and guild,
         representing access to an application subscription.
 
@@ -161,12 +161,12 @@ class ApplicationCommandInteraction(Interaction[ClientT]):
 
     @property
     def options(self) -> dict[str, Any]:
-        """:class:`dict`\\[:class:`str`, :class:`Any`]: The full option tree, including nestings"""
+        r""":class:`dict`\[:class:`str`, :class:`Any`]: The full option tree, including nestings"""
         return {opt.name: opt._simplified_value() for opt in self.data.options}
 
     @property
     def filled_options(self) -> dict[str, Any]:
-        """:class:`dict`\\[:class:`str`, :class:`Any`]: The options of the command (or sub-command) being invoked"""
+        r""":class:`dict`\[:class:`str`, :class:`Any`]: The options of the command (or sub-command) being invoked"""
         _, kwargs = self.data._get_chain_and_kwargs()
         return kwargs
 
@@ -215,7 +215,7 @@ class MessageCommandInteraction(ApplicationCommandInteraction[ClientT]):
 
 
 class ApplicationCommandInteractionData(dict[str, Any]):
-    """Represents the data of an interaction with an application command.
+    r"""Represents the data of an interaction with an application command.
 
     .. versionadded:: 2.1
 
@@ -229,7 +229,7 @@ class ApplicationCommandInteractionData(dict[str, Any]):
         The application command type.
     resolved: :class:`InteractionDataResolved`
         All resolved objects related to this interaction.
-    options: :class:`list`\\[:class:`ApplicationCommandInteractionDataOption`]
+    options: :class:`list`\[:class:`ApplicationCommandInteractionDataOption`]
         A list of options from the API.
     target_id: :class:`int`
         ID of the user or message targeted by a user or message command
@@ -307,7 +307,7 @@ class ApplicationCommandInteractionData(dict[str, Any]):
 
 
 class ApplicationCommandInteractionDataOption(dict[str, Any]):
-    """Represents the structure of an interaction data option from the API.
+    r"""Represents the structure of an interaction data option from the API.
 
     Attributes
     ----------
@@ -317,7 +317,7 @@ class ApplicationCommandInteractionDataOption(dict[str, Any]):
         The option's type.
     value: :class:`Any`
         The option's value.
-    options: :class:`list`\\[:class:`ApplicationCommandInteractionDataOption`]
+    options: :class:`list`\[:class:`ApplicationCommandInteractionDataOption`]
         The list of options of this option. Only exists for subcommands and groups.
     focused: :class:`bool`
         Whether this option is focused by the user. May be ``True`` in

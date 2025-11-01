@@ -234,7 +234,7 @@ _ACTIVITY_URLS = {
 
 
 class Activity(BaseActivity):
-    """Represents an activity in Discord.
+    r"""Represents an activity in Discord.
 
     This could be an activity such as streaming, playing, listening
     or watching.
@@ -283,7 +283,7 @@ class Activity(BaseActivity):
 
         - ``id``: A string representing the party ID.
         - ``size``: A list of two integers denoting (current_size, maximum_size).
-    buttons: :class:`list`\\[:class:`str`]
+    buttons: :class:`list`\[:class:`str`]
         A list of strings representing the labels of custom buttons shown in a rich presence.
 
         .. versionadded:: 2.0
@@ -746,7 +746,7 @@ class Spotify(_BaseActivity):
 
     @property
     def artists(self) -> list[str]:
-        """:class:`list`\\[:class:`str`]: The artists of the song being played."""
+        r""":class:`list`\[:class:`str`]: The artists of the song being played."""
         return self._state.split("; ")
 
     @property
