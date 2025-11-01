@@ -1390,31 +1390,35 @@ def signature_has_self_param(function: Callable[..., Any]) -> bool:
     return not parent.endswith(".<locals>")
 
 
-TimestampStyle = Literal["f", "F", "d", "D", "t", "T", "R"]
+TimestampStyle = Literal["t", "T", "d", "D", "f", "F", "s", "S", "R"]
 
 
 def format_dt(dt: Union[datetime.datetime, float], /, style: TimestampStyle = "f") -> str:
-    """A helper function to format a :class:`datetime.datetime`, :class:`int` or :class:`float` for presentation within Discord.
+    """Format a :class:`datetime.datetime`, :class:`int` or :class:`float` (seconds) for presentation within Discord.
 
     This allows for a locale-independent way of presenting data using Discord specific Markdown.
 
-    +-------------+----------------------------+-----------------+
-    |    Style    |       Example Output       |   Description   |
-    +=============+============================+=================+
-    | t           | 22:57                      | Short Time      |
-    +-------------+----------------------------+-----------------+
-    | T           | 22:57:58                   | Long Time       |
-    +-------------+----------------------------+-----------------+
-    | d           | 17/05/2016                 | Short Date      |
-    +-------------+----------------------------+-----------------+
-    | D           | 17 May 2016                | Long Date       |
-    +-------------+----------------------------+-----------------+
-    | f (default) | 17 May 2016 22:57          | Short Date Time |
-    +-------------+----------------------------+-----------------+
-    | F           | Tuesday, 17 May 2016 22:57 | Long Date Time  |
-    +-------------+----------------------------+-----------------+
-    | R           | 5 years ago                | Relative Time   |
-    +-------------+----------------------------+-----------------+
+    +-------------+-------------------------------+------------------------+
+    |    Style    |        Example Output         |      Description       |
+    +=============+===============================+========================+
+    | t           | 22:57                         | Short Time             |
+    +-------------+-------------------------------+------------------------+
+    | T           | 22:57:58                      | Long Time              |
+    +-------------+-------------------------------+------------------------+
+    | d           | 17/05/2016                    | Short Date             |
+    +-------------+-------------------------------+------------------------+
+    | D           | 17 May 2016                   | Long Date              |
+    +-------------+-------------------------------+------------------------+
+    | f (default) | 17 May 2016 at 22:57          | Long Date, Short Time  |
+    +-------------+-------------------------------+------------------------+
+    | F           | Tuesday, 17 May 2016 at 22:57 | Full Date, Short Time  |
+    +-------------+-------------------------------+------------------------+
+    | s           | 17/05/2016, 22:57             | Short Date, Short Time |
+    +-------------+-------------------------------+------------------------+
+    | S           | 17/05/2016, 22:57:58          | Short Date, Long Time  |
+    +-------------+-------------------------------+------------------------+
+    | R           | 5 years ago                   | Relative Time          |
+    +-------------+-------------------------------+------------------------+
 
     Note that the exact output depends on the user's locale setting in the client. The example output
     presented is using the ``en-GB`` locale.

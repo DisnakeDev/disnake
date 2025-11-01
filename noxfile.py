@@ -250,21 +250,21 @@ def lint(session: nox.Session) -> None:
     session.run("prek", "run", "--all-files", *session.posargs)
 
 
-@nox.session(name="check-manifest")
+@nox.session(name="check-manifest", tags=["misc"])
 def check_manifest(session: nox.Session) -> None:
     """Run check-manifest."""
     install_deps(session)
     session.run("check-manifest", "-v")
 
 
-@nox.session(python=get_version_for_session("slotscheck"))
+@nox.session(python=get_version_for_session("slotscheck"), tags=["misc"])
 def slotscheck(session: nox.Session) -> None:
     """Run slotscheck."""
     install_deps(session)
     session.run("python", "-m", "slotscheck", "--verbose", "-m", "disnake")
 
 
-@nox.session(requires=["check-manifest"])
+@nox.session(requires=["check-manifest"], tags=["misc"])
 def build(session: nox.Session) -> None:
     """Build a dist."""
     install_deps(session)
