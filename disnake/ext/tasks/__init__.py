@@ -299,7 +299,7 @@ class Loop(Generic[LF]):
         return await self.coro(*args, **kwargs)
 
     def start(self, *args: Any, **kwargs: Any) -> asyncio.Task[None]:
-        """Starts the internal task in the event loop.
+        """Start the internal task in the event loop.
 
         Parameters
         ----------
@@ -356,12 +356,12 @@ class Loop(Generic[LF]):
         return bool(not self._is_being_cancelled and self._task and not self._task.done())
 
     def cancel(self) -> None:
-        """Cancels the internal task, if it is running."""
+        """Cancel the internal task, if it is running."""
         if self._can_be_cancelled():
             self._task.cancel()
 
     def restart(self, *args: Any, **kwargs: Any) -> None:
-        """A convenience method to restart the internal task.
+        """Restart the internal task.
 
         .. note::
 
@@ -385,7 +385,7 @@ class Loop(Generic[LF]):
             self._task.cancel()
 
     def add_exception_type(self, *exceptions: type[BaseException]) -> None:
-        """Adds exception types to be handled during the reconnect logic.
+        """Add exception types to be handled during the reconnect logic.
 
         By default the exception types handled are those handled by
         :meth:`disnake.Client.connect`\\, which includes a lot of internet disconnection
@@ -415,7 +415,7 @@ class Loop(Generic[LF]):
         self._valid_exception = (*self._valid_exception, *exceptions)
 
     def clear_exception_types(self) -> None:
-        """Removes all exception types that are handled.
+        """Remove all exception types that are handled.
 
         .. note::
 
@@ -424,7 +424,7 @@ class Loop(Generic[LF]):
         self._valid_exception = ()
 
     def remove_exception_type(self, *exceptions: type[BaseException]) -> bool:
-        """Removes exception types from being handled during the reconnect logic.
+        """Remove exception types from being handled during the reconnect logic.
 
         Parameters
         ----------
@@ -441,7 +441,7 @@ class Loop(Generic[LF]):
         return len(self._valid_exception) == old_length - len(exceptions)
 
     def get_task(self) -> Optional[asyncio.Task[None]]:
-        """Fetches the internal task or :data:`None` if there isn't one running.
+        """Fetch the internal task or :data:`None` if there isn't one running.
 
         :return type: :class:`asyncio.Task` | :data:`None`
         """
@@ -483,7 +483,7 @@ class Loop(Generic[LF]):
         )
 
     def before_loop(self, coro: FT) -> FT:
-        """A decorator that registers a coroutine function to be called before the loop starts running.
+        """Register a coroutine function to be called before the loop starts running.
 
         This is useful if you want to wait for some bot state before the loop starts,
         such as :meth:`disnake.Client.wait_until_ready`.
@@ -508,7 +508,7 @@ class Loop(Generic[LF]):
         return coro
 
     def after_loop(self, coro: FT) -> FT:
-        """A decorator that register a coroutine function to be called after the loop finished running.
+        """Register a coroutine function to be called after the loop finished running.
 
         The coroutine must take no arguments (except ``self`` in a class context).
 
@@ -536,7 +536,7 @@ class Loop(Generic[LF]):
         return coro
 
     def error(self, coro: ET) -> ET:
-        """A decorator that registers a coroutine function to be called if the task encounters an unhandled exception.
+        """Register a coroutine function to be called if the task encounters an unhandled exception.
 
         The coroutine must take only one argument the exception raised (except ``self`` in a class context).
 
@@ -641,7 +641,7 @@ class Loop(Generic[LF]):
         hours: float = 0,
         time: Union[datetime.time, Sequence[datetime.time]] = MISSING,
     ) -> None:
-        """Changes the interval for the sleep time.
+        """Change the interval for the sleep time.
 
         .. versionadded:: 1.2
 
@@ -739,7 +739,7 @@ def loop(
     cls: type[Object[L_co, Concatenate[LF, P]]] = Loop[Any],
     **kwargs: Any,
 ) -> Callable[[LF], L_co]:
-    """A decorator that schedules a task in the background for you with
+    """Schedule a task in the background with
     optional reconnect logic. The decorator returns a :class:`Loop`.
 
     Parameters

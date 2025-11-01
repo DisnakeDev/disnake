@@ -215,7 +215,7 @@ class SubCommandGroup(InvokableApplicationCommand):
         extras: Optional[dict[str, Any]] = None,
         **kwargs: Any,
     ) -> Callable[[CommandCallback], SubCommand]:
-        """A decorator that creates a subcommand in the subcommand group.
+        """Create a subcommand in the subcommand group.
         Parameters are the same as in :class:`InvokableSlashCommand.sub_command`
 
         Returns
@@ -392,7 +392,7 @@ class SubCommand(InvokableApplicationCommand):
             await self.call_after_hooks(inter)
 
     def autocomplete(self, option_name: str) -> Callable[[Callable], Callable]:
-        """A decorator that registers an autocomplete function for the specified option.
+        """Register an autocomplete function for the specified option.
 
         Parameters
         ----------
@@ -570,7 +570,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         extras: Optional[dict[str, Any]] = None,
         **kwargs: Any,
     ) -> Callable[[CommandCallback], SubCommand]:
-        """A decorator that creates a subcommand under the base command.
+        """Create a subcommand under the base command.
 
         Parameters
         ----------
@@ -632,7 +632,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         extras: Optional[dict[str, Any]] = None,
         **kwargs: Any,
     ) -> Callable[[CommandCallback], SubCommandGroup]:
-        """A decorator that creates a subcommand group under the base command.
+        """Create a subcommand group under the base command.
 
         Parameters
         ----------
@@ -672,7 +672,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         return decorator
 
     def autocomplete(self, option_name: str) -> Callable[[Callable], Callable]:
-        """A decorator that registers an autocomplete function for the specified option.
+        """Register an autocomplete function for the specified option.
 
         Parameters
         ----------
@@ -808,7 +808,7 @@ def slash_command(
     extras: Optional[dict[str, Any]] = None,
     **kwargs: Any,
 ) -> Callable[[CommandCallback], InvokableSlashCommand]:
-    """A decorator that builds a slash command.
+    """Build a slash command.
 
     Parameters
     ----------

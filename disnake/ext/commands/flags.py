@@ -116,21 +116,21 @@ class CommandSyncFlags(BaseFlags):
 
     @classmethod
     def all(cls) -> Self:
-        """A factory method that creates a :class:`CommandSyncFlags` with everything enabled."""
+        """Create a :class:`CommandSyncFlags` with everything enabled."""
         self = cls.__new__(cls)
         self.value = all_flags_value(cls.VALID_FLAGS)
         return self
 
     @classmethod
     def none(cls) -> Self:
-        """A factory method that creates a :class:`CommandSyncFlags` with everything disabled."""
+        """Create a :class:`CommandSyncFlags` with everything disabled."""
         self = cls.__new__(cls)
         self.value = self.DEFAULT_VALUE
         return self
 
     @classmethod
     def default(cls) -> Self:
-        """A factory method that creates a :class:`CommandSyncFlags` with the default settings.
+        """Create a :class:`CommandSyncFlags` with the default settings.
 
         The default is all flags enabled except for :attr:`sync_commands_debug`.
         """

@@ -93,7 +93,7 @@ class Cooldown:
         self._last: float = 0.0
 
     def get_tokens(self, current: Optional[float] = None) -> int:
-        """Returns the number of available tokens before rate limiting is applied.
+        """Return the number of available tokens before rate limiting is applied.
 
         Parameters
         ----------
@@ -116,7 +116,7 @@ class Cooldown:
         return tokens
 
     def get_retry_after(self, current: Optional[float] = None) -> float:
-        """Returns the time in seconds until the cooldown will be reset.
+        """Return the time in seconds until the cooldown will be reset.
 
         Parameters
         ----------
@@ -138,7 +138,7 @@ class Cooldown:
         return 0.0
 
     def update_rate_limit(self, current: Optional[float] = None) -> Optional[float]:
-        """Updates the cooldown rate limit.
+        """Update the cooldown rate limit.
 
         Parameters
         ----------
@@ -174,7 +174,7 @@ class Cooldown:
         self._last = 0.0
 
     def copy(self) -> Cooldown:
-        """Creates a copy of this cooldown.
+        """Create a copy of this cooldown.
 
         Returns
         -------

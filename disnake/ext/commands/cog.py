@@ -275,7 +275,7 @@ class Cog(metaclass=CogMeta):
         return self
 
     def get_commands(self) -> list[Command[Self, ..., Any]]:
-        """Returns a list of commands the cog has.
+        """Return a list of commands the cog has.
 
         Returns
         -------
@@ -290,7 +290,7 @@ class Cog(metaclass=CogMeta):
         return [c for c in self.__cog_commands__ if c.parent is None]
 
     def get_application_commands(self) -> list[InvokableApplicationCommand]:
-        """Returns a list of application commands the cog has.
+        """Return a list of application commands the cog has.
 
         Returns
         -------
@@ -305,7 +305,7 @@ class Cog(metaclass=CogMeta):
         return list(self.__cog_app_commands__)
 
     def get_slash_commands(self) -> list[InvokableSlashCommand]:
-        """Returns a list of slash commands the cog has.
+        """Return a list of slash commands the cog has.
 
         Returns
         -------
@@ -320,7 +320,7 @@ class Cog(metaclass=CogMeta):
         return [c for c in self.__cog_app_commands__ if isinstance(c, InvokableSlashCommand)]
 
     def get_user_commands(self) -> list[InvokableUserCommand]:
-        """Returns a list of user commands the cog has.
+        """Return a list of user commands the cog has.
 
         Returns
         -------
@@ -331,7 +331,7 @@ class Cog(metaclass=CogMeta):
         return [c for c in self.__cog_app_commands__ if isinstance(c, InvokableUserCommand)]
 
     def get_message_commands(self) -> list[InvokableMessageCommand]:
-        """Returns a list of message commands the cog has.
+        """Return a list of message commands the cog has.
 
         Returns
         -------
@@ -356,7 +356,7 @@ class Cog(metaclass=CogMeta):
         self.__cog_description__ = description
 
     def walk_commands(self) -> Generator[Command[Self, ..., Any], None, None]:
-        """An iterator that recursively walks through this cog's commands and subcommands.
+        """Return a generator that recursively walks through this cog's commands and subcommands.
 
         Yields
         ------
@@ -372,7 +372,7 @@ class Cog(metaclass=CogMeta):
                     yield from command.walk_commands()
 
     def get_listeners(self) -> list[tuple[str, Callable[..., Any]]]:
-        """Returns a :class:`list` of (name, function) listener pairs the cog has.
+        """Return a :class:`list` of (name, function) listener pairs the cog has.
 
         Returns
         -------
@@ -388,7 +388,7 @@ class Cog(metaclass=CogMeta):
 
     @classmethod
     def listener(cls, name: Union[str, Event] = MISSING) -> Callable[[FuncT], FuncT]:
-        """A decorator that marks a function as a listener.
+        """Return a decorator that marks a function as a listener.
 
         This is the cog equivalent of :meth:`.Bot.listen`.
 
@@ -465,7 +465,7 @@ class Cog(metaclass=CogMeta):
 
     @_cog_special_method
     async def cog_load(self) -> None:
-        """A special method that is called as a task when the cog is added."""
+        """A special method that is called as a task when the cog is added."""  # noqa: D401
         pass
 
     @_cog_special_method
@@ -476,7 +476,7 @@ class Cog(metaclass=CogMeta):
         function.
 
         Subclasses must replace this if they want special unloading behaviour.
-        """
+        """  # noqa: D401
         pass
 
     @_cog_special_method
@@ -488,7 +488,7 @@ class Cog(metaclass=CogMeta):
 
         This function **can** be a coroutine and must take a sole parameter,
         ``ctx``, to represent the :class:`.Context`.
-        """
+        """  # noqa: D401
         return True
 
     @_cog_special_method
@@ -500,7 +500,7 @@ class Cog(metaclass=CogMeta):
 
         This function **can** be a coroutine and must take a sole parameter,
         ``ctx``, to represent the :class:`.Context`.
-        """
+        """  # noqa: D401
         return True
 
     @_cog_special_method
@@ -510,7 +510,7 @@ class Cog(metaclass=CogMeta):
 
         This function **can** be a coroutine and must take a sole parameter,
         ``inter``, to represent the :class:`.ApplicationCommandInteraction`.
-        """
+        """  # noqa: D401
         return True
 
     @_cog_special_method
@@ -520,7 +520,7 @@ class Cog(metaclass=CogMeta):
 
         This function **can** be a coroutine and must take a sole parameter,
         ``inter``, to represent the :class:`.ApplicationCommandInteraction`.
-        """
+        """  # noqa: D401
         return True
 
     @_cog_special_method
@@ -554,7 +554,7 @@ class Cog(metaclass=CogMeta):
 
         This function **can** be a coroutine and must take a sole parameter,
         ``ctx``, to represent the :class:`.Context`.
-        """
+        """  # noqa: D401
         return True
 
     @_cog_special_method
@@ -564,7 +564,7 @@ class Cog(metaclass=CogMeta):
 
         This function **can** be a coroutine and must take a sole parameter,
         ``inter``, to represent the :class:`.ApplicationCommandInteraction`.
-        """
+        """  # noqa: D401
         return True
 
     @_cog_special_method
@@ -595,7 +595,7 @@ class Cog(metaclass=CogMeta):
             The invocation context where the error happened.
         error: :class:`CommandError`
             The error that was raised.
-        """
+        """  # noqa: D401
         pass
 
     @_cog_special_method
@@ -616,7 +616,7 @@ class Cog(metaclass=CogMeta):
             The interaction where the error happened.
         error: :class:`CommandError`
             The error that was raised.
-        """
+        """  # noqa: D401
         pass
 
     @_cog_special_method
@@ -646,7 +646,7 @@ class Cog(metaclass=CogMeta):
         ----------
         ctx: :class:`.Context`
             The invocation context.
-        """
+        """  # noqa: D401
         pass
 
     @_cog_special_method
@@ -662,7 +662,7 @@ class Cog(metaclass=CogMeta):
         ----------
         ctx: :class:`.Context`
             The invocation context.
-        """
+        """  # noqa: D401
         pass
 
     @_cog_special_method
@@ -677,7 +677,7 @@ class Cog(metaclass=CogMeta):
         ----------
         inter: :class:`.ApplicationCommandInteraction`
             The interaction of the slash command.
-        """
+        """  # noqa: D401
         pass
 
     @_cog_special_method
@@ -692,7 +692,7 @@ class Cog(metaclass=CogMeta):
         ----------
         inter: :class:`.ApplicationCommandInteraction`
             The interaction of the slash command.
-        """
+        """  # noqa: D401
         pass
 
     @_cog_special_method

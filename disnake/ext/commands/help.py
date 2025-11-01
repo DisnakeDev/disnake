@@ -105,7 +105,7 @@ class Paginator:
         self.clear()
 
     def clear(self) -> None:
-        """Clears the paginator to have no pages."""
+        """Clear the paginator to have no pages."""
         if self.prefix is not None:
             self._current_page: list[str] = [self.prefix]
             self._count: int = len(self.prefix) + self._linesep_len  # prefix + newline
@@ -127,7 +127,7 @@ class Paginator:
         return len(self.linesep)
 
     def add_line(self, line: str = "", *, empty: bool = False) -> None:
-        """Adds a line to the current page.
+        """Add a line to the current page.
 
         If the line exceeds the :attr:`max_size` then an exception
         is raised.
@@ -352,7 +352,7 @@ class HelpCommand:
         self._command_impl._eject_cog()
 
     def add_check(self, func: Check) -> None:
-        """Adds a check to the help command.
+        """Add a check to the help command.
 
         .. versionadded:: 1.4
 
@@ -364,7 +364,7 @@ class HelpCommand:
         self._command_impl.add_check(func)
 
     def remove_check(self, func: Check) -> None:
-        """Removes a check from the help command.
+        """Remove a check from the help command.
 
         This function is idempotent and will not raise an exception if
         the function is not in the command's checks.
@@ -379,7 +379,7 @@ class HelpCommand:
         self._command_impl.remove_check(func)
 
     def get_bot_mapping(self) -> dict[Optional[Cog], list[Command[Any, ..., Any]]]:
-        """Retrieves the bot mapping passed to :meth:`send_bot_help`."""
+        """Retrieve the bot mapping passed to :meth:`send_bot_help`."""
         bot = self.context.bot
         mapping: dict[Optional[Cog], list[Command[Any, ..., Any]]] = {
             cog: cog.get_commands() for cog in bot.cogs.values()
@@ -413,7 +413,7 @@ class HelpCommand:
         return ctx.invoked_with
 
     def get_command_signature(self, command: Command[Any, ..., Any]) -> str:
-        """Retrieves the signature portion of the help page.
+        """Retrieve the signature portion of the help page.
 
         Parameters
         ----------
@@ -447,7 +447,7 @@ class HelpCommand:
         return f"{self.context.clean_prefix}{alias} {command.signature}"
 
     def remove_mentions(self, string: str) -> str:
-        """Removes mentions from the string to prevent abuse.
+        """Remove mentions from the string to prevent abuse.
 
         This includes ``@everyone``, ``@here``, member mentions and role mentions.
 
@@ -606,7 +606,7 @@ class HelpCommand:
         return ret
 
     def get_max_size(self, commands: Sequence[Command[Any, ..., Any]]) -> int:
-        """Returns the largest name length of the specified command list.
+        """Return the largest name length of the specified command list.
 
         Parameters
         ----------
@@ -622,7 +622,7 @@ class HelpCommand:
         return max(as_lengths, default=0)
 
     def get_destination(self) -> disnake.abc.Messageable:
-        """Returns the :class:`~disnake.abc.Messageable` where the help command will be output.
+        """Return the :class:`~disnake.abc.Messageable` where the help command will be output.
 
         You can override this method to customise the behaviour.
 
@@ -950,7 +950,7 @@ class DefaultHelpCommand(HelpCommand):
         return text
 
     def get_ending_note(self) -> Optional[str]:
-        """Returns help command's ending note. This is mainly useful to override for i18n purposes.
+        """Return help command's ending note. This is mainly useful to override for i18n purposes.
 
         :return type: :class:`str`
         """
@@ -1002,13 +1002,13 @@ class DefaultHelpCommand(HelpCommand):
             self.paginator.add_line(self.shorten_text(entry))
 
     async def send_pages(self) -> None:
-        """A helper utility to send the page output from :attr:`paginator` to the destination."""
+        """Send the page output from :attr:`paginator` to the destination."""
         destination = self.get_destination()
         for page in self.paginator.pages:
             await destination.send(page)
 
     def add_command_formatting(self, command: Command[Any, ..., Any]) -> None:
-        """A utility function to format the non-indented block of commands and groups.
+        """Format the non-indented block of commands and groups.
 
         Parameters
         ----------
@@ -1154,13 +1154,13 @@ class MinimalHelpCommand(HelpCommand):
         super().__init__(**options)
 
     async def send_pages(self) -> None:
-        """A helper utility to send the page output from :attr:`paginator` to the destination."""
+        """Send the page output from :attr:`paginator` to the destination."""
         destination = self.get_destination()
         for page in self.paginator.pages:
             await destination.send(page)
 
     def get_opening_note(self) -> Optional[str]:
-        """Returns help command's opening note. This is mainly useful to override for i18n purposes.
+        """Return help command's opening note. This is mainly useful to override for i18n purposes.
 
         The default implementation returns ::
 
@@ -1196,7 +1196,7 @@ class MinimalHelpCommand(HelpCommand):
     def add_bot_commands_formatting(
         self, commands: Sequence[Command[Any, ..., Any]], heading: str
     ) -> None:
-        """Adds the minified bot heading with commands to the output.
+        """Add the minified bot heading with commands to the output.
 
         The formatting should be added to the :attr:`paginator`.
 
@@ -1217,7 +1217,7 @@ class MinimalHelpCommand(HelpCommand):
             self.paginator.add_line(joined)
 
     def add_subcommand_formatting(self, command: Command[Any, ..., Any]) -> None:
-        """Adds formatting information on a subcommand.
+        """Add formatting information on a subcommand.
 
         The formatting should be added to the :attr:`paginator`.
 
@@ -1235,7 +1235,7 @@ class MinimalHelpCommand(HelpCommand):
         )
 
     def add_aliases_formatting(self, aliases: Sequence[str]) -> None:
-        """Adds the formatting information on a command's aliases.
+        """Add the formatting information on a command's aliases.
 
         The formatting should be added to the :attr:`paginator`.
 
@@ -1252,7 +1252,7 @@ class MinimalHelpCommand(HelpCommand):
         self.paginator.add_line(f"**{self.aliases_heading}** {', '.join(aliases)}", empty=True)
 
     def add_command_formatting(self, command: Command[Any, ..., Any]) -> None:
-        """A utility function to format commands and groups.
+        """Format commands and groups.
 
         Parameters
         ----------

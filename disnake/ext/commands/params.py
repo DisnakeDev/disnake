@@ -138,7 +138,7 @@ def remove_optionals(annotation: Any) -> Any:
 
 
 def _xt_to_xe(xe: Optional[float], xt: Optional[float], direction: float = 1) -> Optional[float]:
-    """Function for combining xt and xe
+    """Combine xt and xe
 
     * x > xt && x >= xe ; x >= f(xt, xe, 1)
     * x < xt && x <= xe ; x <= f(xt, xe, -1)
@@ -200,7 +200,7 @@ class Injection(Generic[P, T_]):
         return copy
 
     def __call__(self, *args: P.args, **kwargs: P.kwargs) -> T_:
-        """Calls the underlying function that the injection holds.
+        """Call the underlying function that the injection holds.
 
         .. versionadded:: 2.6
         """
@@ -618,7 +618,7 @@ class ParamInfo:
         return f"{type(self).__name__}({args})"
 
     async def get_default(self, inter: ApplicationCommandInteraction) -> Any:
-        """Gets the default for an interaction"""
+        """Get the default for an interaction"""
         default = self.default
         if callable(self.default):
             default = self.default(inter)
@@ -846,7 +846,7 @@ class ParamInfo:
 
 
 def safe_call(function: Callable[..., T], /, *possible_args: Any, **possible_kwargs: Any) -> T:
-    """Calls a function without providing any extra unexpected arguments"""
+    """Call a function without providing any extra unexpected arguments"""
     MISSING: Any = object()
     parameters = get_signature_parameters(function)
 
@@ -925,7 +925,7 @@ def isolate_self(
 
 
 def classify_autocompleter(autocompleter: AnyAutocompleter) -> None:
-    """Detects whether an autocomplete function can take a cog as the first argument.
+    """Detect whether an autocomplete function can take a cog as the first argument.
     The result is then saved as a boolean value in `func.__has_cog_param__`
     """
     if not callable(autocompleter):
@@ -1151,7 +1151,7 @@ def Param(
     max_length: Optional[int] = None,
     **kwargs: Any,
 ) -> Any:
-    """A special function that creates an instance of :class:`ParamInfo` that contains some information about a
+    """Create an instance of :class:`ParamInfo` that contains information about a
     slash command option. This instance should be assigned to a parameter of a function representing your slash command.
 
     See :ref:`param_syntax` for more info.
@@ -1339,7 +1339,7 @@ def injection(
 def option_enum(
     choices: Union[dict[str, TChoice], list[TChoice]], **kwargs: TChoice
 ) -> type[TChoice]:
-    """A utility function to create an enum type.
+    """Create an enum type.
     Returns a new :class:`~enum.Enum` based on the provided parameters.
 
     .. versionadded:: 2.1
@@ -1376,7 +1376,7 @@ if TYPE_CHECKING:
 else:
 
     def converter_method(function: Any) -> ConverterMethod:
-        """A decorator to register a method as the converter method.
+        """Register a method as the converter method.
 
         .. versionadded:: 2.3
         """
@@ -1388,7 +1388,7 @@ def register_injection(
     *,
     autocompleters: Optional[dict[str, Callable]] = None,
 ) -> Injection[P, T_]:
-    """A decorator to register a global injection.
+    """Register a global injection.
 
     .. versionadded:: 2.3
 

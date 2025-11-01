@@ -158,7 +158,7 @@ class CommonBotBase(Generic[CogT]):
             return user.id in self.owner_ids
 
     def add_cog(self, cog: Cog, *, override: bool = False) -> None:
-        """Adds a "cog" to the bot.
+        """Add a "cog" to the bot.
 
         A cog is a class that has its own event listeners and commands.
 
@@ -208,7 +208,7 @@ class CommonBotBase(Generic[CogT]):
         self.__cogs[cog_name] = cog
 
     def get_cog(self, name: str) -> Optional[Cog]:
-        """Gets the cog instance requested.
+        """Get the cog instance requested.
 
         If the cog is not found, :data:`None` is returned instead.
 
@@ -227,7 +227,7 @@ class CommonBotBase(Generic[CogT]):
         return self.__cogs.get(name)
 
     def remove_cog(self, name: str) -> Optional[Cog]:
-        """Removes a cog from the bot and returns it.
+        """Remove a cog from the bot and return it.
 
         All registered commands and event listeners that the
         cog has registered will be removed as well.
@@ -337,7 +337,7 @@ class CommonBotBase(Generic[CogT]):
             raise errors.ExtensionNotFound(name) from e
 
     def load_extension(self, name: str, *, package: Optional[str] = None) -> None:
-        """Loads an extension.
+        """Load an extension.
 
         An extension is a python module that contains commands, cogs, or
         listeners.
@@ -485,7 +485,7 @@ class CommonBotBase(Generic[CogT]):
             raise
 
     def load_extensions(self, path: str) -> None:
-        """Loads all extensions in a directory.
+        """Load all extensions in a directory.
 
         .. versionadded:: 2.4
 

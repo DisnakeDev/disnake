@@ -48,7 +48,7 @@ _log = logging.getLogger(__name__)
 
 
 def when_mentioned(bot: BotBase, msg: Message) -> list[str]:
-    """A callable that implements a command prefix equivalent to being mentioned.
+    """Return a command prefix equivalent to being mentioned.
 
     These are meant to be passed into the :attr:`.Bot.command_prefix` attribute.
     """
@@ -57,7 +57,7 @@ def when_mentioned(bot: BotBase, msg: Message) -> list[str]:
 
 
 def when_mentioned_or(*prefixes: str) -> Callable[[BotBase, Message], list[str]]:
-    """A callable that implements when mentioned or other prefixes provided.
+    """Return a command prefix equivalent to being mentioned or other prefixes provided.
 
     These are meant to be passed into the :attr:`.Bot.command_prefix` attribute.
 
@@ -204,7 +204,7 @@ class BotBase(CommonBotBase, GroupMixin):
         *,
         call_once: bool = False,
     ) -> None:
-        """Adds a global check to the bot.
+        """Add a global check to the bot.
 
         This is for text commands only, and doesn't apply to application commands.
 
@@ -229,7 +229,7 @@ class BotBase(CommonBotBase, GroupMixin):
         *,
         call_once: bool = False,
     ) -> None:
-        """Removes a global check from the bot.
+        """Remove a global check from the bot.
 
         This is for text commands only, and doesn't apply to application commands.
 
@@ -251,7 +251,7 @@ class BotBase(CommonBotBase, GroupMixin):
             pass
 
     def check(self, func: T) -> T:
-        """A decorator that adds a global check to the bot.
+        """Return a decorator that adds a global check to the bot.
 
         This is for text commands only, and doesn't apply to application commands.
 
@@ -281,7 +281,7 @@ class BotBase(CommonBotBase, GroupMixin):
         return func
 
     def check_once(self, func: CFT) -> CFT:
-        """A decorator that adds a "call once" global check to the bot.
+        """Return a decorator that adds a "call once" global check to the bot.
 
         This is for text commands only, and doesn't apply to application commands.
 
@@ -329,7 +329,7 @@ class BotBase(CommonBotBase, GroupMixin):
         return await disnake.utils.async_all(f(ctx) for f in data)  # pyright: ignore[reportCallIssue]
 
     def before_invoke(self, coro: CFT) -> CFT:
-        """A decorator that registers a coroutine function as a pre-invoke hook.
+        """Return a decorator that registers a coroutine function as a pre-invoke hook.
 
         This is for text commands only, and doesn't apply to application commands.
 
@@ -364,7 +364,7 @@ class BotBase(CommonBotBase, GroupMixin):
         return coro
 
     def after_invoke(self, coro: CFT) -> CFT:
-        """A decorator that registers a coroutine function as a post-invoke hook.
+        """Return a decorator that registers a coroutine function as a post-invoke hook.
 
         This is for text commands only, and doesn't apply to application commands.
 

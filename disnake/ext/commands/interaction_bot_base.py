@@ -260,7 +260,7 @@ class InteractionBotBase(CommonBotBase):
         return set(self.all_message_commands.values())
 
     def add_slash_command(self, slash_command: InvokableSlashCommand) -> None:
-        """Adds an :class:`InvokableSlashCommand` into the internal list of slash commands.
+        """Add an :class:`InvokableSlashCommand` into the internal list of slash commands.
 
         This is usually not called, instead the :meth:`.slash_command` or
         shortcut decorators are used.
@@ -293,7 +293,7 @@ class InteractionBotBase(CommonBotBase):
         self.all_slash_commands[slash_command.name] = slash_command
 
     def add_user_command(self, user_command: InvokableUserCommand) -> None:
-        """Adds an :class:`InvokableUserCommand` into the internal list of user commands.
+        """Add an :class:`InvokableUserCommand` into the internal list of user commands.
 
         This is usually not called, instead the :meth:`.user_command` or
         shortcut decorators are used.
@@ -326,7 +326,7 @@ class InteractionBotBase(CommonBotBase):
         self.all_user_commands[user_command.name] = user_command
 
     def add_message_command(self, message_command: InvokableMessageCommand) -> None:
-        """Adds an :class:`InvokableMessageCommand` into the internal list of message commands.
+        """Add an :class:`InvokableMessageCommand` into the internal list of message commands.
 
         This is usually not called, instead the :meth:`.message_command` or
         shortcut decorators are used.
@@ -359,7 +359,7 @@ class InteractionBotBase(CommonBotBase):
         self.all_message_commands[message_command.name] = message_command
 
     def remove_slash_command(self, name: str) -> Optional[InvokableSlashCommand]:
-        """Removes an :class:`InvokableSlashCommand` from the internal list
+        """Remove an :class:`InvokableSlashCommand` from the internal list
         of slash commands.
 
         Parameters
@@ -378,7 +378,7 @@ class InteractionBotBase(CommonBotBase):
         return command
 
     def remove_user_command(self, name: str) -> Optional[InvokableUserCommand]:
-        """Removes an :class:`InvokableUserCommand` from the internal list
+        """Remove an :class:`InvokableUserCommand` from the internal list
         of user commands.
 
         Parameters
@@ -397,7 +397,7 @@ class InteractionBotBase(CommonBotBase):
         return command
 
     def remove_message_command(self, name: str) -> Optional[InvokableMessageCommand]:
-        """Removes an :class:`InvokableMessageCommand` from the internal list
+        """Remove an :class:`InvokableMessageCommand` from the internal list
         of message commands.
 
         Parameters
@@ -460,7 +460,7 @@ class InteractionBotBase(CommonBotBase):
         return None
 
     def get_user_command(self, name: str) -> Optional[InvokableUserCommand]:
-        """Gets an :class:`InvokableUserCommand` from the internal list
+        """Get an :class:`InvokableUserCommand` from the internal list
         of user commands.
 
         Parameters
@@ -476,7 +476,7 @@ class InteractionBotBase(CommonBotBase):
         return self.all_user_commands.get(name)
 
     def get_message_command(self, name: str) -> Optional[InvokableMessageCommand]:
-        """Gets an :class:`InvokableMessageCommand` from the internal list
+        """Get an :class:`InvokableMessageCommand` from the internal list
         of message commands.
 
         Parameters
@@ -1092,7 +1092,7 @@ class InteractionBotBase(CommonBotBase):
         user_commands: bool = False,
         message_commands: bool = False,
     ) -> None:
-        """Adds a global application command check to the bot.
+        """Add a global application command check to the bot.
 
         This is the non-decorator interface to :func:`.app_check`,
         :meth:`.slash_command_check` and etc.
@@ -1140,7 +1140,7 @@ class InteractionBotBase(CommonBotBase):
         user_commands: bool = False,
         message_commands: bool = False,
     ) -> None:
-        """Removes a global application command check from the bot.
+        """Remove a global application command check from the bot.
 
         This function is idempotent and will not raise an exception
         if the function is not in the global checks.
@@ -1229,7 +1229,7 @@ class InteractionBotBase(CommonBotBase):
         [Callable[[ApplicationCommandInteraction], Any]],
         Callable[[ApplicationCommandInteraction], Any],
     ]:
-        """A decorator that adds a global application command check to the bot.
+        """Add a global application command check to the bot.
 
         A global check is similar to a :func:`check` that is applied
         on a per command basis except it is run before any application command checks

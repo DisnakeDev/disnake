@@ -324,7 +324,7 @@ class InvokableApplicationCommand(ABC):
         return self._callback
 
     def add_check(self, func: AppCheck) -> None:
-        """Adds a check to the application command.
+        """Add a check to the application command.
 
         This is the non-decorator interface to :func:`.app_check`.
 
@@ -336,7 +336,7 @@ class InvokableApplicationCommand(ABC):
         self.checks.append(func)
 
     def remove_check(self, func: AppCheck) -> None:
-        """Removes a check from the application command.
+        """Remove a check from the application command.
 
         This function is idempotent and will not raise an exception
         if the function is not in the command's checks.
@@ -399,7 +399,7 @@ class InvokableApplicationCommand(ABC):
             raise
 
     def is_on_cooldown(self, inter: ApplicationCommandInteraction) -> bool:
-        """Checks whether the application command is currently on cooldown.
+        """Check whether the application command is currently on cooldown.
 
         Parameters
         ----------
@@ -420,7 +420,7 @@ class InvokableApplicationCommand(ABC):
         return bucket.get_tokens(current) == 0
 
     def reset_cooldown(self, inter: ApplicationCommandInteraction) -> None:
-        """Resets the cooldown on this application command.
+        """Reset the cooldown on this application command.
 
         Parameters
         ----------
@@ -432,7 +432,7 @@ class InvokableApplicationCommand(ABC):
             bucket.reset()
 
     def get_cooldown_retry_after(self, inter: ApplicationCommandInteraction) -> float:
-        """Retrieves the amount of seconds before this application command can be tried again.
+        """Retrieve the amount of seconds before this application command can be tried again.
 
         Parameters
         ----------
@@ -475,7 +475,7 @@ class InvokableApplicationCommand(ABC):
             await self.call_after_hooks(inter)
 
     def error(self, coro: ErrorT) -> ErrorT:
-        """A decorator that registers a coroutine function as a local error handler.
+        """Register a coroutine function as a local error handler.
 
         A local error handler is an error event limited to a single application command.
 
@@ -497,7 +497,7 @@ class InvokableApplicationCommand(ABC):
         return coro
 
     def has_error_handler(self) -> bool:
-        """Checks whether the application command has an error handler registered."""
+        """Check whether the application command has an error handler registered."""
         return hasattr(self, "on_error")
 
     async def _call_local_error_handler(
@@ -590,7 +590,7 @@ class InvokableApplicationCommand(ABC):
             await hook(inter)
 
     def before_invoke(self, coro: HookT) -> HookT:
-        """A decorator that registers a coroutine function as a pre-invoke hook.
+        """Register a coroutine function as a pre-invoke hook.
 
         A pre-invoke hook is called directly before the command is called.
 
@@ -614,7 +614,7 @@ class InvokableApplicationCommand(ABC):
         return coro
 
     def after_invoke(self, coro: HookT) -> HookT:
-        """A decorator that registers a coroutine function as a post-invoke hook.
+        """Register a coroutine function as a post-invoke hook.
 
         A post-invoke hook is called directly after the command is called.
 
@@ -776,7 +776,7 @@ def default_member_permissions(
 
 @_overload_with_permissions
 def default_member_permissions(value: int = 0, **permissions: bool) -> Callable[[T], T]:
-    """A decorator that sets default required member permissions for the application command.
+    """Set default required member permissions for the application command.
     Unlike :func:`~.has_permissions`, this decorator does not add any checks.
     Instead, it prevents the command from being run by members without *all* required permissions,
     if not overridden by moderators on a guild-specific basis.
@@ -837,7 +837,7 @@ def default_member_permissions(value: int = 0, **permissions: bool) -> Callable[
 
 
 def install_types(*, guild: bool = False, user: bool = False) -> Callable[[T], T]:
-    """A decorator that sets the installation types where the
+    """Return a decorator that sets the installation types where the
     application command is available.
 
     See also the ``install_types`` parameter for application command decorators.
@@ -878,7 +878,7 @@ def install_types(*, guild: bool = False, user: bool = False) -> Callable[[T], T
 def contexts(
     *, guild: bool = False, bot_dm: bool = False, private_channel: bool = False
 ) -> Callable[[T], T]:
-    """A decorator that sets the interaction contexts where the application command can be used.
+    """Return a decorator that sets the interaction contexts where the application command can be used.
 
     See also the ``contexts`` parameter for application command decorators.
 

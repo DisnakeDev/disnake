@@ -402,7 +402,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         self.params = params
 
     def add_check(self, func: Check) -> None:
-        """Adds a check to the command.
+        """Add a check to the command.
 
         This is the non-decorator interface to :func:`.check`.
 
@@ -416,7 +416,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         self.checks.append(func)
 
     def remove_check(self, func: Check) -> None:
-        """Removes a check from the command.
+        """Remove a check from the command.
 
         This function is idempotent and will not raise an exception
         if the function is not in the command's checks.
@@ -434,7 +434,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
             pass
 
     def update(self, **kwargs: Any) -> None:
-        """Updates :class:`Command` instance with updated attribute.
+        """Update :class:`Command` instance with updated attribute.
 
         This works similarly to the :func:`.command` decorator in terms
         of parameters in that they are passed to the :class:`Command` or
@@ -479,7 +479,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         return other
 
     def copy(self: CommandT) -> CommandT:
-        """Creates a copy of this command.
+        """Create a copy of this command.
 
         Returns
         -------
@@ -802,7 +802,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
             raise
 
     def is_on_cooldown(self, ctx: Context) -> bool:
-        """Checks whether the command is currently on cooldown.
+        """Check whether the command is currently on cooldown.
 
         Parameters
         ----------
@@ -823,7 +823,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         return bucket.get_tokens(current) == 0
 
     def reset_cooldown(self, ctx: Context) -> None:
-        """Resets the cooldown on this command.
+        """Reset the cooldown on this command.
 
         Parameters
         ----------
@@ -835,7 +835,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
             bucket.reset()
 
     def get_cooldown_retry_after(self, ctx: Context) -> float:
-        """Retrieves the amount of seconds before this command can be tried again.
+        """Retrieve the amount of seconds before this command can be tried again.
 
         .. versionadded:: 1.4
 
@@ -902,7 +902,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         ------
         TypeError
             The argument passed is not actually a coroutine function.
-        """
+        """  # noqa: D401
         if not iscoroutinefunction(coro):
             msg = "The error handler must be a coroutine function."
             raise TypeError(msg)
@@ -939,7 +939,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         ------
         TypeError
             The argument passed is not actually a coroutine function.
-        """
+        """  # noqa: D401
         if not iscoroutinefunction(coro):
             msg = "The pre-invoke hook must be a coroutine function."
             raise TypeError(msg)
@@ -967,7 +967,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         ------
         TypeError
             The argument passed is not actually a coroutine function.
-        """
+        """  # noqa: D401
         if not iscoroutinefunction(coro):
             msg = "The post-invoke hook must be a coroutine function."
             raise TypeError(msg)
@@ -1149,7 +1149,7 @@ class GroupMixin(Generic[CogT]):
             self.remove_command(command.name)
 
     def add_command(self, command: Command[CogT, Any, Any]) -> None:
-        """Adds a :class:`.Command` into the internal list of commands.
+        """Add a :class:`.Command` into the internal list of commands.
 
         This is usually not called, instead the :meth:`~.GroupMixin.command` or
         :meth:`~.GroupMixin.group` shortcut decorators are used instead.
@@ -1224,7 +1224,7 @@ class GroupMixin(Generic[CogT]):
         return command
 
     def walk_commands(self) -> Generator[Command[CogT, Any, Any], None, None]:
-        """An iterator that recursively walks through all commands and subcommands.
+        """Return an iterator that recursively walks through all commands and subcommands.
 
         .. versionchanged:: 1.4
             Duplicates due to aliases are no longer returned
@@ -1313,7 +1313,7 @@ class GroupMixin(Generic[CogT]):
         *args: Any,
         **kwargs: Any,
     ) -> Any:
-        """A shortcut decorator that invokes :func:`.command` and adds it to
+        """Return a decorator that invokes :func:`.command` and adds it to
         the internal command list via :meth:`~.GroupMixin.add_command`.
 
         Returns
@@ -1370,7 +1370,7 @@ class GroupMixin(Generic[CogT]):
         -------
         :class:`~collections.abc.Callable`\\[..., :class:`Group`]
             A decorator that converts the provided method into a Group, adds it to the bot, then returns it.
-        """
+        """  # noqa: D401
 
         def decorator(func: CommandCallback[CogT, ContextT, P, T]) -> Group[Any, Any, Any]:
             kwargs.setdefault("parent", self)
@@ -1409,7 +1409,7 @@ class Group(GroupMixin[CogT], Command[CogT, P, T]):
         super().__init__(*args, **attrs)
 
     def copy(self: GroupT) -> GroupT:
-        """Creates a copy of this :class:`Group`.
+        """Create a copy of this :class:`Group`.
 
         Returns
         -------
@@ -1560,7 +1560,7 @@ def command(
     cls: type[Command[Any, Any, Any]] = MISSING,
     **attrs: Any,
 ) -> Any:
-    """A decorator that transforms a function into a :class:`.Command`
+    """Return a decorator that transforms a function into a :class:`.Command`
     or if called with :func:`.group`, :class:`.Group`.
 
     By default the ``help`` attribute is received automatically from the
@@ -1630,7 +1630,7 @@ def group(
     cls: type[Group[Any, Any, Any]] = MISSING,
     **attrs: Any,
 ) -> Any:
-    """A decorator that transforms a function into a :class:`.Group`.
+    """Return a decorator that transforms a function into a :class:`.Group`.
 
     This is similar to the :func:`.command` decorator but the ``cls``
     parameter is set to :class:`Group` by default.
@@ -1644,7 +1644,7 @@ def group(
 
 
 def check(predicate: Check) -> Callable[[T], T]:
-    """A decorator that adds a check to the :class:`.Command` or its
+    """Return a check to add to the :class:`.Command` or its
     subclasses. These checks could be accessed via :attr:`.Command.checks`.
 
     These checks should be predicates that take in a single parameter taking
