@@ -14,11 +14,8 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    List,
     Literal,
     Optional,
-    Tuple,
-    Type,
     TypedDict,
     TypeVar,
     overload,
@@ -108,14 +105,14 @@ signal_ctl: SignalCtl = {
 }
 
 
-def _err_lt(result: int, func: Callable[..., Any], args: List[Any]) -> int:
+def _err_lt(result: int, func: Callable[..., Any], args: list[Any]) -> int:
     if result < OK:
         _log.info("error has happened in %s", func.__name__)
         raise OpusError(result)
     return result
 
 
-def _err_ne(result: T, func: Callable[..., Any], args: List[Any]) -> T:
+def _err_ne(result: T, func: Callable[..., Any], args: list[Any]) -> T:
     ret = args[-1]._obj
     if ret.value != OK:
         _log.info("error has happened in %s", func.__name__)
@@ -128,8 +125,8 @@ def _err_ne(result: T, func: Callable[..., Any], args: List[Any]) -> T:
 # The second one are the types of arguments it takes.
 # The third is the result type.
 # The fourth is the error handler.
-exported_functions: List[
-    Tuple[str, Optional[List[Type[ctypes._CData]]], Optional[Type[ctypes._CData]], Any]
+exported_functions: list[
+    tuple[str, Optional[list[type[ctypes._CData]]], Optional[type[ctypes._CData]], Any]
 ] = [
     # Generic
     ("opus_get_version_string", [], ctypes.c_char_p, None),
@@ -211,7 +208,7 @@ def libopus_loader(name: str) -> Any:
 
         try:
             if item[1]:
-                func.argtypes = item[1]  # type: ignore
+                func.argtypes = item[1]  # pyright: ignore[reportAttributeAccessIssue]
 
             func.restype = item[2]
         except KeyError:
@@ -355,7 +352,7 @@ class Encoder(_OpusStruct):
         if hasattr(self, "_state"):
             _lib.opus_encoder_destroy(self._state)
             # This is a destructor, so it's okay to assign None
-            self._state = None  # type: ignore
+            self._state = None  # pyright: ignore[reportAttributeAccessIssue]
 
     def _create_state(self) -> EncoderStruct:
         ret = ctypes.c_int()
@@ -394,7 +391,7 @@ class Encoder(_OpusStruct):
     def encode(self, pcm: bytes, frame_size: int) -> bytes:
         max_data_bytes = len(pcm)
         # bytes can be used to reference pointer
-        pcm_ptr = ctypes.cast(pcm, c_int16_ptr)  # type: ignore
+        pcm_ptr = ctypes.cast(pcm, c_int16_ptr)  # pyright: ignore[reportArgumentType]
         data = (ctypes.c_char * max_data_bytes)()
 
         ret = _lib.opus_encode(self._state, pcm_ptr, frame_size, data, max_data_bytes)
@@ -412,7 +409,7 @@ class Decoder(_OpusStruct):
         if hasattr(self, "_state"):
             _lib.opus_decoder_destroy(self._state)
             # This is a destructor, so it's okay to assign None
-            self._state = None  # type: ignore
+            self._state = None  # pyright: ignore[reportAttributeAccessIssue]
 
     def _create_state(self) -> DecoderStruct:
         ret = ctypes.c_int()

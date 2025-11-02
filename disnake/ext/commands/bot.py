@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable, List, Optional, Sequence, Set, Union
+from collections.abc import Sequence
+from typing import TYPE_CHECKING, Any, Callable, Optional, Union
 
 import disnake
 
@@ -59,9 +60,9 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
 
     Parameters
     ----------
-    test_guilds: List[:class:`int`]
+    test_guilds: :class:`list`\\[:class:`int`]
         The list of IDs of the guilds where you're going to test your application commands.
-        Defaults to ``None``, which means global registration of commands across
+        Defaults to :data:`None`, which means global registration of commands across
         all guilds.
 
         .. versionadded:: 2.1
@@ -122,7 +123,7 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
 
         .. versionadded:: 2.5
 
-    default_install_types: Optional[:class:`.ApplicationInstallTypes`]
+    default_install_types: :class:`.ApplicationInstallTypes` | :data:`None`
         The default installation types where application commands will be available.
         This applies to all commands added either through the respective decorators
         or directly using :meth:`.add_slash_command` (etc.).
@@ -133,7 +134,7 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
 
         .. versionadded:: 2.10
 
-    default_contexts: Optional[:class:`.InteractionContextTypes`]
+    default_contexts: :class:`.InteractionContextTypes` | :data:`None`
         The default contexts where application commands will be usable.
         This applies to all commands added either through the respective decorators
         or directly using :meth:`.add_slash_command` (etc.).
@@ -153,7 +154,7 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
         as its first parameter and :class:`disnake.Message` as its second
         parameter and returns the prefix. This is to facilitate "dynamic"
         command prefixes. This callable can be either a regular function or
-        a coroutine.
+        a coroutine function.
 
         An empty string as the prefix always matches, enabling prefix-less
         command invocation. While this may be useful in DMs it should be avoided
@@ -166,7 +167,7 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
         :attr:`.Context.prefix`. To avoid confusion empty iterables are not
         allowed.
 
-        If the prefix is ``None``, the bot won't listen to any prefixes, and prefix
+        If the prefix is :data:`None`, the bot won't listen to any prefixes, and prefix
         commands will not be processed. If you don't need prefix commands, consider
         using :class:`InteractionBot` or :class:`AutoShardedInteractionBot` instead,
         which are drop-in replacements, just without prefix command support.
@@ -194,21 +195,21 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
 
         This can be provided as a parameter at creation.
 
-    help_command: Optional[:class:`.HelpCommand`]
+    help_command: :class:`.HelpCommand` | :data:`None`
         The help command implementation to use. This can be dynamically
-        set at runtime. To remove the help command pass ``None``. For more
+        set at runtime. To remove the help command pass :data:`None`. For more
         information on implementing a help command, see :ref:`ext_commands_api_help_commands`.
 
         This can be provided as a parameter at creation.
 
-    owner_id: Optional[:class:`int`]
+    owner_id: :class:`int` | :data:`None`
         The ID of the user that owns the bot. If this is not set and is then queried via
         :meth:`.is_owner` then it is fetched automatically using
         :meth:`~.Bot.application_info`.
 
         This can be provided as a parameter at creation.
 
-    owner_ids: Optional[Collection[:class:`int`]]
+    owner_ids: :class:`~collections.abc.Collection`\\[:class:`int`] | :data:`None`
         The IDs of the users that own the bot. This is similar to :attr:`owner_id`.
         If this is not set and the application is team based, then it is
         fetched automatically using :meth:`~.Bot.application_info` (taking team roles into account).
@@ -256,7 +257,7 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
             *,
             strip_after_prefix: bool = False,
             owner_id: Optional[int] = None,
-            owner_ids: Optional[Set[int]] = None,
+            owner_ids: Optional[set[int]] = None,
             reload: bool = False,
             case_insensitive: bool = False,
             command_sync_flags: CommandSyncFlags = ...,
@@ -309,7 +310,7 @@ class AutoShardedBot(BotBase, InteractionBotBase, disnake.AutoShardedClient):
             *,
             strip_after_prefix: bool = False,
             owner_id: Optional[int] = None,
-            owner_ids: Optional[Set[int]] = None,
+            owner_ids: Optional[set[int]] = None,
             reload: bool = False,
             case_insensitive: bool = False,
             command_sync_flags: CommandSyncFlags = ...,
@@ -321,7 +322,7 @@ class AutoShardedBot(BotBase, InteractionBotBase, disnake.AutoShardedClient):
             default_contexts: Optional[InteractionContextTypes] = None,
             asyncio_debug: bool = False,
             loop: Optional[asyncio.AbstractEventLoop] = None,
-            shard_ids: Optional[List[int]] = None,  # instead of shard_id
+            shard_ids: Optional[list[int]] = None,  # instead of shard_id
             shard_count: Optional[int] = None,
             enable_debug_events: bool = False,
             enable_gateway_error_handler: bool = True,
@@ -357,9 +358,9 @@ class InteractionBot(InteractionBotBase, disnake.Client):
 
     Parameters
     ----------
-    test_guilds: List[:class:`int`]
+    test_guilds: :class:`list`\\[:class:`int`]
         The list of IDs of the guilds where you're going to test your application commands.
-        Defaults to ``None``, which means global registration of commands across
+        Defaults to :data:`None`, which means global registration of commands across
         all guilds.
 
         .. versionadded:: 2.1
@@ -420,7 +421,7 @@ class InteractionBot(InteractionBotBase, disnake.Client):
 
         .. versionadded:: 2.5
 
-    default_install_types: Optional[:class:`.ApplicationInstallTypes`]
+    default_install_types: :class:`.ApplicationInstallTypes` | :data:`None`
         The default installation types where application commands will be available.
         This applies to all commands added either through the respective decorators
         or directly using :meth:`.add_slash_command` (etc.).
@@ -431,7 +432,7 @@ class InteractionBot(InteractionBotBase, disnake.Client):
 
         .. versionadded:: 2.10
 
-    default_contexts: Optional[:class:`.InteractionContextTypes`]
+    default_contexts: :class:`.InteractionContextTypes` | :data:`None`
         The default contexts where application commands will be usable.
         This applies to all commands added either through the respective decorators
         or directly using :meth:`.add_slash_command` (etc.).
@@ -444,14 +445,14 @@ class InteractionBot(InteractionBotBase, disnake.Client):
 
     Attributes
     ----------
-    owner_id: Optional[:class:`int`]
+    owner_id: :class:`int` | :data:`None`
         The ID of the user that owns the bot. If this is not set and is then queried via
         :meth:`.is_owner` then it is fetched automatically using
         :meth:`~.Bot.application_info`.
 
         This can be provided as a parameter at creation.
 
-    owner_ids: Optional[Collection[:class:`int`]]
+    owner_ids: :class:`~collections.abc.Collection`\\[:class:`int`] | :data:`None`
         The IDs of the users that own the bot. This is similar to :attr:`owner_id`.
         If this is not set and the application is team based, then it is
         fetched automatically using :meth:`~.Bot.application_info` (taking team roles into account).
@@ -482,7 +483,7 @@ class InteractionBot(InteractionBotBase, disnake.Client):
             self,
             *,
             owner_id: Optional[int] = None,
-            owner_ids: Optional[Set[int]] = None,
+            owner_ids: Optional[set[int]] = None,
             reload: bool = False,
             command_sync_flags: CommandSyncFlags = ...,
             sync_commands: bool = ...,
@@ -528,7 +529,7 @@ class AutoShardedInteractionBot(InteractionBotBase, disnake.AutoShardedClient):
             self,
             *,
             owner_id: Optional[int] = None,
-            owner_ids: Optional[Set[int]] = None,
+            owner_ids: Optional[set[int]] = None,
             reload: bool = False,
             command_sync_flags: CommandSyncFlags = ...,
             sync_commands: bool = ...,
@@ -539,7 +540,7 @@ class AutoShardedInteractionBot(InteractionBotBase, disnake.AutoShardedClient):
             default_contexts: Optional[InteractionContextTypes] = None,
             asyncio_debug: bool = False,
             loop: Optional[asyncio.AbstractEventLoop] = None,
-            shard_ids: Optional[List[int]] = None,  # instead of shard_id
+            shard_ids: Optional[list[int]] = None,  # instead of shard_id
             shard_count: Optional[int] = None,
             enable_debug_events: bool = False,
             enable_gateway_error_handler: bool = True,

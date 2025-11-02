@@ -10,27 +10,22 @@ import copy
 import inspect
 import itertools
 import math
-import sys
 import types
 from abc import ABC, abstractmethod
+from collections.abc import Sequence
 from dataclasses import dataclass
 from enum import Enum, EnumMeta
+from types import EllipsisType, UnionType
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
     ClassVar,
-    Dict,
     Final,
-    FrozenSet,
     Generic,
-    List,
     Literal,
     NoReturn,
     Optional,
-    Sequence,
-    Tuple,
-    Type,
     TypeVar,
     Union,
     cast,
@@ -87,18 +82,8 @@ else:
     P = TypeVar("P")
 
 
-if sys.version_info >= (3, 10):
-    from types import EllipsisType, UnionType
-elif TYPE_CHECKING:
-    EllipsisType = type(Ellipsis)
-    UnionType = NoReturn
-
-else:
-    UnionType = object()
-    EllipsisType = type(Ellipsis)
-
-T = TypeVar("T", bound=Any)
-TypeT = TypeVar("TypeT", bound=Type[Any])
+T = TypeVar("T")
+TypeT = TypeVar("TypeT", bound=type[Any])
 BotT = TypeVar("BotT", bound="disnake.Client", covariant=True)
 
 __all__ = (
@@ -117,9 +102,9 @@ __all__ = (
 )
 
 
-def issubclass_(obj: Any, tp: Union[TypeT, Tuple[TypeT, ...]]) -> TypeGuard[TypeT]:
+def issubclass_(obj: Any, tp: Union[TypeT, tuple[TypeT, ...]]) -> TypeGuard[TypeT]:
     """Similar to the builtin `issubclass`, but more lenient.
-    Can also handle unions (`issubclass(Union[int, str], int)`) and
+    Can also handle unions (`issubclass(int | str, int)`) and
     generic types (`issubclass(X[T], X)`) in the first argument.
     """
     if not isinstance(tp, (type, tuple)):
@@ -182,29 +167,29 @@ class Injection(Generic[P, T_]):
     ----------
     function: Callable
         The underlying injection function.
-    autocompleters: Dict[:class:`str`, Callable]
+    autocompleters: :class:`dict`\\[:class:`str`, Callable]
         A mapping of injection's option names to their respective autocompleters.
 
         .. versionadded:: 2.6
     """
 
-    _registered: ClassVar[Dict[Any, Injection]] = {}
+    _registered: ClassVar[dict[Any, Injection]] = {}
 
     def __init__(
         self,
         function: InjectionCallback[CogT, P, T_],
         *,
-        autocompleters: Optional[Dict[str, Callable]] = None,
+        autocompleters: Optional[dict[str, Callable]] = None,
     ) -> None:
         if autocompleters is not None:
             for autocomp in autocompleters.values():
                 classify_autocompleter(autocomp)
 
         self.function: InjectionCallback[Any, P, T_] = function
-        self.autocompleters: Dict[str, Callable] = autocompleters or {}
+        self.autocompleters: dict[str, Callable] = autocompleters or {}
         self._injected: Optional[Cog] = None
 
-    def __get__(self, obj: Optional[Any], _: Type[Any]) -> Self:
+    def __get__(self, obj: Optional[Any], _: type[Any]) -> Self:
         if obj is None:
             return self
 
@@ -220,9 +205,9 @@ class Injection(Generic[P, T_]):
         .. versionadded:: 2.6
         """
         if self._injected is not None:
-            return self.function(self._injected, *args, **kwargs)  # type: ignore
+            return self.function(self._injected, *args, **kwargs)  # pyright: ignore[reportCallIssue]
         else:
-            return self.function(*args, **kwargs)  # type: ignore
+            return self.function(*args, **kwargs)  # pyright: ignore[reportCallIssue]
 
     @classmethod
     def register(
@@ -230,7 +215,7 @@ class Injection(Generic[P, T_]):
         function: InjectionCallback[CogT, P, T_],
         annotation: Any,
         *,
-        autocompleters: Optional[Dict[str, Callable]] = None,
+        autocompleters: Optional[dict[str, Callable]] = None,
     ) -> Injection[P, T_]:
         self = cls(function, autocompleters=autocompleters)
         cls._registered[annotation] = self
@@ -273,13 +258,13 @@ class Injection(Generic[P, T_]):
 class _BaseRange(ABC):
     """Internal base type for supporting ``Range[...]`` and ``String[...]``."""
 
-    _allowed_types: ClassVar[Tuple[Type[Any], ...]]
+    _allowed_types: ClassVar[tuple[type[Any], ...]]
 
-    underlying_type: Type[Any]
+    underlying_type: type[Any]
     min_value: Optional[Union[int, float]]
     max_value: Optional[Union[int, float]]
 
-    def __class_getitem__(cls, params: Tuple[Any, ...]) -> Self:
+    def __class_getitem__(cls, params: tuple[Any, ...]) -> Self:
         # deconstruct type arguments
         if not isinstance(params, tuple):
             params = (params,)
@@ -353,7 +338,7 @@ class _BaseRange(ABC):
 
     @classmethod
     @abstractmethod
-    def _infer_type(cls, params: Tuple[Any, ...]) -> Type[Any]:
+    def _infer_type(cls, params: tuple[Any, ...]) -> type[Any]:
         raise NotImplementedError
 
     # hack to get `typing._type_check` to pass, e.g. when using `Range` as a generic parameter
@@ -361,15 +346,13 @@ class _BaseRange(ABC):
         raise NotImplementedError
 
     # support new union syntax for `Range[int, 1, 2] | None`
-    if sys.version_info >= (3, 10):
-
-        def __or__(self, other):
-            return Union[self, other]
+    def __or__(self, other):
+        return Union[self, other]
 
 
 if TYPE_CHECKING:
     # aliased import since mypy doesn't understand `Range = Annotated`
-    from typing_extensions import Annotated as Range, Annotated as String
+    from typing import Annotated as Range, Annotated as String
 else:
 
     @dataclass(frozen=True, repr=False)
@@ -397,7 +380,7 @@ else:
                     raise TypeError(msg)
 
         @classmethod
-        def _infer_type(cls, params: Tuple[Any, ...]) -> Type[Any]:
+        def _infer_type(cls, params: tuple[Any, ...]) -> type[Any]:
             if any(isinstance(p, float) for p in params):
                 return float
             return int
@@ -430,7 +413,7 @@ else:
                     raise ValueError(msg)
 
         @classmethod
-        def _infer_type(cls, params: Tuple[Any, ...]) -> Type[Any]:
+        def _infer_type(cls, params: tuple[Any, ...]) -> type[Any]:
             return str
 
 
@@ -439,7 +422,7 @@ class LargeInt(int):
 
 
 # option types that require additional handling in verify_type
-_VERIFY_TYPES: Final[FrozenSet[OptionType]] = frozenset((OptionType.user, OptionType.mentionable))
+_VERIFY_TYPES: Final[frozenset[OptionType]] = frozenset((OptionType.user, OptionType.mentionable))
 
 
 class ParamInfo:
@@ -449,35 +432,35 @@ class ParamInfo:
 
     Parameters
     ----------
-    default: Union[Any, Callable[[:class:`.ApplicationCommandInteraction`], Any]]
+    default: Any | :class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`], :data:`~typing.Any`]
         The actual default value for the corresponding function param.
         Can be a sync/async callable taking an interaction and returning a dynamic default value,
         if the user didn't pass a value for this parameter.
-    name: Optional[Union[:class:`str`, :class:`.Localized`]]
+    name: :class:`str` | :class:`.Localized` | :data:`None`
         The name of this slash command option.
 
         .. versionchanged:: 2.5
             Added support for localizations.
 
-    description: Optional[Union[:class:`str`, :class:`.Localized`]]
+    description: :class:`str` | :class:`.Localized` | :data:`None`
         The description of this slash command option.
 
         .. versionchanged:: 2.5
             Added support for localizations.
 
-    choices: Union[Sequence[:class:`.OptionChoice`], Sequence[Union[:class:`str`, :class:`int`, :class:`float`]], Mapping[:class:`str`, Union[:class:`str`, :class:`int`, :class:`float`]]]
+    choices: :class:`~collections.abc.Sequence`\\[:class:`.OptionChoice`] | :class:`~collections.abc.Sequence`\\[:class:`str` | :class:`int` | :class:`float`] | :class:`~collections.abc.Mapping`\\[:class:`str`, :class:`str` | :class:`int` | :class:`float`]
         The pre-defined choices for this option.
     ge: :class:`float`
         The lowest allowed value for this option.
     le: :class:`float`
         The greatest allowed value for this option.
-    type: Any
+    type: :class:`~typing.Any`
         The type of the parameter.
-    channel_types: List[:class:`.ChannelType`]
+    channel_types: :class:`list`\\[:class:`.ChannelType`]
         The list of channel types supported by this slash command option.
-    autocomplete: Callable[[:class:`.ApplicationCommandInteraction`, :class:`str`], Any]
+    autocomplete: :class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`, :class:`str`], :data:`~typing.Any`]
         The function that will suggest possible autocomplete options while typing.
-    converter: Callable[[:class:`.ApplicationCommandInteraction`, Any], Any]
+    converter: :class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`, :data:`~typing.Any`], :data:`~typing.Any`]
         The function that will convert the original input to a desired format.
     min_length: :class:`int`
         The minimum length for this option, if it is a string option.
@@ -490,7 +473,7 @@ class ParamInfo:
         .. versionadded:: 2.6
     """
 
-    TYPES: ClassVar[Dict[Union[type, UnionType], int]] = {
+    TYPES: ClassVar[dict[Union[type, UnionType], int]] = {
         str:                                               OptionType.string.value,
         int:                                               OptionType.integer.value,
         bool:                                              OptionType.boolean.value,
@@ -508,7 +491,7 @@ class ParamInfo:
         float:                                             OptionType.number.value,
         disnake.Attachment:                                OptionType.attachment.value,
     }  # fmt: skip
-    _registered_converters: ClassVar[Dict[type, Callable[..., Any]]] = {}
+    _registered_converters: ClassVar[dict[type, Callable[..., Any]]] = {}
 
     def __init__(
         self,
@@ -521,7 +504,7 @@ class ParamInfo:
         autocomplete: Optional[AnyAutocompleter] = None,
         choices: Optional[Choices] = None,
         type: Optional[type] = None,
-        channel_types: Optional[List[ChannelType]] = None,
+        channel_types: Optional[list[ChannelType]] = None,
         lt: Optional[float] = None,
         le: Optional[float] = None,
         gt: Optional[float] = None,
@@ -604,8 +587,8 @@ class ParamInfo:
     def from_param(
         cls,
         param: inspect.Parameter,
-        type_hints: Dict[str, Any],
-        parsed_docstring: Optional[Dict[str, disnake.utils._DocstringParam]] = None,
+        type_hints: dict[str, Any],
+        parsed_docstring: Optional[dict[str, disnake.utils._DocstringParam]] = None,
     ) -> Self:
         # hopefully repeated parsing won't cause any problems
         parsed_docstring = parsed_docstring or {}
@@ -692,7 +675,7 @@ class ParamInfo:
     def _parse_enum(self, annotation: Any) -> None:
         if isinstance(annotation, (EnumMeta, disnake.enums.EnumMeta)):
             self.choices = [
-                OptionChoice(name, value.value)  # type: ignore
+                OptionChoice(name, value.value)  # pyright: ignore[reportAttributeAccessIssue]
                 for name, value in annotation.__members__.items()
             ]
         else:
@@ -701,7 +684,7 @@ class ParamInfo:
         self.type = type(self.choices[0].value)
 
     def _parse_guild_channel(
-        self, *channels: Union[Type[disnake.abc.GuildChannel], Type[disnake.Thread]]
+        self, *channels: Union[type[disnake.abc.GuildChannel], type[disnake.Thread]]
     ) -> None:
         # this variable continues to be GuildChannel because the type is still
         # determined from the TYPE mapping in the class definition
@@ -877,8 +860,8 @@ def safe_call(function: Callable[..., T], /, *possible_args: Any, **possible_kwa
         raise TypeError(msg)
 
     parsed_pos = False
-    args: List[Any] = []
-    kwargs: Dict[str, Any] = {}
+    args: list[Any] = []
+    kwargs: dict[str, Any] = {}
 
     for index, parameter, posarg in itertools.zip_longest(
         itertools.count(),
@@ -912,8 +895,8 @@ def safe_call(function: Callable[..., T], /, *possible_args: Any, **possible_kwa
 
 def isolate_self(
     function: Callable[..., Any],
-    parameters: Optional[Dict[str, inspect.Parameter]] = None,
-) -> Tuple[Tuple[Optional[inspect.Parameter], ...], Dict[str, inspect.Parameter]]:
+    parameters: Optional[dict[str, inspect.Parameter]] = None,
+) -> tuple[tuple[Optional[inspect.Parameter], ...], dict[str, inspect.Parameter]]:
     """Create parameters without self and the first interaction.
 
     Optionally accepts a `{str: inspect.Parameter}` dict as an optimization,
@@ -978,8 +961,8 @@ def classify_autocompleter(autocompleter: AnyAutocompleter) -> None:
 
 def collect_params(
     function: Callable[..., Any],
-    parameters: Optional[Dict[str, inspect.Parameter]] = None,
-) -> Tuple[Optional[str], Optional[str], List[ParamInfo], Dict[str, Injection]]:
+    parameters: Optional[dict[str, inspect.Parameter]] = None,
+) -> tuple[Optional[str], Optional[str], list[ParamInfo], dict[str, Injection]]:
     """Collect all parameters in a function.
 
     Optionally accepts a `{str: inspect.Parameter}` dict as an optimization.
@@ -990,8 +973,8 @@ def collect_params(
 
     doc = disnake.utils.parse_docstring(function)["params"]
 
-    paraminfos: List[ParamInfo] = []
-    injections: Dict[str, Injection] = {}
+    paraminfos: list[ParamInfo] = []
+    injections: dict[str, Injection] = {}
 
     for parameter in parameters.values():
         if parameter.kind in [parameter.VAR_POSITIONAL, parameter.VAR_KEYWORD]:
@@ -1029,7 +1012,7 @@ def collect_params(
     )
 
 
-def collect_nested_params(function: Callable[..., Any]) -> List[ParamInfo]:
+def collect_nested_params(function: Callable[..., Any]) -> list[ParamInfo]:
     """Collect all options from a function"""
     # TODO: Have these be actually sorted properly and not have injections always at the end
     _, _, paraminfos, injections = collect_params(function)
@@ -1047,7 +1030,7 @@ def format_kwargs(
     /,
     *args: Any,
     **kwargs: Any,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Create kwargs from appropriate information"""
     first = args[0] if args else None
 
@@ -1069,15 +1052,15 @@ def format_kwargs(
 
 
 async def run_injections(
-    injections: Dict[str, Injection],
+    injections: dict[str, Injection],
     interaction: ApplicationCommandInteraction,
     /,
     *args: Any,
     **kwargs: Any,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Run and resolve a list of injections"""
 
-    async def _helper(name: str, injection: Injection) -> Tuple[str, Any]:
+    async def _helper(name: str, injection: Injection) -> tuple[str, Any]:
         return name, await call_param_func(injection.function, interaction, *args, **kwargs)
 
     resolved = await asyncio.gather(*(_helper(name, i) for name, i in injections.items()))
@@ -1108,7 +1091,7 @@ async def call_param_func(
     return await maybe_coroutine(safe_call, function, **kwargs)
 
 
-def expand_params(command: AnySlashCommand) -> List[Option]:
+def expand_params(command: AnySlashCommand) -> list[Option]:
     """Update an option with its params *in-place*
 
     Returns the created options
@@ -1158,7 +1141,7 @@ def Param(
     converter: Optional[Callable[[ApplicationCommandInteraction[BotT], Any], Any]] = None,
     convert_defaults: bool = False,
     autocomplete: Optional[AnyAutocompleter] = None,
-    channel_types: Optional[List[ChannelType]] = None,
+    channel_types: Optional[list[ChannelType]] = None,
     lt: Optional[float] = None,
     le: Optional[float] = None,
     gt: Optional[float] = None,
@@ -1175,26 +1158,26 @@ def Param(
 
     Parameters
     ----------
-    default: Union[Any, Callable[[:class:`.ApplicationCommandInteraction`], Any]]
+    default: Any | :class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`], :data:`~typing.Any`]
         The actual default value of the function parameter that should be passed instead of the :class:`ParamInfo` instance.
         Can be a sync/async callable taking an interaction and returning a dynamic default value,
         if the user didn't pass a value for this parameter.
-    name: Optional[Union[:class:`str`, :class:`.Localized`]]
+    name: :class:`str` | :class:`.Localized` | :data:`None`
         The name of the option. By default, the option name is the parameter name.
 
         .. versionchanged:: 2.5
             Added support for localizations.
 
-    description: Optional[Union[:class:`str`, :class:`.Localized`]]
+    description: :class:`str` | :class:`.Localized` | :data:`None`
         The description of the option. You can skip this kwarg and use docstrings. See :ref:`param_syntax`.
         Kwarg aliases: ``desc``.
 
         .. versionchanged:: 2.5
             Added support for localizations.
 
-    choices: Union[Sequence[:class:`.OptionChoice`], Sequence[Union[:class:`str`, :class:`int`, :class:`float`]], Mapping[:class:`str`, Union[:class:`str`, :class:`int`, :class:`float`]]]
+    choices: :class:`~collections.abc.Sequence`\\[:class:`.OptionChoice`] | :class:`~collections.abc.Sequence`\\[:class:`str` | :class:`int` | :class:`float`] | :class:`~collections.abc.Mapping`\\[:class:`str`, :class:`str` | :class:`int` | :class:`float`]
         The pre-defined choices for this slash command option.
-    converter: Callable[[:class:`.ApplicationCommandInteraction`, Any], Any]
+    converter: :class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`, :data:`~typing.Any`], :data:`~typing.Any`]
         A function that will convert the original input to a desired format.
         Kwarg aliases: ``conv``.
     convert_defaults: :class:`bool`
@@ -1202,10 +1185,10 @@ def Param(
         Defaults to ``False``.
 
         .. versionadded:: 2.3
-    autocomplete: Callable[[:class:`.ApplicationCommandInteraction`, :class:`str`], Any]
+    autocomplete: :class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`, :class:`str`], :data:`~typing.Any`]
         A function that will suggest possible autocomplete options while typing.
         See :ref:`param_syntax`. Kwarg aliases: ``autocomp``.
-    channel_types: Iterable[:class:`.ChannelType`]
+    channel_types: :class:`~collections.abc.Iterable`\\[:class:`.ChannelType`]
         A list of channel types that should be allowed.
         By default these are discerned from the annotation.
     lt: :class:`float`
@@ -1284,7 +1267,7 @@ param = Param
 def inject(
     function: Callable[..., Any],
     *,
-    autocompleters: Optional[Dict[str, Callable]] = None,
+    autocompleters: Optional[dict[str, Callable]] = None,
 ) -> Any:
     """A special function to use the provided function for injections.
     This should be assigned to a parameter of a function representing your slash command.
@@ -1298,7 +1281,7 @@ def inject(
     ----------
     function: Callable
         The injection function.
-    autocompleters: Dict[:class:`str`, Callable]
+    autocompleters: :class:`dict`\\[:class:`str`, Callable]
         A mapping of the injection's option names to their respective autocompleters.
 
         See also :func:`Injection.autocomplete`.
@@ -1321,7 +1304,7 @@ def inject(
 
 def injection(
     *,
-    autocompleters: Optional[Dict[str, Callable]] = None,
+    autocompleters: Optional[dict[str, Callable]] = None,
 ) -> Callable[[Callable[..., Any]], Any]:
     """Decorator interface for :func:`inject`.
     You can then assign this value to your slash commands' parameters.
@@ -1330,14 +1313,14 @@ def injection(
 
     Parameters
     ----------
-    autocompleters: Dict[:class:`str`, Callable]
+    autocompleters: :class:`dict`\\[:class:`str`, Callable]
         A mapping of the injection's option names to their respective autocompleters.
 
         See also :func:`Injection.autocomplete`.
 
     Returns
     -------
-    Callable[[Callable[..., Any]], :class:`Injection`]
+    :class:`~collections.abc.Callable`\\[[:class:`~collections.abc.Callable`\\[..., :data:`~typing.Any`]], :class:`Injection`]
         Decorator which turns your injection function into actual :class:`Injection`.
 
         .. note::
@@ -1354,8 +1337,8 @@ def injection(
 
 
 def option_enum(
-    choices: Union[Dict[str, TChoice], List[TChoice]], **kwargs: TChoice
-) -> Type[TChoice]:
+    choices: Union[dict[str, TChoice], list[TChoice]], **kwargs: TChoice
+) -> type[TChoice]:
     """A utility function to create an enum type.
     Returns a new :class:`~enum.Enum` based on the provided parameters.
 
@@ -1363,7 +1346,7 @@ def option_enum(
 
     Parameters
     ----------
-    choices: Union[Dict[:class:`str`, :class:`Any`], List[:class:`Any`]]
+    choices: :class:`dict`\\[:class:`str`, :class:`Any`] | :class:`list`\\[:class:`Any`]
         A name/value mapping of choices, or a list of values whose stringified representations
         will be used as the names.
     **kwargs
@@ -1374,7 +1357,7 @@ def option_enum(
 
     choices = choices or kwargs
     first, *_ = choices.values()
-    return Enum("", choices, type=type(first))  # type: ignore
+    return Enum("", choices, type=type(first))  # pyright: ignore[reportReturnType]
 
 
 class ConverterMethod(classmethod):
@@ -1403,7 +1386,7 @@ else:
 def register_injection(
     function: InjectionCallback[CogT, P, T_],
     *,
-    autocompleters: Optional[Dict[str, Callable]] = None,
+    autocompleters: Optional[dict[str, Callable]] = None,
 ) -> Injection[P, T_]:
     """A decorator to register a global injection.
 

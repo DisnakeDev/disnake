@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, List, NoReturn, Optional
+from typing import TYPE_CHECKING, Any, NoReturn, Optional
 
 from .guild import Guild, Member
 from .utils import MISSING, _assetbytes_to_base64_data, parse_time
@@ -61,7 +61,7 @@ class _PartialTemplateState:
     def _get_guild(self, id) -> Optional[Guild]:
         return self.__state._get_guild(id)
 
-    async def query_members(self, **kwargs: Any) -> List[Member]:
+    async def query_members(self, **kwargs: Any) -> list[Member]:
         return []
 
     def __getattr__(self, attr) -> NoReturn:
@@ -93,7 +93,7 @@ class Template:
         This is referred to as "last synced" in the official Discord client.
     source_guild: :class:`Guild`
         The source guild.
-    is_dirty: Optional[:class:`bool`]
+    is_dirty: :class:`bool` | :data:`None`
         Whether the template has unsynced changes.
 
         .. versionadded:: 2.0
@@ -138,7 +138,7 @@ class Template:
             source_serialised["id"] = guild_id
             state = _PartialTemplateState(state=self._state)
             # Guild expects a ConnectionState, we're passing a _PartialTemplateState
-            self.source_guild = Guild(data=source_serialised, state=state)  # type: ignore
+            self.source_guild = Guild(data=source_serialised, state=state)  # pyright: ignore[reportArgumentType]
         else:
             self.source_guild = guild
 
@@ -167,7 +167,7 @@ class Template:
         ----------
         name: :class:`str`
             The name of the guild.
-        icon: Optional[|resource_type|]
+        icon: |resource_type| | :data:`None`
             The icon of the guild.
             See :meth:`.ClientUser.edit` for more details on what is expected.
 
@@ -249,7 +249,7 @@ class Template:
         ----------
         name: :class:`str`
             The template's new name.
-        description: Optional[:class:`str`]
+        description: :class:`str` | :data:`None`
             The template's new description.
 
         Raises

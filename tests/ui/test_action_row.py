@@ -82,7 +82,7 @@ class TestActionRow:
             _ = ActionRow().add_button
             _ = ActionRow.with_message_components().add_button
             # should not work
-            _ = ActionRow.with_modal_components().add_button  # type: ignore
+            _ = ActionRow.with_modal_components().add_button  # pyright: ignore[reportAttributeAccessIssue]
 
     def test_add_select(self) -> None:
         r = ActionRow.with_message_components()
@@ -96,7 +96,7 @@ class TestActionRow:
             _ = ActionRow().add_string_select
             _ = ActionRow.with_message_components().add_string_select
             # should not work
-            _ = ActionRow.with_modal_components().add_select  # type: ignore
+            _ = ActionRow.with_modal_components().add_select  # pyright: ignore[reportAttributeAccessIssue]
 
     def test_add_text_input(self) -> None:
         with pytest.warns(DeprecationWarning):
@@ -112,7 +112,7 @@ class TestActionRow:
             _ = ActionRow().add_text_input
             _ = ActionRow.with_modal_components().add_text_input
             # should not work
-            _ = ActionRow.with_message_components().add_text_input  # type: ignore
+            _ = ActionRow.with_message_components().add_text_input  # pyright: ignore[reportAttributeAccessIssue]
 
     def test_clear_items(self) -> None:
         r = ActionRow(button1, button2)
@@ -160,7 +160,7 @@ class TestActionRow:
 
         assert len(result) == len(rows)
         # compare component types and IDs
-        for actual, expected in zip(result, rows):
+        for actual, expected in zip(result, rows, strict=True):
             assert [(type(c), c.custom_id) for c in actual] == [
                 (type(c), c.custom_id) for c in expected
             ]
@@ -188,7 +188,7 @@ class TestActionRow:
 
         expected = [(row, component) for row in rows for component in row.children]
         for (act_row, act_cmp), (exp_row, exp_cmp) in zip(
-            ActionRow.walk_components(rows), expected
+            ActionRow.walk_components(rows), expected, strict=True
         ):
             # test mutation (rows)
             # (remove row below the one containing select1)
@@ -285,10 +285,10 @@ def test_normalize_components__modal(value, expected) -> None:
 def test_normalize_components__invalid() -> None:
     for value in (42, [42], [ActionRow(), 42], iter([button1])):
         with pytest.raises(TypeError, match=r"`components` must be a"):
-            normalize_components(value)  # type: ignore
+            normalize_components(value)  # pyright: ignore[reportArgumentType, reportCallIssue]
     for value in ([[[]]], [[[ActionRow()]]]):
         with pytest.raises(TypeError, match=r"components should be of type"):
-            normalize_components(value)  # type: ignore
+            normalize_components(value)  # pyright: ignore[reportArgumentType, reportCallIssue]
 
 
 def test_normalize_components_to_dict() -> None:

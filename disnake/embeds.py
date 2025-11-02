@@ -3,17 +3,14 @@
 from __future__ import annotations
 
 import datetime
+from collections.abc import Mapping, Sized
 from typing import (
     TYPE_CHECKING,
     Any,
     ClassVar,
-    Dict,
-    List,
     Literal,
-    Mapping,
     Optional,
     Protocol,
-    Sized,
     Union,
     cast,
     overload,
@@ -37,7 +34,7 @@ if not TYPE_CHECKING:
                 "`EmptyEmbed` is deprecated and will be removed in a future version. Use `None` instead.",
                 stacklevel=2,
             )
-            return None
+            return None  # noqa: RET501
         msg = f"module '{__name__}' has no attribute '{name}'"
         raise AttributeError(msg)
 
@@ -150,21 +147,21 @@ class Embed:
 
     Attributes
     ----------
-    title: Optional[:class:`str`]
+    title: :class:`str` | :data:`None`
         The title of the embed.
-    type: Optional[:class:`str`]
+    type: :class:`str` | :data:`None`
         The type of embed. Usually "rich".
         Possible strings for embed types can be found on Discord's
         :ddocs:`api-docs <resources/channel#embed-object-embed-types>`.
-    description: Optional[:class:`str`]
+    description: :class:`str` | :data:`None`
         The description of the embed.
-    url: Optional[:class:`str`]
+    url: :class:`str` | :data:`None`
         The URL of the embed.
-    timestamp: Optional[:class:`datetime.datetime`]
+    timestamp: :class:`datetime.datetime` | :data:`None`
         The timestamp of the embed content. This is an aware datetime.
         If a naive datetime is passed, it is converted to an aware
         datetime with the local timezone.
-    colour: Optional[:class:`Colour`]
+    colour: :class:`Colour` | :data:`None`
         The colour code of the embed. Aliased to ``color`` as well.
         In addition to :class:`Colour`, :class:`int` can also be assigned to it,
         in which case the value will be converted to a :class:`Colour` object.
@@ -223,10 +220,10 @@ class Embed:
         self._author: Optional[EmbedAuthorPayload] = None
         self._image: Optional[EmbedImagePayload] = None
         self._footer: Optional[EmbedFooterPayload] = None
-        self._fields: Optional[List[EmbedFieldPayload]] = None
+        self._fields: Optional[list[EmbedFieldPayload]] = None
         self._flags: int = 0
 
-        self._files: Dict[_FileKey, File] = {}
+        self._files: dict[_FileKey, File] = {}
 
     # see `EmptyEmbed` above
     if not TYPE_CHECKING:
@@ -237,7 +234,7 @@ class Embed:
                 "`Embed.Empty` is deprecated and will be removed in a future version. Use `None` instead.",
                 stacklevel=3,
             )
-            return None
+            return None  # noqa: RET501
 
     @classmethod
     def from_dict(cls, data: EmbedData) -> Self:
@@ -273,7 +270,7 @@ class Embed:
 
         self._thumbnail = data.get("thumbnail")
         if self._thumbnail and (thumbnail_flags := self._thumbnail.get("flags")):
-            self._thumbnail["flags"] = EmbedMediaFlags._from_value(thumbnail_flags)  # type: ignore
+            self._thumbnail["flags"] = EmbedMediaFlags._from_value(thumbnail_flags)  # type: ignore[reportGeneralTypeIssues]
 
         self._video = data.get("video")
         self._provider = data.get("provider")
@@ -281,7 +278,7 @@ class Embed:
 
         self._image = data.get("image")
         if self._image and (image_flags := self._image.get("flags")):
-            self._image["flags"] = EmbedMediaFlags._from_value(image_flags)  # type: ignore
+            self._image["flags"] = EmbedMediaFlags._from_value(image_flags)  # type: ignore[reportGeneralTypeIssues]
 
         self._footer = data.get("footer")
         self._fields = data.get("fields")
@@ -400,7 +397,7 @@ class Embed:
         - ``icon_url``
         - ``proxy_icon_url``
 
-        If an attribute is not set, it will be ``None``.
+        If an attribute is not set, it will be :data:`None`.
         """
         return cast("_EmbedFooterProxy", EmbedProxy(self._footer))
 
@@ -436,7 +433,7 @@ class Embed:
             .. versionchanged:: 2.6
                 No longer optional, must be set to a valid string.
 
-        icon_url: Optional[:class:`str`]
+        icon_url: :class:`str` | :data:`None`
             The URL of the footer icon. Only HTTP(S) is supported.
         icon_file: :class:`File`
             The file to use as the footer icon.
@@ -480,7 +477,7 @@ class Embed:
 
             Added the ``flags`` attribute.
 
-        If an attribute is not set, it will be ``None``.
+        If an attribute is not set, it will be :data:`None`.
         """
         return cast("_EmbedMediaProxy", EmbedProxy(self._image))
 
@@ -507,11 +504,11 @@ class Embed:
             that the :attr:`.File.filename` is unique to avoid duplication.
 
         .. versionchanged:: 1.4
-            Passing ``None`` removes the image.
+            Passing :data:`None` removes the image.
 
         Parameters
         ----------
-        url: Optional[:class:`str`]
+        url: :class:`str` | :data:`None`
             The source URL for the image. Only HTTP(S) is supported.
         file: :class:`File`
             The file to use as the image.
@@ -538,7 +535,7 @@ class Embed:
 
             Added the ``flags`` attribute.
 
-        If an attribute is not set, it will be ``None``.
+        If an attribute is not set, it will be :data:`None`.
         """
         return cast("_EmbedMediaProxy", EmbedProxy(self._thumbnail))
 
@@ -565,11 +562,11 @@ class Embed:
             that the :attr:`.File.filename` is unique to avoid duplication.
 
         .. versionchanged:: 1.4
-            Passing ``None`` removes the thumbnail.
+            Passing :data:`None` removes the thumbnail.
 
         Parameters
         ----------
-        url: Optional[:class:`str`]
+        url: :class:`str` | :data:`None`
             The source URL for the thumbnail. Only HTTP(S) is supported.
         file: :class:`File`
             The file to use as the image.
@@ -591,7 +588,7 @@ class Embed:
         - ``height`` for the video height.
         - ``width`` for the video width.
 
-        If an attribute is not set, it will be ``None``.
+        If an attribute is not set, it will be :data:`None`.
         """
         return cast("_EmbedVideoProxy", EmbedProxy(self._video))
 
@@ -601,7 +598,7 @@ class Embed:
 
         The only attributes that might be accessed are ``name`` and ``url``.
 
-        If an attribute is not set, it will be ``None``.
+        If an attribute is not set, it will be :data:`None`.
         """
         return cast("_EmbedProviderProxy", EmbedProxy(self._provider))
 
@@ -611,7 +608,7 @@ class Embed:
 
         See :meth:`set_author` for possible values you can access.
 
-        If an attribute is not set, it will be ``None``.
+        If an attribute is not set, it will be :data:`None`.
         """
         return cast("_EmbedAuthorProxy", EmbedProxy(self._author))
 
@@ -650,9 +647,9 @@ class Embed:
         ----------
         name: :class:`str`
             The name of the author.
-        url: Optional[:class:`str`]
+        url: :class:`str` | :data:`None`
             The URL for the author.
-        icon_url: Optional[:class:`str`]
+        icon_url: :class:`str` | :data:`None`
             The URL of the author icon. Only HTTP(S) is supported.
         icon_file: :class:`File`
             The file to use as the author icon.
@@ -684,14 +681,14 @@ class Embed:
         return self
 
     @property
-    def fields(self) -> List[_EmbedFieldProxy]:
-        """List[``EmbedProxy``]: Returns a :class:`list` of ``EmbedProxy`` denoting the field contents.
+    def fields(self) -> list[_EmbedFieldProxy]:
+        """:class:`list`\\[``EmbedProxy``]: Returns a :class:`list` of ``EmbedProxy`` denoting the field contents.
 
         See :meth:`add_field` for possible values you can access.
 
-        If an attribute is not set, it will be ``None``.
+        If an attribute is not set, it will be :data:`None`.
         """
-        return cast("List[_EmbedFieldProxy]", [EmbedProxy(d) for d in (self._fields or [])])
+        return cast("list[_EmbedFieldProxy]", [EmbedProxy(d) for d in (self._fields or [])])
 
     def add_field(self, name: Any, value: Any, *, inline: bool = True) -> Self:
         """Adds a field to the embed object.
@@ -872,7 +869,7 @@ class Embed:
 
         Returns
         -------
-        Optional[:class:`Colour`]
+        :class:`Colour` | :data:`None`
             The colour that was set.
         """
         if value is None or isinstance(value, Colour):
@@ -894,7 +891,7 @@ class Embed:
 
         Returns
         -------
-        Optional[:class:`Colour`]
+        :class:`Colour` | :data:`None`
             The default colour.
 
         """

@@ -9,7 +9,8 @@ import logging
 import sys
 import traceback
 import warnings
-from typing import TYPE_CHECKING, Any, Callable, Iterable, List, Optional, Type, TypeVar, Union
+from collections.abc import Iterable
+from typing import TYPE_CHECKING, Any, Callable, Optional, TypeVar, Union
 
 import disnake
 from disnake.utils import iscoroutinefunction
@@ -46,16 +47,16 @@ PrefixType = Union[str, Iterable[str]]
 _log = logging.getLogger(__name__)
 
 
-def when_mentioned(bot: BotBase, msg: Message) -> List[str]:
+def when_mentioned(bot: BotBase, msg: Message) -> list[str]:
     """A callable that implements a command prefix equivalent to being mentioned.
 
     These are meant to be passed into the :attr:`.Bot.command_prefix` attribute.
     """
     # bot.user will never be None when this is called
-    return [f"<@{bot.user.id}> ", f"<@!{bot.user.id}> "]  # type: ignore
+    return [f"<@{bot.user.id}> ", f"<@!{bot.user.id}> "]  # pyright: ignore[reportAttributeAccessIssue]
 
 
-def when_mentioned_or(*prefixes: str) -> Callable[[BotBase, Message], List[str]]:
+def when_mentioned_or(*prefixes: str) -> Callable[[BotBase, Message], list[str]]:
     """A callable that implements when mentioned or other prefixes provided.
 
     These are meant to be passed into the :attr:`.Bot.command_prefix` attribute.
@@ -84,10 +85,9 @@ def when_mentioned_or(*prefixes: str) -> Callable[[BotBase, Message], List[str]]
     :func:`.when_mentioned`
     """
 
-    def inner(bot: BotBase, msg: Message) -> List[str]:
+    def inner(bot: BotBase, msg: Message) -> list[str]:
         r = list(prefixes)
-        r = when_mentioned(bot, msg) + r
-        return r
+        return when_mentioned(bot, msg) + r
 
     return inner
 
@@ -151,8 +151,8 @@ class BotBase(CommonBotBase, GroupMixin):
 
         self.command_prefix = command_prefix
 
-        self._checks: List[Check] = []
-        self._check_once: List[Check] = []
+        self._checks: list[Check] = []
+        self._check_once: list[Check] = []
 
         self._before_invoke: Optional[CoroFunc] = None
         self._after_invoke: Optional[CoroFunc] = None
@@ -261,7 +261,7 @@ class BotBase(CommonBotBase, GroupMixin):
 
         .. note::
 
-            This function can either be a regular function or a coroutine.
+            This function can either be a regular function or a coroutine function.
 
         Similar to a command :func:`.check`\\, this takes a single parameter
         of type :class:`.Context` and can only raise exceptions inherited from
@@ -277,7 +277,7 @@ class BotBase(CommonBotBase, GroupMixin):
 
         """
         # T was used instead of Check to ensure the type matches on return
-        self.add_check(func)  # type: ignore
+        self.add_check(func)  # pyright: ignore[reportArgumentType]
         return func
 
     def check_once(self, func: CFT) -> CFT:
@@ -301,7 +301,7 @@ class BotBase(CommonBotBase, GroupMixin):
 
         .. note::
 
-            This function can either be a regular function or a coroutine.
+            This function can either be a regular function or a coroutine function.
 
         Similar to a command :func:`.check`\\, this takes a single parameter
         of type :class:`.Context` and can only raise exceptions inherited from
@@ -326,10 +326,10 @@ class BotBase(CommonBotBase, GroupMixin):
             return True
 
         # type-checker doesn't distinguish between functions and methods
-        return await disnake.utils.async_all(f(ctx) for f in data)  # type: ignore
+        return await disnake.utils.async_all(f(ctx) for f in data)  # pyright: ignore[reportCallIssue]
 
     def before_invoke(self, coro: CFT) -> CFT:
-        """A decorator that registers a coroutine as a pre-invoke hook.
+        """A decorator that registers a coroutine function as a pre-invoke hook.
 
         This is for text commands only, and doesn't apply to application commands.
 
@@ -348,23 +348,23 @@ class BotBase(CommonBotBase, GroupMixin):
 
         Parameters
         ----------
-        coro: :ref:`coroutine <coroutine>`
-            The coroutine to register as the pre-invoke hook.
+        coro: :ref:`coroutine function <coroutine>`
+            The coroutine function to register as the pre-invoke hook.
 
         Raises
         ------
         TypeError
-            The coroutine passed is not actually a coroutine.
+            The argument passed is not actually a coroutine function.
         """
         if not iscoroutinefunction(coro):
-            msg = "The pre-invoke hook must be a coroutine."
+            msg = "The pre-invoke hook must be a coroutine function."
             raise TypeError(msg)
 
         self._before_invoke = coro
         return coro
 
     def after_invoke(self, coro: CFT) -> CFT:
-        """A decorator that registers a coroutine as a post-invoke hook.
+        """A decorator that registers a coroutine function as a post-invoke hook.
 
         This is for text commands only, and doesn't apply to application commands.
 
@@ -384,16 +384,16 @@ class BotBase(CommonBotBase, GroupMixin):
 
         Parameters
         ----------
-        coro: :ref:`coroutine <coroutine>`
-            The coroutine to register as the post-invoke hook.
+        coro: :ref:`coroutine function <coroutine>`
+            The coroutine function to register as the post-invoke hook.
 
         Raises
         ------
         TypeError
-            The coroutine passed is not actually a coroutine.
+            The argument passed is not actually a coroutine function.
         """
         if not iscoroutinefunction(coro):
-            msg = "The post-invoke hook must be a coroutine."
+            msg = "The post-invoke hook must be a coroutine function."
             raise TypeError(msg)
 
         self._after_invoke = coro
@@ -432,7 +432,7 @@ class BotBase(CommonBotBase, GroupMixin):
 
     # command processing
 
-    async def get_prefix(self, message: Message) -> Optional[Union[List[str], str]]:
+    async def get_prefix(self, message: Message) -> Optional[Union[list[str], str]]:
         """|coro|
 
         Retrieves the prefix the bot is listening to
@@ -445,7 +445,7 @@ class BotBase(CommonBotBase, GroupMixin):
 
         Returns
         -------
-        Optional[Union[List[:class:`str`], :class:`str`]]
+        :class:`list`\\[:class:`str`] | :class:`str` | :data:`None`
             A list of prefixes or a single prefix that the bot is
             listening for. None if the bot isn't listening for prefixes.
         """
@@ -477,7 +477,7 @@ class BotBase(CommonBotBase, GroupMixin):
 
         return ret
 
-    async def get_context(self, message: Message, *, cls: Type[CXT] = Context) -> CXT:
+    async def get_context(self, message: Message, *, cls: type[CXT] = Context) -> CXT:
         """|coro|
 
         Returns the invocation context from the message.
@@ -509,7 +509,7 @@ class BotBase(CommonBotBase, GroupMixin):
         view = StringView(message.content)
         ctx = cls(prefix=None, view=view, bot=self, message=message)
 
-        if message.author.id == self.user.id:  # type: ignore
+        if message.author.id == self.user.id:  # pyright: ignore[reportAttributeAccessIssue]
             return ctx
 
         prefix = await self.get_prefix(message)
@@ -555,7 +555,7 @@ class BotBase(CommonBotBase, GroupMixin):
         invoker = view.get_word()
         ctx.invoked_with = invoker
         # type-checker fails to narrow invoked_prefix type.
-        ctx.prefix = invoked_prefix  # type: ignore
+        ctx.prefix = invoked_prefix  # pyright: ignore[reportAttributeAccessIssue]
         ctx.command = self.all_commands.get(invoker)
         return ctx
 

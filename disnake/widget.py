@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Optional, Union
 
 from .activity import BaseActivity, Spotify, create_activity
 from .asset import Asset
@@ -122,15 +122,15 @@ class WidgetMember(BaseUser):
             See the `help article <https://dis.gd/app-usernames>`__ for details.
     status: :class:`Status`
         The member's status.
-    activity: Optional[Union[:class:`BaseActivity`, :class:`Spotify`]]
+    activity: :class:`BaseActivity` | :class:`Spotify` | :data:`None`
         The member's activity. This generally only has the ``name`` set.
-    deafened: Optional[:class:`bool`]
+    deafened: :class:`bool` | :data:`None`
         Whether the member is currently deafened.
-    muted: Optional[:class:`bool`]
+    muted: :class:`bool` | :data:`None`
         Whether the member is currently muted.
-    suppress: Optional[:class:`bool`]
+    suppress: :class:`bool` | :data:`None`
         Whether the member is currently being suppressed.
-    connected_channel: Optional[:class:`WidgetChannel`]
+    connected_channel: :class:`WidgetChannel` | :data:`None`
         Which channel the member is connected to.
     """
 
@@ -171,7 +171,7 @@ class WidgetMember(BaseUser):
     # and instead a separate `avatar_url` field with a full url
     @property
     def avatar(self) -> Optional[Asset]:
-        """Optional[:class:`Asset`]: The user's avatar.
+        """:class:`Asset` | :data:`None`: The user's avatar.
         The size can be chosen using :func:`Asset.with_size`, however the format is always
         static and cannot be changed through :func:`Asset.with_format` or similar methods.
         """
@@ -196,7 +196,7 @@ class WidgetSettings:
         The widget's guild.
     enabled: :class:`bool`
         Whether the widget is enabled.
-    channel_id: Optional[:class:`int`]
+    channel_id: :class:`int` | :data:`None`
         The widget channel ID. If set, an invite link for this channel will be generated,
         which allows users to join the guild from the widget.
     """
@@ -216,7 +216,7 @@ class WidgetSettings:
 
     @property
     def channel(self) -> Optional[GuildChannel]:
-        """Optional[:class:`abc.GuildChannel`]: The widget channel, if set."""
+        """:class:`abc.GuildChannel` | :data:`None`: The widget channel, if set."""
         return self.guild.get_channel(self.channel_id) if self.channel_id is not None else None
 
     async def edit(
@@ -237,11 +237,11 @@ class WidgetSettings:
         ----------
         enabled: :class:`bool`
             Whether to enable the widget.
-        channel: Optional[:class:`~disnake.abc.Snowflake`]
-            The new widget channel. Pass ``None`` to remove the widget channel.
+        channel: :class:`~disnake.abc.Snowflake` | :data:`None`
+            The new widget channel. Pass :data:`None` to remove the widget channel.
             If set, an invite link for this channel will be generated,
             which allows users to join the guild from the widget.
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason for editing the widget. Shows up on the audit log.
 
         Raises
@@ -282,9 +282,9 @@ class Widget:
         The guild's ID.
     name: :class:`str`
         The guild's name.
-    channels: List[:class:`WidgetChannel`]
+    channels: :class:`list`\\[:class:`WidgetChannel`]
         The publicly accessible voice and stage channels in the guild.
-    members: List[:class:`WidgetMember`]
+    members: :class:`list`\\[:class:`WidgetMember`]
         The online members in the server. Offline members
         do not appear in the widget.
 
@@ -309,14 +309,14 @@ class Widget:
         self.id: int = int(data["id"])
         self.presence_count: int = data["presence_count"]
 
-        self.channels: List[WidgetChannel] = []
+        self.channels: list[WidgetChannel] = []
         for channel in data.get("channels", []):
             _id = int(channel["id"])
             self.channels.append(
                 WidgetChannel(id=_id, name=channel["name"], position=channel["position"])
             )
 
-        self.members: List[WidgetMember] = []
+        self.members: list[WidgetMember] = []
         channels = {channel.id: channel for channel in self.channels}
         for member in data.get("members", []):
             connected_channel = _get_as_snowflake(member, "channel_id")
@@ -355,7 +355,7 @@ class Widget:
 
     @property
     def invite_url(self) -> Optional[str]:
-        """Optional[:class:`str`]: The invite URL for the guild, if available."""
+        """:class:`str` | :data:`None`: The invite URL for the guild, if available."""
         return self._invite
 
     async def fetch_invite(self, *, with_counts: bool = True) -> Optional[Invite]:
@@ -366,7 +366,7 @@ class Widget:
         code is abstracted away.
 
         .. versionchanged:: 2.6
-            This may now return ``None`` if the widget does not have
+            This may now return :data:`None` if the widget does not have
             an attached invite URL.
 
         Parameters
@@ -378,7 +378,7 @@ class Widget:
 
         Returns
         -------
-        Optional[:class:`Invite`]
+        :class:`Invite` | :data:`None`
             The invite from the widget's invite URL, if available.
         """
         if not self._invite:
@@ -408,9 +408,9 @@ class Widget:
         ----------
         enabled: :class:`bool`
             Whether to enable the widget.
-        channel: Optional[:class:`~disnake.abc.Snowflake`]
-            The new widget channel. Pass ``None`` to remove the widget channel.
-        reason: Optional[:class:`str`]
+        channel: :class:`~disnake.abc.Snowflake` | :data:`None`
+            The new widget channel. Pass :data:`None` to remove the widget channel.
+        reason: :class:`str` | :data:`None`
             The reason for editing the widget. Shows up on the audit log.
 
         Raises
@@ -420,7 +420,7 @@ class Widget:
         HTTPException
             Editing the widget failed.
         """
-        payload: Dict[str, Any] = {}
+        payload: dict[str, Any] = {}
         if enabled is not MISSING:
             payload["enabled"] = enabled
         if channel is not MISSING:

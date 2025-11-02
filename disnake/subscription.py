@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, Optional
 
 from .enums import SubscriptionStatus, try_enum
 from .mixins import Hashable
@@ -53,11 +53,11 @@ class Subscription(Hashable):
         The ID of the user who is subscribed to the :attr:`sku_ids`.
 
         See also :attr:`user`.
-    sku_ids: List[:class:`int`]
+    sku_ids: :class:`list`\\[:class:`int`]
         The ID of the SKUs the user is subscribed to.
-    renewal_sku_ids: List[:class:`int`]
+    renewal_sku_ids: :class:`list`\\[:class:`int`]
         The IDs of the SKUs that will be renewed at the start of the new period.
-    entitlement_ids: List[:class:`int`]
+    entitlement_ids: :class:`list`\\[:class:`int`]
         The IDs of the entitlements the user has as part of this subscription.
     current_period_start: :class:`datetime.datetime`
         The time at which the current period for the given subscription started.
@@ -65,7 +65,7 @@ class Subscription(Hashable):
         The time at which the current period for the given subscription will end.
     status: :class:`SubscriptionStatus`
         The current status of the given subscription.
-    canceled_at: Optional[:class:`datetime.datetime`]
+    canceled_at: :class:`datetime.datetime` | :data:`None`
         The time at which the subscription was canceled.
 
         See also :attr:`is_canceled`.
@@ -89,9 +89,9 @@ class Subscription(Hashable):
 
         self.id: int = int(data["id"])
         self.user_id: int = int(data["user_id"])
-        self.sku_ids: List[int] = list(map(int, data["sku_ids"]))
-        self.entitlement_ids: List[int] = list(map(int, data["entitlement_ids"]))
-        self.renewal_sku_ids: Optional[List[int]] = (
+        self.sku_ids: list[int] = list(map(int, data["sku_ids"]))
+        self.entitlement_ids: list[int] = list(map(int, data["entitlement_ids"]))
+        self.renewal_sku_ids: Optional[list[int]] = (
             list(map(int, renewal_sku_ids))
             if (renewal_sku_ids := data.get("renewal_sku_ids")) is not None
             else None
@@ -108,7 +108,7 @@ class Subscription(Hashable):
 
     @property
     def user(self) -> Optional[User]:
-        """Optional[:class:`User`]: The user who is subscribed to the :attr:`sku_ids`.
+        """:class:`User` | :data:`None`: The user who is subscribed to the :attr:`sku_ids`.
 
         Requires the user to be cached.
         See also :attr:`user_id`.

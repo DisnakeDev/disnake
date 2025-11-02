@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import io
 import os
-from typing import TYPE_CHECKING, Any, Literal, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Literal, Optional, Union
 
 import yarl
 
@@ -37,7 +37,7 @@ class AssetMixin:
     url: str
     _state: Optional[AnyState]
 
-    __slots__: Tuple[str, ...] = ("_state",)
+    __slots__: tuple[str, ...] = ("_state",)
 
     async def read(self) -> bytes:
         """|coro|
@@ -76,7 +76,7 @@ class AssetMixin:
 
         Parameters
         ----------
-        fp: Union[:class:`io.BufferedIOBase`, :class:`os.PathLike`]
+        fp: :class:`io.BufferedIOBase` | :class:`os.PathLike`
             The file-like object to save this asset to or the filename
             to use. If a filename is passed then a file is created with that
             filename and used instead.
@@ -129,10 +129,10 @@ class AssetMixin:
         ----------
         spoiler: :class:`bool`
             Whether the file is a spoiler.
-        filename: Optional[:class:`str`]
+        filename: :class:`str` | :data:`None`
             The filename to display when uploading to Discord. If this is not given, it defaults to
             the name of the asset's URL.
-        description: Optional[:class:`str`]
+        description: :class:`str` | :data:`None`
             The file's description.
 
         Raises
@@ -191,7 +191,7 @@ class Asset(AssetMixin):
             Returns the hash of the asset.
     """
 
-    __slots__: Tuple[str, ...] = (
+    __slots__: tuple[str, ...] = (
         "_url",
         "_animated",
         "_key",
