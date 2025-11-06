@@ -781,7 +781,6 @@ def loop(
     if not callable(cls):
         msg = "cls argument must be callable"
         raise TypeError(msg)
-    # TODO: fix/add tests!
 
     def decorator(func: LF) -> L_co:
         if not iscoroutinefunction(func):
