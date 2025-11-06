@@ -735,9 +735,9 @@ def loop(
     Parameters
     ----------
     cls: :class:`~collections.abc.Callable`\\[..., :class:`Loop`]
-        A callable (may be a :class:`Loop` subclass) to create a new instance of that loop.
+        A callable (such as a :class:`Loop` subclass) returning an instance of a :class:`Loop`.
         If provided, the other parameters described below do not apply.
-        Instead, this decorator will accept the same keywords as the passed callable/class does.
+        Instead, this decorator will accept the same keyword arguments as the passed callable does.
 
         .. versionadded:: 2.6
 
