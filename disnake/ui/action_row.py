@@ -158,7 +158,8 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
             Components can now be either valid in the context of a message, or in the
             context of a modal. Combining components from both contexts is not supported.
     id: :class:`int`
-        The numeric identifier for the component. Must be unique within the message.
+        The numeric identifier for the component. Must be unique within a message.
+        This is always present in components received from the API.
         If set to ``0`` (the default) when sending a component, the API will assign
         sequential identifiers to the components in the message.
 
@@ -329,7 +330,8 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
 
             .. versionadded:: 2.11
         id: :class:`int`
-            The numeric identifier for the component.
+            The numeric identifier for the component. Must be unique within a message.
+            This is always present in components received from the API.
             If set to ``0`` (the default) when sending a component, the API will assign
             sequential identifiers to the components in the message.
 
@@ -397,7 +399,8 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         disabled: :class:`bool`
             Whether the select is disabled or not.
         id: :class:`int`
-            The numeric identifier for the component.
+            The numeric identifier for the component. Must be unique within a message.
+            This is always present in components received from the API.
             If set to ``0`` (the default) when sending a component, the API will assign
             sequential identifiers to the components in the message.
 
@@ -465,7 +468,8 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
 
             .. versionadded:: 2.10
         id: :class:`int`
-            The numeric identifier for the component.
+            The numeric identifier for the component. Must be unique within a message.
+            This is always present in components received from the API.
             If set to ``0`` (the default) when sending a component, the API will assign
             sequential identifiers to the components in the message.
 
@@ -531,7 +535,8 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
 
             .. versionadded:: 2.10
         id: :class:`int`
-            The numeric identifier for the component.
+            The numeric identifier for the component. Must be unique within a message.
+            This is always present in components received from the API.
             If set to ``0`` (the default) when sending a component, the API will assign
             sequential identifiers to the components in the message.
 
@@ -601,7 +606,8 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
 
             .. versionadded:: 2.10
         id: :class:`int`
-            The numeric identifier for the component.
+            The numeric identifier for the component. Must be unique within a message.
+            This is always present in components received from the API.
             If set to ``0`` (the default) when sending a component, the API will assign
             sequential identifiers to the components in the message.
 
@@ -671,7 +677,8 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
 
             .. versionadded:: 2.10
         id: :class:`int`
-            The numeric identifier for the component.
+            The numeric identifier for the component. Must be unique within a message.
+            This is always present in components received from the API.
             If set to ``0`` (the default) when sending a component, the API will assign
             sequential identifiers to the components in the message.
 
@@ -743,9 +750,10 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         max_length: :class:`int` | :data:`None`
             The maximum length of the text input.
         id: :class:`int`
-            The numeric identifier for the component.
+            The numeric identifier for the component. Must be unique within a modal.
+            This is always present in components received from the API.
             If set to ``0`` (the default) when sending a component, the API will assign
-            sequential identifiers to the components in the message.
+            sequential identifiers to the components in the modal.
 
             .. versionadded:: 2.11
 
