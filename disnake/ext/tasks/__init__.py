@@ -14,11 +14,9 @@ from typing import (
     Callable,
     Generic,
     Optional,
-    Protocol,
     TypeVar,
     Union,
     cast,
-    get_origin,
     overload,
 )
 
@@ -39,9 +37,8 @@ else:
 __all__ = ("loop",)
 
 T = TypeVar("T")
-_func = Callable[..., Coroutine[Any, Any, Any]]
-LF = TypeVar("LF", bound=_func)
-FT = TypeVar("FT", bound=_func)
+LF = TypeVar("LF", bound=Callable[..., Coroutine[Any, Any, Any]])
+FT = TypeVar("FT", bound=Callable[..., Coroutine[Any, Any, Any]])
 ET = TypeVar("ET", bound=Callable[[Any, BaseException], Coroutine[Any, Any, Any]])
 
 
@@ -706,14 +703,7 @@ class Loop(Generic[LF]):
                 self._handle.recalculate(self._next_iteration)
 
 
-T_co = TypeVar("T_co", covariant=True)
 L_co = TypeVar("L_co", bound=Loop[Any], covariant=True)
-
-
-class Object(Protocol[T_co, P]):
-    def __new__(cls) -> T_co: ...
-
-    def __init__(self, *args: P.args, **kwargs: P.kwargs) -> None: ...
 
 
 @overload
@@ -731,12 +721,12 @@ def loop(
 
 @overload
 def loop(
-    cls: type[Object[L_co, Concatenate[LF, P]]], *_: P.args, **kwargs: P.kwargs
+    cls: Callable[Concatenate[LF, P], L_co], *_: P.args, **kwargs: P.kwargs
 ) -> Callable[[LF], L_co]: ...
 
 
 def loop(
-    cls: type[Object[L_co, Concatenate[LF, P]]] = Loop[Any],
+    cls: Callable[Concatenate[LF, ...], L_co] = Loop[Any],
     **kwargs: Any,
 ) -> Callable[[LF], L_co]:
     """A decorator that schedules a task in the background for you with
@@ -744,10 +734,10 @@ def loop(
 
     Parameters
     ----------
-    cls: :class:`type`\\[:class:`Loop`]
-        The loop subclass to create an instance of. If provided, the following parameters
-        described below do not apply. Instead, this decorator will accept the same keywords
-        as the passed cls does.
+    cls: :class:`~collections.abc.Callable`\\[..., :class:`Loop`]
+        A callable (may be a :class:`Loop` subclass) to create a new instance of that loop.
+        If provided, the other parameters described below do not apply.
+        Instead, this decorator will accept the same keywords as the passed callable/class does.
 
         .. versionadded:: 2.6
 
@@ -771,32 +761,27 @@ def loop(
         .. versionadded:: 2.0
 
     count: :class:`int` | :data:`None`
-        The number of loops to do, :data:`None` if it should be an
-        infinite loop.
+        The number of loops to do, :data:`None` if it should be an infinite loop.
     reconnect: :class:`bool`
-        Whether to handle errors and restart the task
-        using an exponential back-off algorithm similar to the
-        one used in :meth:`disnake.Client.connect`.
+        Whether to handle errors and restart the task using an exponential back-off algorithm
+        similar to the one used in :meth:`disnake.Client.connect`.
     loop: :class:`asyncio.AbstractEventLoop`
-        The loop to use to register the task, if not given
-        defaults to the current event loop or creates a new one
-        if there is none.
+        The loop to use to register the task, if not given defaults to the current event loop
+        or creates a new one if there is none.
 
     Raises
     ------
     ValueError
-        An invalid value was given.
+        An invalid value for the ``count`` or ``time`` parameter was given.
     TypeError
-        The function was not a coroutine, the ``cls`` parameter was not a subclass of ``Loop``,
-        an invalid value for the ``time`` parameter was passed,
-        or ``time`` parameter was passed in conjunction with relative time parameters.
+        The function was not a coroutine, the ``cls`` parameter was not a callable
+        nor a subclass of ``Loop``, an invalid value for the ``time`` parameter was passed,
+        or the ``time`` parameter was passed in conjunction with relative time parameters.
     """
-    if (origin := get_origin(cls)) is not None:
-        cls = origin
-
-    if not isinstance(cls, type) or not issubclass(cls, Loop):
-        msg = f"cls argument must be a subclass of Loop, got {cls!r}"
+    if not callable(cls):
+        msg = "cls argument must be callable"
         raise TypeError(msg)
+    # TODO: fix/add tests!
 
     def decorator(func: LF) -> L_co:
         if not iscoroutinefunction(func):
