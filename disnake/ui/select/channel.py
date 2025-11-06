@@ -247,9 +247,9 @@ def channel_select(
     Parameters
     ----------
     cls: :class:`~collections.abc.Callable`\\[..., :class:`ChannelSelect`]
-        A callable (may be a :class:`ChannelSelect` subclass) to create a new instance of this component.
+        A callable (such as a :class:`ChannelSelect` subclass) returning an instance of a :class:`ChannelSelect`.
         If provided, the other parameters described below do not apply.
-        Instead, this decorator will accept the same keywords as the passed callable/class does.
+        Instead, this decorator will accept the same keyword arguments as the passed callable does.
     placeholder: :class:`str` | :data:`None`
         The placeholder text that is shown if nothing is selected, if any.
     custom_id: :class:`str`
@@ -284,5 +284,11 @@ def channel_select(
         like to control the relative positioning of the row then passing an index is advised.
         For example, row=1 will show up before row=2. Defaults to :data:`None`, which is automatic
         ordering. The row number must be between 0 and 4 (i.e. zero indexed).
+
+    Raises
+    ------
+    TypeError
+        The decorated function was not a coroutine function,
+        or the ``cls`` parameter was not a callable or a subclass of :class:`ChannelSelect`.
     """
     return _create_decorator(cls, **kwargs)

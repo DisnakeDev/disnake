@@ -323,9 +323,9 @@ def button(
     Parameters
     ----------
     cls: :class:`~collections.abc.Callable`\\[..., :class:`Button`]
-        A callable (may be a :class:`Button` subclass) to create a new instance of this component.
+        A callable (such as a :class:`Button` subclass) returning an instance of a :class:`Button`.
         If provided, the other parameters described below do not apply.
-        Instead, this decorator will accept the same keywords as the passed callable/class does.
+        Instead, this decorator will accept the same keyword arguments as the passed callable does.
 
         .. versionadded:: 2.6
     label: :class:`str` | :data:`None`
@@ -353,6 +353,13 @@ def button(
         like to control the relative positioning of the row then passing an index is advised.
         For example, row=1 will show up before row=2. Defaults to :data:`None`, which is automatic
         ordering. The row number must be between 0 and 4 (i.e. zero indexed).
+
+    Raises
+    ------
+    TypeError
+        The decorated function was not a coroutine function,
+        the ``cls`` parameter was not a callable or a subclass of :class:`Button`,
+        or an invalid value for the ``emoji`` parameter was passed.
     """
     if not callable(cls):
         msg = "cls argument must be callable"
