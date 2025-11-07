@@ -68,7 +68,8 @@ class GatewayPayload(TypedDict):
 
 class HeartbeatCommand(TypedDict):
     op: Literal[1, 3]  # normal ws and voice ws have different heartbeat opcodes
-    d: Optional[int]
+    # normal ws uses a plain int seq, voice ws uses {t: <nonce>, seq_ack: <seq>}
+    d: Union[Optional[int], VoiceHeartbeatData]
 
 
 # opcode 2
@@ -164,6 +165,10 @@ class RequestMembersCommand(TypedDict):
 class VoicePayload(TypedDict):
     op: Literal[2, 4, 6, 8, 9]
     d: Any
+    seq: NotRequired[int]  # only present in some messages
+
+
+# voice opcode 2
 
 
 class VoiceReadyPayload(TypedDict):
@@ -173,9 +178,32 @@ class VoiceReadyPayload(TypedDict):
     modes: list[str]
 
 
+# voice opcode 4
+
+
 class VoiceSessionDescriptionPayload(TypedDict):
     mode: SupportedModes
     secret_key: list[int]
+
+
+# voice opcode 6
+
+
+class VoiceHeartbeatAckPayload(TypedDict):
+    t: int
+
+
+# voice opcode 8
+
+
+class VoiceHelloPayload(TypedDict):
+    heartbeat_interval: int
+
+
+# voice opcode 9
+
+
+VoiceResumedPayload = None
 
 
 #####
@@ -216,6 +244,19 @@ class VoiceSelectProtocolCommand(TypedDict):
     d: VoiceSelectProtocolData
 
 
+# voice opcode 3
+
+
+class VoiceHeartbeatData(TypedDict):
+    t: int  # nonce
+    seq_ack: int
+
+
+class VoiceHeartbeatCommand(TypedDict):
+    op: Literal[3]
+    d: VoiceHeartbeatData
+
+
 # voice opcode 5
 
 
@@ -237,6 +278,7 @@ class VoiceResumeData(TypedDict):
     server_id: str
     session_id: str
     token: str
+    seq_ack: int
 
 
 class VoiceResumeCommand(TypedDict):
