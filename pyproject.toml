@@ -86,6 +86,7 @@ tools = [
     "prek>=0.2.0",
     "slotscheck==0.19.1",
     "check-manifest==0.50",
+    "check-wheel-contents~=0.6.3",
     { include-group = "ruff" },
 ]
 changelog = [
@@ -436,3 +437,7 @@ ignore = [
     "tests/**",
     "scripts/**",
 ]
+
+[tool.check-wheel-contents]
+toplevel = ["disnake"]
+package = "disnake"
