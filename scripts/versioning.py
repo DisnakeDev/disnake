@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: MIT
 
+# This script runs as part of the wheel building process,
+# all dependencies MUST be included in pyproject.toml
 from typing import Any, Optional
 
 import packaging.version
@@ -14,17 +16,13 @@ def template_fields(
     next_version: Optional[str],
     params: dict[str, Any],
 ) -> dict[str, Any]:
-    """Implements the ``"basic"`` ``template-fields`` method"""
+    """Implement a custom template_fields function for Disnake."""
     # params = copy.deepcopy(params)
     parsed_version = packaging.version.parse(version)
     fields: dict[str, Any] = {}
     if description is not None:
         fields.update(description.fields)
         fields["branch"] = description.branch
-    if base_version is not None:
-        fields["base_version"] = base_version
-    if next_version is not None:
-        fields["next_version"] = next_version
     fields["version"] = version
 
     releaselevels = {
@@ -49,8 +47,4 @@ def template_fields(
         releaselevel,
         serial,
     )
-    try:
-        fields["normalized_version"] = str(packaging.version.Version(version))
-    except ValueError:
-        fields["normalized_version"] = version
     return fields

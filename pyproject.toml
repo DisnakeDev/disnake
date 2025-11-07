@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
 
 [build-system]
-requires = ["hatchling>=1.27.0", "versioningit>=3.3.0,<4"]
+requires = ["hatchling>=1.27.0", "versioningit>=3.3.0,<4", "packaging"]
 build-backend = "hatchling.build"
 
 [project]
