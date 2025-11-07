@@ -326,10 +326,13 @@ class VoiceClient(VoiceProtocol):
         self._voice_server_complete.clear()
         self._voice_state_complete.clear()
 
-    async def connect_websocket(self) -> DiscordVoiceWebSocket:
-        ws = await DiscordVoiceWebSocket.from_client(self)
+    async def connect_websocket(self, *, resume: bool = False) -> DiscordVoiceWebSocket:
+        seq = self.ws.sequence if resume and self.ws is not MISSING else None
+        ws = await DiscordVoiceWebSocket.from_client(self, sequence=seq, resume=resume)
+
         self._connected.clear()
-        while ws.secret_key is None:
+        event = ws._resumed if resume else ws._ready
+        while not event.is_set():
             await ws.poll_event()
         self._connected.set()
         return ws
@@ -427,11 +430,10 @@ class VoiceClient(VoiceProtocol):
                     self.ws._keep_alive = None
 
                 if isinstance(exc, ConnectionClosed):
-                    # The following close codes are undocumented so I will document them here.
                     # 1000 - normal closure (obviously)
                     # 4014 - voice channel has been deleted.
                     # 4015 - voice server has crashed
-                    if exc.code in (1000, 4015):
+                    if exc.code == 1000:
                         _log.info("Disconnecting from voice normally, close code %d.", exc.code)
                         await self.disconnect()
                         break
@@ -445,6 +447,27 @@ class VoiceClient(VoiceProtocol):
                             await self.disconnect()
                             break
                         continue
+                    # only attempt to resume if the session is valid/established
+                    if exc.code == 4015 and self.ws._ready.is_set():
+                        _log.info("Disconnected from voice, trying to resume session...")
+                        self._connected.clear()
+                        try:
+                            self.ws = await self.connect_websocket(resume=True)
+                        except (ConnectionClosed, asyncio.TimeoutError) as e:
+                            # .connect() re-raises errors, fall back to reconnecting (or disconnecting) below as usual
+                            if isinstance(e, ConnectionClosed):
+                                msg = f"Received {e!r} error"
+                            else:
+                                msg = "Timed out"
+
+                            _log.error(
+                                "%s trying to resume voice connection, %s normally...",
+                                msg,
+                                "reconnecting" if reconnect else "disconnecting",
+                            )
+                        else:
+                            _log.info("Successfully resumed voice session")
+                            continue
 
                 if not reconnect:
                     await self.disconnect()
