@@ -208,7 +208,7 @@ def mentionable_select(
 ) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]:
     """A decorator that attaches a mentionable (user/member/role) select menu to a component.
 
-    The function being decorated should have three parameters, ``self`` representing
+    The function being decorated should have three parameters: ``self`` representing
     the :class:`disnake.ui.View`, the :class:`disnake.ui.MentionableSelect` that was
     interacted with, and the :class:`disnake.MessageInteraction`.
 
@@ -244,10 +244,9 @@ def mentionable_select(
 
         .. versionadded:: 2.10
     id: :class:`int`
-        The numeric identifier for the component. Must be unique within a message or modal.
-        This is always present in components received from the API.
+        The numeric identifier for the component. Must be unique within a view.
         If set to ``0`` (the default) when sending a component, the API will assign
-        sequential identifiers to the components in the message or modal.
+        sequential identifiers to the components in the view.
 
         .. versionadded:: 2.11
     row: :class:`int` | :data:`None`
