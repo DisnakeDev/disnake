@@ -253,16 +253,12 @@ jobs:
         with:
           python-version: ${{ needs.python-versions.outputs.min-python }}
 
-      - name: Run slotscheck
-        if: (success() || failure()) && steps.setup.outcome == 'success'
+      - name: Run misc checks
         run: |
-          nox -s slotscheck
+          nox --tags misc
 
-      # This only runs if the previous steps were successful, no point in running it otherwise
-      - name: Try building package
-        if: (success() || failure()) && steps.setup.outcome == 'success'
+      - name: List built files
         run: |
-          nox -s build
           ls -la dist/
 
       - name: Check README.md renders properly on PyPI

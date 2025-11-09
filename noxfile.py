@@ -96,7 +96,7 @@ EXECUTION_GROUPS: Sequence[ExecutionGroup] = [
     ),
     # the other sessions, they don't need pyright, but they need to run
     ExecutionGroup(
-        sessions=("lint", "slotscheck"),
+        sessions=("lint", "slotscheck", "check-wheel-contents"),
         groups=("tools",),
     ),
     # build
@@ -251,14 +251,14 @@ def lint(session: nox.Session) -> None:
     session.run("prek", "run", "--all-files", *session.posargs)
 
 
-@nox.session(python=get_version_for_session("slotscheck"))
+@nox.session(python=get_version_for_session("slotscheck"), tags=["misc"])
 def slotscheck(session: nox.Session) -> None:
     """Run slotscheck."""
     install_deps(session)
     session.run("python", "-m", "slotscheck", "--verbose", "-m", "disnake")
 
 
-@nox.session
+@nox.session(tags=["misc"])
 def build(session: nox.Session) -> None:
     """Build a dist."""
     install_deps(session)
@@ -267,6 +267,13 @@ def build(session: nox.Session) -> None:
     if dist_path.exists():
         shutil.rmtree(dist_path)
     session.run("python", "-m", "build", "--outdir", "dist")
+
+
+@nox.session(name="check-wheel-contents", requires=["build"], tags=["misc"])
+def check_wheel_contents(session: nox.Session) -> None:
+    """Run check-wheel-contents."""
+    install_deps(session)
+    session.run("check-wheel-contents", "dist")
 
 
 @nox.session(python=get_version_for_session("autotyping"))

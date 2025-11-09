@@ -10,6 +10,7 @@ import disnake.abc
 import disnake.utils
 from disnake import ApplicationCommandInteraction
 from disnake.message import Message
+from disnake.permissions import Permissions
 
 if TYPE_CHECKING:
     from typing_extensions import ParamSpec
@@ -283,6 +284,25 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
         """
         # bot.user will never be None at this point.
         return self.guild.me if self.guild is not None else self.bot.user
+
+    @disnake.utils.cached_property
+    def app_permissions(self) -> Permissions:
+        """:class:`.Permissions`: Returns the permissions the bot has in the context's channel.
+
+        .. versionadded: |vnext|
+        """
+        # This probably won't ever error.
+        # `permissions_for` exists on all except PartialMessageable, which we shouldn't get here
+        # For other channel types, permissions_for exists on all of them.
+        return self.channel.permissions_for(self.me)  # pyright: ignore[reportArgumentType]
+
+    @disnake.utils.cached_property
+    def permissions(self) -> Permissions:
+        """:class:`.Permissions`: Returns the permissions the author has in the context's channel.
+
+        .. versionadded: |vnext|
+        """
+        return self.channel.permissions_for(self.author)  # pyright: ignore[reportArgumentType]
 
     @property
     def voice_client(self) -> Optional[VoiceProtocol]:
