@@ -1458,8 +1458,8 @@ class StagePrivacyLevel(Enum):
     """
     closed = 2
     """The stage instance can only be joined by members of the guild."""
-    guild_only = 2
-    """Alias for :attr:`.closed`"""
+    guild_only = closed
+    """An alias for :attr:`.closed`."""
 
 
 class NSFWLevel(Enum, comparable=True):
