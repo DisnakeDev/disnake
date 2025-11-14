@@ -30,9 +30,9 @@ __all__ = (
 
 
 class PartialSoundboardSound(Hashable, AssetMixin):
-    """Represents a partial soundboard sound.
+    r"""Represents a partial soundboard sound.
 
-    Used for sounds in :class:`VoiceChannelEffect`\\s,
+    Used for sounds in :class:`VoiceChannelEffect`\s,
     and as the base for full :class:`SoundboardSound`/:class:`GuildSoundboardSound` objects.
 
     .. versionadded:: 2.10

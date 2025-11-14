@@ -193,7 +193,7 @@ class PollAnswer:
 
 
 class Poll:
-    """Represents a poll from Discord.
+    r"""Represents a poll from Discord.
 
     .. versionadded:: 2.10
 
@@ -201,7 +201,7 @@ class Poll:
     ----------
     question: :class:`str` | :class:`PollMedia`
         The question of the poll. Currently, emojis are not supported in poll questions.
-    answers: :class:`list`\\[:class:`str` | :class:`PollAnswer`]
+    answers: :class:`list`\[:class:`str` | :class:`PollAnswer`]
         The answers for this poll, up to 10.
     duration: :class:`datetime.timedelta`
         The total duration of the poll, up to 32 days. Defaults to 1 day.
@@ -277,7 +277,7 @@ class Poll:
 
     @property
     def answers(self) -> list[PollAnswer]:
-        """:class:`list`\\[:class:`PollAnswer`]: The list of answers for this poll.
+        r""":class:`list`\[:class:`PollAnswer`]: The list of answers for this poll.
 
         See also :meth:`get_answer` to get specific answers by ID.
         """

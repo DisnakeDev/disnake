@@ -335,14 +335,14 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
     @property
     def members(self) -> list[Member]:
-        """:class:`list`\\[:class:`Member`]: Returns all members that can see this channel."""
+        r""":class:`list`\[:class:`Member`]: Returns all members that can see this channel."""
         if isinstance(self.guild, Object):
             return []
         return [m for m in self.guild.members if self.permissions_for(m).view_channel]
 
     @property
     def threads(self) -> list[Thread]:
-        """:class:`list`\\[:class:`Thread`]: Returns all the threads that you can see.
+        r""":class:`list`\[:class:`Thread`]: Returns all the threads that you can see.
 
         .. versionadded:: 2.0
         """
@@ -443,7 +443,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         reason: Optional[str] = None,
         **kwargs: Never,
     ) -> Optional[TextChannel]:
-        """|coro|
+        r"""|coro|
 
         Edits the channel.
 
@@ -492,7 +492,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             The new type of this text channel. Currently, only conversion between
             :attr:`ChannelType.text` and :attr:`ChannelType.news` is supported. This
             is only available to guilds that contain ``NEWS`` in :attr:`Guild.features`.
-        overwrites: :class:`~collections.abc.Mapping`\\[:class:`~.Member` | :class:`~.Role`, :class:`PermissionOverwrite`]
+        overwrites: :class:`~collections.abc.Mapping`\[:class:`~.Member` | :class:`~.Role`, :class:`PermissionOverwrite`]
             A :class:`Mapping` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply to the channel.
         default_auto_archive_duration: :class:`int` | :class:`ThreadArchiveDuration` | :data:`None`
@@ -559,7 +559,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         news: bool = MISSING,
         reason: Optional[str] = None,
     ) -> TextChannel:
-        """|coro|
+        r"""|coro|
 
         Clones this channel. This creates a channel with the same properties
         as this channel.
@@ -598,7 +598,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             to this channel's default thread slowmode delay.
         default_auto_archive_duration: :class:`int` | :class:`ThreadArchiveDuration`
             The default auto archive duration of the new channel. If not provided, defaults to this channel's default auto archive duration.
-        overwrites: :class:`~collections.abc.Mapping`\\[:class:`~.Member` | :class:`~.Role`, :class:`PermissionOverwrite`]
+        overwrites: :class:`~collections.abc.Mapping`\[:class:`~.Member` | :class:`~.Role`, :class:`PermissionOverwrite`]
             A :class:`Mapping` of target (either a role or a member) to :class:`PermissionOverwrite`
             to apply to the channel. If not provided, defaults to this channel's overwrites.
         news: :class:`bool`
@@ -653,7 +653,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         )
 
     async def delete_messages(self, messages: Iterable[Snowflake]) -> None:
-        """|coro|
+        r"""|coro|
 
         Deletes a list of messages. This is similar to :meth:`Message.delete`
         except it bulk deletes multiple messages.
@@ -670,7 +670,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
         Parameters
         ----------
-        messages: :class:`~collections.abc.Iterable`\\[:class:`abc.Snowflake`]
+        messages: :class:`~collections.abc.Iterable`\[:class:`abc.Snowflake`]
             An iterable of messages denoting which ones to bulk delete.
 
         Raises
@@ -713,7 +713,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         oldest_first: Optional[bool] = False,
         bulk: bool = True,
     ) -> list[Message]:
-        """|coro|
+        r"""|coro|
 
         Purges a list of messages that meet the criteria given by the predicate
         ``check``. If a ``check`` is not provided then all messages are deleted
@@ -739,7 +739,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         limit: :class:`int` | :data:`None`
             The number of messages to search through. This is not the number
             of messages that will be deleted, though it can be.
-        check: :class:`~collections.abc.Callable`\\[[:class:`Message`], :class:`bool`]
+        check: :class:`~collections.abc.Callable`\[[:class:`Message`], :class:`bool`]
             The function used to check if a message should be deleted.
             It must take a :class:`Message` as its sole parameter.
         before: :class:`abc.Snowflake` | :class:`datetime.datetime` | :data:`None`
@@ -764,7 +764,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
         Returns
         -------
-        :class:`list`\\[:class:`.Message`]
+        :class:`list`\[:class:`.Message`]
             A list of messages that were deleted.
         """
         if check is MISSING:
@@ -815,7 +815,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         return ret
 
     async def webhooks(self) -> list[Webhook]:
-        """|coro|
+        r"""|coro|
 
         Retrieves the list of webhooks this channel has.
 
@@ -829,7 +829,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
         Returns
         -------
-        :class:`list`\\[:class:`Webhook`]
+        :class:`list`\[:class:`Webhook`]
             The list of webhooks this channel has.
         """
         from .webhook import Webhook
@@ -1221,7 +1221,7 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
 
     @property
     def members(self) -> list[Member]:
-        """:class:`list`\\[:class:`Member`]: Returns all members that are currently inside this voice channel."""
+        r""":class:`list`\[:class:`Member`]: Returns all members that are currently inside this voice channel."""
         if isinstance(self.guild, Object):
             return []
 
@@ -1235,7 +1235,7 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
 
     @property
     def voice_states(self) -> dict[int, VoiceState]:
-        """Returns a mapping of member IDs who have voice states in this channel.
+        r"""Returns a mapping of member IDs who have voice states in this channel.
 
         .. versionadded:: 1.3
 
@@ -1246,7 +1246,7 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
 
         Returns
         -------
-        :class:`~collections.abc.Mapping`\\[:class:`int`, :class:`VoiceState`]
+        :class:`~collections.abc.Mapping`\[:class:`int`, :class:`VoiceState`]
             The mapping of member ID to a voice state.
         """
         if isinstance(self.guild, Object):
@@ -1416,7 +1416,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         slowmode_delay: Optional[int] = MISSING,
         reason: Optional[str] = None,
     ) -> VoiceChannel:
-        """|coro|
+        r"""|coro|
 
         Clones this channel. This creates a channel with the same properties
         as this channel.
@@ -1451,7 +1451,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
             The video quality mode of the new channel. If not provided, defaults to this channel's video quality mode.
         nsfw: :class:`bool`
             Whether the new channel should be nsfw or not. If not provided, defaults to this channel's NSFW value.
-        overwrites: :class:`~collections.abc.Mapping`\\[:class:`~.Member` | :class:`~.Role`, :class:`PermissionOverwrite`]
+        overwrites: :class:`~collections.abc.Mapping`\[:class:`~.Member` | :class:`~.Role`, :class:`PermissionOverwrite`]
             A :class:`Mapping` of target (either a role or a member) to :class:`PermissionOverwrite` to apply
             to the channel. If not provided, defaults to this channel's overwrites.
         slowmode_delay: :class:`int` | :data:`None`
@@ -1605,7 +1605,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         reason: Optional[str] = None,
         **kwargs: Never,
     ) -> Optional[VoiceChannel]:
-        """|coro|
+        r"""|coro|
 
         Edits the channel.
 
@@ -1639,7 +1639,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
             category.
         reason: :class:`str` | :data:`None`
             The reason for editing this channel. Shows up on the audit log.
-        overwrites: :class:`~collections.abc.Mapping`\\[:class:`~.Member` | :class:`~.Role`, :class:`PermissionOverwrite`]
+        overwrites: :class:`~collections.abc.Mapping`\[:class:`~.Member` | :class:`~.Role`, :class:`PermissionOverwrite`]
             A :class:`Mapping` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply to the channel.
         rtc_region: :class:`str` | :class:`VoiceRegion` | :data:`None`
@@ -1708,7 +1708,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         return None
 
     async def delete_messages(self, messages: Iterable[Snowflake]) -> None:
-        """|coro|
+        r"""|coro|
 
         Deletes a list of messages. This is similar to :meth:`Message.delete`
         except it bulk deletes multiple messages.
@@ -1727,7 +1727,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         Parameters
         ----------
-        messages: :class:`~collections.abc.Iterable`\\[:class:`abc.Snowflake`]
+        messages: :class:`~collections.abc.Iterable`\[:class:`abc.Snowflake`]
             An iterable of messages denoting which ones to bulk delete.
 
         Raises
@@ -1770,7 +1770,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         oldest_first: Optional[bool] = False,
         bulk: bool = True,
     ) -> list[Message]:
-        """|coro|
+        r"""|coro|
 
         Purges a list of messages that meet the criteria given by the predicate
         ``check``. If a ``check`` is not provided then all messages are deleted
@@ -1792,7 +1792,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         limit: :class:`int` | :data:`None`
             The number of messages to search through. This is not the number
             of messages that will be deleted, though it can be.
-        check: :class:`~collections.abc.Callable`\\[[:class:`Message`], :class:`bool`]
+        check: :class:`~collections.abc.Callable`\[[:class:`Message`], :class:`bool`]
             The function used to check if a message should be deleted.
             It must take a :class:`Message` as its sole parameter.
         before: :class:`abc.Snowflake` | :class:`datetime.datetime` | :data:`None`
@@ -1817,7 +1817,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         Returns
         -------
-        :class:`list`\\[:class:`.Message`]
+        :class:`list`\[:class:`.Message`]
             A list of messages that were deleted.
         """
         if check is MISSING:
@@ -1868,7 +1868,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         return ret
 
     async def webhooks(self) -> list[Webhook]:
-        """|coro|
+        r"""|coro|
 
         Retrieves the list of webhooks this channel has.
 
@@ -1884,7 +1884,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         Returns
         -------
-        :class:`list`\\[:class:`Webhook`]
+        :class:`list`\[:class:`Webhook`]
             The list of webhooks this channel has.
         """
         from .webhook import Webhook
@@ -2084,7 +2084,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
 
     @property
     def requesting_to_speak(self) -> list[Member]:
-        """:class:`list`\\[:class:`Member`]: A list of members who are requesting to speak in the stage channel."""
+        r""":class:`list`\[:class:`Member`]: A list of members who are requesting to speak in the stage channel."""
         return [
             member
             for member in self.members
@@ -2093,7 +2093,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
 
     @property
     def speakers(self) -> list[Member]:
-        """:class:`list`\\[:class:`Member`]: A list of members who have been permitted to speak in the stage channel.
+        r""":class:`list`\[:class:`Member`]: A list of members who have been permitted to speak in the stage channel.
 
         .. versionadded:: 2.0
         """
@@ -2107,7 +2107,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
 
     @property
     def listeners(self) -> list[Member]:
-        """:class:`list`\\[:class:`Member`]: A list of members who are listening in the stage channel.
+        r""":class:`list`\[:class:`Member`]: A list of members who are listening in the stage channel.
 
         .. versionadded:: 2.0
         """
@@ -2115,7 +2115,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
 
     @property
     def moderators(self) -> list[Member]:
-        """:class:`list`\\[:class:`Member`]: A list of members who are moderating the stage channel.
+        r""":class:`list`\[:class:`Member`]: A list of members who are moderating the stage channel.
 
         .. versionadded:: 2.0
         """
@@ -2149,7 +2149,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
         reason: Optional[str] = None,
     ) -> StageChannel:
-        """|coro|
+        r"""|coro|
 
         Clones this channel. This creates a channel with the same properties
         as this channel.
@@ -2188,7 +2188,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
             The video quality mode of the new channel. If not provided, defaults to this channel's video quality mode.
         nsfw: :class:`bool`
             Whether the new channel should be nsfw or not. If not provided, defaults to this channel's NSFW value.
-        overwrites: :class:`~collections.abc.Mapping`\\[:class:`~.Member` | :class:`~.Role`, :class:`PermissionOverwrite`]
+        overwrites: :class:`~collections.abc.Mapping`\[:class:`~.Member` | :class:`~.Role`, :class:`PermissionOverwrite`]
             A :class:`Mapping` of target (either a role or a member) to :class:`PermissionOverwrite`
             to apply to the channel. If not provided, defaults to this channel's overwrites.
         reason: :class:`str` | :data:`None`
@@ -2455,7 +2455,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         reason: Optional[str] = None,
         **kwargs: Never,
     ) -> Optional[StageChannel]:
-        """|coro|
+        r"""|coro|
 
         Edits the channel.
 
@@ -2497,7 +2497,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         category: :class:`abc.Snowflake` | :data:`None`
             The new category for this channel. Can be :data:`None` to remove the
             category.
-        overwrites: :class:`~collections.abc.Mapping`\\[:class:`~.Member` | :class:`~.Role`, :class:`PermissionOverwrite`]
+        overwrites: :class:`~collections.abc.Mapping`\[:class:`~.Member` | :class:`~.Role`, :class:`PermissionOverwrite`]
             A :class:`Mapping` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply to the channel.
         rtc_region: :class:`str` | :class:`VoiceRegion` | :data:`None`
@@ -2566,7 +2566,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         return None
 
     async def delete_messages(self, messages: Iterable[Snowflake]) -> None:
-        """|coro|
+        r"""|coro|
 
         Deletes a list of messages. This is similar to :meth:`Message.delete`
         except it bulk deletes multiple messages.
@@ -2585,7 +2585,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         Parameters
         ----------
-        messages: :class:`~collections.abc.Iterable`\\[:class:`abc.Snowflake`]
+        messages: :class:`~collections.abc.Iterable`\[:class:`abc.Snowflake`]
             An iterable of messages denoting which ones to bulk delete.
 
         Raises
@@ -2628,7 +2628,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         oldest_first: Optional[bool] = False,
         bulk: bool = True,
     ) -> list[Message]:
-        """|coro|
+        r"""|coro|
 
         Purges a list of messages that meet the criteria given by the predicate
         ``check``. If a ``check`` is not provided then all messages are deleted
@@ -2650,7 +2650,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         limit: :class:`int` | :data:`None`
             The number of messages to search through. This is not the number
             of messages that will be deleted, though it can be.
-        check: :class:`~collections.abc.Callable`\\[[:class:`Message`], :class:`bool`]
+        check: :class:`~collections.abc.Callable`\[[:class:`Message`], :class:`bool`]
             The function used to check if a message should be deleted.
             It must take a :class:`Message` as its sole parameter.
         before: :class:`abc.Snowflake` | :class:`datetime.datetime` | :data:`None`
@@ -2675,7 +2675,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         Returns
         -------
-        :class:`list`\\[:class:`.Message`]
+        :class:`list`\[:class:`.Message`]
             A list of messages that were deleted.
         """
         if check is MISSING:
@@ -2726,7 +2726,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         return ret
 
     async def webhooks(self) -> list[Webhook]:
-        """|coro|
+        r"""|coro|
 
         Retrieves the list of webhooks this channel has.
 
@@ -2742,7 +2742,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         Returns
         -------
-        :class:`list`\\[:class:`Webhook`]
+        :class:`list`\[:class:`Webhook`]
             The list of webhooks this channel has.
         """
         from .webhook import Webhook
@@ -2912,7 +2912,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
         reason: Optional[str] = None,
     ) -> CategoryChannel:
-        """|coro|
+        r"""|coro|
 
         Clones this channel. This creates a channel with the same properties
         as this channel.
@@ -2933,7 +2933,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
             The name of the new channel. If not provided, defaults to this channel's name.
         position: :class:`int`
             The position of the new channel. If not provided, defaults to this channel's position.
-        overwrites: :class:`~collections.abc.Mapping`\\[:class:`~.Member` | :class:`~.Role`, :class:`PermissionOverwrite`]
+        overwrites: :class:`~collections.abc.Mapping`\[:class:`~.Member` | :class:`~.Role`, :class:`PermissionOverwrite`]
             A :class:`Mapping` of target (either a role or a member) to :class:`PermissionOverwrite`
             to apply to the channel. If not provided, defaults to this channel's overwrites.
         reason: :class:`str` | :data:`None`
@@ -2992,7 +2992,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         reason: Optional[str] = None,
         **kwargs: Never,
     ) -> Optional[CategoryChannel]:
-        """|coro|
+        r"""|coro|
 
         Edits the category.
 
@@ -3016,7 +3016,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
             The new category's position.
         nsfw: :class:`bool`
             Whether to mark the category as NSFW.
-        overwrites: :class:`~collections.abc.Mapping`\\[:class:`~.Member` | :class:`~.Role`, :class:`PermissionOverwrite`]
+        overwrites: :class:`~collections.abc.Mapping`\[:class:`~.Member` | :class:`~.Role`, :class:`PermissionOverwrite`]
             A :class:`Mapping` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply to the category.
         flags: :class:`ChannelFlags`
@@ -3105,7 +3105,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
 
     @property
     def channels(self) -> list[GuildChannelType]:
-        """:class:`list`\\[:class:`abc.GuildChannel`]: Returns the channels that are under this category.
+        r""":class:`list`\[:class:`abc.GuildChannel`]: Returns the channels that are under this category.
 
         These are sorted by the official Discord UI, which places voice channels below the text channels.
         """
@@ -3124,7 +3124,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
 
     @property
     def text_channels(self) -> list[TextChannel]:
-        """:class:`list`\\[:class:`TextChannel`]: Returns the text channels that are under this category."""
+        r""":class:`list`\[:class:`TextChannel`]: Returns the text channels that are under this category."""
         if isinstance(self.guild, Object):
             return []
 
@@ -3138,7 +3138,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
 
     @property
     def voice_channels(self) -> list[VoiceChannel]:
-        """:class:`list`\\[:class:`VoiceChannel`]: Returns the voice channels that are under this category."""
+        r""":class:`list`\[:class:`VoiceChannel`]: Returns the voice channels that are under this category."""
         if isinstance(self.guild, Object):
             return []
 
@@ -3152,7 +3152,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
 
     @property
     def stage_channels(self) -> list[StageChannel]:
-        """:class:`list`\\[:class:`StageChannel`]: Returns the stage channels that are under this category.
+        r""":class:`list`\[:class:`StageChannel`]: Returns the stage channels that are under this category.
 
         .. versionadded:: 1.7
         """
@@ -3169,7 +3169,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
 
     @property
     def forum_channels(self) -> list[ForumChannel]:
-        """:class:`list`\\[:class:`ForumChannel`]: Returns the forum channels that are under this category.
+        r""":class:`list`\[:class:`ForumChannel`]: Returns the forum channels that are under this category.
 
         .. versionadded:: 2.5
         """
@@ -3186,7 +3186,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
 
     @property
     def media_channels(self) -> list[MediaChannel]:
-        """:class:`list`\\[:class:`MediaChannel`]: Returns the media channels that are under this category.
+        r""":class:`list`\[:class:`MediaChannel`]: Returns the media channels that are under this category.
 
         .. versionadded:: 2.10
         """
@@ -3408,14 +3408,14 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
 
     @property
     def members(self) -> list[Member]:
-        """:class:`list`\\[:class:`Member`]: Returns all members that can see this channel."""
+        r""":class:`list`\[:class:`Member`]: Returns all members that can see this channel."""
         if isinstance(self.guild, Object):
             return []
         return [m for m in self.guild.members if self.permissions_for(m).view_channel]
 
     @property
     def threads(self) -> list[Thread]:
-        """:class:`list`\\[:class:`Thread`]: Returns all the threads that you can see."""
+        r""":class:`list`\[:class:`Thread`]: Returns all the threads that you can see."""
         if isinstance(self.guild, Object):
             return []
         return [thread for thread in self.guild._threads.values() if thread.parent_id == self.id]
@@ -3475,7 +3475,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
 
     @property
     def available_tags(self) -> list[ForumTag]:
-        """:class:`list`\\[:class:`ForumTag`]: The available tags for threads in this channel.
+        r""":class:`list`\[:class:`ForumTag`]: The available tags for threads in this channel.
 
         To create/edit/delete tags, use :func:`edit`.
 
@@ -3615,7 +3615,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         components: MessageComponents = MISSING,
         reason: Optional[str] = None,
     ) -> ThreadWithMessage:
-        """|coro|
+        r"""|coro|
 
         Creates a thread (with an initial message) in this channel.
 
@@ -3647,7 +3647,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
             If set to :data:`None` or not provided, slowmode is inherited from the parent's
             :attr:`default_thread_slowmode_delay`.
-        applied_tags: :class:`~collections.abc.Sequence`\\[:class:`abc.Snowflake`]
+        applied_tags: :class:`~collections.abc.Sequence`\[:class:`abc.Snowflake`]
             The tags to apply to the new thread. Maximum of 5.
 
             .. versionadded:: 2.6
@@ -3657,7 +3657,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         embed: :class:`.Embed`
             The rich embed for the content to send. This cannot be mixed with the
             ``embeds`` parameter.
-        embeds: :class:`list`\\[:class:`.Embed`]
+        embeds: :class:`list`\[:class:`.Embed`]
             A list of embeds to send with the content. Must be a maximum of 10.
             This cannot be mixed with the ``embed`` parameter.
         suppress_embeds: :class:`bool`
@@ -3675,10 +3675,10 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
 
         file: :class:`~disnake.File`
             The file to upload. This cannot be mixed with the ``files`` parameter.
-        files: :class:`list`\\[:class:`~disnake.File`]
+        files: :class:`list`\[:class:`~disnake.File`]
             A list of files to upload. Must be a maximum of 10.
             This cannot be mixed with the ``file`` parameter.
-        stickers: :class:`~collections.abc.Sequence`\\[:class:`.GuildSticker` | :class:`.StandardSticker` | :class:`.StickerItem`]
+        stickers: :class:`~collections.abc.Sequence`\[:class:`.GuildSticker` | :class:`.StandardSticker` | :class:`.StickerItem`]
             A list of stickers to upload. Must be a maximum of 3.
         allowed_mentions: :class:`.AllowedMentions`
             Controls the mentions being processed in this message. If this is
@@ -3817,7 +3817,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         )
 
     async def webhooks(self) -> list[Webhook]:
-        """|coro|
+        r"""|coro|
 
         Retrieves the list of webhooks this channel has.
 
@@ -3833,7 +3833,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
 
         Returns
         -------
-        :class:`list`\\[:class:`Webhook`]
+        :class:`list`\[:class:`Webhook`]
             The list of webhooks this channel has.
         """
         from .webhook import Webhook
@@ -4092,7 +4092,7 @@ class ForumChannel(ThreadOnlyGuildChannel):
         reason: Optional[str] = None,
         **kwargs: Never,
     ) -> Optional[ForumChannel]:
-        """|coro|
+        r"""|coro|
 
         Edits the channel.
 
@@ -4130,7 +4130,7 @@ class ForumChannel(ThreadOnlyGuildChannel):
 
             .. versionadded:: 2.6
 
-        overwrites: :class:`~collections.abc.Mapping`\\[:class:`~.Member` | :class:`~.Role`, :class:`PermissionOverwrite`]
+        overwrites: :class:`~collections.abc.Mapping`\[:class:`~.Member` | :class:`~.Role`, :class:`PermissionOverwrite`]
             A :class:`Mapping` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply to the channel.
         default_auto_archive_duration: :class:`int` | :class:`ThreadArchiveDuration` | :data:`None`
@@ -4147,8 +4147,8 @@ class ForumChannel(ThreadOnlyGuildChannel):
 
             .. versionadded:: 2.6
 
-        available_tags: :class:`~collections.abc.Sequence`\\[:class:`ForumTag`]
-            The new :class:`ForumTag`\\s available for threads in this channel.
+        available_tags: :class:`~collections.abc.Sequence`\[:class:`ForumTag`]
+            The new :class:`ForumTag`\s available for threads in this channel.
             Can be used to create new tags and edit/reorder/delete existing tags.
             Maximum of 20.
 
@@ -4240,7 +4240,7 @@ class ForumChannel(ThreadOnlyGuildChannel):
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
         reason: Optional[str] = None,
     ) -> ForumChannel:
-        """|coro|
+        r"""|coro|
 
         Clones this channel. This creates a channel with the same properties
         as this channel.
@@ -4279,7 +4279,7 @@ class ForumChannel(ThreadOnlyGuildChannel):
             The default thread slowmode delay of the new channel. If not provided, defaults to this channel's default thread slowmode delay.
         default_auto_archive_duration: :class:`int` | :class:`ThreadArchiveDuration` | :data:`None`
             The default auto archive duration of the new channel. If not provided, defaults to this channel's default auto archive duration.
-        available_tags: :class:`~collections.abc.Sequence`\\[:class:`ForumTag`]
+        available_tags: :class:`~collections.abc.Sequence`\[:class:`ForumTag`]
             The applicable tags of the new channel. If not provided, defaults to this channel's available tags.
         default_reaction: :class:`str` | :class:`Emoji` | :class:`PartialEmoji` | :data:`None`
             The default reaction of the new channel. If not provided, defaults to this channel's default reaction.
@@ -4287,7 +4287,7 @@ class ForumChannel(ThreadOnlyGuildChannel):
             The default sort order of the new channel. If not provided, defaults to this channel's default sort order.
         default_layout: :class:`ThreadLayout`
             The default layout of threads in the new channel. If not provided, defaults to this channel's default layout.
-        overwrites: :class:`~collections.abc.Mapping`\\[:class:`~.Member` | :class:`~.Role`, :class:`PermissionOverwrite`]
+        overwrites: :class:`~collections.abc.Mapping`\[:class:`~.Member` | :class:`~.Role`, :class:`PermissionOverwrite`]
             A :class:`Mapping` of target (either a role or a member) to :class:`PermissionOverwrite`
             to apply to the channel. If not provided, defaults to this channel's overwrites.
         reason: :class:`str` | :data:`None`
@@ -4518,7 +4518,7 @@ class MediaChannel(ThreadOnlyGuildChannel):
         reason: Optional[str] = None,
         **kwargs: Never,
     ) -> Optional[MediaChannel]:
-        """|coro|
+        r"""|coro|
 
         Edits the channel.
 
@@ -4550,7 +4550,7 @@ class MediaChannel(ThreadOnlyGuildChannel):
             in newly created threads in this channel, in seconds.
             This does not apply retroactively to existing threads.
             A value of ``0`` or :data:`None` disables slowmode. The maximum value possible is ``21600``.
-        overwrites: :class:`~collections.abc.Mapping`\\[:class:`~.Member` | :class:`~.Role`, :class:`PermissionOverwrite`]
+        overwrites: :class:`~collections.abc.Mapping`\[:class:`~.Member` | :class:`~.Role`, :class:`PermissionOverwrite`]
             A :class:`Mapping` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply to the channel.
         default_auto_archive_duration: :class:`int` | :class:`ThreadArchiveDuration` | :data:`None`
@@ -4561,8 +4561,8 @@ class MediaChannel(ThreadOnlyGuildChannel):
             If parameter ``require_tag`` is provided, that will override the setting of :attr:`ChannelFlags.require_tag`.
         require_tag: :class:`bool`
             Whether all newly created threads are required to have a tag.
-        available_tags: :class:`~collections.abc.Sequence`\\[:class:`ForumTag`]
-            The new :class:`ForumTag`\\s available for threads in this channel.
+        available_tags: :class:`~collections.abc.Sequence`\[:class:`ForumTag`]
+            The new :class:`ForumTag`\s available for threads in this channel.
             Can be used to create new tags and edit/reorder/delete existing tags.
             Maximum of 20.
 
@@ -4638,7 +4638,7 @@ class MediaChannel(ThreadOnlyGuildChannel):
         overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
         reason: Optional[str] = None,
     ) -> MediaChannel:
-        """|coro|
+        r"""|coro|
 
         Clones this channel. This creates a channel with the same properties
         as this channel.
@@ -4668,13 +4668,13 @@ class MediaChannel(ThreadOnlyGuildChannel):
             The default thread slowmode delay of the new channel. If not provided, defaults to this channel's default thread slowmode delay.
         default_auto_archive_duration: :class:`int` | :class:`ThreadArchiveDuration` | :data:`None`
             The default auto archive duration of the new channel. If not provided, defaults to this channel's default auto archive duration.
-        available_tags: :class:`~collections.abc.Sequence`\\[:class:`ForumTag`]
+        available_tags: :class:`~collections.abc.Sequence`\[:class:`ForumTag`]
             The applicable tags of the new channel. If not provided, defaults to this channel's available tags.
         default_reaction: :class:`str` | :class:`Emoji` | :class:`PartialEmoji` | :data:`None`
             The default reaction of the new channel. If not provided, defaults to this channel's default reaction.
         default_sort_order: :class:`ThreadSortOrder` | :data:`None`
             The default sort order of the new channel. If not provided, defaults to this channel's default sort order.
-        overwrites: :class:`~collections.abc.Mapping`\\[:class:`~.Member` | :class:`~.Role`, :class:`PermissionOverwrite`]
+        overwrites: :class:`~collections.abc.Mapping`\[:class:`~.Member` | :class:`~.Role`, :class:`PermissionOverwrite`]
             A :class:`Mapping` of target (either a role or a member) to :class:`PermissionOverwrite`
             to apply to the channel. If not provided, defaults to this channel's overwrites.
         reason: :class:`str` | :data:`None`
@@ -4910,7 +4910,7 @@ class DMChannel(disnake.abc.Messageable, Hashable):
 
 
 class GroupChannel(disnake.abc.Messageable, Hashable):
-    """Represents a Discord group channel.
+    r"""Represents a Discord group channel.
 
     .. collapse:: operations
 
@@ -4932,7 +4932,7 @@ class GroupChannel(disnake.abc.Messageable, Hashable):
 
     Attributes
     ----------
-    recipients: :class:`list`\\[:class:`User`]
+    recipients: :class:`list`\[:class:`User`]
         The users you are participating with in the group channel.
         If this channel is received through the gateway, the recipient information
         may not be always available.

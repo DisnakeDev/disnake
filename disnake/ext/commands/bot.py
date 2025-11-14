@@ -49,7 +49,7 @@ MISSING: Any = disnake.utils.MISSING
 
 
 class Bot(BotBase, InteractionBotBase, disnake.Client):
-    """Represents a discord bot.
+    r"""Represents a discord bot.
 
     This class is a subclass of :class:`disnake.Client` and as a result
     anything that you can do with a :class:`disnake.Client` you can do with
@@ -60,7 +60,7 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
 
     Parameters
     ----------
-    test_guilds: :class:`list`\\[:class:`int`]
+    test_guilds: :class:`list`\[:class:`int`]
         The list of IDs of the guilds where you're going to test your application commands.
         Defaults to :data:`None`, which means global registration of commands across
         all guilds.
@@ -101,7 +101,7 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
         .. versionadded:: 2.1
 
         .. versionchanged:: 2.4
-            Changes the log level of corresponding messages from ``DEBUG`` to ``INFO`` or ``print``\\s them,
+            Changes the log level of corresponding messages from ``DEBUG`` to ``INFO`` or ``print``\s them,
             instead of controlling whether they are enabled at all.
 
         .. deprecated:: 2.7
@@ -209,7 +209,7 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
 
         This can be provided as a parameter at creation.
 
-    owner_ids: :class:`~collections.abc.Collection`\\[:class:`int`] | :data:`None`
+    owner_ids: :class:`~collections.abc.Collection`\[:class:`int`] | :data:`None`
         The IDs of the users that own the bot. This is similar to :attr:`owner_id`.
         If this is not set and the application is team based, then it is
         fetched automatically using :meth:`~.Bot.application_info` (taking team roles into account).
@@ -347,7 +347,7 @@ class AutoShardedBot(BotBase, InteractionBotBase, disnake.AutoShardedClient):
 
 
 class InteractionBot(InteractionBotBase, disnake.Client):
-    """Represents a discord bot for application commands only.
+    r"""Represents a discord bot for application commands only.
 
     This class is a subclass of :class:`disnake.Client` and as a result
     anything that you can do with a :class:`disnake.Client` you can do with
@@ -358,7 +358,7 @@ class InteractionBot(InteractionBotBase, disnake.Client):
 
     Parameters
     ----------
-    test_guilds: :class:`list`\\[:class:`int`]
+    test_guilds: :class:`list`\[:class:`int`]
         The list of IDs of the guilds where you're going to test your application commands.
         Defaults to :data:`None`, which means global registration of commands across
         all guilds.
@@ -399,7 +399,7 @@ class InteractionBot(InteractionBotBase, disnake.Client):
         .. versionadded:: 2.1
 
         .. versionchanged:: 2.4
-            Changes the log level of corresponding messages from ``DEBUG`` to ``INFO`` or ``print``\\s them,
+            Changes the log level of corresponding messages from ``DEBUG`` to ``INFO`` or ``print``\s them,
             instead of controlling whether they are enabled at all.
 
         .. deprecated:: 2.7
@@ -452,7 +452,7 @@ class InteractionBot(InteractionBotBase, disnake.Client):
 
         This can be provided as a parameter at creation.
 
-    owner_ids: :class:`~collections.abc.Collection`\\[:class:`int`] | :data:`None`
+    owner_ids: :class:`~collections.abc.Collection`\[:class:`int`] | :data:`None`
         The IDs of the users that own the bot. This is similar to :attr:`owner_id`.
         If this is not set and the application is team based, then it is
         fetched automatically using :meth:`~.Bot.application_info` (taking team roles into account).

@@ -178,7 +178,7 @@ class Paginator:
 
     @property
     def pages(self) -> list[str]:
-        """:class:`list`\\[:class:`str`]: Returns the rendered list of pages."""
+        r""":class:`list`\[:class:`str`]: Returns the rendered list of pages."""
         # we have more than just the prefix in our current page
         if len(self._current_page) > (0 if self.prefix is None else 1):
             self.close_page()
@@ -267,7 +267,7 @@ class _HelpCommandImpl(Command[Optional[CogT], Any, None]):
 
 
 class HelpCommand:
-    """The base implementation for help command formatting.
+    r"""The base implementation for help command formatting.
 
     .. note::
 
@@ -282,7 +282,7 @@ class HelpCommand:
     ----------
     context: :class:`Context` | :data:`None`
         The context that invoked this help formatter. This is generally set after
-        the help command assigned, :func:`command_callback`\\, has been called.
+        the help command assigned, :func:`command_callback`\, has been called.
     show_hidden: :class:`bool`
         Specifies if hidden commands should be shown in the output.
         Defaults to ``False``.
@@ -548,7 +548,7 @@ class HelpCommand:
         sort: bool = False,
         key: Optional[Callable[[Command[Any, ..., Any]], Any]] = None,
     ) -> list[Command[Any, ..., Any]]:
-        """|coro|
+        r"""|coro|
 
         Returns a filtered list of commands and optionally sorts them.
 
@@ -557,18 +557,18 @@ class HelpCommand:
 
         Parameters
         ----------
-        commands: :class:`~collections.abc.Iterable`\\[:class:`Command`]
+        commands: :class:`~collections.abc.Iterable`\[:class:`Command`]
             An iterable of commands that are getting filtered.
         sort: :class:`bool`
             Whether to sort the result.
-        key: :class:`~collections.abc.Callable`\\[[:class:`Command`], :data:`~typing.Any`] | :data:`None`
+        key: :class:`~collections.abc.Callable`\[[:class:`Command`], :data:`~typing.Any`] | :data:`None`
             An optional key function to pass to :func:`py:sorted` that
             takes a :class:`Command` as its sole parameter. If ``sort`` is
             passed as ``True`` then this will default to using the command name.
 
         Returns
         -------
-        :class:`list`\\[:class:`Command`]
+        :class:`list`\[:class:`Command`]
             A list of commands that passed the filter.
         """
         # set `key` iff `sort` is true
@@ -606,11 +606,11 @@ class HelpCommand:
         return ret
 
     def get_max_size(self, commands: Sequence[Command[Any, ..., Any]]) -> int:
-        """Returns the largest name length of the specified command list.
+        r"""Returns the largest name length of the specified command list.
 
         Parameters
         ----------
-        commands: :class:`~collections.abc.Sequence`\\[:class:`Command`]
+        commands: :class:`~collections.abc.Sequence`\[:class:`Command`]
             A sequence of commands to check for the largest size.
 
         Returns
@@ -683,7 +683,7 @@ class HelpCommand:
     async def send_bot_help(
         self, mapping: Mapping[Optional[Cog], list[Command[Any, ..., Any]]]
     ) -> None:
-        """|coro|
+        r"""|coro|
 
         Handles the implementation of the bot command page in the help command.
         This function is called when the help command is called with no arguments.
@@ -704,7 +704,7 @@ class HelpCommand:
 
         Parameters
         ----------
-        mapping: :class:`~collections.abc.Mapping`\\[:class:`Cog` | :data:`None`, :class:`list`\\[:class:`Command`]]
+        mapping: :class:`~collections.abc.Mapping`\[:class:`Cog` | :data:`None`, :class:`list`\[:class:`Command`]]
             A mapping of cogs to commands that have been requested by the user for help.
             The key of the mapping is the :class:`~.commands.Cog` that the command belongs to, or
             :data:`None` if there isn't one, and the value is a list of commands that belongs to that cog.
@@ -967,7 +967,7 @@ class DefaultHelpCommand(HelpCommand):
         heading: str,
         max_size: Optional[int] = None,
     ) -> None:
-        """Indents a list of commands after the specified heading.
+        r"""Indents a list of commands after the specified heading.
 
         The formatting is added to the :attr:`paginator`.
 
@@ -978,7 +978,7 @@ class DefaultHelpCommand(HelpCommand):
 
         Parameters
         ----------
-        commands: :class:`~collections.abc.Sequence`\\[:class:`Command`]
+        commands: :class:`~collections.abc.Sequence`\[:class:`Command`]
             A list of commands to indent for output.
         heading: :class:`str`
             The heading to add to the output. This is only added
@@ -1196,7 +1196,7 @@ class MinimalHelpCommand(HelpCommand):
     def add_bot_commands_formatting(
         self, commands: Sequence[Command[Any, ..., Any]], heading: str
     ) -> None:
-        """Adds the minified bot heading with commands to the output.
+        r"""Adds the minified bot heading with commands to the output.
 
         The formatting should be added to the :attr:`paginator`.
 
@@ -1205,7 +1205,7 @@ class MinimalHelpCommand(HelpCommand):
 
         Parameters
         ----------
-        commands: :class:`~collections.abc.Sequence`\\[:class:`Command`]
+        commands: :class:`~collections.abc.Sequence`\[:class:`Command`]
             A list of commands that belong to the heading.
         heading: :class:`str`
             The heading to add to the line.
@@ -1235,7 +1235,7 @@ class MinimalHelpCommand(HelpCommand):
         )
 
     def add_aliases_formatting(self, aliases: Sequence[str]) -> None:
-        """Adds the formatting information on a command's aliases.
+        r"""Adds the formatting information on a command's aliases.
 
         The formatting should be added to the :attr:`paginator`.
 
@@ -1246,7 +1246,7 @@ class MinimalHelpCommand(HelpCommand):
 
         Parameters
         ----------
-        aliases: :class:`~collections.abc.Sequence`\\[:class:`str`]
+        aliases: :class:`~collections.abc.Sequence`\[:class:`str`]
             A list of aliases to format.
         """
         self.paginator.add_line(f"**{self.aliases_heading}** {', '.join(aliases)}", empty=True)

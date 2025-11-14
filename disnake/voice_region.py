@@ -12,19 +12,19 @@ __all__ = ("VoiceRegion",)
 
 
 class VoiceRegion:
-    """Represents a Discord voice region.
+    r"""Represents a Discord voice region.
 
     .. collapse:: operations
 
         .. describe:: x == y
 
-            Checks if two :class:`VoiceRegion`\\s are equal.
+            Checks if two :class:`VoiceRegion`\s are equal.
 
             .. versionadded:: 2.9
 
         .. describe:: x != y
 
-            Checks if two :class:`VoiceRegion`\\s are not equal.
+            Checks if two :class:`VoiceRegion`\s are not equal.
 
             .. versionadded:: 2.9
 

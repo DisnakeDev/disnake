@@ -505,7 +505,7 @@ class GuildChannel(ABC):
 
     @property
     def changed_roles(self) -> list[Role]:
-        """:class:`list`\\[:class:`.Role`]: Returns a list of roles that have been overridden from
+        r""":class:`list`\[:class:`.Role`]: Returns a list of roles that have been overridden from
         their default values in the :attr:`.Guild.roles` attribute.
         """
         ret: list[Role] = []
@@ -562,7 +562,7 @@ class GuildChannel(ABC):
 
     @property
     def overwrites(self) -> dict[Union[Role, Member], PermissionOverwrite]:
-        """Returns all of the channel's overwrites.
+        r"""Returns all of the channel's overwrites.
 
         This is returned as a dictionary where the key contains the target which
         can be either a :class:`~disnake.Role` or a :class:`~disnake.Member` and the value is the
@@ -570,7 +570,7 @@ class GuildChannel(ABC):
 
         Returns
         -------
-        :class:`dict`\\[:class:`~disnake.Role` | :class:`~disnake.Member`, :class:`~disnake.PermissionOverwrite`]
+        :class:`dict`\[:class:`~disnake.Role` | :class:`~disnake.Member`, :class:`~disnake.PermissionOverwrite`]
             The channel's permission overwrites.
         """
         ret = {}
@@ -1387,7 +1387,7 @@ class GuildChannel(ABC):
         return invite
 
     async def invites(self) -> list[Invite]:
-        """|coro|
+        r"""|coro|
 
         Returns a list of all active instant invites from this channel.
 
@@ -1402,7 +1402,7 @@ class GuildChannel(ABC):
 
         Returns
         -------
-        :class:`list`\\[:class:`.Invite`]
+        :class:`list`\[:class:`.Invite`]
             The list of invites that are currently active.
         """
         state = self._state
@@ -1539,7 +1539,7 @@ class Messageable:
         components: Optional[MessageComponents] = None,
         poll: Optional[Poll] = None,
     ):
-        """|coro|
+        r"""|coro|
 
         Sends a message to the destination with the content given.
 
@@ -1570,7 +1570,7 @@ class Messageable:
         embed: :class:`.Embed`
             The rich embed for the content to send. This cannot be mixed with the
             ``embeds`` parameter.
-        embeds: :class:`list`\\[:class:`.Embed`]
+        embeds: :class:`list`\[:class:`.Embed`]
             A list of embeds to send with the content. Must be a maximum of 10.
             This cannot be mixed with the ``embed`` parameter.
 
@@ -1578,10 +1578,10 @@ class Messageable:
 
         file: :class:`~disnake.File`
             The file to upload. This cannot be mixed with the ``files`` parameter.
-        files: :class:`list`\\[:class:`~disnake.File`]
+        files: :class:`list`\[:class:`~disnake.File`]
             A list of files to upload. Must be a maximum of 10.
             This cannot be mixed with the ``file`` parameter.
-        stickers: :class:`~collections.abc.Sequence`\\[:class:`.GuildSticker` | :class:`.StandardSticker` | :class:`.StickerItem`]
+        stickers: :class:`~collections.abc.Sequence`\[:class:`.GuildSticker` | :class:`.StandardSticker` | :class:`.StickerItem`]
             A list of stickers to upload. Must be a maximum of 3.
 
             .. versionadded:: 2.0
@@ -1882,7 +1882,7 @@ class Messageable:
     def pins(
         self, *, limit: Optional[int] = 50, before: Optional[SnowflakeTime] = None
     ) -> ChannelPinsIterator:
-        """Returns an :class:`.AsyncIterator` that enables receiving the destination's pinned messages.
+        r"""Returns an :class:`.AsyncIterator` that enables receiving the destination's pinned messages.
 
         You must have the :attr:`.Permissions.read_message_history` and :attr:`.Permissions.view_channel` permissions to use this.
 
@@ -1894,7 +1894,7 @@ class Messageable:
 
         .. versionchanged:: 2.11
             Now returns an :class:`.AsyncIterator` to support changes in Discord's API.
-            ``await``\\ing the result of this method remains supported, but only returns the
+            ``await``\ing the result of this method remains supported, but only returns the
             last 50 pins and is deprecated in favor of ``async for msg in channel.pins()``.
 
         Examples
@@ -2043,7 +2043,7 @@ class Connectable(Protocol):
         reconnect: bool = True,
         cls: Callable[[Client, Connectable], VoiceProtocolT] = VoiceClient,
     ) -> VoiceProtocolT:
-        """|coro|
+        r"""|coro|
 
         Connects to voice and creates a :class:`VoiceClient` to establish
         your connection to the voice server.
@@ -2058,7 +2058,7 @@ class Connectable(Protocol):
             Whether the bot should automatically attempt
             a reconnect if a part of the handshake fails
             or the gateway goes down.
-        cls: :class:`type`\\[:class:`VoiceProtocol`]
+        cls: :class:`type`\[:class:`VoiceProtocol`]
             A type that subclasses :class:`VoiceProtocol` to connect with.
             Defaults to :class:`VoiceClient`.
 

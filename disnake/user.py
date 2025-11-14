@@ -639,7 +639,7 @@ class User(BaseUser, disnake.abc.Messageable):
 
     @property
     def mutual_guilds(self) -> list[Guild]:
-        """:class:`list`\\[:class:`Guild`]: The guilds that the user shares with the client.
+        r""":class:`list`\[:class:`Guild`]: The guilds that the user shares with the client.
 
         .. note::
 

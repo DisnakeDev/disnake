@@ -33,9 +33,9 @@ __all__ = ("Container",)
 
 
 class Container(UIComponent):
-    """Represents a UI container.
+    r"""Represents a UI container.
 
-    This is visually similar to :class:`.Embed`\\s, and contains other components.
+    This is visually similar to :class:`.Embed`\s, and contains other components.
 
     .. versionadded:: 2.11
 
@@ -54,7 +54,7 @@ class Container(UIComponent):
 
     Attributes
     ----------
-    children: :class:`list`\\[:class:`~.ui.ActionRow` | :class:`~.ui.Section` | :class:`~.ui.TextDisplay` | :class:`~.ui.MediaGallery` | :class:`~.ui.File` | :class:`~.ui.Separator`]
+    children: :class:`list`\[:class:`~.ui.ActionRow` | :class:`~.ui.Section` | :class:`~.ui.TextDisplay` | :class:`~.ui.MediaGallery` | :class:`~.ui.File` | :class:`~.ui.Separator`]
         The list of child components in this container.
     accent_colour: :class:`.Colour` | :data:`None`
         The accent colour of the container.

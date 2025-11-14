@@ -814,7 +814,7 @@ class WebhookMessage(Message):
         flags: MessageFlags = MISSING,
         allowed_mentions: Optional[AllowedMentions] = None,
     ) -> WebhookMessage:
-        """|coro|
+        r"""|coro|
 
         Edits the message.
 
@@ -836,7 +836,7 @@ class WebhookMessage(Message):
         embed: :class:`Embed` | :data:`None`
             The new embed to replace the original with. This cannot be mixed with the ``embeds`` parameter.
             Could be :data:`None` to remove the embed.
-        embeds: :class:`list`\\[:class:`Embed`]
+        embeds: :class:`list`\[:class:`Embed`]
             The new embeds to replace the original with. Must be a maximum of 10.
             This cannot be mixed with the ``embed`` parameter.
             To remove all embeds ``[]`` should be passed.
@@ -847,14 +847,14 @@ class WebhookMessage(Message):
 
             .. versionadded:: 2.0
 
-        files: :class:`list`\\[:class:`File`]
+        files: :class:`list`\[:class:`File`]
             A list of files to upload. This cannot be mixed with the ``file`` parameter.
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
 
             .. versionadded:: 2.0
 
-        attachments: :class:`list`\\[:class:`Attachment`] | :data:`None`
+        attachments: :class:`list`\[:class:`Attachment`] | :data:`None`
             A list of attachments to keep in the message.
             If ``[]`` or :data:`None` is passed then all existing attachments are removed.
             Keeps existing attachments if not provided.
@@ -1607,7 +1607,7 @@ class Webhook(BaseWebhook):
         delete_after: float = MISSING,
         poll: Poll = MISSING,
     ) -> Optional[WebhookMessage]:
-        """|coro|
+        r"""|coro|
 
         Sends a message using the webhook.
 
@@ -1650,12 +1650,12 @@ class Webhook(BaseWebhook):
 
         file: :class:`File`
             The file to upload. This cannot be mixed with the ``files`` parameter.
-        files: :class:`list`\\[:class:`File`]
+        files: :class:`list`\[:class:`File`]
             A list of files to upload. Must be a maximum of 10.
             This cannot be mixed with the ``file`` parameter.
         embed: :class:`Embed`
             The rich embed for the content to send. This cannot be mixed with the ``embeds`` parameter.
-        embeds: :class:`list`\\[:class:`Embed`]
+        embeds: :class:`list`\[:class:`Embed`]
             A list of embeds to send with the content. Must be a maximum of 10.
             This cannot be mixed with the ``embed`` parameter.
         allowed_mentions: :class:`AllowedMentions`
@@ -1704,7 +1704,7 @@ class Webhook(BaseWebhook):
                 representing the created thread, may be a :class:`PartialMessageable`.
 
             .. versionadded:: 2.6
-        applied_tags: :class:`~collections.abc.Sequence`\\[:class:`abc.Snowflake`]
+        applied_tags: :class:`~collections.abc.Sequence`\[:class:`abc.Snowflake`]
             If in a forum/media channel and creating a new thread (see ``thread_name`` above),
             the tags to apply to the new thread. Maximum of 5.
 
@@ -1921,7 +1921,7 @@ class Webhook(BaseWebhook):
         allowed_mentions: Optional[AllowedMentions] = None,
         thread: Optional[Snowflake] = None,
     ) -> WebhookMessage:
-        """|coro|
+        r"""|coro|
 
         Edits a message owned by this webhook.
 
@@ -1952,7 +1952,7 @@ class Webhook(BaseWebhook):
             The new embed to replace the original with. This cannot be mixed with the
             ``embeds`` parameter.
             Could be :data:`None` to remove the embed.
-        embeds: :class:`list`\\[:class:`Embed`]
+        embeds: :class:`list`\[:class:`Embed`]
             The new embeds to replace the original with. Must be a maximum of 10.
             This cannot be mixed with the ``embed`` parameter.
             To remove all embeds ``[]`` should be passed.
@@ -1963,14 +1963,14 @@ class Webhook(BaseWebhook):
 
             .. versionadded:: 2.0
 
-        files: :class:`list`\\[:class:`File`]
+        files: :class:`list`\[:class:`File`]
             A list of files to upload. This cannot be mixed with the ``file`` parameter.
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
 
             .. versionadded:: 2.0
 
-        attachments: :class:`list`\\[:class:`Attachment`] | :data:`None`
+        attachments: :class:`list`\[:class:`Attachment`] | :data:`None`
             A list of attachments to keep in the message.
             If ``[]`` or :data:`None` is passed then all existing attachments are removed.
             Keeps existing attachments if not provided.

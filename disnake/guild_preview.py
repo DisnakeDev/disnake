@@ -16,7 +16,7 @@ __all__ = ("GuildPreview",)
 
 
 class GuildPreview:
-    """Represents a :class:`.Guild` preview object.
+    r"""Represents a :class:`.Guild` preview object.
 
     .. versionadded:: 2.5
 
@@ -24,15 +24,15 @@ class GuildPreview:
     ----------
     name: :class:`str`
         The guild's name.
-    emojis: :class:`tuple`\\[:class:`Emoji`, ...]
+    emojis: :class:`tuple`\[:class:`Emoji`, ...]
         All emojis that the guild owns.
-    stickers: :class:`tuple`\\[:class:`GuildSticker`, ...]
+    stickers: :class:`tuple`\[:class:`GuildSticker`, ...]
         All stickers that the guild owns.
     id: :class:`int`
         The ID of the guild this preview represents.
     description: :class:`str` | :data:`None`
         The guild's description.
-    features: :class:`list`\\[:class:`str`]
+    features: :class:`list`\[:class:`str`]
         A list of features that the guild has. The features that a guild can have are
         subject to arbitrary change by Discord.
 

@@ -260,7 +260,7 @@ class WidgetSettings:
 
 
 class Widget:
-    """Represents a :class:`Guild` widget.
+    r"""Represents a :class:`Guild` widget.
 
     .. collapse:: operations
 
@@ -282,9 +282,9 @@ class Widget:
         The guild's ID.
     name: :class:`str`
         The guild's name.
-    channels: :class:`list`\\[:class:`WidgetChannel`]
+    channels: :class:`list`\[:class:`WidgetChannel`]
         The publicly accessible voice and stage channels in the guild.
-    members: :class:`list`\\[:class:`WidgetMember`]
+    members: :class:`list`\[:class:`WidgetMember`]
         The online members in the server. Offline members
         do not appear in the widget.
 
