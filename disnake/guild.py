@@ -19,12 +19,12 @@ from typing import (
     overload,
 )
 
-from . import abc, utils
-from .app_commands import GuildApplicationCommandPermissions
-from .asset import Asset
-from .automod import AutoModAction, AutoModRule
-from .bans import BanEntry, BulkBanResult
-from .channel import (
+from disnake import abc, utils
+from disnake.app_commands import GuildApplicationCommandPermissions
+from disnake.asset import Asset
+from disnake.automod import AutoModAction, AutoModRule
+from disnake.bans import BanEntry, BulkBanResult
+from disnake.channel import (
     CategoryChannel,
     ForumChannel,
     MediaChannel,
@@ -34,9 +34,9 @@ from .channel import (
     _guild_channel_factory,
     _threaded_guild_channel_factory,
 )
-from .colour import Colour
-from .emoji import Emoji
-from .enums import (
+from disnake.colour import Colour
+from disnake.emoji import Emoji
+from disnake.enums import (
     AuditLogAction,
     AutoModEventType,
     AutoModTriggerType,
@@ -55,28 +55,28 @@ from .enums import (
     try_enum,
     try_enum_to_int,
 )
-from .errors import ClientException, HTTPException, InvalidData
-from .file import File
-from .flags import SystemChannelFlags
-from .guild_scheduled_event import GuildScheduledEvent, GuildScheduledEventMetadata
-from .integrations import Integration, _integration_factory
-from .invite import Invite
-from .iterators import AuditLogIterator, BanIterator, MemberIterator
-from .member import Member, VoiceState
-from .mixins import Hashable
-from .object import Object
-from .onboarding import Onboarding
-from .partial_emoji import PartialEmoji
-from .permissions import PermissionOverwrite
-from .role import Role
-from .soundboard import GuildSoundboardSound
-from .stage_instance import StageInstance
-from .sticker import GuildSticker
-from .threads import Thread, ThreadMember
-from .user import User
-from .voice_region import VoiceRegion
-from .welcome_screen import WelcomeScreen, WelcomeScreenChannel
-from .widget import Widget, WidgetSettings
+from disnake.errors import ClientException, HTTPException, InvalidData
+from disnake.file import File
+from disnake.flags import SystemChannelFlags
+from disnake.guild_scheduled_event import GuildScheduledEvent, GuildScheduledEventMetadata
+from disnake.integrations import Integration, _integration_factory
+from disnake.invite import Invite
+from disnake.iterators import AuditLogIterator, BanIterator, MemberIterator
+from disnake.member import Member, VoiceState
+from disnake.mixins import Hashable
+from disnake.object import Object
+from disnake.onboarding import Onboarding
+from disnake.partial_emoji import PartialEmoji
+from disnake.permissions import PermissionOverwrite
+from disnake.role import Role
+from disnake.soundboard import GuildSoundboardSound
+from disnake.stage_instance import StageInstance
+from disnake.sticker import GuildSticker
+from disnake.threads import Thread, ThreadMember
+from disnake.user import User
+from disnake.voice_region import VoiceRegion
+from disnake.welcome_screen import WelcomeScreen, WelcomeScreenChannel
+from disnake.widget import Widget, WidgetSettings
 
 __all__ = (
     "IncidentsData",
@@ -88,19 +88,19 @@ VocalGuildChannel = Union[VoiceChannel, StageChannel]
 MISSING = utils.MISSING
 
 if TYPE_CHECKING:
-    from .abc import Snowflake, SnowflakeTime
-    from .app_commands import APIApplicationCommand
-    from .asset import AssetBytes
-    from .automod import AutoModTriggerMetadata
-    from .permissions import Permissions
-    from .state import ConnectionState
-    from .template import Template
-    from .threads import AnyThreadArchiveDuration, ForumTag
-    from .types.channel import (
+    from disnake.abc import Snowflake, SnowflakeTime
+    from disnake.app_commands import APIApplicationCommand
+    from disnake.asset import AssetBytes
+    from disnake.automod import AutoModTriggerMetadata
+    from disnake.permissions import Permissions
+    from disnake.state import ConnectionState
+    from disnake.template import Template
+    from disnake.threads import AnyThreadArchiveDuration, ForumTag
+    from disnake.types.channel import (
         GuildChannel as GuildChannelPayload,
         PermissionOverwrite as PermissionOverwritePayload,
     )
-    from .types.guild import (
+    from disnake.types.guild import (
         Ban as BanPayload,
         CreateGuildPlaceholderChannel,
         CreateGuildPlaceholderRole,
@@ -109,13 +109,13 @@ if TYPE_CHECKING:
         IncidentsData as IncidentsDataPayload,
         MFALevel,
     )
-    from .types.integration import Integration as IntegrationPayload, IntegrationType
-    from .types.role import CreateRole as CreateRolePayload
-    from .types.sticker import CreateGuildSticker as CreateStickerPayload
-    from .types.threads import Thread as ThreadPayload, ThreadArchiveDurationLiteral
-    from .types.voice import GuildVoiceState
-    from .voice_client import VoiceProtocol
-    from .webhook import Webhook
+    from disnake.types.integration import Integration as IntegrationPayload, IntegrationType
+    from disnake.types.role import CreateRole as CreateRolePayload
+    from disnake.types.sticker import CreateGuildSticker as CreateStickerPayload
+    from disnake.types.threads import Thread as ThreadPayload, ThreadArchiveDurationLiteral
+    from disnake.types.voice import GuildVoiceState
+    from disnake.voice_client import VoiceProtocol
+    from disnake.webhook import Webhook
 
     GuildMessageable = Union[TextChannel, Thread, VoiceChannel, StageChannel]
     GuildChannel = Union[
@@ -3265,7 +3265,7 @@ class Guild(Hashable):
         :class:`list`\\[:class:`Template`]
             The templates for this guild.
         """
-        from .template import Template
+        from disnake.template import Template
 
         data = await self._state.http.guild_templates(self.id)
         return [Template(data=d, state=self._state) for d in data]
@@ -3288,7 +3288,7 @@ class Guild(Hashable):
         :class:`list`\\[:class:`Webhook`]
             The webhooks for this guild.
         """
-        from .webhook import Webhook
+        from disnake.webhook import Webhook
 
         data = await self._state.http.guild_webhooks(self.id)
         return [Webhook.from_state(d, state=self._state) for d in data]
@@ -3399,7 +3399,7 @@ class Guild(Hashable):
         :class:`Template`
             The created template.
         """
-        from .template import Template
+        from disnake.template import Template
 
         payload: Any = {"name": name}
 

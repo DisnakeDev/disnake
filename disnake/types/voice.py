@@ -4,9 +4,9 @@ from typing import Literal, Optional, TypedDict
 
 from typing_extensions import NotRequired
 
-from .emoji import PartialEmoji
-from .member import MemberWithUser
-from .snowflake import Snowflake
+from disnake.types.emoji import PartialEmoji
+from disnake.types.member import MemberWithUser
+from disnake.types.snowflake import Snowflake
 
 SupportedModes = Literal[
     # "aead_aes256_gcm_rtpsize",  # supported in libsodium, but not exposed by pynacl

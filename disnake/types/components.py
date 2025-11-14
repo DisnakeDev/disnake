@@ -6,9 +6,9 @@ from typing import Literal, Optional, TypedDict, Union
 
 from typing_extensions import NotRequired, ReadOnly, Required, TypeAlias
 
-from .channel import ChannelType
-from .emoji import PartialEmoji
-from .snowflake import Snowflake
+from disnake.types.channel import ChannelType
+from disnake.types.emoji import PartialEmoji
+from disnake.types.snowflake import Snowflake
 
 ComponentType = Literal[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 17, 18, 19]
 ButtonStyle = Literal[1, 2, 3, 4, 5, 6]

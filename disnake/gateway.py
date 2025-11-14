@@ -27,17 +27,17 @@ from typing import (
 
 import aiohttp
 
-from . import utils
-from .activity import BaseActivity
-from .enums import SpeakingState
-from .errors import ConnectionClosed
+from disnake import utils
+from disnake.activity import BaseActivity
+from disnake.enums import SpeakingState
+from disnake.errors import ConnectionClosed
 
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from .client import Client
-    from .state import ConnectionState
-    from .types.gateway import (
+    from disnake.client import Client
+    from disnake.state import ConnectionState
+    from disnake.types.gateway import (
         GatewayPayload,
         HeartbeatCommand,
         IdentifyCommand,
@@ -54,8 +54,8 @@ if TYPE_CHECKING:
         VoiceSpeakingCommand,
         VoiceStateCommand,
     )
-    from .types.voice import SupportedModes
-    from .voice_client import VoiceClient
+    from disnake.types.voice import SupportedModes
+    from disnake.voice_client import VoiceClient
 
     T = TypeVar("T")
 

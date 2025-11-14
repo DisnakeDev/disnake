@@ -14,18 +14,18 @@ from typing import (
     overload,
 )
 
-from ...abc import Snowflake
-from ...components import SelectOption, StringSelectMenu
-from ...enums import ComponentType, SelectDefaultValueType
-from ...utils import MISSING
-from .base import BaseSelect, P, V_co, _create_decorator
+from disnake.abc import Snowflake
+from disnake.components import SelectOption, StringSelectMenu
+from disnake.enums import ComponentType, SelectDefaultValueType
+from disnake.ui.select.base import BaseSelect, P, V_co, _create_decorator
+from disnake.utils import MISSING
 
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from ...emoji import Emoji
-    from ...partial_emoji import PartialEmoji
-    from ..item import DecoratedItem, ItemCallbackType
+    from disnake.emoji import Emoji
+    from disnake.partial_emoji import PartialEmoji
+    from disnake.ui.item import DecoratedItem, ItemCallbackType
 
 
 __all__ = (

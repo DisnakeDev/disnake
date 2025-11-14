@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, SupportsInt, Union
 
-from . import utils
-from .mixins import Hashable
+from disnake import utils
+from disnake.mixins import Hashable
 
 if TYPE_CHECKING:
     import datetime

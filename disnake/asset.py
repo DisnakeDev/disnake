@@ -8,17 +8,17 @@ from typing import TYPE_CHECKING, Any, Literal, Optional, Union
 
 import yarl
 
-from . import utils
-from .errors import DiscordException
-from .file import File
+from disnake import utils
+from disnake.errors import DiscordException
+from disnake.file import File
 
 __all__ = ("Asset",)
 
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from .state import ConnectionState
-    from .webhook.async_ import BaseWebhook, _WebhookState
+    from disnake.state import ConnectionState
+    from disnake.webhook.async_ import BaseWebhook, _WebhookState
 
     ValidStaticFormatTypes = Literal["webp", "jpeg", "jpg", "png"]
     ValidAssetFormatTypes = Literal["webp", "jpeg", "jpg", "png", "gif"]

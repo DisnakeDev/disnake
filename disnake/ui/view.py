@@ -13,17 +13,17 @@ from functools import partial
 from itertools import groupby
 from typing import TYPE_CHECKING, Callable, ClassVar, Optional
 
-from ..components import (
+from disnake.components import (
     VALID_ACTION_ROW_MESSAGE_COMPONENT_TYPES,
     ActionRow as ActionRowComponent,
     ActionRowMessageComponent,
     Button as ButtonComponent,
     _component_factory,
 )
-from ..enums import try_enum_to_int
-from .action_row import _message_component_to_item, walk_components
-from .button import Button
-from .item import Item
+from disnake.enums import try_enum_to_int
+from disnake.ui.action_row import _message_component_to_item, walk_components
+from disnake.ui.button import Button
+from disnake.ui.item import Item
 
 __all__ = ("View",)
 
@@ -31,11 +31,14 @@ __all__ = ("View",)
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from ..interactions import MessageInteraction
-    from ..message import Message
-    from ..state import ConnectionState
-    from ..types.components import ActionRow as ActionRowPayload, Component as ComponentPayload
-    from .item import ItemCallbackType
+    from disnake.interactions import MessageInteraction
+    from disnake.message import Message
+    from disnake.state import ConnectionState
+    from disnake.types.components import (
+        ActionRow as ActionRowPayload,
+        Component as ComponentPayload,
+    )
+    from disnake.ui.item import ItemCallbackType
 
 
 _log = logging.getLogger(__name__)

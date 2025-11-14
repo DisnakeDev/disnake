@@ -21,17 +21,17 @@ from typing import (
 import disnake.abc
 import disnake.utils
 
-from .context import BotT, Context
-from .core import Command, Group
-from .errors import CommandError
+from disnake.ext.commands.context import BotT, Context
+from disnake.ext.commands.core import Command, Group
+from disnake.ext.commands.errors import CommandError
 
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from ._types import Check, FuncT, MaybeCoro
-    from .bot import AutoShardedBot, Bot
-    from .bot_base import BotBase
-    from .cog import Cog
+    from disnake.ext.commands._types import Check, FuncT, MaybeCoro
+    from disnake.ext.commands.bot import AutoShardedBot, Bot
+    from disnake.ext.commands.bot_base import BotBase
+    from disnake.ext.commands.cog import Cog
 
     # note: no InteractionBot
     AnyBot = Union[Bot, AutoShardedBot]

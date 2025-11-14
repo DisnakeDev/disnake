@@ -2,7 +2,7 @@
 
 from typing import Literal, TypedDict
 
-from .snowflake import Snowflake
+from disnake.types.snowflake import Snowflake
 
 SKUType = Literal[2, 3, 5, 6]
 

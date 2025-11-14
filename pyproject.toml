@@ -123,12 +123,14 @@ include = ["disnake*"]
 [tool.uv]
 required-version = ">=0.9.2"
 
-[tool.ruff]
-line-length = 100
 
 [tool.codespell]
 skip = ['docs/_static/**', '*.po']
 ignore-words-list = ['GroupT', "OT",]
+
+[tool.ruff]
+line-length = 100
+namespace-packages = ["disnake/ext"]
 
 [tool.ruff.lint]
 future-annotations = true
@@ -168,9 +170,7 @@ ignore = [
     ## flake8-simplify
     "SIM105", # TODO: enable, most have autofixes.
     "SIM108", # too opinionated.
-    ## flake8-tidy-imports
-    "TID252", # we still use relative imports
-    ## flake8-todos
+     ## flake8-todos
     "TD", # similar to flake8-fixme, though they may conflict
     ## flake8-typechecking
     "TC001", # typing-only first party import # to be enabled
@@ -220,6 +220,7 @@ ignore = [
     "F403", # Pyflakes: allow star imports
 ]
 "disnake/client.py" = ["T201"]
+"docs/*" = ["TID252"] # flake8-tidy-imports: allow relative imports in docs
 ## examples
 "examples/*.py" = [
     "ANN", # missing type annotations in examples is fine
@@ -234,6 +235,7 @@ ignore = [
 ## scripts
 "scripts/*.py" = [
     "S101", # flake8-bandit: allow scripts to use assertions
+    "TID252",
 ]
 "scripts/ci/*.py" = [
     "T20", # allow print temporarily before shifting to logging
@@ -273,6 +275,9 @@ ignorelist = [
 [tool.ruff.lint.flake8-errmsg]
 max-string-length = 0
 
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "all"
+
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
 "subprocess".msg = "Consider possible security implications associated with the subprocess module." # replaces S404
 
@@ -282,6 +287,18 @@ mark-parentheses = false
 
 [tool.ruff.lint.isort]
 combine-as-imports = true
+
+section-order = [
+  "future",
+  "standard-library",
+  "third-party",
+  "first-party",
+  "local-folder",
+  "commands"
+]
+
+[tool.ruff.lint.isort.sections]
+commands = ["disnake.ext.commands"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "numpy"

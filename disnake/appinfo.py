@@ -5,17 +5,17 @@ from __future__ import annotations
 from collections.abc import Sequence
 from typing import TYPE_CHECKING, Optional, cast
 
-from . import utils
-from .asset import Asset, AssetBytes
-from .enums import ApplicationEventWebhookStatus, try_enum
-from .flags import ApplicationFlags
-from .permissions import Permissions
-from .utils import MISSING
+from disnake import utils
+from disnake.asset import Asset, AssetBytes
+from disnake.enums import ApplicationEventWebhookStatus, try_enum
+from disnake.flags import ApplicationFlags
+from disnake.permissions import Permissions
+from disnake.utils import MISSING
 
 if TYPE_CHECKING:
-    from .guild import Guild
-    from .state import ConnectionState
-    from .types.appinfo import (
+    from disnake.guild import Guild
+    from disnake.state import ConnectionState
+    from disnake.types.appinfo import (
         AppInfo as AppInfoPayload,
         ApplicationIntegrationType as ApplicationIntegrationTypeLiteral,
         ApplicationIntegrationTypeConfiguration as ApplicationIntegrationTypeConfigurationPayload,
@@ -24,7 +24,7 @@ if TYPE_CHECKING:
         PartialAppInfo as PartialAppInfoPayload,
         Team as TeamPayload,
     )
-    from .user import User
+    from disnake.user import User
 
 
 __all__ = (
@@ -326,7 +326,7 @@ class AppInfo:
     )
 
     def __init__(self, state: ConnectionState, data: AppInfoPayload) -> None:
-        from .team import Team
+        from disnake.team import Team
 
         self._state: ConnectionState = state
         self.id: int = int(data["id"])

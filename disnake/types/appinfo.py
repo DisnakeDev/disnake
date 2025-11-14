@@ -6,9 +6,9 @@ from typing import Literal, Optional, TypedDict
 
 from typing_extensions import NotRequired
 
-from .snowflake import Snowflake
-from .team import Team
-from .user import User
+from disnake.types.snowflake import Snowflake
+from disnake.types.team import Team
+from disnake.types.user import User
 
 # (also called "installation context", which seems more accurate)
 ApplicationIntegrationType = Literal[0, 1]  # GUILD_INSTALL, USER_INSTALL

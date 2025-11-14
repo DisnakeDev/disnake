@@ -4,9 +4,9 @@ from typing import Literal, Optional, TypedDict
 
 from typing_extensions import NotRequired
 
-from .member import Member
-from .snowflake import Snowflake
-from .user import User
+from disnake.types.member import Member
+from disnake.types.snowflake import Snowflake
+from disnake.types.user import User
 
 GuildScheduledEventPrivacyLevel = Literal[2]
 GuildScheduledEventStatus = Literal[1, 2, 3, 4]

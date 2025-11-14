@@ -21,8 +21,8 @@ from typing import (
     overload,
 )
 
-from .errors import DiscordException
-from .utils import MISSING
+from disnake.errors import DiscordException
+from disnake.utils import MISSING
 
 if TYPE_CHECKING:
     T = TypeVar("T")

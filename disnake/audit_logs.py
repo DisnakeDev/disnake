@@ -14,17 +14,17 @@ from typing import (
     cast,
 )
 
-from . import abc, enums, flags, utils
-from .app_commands import ApplicationCommandPermissions
-from .asset import Asset
-from .automod import AutoModAction, AutoModTriggerMetadata, _automod_action_factory
-from .colour import Colour
-from .invite import Invite
-from .mixins import Hashable
-from .object import Object
-from .partial_emoji import PartialEmoji
-from .permissions import PermissionOverwrite, Permissions
-from .threads import ForumTag, Thread
+from disnake import abc, enums, flags, utils
+from disnake.app_commands import ApplicationCommandPermissions
+from disnake.asset import Asset
+from disnake.automod import AutoModAction, AutoModTriggerMetadata, _automod_action_factory
+from disnake.colour import Colour
+from disnake.invite import Invite
+from disnake.mixins import Hashable
+from disnake.object import Object
+from disnake.partial_emoji import PartialEmoji
+from disnake.permissions import PermissionOverwrite, Permissions
+from disnake.threads import ForumTag, Thread
 
 __all__ = (
     "AuditLogDiff",
@@ -36,35 +36,35 @@ __all__ = (
 if TYPE_CHECKING:
     import datetime
 
-    from .app_commands import APIApplicationCommand
-    from .automod import AutoModRule
-    from .emoji import Emoji
-    from .guild import Guild
-    from .guild_scheduled_event import GuildScheduledEvent
-    from .integrations import PartialIntegration
-    from .member import Member
-    from .role import Role
-    from .stage_instance import StageInstance
-    from .sticker import GuildSticker
-    from .types.audit_log import (
+    from disnake.app_commands import APIApplicationCommand
+    from disnake.automod import AutoModRule
+    from disnake.emoji import Emoji
+    from disnake.guild import Guild
+    from disnake.guild_scheduled_event import GuildScheduledEvent
+    from disnake.integrations import PartialIntegration
+    from disnake.member import Member
+    from disnake.role import Role
+    from disnake.stage_instance import StageInstance
+    from disnake.sticker import GuildSticker
+    from disnake.types.audit_log import (
         AuditLogChange as AuditLogChangePayload,
         AuditLogEntry as AuditLogEntryPayload,
         _AuditLogChange_ApplicationCommandPermissions as AuditLogChangeAppCmdPermsPayload,
     )
-    from .types.automod import (
+    from disnake.types.automod import (
         AutoModAction as AutoModActionPayload,
         AutoModTriggerMetadata as AutoModTriggerMetadataPayload,
     )
-    from .types.channel import (
+    from disnake.types.channel import (
         DefaultReaction as DefaultReactionPayload,
         PermissionOverwrite as PermissionOverwritePayload,
     )
-    from .types.invite import Invite as InvitePayload
-    from .types.role import Role as RolePayload
-    from .types.snowflake import Snowflake
-    from .types.threads import ForumTag as ForumTagPayload
-    from .user import User
-    from .webhook import Webhook
+    from disnake.types.invite import Invite as InvitePayload
+    from disnake.types.role import Role as RolePayload
+    from disnake.types.snowflake import Snowflake
+    from disnake.types.threads import ForumTag as ForumTagPayload
+    from disnake.user import User
+    from disnake.webhook import Webhook
 
 
 def _transform_permissions(entry: AuditLogEntry, data: str) -> Permissions:
@@ -174,7 +174,7 @@ def _transform_tag_id(
         return None
 
     # cyclic imports
-    from .channel import ThreadOnlyGuildChannel
+    from disnake.channel import ThreadOnlyGuildChannel
 
     tag: Optional[ForumTag] = None
     tag_id = int(data)

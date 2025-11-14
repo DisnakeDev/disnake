@@ -22,8 +22,8 @@ from typing import (
 
 import disnake
 
-from .context import AnyContext, Context
-from .errors import (
+from disnake.ext.commands.context import AnyContext, Context
+from disnake.ext.commands.errors import (
     BadArgument,
     BadBoolArgument,
     BadColourArgument,

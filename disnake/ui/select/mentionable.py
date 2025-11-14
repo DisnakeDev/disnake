@@ -14,19 +14,25 @@ from typing import (
     overload,
 )
 
-from ...abc import Snowflake
-from ...components import MentionableSelectMenu
-from ...enums import ComponentType, SelectDefaultValueType
-from ...member import Member
-from ...role import Role
-from ...user import ClientUser, User
-from ...utils import MISSING
-from .base import BaseSelect, P, SelectDefaultValueMultiInputType, V_co, _create_decorator
+from disnake.abc import Snowflake
+from disnake.components import MentionableSelectMenu
+from disnake.enums import ComponentType, SelectDefaultValueType
+from disnake.member import Member
+from disnake.role import Role
+from disnake.ui.select.base import (
+    BaseSelect,
+    P,
+    SelectDefaultValueMultiInputType,
+    V_co,
+    _create_decorator,
+)
+from disnake.user import ClientUser, User
+from disnake.utils import MISSING
 
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from ..item import DecoratedItem, ItemCallbackType
+    from disnake.ui.item import DecoratedItem, ItemCallbackType
 
 
 __all__ = (

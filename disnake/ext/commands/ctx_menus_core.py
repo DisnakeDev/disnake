@@ -11,9 +11,9 @@ from disnake.i18n import Localized
 from disnake.permissions import Permissions
 from disnake.utils import iscoroutinefunction
 
-from .base_core import InvokableApplicationCommand, _get_overridden_method
-from .errors import CommandError
-from .params import safe_call
+from disnake.ext.commands.base_core import InvokableApplicationCommand, _get_overridden_method
+from disnake.ext.commands.errors import CommandError
+from disnake.ext.commands.params import safe_call
 
 if TYPE_CHECKING:
     from typing_extensions import ParamSpec
@@ -25,7 +25,7 @@ if TYPE_CHECKING:
         UserCommandInteraction,
     )
 
-    from .base_core import CogT, InteractionCommandCallback
+    from disnake.ext.commands.base_core import CogT, InteractionCommandCallback
 
     P = ParamSpec("P")
 

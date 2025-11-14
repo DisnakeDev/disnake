@@ -4,21 +4,21 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, ClassVar, Optional, Union, cast
 
-from ..colour import Colour
-from ..components import Container as ContainerComponent
-from ..enums import ComponentType
-from ..utils import copy_doc
-from .item import UIComponent, ensure_ui_component
+from disnake.colour import Colour
+from disnake.components import Container as ContainerComponent
+from disnake.enums import ComponentType
+from disnake.ui.item import UIComponent, ensure_ui_component
+from disnake.utils import copy_doc
 
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from .action_row import ActionRow, ActionRowMessageComponent
-    from .file import File
-    from .media_gallery import MediaGallery
-    from .section import Section
-    from .separator import Separator
-    from .text_display import TextDisplay
+    from disnake.ui.action_row import ActionRow, ActionRowMessageComponent
+    from disnake.ui.file import File
+    from disnake.ui.media_gallery import MediaGallery
+    from disnake.ui.section import Section
+    from disnake.ui.separator import Separator
+    from disnake.ui.text_display import TextDisplay
 
     ContainerChildUIComponent = Union[
         ActionRow[ActionRowMessageComponent],
@@ -124,7 +124,7 @@ class Container(UIComponent):
 
     @classmethod
     def from_component(cls, container: ContainerComponent) -> Self:
-        from .action_row import _to_ui_component
+        from disnake.ui.action_row import _to_ui_component
 
         return cls(
             *cast(

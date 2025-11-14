@@ -5,14 +5,14 @@ from __future__ import annotations
 import datetime
 from typing import TYPE_CHECKING, Optional
 
-from . import utils
-from .asset import Asset
-from .enums import TeamMemberRole, TeamMembershipState, try_enum
-from .user import BaseUser
+from disnake import utils
+from disnake.asset import Asset
+from disnake.enums import TeamMemberRole, TeamMembershipState, try_enum
+from disnake.user import BaseUser
 
 if TYPE_CHECKING:
-    from .state import ConnectionState
-    from .types.team import Team as TeamPayload, TeamMember as TeamMemberPayload
+    from disnake.state import ConnectionState
+    from disnake.types.team import Team as TeamPayload, TeamMember as TeamMemberPayload
 
 __all__ = (
     "Team",

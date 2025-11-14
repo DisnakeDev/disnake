@@ -6,8 +6,8 @@ from typing import Literal, Optional, TypedDict
 
 from typing_extensions import NotRequired
 
-from .snowflake import Snowflake
-from .user import User
+from disnake.types.snowflake import Snowflake
+from disnake.types.user import User
 
 StatusType = Literal["idle", "dnd", "online", "offline"]
 StatusDisplayType = Literal[0, 1, 2]
