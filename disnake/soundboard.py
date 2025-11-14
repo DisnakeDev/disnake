@@ -11,6 +11,8 @@ from .partial_emoji import PartialEmoji
 from .utils import MISSING, _get_as_snowflake, snowflake_time
 
 if TYPE_CHECKING:
+    import datetime
+
     from .emoji import Emoji
     from .guild import Guild
     from .state import ConnectionState

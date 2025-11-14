@@ -2,14 +2,16 @@
 from __future__ import annotations
 
 import contextlib
-from collections.abc import Iterator
-from typing import Any, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar
 
 import pytest
 from typing_extensions import assert_type
 
 from disnake import ui
 from disnake.ui.button import V_co
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 V = TypeVar("V", bound=ui.View)
 I = TypeVar("I", bound=ui.Item)

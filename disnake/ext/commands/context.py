@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import inspect
 import re
 from typing import TYPE_CHECKING, Any, Generic, Optional, TypeVar, Union
 
@@ -13,6 +12,8 @@ from disnake.message import Message
 from disnake.permissions import Permissions
 
 if TYPE_CHECKING:
+    import inspect
+
     from typing_extensions import ParamSpec
 
     from disnake.channel import DMChannel, GroupChannel

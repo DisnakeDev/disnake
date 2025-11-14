@@ -17,7 +17,7 @@ import unicodedata
 import warnings
 from base64 import b64encode
 from bisect import bisect_left
-from collections.abc import AsyncIterator, Awaitable, Iterable, Iterator, Mapping, Sequence
+from collections.abc import AsyncIterator, Iterator, Sequence
 from inspect import getdoc as _getdoc, isawaitable as _isawaitable, signature as _signature
 from operator import attrgetter
 from types import UnionType
@@ -39,6 +39,8 @@ from typing import (
 from urllib.parse import parse_qs, urlencode
 
 if TYPE_CHECKING:
+    from collections.abc import Awaitable, Iterable, Mapping
+
     from typing_extensions import Self
 
 from .enums import Locale
