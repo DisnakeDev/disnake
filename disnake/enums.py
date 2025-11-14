@@ -167,10 +167,10 @@ class EnumMeta(type):
         value_cls._actual_enum_cls_ = actual_cls = super().__new__(cls, name, bases, attrs)
         return actual_cls
 
-    def __iter__(cls) -> Iterator[EnumMetaT]:
+    def __iter__(cls) -> Iterator[EnumMeta]:
         return (cls._enum_member_map_[name] for name in cls._enum_member_names_)
 
-    def __reversed__(cls) -> Iterator[EnumMetaT]:
+    def __reversed__(cls) -> Iterator[EnumMeta]:
         return (cls._enum_member_map_[name] for name in reversed(cls._enum_member_names_))
 
     def __len__(cls) -> int:

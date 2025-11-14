@@ -97,25 +97,30 @@ __all__ = (
 
 MISSING: Any = disnake.utils.MISSING
 
-T = TypeVar("T")
 VT = TypeVar("VT")
-CogT = TypeVar("CogT", bound="Optional[Cog]")
 CommandT = TypeVar("CommandT", bound="Command")
-ContextT = TypeVar("ContextT", bound="Context")
 GroupT = TypeVar("GroupT", bound="Group")
 HookT = TypeVar("HookT", bound="Hook")
 ErrorT = TypeVar("ErrorT", bound="Error")
 
 
 if TYPE_CHECKING:
-    P = ParamSpec("P")
+    from typing_extensions import TypeVar  # noqa: TC004
 
+    P = ParamSpec("P", default=...)
+    T = TypeVar("T", default=Any)
+
+    CogT = TypeVar("CogT", bound="Optional[Cog]", default="Optional[Cog]")
+    ContextT = TypeVar("ContextT", bound="Context", default="Context")
     CommandCallback = Union[
         Callable[Concatenate[CogT, ContextT, P], Coro[T]],
         Callable[Concatenate[ContextT, P], Coro[T]],
     ]
 else:
+    T = TypeVar("T")
     P = TypeVar("P")
+    CogT = TypeVar("CogT", bound="Optional[Cog]")
+    ContextT = TypeVar("ContextT", bound="Context")
 
 
 def wrap_callback(coro: Callable[..., Coro[T]]) -> Callable[..., Coro[Optional[T]]]:
@@ -1418,7 +1423,7 @@ class Group(GroupMixin[CogT], Command[CogT, P, T]):
         """
         ret = super().copy()
         for cmd in self.commands:
-            ret.add_command(cmd.copy())
+            ret.add_command(cast("Command[CogT, Any, Any]", cmd.copy()))
         return ret
 
     async def invoke(self, ctx: Context) -> None:

@@ -22,11 +22,12 @@ __all__ = (
     "Item",
 )
 
-I = TypeVar("I", bound="Item[Any]")  # noqa: E741
-V_co = TypeVar("V_co", bound="Optional[View]", covariant=True)
 
 if TYPE_CHECKING:
-    from typing_extensions import Self
+    from typing_extensions import (
+        Self,
+        TypeVar,  # noqa: TC004
+    )
 
     from ..client import Client
     from ..components import ActionRowChildComponent, Component
@@ -35,7 +36,17 @@ if TYPE_CHECKING:
     from ..types.components import ActionRowChildComponent as ActionRowChildComponentPayload
     from .view import View
 
+    V_co = TypeVar("V_co", bound="Optional[View]", covariant=True, default=Optional[View])
+    I = TypeVar("I", bound="Item[Any]", default="Item[Any]")  # noqa: E741
     ItemCallbackType = Callable[[V_co, I, MessageInteraction], Coroutine[Any, Any, Any]]
+
+    SelfViewT = TypeVar("SelfViewT", bound="Optional[View]", default=Optional[View])
+else:
+    I = TypeVar("I", bound="Item[Any]")  # noqa: E741
+    V_co = TypeVar("V_co", bound="Optional[View]", covariant=True)
+
+    SelfViewT = TypeVar("SelfViewT", bound="Optional[View]")
+
 
 ClientT = TypeVar("ClientT", bound="Client")
 UIComponentT = TypeVar("UIComponentT", bound="UIComponent")
@@ -159,12 +170,6 @@ class Item(WrappedComponent, Generic[V_co]):
 
     __repr_attributes__: ClassVar[tuple[str, ...]] = ("row",)
 
-    @overload
-    def __init__(self: Item[None]) -> None: ...
-
-    @overload
-    def __init__(self: Item[V_co]) -> None: ...
-
     def __init__(self) -> None:
         self._view: V_co = None  # pyright: ignore[reportAttributeAccessIssue]
         self._row: Optional[int] = None
@@ -221,9 +226,6 @@ class Item(WrappedComponent, Generic[V_co]):
             The interaction that triggered this UI item.
         """
         pass
-
-
-SelfViewT = TypeVar("SelfViewT", bound="Optional[View]")
 
 
 # While the decorators don't actually return a descriptor that matches this protocol,
