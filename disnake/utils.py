@@ -312,15 +312,16 @@ def warn_deprecated(
                 send_warning = False
                 break  # break out after first disnake rule, it's good enough.
 
-    if send_warning:
-        # this still allows force bypassing of filters if the default DeprecationWarning ignore is set.
-        try:
-            warnings.simplefilter(action="always", category=DeprecationWarning)
-            warnings.warn(*args, stacklevel=stacklevel + 1, category=DeprecationWarning, **kwargs)
-        finally:
-            # NOTE: Is this assertion even necessary? warnings.filters is always at minimum an empty list?
-            assert isinstance(warnings.filters, list)
-            warnings.filters[:] = old_filters
+    # allow force bypassing of filters if the default DeprecationWarning ignore is set.
+    if not send_warning:
+        return
+
+    try:
+        warnings.simplefilter(action="always", category=DeprecationWarning)
+        warnings.warn(*args, stacklevel=stacklevel + 1, category=DeprecationWarning, **kwargs)
+    finally:
+        assert isinstance(warnings.filters, list)
+        warnings.filters[:] = old_filters
 
 
 def oauth_url(
