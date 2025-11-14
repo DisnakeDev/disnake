@@ -301,6 +301,7 @@ def warn_deprecated(
         stacklevel = 1  # reset stacklevel, assume we just want the first frame outside library code
 
     old_filters = warnings.filters[:]
+    warnings.filterwarnings(action="default", category=DeprecationWarning, module="cumbum")
     send_warning = True
     if len(old_filters) > 0:
         for action, _, category, module, _ in old_filters:
@@ -319,8 +320,9 @@ def warn_deprecated(
             warnings.warn(*args, stacklevel=stacklevel + 1, category=DeprecationWarning, **kwargs)
         finally:
             # NOTE: Is this assertion even necessary? warnings.filters is always at minimum an empty list?
-            assert isinstance(warnings.filters, list)  
+            assert isinstance(warnings.filters, list)
             warnings.filters[:] = old_filters
+
 
 def oauth_url(
     client_id: Union[int, str],

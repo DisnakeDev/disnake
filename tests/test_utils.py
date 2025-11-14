@@ -132,41 +132,43 @@ def test_deprecated_skip() -> None:
     ["This is a deprecated function"],
 )
 def test_deprecated_warn(msg: str) -> None:
-    # Just test if works 
+    # Just test if works
     # first clear existing filters - these will be restored at the end as this is probably messing with the global warning filters
     filters = warnings.filters[:]
-    
+
     warnings.resetwarnings()
     with warnings.catch_warnings(record=True) as result:
-        warnings.filterwarnings("always", category=DeprecationWarning, module=r"disnake\..*")  # this also works with just a plain str
+        warnings.filterwarnings(
+            "always", category=DeprecationWarning, module=r"disnake\..*"
+        )  # this also works with just a plain str
         utils.warn_deprecated(msg)
 
     assert len(result) == 1
     assert result[0].message.args[0] == msg  # pyright: ignore[reportAttributeAccessIssue]
     assert result[0].category is DeprecationWarning
-    
+
     # Reset With empty filters - expected behaviour is that a warning is forced because it's empty
     warnings.resetwarnings()
-    assert len(warnings.filters) == 0  # should be empty 
+    assert len(warnings.filters) == 0  # should be empty
     with warnings.catch_warnings(record=True) as result:
         utils.warn_deprecated(msg)
 
     assert len(result) == 1
     assert result[0].message.args[0] == msg  # pyright: ignore[reportAttributeAccessIssue]
     assert result[0].category is DeprecationWarning
-    
+
     # Reset With empty filters - expected behaviour is that there is no warning because it's ignored
     warnings.resetwarnings()
-    assert len(warnings.filters) == 0  # should be empty 
+    assert len(warnings.filters) == 0  # should be empty
     with warnings.catch_warnings(record=True) as result:
         warnings.filterwarnings("ignore", category=DeprecationWarning, module=r"disnake\..*")
         utils.warn_deprecated(msg)
 
     assert len(result) == 0
 
+    warnings.filters[:] = filters  # pyright: ignore[reportIndexIssue]
 
-    warnings.filters[:] = filters # pyright: ignore[reportIndexIssue]
-    
+
 @pytest.mark.parametrize(
     ("params", "expected"),
     [
