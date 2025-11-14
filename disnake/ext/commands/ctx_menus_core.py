@@ -316,9 +316,11 @@ def user_command(
 
     auto_sync: :class:`bool`
         Whether to automatically register the command. Defaults to ``True``.
-    guild_ids: :class:`~collections.abc.Sequence`\\[:class:`int`]
-        If specified, the client will register the command in these guilds.
-        Otherwise, this command will be registered globally.
+    guild_ids: :class:`~collections.abc.Optional[Sequence`\\[:class:`int`]]
+        If specified, the client will register the command to these guilds.
+        Otherwise the command will be registered globally, unless
+        parameter ``test_guilds`` is specified in the bot constructor, in which case
+        this command will be registered to those guilds.
     extras: :class:`dict`\\[:class:`str`, :data:`~typing.Any`]
         A dict of user provided extras to attach to the command.
 
@@ -427,9 +429,11 @@ def message_command(
 
     auto_sync: :class:`bool`
         Whether to automatically register the command. Defaults to ``True``.
-    guild_ids: :class:`~collections.abc.Sequence`\\[:class:`int`]
-        If specified, the client will register the command in these guilds.
-        Otherwise, this command will be registered globally.
+    guild_ids: :class:`~collections.abc.Optional[Sequence`\\[:class:`int`]]
+        If specified, the client will register the command to these guilds.
+        Otherwise the command will be registered globally, unless
+        parameter ``test_guilds`` is specified in the bot constructor, in which case
+        this command will be registered to those guilds.
     extras: :class:`dict`\\[:class:`str`, :data:`~typing.Any`]
         A dict of user provided extras to attach to the command.
 
