@@ -1,0 +1,1 @@
+warn_deprecated now respected warning.filter ignores if at least "disnake" is passed to module argument.
