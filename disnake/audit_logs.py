@@ -2,11 +2,10 @@
 
 from __future__ import annotations
 
-from collections.abc import Generator, Mapping
+from collections.abc import Callable, Generator, Mapping
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     ClassVar,
     Optional,
     TypeVar,
@@ -292,7 +291,7 @@ class AuditLogDiff:
     def __len__(self) -> int:
         return len(self.__dict__)
 
-    def __iter__(self) -> Generator[tuple[str, Any], None, None]:
+    def __iter__(self) -> Generator[tuple[str, Any]]:
         yield from self.__dict__.items()
 
     def __repr__(self) -> str:
@@ -303,7 +302,7 @@ class AuditLogDiff:
 
         def __getattr__(self, item: str) -> Any: ...
 
-        def __setattr__(self, key: str, value: Any) -> Any: ...
+        def __setattr__(self, key: str, value: object) -> Any: ...
 
 
 Transformer = Callable[["AuditLogEntry", Any], Any]

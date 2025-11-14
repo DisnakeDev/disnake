@@ -12,14 +12,13 @@ import itertools
 import math
 import types
 from abc import ABC, abstractmethod
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from enum import Enum, EnumMeta
 from types import EllipsisType, UnionType
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     ClassVar,
     Final,
     Generic,
@@ -83,7 +82,7 @@ else:
 
 
 T = TypeVar("T")
-TypeT = TypeVar("TypeT", bound=type[Any])
+TypeT = TypeVar("TypeT", bound=type[object])
 BotT = TypeVar("BotT", bound="disnake.Client", covariant=True)
 
 __all__ = (
@@ -189,7 +188,7 @@ class Injection(Generic[P, T_]):
         self.autocompleters: dict[str, Callable] = autocompleters or {}
         self._injected: Optional[Cog] = None
 
-    def __get__(self, obj: Optional[Any], _: type[Any]) -> Self:
+    def __get__(self, obj: Optional[Any], _: type[object]) -> Self:
         if obj is None:
             return self
 
@@ -338,7 +337,7 @@ class _BaseRange(ABC):
 
     @classmethod
     @abstractmethod
-    def _infer_type(cls, params: tuple[Any, ...]) -> type[Any]:
+    def _infer_type(cls, params: tuple[object, ...]) -> type[Any]:
         raise NotImplementedError
 
     # hack to get `typing._type_check` to pass, e.g. when using `Range` as a generic parameter
@@ -380,7 +379,7 @@ else:
                     raise TypeError(msg)
 
         @classmethod
-        def _infer_type(cls, params: tuple[Any, ...]) -> type[Any]:
+        def _infer_type(cls, params: tuple[object, ...]) -> type[Union[int, float]]:
             if any(isinstance(p, float) for p in params):
                 return float
             return int
@@ -413,7 +412,7 @@ else:
                     raise ValueError(msg)
 
         @classmethod
-        def _infer_type(cls, params: tuple[Any, ...]) -> type[Any]:
+        def _infer_type(cls, params: tuple[object, ...]) -> type[str]:
             return str
 
 

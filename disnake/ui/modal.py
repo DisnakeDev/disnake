@@ -6,8 +6,9 @@ import asyncio
 import os
 import sys
 import traceback
+from collections.abc import Callable
 from functools import partial
-from typing import TYPE_CHECKING, Callable, Optional, TypeVar, Union, cast
+from typing import TYPE_CHECKING, Optional, TypeVar, Union, cast
 
 from ..enums import TextInputStyle
 from ..utils import MISSING

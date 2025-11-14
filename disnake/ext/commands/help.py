@@ -6,12 +6,11 @@ import copy
 import functools
 import itertools
 import re
-from collections.abc import Generator, Iterable, Mapping, Sequence
+from collections.abc import Callable, Generator, Iterable, Mapping, Sequence
 from re import Match
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     ClassVar,
     Optional,
     TypeVar,
@@ -245,7 +244,7 @@ class _HelpCommandImpl(Command[Optional[CogT], Any, None]):
             return ret
 
         # Ditto here
-        def wrapped_walk_commands() -> Generator[Command[Any, ..., Any], None, None]:
+        def wrapped_walk_commands() -> Generator[Command[Any, ..., Any]]:
             yield from original_walk_commands()
             yield self
 

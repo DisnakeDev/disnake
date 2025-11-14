@@ -11,11 +11,10 @@ import logging
 import os
 import weakref
 from collections import OrderedDict, deque
-from collections.abc import Coroutine, Sequence
+from collections.abc import Callable, Coroutine, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     Generic,
     Literal,
     Optional,

@@ -7,12 +7,12 @@ import inspect
 import os
 import sys
 import warnings
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import timedelta, timezone
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     Literal,
     Optional,
     TypeVar,
