@@ -29,7 +29,8 @@ class Separator(UIComponent):
         The size of the separator padding.
         Defaults to :attr:`~.SeparatorSpacing.small`.
     id: :class:`int`
-        The numeric identifier for the component. Must be unique within the message.
+        The numeric identifier for the component. Must be unique within a message.
+        This is always present in components received from the API.
         If set to ``0`` (the default) when sending a component, the API will assign
         sequential identifiers to the components in the message.
     """

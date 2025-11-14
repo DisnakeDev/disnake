@@ -93,8 +93,8 @@ class UIComponent(ABC):
     @property
     def id(self) -> int:
         """:class:`int`: The numeric identifier for the component.
-        This is always present in components received from the API,
-        and unique within a message.
+        Must be unique within a message or modal.
+        This is always present in components received from the API.
 
         .. versionadded:: 2.11
         """

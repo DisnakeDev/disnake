@@ -1,0 +1,1 @@
+Add a ``Raises`` section to the docstrings of :func:`ui.button` and :func:`ui.*_select() <ui.string_select>` decorators.

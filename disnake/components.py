@@ -205,11 +205,10 @@ class Component:
     type: :class:`ComponentType`
         The type of component.
     id: :class:`int`
-        The numeric identifier for the component.
-        This is always present in components received from the API,
-        and unique within a message.
-        If set to ``0`` (the default) when sending a component, the API will assign sequential
-        identifiers to the components in the message.
+        The numeric identifier for the component. Must be unique within a message or modal.
+        This is always present in components received from the API.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the message or modal.
 
         .. versionadded:: 2.11
     """
@@ -258,9 +257,10 @@ class ActionRow(Component, Generic[ActionRowChildComponentT]):
     children: :class:`list`\\[:class:`Button` | :class:`BaseSelectMenu` | :class:`TextInput`]
         The children components that this holds, if any.
     id: :class:`int`
-        The numeric identifier for the component.
-        This is always present in components received from the API,
-        and unique within a message.
+        The numeric identifier for the component. Must be unique within a message.
+        This is always present in components received from the API.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the message.
 
         .. versionadded:: 2.11
     """
@@ -317,9 +317,10 @@ class Button(Component):
 
         .. versionadded:: 2.11
     id: :class:`int`
-        The numeric identifier for the component.
-        This is always present in components received from the API,
-        and unique within a message.
+        The numeric identifier for the component. Must be unique within a message.
+        This is always present in components received from the API.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the message.
 
         .. versionadded:: 2.11
     """
@@ -421,9 +422,10 @@ class BaseSelectMenu(Component):
 
         .. versionadded:: 2.11
     id: :class:`int`
-        The numeric identifier for the component.
-        This is always present in components received from the API,
-        and unique within a message.
+        The numeric identifier for the component. Must be unique within a message or modal.
+        This is always present in components received from the API.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the message or modal.
 
         .. versionadded:: 2.11
     """
@@ -515,9 +517,10 @@ class StringSelectMenu(BaseSelectMenu):
 
         .. versionadded:: 2.11
     id: :class:`int`
-        The numeric identifier for the component.
-        This is always present in components received from the API,
-        and unique within a message.
+        The numeric identifier for the component. Must be unique within a message or modal.
+        This is always present in components received from the API.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the message or modal.
 
         .. versionadded:: 2.11
     """
@@ -579,9 +582,10 @@ class UserSelectMenu(BaseSelectMenu):
 
         .. versionadded:: 2.11
     id: :class:`int`
-        The numeric identifier for the component.
-        This is always present in components received from the API,
-        and unique within a message.
+        The numeric identifier for the component. Must be unique within a message or modal.
+        This is always present in components received from the API.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the message or modal.
 
         .. versionadded:: 2.11
     """
@@ -630,9 +634,10 @@ class RoleSelectMenu(BaseSelectMenu):
 
         .. versionadded:: 2.11
     id: :class:`int`
-        The numeric identifier for the component.
-        This is always present in components received from the API,
-        and unique within a message.
+        The numeric identifier for the component. Must be unique within a message or modal.
+        This is always present in components received from the API.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the message or modal.
 
         .. versionadded:: 2.11
     """
@@ -681,9 +686,10 @@ class MentionableSelectMenu(BaseSelectMenu):
 
         .. versionadded:: 2.11
     id: :class:`int`
-        The numeric identifier for the component.
-        This is always present in components received from the API,
-        and unique within a message.
+        The numeric identifier for the component. Must be unique within a message or modal.
+        This is always present in components received from the API.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the message or modal.
 
         .. versionadded:: 2.11
     """
@@ -735,9 +741,10 @@ class ChannelSelectMenu(BaseSelectMenu):
 
         .. versionadded:: 2.11
     id: :class:`int`
-        The numeric identifier for the component.
-        This is always present in components received from the API,
-        and unique within a message.
+        The numeric identifier for the component. Must be unique within a message or modal.
+        This is always present in components received from the API.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the message or modal.
 
         .. versionadded:: 2.11
     """
@@ -938,9 +945,10 @@ class TextInput(Component):
     max_length: :class:`int` | :data:`None`
         The maximum length of the text input.
     id: :class:`int`
-        The numeric identifier for the component.
-        This is always present in components received from the API,
-        and unique within a message.
+        The numeric identifier for the component. Must be unique within a modal.
+        This is always present in components received from the API.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the modal.
 
         .. versionadded:: 2.11
     """
@@ -1016,9 +1024,10 @@ class Section(Component):
     accessory: :class:`Thumbnail` | :class:`Button`
         The accessory component displayed next to the section text.
     id: :class:`int`
-        The numeric identifier for the component.
-        This is always present in components received from the API,
-        and unique within a message.
+        The numeric identifier for the component. Must be unique within a message.
+        This is always present in components received from the API.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the message.
 
         .. versionadded:: 2.11
     """
@@ -1063,9 +1072,10 @@ class TextDisplay(Component):
     content: :class:`str`
         The text displayed by this component.
     id: :class:`int`
-        The numeric identifier for the component.
-        This is always present in components received from the API,
-        and unique within a message.
+        The numeric identifier for the component. Must be unique within a message.
+        This is always present in components received from the API.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the message.
 
         .. versionadded:: 2.11
     """
@@ -1171,9 +1181,10 @@ class Thumbnail(Component):
     spoiler: :class:`bool`
         Whether the thumbnail is marked as a spoiler. Defaults to ``False``.
     id: :class:`int`
-        The numeric identifier for the component.
-        This is always present in components received from the API,
-        and unique within a message.
+        The numeric identifier for the component. Must be unique within a message.
+        This is always present in components received from the API.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the message.
 
         .. versionadded:: 2.11
     """
@@ -1226,9 +1237,10 @@ class MediaGallery(Component):
     items: :class:`list`\\[:class:`MediaGalleryItem`]
         The images in this gallery.
     id: :class:`int`
-        The numeric identifier for the component.
-        This is always present in components received from the API,
-        and unique within a message.
+        The numeric identifier for the component. Must be unique within a message.
+        This is always present in components received from the API.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the message.
 
         .. versionadded:: 2.11
     """
@@ -1334,9 +1346,10 @@ class FileComponent(Component):
         The size of the file.
         This is available in objects from the API, and ignored when sending.
     id: :class:`int`
-        The numeric identifier for the component.
-        This is always present in components received from the API,
-        and unique within a message.
+        The numeric identifier for the component. Must be unique within a message.
+        This is always present in components received from the API.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the message.
 
         .. versionadded:: 2.11
     """
@@ -1385,9 +1398,10 @@ class Separator(Component):
     spacing: :class:`SeparatorSpacing`
         The size of the separator padding.
     id: :class:`int`
-        The numeric identifier for the component.
-        This is always present in components received from the API,
-        and unique within a message.
+        The numeric identifier for the component. Must be unique within a message.
+        This is always present in components received from the API.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the message.
 
         .. versionadded:: 2.11
     """
@@ -1434,9 +1448,10 @@ class Container(Component):
     spoiler: :class:`bool`
         Whether the container is marked as a spoiler. Defaults to ``False``.
     id: :class:`int`
-        The numeric identifier for the component.
-        This is always present in components received from the API,
-        and unique within a message.
+        The numeric identifier for the component. Must be unique within a message.
+        This is always present in components received from the API.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the message.
 
         .. versionadded:: 2.11
     """
@@ -1506,9 +1521,10 @@ class Label(Component):
     component: :class:`TextInput` | :class:`FileUpload` | :class:`BaseSelectMenu`
         The component within the label.
     id: :class:`int`
-        The numeric identifier for the component.
-        This is always present in components received from the API,
-        and unique within a message.
+        The numeric identifier for the component. Must be unique within a modal.
+        This is always present in components received from the API.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the modal.
     """
 
     __slots__: tuple[str, ...] = (
@@ -1568,9 +1584,10 @@ class FileUpload(Component):
         Whether the file upload is required.
         Defaults to ``True``.
     id: :class:`int`
-        The numeric identifier for the component.
-        This is always present in components received from the API,
-        and unique within a modal.
+        The numeric identifier for the component. Must be unique within a modal.
+        This is always present in components received from the API.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the modal.
     """
 
     __slots__: tuple[str, ...] = (
