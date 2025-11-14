@@ -1,0 +1,1 @@
+Fix enum member aliases being wrongly considered canonical by pyright.

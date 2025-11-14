@@ -131,9 +131,9 @@ class EnumMeta(type):
         *,
         comparable: bool = False,
     ) -> EnumMetaT:
-        value_mapping = {}
-        member_mapping = {}
-        member_names = []
+        value_mapping: dict[object, _EnumValueBase] = {}
+        member_mapping: dict[str, _EnumValueBase] = {}
+        member_names: list[str] = []
 
         value_cls = _create_value_cls(name, comparable)
         for key, value in list(attrs.items()):
@@ -604,7 +604,7 @@ class Status(Enum):
     """The member is idle."""
     dnd = "dnd"
     """The member is "Do Not Disturb"."""
-    do_not_disturb = "dnd"
+    do_not_disturb = dnd
     """An alias for :attr:`dnd`."""
     invisible = "invisible"
     """The member is "invisible". In reality, this is only used in sending
@@ -645,7 +645,7 @@ class DefaultAvatar(Enum):
     """Represents the default avatar with the color blurple. See also :attr:`Colour.blurple`."""
     grey = 1
     """Represents the default avatar with the color grey. See also :attr:`Colour.greyple`."""
-    gray = 1
+    gray = grey
     """An alias for :attr:`grey`."""
     green = 2
     """Represents the default avatar with the color green. See also :attr:`Colour.green`."""
@@ -1221,7 +1221,7 @@ class ComponentType(Enum):
 
     .. versionadded:: 2.7
     """
-    select = 3  # backwards compatibility
+    select = string_select  # backwards compatibility
     """An alias of :attr:`string_select`."""
     text_input = 4
     """Represents a text input component."""
@@ -1318,19 +1318,19 @@ class ButtonStyle(Enum):
     """
 
     # Aliases
-    blurple = 1
+    blurple = primary
     """An alias for :attr:`primary`."""
-    grey = 2
+    grey = secondary
     """An alias for :attr:`secondary`."""
-    gray = 2
+    gray = secondary
     """An alias for :attr:`secondary`."""
-    green = 3
+    green = success
     """An alias for :attr:`success`."""
-    red = 4
+    red = danger
     """An alias for :attr:`danger`."""
-    url = 5
+    url = link
     """An alias for :attr:`link`."""
-    sku = 6
+    sku = premium
     """An alias for :attr:`premium`.
 
     .. versionadded:: 2.11
@@ -1352,11 +1352,11 @@ class TextInputStyle(Enum):
     """Represents a multi-line text input component."""
 
     # Aliases
-    single_line = 1
+    single_line = short
     """An alias for :attr:`short`."""
-    multi_line = 2
+    multi_line = paragraph
     """An alias for :attr:`paragraph`."""
-    long = 2
+    long = paragraph
     """An alias for :attr:`paragraph`."""
 
     def __int__(self) -> int:
@@ -1458,8 +1458,8 @@ class StagePrivacyLevel(Enum):
     """
     closed = 2
     """The stage instance can only be joined by members of the guild."""
-    guild_only = 2
-    """Alias for :attr:`.closed`"""
+    guild_only = closed
+    """An alias for :attr:`.closed`."""
 
 
 class NSFWLevel(Enum, comparable=True):
@@ -1527,7 +1527,7 @@ class GuildScheduledEventStatus(Enum):
     """Represents a completed event."""
     canceled = 4
     """Represents a canceled event."""
-    cancelled = 4
+    cancelled = canceled
     """An alias for :attr:`canceled`.
 
     .. versionadded:: 2.6
