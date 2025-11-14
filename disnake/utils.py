@@ -301,13 +301,26 @@ def warn_deprecated(
         stacklevel = 1  # reset stacklevel, assume we just want the first frame outside library code
 
     old_filters = warnings.filters[:]
-    try:
-        warnings.simplefilter("always", DeprecationWarning)
-        warnings.warn(*args, stacklevel=stacklevel + 1, category=DeprecationWarning, **kwargs)
-    finally:
-        assert isinstance(warnings.filters, list)
-        warnings.filters[:] = old_filters
+    send_warning = True
+    if len(old_filters) > 0:
+        for action, _, category, module, _ in old_filters:
+            if (
+                (category is DeprecationWarning)
+                and ("disnake" in str(module))
+                and (action == "ignore")
+            ):
+                send_warning = False
+                break  # break out after first disnake rule, it's good enough.
 
+    if send_warning:
+        # this still allows force bypassing of filters if the default DeprecationWarning ignore is set.
+        try:
+            warnings.simplefilter(action="always", category=DeprecationWarning)
+            warnings.warn(*args, stacklevel=stacklevel + 1, category=DeprecationWarning, **kwargs)
+        finally:
+            # NOTE: Is this assertion even necessary? warnings.filters is always at minimum an empty list?
+            assert isinstance(warnings.filters, list)  
+            warnings.filters[:] = old_filters
 
 def oauth_url(
     client_id: Union[int, str],
