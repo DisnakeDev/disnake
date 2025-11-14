@@ -39,7 +39,7 @@ assert not _missing, f"missing component objects: {_missing}"
 @pytest.mark.parametrize(
     "obj",
     all_ui_component_objects,
-    ids=[type(o).__name__ for o in all_ui_component_objects],
+    ids=[o.__class__.__name__ for o in all_ui_component_objects],
 )
 def test_id_property(obj: ui.UIComponent) -> None:
     assert obj.id == 0

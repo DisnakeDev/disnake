@@ -624,7 +624,7 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
 
     def __repr__(self) -> str:
         attrs = " ".join(f"{key}={getattr(self, key)!r}" for key in self.__repr_attributes__)
-        return f"<{type(self).__name__} {attrs}>"
+        return f"<{self.__class__.__name__} {attrs}>"
 
     def __str__(self) -> str:
         return self.name

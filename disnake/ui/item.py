@@ -43,7 +43,7 @@ UIComponentT = TypeVar("UIComponentT", bound="UIComponent")
 
 def ensure_ui_component(obj: UIComponentT, name: str = "component") -> UIComponentT:
     if not isinstance(obj, UIComponent):
-        msg = f"{name} should be a valid UI component, got {type(obj).__name__}."
+        msg = f"{name} should be a valid UI component, got {obj.__class__.__name__}."
         raise TypeError(msg)
     return obj
 
@@ -80,7 +80,7 @@ class UIComponent(ABC):
         attrs = " ".join(
             f"{key.lstrip('_')}={getattr(self, key)!r}" for key in self.__repr_attributes__
         )
-        return f"<{type(self).__name__} {attrs}>"
+        return f"<{self.__class__.__name__} {attrs}>"
 
     @property
     def is_v2(self) -> bool:

@@ -201,7 +201,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
 
         for component in components:
             if not isinstance(component, WrappedComponent):
-                msg = f"components should be of type WrappedComponent, got {type(component).__name__}."
+                msg = f"components should be of type WrappedComponent, got {component.__class__.__name__}."
                 raise TypeError(msg)
             self.append_item(component)  # pyright: ignore[reportArgumentType]
 
