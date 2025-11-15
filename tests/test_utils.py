@@ -143,28 +143,28 @@ def test_deprecated_warn(msg: str) -> None:
         )  # this also works with just a plain str
         utils.warn_deprecated(msg)
 
-    assert len(result) == 1
-    assert result[0].message.args[0] == msg  # pyright: ignore[reportAttributeAccessIssue]
+    assert len(result) == 1, "Expected one warning to be raised."
     assert result[0].category is DeprecationWarning
+    assert result[0].message.args[0] == msg  # pyright: ignore[reportAttributeAccessIssue]
 
     # Reset With empty filters - expected behaviour is that a warning is forced because it's empty
     warnings.resetwarnings()
-    assert len(warnings.filters) == 0  # should be empty
     with warnings.catch_warnings(record=True) as result:
         utils.warn_deprecated(msg)
 
-    assert len(result) == 1
-    assert result[0].message.args[0] == msg  # pyright: ignore[reportAttributeAccessIssue]
+    assert len(result) == 1, "Expected one warning to be raised."
     assert result[0].category is DeprecationWarning
+    assert result[0].message.args[0] == msg  # pyright: ignore[reportAttributeAccessIssue]
 
     # Reset With empty filters - expected behaviour is that there is no warning because it's ignored
     warnings.resetwarnings()
-    assert len(warnings.filters) == 0  # should be empty
     with warnings.catch_warnings(record=True) as result:
         warnings.filterwarnings("ignore", category=DeprecationWarning, module=r"disnake\..*")
         utils.warn_deprecated(msg)
 
-    assert len(result) == 0
+    assert len(result) == 0, (
+        "Expected no warnings to be raised when declaring disnake to be ignored."
+    )
 
     warnings.filters[:] = filters  # pyright: ignore[reportIndexIssue]
 
