@@ -10,12 +10,12 @@ from disnake.ext import commands
 
 # n.b. the specific choice of events used in this file is irrelevant
 @pytest.fixture
-def client():
+def client() -> disnake.Client:
     return disnake.Client()
 
 
 @pytest.fixture
-def bot():
+def bot() -> commands.Bot:
     return commands.Bot(
         command_prefix=commands.when_mentioned,
         command_sync_flags=commands.CommandSyncFlags.none(),
@@ -36,7 +36,7 @@ def test_event(client_or_bot: disnake.Client) -> None:
     @client_or_bot.event
     async def on_message_edit(self, *args: Any) -> None: ...
 
-    assert client_or_bot.on_message_edit is on_message_edit  # type: ignore
+    assert client_or_bot.on_message_edit is on_message_edit  # pyright: ignore[reportAttributeAccessIssue]
 
 
 # Client.wait_for

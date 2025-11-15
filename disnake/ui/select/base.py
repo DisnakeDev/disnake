@@ -2,20 +2,15 @@
 
 from __future__ import annotations
 
-import asyncio
 import os
 from abc import ABC, abstractmethod
+from collections.abc import Mapping, Sequence
 from typing import (
     TYPE_CHECKING,
     Callable,
     ClassVar,
     Generic,
-    List,
-    Mapping,
     Optional,
-    Sequence,
-    Tuple,
-    Type,
     TypeVar,
     Union,
 )
@@ -23,7 +18,7 @@ from typing import (
 from ...components import AnySelectMenu, SelectDefaultValue
 from ...enums import ComponentType, SelectDefaultValueType
 from ...object import Object
-from ...utils import MISSING, humanize_list
+from ...utils import MISSING, humanize_list, iscoroutinefunction
 from ..item import DecoratedItem, Item
 
 __all__ = ("BaseSelect",)
@@ -67,21 +62,22 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
     .. versionadded:: 2.7
     """
 
-    __repr_attributes__: Tuple[str, ...] = (
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (
         "placeholder",
         "min_values",
         "max_values",
         "disabled",
+        "required",
     )
-    # We have to set this to MISSING in order to overwrite the abstract property from WrappedComponent
+    # We have to set this to MISSING in order to overwrite the abstract property from UIComponent
     _underlying: SelectMenuT = MISSING
 
     # Subclasses are expected to set this
-    _default_value_type_map: ClassVar[Mapping[SelectDefaultValueType, Tuple[Type[Snowflake], ...]]]
+    _default_value_type_map: ClassVar[Mapping[SelectDefaultValueType, tuple[type[Snowflake], ...]]]
 
     def __init__(
         self,
-        underlying_type: Type[SelectMenuT],
+        underlying_type: type[SelectMenuT],
         component_type: ComponentType,
         *,
         custom_id: str,
@@ -90,20 +86,24 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
         max_values: int,
         disabled: bool,
         default_values: Optional[Sequence[SelectDefaultValueInputType[SelectValueT]]],
+        required: bool,
+        id: int,
         row: Optional[int],
     ) -> None:
         super().__init__()
-        self._selected_values: List[SelectValueT] = []
+        self._selected_values: list[SelectValueT] = []
         self._provided_custom_id = custom_id is not MISSING
         custom_id = os.urandom(16).hex() if custom_id is MISSING else custom_id
         self._underlying = underlying_type._raw_construct(
-            custom_id=custom_id,
             type=component_type,
+            id=id,
+            custom_id=custom_id,
             placeholder=placeholder,
             min_values=min_values,
             max_values=max_values,
             disabled=disabled,
             default_values=self._transform_default_values(default_values) if default_values else [],
+            required=required,
         )
         self.row = row
 
@@ -115,19 +115,21 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
     @custom_id.setter
     def custom_id(self, value: str) -> None:
         if not isinstance(value, str):
-            raise TypeError("custom_id must be None or str")
+            msg = "custom_id must be None or str"
+            raise TypeError(msg)
 
         self._underlying.custom_id = value
 
     @property
     def placeholder(self) -> Optional[str]:
-        """Optional[:class:`str`]: The placeholder text that is shown if nothing is selected, if any."""
+        """:class:`str` | :data:`None`: The placeholder text that is shown if nothing is selected, if any."""
         return self._underlying.placeholder
 
     @placeholder.setter
     def placeholder(self, value: Optional[str]) -> None:
         if value is not None and not isinstance(value, str):
-            raise TypeError("placeholder must be None or str")
+            msg = "placeholder must be None or str"
+            raise TypeError(msg)
 
         self._underlying.placeholder = value
 
@@ -159,8 +161,8 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
         self._underlying.disabled = bool(value)
 
     @property
-    def default_values(self) -> List[SelectDefaultValue]:
-        """List[:class:`.SelectDefaultValue`]: The list of values that are selected by default.
+    def default_values(self) -> list[SelectDefaultValue]:
+        """:class:`list`\\[:class:`.SelectDefaultValue`]: The list of values that are selected by default.
         Only available for auto-populated select menus.
         """
         return self._underlying.default_values
@@ -172,7 +174,20 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
         self._underlying.default_values = self._transform_default_values(value) if value else []
 
     @property
-    def values(self) -> List[SelectValueT]:
+    def required(self) -> bool:
+        """:class:`bool`: Whether the select menu is required.
+        Only applies to components in modals.
+
+        .. versionadded:: 2.11
+        """
+        return self._underlying.required
+
+    @required.setter
+    def required(self, value: bool) -> None:
+        self._underlying.required = bool(value)
+
+    @property
+    def values(self) -> list[SelectValueT]:
         return self._selected_values
 
     @property
@@ -183,7 +198,7 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
         self._underlying = component
 
     def refresh_state(self, interaction: MessageInteraction) -> None:
-        self._selected_values = interaction.resolved_values  # type: ignore
+        self._selected_values = interaction.resolved_values  # pyright: ignore[reportAttributeAccessIssue]
 
     @classmethod
     @abstractmethod
@@ -200,17 +215,16 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
     @classmethod
     def _transform_default_values(
         cls, values: Sequence[SelectDefaultValueInputType[SelectValueT]]
-    ) -> List[SelectDefaultValue]:
-        result: List[SelectDefaultValue] = []
+    ) -> list[SelectDefaultValue]:
+        result: list[SelectDefaultValue] = []
 
         for value in values:
             # If we have a SelectDefaultValue, just use it as-is
             if isinstance(value, SelectDefaultValue):
                 if value.type not in cls._default_value_type_map:
                     allowed_types = [str(t) for t in cls._default_value_type_map]
-                    raise ValueError(
-                        f"SelectDefaultValue.type should be {humanize_list(allowed_types, 'or')}, not {value.type}"
-                    )
+                    msg = f"SelectDefaultValue.type should be {humanize_list(allowed_types, 'or')}, not {value.type}"
+                    raise ValueError(msg)
                 result.append(value)
                 continue
 
@@ -227,9 +241,8 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
                     t.__name__ for ts in cls._default_value_type_map.values() for t in ts
                 ]
                 allowed_types.append(SelectDefaultValue.__name__)
-                raise TypeError(
-                    f"Expected type of default value to be {humanize_list(allowed_types, 'or')}, not {type(value)!r}"
-                )
+                msg = f"Expected type of default value to be {humanize_list(allowed_types, 'or')}, not {type(value)!r}"
+                raise TypeError(msg)
 
             result.append(SelectDefaultValue(value.id, value_type))
 
@@ -245,17 +258,20 @@ def _create_decorator(
 ) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]:
     if args:
         # the `*args` def above is just to satisfy the typechecker
-        raise RuntimeError("expected no *args")
+        msg = "expected no *args"
+        raise RuntimeError(msg)
 
     if not callable(cls):
-        raise TypeError("cls argument must be callable")
+        msg = "cls argument must be callable"
+        raise TypeError(msg)
 
     def decorator(func: ItemCallbackType[V_co, S_co]) -> DecoratedItem[S_co]:
-        if not asyncio.iscoroutinefunction(func):
-            raise TypeError("select function must be a coroutine function")
+        if not iscoroutinefunction(func):
+            msg = "select function must be a coroutine function"
+            raise TypeError(msg)
 
         func.__discord_ui_model_type__ = cls
         func.__discord_ui_model_kwargs__ = kwargs
-        return func  # type: ignore
+        return func  # pyright: ignore[reportReturnType]
 
     return decorator

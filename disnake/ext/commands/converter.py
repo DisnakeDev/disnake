@@ -5,21 +5,18 @@ from __future__ import annotations
 import functools
 import inspect
 import re
+from collections.abc import Iterable
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    Dict,
     Generic,
-    Iterable,
-    List,
     Literal,
     Optional,
     Protocol,
-    Tuple,
-    Type,
     TypeVar,
     Union,
+    cast,
     runtime_checkable,
 )
 
@@ -117,7 +114,7 @@ class Converter(Protocol[T_co]):
     special cased ``disnake`` classes.
 
     Classes that derive from this should override the :meth:`~.Converter.convert`
-    method to do its conversion logic. This method must be a :ref:`coroutine <coroutine>`.
+    method to do its conversion logic. This method must be a :ref:`coroutine function <coroutine>`.
     """
 
     async def convert(self, ctx: AnyContext, argument: str) -> T_co:
@@ -131,7 +128,7 @@ class Converter(Protocol[T_co]):
 
         Parameters
         ----------
-        ctx: Union[:class:`.Context`, :class:`.ApplicationCommandInteraction`]
+        ctx: :class:`.Context` | :class:`.ApplicationCommandInteraction`
             The invocation context that the argument is being used in.
         argument: :class:`str`
             The argument that is being converted.
@@ -143,7 +140,8 @@ class Converter(Protocol[T_co]):
         BadArgument
             The converter failed to convert the argument.
         """
-        raise NotImplementedError("Derived classes need to implement this.")
+        msg = "Derived classes need to implement this."
+        raise NotImplementedError(msg)
 
 
 _ID_REGEX = re.compile(r"([0-9]{17,19})$")
@@ -324,7 +322,7 @@ class UserConverter(IDConverter[disnake.User]):
     async def convert(self, ctx: AnyContext, argument: str) -> disnake.User:
         match = self._get_id_match(argument) or re.match(r"<@!?([0-9]{17,19})>$", argument)
         state = ctx._state
-        bot: disnake.Client = ctx.bot
+        bot: disnake.Client = cast("disnake.Client", ctx.bot)
         result: Optional[Union[disnake.User, disnake.Member]] = None
 
         if match is not None:
@@ -343,9 +341,11 @@ class UserConverter(IDConverter[disnake.User]):
                 except disnake.HTTPException:
                     raise UserNotFound(argument) from None
 
+            # TODO: inverting this condition somehow fixes the type ignore
             if isinstance(result, disnake.Member):
                 return result._user
-            return result
+
+            return result  # pyright: ignore[reportReturnType]
 
         username, _, discriminator = argument.rpartition("#")
         # n.b. there's no builtin method that only matches arabic digits, `isdecimal` is the closest one.
@@ -382,7 +382,7 @@ class PartialMessageConverter(Converter[disnake.PartialMessage]):
     """
 
     @staticmethod
-    def _get_id_matches(ctx: AnyContext, argument: str) -> Tuple[Optional[int], int, int]:
+    def _get_id_matches(ctx: AnyContext, argument: str) -> tuple[Optional[int], int, int]:
         id_regex = re.compile(r"(?:(?P<channel_id>[0-9]{17,19})-)?(?P<message_id>[0-9]{17,19})$")
         link_regex = re.compile(
             r"https?://(?:(ptb|canary|www)\.)?discord(?:app)?\.com/channels/"
@@ -408,13 +408,13 @@ class PartialMessageConverter(Converter[disnake.PartialMessage]):
     def _resolve_channel(
         ctx: AnyContext, guild_id: Optional[int], channel_id: int
     ) -> Optional[MessageableChannel]:
-        bot: disnake.Client = ctx.bot
+        bot: disnake.Client = cast("disnake.Client", ctx.bot)
         if guild_id is None:
-            return bot.get_channel(channel_id) if channel_id else ctx.channel  # type: ignore
+            return bot.get_channel(channel_id) if channel_id else ctx.channel  # pyright: ignore[reportReturnType]
 
         guild = bot.get_guild(guild_id)
         if guild is not None:
-            return guild._resolve_channel(channel_id)  # type: ignore
+            return guild._resolve_channel(channel_id)  # pyright: ignore[reportReturnType]
         return None
 
     async def convert(self, ctx: AnyContext, argument: str) -> disnake.PartialMessage:
@@ -442,19 +442,19 @@ class MessageConverter(IDConverter[disnake.Message]):
 
     async def convert(self, ctx: AnyContext, argument: str) -> disnake.Message:
         guild_id, message_id, channel_id = PartialMessageConverter._get_id_matches(ctx, argument)
-        bot: disnake.Client = ctx.bot
+        bot: disnake.Client = cast("disnake.Client", ctx.bot)
         message = bot._connection._get_message(message_id)
-        if message:
+        if message is not None:
             return message
         channel = PartialMessageConverter._resolve_channel(ctx, guild_id, channel_id)
-        if not channel:
+        if channel is None:
             raise ChannelNotFound(str(channel_id))
         try:
             return await channel.fetch_message(message_id)
         except disnake.NotFound:
             raise MessageNotFound(argument) from None
         except disnake.Forbidden:
-            raise ChannelNotReadable(channel) from None  # type: ignore
+            raise ChannelNotReadable(channel) from None  # pyright: ignore[reportArgumentType]
 
 
 class GuildChannelConverter(IDConverter[disnake.abc.GuildChannel]):
@@ -476,7 +476,7 @@ class GuildChannelConverter(IDConverter[disnake.abc.GuildChannel]):
         return self._resolve_channel(ctx, argument, "channels", disnake.abc.GuildChannel)
 
     @staticmethod
-    def _resolve_channel(ctx: AnyContext, argument: str, attribute: str, type: Type[CT]) -> CT:
+    def _resolve_channel(ctx: AnyContext, argument: str, attribute: str, type: type[CT]) -> CT:
         bot: disnake.Client = ctx.bot
 
         match = IDConverter._get_id_match(argument) or re.match(r"<#([0-9]{17,19})>$", argument)
@@ -505,7 +505,7 @@ class GuildChannelConverter(IDConverter[disnake.abc.GuildChannel]):
         return result
 
     @staticmethod
-    def _resolve_thread(ctx: AnyContext, argument: str, attribute: str, type: Type[TT]) -> TT:
+    def _resolve_thread(ctx: AnyContext, argument: str, attribute: str, type: type[TT]) -> TT:
         match = IDConverter._get_id_match(argument) or re.match(r"<#([0-9]{17,19})>$", argument)
         result: Optional[disnake.Thread] = None
         guild = ctx.guild
@@ -656,7 +656,7 @@ class MediaChannelConverter(IDConverter[disnake.MediaChannel]):
 
 
 class ThreadConverter(IDConverter[disnake.Thread]):
-    """Coverts to a :class:`~disnake.Thread`.
+    """Converts to a :class:`~disnake.Thread`.
 
     All lookups are via the local guild.
 
@@ -1003,14 +1003,14 @@ class PermissionsConverter(Converter[disnake.Permissions]):
         argument = argument.replace("server", "guild")
 
         # try multiple attributes, then a single one
-        perms: List[disnake.Permissions] = []
+        perms: list[disnake.Permissions] = []
         for name in argument.split():
             attr = getattr(disnake.Permissions, name, None)
             if attr is None:
                 break
 
             if callable(attr):
-                perms.append(attr())
+                perms.append(attr())  # pyright: ignore[reportArgumentType]
             else:
                 perms.append(disnake.Permissions(**{name: True}))
         else:
@@ -1020,10 +1020,11 @@ class PermissionsConverter(Converter[disnake.Permissions]):
 
         attr = getattr(disnake.Permissions, name, None)
         if attr is None:
-            raise BadArgument(f"Invalid Permissions: {name!r}")
+            msg = f"Invalid Permissions: {name!r}"
+            raise BadArgument(msg)
 
         if callable(attr):
-            return attr()
+            return attr()  # pyright: ignore[reportReturnType]
         else:
             return disnake.Permissions(**{name: True})
 
@@ -1127,7 +1128,7 @@ class clean_content(Converter[str]):
 
             return f"<#{id}>"
 
-        transforms: Dict[str, Callable[[int], str]] = {
+        transforms: dict[str, Callable[[int], str]] = {
             "@": resolve_user,
             "@!": resolve_user,
             "#": resolve_channel,
@@ -1149,7 +1150,7 @@ class clean_content(Converter[str]):
         return disnake.utils.escape_mentions(result)
 
 
-class Greedy(List[T]):
+class Greedy(list[T]):
     """A special converter that greedily consumes arguments until it can't.
     As a consequence of this behaviour, most input errors are silently discarded,
     since it is used as an indicator of when to stop parsing.
@@ -1180,26 +1181,30 @@ class Greedy(List[T]):
         converter = getattr(self.converter, "__name__", repr(self.converter))
         return f"Greedy[{converter}]"
 
-    def __class_getitem__(cls, params: Union[Tuple[T], T]) -> Greedy[T]:
+    def __class_getitem__(cls, params: Union[tuple[T], T]) -> Greedy[T]:
         if not isinstance(params, tuple):
             params = (params,)
         if len(params) != 1:
-            raise TypeError("Greedy[...] only takes a single argument")
+            msg = "Greedy[...] only takes a single argument"
+            raise TypeError(msg)
         converter = params[0]
 
         origin = getattr(converter, "__origin__", None)
         args = getattr(converter, "__args__", ())
 
         if not (callable(converter) or isinstance(converter, Converter) or origin is not None):
-            raise TypeError("Greedy[...] expects a type or a Converter instance.")
+            msg = "Greedy[...] expects a type or a Converter instance."
+            raise TypeError(msg)
 
         if converter in (str, type(None)) or origin is Greedy:
-            raise TypeError(f"Greedy[{converter.__name__}] is invalid.")
+            msg = f"Greedy[{converter.__name__}] is invalid."  # pyright: ignore[reportAttributeAccessIssue]
+            raise TypeError(msg)
 
         if origin is Union and type(None) in args:
-            raise TypeError(f"Greedy[{converter!r}] is invalid.")
+            msg = f"Greedy[{converter!r}] is invalid."
+            raise TypeError(msg)
 
-        return cls(converter=converter)
+        return cls(converter=converter)  # pyright: ignore[reportArgumentType]
 
 
 def _convert_to_bool(argument: str) -> bool:
@@ -1222,14 +1227,14 @@ def get_converter(param: inspect.Parameter) -> Any:
     return converter
 
 
-_GenericAlias = type(List[Any])
+_GenericAlias = type(list[Any])
 
 
-def is_generic_type(tp: Any, *, _GenericAlias: Type = _GenericAlias) -> bool:
+def is_generic_type(tp: Any, *, _GenericAlias: type = _GenericAlias) -> bool:
     return (isinstance(tp, type) and issubclass(tp, Generic)) or isinstance(tp, _GenericAlias)
 
 
-CONVERTER_MAPPING: Dict[Type[Any], Type[Converter]] = {
+CONVERTER_MAPPING: dict[type[Any], type[Converter]] = {
     disnake.Object: ObjectConverter,
     disnake.Member: MemberConverter,
     disnake.User: UserConverter,
@@ -1259,12 +1264,12 @@ CONVERTER_MAPPING: Dict[Type[Any], Type[Converter]] = {
 
 async def _actual_conversion(
     ctx: Context,
-    converter: Union[Type[T], Type[Converter[T]], Converter[T], Callable[[str], T]],
+    converter: Union[type[T], type[Converter[T]], Converter[T], Callable[[str], T]],
     argument: str,
     param: inspect.Parameter,
 ) -> T:
     if converter is bool:
-        return _convert_to_bool(argument)  # type: ignore
+        return _convert_to_bool(argument)  # pyright: ignore[reportReturnType]
 
     if isinstance(converter, type):
         module = converter.__module__
@@ -1278,14 +1283,14 @@ async def _actual_conversion(
             else:
                 return await converter().convert(ctx, argument)
         elif isinstance(converter, Converter):
-            return await converter.convert(ctx, argument)  # type: ignore
+            return await converter.convert(ctx, argument)
     except CommandError:
         raise
     except Exception as exc:
         raise ConversionError(converter, exc) from exc
 
     try:
-        return converter(argument)  # type: ignore
+        return converter(argument)  # pyright: ignore[reportReturnType, reportCallIssue]
     except CommandError:
         raise
     except Exception as exc:
@@ -1294,10 +1299,16 @@ async def _actual_conversion(
         except AttributeError:
             name = converter.__class__.__name__
 
-        raise BadArgument(f'Converting to "{name}" failed for parameter "{param.name}".') from exc
+        msg = f'Converting to "{name}" failed for parameter "{param.name}".'
+        raise BadArgument(msg) from exc
 
 
-async def run_converters(ctx: Context, converter, argument: str, param: inspect.Parameter):
+async def run_converters(
+    ctx: Context,
+    converter: Any,
+    argument: str,
+    param: inspect.Parameter,
+) -> Any:
     """|coro|
 
     Runs converters for a given converter, argument, and parameter.
@@ -1330,7 +1341,7 @@ async def run_converters(ctx: Context, converter, argument: str, param: inspect.
     origin = getattr(converter, "__origin__", None)
 
     if origin is Union:
-        errors = []
+        errors: list[CommandError] = []
         _NoneType = type(None)
         union_args = converter.__args__
         for conv in union_args:
@@ -1352,7 +1363,7 @@ async def run_converters(ctx: Context, converter, argument: str, param: inspect.
         raise BadUnionArgument(param, union_args, errors)
 
     if origin is Literal:
-        errors = []
+        errors: list[CommandError] = []
         conversions = {}
         literal_args = converter.__args__
         for literal in literal_args:

@@ -1,7 +1,9 @@
 # SPDX-License-Identifier: MIT
+from __future__ import annotations
 
 import contextlib
-from typing import Any, Iterator, Type, TypeVar
+from collections.abc import Iterator
+from typing import Any, TypeVar
 
 import pytest
 from typing_extensions import assert_type
@@ -15,8 +17,8 @@ I = TypeVar("I", bound=ui.Item)
 
 @contextlib.contextmanager
 def create_callback(
-    view_type: Type[V], item_type: Type[I]
-) -> Iterator["ui.item.ItemCallbackType[V, I]"]:
+    view_type: type[V], item_type: type[I]
+) -> Iterator[ui.item.ItemCallbackType[V, I]]:
     async def callback(self: V, item: I, inter) -> None:
         pytest.fail("callback should not be invoked")
 
@@ -54,10 +56,10 @@ class TestDecorator:
     # as @ui.string_select etc. works identically
 
     @pytest.mark.parametrize("cls", [_CustomButton, _CustomButton[Any]])
-    def test_cls(self, cls: Type[_CustomButton[ui.View]]) -> None:
+    def test_cls(self, cls: type[_CustomButton[ui.View]]) -> None:
         with create_callback(_CustomView, cls) as func:
             res = ui.button(cls=cls, param=1337)(func)
-            assert_type(res, ui.item.DecoratedItem[cls])
+            assert_type(res, ui.item.DecoratedItem[_CustomButton[ui.View]])
 
             assert func.__discord_ui_model_type__ is cls
             assert func.__discord_ui_model_kwargs__ == {"param": 1337}
@@ -66,5 +68,5 @@ class TestDecorator:
     def _test_typing_cls(self) -> None:
         ui.button(
             cls=_CustomButton,
-            this_should_not_work="h",  # type: ignore
+            this_should_not_work="h",  # pyright: ignore[reportCallIssue]
         )

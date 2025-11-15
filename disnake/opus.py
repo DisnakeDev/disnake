@@ -14,11 +14,8 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    List,
     Literal,
     Optional,
-    Tuple,
-    Type,
     TypedDict,
     TypeVar,
     overload,
@@ -108,14 +105,14 @@ signal_ctl: SignalCtl = {
 }
 
 
-def _err_lt(result: int, func: Callable, args: List) -> int:
+def _err_lt(result: int, func: Callable[..., Any], args: list[Any]) -> int:
     if result < OK:
         _log.info("error has happened in %s", func.__name__)
         raise OpusError(result)
     return result
 
 
-def _err_ne(result: T, func: Callable, args: List) -> T:
+def _err_ne(result: T, func: Callable[..., Any], args: list[Any]) -> T:
     ret = args[-1]._obj
     if ret.value != OK:
         _log.info("error has happened in %s", func.__name__)
@@ -128,8 +125,8 @@ def _err_ne(result: T, func: Callable, args: List) -> T:
 # The second one are the types of arguments it takes.
 # The third is the result type.
 # The fourth is the error handler.
-exported_functions: List[
-    Tuple[str, Optional[List[Type[ctypes._CData]]], Optional[Type[ctypes._CData]], Any]
+exported_functions: list[
+    tuple[str, Optional[list[type[ctypes._CData]]], Optional[type[ctypes._CData]], Any]
 ] = [
     # Generic
     ("opus_get_version_string", [], ctypes.c_char_p, None),
@@ -211,7 +208,7 @@ def libopus_loader(name: str) -> Any:
 
         try:
             if item[1]:
-                func.argtypes = item[1]
+                func.argtypes = item[1]  # pyright: ignore[reportAttributeAccessIssue]
 
             func.restype = item[2]
         except KeyError:
@@ -238,7 +235,8 @@ def _load_default() -> bool:
         else:
             path = ctypes.util.find_library("opus")
             if not path:
-                raise AssertionError("could not find the opus library")
+                msg = "could not find the opus library"
+                raise AssertionError(msg)
             _lib = libopus_loader(path)
     except Exception:
         _lib = MISSING
@@ -354,7 +352,7 @@ class Encoder(_OpusStruct):
         if hasattr(self, "_state"):
             _lib.opus_encoder_destroy(self._state)
             # This is a destructor, so it's okay to assign None
-            self._state = None  # type: ignore
+            self._state = None  # pyright: ignore[reportAttributeAccessIssue]
 
     def _create_state(self) -> EncoderStruct:
         ret = ctypes.c_int()
@@ -370,18 +368,16 @@ class Encoder(_OpusStruct):
 
     def set_bandwidth(self, req: BAND_CTL) -> None:
         if req not in band_ctl:
-            raise KeyError(
-                f"{req!r} is not a valid bandwidth setting. Try one of: {','.join(band_ctl)}"
-            )
+            msg = f"{req!r} is not a valid bandwidth setting. Try one of: {','.join(band_ctl)}"
+            raise KeyError(msg)
 
         k = band_ctl[req]
         _lib.opus_encoder_ctl(self._state, CTL_SET_BANDWIDTH, k)
 
     def set_signal_type(self, req: SIGNAL_CTL) -> None:
         if req not in signal_ctl:
-            raise KeyError(
-                f"{req!r} is not a valid bandwidth setting. Try one of: {','.join(signal_ctl)}"
-            )
+            msg = f"{req!r} is not a valid bandwidth setting. Try one of: {','.join(signal_ctl)}"
+            raise KeyError(msg)
 
         k = signal_ctl[req]
         _lib.opus_encoder_ctl(self._state, CTL_SET_SIGNAL, k)
@@ -395,7 +391,7 @@ class Encoder(_OpusStruct):
     def encode(self, pcm: bytes, frame_size: int) -> bytes:
         max_data_bytes = len(pcm)
         # bytes can be used to reference pointer
-        pcm_ptr = ctypes.cast(pcm, c_int16_ptr)  # type: ignore
+        pcm_ptr = ctypes.cast(pcm, c_int16_ptr)  # pyright: ignore[reportArgumentType]
         data = (ctypes.c_char * max_data_bytes)()
 
         ret = _lib.opus_encode(self._state, pcm_ptr, frame_size, data, max_data_bytes)
@@ -413,7 +409,7 @@ class Decoder(_OpusStruct):
         if hasattr(self, "_state"):
             _lib.opus_decoder_destroy(self._state)
             # This is a destructor, so it's okay to assign None
-            self._state = None  # type: ignore
+            self._state = None  # pyright: ignore[reportAttributeAccessIssue]
 
     def _create_state(self) -> DecoderStruct:
         ret = ctypes.c_int()
@@ -469,7 +465,8 @@ class Decoder(_OpusStruct):
 
     def decode(self, data: Optional[bytes], *, fec: bool = False) -> bytes:
         if data is None and fec:
-            raise TypeError("Invalid arguments: FEC cannot be used with null data")
+            msg = "Invalid arguments: FEC cannot be used with null data"
+            raise TypeError(msg)
 
         if data is None:
             frame_size = self._get_last_packet_duration() or self.SAMPLES_PER_FRAME

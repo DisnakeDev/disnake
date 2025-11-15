@@ -2,16 +2,13 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
     ClassVar,
-    Mapping,
     Optional,
-    Sequence,
-    Tuple,
-    Type,
     TypeVar,
     Union,
     overload,
@@ -52,7 +49,7 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, R
     custom_id: :class:`str`
         The ID of the select menu that gets received during an interaction.
         If not given then one is generated for you.
-    placeholder: Optional[:class:`str`]
+    placeholder: :class:`str` | :data:`None`
         The placeholder text that is shown if nothing is selected, if any.
     min_values: :class:`int`
         The minimum number of items that must be chosen for this select menu.
@@ -62,28 +59,39 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, R
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select is disabled.
-    default_values: Optional[Sequence[Union[:class:`~disnake.User`, :class:`.Member`, :class:`.Role`, :class:`.SelectDefaultValue`]]]
+    default_values: :class:`~collections.abc.Sequence`\\[:class:`~disnake.User` | :class:`.Member` | :class:`.Role` | :class:`.SelectDefaultValue`] | :data:`None`
         The list of values (users/roles) that are selected by default.
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
         Note that unlike other select menu types, this does not support :class:`.Object`\\s due to ambiguities.
 
         .. versionadded:: 2.10
-    row: Optional[:class:`int`]
+    required: :class:`bool`
+        Whether the select menu is required. Only applies to components in modals.
+        Defaults to ``True``.
+
+        .. versionadded:: 2.11
+    id: :class:`int`
+        The numeric identifier for the component. Must be unique within the message.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the message.
+
+        .. versionadded:: 2.11
+    row: :class:`int` | :data:`None`
         The relative row this select menu belongs to. A Discord component can only have 5
         rows. By default, items are arranged automatically into those 5 rows. If you'd
         like to control the relative positioning of the row then passing an index is advised.
-        For example, row=1 will show up before row=2. Defaults to ``None``, which is automatic
+        For example, row=1 will show up before row=2. Defaults to :data:`None`, which is automatic
         ordering. The row number must be between 0 and 4 (i.e. zero indexed).
 
     Attributes
     ----------
-    values: List[Union[:class:`~disnake.User`, :class:`.Member`, :class:`.Role`]]
+    values: :class:`list`\\[:class:`~disnake.User` | :class:`.Member` | :class:`.Role`]
         A list of users, members and/or roles that have been selected by the user.
     """
 
     _default_value_type_map: ClassVar[
-        Mapping[SelectDefaultValueType, Tuple[Type[Snowflake], ...]]
+        Mapping[SelectDefaultValueType, tuple[type[Snowflake], ...]]
     ] = {
         SelectDefaultValueType.user: (Member, User, ClientUser),
         SelectDefaultValueType.role: (Role,),
@@ -101,6 +109,8 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, R
         default_values: Optional[
             Sequence[SelectDefaultValueMultiInputType[Union[User, Member, Role]]]
         ] = None,
+        required: bool = True,
+        id: int = 0,
         row: Optional[int] = None,
     ) -> None: ...
 
@@ -116,6 +126,8 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, R
         default_values: Optional[
             Sequence[SelectDefaultValueMultiInputType[Union[User, Member, Role]]]
         ] = None,
+        required: bool = True,
+        id: int = 0,
         row: Optional[int] = None,
     ) -> None: ...
 
@@ -130,6 +142,8 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, R
         default_values: Optional[
             Sequence[SelectDefaultValueMultiInputType[Union[User, Member, Role]]]
         ] = None,
+        required: bool = True,
+        id: int = 0,
         row: Optional[int] = None,
     ) -> None:
         super().__init__(
@@ -141,6 +155,8 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, R
             max_values=max_values,
             disabled=disabled,
             default_values=default_values,
+            required=required,
+            id=id,
             row=row,
         )
 
@@ -153,6 +169,8 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, R
             max_values=component.max_values,
             disabled=component.disabled,
             default_values=component.default_values,
+            required=component.required,
+            id=component.id,
             row=None,
         )
 
@@ -171,6 +189,7 @@ def mentionable_select(
     default_values: Optional[
         Sequence[SelectDefaultValueMultiInputType[Union[User, Member, Role]]]
     ] = None,
+    id: int = 0,
     row: Optional[int] = None,
 ) -> Callable[
     [ItemCallbackType[V_co, MentionableSelect[V_co]]], DecoratedItem[MentionableSelect[V_co]]
@@ -199,21 +218,15 @@ def mentionable_select(
 
     Parameters
     ----------
-    cls: Callable[..., :class:`MentionableSelect`]
+    cls: :class:`~collections.abc.Callable`\\[..., :class:`MentionableSelect`]
         A callable (may be a :class:`MentionableSelect` subclass) to create a new instance of this component.
         If provided, the other parameters described below do not apply.
         Instead, this decorator will accept the same keywords as the passed callable/class does.
-    placeholder: Optional[:class:`str`]
+    placeholder: :class:`str` | :data:`None`
         The placeholder text that is shown if nothing is selected, if any.
     custom_id: :class:`str`
         The ID of the select menu that gets received during an interaction.
         It is recommended not to set this parameter to prevent conflicts.
-    row: Optional[:class:`int`]
-        The relative row this select menu belongs to. A Discord component can only have 5
-        rows. By default, items are arranged automatically into those 5 rows. If you'd
-        like to control the relative positioning of the row then passing an index is advised.
-        For example, row=1 will show up before row=2. Defaults to ``None``, which is automatic
-        ordering. The row number must be between 0 and 4 (i.e. zero indexed).
     min_values: :class:`int`
         The minimum number of items that must be chosen for this select menu.
         Defaults to 1 and must be between 1 and 25.
@@ -222,12 +235,24 @@ def mentionable_select(
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select is disabled. Defaults to ``False``.
-    default_values: Optional[Sequence[Union[:class:`~disnake.User`, :class:`.Member`, :class:`.Role`, :class:`.SelectDefaultValue`]]]
+    default_values: :class:`~collections.abc.Sequence`\\[:class:`~disnake.User` | :class:`.Member` | :class:`.Role` | :class:`.SelectDefaultValue`] | :data:`None`
         The list of values (users/roles) that are selected by default.
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
         Note that unlike other select menu types, this does not support :class:`.Object`\\s due to ambiguities.
 
         .. versionadded:: 2.10
+    id: :class:`int`
+        The numeric identifier for the component. Must be unique within the message.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the message.
+
+        .. versionadded:: 2.11
+    row: :class:`int` | :data:`None`
+        The relative row this select menu belongs to. A Discord component can only have 5
+        rows. By default, items are arranged automatically into those 5 rows. If you'd
+        like to control the relative positioning of the row then passing an index is advised.
+        For example, row=1 will show up before row=2. Defaults to :data:`None`, which is automatic
+        ordering. The row number must be between 0 and 4 (i.e. zero indexed).
     """
     return _create_decorator(cls, **kwargs)

@@ -11,7 +11,8 @@ import os
 import sys
 import time
 import types
-from typing import TYPE_CHECKING, Any, Dict, Generic, List, Mapping, Optional, Set, TypeVar, Union
+from collections.abc import Mapping
+from typing import TYPE_CHECKING, Any, Generic, Optional, TypeVar, Union
 
 import disnake
 import disnake.utils
@@ -21,10 +22,7 @@ from .cog import Cog
 
 if TYPE_CHECKING:
     from ._types import CoroFunc
-    from .bot import AutoShardedBot, AutoShardedInteractionBot, Bot, InteractionBot
     from .help import HelpCommand
-
-    AnyBot = Union[Bot, AutoShardedBot, InteractionBot, AutoShardedInteractionBot]
 
 __all__ = ("CommonBotBase",)
 _log = logging.getLogger(__name__)
@@ -41,30 +39,32 @@ def _is_submodule(parent: str, child: str) -> bool:
 
 class CommonBotBase(Generic[CogT]):
     if TYPE_CHECKING:
-        extra_events: Dict[str, List[CoroFunc]]
+        extra_events: dict[str, list[CoroFunc]]
 
     def __init__(
         self,
         *args: Any,
         owner_id: Optional[int] = None,
-        owner_ids: Optional[Set[int]] = None,
+        owner_ids: Optional[set[int]] = None,
         reload: bool = False,
         **kwargs: Any,
     ) -> None:
-        self.__cogs: Dict[str, Cog] = {}
-        self.__extensions: Dict[str, types.ModuleType] = {}
+        self.__cogs: dict[str, Cog] = {}
+        self.__extensions: dict[str, types.ModuleType] = {}
         self._is_closed: bool = False
 
         self.owner_id: Optional[int] = owner_id
-        self.owner_ids: Set[int] = owner_ids or set()
+        self.owner_ids: set[int] = owner_ids or set()
         self.owner: Optional[disnake.User] = None
-        self.owners: Set[disnake.TeamMember] = set()
+        self.owners: set[disnake.TeamMember] = set()
 
         if self.owner_id and self.owner_ids:
-            raise TypeError("Both owner_id and owner_ids are set.")
+            msg = "Both owner_id and owner_ids are set."
+            raise TypeError(msg)
 
         if self.owner_ids and not isinstance(self.owner_ids, collections.abc.Collection):
-            raise TypeError(f"owner_ids must be a collection not {self.owner_ids.__class__!r}")
+            msg = f"owner_ids must be a collection not {self.owner_ids.__class__!r}"
+            raise TypeError(msg)
 
         self.reload: bool = reload
 
@@ -73,13 +73,13 @@ class CommonBotBase(Generic[CogT]):
     # FIXME: make event name pos-only or remove entirely in v3.0
     def dispatch(self, event_name: str, *args: Any, **kwargs: Any) -> None:
         # super() will resolve to Client
-        super().dispatch(event_name, *args, **kwargs)  # type: ignore
+        super().dispatch(event_name, *args, **kwargs)  # pyright: ignore[reportAttributeAccessIssue]
 
     async def _fill_owners(self) -> None:
         if self.owner_id or self.owner_ids:
             return
 
-        app: disnake.AppInfo = await self.application_info()  # type: ignore
+        app: disnake.AppInfo = await self.application_info()  # pyright: ignore[reportAttributeAccessIssue]
         if app.team:
             self.owners = owners = {
                 member
@@ -109,13 +109,13 @@ class CommonBotBase(Generic[CogT]):
                 error.__suppress_context__ = True
                 _log.exception("Failed to remove cog %r", cog, exc_info=error)
 
-        await super().close()  # type: ignore
+        await super().close()  # pyright: ignore[reportAttributeAccessIssue]
 
     @disnake.utils.copy_doc(disnake.Client.login)
     async def login(self, token: str) -> None:
-        await super().login(token=token)  # type: ignore
+        await super().login(token=token)  # pyright: ignore[reportAttributeAccessIssue]
 
-        loop: asyncio.AbstractEventLoop = self.loop  # type: ignore
+        loop: asyncio.AbstractEventLoop = self.loop  # pyright: ignore[reportAttributeAccessIssue]
         if self.reload:
             loop.create_task(self._watchdog())
 
@@ -191,24 +191,26 @@ class CommonBotBase(Generic[CogT]):
             A cog with the same name is already loaded.
         """
         if not isinstance(cog, Cog):
-            raise TypeError("cogs must derive from Cog")
+            msg = "cogs must derive from Cog"
+            raise TypeError(msg)
 
         cog_name = cog.__cog_name__
         existing = self.__cogs.get(cog_name)
 
         if existing is not None:
             if not override:
-                raise disnake.ClientException(f"Cog named {cog_name!r} already loaded")
+                msg = f"Cog named {cog_name!r} already loaded"
+                raise disnake.ClientException(msg)
             self.remove_cog(cog_name)
 
         # NOTE: Should be covariant
-        cog = cog._inject(self)  # type: ignore
+        cog = cog._inject(self)  # pyright: ignore[reportArgumentType]
         self.__cogs[cog_name] = cog
 
     def get_cog(self, name: str) -> Optional[Cog]:
         """Gets the cog instance requested.
 
-        If the cog is not found, ``None`` is returned instead.
+        If the cog is not found, :data:`None` is returned instead.
 
         Parameters
         ----------
@@ -219,8 +221,8 @@ class CommonBotBase(Generic[CogT]):
 
         Returns
         -------
-        Optional[:class:`Cog`]
-            The cog that was requested. If not found, returns ``None``.
+        :class:`Cog` | :data:`None`
+            The cog that was requested. If not found, returns :data:`None`.
         """
         return self.__cogs.get(name)
 
@@ -243,24 +245,24 @@ class CommonBotBase(Generic[CogT]):
 
         Returns
         -------
-        Optional[:class:`.Cog`]
-            The cog that was removed. Returns ``None`` if not found.
+        :class:`.Cog` | :data:`None`
+            The cog that was removed. Returns :data:`None` if not found.
         """
         cog = self.__cogs.pop(name, None)
         if cog is None:
-            return
+            return None
 
         help_command: Optional[HelpCommand] = getattr(self, "_help_command", None)
         if help_command and help_command.cog is cog:
             help_command.cog = None
         # NOTE: Should be covariant
-        cog._eject(self)  # type: ignore
+        cog._eject(self)  # pyright: ignore[reportArgumentType]
 
         return cog
 
     @property
     def cogs(self) -> Mapping[str, Cog]:
-        """Mapping[:class:`str`, :class:`Cog`]: A read-only mapping of cog name to cog."""
+        """:class:`~collections.abc.Mapping`\\[:class:`str`, :class:`Cog`]: A read-only mapping of cog name to cog."""
         return types.MappingProxyType(self.__cogs)
 
     # extensions
@@ -306,7 +308,8 @@ class CommonBotBase(Generic[CogT]):
         lib = importlib.util.module_from_spec(spec)
         sys.modules[key] = lib
         try:
-            spec.loader.exec_module(lib)  # type: ignore
+            assert spec.loader is not None
+            spec.loader.exec_module(lib)
         except Exception as e:
             del sys.modules[key]
             raise errors.ExtensionFailed(key, e) from e
@@ -349,10 +352,10 @@ class CommonBotBase(Generic[CogT]):
             The extension name to load. It must be dot separated like
             regular Python imports if accessing a sub-module. e.g.
             ``foo.test`` if you want to import ``foo/test.py``.
-        package: Optional[:class:`str`]
+        package: :class:`str` | :data:`None`
             The package name to resolve relative imports with.
             This is required when loading an extension using a relative path, e.g ``.foo.test``.
-            Defaults to ``None``.
+            Defaults to :data:`None`.
 
             .. versionadded:: 1.7
 
@@ -396,10 +399,10 @@ class CommonBotBase(Generic[CogT]):
             The extension name to unload. It must be dot separated like
             regular Python imports if accessing a sub-module. e.g.
             ``foo.test`` if you want to import ``foo/test.py``.
-        package: Optional[:class:`str`]
+        package: :class:`str` | :data:`None`
             The package name to resolve relative imports with.
             This is required when unloading an extension using a relative path, e.g ``.foo.test``.
-            Defaults to ``None``.
+            Defaults to :data:`None`.
 
             .. versionadded:: 1.7
 
@@ -433,10 +436,10 @@ class CommonBotBase(Generic[CogT]):
             The extension name to reload. It must be dot separated like
             regular Python imports if accessing a sub-module. e.g.
             ``foo.test`` if you want to import ``foo/test.py``.
-        package: Optional[:class:`str`]
+        package: :class:`str` | :data:`None`
             The package name to resolve relative imports with.
             This is required when reloading an extension using a relative path, e.g ``.foo.test``.
-            Defaults to ``None``.
+            Defaults to :data:`None`.
 
             .. versionadded:: 1.7
 
@@ -496,7 +499,7 @@ class CommonBotBase(Generic[CogT]):
 
     @property
     def extensions(self) -> Mapping[str, types.ModuleType]:
-        """Mapping[:class:`str`, :class:`py:types.ModuleType`]: A read-only mapping of extension name to extension."""
+        """:class:`~collections.abc.Mapping`\\[:class:`str`, :class:`py:types.ModuleType`]: A read-only mapping of extension name to extension."""
         return types.MappingProxyType(self.__extensions)
 
     async def _watchdog(self) -> None:
@@ -529,7 +532,7 @@ class CommonBotBase(Generic[CogT]):
 
             if extensions:
                 try:
-                    self.i18n.reload()  # type: ignore
+                    self.i18n.reload()  # pyright: ignore[reportAttributeAccessIssue]
                 except Exception as e:
                     reload_log.exception(e)
 

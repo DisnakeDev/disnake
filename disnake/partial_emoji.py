@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Optional, Union
 
 from . import utils
 from .asset import Asset, AssetMixin
@@ -58,13 +58,13 @@ class PartialEmoji(_EmojiTag, AssetMixin):
 
     Attributes
     ----------
-    name: Optional[:class:`str`]
+    name: :class:`str` | :data:`None`
         The custom emoji name, if applicable, or the unicode codepoint
-        of the non-custom emoji. This can be ``None`` if the emoji
+        of the non-custom emoji. This can be :data:`None` if the emoji
         got deleted (e.g. removing a reaction with a deleted emoji).
     animated: :class:`bool`
         Whether the emoji is animated or not.
-    id: Optional[:class:`int`]
+    id: :class:`int` | :data:`None`
         The ID of the custom emoji, if applicable.
     """
 
@@ -85,7 +85,7 @@ class PartialEmoji(_EmojiTag, AssetMixin):
 
     @classmethod
     def from_dict(
-        cls, data: Union[PartialEmojiPayload, ActivityEmojiPayload, Dict[str, Any]]
+        cls, data: Union[PartialEmojiPayload, ActivityEmojiPayload, dict[str, Any]]
     ) -> Self:
         return cls(
             animated=data.get("animated", False),
@@ -200,7 +200,7 @@ class PartialEmoji(_EmojiTag, AssetMixin):
 
     @property
     def created_at(self) -> Optional[datetime]:
-        """Optional[:class:`datetime.datetime`]: Returns the emoji's creation time in UTC, or None if it's a Unicode emoji.
+        """:class:`datetime.datetime` | :data:`None`: Returns the emoji's creation time in UTC, or None if it's a Unicode emoji.
 
         .. versionadded:: 1.6
         """
@@ -246,7 +246,8 @@ class PartialEmoji(_EmojiTag, AssetMixin):
             The content of the asset.
         """
         if self.is_unicode_emoji():
-            raise TypeError("PartialEmoji is not a custom emoji")
+            msg = "PartialEmoji is not a custom emoji"
+            raise TypeError(msg)
 
         return await super().read()
 
@@ -255,7 +256,7 @@ class PartialEmoji(_EmojiTag, AssetMixin):
     @staticmethod
     def _emoji_to_name_id(
         emoji: Optional[Union[str, Emoji, PartialEmoji]],
-    ) -> Tuple[Optional[str], Optional[int]]:
+    ) -> tuple[Optional[str], Optional[int]]:
         if emoji is None:
             return None, None
 

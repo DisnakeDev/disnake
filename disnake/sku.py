@@ -87,7 +87,7 @@ class SKU(Hashable):
         """:class:`SKUFlags`: Returns the SKU's flags."""
         return SKUFlags._from_value(self._flags)
 
-    async def subscriptions(
+    def subscriptions(
         self,
         user: Snowflake,
         *,
@@ -95,26 +95,28 @@ class SKU(Hashable):
         before: Optional[SnowflakeTime] = None,
         after: Optional[SnowflakeTime] = None,
     ) -> SubscriptionIterator:
-        """|coro|
-
-        Retrieves an :class:`.AsyncIterator` that enables receiving subscriptions for the SKU.
+        """Retrieves an :class:`.AsyncIterator` that enables receiving subscriptions for the SKU.
 
         All parameters, except ``user``, are optional.
+
+        .. versionchanged:: |vnext|
+            Now returns an async iterator, like all other iterator methods.
+            Previously, this mistakenly returned a coroutine.
 
         Parameters
         ----------
         user: :class:`abc.Snowflake`
             The user to retrieve subscriptions for.
-        limit: Optional[:class:`int`]
+        limit: :class:`int` | :data:`None`
             The number of subscriptions to retrieve.
-            If ``None``, retrieves every subscription.
+            If :data:`None`, retrieves every subscription.
             Note, however, that this would make it a slow operation.
             Defaults to ``50``.
-        before: Union[:class:`.abc.Snowflake`, :class:`datetime.datetime`]
+        before: :class:`.abc.Snowflake` | :class:`datetime.datetime`
             Retrieves subscriptions created before this date or object.
             If a datetime is provided, it is recommended to use a UTC aware datetime.
             If the datetime is naive, it is assumed to be local time.
-        after: Union[:class:`.abc.Snowflake`, :class:`datetime.datetime`]
+        after: :class:`.abc.Snowflake` | :class:`datetime.datetime`
             Retrieve subscriptions created after this date or object.
             If a datetime is provided, it is recommended to use a UTC aware datetime.
             If the datetime is naive, it is assumed to be local time.

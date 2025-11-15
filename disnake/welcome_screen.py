@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 
 from . import utils
 from .partial_emoji import PartialEmoji, _EmojiTag
@@ -36,7 +36,7 @@ class WelcomeScreenChannel:
         The ID of the guild channel this welcome screen channel represents.
     description: :class:`str`
         The description of this channel in the official UI.
-    emoji: Optional[Union[:class:`Emoji`, :class:`PartialEmoji`]]
+    emoji: :class:`Emoji` | :class:`PartialEmoji` | :data:`None`
         The emoji associated with this channel's welcome message, if any.
     """
 
@@ -63,7 +63,8 @@ class WelcomeScreenChannel:
         elif isinstance(emoji, _EmojiTag):
             self.emoji = emoji
         else:
-            raise TypeError("emoji must be None, a str, PartialEmoji, or Emoji instance.")
+            msg = "emoji must be None, a str, PartialEmoji, or Emoji instance."
+            raise TypeError(msg)
 
     def __repr__(self) -> str:
         return f"<WelcomeScreenChannel id={self.id!r} emoji={self.emoji!r} description={self.description!r}>"
@@ -83,9 +84,10 @@ class WelcomeScreenChannel:
         return cls(id=int(data["channel_id"]), description=data["description"], emoji=emoji)
 
     def to_dict(self) -> WelcomeScreenChannelPayload:
-        result: WelcomeScreenChannelPayload = {}  # type: ignore
-        result["channel_id"] = self.id
-        result["description"] = self.description
+        result: WelcomeScreenChannelPayload = {
+            "channel_id": self.id,
+            "description": self.description,
+        }  # pyright: ignore[reportAssignmentType]
 
         if self.emoji is not None:
             if self.emoji.id:
@@ -102,9 +104,9 @@ class WelcomeScreen:
 
     Attributes
     ----------
-    description: Optional[:class:`str`]
+    description: :class:`str` | :data:`None`
         The guild description in the welcome screen.
-    channels: List[:class:`WelcomeScreenChannel`]
+    channels: :class:`list`\\[:class:`WelcomeScreenChannel`]
         The welcome screen's channels.
     """
 
@@ -125,7 +127,7 @@ class WelcomeScreen:
         self._state = state
         self._guild = guild
         self.description: Optional[str] = data.get("description")
-        self.channels: List[WelcomeScreenChannel] = [
+        self.channels: list[WelcomeScreenChannel] = [
             WelcomeScreenChannel._from_data(data=channel, state=state)
             for channel in data["welcome_channels"]
         ]
@@ -145,7 +147,7 @@ class WelcomeScreen:
         *,
         enabled: bool = MISSING,
         description: Optional[str] = MISSING,
-        channels: Optional[List[WelcomeScreenChannel]] = MISSING,
+        channels: Optional[list[WelcomeScreenChannel]] = MISSING,
         reason: Optional[str] = None,
     ) -> WelcomeScreen:
         """|coro|
@@ -161,11 +163,11 @@ class WelcomeScreen:
         ----------
         enabled: :class:`bool`
             Whether the welcome screen is enabled.
-        description: Optional[:class:`str`]
+        description: :class:`str` | :data:`None`
             The new guild description in the welcome screen.
-        channels: Optional[List[:class:`WelcomeScreenChannel`]]
+        channels: :class:`list`\\[:class:`WelcomeScreenChannel`] | :data:`None`
             The new welcome channels.
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason for editing the welcome screen. Shows up on the audit log.
 
         Raises
@@ -186,7 +188,8 @@ class WelcomeScreen:
         from .guild import Guild
 
         if not isinstance(self._guild, Guild):
-            raise TypeError("May not edit a WelcomeScreen from a PartialInviteGuild.")
+            msg = "May not edit a WelcomeScreen from a PartialInviteGuild."
+            raise TypeError(msg)
 
         return await self._guild.edit_welcome_screen(
             enabled=enabled,

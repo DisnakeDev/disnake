@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable, List, Optional, Tuple, Type, Union
+from typing import TYPE_CHECKING, Any, Callable, Optional, Union
 
 from disnake.errors import ClientException, DiscordException
 from disnake.utils import humanize_list
@@ -200,17 +200,17 @@ class CheckAnyFailure(CheckFailure):
 
     Attributes
     ----------
-    errors: List[:class:`CheckFailure`]
+    errors: :class:`list`\\[:class:`CheckFailure`]
         A list of errors that were caught during execution.
-    checks: List[Callable[[Union[:class:`Context`, :class:`disnake.ApplicationCommandInteraction`]], :class:`bool`]]
+    checks: :class:`list`\\[:class:`~collections.abc.Callable`\\[[:class:`Context` | :class:`disnake.ApplicationCommandInteraction`], :class:`bool`]]
         A list of check predicates that failed.
     """
 
     def __init__(
-        self, checks: List[CheckFailure], errors: List[Callable[[AnyContext], bool]]
+        self, checks: list[CheckFailure], errors: list[Callable[[AnyContext], bool]]
     ) -> None:
-        self.checks: List[CheckFailure] = checks
-        self.errors: List[Callable[[AnyContext], bool]] = errors
+        self.checks: list[CheckFailure] = checks
+        self.errors: list[Callable[[AnyContext], bool]] = errors
         super().__init__("You do not have permission to run this command.")
 
 
@@ -348,7 +348,7 @@ class ChannelNotReadable(BadArgument):
 
     Attributes
     ----------
-    argument: Union[:class:`.abc.GuildChannel`, :class:`.Thread`]
+    argument: :class:`.abc.GuildChannel` | :class:`.Thread`
         The channel supplied by the caller that was not readable
     """
 
@@ -537,7 +537,7 @@ class GuildScheduledEventNotFound(BadArgument):
 
 
 class BadBoolArgument(BadArgument):
-    """Exception raised when a boolean argument was not convertable.
+    """Exception raised when a boolean argument was not convertible.
 
     This inherits from :exc:`BadArgument`
 
@@ -654,7 +654,7 @@ class MissingRole(CheckFailure):
 
     Attributes
     ----------
-    missing_role: Union[:class:`str`, :class:`int`]
+    missing_role: :class:`str` | :class:`int`
         The required role that is missing.
         This is the parameter passed to :func:`~.commands.has_role`.
     """
@@ -674,7 +674,7 @@ class BotMissingRole(CheckFailure):
 
     Attributes
     ----------
-    missing_role: Union[:class:`str`, :class:`int`]
+    missing_role: :class:`str` | :class:`int`
         The required role that is missing.
         This is the parameter passed to :func:`~.commands.has_role`.
     """
@@ -695,7 +695,7 @@ class MissingAnyRole(CheckFailure):
 
     Attributes
     ----------
-    missing_roles: List[Union[:class:`str`, :class:`int`]]
+    missing_roles: :class:`list`\\[:class:`str` | :class:`int`]
         The roles that the invoker is missing.
         These are the parameters passed to :func:`~.commands.has_any_role`.
     """
@@ -720,7 +720,7 @@ class BotMissingAnyRole(CheckFailure):
 
     Attributes
     ----------
-    missing_roles: List[Union[:class:`str`, :class:`int`]]
+    missing_roles: :class:`list`\\[:class:`str` | :class:`int`]
         The roles that the bot's member is missing.
         These are the parameters passed to :func:`~.commands.has_any_role`.
 
@@ -745,7 +745,7 @@ class NSFWChannelRequired(CheckFailure):
 
     Parameters
     ----------
-    channel: Union[:class:`.abc.GuildChannel`, :class:`.Thread`]
+    channel: :class:`.abc.GuildChannel` | :class:`.Thread`
         The channel that does not have NSFW enabled.
     """
 
@@ -762,12 +762,12 @@ class MissingPermissions(CheckFailure):
 
     Attributes
     ----------
-    missing_permissions: List[:class:`str`]
+    missing_permissions: :class:`list`\\[:class:`str`]
         The required permissions that are missing.
     """
 
-    def __init__(self, missing_permissions: List[str], *args: Any) -> None:
-        self.missing_permissions: List[str] = missing_permissions
+    def __init__(self, missing_permissions: list[str], *args: Any) -> None:
+        self.missing_permissions: list[str] = missing_permissions
 
         missing = [
             perm.replace("_", " ").replace("guild", "server").title()
@@ -787,12 +787,12 @@ class BotMissingPermissions(CheckFailure):
 
     Attributes
     ----------
-    missing_permissions: List[:class:`str`]
+    missing_permissions: :class:`list`\\[:class:`str`]
         The required permissions that are missing.
     """
 
-    def __init__(self, missing_permissions: List[str], *args: Any) -> None:
-        self.missing_permissions: List[str] = missing_permissions
+    def __init__(self, missing_permissions: list[str], *args: Any) -> None:
+        self.missing_permissions: list[str] = missing_permissions
 
         missing = [
             perm.replace("_", " ").replace("guild", "server").title()
@@ -805,7 +805,7 @@ class BotMissingPermissions(CheckFailure):
 
 
 class BadUnionArgument(UserInputError):
-    """Exception raised when a :data:`typing.Union` converter fails for all
+    """Exception raised when a :class:`typing.Union` converter fails for all
     its associated types.
 
     This inherits from :exc:`UserInputError`
@@ -814,18 +814,18 @@ class BadUnionArgument(UserInputError):
     ----------
     param: :class:`inspect.Parameter`
         The parameter that failed being converted.
-    converters: Tuple[Type, ``...``]
+    converters: :class:`tuple`\\[:class:`type`, ``...``]
         A tuple of converters attempted in conversion, in order of failure.
-    errors: List[:class:`CommandError`]
+    errors: :class:`list`\\[:class:`CommandError`]
         A list of errors that were caught from failing the conversion.
     """
 
     def __init__(
-        self, param: Parameter, converters: Tuple[Type, ...], errors: List[CommandError]
+        self, param: Parameter, converters: tuple[type, ...], errors: list[CommandError]
     ) -> None:
         self.param: Parameter = param
-        self.converters: Tuple[Type, ...] = converters
-        self.errors: List[CommandError] = errors
+        self.converters: tuple[type, ...] = converters
+        self.errors: list[CommandError] = errors
 
         def _get_name(x):
             try:
@@ -853,18 +853,18 @@ class BadLiteralArgument(UserInputError):
     ----------
     param: :class:`inspect.Parameter`
         The parameter that failed being converted.
-    literals: Tuple[Any, ``...``]
+    literals: :class:`tuple`\\[:data:`~typing.Any`, ``...``]
         A tuple of values compared against in conversion, in order of failure.
-    errors: List[:class:`CommandError`]
+    errors: :class:`list`\\[:class:`CommandError`]
         A list of errors that were caught from failing the conversion.
     """
 
     def __init__(
-        self, param: Parameter, literals: Tuple[Any, ...], errors: List[CommandError]
+        self, param: Parameter, literals: tuple[Any, ...], errors: list[CommandError]
     ) -> None:
         self.param: Parameter = param
-        self.literals: Tuple[Any, ...] = literals
-        self.errors: List[CommandError] = errors
+        self.literals: tuple[Any, ...] = literals
+        self.errors: list[CommandError] = errors
 
         to_string = [repr(literal) for literal in literals]
         fmt = humanize_list(to_string, "or")
@@ -1066,13 +1066,13 @@ class TooManyFlags(FlagError):
     ----------
     flag: :class:`.Flag`
         The flag that received too many values.
-    values: List[:class:`str`]
+    values: :class:`list`\\[:class:`str`]
         The values that were passed.
     """
 
-    def __init__(self, flag: Flag, values: List[str]) -> None:
+    def __init__(self, flag: Flag, values: list[str]) -> None:
         self.flag: Flag = flag
-        self.values: List[str] = values
+        self.values: list[str] = values
         super().__init__(
             f"Too many flag values, expected {flag.max_args} but received {len(values)}."
         )

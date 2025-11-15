@@ -3,37 +3,25 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 import os
 import sys
 import time
 import traceback
+from collections.abc import Sequence
 from functools import partial
 from itertools import groupby
-from typing import (
-    TYPE_CHECKING,
-    Callable,
-    ClassVar,
-    Dict,
-    Iterator,
-    List,
-    Optional,
-    Sequence,
-    Tuple,
-)
+from typing import TYPE_CHECKING, Callable, ClassVar, Optional
 
 from ..components import (
+    VALID_ACTION_ROW_MESSAGE_COMPONENT_TYPES,
     ActionRow as ActionRowComponent,
+    ActionRowMessageComponent,
     Button as ButtonComponent,
-    ChannelSelectMenu as ChannelSelectComponent,
-    MentionableSelectMenu as MentionableSelectComponent,
-    MessageComponent,
-    RoleSelectMenu as RoleSelectComponent,
-    StringSelectMenu as StringSelectComponent,
-    UserSelectMenu as UserSelectComponent,
     _component_factory,
 )
 from ..enums import try_enum_to_int
-from ..utils import assert_never
+from .action_row import _message_component_to_item, walk_components
 from .button import Button
 from .item import Item
 
@@ -50,48 +38,21 @@ if TYPE_CHECKING:
     from .item import ItemCallbackType
 
 
-def _walk_all_components(
-    components: List[ActionRowComponent[MessageComponent]],
-) -> Iterator[MessageComponent]:
-    for item in components:
-        yield from item.children
+_log = logging.getLogger(__name__)
 
 
-def _component_to_item(component: MessageComponent) -> Item:
-    if isinstance(component, ButtonComponent):
-        from .button import Button
-
-        return Button.from_component(component)
-    if isinstance(component, StringSelectComponent):
-        from .select import StringSelect
-
-        return StringSelect.from_component(component)
-    if isinstance(component, UserSelectComponent):
-        from .select import UserSelect
-
-        return UserSelect.from_component(component)
-    if isinstance(component, RoleSelectComponent):
-        from .select import RoleSelect
-
-        return RoleSelect.from_component(component)
-    if isinstance(component, MentionableSelectComponent):
-        from .select import MentionableSelect
-
-        return MentionableSelect.from_component(component)
-    if isinstance(component, ChannelSelectComponent):
-        from .select import ChannelSelect
-
-        return ChannelSelect.from_component(component)
-
-    assert_never(component)
-    return Item.from_component(component)
+def _component_to_item(component: ActionRowMessageComponent) -> Item:
+    if item := _message_component_to_item(component):
+        return item
+    else:
+        return Item.from_component(component)
 
 
 class _ViewWeights:
     __slots__ = ("weights",)
 
-    def __init__(self, children: List[Item]) -> None:
-        self.weights: List[int] = [0, 0, 0, 0, 0]
+    def __init__(self, children: list[Item]) -> None:
+        self.weights: list[int] = [0, 0, 0, 0, 0]
 
         key: Callable[[Item[View]], int] = lambda i: sys.maxsize if i.row is None else i.row
         children = sorted(children, key=key)
@@ -104,13 +65,15 @@ class _ViewWeights:
             if weight + item.width <= 5:
                 return index
 
-        raise ValueError("could not find open space for item")
+        msg = "could not find open space for item"
+        raise ValueError(msg)
 
     def add_item(self, item: Item) -> None:
         if item.row is not None:
             total = self.weights[item.row] + item.width
             if total > 5:
-                raise ValueError(f"item would not fit at row {item.row} ({total} > 5 width)")
+                msg = f"item would not fit at row {item.row} ({total} > 5 width)"
+                raise ValueError(msg)
             self.weights[item.row] = total
             item._rendered_row = item.row
         else:
@@ -140,40 +103,41 @@ class View:
 
     Parameters
     ----------
-    timeout: Optional[:class:`float`]
+    timeout: :class:`float` | :data:`None`
         Timeout in seconds from last interaction with the UI before no longer accepting input.
-        If ``None`` then there is no timeout.
+        If :data:`None` then there is no timeout.
 
     Attributes
     ----------
-    timeout: Optional[:class:`float`]
+    timeout: :class:`float` | :data:`None`
         Timeout from last interaction with the UI before no longer accepting input.
-        If ``None`` then there is no timeout.
-    children: List[:class:`Item`]
+        If :data:`None` then there is no timeout.
+    children: :class:`list`\\[:class:`Item`]
         The list of children attached to this view.
     """
 
     __discord_ui_view__: ClassVar[bool] = True
-    __view_children_items__: ClassVar[List[ItemCallbackType[Self, Item[Self]]]] = []
+    __view_children_items__: ClassVar[list[ItemCallbackType[Self, Item[Self]]]] = []
 
     def __init_subclass__(cls) -> None:
-        children: List[ItemCallbackType[Self, Item[Self]]] = []
+        children: list[ItemCallbackType[Self, Item[Self]]] = []
         for base in reversed(cls.__mro__):
             for member in base.__dict__.values():
                 if hasattr(member, "__discord_ui_model_type__"):
                     children.append(member)
 
         if len(children) > 25:
-            raise TypeError("View cannot have more than 25 children")
+            msg = "View cannot have more than 25 children"
+            raise TypeError(msg)
 
         cls.__view_children_items__ = children
 
     def __init__(self, *, timeout: Optional[float] = 180.0) -> None:
         self.timeout = timeout
-        self.children: List[Item[Self]] = []
+        self.children: list[Item[Self]] = []
         for func in self.__view_children_items__:
             item: Item[Self] = func.__discord_ui_model_type__(**func.__discord_ui_model_kwargs__)
-            item.callback = partial(func, self, item)
+            item.callback = partial(func, self, item)  # pyright: ignore[reportAttributeAccessIssue]
             item._view = self
             setattr(self, func.__name__, item)
             self.children.append(item)
@@ -196,22 +160,24 @@ class View:
                 return
 
             if self.__timeout_expiry is None:
-                return self._dispatch_timeout()
+                self._dispatch_timeout()
+                return
 
             # Check if we've elapsed our currently set timeout
             now = time.monotonic()
             if now >= self.__timeout_expiry:
-                return self._dispatch_timeout()
+                self._dispatch_timeout()
+                return
 
             # Wait N seconds to see if timeout data has been refreshed
             await asyncio.sleep(self.__timeout_expiry - now)
 
-    def to_components(self) -> List[ActionRowPayload]:
+    def to_components(self) -> list[ActionRowPayload]:
         def key(item: Item) -> int:
             return item._rendered_row or 0
 
         children = sorted(self.children, key=key)
-        components: List[ActionRowPayload] = []
+        components: list[ActionRowPayload] = []
         for _, group in groupby(children, key=key):
             children = [item.to_component_dict() for item in group]
             if not children:
@@ -220,6 +186,7 @@ class View:
             components.append(
                 {
                     "type": 1,
+                    "id": 0,
                     "components": children,
                 }
             )
@@ -239,8 +206,14 @@ class View:
         ----------
         message: :class:`disnake.Message`
             The message with components to convert into a view.
-        timeout: Optional[:class:`float`]
+        timeout: :class:`float` | :data:`None`
             The timeout of the converted view.
+
+        Raises
+        ------
+        TypeError
+            Message contains v2 components, which are not supported by :class:`View`.
+            See also :attr:`.MessageFlags.is_components_v2`.
 
         Returns
         -------
@@ -249,7 +222,14 @@ class View:
             one of its subclasses.
         """
         view = View(timeout=timeout)
-        for component in _walk_all_components(message.components):
+        # FIXME: preserve rows
+        for component in walk_components(message.components):
+            if isinstance(component, ActionRowComponent):
+                continue
+            if not isinstance(component, VALID_ACTION_ROW_MESSAGE_COMPONENT_TYPES):
+                # can happen if message uses components v2
+                msg = f"Cannot construct view from message - unexpected {type(component).__name__}"
+                raise TypeError(msg)
             view.add_item(_component_to_item(component))
         return view
 
@@ -279,10 +259,12 @@ class View:
             or the row the item is trying to be added to is full.
         """
         if len(self.children) > 25:
-            raise ValueError("maximum number of children exceeded")
+            msg = "maximum number of children exceeded"
+            raise ValueError(msg)
 
         if not isinstance(item, Item):
-            raise TypeError(f"expected Item not {item.__class__!r}")
+            msg = f"expected Item not {item.__class__!r}"
+            raise TypeError(msg)
 
         self.__weights.add_item(item)
 
@@ -374,14 +356,14 @@ class View:
         print(f"Ignoring exception in view {self} for item {item}:", file=sys.stderr)
         traceback.print_exception(error.__class__, error, error.__traceback__, file=sys.stderr)
 
-    async def _scheduled_task(self, item: Item, interaction: MessageInteraction):
+    async def _scheduled_task(self, item: Item, interaction: MessageInteraction) -> None:
         try:
             if self.timeout:
                 self.__timeout_expiry = time.monotonic() + self.timeout
 
             allow = await self.interaction_check(interaction)
             if not allow:
-                return
+                return None
 
             await item.callback(interaction)
         except Exception as e:
@@ -412,18 +394,19 @@ class View:
             self._scheduled_task(item, interaction), name=f"disnake-ui-view-dispatch-{self.id}"
         )
 
-    def refresh(self, components: List[ActionRowComponent[MessageComponent]]) -> None:
+    def refresh(self, components: list[ActionRowComponent[ActionRowMessageComponent]]) -> None:
         # TODO: this is pretty hacky at the moment, see https://github.com/DisnakeDev/disnake/commit/9384a72acb8c515b13a600592121357e165368da
-        old_state: Dict[Tuple[int, str], Item] = {
-            (item.type.value, item.custom_id): item  # type: ignore
+        old_state: dict[tuple[int, str], Item] = {
+            (item.type.value, item.custom_id): item  # pyright: ignore[reportAttributeAccessIssue]
             for item in self.children
             if item.is_dispatchable()
         }
-        children: List[Item] = []
-        for component in _walk_all_components(components):
+
+        children: list[Item] = []
+        for component in (c for row in components for c in row.children):
             older: Optional[Item] = None
             try:
-                older = old_state[(component.type.value, component.custom_id)]  # type: ignore
+                older = old_state[component.type.value, component.custom_id]  # pyright: ignore[reportArgumentType]
             except (KeyError, AttributeError):
                 # workaround for non-interactive buttons, since they're not part of `old_state`
                 if isinstance(component, ButtonComponent):
@@ -439,7 +422,7 @@ class View:
                             break
 
             if older:
-                older.refresh_component(component)  # type: ignore  # this is fine, pyright is trying to be smart
+                older.refresh_component(component)  # pyright: ignore[reportArgumentType]  # this is fine, pyright is trying to be smart
                 children.append(older)
             else:
                 # fallback, should not happen as long as implementation covers all cases
@@ -483,7 +466,7 @@ class View:
 
         A persistent view only has components with a set ``custom_id``
         (or non-interactive components such as :attr:`~.ButtonStyle.link` or :attr:`~.ButtonStyle.premium` buttons),
-        and a :attr:`timeout` set to ``None``.
+        and a :attr:`timeout` set to :data:`None`.
 
         :return type: :class:`bool`
         """
@@ -507,9 +490,9 @@ class View:
 class ViewStore:
     def __init__(self, state: ConnectionState) -> None:
         # (component_type, message_id, custom_id): (View, Item)
-        self._views: Dict[Tuple[int, Optional[int], str], Tuple[View, Item]] = {}
+        self._views: dict[tuple[int, Optional[int], str], tuple[View, Item]] = {}
         # message_id: View
-        self._synced_message_views: Dict[int, View] = {}
+        self._synced_message_views: dict[int, View] = {}
         self._state: ConnectionState = state
 
     @property
@@ -518,7 +501,7 @@ class ViewStore:
         return list(views.values())
 
     def __verify_integrity(self) -> None:
-        to_remove: List[Tuple[int, Optional[int], str]] = []
+        to_remove: list[tuple[int, Optional[int], str]] = []
         for k, (view, _) in self._views.items():
             if view.is_finished():
                 to_remove.append(k)
@@ -532,7 +515,7 @@ class ViewStore:
         view._start_listening_from_store(self)
         for item in view.children:
             if item.is_dispatchable():
-                self._views[(item.type.value, message_id, item.custom_id)] = (view, item)  # type: ignore
+                self._views[item.type.value, message_id, item.custom_id] = (view, item)  # pyright: ignore[reportAttributeAccessIssue]
 
         if message_id is not None:
             self._synced_message_views[message_id] = view
@@ -540,7 +523,10 @@ class ViewStore:
     def remove_view(self, view: View) -> None:
         for item in view.children:
             if item.is_dispatchable():
-                self._views.pop((item.type.value, item.custom_id), None)  # type: ignore
+                self._views.pop(  # pyright: ignore[reportCallIssue]
+                    (item.type.value, item.custom_id),  # pyright: ignore[reportArgumentType, reportAttributeAccessIssue]
+                    None,
+                )
 
         for key, value in self._synced_message_views.items():
             if value.id == view.id:
@@ -569,9 +555,21 @@ class ViewStore:
     def remove_message_tracking(self, message_id: int) -> Optional[View]:
         return self._synced_message_views.pop(message_id, None)
 
-    def update_from_message(self, message_id: int, components: List[ComponentPayload]) -> None:
+    def update_from_message(self, message_id: int, components: Sequence[ComponentPayload]) -> None:
         # pre-req: is_message_tracked == true
         view = self._synced_message_views[message_id]
-        view.refresh(
-            [_component_factory(d, type=ActionRowComponent[MessageComponent]) for d in components]
-        )
+
+        rows = [
+            _component_factory(d, type=ActionRowComponent[ActionRowMessageComponent])
+            for d in components
+        ]
+        for row in rows:
+            if not isinstance(row, ActionRowComponent):
+                _log.warning(
+                    "cannot update view for message %d, unexpected %s",
+                    message_id,
+                    type(row).__name__,
+                )
+                return
+
+        view.refresh(rows)

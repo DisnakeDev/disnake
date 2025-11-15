@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import List, Literal, Optional, TypedDict
+from typing import Literal, Optional, TypedDict
 
 from typing_extensions import NotRequired
 
@@ -10,12 +10,13 @@ from .snowflake import Snowflake
 from .user import User
 
 StatusType = Literal["idle", "dnd", "online", "offline"]
+StatusDisplayType = Literal[0, 1, 2]
 
 
 class PresenceData(TypedDict):
     user: User
     status: StatusType
-    activities: List[Activity]
+    activities: list[Activity]
     client_status: ClientStatus
 
 
@@ -36,7 +37,7 @@ class ActivityTimestamps(TypedDict, total=False):
 
 class ActivityParty(TypedDict, total=False):
     id: str
-    size: List[int]  # (current size, max size)
+    size: list[int]  # (current size, max size)
 
 
 class ActivityAssets(TypedDict, total=False):
@@ -44,8 +45,10 @@ class ActivityAssets(TypedDict, total=False):
     # https://discord.com/developers/docs/topics/gateway-events#activity-object-activity-asset-image
     large_image: str
     large_text: str
+    large_url: str
     small_image: str
     small_text: str
+    small_url: str
 
 
 class ActivitySecrets(TypedDict, total=False):
@@ -75,7 +78,9 @@ class Activity(SendableActivity, total=False):
     timestamps: ActivityTimestamps
     application_id: Snowflake
     details: Optional[str]
+    details_url: Optional[str]
     state: Optional[str]
+    state_url: Optional[str]
     emoji: Optional[ActivityEmoji]
     party: ActivityParty
     assets: ActivityAssets
@@ -84,9 +89,10 @@ class Activity(SendableActivity, total=False):
     flags: int
     # `buttons` is a list of strings when received over gw,
     # bots cannot access the full button data (like urls)
-    buttons: List[str]
+    buttons: list[str]
     # all of these are undocumented, but still useful in some cases:
     id: Optional[str]
     platform: Optional[str]
     sync_id: Optional[str]
     session_id: Optional[str]
+    status_display_type: Optional[StatusDisplayType]

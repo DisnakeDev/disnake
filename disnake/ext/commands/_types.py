@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: MIT
 
-from typing import TYPE_CHECKING, Any, Callable, Coroutine, TypeVar, Union
+from collections.abc import Coroutine
+from typing import TYPE_CHECKING, Any, Callable, TypeVar, Union
 
 if TYPE_CHECKING:
     from disnake import ApplicationCommandInteraction
@@ -10,6 +11,8 @@ if TYPE_CHECKING:
     from .errors import CommandError
 
 T = TypeVar("T")
+
+FuncT = TypeVar("FuncT", bound=Callable[..., Any])
 
 Coro = Coroutine[Any, Any, T]
 MaybeCoro = Union[T, Coro[T]]

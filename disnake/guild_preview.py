@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional, Tuple
+from typing import TYPE_CHECKING, Optional
 
 from .asset import Asset
 from .emoji import Emoji
@@ -24,15 +24,15 @@ class GuildPreview:
     ----------
     name: :class:`str`
         The guild's name.
-    emojis: Tuple[:class:`Emoji`, ...]
+    emojis: :class:`tuple`\\[:class:`Emoji`, ...]
         All emojis that the guild owns.
-    stickers: Tuple[:class:`GuildSticker`, ...]
+    stickers: :class:`tuple`\\[:class:`GuildSticker`, ...]
         All stickers that the guild owns.
     id: :class:`int`
         The ID of the guild this preview represents.
-    description: Optional[:class:`str`]
+    description: :class:`str` | :data:`None`
         The guild's description.
-    features: List[:class:`str`]
+    features: :class:`list`\\[:class:`str`]
         A list of features that the guild has. The features that a guild can have are
         subject to arbitrary change by Discord.
 
@@ -74,40 +74,40 @@ class GuildPreview:
 
         emojis = data.get("emojis")
         if emojis:
-            self.emojis: Tuple[Emoji, ...] = tuple(
+            self.emojis: tuple[Emoji, ...] = tuple(
                 Emoji(guild=self, state=self._state, data=emoji) for emoji in emojis
             )
         else:
-            self.emojis: Tuple[Emoji, ...] = ()
+            self.emojis: tuple[Emoji, ...] = ()
 
         stickers = data.get("stickers")
         if stickers:
-            self.stickers: Tuple[GuildSticker, ...] = tuple(
+            self.stickers: tuple[GuildSticker, ...] = tuple(
                 GuildSticker(state=self._state, data=sticker) for sticker in stickers
             )
         else:
-            self.stickers: Tuple[GuildSticker, ...] = ()
+            self.stickers: tuple[GuildSticker, ...] = ()
 
     def __repr__(self) -> str:
         return f"<GuildPreview id={self.id!r} name={self.name!r}>"
 
     @property
     def icon(self) -> Optional[Asset]:
-        """Optional[:class:`Asset`]: Returns the guild preview's icon asset, if available."""
+        """:class:`Asset` | :data:`None`: Returns the guild preview's icon asset, if available."""
         if self._icon is None:
             return None
         return Asset._from_guild_icon(self._state, self.id, self._icon)
 
     @property
     def splash(self) -> Optional[Asset]:
-        """Optional[:class:`Asset`]: Returns the guild preview's invite splash asset, if available."""
+        """:class:`Asset` | :data:`None`: Returns the guild preview's invite splash asset, if available."""
         if self._splash is None:
             return None
         return Asset._from_guild_image(self._state, self.id, self._splash, path="splashes")
 
     @property
     def discovery_splash(self) -> Optional[Asset]:
-        """Optional[:class:`Asset`]: Returns the guild preview's discovery splash asset, if available."""
+        """:class:`Asset` | :data:`None`: Returns the guild preview's discovery splash asset, if available."""
         if self._discovery_splash is None:
             return None
         return Asset._from_guild_image(

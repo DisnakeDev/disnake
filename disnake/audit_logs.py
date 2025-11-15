@@ -2,18 +2,13 @@
 
 from __future__ import annotations
 
+from collections.abc import Generator, Mapping
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
     ClassVar,
-    Dict,
-    Generator,
-    List,
-    Mapping,
     Optional,
-    Tuple,
-    Type,
     TypeVar,
     Union,
     cast,
@@ -117,9 +112,9 @@ def _transform_guild_id(entry: AuditLogEntry, data: Optional[Snowflake]) -> Opti
 
 
 def _transform_overwrites(
-    entry: AuditLogEntry, data: List[PermissionOverwritePayload]
-) -> List[Tuple[Object, PermissionOverwrite]]:
-    overwrites = []
+    entry: AuditLogEntry, data: list[PermissionOverwritePayload]
+) -> list[tuple[Union[Object, Member, Role, User], PermissionOverwrite]]:
+    overwrites: list[tuple[Union[Object, Member, Role, User], PermissionOverwrite]] = []
     for elem in data:
         allow = Permissions(int(elem["allow"]))
         deny = Permissions(int(elem["deny"]))
@@ -145,14 +140,16 @@ def _transform_icon(entry: AuditLogEntry, data: Optional[str]) -> Optional[Asset
     if data is None:
         return None
     if entry.action.name.startswith("role_"):
-        return Asset._from_role_icon(entry._state, entry._target_id, data)  # type: ignore
+        assert entry._target_id is not None
+        return Asset._from_role_icon(entry._state, entry._target_id, data)
     return Asset._from_guild_icon(entry._state, entry.guild.id, data)
 
 
 def _transform_avatar(entry: AuditLogEntry, data: Optional[str]) -> Optional[Asset]:
     if data is None:
         return None
-    return Asset._from_avatar(entry._state, entry._target_id, data)  # type: ignore
+    assert entry._target_id is not None
+    return Asset._from_avatar(entry._state, entry._target_id, data)
 
 
 def _guild_hash_transformer(path: str) -> Callable[[AuditLogEntry, Optional[str]], Optional[Asset]]:
@@ -199,7 +196,7 @@ EnumT = TypeVar("EnumT", bound=enums.Enum)
 FlagsT = TypeVar("FlagsT", bound=flags.BaseFlags)
 
 
-def _enum_transformer(enum: Type[EnumT]) -> Callable[[AuditLogEntry, int], EnumT]:
+def _enum_transformer(enum: type[EnumT]) -> Callable[[AuditLogEntry, int], EnumT]:
     def _transform(entry: AuditLogEntry, data: int) -> EnumT:
         return enums.try_enum(enum, data)
 
@@ -207,7 +204,7 @@ def _enum_transformer(enum: Type[EnumT]) -> Callable[[AuditLogEntry, int], EnumT
 
 
 def _flags_transformer(
-    flags_type: Type[FlagsT],
+    flags_type: type[FlagsT],
 ) -> Callable[[AuditLogEntry, Optional[int]], Optional[FlagsT]]:
     def _transform(entry: AuditLogEntry, data: Optional[int]) -> Optional[FlagsT]:
         return flags_type._from_value(data) if data is not None else None
@@ -217,8 +214,8 @@ def _flags_transformer(
 
 def _list_transformer(
     func: Callable[[AuditLogEntry, Any], T],
-) -> Callable[[AuditLogEntry, Any], List[T]]:
-    def _transform(entry: AuditLogEntry, data: Any) -> List[T]:
+) -> Callable[[AuditLogEntry, Any], list[T]]:
+    def _transform(entry: AuditLogEntry, data: Any) -> list[T]:
         if not data:
             return []
         return [func(entry, value) for value in data if value is not None]
@@ -234,7 +231,7 @@ def _transform_type(
         return enums.try_enum(enums.StickerType, data)
     elif action_name.startswith("webhook_"):
         return enums.try_enum(enums.WebhookType, data)
-    elif action_name.startswith("integration_") or action_name.startswith("overwrite_"):
+    elif action_name.startswith(("integration_", "overwrite_")):
         # integration: str, overwrite: int
         return data
     else:
@@ -260,7 +257,8 @@ def _transform_guild_scheduled_event_image(
 ) -> Optional[Asset]:
     if data is None:
         return None
-    return Asset._from_guild_scheduled_event_image(entry._state, entry._target_id, data)  # type: ignore
+    assert entry._target_id is not None
+    return Asset._from_guild_scheduled_event_image(entry._state, entry._target_id, data)
 
 
 def _transform_automod_action(
@@ -294,7 +292,7 @@ class AuditLogDiff:
     def __len__(self) -> int:
         return len(self.__dict__)
 
-    def __iter__(self) -> Generator[Tuple[str, Any], None, None]:
+    def __iter__(self) -> Generator[tuple[str, Any], None, None]:
         yield from self.__dict__.items()
 
     def __repr__(self) -> str:
@@ -313,7 +311,7 @@ Transformer = Callable[["AuditLogEntry", Any], Any]
 
 class AuditLogChanges:
     # fmt: off
-    TRANSFORMERS: ClassVar[Dict[str, Tuple[Optional[str], Optional[Transformer]]]] = {
+    TRANSFORMERS: ClassVar[dict[str, tuple[Optional[str], Optional[Transformer]]]] = {
         "verification_level":                 (None, _enum_transformer(enums.VerificationLevel)),
         "explicit_content_filter":            (None, _enum_transformer(enums.ContentFilter)),
         "allow":                              (None, _transform_permissions),
@@ -367,7 +365,7 @@ class AuditLogChanges:
     }
     # fmt: on
 
-    def __init__(self, entry: AuditLogEntry, data: List[AuditLogChangePayload]) -> None:
+    def __init__(self, entry: AuditLogEntry, data: list[AuditLogChangePayload]) -> None:
         self.before = AuditLogDiff()
         self.after = AuditLogDiff()
 
@@ -378,10 +376,12 @@ class AuditLogChanges:
 
             # special cases for role add/remove
             if attr == "$add":
-                self._handle_role(self.before, self.after, entry, elem["new_value"])  # type: ignore
+                assert "new_value" in elem
+                self._handle_role(self.before, self.after, entry, elem["new_value"])  # pyright: ignore[reportArgumentType]
                 continue
-            elif attr == "$remove":
-                self._handle_role(self.after, self.before, entry, elem["new_value"])  # type: ignore
+            if attr == "$remove":
+                assert "new_value" in elem
+                self._handle_role(self.after, self.before, entry, elem["new_value"])  # pyright: ignore[reportArgumentType]
                 continue
 
             # special case for application command permissions update
@@ -405,24 +405,20 @@ class AuditLogChanges:
                 if key:
                     attr = key
 
-            try:
+            if "old_value" in elem:
                 before = elem["old_value"]
-            except KeyError:
-                before = None
-            else:
                 if transformer:
                     before = transformer(entry, before)
-
+            else:
+                before = None
             setattr(self.before, attr, before)
 
-            try:
+            if "new_value" in elem:
                 after = elem["new_value"]
-            except KeyError:
-                after = None
-            else:
                 if transformer:
                     after = transformer(entry, after)
-
+            else:
+                after = None
             setattr(self.after, attr, after)
 
         if has_emoji_fields:
@@ -444,7 +440,7 @@ class AuditLogChanges:
         first: AuditLogDiff,
         second: AuditLogDiff,
         entry: AuditLogEntry,
-        elem: List[RolePayload],
+        elem: list[RolePayload],
     ) -> None:
         if not hasattr(first, "roles"):
             first.roles = []
@@ -458,7 +454,7 @@ class AuditLogChanges:
 
             if role is None:
                 role = Object(id=role_id)
-                role.name = e["name"]  # type: ignore
+                role.name = e["name"]  # pyright: ignore[reportAttributeAccessIssue]
 
             data.append(role)
 
@@ -557,7 +553,7 @@ class AuditLogEntry(Hashable):
     ----------
     action: :class:`AuditLogAction`
         The action that was done.
-    user: Optional[Union[:class:`Member`, :class:`User`, :class:`Object`]]
+    user: :class:`Member` | :class:`User` | :class:`Object` | :data:`None`
         The user who initiated this action. Usually :class:`Member`\\, unless gone
         then it's a :class:`User`.
 
@@ -570,10 +566,10 @@ class AuditLogEntry(Hashable):
         the action being done.
     extra: Any
         Extra information that this entry has that might be useful.
-        For most actions, this is ``None``. However in some cases it
+        For most actions, this is :data:`None`. However in some cases it
         contains extra information. See :class:`AuditLogAction` for
         which actions have this field filled out.
-    reason: Optional[:class:`str`]
+    reason: :class:`str` | :data:`None`
         The reason this action was done.
     """
 
@@ -651,7 +647,7 @@ class AuditLogEntry(Hashable):
                     role = self.guild.get_role(instance_id)
                     if role is None:
                         role = Object(id=instance_id)
-                        role.name = extra.get("role_name")  # type: ignore
+                        role.name = extra.get("role_name")  # pyright: ignore[reportAttributeAccessIssue]
                     self.extra = role
             elif self.action.name.startswith("stage_instance"):
                 elems = {
@@ -670,6 +666,7 @@ class AuditLogEntry(Hashable):
                 enums.AuditLogAction.automod_block_message,
                 enums.AuditLogAction.automod_send_alert_message,
                 enums.AuditLogAction.automod_timeout,
+                enums.AuditLogAction.automod_quarantine_user,
             ):
                 elems = {
                     "channel": (
@@ -781,7 +778,7 @@ class AuditLogEntry(Hashable):
 
     @utils.cached_property
     def category(self) -> Optional[enums.AuditLogActionCategory]:
-        """Optional[:class:`AuditLogActionCategory`]: The category of the action, if applicable."""
+        """:class:`AuditLogActionCategory` | :data:`None`: The category of the action, if applicable."""
         return self.action.category
 
     @utils.cached_property
@@ -826,6 +823,7 @@ class AuditLogEntry(Hashable):
             "uses": changeset.uses,
             "type": 0,
             "channel": None,
+            "expires_at": None,
         }
 
         obj = Invite(

@@ -6,10 +6,11 @@ from setuptools import setup
 
 version = ""
 with open("disnake/__init__.py", encoding="utf-8") as f:
-    version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE).group(1)  # type: ignore
+    version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE).group(1)  # pyright: ignore[reportOptionalMemberAccess]
 
 if not version:
-    raise RuntimeError("version is not set")
+    msg = "version is not set"
+    raise RuntimeError(msg)
 
 if version.endswith(("a", "b", "rc")):
     # append version identifier based on commit count
@@ -31,21 +32,6 @@ if version.endswith(("a", "b", "rc")):
     except Exception:
         pass
 
-packages = [
-    "disnake",
-    "disnake.bin",
-    "disnake.types",
-    "disnake.ui",
-    "disnake.ui.select",
-    "disnake.webhook",
-    "disnake.interactions",
-    "disnake.ext.commands",
-    "disnake.ext.tasks",
-    "disnake.ext.mypy_plugin",
-]
-
 setup(
     version=version,
-    packages=packages,
-    include_package_data=True,
 )

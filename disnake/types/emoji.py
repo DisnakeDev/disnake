@@ -23,3 +23,7 @@ class Emoji(PartialEmoji, total=False):
 class EditEmoji(TypedDict):
     name: str
     roles: Optional[SnowflakeList]
+
+
+class ListAppEmoji(TypedDict):
+    items: list[Emoji]

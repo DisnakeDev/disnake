@@ -2,18 +2,15 @@
 from __future__ import annotations
 
 import types
+from collections.abc import Iterator
 from functools import total_ordering
 from typing import (
     TYPE_CHECKING,
     Any,
     ClassVar,
-    Dict,
-    Iterator,
-    List,
     NamedTuple,
     NoReturn,
     Optional,
-    Type,
     TypeVar,
 )
 
@@ -28,6 +25,7 @@ __all__ = (
     "VerificationLevel",
     "ContentFilter",
     "Status",
+    "StatusDisplayType",
     "DefaultAvatar",
     "AuditLogAction",
     "AuditLogActionCategory",
@@ -69,6 +67,7 @@ __all__ = (
     "ThreadLayout",
     "Event",
     "ApplicationRoleConnectionMetadataType",
+    "ApplicationEventWebhookStatus",
     "OnboardingPromptType",
     "SKUType",
     "EntitlementType",
@@ -76,12 +75,17 @@ __all__ = (
     "PollLayoutType",
     "VoiceChannelEffectAnimationType",
     "MessageReferenceType",
+    "SeparatorSpacing",
+    "NameplatePalette",
 )
+
+EnumMetaT = TypeVar("EnumMetaT", bound="EnumMeta")
 
 
 class _EnumValueBase(NamedTuple):
     if TYPE_CHECKING:
-        _cls_name: ClassVar[str]
+        _cls_name: ClassVar[str]  # pyright: ignore[reportGeneralTypeIssues, reportInvalidTypeForm]
+        _actual_enum_cls_: ClassVar[EnumMeta]  # pyright: ignore[reportGeneralTypeIssues, reportInvalidTypeForm]
 
     name: str
     value: Any
@@ -102,24 +106,31 @@ class _EnumValueComparable(_EnumValueBase):
         return isinstance(other, self.__class__) and self.value < other.value
 
 
-def _create_value_cls(name: str, comparable: bool) -> Type[_EnumValueBase]:
+def _create_value_cls(name: str, comparable: bool) -> type[_EnumValueBase]:
     parent = _EnumValueComparable if comparable else _EnumValueBase
-    return type(f"{parent.__name__}_{name}", (parent,), {"_cls_name": name})  # type: ignore
+    return type(f"{parent.__name__}_{name}", (parent,), {"_cls_name": name})  # pyright: ignore[reportReturnType]
 
 
-def _is_descriptor(obj):
+def _is_descriptor(obj) -> bool:
     return hasattr(obj, "__get__") or hasattr(obj, "__set__") or hasattr(obj, "__delete__")
 
 
 class EnumMeta(type):
     if TYPE_CHECKING:
         __name__: ClassVar[str]
-        _enum_member_names_: ClassVar[List[str]]
-        _enum_member_map_: ClassVar[Dict[str, Any]]
-        _enum_value_map_: ClassVar[Dict[Any, Any]]
-        _enum_value_cls_: ClassVar[Type[_EnumValueBase]]
+        _enum_member_names_: ClassVar[list[str]]
+        _enum_member_map_: ClassVar[dict[str, Any]]
+        _enum_value_map_: ClassVar[dict[Any, Any]]
+        _enum_value_cls_: ClassVar[type[_EnumValueBase]]
 
-    def __new__(cls, name: str, bases, attrs, *, comparable: bool = False):
+    def __new__(
+        cls: type[EnumMetaT],
+        name: str,
+        bases: tuple[type, ...],
+        attrs: dict[str, Any],
+        *,
+        comparable: bool = False,
+    ) -> EnumMetaT:
         value_mapping = {}
         member_mapping = {}
         member_names = []
@@ -153,14 +164,13 @@ class EnumMeta(type):
         attrs["_enum_member_map_"] = member_mapping
         attrs["_enum_member_names_"] = member_names
         attrs["_enum_value_cls_"] = value_cls
-        actual_cls = super().__new__(cls, name, bases, attrs)
-        value_cls._actual_enum_cls_ = actual_cls  # type: ignore
+        value_cls._actual_enum_cls_ = actual_cls = super().__new__(cls, name, bases, attrs)
         return actual_cls
 
-    def __iter__(cls) -> Iterator[Self]:
+    def __iter__(cls) -> Iterator[EnumMetaT]:
         return (cls._enum_member_map_[name] for name in cls._enum_member_names_)
 
-    def __reversed__(cls) -> Iterator[Self]:
+    def __reversed__(cls) -> Iterator[EnumMetaT]:
         return (cls._enum_member_map_[name] for name in reversed(cls._enum_member_names_))
 
     def __len__(cls) -> int:
@@ -173,26 +183,29 @@ class EnumMeta(type):
     def __members__(cls):
         return types.MappingProxyType(cls._enum_member_map_)
 
-    def __call__(cls, value):
+    def __call__(cls, value: Any) -> Any:
         try:
             return cls._enum_value_map_[value]
         except (KeyError, TypeError):
-            raise ValueError(f"{value!r} is not a valid {cls.__name__}") from None
+            msg = f"{value!r} is not a valid {cls.__name__}"
+            raise ValueError(msg) from None
 
-    def __getitem__(cls, key):
+    def __getitem__(cls, key: str) -> Any:
         return cls._enum_member_map_[key]
 
-    def __setattr__(cls, name: str, value) -> NoReturn:
-        raise TypeError("Enums are immutable.")
+    def __setattr__(cls, name: str, value: Any) -> NoReturn:
+        msg = "Enums are immutable."
+        raise TypeError(msg)
 
-    def __delattr__(cls, attr) -> NoReturn:
-        raise TypeError("Enums are immutable")
+    def __delattr__(cls, attr: str) -> NoReturn:
+        msg = "Enums are immutable."
+        raise TypeError(msg)
 
-    def __instancecheck__(self, instance) -> bool:
+    def __instancecheck__(self, instance: object) -> bool:
         # isinstance(x, Y)
         # -> __instancecheck__(Y, x)
         try:
-            return instance._actual_enum_cls_ is self
+            return instance._actual_enum_cls_ is self  # pyright: ignore[reportAttributeAccessIssue]
         except AttributeError:
             return False
 
@@ -203,7 +216,7 @@ else:
 
     class Enum(metaclass=EnumMeta):
         @classmethod
-        def try_value(cls, value):
+        def try_value(cls, value: Any) -> Self:
             try:
                 return cls._enum_value_map_[value]
             except (KeyError, TypeError):
@@ -425,6 +438,11 @@ class MessageType(Enum):
 
     .. versionadded:: 2.10
     """
+    emoji_added = 63
+    """The system message denoting that an emoji was added to the server.
+
+    .. versionadded: 2.11
+    """
 
 
 class PartyType(Enum):
@@ -603,6 +621,23 @@ class Status(Enum):
         return self.value
 
 
+class StatusDisplayType(Enum):
+    """Specifies an :class:`Activity` display status.
+
+    .. versionadded:: 2.11
+    """
+
+    name = 0  # pyright: ignore[reportAssignmentType]
+    """The name of the activity is displayed, e.g: ``Listening to Spotify``."""
+    state = 1
+    """The state of the activity is displayed, e.g: ``Listening to Rick Astley``."""
+    details = 2
+    """The details of the activity are displayed, e.g: ``Listening to Never Gonna Give You Up``."""
+
+    def __int__(self) -> int:
+        return self.value
+
+
 class DefaultAvatar(Enum):
     """Represents the default avatar of a Discord :class:`User`."""
 
@@ -738,6 +773,7 @@ class AuditLogAction(Enum):
     automod_block_message                 = 143
     automod_send_alert_message            = 144
     automod_timeout                       = 145
+    automod_quarantine_user               = 146
     creator_monetization_request_created  = 150
     creator_monetization_terms_accepted   = 151
     # fmt: on
@@ -745,7 +781,7 @@ class AuditLogAction(Enum):
     @property
     def category(self) -> Optional[AuditLogActionCategory]:
         # fmt: off
-        lookup: Dict[AuditLogAction, Optional[AuditLogActionCategory]] = {
+        lookup: dict[AuditLogAction, Optional[AuditLogActionCategory]] = {
             AuditLogAction.guild_update:                          AuditLogActionCategory.update,
             AuditLogAction.channel_create:                        AuditLogActionCategory.create,
             AuditLogAction.channel_update:                        AuditLogActionCategory.update,
@@ -803,6 +839,7 @@ class AuditLogAction(Enum):
             AuditLogAction.automod_block_message:                 None,
             AuditLogAction.automod_send_alert_message:            None,
             AuditLogAction.automod_timeout:                       None,
+            AuditLogAction.automod_quarantine_user:               None,
             AuditLogAction.creator_monetization_request_created:  None,
             AuditLogAction.creator_monetization_terms_accepted:   None,
         }
@@ -848,7 +885,7 @@ class AuditLogAction(Enum):
             return None
         elif v < 143:
             return "automod_rule"
-        elif v < 146:
+        elif v < 147:
             return "user"
         elif v < 152:
             return None
@@ -1043,7 +1080,7 @@ class StickerFormatType(Enum):
         return STICKER_FORMAT_LOOKUP[self]
 
 
-STICKER_FORMAT_LOOKUP: Dict[StickerFormatType, str] = {
+STICKER_FORMAT_LOOKUP: dict[StickerFormatType, str] = {
     StickerFormatType.png: "png",
     StickerFormatType.apng: "png",
     StickerFormatType.lottie: "json",
@@ -1207,6 +1244,51 @@ class ComponentType(Enum):
     """Represents a channel select component.
 
     .. versionadded:: 2.7
+    """
+    section = 9
+    """Represents a Components V2 section component.
+
+    .. versionadded:: 2.11
+    """
+    text_display = 10
+    """Represents a Components V2 text display component.
+
+    .. versionadded:: 2.11
+    """
+    thumbnail = 11
+    """Represents a Components V2 thumbnail component.
+
+    .. versionadded:: 2.11
+    """
+    media_gallery = 12
+    """Represents a Components V2 media gallery component.
+
+    .. versionadded:: 2.11
+    """
+    file = 13
+    """Represents a Components V2 file component.
+
+    .. versionadded:: 2.11
+    """
+    separator = 14
+    """Represents a Components V2 separator component.
+
+    .. versionadded:: 2.11
+    """
+    container = 17
+    """Represents a Components V2 container component.
+
+    .. versionadded:: 2.11
+    """
+    label = 18
+    """Represents a label component.
+
+    .. versionadded:: 2.11
+    """
+    file_upload = 19
+    """Represents a file upload component.
+
+    .. versionadded:: |vnext|
     """
 
     def __int__(self) -> int:
@@ -2263,6 +2345,20 @@ class ApplicationRoleConnectionMetadataType(Enum):
     """The metadata value (``integer``) is not equal to the guild's configured value."""
 
 
+class ApplicationEventWebhookStatus(Enum):
+    """Represents the status of an application event webhook.
+
+    .. versionadded:: 2.11
+    """
+
+    disabled = 1
+    """Webhook events are disabled by developer."""
+    enabled = 2
+    """Webhook events are enabled by developer."""
+    disabled_by_discord = 3
+    """Webhook events are disabled by Discord, usually due to inactivity."""
+
+
 class OnboardingPromptType(Enum):
     """Represents the type of onboarding prompt.
 
@@ -2364,27 +2460,69 @@ class MessageReferenceType(Enum):
     """Reference used to point to a message at a point in time (forward)."""
 
 
-T = TypeVar("T")
+class SeparatorSpacing(Enum):
+    """Specifies the size of a :class:`Separator` component's padding.
+
+    .. versionadded:: 2.11
+    """
+
+    small = 1
+    """Small spacing."""
+    large = 2
+    """Large spacing."""
 
 
-def create_unknown_value(cls: Type[T], val: Any) -> T:
-    value_cls = cls._enum_value_cls_  # type: ignore
+class NameplatePalette(Enum):
+    """Specifies the palette of a :class:`Nameplate`.
+
+    .. versionadded:: 2.11
+    """
+
+    crimson = "crimson"
+    """Crimson color palette."""
+    berry = "berry"
+    """Berry color palette."""
+    sky = "sky"
+    """Sky color palette."""
+    teal = "teal"
+    """Teal color palette."""
+    forest = "forest"
+    """Forest color palette."""
+    bubble_gum = "bubble_gum"
+    """Bubble gum color palette."""
+    violet = "violet"
+    """Violet color palette."""
+    cobalt = "cobalt"
+    """Cobalt color palette."""
+    clover = "clover"
+    """Clover color palette."""
+    lemon = "lemon"
+    """Lemon color palette."""
+    white = "white"
+    """White color palette."""
+
+
+T = TypeVar("T", bound="Enum")
+
+
+def create_unknown_value(cls: type[T], val: Any) -> T:
+    value_cls = cls._enum_value_cls_  # pyright: ignore[reportAttributeAccessIssue]
     name = f"unknown_{val}"
     return value_cls(name=name, value=val)
 
 
-def try_enum(cls: Type[T], val: Any) -> T:
+def try_enum(cls: type[T], val: Any) -> T:
     """A function that tries to turn the value into enum ``cls``.
 
     If it fails it returns a proxy invalid value instead.
     """
     try:
-        return cls._enum_value_map_[val]  # type: ignore
+        return cls._enum_value_map_[val]  # pyright: ignore[reportAttributeAccessIssue]
     except (KeyError, TypeError, AttributeError):
         return create_unknown_value(cls, val)
 
 
-def enum_if_int(cls: Type[T], val: Any) -> T:
+def enum_if_int(cls: type[T], val: Any) -> T:
     """A function that tries to turn the value into enum ``cls``.
 
     If it fails it returns a proxy invalid value instead.

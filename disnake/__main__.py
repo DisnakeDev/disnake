@@ -13,7 +13,7 @@ import disnake
 
 
 def show_version() -> None:
-    entries = []
+    entries: list[str] = []
 
     sys_ver = sys.version_info
     entries.append(
@@ -232,7 +232,7 @@ _base_table = {**_ascii_table, **_byte_table}
 _translation_table = str.maketrans(_base_table)
 
 
-def to_path(parser, name: Union[str, Path], *, replace_spaces: bool = False):
+def to_path(parser, name: Union[str, Path], *, replace_spaces: bool = False) -> Path:
     if isinstance(name, Path):
         return name
 
@@ -399,7 +399,7 @@ def add_newcog_args(subparser) -> None:
     parser.add_argument("--full", help="add all special methods as well", action="store_true")
 
 
-def parse_args():
+def parse_args() -> tuple[argparse.ArgumentParser, argparse.Namespace]:
     parser = argparse.ArgumentParser(prog="disnake", description="Tools for helping with disnake")
     parser.add_argument("-v", "--version", action="store_true", help="shows the library version")
     parser.set_defaults(func=core)
