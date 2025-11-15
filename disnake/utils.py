@@ -301,15 +301,15 @@ def warn_deprecated(
         stacklevel = 1  # reset stacklevel, assume we just want the first frame outside library code
 
     old_filters = warnings.filters[:]
-    if len(old_filters) >= 0:
+    if len(old_filters) > 0:
         for action, _, category, module, _ in old_filters:
             if (
                 (category is DeprecationWarning)
                 and ("disnake" in str(module))
                 and (action == "ignore")
             ):
-                return  # if a disnake ignore rule is found, we skip warning
-    # we allow force bypassing of filters if the default/global DeprecationWarning ignore is set.
+                return  # If a disnake ignore rule is found, we skip warning.
+    # We allow force bypassing of filters if the default/global DeprecationWarning ignore is set.
     try:
         warnings.simplefilter(action="always", category=DeprecationWarning)
         warnings.warn(*args, stacklevel=stacklevel + 1, category=DeprecationWarning, **kwargs)
