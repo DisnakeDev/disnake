@@ -135,3 +135,75 @@ class Container(UIComponent):
             spoiler=container.spoiler,
             id=container.id,
         )
+
+    def add_item(self, component: ContainerChildUIComponent) -> Self:
+        """Adds a component to the container.
+
+        This function returns the class instance to allow for fluent-style chaining.
+
+        Parameters
+        ----------
+        component: :class:`~.ui.ActionRow` | :class:`~.ui.Section` | :class:`~.ui.TextDisplay` | :class:`~.ui.MediaGallery` | :class:`~.ui.File` | :class:`~.ui.Separator`
+            The component to add to the container.
+
+        Raises
+        ------
+        TypeError
+            Raised if the component is not a valid UI component type.
+        ValueError
+            Raised if adding the component would exceed Discord's limits or the container is full.
+        """
+        total = 0
+        for child in self.children:
+            # If the child is a Section or Container, iterate its children
+            if hasattr(child, "children") and isinstance(child.children, list):
+                for b in child.children:
+                    total += 1  # the child itself
+                    # Check for accessory inside Section
+                    if hasattr(b, "accessory") and b.accessory is not None:
+                        total += 1
+                    elif hasattr(child, "accessory") and child.accessory is not None:
+                        total += 2  # double count as it's a child with an accessory
+                    elif ensure_ui_component(b, "components"):
+                        total += 1
+                    else:
+                        # Fallback for safey
+                        total += 1
+        if total >= 40:
+            msg = f"Container cannot have more than 40 ContainerChildUIComponents. There were {total} ContainerChildUIComponents in {len(self.children)} components."
+            raise ValueError(msg)
+
+        self.children.append(ensure_ui_component(component, "components"))
+        return self
+
+    def remove_item(self, component: ContainerChildUIComponent) -> Self:
+        """Removes a component from the container.
+
+        This function returns the class instance to allow for fluent-style chaining.
+
+        Parameters
+        ----------
+        component: :class:`~.ui.ActionRow` | :class:`~.ui.Section` | :class:`~.ui.TextDisplay` | :class:`~.ui.MediaGallery` | :class:`~.ui.File` | :class:`~.ui.Separator`
+            The component to remove from the container.
+
+        Raises
+        ------
+        ValueError
+            Raised if the component is not found in the container.
+        """
+        try:
+            self.children.remove(component)
+        except ValueError:
+            pass  # silently pass like in ui.View.remove_item
+        return self
+
+    def clear_items(self) -> Self:
+        """Clears all components from the container.
+
+        This function returns the class instance to allow for fluent-style chaining.
+        """
+        try:
+            self.children.clear()
+        except ValueError:
+            pass  # silently pass like in ui.View.remove_item
+        return self
