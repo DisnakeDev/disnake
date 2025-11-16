@@ -481,3 +481,52 @@ def dev(session: nox.Session) -> None:
 
 if __name__ == "__main__":
     nox.main()
+
+
+@nox.session(name="release-build", default=False, python=MIN_PYTHON)
+def release_build(session: nox.Session) -> None:
+    """Prepare a new release."""
+    install_deps(
+        session,
+        execution_group=ExecutionGroup(
+            project=True,
+            groups=(
+                "build",
+                "changelog",
+            ),
+        ),
+    )
+    import packaging.version
+    import versioningit
+
+    # This may not be accurate, if on a branch.
+    next_release = versioningit.get_next_version(os.path.abspath("."))
+
+    if session.posargs:
+        next_release = session.posargs[0]
+    parsed_version = packaging.version.Version(next_release)
+    if parsed_version.is_prerelease or parsed_version.is_devrelease:
+        session.error("Release version cannot be a pre-release or dev-release.")
+
+    # Replace all of the version strings in the codebase
+    current_dir = pathlib.Path.cwd()
+    for file in (*current_dir.rglob("disnake/**/*.py"), *current_dir.rglob("docs/**/*.rst")):
+        with file.open("r", encoding="utf-8") as f:
+            content = f.read()
+
+        new_content = content.replace("|vnext|", next_release)
+
+        if content != new_content:
+            with file.open("w", encoding="utf-8") as f:
+                f.write(new_content)
+
+            session.log(f"Updated version in {file}")
+
+    # Build the changelog
+    session.run("towncrier", "build", "--yes", "--version", next_release)
+
+    # Clean and build the dist
+    dist_path = pathlib.Path("dist")
+    if dist_path.exists():
+        shutil.rmtree(dist_path)
+    session.run("python", "-m", "build", "--outdir", "dist")

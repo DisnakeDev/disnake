@@ -144,6 +144,9 @@ distance = "{base_version}a{distance}+{vcs}{rev}"
 dirty = "{base_version}+d{build_date:%Y%m%d}"
 distance-dirty = "{base_version}a{distance}+{vcs}{rev}.d{build_date:%Y%m%d}"
 
+[tool.versioningit.next-version]
+method = "minor"
+
 [tool.versioningit.template-fields]
 method = { module = "scripts.versioning", value = "template_fields"}
 
