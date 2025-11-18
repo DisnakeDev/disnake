@@ -1,0 +1,1 @@
+Class properties of :class:`BaseFlag` now return instances of :class:`BaseFlag`, allowing you to pass them directly where a flag instance is expected.

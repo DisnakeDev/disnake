@@ -14,7 +14,7 @@ class TestPermissions:
         assert perms.manage_messages is True
 
         # check we only have the manage message permission
-        assert perms.value == Permissions.manage_messages.flag
+        assert perms.value == Permissions.manage_messages.value
 
     def test_init_permissions_keyword_arguments_with_aliases(self) -> None:
         assert Permissions(read_messages=True, view_channel=False).value == 0
