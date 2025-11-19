@@ -578,7 +578,7 @@ class LargeIntOutOfRange(BadArgument):
 
     This inherits from :exc:`BadArgument`
 
-    .. versionadded:: 2.11
+    .. versionadded:: |vnext|
 
     Attributes
     ----------

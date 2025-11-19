@@ -418,12 +418,13 @@ else:
                     msg = "Range[int, ...] bounds must be int, not float"
                     raise TypeError(msg)
 
-                if self.underlying_type is int and abs(value) >= 2**53:
+                if self.underlying_type is int and abs(value) >= 2**53 - 1:
                     msg = (
                         "Discord has upper input limit on integer input type of +/-2**53.\n"
-                        " For larger values, use Range[commands.LargeInt, ...], which will use"
-                        " string input type with length limited to the minimum and maximum string"
-                        " representations of the range bounds."
+                        "For larger values, use Range[commands.LargeInt, ...], which will use"
+                        " a string input type with length limited to the minimum and maximum"
+                        " string representations of the range bounds, and will automatically"
+                        " convert it into an integer locally."
                     )
                     raise ValueError(msg)
 
