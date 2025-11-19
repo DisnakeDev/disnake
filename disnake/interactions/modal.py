@@ -156,7 +156,7 @@ class ModalInteraction(Interaction[ClientT]):
         components: Sequence[
             ModalInteractionComponentDataPayload | ModalInteractionInnerComponentDataPayload
         ],
-    ) -> Generator[ModalInteractionInnerComponentDataPayload, None, None]:
+    ) -> Generator[ModalInteractionInnerComponentDataPayload]:
         for component in components:
             if component["type"] == ComponentType.action_row.value:
                 yield from self._walk_components(component["components"])
@@ -169,7 +169,7 @@ class ModalInteraction(Interaction[ClientT]):
 
     def walk_raw_components(
         self,
-    ) -> Generator[ModalInteractionInnerComponentDataPayload, None, None]:
+    ) -> Generator[ModalInteractionInnerComponentDataPayload]:
         r"""Returns a generator that yields raw component data of the innermost/non-layout
         components one by one, as provided by Discord.
         This does not contain all fields of the components due to API limitations.
@@ -178,7 +178,7 @@ class ModalInteraction(Interaction[ClientT]):
 
         Returns
         -------
-        :class:`~collections.abc.Generator`\[:class:`dict`, None, None]
+        :class:`~collections.abc.Generator`\[:class:`dict`]
         """
         yield from self._walk_components(self.data.components)
 

@@ -1225,7 +1225,7 @@ class GroupMixin(Generic[CogT]):
                 self.all_commands[alias] = cmd
         return command
 
-    def walk_commands(self) -> Generator[Command[CogT, Any, Any], None, None]:
+    def walk_commands(self) -> Generator[Command[CogT, Any, Any]]:
         """An iterator that recursively walks through all commands and subcommands.
 
         .. versionchanged:: 1.4

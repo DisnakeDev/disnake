@@ -730,13 +730,7 @@ class Client:
         """
         return self._ready.is_set()
 
-    async def _run_event(
-        self,
-        coro: Callable[..., Coroutine[Any, Any, Any]],
-        event_name: str,
-        *args: Any,
-        **kwargs: Any,
-    ) -> None:
+    async def _run_event(self, coro: CoroFunc, event_name: str, *args: Any, **kwargs: Any) -> None:
         try:
             await coro(*args, **kwargs)
         except asyncio.CancelledError:
@@ -748,11 +742,7 @@ class Client:
                 pass
 
     def _schedule_event(
-        self,
-        coro: Callable[..., Coroutine[Any, Any, Any]],
-        event_name: str,
-        *args: Any,
-        **kwargs: Any,
+        self, coro: CoroFunc, event_name: str, *args: Any, **kwargs: Any
     ) -> asyncio.Task:
         wrapped = self._run_event(coro, event_name, *args, **kwargs)
         # Schedules the task
@@ -1541,7 +1531,7 @@ class Client:
         """
         return self._connection.get_soundboard_sound(id)
 
-    def get_all_channels(self) -> Generator[GuildChannel, None, None]:
+    def get_all_channels(self) -> Generator[GuildChannel]:
         """A generator that retrieves every :class:`.abc.GuildChannel` the client can 'access'.
 
         This is equivalent to: ::
@@ -1564,7 +1554,7 @@ class Client:
         for guild in self.guilds:
             yield from guild.channels
 
-    def get_all_members(self) -> Generator[Member, None, None]:
+    def get_all_members(self) -> Generator[Member]:
         """Returns a generator with every :class:`.Member` the client can see.
 
         This is equivalent to: ::

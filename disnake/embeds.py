@@ -54,7 +54,7 @@ class EmbedProxy:
     def __getattr__(self, attr: str) -> None:
         return None
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         return isinstance(other, EmbedProxy) and self.__dict__ == other.__dict__
 
 
@@ -189,10 +189,10 @@ class Embed:
     def __init__(
         self,
         *,
-        title: Any | None = None,
+        title: object | None = None,
         type: EmbedType | None = "rich",
-        description: Any | None = None,
-        url: Any | None = None,
+        description: object | None = None,
+        url: object | None = None,
         timestamp: datetime.datetime | None = None,
         colour: int | Colour | None = MISSING,
         color: int | Colour | None = MISSING,
@@ -224,7 +224,7 @@ class Embed:
 
     # see `EmptyEmbed` above
     if not TYPE_CHECKING:
-
+        # n.b. this is the only use site of classproperty
         @classproperty
         def Empty(self) -> None:
             warn_deprecated(
@@ -321,7 +321,7 @@ class Embed:
             )
         )
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         if not isinstance(other, Embed):
             return False
         for slot in self.__slots__:
@@ -383,13 +383,13 @@ class Embed:
         return cast("_EmbedFooterProxy", EmbedProxy(self._footer))
 
     @overload
-    def set_footer(self, *, text: Any, icon_url: Any | None = ...) -> Self: ...
+    def set_footer(self, *, text: object, icon_url: object | None = ...) -> Self: ...
 
     @overload
-    def set_footer(self, *, text: Any, icon_file: File = ...) -> Self: ...
+    def set_footer(self, *, text: object, icon_file: File = ...) -> Self: ...
 
     def set_footer(
-        self, *, text: Any, icon_url: Any | None = MISSING, icon_file: File = MISSING
+        self, *, text: object, icon_url: object | None = MISSING, icon_file: File = MISSING
     ) -> Self:
         """Sets the footer for the embed content.
 
@@ -458,12 +458,12 @@ class Embed:
         return cast("_EmbedMediaProxy", EmbedProxy(self._image))
 
     @overload
-    def set_image(self, url: Any | None) -> Self: ...
+    def set_image(self, url: object | None) -> Self: ...
 
     @overload
     def set_image(self, *, file: File) -> Self: ...
 
-    def set_image(self, url: Any | None = MISSING, *, file: File = MISSING) -> Self:
+    def set_image(self, url: object | None = MISSING, *, file: File = MISSING) -> Self:
         """Sets the image for the embed content.
 
         This function returns the class instance to allow for fluent-style
@@ -511,12 +511,12 @@ class Embed:
         return cast("_EmbedMediaProxy", EmbedProxy(self._thumbnail))
 
     @overload
-    def set_thumbnail(self, url: Any | None) -> Self: ...
+    def set_thumbnail(self, url: object | None) -> Self: ...
 
     @overload
     def set_thumbnail(self, *, file: File) -> Self: ...
 
-    def set_thumbnail(self, url: Any | None = MISSING, *, file: File = MISSING) -> Self:
+    def set_thumbnail(self, url: object | None = MISSING, *, file: File = MISSING) -> Self:
         """Sets the thumbnail for the embed content.
 
         This function returns the class instance to allow for fluent-style
@@ -585,18 +585,20 @@ class Embed:
 
     @overload
     def set_author(
-        self, *, name: Any, url: Any | None = ..., icon_url: Any | None = ...
+        self, *, name: object, url: object | None = ..., icon_url: object | None = ...
     ) -> Self: ...
 
     @overload
-    def set_author(self, *, name: Any, url: Any | None = ..., icon_file: File = ...) -> Self: ...
+    def set_author(
+        self, *, name: object, url: object | None = ..., icon_file: File = ...
+    ) -> Self: ...
 
     def set_author(
         self,
         *,
-        name: Any,
-        url: Any | None = None,
-        icon_url: Any | None = MISSING,
+        name: object,
+        url: object | None = None,
+        icon_url: object | None = MISSING,
         icon_file: File = MISSING,
     ) -> Self:
         """Sets the author for the embed content.
@@ -661,7 +663,7 @@ class Embed:
         """
         return cast("list[_EmbedFieldProxy]", [EmbedProxy(d) for d in (self._fields or [])])
 
-    def add_field(self, name: Any, value: Any, *, inline: bool = True) -> Self:
+    def add_field(self, name: object, value: object, *, inline: bool = True) -> Self:
         """Adds a field to the embed object.
 
         This function returns the class instance to allow for fluent-style
@@ -690,7 +692,9 @@ class Embed:
 
         return self
 
-    def insert_field_at(self, index: int, name: Any, value: Any, *, inline: bool = True) -> Self:
+    def insert_field_at(
+        self, index: int, name: object, value: object, *, inline: bool = True
+    ) -> Self:
         """Inserts a field before a specified index to the embed.
 
         This function returns the class instance to allow for fluent-style
@@ -749,7 +753,7 @@ class Embed:
             except IndexError:
                 pass
 
-    def set_field_at(self, index: int, name: Any, value: Any, *, inline: bool = True) -> Self:
+    def set_field_at(self, index: int, name: object, value: object, *, inline: bool = True) -> Self:
         """Modifies a field to the embed object.
 
         The index must point to a valid pre-existing field.
@@ -871,7 +875,7 @@ class Embed:
     get_default_color = get_default_colour
 
     def _handle_resource(
-        self, url: Any | None, file: File | None, *, key: _FileKey, required: bool = True
+        self, url: object | None, file: File | None, *, key: _FileKey, required: bool = True
     ) -> str | None:
         if required:
             if not (url is MISSING) ^ (file is MISSING):

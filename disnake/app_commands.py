@@ -128,7 +128,7 @@ class OptionChoice:
     def __repr__(self) -> str:
         return f"<OptionChoice name={self.name!r} value={self.value!r}>"
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: OptionChoice) -> bool:
         return (
             self.name == other.name
             and self.value == other.value
@@ -339,7 +339,7 @@ class Option:
             f" min_length={self.min_length!r} max_length={self.max_length!r}>"
         )
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Option) -> bool:
         return (
             self.name == other.name
             and self.description == other.description
@@ -633,7 +633,7 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
     def __str__(self) -> str:
         return self.name
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: object) -> bool:
         if not isinstance(other, ApplicationCommand):
             return False
 
@@ -1092,12 +1092,12 @@ class SlashCommand(ApplicationCommand):
 
         self.options: list[Option] = options or []
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: object) -> bool:
         return (
             super().__eq__(other)
-            and self.description == other.description
-            and self.options == other.options
-            and self.description_localizations == other.description_localizations
+            and self.description == other.description  # pyright: ignore[reportAttributeAccessIssue]
+            and self.options == other.options  # pyright: ignore[reportAttributeAccessIssue]
+            and self.description_localizations == other.description_localizations  # pyright: ignore[reportAttributeAccessIssue]
         )
 
     def add_option(

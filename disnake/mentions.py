@@ -25,7 +25,7 @@ class _FakeBool:
     def __repr__(self) -> str:
         return "True"
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: object) -> bool:
         return other is True
 
     def __bool__(self) -> bool:

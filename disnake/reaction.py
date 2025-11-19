@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from .iterators import ReactionIterator
 
@@ -79,10 +79,10 @@ class Reaction:
         """
         return not isinstance(self.emoji, str)
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         return isinstance(other, self.__class__) and other.emoji == self.emoji
 
-    def __ne__(self, other: Any) -> bool:
+    def __ne__(self, other: object) -> bool:
         if isinstance(other, self.__class__):
             return other.emoji != self.emoji
         return True

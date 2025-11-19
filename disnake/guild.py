@@ -204,7 +204,7 @@ class IncidentsData:
 
         return self._dms_disabled_until
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         return (
             isinstance(other, IncidentsData)
             and self.invites_disabled_until == other.invites_disabled_until
