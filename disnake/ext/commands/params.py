@@ -414,7 +414,7 @@ class _Range(_BaseRange[int | float]):
                 continue
 
             if self.underlying_type is not float and not isinstance(value, int):
-                msg = "Range[int, ...] bounds must be int, not float"
+                msg = f"Range[{self.underlying_type.__name__}, ...] bounds must be int, not float"
                 raise TypeError(msg)
 
             if self.underlying_type is int and abs(value) >= 2**53 - 1:
@@ -476,12 +476,7 @@ else:
 class LargeInt(int):
     """Type representing integers that may exceed the Discord limit of ``[-2**53+1, 2**53-1]``.
 
-    Uses a string option on the Discord API side and parses user received content to an integer.
-    This inevitably means that users are able to input *any* string;
-    if the input is not a valid integer, :exc:`LargeIntConversionFailure` is raised.
-
-    You can combine this with ``commands.Range[LargeInt, ...]`` for
-    an *approximate length* limit on the string option.
+    See :ref:`large_integers` for more info.
     """
 
 
@@ -518,6 +513,11 @@ class ParamInfo:
         The lowest allowed value for this option.
     le: :class:`float`
         The greatest allowed value for this option.
+    large: :class:`bool`
+        For a parameter of type :class:`int`, this controls whether to accept values outside the
+        range of ``[-2**53+1, 2**53-1]``, at the cost of reduced Discord-side input validation.
+
+        See :ref:`large_integers` for more info.
     type: :class:`~typing.Any`
         The type of the parameter.
     channel_types: :class:`list`\[:class:`.ChannelType`]
@@ -1277,8 +1277,10 @@ def Param(
     ge: :class:`float`
         The (inclusive) lower bound of values for this option (greater-than-or-equal). Kwarg aliases: ``min_value``.
     large: :class:`bool`
-        Whether to accept large :class:`int` values (if this is ``False``, only
-        values in the range ``(-2^53, 2^53)`` would be accepted due to an API limitation).
+        For a parameter of type :class:`int`, this controls whether to accept values outside the
+        range of ``[-2**53+1, 2**53-1]``, at the cost of reduced Discord-side input validation.
+
+        See :ref:`large_integers` for more info.
 
         .. versionadded:: 2.3
 
