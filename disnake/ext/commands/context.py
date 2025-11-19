@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import inspect
 import re
-from typing import TYPE_CHECKING, Any, Generic, Optional, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Generic, TypeAlias, TypeVar
 
 import disnake.abc
 import disnake.utils
@@ -33,7 +33,7 @@ MISSING: Any = disnake.utils.MISSING
 
 
 T = TypeVar("T")
-BotT = TypeVar("BotT", bound="Union[Bot, AutoShardedBot]")
+BotT = TypeVar("BotT", bound="Bot | AutoShardedBot")
 CogT = TypeVar("CogT", bound="Cog")
 
 if TYPE_CHECKING:
@@ -106,28 +106,28 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
         view: StringView,
         args: list[Any] = MISSING,
         kwargs: dict[str, Any] = MISSING,
-        prefix: Optional[str] = None,
-        command: Optional[Command[Any, ..., Any]] = None,
-        invoked_with: Optional[str] = None,
+        prefix: str | None = None,
+        command: Command[Any, ..., Any] | None = None,
+        invoked_with: str | None = None,
         invoked_parents: list[str] = MISSING,
-        invoked_subcommand: Optional[Command[Any, ..., Any]] = None,
-        subcommand_passed: Optional[str] = None,
+        invoked_subcommand: Command[Any, ..., Any] | None = None,
+        subcommand_passed: str | None = None,
         command_failed: bool = False,
-        current_parameter: Optional[inspect.Parameter] = None,
+        current_parameter: inspect.Parameter | None = None,
     ) -> None:
         self.message: Message = message
         self.bot: BotT = bot
         self.args: list[Any] = args or []
         self.kwargs: dict[str, Any] = kwargs or {}
-        self.prefix: Optional[str] = prefix
-        self.command: Optional[Command[Any, ..., Any]] = command
+        self.prefix: str | None = prefix
+        self.command: Command[Any, ..., Any] | None = command
         self.view: StringView = view
-        self.invoked_with: Optional[str] = invoked_with
+        self.invoked_with: str | None = invoked_with
         self.invoked_parents: list[str] = invoked_parents or []
-        self.invoked_subcommand: Optional[Command[Any, ..., Any]] = invoked_subcommand
-        self.subcommand_passed: Optional[str] = subcommand_passed
+        self.invoked_subcommand: Command[Any, ..., Any] | None = invoked_subcommand
+        self.subcommand_passed: str | None = subcommand_passed
         self.command_failed: bool = command_failed
-        self.current_parameter: Optional[inspect.Parameter] = current_parameter
+        self.current_parameter: inspect.Parameter | None = current_parameter
         self._state: ConnectionState = self.message._state
 
     async def invoke(self, command: Command[CogT, P, T], /, *args: P.args, **kwargs: P.kwargs) -> T:
@@ -252,33 +252,33 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
         return pattern.sub("@" + user.display_name.replace("\\", r"\\"), self.prefix)
 
     @property
-    def cog(self) -> Optional[Cog]:
+    def cog(self) -> Cog | None:
         """:class:`.Cog` | :data:`None`: Returns the cog associated with this context's command. Returns :data:`None` if it does not exist."""
         if self.command is None:
             return None
         return self.command.cog
 
     @disnake.utils.cached_property
-    def guild(self) -> Optional[Guild]:
+    def guild(self) -> Guild | None:
         """:class:`.Guild` | :data:`None`: Returns the guild associated with this context's command. Returns :data:`None` if not available."""
         return self.message.guild
 
     @disnake.utils.cached_property
-    def channel(self) -> Union[GuildMessageable, DMChannel, GroupChannel]:
+    def channel(self) -> GuildMessageable | DMChannel | GroupChannel:
         """:class:`.abc.Messageable`: Returns the channel associated with this context's command.
         Shorthand for :attr:`.Message.channel`.
         """
         return self.message.channel
 
     @disnake.utils.cached_property
-    def author(self) -> Union[User, Member]:
+    def author(self) -> User | Member:
         """:class:`~disnake.User` | :class:`.Member`:
         Returns the author associated with this context's command. Shorthand for :attr:`.Message.author`
         """
         return self.message.author
 
     @disnake.utils.cached_property
-    def me(self) -> Union[Member, ClientUser]:
+    def me(self) -> Member | ClientUser:
         """:class:`.Member` | :class:`.ClientUser`:
         Similar to :attr:`.Guild.me` except it may return the :class:`.ClientUser` in private message contexts.
         """
@@ -305,7 +305,7 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
         return self.channel.permissions_for(self.author)  # pyright: ignore[reportArgumentType]
 
     @property
-    def voice_client(self) -> Optional[VoiceProtocol]:
+    def voice_client(self) -> VoiceProtocol | None:
         r""":class:`.VoiceProtocol` | :data:`None`: A shortcut to :attr:`.Guild.voice_client`\, if applicable."""
         g = self.guild
         return g.voice_client if g else None
@@ -388,7 +388,7 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
             await cmd.on_help_command_error(self, e)
 
     @disnake.utils.copy_doc(Message.reply)
-    async def reply(self, content: Optional[str] = None, **kwargs: Any) -> Message:
+    async def reply(self, content: str | None = None, **kwargs: Any) -> Message:
         return await self.message.reply(content, **kwargs)
 
 
@@ -405,4 +405,4 @@ class GuildContext(Context):
     me: Member
 
 
-AnyContext = Union[Context, ApplicationCommandInteraction]
+AnyContext: TypeAlias = Context | ApplicationCommandInteraction

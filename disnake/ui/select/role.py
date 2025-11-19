@@ -2,13 +2,11 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     ClassVar,
-    Optional,
     TypeVar,
     overload,
 )
@@ -97,14 +95,14 @@ class RoleSelect(BaseSelect[RoleSelectMenu, "Role", V_co]):
         self: RoleSelect[None],
         *,
         custom_id: str = ...,
-        placeholder: Optional[str] = None,
+        placeholder: str | None = None,
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
-        default_values: Optional[Sequence[SelectDefaultValueInputType[Role]]] = None,
+        default_values: Sequence[SelectDefaultValueInputType[Role]] | None = None,
         required: bool = True,
         id: int = 0,
-        row: Optional[int] = None,
+        row: int | None = None,
     ) -> None: ...
 
     @overload
@@ -112,28 +110,28 @@ class RoleSelect(BaseSelect[RoleSelectMenu, "Role", V_co]):
         self: RoleSelect[V_co],
         *,
         custom_id: str = ...,
-        placeholder: Optional[str] = None,
+        placeholder: str | None = None,
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
-        default_values: Optional[Sequence[SelectDefaultValueInputType[Role]]] = None,
+        default_values: Sequence[SelectDefaultValueInputType[Role]] | None = None,
         required: bool = True,
         id: int = 0,
-        row: Optional[int] = None,
+        row: int | None = None,
     ) -> None: ...
 
     def __init__(
         self,
         *,
         custom_id: str = MISSING,
-        placeholder: Optional[str] = None,
+        placeholder: str | None = None,
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
-        default_values: Optional[Sequence[SelectDefaultValueInputType[Role]]] = None,
+        default_values: Sequence[SelectDefaultValueInputType[Role]] | None = None,
         required: bool = True,
         id: int = 0,
-        row: Optional[int] = None,
+        row: int | None = None,
     ) -> None:
         super().__init__(
             RoleSelectMenu,
@@ -170,14 +168,14 @@ S_co = TypeVar("S_co", bound="RoleSelect", covariant=True)
 @overload
 def role_select(
     *,
-    placeholder: Optional[str] = None,
+    placeholder: str | None = None,
     custom_id: str = ...,
     min_values: int = 1,
     max_values: int = 1,
     disabled: bool = False,
-    default_values: Optional[Sequence[SelectDefaultValueInputType[Role]]] = None,
+    default_values: Sequence[SelectDefaultValueInputType[Role]] | None = None,
     id: int = 0,
-    row: Optional[int] = None,
+    row: int | None = None,
 ) -> Callable[[ItemCallbackType[V_co, RoleSelect[V_co]]], DecoratedItem[RoleSelect[V_co]]]: ...
 
 

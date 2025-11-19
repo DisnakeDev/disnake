@@ -9,8 +9,8 @@ import logging
 import sys
 import traceback
 import warnings
-from collections.abc import Iterable
-from typing import TYPE_CHECKING, Any, Callable, Optional, TypeVar, Union
+from collections.abc import Callable, Iterable
+from typing import TYPE_CHECKING, Any, TypeAlias, TypeVar
 
 import disnake
 from disnake.utils import iscoroutinefunction
@@ -42,7 +42,7 @@ T = TypeVar("T")
 CFT = TypeVar("CFT", bound="CoroFunc")
 CXT = TypeVar("CXT", bound="Context")
 
-PrefixType = Union[str, Iterable[str]]
+PrefixType: TypeAlias = str | Iterable[str]
 
 _log = logging.getLogger(__name__)
 
@@ -107,11 +107,9 @@ _default: Any = _DefaultRepr()
 class BotBase(CommonBotBase, GroupMixin):
     def __init__(
         self,
-        command_prefix: Optional[
-            Union[PrefixType, Callable[[Self, Message], MaybeCoro[PrefixType]]]
-        ] = None,
-        help_command: Optional[HelpCommand] = _default,
-        description: Optional[str] = None,
+        command_prefix: PrefixType | Callable[[Self, Message], MaybeCoro[PrefixType]] | None = None,
+        help_command: HelpCommand | None = _default,
+        description: str | None = None,
         *,
         strip_after_prefix: bool = False,
         **options: Any,
@@ -154,10 +152,10 @@ class BotBase(CommonBotBase, GroupMixin):
         self._checks: list[Check] = []
         self._check_once: list[Check] = []
 
-        self._before_invoke: Optional[CoroFunc] = None
-        self._after_invoke: Optional[CoroFunc] = None
+        self._before_invoke: CoroFunc | None = None
+        self._after_invoke: CoroFunc | None = None
 
-        self._help_command: Optional[HelpCommand] = None
+        self._help_command: HelpCommand | None = None
         self.description: str = inspect.cleandoc(description) if description else ""
         self.strip_after_prefix: bool = strip_after_prefix
 
@@ -413,11 +411,11 @@ class BotBase(CommonBotBase, GroupMixin):
     # help command stuff
 
     @property
-    def help_command(self) -> Optional[HelpCommand]:
+    def help_command(self) -> HelpCommand | None:
         return self._help_command
 
     @help_command.setter
-    def help_command(self, value: Optional[HelpCommand]) -> None:
+    def help_command(self, value: HelpCommand | None) -> None:
         if value is not None and not isinstance(value, HelpCommand):
             msg = "help_command must be a subclass of HelpCommand or None"
             raise TypeError(msg)
@@ -432,7 +430,7 @@ class BotBase(CommonBotBase, GroupMixin):
 
     # command processing
 
-    async def get_prefix(self, message: Message) -> Optional[Union[list[str], str]]:
+    async def get_prefix(self, message: Message) -> list[str] | str | None:
         """|coro|
 
         Retrieves the prefix the bot is listening to

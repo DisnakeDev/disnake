@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import TYPE_CHECKING, Optional, cast
+from typing import TYPE_CHECKING, cast
 
 from . import utils
 from .asset import Asset, AssetBytes
@@ -68,8 +68,8 @@ class InstallParams:
         if permissions is MISSING:
             permissions = Permissions.none()
         self.permissions = permissions
-        self._app_id: Optional[int] = None
-        self._install_type: Optional[ApplicationIntegrationTypeLiteral] = None
+        self._app_id: int | None = None
+        self._install_type: ApplicationIntegrationTypeLiteral | None = None
 
     @classmethod
     def _from_data(
@@ -77,7 +77,7 @@ class InstallParams:
         data: InstallParamsPayload,
         parent: AppInfo,
         *,
-        install_type: Optional[ApplicationIntegrationTypeLiteral] = None,
+        install_type: ApplicationIntegrationTypeLiteral | None = None,
     ) -> InstallParams:
         instance = cls(permissions=Permissions(int(data["permissions"])), scopes=data["scopes"])
         instance._install_type = install_type
@@ -133,8 +133,8 @@ class InstallTypeConfiguration:
 
     __slots__ = ("install_params",)
 
-    def __init__(self, *, install_params: Optional[InstallParams] = None) -> None:
-        self.install_params: Optional[InstallParams] = install_params
+    def __init__(self, *, install_params: InstallParams | None = None) -> None:
+        self.install_params: InstallParams | None = install_params
 
     @classmethod
     def _from_data(
@@ -332,47 +332,47 @@ class AppInfo:
         self.id: int = int(data["id"])
         self.name: str = data["name"]
         self.description: str = data["description"]
-        self._icon: Optional[str] = data["icon"]
+        self._icon: str | None = data["icon"]
         self.rpc_origins: list[str] = data.get("rpc_origins") or []
         self.bot_public: bool = data["bot_public"]
         self.bot_require_code_grant: bool = data["bot_require_code_grant"]
         self.owner: User = state.create_user(data["owner"])
 
-        team: Optional[TeamPayload] = data.get("team")
-        self.team: Optional[Team] = Team(state, team) if team else None
+        team: TeamPayload | None = data.get("team")
+        self.team: Team | None = Team(state, team) if team else None
 
         self._summary: str = data.get("summary", "")
         self.verify_key: str = data["verify_key"]
 
-        self.guild_id: Optional[int] = utils._get_as_snowflake(data, "guild_id")
+        self.guild_id: int | None = utils._get_as_snowflake(data, "guild_id")
 
-        self.primary_sku_id: Optional[int] = utils._get_as_snowflake(data, "primary_sku_id")
-        self.slug: Optional[str] = data.get("slug")
-        self._cover_image: Optional[str] = data.get("cover_image")
-        self.terms_of_service_url: Optional[str] = data.get("terms_of_service_url")
-        self.privacy_policy_url: Optional[str] = data.get("privacy_policy_url")
+        self.primary_sku_id: int | None = utils._get_as_snowflake(data, "primary_sku_id")
+        self.slug: str | None = data.get("slug")
+        self._cover_image: str | None = data.get("cover_image")
+        self.terms_of_service_url: str | None = data.get("terms_of_service_url")
+        self.privacy_policy_url: str | None = data.get("privacy_policy_url")
 
-        flags: Optional[int] = data.get("flags")
-        self.flags: Optional[ApplicationFlags] = (
+        flags: int | None = data.get("flags")
+        self.flags: ApplicationFlags | None = (
             ApplicationFlags._from_value(flags) if flags is not None else None
         )
-        self.tags: Optional[list[str]] = data.get("tags")
-        self.install_params: Optional[InstallParams] = (
+        self.tags: list[str] | None = data.get("tags")
+        self.install_params: InstallParams | None = (
             InstallParams._from_data(data["install_params"], parent=self)
             if "install_params" in data
             else None
         )
-        self.custom_install_url: Optional[str] = data.get("custom_install_url")
-        self.redirect_uris: Optional[list[str]] = data.get("redirect_uris")
-        self.interactions_endpoint_url: Optional[str] = data.get("interactions_endpoint_url")
-        self.role_connections_verification_url: Optional[str] = data.get(
+        self.custom_install_url: str | None = data.get("custom_install_url")
+        self.redirect_uris: list[str] | None = data.get("redirect_uris")
+        self.interactions_endpoint_url: str | None = data.get("interactions_endpoint_url")
+        self.role_connections_verification_url: str | None = data.get(
             "role_connections_verification_url"
         )
-        self.event_webhooks_url: Optional[str] = data.get("event_webhooks_url")
+        self.event_webhooks_url: str | None = data.get("event_webhooks_url")
         self.event_webhooks_status: ApplicationEventWebhookStatus = try_enum(
             ApplicationEventWebhookStatus, data.get("event_webhooks_status", 1)
         )
-        self.event_webhooks_types: Optional[list[str]] = data.get("event_webhooks_types")
+        self.event_webhooks_types: list[str] | None = data.get("event_webhooks_types")
         self.approximate_guild_count: int = data.get("approximate_guild_count", 0)
         self.approximate_user_install_count: int = data.get("approximate_user_install_count", 0)
         self.approximate_user_authorization_count: int = data.get(
@@ -399,21 +399,21 @@ class AppInfo:
         )
 
     @property
-    def icon(self) -> Optional[Asset]:
+    def icon(self) -> Asset | None:
         """:class:`.Asset` | :data:`None`: Retrieves the application's icon asset, if any."""
         if self._icon is None:
             return None
         return Asset._from_icon(self._state, self.id, self._icon, path="app")
 
     @property
-    def cover_image(self) -> Optional[Asset]:
+    def cover_image(self) -> Asset | None:
         """:class:`.Asset` | :data:`None`: Retrieves the rich presence cover image asset, if any."""
         if self._cover_image is None:
             return None
         return Asset._from_cover_image(self._state, self.id, self._cover_image)
 
     @property
-    def guild(self) -> Optional[Guild]:
+    def guild(self) -> Guild | None:
         """:class:`Guild` | :data:`None`: The guild associated with the application, if any.
 
         .. versionadded:: 1.3
@@ -438,7 +438,7 @@ class AppInfo:
         return self._summary
 
     @property
-    def guild_install_type_config(self) -> Optional[InstallTypeConfiguration]:
+    def guild_install_type_config(self) -> InstallTypeConfiguration | None:
         """:class:`InstallTypeConfiguration` | :data:`None`: The guild installation parameters for
         this application. If this application cannot be installed to guilds, returns :data:`None`.
 
@@ -447,7 +447,7 @@ class AppInfo:
         return self._install_types_config.get(0)
 
     @property
-    def user_install_type_config(self) -> Optional[InstallTypeConfiguration]:
+    def user_install_type_config(self) -> InstallTypeConfiguration | None:
         """:class:`InstallTypeConfiguration` | :data:`None`: The user installation parameters for
         this application. If this application cannot be installed to users, returns :data:`None`.
 
@@ -458,18 +458,18 @@ class AppInfo:
     async def edit(
         self,
         *,
-        custom_install_url: Optional[str] = MISSING,
-        description: Optional[str] = MISSING,
-        role_connections_verification_url: Optional[str] = MISSING,
-        install_params: Optional[InstallParams] = MISSING,
-        guild_install_type_config: Optional[InstallTypeConfiguration] = MISSING,
-        user_install_type_config: Optional[InstallTypeConfiguration] = MISSING,
+        custom_install_url: str | None = MISSING,
+        description: str | None = MISSING,
+        role_connections_verification_url: str | None = MISSING,
+        install_params: InstallParams | None = MISSING,
+        guild_install_type_config: InstallTypeConfiguration | None = MISSING,
+        user_install_type_config: InstallTypeConfiguration | None = MISSING,
         flags: ApplicationFlags = MISSING,
-        icon: Optional[AssetBytes] = MISSING,
-        cover_image: Optional[AssetBytes] = MISSING,
-        interactions_endpoint_url: Optional[str] = MISSING,
+        icon: AssetBytes | None = MISSING,
+        cover_image: AssetBytes | None = MISSING,
+        interactions_endpoint_url: str | None = MISSING,
         tags: Sequence[str] = MISSING,
-        event_webhooks_url: Optional[str] = MISSING,
+        event_webhooks_url: str | None = MISSING,
         event_webhooks_status: ApplicationEventWebhookStatus = MISSING,
         event_webhooks_types: Sequence[str] = MISSING,
     ) -> AppInfo:
@@ -684,19 +684,19 @@ class PartialAppInfo:
         self._state: ConnectionState = state
         self.id: int = int(data["id"])
         self.name: str = data["name"]
-        self._icon: Optional[str] = data.get("icon")
+        self._icon: str | None = data.get("icon")
         self.description: str = data["description"]
-        self.rpc_origins: Optional[list[str]] = data.get("rpc_origins")
+        self.rpc_origins: list[str] | None = data.get("rpc_origins")
         self._summary: str = data.get("summary", "")
         self.verify_key: str = data["verify_key"]
-        self.terms_of_service_url: Optional[str] = data.get("terms_of_service_url")
-        self.privacy_policy_url: Optional[str] = data.get("privacy_policy_url")
+        self.terms_of_service_url: str | None = data.get("terms_of_service_url")
+        self.privacy_policy_url: str | None = data.get("privacy_policy_url")
 
     def __repr__(self) -> str:
         return f"<{self.__class__.__name__} id={self.id} name={self.name!r} description={self.description!r}>"
 
     @property
-    def icon(self) -> Optional[Asset]:
+    def icon(self) -> Asset | None:
         """:class:`.Asset` | :data:`None`: Retrieves the application's icon asset, if any."""
         if self._icon is None:
             return None

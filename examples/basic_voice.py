@@ -9,7 +9,7 @@
 
 import asyncio
 import os
-from typing import Any, Optional
+from typing import Any
 
 import disnake
 import youtube_dl  # pyright: ignore[reportMissingImports]
@@ -44,7 +44,7 @@ class YTDLSource(disnake.PCMVolumeTransformer):
 
     @classmethod
     async def from_url(
-        cls, url, *, loop: Optional[asyncio.AbstractEventLoop] = None, stream: bool = False
+        cls, url, *, loop: asyncio.AbstractEventLoop | None = None, stream: bool = False
     ):
         loop = loop or asyncio.get_event_loop()
         data: Any = await loop.run_in_executor(

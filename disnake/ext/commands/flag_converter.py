@@ -12,7 +12,6 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Literal,
-    Optional,
     TypeVar,
     Union,
     get_args,
@@ -416,7 +415,7 @@ async def convert_flag(ctx: Context, argument: str, flag: Flag, annotation: Any 
             return await convert_flag(ctx, argument, flag, annotation)
         elif origin is Union and args[-1] is type(None):
             # typing.Optional[x]
-            annotation = Union[args[:-1]]
+            annotation = Union[args[:-1]]  # noqa: UP007
             return await run_converters(ctx, annotation, argument, param)
         elif origin is dict:
             # typing.Dict[K, V] -> typing.Tuple[K, V]
@@ -502,7 +501,7 @@ class FlagConverter(metaclass=FlagsMeta):
         flags = cls.__commands_flags__
         aliases = cls.__commands_flag_aliases__
         last_position = 0
-        last_flag: Optional[Flag] = None
+        last_flag: Flag | None = None
 
         case_insensitive = cls.__commands_flag_case_insensitive__
         for match in cls.__commands_flag_regex__.finditer(argument):

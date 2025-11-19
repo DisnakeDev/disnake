@@ -2,13 +2,11 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     ClassVar,
-    Optional,
     TypeVar,
     overload,
 )
@@ -114,15 +112,15 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
         self: ChannelSelect[None],
         *,
         custom_id: str = ...,
-        placeholder: Optional[str] = None,
+        placeholder: str | None = None,
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
-        channel_types: Optional[list[ChannelType]] = None,
-        default_values: Optional[Sequence[SelectDefaultValueInputType[AnyChannel]]] = None,
+        channel_types: list[ChannelType] | None = None,
+        default_values: Sequence[SelectDefaultValueInputType[AnyChannel]] | None = None,
         required: bool = True,
         id: int = 0,
-        row: Optional[int] = None,
+        row: int | None = None,
     ) -> None: ...
 
     @overload
@@ -130,30 +128,30 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
         self: ChannelSelect[V_co],
         *,
         custom_id: str = ...,
-        placeholder: Optional[str] = None,
+        placeholder: str | None = None,
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
-        channel_types: Optional[list[ChannelType]] = None,
-        default_values: Optional[Sequence[SelectDefaultValueInputType[AnyChannel]]] = None,
+        channel_types: list[ChannelType] | None = None,
+        default_values: Sequence[SelectDefaultValueInputType[AnyChannel]] | None = None,
         required: bool = True,
         id: int = 0,
-        row: Optional[int] = None,
+        row: int | None = None,
     ) -> None: ...
 
     def __init__(
         self,
         *,
         custom_id: str = MISSING,
-        placeholder: Optional[str] = None,
+        placeholder: str | None = None,
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
-        channel_types: Optional[list[ChannelType]] = None,
-        default_values: Optional[Sequence[SelectDefaultValueInputType[AnyChannel]]] = None,
+        channel_types: list[ChannelType] | None = None,
+        default_values: Sequence[SelectDefaultValueInputType[AnyChannel]] | None = None,
         required: bool = True,
         id: int = 0,
-        row: Optional[int] = None,
+        row: int | None = None,
     ) -> None:
         super().__init__(
             ChannelSelectMenu,
@@ -186,12 +184,12 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
         )
 
     @property
-    def channel_types(self) -> Optional[list[ChannelType]]:
+    def channel_types(self) -> list[ChannelType] | None:
         """:class:`list`\\[:class:`disnake.ChannelType`] | :data:`None`: A list of channel types that can be selected in this select menu."""
         return self._underlying.channel_types
 
     @channel_types.setter
-    def channel_types(self, value: Optional[list[ChannelType]]) -> None:
+    def channel_types(self, value: list[ChannelType] | None) -> None:
         if value is not None:
             if not isinstance(value, list):
                 msg = "channel_types must be a list of ChannelType"
@@ -209,15 +207,15 @@ S_co = TypeVar("S_co", bound="ChannelSelect", covariant=True)
 @overload
 def channel_select(
     *,
-    placeholder: Optional[str] = None,
+    placeholder: str | None = None,
     custom_id: str = ...,
     min_values: int = 1,
     max_values: int = 1,
     disabled: bool = False,
-    channel_types: Optional[list[ChannelType]] = None,
-    default_values: Optional[Sequence[SelectDefaultValueInputType[AnyChannel]]] = None,
+    channel_types: list[ChannelType] | None = None,
+    default_values: Sequence[SelectDefaultValueInputType[AnyChannel]] | None = None,
     id: int = 0,
-    row: Optional[int] = None,
+    row: int | None = None,
 ) -> Callable[
     [ItemCallbackType[V_co, ChannelSelect[V_co]]], DecoratedItem[ChannelSelect[V_co]]
 ]: ...

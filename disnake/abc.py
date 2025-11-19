@@ -5,15 +5,13 @@ from __future__ import annotations
 import asyncio
 import copy
 from abc import ABC
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
-    Optional,
     Protocol,
+    TypeAlias,
     TypeVar,
-    Union,
     cast,
     overload,
     runtime_checkable,
@@ -86,11 +84,11 @@ if TYPE_CHECKING:
     from .user import ClientUser
     from .voice_region import VoiceRegion
 
-    MessageableChannel = Union[GuildMessageable, DMChannel, GroupChannel, PartialMessageable]
+    MessageableChannel: TypeAlias = GuildMessageable | DMChannel | GroupChannel | PartialMessageable
     # include non-messageable channels, e.g. category/forum
-    AnyChannel = Union[MessageableChannel, AnyGuildChannel]
+    AnyChannel: TypeAlias = MessageableChannel | AnyGuildChannel
 
-    SnowflakeTime = Union["Snowflake", datetime]
+    SnowflakeTime: TypeAlias = "Snowflake | datetime"
 
 MISSING = utils.MISSING
 
@@ -154,7 +152,7 @@ class User(Snowflake, Protocol):
 
     name: str
     discriminator: str
-    global_name: Optional[str]
+    global_name: str | None
     bot: bool
 
     @property
@@ -168,7 +166,7 @@ class User(Snowflake, Protocol):
         raise NotImplementedError
 
     @property
-    def avatar(self) -> Optional[Asset]:
+    def avatar(self) -> Asset | None:
         """:class:`~disnake.Asset` | :data:`None`: Returns an :class:`~disnake.Asset` for
         the avatar the user has.
         """
@@ -257,7 +255,7 @@ class GuildChannel(ABC):
     guild: Guild
     type: ChannelType
     position: int
-    category_id: Optional[int]
+    category_id: int | None
     _flags: int
     _state: ConnectionState
     _overwrites: list[_Overwrites]
@@ -281,10 +279,10 @@ class GuildChannel(ABC):
     async def _move(
         self,
         position: int,
-        parent_id: Optional[int] = None,
+        parent_id: int | None = None,
         lock_permissions: bool = False,
         *,
-        reason: Optional[str],
+        reason: str | None,
     ) -> None:
         if position < 0:
             msg = "Channel position cannot be less than 0."
@@ -323,28 +321,28 @@ class GuildChannel(ABC):
         self,
         *,
         name: str = MISSING,
-        topic: Optional[str] = MISSING,
+        topic: str | None = MISSING,
         position: int = MISSING,
         nsfw: bool = MISSING,
         sync_permissions: bool = MISSING,
-        category: Optional[Snowflake] = MISSING,
-        slowmode_delay: Optional[int] = MISSING,
-        default_thread_slowmode_delay: Optional[int] = MISSING,
-        default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = MISSING,
+        category: Snowflake | None = MISSING,
+        slowmode_delay: int | None = MISSING,
+        default_thread_slowmode_delay: int | None = MISSING,
+        default_auto_archive_duration: AnyThreadArchiveDuration | None = MISSING,
         type: ChannelType = MISSING,
-        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
+        overwrites: Mapping[Role | Member, PermissionOverwrite] = MISSING,
         bitrate: int = MISSING,
         user_limit: int = MISSING,
-        rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
+        rtc_region: str | VoiceRegion | None = MISSING,
         video_quality_mode: VideoQualityMode = MISSING,
         flags: ChannelFlags = MISSING,
         available_tags: Sequence[ForumTag] = MISSING,
-        default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = MISSING,
-        default_sort_order: Optional[ThreadSortOrder] = MISSING,
+        default_reaction: str | Emoji | PartialEmoji | None = MISSING,
+        default_sort_order: ThreadSortOrder | None = MISSING,
         default_layout: ThreadLayout = MISSING,
-        reason: Optional[str] = None,
-    ) -> Optional[ChannelPayload]:
-        parent_id: Optional[int]
+        reason: str | None = None,
+    ) -> ChannelPayload | None:
+        parent_id: int | None
         if category is not MISSING:
             # if category is given, it's either `None` (no parent) or a category channel
             parent_id = category.id if category else None
@@ -352,19 +350,19 @@ class GuildChannel(ABC):
             # if it's not given, don't change the category
             parent_id = MISSING
 
-        rtc_region_payload: Optional[str]
+        rtc_region_payload: str | None
         if rtc_region is not MISSING:
             rtc_region_payload = str(rtc_region) if rtc_region is not None else None
         else:
             rtc_region_payload = MISSING
 
-        video_quality_mode_payload: Optional[int]
+        video_quality_mode_payload: int | None
         if video_quality_mode is not MISSING:
             video_quality_mode_payload = int(video_quality_mode)
         else:
             video_quality_mode_payload = MISSING
 
-        default_auto_archive_duration_payload: Optional[int]
+        default_auto_archive_duration_payload: int | None
         if default_auto_archive_duration is not MISSING:
             default_auto_archive_duration_payload = (
                 int(default_auto_archive_duration)
@@ -430,7 +428,7 @@ class GuildChannel(ABC):
         if available_tags is not MISSING:
             available_tags_payload = [tag.to_dict() for tag in available_tags]
 
-        default_reaction_emoji_payload: Optional[DefaultReactionPayload] = MISSING
+        default_reaction_emoji_payload: DefaultReactionPayload | None = MISSING
         if default_reaction is not MISSING:
             if default_reaction is not None:
                 emoji_name, emoji_id = PartialEmoji._emoji_to_name_id(default_reaction)
@@ -441,7 +439,7 @@ class GuildChannel(ABC):
             else:
                 default_reaction_emoji_payload = None
 
-        default_sort_order_payload: Optional[int] = MISSING
+        default_sort_order_payload: int | None = MISSING
         if default_sort_order is not MISSING:
             default_sort_order_payload = (
                 try_enum_to_int(default_sort_order) if default_sort_order is not None else None
@@ -530,7 +528,7 @@ class GuildChannel(ABC):
         """:class:`datetime.datetime`: Returns the channel's creation time in UTC."""
         return utils.snowflake_time(self.id)
 
-    def overwrites_for(self, obj: Union[Role, User]) -> PermissionOverwrite:
+    def overwrites_for(self, obj: Role | User) -> PermissionOverwrite:
         """Returns the channel-specific overwrites for a member or a role.
 
         Parameters
@@ -561,7 +559,7 @@ class GuildChannel(ABC):
         return PermissionOverwrite()
 
     @property
-    def overwrites(self) -> dict[Union[Role, Member], PermissionOverwrite]:
+    def overwrites(self) -> dict[Role | Member, PermissionOverwrite]:
         """Returns all of the channel's overwrites.
 
         This is returned as a dictionary where the key contains the target which
@@ -595,7 +593,7 @@ class GuildChannel(ABC):
         return ret
 
     @property
-    def category(self) -> Optional[CategoryChannel]:
+    def category(self) -> CategoryChannel | None:
         """:class:`~disnake.CategoryChannel` | :data:`None`: The category this channel belongs to.
 
         If there is no category then this is :data:`None`.
@@ -657,7 +655,7 @@ class GuildChannel(ABC):
 
     def permissions_for(
         self,
-        obj: Union[Member, Role],
+        obj: Member | Role,
         /,
         *,
         ignore_timeout: bool = MISSING,
@@ -822,7 +820,7 @@ class GuildChannel(ABC):
 
         return base
 
-    async def delete(self, *, reason: Optional[str] = None) -> None:
+    async def delete(self, *, reason: str | None = None) -> None:
         """|coro|
 
         Deletes the channel.
@@ -848,86 +846,86 @@ class GuildChannel(ABC):
     @overload
     async def set_permissions(
         self,
-        target: Union[Member, Role],
+        target: Member | Role,
         *,
-        overwrite: Optional[PermissionOverwrite] = ...,
-        reason: Optional[str] = ...,
+        overwrite: PermissionOverwrite | None = ...,
+        reason: str | None = ...,
     ) -> None: ...
 
     @overload
     @_overload_with_permissions
     async def set_permissions(
         self,
-        target: Union[Member, Role],
+        target: Member | Role,
         *,
-        reason: Optional[str] = ...,
-        add_reactions: Optional[bool] = ...,
-        administrator: Optional[bool] = ...,
-        attach_files: Optional[bool] = ...,
-        ban_members: Optional[bool] = ...,
-        change_nickname: Optional[bool] = ...,
-        connect: Optional[bool] = ...,
-        create_events: Optional[bool] = ...,
-        create_forum_threads: Optional[bool] = ...,
-        create_guild_expressions: Optional[bool] = ...,
-        create_instant_invite: Optional[bool] = ...,
-        create_private_threads: Optional[bool] = ...,
-        create_public_threads: Optional[bool] = ...,
-        deafen_members: Optional[bool] = ...,
-        embed_links: Optional[bool] = ...,
-        external_emojis: Optional[bool] = ...,
-        external_stickers: Optional[bool] = ...,
-        kick_members: Optional[bool] = ...,
-        manage_channels: Optional[bool] = ...,
-        manage_emojis: Optional[bool] = ...,
-        manage_emojis_and_stickers: Optional[bool] = ...,
-        manage_events: Optional[bool] = ...,
-        manage_guild: Optional[bool] = ...,
-        manage_guild_expressions: Optional[bool] = ...,
-        manage_messages: Optional[bool] = ...,
-        manage_nicknames: Optional[bool] = ...,
-        manage_permissions: Optional[bool] = ...,
-        manage_roles: Optional[bool] = ...,
-        manage_threads: Optional[bool] = ...,
-        manage_webhooks: Optional[bool] = ...,
-        mention_everyone: Optional[bool] = ...,
-        moderate_members: Optional[bool] = ...,
-        move_members: Optional[bool] = ...,
-        mute_members: Optional[bool] = ...,
-        pin_messages: Optional[bool] = ...,
-        priority_speaker: Optional[bool] = ...,
-        read_message_history: Optional[bool] = ...,
-        read_messages: Optional[bool] = ...,
-        request_to_speak: Optional[bool] = ...,
-        send_messages: Optional[bool] = ...,
-        send_messages_in_threads: Optional[bool] = ...,
-        send_polls: Optional[bool] = ...,
-        send_tts_messages: Optional[bool] = ...,
-        send_voice_messages: Optional[bool] = ...,
-        speak: Optional[bool] = ...,
-        start_embedded_activities: Optional[bool] = ...,
-        stream: Optional[bool] = ...,
-        use_application_commands: Optional[bool] = ...,
-        use_embedded_activities: Optional[bool] = ...,
-        use_external_apps: Optional[bool] = ...,
-        use_external_emojis: Optional[bool] = ...,
-        use_external_sounds: Optional[bool] = ...,
-        use_external_stickers: Optional[bool] = ...,
-        use_slash_commands: Optional[bool] = ...,
-        use_soundboard: Optional[bool] = ...,
-        use_voice_activation: Optional[bool] = ...,
-        view_audit_log: Optional[bool] = ...,
-        view_channel: Optional[bool] = ...,
-        view_creator_monetization_analytics: Optional[bool] = ...,
-        view_guild_insights: Optional[bool] = ...,
+        reason: str | None = ...,
+        add_reactions: bool | None = ...,
+        administrator: bool | None = ...,
+        attach_files: bool | None = ...,
+        ban_members: bool | None = ...,
+        change_nickname: bool | None = ...,
+        connect: bool | None = ...,
+        create_events: bool | None = ...,
+        create_forum_threads: bool | None = ...,
+        create_guild_expressions: bool | None = ...,
+        create_instant_invite: bool | None = ...,
+        create_private_threads: bool | None = ...,
+        create_public_threads: bool | None = ...,
+        deafen_members: bool | None = ...,
+        embed_links: bool | None = ...,
+        external_emojis: bool | None = ...,
+        external_stickers: bool | None = ...,
+        kick_members: bool | None = ...,
+        manage_channels: bool | None = ...,
+        manage_emojis: bool | None = ...,
+        manage_emojis_and_stickers: bool | None = ...,
+        manage_events: bool | None = ...,
+        manage_guild: bool | None = ...,
+        manage_guild_expressions: bool | None = ...,
+        manage_messages: bool | None = ...,
+        manage_nicknames: bool | None = ...,
+        manage_permissions: bool | None = ...,
+        manage_roles: bool | None = ...,
+        manage_threads: bool | None = ...,
+        manage_webhooks: bool | None = ...,
+        mention_everyone: bool | None = ...,
+        moderate_members: bool | None = ...,
+        move_members: bool | None = ...,
+        mute_members: bool | None = ...,
+        pin_messages: bool | None = ...,
+        priority_speaker: bool | None = ...,
+        read_message_history: bool | None = ...,
+        read_messages: bool | None = ...,
+        request_to_speak: bool | None = ...,
+        send_messages: bool | None = ...,
+        send_messages_in_threads: bool | None = ...,
+        send_polls: bool | None = ...,
+        send_tts_messages: bool | None = ...,
+        send_voice_messages: bool | None = ...,
+        speak: bool | None = ...,
+        start_embedded_activities: bool | None = ...,
+        stream: bool | None = ...,
+        use_application_commands: bool | None = ...,
+        use_embedded_activities: bool | None = ...,
+        use_external_apps: bool | None = ...,
+        use_external_emojis: bool | None = ...,
+        use_external_sounds: bool | None = ...,
+        use_external_stickers: bool | None = ...,
+        use_slash_commands: bool | None = ...,
+        use_soundboard: bool | None = ...,
+        use_voice_activation: bool | None = ...,
+        view_audit_log: bool | None = ...,
+        view_channel: bool | None = ...,
+        view_creator_monetization_analytics: bool | None = ...,
+        view_guild_insights: bool | None = ...,
     ) -> None: ...
 
     async def set_permissions(
         self,
         target,
         *,
-        overwrite: Optional[PermissionOverwrite] = MISSING,
-        reason: Optional[str] = None,
+        overwrite: PermissionOverwrite | None = MISSING,
+        reason: str | None = None,
         **permissions,
     ) -> None:
         """|coro|
@@ -1042,10 +1040,10 @@ class GuildChannel(ABC):
         self,
         base_attrs: dict[str, Any],
         *,
-        name: Optional[str] = None,
-        category: Optional[Snowflake] = MISSING,
-        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
-        reason: Optional[str] = None,
+        name: str | None = None,
+        category: Snowflake | None = MISSING,
+        overwrites: Mapping[Role | Member, PermissionOverwrite] = MISSING,
+        reason: str | None = None,
     ) -> Self:
         # if the overwrites are MISSING, defaults to the
         # original permissions of the channel
@@ -1090,7 +1088,7 @@ class GuildChannel(ABC):
         self.guild._channels[obj.id] = obj  # pyright: ignore[reportArgumentType]
         return obj
 
-    async def clone(self, *, name: Optional[str] = None, reason: Optional[str] = None) -> Self:
+    async def clone(self, *, name: str | None = None, reason: str | None = None) -> Self:
         """|coro|
 
         Clones this channel. This creates a channel with the same properties
@@ -1128,9 +1126,9 @@ class GuildChannel(ABC):
         *,
         beginning: bool,
         offset: int = ...,
-        category: Optional[Snowflake] = ...,
+        category: Snowflake | None = ...,
         sync_permissions: bool = ...,
-        reason: Optional[str] = ...,
+        reason: str | None = ...,
     ) -> None: ...
 
     @overload
@@ -1139,9 +1137,9 @@ class GuildChannel(ABC):
         *,
         end: bool,
         offset: int = ...,
-        category: Optional[Snowflake] = ...,
+        category: Snowflake | None = ...,
         sync_permissions: bool = ...,
-        reason: Optional[str] = ...,
+        reason: str | None = ...,
     ) -> None: ...
 
     @overload
@@ -1150,9 +1148,9 @@ class GuildChannel(ABC):
         *,
         before: Snowflake,
         offset: int = ...,
-        category: Optional[Snowflake] = ...,
+        category: Snowflake | None = ...,
         sync_permissions: bool = ...,
-        reason: Optional[str] = ...,
+        reason: str | None = ...,
     ) -> None: ...
 
     @overload
@@ -1161,9 +1159,9 @@ class GuildChannel(ABC):
         *,
         after: Snowflake,
         offset: int = ...,
-        category: Optional[Snowflake] = ...,
+        category: Snowflake | None = ...,
         sync_permissions: bool = ...,
-        reason: Optional[str] = ...,
+        reason: str | None = ...,
     ) -> None: ...
 
     async def move(self, **kwargs: Any) -> None:
@@ -1294,15 +1292,15 @@ class GuildChannel(ABC):
     async def create_invite(
         self,
         *,
-        reason: Optional[str] = None,
+        reason: str | None = None,
         max_age: int = 0,
         max_uses: int = 0,
         temporary: bool = False,
         unique: bool = True,
-        target_type: Optional[InviteTarget] = None,
-        target_user: Optional[User] = None,
-        target_application: Optional[Union[Snowflake, PartyType]] = None,
-        guild_scheduled_event: Optional[GuildScheduledEvent] = None,
+        target_type: InviteTarget | None = None,
+        target_user: User | None = None,
+        target_application: Snowflake | PartyType | None = None,
+        guild_scheduled_event: GuildScheduledEvent | None = None,
     ) -> Invite:
         """|coro|
 
@@ -1437,18 +1435,18 @@ class Messageable:
     @overload
     async def send(
         self,
-        content: Optional[str] = ...,
+        content: str | None = ...,
         *,
         tts: bool = ...,
         embed: Embed = ...,
         file: File = ...,
-        stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
+        stickers: Sequence[GuildSticker | StandardSticker | StickerItem] = ...,
         delete_after: float = ...,
-        nonce: Union[str, int] = ...,
+        nonce: str | int = ...,
         suppress_embeds: bool = ...,
         flags: MessageFlags = ...,
         allowed_mentions: AllowedMentions = ...,
-        reference: Union[Message, MessageReference, PartialMessage] = ...,
+        reference: Message | MessageReference | PartialMessage = ...,
         mention_author: bool = ...,
         view: View = ...,
         components: MessageComponents = ...,
@@ -1458,18 +1456,18 @@ class Messageable:
     @overload
     async def send(
         self,
-        content: Optional[str] = ...,
+        content: str | None = ...,
         *,
         tts: bool = ...,
         embed: Embed = ...,
         files: list[File] = ...,
-        stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
+        stickers: Sequence[GuildSticker | StandardSticker | StickerItem] = ...,
         delete_after: float = ...,
-        nonce: Union[str, int] = ...,
+        nonce: str | int = ...,
         suppress_embeds: bool = ...,
         flags: MessageFlags = ...,
         allowed_mentions: AllowedMentions = ...,
-        reference: Union[Message, MessageReference, PartialMessage] = ...,
+        reference: Message | MessageReference | PartialMessage = ...,
         mention_author: bool = ...,
         view: View = ...,
         components: MessageComponents = ...,
@@ -1479,18 +1477,18 @@ class Messageable:
     @overload
     async def send(
         self,
-        content: Optional[str] = ...,
+        content: str | None = ...,
         *,
         tts: bool = ...,
         embeds: list[Embed] = ...,
         file: File = ...,
-        stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
+        stickers: Sequence[GuildSticker | StandardSticker | StickerItem] = ...,
         delete_after: float = ...,
-        nonce: Union[str, int] = ...,
+        nonce: str | int = ...,
         suppress_embeds: bool = ...,
         flags: MessageFlags = ...,
         allowed_mentions: AllowedMentions = ...,
-        reference: Union[Message, MessageReference, PartialMessage] = ...,
+        reference: Message | MessageReference | PartialMessage = ...,
         mention_author: bool = ...,
         view: View = ...,
         components: MessageComponents = ...,
@@ -1500,18 +1498,18 @@ class Messageable:
     @overload
     async def send(
         self,
-        content: Optional[str] = ...,
+        content: str | None = ...,
         *,
         tts: bool = ...,
         embeds: list[Embed] = ...,
         files: list[File] = ...,
-        stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
+        stickers: Sequence[GuildSticker | StandardSticker | StickerItem] = ...,
         delete_after: float = ...,
-        nonce: Union[str, int] = ...,
+        nonce: str | int = ...,
         suppress_embeds: bool = ...,
         flags: MessageFlags = ...,
         allowed_mentions: AllowedMentions = ...,
-        reference: Union[Message, MessageReference, PartialMessage] = ...,
+        reference: Message | MessageReference | PartialMessage = ...,
         mention_author: bool = ...,
         view: View = ...,
         components: MessageComponents = ...,
@@ -1520,24 +1518,24 @@ class Messageable:
 
     async def send(
         self,
-        content: Optional[str] = None,
+        content: str | None = None,
         *,
         tts: bool = False,
-        embed: Optional[Embed] = None,
-        embeds: Optional[list[Embed]] = None,
-        file: Optional[File] = None,
-        files: Optional[list[File]] = None,
-        stickers: Optional[Sequence[Union[GuildSticker, StandardSticker, StickerItem]]] = None,
-        delete_after: Optional[float] = None,
-        nonce: Optional[Union[str, int]] = None,
-        suppress_embeds: Optional[bool] = None,
-        flags: Optional[MessageFlags] = None,
-        allowed_mentions: Optional[AllowedMentions] = None,
-        reference: Optional[Union[Message, MessageReference, PartialMessage]] = None,
-        mention_author: Optional[bool] = None,
-        view: Optional[View] = None,
-        components: Optional[MessageComponents] = None,
-        poll: Optional[Poll] = None,
+        embed: Embed | None = None,
+        embeds: list[Embed] | None = None,
+        file: File | None = None,
+        files: list[File] | None = None,
+        stickers: Sequence[GuildSticker | StandardSticker | StickerItem] | None = None,
+        delete_after: float | None = None,
+        nonce: str | int | None = None,
+        suppress_embeds: bool | None = None,
+        flags: MessageFlags | None = None,
+        allowed_mentions: AllowedMentions | None = None,
+        reference: Message | MessageReference | PartialMessage | None = None,
+        mention_author: bool | None = None,
+        view: View | None = None,
+        components: MessageComponents | None = None,
+        poll: Poll | None = None,
     ):
         """|coro|
 
@@ -1880,7 +1878,7 @@ class Messageable:
         return self._state.create_message(channel=channel, data=data)
 
     def pins(
-        self, *, limit: Optional[int] = 50, before: Optional[SnowflakeTime] = None
+        self, *, limit: int | None = 50, before: SnowflakeTime | None = None
     ) -> ChannelPinsIterator:
         """Returns an :class:`.AsyncIterator` that enables receiving the destination's pinned messages.
 
@@ -1941,11 +1939,11 @@ class Messageable:
     def history(
         self,
         *,
-        limit: Optional[int] = 100,
-        before: Optional[SnowflakeTime] = None,
-        after: Optional[SnowflakeTime] = None,
-        around: Optional[SnowflakeTime] = None,
-        oldest_first: Optional[bool] = None,
+        limit: int | None = 100,
+        before: SnowflakeTime | None = None,
+        after: SnowflakeTime | None = None,
+        around: SnowflakeTime | None = None,
+        oldest_first: bool | None = None,
     ) -> HistoryIterator:
         """Returns an :class:`.AsyncIterator` that enables receiving the destination's message history.
 

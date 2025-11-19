@@ -2,15 +2,12 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     ClassVar,
-    Optional,
     TypeVar,
-    Union,
     overload,
 )
 
@@ -35,7 +32,7 @@ __all__ = (
 )
 
 
-class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, Role]", V_co]):
+class MentionableSelect(BaseSelect[MentionableSelectMenu, User | Member | Role, V_co]):
     """Represents a UI mentionable (user/member/role) select menu.
 
     This is usually represented as a drop down menu.
@@ -102,16 +99,15 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, R
         self: MentionableSelect[None],
         *,
         custom_id: str = ...,
-        placeholder: Optional[str] = None,
+        placeholder: str | None = None,
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
-        default_values: Optional[
-            Sequence[SelectDefaultValueMultiInputType[Union[User, Member, Role]]]
-        ] = None,
+        default_values: Sequence[SelectDefaultValueMultiInputType[User | Member | Role]]
+        | None = None,
         required: bool = True,
         id: int = 0,
-        row: Optional[int] = None,
+        row: int | None = None,
     ) -> None: ...
 
     @overload
@@ -119,32 +115,30 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, "Union[User, Member, R
         self: MentionableSelect[V_co],
         *,
         custom_id: str = ...,
-        placeholder: Optional[str] = None,
+        placeholder: str | None = None,
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
-        default_values: Optional[
-            Sequence[SelectDefaultValueMultiInputType[Union[User, Member, Role]]]
-        ] = None,
+        default_values: Sequence[SelectDefaultValueMultiInputType[User | Member | Role]]
+        | None = None,
         required: bool = True,
         id: int = 0,
-        row: Optional[int] = None,
+        row: int | None = None,
     ) -> None: ...
 
     def __init__(
         self,
         *,
         custom_id: str = MISSING,
-        placeholder: Optional[str] = None,
+        placeholder: str | None = None,
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
-        default_values: Optional[
-            Sequence[SelectDefaultValueMultiInputType[Union[User, Member, Role]]]
-        ] = None,
+        default_values: Sequence[SelectDefaultValueMultiInputType[User | Member | Role]]
+        | None = None,
         required: bool = True,
         id: int = 0,
-        row: Optional[int] = None,
+        row: int | None = None,
     ) -> None:
         super().__init__(
             MentionableSelectMenu,
@@ -181,16 +175,14 @@ S_co = TypeVar("S_co", bound="MentionableSelect", covariant=True)
 @overload
 def mentionable_select(
     *,
-    placeholder: Optional[str] = None,
+    placeholder: str | None = None,
     custom_id: str = ...,
     min_values: int = 1,
     max_values: int = 1,
     disabled: bool = False,
-    default_values: Optional[
-        Sequence[SelectDefaultValueMultiInputType[Union[User, Member, Role]]]
-    ] = None,
+    default_values: Sequence[SelectDefaultValueMultiInputType[User | Member | Role]] | None = None,
     id: int = 0,
-    row: Optional[int] = None,
+    row: int | None = None,
 ) -> Callable[
     [ItemCallbackType[V_co, MentionableSelect[V_co]]], DecoratedItem[MentionableSelect[V_co]]
 ]: ...

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, Optional, Union, cast
+from typing import TYPE_CHECKING, ClassVar, TypeAlias, cast
 
 from ..colour import Colour
 from ..components import Container as ContainerComponent
@@ -20,14 +20,14 @@ if TYPE_CHECKING:
     from .separator import Separator
     from .text_display import TextDisplay
 
-    ContainerChildUIComponent = Union[
-        ActionRow[ActionRowMessageComponent],
-        Section,
-        TextDisplay,
-        MediaGallery,
-        File,
-        Separator,
-    ]
+    ContainerChildUIComponent: TypeAlias = (
+        ActionRow[ActionRowMessageComponent]
+        | Section
+        | TextDisplay
+        | MediaGallery
+        | File
+        | Separator
+    )
 
 __all__ = ("Container",)
 
@@ -72,7 +72,7 @@ class Container(UIComponent):
     def __init__(
         self,
         *components: ContainerChildUIComponent,
-        accent_colour: Optional[Colour] = None,
+        accent_colour: Colour | None = None,
         spoiler: bool = False,
         id: int = 0,
     ) -> None:
@@ -82,7 +82,7 @@ class Container(UIComponent):
         self.children: list[ContainerChildUIComponent] = [
             ensure_ui_component(c, "components") for c in components
         ]
-        self._accent_colour: Optional[Colour] = accent_colour
+        self._accent_colour: Colour | None = accent_colour
         self.spoiler: bool = spoiler
 
     # these are reimplemented here to store the value in a separate attribute,
@@ -97,11 +97,11 @@ class Container(UIComponent):
         self._id = value
 
     @property
-    def accent_colour(self) -> Optional[Colour]:
+    def accent_colour(self) -> Colour | None:
         return self._accent_colour
 
     @accent_colour.setter
-    def accent_colour(self, value: Optional[Union[int, Colour]]) -> None:
+    def accent_colour(self, value: int | Colour | None) -> None:
         if isinstance(value, int):
             self._accent_colour = Colour(value)
         elif value is None or isinstance(value, Colour):

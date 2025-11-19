@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable, Optional, Union
+from collections.abc import Callable
+from typing import TYPE_CHECKING, Any
 
 from disnake.errors import ClientException, DiscordException
 from disnake.utils import humanize_list
@@ -93,7 +94,7 @@ class CommandError(DiscordException):
     from :class:`.Bot`\\, :func:`.on_command_error`.
     """
 
-    def __init__(self, message: Optional[str] = None, *args: Any) -> None:
+    def __init__(self, message: str | None = None, *args: Any) -> None:
         if message is not None:
             # clean-up @everyone and @here mentions
             m = message.replace("@everyone", "@\u200beveryone").replace("@here", "@\u200bhere")
@@ -221,7 +222,7 @@ class PrivateMessageOnly(CheckFailure):
     This inherits from :exc:`CheckFailure`
     """
 
-    def __init__(self, message: Optional[str] = None) -> None:
+    def __init__(self, message: str | None = None) -> None:
         super().__init__(message or "This command can only be used in private messages.")
 
 
@@ -232,7 +233,7 @@ class NoPrivateMessage(CheckFailure):
     This inherits from :exc:`CheckFailure`
     """
 
-    def __init__(self, message: Optional[str] = None) -> None:
+    def __init__(self, message: str | None = None) -> None:
         super().__init__(message or "This command cannot be used in private messages.")
 
 
@@ -352,8 +353,8 @@ class ChannelNotReadable(BadArgument):
         The channel supplied by the caller that was not readable
     """
 
-    def __init__(self, argument: Union[GuildChannel, Thread]) -> None:
-        self.argument: Union[GuildChannel, Thread] = argument
+    def __init__(self, argument: GuildChannel | Thread) -> None:
+        self.argument: GuildChannel | Thread = argument
         super().__init__(f"Can't read messages in {argument.mention}.")
 
 
@@ -749,8 +750,8 @@ class NSFWChannelRequired(CheckFailure):
         The channel that does not have NSFW enabled.
     """
 
-    def __init__(self, channel: Union[GuildChannel, Thread]) -> None:
-        self.channel: Union[GuildChannel, Thread] = channel
+    def __init__(self, channel: GuildChannel | Thread) -> None:
+        self.channel: GuildChannel | Thread = channel
         super().__init__(f"Channel '{channel}' needs to be NSFW for this command to work.")
 
 
@@ -944,7 +945,7 @@ class ExtensionError(DiscordException):
         The extension that had an error.
     """
 
-    def __init__(self, message: Optional[str] = None, *args: Any, name: str) -> None:
+    def __init__(self, message: str | None = None, *args: Any, name: str) -> None:
         self.name: str = name
         message = message or f"Extension {name!r} had an error."
         # clean-up @everyone and @here mentions

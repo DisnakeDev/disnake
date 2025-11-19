@@ -9,9 +9,8 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Generic,
-    Optional,
+    TypeAlias,
     TypeVar,
-    Union,
     cast,
     overload,
 )
@@ -90,7 +89,7 @@ if TYPE_CHECKING:
     from .message import MessageInteraction
     from .modal import ModalInteraction
 
-    AnyBot = Union[Bot, AutoShardedBot]
+    AnyBot: TypeAlias = Bot | AutoShardedBot
 
 
 MISSING: Any = utils.MISSING
@@ -231,27 +230,25 @@ class Interaction(Generic[ClientT]):
         # TODO: Maybe use a unique session
         self._session: ClientSession = state.http._HTTPClient__session  # pyright: ignore[reportAttributeAccessIssue]
         self.client: ClientT = cast("ClientT", state._get_client())
-        self._original_response: Optional[InteractionMessage] = None
+        self._original_response: InteractionMessage | None = None
 
         self.id: int = int(data["id"])
         self.type: InteractionType = try_enum(InteractionType, data["type"])
         self.token: str = data["token"]
         self.version: int = data["version"]
         self.application_id: int = int(data["application_id"])
-        self.guild_id: Optional[int] = utils._get_as_snowflake(data, "guild_id")
+        self.guild_id: int | None = utils._get_as_snowflake(data, "guild_id")
 
         self.locale: Locale = try_enum(Locale, data["locale"])
         guild_locale = data.get("guild_locale")
-        self.guild_locale: Optional[Locale] = (
-            try_enum(Locale, guild_locale) if guild_locale else None
-        )
+        self.guild_locale: Locale | None = try_enum(Locale, guild_locale) if guild_locale else None
 
         self._app_permissions: int = int(data.get("app_permissions", 0))
-        self._permissions: Optional[int] = None
+        self._permissions: int | None = None
         # one of user and member will always exist
-        self.author: Union[User, Member] = MISSING
+        self.author: User | Member = MISSING
 
-        guild_fallback: Optional[Union[Guild, Object]] = None
+        guild_fallback: Guild | Object | None = None
         if self.guild_id:
             guild_fallback = self.guild or Object(self.guild_id)
 
@@ -301,14 +298,14 @@ class Interaction(Generic[ClientT]):
         return utils.snowflake_time(self.id)
 
     @property
-    def user(self) -> Union[User, Member]:
+    def user(self) -> User | Member:
         """:class:`.User` | :class:`.Member`: The user or member that sent the interaction.
         There is an alias for this named :attr:`author`.
         """
         return self.author
 
     @property
-    def guild(self) -> Optional[Guild]:
+    def guild(self) -> Guild | None:
         """:class:`Guild` | :data:`None`: The guild the interaction was sent from.
 
         .. note::
@@ -323,7 +320,7 @@ class Interaction(Generic[ClientT]):
         return self._state._get_guild(self.guild_id)
 
     @utils.cached_slot_property("_cs_me")
-    def me(self) -> Union[Member, ClientUser]:
+    def me(self) -> Member | ClientUser:
         """:class:`.Member` | :class:`.ClientUser`: Similar to :attr:`.Guild.me`,
         except it may return the :class:`.ClientUser` in private message contexts or
         when the bot is not a member of the guild (e.g. in the case of user-installed applications).
@@ -439,20 +436,20 @@ class Interaction(Generic[ClientT]):
 
     async def edit_original_response(
         self,
-        content: Optional[str] = MISSING,
+        content: str | None = MISSING,
         *,
-        embed: Optional[Embed] = MISSING,
+        embed: Embed | None = MISSING,
         embeds: list[Embed] = MISSING,
         file: File = MISSING,
         files: list[File] = MISSING,
-        attachments: Optional[list[Attachment]] = MISSING,
-        view: Optional[View] = MISSING,
-        components: Optional[MessageComponents] = MISSING,
+        attachments: list[Attachment] | None = MISSING,
+        view: View | None = MISSING,
+        components: MessageComponents | None = MISSING,
         poll: Poll = MISSING,
         suppress_embeds: bool = MISSING,
         flags: MessageFlags = MISSING,
-        allowed_mentions: Optional[AllowedMentions] = None,
-        delete_after: Optional[float] = None,
+        allowed_mentions: AllowedMentions | None = None,
+        delete_after: float | None = None,
     ) -> InteractionMessage:
         """|coro|
 
@@ -579,7 +576,7 @@ class Interaction(Generic[ClientT]):
         if attachments is MISSING and (file or files):
             attachments = (await self.original_response()).attachments
 
-        previous_mentions: Optional[AllowedMentions] = self._state.allowed_mentions
+        previous_mentions: AllowedMentions | None = self._state.allowed_mentions
         params = handle_message_parameters(
             content=content,
             file=file,
@@ -626,7 +623,7 @@ class Interaction(Generic[ClientT]):
 
         return message
 
-    async def delete_original_response(self, *, delay: Optional[float] = None) -> None:
+    async def delete_original_response(self, *, delay: float | None = None) -> None:
         """|coro|
 
         Deletes the original interaction response message.
@@ -689,7 +686,7 @@ class Interaction(Generic[ClientT]):
 
     async def send(
         self,
-        content: Optional[str] = None,
+        content: str | None = None,
         *,
         embed: Embed = MISSING,
         embeds: list[Embed] = MISSING,
@@ -838,10 +835,10 @@ class InteractionResponse:
 
     def __init__(self, parent: Interaction) -> None:
         self._parent: Interaction = parent
-        self._response_type: Optional[InteractionResponseType] = None
+        self._response_type: InteractionResponseType | None = None
 
     @property
-    def type(self) -> Optional[InteractionResponseType]:
+    def type(self) -> InteractionResponseType | None:
         """:class:`InteractionResponseType` | :data:`None`: If a response was successfully made, this is the type of the response.
 
         .. versionadded:: 2.6
@@ -912,7 +909,7 @@ class InteractionResponse:
         if self._response_type is not None:
             raise InteractionResponded(self._parent)
 
-        defer_type: Optional[InteractionResponseType] = None
+        defer_type: InteractionResponseType | None = None
         data: dict[str, Any] = {}
         parent = self._parent
 
@@ -979,7 +976,7 @@ class InteractionResponse:
 
     async def send_message(
         self,
-        content: Optional[str] = None,
+        content: str | None = None,
         *,
         embed: Embed = MISSING,
         embeds: list[Embed] = MISSING,
@@ -1119,7 +1116,7 @@ class InteractionResponse:
             msg = "files cannot exceed maximum of 10 elements"
             raise ValueError(msg)
 
-        previous_mentions: Optional[AllowedMentions] = getattr(
+        previous_mentions: AllowedMentions | None = getattr(
             self._parent._state, "allowed_mentions", None
         )
         if allowed_mentions:
@@ -1194,18 +1191,18 @@ class InteractionResponse:
 
     async def edit_message(
         self,
-        content: Optional[str] = MISSING,
+        content: str | None = MISSING,
         *,
-        embed: Optional[Embed] = MISSING,
+        embed: Embed | None = MISSING,
         embeds: list[Embed] = MISSING,
         file: File = MISSING,
         files: list[File] = MISSING,
-        attachments: Optional[list[Attachment]] = MISSING,
-        view: Optional[View] = MISSING,
-        components: Optional[MessageComponents] = MISSING,
+        attachments: list[Attachment] | None = MISSING,
+        view: View | None = MISSING,
+        components: MessageComponents | None = MISSING,
         flags: MessageFlags = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
-        delete_after: Optional[float] = None,
+        delete_after: float | None = None,
     ) -> None:
         """|coro|
 
@@ -1311,7 +1308,7 @@ class InteractionResponse:
 
         if parent.type not in (InteractionType.component, InteractionType.modal_submit):
             raise InteractionNotEditable(parent)
-        parent = cast("Union[MessageInteraction, ModalInteraction]", parent)
+        parent = cast("MessageInteraction | ModalInteraction", parent)
         message = parent.message
         # message in modal interactions only exists if modal was sent from component interaction
         if not message:
@@ -1345,7 +1342,7 @@ class InteractionResponse:
             msg = "files cannot exceed maximum of 10 elements"
             raise ValueError(msg)
 
-        previous_mentions: Optional[AllowedMentions] = getattr(
+        previous_mentions: AllowedMentions | None = getattr(
             self._parent._state, "allowed_mentions", None
         )
         if allowed_mentions:
@@ -1485,11 +1482,11 @@ class InteractionResponse:
 
     async def send_modal(
         self,
-        modal: Optional[Modal] = None,
+        modal: Modal | None = None,
         *,
-        title: Optional[str] = None,
-        custom_id: Optional[str] = None,
-        components: Optional[ModalComponents] = None,
+        title: str | None = None,
+        custom_id: str | None = None,
+        components: ModalComponents | None = None,
     ) -> None:
         """|coro|
 
@@ -1638,7 +1635,7 @@ class _InteractionMessageState:
         self._interaction: Interaction = interaction
         self._parent: ConnectionState = parent
 
-    def _get_guild(self, guild_id) -> Optional[Guild]:
+    def _get_guild(self, guild_id) -> Guild | None:
         return self._parent._get_guild(guild_id)
 
     def store_user(self, data: UserPayload) -> User:
@@ -1736,82 +1733,82 @@ class InteractionMessage(Message):
     @overload
     async def edit(
         self,
-        content: Optional[str] = ...,
+        content: str | None = ...,
         *,
-        embed: Optional[Embed] = ...,
+        embed: Embed | None = ...,
         file: File = ...,
-        attachments: Optional[list[Attachment]] = ...,
+        attachments: list[Attachment] | None = ...,
         suppress_embeds: bool = ...,
         flags: MessageFlags = ...,
-        allowed_mentions: Optional[AllowedMentions] = ...,
-        view: Optional[View] = ...,
-        components: Optional[MessageComponents] = ...,
-        delete_after: Optional[float] = ...,
+        allowed_mentions: AllowedMentions | None = ...,
+        view: View | None = ...,
+        components: MessageComponents | None = ...,
+        delete_after: float | None = ...,
     ) -> InteractionMessage: ...
 
     @overload
     async def edit(
         self,
-        content: Optional[str] = ...,
+        content: str | None = ...,
         *,
-        embed: Optional[Embed] = ...,
+        embed: Embed | None = ...,
         files: list[File] = ...,
-        attachments: Optional[list[Attachment]] = ...,
+        attachments: list[Attachment] | None = ...,
         suppress_embeds: bool = ...,
         flags: MessageFlags = ...,
-        allowed_mentions: Optional[AllowedMentions] = ...,
-        view: Optional[View] = ...,
-        components: Optional[MessageComponents] = ...,
-        delete_after: Optional[float] = ...,
+        allowed_mentions: AllowedMentions | None = ...,
+        view: View | None = ...,
+        components: MessageComponents | None = ...,
+        delete_after: float | None = ...,
     ) -> InteractionMessage: ...
 
     @overload
     async def edit(
         self,
-        content: Optional[str] = ...,
+        content: str | None = ...,
         *,
         embeds: list[Embed] = ...,
         file: File = ...,
-        attachments: Optional[list[Attachment]] = ...,
+        attachments: list[Attachment] | None = ...,
         suppress_embeds: bool = ...,
         flags: MessageFlags = ...,
-        allowed_mentions: Optional[AllowedMentions] = ...,
-        view: Optional[View] = ...,
-        components: Optional[MessageComponents] = ...,
-        delete_after: Optional[float] = ...,
+        allowed_mentions: AllowedMentions | None = ...,
+        view: View | None = ...,
+        components: MessageComponents | None = ...,
+        delete_after: float | None = ...,
     ) -> InteractionMessage: ...
 
     @overload
     async def edit(
         self,
-        content: Optional[str] = ...,
+        content: str | None = ...,
         *,
         embeds: list[Embed] = ...,
         files: list[File] = ...,
-        attachments: Optional[list[Attachment]] = ...,
+        attachments: list[Attachment] | None = ...,
         suppress_embeds: bool = ...,
         flags: MessageFlags = ...,
-        allowed_mentions: Optional[AllowedMentions] = ...,
-        view: Optional[View] = ...,
-        components: Optional[MessageComponents] = ...,
-        delete_after: Optional[float] = ...,
+        allowed_mentions: AllowedMentions | None = ...,
+        view: View | None = ...,
+        components: MessageComponents | None = ...,
+        delete_after: float | None = ...,
     ) -> InteractionMessage: ...
 
     async def edit(
         self,
-        content: Optional[str] = MISSING,
+        content: str | None = MISSING,
         *,
-        embed: Optional[Embed] = MISSING,
+        embed: Embed | None = MISSING,
         embeds: list[Embed] = MISSING,
         file: File = MISSING,
         files: list[File] = MISSING,
-        attachments: Optional[list[Attachment]] = MISSING,
+        attachments: list[Attachment] | None = MISSING,
         suppress_embeds: bool = MISSING,
         flags: MessageFlags = MISSING,
-        allowed_mentions: Optional[AllowedMentions] = MISSING,
-        view: Optional[View] = MISSING,
-        components: Optional[MessageComponents] = MISSING,
-        delete_after: Optional[float] = None,
+        allowed_mentions: AllowedMentions | None = MISSING,
+        view: View | None = MISSING,
+        components: MessageComponents | None = MISSING,
+        delete_after: float | None = None,
     ) -> Message:
         """|coro|
 
@@ -1957,7 +1954,7 @@ class InteractionMessage(Message):
             delete_after=delete_after,
         )
 
-    async def delete(self, *, delay: Optional[float] = None) -> None:
+    async def delete(self, *, delay: float | None = None) -> None:
         """|coro|
 
         Deletes the message.
@@ -2049,10 +2046,10 @@ class InteractionDataResolved(dict[str, Any]):
         state = parent._state
         guild_id = parent.guild_id
 
-        guild: Optional[Guild] = None
+        guild: Guild | None = None
         # `guild_fallback` is only used in guild contexts, so this `MISSING` value should never be used.
         # We need to define it anyway to satisfy the typechecker.
-        guild_fallback: Union[Guild, Object] = MISSING
+        guild_fallback: Guild | Object = MISSING
         if guild_id is not None:
             guild = state._get_guild(guild_id)
             guild_fallback = guild or Object(id=guild_id)
@@ -2084,7 +2081,7 @@ class InteractionDataResolved(dict[str, Any]):
 
         for str_id, message in messages.items():
             channel_id = int(message["channel_id"])
-            channel: Optional[MessageableChannel] = None
+            channel: MessageableChannel | None = None
 
             if channel_id == parent.channel.id:
                 # fast path, this should generally be the case
@@ -2092,7 +2089,7 @@ class InteractionDataResolved(dict[str, Any]):
             else:
                 # in case this ever happens, fall back to guild channel cache
                 channel = cast(
-                    "Optional[MessageableChannel]",
+                    "MessageableChannel | None",
                     (guild and guild.get_channel(channel_id)),
                 )
 
@@ -2114,17 +2111,17 @@ class InteractionDataResolved(dict[str, Any]):
 
     @overload
     def get_with_type(
-        self, key: Snowflake, data_type: Union[OptionType, ComponentType]
-    ) -> Union[Member, User, Role, AnyChannel, Message, Attachment, None]: ...
+        self, key: Snowflake, data_type: OptionType | ComponentType
+    ) -> Member | User | Role | AnyChannel | Message | Attachment | None: ...
 
     @overload
     def get_with_type(
-        self, key: Snowflake, data_type: Union[OptionType, ComponentType], default: T
-    ) -> Union[Member, User, Role, AnyChannel, Message, Attachment, T]: ...
+        self, key: Snowflake, data_type: OptionType | ComponentType, default: T
+    ) -> Member | User | Role | AnyChannel | Message | Attachment | T: ...
 
     def get_with_type(
-        self, key: Snowflake, data_type: Union[OptionType, ComponentType], default: T = None
-    ) -> Union[Member, User, Role, AnyChannel, Message, Attachment, T, None]:
+        self, key: Snowflake, data_type: OptionType | ComponentType, default: T = None
+    ) -> Member | User | Role | AnyChannel | Message | Attachment | T | None:
         if data_type is OptionType.mentionable or data_type is ComponentType.mentionable_select:
             key = int(key)
             if (result := self.members.get(key)) is not None:
@@ -2151,8 +2148,8 @@ class InteractionDataResolved(dict[str, Any]):
         return default
 
     def get_by_id(
-        self, key: Optional[int]
-    ) -> Optional[Union[Member, User, Role, AnyChannel, Message, Attachment]]:
+        self, key: int | None
+    ) -> Member | User | Role | AnyChannel | Message | Attachment | None:
         if key is None:
             return None
 

@@ -4,15 +4,13 @@ from __future__ import annotations
 
 import os
 from abc import ABC, abstractmethod
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from typing import (
     TYPE_CHECKING,
-    Callable,
     ClassVar,
     Generic,
-    Optional,
+    TypeAlias,
     TypeVar,
-    Union,
 )
 
 from ...components import AnySelectMenu, SelectDefaultValue
@@ -36,14 +34,14 @@ else:
 
 
 S_co = TypeVar("S_co", bound="BaseSelect", covariant=True)
-V_co = TypeVar("V_co", bound="Optional[View]", covariant=True)
+V_co = TypeVar("V_co", bound="View | None", covariant=True)
 SelectMenuT = TypeVar("SelectMenuT", bound=AnySelectMenu)
 SelectValueT = TypeVar("SelectValueT")
 P = ParamSpec("P")
 
-SelectDefaultValueMultiInputType = Union[SelectValueT, SelectDefaultValue]
+SelectDefaultValueMultiInputType: TypeAlias = SelectValueT | SelectDefaultValue
 # almost the same as above, but with `Object`; used for selects where the type isn't ambiguous (i.e. all except mentionable select)
-SelectDefaultValueInputType = Union[SelectDefaultValueMultiInputType[SelectValueT], Object]
+SelectDefaultValueInputType: TypeAlias = SelectDefaultValueMultiInputType[SelectValueT] | Object
 
 
 class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
@@ -81,14 +79,14 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
         component_type: ComponentType,
         *,
         custom_id: str,
-        placeholder: Optional[str],
+        placeholder: str | None,
         min_values: int,
         max_values: int,
         disabled: bool,
-        default_values: Optional[Sequence[SelectDefaultValueInputType[SelectValueT]]],
+        default_values: Sequence[SelectDefaultValueInputType[SelectValueT]] | None,
         required: bool,
         id: int,
-        row: Optional[int],
+        row: int | None,
     ) -> None:
         super().__init__()
         self._selected_values: list[SelectValueT] = []
@@ -121,12 +119,12 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
         self._underlying.custom_id = value
 
     @property
-    def placeholder(self) -> Optional[str]:
+    def placeholder(self) -> str | None:
         """:class:`str` | :data:`None`: The placeholder text that is shown if nothing is selected, if any."""
         return self._underlying.placeholder
 
     @placeholder.setter
-    def placeholder(self, value: Optional[str]) -> None:
+    def placeholder(self, value: str | None) -> None:
         if value is not None and not isinstance(value, str):
             msg = "placeholder must be None or str"
             raise TypeError(msg)
@@ -169,7 +167,7 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
 
     @default_values.setter
     def default_values(
-        self, value: Optional[Sequence[SelectDefaultValueInputType[SelectValueT]]]
+        self, value: Sequence[SelectDefaultValueInputType[SelectValueT]] | None
     ) -> None:
         self._underlying.default_values = self._transform_default_values(value) if value else []
 

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Literal, TypedDict, Union
+from typing import Literal, TypeAlias, TypedDict
 
 from typing_extensions import NotRequired
 
@@ -26,11 +26,11 @@ class AutoModTimeoutActionMetadata(TypedDict):
     duration_seconds: int
 
 
-AutoModActionMetadata = Union[
-    AutoModBlockMessageActionMetadata,
-    AutoModSendAlertActionMetadata,
-    AutoModTimeoutActionMetadata,
-]
+AutoModActionMetadata: TypeAlias = (
+    AutoModBlockMessageActionMetadata
+    | AutoModSendAlertActionMetadata
+    | AutoModTimeoutActionMetadata
+)
 
 
 class AutoModAction(TypedDict):

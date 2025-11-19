@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from .enums import SKUType, try_enum
 from .flags import SKUFlags
@@ -91,9 +91,9 @@ class SKU(Hashable):
         self,
         user: Snowflake,
         *,
-        limit: Optional[int] = 50,
-        before: Optional[SnowflakeTime] = None,
-        after: Optional[SnowflakeTime] = None,
+        limit: int | None = 50,
+        before: SnowflakeTime | None = None,
+        after: SnowflakeTime | None = None,
     ) -> SubscriptionIterator:
         """Retrieves an :class:`.AsyncIterator` that enables receiving subscriptions for the SKU.
 

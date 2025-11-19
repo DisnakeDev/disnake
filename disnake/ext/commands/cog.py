@@ -4,14 +4,12 @@ from __future__ import annotations
 
 import inspect
 import logging
-from collections.abc import Generator
+from collections.abc import Callable, Generator
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     ClassVar,
-    Optional,
-    Union,
+    TypeAlias,
 )
 
 import disnake
@@ -33,7 +31,7 @@ if TYPE_CHECKING:
     from .context import Context
     from .core import Command
 
-    AnyBot = Union[Bot, AutoShardedBot, InteractionBot, AutoShardedInteractionBot]
+    AnyBot: TypeAlias = Bot | AutoShardedBot | InteractionBot | AutoShardedInteractionBot
 
 
 __all__ = (
@@ -382,12 +380,12 @@ class Cog(metaclass=CogMeta):
         return [(name, getattr(self, method_name)) for name, method_name in self.__cog_listeners__]
 
     @classmethod
-    def _get_overridden_method(cls, method: FuncT) -> Optional[FuncT]:
+    def _get_overridden_method(cls, method: FuncT) -> FuncT | None:
         """Return None if the method is not overridden. Otherwise returns the overridden method."""
         return getattr(method.__func__, "__cog_special_method__", method)
 
     @classmethod
-    def listener(cls, name: Union[str, Event] = MISSING) -> Callable[[FuncT], FuncT]:
+    def listener(cls, name: str | Event = MISSING) -> Callable[[FuncT], FuncT]:
         """A decorator that marks a function as a listener.
 
         This is the cog equivalent of :meth:`.Bot.listen`.
