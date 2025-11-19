@@ -32,7 +32,7 @@ __all__ = (
 )
 
 
-class UserSelect(BaseSelect[UserSelectMenu, "Union[User, Member]", V_co]):
+class UserSelect(BaseSelect[UserSelectMenu, "User | Member", V_co]):
     """Represents a UI user select menu.
 
     This is usually represented as a drop down menu.

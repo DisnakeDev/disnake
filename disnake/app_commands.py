@@ -47,7 +47,7 @@ if TYPE_CHECKING:
         | Sequence[Localized[str]]
     )
 
-    APIApplicationCommand: TypeAlias = "APIUserCommand" | "APIMessageCommand" | "APISlashCommand"
+    APIApplicationCommand: TypeAlias = "APIUserCommand | APIMessageCommand | APISlashCommand"
 
 
 __all__ = (

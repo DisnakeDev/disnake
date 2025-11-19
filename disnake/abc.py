@@ -88,7 +88,7 @@ if TYPE_CHECKING:
     # include non-messageable channels, e.g. category/forum
     AnyChannel: TypeAlias = MessageableChannel | AnyGuildChannel
 
-    SnowflakeTime: TypeAlias = "Snowflake" | datetime
+    SnowflakeTime: TypeAlias = "Snowflake | datetime"
 
 MISSING = utils.MISSING
 
