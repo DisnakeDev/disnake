@@ -240,7 +240,7 @@ class View:
             return time.monotonic() + self.timeout
         return None
 
-    def add_item(self, item: Item) -> Self:
+    def add_item(self, item: Item[Self]) -> Self:
         """Adds an item to the view.
 
         This function returns the class instance to allow for fluent-style
