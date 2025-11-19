@@ -5,7 +5,7 @@ import importlib
 import inspect
 import re
 from collections import defaultdict
-from typing import TYPE_CHECKING, ClassVar, NamedTuple, Optional
+from typing import TYPE_CHECKING, ClassVar, NamedTuple
 
 from docutils import nodes
 from sphinx import addnodes
@@ -104,7 +104,7 @@ class PyAttributeTable(SphinxDirective):
     final_argument_whitespace = False
     option_spec: ClassVar[OptionSpec] = {}
 
-    def parse_name(self, content: str) -> tuple[str, Optional[str]]:
+    def parse_name(self, content: str) -> tuple[str, str | None]:
         match = _name_parser_regex.match(content)
         path, name = match.groups() if match else (None, None)
         if path:
@@ -182,14 +182,14 @@ def build_lookup_table(env: BuildEnvironment) -> dict[str, list[str]]:
 class TableElement(NamedTuple):
     fullname: str
     label: str
-    badge: Optional[attributetablebadge]
+    badge: attributetablebadge | None
 
 
 def process_attributetable(app: Sphinx, doctree: nodes.document, docname: str) -> None:
     env = app.builder.env
 
     lookup = build_lookup_table(env)
-    for node in doctree.traverse(attributetableplaceholder):
+    for node in doctree.findall(attributetableplaceholder):
         modulename, classname, fullname = (
             node["python-module"],
             node["python-class"],

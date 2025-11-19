@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-from typing import Literal, Optional
+from typing import Literal
 
 import pytest
 
@@ -142,7 +142,7 @@ class TestPermissions:
             ),
         ],
     )
-    def test_iter(self, parameters: dict[str, bool], expected: Optional[dict[str, bool]]) -> None:
+    def test_iter(self, parameters: dict[str, bool], expected: dict[str, bool] | None) -> None:
         perms = Permissions(**parameters)
         if expected is None:
             expected = parameters

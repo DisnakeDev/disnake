@@ -2,14 +2,15 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
-from typing import TYPE_CHECKING, Any, Union, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from .enums import MessageType
 
 __all__ = ("AllowedMentions",)
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
     from typing_extensions import Self
 
     from .abc import Snowflake
@@ -24,7 +25,7 @@ class _FakeBool:
     def __repr__(self) -> str:
         return "True"
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: object) -> bool:
         return other is True
 
     def __bool__(self) -> bool:
@@ -35,7 +36,7 @@ default: Any = _FakeBool()
 
 
 class AllowedMentions:
-    """A class that represents what mentions are allowed in a message.
+    r"""A class that represents what mentions are allowed in a message.
 
     This class can be set during :class:`Client` initialisation to apply
     to every message sent. It can also be applied on a per message basis
@@ -45,13 +46,13 @@ class AllowedMentions:
     ----------
     everyone: :class:`bool`
         Whether to allow everyone and here mentions. Defaults to ``True``.
-    users: :class:`bool` | :class:`list`\\[:class:`abc.Snowflake`]
+    users: :class:`bool` | :class:`list`\[:class:`abc.Snowflake`]
         Controls the users being mentioned. If ``True`` (the default) then
         users are mentioned based on the message content. If ``False`` then
         users are not mentioned at all. If a list of :class:`abc.Snowflake`
         is given then only the users provided will be mentioned, provided those
         users are in the message content.
-    roles: :class:`bool` | :class:`list`\\[:class:`abc.Snowflake`]
+    roles: :class:`bool` | :class:`list`\[:class:`abc.Snowflake`]
         Controls the roles being mentioned. If ``True`` (the default) then
         roles are mentioned based on the message content. If ``False`` then
         roles are not mentioned at all. If a list of :class:`abc.Snowflake`
@@ -70,14 +71,14 @@ class AllowedMentions:
         self,
         *,
         everyone: bool = default,
-        users: Union[bool, Sequence[Snowflake]] = default,
-        roles: Union[bool, Sequence[Snowflake]] = default,
+        users: bool | Sequence[Snowflake] = default,
+        roles: bool | Sequence[Snowflake] = default,
         replied_user: bool = default,
     ) -> None:
         self.everyone = everyone
         # TODO(3.0): annotate attributes as `Sequence` instead of copying to list
-        self.users: Union[bool, list[Snowflake]]
-        self.roles: Union[bool, list[Snowflake]]
+        self.users: bool | list[Snowflake]
+        self.roles: bool | list[Snowflake]
         if users is default or isinstance(users, bool):
             self.users = cast("bool", users)
         else:

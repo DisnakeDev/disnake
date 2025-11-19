@@ -11,16 +11,21 @@
 #
 # All configuration values have a default; values that are commented out
 # serve to show the default.
+from __future__ import annotations
 
+import importlib.metadata
 import importlib.util
 import inspect
 import os
 import re
 import subprocess  # noqa: TID251
 import sys
-from typing import Any, Optional
+from typing import TYPE_CHECKING, Any
 
-from sphinx.application import Sphinx
+import versioningit
+
+if TYPE_CHECKING:
+    from sphinx.application import Sphinx
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -106,15 +111,18 @@ copyright = "2015-2021, Rapptz, 2021-present, Disnake Development"
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
-# The short X.Y version.
-
-version = ""
-with open("../disnake/__init__.py") as f:
-    version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE).group(1)  # pyright: ignore[reportOptionalMemberAccess]
-
 # The full version, including alpha/beta/rc tags.
-release = version
+release = importlib.metadata.version("disnake")
+# The short X.Y version.
+version = ".".join(release.split(".")[:2])
+# The release for the next release
+next_release = versioningit.get_next_version(os.path.abspath(".."))
+next_version = ".".join((next_release).split(".", 2)[:2])
 
+rst_prolog += f"""
+.. |vnext_full| replace:: {next_release}
+.. |vnext| replace:: {next_version}
+"""
 
 _IS_READTHEDOCS = bool(os.getenv("READTHEDOCS"))
 
@@ -208,7 +216,7 @@ if not (_spec and _spec.origin):
 _disnake_module_path = os.path.dirname(_spec.origin)
 
 
-def linkcode_resolve(domain: str, info: dict[str, Any]) -> Optional[str]:
+def linkcode_resolve(domain: str, info: dict[str, Any]) -> str | None:
     if domain != "py":
         return None
 

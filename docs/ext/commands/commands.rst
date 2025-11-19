@@ -356,6 +356,8 @@ This can get tedious, so an inline advanced converter is possible through a :fun
         else:
             await ctx.send("Hm you're not so new.")
 
+.. _ext_commands_discord_converters:
+
 Discord Converters
 ++++++++++++++++++
 
@@ -551,6 +553,34 @@ The ``buy_sell`` parameter must be either the literal string ``"buy"`` or ``"sel
 :exc:`~.ext.commands.BadLiteralArgument`. Any literal values can be mixed and matched within the same :data:`typing.Literal` converter.
 
 Note that ``typing.Literal[True]`` and ``typing.Literal[False]`` still follow the :class:`bool` converter rules.
+
+.. _ext_commands_converters_annotated:
+
+typing.Annotated
+^^^^^^^^^^^^^^^^
+
+.. versionadded:: |vnext|
+
+With :data:`typing.Annotated`, you can use converters in a more type-safe way.
+Taking the example from :ref:`ext_commands_basic_converters` above, ``content`` is annotated
+as ``to_upper`` (i.e. a converter function), while it would naturally be a :class:`str` at runtime;
+this will likely trip up type-checkers such as pyright/mypy.
+
+To avoid this, you can use :data:`typing.Annotated`, such that type-checkers consider the parameter
+a :class:`str` while disnake will use the converter passed as the second argument to :data:`~typing.Annotated` at runtime:
+
+.. code-block:: python3
+
+    from typing import Annotated
+
+    def to_upper(argument: str):
+        return argument.upper()
+
+    @bot.command()
+    async def up(ctx, *, content: Annotated[str, to_upper]):
+        await ctx.send(content)
+
+This works with all types of converters mentioned on this page.
 
 Greedy
 ^^^^^^

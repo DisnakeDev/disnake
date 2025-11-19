@@ -17,11 +17,12 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Final,
-    Optional,
-    Sequence,
 )
 
 import nox
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
 
 nox.needs_version = ">=2025.5.1"
 
@@ -74,11 +75,11 @@ EXECUTION_GROUPS: Sequence[ExecutionGroup] = [
         ExecutionGroup(
             sessions=("pyright",),
             python=python,
-            pyright_paths=("disnake", "tests", "examples", "noxfile.py", "setup.py"),
+            pyright_paths=("disnake", "tests", "examples", "noxfile.py"),
             project=True,
             extras=("speed", "voice"),
             groups=("test", "nox"),
-            dependencies=("setuptools", "pytz", "requests"),  # needed for type checking
+            dependencies=("pytz", "requests"),  # needed for type checking
         )
         for python in ALL_PYTHONS
     ),
@@ -86,22 +87,23 @@ EXECUTION_GROUPS: Sequence[ExecutionGroup] = [
     ExecutionGroup(
         sessions=("docs", "pyright"),
         pyright_paths=("docs",),
-        extras=("docs",),
+        groups=("docs",),
     ),
     # codemodding and pyright
     ExecutionGroup(
         sessions=("codemod", "autotyping", "pyright"),
-        pyright_paths=("scripts",),
+        pyright_paths=("scripts/codemods", "scripts/ci"),
         groups=("codemod",),
     ),
     # the other sessions, they don't need pyright, but they need to run
     ExecutionGroup(
-        sessions=("lint", "slotscheck", "check-manifest"),
+        sessions=("lint", "slotscheck", "check-wheel-contents"),
         groups=("tools",),
     ),
     # build
     ExecutionGroup(
-        sessions=("build",),
+        sessions=("build", "pyright"),
+        pyright_paths=("scripts/versioning.py",),
         groups=("build",),
     ),
     ## testing
@@ -134,7 +136,7 @@ def get_version_for_session(name: str) -> str:
     return versions.pop()
 
 
-def install_deps(session: nox.Session, *, execution_group: Optional[ExecutionGroup] = None) -> None:
+def install_deps(session: nox.Session, *, execution_group: ExecutionGroup | None = None) -> None:
     """Helper to install dependencies from a group."""
     if not execution_group:
         results = get_groups_for_session(session.name)
@@ -177,7 +179,7 @@ def install_deps(session: nox.Session, *, execution_group: Optional[ExecutionGro
         "sync",
         "--no-default-groups",
     ]
-    env: dict[str, Any] = {}
+    env: dict[str, str] = {}
 
     if session.venv_backend != "none":
         command.append(f"--python={session.virtualenv.location}")
@@ -250,21 +252,14 @@ def lint(session: nox.Session) -> None:
     session.run("prek", "run", "--all-files", *session.posargs)
 
 
-@nox.session(name="check-manifest")
-def check_manifest(session: nox.Session) -> None:
-    """Run check-manifest."""
-    install_deps(session)
-    session.run("check-manifest", "-v")
-
-
-@nox.session(python=get_version_for_session("slotscheck"))
+@nox.session(python=get_version_for_session("slotscheck"), tags=["misc"])
 def slotscheck(session: nox.Session) -> None:
     """Run slotscheck."""
     install_deps(session)
     session.run("python", "-m", "slotscheck", "--verbose", "-m", "disnake")
 
 
-@nox.session(requires=["check-manifest"])
+@nox.session(tags=["misc"])
 def build(session: nox.Session) -> None:
     """Build a dist."""
     install_deps(session)
@@ -273,6 +268,13 @@ def build(session: nox.Session) -> None:
     if dist_path.exists():
         shutil.rmtree(dist_path)
     session.run("python", "-m", "build", "--outdir", "dist")
+
+
+@nox.session(name="check-wheel-contents", requires=["build"], tags=["misc"])
+def check_wheel_contents(session: nox.Session) -> None:
+    """Run check-wheel-contents."""
+    install_deps(session)
+    session.run("check-wheel-contents", "dist")
 
 
 @nox.session(python=get_version_for_session("autotyping"))

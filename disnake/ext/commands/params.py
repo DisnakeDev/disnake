@@ -12,31 +12,31 @@ import itertools
 import math
 import types
 from abc import ABC, abstractmethod
-from collections.abc import Sequence
 from dataclasses import dataclass
 from enum import Enum, EnumMeta
 from types import EllipsisType, UnionType
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     ClassVar,
+    Concatenate,
     Final,
     Generic,
     Literal,
     NoReturn,
-    Optional,
+    TypeAlias,
+    TypeGuard,
     TypeVar,
     Union,
     get_origin,
 )
 
-from typing_extensions import Concatenate, ParamSpec, Self, TypeGuard
+from typing_extensions import ParamSpec, Self
 
 import disnake
 from disnake.app_commands import Option, OptionChoice
 from disnake.channel import _channel_type_factory
-from disnake.enums import ChannelType, OptionType, try_enum_to_int
+from disnake.enums import OptionType, try_enum_to_int
 from disnake.ext import commands
 from disnake.i18n import Localized
 from disnake.interactions import ApplicationCommandInteraction
@@ -54,7 +54,11 @@ T = TypeVar("T")
 P = ParamSpec("P")
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Sequence
+    from typing import Concatenate, TypeGuard
+
     from disnake.app_commands import Choices
+    from disnake.enums import ChannelType
     from disnake.i18n import LocalizationValue, LocalizedOptional
     from disnake.types.interactions import ApplicationCommandOptionChoiceValue
 
@@ -63,19 +67,16 @@ if TYPE_CHECKING:
     from .cog import Cog
     from .slash_core import InvokableSlashCommand, SubCommand
 
-    AnySlashCommand = Union[InvokableSlashCommand, SubCommand]
+    AnySlashCommand: TypeAlias = InvokableSlashCommand | SubCommand
 
-    InjectionCallback = Union[
-        Callable[Concatenate[CogT, P], T],
-        Callable[P, T],
-    ]
-    AnyAutocompleter = Union[
-        Sequence[Any],
-        Callable[Concatenate[ApplicationCommandInteraction, str, P], Any],
-        Callable[Concatenate[CogT, ApplicationCommandInteraction, str, P], Any],
-    ]
+    InjectionCallback: TypeAlias = Callable[Concatenate[CogT, P], T] | Callable[P, T]
+    AnyAutocompleter: TypeAlias = (
+        Sequence[Any]
+        | Callable[Concatenate[ApplicationCommandInteraction, str, P], Any]
+        | Callable[Concatenate[CogT, ApplicationCommandInteraction, str, P], Any]
+    )
 
-TypeT = TypeVar("TypeT", bound=type[Any])
+TypeT = TypeVar("TypeT", bound=type[object])
 BotT = TypeVar("BotT", bound="disnake.Client", covariant=True)
 
 __all__ = (
@@ -94,7 +95,7 @@ __all__ = (
 )
 
 
-def issubclass_(obj: Any, tp: Union[TypeT, tuple[TypeT, ...]]) -> TypeGuard[TypeT]:
+def issubclass_(obj: Any, tp: TypeT | tuple[TypeT, ...]) -> TypeGuard[TypeT]:
     """Similar to the builtin `issubclass`, but more lenient.
     Can also handle unions (`issubclass(int | str, int)`) and
     generic types (`issubclass(X[T], X)`) in the first argument.
@@ -124,12 +125,12 @@ def remove_optionals(annotation: Any) -> Any:
         if len(args) == 1:
             annotation = args[0]
         else:
-            annotation = Union[args]
+            annotation = Union[args]  # noqa: UP007
 
     return annotation
 
 
-def _xt_to_xe(xe: Optional[float], xt: Optional[float], direction: float = 1) -> Optional[float]:
+def _xt_to_xe(xe: float | None, xt: float | None, direction: float = 1) -> float | None:
     """Function for combining xt and xe
 
     * x > xt && x >= xe ; x >= f(xt, xe, 1)
@@ -171,8 +172,8 @@ def _range_to_str_len(min_value: int, max_value: int) -> tuple[int, int]:
 
 
 def _unbound_range_to_str_len(
-    min_value: Optional[int], max_value: Optional[int]
-) -> tuple[Optional[int], Optional[int]]:
+    min_value: int | None, max_value: int | None
+) -> tuple[int | None, int | None]:
     if min_value is not None and max_value is not None:
         return _range_to_str_len(min_value, max_value)
 
@@ -188,7 +189,7 @@ def _unbound_range_to_str_len(
 
 
 class Injection(Generic[P, T]):
-    """Represents a slash command injection.
+    r"""Represents a slash command injection.
 
     .. versionadded:: 2.3
 
@@ -199,7 +200,7 @@ class Injection(Generic[P, T]):
     ----------
     function: Callable
         The underlying injection function.
-    autocompleters: :class:`dict`\\[:class:`str`, Callable]
+    autocompleters: :class:`dict`\[:class:`str`, Callable]
         A mapping of injection's option names to their respective autocompleters.
 
         .. versionadded:: 2.6
@@ -211,7 +212,7 @@ class Injection(Generic[P, T]):
         self,
         function: InjectionCallback[CogT, P, T],
         *,
-        autocompleters: Optional[dict[str, Callable]] = None,
+        autocompleters: dict[str, Callable] | None = None,
     ) -> None:
         if autocompleters is not None:
             for autocomp in autocompleters.values():
@@ -219,9 +220,9 @@ class Injection(Generic[P, T]):
 
         self.function: InjectionCallback[Any, P, T] = function
         self.autocompleters: dict[str, Callable] = autocompleters or {}
-        self._injected: Optional[Cog] = None
+        self._injected: Cog | None = None
 
-    def __get__(self, obj: Optional[Any], _: type[Any]) -> Self:
+    def __get__(self, obj: Any | None, _: type[object]) -> Self:
         if obj is None:
             return self
 
@@ -247,7 +248,7 @@ class Injection(Generic[P, T]):
         function: InjectionCallback[CogT, P, T],
         annotation: Any,
         *,
-        autocompleters: Optional[dict[str, Callable]] = None,
+        autocompleters: dict[str, Callable] | None = None,
     ) -> Injection[P, T]:
         self = cls(function, autocompleters=autocompleters)
         cls._registered[annotation] = self
@@ -286,7 +287,7 @@ class Injection(Generic[P, T]):
         return decorator
 
 
-NumT = TypeVar("NumT", bound=Union[int, float])
+NumT = TypeVar("NumT", bound=int | float)
 
 
 @dataclass(frozen=True)
@@ -296,8 +297,8 @@ class _BaseRange(ABC, Generic[NumT]):
     _allowed_types: ClassVar[tuple[type[Any], ...]]
 
     underlying_type: type[Any]
-    min_value: Optional[NumT]
-    max_value: Optional[NumT]
+    min_value: NumT | None
+    max_value: NumT | None
 
     def __class_getitem__(cls, params: tuple[Any, ...]) -> Self:
         if cls is _BaseRange:
@@ -357,7 +358,7 @@ class _BaseRange(ABC, Generic[NumT]):
         return cls(underlying_type=underlying_type, min_value=min_value, max_value=max_value)
 
     @staticmethod
-    def _coerce_bound(value: Union[NumT, EllipsisType, None], name: str) -> Optional[NumT]:
+    def _coerce_bound(value: NumT | EllipsisType | None, name: str) -> NumT | None:
         if value is None or value is ...:
             return None
         elif isinstance(value, (int, float)):
@@ -376,7 +377,7 @@ class _BaseRange(ABC, Generic[NumT]):
 
     @staticmethod
     @abstractmethod
-    def _infer_type(params: tuple[Any, ...]) -> type[Any]:
+    def _infer_type(params: tuple[object, ...]) -> type[Any]:
         raise NotImplementedError
 
     # hack to get `typing._type_check` to pass, e.g. when using `Range` as a generic parameter
@@ -385,7 +386,7 @@ class _BaseRange(ABC, Generic[NumT]):
 
     # support new union syntax for `Range[int, 1, 2] | None`
     def __or__(self, other: type[Any]) -> UnionType:
-        return Union[self, other]
+        return Union[self, other]  # noqa: UP007
 
 
 if TYPE_CHECKING:
@@ -394,7 +395,7 @@ if TYPE_CHECKING:
 else:
 
     @dataclass(frozen=True, repr=False)
-    class Range(_BaseRange[Union[int, float]]):
+    class Range(_BaseRange[int | float]):
         """Type representing a number with a limited range of allowed values.
 
         See :ref:`param_ranges` for more information.
@@ -427,7 +428,7 @@ else:
                     raise ValueError(msg)
 
         @staticmethod
-        def _infer_type(params: tuple[Any, ...]) -> type[Any]:
+        def _infer_type(params: tuple[object, ...]) -> type[int | float]:
             if any(isinstance(p, float) for p in params):
                 return float
             return int
@@ -460,7 +461,7 @@ else:
                     raise ValueError(msg)
 
         @staticmethod
-        def _infer_type(params: tuple[Any, ...]) -> type[Any]:
+        def _infer_type(params: tuple[object, ...]) -> type[str]:
             return str
 
 
@@ -473,13 +474,13 @@ _VERIFY_TYPES: Final[frozenset[OptionType]] = frozenset((OptionType.user, Option
 
 
 class ParamInfo:
-    """A class that basically connects function params with slash command options.
+    r"""A class that basically connects function params with slash command options.
     The instances of this class are not created manually, but via the functional interface instead.
     See :func:`Param`.
 
     Parameters
     ----------
-    default: Any | :class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`], :data:`~typing.Any`]
+    default: Any | :class:`~collections.abc.Callable`\[[:class:`.ApplicationCommandInteraction`], :data:`~typing.Any`]
         The actual default value for the corresponding function param.
         Can be a sync/async callable taking an interaction and returning a dynamic default value,
         if the user didn't pass a value for this parameter.
@@ -495,7 +496,7 @@ class ParamInfo:
         .. versionchanged:: 2.5
             Added support for localizations.
 
-    choices: :class:`~collections.abc.Sequence`\\[:class:`.OptionChoice`] | :class:`~collections.abc.Sequence`\\[:class:`str` | :class:`int` | :class:`float`] | :class:`~collections.abc.Mapping`\\[:class:`str`, :class:`str` | :class:`int` | :class:`float`]
+    choices: :class:`~collections.abc.Sequence`\[:class:`.OptionChoice`] | :class:`~collections.abc.Sequence`\[:class:`str` | :class:`int` | :class:`float`] | :class:`~collections.abc.Mapping`\[:class:`str`, :class:`str` | :class:`int` | :class:`float`]
         The pre-defined choices for this option.
     ge: :class:`float`
         The lowest allowed value for this option.
@@ -503,11 +504,11 @@ class ParamInfo:
         The greatest allowed value for this option.
     type: :class:`~typing.Any`
         The type of the parameter.
-    channel_types: :class:`list`\\[:class:`.ChannelType`]
+    channel_types: :class:`list`\[:class:`.ChannelType`]
         The list of channel types supported by this slash command option.
-    autocomplete: :class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`, :class:`str`], :data:`~typing.Any`]
+    autocomplete: :class:`~collections.abc.Callable`\[[:class:`.ApplicationCommandInteraction`, :class:`str`], :data:`~typing.Any`]
         The function that will suggest possible autocomplete options while typing.
-    converter: :class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`, :data:`~typing.Any`], :data:`~typing.Any`]
+    converter: :class:`~collections.abc.Callable`\[[:class:`.ApplicationCommandInteraction`, :data:`~typing.Any`], :data:`~typing.Any`]
         The function that will convert the original input to a desired format.
     min_length: :class:`int`
         The minimum length for this option, if it is a string option.
@@ -520,7 +521,7 @@ class ParamInfo:
         .. versionadded:: 2.6
     """
 
-    TYPES: ClassVar[dict[Union[type[Any], UnionType], int]] = {
+    TYPES: ClassVar[dict[type | UnionType, int]] = {
         str:                                               OptionType.string.value,
         int:                                               OptionType.integer.value,
         bool:                                              OptionType.boolean.value,
@@ -528,12 +529,12 @@ class ParamInfo:
         disnake.abc.User:                                  OptionType.user.value,
         disnake.User:                                      OptionType.user.value,
         disnake.Member:                                    OptionType.user.value,
-        Union[disnake.User, disnake.Member]:               OptionType.user.value,
+        Union[disnake.User, disnake.Member]:               OptionType.user.value,  # noqa: UP007
         disnake.Role:                                      OptionType.role.value,
         disnake.abc.Snowflake:                             OptionType.mentionable.value,
-        Union[disnake.Member, disnake.Role]:               OptionType.mentionable.value,
-        Union[disnake.User, disnake.Role]:                 OptionType.mentionable.value,
-        Union[disnake.User, disnake.Member, disnake.Role]: OptionType.mentionable.value,
+        Union[disnake.Member, disnake.Role]:               OptionType.mentionable.value,  # noqa: UP007
+        Union[disnake.User, disnake.Role]:                 OptionType.mentionable.value,  # noqa: UP007
+        Union[disnake.User, disnake.Member, disnake.Role]: OptionType.mentionable.value,  # noqa: UP007
         disnake.Attachment:                                OptionType.attachment.value,
         # channels handled separately
         disnake.abc.GuildChannel:                          OptionType.channel.value,
@@ -542,30 +543,30 @@ class ParamInfo:
 
     def __init__(
         self,
-        default: Union[Any, Callable[[ApplicationCommandInteraction[BotT]], Any]] = ...,
+        default: Any | Callable[[ApplicationCommandInteraction[BotT]], Any] = ...,
         *,
         name: LocalizedOptional = None,
         description: LocalizedOptional = None,
-        converter: Optional[Callable[[ApplicationCommandInteraction[BotT], Any], Any]] = None,
+        converter: Callable[[ApplicationCommandInteraction[BotT], Any], Any] | None = None,
         convert_default: bool = False,
-        autocomplete: Optional[AnyAutocompleter] = None,
-        choices: Optional[Choices] = None,
-        type: Optional[type] = None,
-        channel_types: Optional[list[ChannelType]] = None,
-        lt: Union[int, float, None] = None,
-        le: Union[int, float, None] = None,
-        gt: Union[int, float, None] = None,
-        ge: Union[int, float, None] = None,
+        autocomplete: AnyAutocompleter | None = None,
+        choices: Choices | None = None,
+        type: type | None = None,
+        channel_types: list[ChannelType] | None = None,
+        lt: int | float | None = None,
+        le: int | float | None = None,
+        gt: int | float | None = None,
+        ge: int | float | None = None,
         large: bool = False,
-        min_length: Optional[int] = None,
-        max_length: Optional[int] = None,
+        min_length: int | None = None,
+        max_length: int | None = None,
     ) -> None:
         name_loc = Localized._cast(name, False)
         self.name: str = name_loc.string or ""
         self.name_localizations: LocalizationValue = name_loc.localizations
 
         desc_loc = Localized._cast(description, False)
-        self.description: Optional[str] = desc_loc.string
+        self.description: str | None = desc_loc.string
         self.description_localizations: LocalizationValue = desc_loc.localizations
 
         self.default = default
@@ -580,10 +581,10 @@ class ParamInfo:
         self.choices = choices or []
         self.type = type or str
         self.channel_types = channel_types or []
-        self.min_value: Union[int, float, None] = _xt_to_xe(ge, gt, 1)
-        self.max_value: Union[int, float, None] = _xt_to_xe(le, lt, -1)
-        self.min_length: Optional[int] = min_length
-        self.max_length: Optional[int] = max_length
+        self.min_value: int | float | None = _xt_to_xe(ge, gt, 1)
+        self.max_value: int | float | None = _xt_to_xe(le, lt, -1)
+        self.min_length: int | None = min_length
+        self.max_length: int | None = max_length
         self.large = large
 
     def copy(self) -> Self:
@@ -635,7 +636,7 @@ class ParamInfo:
         cls,
         param: inspect.Parameter,
         type_hints: dict[str, Any],
-        parsed_docstring: Optional[dict[str, disnake.utils._DocstringParam]] = None,
+        parsed_docstring: dict[str, disnake.utils._DocstringParam] | None = None,
     ) -> Self:
         # hopefully repeated parsing won't cause any problems
         parsed_docstring = parsed_docstring or {}
@@ -737,7 +738,7 @@ class ParamInfo:
         self.type = type(self.choices[0].value)
 
     def _parse_guild_channel(
-        self, *channels: Union[type[disnake.abc.GuildChannel], type[disnake.Thread]]
+        self, *channels: type[disnake.abc.GuildChannel] | type[disnake.Thread]
     ) -> None:
         # this variable continues to be GuildChannel because the type is still
         # determined from the TYPE mapping in the class definition
@@ -955,8 +956,8 @@ def safe_call(function: Callable[..., T], /, *possible_args: Any, **possible_kwa
 
 def isolate_self(
     function: Callable[..., Any],
-    parameters: Optional[dict[str, inspect.Parameter]] = None,
-) -> tuple[tuple[Optional[inspect.Parameter], ...], dict[str, inspect.Parameter]]:
+    parameters: dict[str, inspect.Parameter] | None = None,
+) -> tuple[tuple[inspect.Parameter | None, ...], dict[str, inspect.Parameter]]:
     """Create parameters without self and the first interaction.
 
     Optionally accepts a `{str: inspect.Parameter}` dict as an optimization,
@@ -970,8 +971,8 @@ def isolate_self(
     parameters = dict(parameters)  # shallow copy
     parametersl = list(parameters.values())
 
-    cog_param: Optional[inspect.Parameter] = None
-    inter_param: Optional[inspect.Parameter] = None
+    cog_param: inspect.Parameter | None = None
+    inter_param: inspect.Parameter | None = None
 
     if signature_has_self_param(function):
         cog_param = parameters.pop(parametersl[0].name)
@@ -1021,8 +1022,8 @@ def classify_autocompleter(autocompleter: AnyAutocompleter) -> None:
 
 def collect_params(
     function: Callable[..., Any],
-    parameters: Optional[dict[str, inspect.Parameter]] = None,
-) -> tuple[Optional[str], Optional[str], list[ParamInfo], dict[str, Injection]]:
+    parameters: dict[str, inspect.Parameter] | None = None,
+) -> tuple[str | None, str | None, list[ParamInfo], dict[str, Injection]]:
     """Collect all parameters in a function.
 
     Optionally accepts a `{str: inspect.Parameter}` dict as an optimization.
@@ -1085,8 +1086,8 @@ def collect_nested_params(function: Callable[..., Any]) -> list[ParamInfo]:
 
 def format_kwargs(
     interaction: ApplicationCommandInteraction,
-    cog_param: Optional[str] = None,
-    inter_param: Optional[str] = None,
+    cog_param: str | None = None,
+    inter_param: str | None = None,
     /,
     *args: Any,
     **kwargs: Any,
@@ -1101,7 +1102,7 @@ def format_kwargs(
         msg = "Method slash commands may be created only in cog subclasses"
         raise TypeError(msg)
 
-    cog: Optional[commands.Cog] = first
+    cog: commands.Cog | None = first
 
     if cog_param:
         kwargs[cog_param] = cog
@@ -1193,32 +1194,32 @@ def expand_params(command: AnySlashCommand) -> list[Option]:
 
 
 def Param(
-    default: Union[Any, Callable[[ApplicationCommandInteraction[BotT]], Any]] = ...,
+    default: Any | Callable[[ApplicationCommandInteraction[BotT]], Any] = ...,
     *,
     name: LocalizedOptional = None,
     description: LocalizedOptional = None,
-    choices: Optional[Choices] = None,
-    converter: Optional[Callable[[ApplicationCommandInteraction[BotT], Any], Any]] = None,
+    choices: Choices | None = None,
+    converter: Callable[[ApplicationCommandInteraction[BotT], Any], Any] | None = None,
     convert_defaults: bool = False,
-    autocomplete: Optional[AnyAutocompleter] = None,
-    channel_types: Optional[list[ChannelType]] = None,
-    lt: Optional[float] = None,
-    le: Optional[float] = None,
-    gt: Optional[float] = None,
-    ge: Optional[float] = None,
+    autocomplete: AnyAutocompleter | None = None,
+    channel_types: list[ChannelType] | None = None,
+    lt: float | None = None,
+    le: float | None = None,
+    gt: float | None = None,
+    ge: float | None = None,
     large: bool = False,
-    min_length: Optional[int] = None,
-    max_length: Optional[int] = None,
+    min_length: int | None = None,
+    max_length: int | None = None,
     **kwargs: Any,
 ) -> Any:
-    """A special function that creates an instance of :class:`ParamInfo` that contains some information about a
+    r"""A special function that creates an instance of :class:`ParamInfo` that contains some information about a
     slash command option. This instance should be assigned to a parameter of a function representing your slash command.
 
     See :ref:`param_syntax` for more info.
 
     Parameters
     ----------
-    default: Any | :class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`], :data:`~typing.Any`]
+    default: Any | :class:`~collections.abc.Callable`\[[:class:`.ApplicationCommandInteraction`], :data:`~typing.Any`]
         The actual default value of the function parameter that should be passed instead of the :class:`ParamInfo` instance.
         Can be a sync/async callable taking an interaction and returning a dynamic default value,
         if the user didn't pass a value for this parameter.
@@ -1235,9 +1236,9 @@ def Param(
         .. versionchanged:: 2.5
             Added support for localizations.
 
-    choices: :class:`~collections.abc.Sequence`\\[:class:`.OptionChoice`] | :class:`~collections.abc.Sequence`\\[:class:`str` | :class:`int` | :class:`float`] | :class:`~collections.abc.Mapping`\\[:class:`str`, :class:`str` | :class:`int` | :class:`float`]
+    choices: :class:`~collections.abc.Sequence`\[:class:`.OptionChoice`] | :class:`~collections.abc.Sequence`\[:class:`str` | :class:`int` | :class:`float`] | :class:`~collections.abc.Mapping`\[:class:`str`, :class:`str` | :class:`int` | :class:`float`]
         The pre-defined choices for this slash command option.
-    converter: :class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`, :data:`~typing.Any`], :data:`~typing.Any`]
+    converter: :class:`~collections.abc.Callable`\[[:class:`.ApplicationCommandInteraction`, :data:`~typing.Any`], :data:`~typing.Any`]
         A function that will convert the original input to a desired format.
         Kwarg aliases: ``conv``.
     convert_defaults: :class:`bool`
@@ -1245,10 +1246,10 @@ def Param(
         Defaults to ``False``.
 
         .. versionadded:: 2.3
-    autocomplete: :class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`, :class:`str`], :data:`~typing.Any`]
+    autocomplete: :class:`~collections.abc.Callable`\[[:class:`.ApplicationCommandInteraction`, :class:`str`], :data:`~typing.Any`]
         A function that will suggest possible autocomplete options while typing.
         See :ref:`param_syntax`. Kwarg aliases: ``autocomp``.
-    channel_types: :class:`~collections.abc.Iterable`\\[:class:`.ChannelType`]
+    channel_types: :class:`~collections.abc.Iterable`\[:class:`.ChannelType`]
         A list of channel types that should be allowed.
         By default these are discerned from the annotation.
     lt: :class:`float`
@@ -1327,9 +1328,9 @@ param = Param
 def inject(
     function: Callable[..., Any],
     *,
-    autocompleters: Optional[dict[str, Callable]] = None,
+    autocompleters: dict[str, Callable] | None = None,
 ) -> Any:
-    """A special function to use the provided function for injections.
+    r"""A special function to use the provided function for injections.
     This should be assigned to a parameter of a function representing your slash command.
 
     .. versionadded:: 2.3
@@ -1341,7 +1342,7 @@ def inject(
     ----------
     function: Callable
         The injection function.
-    autocompleters: :class:`dict`\\[:class:`str`, Callable]
+    autocompleters: :class:`dict`\[:class:`str`, Callable]
         A mapping of the injection's option names to their respective autocompleters.
 
         See also :func:`Injection.autocomplete`.
@@ -1364,23 +1365,23 @@ def inject(
 
 def injection(
     *,
-    autocompleters: Optional[dict[str, Callable]] = None,
+    autocompleters: dict[str, Callable] | None = None,
 ) -> Callable[[Callable[..., Any]], Any]:
-    """Decorator interface for :func:`inject`.
+    r"""Decorator interface for :func:`inject`.
     You can then assign this value to your slash commands' parameters.
 
     .. versionadded:: 2.6
 
     Parameters
     ----------
-    autocompleters: :class:`dict`\\[:class:`str`, Callable]
+    autocompleters: :class:`dict`\[:class:`str`, Callable]
         A mapping of the injection's option names to their respective autocompleters.
 
         See also :func:`Injection.autocomplete`.
 
     Returns
     -------
-    :class:`~collections.abc.Callable`\\[[:class:`~collections.abc.Callable`\\[..., :data:`~typing.Any`]], :class:`Injection`]
+    :class:`~collections.abc.Callable`\[[:class:`~collections.abc.Callable`\[..., :data:`~typing.Any`]], :class:`Injection`]
         Decorator which turns your injection function into actual :class:`Injection`.
 
         .. note::
@@ -1399,17 +1400,15 @@ def injection(
 TChoice = TypeVar("TChoice", bound="ApplicationCommandOptionChoiceValue")
 
 
-def option_enum(
-    choices: Union[dict[str, TChoice], list[TChoice]], **kwargs: TChoice
-) -> type[TChoice]:
-    """A utility function to create an enum type.
+def option_enum(choices: dict[str, TChoice] | list[TChoice], **kwargs: TChoice) -> type[TChoice]:
+    r"""A utility function to create an enum type.
     Returns a new :class:`~enum.Enum` based on the provided parameters.
 
     .. versionadded:: 2.1
 
     Parameters
     ----------
-    choices: :class:`dict`\\[:class:`str`, :class:`Any`] | :class:`list`\\[:class:`Any`]
+    choices: :class:`dict`\[:class:`str`, :class:`Any`] | :class:`list`\[:class:`Any`]
         A name/value mapping of choices, or a list of values whose stringified representations
         will be used as the names.
     **kwargs
@@ -1449,7 +1448,7 @@ else:
 def register_injection(
     function: InjectionCallback[CogT, P, T],
     *,
-    autocompleters: Optional[dict[str, Callable]] = None,
+    autocompleters: dict[str, Callable] | None = None,
 ) -> Injection[P, T]:
     """A decorator to register a global injection.
 

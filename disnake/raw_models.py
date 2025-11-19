@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING, Literal, Optional, Union, cast
+from typing import TYPE_CHECKING, Literal, cast
 
 from .enums import ChannelType, try_enum
 from .utils import _get_as_snowflake, get_slots
@@ -82,22 +82,22 @@ class RawMessageDeleteEvent(_RawReprMixin):
     def __init__(self, data: MessageDeleteEvent) -> None:
         self.message_id: int = int(data["id"])
         self.channel_id: int = int(data["channel_id"])
-        self.cached_message: Optional[Message] = None
-        self.guild_id: Optional[int] = _get_as_snowflake(data, "guild_id")
+        self.cached_message: Message | None = None
+        self.guild_id: int | None = _get_as_snowflake(data, "guild_id")
 
 
 class RawBulkMessageDeleteEvent(_RawReprMixin):
-    """Represents the event payload for an :func:`on_raw_bulk_message_delete` event.
+    r"""Represents the event payload for an :func:`on_raw_bulk_message_delete` event.
 
     Attributes
     ----------
-    message_ids: :class:`set`\\[:class:`int`]
+    message_ids: :class:`set`\[:class:`int`]
         A :class:`set` of the message IDs that were deleted.
     channel_id: :class:`int`
         The channel ID where the deletion took place.
     guild_id: :class:`int` | :data:`None`
         The guild ID where the deletion took place, if applicable.
-    cached_messages: :class:`list`\\[:class:`Message`]
+    cached_messages: :class:`list`\[:class:`Message`]
         The cached messages, if found in the internal message cache.
     """
 
@@ -107,7 +107,7 @@ class RawBulkMessageDeleteEvent(_RawReprMixin):
         self.message_ids: set[int] = {int(x) for x in data.get("ids", [])}
         self.channel_id: int = int(data["channel_id"])
         self.cached_messages: list[Message] = []
-        self.guild_id: Optional[int] = _get_as_snowflake(data, "guild_id")
+        self.guild_id: int | None = _get_as_snowflake(data, "guild_id")
 
 
 class RawMessageUpdateEvent(_RawReprMixin):
@@ -140,8 +140,8 @@ class RawMessageUpdateEvent(_RawReprMixin):
         self.message_id: int = int(data["id"])
         self.channel_id: int = int(data["channel_id"])
         self.data: MessageUpdateEvent = data
-        self.cached_message: Optional[Message] = None
-        self.guild_id: Optional[int] = _get_as_snowflake(data, "guild_id")
+        self.cached_message: Message | None = None
+        self.guild_id: int | None = _get_as_snowflake(data, "guild_id")
 
 
 PollEventType = Literal["POLL_VOTE_ADD", "POLL_VOTE_REMOVE"]
@@ -185,16 +185,16 @@ class RawPollVoteActionEvent(_RawReprMixin):
 
     def __init__(
         self,
-        data: Union[PollVoteAddEvent, PollVoteRemoveEvent],
+        data: PollVoteAddEvent | PollVoteRemoveEvent,
         event_type: PollEventType,
     ) -> None:
         self.message_id: int = int(data["message_id"])
         self.user_id: int = int(data["user_id"])
-        self.cached_member: Optional[Member] = None
+        self.cached_member: Member | None = None
         self.channel_id: int = int(data["channel_id"])
         self.event_type = event_type
         self.answer_id: int = int(data["answer_id"])
-        self.guild_id: Optional[int] = _get_as_snowflake(data, "guild_id")
+        self.guild_id: int | None = _get_as_snowflake(data, "guild_id")
 
 
 ReactionEventType = Literal["REACTION_ADD", "REACTION_REMOVE"]
@@ -253,7 +253,7 @@ class RawReactionActionEvent(_RawReprMixin):
 
     def __init__(
         self,
-        data: Union[MessageReactionAddEvent, MessageReactionRemoveEvent],
+        data: MessageReactionAddEvent | MessageReactionRemoveEvent,
         emoji: PartialEmoji,
         event_type: ReactionEventType,
     ) -> None:
@@ -262,9 +262,9 @@ class RawReactionActionEvent(_RawReprMixin):
         self.user_id: int = int(data["user_id"])
         self.emoji: PartialEmoji = emoji
         self.event_type: ReactionEventType = event_type
-        self.member: Optional[Member] = None
-        self.guild_id: Optional[int] = _get_as_snowflake(data, "guild_id")
-        self.message_author_id: Optional[int] = _get_as_snowflake(data, "message_author_id")
+        self.member: Member | None = None
+        self.guild_id: int | None = _get_as_snowflake(data, "guild_id")
+        self.message_author_id: int | None = _get_as_snowflake(data, "message_author_id")
 
 
 class RawReactionClearEvent(_RawReprMixin):
@@ -285,7 +285,7 @@ class RawReactionClearEvent(_RawReprMixin):
     def __init__(self, data: MessageReactionRemoveAllEvent) -> None:
         self.message_id: int = int(data["message_id"])
         self.channel_id: int = int(data["channel_id"])
-        self.guild_id: Optional[int] = _get_as_snowflake(data, "guild_id")
+        self.guild_id: int | None = _get_as_snowflake(data, "guild_id")
 
 
 class RawReactionClearEmojiEvent(_RawReprMixin):
@@ -314,7 +314,7 @@ class RawReactionClearEmojiEvent(_RawReprMixin):
         self.emoji: PartialEmoji = emoji
         self.message_id: int = int(data["message_id"])
         self.channel_id: int = int(data["channel_id"])
-        self.guild_id: Optional[int] = _get_as_snowflake(data, "guild_id")
+        self.guild_id: int | None = _get_as_snowflake(data, "guild_id")
 
 
 class RawIntegrationDeleteEvent(_RawReprMixin):
@@ -337,7 +337,7 @@ class RawIntegrationDeleteEvent(_RawReprMixin):
     def __init__(self, data: IntegrationDeleteEvent) -> None:
         self.integration_id: int = int(data["id"])
         self.guild_id: int = int(data["guild_id"])
-        self.application_id: Optional[int] = _get_as_snowflake(data, "application_id")
+        self.application_id: int | None = _get_as_snowflake(data, "application_id")
 
 
 class RawGuildScheduledEventUserActionEvent(_RawReprMixin):
@@ -359,7 +359,7 @@ class RawGuildScheduledEventUserActionEvent(_RawReprMixin):
     __slots__ = ("event_id", "user_id", "guild_id")
 
     def __init__(
-        self, data: Union[GuildScheduledEventUserAddEvent, GuildScheduledEventUserRemoveEvent]
+        self, data: GuildScheduledEventUserAddEvent | GuildScheduledEventUserRemoveEvent
     ) -> None:
         self.event_id: int = int(data["guild_scheduled_event_id"])
         self.user_id: int = int(data["user_id"])
@@ -398,7 +398,7 @@ class RawThreadDeleteEvent(_RawReprMixin):
         self.thread_type: ThreadType = cast("ThreadType", try_enum(ChannelType, data["type"]))
         self.guild_id: int = int(data["guild_id"])
         self.parent_id: int = int(data["parent_id"])
-        self.thread: Optional[Thread] = None
+        self.thread: Thread | None = None
 
 
 class RawThreadMemberRemoveEvent(_RawReprMixin):
@@ -425,7 +425,7 @@ class RawThreadMemberRemoveEvent(_RawReprMixin):
     def __init__(self, thread: Thread, member_id: int) -> None:
         self.thread: Thread = thread
         self.member_id: int = member_id
-        self.cached_member: Optional[ThreadMember] = None
+        self.cached_member: ThreadMember | None = None
 
 
 class RawTypingEvent(_RawReprMixin):
@@ -455,11 +455,11 @@ class RawTypingEvent(_RawReprMixin):
     def __init__(self, data: TypingStartEvent) -> None:
         self.user_id: int = int(data["user_id"])
         self.channel_id: int = int(data["channel_id"])
-        self.member: Optional[Member] = None
+        self.member: Member | None = None
         self.timestamp: datetime.datetime = datetime.datetime.fromtimestamp(
             data["timestamp"], tz=datetime.timezone.utc
         )
-        self.guild_id: Optional[int] = _get_as_snowflake(data, "guild_id")
+        self.guild_id: int | None = _get_as_snowflake(data, "guild_id")
 
 
 class RawGuildMemberRemoveEvent(_RawReprMixin):
@@ -480,8 +480,8 @@ class RawGuildMemberRemoveEvent(_RawReprMixin):
         "user",
     )
 
-    def __init__(self, user: Union[User, Member], guild_id: int) -> None:
-        self.user: Union[User, Member] = user
+    def __init__(self, user: User | Member, guild_id: int) -> None:
+        self.user: User | Member = user
         self.guild_id: int = guild_id
 
 
@@ -545,4 +545,4 @@ class RawVoiceChannelEffectEvent(_RawReprMixin):
         self.user_id: int = int(data["user_id"])
         self.effect: VoiceChannelEffect = effect
 
-        self.cached_member: Optional[Member] = None
+        self.cached_member: Member | None = None

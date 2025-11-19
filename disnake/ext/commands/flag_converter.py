@@ -5,14 +5,11 @@ from __future__ import annotations
 import inspect
 import re
 import sys
-from collections.abc import Iterator
 from dataclasses import dataclass, field
-from re import Pattern
 from typing import (
     TYPE_CHECKING,
     Any,
     Literal,
-    Optional,
     TypeVar,
     Union,
     get_args,
@@ -39,6 +36,9 @@ __all__ = (
 
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
+    from re import Pattern
+
     from typing_extensions import Self
 
     from .context import Context
@@ -48,7 +48,7 @@ FlagsMetaT = TypeVar("FlagsMetaT", bound="type[FlagsMeta]")
 
 @dataclass
 class Flag:
-    """Represents a flag parameter for :class:`FlagConverter`.
+    r"""Represents a flag parameter for :class:`FlagConverter`.
 
     The :func:`.flag` function helps
     create these flag objects, but it is not necessary to
@@ -58,7 +58,7 @@ class Flag:
     ----------
     name: :class:`str`
         The name of the flag.
-    aliases: :class:`list`\\[:class:`str`]
+    aliases: :class:`list`\[:class:`str`]
         The aliases of the flag name.
     attribute: :class:`str`
         The attribute in the class that corresponds to this flag.
@@ -99,14 +99,14 @@ def flag(
     max_args: int = MISSING,
     override: bool = MISSING,
 ) -> Any:
-    """Override default functionality and parameters of the underlying :class:`FlagConverter`
+    r"""Override default functionality and parameters of the underlying :class:`FlagConverter`
     class attributes.
 
     Parameters
     ----------
     name: :class:`str`
         The flag name. If not given, defaults to the attribute name.
-    aliases: :class:`list`\\[:class:`str`]
+    aliases: :class:`list`\[:class:`str`]
         Aliases to the flag name. If not given no aliases are set.
     default: Any
         The default parameter. This could be either a value or a callable that takes
@@ -416,7 +416,7 @@ async def convert_flag(ctx: Context, argument: str, flag: Flag, annotation: Any 
             return await convert_flag(ctx, argument, flag, annotation)
         elif origin is Union and args[-1] is type(None):
             # typing.Optional[x]
-            annotation = Union[args[:-1]]
+            annotation = Union[args[:-1]]  # noqa: UP007
             return await run_converters(ctx, annotation, argument, param)
         elif origin is dict:
             # typing.Dict[K, V] -> typing.Tuple[K, V]
@@ -464,7 +464,7 @@ class FlagConverter(metaclass=FlagsMeta):
 
     @classmethod
     def get_flags(cls) -> dict[str, Flag]:
-        """:class:`dict`\\[:class:`str`, :class:`Flag`]: A mapping of flag name to flag object this converter has."""
+        r""":class:`dict`\[:class:`str`, :class:`Flag`]: A mapping of flag name to flag object this converter has."""
         return cls.__commands_flags__.copy()
 
     @classmethod
@@ -502,7 +502,7 @@ class FlagConverter(metaclass=FlagsMeta):
         flags = cls.__commands_flags__
         aliases = cls.__commands_flag_aliases__
         last_position = 0
-        last_flag: Optional[Flag] = None
+        last_flag: Flag | None = None
 
         case_insensitive = cls.__commands_flag_case_insensitive__
         for match in cls.__commands_flag_regex__.finditer(argument):
@@ -548,13 +548,13 @@ class FlagConverter(metaclass=FlagsMeta):
 
     @classmethod
     async def convert(cls, ctx: Context, argument: str) -> Self:
-        """|coro|
+        r"""|coro|
 
         The method that actually converters an argument to the flag mapping.
 
         Parameters
         ----------
-        cls: :class:`type`\\[:class:`FlagConverter`]
+        cls: :class:`type`\[:class:`FlagConverter`]
             The flag converter class.
         ctx: :class:`Context`
             The invocation context.

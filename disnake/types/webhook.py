@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
-from typing import Literal, Optional, TypedDict
+from typing import TYPE_CHECKING, Literal, TypedDict
 
 from typing_extensions import NotRequired
 
-from .channel import PartialChannel
-from .snowflake import Snowflake
-from .user import User
+if TYPE_CHECKING:
+    from .channel import PartialChannel
+    from .snowflake import Snowflake
+    from .user import User
 
 
 class SourceGuild(TypedDict):
@@ -30,14 +31,14 @@ class FollowerWebhook(TypedDict):
 class PartialWebhook(TypedDict):
     id: Snowflake
     type: WebhookType
-    guild_id: NotRequired[Optional[Snowflake]]
+    guild_id: NotRequired[Snowflake | None]
     user: NotRequired[User]
     token: NotRequired[str]
 
 
 # note: `total=False` to support `Webhook.partial`
 class Webhook(PartialWebhook, total=False):
-    name: Optional[str]
-    avatar: Optional[str]
+    name: str | None
+    avatar: str | None
     channel_id: Snowflake
-    application_id: Optional[Snowflake]
+    application_id: Snowflake | None

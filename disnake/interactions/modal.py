@@ -2,25 +2,25 @@
 
 from __future__ import annotations
 
-from collections.abc import Generator, Sequence
+from collections.abc import Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
-    Optional,
     TypeVar,
-    Union,
 )
 
 from ..components import _SELECT_COMPONENT_TYPE_VALUES
 from ..enums import ComponentType
-from ..message import Attachment, Message
+from ..message import Message
 from ..utils import cached_slot_property
 from .base import ClientT, Interaction, InteractionDataResolved
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Generator
+
     from ..abc import AnyChannel
     from ..member import Member
+    from ..message import Attachment
     from ..role import Role
     from ..state import ConnectionState
     from ..types.interactions import (
@@ -38,11 +38,11 @@ __all__ = ("ModalInteraction", "ModalInteractionData")
 T = TypeVar("T")
 
 # {custom_id: text_input_value | select_values | attachments}
-ResolvedValues = dict[str, Union[str, Sequence[T]]]
+ResolvedValues = dict[str, str | Sequence[T]]
 
 
 class ModalInteraction(Interaction[ClientT]):
-    """Represents an interaction with a modal.
+    r"""Represents an interaction with a modal.
 
     .. versionadded:: 2.4
 
@@ -81,7 +81,7 @@ class ModalInteraction(Interaction[ClientT]):
 
         .. note::
             In scenarios where an interaction occurs in a guild but :attr:`.guild` is unavailable,
-            such as with user-installed applications in guilds, some attributes of :class:`Member`\\s
+            such as with user-installed applications in guilds, some attributes of :class:`Member`\s
             that depend on the guild/role cache will not work due to an API limitation.
             This includes :attr:`~Member.roles`, :attr:`~Member.top_role`, :attr:`~Member.role_icon`,
             and :attr:`~Member.guild_permissions`.
@@ -101,7 +101,7 @@ class ModalInteraction(Interaction[ClientT]):
 
     client: :class:`Client`
         The interaction client.
-    entitlements: :class:`list`\\[:class:`Entitlement`]
+    entitlements: :class:`list`\[:class:`Entitlement`]
         The entitlements for the invoking user and guild,
         representing access to an application subscription.
 
@@ -149,14 +149,14 @@ class ModalInteraction(Interaction[ClientT]):
             message = Message(state=self._state, channel=self.channel, data=message_data)
         else:
             message = None
-        self.message: Optional[Message] = message
+        self.message: Message | None = message
 
     def _walk_components(
         self,
         components: Sequence[
-            Union[ModalInteractionComponentDataPayload, ModalInteractionInnerComponentDataPayload]
+            ModalInteractionComponentDataPayload | ModalInteractionInnerComponentDataPayload
         ],
-    ) -> Generator[ModalInteractionInnerComponentDataPayload, None, None]:
+    ) -> Generator[ModalInteractionInnerComponentDataPayload]:
         for component in components:
             if component["type"] == ComponentType.action_row.value:
                 yield from self._walk_components(component["components"])
@@ -169,8 +169,8 @@ class ModalInteraction(Interaction[ClientT]):
 
     def walk_raw_components(
         self,
-    ) -> Generator[ModalInteractionInnerComponentDataPayload, None, None]:
-        """Returns a generator that yields raw component data of the innermost/non-layout
+    ) -> Generator[ModalInteractionInnerComponentDataPayload]:
+        r"""Returns a generator that yields raw component data of the innermost/non-layout
         components one by one, as provided by Discord.
         This does not contain all fields of the components due to API limitations.
 
@@ -178,14 +178,14 @@ class ModalInteraction(Interaction[ClientT]):
 
         Returns
         -------
-        :class:`~collections.abc.Generator`\\[:class:`dict`, None, None]
+        :class:`~collections.abc.Generator`\[:class:`dict`]
         """
         yield from self._walk_components(self.data.components)
 
     def _resolve_values(
         self, resolve: Callable[[Snowflake, ComponentType], T]
-    ) -> ResolvedValues[Union[str, T]]:
-        values: ResolvedValues[Union[str, T]] = {}
+    ) -> ResolvedValues[str | T]:
+        values: ResolvedValues[str | T] = {}
         for component in self.walk_raw_components():
             if component["type"] == ComponentType.text_input.value:
                 value = component.get("value")
@@ -205,7 +205,7 @@ class ModalInteraction(Interaction[ClientT]):
 
     @cached_slot_property("_cs_values")
     def values(self) -> ResolvedValues[str]:
-        """:class:`dict`\\[:class:`str`, :class:`str` | :class:`~collections.abc.Sequence`\\[:class:`str`]]: Returns all raw values the user has entered in the modal.
+        r""":class:`dict`\[:class:`str`, :class:`str` | :class:`~collections.abc.Sequence`\[:class:`str`]]: Returns all raw values the user has entered in the modal.
         This is a dict of the form ``{custom_id: value}``.
 
         For select menus, the corresponding dict value is a list of the values the user has selected.
@@ -222,8 +222,8 @@ class ModalInteraction(Interaction[ClientT]):
     @cached_slot_property("_cs_resolved_values")
     def resolved_values(
         self,
-    ) -> ResolvedValues[Union[str, Member, User, Role, AnyChannel, Attachment]]:
-        """:class:`dict`\\[:class:`str`, :class:`str` | :class:`~collections.abc.Sequence`\\[:class:`str` | :class:`Member` | :class:`User` | :class:`Role` | :class:`abc.GuildChannel` | :class:`Thread` | :class:`PartialMessageable` | :class:`Attachment`]]: The (resolved) values the user entered in the modal.
+    ) -> ResolvedValues[str | Member | User | Role | AnyChannel | Attachment]:
+        r""":class:`dict`\[:class:`str`, :class:`str` | :class:`~collections.abc.Sequence`\[:class:`str` | :class:`Member` | :class:`User` | :class:`Role` | :class:`abc.GuildChannel` | :class:`Thread` | :class:`PartialMessageable` | :class:`Attachment`]]: The (resolved) values the user entered in the modal.
         This is a dict of the form ``{custom_id: value}``.
 
         For select menus, the corresponding dict value is a list of the values the user has selected.
@@ -241,7 +241,7 @@ class ModalInteraction(Interaction[ClientT]):
 
     @cached_slot_property("_cs_text_values")
     def text_values(self) -> dict[str, str]:
-        """:class:`dict`\\[:class:`str`, :class:`str`]: Returns the text values the user has entered in the modal.
+        r""":class:`dict`\[:class:`str`, :class:`str`]: Returns the text values the user has entered in the modal.
         This is a dict of the form ``{custom_id: value}``.
         """
         text_input_type = ComponentType.text_input.value
@@ -258,7 +258,7 @@ class ModalInteraction(Interaction[ClientT]):
 
 
 class ModalInteractionData(dict[str, Any]):
-    """Represents the data of an interaction with a modal.
+    r"""Represents the data of an interaction with a modal.
 
     .. versionadded:: 2.4
 
@@ -266,7 +266,7 @@ class ModalInteractionData(dict[str, Any]):
     ----------
     custom_id: :class:`str`
         The custom ID of the modal.
-    components: :class:`list`\\[:class:`dict`]
+    components: :class:`list`\[:class:`dict`]
         The raw component data of the modal interaction, as provided by Discord.
         This does not contain all fields of the components due to API limitations.
 

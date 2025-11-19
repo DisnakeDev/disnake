@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .types.voice import VoiceRegion as VoiceRegionPayload
@@ -12,19 +12,19 @@ __all__ = ("VoiceRegion",)
 
 
 class VoiceRegion:
-    """Represents a Discord voice region.
+    r"""Represents a Discord voice region.
 
     .. collapse:: operations
 
         .. describe:: x == y
 
-            Checks if two :class:`VoiceRegion`\\s are equal.
+            Checks if two :class:`VoiceRegion`\s are equal.
 
             .. versionadded:: 2.9
 
         .. describe:: x != y
 
-            Checks if two :class:`VoiceRegion`\\s are not equal.
+            Checks if two :class:`VoiceRegion`\s are not equal.
 
             .. versionadded:: 2.9
 
@@ -69,5 +69,5 @@ class VoiceRegion:
     def __repr__(self) -> str:
         return f"<VoiceRegion id={self.id!r} name={self.name!r} optimal={self.optimal!r}>"
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         return isinstance(other, VoiceRegion) and self.id == other.id
