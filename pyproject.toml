@@ -119,14 +119,16 @@ docs = [
 [tool.uv]
 required-version = ">=0.9.2"
 
-[tool.hatch.build]
-artifacts = ["disnake/_version.py"]
-
 [tool.hatch.build.targets.sdist]
+artifacts = ["src/disnake/_version.py"]
 only-include = [
-    "disnake",
+    "src",
     "scripts/versioning.py",
 ]
+
+[tool.hatch.build.targets.wheel]
+artifacts = ["disnake/_version.py"]
+packages = ["src/disnake"]
 
 [tool.hatch.version]
 source = "versioningit"
@@ -252,10 +254,10 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"disnake/*.py" = [
+"src/disnake/*.py" = [
     "F403", # Pyflakes: allow star imports
 ]
-"disnake/client.py" = ["T201"]
+"src/disnake/client.py" = ["T201"]
 ## examples
 "examples/*.py" = [
     "ANN", # missing type annotations in examples is fine
@@ -379,7 +381,7 @@ exclude-modules = '''
 [tool.pyright]
 typeCheckingMode = "strict"
 include = [
-    "disnake",
+    "src",
     "docs",
     "examples",
     "scripts",
@@ -387,7 +389,7 @@ include = [
     "*.py",
 ]
 ignore = [
-    "disnake/ext/mypy_plugin",
+    "src/disnake/ext/mypy_plugin",
 ]
 
 # this is one of the diagnostics that aren't enabled by default, even in strict mode
@@ -457,4 +459,4 @@ exclude_lines = [
 
 [tool.check-wheel-contents]
 toplevel = ["disnake"]
-package = "disnake"
+src_dir = "src"

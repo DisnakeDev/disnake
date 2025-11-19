@@ -75,7 +75,7 @@ EXECUTION_GROUPS: Sequence[ExecutionGroup] = [
         ExecutionGroup(
             sessions=("pyright",),
             python=python,
-            pyright_paths=("disnake", "tests", "examples", "noxfile.py"),
+            pyright_paths=("src/disnake", "tests", "examples", "noxfile.py"),
             project=True,
             extras=("speed", "voice"),
             groups=("test", "nox"),
@@ -353,10 +353,10 @@ def codemod(session: nox.Session) -> None:
         # run all of the transformers on disnake
         session.log("Running all transformers.")
 
-        session.run(*base_command_codemod, "combined.CombinedCodemod", "disnake")
+        session.run(*base_command_codemod, "combined.CombinedCodemod", "src/disnake")
     elif session.posargs:
         if len(session.posargs) < 2:
-            session.posargs.append("disnake")
+            session.posargs.append("src/disnake")
 
         session.run(*base_command_codemod, *session.posargs)
     else:
