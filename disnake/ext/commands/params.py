@@ -5,7 +5,6 @@
 from __future__ import annotations
 
 import asyncio
-import collections.abc
 import copy
 import enum
 import inspect
@@ -13,6 +12,7 @@ import itertools
 import math
 import types
 from abc import ABC, abstractmethod
+from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import (
     TYPE_CHECKING,
@@ -53,7 +53,7 @@ T = TypeVar("T")
 P = ParamSpec("P")
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Sequence
+    from collections.abc import Callable
 
     from disnake.app_commands import Choices
     from disnake.enums import ChannelType
@@ -835,7 +835,7 @@ class ParamInfo:
                 raise TypeError(msg)
         elif issubclass_(annotation, (disnake.abc.GuildChannel, disnake.Thread)):
             self._parse_guild_channel(annotation)
-        elif issubclass_(get_origin(annotation), collections.abc.Sequence):
+        elif issubclass_(get_origin(annotation), Sequence):
             msg = f"List arguments have not been implemented yet and therefore {annotation!r} is invalid"
             raise TypeError(msg)
 
