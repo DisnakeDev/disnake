@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, List, NoReturn, Optional
+from typing import TYPE_CHECKING, Any, NoReturn
 
-from .guild import Guild, Member
+from .guild import Guild
 from .utils import MISSING, _assetbytes_to_base64_data, parse_time
 
 __all__ = ("Template",)
@@ -14,6 +14,7 @@ if TYPE_CHECKING:
 
     from .asset import AssetBytes
     from .flags import MemberCacheFlags
+    from .guild import Member
     from .state import ConnectionState
     from .types.emoji import Emoji as EmojiPayload
     from .types.template import Template as TemplatePayload
@@ -34,7 +35,7 @@ class _PartialTemplateState:
         self.http = _FriendlyHttpAttributeErrorHelper()
 
     @property
-    def shard_count(self) -> Optional[int]:
+    def shard_count(self) -> int | None:
         return self.__state.shard_count
 
     @property
@@ -58,10 +59,10 @@ class _PartialTemplateState:
     def _get_message(self, id: int) -> None:
         return None
 
-    def _get_guild(self, id) -> Optional[Guild]:
+    def _get_guild(self, id) -> Guild | None:
         return self.__state._get_guild(id)
 
-    async def query_members(self, **kwargs: Any) -> List[Member]:
+    async def query_members(self, **kwargs: Any) -> list[Member]:
         return []
 
     def __getattr__(self, attr) -> NoReturn:
@@ -93,7 +94,7 @@ class Template:
         This is referred to as "last synced" in the official Discord client.
     source_guild: :class:`Guild`
         The source guild.
-    is_dirty: Optional[:class:`bool`]
+    is_dirty: :class:`bool` | :data:`None`
         Whether the template has unsynced changes.
 
         .. versionadded:: 2.0
@@ -120,17 +121,17 @@ class Template:
         self.code: str = data["code"]
         self.uses: int = data["usage_count"]
         self.name: str = data["name"]
-        self.description: Optional[str] = data["description"]
+        self.description: str | None = data["description"]
         creator_data = data.get("creator")
-        self.creator: Optional[User] = (
+        self.creator: User | None = (
             None if creator_data is None else self._state.create_user(creator_data)
         )
 
-        self.created_at: Optional[datetime.datetime] = parse_time(data.get("created_at"))
-        self.updated_at: Optional[datetime.datetime] = parse_time(data.get("updated_at"))
+        self.created_at: datetime.datetime | None = parse_time(data.get("created_at"))
+        self.updated_at: datetime.datetime | None = parse_time(data.get("updated_at"))
 
         guild_id = int(data["source_guild_id"])
-        guild: Optional[Guild] = self._state._get_guild(guild_id)
+        guild: Guild | None = self._state._get_guild(guild_id)
 
         self.source_guild: Guild
         if guild is None:
@@ -138,11 +139,11 @@ class Template:
             source_serialised["id"] = guild_id
             state = _PartialTemplateState(state=self._state)
             # Guild expects a ConnectionState, we're passing a _PartialTemplateState
-            self.source_guild = Guild(data=source_serialised, state=state)  # type: ignore
+            self.source_guild = Guild(data=source_serialised, state=state)  # pyright: ignore[reportArgumentType]
         else:
             self.source_guild = guild
 
-        self.is_dirty: Optional[bool] = data.get("is_dirty", None)
+        self.is_dirty: bool | None = data.get("is_dirty", None)
 
     def __repr__(self) -> str:
         return (
@@ -150,7 +151,7 @@ class Template:
             f" creator={self.creator!r} source_guild={self.source_guild!r} is_dirty={self.is_dirty}>"
         )
 
-    async def create_guild(self, name: str, icon: Optional[AssetBytes] = None) -> Guild:
+    async def create_guild(self, name: str, icon: AssetBytes | None = None) -> Guild:
         """|coro|
 
         Creates a :class:`.Guild` using the template.
@@ -167,7 +168,7 @@ class Template:
         ----------
         name: :class:`str`
             The name of the guild.
-        icon: Optional[|resource_type|]
+        icon: |resource_type| | :data:`None`
             The icon of the guild.
             See :meth:`.ClientUser.edit` for more details on what is expected.
 
@@ -231,7 +232,7 @@ class Template:
         self,
         *,
         name: str = MISSING,
-        description: Optional[str] = MISSING,
+        description: str | None = MISSING,
     ) -> Template:
         """|coro|
 
@@ -249,7 +250,7 @@ class Template:
         ----------
         name: :class:`str`
             The template's new name.
-        description: Optional[:class:`str`]
+        description: :class:`str` | :data:`None`
             The template's new description.
 
         Raises

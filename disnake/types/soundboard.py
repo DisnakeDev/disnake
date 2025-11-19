@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
-from typing import List, Optional, TypedDict
+from typing import TYPE_CHECKING, TypedDict
 
 from typing_extensions import NotRequired
 
-from .snowflake import Snowflake
-from .user import User
+if TYPE_CHECKING:
+    from .snowflake import Snowflake
+    from .user import User
 
 
 class PartialSoundboardSound(TypedDict):
@@ -17,8 +18,8 @@ class PartialSoundboardSound(TypedDict):
 
 class SoundboardSound(PartialSoundboardSound):
     name: str
-    emoji_id: Optional[Snowflake]
-    emoji_name: Optional[str]
+    emoji_id: Snowflake | None
+    emoji_name: str | None
     available: bool
 
 
@@ -28,4 +29,4 @@ class GuildSoundboardSound(SoundboardSound):
 
 
 class ListGuildSoundboardSounds(TypedDict):
-    items: List[GuildSoundboardSound]
+    items: list[GuildSoundboardSound]

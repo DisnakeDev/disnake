@@ -4,16 +4,10 @@ from __future__ import annotations
 
 import asyncio
 import datetime
+from collections.abc import AsyncIterator, Awaitable, Callable
 from typing import (
     TYPE_CHECKING,
     Any,
-    AsyncIterator,
-    Awaitable,
-    Callable,
-    Dict,
-    Generator,
-    List,
-    Optional,
     TypeVar,
     Union,
     cast,
@@ -46,8 +40,11 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Generator
+
     from .abc import Messageable, Snowflake
     from .app_commands import APIApplicationCommand
+    from .client import Client
     from .guild import Guild
     from .member import Member
     from .message import Message
@@ -71,7 +68,7 @@ if TYPE_CHECKING:
 
 T = TypeVar("T")
 OT = TypeVar("OT")
-_Func = Callable[[T], Union[OT, Awaitable[OT]]]
+_Func = Callable[[T], OT | Awaitable[OT]]
 
 OLDEST_OBJECT = Object(id=0)
 
@@ -82,7 +79,7 @@ class _AsyncIterator(AsyncIterator[T]):
     async def next(self) -> T:
         raise NotImplementedError
 
-    def get(self, **attrs: Any) -> Awaitable[Optional[T]]:
+    def get(self, **attrs: Any) -> Awaitable[T | None]:
         def predicate(elem: T) -> bool:
             for attr, val in attrs.items():
                 nested = attr.split("__")
@@ -96,7 +93,7 @@ class _AsyncIterator(AsyncIterator[T]):
 
         return self.find(predicate)
 
-    async def find(self, predicate: _Func[T, bool]) -> Optional[T]:
+    async def find(self, predicate: _Func[T, bool]) -> T | None:
         while True:
             try:
                 elem = await self.next()
@@ -116,10 +113,10 @@ class _AsyncIterator(AsyncIterator[T]):
     def map(self, func: _Func[T, OT]) -> _MappedAsyncIterator[OT]:
         return _MappedAsyncIterator(self, func)
 
-    def filter(self, predicate: Optional[_Func[T, bool]]) -> _FilteredAsyncIterator[T]:
+    def filter(self, predicate: _Func[T, bool] | None) -> _FilteredAsyncIterator[T]:
         return _FilteredAsyncIterator(self, predicate)
 
-    async def flatten(self) -> List[T]:
+    async def flatten(self) -> list[T]:
         return [element async for element in self]
 
     async def __anext__(self) -> T:
@@ -129,13 +126,13 @@ class _AsyncIterator(AsyncIterator[T]):
             raise StopAsyncIteration from None
 
 
-class _ChunkedAsyncIterator(_AsyncIterator[List[T]]):
+class _ChunkedAsyncIterator(_AsyncIterator[list[T]]):
     def __init__(self, iterator: _AsyncIterator[T], max_size: int) -> None:
         self.iterator = iterator
         self.max_size = max_size
 
-    async def next(self) -> List[T]:
-        ret: List[T] = []
+    async def next(self) -> list[T]:
+        ret: list[T] = []
         n = 0
         while n < self.max_size:
             try:
@@ -162,7 +159,7 @@ class _MappedAsyncIterator(_AsyncIterator[OT]):
 
 
 class _FilteredAsyncIterator(_AsyncIterator[T]):
-    def __init__(self, iterator: _AsyncIterator[T], predicate: Optional[_Func[T, bool]]) -> None:
+    def __init__(self, iterator: _AsyncIterator[T], predicate: _Func[T, bool] | None) -> None:
         self.iterator = iterator
 
         if predicate is None:
@@ -194,7 +191,7 @@ class ReactionIterator(_AsyncIterator[Union["User", "Member"]]):
         self.channel_id = message.channel.id
         self.users = asyncio.Queue()
 
-    async def next(self) -> Union[User, Member]:
+    async def next(self) -> User | Member:
         if self.users.empty():
             await self.fill_users()
 
@@ -208,7 +205,7 @@ class ReactionIterator(_AsyncIterator[Union["User", "Member"]]):
             retrieve = min(self.limit, 100)
 
             after = self.after.id if self.after else None
-            data: List[PartialUserPayload] = await self.getter(
+            data: list[PartialUserPayload] = await self.getter(
                 self.channel_id, self.message.id, self.emoji, retrieve, after=after
             )
 
@@ -250,14 +247,14 @@ class HistoryIterator(_AsyncIterator["Message"]):
         Messageable class to retrieve message history from.
     limit: :class:`int`
         Maximum number of messages to retrieve
-    before: Optional[Union[:class:`abc.Snowflake`, :class:`datetime.datetime`]]
+    before: :class:`abc.Snowflake` | :class:`datetime.datetime` | :data:`None`
         Message before which all messages must be.
-    after: Optional[Union[:class:`abc.Snowflake`, :class:`datetime.datetime`]]
+    after: :class:`abc.Snowflake` | :class:`datetime.datetime` | :data:`None`
         Message after which all messages must be.
-    around: Optional[Union[:class:`abc.Snowflake`, :class:`datetime.datetime`]]
+    around: :class:`abc.Snowflake` | :class:`datetime.datetime` | :data:`None`
         Message around which all messages must be. Limit max 101. Note that if
         limit is an even number, this will return at most limit+1 messages.
-    oldest_first: Optional[:class:`bool`]
+    oldest_first: :class:`bool` | :data:`None`
         If set to ``True``, return messages in oldest->newest order. Defaults to
         ``True`` if `after` is specified, otherwise ``False``.
     """
@@ -265,11 +262,11 @@ class HistoryIterator(_AsyncIterator["Message"]):
     def __init__(
         self,
         messageable: Messageable,
-        limit: Optional[int] = 100,
-        before: Optional[Union[Snowflake, datetime.datetime]] = None,
-        after: Optional[Union[Snowflake, datetime.datetime]] = None,
-        around: Optional[Union[Snowflake, datetime.datetime]] = None,
-        oldest_first: Optional[bool] = None,
+        limit: int | None = 100,
+        before: Snowflake | datetime.datetime | None = None,
+        after: Snowflake | datetime.datetime | None = None,
+        around: Snowflake | datetime.datetime | None = None,
+        oldest_first: bool | None = None,
     ) -> None:
         if isinstance(before, datetime.datetime):
             before = Object(id=time_snowflake(before, high=False))
@@ -289,7 +286,7 @@ class HistoryIterator(_AsyncIterator["Message"]):
         self.after = after or OLDEST_OBJECT
         self.around = around
 
-        self._filter: Optional[Callable[[MessagePayload], bool]] = None
+        self._filter: Callable[[MessagePayload], bool] | None = None
 
         self.state = self.messageable._state
         self.logs_from = self.state.http.logs_from
@@ -306,17 +303,17 @@ class HistoryIterator(_AsyncIterator["Message"]):
                 self.limit = 100  # Thanks Discord
 
             self._retrieve_messages = self._retrieve_messages_around_strategy
-            if self.before and self.after:
-                self._filter = lambda m: self.after.id < int(m["id"]) < self.before.id  # type: ignore
-            elif self.before:
-                self._filter = lambda m: int(m["id"]) < self.before.id  # type: ignore
+            if before and self.after:
+                self._filter = lambda m: self.after.id < int(m["id"]) < before.id
+            elif before:
+                self._filter = lambda m: int(m["id"]) < before.id
             elif self.after:
                 self._filter = lambda m: self.after.id < int(m["id"])
         else:
             if self.reverse:
                 self._retrieve_messages = self._retrieve_messages_after_strategy
-                if self.before:
-                    self._filter = lambda m: int(m["id"]) < self.before.id  # type: ignore
+                if before:
+                    self._filter = lambda m: int(m["id"]) < before.id
             else:
                 self._retrieve_messages = self._retrieve_messages_before_strategy
                 if self.after and self.after != OLDEST_OBJECT:
@@ -360,35 +357,35 @@ class HistoryIterator(_AsyncIterator["Message"]):
             for element in data:
                 await self.messages.put(self.state.create_message(channel=channel, data=element))
 
-    async def _retrieve_messages(self, retrieve: int) -> List[MessagePayload]:
+    async def _retrieve_messages(self, retrieve: int) -> list[MessagePayload]:
         """Retrieve messages and update next parameters."""
         raise NotImplementedError
 
-    async def _retrieve_messages_before_strategy(self, retrieve: int) -> List[MessagePayload]:
+    async def _retrieve_messages_before_strategy(self, retrieve: int) -> list[MessagePayload]:
         """Retrieve messages using before parameter."""
         before = self.before.id if self.before else None
-        data: List[MessagePayload] = await self.logs_from(self.channel.id, retrieve, before=before)
+        data: list[MessagePayload] = await self.logs_from(self.channel.id, retrieve, before=before)
         if len(data):
             if self.limit is not None:
                 self.limit -= retrieve
             self.before = Object(id=int(data[-1]["id"]))
         return data
 
-    async def _retrieve_messages_after_strategy(self, retrieve: int) -> List[MessagePayload]:
+    async def _retrieve_messages_after_strategy(self, retrieve: int) -> list[MessagePayload]:
         """Retrieve messages using after parameter."""
         after = self.after.id if self.after else None
-        data: List[MessagePayload] = await self.logs_from(self.channel.id, retrieve, after=after)
+        data: list[MessagePayload] = await self.logs_from(self.channel.id, retrieve, after=after)
         if len(data):
             if self.limit is not None:
                 self.limit -= retrieve
             self.after = Object(id=int(data[0]["id"]))
         return data
 
-    async def _retrieve_messages_around_strategy(self, retrieve: int) -> List[MessagePayload]:
+    async def _retrieve_messages_around_strategy(self, retrieve: int) -> list[MessagePayload]:
         """Retrieve messages using around parameter."""
         if self.around:
             around = self.around.id if self.around else None
-            data: List[MessagePayload] = await self.logs_from(
+            data: list[MessagePayload] = await self.logs_from(
                 self.channel.id, retrieve, around=around
             )
             self.around = None
@@ -414,20 +411,20 @@ class BanIterator(_AsyncIterator["BanEntry"]):
     ----------
     guild: :class:`~disnake.Guild`
         The guild to get bans from.
-    limit: Optional[:class:`int`]
+    limit: :class:`int` | :data:`None`
         Maximum number of bans to retrieve.
-    before: Optional[:class:`abc.Snowflake`]
+    before: :class:`abc.Snowflake` | :data:`None`
         Object before which all bans must be.
-    after: Optional[:class:`abc.Snowflake`]
+    after: :class:`abc.Snowflake` | :data:`None`
         Object after which all bans must be.
     """
 
     def __init__(
         self,
         guild: Guild,
-        limit: Optional[int] = None,
-        before: Optional[Snowflake] = None,
-        after: Optional[Snowflake] = None,
+        limit: int | None = None,
+        before: Snowflake | None = None,
+        after: Snowflake | None = None,
     ) -> None:
         self.guild = guild
         self.limit = limit
@@ -438,7 +435,7 @@ class BanIterator(_AsyncIterator["BanEntry"]):
         self.get_bans = self.state.http.get_bans
         self.bans = asyncio.Queue()
 
-        self._filter: Optional[Callable[[BanPayload], bool]] = None
+        self._filter: Callable[[BanPayload], bool] | None = None
 
         if self.before:
             self._retrieve_bans = self._retrieve_bans_before_strategy
@@ -477,20 +474,20 @@ class BanIterator(_AsyncIterator["BanEntry"]):
                     )
                 )
 
-    async def _retrieve_bans_before_strategy(self, retrieve: int) -> List[BanPayload]:
+    async def _retrieve_bans_before_strategy(self, retrieve: int) -> list[BanPayload]:
         """Retrieve bans using before parameter."""
         before = self.before.id if self.before else None
-        data: List[BanPayload] = await self.get_bans(self.guild.id, retrieve, before=before)
+        data: list[BanPayload] = await self.get_bans(self.guild.id, retrieve, before=before)
         if len(data):
             if self.limit is not None:
                 self.limit -= len(data)
             self.before = Object(id=int(data[0]["user"]["id"]))
         return data
 
-    async def _retrieve_bans_after_strategy(self, retrieve: int) -> List[BanPayload]:
+    async def _retrieve_bans_after_strategy(self, retrieve: int) -> list[BanPayload]:
         """Retrieve bans using after parameter."""
         after = self.after.id if self.after else None
-        data: List[BanPayload] = await self.get_bans(self.guild.id, retrieve, after=after)
+        data: list[BanPayload] = await self.get_bans(self.guild.id, retrieve, after=after)
         if len(data):
             if self.limit is not None:
                 self.limit -= len(data)
@@ -502,11 +499,11 @@ class AuditLogIterator(_AsyncIterator["AuditLogEntry"]):
     def __init__(
         self,
         guild: Guild,
-        limit: Optional[int] = None,
-        before: Optional[Union[Snowflake, datetime.datetime]] = None,
-        after: Optional[Union[Snowflake, datetime.datetime]] = None,
-        user_id: Optional[int] = None,
-        action_type: Optional[AuditLogEvent] = None,
+        limit: int | None = None,
+        before: Snowflake | datetime.datetime | None = None,
+        after: Snowflake | datetime.datetime | None = None,
+        user_id: int | None = None,
+        action_type: AuditLogEvent | None = None,
         oldest_first: bool = False,
     ) -> None:
         if isinstance(before, datetime.datetime):
@@ -514,11 +511,11 @@ class AuditLogIterator(_AsyncIterator["AuditLogEntry"]):
         if isinstance(after, datetime.datetime):
             after = Object(id=time_snowflake(after, high=True))
 
-        self.limit: Optional[int] = limit
-        self.before: Optional[Snowflake] = before
+        self.limit: int | None = limit
+        self.before: Snowflake | None = before
         self.after: Snowflake = after or OLDEST_OBJECT
-        self.user_id: Optional[int] = user_id
-        self.action_type: Optional[AuditLogEvent] = action_type
+        self.user_id: int | None = user_id
+        self.action_type: AuditLogEvent | None = action_type
 
         self.guild = guild
         self._state = guild._state
@@ -526,11 +523,11 @@ class AuditLogIterator(_AsyncIterator["AuditLogEntry"]):
 
         self.entries: asyncio.Queue[AuditLogEntry] = asyncio.Queue()
 
-        self._filter: Optional[Callable[[AuditLogEntryPayload], bool]] = None
+        self._filter: Callable[[AuditLogEntryPayload], bool] | None = None
         if oldest_first:
             self._strategy = self._after_strategy
-            if self.before:
-                self._filter = lambda m: int(m["id"]) < self.before.id  # type: ignore
+            if before:
+                self._filter = lambda m: int(m["id"]) < before.id
         else:
             self._strategy = self._before_strategy
             if self.after and self.after != OLDEST_OBJECT:
@@ -602,7 +599,7 @@ class AuditLogIterator(_AsyncIterator["AuditLogEntry"]):
 
             state = self._state
 
-            appcmds: Dict[int, APIApplicationCommand] = {}
+            appcmds: dict[int, APIApplicationCommand] = {}
             for data in log_data.get("application_commands", []):
                 try:
                     cmd = application_command_factory(data)
@@ -680,14 +677,19 @@ class GuildIterator(_AsyncIterator["Guild"]):
         The client to retrieve the guilds from.
     limit: :class:`int`
         Maximum number of guilds to retrieve.
-    before: Optional[Union[:class:`abc.Snowflake`, :class:`datetime.datetime`]]
+    before: :class:`abc.Snowflake` | :class:`datetime.datetime` | :data:`None`
         Object before which all guilds must be.
-    after: Optional[Union[:class:`abc.Snowflake`, :class:`datetime.datetime`]]
+    after: :class:`abc.Snowflake` | :class:`datetime.datetime` | :data:`None`
         Object after which all guilds must be.
     """
 
     def __init__(
-        self, bot, limit: Optional[int], before=None, after=None, with_counts: bool = True
+        self,
+        bot: Client,
+        limit: int | None,
+        before: Snowflake | datetime.datetime | None = None,
+        after: Snowflake | datetime.datetime | None = None,
+        with_counts: bool = True,
     ) -> None:
         if isinstance(before, datetime.datetime):
             before = Object(id=time_snowflake(before, high=False))
@@ -700,17 +702,17 @@ class GuildIterator(_AsyncIterator["Guild"]):
         self.after = after
         self.with_counts = with_counts
 
-        self._filter = None
+        self._filter: Callable[[GuildPayload], bool] | None = None
 
         self.state = self.bot._connection
         self.get_guilds = self.bot.http.get_guilds
-        self.guilds = asyncio.Queue()
+        self.guilds: asyncio.Queue[Guild] = asyncio.Queue()
 
         if self.before:
             self.reverse = True
             self._retrieve_guilds = self._retrieve_guilds_before_strategy
-            if self.after:
-                self._filter = lambda m: int(m["id"]) > self.after.id  # type: ignore
+            if after:
+                self._filter = lambda m: int(m["id"]) > after.id
         else:
             self.reverse = False
             self._retrieve_guilds = self._retrieve_guilds_after_strategy
@@ -752,14 +754,14 @@ class GuildIterator(_AsyncIterator["Guild"]):
             for element in data:
                 await self.guilds.put(self.create_guild(element))
 
-    async def _retrieve_guilds(self, retrieve: int) -> List[GuildPayload]:
+    async def _retrieve_guilds(self, retrieve: int) -> list[GuildPayload]:
         """Retrieve guilds and update next parameters."""
         raise NotImplementedError
 
-    async def _retrieve_guilds_before_strategy(self, retrieve: int) -> List[GuildPayload]:
+    async def _retrieve_guilds_before_strategy(self, retrieve: int) -> list[GuildPayload]:
         """Retrieve guilds using before parameter."""
         before = self.before.id if self.before else None
-        data: List[GuildPayload] = await self.get_guilds(
+        data: list[GuildPayload] = await self.get_guilds(
             retrieve, before=before, with_counts=self.with_counts
         )
         if len(data):
@@ -768,10 +770,10 @@ class GuildIterator(_AsyncIterator["Guild"]):
             self.before = Object(id=int(data[0]["id"]))
         return data
 
-    async def _retrieve_guilds_after_strategy(self, retrieve: int) -> List[GuildPayload]:
+    async def _retrieve_guilds_after_strategy(self, retrieve: int) -> list[GuildPayload]:
         """Retrieve guilds using after parameter."""
         after = self.after.id if self.after else None
-        data: List[GuildPayload] = await self.get_guilds(
+        data: list[GuildPayload] = await self.get_guilds(
             retrieve, after=after, with_counts=self.with_counts
         )
         if len(data):
@@ -782,7 +784,12 @@ class GuildIterator(_AsyncIterator["Guild"]):
 
 
 class MemberIterator(_AsyncIterator["Member"]):
-    def __init__(self, guild, limit: Optional[int] = 1000, after=None) -> None:
+    def __init__(
+        self,
+        guild: Guild,
+        limit: int | None = 1000,
+        after: Snowflake | datetime.datetime | None = None,
+    ) -> None:
         if isinstance(after, datetime.datetime):
             after = Object(id=time_snowflake(after, high=True))
 
@@ -841,10 +848,10 @@ class ArchivedThreadIterator(_AsyncIterator["Thread"]):
         self,
         channel_id: int,
         guild: Guild,
-        limit: Optional[int],
+        limit: int | None,
         joined: bool,
         private: bool,
-        before: Optional[Union[Snowflake, datetime.datetime]] = None,
+        before: Snowflake | datetime.datetime | None = None,
     ) -> None:
         self.channel_id = channel_id
         self.guild = guild
@@ -857,7 +864,7 @@ class ArchivedThreadIterator(_AsyncIterator["Thread"]):
             msg = "Cannot iterate over joined public archived threads"
             raise ValueError(msg)
 
-        self.before: Optional[str]
+        self.before: str | None
         if before is None:
             self.before = None
         elif isinstance(before, datetime.datetime):
@@ -899,7 +906,7 @@ class ArchivedThreadIterator(_AsyncIterator["Thread"]):
 
     @staticmethod
     def get_thread_id(data: ThreadPayload) -> str:
-        return data["id"]  # type: ignore
+        return data["id"]  # pyright: ignore[reportReturnType]
 
     async def fill_queue(self) -> None:
         if not self.has_more:
@@ -909,7 +916,7 @@ class ArchivedThreadIterator(_AsyncIterator["Thread"]):
         # endpoint requires at least 2, for unknown reasons
         data = await self.endpoint(self.channel_id, before=self.before, limit=max(2, limit))
 
-        threads: List[ThreadPayload] = data.get("threads", [])
+        threads: list[ThreadPayload] = data.get("threads", [])
         # special case: since the minimum limit the endpoint accepts is 2,
         # we request 2 threads when only needing 1, so slice the list before yielding
         if limit == 1:
@@ -937,22 +944,22 @@ class GuildScheduledEventUserIterator(_AsyncIterator[Union["User", "Member"]]):
     def __init__(
         self,
         event: GuildScheduledEvent,
-        limit: Optional[int],
+        limit: int | None,
         with_members: bool,
-        before: Optional[Snowflake],
-        after: Optional[Snowflake],
+        before: Snowflake | None,
+        after: Snowflake | None,
     ) -> None:
         self.event: GuildScheduledEvent = event
-        self.limit: Optional[int] = limit
+        self.limit: int | None = limit
         self.with_members: bool = with_members
-        self.before: Optional[Snowflake] = before
-        self.after: Optional[Snowflake] = after
+        self.before: Snowflake | None = before
+        self.after: Snowflake | None = after
 
         self.state: ConnectionState = event._state
         self.get_event_users = self.state.http.get_guild_scheduled_event_users
         self.users = asyncio.Queue()
 
-        self._filter: Optional[Callable[[GuildScheduledEventUserPayload], bool]] = None
+        self._filter: Callable[[GuildScheduledEventUserPayload], bool] | None = None
         if self.before is not None:
             self._strategy = self._before_strategy
             if self.after is not None:
@@ -964,7 +971,7 @@ class GuildScheduledEventUserIterator(_AsyncIterator[Union["User", "Member"]]):
             self._strategy = self._after_strategy
             self.reverse = False
 
-    async def next(self) -> Union[User, Member]:
+    async def next(self) -> User | Member:
         if self.users.empty():
             await self.fill_users()
 
@@ -982,7 +989,7 @@ class GuildScheduledEventUserIterator(_AsyncIterator[Union["User", "Member"]]):
         self.retrieve: int = retrieve
         return retrieve > 0
 
-    def create_user(self, data: GuildScheduledEventUserPayload) -> Union[User, Member]:
+    def create_user(self, data: GuildScheduledEventUserPayload) -> User | Member:
         from .member import Member
 
         user_data = data["user"]
@@ -1010,7 +1017,7 @@ class GuildScheduledEventUserIterator(_AsyncIterator[Union["User", "Member"]]):
         for user in data:
             await self.users.put(self.create_user(user))
 
-    async def _before_strategy(self, retrieve: int) -> List[GuildScheduledEventUserPayload]:
+    async def _before_strategy(self, retrieve: int) -> list[GuildScheduledEventUserPayload]:
         before = self.before.id if self.before else None
         data = await self.get_event_users(
             self.event.guild_id,
@@ -1027,7 +1034,7 @@ class GuildScheduledEventUserIterator(_AsyncIterator[Union["User", "Member"]]):
             self.before = Object(id=int(data[0]["user"]["id"]))
         return data
 
-    async def _after_strategy(self, retrieve: int) -> List[GuildScheduledEventUserPayload]:
+    async def _after_strategy(self, retrieve: int) -> list[GuildScheduledEventUserPayload]:
         after = self.after.id if self.after else None
         data = await self.get_event_users(
             self.event.guild_id,
@@ -1053,12 +1060,12 @@ class EntitlementIterator(_AsyncIterator["Entitlement"]):
         application_id: int,
         *,
         state: ConnectionState,
-        limit: Optional[int],
-        user_id: Optional[int] = None,
-        guild_id: Optional[int] = None,
-        sku_ids: Optional[List[int]] = None,
-        before: Optional[Union[Snowflake, datetime.datetime]] = None,
-        after: Optional[Union[Snowflake, datetime.datetime]] = None,
+        limit: int | None,
+        user_id: int | None = None,
+        guild_id: int | None = None,
+        sku_ids: list[int] | None = None,
+        before: Snowflake | datetime.datetime | None = None,
+        after: Snowflake | datetime.datetime | None = None,
         exclude_ended: bool = False,
         exclude_deleted: bool = True,
         oldest_first: bool = False,
@@ -1069,12 +1076,12 @@ class EntitlementIterator(_AsyncIterator["Entitlement"]):
             after = Object(id=time_snowflake(after, high=True))
 
         self.application_id: int = application_id
-        self.limit: Optional[int] = limit
-        self.before: Optional[Snowflake] = before
+        self.limit: int | None = limit
+        self.before: Snowflake | None = before
         self.after: Snowflake = after or OLDEST_OBJECT
-        self.user_id: Optional[int] = user_id
-        self.guild_id: Optional[int] = guild_id
-        self.sku_ids: Optional[List[int]] = sku_ids
+        self.user_id: int | None = user_id
+        self.guild_id: int | None = guild_id
+        self.sku_ids: list[int] | None = sku_ids
         self.exclude_ended: bool = exclude_ended
         self.exclude_deleted: bool = exclude_deleted
 
@@ -1083,11 +1090,11 @@ class EntitlementIterator(_AsyncIterator["Entitlement"]):
 
         self.entitlements: asyncio.Queue[Entitlement] = asyncio.Queue()
 
-        self._filter: Optional[Callable[[EntitlementPayload], bool]] = None
+        self._filter: Callable[[EntitlementPayload], bool] | None = None
         if oldest_first:
             self._strategy = self._after_strategy
-            if self.before:
-                self._filter = lambda m: int(m["id"]) < self.before.id  # type: ignore
+            if before:
+                self._filter = lambda m: int(m["id"]) < before.id
         else:
             self._strategy = self._before_strategy
             if self.after and self.after != OLDEST_OBJECT:
@@ -1125,7 +1132,7 @@ class EntitlementIterator(_AsyncIterator["Entitlement"]):
         for entitlement in data:
             await self.entitlements.put(Entitlement(data=entitlement, state=self.state))
 
-    async def _before_strategy(self, retrieve: int) -> List[EntitlementPayload]:
+    async def _before_strategy(self, retrieve: int) -> list[EntitlementPayload]:
         before = self.before.id if self.before else None
         data = await self.request(
             self.application_id,
@@ -1143,7 +1150,7 @@ class EntitlementIterator(_AsyncIterator["Entitlement"]):
             self.before = Object(id=int(data[-1]["id"]))
         return data
 
-    async def _after_strategy(self, retrieve: int) -> List[EntitlementPayload]:
+    async def _after_strategy(self, retrieve: int) -> list[EntitlementPayload]:
         after = self.after.id
         data = await self.request(
             self.application_id,
@@ -1169,10 +1176,10 @@ class SubscriptionIterator(_AsyncIterator["Subscription"]):
         sku_id: int,
         *,
         state: ConnectionState,
-        user_id: Optional[int] = None,  # required, except for oauth queries
-        limit: Optional[int] = None,
-        before: Optional[Union[Snowflake, datetime.datetime]] = None,
-        after: Optional[Union[Snowflake, datetime.datetime]] = None,
+        user_id: int | None = None,  # required, except for oauth queries
+        limit: int | None = None,
+        before: Snowflake | datetime.datetime | None = None,
+        after: Snowflake | datetime.datetime | None = None,
     ) -> None:
         if isinstance(before, datetime.datetime):
             before = Object(id=time_snowflake(before, high=False))
@@ -1180,16 +1187,16 @@ class SubscriptionIterator(_AsyncIterator["Subscription"]):
             after = Object(id=time_snowflake(after, high=True))
 
         self.sku_id: int = sku_id
-        self.user_id: Optional[int] = user_id
-        self.limit: Optional[int] = limit
-        self.before: Optional[Snowflake] = before
+        self.user_id: int | None = user_id
+        self.limit: int | None = limit
+        self.before: Snowflake | None = before
         self.after: Snowflake = after or OLDEST_OBJECT
 
         self._state: ConnectionState = state
         self.request = self._state.http.get_subscriptions
         self.subscriptions: asyncio.Queue[Subscription] = asyncio.Queue()
 
-        self._filter: Optional[Callable[[SubscriptionPayload], bool]] = None
+        self._filter: Callable[[SubscriptionPayload], bool] | None = None
         if self.before:
             self._strategy = self._before_strategy
             if self.after != OLDEST_OBJECT:
@@ -1229,7 +1236,7 @@ class SubscriptionIterator(_AsyncIterator["Subscription"]):
         for subscription in data:
             await self.subscriptions.put(Subscription(data=subscription, state=self._state))
 
-    async def _before_strategy(self, retrieve: int) -> List[SubscriptionPayload]:
+    async def _before_strategy(self, retrieve: int) -> list[SubscriptionPayload]:
         before = self.before.id if self.before else None
         data = await self.request(
             self.sku_id,
@@ -1245,7 +1252,7 @@ class SubscriptionIterator(_AsyncIterator["Subscription"]):
             self.before = Object(id=min(int(data[0]["id"]), int(data[-1]["id"])))
         return data
 
-    async def _after_strategy(self, retrieve: int) -> List[SubscriptionPayload]:
+    async def _after_strategy(self, retrieve: int) -> list[SubscriptionPayload]:
         after = self.after.id
         data = await self.request(
             self.sku_id,
@@ -1267,22 +1274,22 @@ class PollAnswerIterator(_AsyncIterator[Union["User", "Member"]]):
         message: Message,
         answer_id: int,
         *,
-        limit: Optional[int],
-        after: Optional[Snowflake] = None,
+        limit: int | None,
+        after: Snowflake | None = None,
     ) -> None:
         self.channel_id: int = message.channel.id
         self.message_id: int = message.id
         self.answer_id: int = answer_id
-        self.guild: Optional[Guild] = message.guild
+        self.guild: Guild | None = message.guild
         self.state: ConnectionState = message._state
 
-        self.limit: Optional[int] = limit
-        self.after: Optional[Snowflake] = after
+        self.limit: int | None = limit
+        self.after: Snowflake | None = after
 
         self.getter = message._state.http.get_poll_answer_voters
         self.users = asyncio.Queue()
 
-    async def next(self) -> Union[User, Member]:
+    async def next(self) -> User | Member:
         if self.users.empty():
             await self.fill_users()
 
@@ -1328,8 +1335,8 @@ class ChannelPinsIterator(_AsyncIterator["Message"]):
         self,
         messageable: Messageable,
         *,
-        limit: Optional[int],
-        before: Optional[Union[Snowflake, datetime.datetime]] = None,
+        limit: int | None,
+        before: Snowflake | datetime.datetime | None = None,
     ) -> None:
         before_ = None
         if before is not None:
@@ -1344,14 +1351,14 @@ class ChannelPinsIterator(_AsyncIterator["Message"]):
         self.messageable = messageable
         self._state = messageable._state
         self.limit = limit
-        self.before: Optional[str] = before_
+        self.before: str | None = before_
 
         self.getter = self._state.http.get_pins
         self.messages: asyncio.Queue[Message] = asyncio.Queue()
 
     # defined to maintain backward compatibility with the old `pins` method
     @deprecated("async for msg in channel.pins()")
-    def __await__(self) -> Generator[None, None, List[Message]]:
+    def __await__(self) -> Generator[None, None, list[Message]]:
         return self.flatten().__await__()
 
     async def next(self) -> Message:

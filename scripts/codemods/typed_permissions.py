@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: MIT
 
 import itertools
-from typing import List, Optional, Union
 
 import libcst as cst
 import libcst.codemod.visitors as codevisitors
@@ -16,7 +15,7 @@ ALL_PERMISSIONS = sorted(Permissions.VALID_FLAGS.keys())
 PERMISSION_MATCHERS = m.OneOf(*map(m.Name, ALL_PERMISSIONS))
 
 
-def get_perm_kwargs(annotation: cst.Annotation) -> List[cst.Param]:
+def get_perm_kwargs(annotation: cst.Annotation) -> list[cst.Param]:
     return [
         cst.Param(
             cst.Name(perm),
@@ -68,7 +67,7 @@ class PermissionTypings(BaseCodemodCommand):
     DESCRIPTION: str = "Adds overloads for all permissions."
     CHECK_MARKER: str = "@_overload_with_permissions"
 
-    def leave_ClassDef(self, _: cst.ClassDef, node: cst.ClassDef) -> Union[cst.ClassDef, cst.If]:
+    def leave_ClassDef(self, _: cst.ClassDef, node: cst.ClassDef) -> cst.ClassDef | cst.If:
         # this method manages where PermissionOverwrite defines the typed augmented permissions.
         # in order to type these properly, we destroy that node and recreate it with the proper permissions.
         if not m.matches(node.name, m.Name("PermissionOverwrite")):
@@ -83,7 +82,7 @@ class PermissionTypings(BaseCodemodCommand):
             msg = "could not find TYPE_CHECKING block in PermissionOverwrite."
             raise RuntimeError(msg)
 
-        og_type_check: cst.If = b  # type: ignore
+        og_type_check: cst.If = b  # pyright: ignore[reportAssignmentType]
 
         body = [
             cst.SimpleStatementLine(
@@ -91,9 +90,10 @@ class PermissionTypings(BaseCodemodCommand):
                     cst.AnnAssign(
                         cst.Name(perm),
                         cst.Annotation(
-                            cst.Subscript(
-                                cst.Name("Optional"),
-                                [cst.SubscriptElement(cst.Index(cst.Name("bool")))],
+                            cst.BinaryOperation(
+                                cst.Name("bool"),
+                                cst.BitOr(),
+                                cst.Name("None"),
                             )
                         ),
                     )
@@ -106,13 +106,13 @@ class PermissionTypings(BaseCodemodCommand):
 
         return node.deep_replace(og_type_check, new_type_check)
 
-    def visit_FunctionDef(self, node: cst.FunctionDef) -> Optional[bool]:
+    def visit_FunctionDef(self, node: cst.FunctionDef) -> bool | None:
         # don't recurse into the body of a function
         return False
 
     def leave_FunctionDef(
         self, _: cst.FunctionDef, node: cst.FunctionDef
-    ) -> Union[cst.FlattenSentinel[cst.FunctionDef], cst.FunctionDef, cst.RemovalSentinel]:
+    ) -> cst.FlattenSentinel[cst.FunctionDef] | cst.FunctionDef | cst.RemovalSentinel:
         # we don't care about the original node
         has_overload_deco = False
         is_overload = False
@@ -138,7 +138,7 @@ class PermissionTypings(BaseCodemodCommand):
             msg = 'a function cannot be decorated with "_overload_with_permissions" and not take any kwargs unless it is an overload.'
             raise RuntimeError(msg)
         # always true if this isn't an overload
-        elif node.params.star_kwarg:
+        if node.params.star_kwarg:
             # use the existing annotation if one exists
             annotation = node.params.star_kwarg.annotation
             if annotation is None:
@@ -166,8 +166,7 @@ class PermissionTypings(BaseCodemodCommand):
         params = params.with_changes(kwonly_params=kwonly_params)
 
         if is_overload:
-            node = node.with_changes(params=params)
-            return node
+            return node.with_changes(params=params)
 
         # make an overload before permissions
         empty_overload = node.deep_clone().with_changes(params=empty_overload_params)

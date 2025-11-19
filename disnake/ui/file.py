@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import copy
-from typing import TYPE_CHECKING, ClassVar, Optional, Tuple
+from typing import TYPE_CHECKING, ClassVar
 
-from ..components import FileComponent, UnfurledMediaItem, handle_media_item_input
+from ..components import FileComponent, handle_media_item_input
 from ..enums import ComponentType
 from ..utils import MISSING
 from .item import UIComponent
@@ -13,7 +13,7 @@ from .item import UIComponent
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from ..components import LocalMediaItemInput
+    from ..components import LocalMediaItemInput, UnfurledMediaItem
 
 __all__ = ("File",)
 
@@ -25,7 +25,7 @@ class File(UIComponent):
 
     Parameters
     ----------
-    file: Union[:class:`str`, :class:`.UnfurledMediaItem`]
+    file: :class:`str` | :class:`.UnfurledMediaItem`
         The file to display. This **only** supports attachment references (i.e.
         using the ``attachment://<filename>`` syntax), not arbitrary URLs.
     spoiler: :class:`bool`
@@ -36,7 +36,7 @@ class File(UIComponent):
         sequential identifiers to the components in the message.
     """
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (
         "file",
         "spoiler",
     )
@@ -87,15 +87,15 @@ class File(UIComponent):
         self._underlying.spoiler = value
 
     @property
-    def name(self) -> Optional[str]:
-        """Optional[:class:`str`]: The name of the file.
+    def name(self) -> str | None:
+        """:class:`str` | :data:`None`: The name of the file.
         This is available in objects from the API, and ignored when sending.
         """
         return self._underlying.name
 
     @property
-    def size(self) -> Optional[int]:
-        """Optional[:class:`int`]: The size of the file.
+    def size(self) -> int | None:
+        """:class:`int` | :data:`None`: The size of the file.
         This is available in objects from the API, and ignored when sending.
         """
         return self._underlying.size

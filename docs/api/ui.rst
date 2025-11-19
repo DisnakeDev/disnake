@@ -205,6 +205,15 @@ Label
     :members:
     :inherited-members:
 
+FileUpload
+~~~~~~~~~~
+
+.. attributetable:: FileUpload
+
+.. autoclass:: FileUpload
+    :members:
+    :inherited-members:
+
 
 Functions
 ---------

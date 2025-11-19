@@ -7,19 +7,10 @@ import operator
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     ClassVar,
-    Dict,
     Generic,
-    Iterator,
-    List,
     NoReturn,
-    Optional,
-    Sequence,
-    Tuple,
-    Type,
     TypeVar,
-    Union,
     overload,
 )
 
@@ -27,7 +18,13 @@ from .enums import UserFlags
 from .utils import MISSING, _generated
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Iterator, Sequence
+
     from typing_extensions import Self
+
+    from disnake.types.appinfo import ApplicationIntegrationType
+    from disnake.types.automod import AutoModPresetType
+    from disnake.types.interactions import InteractionContextType
 
 
 __all__ = (
@@ -55,19 +52,19 @@ class flag_value(Generic[T]):
     def __init__(self, func: Callable[[Any], int]) -> None:
         self.flag = func(None)
         self.__doc__ = func.__doc__
-        self._parent: Type[T] = MISSING
+        self._parent: type[T] = MISSING
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         if isinstance(other, flag_value):
             return self.flag == other.flag
         if isinstance(other, BaseFlags):
             return self._parent is other.__class__ and self.flag == other.value
         return False
 
-    def __ne__(self, other: Any) -> bool:
+    def __ne__(self, other: object) -> bool:
         return not self.__eq__(other)
 
-    def __or__(self, other: Union[flag_value[T], T]) -> T:
+    def __or__(self, other: flag_value[T] | T) -> T:
         if isinstance(other, BaseFlags):
             if self._parent is not other.__class__:
                 msg = f"unsupported operand type(s) for |: flags of '{self._parent.__name__}' and flags of '{other.__class__.__name__}'"
@@ -85,12 +82,12 @@ class flag_value(Generic[T]):
         return ~self._parent._from_value(self.flag)
 
     @overload
-    def __get__(self, instance: None, owner: Type[BF]) -> flag_value[BF]: ...
+    def __get__(self, instance: None, owner: type[BF]) -> flag_value[BF]: ...
 
     @overload
-    def __get__(self, instance: BF, owner: Type[BF]) -> bool: ...
+    def __get__(self, instance: BF, owner: type[BF]) -> bool: ...
 
-    def __get__(self, instance: Optional[BF], owner: Type[BF]) -> Any:
+    def __get__(self, instance: BF | None, owner: type[BF]) -> Any:
         if instance is None:
             return self
         return instance._has_flag(self.flag)
@@ -106,12 +103,12 @@ class alias_flag_value(flag_value[T]):
     pass
 
 
-def all_flags_value(flags: Dict[str, int]) -> int:
+def all_flags_value(flags: dict[str, int]) -> int:
     return functools.reduce(operator.or_, flags.values())
 
 
 class BaseFlags:
-    VALID_FLAGS: ClassVar[Dict[str, int]]
+    VALID_FLAGS: ClassVar[dict[str, int]]
     DEFAULT_VALUE: ClassVar[int]
 
     value: int
@@ -127,7 +124,7 @@ class BaseFlags:
             setattr(self, key, value)
 
     @classmethod
-    def __init_subclass__(cls, inverted: bool = False, no_fill_flags: bool = False) -> Type[Self]:
+    def __init_subclass__(cls, inverted: bool = False, no_fill_flags: bool = False) -> type[Self]:
         # add a way to bypass filling flags, eg for ListBaseFlags.
         if no_fill_flags:
             return cls
@@ -154,14 +151,14 @@ class BaseFlags:
         self.value = value
         return self
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         if isinstance(other, self.__class__):
             return self.value == other.value
         if isinstance(other, flag_value):
             return self.__class__ is other._parent and self.value == other.flag
         return False
 
-    def __ne__(self, other: Any) -> bool:
+    def __ne__(self, other: object) -> bool:
         return not self.__eq__(other)
 
     def __and__(self, other: Self) -> Self:
@@ -177,7 +174,7 @@ class BaseFlags:
         self.value &= other.value
         return self
 
-    def __or__(self, other: Union[Self, flag_value[Self]]) -> Self:
+    def __or__(self, other: Self | flag_value[Self]) -> Self:
         if isinstance(other, flag_value):
             if self.__class__ is not other._parent:
                 msg = f"unsupported operand type(s) for |: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
@@ -188,7 +185,7 @@ class BaseFlags:
             raise TypeError(msg)
         return self._from_value(self.value | other.value)
 
-    def __ior__(self, other: Union[Self, flag_value[Self]]) -> Self:
+    def __ior__(self, other: Self | flag_value[Self]) -> Self:
         if isinstance(other, flag_value):
             if self.__class__ is not other._parent:
                 msg = f"unsupported operand type(s) for |=: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
@@ -201,7 +198,7 @@ class BaseFlags:
         self.value |= other.value
         return self
 
-    def __xor__(self, other: Union[Self, flag_value[Self]]) -> Self:
+    def __xor__(self, other: Self | flag_value[Self]) -> Self:
         if isinstance(other, flag_value):
             if self.__class__ is not other._parent:
                 msg = f"unsupported operand type(s) for ^: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
@@ -212,7 +209,7 @@ class BaseFlags:
             raise TypeError(msg)
         return self._from_value(self.value ^ other.value)
 
-    def __ixor__(self, other: Union[Self, flag_value[Self]]) -> Self:
+    def __ixor__(self, other: Self | flag_value[Self]) -> Self:
         if isinstance(other, flag_value):
             if self.__class__ is not other._parent:
                 msg = f"unsupported operand type(s) for ^=: flags of '{self.__class__.__name__}' and flags of '{other._parent.__name__}'"
@@ -262,7 +259,7 @@ class BaseFlags:
     def __repr__(self) -> str:
         return f"<{self.__class__.__name__} value={self.value}>"
 
-    def __iter__(self) -> Iterator[Tuple[str, bool]]:
+    def __iter__(self) -> Iterator[tuple[str, bool]]:
         for name, value in self.__class__.__dict__.items():
             if isinstance(value, alias_flag_value):
                 continue
@@ -306,7 +303,7 @@ class ListBaseFlags(BaseFlags, no_fill_flags=True):
         return self
 
     @property
-    def values(self) -> List[int]:
+    def values(self) -> list[int]:
         # This essentially converts an int like `0b100110` into `[1, 2, 5]`,
         # i.e. the exponents of set bits in `self.value`.
         # This may look weird but interestingly it's by far the
@@ -319,9 +316,9 @@ class ListBaseFlags(BaseFlags, no_fill_flags=True):
 
 
 class SystemChannelFlags(BaseFlags, inverted=True):
-    """Wraps up a Discord system channel flag value.
+    r"""Wraps up a Discord system channel flag value.
 
-    Similar to :class:`Permissions`\\, the properties provided are two way.
+    Similar to :class:`Permissions`\, the properties provided are two way.
     You can set and retrieve individual bits using the properties as if they
     were regular bools. This allows you to edit the system flags easily.
 
@@ -943,15 +940,15 @@ class PublicUserFlags(BaseFlags):
         """
         return UserFlags.active_developer.value
 
-    def all(self) -> List[UserFlags]:
-        """List[:class:`UserFlags`]: Returns all public flags the user has."""
+    def all(self) -> list[UserFlags]:
+        r""":class:`list`\[:class:`UserFlags`]: Returns all public flags the user has."""
         return [public_flag for public_flag in UserFlags if self._has_flag(public_flag.value)]
 
 
 class Intents(BaseFlags):
-    """Wraps up a Discord gateway intent flag.
+    r"""Wraps up a Discord gateway intent flag.
 
-    Similar to :class:`Permissions`\\, the properties provided are two way.
+    Similar to :class:`Permissions`\, the properties provided are two way.
     You can set and retrieve individual bits using the properties as if they
     were regular bools.
 
@@ -1055,7 +1052,7 @@ class Intents(BaseFlags):
     @_generated
     def __init__(
         self,
-        value: Optional[int] = None,
+        value: int | None = None,
         *,
         automod: bool = ...,
         automod_configuration: bool = ...,
@@ -1092,7 +1089,7 @@ class Intents(BaseFlags):
     @_generated
     def __init__(self: NoReturn) -> None: ...
 
-    def __init__(self, value: Optional[int] = None, **kwargs: bool) -> None:
+    def __init__(self, value: int | None = None, **kwargs: bool) -> None:
         if value is not None:
             if not isinstance(value, int):
                 msg = f"Expected int, received {type(value).__name__} for argument 'value'."
@@ -2282,6 +2279,9 @@ class AutoModKeywordPresets(ListBaseFlags):
             self, *, profanity: bool = ..., sexual_content: bool = ..., slurs: bool = ...
         ) -> None: ...
 
+        @property
+        def values(self) -> list[AutoModPresetType]: ...
+
     @classmethod
     def all(cls) -> Self:
         """A factory method that creates an :class:`AutoModKeywordPresets` instance with everything enabled."""
@@ -2801,6 +2801,9 @@ class ApplicationInstallTypes(ListBaseFlags):
         @_generated
         def __init__(self, *, guild: bool = ..., user: bool = ...) -> None: ...
 
+        @property
+        def values(self) -> list[ApplicationIntegrationType]: ...
+
     @classmethod
     def all(cls) -> Self:
         """A factory method that creates an :class:`ApplicationInstallTypes` instance with everything enabled."""
@@ -2895,6 +2898,9 @@ class InteractionContextTypes(ListBaseFlags):
         def __init__(
             self, *, bot_dm: bool = ..., guild: bool = ..., private_channel: bool = ...
         ) -> None: ...
+
+        @property
+        def values(self) -> list[InteractionContextType]: ...
 
     @classmethod
     def all(cls) -> Self:

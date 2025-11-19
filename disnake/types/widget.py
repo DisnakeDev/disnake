@@ -1,9 +1,12 @@
 # SPDX-License-Identifier: MIT
+from __future__ import annotations
 
-from typing import List, Optional, TypedDict
+from typing import TYPE_CHECKING, TypedDict
 
-from .snowflake import Snowflake
 from .user import User
+
+if TYPE_CHECKING:
+    from .snowflake import Snowflake
 
 
 class WidgetChannel(TypedDict):
@@ -34,12 +37,12 @@ class WidgetMember(User, total=False):
 class Widget(TypedDict):
     id: Snowflake
     name: str
-    instant_invite: Optional[str]
-    channels: List[WidgetChannel]
-    members: List[WidgetMember]
+    instant_invite: str | None
+    channels: list[WidgetChannel]
+    members: list[WidgetMember]
     presence_count: int
 
 
 class WidgetSettings(TypedDict):
     enabled: bool
-    channel_id: Optional[Snowflake]
+    channel_id: Snowflake | None

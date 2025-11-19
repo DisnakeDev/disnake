@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING
 
 from . import utils
 from .partial_emoji import PartialEmoji, _EmojiTag
@@ -36,7 +36,7 @@ class WelcomeScreenChannel:
         The ID of the guild channel this welcome screen channel represents.
     description: :class:`str`
         The description of this channel in the official UI.
-    emoji: Optional[Union[:class:`Emoji`, :class:`PartialEmoji`]]
+    emoji: :class:`Emoji` | :class:`PartialEmoji` | :data:`None`
         The emoji associated with this channel's welcome message, if any.
     """
 
@@ -51,11 +51,11 @@ class WelcomeScreenChannel:
         *,
         id: int,
         description: str,
-        emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
+        emoji: str | Emoji | PartialEmoji | None = None,
     ) -> None:
         self.id: int = id
         self.description: str = description
-        self.emoji: Optional[Union[Emoji, PartialEmoji]] = None
+        self.emoji: Emoji | PartialEmoji | None = None
         if emoji is None:
             self.emoji = None
         elif isinstance(emoji, str):
@@ -84,9 +84,10 @@ class WelcomeScreenChannel:
         return cls(id=int(data["channel_id"]), description=data["description"], emoji=emoji)
 
     def to_dict(self) -> WelcomeScreenChannelPayload:
-        result: WelcomeScreenChannelPayload = {}  # type: ignore
-        result["channel_id"] = self.id
-        result["description"] = self.description
+        result: WelcomeScreenChannelPayload = {
+            "channel_id": self.id,
+            "description": self.description,
+        }  # pyright: ignore[reportAssignmentType]
 
         if self.emoji is not None:
             if self.emoji.id:
@@ -97,15 +98,15 @@ class WelcomeScreenChannel:
 
 
 class WelcomeScreen:
-    """Represents a Discord welcome screen for a :class:`Guild`.
+    r"""Represents a Discord welcome screen for a :class:`Guild`.
 
     .. versionadded:: 2.5
 
     Attributes
     ----------
-    description: Optional[:class:`str`]
+    description: :class:`str` | :data:`None`
         The guild description in the welcome screen.
-    channels: List[:class:`WelcomeScreenChannel`]
+    channels: :class:`list`\[:class:`WelcomeScreenChannel`]
         The welcome screen's channels.
     """
 
@@ -121,12 +122,12 @@ class WelcomeScreen:
         *,
         data: WelcomeScreenPayload,
         state: ConnectionState,
-        guild: Union[Guild, PartialInviteGuild],
+        guild: Guild | PartialInviteGuild,
     ) -> None:
         self._state = state
         self._guild = guild
-        self.description: Optional[str] = data.get("description")
-        self.channels: List[WelcomeScreenChannel] = [
+        self.description: str | None = data.get("description")
+        self.channels: list[WelcomeScreenChannel] = [
             WelcomeScreenChannel._from_data(data=channel, state=state)
             for channel in data["welcome_channels"]
         ]
@@ -145,11 +146,11 @@ class WelcomeScreen:
         self,
         *,
         enabled: bool = MISSING,
-        description: Optional[str] = MISSING,
-        channels: Optional[List[WelcomeScreenChannel]] = MISSING,
-        reason: Optional[str] = None,
+        description: str | None = MISSING,
+        channels: list[WelcomeScreenChannel] | None = MISSING,
+        reason: str | None = None,
     ) -> WelcomeScreen:
-        """|coro|
+        r"""|coro|
 
         Edits the welcome screen.
 
@@ -162,11 +163,11 @@ class WelcomeScreen:
         ----------
         enabled: :class:`bool`
             Whether the welcome screen is enabled.
-        description: Optional[:class:`str`]
+        description: :class:`str` | :data:`None`
             The new guild description in the welcome screen.
-        channels: Optional[List[:class:`WelcomeScreenChannel`]]
+        channels: :class:`list`\[:class:`WelcomeScreenChannel`] | :data:`None`
             The new welcome channels.
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason for editing the welcome screen. Shows up on the audit log.
 
         Raises

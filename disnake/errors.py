@@ -2,16 +2,18 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Mapping, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, ClassVar, TypeAlias
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from aiohttp import ClientResponse, ClientWebSocketResponse
     from requests import Response
 
     from .client import SessionStartLimit
     from .interactions import Interaction, ModalInteraction
 
-    _ResponseType = Union[ClientResponse, Response]
+    _ResponseType: TypeAlias = ClientResponse | Response
 
 __all__ = (
     "DiscordException",
@@ -70,14 +72,14 @@ class GatewayNotFound(DiscordException):
         super().__init__(message)
 
 
-def _flatten_error_dict(d: Dict[str, Any], key: str = "") -> Dict[str, str]:
-    items: List[Tuple[str, str]] = []
+def _flatten_error_dict(d: dict[str, Any], key: str = "") -> dict[str, str]:
+    items: list[tuple[str, str]] = []
     for k, v in d.items():
         new_key = f"{key}.{k}" if key else k
 
         if isinstance(v, dict):
             try:
-                _errors: List[Dict[str, Any]] = v["_errors"]
+                _errors: list[dict[str, Any]] = v["_errors"]
             except KeyError:
                 items.extend(_flatten_error_dict(v, new_key).items())
             else:
@@ -106,11 +108,9 @@ class HTTPException(DiscordException):
         The Discord specific error code for the failure.
     """
 
-    def __init__(
-        self, response: _ResponseType, message: Optional[Union[str, Dict[str, Any]]]
-    ) -> None:
+    def __init__(self, response: _ResponseType, message: str | dict[str, Any] | None) -> None:
         self.response: _ResponseType = response
-        self.status: int = response.status  # type: ignore
+        self.status: int = response.status  # pyright: ignore[reportAttributeAccessIssue]
         self.code: int
         self.text: str
         if isinstance(message, dict):
@@ -220,7 +220,7 @@ class ConnectionClosed(ClientException):
         The close code of the websocket.
     reason: :class:`str`
         The reason provided for the closure.
-    shard_id: Optional[:class:`int`]
+    shard_id: :class:`int` | :data:`None`
         The shard ID that got closed if applicable.
     """
 
@@ -261,8 +261,8 @@ class ConnectionClosed(ClientException):
         self,
         socket: ClientWebSocketResponse,
         *,
-        shard_id: Optional[int],
-        code: Optional[int] = None,
+        shard_id: int | None,
+        code: int | None = None,
         voice: bool = False,
     ) -> None:
         # This exception is just the same exception except
@@ -273,7 +273,7 @@ class ConnectionClosed(ClientException):
         if voice:
             self.reason = self.GATEWAY_VOICE_CLOSE_EVENT_REASONS.get(self.code, "Unknown reason")
 
-        self.shard_id: Optional[int] = shard_id
+        self.shard_id: int | None = shard_id
         super().__init__(
             f"Shard ID {self.shard_id} WebSocket closed with {self.code}: {self.reason}"
         )
@@ -292,12 +292,12 @@ class PrivilegedIntentsRequired(ClientException):
 
     Attributes
     ----------
-    shard_id: Optional[:class:`int`]
+    shard_id: :class:`int` | :data:`None`
         The shard ID that got closed if applicable.
     """
 
-    def __init__(self, shard_id: Optional[int]) -> None:
-        self.shard_id: Optional[int] = shard_id
+    def __init__(self, shard_id: int | None) -> None:
+        self.shard_id: int | None = shard_id
         msg = (
             f"Shard ID {shard_id} is requesting privileged intents that have not been explicitly enabled in the "
             "developer portal. It is recommended to go to https://discord.com/developers/applications/ "

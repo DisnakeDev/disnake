@@ -645,7 +645,7 @@ This command can be invoked any of the following ways:
     unintended parsing ambiguities in your code. One technique would be to clamp down the expected syntaxes
     allowed through custom converters or reordering the parameters to minimise clashes.
 
-    To help aid with some parsing ambiguities, :class:`str`, ``None``, :data:`typing.Optional` and
+    To help aid with some parsing ambiguities, :class:`str`, :data:`None`, :data:`typing.Optional` and
     :class:`~ext.commands.Greedy` are forbidden as parameters for the :class:`~ext.commands.Greedy` converter.
 
 .. _ext_commands_flag_converter:

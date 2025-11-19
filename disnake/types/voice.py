@@ -1,12 +1,14 @@
 # SPDX-License-Identifier: MIT
+from __future__ import annotations
 
-from typing import List, Literal, Optional, TypedDict
+from typing import TYPE_CHECKING, Literal, TypedDict
 
 from typing_extensions import NotRequired
 
-from .emoji import PartialEmoji
-from .member import MemberWithUser
-from .snowflake import Snowflake
+if TYPE_CHECKING:
+    from .emoji import PartialEmoji
+    from .member import MemberWithUser
+    from .snowflake import Snowflake
 
 SupportedModes = Literal[
     # "aead_aes256_gcm_rtpsize",  # supported in libsodium, but not exposed by pynacl
@@ -27,15 +29,15 @@ class _VoiceState(TypedDict):
     self_stream: NotRequired[bool]
     self_video: bool
     suppress: bool
-    request_to_speak_timestamp: Optional[str]
+    request_to_speak_timestamp: str | None
 
 
 class GuildVoiceState(_VoiceState):
-    channel_id: Optional[Snowflake]
+    channel_id: Snowflake | None
 
 
 class VoiceState(_VoiceState, total=False):
-    channel_id: Optional[Snowflake]
+    channel_id: Snowflake | None
     guild_id: Snowflake
 
 
@@ -58,13 +60,13 @@ class VoiceReady(TypedDict):
     ssrc: int
     ip: str
     port: int
-    modes: List[SupportedModes]
+    modes: list[SupportedModes]
     heartbeat_interval: int
 
 
 class VoiceChannelEffect(TypedDict, total=False):
-    emoji: Optional[PartialEmoji]
-    animation_type: Optional[VoiceChannelEffectAnimationType]
+    emoji: PartialEmoji | None
+    animation_type: VoiceChannelEffectAnimationType | None
     animation_id: int
     sound_id: Snowflake
     sound_volume: float

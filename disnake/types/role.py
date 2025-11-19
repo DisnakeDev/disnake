@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
-from typing import Optional, TypedDict
+from typing import TYPE_CHECKING, TypedDict
 
 from typing_extensions import NotRequired
 
-from .snowflake import Snowflake
+if TYPE_CHECKING:
+    from .snowflake import Snowflake
 
 
 class Role(TypedDict):
@@ -15,8 +16,8 @@ class Role(TypedDict):
     color: int
     colors: RoleColors
     hoist: bool
-    icon: NotRequired[Optional[str]]
-    unicode_emoji: NotRequired[Optional[str]]
+    icon: NotRequired[str | None]
+    unicode_emoji: NotRequired[str | None]
     position: int
     permissions: str
     managed: bool
@@ -36,8 +37,8 @@ class RoleTags(TypedDict, total=False):
 
 class RoleColors(TypedDict):
     primary_color: int
-    secondary_color: Optional[int]
-    tertiary_color: Optional[int]
+    secondary_color: int | None
+    tertiary_color: int | None
 
 
 class CreateRole(TypedDict, total=False):
@@ -45,6 +46,6 @@ class CreateRole(TypedDict, total=False):
     permissions: str
     colors: RoleColors
     hoist: bool
-    icon: Optional[str]
-    unicode_emoji: Optional[str]
+    icon: str | None
+    unicode_emoji: str | None
     mentionable: bool

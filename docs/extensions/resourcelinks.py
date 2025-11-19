@@ -4,7 +4,7 @@
 # Licensed under BSD.
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any
 
 from docutils import nodes, utils
 from sphinx.util.nodes import split_explicit_title
@@ -18,16 +18,16 @@ if TYPE_CHECKING:
     from ._types import SphinxExtensionMeta
 
 
-def make_link_role(resource_links: Dict[str, str]) -> RoleFunction:
+def make_link_role(resource_links: dict[str, str]) -> RoleFunction:
     def role(
         typ: str,
         rawtext: str,
         text: str,
         lineno: int,
         inliner: Inliner,
-        options: Optional[Dict[str, Any]] = None,
-        content: Optional[List[str]] = None,
-    ) -> Tuple[List[Node], List[system_message]]:
+        options: dict[str, Any] | None = None,
+        content: list[str] | None = None,
+    ) -> tuple[list[Node], list[system_message]]:
         text = utils.unescape(text)
         has_explicit_title, title, key = split_explicit_title(text)
         full_url = resource_links[key]

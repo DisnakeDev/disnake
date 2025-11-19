@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, List, Optional, Tuple, Union, cast
+from typing import TYPE_CHECKING, ClassVar, TypeAlias, cast
 
 from ..colour import Colour
 from ..components import Container as ContainerComponent
@@ -20,30 +20,30 @@ if TYPE_CHECKING:
     from .separator import Separator
     from .text_display import TextDisplay
 
-    ContainerChildUIComponent = Union[
-        ActionRow[ActionRowMessageComponent],
-        Section,
-        TextDisplay,
-        MediaGallery,
-        File,
-        Separator,
-    ]
+    ContainerChildUIComponent: TypeAlias = (
+        ActionRow[ActionRowMessageComponent]
+        | Section
+        | TextDisplay
+        | MediaGallery
+        | File
+        | Separator
+    )
 
 __all__ = ("Container",)
 
 
 class Container(UIComponent):
-    """Represents a UI container.
+    r"""Represents a UI container.
 
-    This is visually similar to :class:`.Embed`\\s, and contains other components.
+    This is visually similar to :class:`.Embed`\s, and contains other components.
 
     .. versionadded:: 2.11
 
     Parameters
     ----------
-    *components: Union[:class:`~.ui.ActionRow`, :class:`~.ui.Section`, :class:`~.ui.TextDisplay`, :class:`~.ui.MediaGallery`, :class:`~.ui.File`, :class:`~.ui.Separator`]
+    *components: :class:`~.ui.ActionRow` | :class:`~.ui.Section` | :class:`~.ui.TextDisplay` | :class:`~.ui.MediaGallery` | :class:`~.ui.File` | :class:`~.ui.Separator`
         The components in this container.
-    accent_colour: Optional[:class:`.Colour`]
+    accent_colour: :class:`.Colour` | :data:`None`
         The accent colour of the container.
     spoiler: :class:`bool`
         Whether the container is marked as a spoiler. Defaults to ``False``.
@@ -54,16 +54,16 @@ class Container(UIComponent):
 
     Attributes
     ----------
-    children: List[Union[:class:`~.ui.ActionRow`, :class:`~.ui.Section`, :class:`~.ui.TextDisplay`, :class:`~.ui.MediaGallery`, :class:`~.ui.File`, :class:`~.ui.Separator`]]
+    children: :class:`list`\[:class:`~.ui.ActionRow` | :class:`~.ui.Section` | :class:`~.ui.TextDisplay` | :class:`~.ui.MediaGallery` | :class:`~.ui.File` | :class:`~.ui.Separator`]
         The list of child components in this container.
-    accent_colour: Optional[:class:`.Colour`]
+    accent_colour: :class:`.Colour` | :data:`None`
         The accent colour of the container.
         An alias exists under ``accent_color``.
     spoiler: :class:`bool`
         Whether the container is marked as a spoiler.
     """
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (
         "children",
         "accent_colour",
         "spoiler",
@@ -72,17 +72,17 @@ class Container(UIComponent):
     def __init__(
         self,
         *components: ContainerChildUIComponent,
-        accent_colour: Optional[Colour] = None,
+        accent_colour: Colour | None = None,
         spoiler: bool = False,
         id: int = 0,
     ) -> None:
         self._id: int = id
         # this list can be modified without any runtime checks later on,
         # just assume the user knows what they're doing at that point
-        self.children: List[ContainerChildUIComponent] = [
+        self.children: list[ContainerChildUIComponent] = [
             ensure_ui_component(c, "components") for c in components
         ]
-        self._accent_colour: Optional[Colour] = accent_colour
+        self._accent_colour: Colour | None = accent_colour
         self.spoiler: bool = spoiler
 
     # these are reimplemented here to store the value in a separate attribute,
@@ -97,11 +97,11 @@ class Container(UIComponent):
         self._id = value
 
     @property
-    def accent_colour(self) -> Optional[Colour]:
+    def accent_colour(self) -> Colour | None:
         return self._accent_colour
 
     @accent_colour.setter
-    def accent_colour(self, value: Optional[Union[int, Colour]]) -> None:
+    def accent_colour(self, value: int | Colour | None) -> None:
         if isinstance(value, int):
             self._accent_colour = Colour(value)
         elif value is None or isinstance(value, Colour):
@@ -128,7 +128,7 @@ class Container(UIComponent):
 
         return cls(
             *cast(
-                "List[ContainerChildUIComponent]",
+                "list[ContainerChildUIComponent]",
                 [_to_ui_component(c) for c in container.children],
             ),
             accent_colour=container.accent_colour,

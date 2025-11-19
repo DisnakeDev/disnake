@@ -1,17 +1,22 @@
 # SPDX-License-Identifier: MIT
+from __future__ import annotations
 
 import functools
+from typing import TYPE_CHECKING
 
-import libcst as cst
 from libcst import codemod
 
-from . import overloads_no_missing, typed_flags, typed_permissions
+from . import link_doc_types, overloads_no_missing, typed_flags, typed_permissions
 from .base import NoMetadataWrapperMixin
+
+if TYPE_CHECKING:
+    import libcst as cst
 
 CODEMODS = [
     overloads_no_missing.EllipsisOverloads,
     typed_flags.FlagTypings,
     typed_permissions.PermissionTypings,
+    link_doc_types.DocstringTransformer,
 ]
 
 

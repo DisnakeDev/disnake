@@ -10,18 +10,11 @@ from errno import ECONNRESET
 from typing import (
     TYPE_CHECKING,
     Any,
-    Dict,
     Generic,
-    List,
     Literal,
     NamedTuple,
     NoReturn,
-    Optional,
-    Sequence,
-    Tuple,
-    Type,
     TypeVar,
-    Union,
     overload,
 )
 from urllib.parse import quote as urlquote
@@ -52,6 +45,7 @@ _log = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     import datetime
+    from collections.abc import Sequence
     from types import TracebackType
 
     from typing_extensions import Self
@@ -72,6 +66,7 @@ if TYPE_CHECKING:
     from ..types.webhook import Webhook as WebhookPayload
     from ..ui._types import MessageComponents
     from ..ui.view import View
+    from ..user import ClientUser
 
 MISSING = utils.MISSING
 
@@ -79,7 +74,7 @@ MISSING = utils.MISSING
 class AsyncDeferredLock:
     def __init__(self, lock: asyncio.Lock) -> None:
         self.lock = lock
-        self.delta: Optional[float] = None
+        self.delta: float | None = None
 
     async def __aenter__(self) -> Self:
         await self.lock.acquire()
@@ -90,9 +85,9 @@ class AsyncDeferredLock:
 
     async def __aexit__(
         self,
-        type: Optional[Type[BaseException]],
-        value: Optional[BaseException],
-        traceback: Optional[TracebackType],
+        type: type[BaseException] | None,
+        value: BaseException | None,
+        traceback: TracebackType | None,
     ) -> None:
         if self.delta:
             await asyncio.sleep(self.delta)
@@ -101,23 +96,23 @@ class AsyncDeferredLock:
 
 class AsyncWebhookAdapter:
     def __init__(self) -> None:
-        self._locks: Dict[Any, asyncio.Lock] = {}
+        self._locks: dict[Any, asyncio.Lock] = {}
 
     async def request(
         self,
         route: Route,
         session: aiohttp.ClientSession,
         *,
-        payload: Optional[Dict[str, Any]] = None,
-        multipart: Optional[List[Dict[str, Any]]] = None,
-        files: Optional[List[File]] = None,
-        reason: Optional[str] = None,
-        auth_token: Optional[str] = None,
-        params: Optional[Dict[str, Any]] = None,
+        payload: dict[str, Any] | None = None,
+        multipart: list[dict[str, Any]] | None = None,
+        files: list[File] | None = None,
+        reason: str | None = None,
+        auth_token: str | None = None,
+        params: dict[str, Any] | None = None,
     ) -> Any:
-        headers: Dict[str, str] = {}
+        headers: dict[str, str] = {}
         files = files or []
-        to_send: Optional[Union[str, aiohttp.FormData]] = None
+        to_send: str | aiohttp.FormData | None = None
         bucket = (route.webhook_id, route.webhook_token)
 
         try:
@@ -135,8 +130,8 @@ class AsyncWebhookAdapter:
         if reason is not None:
             headers["X-Audit-Log-Reason"] = urlquote(reason, safe="/ ")
 
-        response: Optional[aiohttp.ClientResponse] = None
-        data: Optional[Union[Dict[str, Any], str]] = None
+        response: aiohttp.ClientResponse | None = None
+        data: dict[str, Any] | str | None = None
         method = route.method
         url = route.url
         webhook_id = route.webhook_id
@@ -193,7 +188,8 @@ class AsyncWebhookAdapter:
                             if not response.headers.get("Via"):
                                 raise HTTPException(response, data)
 
-                            retry_after: float = data["retry_after"]  # type: ignore
+                            assert isinstance(data, dict)
+                            retry_after: float = data["retry_after"]
                             _log.warning(
                                 "Webhook ID %s is rate limited. Retrying in %.2f seconds",
                                 webhook_id,
@@ -231,9 +227,9 @@ class AsyncWebhookAdapter:
         self,
         webhook_id: int,
         *,
-        token: Optional[str] = None,
+        token: str | None = None,
         session: aiohttp.ClientSession,
-        reason: Optional[str] = None,
+        reason: str | None = None,
     ) -> Response[None]:
         route = Route("DELETE", "/webhooks/{webhook_id}", webhook_id=webhook_id)
         return self.request(route, session, reason=reason, auth_token=token)
@@ -244,7 +240,7 @@ class AsyncWebhookAdapter:
         token: str,
         *,
         session: aiohttp.ClientSession,
-        reason: Optional[str] = None,
+        reason: str | None = None,
     ) -> Response[None]:
         route = Route(
             "DELETE",
@@ -258,10 +254,10 @@ class AsyncWebhookAdapter:
         self,
         webhook_id: int,
         token: str,
-        payload: Dict[str, Any],
+        payload: dict[str, Any],
         *,
         session: aiohttp.ClientSession,
-        reason: Optional[str] = None,
+        reason: str | None = None,
     ) -> Response[WebhookPayload]:
         route = Route("PATCH", "/webhooks/{webhook_id}", webhook_id=webhook_id)
         return self.request(route, session, reason=reason, payload=payload, auth_token=token)
@@ -270,10 +266,10 @@ class AsyncWebhookAdapter:
         self,
         webhook_id: int,
         token: str,
-        payload: Dict[str, Any],
+        payload: dict[str, Any],
         *,
         session: aiohttp.ClientSession,
-        reason: Optional[str] = None,
+        reason: str | None = None,
     ) -> Response[WebhookPayload]:
         route = Route(
             "PATCH",
@@ -289,13 +285,13 @@ class AsyncWebhookAdapter:
         token: str,
         *,
         session: aiohttp.ClientSession,
-        payload: Optional[Dict[str, Any]] = None,
-        multipart: Optional[List[Dict[str, Any]]] = None,
-        files: Optional[List[File]] = None,
-        thread_id: Optional[int] = None,
+        payload: dict[str, Any] | None = None,
+        multipart: list[dict[str, Any]] | None = None,
+        files: list[File] | None = None,
+        thread_id: int | None = None,
         wait: bool = False,
         with_components: bool = True,
-    ) -> Response[Optional[MessagePayload]]:
+    ) -> Response[MessagePayload | None]:
         params = {"wait": int(wait), "with_components": int(with_components)}
         if thread_id:
             params["thread_id"] = thread_id
@@ -317,9 +313,9 @@ class AsyncWebhookAdapter:
         message_id: int,
         *,
         session: aiohttp.ClientSession,
-        thread_id: Optional[int] = None,
+        thread_id: int | None = None,
     ) -> Response[MessagePayload]:
-        params: Dict[str, Any] = {}
+        params: dict[str, Any] = {}
         if thread_id is not None:
             params["thread_id"] = thread_id
 
@@ -339,12 +335,12 @@ class AsyncWebhookAdapter:
         message_id: int,
         *,
         session: aiohttp.ClientSession,
-        payload: Optional[Dict[str, Any]] = None,
-        multipart: Optional[List[Dict[str, Any]]] = None,
-        files: Optional[List[File]] = None,
-        thread_id: Optional[int] = None,
+        payload: dict[str, Any] | None = None,
+        multipart: list[dict[str, Any]] | None = None,
+        files: list[File] | None = None,
+        thread_id: int | None = None,
     ) -> Response[MessagePayload]:
-        params: Dict[str, Any] = {}
+        params: dict[str, Any] = {}
         if thread_id is not None:
             params["thread_id"] = thread_id
 
@@ -366,9 +362,9 @@ class AsyncWebhookAdapter:
         message_id: int,
         *,
         session: aiohttp.ClientSession,
-        thread_id: Optional[int] = None,
+        thread_id: int | None = None,
     ) -> Response[None]:
-        params: Dict[str, Any] = {}
+        params: dict[str, Any] = {}
         if thread_id is not None:
             params["thread_id"] = thread_id
 
@@ -413,8 +409,8 @@ class AsyncWebhookAdapter:
         *,
         session: aiohttp.ClientSession,
         type: int,
-        data: Optional[Dict[str, Any]] = None,
-        files: Optional[List[File]] = None,
+        data: dict[str, Any] | None = None,
+        files: list[File] | None = None,
     ) -> Response[None]:
         route = Route(
             "POST",
@@ -423,7 +419,7 @@ class AsyncWebhookAdapter:
             webhook_token=token,
         )
 
-        payload: Dict[str, Any] = {
+        payload: dict[str, Any] = {
             "type": type,
         }
 
@@ -458,9 +454,9 @@ class AsyncWebhookAdapter:
         token: str,
         *,
         session: aiohttp.ClientSession,
-        payload: Optional[Dict[str, Any]] = None,
-        multipart: Optional[List[Dict[str, Any]]] = None,
-        files: Optional[List[File]] = None,
+        payload: dict[str, Any] | None = None,
+        multipart: list[dict[str, Any]] | None = None,
+        files: list[File] | None = None,
     ) -> Response[MessagePayload]:
         r = Route(
             "PATCH",
@@ -487,35 +483,35 @@ class AsyncWebhookAdapter:
 
 
 class DictPayloadParameters(NamedTuple):
-    payload: Dict[str, Any]
-    files: Optional[List[File]]
+    payload: dict[str, Any]
+    files: list[File] | None
 
 
 class PayloadParameters(NamedTuple):
-    payload: Optional[Dict[str, Any]]
-    multipart: Optional[List[Dict[str, Any]]]
-    files: Optional[List[File]]
+    payload: dict[str, Any] | None
+    multipart: list[dict[str, Any]] | None
+    files: list[File] | None
 
 
 def handle_message_parameters_dict(
-    content: Optional[str] = MISSING,
+    content: str | None = MISSING,
     *,
     username: str = MISSING,
-    avatar_url: Any = MISSING,
+    avatar_url: object = MISSING,
     tts: bool = False,
-    ephemeral: Optional[bool] = MISSING,
-    suppress_embeds: Optional[bool] = MISSING,
+    ephemeral: bool | None = MISSING,
+    suppress_embeds: bool | None = MISSING,
     flags: MessageFlags = MISSING,
     file: File = MISSING,
-    files: List[File] = MISSING,
-    attachments: Optional[List[Attachment]] = MISSING,
-    embed: Optional[Embed] = MISSING,
-    embeds: List[Embed] = MISSING,
-    view: Optional[View] = MISSING,
-    components: Optional[MessageComponents] = MISSING,
-    allowed_mentions: Optional[AllowedMentions] = MISSING,
-    previous_allowed_mentions: Optional[AllowedMentions] = None,
-    stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = MISSING,
+    files: list[File] = MISSING,
+    attachments: list[Attachment] | None = MISSING,
+    embed: Embed | None = MISSING,
+    embeds: list[Embed] = MISSING,
+    view: View | None = MISSING,
+    components: MessageComponents | None = MISSING,
+    allowed_mentions: AllowedMentions | None = MISSING,
+    previous_allowed_mentions: AllowedMentions | None = None,
+    stickers: Sequence[GuildSticker | StandardSticker | StickerItem] = MISSING,
     poll: Poll = MISSING,
     # these parameters are exclusive to webhooks in forum/media channels
     thread_name: str = MISSING,
@@ -610,24 +606,24 @@ def handle_message_parameters_dict(
 
 
 def handle_message_parameters(
-    content: Optional[str] = MISSING,
+    content: str | None = MISSING,
     *,
     username: str = MISSING,
-    avatar_url: Any = MISSING,
+    avatar_url: object = MISSING,
     tts: bool = False,
-    ephemeral: Optional[bool] = MISSING,
-    suppress_embeds: Optional[bool] = MISSING,
+    ephemeral: bool | None = MISSING,
+    suppress_embeds: bool | None = MISSING,
     flags: MessageFlags = MISSING,
     file: File = MISSING,
-    files: List[File] = MISSING,
-    attachments: Optional[List[Attachment]] = MISSING,
-    embed: Optional[Embed] = MISSING,
-    embeds: List[Embed] = MISSING,
-    view: Optional[View] = MISSING,
-    components: Optional[MessageComponents] = MISSING,
-    allowed_mentions: Optional[AllowedMentions] = MISSING,
-    previous_allowed_mentions: Optional[AllowedMentions] = None,
-    stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = MISSING,
+    files: list[File] = MISSING,
+    attachments: list[Attachment] | None = MISSING,
+    embed: Embed | None = MISSING,
+    embeds: list[Embed] = MISSING,
+    view: View | None = MISSING,
+    components: MessageComponents | None = MISSING,
+    allowed_mentions: AllowedMentions | None = MISSING,
+    previous_allowed_mentions: AllowedMentions | None = None,
+    stickers: Sequence[GuildSticker | StandardSticker | StickerItem] = MISSING,
     poll: Poll = MISSING,
     # these parameters are exclusive to webhooks in forum/media channels
     thread_name: str = MISSING,
@@ -720,8 +716,8 @@ class PartialWebhookGuild(Hashable):
         return f"<PartialWebhookGuild name={self.name!r} id={self.id}>"
 
     @property
-    def icon(self) -> Optional[Asset]:
-        """Optional[:class:`Asset`]: Returns the guild's icon asset, if available."""
+    def icon(self) -> Asset | None:
+        """:class:`Asset` | :data:`None`: Returns the guild's icon asset, if available."""
         if self._icon is None:
             return None
         return Asset._from_guild_icon(self._state, self.id, self._icon)
@@ -744,34 +740,34 @@ class _WebhookState(Generic[WebhookT]):
     def __init__(
         self,
         webhook: WebhookT,
-        parent: Optional[Union[ConnectionState, _WebhookState[Any]]],
+        parent: ConnectionState | _WebhookState[Any] | None,
         *,
-        thread: Optional[Snowflake] = None,
+        thread: Snowflake | None = None,
     ) -> None:
         self._webhook: WebhookT = webhook
 
-        self._parent: Optional[ConnectionState]
+        self._parent: ConnectionState | None
         if isinstance(parent, _WebhookState):
             self._parent = None
         else:
             self._parent = parent
 
-        self._thread: Optional[Snowflake] = thread
+        self._thread: Snowflake | None = thread
 
-    def _get_guild(self, guild_id: Optional[int]) -> Optional[Guild]:
+    def _get_guild(self, guild_id: int | None) -> Guild | None:
         if self._parent is not None:
             return self._parent._get_guild(guild_id)
         return None
 
-    def store_user(self, data) -> Union[BaseUser, User]:
+    def store_user(self, data) -> BaseUser | User:
         if self._parent is not None:
             return self._parent.store_user(data)
         # state parameter is artificial
-        return BaseUser(state=self, data=data)  # type: ignore
+        return BaseUser(state=self, data=data)  # pyright: ignore[reportArgumentType]
 
     def create_user(self, data) -> BaseUser:
         # state parameter is artificial
-        return BaseUser(state=self, data=data)  # type: ignore
+        return BaseUser(state=self, data=data)  # pyright: ignore[reportArgumentType]
 
     @property
     def http(self) -> HTTPClient:
@@ -780,7 +776,7 @@ class _WebhookState(Generic[WebhookT]):
 
         # Some data classes assign state.http and that should be kosher
         # however, using it should result in a late-binding error.
-        return _FriendlyHttpAttributeErrorHelper()  # type: ignore
+        return _FriendlyHttpAttributeErrorHelper()  # pyright: ignore[reportReturnType]
 
     def __getattr__(self, attr) -> Any:
         if self._parent is not None:
@@ -806,18 +802,18 @@ class WebhookMessage(Message):
 
     async def edit(
         self,
-        content: Optional[str] = MISSING,
-        embed: Optional[Embed] = MISSING,
-        embeds: List[Embed] = MISSING,
+        content: str | None = MISSING,
+        embed: Embed | None = MISSING,
+        embeds: list[Embed] = MISSING,
         file: File = MISSING,
-        files: List[File] = MISSING,
-        attachments: Optional[List[Attachment]] = MISSING,
-        view: Optional[View] = MISSING,
-        components: Optional[MessageComponents] = MISSING,
+        files: list[File] = MISSING,
+        attachments: list[Attachment] | None = MISSING,
+        view: View | None = MISSING,
+        components: MessageComponents | None = MISSING,
         flags: MessageFlags = MISSING,
-        allowed_mentions: Optional[AllowedMentions] = None,
+        allowed_mentions: AllowedMentions | None = None,
     ) -> WebhookMessage:
-        """|coro|
+        r"""|coro|
 
         Edits the message.
 
@@ -834,12 +830,12 @@ class WebhookMessage(Message):
 
         Parameters
         ----------
-        content: Optional[:class:`str`]
-            The content to edit the message with, or ``None`` to clear it.
-        embed: Optional[:class:`Embed`]
+        content: :class:`str` | :data:`None`
+            The content to edit the message with, or :data:`None` to clear it.
+        embed: :class:`Embed` | :data:`None`
             The new embed to replace the original with. This cannot be mixed with the ``embeds`` parameter.
-            Could be ``None`` to remove the embed.
-        embeds: List[:class:`Embed`]
+            Could be :data:`None` to remove the embed.
+        embeds: :class:`list`\[:class:`Embed`]
             The new embeds to replace the original with. Must be a maximum of 10.
             This cannot be mixed with the ``embed`` parameter.
             To remove all embeds ``[]`` should be passed.
@@ -850,32 +846,32 @@ class WebhookMessage(Message):
 
             .. versionadded:: 2.0
 
-        files: List[:class:`File`]
+        files: :class:`list`\[:class:`File`]
             A list of files to upload. This cannot be mixed with the ``file`` parameter.
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
 
             .. versionadded:: 2.0
 
-        attachments: Optional[List[:class:`Attachment`]]
+        attachments: :class:`list`\[:class:`Attachment`] | :data:`None`
             A list of attachments to keep in the message.
-            If ``[]`` or ``None`` is passed then all existing attachments are removed.
+            If ``[]`` or :data:`None` is passed then all existing attachments are removed.
             Keeps existing attachments if not provided.
 
             .. versionadded:: 2.2
 
             .. versionchanged:: 2.5
-                Supports passing ``None`` to clear attachments.
+                Supports passing :data:`None` to clear attachments.
 
-        view: Optional[:class:`~disnake.ui.View`]
+        view: :class:`~disnake.ui.View` | :data:`None`
             The view to update this message with. This cannot be mixed with ``components``.
-            If ``None`` is passed then the view is removed.
+            If :data:`None` is passed then the view is removed.
 
             .. versionadded:: 2.0
 
-        components: Optional[|components_type|]
+        components: |components_type| | :data:`None`
             A list of components to update the message with. This cannot be mixed with ``view``.
-            If ``None`` is passed then the components are removed.
+            If :data:`None` is passed then the components are removed.
 
             .. versionadded:: 2.4
 
@@ -883,7 +879,7 @@ class WebhookMessage(Message):
                 Passing v2 components here automatically sets the :attr:`~MessageFlags.is_components_v2` flag.
                 Setting this flag cannot be reverted. Note that this also disables the
                 ``content`` and ``embeds`` fields.
-                If the message previously had any of these fields set, you must set them to ``None``.
+                If the message previously had any of these fields set, you must set them to :data:`None`.
 
         flags: :class:`MessageFlags`
             The new flags to set for this message. Overrides existing flags.
@@ -935,14 +931,14 @@ class WebhookMessage(Message):
             thread=self._state._thread,
         )
 
-    async def delete(self, *, delay: Optional[float] = None) -> None:
+    async def delete(self, *, delay: float | None = None) -> None:
         """|coro|
 
         Deletes the message.
 
         Parameters
         ----------
-        delay: Optional[:class:`float`]
+        delay: :class:`float` | :data:`None`
             If provided, the number of seconds to wait before deleting the message.
             The waiting is done in the background and deletion failures are ignored.
 
@@ -970,7 +966,7 @@ class WebhookMessage(Message):
 
 
 class BaseWebhook(Hashable):
-    __slots__: Tuple[str, ...] = (
+    __slots__: tuple[str, ...] = (
         "id",
         "type",
         "guild_id",
@@ -989,11 +985,11 @@ class BaseWebhook(Hashable):
     def __init__(
         self,
         data: WebhookPayload,
-        token: Optional[str] = None,
-        state: Optional[ConnectionState] = None,
+        token: str | None = None,
+        state: ConnectionState | None = None,
     ) -> None:
-        self.auth_token: Optional[str] = token
-        self._state: Union[ConnectionState, _WebhookState[BaseWebhook]] = state or _WebhookState(
+        self.auth_token: str | None = token
+        self._state: ConnectionState | _WebhookState[BaseWebhook] = state or _WebhookState(
             self, parent=state
         )
         self._update(data)
@@ -1008,24 +1004,24 @@ class BaseWebhook(Hashable):
         self.token = data.get("token")
 
         user = data.get("user")
-        self.user: Optional[Union[BaseUser, User]] = None
+        self.user: BaseUser | User | None = None
         if user is not None:
             # state parameter may be _WebhookState
-            self.user = User(state=self._state, data=user)  # type: ignore
+            self.user = User(state=self._state, data=user)  # pyright: ignore[reportArgumentType]
 
         source_channel = data.get("source_channel")
         if source_channel:
             source_channel = PartialWebhookChannel(data=source_channel)
 
-        self.source_channel: Optional[PartialWebhookChannel] = source_channel
+        self.source_channel: PartialWebhookChannel | None = source_channel
 
         source_guild = data.get("source_guild")
         if source_guild:
             source_guild = PartialWebhookGuild(data=source_guild, state=self._state)
 
-        self.source_guild: Optional[PartialWebhookGuild] = source_guild
+        self.source_guild: PartialWebhookGuild | None = source_guild
 
-        self.application_id: Optional[int] = utils._get_as_snowflake(data, "application_id")
+        self.application_id: int | None = utils._get_as_snowflake(data, "application_id")
 
     def is_partial(self) -> bool:
         """Whether the webhook is a "partial" webhook.
@@ -1046,27 +1042,28 @@ class BaseWebhook(Hashable):
         return self.auth_token is not None
 
     @property
-    def guild(self) -> Optional[Guild]:
-        """Optional[:class:`Guild`]: The guild this webhook belongs to.
+    def guild(self) -> Guild | None:
+        """:class:`Guild` | :data:`None`: The guild this webhook belongs to.
 
-        If this is a partial webhook, then this will always return ``None``.
+        If this is a partial webhook, then this will always return :data:`None`.
         """
         return self._state and self._state._get_guild(self.guild_id)
 
     @property
     def channel(
         self,
-    ) -> Optional[Union[TextChannel, VoiceChannel, StageChannel, ForumChannel, MediaChannel]]:
-        """Optional[Union[:class:`TextChannel`, :class:`VoiceChannel`, :class:`StageChannel`, :class:`ForumChannel`, :class:`MediaChannel`]]: The channel this webhook belongs to.
+    ) -> TextChannel | VoiceChannel | StageChannel | ForumChannel | MediaChannel | None:
+        """:class:`TextChannel` | :class:`VoiceChannel` | :class:`StageChannel` | :class:`ForumChannel` | :class:`MediaChannel` | :data:`None`: The channel this webhook belongs to.
 
-        If this is a partial webhook, then this will always return ``None``.
+        If this is a partial webhook, then this will always return :data:`None`.
 
         Webhooks in a :class:`ForumChannel` or :class:`MediaChannel` can not send messages directly.
         They can only create new threads (see ``thread_name`` for :attr:`Webhook.send`)
         and interact with existing threads.
         """
-        guild = self.guild
-        return guild and guild.get_channel(self.channel_id)  # type: ignore
+        if self.guild is None or self.channel_id is None:
+            return None
+        return self.guild.get_channel(self.channel_id)  # pyright: ignore[reportReturnType]
 
     @property
     def created_at(self) -> datetime.datetime:
@@ -1141,43 +1138,43 @@ class Webhook(BaseWebhook):
 
         .. versionadded:: 1.3
 
-    token: Optional[:class:`str`]
-        The authentication token of the webhook. If this is ``None``
+    token: :class:`str` | :data:`None`
+        The authentication token of the webhook. If this is :data:`None`
         then the webhook cannot be used to make requests.
-    guild_id: Optional[:class:`int`]
+    guild_id: :class:`int` | :data:`None`
         The guild ID this webhook belongs to.
-    channel_id: Optional[:class:`int`]
+    channel_id: :class:`int` | :data:`None`
         The channel ID this webhook belongs to.
-    user: Optional[:class:`abc.User`]
+    user: :class:`abc.User` | :data:`None`
         The user this webhook was created by. If the webhook was
-        received without authentication then this will be ``None``.
-    name: Optional[:class:`str`]
+        received without authentication then this will be :data:`None`.
+    name: :class:`str` | :data:`None`
         The default name of the webhook.
-    source_guild: Optional[:class:`PartialWebhookGuild`]
+    source_guild: :class:`PartialWebhookGuild` | :data:`None`
         The guild of the channel that this webhook is following.
         Only given if :attr:`type` is :attr:`WebhookType.channel_follower`.
 
         .. versionadded:: 2.0
 
-    source_channel: Optional[:class:`PartialWebhookChannel`]
+    source_channel: :class:`PartialWebhookChannel` | :data:`None`
         The channel that this webhook is following.
         Only given if :attr:`type` is :attr:`WebhookType.channel_follower`.
 
         .. versionadded:: 2.0
 
-    application_id: Optional[:class:`int`]
+    application_id: :class:`int` | :data:`None`
         The ID of the application associated with this webhook, if it was created by an application.
 
         .. versionadded:: 2.6
     """
 
-    __slots__: Tuple[str, ...] = ("session",)
+    __slots__: tuple[str, ...] = ("session",)
 
     def __init__(
         self,
         data: WebhookPayload,
         session: aiohttp.ClientSession,
-        token: Optional[str] = None,
+        token: str | None = None,
         state=None,
     ) -> None:
         super().__init__(data, token, state)
@@ -1193,7 +1190,7 @@ class Webhook(BaseWebhook):
 
     @classmethod
     def partial(
-        cls, id: int, token: str, *, session: aiohttp.ClientSession, bot_token: Optional[str] = None
+        cls, id: int, token: str, *, session: aiohttp.ClientSession, bot_token: str | None = None
     ) -> Webhook:
         """Creates a partial :class:`Webhook`.
 
@@ -1210,7 +1207,7 @@ class Webhook(BaseWebhook):
 
             .. versionadded:: 2.0
 
-        bot_token: Optional[:class:`str`]
+        bot_token: :class:`str` | :data:`None`
             The bot authentication token for authenticated requests
             involving the webhook.
 
@@ -1232,7 +1229,7 @@ class Webhook(BaseWebhook):
 
     @classmethod
     def from_url(
-        cls, url: str, *, session: aiohttp.ClientSession, bot_token: Optional[str] = None
+        cls, url: str, *, session: aiohttp.ClientSession, bot_token: str | None = None
     ) -> Webhook:
         """Creates a partial :class:`Webhook` from a webhook URL.
 
@@ -1250,7 +1247,7 @@ class Webhook(BaseWebhook):
 
             .. versionadded:: 2.0
 
-        bot_token: Optional[:class:`str`]
+        bot_token: :class:`str` | :data:`None`
             The bot authentication token for authenticated requests
             involving the webhook.
 
@@ -1275,12 +1272,12 @@ class Webhook(BaseWebhook):
             msg = "Invalid webhook URL given."
             raise ValueError(msg)
 
-        data: Dict[str, Any] = m.groupdict()
-        data["type"] = 1
-        return cls(data, session, token=bot_token)  # type: ignore
+        data: WebhookPayload = {"id": m["id"], "type": 1, "token": m["token"]}
+        return cls(data, session, token=bot_token)
 
+    # FIXME: data comes from HTTPClient.follow_webhook, but is hinted as returning Response[None]?
     @classmethod
-    def _as_follower(cls, data, *, channel, user) -> Webhook:
+    def _as_follower(cls, data: Any, *, channel: TextChannel, user: ClientUser) -> Webhook:
         name = f"{channel.guild} #{channel}"
         feed: WebhookPayload = {
             "id": data["webhook_id"],
@@ -1298,12 +1295,12 @@ class Webhook(BaseWebhook):
         }
 
         state = channel._state
-        session = channel._state.http._HTTPClient__session
+        session = channel._state.http._HTTPClient__session  # pyright: ignore[reportAttributeAccessIssue]
         return cls(feed, session=session, state=state, token=state.http.token)
 
     @classmethod
-    def from_state(cls, data, state) -> Webhook:
-        session = state.http._HTTPClient__session
+    def from_state(cls, data: WebhookPayload, state: ConnectionState) -> Webhook:
+        session = state.http._HTTPClient__session  # pyright: ignore[reportAttributeAccessIssue]
         return cls(data, session=session, state=state, token=state.http.token)
 
     async def fetch(self, *, prefer_auth: bool = True) -> Webhook:
@@ -1356,7 +1353,7 @@ class Webhook(BaseWebhook):
 
         return Webhook(data, self.session, token=self.auth_token, state=self._state)
 
-    async def delete(self, *, reason: Optional[str] = None, prefer_auth: bool = True) -> None:
+    async def delete(self, *, reason: str | None = None, prefer_auth: bool = True) -> None:
         """|coro|
 
         Deletes this Webhook.
@@ -1366,7 +1363,7 @@ class Webhook(BaseWebhook):
 
         Parameters
         ----------
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason for deleting this webhook. Shows up on the audit log.
 
             .. versionadded:: 1.4
@@ -1406,10 +1403,10 @@ class Webhook(BaseWebhook):
     async def edit(
         self,
         *,
-        reason: Optional[str] = None,
-        name: Optional[str] = MISSING,
-        avatar: Optional[AssetBytes] = MISSING,
-        channel: Optional[Snowflake] = None,
+        reason: str | None = None,
+        name: str | None = MISSING,
+        avatar: AssetBytes | None = MISSING,
+        channel: Snowflake | None = None,
         prefer_auth: bool = True,
     ) -> Webhook:
         """|coro|
@@ -1421,15 +1418,15 @@ class Webhook(BaseWebhook):
 
         Parameters
         ----------
-        name: Optional[:class:`str`]
+        name: :class:`str` | :data:`None`
             The webhook's new default name.
-        avatar: Optional[|resource_type|]
+        avatar: |resource_type| | :data:`None`
             The webhook's new default avatar.
 
             .. versionchanged:: 2.5
                 Now accepts various resource types in addition to :class:`bytes`.
 
-        channel: Optional[:class:`abc.Snowflake`]
+        channel: :class:`abc.Snowflake` | :data:`None`
             The webhook's new channel. This requires an authenticated webhook.
 
             .. versionadded:: 2.0
@@ -1440,7 +1437,7 @@ class Webhook(BaseWebhook):
 
             .. versionadded:: 2.0
 
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason for editing this webhook. Shows up on the audit log.
 
             .. versionadded:: 1.4
@@ -1466,7 +1463,7 @@ class Webhook(BaseWebhook):
             msg = "This webhook does not have a token associated with it"
             raise WebhookTokenMissing(msg)
 
-        payload: Dict[str, Any] = {}
+        payload: dict[str, Any] = {}
         if name is not MISSING:
             payload["name"] = str(name) if name is not None else None
 
@@ -1475,7 +1472,7 @@ class Webhook(BaseWebhook):
 
         adapter = async_context.get()
 
-        data: Optional[WebhookPayload] = None
+        data: WebhookPayload | None = None
         # If a channel is given, always use the authenticated endpoint
         if channel is not None:
             if self.auth_token is None:
@@ -1506,8 +1503,8 @@ class Webhook(BaseWebhook):
         self,
         data: MessagePayload,
         *,
-        thread: Optional[Snowflake] = None,
-        thread_name: Optional[str] = None,
+        thread: Snowflake | None = None,
+        thread_name: str | None = None,
     ) -> WebhookMessage:
         channel_id = int(data["channel_id"])
 
@@ -1526,28 +1523,28 @@ class Webhook(BaseWebhook):
         else:
             msg_channel = self.channel
 
-        if not msg_channel:
+        if msg_channel is None:
             # state may be artificial (unlikely at this point...)
-            msg_channel = PartialMessageable(state=self._state, id=channel_id)  # type: ignore
+            msg_channel = PartialMessageable(state=self._state, id=channel_id)  # pyright: ignore[reportArgumentType]
 
         # state is artificial
-        return WebhookMessage(data=data, state=state, channel=msg_channel)  # type: ignore
+        return WebhookMessage(data=data, state=state, channel=msg_channel)  # pyright: ignore[reportArgumentType]
 
     @overload
     async def send(
         self,
-        content: Optional[str] = ...,
+        content: str | None = ...,
         *,
         username: str = ...,
-        avatar_url: Any = ...,
+        avatar_url: object = ...,
         tts: bool = ...,
         ephemeral: bool = ...,
         suppress_embeds: bool = ...,
         flags: MessageFlags = ...,
         file: File = ...,
-        files: List[File] = ...,
+        files: list[File] = ...,
         embed: Embed = ...,
-        embeds: List[Embed] = ...,
+        embeds: list[Embed] = ...,
         allowed_mentions: AllowedMentions = ...,
         view: View = ...,
         components: MessageComponents = ...,
@@ -1562,18 +1559,18 @@ class Webhook(BaseWebhook):
     @overload
     async def send(
         self,
-        content: Optional[str] = ...,
+        content: str | None = ...,
         *,
         username: str = ...,
-        avatar_url: Any = ...,
+        avatar_url: object = ...,
         tts: bool = ...,
         ephemeral: bool = ...,
         suppress_embeds: bool = ...,
         flags: MessageFlags = ...,
         file: File = ...,
-        files: List[File] = ...,
+        files: list[File] = ...,
         embed: Embed = ...,
-        embeds: List[Embed] = ...,
+        embeds: list[Embed] = ...,
         allowed_mentions: AllowedMentions = ...,
         view: View = ...,
         components: MessageComponents = ...,
@@ -1587,18 +1584,18 @@ class Webhook(BaseWebhook):
 
     async def send(
         self,
-        content: Optional[str] = MISSING,
+        content: str | None = MISSING,
         *,
         username: str = MISSING,
-        avatar_url: Any = MISSING,
+        avatar_url: object = MISSING,
         tts: bool = False,
         ephemeral: bool = MISSING,
         suppress_embeds: bool = MISSING,
         flags: MessageFlags = MISSING,
         file: File = MISSING,
-        files: List[File] = MISSING,
+        files: list[File] = MISSING,
         embed: Embed = MISSING,
-        embeds: List[Embed] = MISSING,
+        embeds: list[Embed] = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         view: View = MISSING,
         components: MessageComponents = MISSING,
@@ -1608,8 +1605,8 @@ class Webhook(BaseWebhook):
         wait: bool = False,
         delete_after: float = MISSING,
         poll: Poll = MISSING,
-    ) -> Optional[WebhookMessage]:
-        """|coro|
+    ) -> WebhookMessage | None:
+        r"""|coro|
 
         Sends a message using the webhook.
 
@@ -1631,7 +1628,7 @@ class Webhook(BaseWebhook):
 
         Parameters
         ----------
-        content: Optional[:class:`str`]
+        content: :class:`str` | :data:`None`
             The content of the message to send.
         username: :class:`str`
             The username to send with this message. If no username is provided
@@ -1652,12 +1649,12 @@ class Webhook(BaseWebhook):
 
         file: :class:`File`
             The file to upload. This cannot be mixed with the ``files`` parameter.
-        files: List[:class:`File`]
+        files: :class:`list`\[:class:`File`]
             A list of files to upload. Must be a maximum of 10.
             This cannot be mixed with the ``file`` parameter.
         embed: :class:`Embed`
             The rich embed for the content to send. This cannot be mixed with the ``embeds`` parameter.
-        embeds: List[:class:`Embed`]
+        embeds: :class:`list`\[:class:`Embed`]
             A list of embeds to send with the content. Must be a maximum of 10.
             This cannot be mixed with the ``embed`` parameter.
         allowed_mentions: :class:`AllowedMentions`
@@ -1706,7 +1703,7 @@ class Webhook(BaseWebhook):
                 representing the created thread, may be a :class:`PartialMessageable`.
 
             .. versionadded:: 2.6
-        applied_tags: Sequence[:class:`abc.Snowflake`]
+        applied_tags: :class:`~collections.abc.Sequence`\[:class:`abc.Snowflake`]
             If in a forum/media channel and creating a new thread (see ``thread_name`` above),
             the tags to apply to the new thread. Maximum of 5.
 
@@ -1714,7 +1711,7 @@ class Webhook(BaseWebhook):
 
         wait: :class:`bool`
             Whether the server should wait before sending a response. This essentially
-            means that the return type of this function changes from ``None`` to
+            means that the return type of this function changes from :data:`None` to
             a :class:`WebhookMessage` if set to ``True``. If the type of webhook
             is :attr:`WebhookType.application` then this is always set to ``True``.
         delete_after: :class:`float`
@@ -1771,16 +1768,14 @@ class Webhook(BaseWebhook):
 
         Returns
         -------
-        Optional[:class:`WebhookMessage`]
-            If ``wait`` is ``True`` then the message that was sent, otherwise ``None``.
+        :class:`WebhookMessage` | :data:`None`
+            If ``wait`` is ``True`` then the message that was sent, otherwise :data:`None`.
         """
         if self.token is None:
             msg = "This webhook does not have a token associated with it"
             raise WebhookTokenMissing(msg)
 
-        previous_mentions: Optional[AllowedMentions] = getattr(
-            self._state, "allowed_mentions", None
-        )
+        previous_mentions: AllowedMentions | None = getattr(self._state, "allowed_mentions", None)
         if content is None:
             content = MISSING
 
@@ -1799,7 +1794,7 @@ class Webhook(BaseWebhook):
             if ephemeral is True and view.timeout is None:
                 view.timeout = 15 * 60.0
 
-        thread_id: Optional[int] = None
+        thread_id: int | None = None
         if thread is not MISSING:
             if thread_name or applied_tags:
                 msg = "Cannot use `thread_name` or `applied_tags` when `thread` is provided."
@@ -1847,11 +1842,8 @@ class Webhook(BaseWebhook):
 
         msg = None
         if wait:
-            msg = self._create_message(
-                data,  # type: ignore
-                thread=thread,
-                thread_name=thread_name,
-            )
+            assert data is not None
+            msg = self._create_message(data, thread=thread, thread_name=thread_name)
             if delete_after is not MISSING:
                 await msg.delete(delay=delete_after)
 
@@ -1861,7 +1853,7 @@ class Webhook(BaseWebhook):
 
         return msg
 
-    async def fetch_message(self, id: int, *, thread: Optional[Snowflake] = None) -> WebhookMessage:
+    async def fetch_message(self, id: int, *, thread: Snowflake | None = None) -> WebhookMessage:
         """|coro|
 
         Retrieves a single :class:`WebhookMessage` owned by this webhook.
@@ -1875,7 +1867,7 @@ class Webhook(BaseWebhook):
         ----------
         id: :class:`int`
             The message ID to look for.
-        thread: Optional[:class:`~disnake.abc.Snowflake`]
+        thread: :class:`~disnake.abc.Snowflake` | :data:`None`
             The thread the message is in, if any.
 
             .. versionadded:: 2.10
@@ -1914,19 +1906,19 @@ class Webhook(BaseWebhook):
         self,
         message_id: int,
         *,
-        content: Optional[str] = MISSING,
-        embed: Optional[Embed] = MISSING,
-        embeds: List[Embed] = MISSING,
+        content: str | None = MISSING,
+        embed: Embed | None = MISSING,
+        embeds: list[Embed] = MISSING,
         file: File = MISSING,
-        files: List[File] = MISSING,
-        attachments: Optional[List[Attachment]] = MISSING,
-        view: Optional[View] = MISSING,
-        components: Optional[MessageComponents] = MISSING,
+        files: list[File] = MISSING,
+        attachments: list[Attachment] | None = MISSING,
+        view: View | None = MISSING,
+        components: MessageComponents | None = MISSING,
         flags: MessageFlags = MISSING,
-        allowed_mentions: Optional[AllowedMentions] = None,
-        thread: Optional[Snowflake] = None,
+        allowed_mentions: AllowedMentions | None = None,
+        thread: Snowflake | None = None,
     ) -> WebhookMessage:
-        """|coro|
+        r"""|coro|
 
         Edits a message owned by this webhook.
 
@@ -1951,13 +1943,13 @@ class Webhook(BaseWebhook):
         ----------
         message_id: :class:`int`
             The ID of the message to edit.
-        content: Optional[:class:`str`]
-            The content to edit the message with, or ``None`` to clear it.
-        embed: Optional[:class:`Embed`]
+        content: :class:`str` | :data:`None`
+            The content to edit the message with, or :data:`None` to clear it.
+        embed: :class:`Embed` | :data:`None`
             The new embed to replace the original with. This cannot be mixed with the
             ``embeds`` parameter.
-            Could be ``None`` to remove the embed.
-        embeds: List[:class:`Embed`]
+            Could be :data:`None` to remove the embed.
+        embeds: :class:`list`\[:class:`Embed`]
             The new embeds to replace the original with. Must be a maximum of 10.
             This cannot be mixed with the ``embed`` parameter.
             To remove all embeds ``[]`` should be passed.
@@ -1968,33 +1960,33 @@ class Webhook(BaseWebhook):
 
             .. versionadded:: 2.0
 
-        files: List[:class:`File`]
+        files: :class:`list`\[:class:`File`]
             A list of files to upload. This cannot be mixed with the ``file`` parameter.
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
 
             .. versionadded:: 2.0
 
-        attachments: Optional[List[:class:`Attachment`]]
+        attachments: :class:`list`\[:class:`Attachment`] | :data:`None`
             A list of attachments to keep in the message.
-            If ``[]`` or ``None`` is passed then all existing attachments are removed.
+            If ``[]`` or :data:`None` is passed then all existing attachments are removed.
             Keeps existing attachments if not provided.
 
             .. versionadded:: 2.2
 
             .. versionchanged:: 2.5
-                Supports passing ``None`` to clear attachments.
+                Supports passing :data:`None` to clear attachments.
 
-        view: Optional[:class:`~disnake.ui.View`]
-            The updated view to update this message with. If ``None`` is passed then
+        view: :class:`~disnake.ui.View` | :data:`None`
+            The updated view to update this message with. If :data:`None` is passed then
             the view is removed. The webhook must have state attached, similar to
             :meth:`send`. This cannot be mixed with ``components``.
 
             .. versionadded:: 2.0
 
-        components: Optional[|components_type|]
+        components: |components_type| | :data:`None`
             A list of components to update this message with. This cannot be mixed with ``view``.
-            If ``None`` is passed then the components are removed.
+            If :data:`None` is passed then the components are removed.
 
             .. versionadded:: 2.4
 
@@ -2002,7 +1994,7 @@ class Webhook(BaseWebhook):
                 Passing v2 components here automatically sets the :attr:`~MessageFlags.is_components_v2` flag.
                 Setting this flag cannot be reverted. Note that this also disables the
                 ``content`` and ``embeds`` fields.
-                If the message previously had any of these fields set, you must set them to ``None``.
+                If the message previously had any of these fields set, you must set them to :data:`None`.
 
         flags: :class:`MessageFlags`
             The new flags to set for this message. Overrides existing flags.
@@ -2015,7 +2007,7 @@ class Webhook(BaseWebhook):
             Controls the mentions being processed in this message.
             See :meth:`.abc.Messageable.send` for more information.
 
-        thread: Optional[:class:`~disnake.abc.Snowflake`]
+        thread: :class:`~disnake.abc.Snowflake` | :data:`None`
             The thread the message is in, if any.
 
             .. versionadded:: 2.10
@@ -2056,9 +2048,7 @@ class Webhook(BaseWebhook):
         if attachments is MISSING and (file or files):
             attachments = (await self.fetch_message(message_id, thread=thread)).attachments
 
-        previous_mentions: Optional[AllowedMentions] = getattr(
-            self._state, "allowed_mentions", None
-        )
+        previous_mentions: AllowedMentions | None = getattr(self._state, "allowed_mentions", None)
         params = handle_message_parameters(
             content=content,
             file=file,
@@ -2094,9 +2084,7 @@ class Webhook(BaseWebhook):
             self._state.store_view(view, message_id)
         return message
 
-    async def delete_message(
-        self, message_id: int, /, *, thread: Optional[Snowflake] = None
-    ) -> None:
+    async def delete_message(self, message_id: int, /, *, thread: Snowflake | None = None) -> None:
         """|coro|
 
         Deletes a message owned by this webhook.
@@ -2113,7 +2101,7 @@ class Webhook(BaseWebhook):
         ----------
         message_id: :class:`int`
             The ID of the message to delete.
-        thread: Optional[:class:`~disnake.abc.Snowflake`]
+        thread: :class:`~disnake.abc.Snowflake` | :data:`None`
             The thread the message is in, if any.
 
             .. versionadded:: 2.10

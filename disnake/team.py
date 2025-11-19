@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-import datetime
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING
 
 from . import utils
 from .asset import Asset
@@ -11,6 +10,8 @@ from .enums import TeamMemberRole, TeamMembershipState, try_enum
 from .user import BaseUser
 
 if TYPE_CHECKING:
+    import datetime
+
     from .state import ConnectionState
     from .types.team import Team as TeamPayload, TeamMember as TeamMemberPayload
 
@@ -21,7 +22,7 @@ __all__ = (
 
 
 class Team:
-    """Represents an application team.
+    r"""Represents an application team.
     Teams are groups of users who share access to an application's configuration.
 
     Attributes
@@ -32,7 +33,7 @@ class Team:
         The team name.
     owner_id: :class:`int`
         The team owner's ID.
-    members: List[:class:`TeamMember`]
+    members: :class:`list`\[:class:`TeamMember`]
         A list of the members in the team.
 
         .. versionadded:: 1.3
@@ -45,9 +46,9 @@ class Team:
 
         self.id: int = int(data["id"])
         self.name: str = data["name"]
-        self._icon: Optional[str] = data.get("icon")
-        self.owner_id: Optional[int] = utils._get_as_snowflake(data, "owner_user_id")
-        self.members: List[TeamMember] = [
+        self._icon: str | None = data.get("icon")
+        self.owner_id: int | None = utils._get_as_snowflake(data, "owner_user_id")
+        self.members: list[TeamMember] = [
             TeamMember(self, self._state, member) for member in data["members"]
         ]
 
@@ -63,15 +64,15 @@ class Team:
         return utils.snowflake_time(self.id)
 
     @property
-    def icon(self) -> Optional[Asset]:
-        """Optional[:class:`.Asset`]: Retrieves the team's icon asset, if any."""
+    def icon(self) -> Asset | None:
+        """:class:`.Asset` | :data:`None`: Retrieves the team's icon asset, if any."""
         if self._icon is None:
             return None
         return Asset._from_icon(self._state, self.id, self._icon, path="team")
 
     @property
-    def owner(self) -> Optional[TeamMember]:
-        """Optional[:class:`TeamMember`]: The team's owner."""
+    def owner(self) -> TeamMember | None:
+        """:class:`TeamMember` | :data:`None`: The team's owner."""
         return utils.get(self.members, id=self.owner_id)
 
 
@@ -113,7 +114,7 @@ class TeamMember(BaseUser):
             The value of a single zero (``"0"``) indicates that the user has been migrated to the new system.
             See the `help article <https://dis.gd/app-usernames>`__ for details.
 
-    global_name: Optional[:class:`str`]
+    global_name: :class:`str` | :data:`None`
         The team member's global display name, if set.
         This takes precedence over :attr:`.name` when shown.
 

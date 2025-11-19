@@ -16,14 +16,7 @@ from errno import ECONNRESET
 from typing import (
     TYPE_CHECKING,
     Any,
-    Dict,
-    List,
     Literal,
-    Optional,
-    Sequence,
-    Tuple,
-    Type,
-    Union,
     overload,
 )
 from urllib.parse import quote as urlquote
@@ -31,7 +24,6 @@ from urllib.parse import quote as urlquote
 from .. import utils
 from ..channel import PartialMessageable
 from ..errors import DiscordServerError, Forbidden, HTTPException, NotFound, WebhookTokenMissing
-from ..flags import MessageFlags
 from ..http import Route
 from ..message import Message
 from ..object import Object
@@ -45,6 +37,7 @@ __all__ = (
 _log = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
     from types import TracebackType
 
     from typing_extensions import Self
@@ -52,6 +45,7 @@ if TYPE_CHECKING:
     from ..abc import Snowflake
     from ..embeds import Embed
     from ..file import File
+    from ..flags import MessageFlags
     from ..mentions import AllowedMentions
     from ..message import Attachment
     from ..types.message import Message as MessagePayload
@@ -68,7 +62,7 @@ MISSING = utils.MISSING
 class DeferredLock:
     def __init__(self, lock: threading.Lock) -> None:
         self.lock = lock
-        self.delta: Optional[float] = None
+        self.delta: float | None = None
 
     def __enter__(self) -> Self:
         self.lock.acquire()
@@ -79,9 +73,9 @@ class DeferredLock:
 
     def __exit__(
         self,
-        type: Optional[Type[BaseException]],
-        value: Optional[BaseException],
-        traceback: Optional[TracebackType],
+        type: type[BaseException] | None,
+        value: BaseException | None,
+        traceback: TracebackType | None,
     ) -> None:
         if self.delta:
             time.sleep(self.delta)
@@ -90,23 +84,23 @@ class DeferredLock:
 
 class WebhookAdapter:
     def __init__(self) -> None:
-        self._locks: Dict[Any, threading.Lock] = {}
+        self._locks: dict[Any, threading.Lock] = {}
 
     def request(
         self,
         route: Route,
         session: Session,
         *,
-        payload: Optional[Dict[str, Any]] = None,
-        multipart: Optional[List[Dict[str, Any]]] = None,
-        files: Optional[List[File]] = None,
-        reason: Optional[str] = None,
-        auth_token: Optional[str] = None,
-        params: Optional[Dict[str, Any]] = None,
+        payload: dict[str, Any] | None = None,
+        multipart: list[dict[str, Any]] | None = None,
+        files: list[File] | None = None,
+        reason: str | None = None,
+        auth_token: str | None = None,
+        params: dict[str, Any] | None = None,
     ) -> Any:
-        headers: Dict[str, str] = {}
+        headers: dict[str, str] = {}
         files = files or []
-        to_send: Optional[Union[str, Dict[str, Any]]] = None
+        to_send: str | dict[str, Any] | None = None
         bucket = (route.webhook_id, route.webhook_token)
 
         try:
@@ -124,9 +118,9 @@ class WebhookAdapter:
         if reason is not None:
             headers["X-Audit-Log-Reason"] = urlquote(reason, safe="/ ")
 
-        response: Optional[Response] = None
-        data: Optional[Union[Dict[str, Any], str]] = None
-        file_data: Optional[Dict[str, Any]] = None
+        response: Response | None = None
+        data: dict[str, Any] | str | None = None
+        file_data: dict[str, Any] | None = None
         method = route.method
         url = route.url
         webhook_id = route.webhook_id
@@ -159,7 +153,7 @@ class WebhookAdapter:
                         )
                         response.encoding = "utf-8"
                         # Compatibility with aiohttp
-                        response.status = response.status_code  # type: ignore
+                        response.status = response.status_code  # pyright: ignore[reportAttributeAccessIssue]
 
                         data = response.text or None
                         if data and response.headers["Content-Type"] == "application/json":
@@ -183,7 +177,8 @@ class WebhookAdapter:
                             if not response.headers.get("Via"):
                                 raise HTTPException(response, data)
 
-                            retry_after: float = data["retry_after"]  # type: ignore
+                            assert isinstance(data, dict)
+                            retry_after: float = data["retry_after"]
                             _log.warning(
                                 "Webhook ID %s is rate limited. Retrying in %.2f seconds",
                                 webhook_id,
@@ -221,9 +216,9 @@ class WebhookAdapter:
         self,
         webhook_id: int,
         *,
-        token: Optional[str] = None,
+        token: str | None = None,
         session: Session,
-        reason: Optional[str] = None,
+        reason: str | None = None,
     ) -> None:
         route = Route("DELETE", "/webhooks/{webhook_id}", webhook_id=webhook_id)
         return self.request(route, session, reason=reason, auth_token=token)
@@ -234,7 +229,7 @@ class WebhookAdapter:
         token: str,
         *,
         session: Session,
-        reason: Optional[str] = None,
+        reason: str | None = None,
     ) -> None:
         route = Route(
             "DELETE",
@@ -248,10 +243,10 @@ class WebhookAdapter:
         self,
         webhook_id: int,
         token: str,
-        payload: Dict[str, Any],
+        payload: dict[str, Any],
         *,
         session: Session,
-        reason: Optional[str] = None,
+        reason: str | None = None,
     ) -> WebhookPayload:
         route = Route("PATCH", "/webhooks/{webhook_id}", webhook_id=webhook_id)
         return self.request(route, session, reason=reason, payload=payload, auth_token=token)
@@ -260,10 +255,10 @@ class WebhookAdapter:
         self,
         webhook_id: int,
         token: str,
-        payload: Dict[str, Any],
+        payload: dict[str, Any],
         *,
         session: Session,
-        reason: Optional[str] = None,
+        reason: str | None = None,
     ) -> WebhookPayload:
         route = Route(
             "PATCH",
@@ -280,10 +275,10 @@ class WebhookAdapter:
         token: str,
         *,
         session: Session,
-        payload: Optional[Dict[str, Any]] = None,
-        multipart: Optional[List[Dict[str, Any]]] = None,
-        files: Optional[List[File]] = None,
-        thread_id: Optional[int] = None,
+        payload: dict[str, Any] | None = None,
+        multipart: list[dict[str, Any]] | None = None,
+        files: list[File] | None = None,
+        thread_id: int | None = None,
         wait: bool = False,
     ) -> MessagePayload: ...
 
@@ -294,10 +289,10 @@ class WebhookAdapter:
         token: str,
         *,
         session: Session,
-        payload: Optional[Dict[str, Any]] = None,
-        multipart: Optional[List[Dict[str, Any]]] = None,
-        files: Optional[List[File]] = None,
-        thread_id: Optional[int] = None,
+        payload: dict[str, Any] | None = None,
+        multipart: list[dict[str, Any]] | None = None,
+        files: list[File] | None = None,
+        thread_id: int | None = None,
         wait: bool = False,
     ) -> None: ...
 
@@ -307,12 +302,12 @@ class WebhookAdapter:
         token: str,
         *,
         session: Session,
-        payload: Optional[Dict[str, Any]] = None,
-        multipart: Optional[List[Dict[str, Any]]] = None,
-        files: Optional[List[File]] = None,
-        thread_id: Optional[int] = None,
+        payload: dict[str, Any] | None = None,
+        multipart: list[dict[str, Any]] | None = None,
+        files: list[File] | None = None,
+        thread_id: int | None = None,
         wait: bool = False,
-    ) -> Optional[MessagePayload]:
+    ) -> MessagePayload | None:
         params = {"wait": int(wait)}
         if thread_id:
             params["thread_id"] = thread_id
@@ -334,9 +329,9 @@ class WebhookAdapter:
         message_id: int,
         *,
         session: Session,
-        thread_id: Optional[int] = None,
+        thread_id: int | None = None,
     ) -> MessagePayload:
-        params: Dict[str, Any] = {}
+        params: dict[str, Any] = {}
         if thread_id is not None:
             params["thread_id"] = thread_id
 
@@ -356,12 +351,12 @@ class WebhookAdapter:
         message_id: int,
         *,
         session: Session,
-        payload: Optional[Dict[str, Any]] = None,
-        multipart: Optional[List[Dict[str, Any]]] = None,
-        files: Optional[List[File]] = None,
-        thread_id: Optional[int] = None,
+        payload: dict[str, Any] | None = None,
+        multipart: list[dict[str, Any]] | None = None,
+        files: list[File] | None = None,
+        thread_id: int | None = None,
     ) -> MessagePayload:
-        params: Dict[str, Any] = {}
+        params: dict[str, Any] = {}
         if thread_id is not None:
             params["thread_id"] = thread_id
 
@@ -383,9 +378,9 @@ class WebhookAdapter:
         message_id: int,
         *,
         session: Session,
-        thread_id: Optional[int] = None,
+        thread_id: int | None = None,
     ) -> None:
-        params: Dict[str, Any] = {}
+        params: dict[str, Any] = {}
         if thread_id is not None:
             params["thread_id"] = thread_id
 
@@ -425,7 +420,7 @@ class WebhookAdapter:
 
 
 class _WebhookContext(threading.local):
-    adapter: Optional[WebhookAdapter] = None
+    adapter: WebhookAdapter | None = None
 
 
 _context = _WebhookContext()
@@ -453,15 +448,15 @@ class SyncWebhookMessage(Message):
 
     def edit(
         self,
-        content: Optional[str] = MISSING,
-        embed: Optional[Embed] = MISSING,
-        embeds: List[Embed] = MISSING,
+        content: str | None = MISSING,
+        embed: Embed | None = MISSING,
+        embeds: list[Embed] = MISSING,
         file: File = MISSING,
-        files: List[File] = MISSING,
-        attachments: Optional[List[Attachment]] = MISSING,
-        allowed_mentions: Optional[AllowedMentions] = None,
+        files: list[File] = MISSING,
+        attachments: list[Attachment] | None = MISSING,
+        allowed_mentions: AllowedMentions | None = None,
     ) -> SyncWebhookMessage:
-        """Edits the message.
+        r"""Edits the message.
 
         .. note::
             If the original message has embeds with images that were created from local files
@@ -474,13 +469,13 @@ class SyncWebhookMessage(Message):
 
         Parameters
         ----------
-        content: Optional[:class:`str`]
-            The content to edit the message with or ``None`` to clear it.
-        embed: Optional[:class:`Embed`]
+        content: :class:`str` | :data:`None`
+            The content to edit the message with or :data:`None` to clear it.
+        embed: :class:`Embed` | :data:`None`
             The new embed to replace the original with. This cannot be mixed with the
             ``embeds`` parameter.
-            Could be ``None`` to remove the embed.
-        embeds: List[:class:`Embed`]
+            Could be :data:`None` to remove the embed.
+        embeds: :class:`list`\[:class:`Embed`]
             The new embeds to replace the original with. Must be a maximum of 10.
             This cannot be mixed with the ``embed`` parameter.
             To remove all embeds ``[]`` should be passed.
@@ -488,19 +483,19 @@ class SyncWebhookMessage(Message):
             The file to upload. This cannot be mixed with the ``files`` parameter.
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
-        files: List[:class:`File`]
+        files: :class:`list`\[:class:`File`]
             A list of files to upload. This cannot be mixed with the ``file`` parameter.
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
-        attachments: Optional[List[:class:`Attachment`]]
+        attachments: :class:`list`\[:class:`Attachment`] | :data:`None`
             A list of attachments to keep in the message.
-            If ``[]`` or ``None`` is passed then all existing attachments are removed.
+            If ``[]`` or :data:`None` is passed then all existing attachments are removed.
             Keeps existing attachments if not provided.
 
             .. versionadded:: 2.2
 
             .. versionchanged:: 2.5
-                Supports passing ``None`` to clear attachments.
+                Supports passing :data:`None` to clear attachments.
 
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
@@ -541,7 +536,7 @@ class SyncWebhookMessage(Message):
             thread=self._state._thread,
         )
 
-    def delete(self, *, delay: Optional[float] = None) -> None:
+    def delete(self, *, delay: float | None = None) -> None:
         """Deletes the message.
 
         .. versionchanged:: 2.6
@@ -549,7 +544,7 @@ class SyncWebhookMessage(Message):
 
         Parameters
         ----------
-        delay: Optional[:class:`float`]
+        delay: :class:`float` | :data:`None`
             If provided, the number of seconds to wait before deleting the message.
             This blocks the thread.
 
@@ -600,40 +595,40 @@ class SyncWebhook(BaseWebhook):
 
         .. versionadded:: 1.3
 
-    token: Optional[:class:`str`]
-        The authentication token of the webhook. If this is ``None``
+    token: :class:`str` | :data:`None`
+        The authentication token of the webhook. If this is :data:`None`
         then the webhook cannot be used to make requests.
-    guild_id: Optional[:class:`int`]
+    guild_id: :class:`int` | :data:`None`
         The guild ID this webhook belongs to.
-    channel_id: Optional[:class:`int`]
+    channel_id: :class:`int` | :data:`None`
         The channel ID this webhook belongs to.
-    user: Optional[:class:`abc.User`]
+    user: :class:`abc.User` | :data:`None`
         The user this webhook was created by. If the webhook was
-        received without authentication then this will be ``None``.
-    name: Optional[:class:`str`]
+        received without authentication then this will be :data:`None`.
+    name: :class:`str` | :data:`None`
         The default name of the webhook.
-    source_guild: Optional[:class:`PartialWebhookGuild`]
+    source_guild: :class:`PartialWebhookGuild` | :data:`None`
         The guild of the channel that this webhook is following.
         Only given if :attr:`type` is :attr:`WebhookType.channel_follower`.
 
         .. versionadded:: 2.0
 
-    source_channel: Optional[:class:`PartialWebhookChannel`]
+    source_channel: :class:`PartialWebhookChannel` | :data:`None`
         The channel that this webhook is following.
         Only given if :attr:`type` is :attr:`WebhookType.channel_follower`.
 
         .. versionadded:: 2.0
 
-    application_id: Optional[:class:`int`]
+    application_id: :class:`int` | :data:`None`
         The ID of the application associated with this webhook, if it was created by an application.
 
         .. versionadded:: 2.6
     """
 
-    __slots__: Tuple[str, ...] = ("session",)
+    __slots__: tuple[str, ...] = ("session",)
 
     def __init__(
-        self, data: WebhookPayload, session: Session, token: Optional[str] = None, state=None
+        self, data: WebhookPayload, session: Session, token: str | None = None, state=None
     ) -> None:
         super().__init__(data, token, state)
         self.session = session
@@ -648,7 +643,7 @@ class SyncWebhook(BaseWebhook):
 
     @classmethod
     def partial(
-        cls, id: int, token: str, *, session: Session = MISSING, bot_token: Optional[str] = None
+        cls, id: int, token: str, *, session: Session = MISSING, bot_token: str | None = None
     ) -> SyncWebhook:
         """Creates a partial :class:`SyncWebhook`.
 
@@ -663,7 +658,7 @@ class SyncWebhook(BaseWebhook):
             that the library does not manage the session and
             will not close it. If not given, the ``requests``
             auto session creation functions are used instead.
-        bot_token: Optional[:class:`str`]
+        bot_token: :class:`str` | :data:`None`
             The bot authentication token for authenticated requests
             involving the webhook.
 
@@ -685,12 +680,12 @@ class SyncWebhook(BaseWebhook):
                 msg = f"expected requests.Session not {session.__class__!r}"
                 raise TypeError(msg)
         else:
-            session = requests  # type: ignore
+            session = requests  # pyright: ignore[reportAssignmentType]
         return cls(data, session, token=bot_token)
 
     @classmethod
     def from_url(
-        cls, url: str, *, session: Session = MISSING, bot_token: Optional[str] = None
+        cls, url: str, *, session: Session = MISSING, bot_token: str | None = None
     ) -> SyncWebhook:
         """Creates a partial :class:`SyncWebhook` from a webhook URL.
 
@@ -706,7 +701,7 @@ class SyncWebhook(BaseWebhook):
             that the library does not manage the session and
             will not close it. If not given, the ``requests``
             auto session creation functions are used instead.
-        bot_token: Optional[:class:`str`]
+        bot_token: :class:`str` | :data:`None`
             The bot authentication token for authenticated requests
             involving the webhook.
 
@@ -729,8 +724,7 @@ class SyncWebhook(BaseWebhook):
             msg = "Invalid webhook URL given."
             raise ValueError(msg)
 
-        data: Dict[str, Any] = m.groupdict()
-        data["type"] = 1
+        data: WebhookPayload = {"id": m["id"], "type": 1, "token": m["token"]}
         import requests
 
         if session is not MISSING:
@@ -738,8 +732,8 @@ class SyncWebhook(BaseWebhook):
                 msg = f"expected requests.Session not {session.__class__!r}"
                 raise TypeError(msg)
         else:
-            session = requests  # type: ignore
-        return cls(data, session, token=bot_token)  # type: ignore
+            session = requests  # pyright: ignore[reportAssignmentType]
+        return cls(data, session, token=bot_token)
 
     def fetch(self, *, prefer_auth: bool = True) -> SyncWebhook:
         """Fetches the current webhook.
@@ -787,7 +781,7 @@ class SyncWebhook(BaseWebhook):
 
         return SyncWebhook(data, self.session, token=self.auth_token, state=self._state)
 
-    def delete(self, *, reason: Optional[str] = None, prefer_auth: bool = True) -> None:
+    def delete(self, *, reason: str | None = None, prefer_auth: bool = True) -> None:
         """Deletes this Webhook.
 
         .. versionchanged:: 2.6
@@ -795,7 +789,7 @@ class SyncWebhook(BaseWebhook):
 
         Parameters
         ----------
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason for deleting this webhook. Shows up on the audit log.
 
             .. versionadded:: 1.4
@@ -833,10 +827,10 @@ class SyncWebhook(BaseWebhook):
     def edit(
         self,
         *,
-        reason: Optional[str] = None,
-        name: Optional[str] = MISSING,
-        avatar: Optional[bytes] = MISSING,
-        channel: Optional[Snowflake] = None,
+        reason: str | None = None,
+        name: str | None = MISSING,
+        avatar: bytes | None = MISSING,
+        channel: Snowflake | None = None,
         prefer_auth: bool = True,
     ) -> SyncWebhook:
         """Edits this Webhook.
@@ -846,16 +840,16 @@ class SyncWebhook(BaseWebhook):
 
         Parameters
         ----------
-        name: Optional[:class:`str`]
+        name: :class:`str` | :data:`None`
             The webhook's new default name.
-        avatar: Optional[:class:`bytes`]
+        avatar: :class:`bytes` | :data:`None`
             A :term:`py:bytes-like object` representing the webhook's new default avatar.
-        channel: Optional[:class:`abc.Snowflake`]
+        channel: :class:`abc.Snowflake` | :data:`None`
             The webhook's new channel. This requires an authenticated webhook.
         prefer_auth: :class:`bool`
             Whether to use the bot token over the webhook token
             if available. Defaults to ``True``.
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason for editing this webhook. Shows up on the audit log.
 
             .. versionadded:: 1.4
@@ -879,7 +873,7 @@ class SyncWebhook(BaseWebhook):
             msg = "This webhook does not have a token associated with it"
             raise WebhookTokenMissing(msg)
 
-        payload: Dict[str, Any] = {}
+        payload: dict[str, Any] = {}
         if name is not MISSING:
             payload["name"] = str(name) if name is not None else None
 
@@ -888,7 +882,7 @@ class SyncWebhook(BaseWebhook):
 
         adapter: WebhookAdapter = _get_webhook_adapter()
 
-        data: Optional[WebhookPayload] = None
+        data: WebhookPayload | None = None
         # If a channel is given, always use the authenticated endpoint
         if channel is not None:
             if self.auth_token is None:
@@ -918,7 +912,11 @@ class SyncWebhook(BaseWebhook):
         )
 
     def _create_message(
-        self, data, *, thread: Optional[Snowflake] = None, thread_name: Optional[str] = None
+        self,
+        data: MessagePayload,
+        *,
+        thread: Snowflake | None = None,
+        thread_name: str | None = None,
     ) -> SyncWebhookMessage:
         # see async webhook's _create_message for details
         channel_id = int(data["channel_id"])
@@ -927,23 +925,23 @@ class SyncWebhook(BaseWebhook):
 
         state = _WebhookState(self, parent=self._state, thread=thread)
         channel = self.channel
-        if not channel or self.channel_id != channel_id:
-            channel = PartialMessageable(state=self._state, id=channel_id)  # type: ignore
+        if channel is None or self.channel_id != channel_id:
+            channel = PartialMessageable(state=self._state, id=channel_id)  # pyright: ignore[reportArgumentType]
         # state is artificial
-        return SyncWebhookMessage(data=data, state=state, channel=channel)  # type: ignore
+        return SyncWebhookMessage(data=data, state=state, channel=channel)  # pyright: ignore[reportArgumentType]
 
     @overload
     def send(
         self,
-        content: Optional[str] = ...,
+        content: str | None = ...,
         *,
         username: str = ...,
-        avatar_url: Any = ...,
+        avatar_url: object = ...,
         tts: bool = ...,
         file: File = ...,
-        files: List[File] = ...,
+        files: list[File] = ...,
         embed: Embed = ...,
-        embeds: List[Embed] = ...,
+        embeds: list[Embed] = ...,
         suppress_embeds: bool = ...,
         flags: MessageFlags = ...,
         allowed_mentions: AllowedMentions = ...,
@@ -956,15 +954,15 @@ class SyncWebhook(BaseWebhook):
     @overload
     def send(
         self,
-        content: Optional[str] = ...,
+        content: str | None = ...,
         *,
         username: str = ...,
-        avatar_url: Any = ...,
+        avatar_url: object = ...,
         tts: bool = ...,
         file: File = ...,
-        files: List[File] = ...,
+        files: list[File] = ...,
         embed: Embed = ...,
-        embeds: List[Embed] = ...,
+        embeds: list[Embed] = ...,
         suppress_embeds: bool = ...,
         flags: MessageFlags = ...,
         allowed_mentions: AllowedMentions = ...,
@@ -976,15 +974,15 @@ class SyncWebhook(BaseWebhook):
 
     def send(
         self,
-        content: Optional[str] = MISSING,
+        content: str | None = MISSING,
         *,
         username: str = MISSING,
-        avatar_url: Any = MISSING,
+        avatar_url: object = MISSING,
         tts: bool = False,
         file: File = MISSING,
-        files: List[File] = MISSING,
+        files: list[File] = MISSING,
         embed: Embed = MISSING,
-        embeds: List[Embed] = MISSING,
+        embeds: list[Embed] = MISSING,
         suppress_embeds: bool = MISSING,
         flags: MessageFlags = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
@@ -992,8 +990,8 @@ class SyncWebhook(BaseWebhook):
         thread_name: str = MISSING,
         applied_tags: Sequence[Snowflake] = MISSING,
         wait: bool = False,
-    ) -> Optional[SyncWebhookMessage]:
-        """Sends a message using the webhook.
+    ) -> SyncWebhookMessage | None:
+        r"""Sends a message using the webhook.
 
         The content must be a type that can convert to a string through ``str(content)``.
 
@@ -1013,7 +1011,7 @@ class SyncWebhook(BaseWebhook):
 
         Parameters
         ----------
-        content: Optional[:class:`str`]
+        content: :class:`str` | :data:`None`
             The content of the message to send.
         username: :class:`str`
             The username to send with this message. If no username is provided
@@ -1026,12 +1024,12 @@ class SyncWebhook(BaseWebhook):
             Whether the message should be sent using text-to-speech.
         file: :class:`File`
             The file to upload. This cannot be mixed with the ``files`` parameter.
-        files: List[:class:`File`]
+        files: :class:`list`\[:class:`File`]
             A list of files to upload. Must be a maximum of 10.
             This cannot be mixed with the ``file`` parameter.
         embed: :class:`Embed`
             The rich embed for the content to send. This cannot be mixed with the ``embeds`` parameter.
-        embeds: List[:class:`Embed`]
+        embeds: :class:`list`\[:class:`Embed`]
             A list of embeds to send with the content. Must be a maximum of 10.
             This cannot be mixed with the ``embed`` parameter.
         allowed_mentions: :class:`AllowedMentions`
@@ -1050,7 +1048,7 @@ class SyncWebhook(BaseWebhook):
 
             .. versionadded:: 2.6
 
-        applied_tags: Sequence[:class:`abc.Snowflake`]
+        applied_tags: :class:`~collections.abc.Sequence`\[:class:`abc.Snowflake`]
             If in a forum/media channel and creating a new thread (see ``thread_name`` above),
             the tags to apply to the new thread. Maximum of 5.
 
@@ -1074,7 +1072,7 @@ class SyncWebhook(BaseWebhook):
 
         wait: :class:`bool`
             Whether the server should wait before sending a response. This essentially
-            means that the return type of this function changes from ``None`` to
+            means that the return type of this function changes from :data:`None` to
             a :class:`WebhookMessage` if set to ``True``.
 
         Raises
@@ -1096,20 +1094,18 @@ class SyncWebhook(BaseWebhook):
 
         Returns
         -------
-        Optional[:class:`SyncWebhookMessage`]
-            If ``wait`` is ``True`` then the message that was sent, otherwise ``None``.
+        :class:`SyncWebhookMessage` | :data:`None`
+            If ``wait`` is ``True`` then the message that was sent, otherwise :data:`None`.
         """
         if self.token is None:
             msg = "This webhook does not have a token associated with it"
             raise WebhookTokenMissing(msg)
 
-        previous_mentions: Optional[AllowedMentions] = getattr(
-            self._state, "allowed_mentions", None
-        )
+        previous_mentions: AllowedMentions | None = getattr(self._state, "allowed_mentions", None)
         if content is None:
             content = MISSING
 
-        thread_id: Optional[int] = None
+        thread_id: int | None = None
         if thread is not MISSING:
             if thread_name or applied_tags:
                 msg = "Cannot use `thread_name` or `applied_tags` when `thread` is provided."
@@ -1152,10 +1148,9 @@ class SyncWebhook(BaseWebhook):
                     f.close()
         if wait:
             return self._create_message(data, thread=thread, thread_name=thread_name)
+        return None
 
-    def fetch_message(
-        self, id: int, /, *, thread: Optional[Snowflake] = None
-    ) -> SyncWebhookMessage:
+    def fetch_message(self, id: int, /, *, thread: Snowflake | None = None) -> SyncWebhookMessage:
         """Retrieves a single :class:`SyncWebhookMessage` owned by this webhook.
 
         .. versionadded:: 2.0
@@ -1167,7 +1162,7 @@ class SyncWebhook(BaseWebhook):
         ----------
         id: :class:`int`
             The message ID to look for.
-        thread: Optional[:class:`~disnake.abc.Snowflake`]
+        thread: :class:`~disnake.abc.Snowflake` | :data:`None`
             The thread the message is in, if any.
 
             .. versionadded:: 2.10
@@ -1206,16 +1201,16 @@ class SyncWebhook(BaseWebhook):
         self,
         message_id: int,
         *,
-        content: Optional[str] = MISSING,
-        embed: Optional[Embed] = MISSING,
-        embeds: List[Embed] = MISSING,
+        content: str | None = MISSING,
+        embed: Embed | None = MISSING,
+        embeds: list[Embed] = MISSING,
         file: File = MISSING,
-        files: List[File] = MISSING,
-        attachments: Optional[List[Attachment]] = MISSING,
-        allowed_mentions: Optional[AllowedMentions] = None,
-        thread: Optional[Snowflake] = None,
+        files: list[File] = MISSING,
+        attachments: list[Attachment] | None = MISSING,
+        allowed_mentions: AllowedMentions | None = None,
+        thread: Snowflake | None = None,
     ) -> SyncWebhookMessage:
-        """Edits a message owned by this webhook.
+        r"""Edits a message owned by this webhook.
 
         This is a lower level interface to :meth:`WebhookMessage.edit` in case
         you only have an ID.
@@ -1235,13 +1230,13 @@ class SyncWebhook(BaseWebhook):
         ----------
         message_id: :class:`int`
             The ID of the message to edit.
-        content: Optional[:class:`str`]
-            The content to edit the message with, or ``None`` to clear it.
-        embed: Optional[:class:`Embed`]
+        content: :class:`str` | :data:`None`
+            The content to edit the message with, or :data:`None` to clear it.
+        embed: :class:`Embed` | :data:`None`
             The new embed to replace the original with. This cannot be mixed with the
             ``embeds`` parameter.
-            Could be ``None`` to remove the embed.
-        embeds: List[:class:`Embed`]
+            Could be :data:`None` to remove the embed.
+        embeds: :class:`list`\[:class:`Embed`]
             The new embeds to replace the original with. Must be a maximum of 10.
             This cannot be mixed with the ``embed`` parameter.
             To remove all embeds ``[]`` should be passed.
@@ -1249,24 +1244,24 @@ class SyncWebhook(BaseWebhook):
             The file to upload. This cannot be mixed with the ``files`` parameter.
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
-        files: List[:class:`File`]
+        files: :class:`list`\[:class:`File`]
             A list of files to upload. This cannot be mixed with the ``file`` parameter.
             Files will be appended to the message, see the ``attachments`` parameter
             to remove/replace existing files.
-        attachments: Optional[List[:class:`Attachment`]]
+        attachments: :class:`list`\[:class:`Attachment`] | :data:`None`
             A list of attachments to keep in the message.
-            If ``[]`` or ``None`` is passed then all existing attachments are removed.
+            If ``[]`` or :data:`None` is passed then all existing attachments are removed.
             Keeps existing attachments if not provided.
 
             .. versionadded:: 2.2
 
             .. versionchanged:: 2.5
-                Supports passing ``None`` to clear attachments.
+                Supports passing :data:`None` to clear attachments.
 
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
             See :meth:`.abc.Messageable.send` for more information.
-        thread: Optional[:class:`~disnake.abc.Snowflake`]
+        thread: :class:`~disnake.abc.Snowflake` | :data:`None`
             The thread the message is in, if any.
 
             .. versionadded:: 2.10
@@ -1293,9 +1288,7 @@ class SyncWebhook(BaseWebhook):
         if attachments is MISSING and (file or files):
             attachments = self.fetch_message(message_id, thread=thread).attachments
 
-        previous_mentions: Optional[AllowedMentions] = getattr(
-            self._state, "allowed_mentions", None
-        )
+        previous_mentions: AllowedMentions | None = getattr(self._state, "allowed_mentions", None)
         params = handle_message_parameters(
             content=content,
             file=file,
@@ -1324,7 +1317,7 @@ class SyncWebhook(BaseWebhook):
                     f.close()
         return self._create_message(data, thread=thread)
 
-    def delete_message(self, message_id: int, /, *, thread: Optional[Snowflake] = None) -> None:
+    def delete_message(self, message_id: int, /, *, thread: Snowflake | None = None) -> None:
         """Deletes a message owned by this webhook.
 
         This is a lower level interface to :meth:`WebhookMessage.delete` in case
@@ -1339,7 +1332,7 @@ class SyncWebhook(BaseWebhook):
         ----------
         message_id: :class:`int`
             The ID of the message to delete.
-        thread: Optional[:class:`~disnake.abc.Snowflake`]
+        thread: :class:`~disnake.abc.Snowflake` | :data:`None`
             The thread the message is in, if any.
 
             .. versionadded:: 2.10

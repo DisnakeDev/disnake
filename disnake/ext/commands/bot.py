@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable, List, Optional, Sequence, Set, Union
+from typing import TYPE_CHECKING, Any
 
 import disnake
 
@@ -11,6 +11,7 @@ from .interaction_bot_base import InteractionBotBase
 
 if TYPE_CHECKING:
     import asyncio
+    from collections.abc import Callable, Sequence
 
     import aiohttp
     from typing_extensions import Self
@@ -48,7 +49,7 @@ MISSING: Any = disnake.utils.MISSING
 
 
 class Bot(BotBase, InteractionBotBase, disnake.Client):
-    """Represents a discord bot.
+    r"""Represents a discord bot.
 
     This class is a subclass of :class:`disnake.Client` and as a result
     anything that you can do with a :class:`disnake.Client` you can do with
@@ -59,9 +60,9 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
 
     Parameters
     ----------
-    test_guilds: List[:class:`int`]
+    test_guilds: :class:`list`\[:class:`int`]
         The list of IDs of the guilds where you're going to test your application commands.
-        Defaults to ``None``, which means global registration of commands across
+        Defaults to :data:`None`, which means global registration of commands across
         all guilds.
 
         .. versionadded:: 2.1
@@ -100,7 +101,7 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
         .. versionadded:: 2.1
 
         .. versionchanged:: 2.4
-            Changes the log level of corresponding messages from ``DEBUG`` to ``INFO`` or ``print``\\s them,
+            Changes the log level of corresponding messages from ``DEBUG`` to ``INFO`` or ``print``\s them,
             instead of controlling whether they are enabled at all.
 
         .. deprecated:: 2.7
@@ -122,7 +123,7 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
 
         .. versionadded:: 2.5
 
-    default_install_types: Optional[:class:`.ApplicationInstallTypes`]
+    default_install_types: :class:`.ApplicationInstallTypes` | :data:`None`
         The default installation types where application commands will be available.
         This applies to all commands added either through the respective decorators
         or directly using :meth:`.add_slash_command` (etc.).
@@ -133,7 +134,7 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
 
         .. versionadded:: 2.10
 
-    default_contexts: Optional[:class:`.InteractionContextTypes`]
+    default_contexts: :class:`.InteractionContextTypes` | :data:`None`
         The default contexts where application commands will be usable.
         This applies to all commands added either through the respective decorators
         or directly using :meth:`.add_slash_command` (etc.).
@@ -153,7 +154,7 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
         as its first parameter and :class:`disnake.Message` as its second
         parameter and returns the prefix. This is to facilitate "dynamic"
         command prefixes. This callable can be either a regular function or
-        a coroutine.
+        a coroutine function.
 
         An empty string as the prefix always matches, enabling prefix-less
         command invocation. While this may be useful in DMs it should be avoided
@@ -166,7 +167,7 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
         :attr:`.Context.prefix`. To avoid confusion empty iterables are not
         allowed.
 
-        If the prefix is ``None``, the bot won't listen to any prefixes, and prefix
+        If the prefix is :data:`None`, the bot won't listen to any prefixes, and prefix
         commands will not be processed. If you don't need prefix commands, consider
         using :class:`InteractionBot` or :class:`AutoShardedInteractionBot` instead,
         which are drop-in replacements, just without prefix command support.
@@ -194,21 +195,21 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
 
         This can be provided as a parameter at creation.
 
-    help_command: Optional[:class:`.HelpCommand`]
+    help_command: :class:`.HelpCommand` | :data:`None`
         The help command implementation to use. This can be dynamically
-        set at runtime. To remove the help command pass ``None``. For more
+        set at runtime. To remove the help command pass :data:`None`. For more
         information on implementing a help command, see :ref:`ext_commands_api_help_commands`.
 
         This can be provided as a parameter at creation.
 
-    owner_id: Optional[:class:`int`]
+    owner_id: :class:`int` | :data:`None`
         The ID of the user that owns the bot. If this is not set and is then queried via
         :meth:`.is_owner` then it is fetched automatically using
         :meth:`~.Bot.application_info`.
 
         This can be provided as a parameter at creation.
 
-    owner_ids: Optional[Collection[:class:`int`]]
+    owner_ids: :class:`~collections.abc.Collection`\[:class:`int`] | :data:`None`
         The IDs of the users that own the bot. This is similar to :attr:`owner_id`.
         If this is not set and the application is team based, then it is
         fetched automatically using :meth:`~.Bot.application_info` (taking team roles into account).
@@ -248,46 +249,46 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
 
         def __init__(
             self,
-            command_prefix: Optional[
-                Union[PrefixType, Callable[[Self, Message], MaybeCoro[PrefixType]]]
-            ] = None,
-            help_command: Optional[HelpCommand] = ...,
-            description: Optional[str] = None,
+            command_prefix: PrefixType
+            | Callable[[Self, Message], MaybeCoro[PrefixType]]
+            | None = None,
+            help_command: HelpCommand | None = ...,
+            description: str | None = None,
             *,
             strip_after_prefix: bool = False,
-            owner_id: Optional[int] = None,
-            owner_ids: Optional[Set[int]] = None,
+            owner_id: int | None = None,
+            owner_ids: set[int] | None = None,
             reload: bool = False,
             case_insensitive: bool = False,
             command_sync_flags: CommandSyncFlags = ...,
             sync_commands: bool = ...,
             sync_commands_debug: bool = ...,
             sync_commands_on_cog_unload: bool = ...,
-            test_guilds: Optional[Sequence[int]] = None,
-            default_install_types: Optional[ApplicationInstallTypes] = None,
-            default_contexts: Optional[InteractionContextTypes] = None,
+            test_guilds: Sequence[int] | None = None,
+            default_install_types: ApplicationInstallTypes | None = None,
+            default_contexts: InteractionContextTypes | None = None,
             asyncio_debug: bool = False,
-            loop: Optional[asyncio.AbstractEventLoop] = None,
-            shard_id: Optional[int] = None,
-            shard_count: Optional[int] = None,
+            loop: asyncio.AbstractEventLoop | None = None,
+            shard_id: int | None = None,
+            shard_count: int | None = None,
             enable_debug_events: bool = False,
             enable_gateway_error_handler: bool = True,
-            gateway_params: Optional[GatewayParams] = None,
-            connector: Optional[aiohttp.BaseConnector] = None,
-            proxy: Optional[str] = None,
-            proxy_auth: Optional[aiohttp.BasicAuth] = None,
+            gateway_params: GatewayParams | None = None,
+            connector: aiohttp.BaseConnector | None = None,
+            proxy: str | None = None,
+            proxy_auth: aiohttp.BasicAuth | None = None,
             assume_unsync_clock: bool = True,
-            max_messages: Optional[int] = 1000,
-            application_id: Optional[int] = None,
+            max_messages: int | None = 1000,
+            application_id: int | None = None,
             heartbeat_timeout: float = 60.0,
             guild_ready_timeout: float = 2.0,
-            allowed_mentions: Optional[AllowedMentions] = None,
-            activity: Optional[BaseActivity] = None,
-            status: Optional[Union[Status, str]] = None,
-            intents: Optional[Intents] = None,
-            chunk_guilds_at_startup: Optional[bool] = None,
-            member_cache_flags: Optional[MemberCacheFlags] = None,
-            localization_provider: Optional[LocalizationProtocol] = None,
+            allowed_mentions: AllowedMentions | None = None,
+            activity: BaseActivity | None = None,
+            status: Status | str | None = None,
+            intents: Intents | None = None,
+            chunk_guilds_at_startup: bool | None = None,
+            member_cache_flags: MemberCacheFlags | None = None,
+            localization_provider: LocalizationProtocol | None = None,
             strict_localization: bool = False,
         ) -> None: ...
 
@@ -301,52 +302,52 @@ class AutoShardedBot(BotBase, InteractionBotBase, disnake.AutoShardedClient):
 
         def __init__(
             self,
-            command_prefix: Optional[
-                Union[PrefixType, Callable[[Self, Message], MaybeCoro[PrefixType]]]
-            ] = None,
-            help_command: Optional[HelpCommand] = ...,
-            description: Optional[str] = None,
+            command_prefix: PrefixType
+            | Callable[[Self, Message], MaybeCoro[PrefixType]]
+            | None = None,
+            help_command: HelpCommand | None = ...,
+            description: str | None = None,
             *,
             strip_after_prefix: bool = False,
-            owner_id: Optional[int] = None,
-            owner_ids: Optional[Set[int]] = None,
+            owner_id: int | None = None,
+            owner_ids: set[int] | None = None,
             reload: bool = False,
             case_insensitive: bool = False,
             command_sync_flags: CommandSyncFlags = ...,
             sync_commands: bool = ...,
             sync_commands_debug: bool = ...,
             sync_commands_on_cog_unload: bool = ...,
-            test_guilds: Optional[Sequence[int]] = None,
-            default_install_types: Optional[ApplicationInstallTypes] = None,
-            default_contexts: Optional[InteractionContextTypes] = None,
+            test_guilds: Sequence[int] | None = None,
+            default_install_types: ApplicationInstallTypes | None = None,
+            default_contexts: InteractionContextTypes | None = None,
             asyncio_debug: bool = False,
-            loop: Optional[asyncio.AbstractEventLoop] = None,
-            shard_ids: Optional[List[int]] = None,  # instead of shard_id
-            shard_count: Optional[int] = None,
+            loop: asyncio.AbstractEventLoop | None = None,
+            shard_ids: list[int] | None = None,  # instead of shard_id
+            shard_count: int | None = None,
             enable_debug_events: bool = False,
             enable_gateway_error_handler: bool = True,
-            gateway_params: Optional[GatewayParams] = None,
-            connector: Optional[aiohttp.BaseConnector] = None,
-            proxy: Optional[str] = None,
-            proxy_auth: Optional[aiohttp.BasicAuth] = None,
+            gateway_params: GatewayParams | None = None,
+            connector: aiohttp.BaseConnector | None = None,
+            proxy: str | None = None,
+            proxy_auth: aiohttp.BasicAuth | None = None,
             assume_unsync_clock: bool = True,
-            max_messages: Optional[int] = 1000,
-            application_id: Optional[int] = None,
+            max_messages: int | None = 1000,
+            application_id: int | None = None,
             heartbeat_timeout: float = 60.0,
             guild_ready_timeout: float = 2.0,
-            allowed_mentions: Optional[AllowedMentions] = None,
-            activity: Optional[BaseActivity] = None,
-            status: Optional[Union[Status, str]] = None,
-            intents: Optional[Intents] = None,
-            chunk_guilds_at_startup: Optional[bool] = None,
-            member_cache_flags: Optional[MemberCacheFlags] = None,
-            localization_provider: Optional[LocalizationProtocol] = None,
+            allowed_mentions: AllowedMentions | None = None,
+            activity: BaseActivity | None = None,
+            status: Status | str | None = None,
+            intents: Intents | None = None,
+            chunk_guilds_at_startup: bool | None = None,
+            member_cache_flags: MemberCacheFlags | None = None,
+            localization_provider: LocalizationProtocol | None = None,
             strict_localization: bool = False,
         ) -> None: ...
 
 
 class InteractionBot(InteractionBotBase, disnake.Client):
-    """Represents a discord bot for application commands only.
+    r"""Represents a discord bot for application commands only.
 
     This class is a subclass of :class:`disnake.Client` and as a result
     anything that you can do with a :class:`disnake.Client` you can do with
@@ -357,9 +358,9 @@ class InteractionBot(InteractionBotBase, disnake.Client):
 
     Parameters
     ----------
-    test_guilds: List[:class:`int`]
+    test_guilds: :class:`list`\[:class:`int`]
         The list of IDs of the guilds where you're going to test your application commands.
-        Defaults to ``None``, which means global registration of commands across
+        Defaults to :data:`None`, which means global registration of commands across
         all guilds.
 
         .. versionadded:: 2.1
@@ -398,7 +399,7 @@ class InteractionBot(InteractionBotBase, disnake.Client):
         .. versionadded:: 2.1
 
         .. versionchanged:: 2.4
-            Changes the log level of corresponding messages from ``DEBUG`` to ``INFO`` or ``print``\\s them,
+            Changes the log level of corresponding messages from ``DEBUG`` to ``INFO`` or ``print``\s them,
             instead of controlling whether they are enabled at all.
 
         .. deprecated:: 2.7
@@ -420,7 +421,7 @@ class InteractionBot(InteractionBotBase, disnake.Client):
 
         .. versionadded:: 2.5
 
-    default_install_types: Optional[:class:`.ApplicationInstallTypes`]
+    default_install_types: :class:`.ApplicationInstallTypes` | :data:`None`
         The default installation types where application commands will be available.
         This applies to all commands added either through the respective decorators
         or directly using :meth:`.add_slash_command` (etc.).
@@ -431,7 +432,7 @@ class InteractionBot(InteractionBotBase, disnake.Client):
 
         .. versionadded:: 2.10
 
-    default_contexts: Optional[:class:`.InteractionContextTypes`]
+    default_contexts: :class:`.InteractionContextTypes` | :data:`None`
         The default contexts where application commands will be usable.
         This applies to all commands added either through the respective decorators
         or directly using :meth:`.add_slash_command` (etc.).
@@ -444,14 +445,14 @@ class InteractionBot(InteractionBotBase, disnake.Client):
 
     Attributes
     ----------
-    owner_id: Optional[:class:`int`]
+    owner_id: :class:`int` | :data:`None`
         The ID of the user that owns the bot. If this is not set and is then queried via
         :meth:`.is_owner` then it is fetched automatically using
         :meth:`~.Bot.application_info`.
 
         This can be provided as a parameter at creation.
 
-    owner_ids: Optional[Collection[:class:`int`]]
+    owner_ids: :class:`~collections.abc.Collection`\[:class:`int`] | :data:`None`
         The IDs of the users that own the bot. This is similar to :attr:`owner_id`.
         If this is not set and the application is team based, then it is
         fetched automatically using :meth:`~.Bot.application_info` (taking team roles into account).
@@ -481,38 +482,38 @@ class InteractionBot(InteractionBotBase, disnake.Client):
         def __init__(
             self,
             *,
-            owner_id: Optional[int] = None,
-            owner_ids: Optional[Set[int]] = None,
+            owner_id: int | None = None,
+            owner_ids: set[int] | None = None,
             reload: bool = False,
             command_sync_flags: CommandSyncFlags = ...,
             sync_commands: bool = ...,
             sync_commands_debug: bool = ...,
             sync_commands_on_cog_unload: bool = ...,
-            test_guilds: Optional[Sequence[int]] = None,
-            default_install_types: Optional[ApplicationInstallTypes] = None,
-            default_contexts: Optional[InteractionContextTypes] = None,
+            test_guilds: Sequence[int] | None = None,
+            default_install_types: ApplicationInstallTypes | None = None,
+            default_contexts: InteractionContextTypes | None = None,
             asyncio_debug: bool = False,
-            loop: Optional[asyncio.AbstractEventLoop] = None,
-            shard_id: Optional[int] = None,
-            shard_count: Optional[int] = None,
+            loop: asyncio.AbstractEventLoop | None = None,
+            shard_id: int | None = None,
+            shard_count: int | None = None,
             enable_debug_events: bool = False,
             enable_gateway_error_handler: bool = True,
-            gateway_params: Optional[GatewayParams] = None,
-            connector: Optional[aiohttp.BaseConnector] = None,
-            proxy: Optional[str] = None,
-            proxy_auth: Optional[aiohttp.BasicAuth] = None,
+            gateway_params: GatewayParams | None = None,
+            connector: aiohttp.BaseConnector | None = None,
+            proxy: str | None = None,
+            proxy_auth: aiohttp.BasicAuth | None = None,
             assume_unsync_clock: bool = True,
-            max_messages: Optional[int] = 1000,
-            application_id: Optional[int] = None,
+            max_messages: int | None = 1000,
+            application_id: int | None = None,
             heartbeat_timeout: float = 60.0,
             guild_ready_timeout: float = 2.0,
-            allowed_mentions: Optional[AllowedMentions] = None,
-            activity: Optional[BaseActivity] = None,
-            status: Optional[Union[Status, str]] = None,
-            intents: Optional[Intents] = None,
-            chunk_guilds_at_startup: Optional[bool] = None,
-            member_cache_flags: Optional[MemberCacheFlags] = None,
-            localization_provider: Optional[LocalizationProtocol] = None,
+            allowed_mentions: AllowedMentions | None = None,
+            activity: BaseActivity | None = None,
+            status: Status | str | None = None,
+            intents: Intents | None = None,
+            chunk_guilds_at_startup: bool | None = None,
+            member_cache_flags: MemberCacheFlags | None = None,
+            localization_provider: LocalizationProtocol | None = None,
             strict_localization: bool = False,
         ) -> None: ...
 
@@ -527,37 +528,37 @@ class AutoShardedInteractionBot(InteractionBotBase, disnake.AutoShardedClient):
         def __init__(
             self,
             *,
-            owner_id: Optional[int] = None,
-            owner_ids: Optional[Set[int]] = None,
+            owner_id: int | None = None,
+            owner_ids: set[int] | None = None,
             reload: bool = False,
             command_sync_flags: CommandSyncFlags = ...,
             sync_commands: bool = ...,
             sync_commands_debug: bool = ...,
             sync_commands_on_cog_unload: bool = ...,
-            test_guilds: Optional[Sequence[int]] = None,
-            default_install_types: Optional[ApplicationInstallTypes] = None,
-            default_contexts: Optional[InteractionContextTypes] = None,
+            test_guilds: Sequence[int] | None = None,
+            default_install_types: ApplicationInstallTypes | None = None,
+            default_contexts: InteractionContextTypes | None = None,
             asyncio_debug: bool = False,
-            loop: Optional[asyncio.AbstractEventLoop] = None,
-            shard_ids: Optional[List[int]] = None,  # instead of shard_id
-            shard_count: Optional[int] = None,
+            loop: asyncio.AbstractEventLoop | None = None,
+            shard_ids: list[int] | None = None,  # instead of shard_id
+            shard_count: int | None = None,
             enable_debug_events: bool = False,
             enable_gateway_error_handler: bool = True,
-            gateway_params: Optional[GatewayParams] = None,
-            connector: Optional[aiohttp.BaseConnector] = None,
-            proxy: Optional[str] = None,
-            proxy_auth: Optional[aiohttp.BasicAuth] = None,
+            gateway_params: GatewayParams | None = None,
+            connector: aiohttp.BaseConnector | None = None,
+            proxy: str | None = None,
+            proxy_auth: aiohttp.BasicAuth | None = None,
             assume_unsync_clock: bool = True,
-            max_messages: Optional[int] = 1000,
-            application_id: Optional[int] = None,
+            max_messages: int | None = 1000,
+            application_id: int | None = None,
             heartbeat_timeout: float = 60.0,
             guild_ready_timeout: float = 2.0,
-            allowed_mentions: Optional[AllowedMentions] = None,
-            activity: Optional[BaseActivity] = None,
-            status: Optional[Union[Status, str]] = None,
-            intents: Optional[Intents] = None,
-            chunk_guilds_at_startup: Optional[bool] = None,
-            member_cache_flags: Optional[MemberCacheFlags] = None,
-            localization_provider: Optional[LocalizationProtocol] = None,
+            allowed_mentions: AllowedMentions | None = None,
+            activity: BaseActivity | None = None,
+            status: Status | str | None = None,
+            intents: Intents | None = None,
+            chunk_guilds_at_startup: bool | None = None,
+            member_cache_flags: MemberCacheFlags | None = None,
+            localization_provider: LocalizationProtocol | None = None,
             strict_localization: bool = False,
         ) -> None: ...

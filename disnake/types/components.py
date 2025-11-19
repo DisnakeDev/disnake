@@ -2,15 +2,16 @@
 
 from __future__ import annotations
 
-from typing import List, Literal, Optional, TypedDict, Union
+from typing import TYPE_CHECKING, Literal, TypeAlias, TypedDict, Union
 
-from typing_extensions import NotRequired, Required, TypeAlias
+from typing_extensions import NotRequired, ReadOnly, Required
 
-from .channel import ChannelType
-from .emoji import PartialEmoji
-from .snowflake import Snowflake
+if TYPE_CHECKING:
+    from .channel import ChannelType
+    from .emoji import PartialEmoji
+    from .snowflake import Snowflake
 
-ComponentType = Literal[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 17, 18]
+ComponentType = Literal[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 17, 18, 19]
 ButtonStyle = Literal[1, 2, 3, 4, 5, 6]
 TextInputStyle = Literal[1, 2]
 SeparatorSpacing = Literal[1, 2]
@@ -34,6 +35,7 @@ Component = Union[
     "SeparatorComponent",
     "ContainerComponent",
     "LabelComponent",
+    "FileUploadComponent",
 ]
 
 ActionRowChildComponent = Union[
@@ -45,12 +47,13 @@ ActionRowChildComponent = Union[
 LabelChildComponent = Union[
     "TextInput",
     "AnySelectMenu",
+    "FileUploadComponent",
 ]
 
 # valid message component types (v1/v2)
 MessageTopLevelComponentV1: TypeAlias = "ActionRow"
 # currently, all v2 components except Thumbnail
-MessageTopLevelComponentV2 = Union[
+MessageTopLevelComponentV2: TypeAlias = Union[
     "SectionComponent",
     "TextDisplayComponent",
     "MediaGalleryComponent",
@@ -58,10 +61,10 @@ MessageTopLevelComponentV2 = Union[
     "SeparatorComponent",
     "ContainerComponent",
 ]
-MessageTopLevelComponent = Union[MessageTopLevelComponentV1, MessageTopLevelComponentV2]
+MessageTopLevelComponent: TypeAlias = MessageTopLevelComponentV1 | MessageTopLevelComponentV2
 
 # valid modal component types
-ModalTopLevelComponent = Union[
+ModalTopLevelComponent: TypeAlias = Union[
     "ActionRow",  # deprecated
     "TextDisplayComponent",
     "LabelComponent",
@@ -72,13 +75,13 @@ ModalTopLevelComponent = Union[
 
 
 class _BaseComponent(TypedDict):
-    # type: ComponentType  # FIXME: current version of pyright only supports PEP 705 experimentally, this can be re-enabled in 1.1.353+
+    type: ReadOnly[ComponentType]
     id: int  # note: technically optional when sending, we just default to 0 for simplicity, which is equivalent (https://discord.com/developers/docs/components/reference#anatomy-of-a-component)
 
 
 class ActionRow(_BaseComponent):
     type: Literal[1]
-    components: List[ActionRowChildComponent]
+    components: list[ActionRowChildComponent]
 
 
 # button
@@ -118,7 +121,7 @@ class _SelectMenu(_BaseComponent):
     max_values: NotRequired[int]
     disabled: NotRequired[bool]
     # This is technically not applicable to string selects, but for simplicity we'll just have it here
-    default_values: NotRequired[List[SelectDefaultValue]]
+    default_values: NotRequired[list[SelectDefaultValue]]
     required: NotRequired[bool]
 
 
@@ -128,7 +131,7 @@ class BaseSelectMenu(_SelectMenu):
 
 class StringSelectMenu(_SelectMenu):
     type: Literal[3]
-    options: List[SelectOption]
+    options: list[SelectOption]
 
 
 class UserSelectMenu(_SelectMenu):
@@ -145,16 +148,12 @@ class MentionableSelectMenu(_SelectMenu):
 
 class ChannelSelectMenu(_SelectMenu):
     type: Literal[8]
-    channel_types: NotRequired[List[ChannelType]]
+    channel_types: NotRequired[list[ChannelType]]
 
 
-AnySelectMenu = Union[
-    StringSelectMenu,
-    UserSelectMenu,
-    RoleSelectMenu,
-    MentionableSelectMenu,
-    ChannelSelectMenu,
-]
+AnySelectMenu: TypeAlias = (
+    StringSelectMenu | UserSelectMenu | RoleSelectMenu | MentionableSelectMenu | ChannelSelectMenu
+)
 
 
 # modal
@@ -163,14 +162,14 @@ AnySelectMenu = Union[
 class Modal(TypedDict):
     title: str
     custom_id: str
-    components: List[ModalTopLevelComponent]
+    components: list[ModalTopLevelComponent]
 
 
 class TextInput(_BaseComponent):
     type: Literal[4]
     custom_id: str
     style: TextInputStyle
-    label: NotRequired[Optional[str]]
+    label: NotRequired[str | None]
     min_length: NotRequired[int]
     max_length: NotRequired[int]
     required: NotRequired[bool]
@@ -185,14 +184,22 @@ class LabelComponent(_BaseComponent):
     component: LabelChildComponent
 
 
+class FileUploadComponent(_BaseComponent):
+    type: Literal[19]
+    custom_id: str
+    min_values: NotRequired[int]
+    max_values: NotRequired[int]
+    required: NotRequired[bool]
+
+
 # components v2
 
 
 class UnfurledMediaItem(TypedDict, total=False):
     url: Required[str]  # this is the only field required for sending
     proxy_url: str
-    height: Optional[int]
-    width: Optional[int]
+    height: int | None
+    width: int | None
     content_type: str
     attachment_id: Snowflake
 
@@ -203,9 +210,9 @@ class UnfurledMediaItem(TypedDict, total=False):
 class SectionComponent(_BaseComponent):
     type: Literal[9]
     # note: this may be expanded to more component types in the future
-    components: List[TextDisplayComponent]
+    components: list[TextDisplayComponent]
     # note: same as above
-    accessory: Union[ThumbnailComponent, ButtonComponent]
+    accessory: ThumbnailComponent | ButtonComponent
 
 
 class TextDisplayComponent(_BaseComponent):
@@ -229,7 +236,7 @@ class MediaGalleryItem(TypedDict):
 
 class MediaGalleryComponent(_BaseComponent):
     type: Literal[12]
-    items: List[MediaGalleryItem]
+    items: list[MediaGalleryItem]
 
 
 class FileComponent(_BaseComponent):
@@ -250,13 +257,11 @@ class ContainerComponent(_BaseComponent):
     type: Literal[17]
     accent_color: NotRequired[int]
     spoiler: NotRequired[bool]
-    components: List[
-        Union[
-            ActionRow,
-            SectionComponent,
-            TextDisplayComponent,
-            MediaGalleryComponent,
-            FileComponent,
-            SeparatorComponent,
-        ]
+    components: list[
+        ActionRow
+        | SectionComponent
+        | TextDisplayComponent
+        | MediaGalleryComponent
+        | FileComponent
+        | SeparatorComponent
     ]

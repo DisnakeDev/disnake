@@ -3,9 +3,12 @@
 from __future__ import annotations
 
 import struct
-from typing import IO, TYPE_CHECKING, ClassVar, Generator, Optional, Tuple
+from typing import IO, TYPE_CHECKING, ClassVar
 
 from .errors import DiscordException
+
+if TYPE_CHECKING:
+    from collections.abc import Generator
 
 __all__ = (
     "OggError",
@@ -54,7 +57,7 @@ class OggPage:
             msg = "bad data stream"
             raise OggError(msg) from None
 
-    def iter_packets(self) -> Generator[Tuple[bytes, bool], None, None]:
+    def iter_packets(self) -> Generator[tuple[bytes, bool]]:
         packetlen = offset = 0
         partial = True
 
@@ -77,7 +80,7 @@ class OggStream:
     def __init__(self, stream: IO[bytes]) -> None:
         self.stream: IO[bytes] = stream
 
-    def _next_page(self) -> Optional[OggPage]:
+    def _next_page(self) -> OggPage | None:
         head = self.stream.read(4)
         if head == b"OggS":
             return OggPage(self.stream)
@@ -87,13 +90,13 @@ class OggStream:
             msg = "invalid header magic"
             raise OggError(msg)
 
-    def _iter_pages(self) -> Generator[OggPage, None, None]:
+    def _iter_pages(self) -> Generator[OggPage]:
         page = self._next_page()
         while page:
             yield page
             page = self._next_page()
 
-    def iter_packets(self) -> Generator[bytes, None, None]:
+    def iter_packets(self) -> Generator[bytes]:
         partial = b""
         for page in self._iter_pages():
             for data, complete in page.iter_packets():

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Iterator, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any
 
 from .asset import Asset, AssetMixin
 from .errors import InvalidData
@@ -13,6 +13,7 @@ from .utils import MISSING, SnowflakeList, snowflake_time
 __all__ = ("Emoji",)
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
     from datetime import datetime
 
     from .abc import Snowflake
@@ -27,7 +28,7 @@ class Emoji(_EmojiTag, AssetMixin):
     """Represents a custom emoji.
 
     Depending on the way this object was created, some of the attributes can
-    have a value of ``None``.
+    have a value of :data:`None`.
 
     .. collapse:: operations
 
@@ -69,11 +70,11 @@ class Emoji(_EmojiTag, AssetMixin):
         Whether the emoji is animated or not.
     managed: :class:`bool`
         Whether the emoji is managed by a Twitch integration.
-    guild_id: Optional[:class:`int`]
-        The guild ID the emoji belongs to. ``None`` if this is an app emoji.
+    guild_id: :class:`int` | :data:`None`
+        The guild ID the emoji belongs to. :data:`None` if this is an app emoji.
     available: :class:`bool`
         Whether the emoji is available for use.
-    user: Optional[:class:`User`]
+    user: :class:`User` | :data:`None`
         The user that created this emoji. If this is a guild emoji, this can only be retrieved
         using :meth:`Guild.fetch_emoji`/:meth:`Guild.fetch_emojis` while
         having the :attr:`~Permissions.manage_guild_expressions` permission.
@@ -82,7 +83,7 @@ class Emoji(_EmojiTag, AssetMixin):
         or the bot user if created using :meth:`Client.create_application_emoji`.
     """
 
-    __slots__: Tuple[str, ...] = (
+    __slots__: tuple[str, ...] = (
         "require_colons",
         "animated",
         "managed",
@@ -97,29 +98,30 @@ class Emoji(_EmojiTag, AssetMixin):
     def __init__(
         self,
         *,
-        guild: Optional[Union[Guild, GuildPreview]],
+        guild: Guild | GuildPreview | None,
         state: ConnectionState,
         data: EmojiPayload,
     ) -> None:
-        self.guild_id: Optional[int] = guild.id if guild else None
+        self.guild_id: int | None = guild.id if guild else None
         self._state: ConnectionState = state
         self._from_data(data)
 
     def _from_data(self, emoji: EmojiPayload) -> None:
         self.require_colons: bool = emoji.get("require_colons", False)
         self.managed: bool = emoji.get("managed", False)
-        self.id: int = int(emoji["id"])  # type: ignore
-        self.name: str = emoji["name"]  # type: ignore
+        assert emoji["id"] is not None
+        self.id: int = int(emoji["id"])
+        self.name: str = emoji["name"]  # pyright: ignore[reportAttributeAccessIssue]
         self.animated: bool = emoji.get("animated", False)
         self.available: bool = emoji.get("available", True)
         self._roles: SnowflakeList = SnowflakeList(map(int, emoji.get("roles", [])))
         user = emoji.get("user")
-        self.user: Optional[User] = User(state=self._state, data=user) if user else None
+        self.user: User | None = User(state=self._state, data=user) if user else None
 
     def _to_partial(self) -> PartialEmoji:
         return PartialEmoji(name=self.name, animated=self.animated, id=self.id)
 
-    def __iter__(self) -> Iterator[Tuple[str, Any]]:
+    def __iter__(self) -> Iterator[tuple[str, Any]]:
         for attr in self.__slots__:
             if attr[0] != "_":
                 value = getattr(self, attr, None)
@@ -139,10 +141,10 @@ class Emoji(_EmojiTag, AssetMixin):
             + ">"
         )
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         return isinstance(other, _EmojiTag) and self.id == other.id
 
-    def __ne__(self, other: Any) -> bool:
+    def __ne__(self, other: object) -> bool:
         return not self.__eq__(other)
 
     def __hash__(self) -> int:
@@ -160,34 +162,33 @@ class Emoji(_EmojiTag, AssetMixin):
         return f"{Asset.BASE}/emojis/{self.id}.{fmt}"
 
     @property
-    def roles(self) -> List[Role]:
-        """List[:class:`Role`]: A :class:`list` of roles that are allowed to use this emoji.
+    def roles(self) -> list[Role]:
+        r""":class:`list`\[:class:`Role`]: A :class:`list` of roles that are allowed to use this emoji.
 
         If roles is empty, the emoji is unrestricted.
 
         Emojis with :attr:`subscription roles <RoleTags.integration_id>` are considered premium emojis,
         and count towards a separate limit of 25 emojis.
         """
-        guild = self.guild
-        if guild is None:
+        if self.guild is None:
             return []
 
-        return [role for role in guild.roles if self._roles.has(role.id)]
+        return [role for role in self.guild.roles if self._roles.has(role.id)]
 
     @property
-    def guild(self) -> Optional[Guild]:
-        """Optional[:class:`Guild`]: The guild this emoji belongs to. ``None`` if this is an app emoji.
+    def guild(self) -> Guild | None:
+        """:class:`Guild` | :data:`None`: The guild this emoji belongs to. :data:`None` if this is an app emoji.
 
         .. versionchanged:: |vnext|
 
-            This can now return ``None`` if the emoji is an
+            This can now return :data:`None` if the emoji is an
             application owned emoji.
         """
         return self._state._get_guild(self.guild_id)
 
     @property
-    def application_id(self) -> Optional[int]:
-        """Optional[:class:`int`]: The ID of the application which owns this emoji,
+    def application_id(self) -> int | None:
+        """:class:`int` | :data:`None`: The ID of the application which owns this emoji,
         if this is an app emoji.
 
         .. versionadded:: |vnext|
@@ -229,7 +230,7 @@ class Emoji(_EmojiTag, AssetMixin):
         emoji_roles, my_roles = self._roles, self.guild.me._roles
         return any(my_roles.has(role_id) for role_id in emoji_roles)
 
-    async def delete(self, *, reason: Optional[str] = None) -> None:
+    async def delete(self, *, reason: str | None = None) -> None:
         """|coro|
 
         Deletes the emoji.
@@ -239,7 +240,7 @@ class Emoji(_EmojiTag, AssetMixin):
 
         Parameters
         ----------
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason for deleting this emoji. Shows up on the audit log.
 
             Only applies to emojis that belong to a :class:`.Guild`.
@@ -253,23 +254,23 @@ class Emoji(_EmojiTag, AssetMixin):
         InvalidData
             The emoji data is invalid and cannot be processed.
         """
-        if self.guild_id is None:
-            # this is an app emoji
-            if self.application_id is None:
-                # should never happen
-                msg = (
-                    f"guild_id and application_id are both None when attempting to delete emoji with ID {self.id}."
-                    " This may be a library bug! Open an issue on GitHub."
-                )
-                raise InvalidData(msg)
-
-            return await self._state.http.delete_app_emoji(self.application_id, self.id)
-        await self._state.http.delete_custom_emoji(self.guild_id, self.id, reason=reason)
+        if self.guild_id is not None:
+            await self._state.http.delete_custom_emoji(self.guild_id, self.id, reason=reason)
+            return
+        if self.application_id is not None:
+            await self._state.http.delete_app_emoji(self.application_id, self.id)
+            return
+        # should never happen
+        msg = (
+            f"guild_id and application_id are both None when attempting to delete emoji with ID {self.id}."
+            " This may be a library bug! Open an issue on GitHub."
+        )
+        raise InvalidData(msg)
 
     async def edit(
-        self, *, name: str = MISSING, roles: List[Snowflake] = MISSING, reason: Optional[str] = None
+        self, *, name: str = MISSING, roles: list[Snowflake] = MISSING, reason: str | None = None
     ) -> Emoji:
-        """|coro|
+        r"""|coro|
 
         Edits the emoji.
 
@@ -283,7 +284,7 @@ class Emoji(_EmojiTag, AssetMixin):
         ----------
         name: :class:`str`
             The new emoji name.
-        roles: Optional[List[:class:`~disnake.abc.Snowflake`]]
+        roles: :class:`list`\[:class:`~disnake.abc.Snowflake`] | :data:`None`
             A list of roles that can use this emoji. An empty list can be passed to make it available to everyone.
 
             An emoji cannot have both subscription roles (see :attr:`RoleTags.integration_id`) and
@@ -291,7 +292,7 @@ class Emoji(_EmojiTag, AssetMixin):
             after creation.
 
             Only applies to emojis that belong to a :class:`.Guild`.
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason for editing this emoji. Shows up on the audit log.
 
             Only applies to emojis that belong to a :class:`.Guild`.

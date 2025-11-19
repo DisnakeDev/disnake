@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: MIT
 
-from typing import TYPE_CHECKING, Any, Callable, Coroutine, TypeVar, Union
+from collections.abc import Callable, Coroutine
+from typing import TYPE_CHECKING, Any, TypeAlias, TypeVar
 
 if TYPE_CHECKING:
     from disnake import ApplicationCommandInteraction
@@ -13,22 +14,24 @@ T = TypeVar("T")
 
 FuncT = TypeVar("FuncT", bound=Callable[..., Any])
 
-Coro = Coroutine[Any, Any, T]
-MaybeCoro = Union[T, Coro[T]]
-CoroFunc = Callable[..., Coro[Any]]
+Coro: TypeAlias = Coroutine[Any, Any, T]
+MaybeCoro: TypeAlias = T | Coro[T]
+CoroFunc: TypeAlias = Callable[..., Coro[Any]]
 
-Check = Union[
-    Callable[["Cog", "Context[Any]"], MaybeCoro[bool]], Callable[["Context[Any]"], MaybeCoro[bool]]
-]
-AppCheck = Union[
-    Callable[["Cog", "ApplicationCommandInteraction"], MaybeCoro[bool]],
-    Callable[["ApplicationCommandInteraction"], MaybeCoro[bool]],
-]
-Hook = Union[Callable[["Cog", "Context[Any]"], Coro[Any]], Callable[["Context[Any]"], Coro[Any]]]
-Error = Union[
-    Callable[["Cog", "Context[Any]", "CommandError"], Coro[Any]],
-    Callable[["Context[Any]", "CommandError"], Coro[Any]],
-]
+Check: TypeAlias = (
+    Callable[["Cog", "Context[Any]"], MaybeCoro[bool]] | Callable[["Context[Any]"], MaybeCoro[bool]]
+)
+AppCheck: TypeAlias = (
+    Callable[["Cog", "ApplicationCommandInteraction"], MaybeCoro[bool]]
+    | Callable[["ApplicationCommandInteraction"], MaybeCoro[bool]]
+)
+Hook: TypeAlias = (
+    Callable[["Cog", "Context[Any]"], Coro[Any]] | Callable[["Context[Any]"], Coro[Any]]
+)
+Error: TypeAlias = (
+    Callable[["Cog", "Context[Any]", "CommandError"], Coro[Any]]
+    | Callable[["Context[Any]", "CommandError"], Coro[Any]]
+)
 
 
 # This is merely a tag type to avoid circular import issues.

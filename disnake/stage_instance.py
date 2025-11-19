@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-import datetime
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from .enums import StagePrivacyLevel, try_enum
 from .mixins import Hashable
@@ -12,6 +11,8 @@ from .utils import MISSING, _get_as_snowflake, cached_slot_property, snowflake_t
 __all__ = ("StageInstance",)
 
 if TYPE_CHECKING:
+    import datetime
+
     from .channel import StageChannel
     from .guild import Guild
     from .guild_scheduled_event import GuildScheduledEvent
@@ -50,7 +51,7 @@ class StageInstance(Hashable):
         The topic of the stage instance.
     privacy_level: :class:`StagePrivacyLevel`
         The privacy level of the stage instance.
-    guild_scheduled_event_id: Optional[:class:`int`]
+    guild_scheduled_event_id: :class:`int` | :data:`None`
         The ID of the stage instance's associated scheduled event, if applicable.
         See also :attr:`.guild_scheduled_event`.
     """
@@ -78,7 +79,7 @@ class StageInstance(Hashable):
         self.topic: str = data["topic"]
         self.privacy_level: StagePrivacyLevel = try_enum(StagePrivacyLevel, data["privacy_level"])
         self._discoverable_disabled: bool = data.get("discoverable_disabled", False)
-        self.guild_scheduled_event_id: Optional[int] = _get_as_snowflake(
+        self.guild_scheduled_event_id: int | None = _get_as_snowflake(
             data, "guild_scheduled_event_id"
         )
 
@@ -94,10 +95,10 @@ class StageInstance(Hashable):
         return snowflake_time(self.id)
 
     @cached_slot_property("_cs_channel")
-    def channel(self) -> Optional[StageChannel]:
-        """Optional[:class:`StageChannel`]: The channel that stage instance is running in."""
+    def channel(self) -> StageChannel | None:
+        """:class:`StageChannel` | :data:`None`: The channel that stage instance is running in."""
         # the returned channel will always be a StageChannel or None
-        return self._state.get_channel(self.channel_id)  # type: ignore
+        return self._state.get_channel(self.channel_id)  # pyright: ignore[reportReturnType]
 
     @property
     def discoverable_disabled(self) -> bool:
@@ -129,8 +130,8 @@ class StageInstance(Hashable):
         return self.privacy_level is StagePrivacyLevel.public
 
     @property
-    def guild_scheduled_event(self) -> Optional[GuildScheduledEvent]:
-        """Optional[:class:`GuildScheduledEvent`]: The stage instance's scheduled event.
+    def guild_scheduled_event(self) -> GuildScheduledEvent | None:
+        """:class:`GuildScheduledEvent` | :data:`None`: The stage instance's scheduled event.
 
         This is only set if this stage instance has an associated scheduled event,
         and requires that event to be cached
@@ -145,7 +146,7 @@ class StageInstance(Hashable):
         *,
         topic: str = MISSING,
         privacy_level: StagePrivacyLevel = MISSING,
-        reason: Optional[str] = None,
+        reason: str | None = None,
     ) -> None:
         """|coro|
 
@@ -163,7 +164,7 @@ class StageInstance(Hashable):
             The stage instance's new topic.
         privacy_level: :class:`StagePrivacyLevel`
             The stage instance's new privacy level.
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason the stage instance was edited. Shows up on the audit log.
 
         Raises
@@ -195,7 +196,7 @@ class StageInstance(Hashable):
         if payload:
             await self._state.http.edit_stage_instance(self.channel_id, **payload, reason=reason)
 
-    async def delete(self, *, reason: Optional[str] = None) -> None:
+    async def delete(self, *, reason: str | None = None) -> None:
         """|coro|
 
         Deletes the stage instance.
@@ -205,7 +206,7 @@ class StageInstance(Hashable):
 
         Parameters
         ----------
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason the stage instance was deleted. Shows up on the audit log.
 
         Raises

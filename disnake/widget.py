@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any
 
-from .activity import BaseActivity, Spotify, create_activity
+from .activity import create_activity
 from .asset import Asset
 from .enums import Status, WidgetStyle, try_enum
 from .invite import Invite
@@ -15,6 +15,7 @@ if TYPE_CHECKING:
     import datetime
 
     from .abc import GuildChannel, Snowflake
+    from .activity import BaseActivity, Spotify
     from .guild import Guild
     from .state import ConnectionState
     from .types.widget import (
@@ -122,15 +123,15 @@ class WidgetMember(BaseUser):
             See the `help article <https://dis.gd/app-usernames>`__ for details.
     status: :class:`Status`
         The member's status.
-    activity: Optional[Union[:class:`BaseActivity`, :class:`Spotify`]]
+    activity: :class:`BaseActivity` | :class:`Spotify` | :data:`None`
         The member's activity. This generally only has the ``name`` set.
-    deafened: Optional[:class:`bool`]
+    deafened: :class:`bool` | :data:`None`
         Whether the member is currently deafened.
-    muted: Optional[:class:`bool`]
+    muted: :class:`bool` | :data:`None`
         Whether the member is currently muted.
-    suppress: Optional[:class:`bool`]
+    suppress: :class:`bool` | :data:`None`
         Whether the member is currently being suppressed.
-    connected_channel: Optional[:class:`WidgetChannel`]
+    connected_channel: :class:`WidgetChannel` | :data:`None`
         Which channel the member is connected to.
     """
 
@@ -149,20 +150,20 @@ class WidgetMember(BaseUser):
         *,
         state: ConnectionState,
         data: WidgetMemberPayload,
-        connected_channel: Optional[WidgetChannel] = None,
+        connected_channel: WidgetChannel | None = None,
     ) -> None:
         super().__init__(state=state, data=data)
         self.status: Status = try_enum(Status, data.get("status"))
-        self.deafened: Optional[bool] = data.get("deaf", False) or data.get("self_deaf", False)
-        self.muted: Optional[bool] = data.get("mute", False) or data.get("self_mute", False)
-        self.suppress: Optional[bool] = data.get("suppress", False)
-        self._avatar_url: Optional[str] = data.get("avatar_url")
+        self.deafened: bool | None = data.get("deaf", False) or data.get("self_deaf", False)
+        self.muted: bool | None = data.get("mute", False) or data.get("self_mute", False)
+        self.suppress: bool | None = data.get("suppress", False)
+        self._avatar_url: str | None = data.get("avatar_url")
 
-        self.activity: Optional[Union[BaseActivity, Spotify]] = None
+        self.activity: BaseActivity | Spotify | None = None
         if activity := (data.get("activity") or data.get("game")):
             self.activity = create_activity(activity, state=state)
 
-        self.connected_channel: Optional[WidgetChannel] = connected_channel
+        self.connected_channel: WidgetChannel | None = connected_channel
 
     def __repr__(self) -> str:
         return f"<WidgetMember name={self.name!r} discriminator={self.discriminator!r}"
@@ -170,8 +171,8 @@ class WidgetMember(BaseUser):
     # overwrite base type's @property since widget members always seem to have `avatar: null`,
     # and instead a separate `avatar_url` field with a full url
     @property
-    def avatar(self) -> Optional[Asset]:
-        """Optional[:class:`Asset`]: The user's avatar.
+    def avatar(self) -> Asset | None:
+        """:class:`Asset` | :data:`None`: The user's avatar.
         The size can be chosen using :func:`Asset.with_size`, however the format is always
         static and cannot be changed through :func:`Asset.with_format` or similar methods.
         """
@@ -196,7 +197,7 @@ class WidgetSettings:
         The widget's guild.
     enabled: :class:`bool`
         Whether the widget is enabled.
-    channel_id: Optional[:class:`int`]
+    channel_id: :class:`int` | :data:`None`
         The widget channel ID. If set, an invite link for this channel will be generated,
         which allows users to join the guild from the widget.
     """
@@ -209,22 +210,22 @@ class WidgetSettings:
         self._state: ConnectionState = state
         self.guild: Guild = guild
         self.enabled: bool = data["enabled"]
-        self.channel_id: Optional[int] = _get_as_snowflake(data, "channel_id")
+        self.channel_id: int | None = _get_as_snowflake(data, "channel_id")
 
     def __repr__(self) -> str:
         return f"<WidgetSettings enabled={self.enabled!r} channel_id={self.channel_id!r} guild={self.guild!r}>"
 
     @property
-    def channel(self) -> Optional[GuildChannel]:
-        """Optional[:class:`abc.GuildChannel`]: The widget channel, if set."""
+    def channel(self) -> GuildChannel | None:
+        """:class:`abc.GuildChannel` | :data:`None`: The widget channel, if set."""
         return self.guild.get_channel(self.channel_id) if self.channel_id is not None else None
 
     async def edit(
         self,
         *,
         enabled: bool = MISSING,
-        channel: Optional[Snowflake] = MISSING,
-        reason: Optional[str] = None,
+        channel: Snowflake | None = MISSING,
+        reason: str | None = None,
     ) -> WidgetSettings:
         """|coro|
 
@@ -237,11 +238,11 @@ class WidgetSettings:
         ----------
         enabled: :class:`bool`
             Whether to enable the widget.
-        channel: Optional[:class:`~disnake.abc.Snowflake`]
-            The new widget channel. Pass ``None`` to remove the widget channel.
+        channel: :class:`~disnake.abc.Snowflake` | :data:`None`
+            The new widget channel. Pass :data:`None` to remove the widget channel.
             If set, an invite link for this channel will be generated,
             which allows users to join the guild from the widget.
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason for editing the widget. Shows up on the audit log.
 
         Raises
@@ -260,7 +261,7 @@ class WidgetSettings:
 
 
 class Widget:
-    """Represents a :class:`Guild` widget.
+    r"""Represents a :class:`Guild` widget.
 
     .. collapse:: operations
 
@@ -282,9 +283,9 @@ class Widget:
         The guild's ID.
     name: :class:`str`
         The guild's name.
-    channels: List[:class:`WidgetChannel`]
+    channels: :class:`list`\[:class:`WidgetChannel`]
         The publicly accessible voice and stage channels in the guild.
-    members: List[:class:`WidgetMember`]
+    members: :class:`list`\[:class:`WidgetMember`]
         The online members in the server. Offline members
         do not appear in the widget.
 
@@ -309,14 +310,14 @@ class Widget:
         self.id: int = int(data["id"])
         self.presence_count: int = data["presence_count"]
 
-        self.channels: List[WidgetChannel] = []
+        self.channels: list[WidgetChannel] = []
         for channel in data.get("channels", []):
             _id = int(channel["id"])
             self.channels.append(
                 WidgetChannel(id=_id, name=channel["name"], position=channel["position"])
             )
 
-        self.members: List[WidgetMember] = []
+        self.members: list[WidgetMember] = []
         channels = {channel.id: channel for channel in self.channels}
         for member in data.get("members", []):
             connected_channel = _get_as_snowflake(member, "channel_id")
@@ -332,7 +333,7 @@ class Widget:
     def __str__(self) -> str:
         return self.json_url
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         if isinstance(other, Widget):
             return self.id == other.id
         return False
@@ -354,11 +355,11 @@ class Widget:
         return f"https://discord.com/api/guilds/{self.id}/widget.json"
 
     @property
-    def invite_url(self) -> Optional[str]:
-        """Optional[:class:`str`]: The invite URL for the guild, if available."""
+    def invite_url(self) -> str | None:
+        """:class:`str` | :data:`None`: The invite URL for the guild, if available."""
         return self._invite
 
-    async def fetch_invite(self, *, with_counts: bool = True) -> Optional[Invite]:
+    async def fetch_invite(self, *, with_counts: bool = True) -> Invite | None:
         """|coro|
 
         Retrieves an :class:`Invite` from the widget's invite URL.
@@ -366,7 +367,7 @@ class Widget:
         code is abstracted away.
 
         .. versionchanged:: 2.6
-            This may now return ``None`` if the widget does not have
+            This may now return :data:`None` if the widget does not have
             an attached invite URL.
 
         Parameters
@@ -378,7 +379,7 @@ class Widget:
 
         Returns
         -------
-        Optional[:class:`Invite`]
+        :class:`Invite` | :data:`None`
             The invite from the widget's invite URL, if available.
         """
         if not self._invite:
@@ -392,8 +393,8 @@ class Widget:
         self,
         *,
         enabled: bool = MISSING,
-        channel: Optional[Snowflake] = MISSING,
-        reason: Optional[str] = None,
+        channel: Snowflake | None = MISSING,
+        reason: str | None = None,
     ) -> None:
         """|coro|
 
@@ -408,9 +409,9 @@ class Widget:
         ----------
         enabled: :class:`bool`
             Whether to enable the widget.
-        channel: Optional[:class:`~disnake.abc.Snowflake`]
-            The new widget channel. Pass ``None`` to remove the widget channel.
-        reason: Optional[:class:`str`]
+        channel: :class:`~disnake.abc.Snowflake` | :data:`None`
+            The new widget channel. Pass :data:`None` to remove the widget channel.
+        reason: :class:`str` | :data:`None`
             The reason for editing the widget. Shows up on the audit log.
 
         Raises
@@ -420,7 +421,7 @@ class Widget:
         HTTPException
             Editing the widget failed.
         """
-        payload: Dict[str, Any] = {}
+        payload: dict[str, Any] = {}
         if enabled is not MISSING:
             payload["enabled"] = enabled
         if channel is not MISSING:

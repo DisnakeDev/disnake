@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: MIT
 
 import math
-import sys
 from typing import Any, Optional, Union
 from unittest import mock
 
@@ -21,16 +20,20 @@ class TestParamInfo:
             # should accept user or member
             (disnake.abc.User, OptionType.user, [User, Member]),
             (User, OptionType.user, [User, Member]),
-            (Union[User, Member], OptionType.user, [User, Member]),
+            (Union[User, Member], OptionType.user, [User, Member]),  # noqa: UP007
+            (User | Member, OptionType.user, [User, Member]),
             # only accepts member, not user
             (Member, OptionType.user, [Member]),
             # only accepts role
             (Role, OptionType.role, [Role]),
             # should accept member or role
-            (Union[Member, Role], OptionType.mentionable, [Member, Role]),
+            (Union[Member, Role], OptionType.mentionable, [Member, Role]),  # noqa: UP007
+            (Member | Role, OptionType.mentionable, [Member, Role]),
             # should accept everything
-            (Union[User, Role], OptionType.mentionable, [User, Member, Role]),
-            (Union[User, Member, Role], OptionType.mentionable, [User, Member, Role]),
+            (Union[User, Role], OptionType.mentionable, [User, Member, Role]),  # noqa: UP007
+            (User | Role, OptionType.mentionable, [User, Member, Role]),
+            (Union[User, Member, Role], OptionType.mentionable, [User, Member, Role]),  # noqa: UP007
+            (User | Member | Role, OptionType.mentionable, [User, Member, Role]),
             (disnake.abc.Snowflake, OptionType.mentionable, [User, Member, Role]),
         ],
     )
@@ -52,7 +55,8 @@ class TestParamInfo:
         ("annotation", "arg_types"),
         [
             (Member, [User]),
-            (Union[Member, Role], [User]),
+            (Union[Member, Role], [User]),  # noqa: UP007
+            (Member | Role, [User]),
         ],
     )
     @pytest.mark.asyncio
@@ -74,7 +78,10 @@ class TestBaseRange:
         with pytest.raises(TypeError, match=r"`Range` expects 3 type arguments"):
             commands.Range[args]
 
-    @pytest.mark.parametrize("value", ["int", 42, Optional[int], Union[int, float]])
+    @pytest.mark.parametrize(
+        "value",
+        ["int", 42, int | None, Union[int, float], Optional[int]],  # noqa: UP007, UP045
+    )
     def test_invalid_type(self, value) -> None:
         with pytest.raises(TypeError, match=r"First `Range` argument must be a type"):
             commands.Range[value, 1, 10]
@@ -194,12 +201,7 @@ class TestRangeStringParam:
         [
             "Optional[commands.Range[int, 1, 2]]",
             # 3.10 union syntax
-            pytest.param(
-                "commands.Range[int, 1, 2] | None",
-                marks=pytest.mark.skipif(
-                    sys.version_info < (3, 10), reason="syntax requires py3.10"
-                ),
-            ),
+            "commands.Range[int, 1, 2] | None",
         ],
     )
     def test_optional(self, annotation_str) -> None:
@@ -260,7 +262,7 @@ class TestIsolateSelf:
 
     def test_inter_union(self) -> None:
         def func(
-            inter: Union[commands.Context, disnake.ApplicationCommandInteraction[commands.Bot]],
+            inter: commands.Context | disnake.ApplicationCommandInteraction[commands.Bot],
             a: int,
         ) -> None: ...
 

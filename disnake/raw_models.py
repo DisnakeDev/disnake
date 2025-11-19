@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING, List, Literal, Optional, Set, Union, cast
+from typing import TYPE_CHECKING, Literal, cast
 
 from .enums import ChannelType, try_enum
 from .utils import _get_as_snowflake, get_slots
@@ -69,11 +69,11 @@ class RawMessageDeleteEvent(_RawReprMixin):
     ----------
     channel_id: :class:`int`
         The channel ID where the deletion took place.
-    guild_id: Optional[:class:`int`]
+    guild_id: :class:`int` | :data:`None`
         The guild ID where the deletion took place, if applicable.
     message_id: :class:`int`
         The message ID that got deleted.
-    cached_message: Optional[:class:`Message`]
+    cached_message: :class:`Message` | :data:`None`
         The cached message, if found in the internal message cache.
     """
 
@@ -82,32 +82,32 @@ class RawMessageDeleteEvent(_RawReprMixin):
     def __init__(self, data: MessageDeleteEvent) -> None:
         self.message_id: int = int(data["id"])
         self.channel_id: int = int(data["channel_id"])
-        self.cached_message: Optional[Message] = None
-        self.guild_id: Optional[int] = _get_as_snowflake(data, "guild_id")
+        self.cached_message: Message | None = None
+        self.guild_id: int | None = _get_as_snowflake(data, "guild_id")
 
 
 class RawBulkMessageDeleteEvent(_RawReprMixin):
-    """Represents the event payload for an :func:`on_raw_bulk_message_delete` event.
+    r"""Represents the event payload for an :func:`on_raw_bulk_message_delete` event.
 
     Attributes
     ----------
-    message_ids: Set[:class:`int`]
+    message_ids: :class:`set`\[:class:`int`]
         A :class:`set` of the message IDs that were deleted.
     channel_id: :class:`int`
         The channel ID where the deletion took place.
-    guild_id: Optional[:class:`int`]
+    guild_id: :class:`int` | :data:`None`
         The guild ID where the deletion took place, if applicable.
-    cached_messages: List[:class:`Message`]
+    cached_messages: :class:`list`\[:class:`Message`]
         The cached messages, if found in the internal message cache.
     """
 
     __slots__ = ("message_ids", "channel_id", "guild_id", "cached_messages")
 
     def __init__(self, data: MessageDeleteBulkEvent) -> None:
-        self.message_ids: Set[int] = {int(x) for x in data.get("ids", [])}
+        self.message_ids: set[int] = {int(x) for x in data.get("ids", [])}
         self.channel_id: int = int(data["channel_id"])
-        self.cached_messages: List[Message] = []
-        self.guild_id: Optional[int] = _get_as_snowflake(data, "guild_id")
+        self.cached_messages: list[Message] = []
+        self.guild_id: int | None = _get_as_snowflake(data, "guild_id")
 
 
 class RawMessageUpdateEvent(_RawReprMixin):
@@ -122,14 +122,14 @@ class RawMessageUpdateEvent(_RawReprMixin):
 
         .. versionadded:: 1.3
 
-    guild_id: Optional[:class:`int`]
+    guild_id: :class:`int` | :data:`None`
         The guild ID where the update took place, if applicable.
 
         .. versionadded:: 1.7
 
     data: :class:`dict`
         The raw data given by the :ddocs:`gateway <topics/gateway-events#message-update>`.
-    cached_message: Optional[:class:`Message`]
+    cached_message: :class:`Message` | :data:`None`
         The cached message, if found in the internal message cache. Represents the message before
         it is modified by the data in :attr:`RawMessageUpdateEvent.data`.
     """
@@ -140,8 +140,8 @@ class RawMessageUpdateEvent(_RawReprMixin):
         self.message_id: int = int(data["id"])
         self.channel_id: int = int(data["channel_id"])
         self.data: MessageUpdateEvent = data
-        self.cached_message: Optional[Message] = None
-        self.guild_id: Optional[int] = _get_as_snowflake(data, "guild_id")
+        self.cached_message: Message | None = None
+        self.guild_id: int | None = _get_as_snowflake(data, "guild_id")
 
 
 PollEventType = Literal["POLL_VOTE_ADD", "POLL_VOTE_REMOVE"]
@@ -159,11 +159,11 @@ class RawPollVoteActionEvent(_RawReprMixin):
         The message ID that got or lost a vote.
     user_id: :class:`int`
         The user ID who added the vote or whose vote was removed.
-    cached_member: Optional[:class:`Member`]
+    cached_member: :class:`Member` | :data:`None`
         The member who added the vote. Available only when the guilds and members are cached.
     channel_id: :class:`int`
         The channel ID where the vote addition or removal took place.
-    guild_id: Optional[:class:`int`]
+    guild_id: :class:`int` | :data:`None`
         The guild ID where the vote addition or removal took place, if applicable.
     answer_id: :class:`int`
         The ID of the answer that was voted or unvoted.
@@ -185,16 +185,16 @@ class RawPollVoteActionEvent(_RawReprMixin):
 
     def __init__(
         self,
-        data: Union[PollVoteAddEvent, PollVoteRemoveEvent],
+        data: PollVoteAddEvent | PollVoteRemoveEvent,
         event_type: PollEventType,
     ) -> None:
         self.message_id: int = int(data["message_id"])
         self.user_id: int = int(data["user_id"])
-        self.cached_member: Optional[Member] = None
+        self.cached_member: Member | None = None
         self.channel_id: int = int(data["channel_id"])
         self.event_type = event_type
         self.answer_id: int = int(data["answer_id"])
-        self.guild_id: Optional[int] = _get_as_snowflake(data, "guild_id")
+        self.guild_id: int | None = _get_as_snowflake(data, "guild_id")
 
 
 ReactionEventType = Literal["REACTION_ADD", "REACTION_REMOVE"]
@@ -212,7 +212,7 @@ class RawReactionActionEvent(_RawReprMixin):
         The user ID who added the reaction or whose reaction was removed.
     channel_id: :class:`int`
         The channel ID where the reaction addition or removal took place.
-    guild_id: Optional[:class:`int`]
+    guild_id: :class:`int` | :data:`None`
         The guild ID where the reaction addition or removal took place, if applicable.
     emoji: :class:`PartialEmoji`
         The custom or unicode emoji being used.
@@ -220,7 +220,7 @@ class RawReactionActionEvent(_RawReprMixin):
         .. versionchanged:: 2.9
             This now also includes the correct :attr:`~PartialEmoji.animated` value when a reaction was removed.
 
-    member: Optional[:class:`Member`]
+    member: :class:`Member` | :data:`None`
         The member who added the reaction. Only available if :attr:`event_type` is ``REACTION_ADD`` and the reaction is inside a guild.
 
         .. versionadded:: 1.3
@@ -232,10 +232,10 @@ class RawReactionActionEvent(_RawReprMixin):
 
         .. versionadded:: 1.3
 
-    message_author_id: Optional[:class:`int`]
+    message_author_id: :class:`int` | :data:`None`
         The ID of the author who created the message that got a reaction.
         Only available if :attr:`event_type` is ``REACTION_ADD``.
-        May also be ``None`` if the message was created by a webhook.
+        May also be :data:`None` if the message was created by a webhook.
 
         .. versionadded:: 2.10
     """
@@ -253,7 +253,7 @@ class RawReactionActionEvent(_RawReprMixin):
 
     def __init__(
         self,
-        data: Union[MessageReactionAddEvent, MessageReactionRemoveEvent],
+        data: MessageReactionAddEvent | MessageReactionRemoveEvent,
         emoji: PartialEmoji,
         event_type: ReactionEventType,
     ) -> None:
@@ -262,9 +262,9 @@ class RawReactionActionEvent(_RawReprMixin):
         self.user_id: int = int(data["user_id"])
         self.emoji: PartialEmoji = emoji
         self.event_type: ReactionEventType = event_type
-        self.member: Optional[Member] = None
-        self.guild_id: Optional[int] = _get_as_snowflake(data, "guild_id")
-        self.message_author_id: Optional[int] = _get_as_snowflake(data, "message_author_id")
+        self.member: Member | None = None
+        self.guild_id: int | None = _get_as_snowflake(data, "guild_id")
+        self.message_author_id: int | None = _get_as_snowflake(data, "message_author_id")
 
 
 class RawReactionClearEvent(_RawReprMixin):
@@ -276,7 +276,7 @@ class RawReactionClearEvent(_RawReprMixin):
         The message ID that got its reactions cleared.
     channel_id: :class:`int`
         The channel ID where the reaction clear took place.
-    guild_id: Optional[:class:`int`]
+    guild_id: :class:`int` | :data:`None`
         The guild ID where the reaction clear took place, if applicable.
     """
 
@@ -285,7 +285,7 @@ class RawReactionClearEvent(_RawReprMixin):
     def __init__(self, data: MessageReactionRemoveAllEvent) -> None:
         self.message_id: int = int(data["message_id"])
         self.channel_id: int = int(data["channel_id"])
-        self.guild_id: Optional[int] = _get_as_snowflake(data, "guild_id")
+        self.guild_id: int | None = _get_as_snowflake(data, "guild_id")
 
 
 class RawReactionClearEmojiEvent(_RawReprMixin):
@@ -299,7 +299,7 @@ class RawReactionClearEmojiEvent(_RawReprMixin):
         The message ID that got its reactions cleared.
     channel_id: :class:`int`
         The channel ID where the reaction clear took place.
-    guild_id: Optional[:class:`int`]
+    guild_id: :class:`int` | :data:`None`
         The guild ID where the reaction clear took place, if applicable.
     emoji: :class:`PartialEmoji`
         The custom or unicode emoji being removed.
@@ -314,7 +314,7 @@ class RawReactionClearEmojiEvent(_RawReprMixin):
         self.emoji: PartialEmoji = emoji
         self.message_id: int = int(data["message_id"])
         self.channel_id: int = int(data["channel_id"])
-        self.guild_id: Optional[int] = _get_as_snowflake(data, "guild_id")
+        self.guild_id: int | None = _get_as_snowflake(data, "guild_id")
 
 
 class RawIntegrationDeleteEvent(_RawReprMixin):
@@ -326,7 +326,7 @@ class RawIntegrationDeleteEvent(_RawReprMixin):
     ----------
     integration_id: :class:`int`
         The ID of the integration that got deleted.
-    application_id: Optional[:class:`int`]
+    application_id: :class:`int` | :data:`None`
         The ID of the bot/OAuth2 application for this deleted integration.
     guild_id: :class:`int`
         The guild ID where the integration deletion took place.
@@ -337,7 +337,7 @@ class RawIntegrationDeleteEvent(_RawReprMixin):
     def __init__(self, data: IntegrationDeleteEvent) -> None:
         self.integration_id: int = int(data["id"])
         self.guild_id: int = int(data["guild_id"])
-        self.application_id: Optional[int] = _get_as_snowflake(data, "application_id")
+        self.application_id: int | None = _get_as_snowflake(data, "application_id")
 
 
 class RawGuildScheduledEventUserActionEvent(_RawReprMixin):
@@ -359,7 +359,7 @@ class RawGuildScheduledEventUserActionEvent(_RawReprMixin):
     __slots__ = ("event_id", "user_id", "guild_id")
 
     def __init__(
-        self, data: Union[GuildScheduledEventUserAddEvent, GuildScheduledEventUserRemoveEvent]
+        self, data: GuildScheduledEventUserAddEvent | GuildScheduledEventUserRemoveEvent
     ) -> None:
         self.event_id: int = int(data["guild_scheduled_event_id"])
         self.user_id: int = int(data["user_id"])
@@ -381,7 +381,7 @@ class RawThreadDeleteEvent(_RawReprMixin):
         The type of the deleted thread.
     parent_id: :class:`int`
         The ID of the channel the thread belonged to.
-    thread: Optional[:class:`Thread`]
+    thread: :class:`Thread` | :data:`None`
         The thread, if it could be found in the internal cache.
     """
 
@@ -398,7 +398,7 @@ class RawThreadDeleteEvent(_RawReprMixin):
         self.thread_type: ThreadType = cast("ThreadType", try_enum(ChannelType, data["type"]))
         self.guild_id: int = int(data["guild_id"])
         self.parent_id: int = int(data["parent_id"])
-        self.thread: Optional[Thread] = None
+        self.thread: Thread | None = None
 
 
 class RawThreadMemberRemoveEvent(_RawReprMixin):
@@ -412,7 +412,7 @@ class RawThreadMemberRemoveEvent(_RawReprMixin):
         The Thread that the member was removed from
     member_id: :class:`int`
         The ID of the removed member.
-    cached_member: Optional[:class:`.ThreadMember`]
+    cached_member: :class:`.ThreadMember` | :data:`None`
         The member, if they could be found in the internal cache.
     """
 
@@ -425,7 +425,7 @@ class RawThreadMemberRemoveEvent(_RawReprMixin):
     def __init__(self, thread: Thread, member_id: int) -> None:
         self.thread: Thread = thread
         self.member_id: int = member_id
-        self.cached_member: Optional[ThreadMember] = None
+        self.cached_member: ThreadMember | None = None
 
 
 class RawTypingEvent(_RawReprMixin):
@@ -439,10 +439,10 @@ class RawTypingEvent(_RawReprMixin):
         The ID of the user who started typing.
     channel_id: :class:`int`
         The ID of the channel where the user started typing.
-    guild_id: Optional[:class:`int`]
-        The ID of the guild where the user started typing or ``None`` if it was in a DM.
-    member: Optional[:class:`Member`]
-        The member object of the user who started typing or ``None`` if it was in a DM.
+    guild_id: :class:`int` | :data:`None`
+        The ID of the guild where the user started typing or :data:`None` if it was in a DM.
+    member: :class:`Member` | :data:`None`
+        The member object of the user who started typing or :data:`None` if it was in a DM.
     timestamp: :class:`datetime.datetime`
         The UTC datetime when the user started typing.
 
@@ -455,11 +455,11 @@ class RawTypingEvent(_RawReprMixin):
     def __init__(self, data: TypingStartEvent) -> None:
         self.user_id: int = int(data["user_id"])
         self.channel_id: int = int(data["channel_id"])
-        self.member: Optional[Member] = None
+        self.member: Member | None = None
         self.timestamp: datetime.datetime = datetime.datetime.fromtimestamp(
             data["timestamp"], tz=datetime.timezone.utc
         )
-        self.guild_id: Optional[int] = _get_as_snowflake(data, "guild_id")
+        self.guild_id: int | None = _get_as_snowflake(data, "guild_id")
 
 
 class RawGuildMemberRemoveEvent(_RawReprMixin):
@@ -471,7 +471,7 @@ class RawGuildMemberRemoveEvent(_RawReprMixin):
     ----------
     guild_id: :class:`int`
         The ID of the guild where the member was removed from.
-    user: Union[:class:`User`, :class:`Member`]
+    user: :class:`User` | :class:`Member`
         The user object of the member that was removed.
     """
 
@@ -480,8 +480,8 @@ class RawGuildMemberRemoveEvent(_RawReprMixin):
         "user",
     )
 
-    def __init__(self, user: Union[User, Member], guild_id: int) -> None:
-        self.user: Union[User, Member] = user
+    def __init__(self, user: User | Member, guild_id: int) -> None:
+        self.user: User | Member = user
         self.guild_id: int = guild_id
 
 
@@ -527,7 +527,7 @@ class RawVoiceChannelEffectEvent(_RawReprMixin):
         The ID of the user who sent the effect.
     effect: :class:`VoiceChannelEffect`
         The effect that was sent.
-    cached_member: Optional[:class:`Member`]
+    cached_member: :class:`Member` | :data:`None`
         The member who sent the effect, if they could be found in the internal cache.
     """
 
@@ -545,4 +545,4 @@ class RawVoiceChannelEffectEvent(_RawReprMixin):
         self.user_id: int = int(data["user_id"])
         self.effect: VoiceChannelEffect = effect
 
-        self.cached_member: Optional[Member] = None
+        self.cached_member: Member | None = None

@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, Optional, Tuple
+from typing import TYPE_CHECKING, ClassVar
 
-from ..components import Thumbnail as ThumbnailComponent, UnfurledMediaItem, handle_media_item_input
+from ..components import Thumbnail as ThumbnailComponent, handle_media_item_input
 from ..enums import ComponentType
 from ..utils import MISSING
 from .item import UIComponent
@@ -12,7 +12,7 @@ from .item import UIComponent
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from ..components import MediaItemInput
+    from ..components import MediaItemInput, UnfurledMediaItem
 
 __all__ = ("Thumbnail",)
 
@@ -26,10 +26,10 @@ class Thumbnail(UIComponent):
 
     Parameters
     ----------
-    media: Union[:class:`str`, :class:`.Asset`, :class:`.Attachment`, :class:`.UnfurledMediaItem`]
+    media: :class:`str` | :class:`.Asset` | :class:`.Attachment` | :class:`.UnfurledMediaItem`
         The media item to display. Can be an arbitrary URL or attachment
         reference (``attachment://<filename>``).
-    description: Optional[:class:`str`]
+    description: :class:`str` | :data:`None`
         The thumbnail's description ("alt text"), if any.
     spoiler: :class:`bool`
         Whether the thumbnail is marked as a spoiler. Defaults to ``False``.
@@ -39,7 +39,7 @@ class Thumbnail(UIComponent):
         sequential identifiers to the components in the message.
     """
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (
         "media",
         "description",
         "spoiler",
@@ -50,7 +50,7 @@ class Thumbnail(UIComponent):
     def __init__(
         self,
         media: MediaItemInput,
-        description: Optional[str] = None,
+        description: str | None = None,
         *,
         spoiler: bool = False,
         id: int = 0,
@@ -73,12 +73,12 @@ class Thumbnail(UIComponent):
         self._underlying.media = handle_media_item_input(value)
 
     @property
-    def description(self) -> Optional[str]:
-        """Optional[:class:`str`]: The thumbnail's description ("alt text"), if any."""
+    def description(self) -> str | None:
+        """:class:`str` | :data:`None`: The thumbnail's description ("alt text"), if any."""
         return self._underlying.description
 
     @description.setter
-    def description(self, value: Optional[str]) -> None:
+    def description(self, value: str | None) -> None:
         self._underlying.description = value
 
     @property
