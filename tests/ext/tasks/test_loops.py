@@ -53,9 +53,6 @@ class TestLoops:
                 instance._injected = self._injected
                 return instance
 
-        class WhileTrueLoop:
-            def __init__(self, coro: Any) -> None: ...
-
         async def callback() -> None:
             pass
 
@@ -68,7 +65,9 @@ class TestLoops:
         for c in (Cog, Cog()):
             assert (c.task.seconds, c.task.minutes, c.task.hours) == (1, 2, 3)
 
-        with pytest.raises(TypeError, match="subclass of Loop"):
+    def test_factory(self) -> None:
+        with pytest.raises(TypeError, match="must be callable"):
+            loop(cls=...)  # pyright: ignore[reportArgumentType, reportCallIssue]
 
-            @loop(cls=WhileTrueLoop)  # pyright: ignore[reportUntypedFunctionDecorator, reportArgumentType]
-            async def task() -> None: ...
+        @loop(lambda lf: Loop(lf))
+        async def task() -> None: ...

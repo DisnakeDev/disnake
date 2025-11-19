@@ -153,5 +153,5 @@ API Reference
     .. automethod:: Loop.error()
         :decorator:
 
-.. autofunction:: disnake.ext.tasks.loop
+.. autofunction:: disnake.ext.tasks.loop(cls=Loop, *, seconds=..., minutes=..., hours=..., time=..., count=None, reconnect=True, loop=...)
     :decorator:
