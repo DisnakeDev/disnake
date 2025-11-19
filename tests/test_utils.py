@@ -777,7 +777,7 @@ def test_normalise_optional_params(params, expected) -> None:
         (Union["tuple", None, int], Union[tuple, int, None], True),  # noqa: UP007
         # forward refs
         ("bool", bool, True),
-        ("Tuple[dict, List[Literal[42, 99]]]", tuple[dict, list[Literal[42, 99]]], True),
+        ("tuple[dict, list[Literal[42, 99]]]", tuple[dict, list[Literal[42, 99]]], True),
         # Annotated[X, Y] -> Y
         (Annotated[str, str.casefold], str.casefold, False),
         # 3.10 union syntax
