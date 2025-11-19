@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import copy
-from typing import TYPE_CHECKING, ClassVar, Optional
+from typing import TYPE_CHECKING, ClassVar
 
 from ..components import FileComponent, UnfurledMediaItem, handle_media_item_input
 from ..enums import ComponentType
@@ -87,14 +87,14 @@ class File(UIComponent):
         self._underlying.spoiler = value
 
     @property
-    def name(self) -> Optional[str]:
+    def name(self) -> str | None:
         """:class:`str` | :data:`None`: The name of the file.
         This is available in objects from the API, and ignored when sending.
         """
         return self._underlying.name
 
     @property
-    def size(self) -> Optional[int]:
+    def size(self) -> int | None:
         """:class:`int` | :data:`None`: The size of the file.
         This is available in objects from the API, and ignored when sending.
         """

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, Optional, Union
+from typing import TYPE_CHECKING, Any
 
 from .. import utils
 from ..enums import ApplicationCommandType, Locale, OptionType, try_enum
@@ -155,7 +155,7 @@ class ApplicationCommandInteraction(Interaction[ClientT]):
         self.command_failed: bool = False
 
     @property
-    def target(self) -> Optional[Union[User, Member, Message]]:
+    def target(self) -> User | Member | Message | None:
         """:class:`abc.User` | :class:`Message` | :data:`None`: The user or message targeted by a user or message command"""
         return self.data.target
 
@@ -200,7 +200,7 @@ class UserCommandInteraction(ApplicationCommandInteraction[ClientT]):
     are modified to match the expected type with user commands.
     """
 
-    target: Union[User, Member]
+    target: User | Member
 
 
 class MessageCommandInteraction(ApplicationCommandInteraction[ClientT]):
@@ -259,9 +259,9 @@ class ApplicationCommandInteractionData(dict[str, Any]):
         self.type: ApplicationCommandType = try_enum(ApplicationCommandType, data["type"])
 
         self.resolved = InteractionDataResolved(data=data.get("resolved", {}), parent=parent)
-        self.target_id: Optional[int] = utils._get_as_snowflake(data, "target_id")
+        self.target_id: int | None = utils._get_as_snowflake(data, "target_id")
         target = self.resolved.get_by_id(self.target_id)
-        self.target: Optional[Union[User, Member, Message]] = target  # pyright: ignore[reportAttributeAccessIssue]
+        self.target: User | Member | Message | None = target  # pyright: ignore[reportAttributeAccessIssue]
 
         self.options: list[ApplicationCommandInteractionDataOption] = [
             ApplicationCommandInteractionDataOption(data=d, resolved=self.resolved)
@@ -275,7 +275,7 @@ class ApplicationCommandInteractionData(dict[str, Any]):
         )
 
     def _get_chain_and_kwargs(
-        self, chain: Optional[tuple[str, ...]] = None
+        self, chain: tuple[str, ...] | None = None
     ) -> tuple[tuple[str, ...], dict[str, Any]]:
         """Returns a chain of sub-command names and a dict of filled options."""
         if chain is None:
@@ -287,7 +287,7 @@ class ApplicationCommandInteractionData(dict[str, Any]):
             return chain, {o.name: o.value for o in self.options}
         return chain, {}
 
-    def _get_focused_option(self) -> Optional[ApplicationCommandInteractionDataOption]:
+    def _get_focused_option(self) -> ApplicationCommandInteractionDataOption | None:
         for option in self.options:
             if option.focused:
                 return option
@@ -352,7 +352,7 @@ class ApplicationCommandInteractionDataOption(dict[str, Any]):
             return self.value
         return {opt.name: opt._simplified_value() for opt in self.options}
 
-    def _get_focused_option(self) -> Optional[ApplicationCommandInteractionDataOption]:
+    def _get_focused_option(self) -> ApplicationCommandInteractionDataOption | None:
         for option in self.options:
             if option.focused:
                 return option
@@ -361,7 +361,7 @@ class ApplicationCommandInteractionDataOption(dict[str, Any]):
         return None
 
     def _get_chain_and_kwargs(
-        self, chain: Optional[tuple[str, ...]] = None
+        self, chain: tuple[str, ...] | None = None
     ) -> tuple[tuple[str, ...], dict[str, Any]]:
         if chain is None:
             chain = ()

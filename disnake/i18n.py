@@ -13,7 +13,6 @@ from typing import (
     Any,
     Generic,
     Literal,
-    Optional,
     TypeVar,
     Union,
     overload,
@@ -28,7 +27,7 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     LocalizedRequired = Union[str, "Localized[str]"]
-    LocalizedOptional = Union[Optional[str], "Localized[Optional[str]]"]
+    LocalizedOptional = Union[str | None, "Localized[str | None]"]
 
 
 __all__ = (
@@ -47,7 +46,7 @@ _log = logging.getLogger(__name__)
 LocalizationsDict = Union[dict[Locale, str], dict[str, str]]
 Localizations = Union[str, LocalizationsDict]
 
-StringT = TypeVar("StringT", str, Optional[str], covariant=True)
+StringT = TypeVar("StringT", str, str | None, covariant=True)
 
 
 # This is generic over `string`, as some localized strings can be optional, e.g. option descriptions.
@@ -87,21 +86,21 @@ class Localized(Generic[StringT]):
     def __init__(self: Localized[StringT], string: StringT, *, key: str) -> None: ...
 
     @overload
-    def __init__(self: Localized[Optional[str]], *, key: str) -> None: ...
+    def __init__(self: Localized[str | None], *, key: str) -> None: ...
 
     @overload
     def __init__(
         self: Localized[StringT],
         string: StringT,
         *,
-        data: Union[Optional[LocalizationsDict], LocalizationValue],
+        data: LocalizationsDict | None | LocalizationValue,
     ) -> None: ...
 
     @overload
     def __init__(
-        self: Localized[Optional[str]],
+        self: Localized[str | None],
         *,
-        data: Union[Optional[LocalizationsDict], LocalizationValue],
+        data: LocalizationsDict | None | LocalizationValue,
     ) -> None: ...
 
     # note: `data` accepting `LocalizationValue` is intentionally undocumented,
@@ -111,7 +110,7 @@ class Localized(Generic[StringT]):
         string: StringT = None,
         *,
         key: str = MISSING,
-        data: Union[Optional[LocalizationsDict], LocalizationValue] = MISSING,
+        data: LocalizationsDict | None | LocalizationValue = MISSING,
     ) -> None:
         self.string: StringT = string
 
@@ -127,7 +126,7 @@ class Localized(Generic[StringT]):
     @classmethod
     def _cast(
         cls, string: LocalizedOptional, required: Literal[False]
-    ) -> Localized[Optional[str]]: ...
+    ) -> Localized[str | None]: ...
 
     @overload
     @classmethod
@@ -135,7 +134,7 @@ class Localized(Generic[StringT]):
 
     @classmethod
     def _cast(
-        cls: type[Localized[Any]], string: Union[Optional[str], Localized[Any]], required: bool
+        cls: type[Localized[Any]], string: str | None | Localized[Any], required: bool
     ) -> Localized[Any]:
         if not isinstance(string, Localized):
             string = cls(string, data=None)
@@ -147,13 +146,13 @@ class Localized(Generic[StringT]):
         return string
 
     @overload
-    def _upgrade(self, *, key: Optional[str]) -> Self: ...
+    def _upgrade(self, *, key: str | None) -> Self: ...
 
     @overload
-    def _upgrade(self, string: str, *, key: Optional[str] = None) -> Localized[str]: ...
+    def _upgrade(self, string: str, *, key: str | None = None) -> Localized[str]: ...
 
     def _upgrade(
-        self: Localized[Any], string: Optional[str] = None, *, key: Optional[str] = None
+        self: Localized[Any], string: str | None = None, *, key: str | None = None
     ) -> Localized[Any]:
         # update key if provided and not already set
         self.localizations._upgrade(key)
@@ -178,9 +177,9 @@ class LocalizationValue:
 
     __slots__ = ("_key", "_data")
 
-    def __init__(self, localizations: Optional[Localizations]) -> None:
-        self._key: Optional[str]
-        self._data: Optional[dict[str, str]]
+    def __init__(self, localizations: Localizations | None) -> None:
+        self._key: str | None
+        self._data: dict[str, str] | None
 
         if localizations is None:
             # no localization
@@ -198,7 +197,7 @@ class LocalizationValue:
             msg = f"Invalid localizations type: {type(localizations).__name__}"
             raise TypeError(msg)
 
-    def _upgrade(self, key: Optional[str]) -> None:
+    def _upgrade(self, key: str | None) -> None:
         if not key:
             return
 
@@ -230,7 +229,7 @@ class LocalizationValue:
         return ins
 
     @property
-    def data(self) -> Optional[dict[str, str]]:
+    def data(self) -> dict[str, str] | None:
         """:class:`dict`\\[:class:`str`, :class:`str`] | :data:`None`: A dict with a locale -> localization mapping, if available."""
         if self._data is MISSING:
             # This will happen when `_link(store)` hasn't been called yet, which *shouldn't* occur under normal circumstances.
@@ -263,7 +262,7 @@ class LocalizationProtocol(ABC):
     """
 
     @abstractmethod
-    def get(self, key: str) -> Optional[dict[str, str]]:
+    def get(self, key: str) -> dict[str, str] | None:
         """Returns localizations for the specified key.
 
         Parameters
@@ -286,7 +285,7 @@ class LocalizationProtocol(ABC):
         raise NotImplementedError
 
     # subtypes don't have to implement this
-    def load(self, path: Union[str, os.PathLike[str]]) -> None:
+    def load(self, path: str | os.PathLike[str]) -> None:
         """Adds localizations from the provided path.
 
         Parameters
@@ -326,7 +325,7 @@ class LocalizationStore(LocalizationProtocol):
         self._loc: defaultdict[str, dict[str, str]] = defaultdict(dict)
         self._paths: set[Path] = set()
 
-    def get(self, key: str) -> Optional[dict[str, str]]:
+    def get(self, key: str) -> dict[str, str] | None:
         """Returns localizations for the specified key.
 
         Parameters
@@ -351,7 +350,7 @@ class LocalizationStore(LocalizationProtocol):
             raise LocalizationKeyError(key)
         return data
 
-    def load(self, path: Union[str, os.PathLike[str]]) -> None:
+    def load(self, path: str | os.PathLike[str]) -> None:
         """Adds localizations from the provided path to the store.
         If the path points to a file, the file gets loaded.
         If it's a directory, all ``.json`` files in that directory get loaded (non-recursive).
@@ -415,7 +414,7 @@ class LocalizationStore(LocalizationProtocol):
             msg = f"Unable to load '{path}': {e}"
             raise RuntimeError(msg) from e
 
-    def _load_dict(self, data: dict[str, Optional[str]], locale: str) -> None:
+    def _load_dict(self, data: dict[str, str | None], locale: str) -> None:
         if not isinstance(data, dict) or not all(
             o is None or isinstance(o, str) for o in data.values()
         ):

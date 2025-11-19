@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from .asset import Asset
 from .emoji import Emoji
@@ -65,12 +65,12 @@ class GuildPreview:
         self.name: str = data["name"]
         self.approximate_member_count: int = data["approximate_member_count"]
         self.approximate_presence_count: int = data["approximate_presence_count"]
-        self.description: Optional[str] = data.get("description")
+        self.description: str | None = data.get("description")
         self.features = data["features"]
 
-        self._icon: Optional[str] = data.get("icon")
-        self._splash: Optional[str] = data.get("splash")
-        self._discovery_splash: Optional[str] = data.get("discovery_splash")
+        self._icon: str | None = data.get("icon")
+        self._splash: str | None = data.get("splash")
+        self._discovery_splash: str | None = data.get("discovery_splash")
 
         emojis = data.get("emojis")
         if emojis:
@@ -92,21 +92,21 @@ class GuildPreview:
         return f"<GuildPreview id={self.id!r} name={self.name!r}>"
 
     @property
-    def icon(self) -> Optional[Asset]:
+    def icon(self) -> Asset | None:
         """:class:`Asset` | :data:`None`: Returns the guild preview's icon asset, if available."""
         if self._icon is None:
             return None
         return Asset._from_guild_icon(self._state, self.id, self._icon)
 
     @property
-    def splash(self) -> Optional[Asset]:
+    def splash(self) -> Asset | None:
         """:class:`Asset` | :data:`None`: Returns the guild preview's invite splash asset, if available."""
         if self._splash is None:
             return None
         return Asset._from_guild_image(self._state, self.id, self._splash, path="splashes")
 
     @property
-    def discovery_splash(self) -> Optional[Asset]:
+    def discovery_splash(self) -> Asset | None:
         """:class:`Asset` | :data:`None`: Returns the guild preview's discovery splash asset, if available."""
         if self._discovery_splash is None:
             return None

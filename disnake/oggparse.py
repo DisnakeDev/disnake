@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import struct
 from collections.abc import Generator
-from typing import IO, TYPE_CHECKING, ClassVar, Optional
+from typing import IO, TYPE_CHECKING, ClassVar
 
 from .errors import DiscordException
 
@@ -78,7 +78,7 @@ class OggStream:
     def __init__(self, stream: IO[bytes]) -> None:
         self.stream: IO[bytes] = stream
 
-    def _next_page(self) -> Optional[OggPage]:
+    def _next_page(self) -> OggPage | None:
         head = self.stream.read(4)
         if head == b"OggS":
             return OggPage(self.stream)

@@ -8,19 +8,16 @@ import signal
 import sys
 import traceback
 import types
-from collections.abc import Coroutine, Generator, Mapping, Sequence
+from collections.abc import Callable, Coroutine, Generator, Mapping, Sequence
 from datetime import datetime, timedelta
 from errno import ECONNRESET
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     Literal,
     NamedTuple,
-    Optional,
     TypedDict,
     TypeVar,
-    Union,
     overload,
 )
 
@@ -209,12 +206,12 @@ class GatewayParams(NamedTuple):
 # used for typing the ws parameter dict in the connect() loop
 class _WebSocketParams(TypedDict):
     initial: bool
-    shard_id: Optional[int]
-    gateway: Optional[str]
+    shard_id: int | None
+    gateway: str | None
 
-    sequence: NotRequired[Optional[int]]
+    sequence: NotRequired[int | None]
     resume: NotRequired[bool]
-    session: NotRequired[Optional[str]]
+    session: NotRequired[str | None]
 
 
 class Client:
@@ -373,28 +370,28 @@ class Client:
         self,
         *,
         asyncio_debug: bool = False,
-        loop: Optional[asyncio.AbstractEventLoop] = None,
-        shard_id: Optional[int] = None,
-        shard_count: Optional[int] = None,
+        loop: asyncio.AbstractEventLoop | None = None,
+        shard_id: int | None = None,
+        shard_count: int | None = None,
         enable_debug_events: bool = False,
         enable_gateway_error_handler: bool = True,
-        localization_provider: Optional[LocalizationProtocol] = None,
+        localization_provider: LocalizationProtocol | None = None,
         strict_localization: bool = False,
-        gateway_params: Optional[GatewayParams] = None,
-        connector: Optional[aiohttp.BaseConnector] = None,
-        proxy: Optional[str] = None,
-        proxy_auth: Optional[aiohttp.BasicAuth] = None,
+        gateway_params: GatewayParams | None = None,
+        connector: aiohttp.BaseConnector | None = None,
+        proxy: str | None = None,
+        proxy_auth: aiohttp.BasicAuth | None = None,
         assume_unsync_clock: bool = True,
-        max_messages: Optional[int] = 1000,
-        application_id: Optional[int] = None,
+        max_messages: int | None = 1000,
+        application_id: int | None = None,
         heartbeat_timeout: float = 60.0,
         guild_ready_timeout: float = 2.0,
-        allowed_mentions: Optional[AllowedMentions] = None,
-        activity: Optional[BaseActivity] = None,
-        status: Optional[Union[Status, str]] = None,
-        intents: Optional[Intents] = None,
-        chunk_guilds_at_startup: Optional[bool] = None,
-        member_cache_flags: Optional[MemberCacheFlags] = None,
+        allowed_mentions: AllowedMentions | None = None,
+        activity: BaseActivity | None = None,
+        status: Status | str | None = None,
+        intents: Intents | None = None,
+        chunk_guilds_at_startup: bool | None = None,
+        member_cache_flags: MemberCacheFlags | None = None,
     ) -> None:
         # self.ws is set in the connect method
         self.ws: DiscordWebSocket = None  # pyright: ignore[reportAttributeAccessIssue]
@@ -406,7 +403,7 @@ class Client:
 
         self.loop.set_debug(asyncio_debug)
         self._listeners: dict[str, list[tuple[asyncio.Future, Callable[..., bool]]]] = {}
-        self.session_start_limit: Optional[SessionStartLimit] = None
+        self.session_start_limit: SessionStartLimit | None = None
 
         self.http: HTTPClient = HTTPClient(
             connector,
@@ -439,8 +436,8 @@ class Client:
             chunk_guilds_at_startup=chunk_guilds_at_startup,
             member_cache_flags=member_cache_flags,
         )
-        self.shard_id: Optional[int] = shard_id
-        self.shard_count: Optional[int] = shard_count
+        self.shard_id: int | None = shard_id
+        self.shard_count: int | None = shard_count
         self._connection.shard_count = shard_count
 
         self._closed: bool = False
@@ -477,23 +474,23 @@ class Client:
     # internals
 
     def _get_websocket(
-        self, guild_id: Optional[int] = None, *, shard_id: Optional[int] = None
+        self, guild_id: int | None = None, *, shard_id: int | None = None
     ) -> DiscordWebSocket:
         return self.ws
 
     def _get_state(
         self,
         *,
-        max_messages: Optional[int],
-        application_id: Optional[int],
+        max_messages: int | None,
+        application_id: int | None,
         heartbeat_timeout: float,
         guild_ready_timeout: float,
-        allowed_mentions: Optional[AllowedMentions],
-        activity: Optional[BaseActivity],
-        status: Optional[Union[str, Status]],
-        intents: Optional[Intents],
-        chunk_guilds_at_startup: Optional[bool],
-        member_cache_flags: Optional[MemberCacheFlags],
+        allowed_mentions: AllowedMentions | None,
+        activity: BaseActivity | None,
+        status: str | Status | None,
+        intents: Intents | None,
+        chunk_guilds_at_startup: bool | None,
+        member_cache_flags: MemberCacheFlags | None,
     ) -> ConnectionState:
         return ConnectionState(
             dispatch=self.dispatch,
@@ -654,7 +651,7 @@ class Client:
             if isinstance(cmd, APIMessageCommand)
         ]
 
-    def get_message(self, id: int) -> Optional[Message]:
+    def get_message(self, id: int) -> Message | None:
         """Gets the message with the given ID from the bot's message cache.
 
         Parameters
@@ -672,12 +669,12 @@ class Client:
     @overload
     async def get_or_fetch_user(
         self, user_id: int, *, strict: Literal[False] = ...
-    ) -> Optional[User]: ...
+    ) -> User | None: ...
 
     @overload
     async def get_or_fetch_user(self, user_id: int, *, strict: Literal[True]) -> User: ...
 
-    async def get_or_fetch_user(self, user_id: int, *, strict: bool = False) -> Optional[User]:
+    async def get_or_fetch_user(self, user_id: int, *, strict: bool = False) -> User | None:
         """|coro|
 
         Tries to get the user from the cache. If it fails,
@@ -791,7 +788,7 @@ class Client:
         for event_ in self.extra_events.get(method, []):
             self._schedule_event(event_, method, *args, **kwargs)
 
-    def add_listener(self, func: CoroFunc, name: Union[str, Event] = MISSING) -> None:
+    def add_listener(self, func: CoroFunc, name: str | Event = MISSING) -> None:
         """The non decorator alternative to :meth:`.listen`.
 
         .. versionchanged:: 2.10
@@ -843,7 +840,7 @@ class Client:
         else:
             self.extra_events[name_] = [func]
 
-    def remove_listener(self, func: CoroFunc, name: Union[str, Event] = MISSING) -> None:
+    def remove_listener(self, func: CoroFunc, name: str | Event = MISSING) -> None:
         """Removes a listener from the pool of listeners.
 
         .. versionchanged:: 2.10
@@ -878,7 +875,7 @@ class Client:
             except ValueError:
                 pass
 
-    def listen(self, name: Union[str, Event] = MISSING) -> Callable[[CoroT], CoroT]:
+    def listen(self, name: str | Event = MISSING) -> Callable[[CoroT], CoroT]:
         """A decorator that registers another function as an external
         event listener. Basically this allows you to listen to multiple
         events from different places e.g. such as :func:`.on_ready`
@@ -952,7 +949,7 @@ class Client:
         traceback.print_exc()
 
     async def _dispatch_gateway_error(
-        self, event: str, data: Any, shard_id: Optional[int], exc: Exception, /
+        self, event: str, data: Any, shard_id: int | None, exc: Exception, /
     ) -> None:
         # This is an internal hook that calls the public one,
         # enabling additional handling while still allowing users to
@@ -962,7 +959,7 @@ class Client:
         await utils.maybe_coroutine(self.on_gateway_error, event, data, shard_id, exc)
 
     async def on_gateway_error(
-        self, event: str, data: Any, shard_id: Optional[int], exc: Exception, /
+        self, event: str, data: Any, shard_id: int | None, exc: Exception, /
     ) -> None:
         """|coro|
 
@@ -987,14 +984,14 @@ class Client:
     # hooks
 
     async def _call_before_identify_hook(
-        self, shard_id: Optional[int], *, initial: bool = False
+        self, shard_id: int | None, *, initial: bool = False
     ) -> None:
         # This hook is an internal hook that actually calls the public one.
         # It allows the library to have its own hook without stepping on the
         # toes of those who need to override their own hook.
         await self.before_identify_hook(shard_id, initial=initial)
 
-    async def before_identify_hook(self, shard_id: Optional[int], *, initial: bool = False) -> None:
+    async def before_identify_hook(self, shard_id: int | None, *, initial: bool = False) -> None:
         """|coro|
 
         A hook that is called before IDENTIFYing a session. This is useful
@@ -1326,12 +1323,12 @@ class Client:
         return self._closed
 
     @property
-    def activity(self) -> Optional[ActivityTypes]:
+    def activity(self) -> ActivityTypes | None:
         """:class:`.BaseActivity` | :data:`None`: The activity being used upon logging in."""
         return create_activity(self._connection._activity, state=self._connection)
 
     @activity.setter
-    def activity(self, value: Optional[ActivityTypes]) -> None:
+    def activity(self, value: ActivityTypes | None) -> None:
         if value is None:
             self._connection._activity = None
         elif isinstance(value, BaseActivity):
@@ -1361,7 +1358,7 @@ class Client:
             raise TypeError(msg)
 
     @property
-    def allowed_mentions(self) -> Optional[AllowedMentions]:
+    def allowed_mentions(self) -> AllowedMentions | None:
         """:class:`~disnake.AllowedMentions` | :data:`None`: The allowed mention configuration.
 
         .. versionadded:: 1.4
@@ -1369,7 +1366,7 @@ class Client:
         return self._connection.allowed_mentions
 
     @allowed_mentions.setter
-    def allowed_mentions(self, value: Optional[AllowedMentions]) -> None:
+    def allowed_mentions(self, value: AllowedMentions | None) -> None:
         if value is None or isinstance(value, AllowedMentions):
             self._connection.allowed_mentions = value
         else:
@@ -1391,7 +1388,7 @@ class Client:
         """:class:`list`\\[:class:`~disnake.User`]: Returns a list of all the users the bot can see."""
         return list(self._connection._users.values())
 
-    def get_channel(self, id: int, /) -> Optional[Union[GuildChannel, Thread, PrivateChannel]]:
+    def get_channel(self, id: int, /) -> GuildChannel | Thread | PrivateChannel | None:
         """Returns a channel or thread with the given ID.
 
         Parameters
@@ -1407,7 +1404,7 @@ class Client:
         return self._connection.get_channel(id)
 
     def get_partial_messageable(
-        self, id: int, *, type: Optional[ChannelType] = None
+        self, id: int, *, type: ChannelType | None = None
     ) -> PartialMessageable:
         """Returns a partial messageable with the given channel ID.
 
@@ -1430,7 +1427,7 @@ class Client:
         """
         return PartialMessageable(state=self._connection, id=id, type=type)
 
-    def get_stage_instance(self, id: int, /) -> Optional[StageInstance]:
+    def get_stage_instance(self, id: int, /) -> StageInstance | None:
         """Returns a stage instance with the given stage channel ID.
 
         .. versionadded:: 2.0
@@ -1453,7 +1450,7 @@ class Client:
             return channel.instance
         return None
 
-    def get_guild(self, id: int, /) -> Optional[Guild]:
+    def get_guild(self, id: int, /) -> Guild | None:
         """Returns a guild with the given ID.
 
         Parameters
@@ -1468,7 +1465,7 @@ class Client:
         """
         return self._connection._get_guild(id)
 
-    def get_user(self, id: int, /) -> Optional[User]:
+    def get_user(self, id: int, /) -> User | None:
         """Returns a user with the given ID.
 
         Parameters
@@ -1483,7 +1480,7 @@ class Client:
         """
         return self._connection.get_user(id)
 
-    def get_emoji(self, id: int, /) -> Optional[Emoji]:
+    def get_emoji(self, id: int, /) -> Emoji | None:
         """Returns an emoji with the given ID.
 
         Parameters
@@ -1498,7 +1495,7 @@ class Client:
         """
         return self._connection.get_emoji(id)
 
-    def get_sticker(self, id: int, /) -> Optional[GuildSticker]:
+    def get_sticker(self, id: int, /) -> GuildSticker | None:
         """Returns a guild sticker with the given ID.
 
         .. versionadded:: 2.0
@@ -1515,7 +1512,7 @@ class Client:
         """
         return self._connection.get_sticker(id)
 
-    def get_soundboard_sound(self, id: int, /) -> Optional[GuildSoundboardSound]:
+    def get_soundboard_sound(self, id: int, /) -> GuildSoundboardSound | None:
         """Returns a guild soundboard sound with the given ID.
 
         .. versionadded:: 2.10
@@ -1635,7 +1632,7 @@ class Client:
         data = self._connection._guild_application_commands.get(guild_id, {})
         return [cmd for cmd in data.values() if isinstance(cmd, APIMessageCommand)]
 
-    def get_global_command(self, id: int) -> Optional[APIApplicationCommand]:
+    def get_global_command(self, id: int) -> APIApplicationCommand | None:
         """Returns a global application command with the given ID.
 
         Parameters
@@ -1650,7 +1647,7 @@ class Client:
         """
         return self._connection._get_global_application_command(id)
 
-    def get_guild_command(self, guild_id: int, id: int) -> Optional[APIApplicationCommand]:
+    def get_guild_command(self, guild_id: int, id: int) -> APIApplicationCommand | None:
         """Returns a guild application command with the given guild ID and application command ID.
 
         Parameters
@@ -1668,8 +1665,8 @@ class Client:
         return self._connection._get_guild_application_command(guild_id, id)
 
     def get_global_command_named(
-        self, name: str, cmd_type: Optional[ApplicationCommandType] = None
-    ) -> Optional[APIApplicationCommand]:
+        self, name: str, cmd_type: ApplicationCommandType | None = None
+    ) -> APIApplicationCommand | None:
         """Returns a global application command matching the given name.
 
         Parameters
@@ -1687,8 +1684,8 @@ class Client:
         return self._connection._get_global_command_named(name, cmd_type)
 
     def get_guild_command_named(
-        self, guild_id: int, name: str, cmd_type: Optional[ApplicationCommandType] = None
-    ) -> Optional[APIApplicationCommand]:
+        self, guild_id: int, name: str, cmd_type: ApplicationCommandType | None = None
+    ) -> APIApplicationCommand | None:
         """Returns a guild application command matching the given name.
 
         Parameters
@@ -1725,10 +1722,10 @@ class Client:
 
     def wait_for(
         self,
-        event: Union[str, Event],
+        event: str | Event,
         *,
-        check: Optional[Callable[..., bool]] = None,
-        timeout: Optional[float] = None,
+        check: Callable[..., bool] | None = None,
+        timeout: float | None = None,
     ) -> Any:
         """|coro|
 
@@ -1877,8 +1874,8 @@ class Client:
     async def change_presence(
         self,
         *,
-        activity: Optional[BaseActivity] = None,
-        status: Optional[Status] = None,
+        activity: BaseActivity | None = None,
+        status: Status | None = None,
     ) -> None:
         """|coro|
 
@@ -1938,9 +1935,9 @@ class Client:
     def fetch_guilds(
         self,
         *,
-        limit: Optional[int] = 100,
-        before: Optional[SnowflakeTime] = None,
-        after: Optional[SnowflakeTime] = None,
+        limit: int | None = 100,
+        before: SnowflakeTime | None = None,
+        after: SnowflakeTime | None = None,
         with_counts: bool = True,
     ) -> GuildIterator:
         """Retrieves an :class:`.AsyncIterator` that enables receiving your guilds.
@@ -2001,7 +1998,7 @@ class Client:
         """
         return GuildIterator(self, limit=limit, before=before, after=after, with_counts=with_counts)
 
-    async def fetch_template(self, code: Union[Template, str]) -> Template:
+    async def fetch_template(self, code: Template | str) -> Template:
         """|coro|
 
         Retrieves a :class:`.Template` from a discord.new URL or code.
@@ -2236,10 +2233,10 @@ class Client:
 
     async def fetch_invite(
         self,
-        url: Union[Invite, str],
+        url: Invite | str,
         *,
         with_counts: bool = True,
-        guild_scheduled_event_id: Optional[int] = None,
+        guild_scheduled_event_id: int | None = None,
         with_expiration: bool = False,
     ) -> Invite:
         """|coro|
@@ -2303,7 +2300,7 @@ class Client:
         )
         return Invite.from_incomplete(state=self._connection, data=data)
 
-    async def delete_invite(self, invite: Union[Invite, str]) -> None:
+    async def delete_invite(self, invite: Invite | str) -> None:
         """|coro|
 
         Revokes an :class:`.Invite`, URL, or ID to an invite.
@@ -2330,7 +2327,7 @@ class Client:
 
     # Voice region stuff
 
-    async def fetch_voice_regions(self, guild_id: Optional[int] = None) -> list[VoiceRegion]:
+    async def fetch_voice_regions(self, guild_id: int | None = None) -> list[VoiceRegion]:
         """Retrieves a list of :class:`.VoiceRegion`\\s.
 
         Retrieves voice regions for the user, or a guild if provided.
@@ -2544,7 +2541,7 @@ class Client:
         self,
         channel_id: int,
         /,
-    ) -> Union[GuildChannel, PrivateChannel, Thread]:
+    ) -> GuildChannel | PrivateChannel | Thread:
         """|coro|
 
         Retrieves a :class:`.abc.GuildChannel`, :class:`.abc.PrivateChannel`, or :class:`.Thread` with the specified ID.
@@ -2629,7 +2626,7 @@ class Client:
         data = await self.http.get_webhook(webhook_id)
         return Webhook.from_state(data, state=self._connection)
 
-    async def fetch_sticker(self, sticker_id: int, /) -> Union[StandardSticker, GuildSticker]:
+    async def fetch_sticker(self, sticker_id: int, /) -> StandardSticker | GuildSticker:
         """|coro|
 
         Retrieves a :class:`.Sticker` with the given ID.
@@ -2743,7 +2740,7 @@ class Client:
         data = await state.http.start_private_message(user.id)
         return state.add_dm_channel(data)
 
-    def add_view(self, view: View, *, message_id: Optional[int] = None) -> None:
+    def add_view(self, view: View, *, message_id: int | None = None) -> None:
         """Registers a :class:`~disnake.ui.View` for persistent listening.
 
         This method should be used for when a view is comprised of components
@@ -3266,12 +3263,12 @@ class Client:
     def entitlements(
         self,
         *,
-        limit: Optional[int] = 100,
-        before: Optional[SnowflakeTime] = None,
-        after: Optional[SnowflakeTime] = None,
-        user: Optional[Snowflake] = None,
-        guild: Optional[Snowflake] = None,
-        skus: Optional[Sequence[Snowflake]] = None,
+        limit: int | None = 100,
+        before: SnowflakeTime | None = None,
+        after: SnowflakeTime | None = None,
+        user: Snowflake | None = None,
+        guild: Snowflake | None = None,
+        skus: Sequence[Snowflake] | None = None,
         exclude_ended: bool = False,
         exclude_deleted: bool = True,
         oldest_first: bool = False,
@@ -3372,9 +3369,7 @@ class Client:
         data = await self.http.get_entitlement(self.application_id, entitlement_id=entitlement_id)
         return Entitlement(data=data, state=self._connection)
 
-    async def create_entitlement(
-        self, sku: Snowflake, owner: Union[abc.User, Guild]
-    ) -> Entitlement:
+    async def create_entitlement(self, sku: Snowflake, owner: abc.User | Guild) -> Entitlement:
         """|coro|
 
         Creates a new test :class:`.Entitlement` for the given user or guild, with no expiry.

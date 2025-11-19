@@ -13,12 +13,11 @@ import dataclasses
 import os
 import pathlib
 import shutil
+from collections.abc import Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
     Final,
-    Optional,
-    Sequence,
 )
 
 import nox
@@ -135,7 +134,7 @@ def get_version_for_session(name: str) -> str:
     return versions.pop()
 
 
-def install_deps(session: nox.Session, *, execution_group: Optional[ExecutionGroup] = None) -> None:
+def install_deps(session: nox.Session, *, execution_group: ExecutionGroup | None = None) -> None:
     """Helper to install dependencies from a group."""
     if not execution_group:
         results = get_groups_for_session(session.name)

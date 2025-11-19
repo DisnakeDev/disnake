@@ -2,7 +2,7 @@
 
 # This script runs as part of the wheel building process,
 # all dependencies MUST be included in pyproject.toml
-from typing import Any, Optional
+from typing import Any
 
 import packaging.version
 import versioningit
@@ -11,9 +11,9 @@ import versioningit
 def template_fields(
     *,
     version: str,
-    description: Optional[versioningit.VCSDescription],
-    base_version: Optional[str],
-    next_version: Optional[str],
+    description: versioningit.VCSDescription | None,
+    base_version: str | None,
+    next_version: str | None,
     params: dict[str, Any],
 ) -> dict[str, Any]:
     """Implement a custom template_fields function for Disnake."""

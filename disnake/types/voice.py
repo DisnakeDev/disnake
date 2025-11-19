@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-from typing import Literal, Optional, TypedDict
+from typing import Literal, TypedDict
 
 from typing_extensions import NotRequired
 
@@ -27,15 +27,15 @@ class _VoiceState(TypedDict):
     self_stream: NotRequired[bool]
     self_video: bool
     suppress: bool
-    request_to_speak_timestamp: Optional[str]
+    request_to_speak_timestamp: str | None
 
 
 class GuildVoiceState(_VoiceState):
-    channel_id: Optional[Snowflake]
+    channel_id: Snowflake | None
 
 
 class VoiceState(_VoiceState, total=False):
-    channel_id: Optional[Snowflake]
+    channel_id: Snowflake | None
     guild_id: Snowflake
 
 
@@ -63,8 +63,8 @@ class VoiceReady(TypedDict):
 
 
 class VoiceChannelEffect(TypedDict, total=False):
-    emoji: Optional[PartialEmoji]
-    animation_type: Optional[VoiceChannelEffectAnimationType]
+    emoji: PartialEmoji | None
+    animation_type: VoiceChannelEffectAnimationType | None
     animation_id: int
     sound_id: Snowflake
     sound_volume: float

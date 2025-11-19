@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING, ClassVar, Optional
+from typing import TYPE_CHECKING, ClassVar
 
 from ..components import TextInput as TextInputComponent
 from ..enums import ComponentType, TextInputStyle
@@ -70,14 +70,14 @@ class TextInput(WrappedComponent):
     def __init__(
         self,
         *,
-        label: Optional[str] = None,
+        label: str | None = None,
         custom_id: str = MISSING,
         style: TextInputStyle = TextInputStyle.short,
-        placeholder: Optional[str] = None,
-        value: Optional[str] = None,
+        placeholder: str | None = None,
+        value: str | None = None,
         required: bool = True,
-        min_length: Optional[int] = None,
-        max_length: Optional[int] = None,
+        min_length: int | None = None,
+        max_length: int | None = None,
         id: int = 0,
     ) -> None:
         custom_id = os.urandom(16).hex() if custom_id is MISSING else custom_id
@@ -109,7 +109,7 @@ class TextInput(WrappedComponent):
 
     @property
     @deprecated('ui.Label("<text>", ui.TextInput(...))')
-    def label(self) -> Optional[str]:
+    def label(self) -> str | None:
         """:class:`str`: The label of the text input.
 
         .. deprecated:: 2.11
@@ -132,21 +132,21 @@ class TextInput(WrappedComponent):
         self._underlying.custom_id = value
 
     @property
-    def placeholder(self) -> Optional[str]:
+    def placeholder(self) -> str | None:
         """:class:`str` | :data:`None`: The placeholder text that is shown if nothing is entered."""
         return self._underlying.placeholder
 
     @placeholder.setter
-    def placeholder(self, value: Optional[str]) -> None:
+    def placeholder(self, value: str | None) -> None:
         self._underlying.placeholder = value
 
     @property
-    def value(self) -> Optional[str]:
+    def value(self) -> str | None:
         """:class:`str` | :data:`None`: The pre-filled text of the text input."""
         return self._underlying.value
 
     @value.setter
-    def value(self, value: Optional[str]) -> None:
+    def value(self, value: str | None) -> None:
         self._underlying.value = value
 
     @property
@@ -159,21 +159,21 @@ class TextInput(WrappedComponent):
         self._underlying.required = value
 
     @property
-    def min_length(self) -> Optional[int]:
+    def min_length(self) -> int | None:
         """:class:`int` | :data:`None`: The minimum length of the text input."""
         return self._underlying.min_length
 
     @min_length.setter
-    def min_length(self, value: Optional[int]) -> None:
+    def min_length(self, value: int | None) -> None:
         self._underlying.min_length = value
 
     @property
-    def max_length(self) -> Optional[int]:
+    def max_length(self) -> int | None:
         """:class:`int` | :data:`None`: The maximum length of the text input."""
         return self._underlying.max_length
 
     @max_length.setter
-    def max_length(self, value: Optional[int]) -> None:
+    def max_length(self, value: int | None) -> None:
         self._underlying.max_length = value
 
     @classmethod

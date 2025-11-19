@@ -6,12 +6,11 @@ import copy
 import functools
 import itertools
 import re
-from collections.abc import Generator, Iterable, Mapping, Sequence
+from collections.abc import Callable, Generator, Iterable, Mapping, Sequence
 from re import Match
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     ClassVar,
     Optional,
     TypeVar,
@@ -93,13 +92,13 @@ class Paginator:
 
     def __init__(
         self,
-        prefix: Optional[str] = "```",
-        suffix: Optional[str] = "```",
+        prefix: str | None = "```",
+        suffix: str | None = "```",
         max_size: int = 2000,
         linesep: str = "\n",
     ) -> None:
-        self.prefix: Optional[str] = prefix
-        self.suffix: Optional[str] = suffix
+        self.prefix: str | None = prefix
+        self.suffix: str | None = suffix
         self.max_size: int = max_size
         self.linesep: str = linesep
         self.clear()
@@ -327,7 +326,7 @@ class HelpCommand:
 
     def __init__(self, **options: Any) -> None:
         self.show_hidden: bool = options.pop("show_hidden", False)
-        self.verify_checks: Optional[bool] = options.pop("verify_checks", True)
+        self.verify_checks: bool | None = options.pop("verify_checks", True)
 
         attrs = options.pop("command_attrs", {})
         attrs.setdefault("name", "help")
@@ -378,17 +377,17 @@ class HelpCommand:
         """
         self._command_impl.remove_check(func)
 
-    def get_bot_mapping(self) -> dict[Optional[Cog], list[Command[Any, ..., Any]]]:
+    def get_bot_mapping(self) -> dict[Cog | None, list[Command[Any, ..., Any]]]:
         """Retrieves the bot mapping passed to :meth:`send_bot_help`."""
         bot = self.context.bot
-        mapping: dict[Optional[Cog], list[Command[Any, ..., Any]]] = {
+        mapping: dict[Cog | None, list[Command[Any, ..., Any]]] = {
             cog: cog.get_commands() for cog in bot.cogs.values()
         }
         mapping[None] = [c for c in bot.commands if c.cog is None]
         return mapping
 
     @property
-    def invoked_with(self) -> Optional[str]:
+    def invoked_with(self) -> str | None:
         """Similar to :attr:`Context.invoked_with` except properly handles
         the case where :meth:`Context.send_help` is used.
 
@@ -425,7 +424,7 @@ class HelpCommand:
         :class:`str`
             The signature for the command.
         """
-        parent: Optional[Group[Any, ..., Any]] = command.parent  # pyright: ignore[reportAssignmentType]
+        parent: Group[Any, ..., Any] | None = command.parent  # pyright: ignore[reportAssignmentType]
         entries = []
         while parent is not None:
             if not parent.signature or parent.invoke_without_command:
@@ -465,7 +464,7 @@ class HelpCommand:
         return self.MENTION_PATTERN.sub(replace, string)
 
     @property
-    def cog(self) -> Optional[Cog]:
+    def cog(self) -> Cog | None:
         """A property for retrieving or setting the cog for the help command.
 
         When a cog is set for the help command, it is as-if the help command
@@ -482,7 +481,7 @@ class HelpCommand:
         return self._command_impl.cog
 
     @cog.setter
-    def cog(self, cog: Optional[Cog]) -> None:
+    def cog(self, cog: Cog | None) -> None:
         # Remove whatever cog is currently valid, if any
         self._command_impl._eject_cog()
 
@@ -546,7 +545,7 @@ class HelpCommand:
         commands: Iterable[Command[Any, ..., Any]],
         *,
         sort: bool = False,
-        key: Optional[Callable[[Command[Any, ..., Any]], Any]] = None,
+        key: Callable[[Command[Any, ..., Any]], Any] | None = None,
     ) -> list[Command[Any, ..., Any]]:
         """|coro|
 
@@ -681,7 +680,7 @@ class HelpCommand:
         pass
 
     async def send_bot_help(
-        self, mapping: Mapping[Optional[Cog], list[Command[Any, ..., Any]]]
+        self, mapping: Mapping[Cog | None, list[Command[Any, ..., Any]]]
     ) -> None:
         """|coro|
 
@@ -805,7 +804,7 @@ class HelpCommand:
         """
         return
 
-    async def prepare_help_command(self, ctx: Context[BotT], command: Optional[str] = None) -> None:
+    async def prepare_help_command(self, ctx: Context[BotT], command: str | None = None) -> None:
         """|coro|
 
         A low level method that can be used to prepare the help command
@@ -829,7 +828,7 @@ class HelpCommand:
         """
         pass
 
-    async def command_callback(self, ctx: Context[BotT], *, command: Optional[str] = None) -> None:
+    async def command_callback(self, ctx: Context[BotT], *, command: str | None = None) -> None:
         """|coro|
 
         The actual implementation of the help command.
@@ -932,7 +931,7 @@ class DefaultHelpCommand(HelpCommand):
         self.width: int = options.pop("width", 80)
         self.indent: int = options.pop("indent", 2)
         self.sort_commands: bool = options.pop("sort_commands", True)
-        self.dm_help: Optional[bool] = options.pop("dm_help", False)
+        self.dm_help: bool | None = options.pop("dm_help", False)
         self.dm_help_threshold: int = options.pop("dm_help_threshold", 1000)
         self.commands_heading: str = options.pop("commands_heading", "Commands:")
         self.no_category: str = options.pop("no_category", "No Category")
@@ -949,7 +948,7 @@ class DefaultHelpCommand(HelpCommand):
             return text[: self.width - 3].rstrip() + "..."
         return text
 
-    def get_ending_note(self) -> Optional[str]:
+    def get_ending_note(self) -> str | None:
         """Returns help command's ending note. This is mainly useful to override for i18n purposes.
 
         :return type: :class:`str`
@@ -965,7 +964,7 @@ class DefaultHelpCommand(HelpCommand):
         commands: Sequence[Command[Any, ..., Any]],
         *,
         heading: str,
-        max_size: Optional[int] = None,
+        max_size: int | None = None,
     ) -> None:
         """Indents a list of commands after the specified heading.
 
@@ -1038,12 +1037,12 @@ class DefaultHelpCommand(HelpCommand):
         else:
             return ctx.channel
 
-    async def prepare_help_command(self, ctx: Context[BotT], command: Optional[str]) -> None:
+    async def prepare_help_command(self, ctx: Context[BotT], command: str | None) -> None:
         self.paginator.clear()
         await super().prepare_help_command(ctx, command)
 
     async def send_bot_help(
-        self, mapping: Mapping[Optional[Cog], list[Command[Any, ..., Any]]]
+        self, mapping: Mapping[Cog | None, list[Command[Any, ..., Any]]]
     ) -> None:
         ctx = self.context
         bot = ctx.bot
@@ -1145,7 +1144,7 @@ class MinimalHelpCommand(HelpCommand):
     def __init__(self, **options: Any) -> None:
         self.sort_commands: bool = options.pop("sort_commands", True)
         self.commands_heading: str = options.pop("commands_heading", "Commands")
-        self.dm_help: Optional[bool] = options.pop("dm_help", False)
+        self.dm_help: bool | None = options.pop("dm_help", False)
         self.dm_help_threshold: int = options.pop("dm_help_threshold", 1000)
         self.aliases_heading: str = options.pop("aliases_heading", "Aliases:")
         self.no_category: str = options.pop("no_category", "No Category")
@@ -1159,7 +1158,7 @@ class MinimalHelpCommand(HelpCommand):
         for page in self.paginator.pages:
             await destination.send(page)
 
-    def get_opening_note(self) -> Optional[str]:
+    def get_opening_note(self) -> str | None:
         """Returns help command's opening note. This is mainly useful to override for i18n purposes.
 
         The default implementation returns ::
@@ -1181,7 +1180,7 @@ class MinimalHelpCommand(HelpCommand):
     def get_command_signature(self, command: Command[Any, ..., Any]) -> str:
         return f"{self.context.clean_prefix}{command.qualified_name} {command.signature}"
 
-    def get_ending_note(self) -> Optional[str]:
+    def get_ending_note(self) -> str | None:
         """Return the help command's ending note. This is mainly useful to override for i18n purposes.
 
         The default implementation does nothing.
@@ -1286,12 +1285,12 @@ class MinimalHelpCommand(HelpCommand):
         else:
             return ctx.channel
 
-    async def prepare_help_command(self, ctx: Context[BotT], command: Optional[str]) -> None:
+    async def prepare_help_command(self, ctx: Context[BotT], command: str | None) -> None:
         self.paginator.clear()
         await super().prepare_help_command(ctx, command)
 
     async def send_bot_help(
-        self, mapping: Mapping[Optional[Cog], list[Command[Any, ..., Any]]]
+        self, mapping: Mapping[Cog | None, list[Command[Any, ..., Any]]]
     ) -> None:
         ctx = self.context
         bot = ctx.bot

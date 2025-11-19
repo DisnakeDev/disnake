@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import asyncio
 import time
-from collections.abc import Iterable, Sequence
-from typing import TYPE_CHECKING, Callable, Literal, Optional, Union
+from collections.abc import Callable, Iterable, Sequence
+from typing import TYPE_CHECKING, Literal, Union
 
 from .abc import GuildChannel, Messageable
 from .enums import ChannelType, ThreadArchiveDuration, try_enum, try_enum_to_int
@@ -187,15 +187,15 @@ class Thread(Messageable, Hashable):
     def _from_data(self, data: ThreadPayload) -> None:
         self.id: int = int(data["id"])
         self.parent_id: int = int(data["parent_id"])
-        self.owner_id: Optional[int] = _get_as_snowflake(data, "owner_id")
+        self.owner_id: int | None = _get_as_snowflake(data, "owner_id")
         self.name: str = data["name"]
         self._type: ThreadType = try_enum(ChannelType, data["type"])  # pyright: ignore[reportAttributeAccessIssue]
-        self.last_message_id: Optional[int] = _get_as_snowflake(data, "last_message_id")
+        self.last_message_id: int | None = _get_as_snowflake(data, "last_message_id")
         self.slowmode_delay: int = data.get("rate_limit_per_user", 0)
         self.message_count: int = data.get("message_count") or 0
         self.total_message_sent: int = data.get("total_message_sent") or 0
-        self.member_count: Optional[int] = data.get("member_count")
-        self.last_pin_timestamp: Optional[datetime.datetime] = parse_time(
+        self.member_count: int | None = data.get("member_count")
+        self.last_pin_timestamp: datetime.datetime | None = parse_time(
             data.get("last_pin_timestamp")
         )
         self._flags: int = data.get("flags", 0)
@@ -213,9 +213,7 @@ class Thread(Messageable, Hashable):
         self.archive_timestamp: datetime.datetime = parse_time(data["archive_timestamp"])
         self.locked: bool = data.get("locked", False)
         self.invitable: bool = data.get("invitable", True)
-        self.create_timestamp: Optional[datetime.datetime] = parse_time(
-            data.get("create_timestamp")
-        )
+        self.create_timestamp: datetime.datetime | None = parse_time(data.get("create_timestamp"))
 
     def _update(self, data: ThreadPayload) -> None:
         try:
@@ -242,14 +240,14 @@ class Thread(Messageable, Hashable):
         return self._type
 
     @property
-    def parent(self) -> Optional[Union[TextChannel, ForumChannel, MediaChannel]]:
+    def parent(self) -> TextChannel | ForumChannel | MediaChannel | None:
         """:class:`TextChannel` | :class:`ForumChannel` | :class:`MediaChannel` | :data:`None`: The parent channel this thread belongs to."""
         if isinstance(self.guild, Object):
             return None
         return self.guild.get_channel(self.parent_id)  # pyright: ignore[reportReturnType]
 
     @property
-    def owner(self) -> Optional[Member]:
+    def owner(self) -> Member | None:
         """:class:`Member` | :data:`None`: The member this thread belongs to."""
         if self.owner_id is None or isinstance(self.guild, Object):
             return None
@@ -271,7 +269,7 @@ class Thread(Messageable, Hashable):
         return list(self._members.values())
 
     @property
-    def last_message(self) -> Optional[Message]:
+    def last_message(self) -> Message | None:
         """Gets the last message in this channel from the cache.
 
         The message might not be valid or point to an existing message.
@@ -292,7 +290,7 @@ class Thread(Messageable, Hashable):
         return self._state._get_message(self.last_message_id) if self.last_message_id else None
 
     @property
-    def category(self) -> Optional[CategoryChannel]:
+    def category(self) -> CategoryChannel | None:
         """The category channel the parent channel belongs to, if applicable.
 
         Raises
@@ -312,7 +310,7 @@ class Thread(Messageable, Hashable):
         return parent.category
 
     @property
-    def category_id(self) -> Optional[int]:
+    def category_id(self) -> int | None:
         """The category channel ID the parent channel belongs to, if applicable.
 
         Raises
@@ -418,7 +416,7 @@ class Thread(Messageable, Hashable):
 
     def permissions_for(
         self,
-        obj: Union[Member, Role],
+        obj: Member | Role,
         /,
         *,
         ignore_timeout: bool = MISSING,
@@ -554,12 +552,12 @@ class Thread(Messageable, Hashable):
     async def purge(
         self,
         *,
-        limit: Optional[int] = 100,
+        limit: int | None = 100,
         check: Callable[[Message], bool] = MISSING,
-        before: Optional[SnowflakeTime] = None,
-        after: Optional[SnowflakeTime] = None,
-        around: Optional[SnowflakeTime] = None,
-        oldest_first: Optional[bool] = False,
+        before: SnowflakeTime | None = None,
+        after: SnowflakeTime | None = None,
+        around: SnowflakeTime | None = None,
+        oldest_first: bool | None = False,
         bulk: bool = True,
     ) -> list[Message]:
         """|coro|
@@ -680,7 +678,7 @@ class Thread(Messageable, Hashable):
         pinned: bool = MISSING,
         flags: ChannelFlags = MISSING,
         applied_tags: Sequence[Snowflake] = MISSING,
-        reason: Optional[str] = None,
+        reason: str | None = None,
     ) -> Thread:
         """|coro|
 
@@ -903,7 +901,7 @@ class Thread(Messageable, Hashable):
         members = await self._state.http.get_thread_members(self.id)
         return [ThreadMember(parent=self, data=data) for data in members]
 
-    async def delete(self, *, reason: Optional[str] = None) -> None:
+    async def delete(self, *, reason: str | None = None) -> None:
         """|coro|
 
         Deletes this thread.
@@ -928,7 +926,7 @@ class Thread(Messageable, Hashable):
         """
         await self._state.http.delete_channel(self.id, reason=reason)
 
-    async def add_tags(self, *tags: Snowflake, reason: Optional[str] = None) -> None:
+    async def add_tags(self, *tags: Snowflake, reason: str | None = None) -> None:
         """|coro|
 
         Adds the given tags to this thread, up to 5 in total.
@@ -965,7 +963,7 @@ class Thread(Messageable, Hashable):
 
         await self._state.http.edit_channel(self.id, applied_tags=new_tags, reason=reason)
 
-    async def remove_tags(self, *tags: Snowflake, reason: Optional[str] = None) -> None:
+    async def remove_tags(self, *tags: Snowflake, reason: str | None = None) -> None:
         """|coro|
 
         Removes the given tags from this thread.
@@ -1026,7 +1024,7 @@ class Thread(Messageable, Hashable):
     def _add_member(self, member: ThreadMember) -> None:
         self._members[member.id] = member
 
-    def _pop_member(self, member_id: int) -> Optional[ThreadMember]:
+    def _pop_member(self, member_id: int) -> ThreadMember | None:
         return self._members.pop(member_id, None)
 
 
@@ -1173,14 +1171,14 @@ class ForumTag(Hashable):
         self,
         *,
         name: str,
-        emoji: Optional[Union[str, PartialEmoji, Emoji]] = None,
+        emoji: str | PartialEmoji | Emoji | None = None,
         moderated: bool = False,
     ) -> None:
         self.id: int = 0
         self.name: str = name
         self.moderated: bool = moderated
 
-        self.emoji: Optional[Union[Emoji, PartialEmoji]] = None
+        self.emoji: Emoji | PartialEmoji | None = None
         if emoji is None:
             self.emoji = None
         elif isinstance(emoji, str):
@@ -1242,7 +1240,7 @@ class ForumTag(Hashable):
         self,
         *,
         name: str = MISSING,
-        emoji: Optional[Union[str, Emoji, PartialEmoji]] = MISSING,
+        emoji: str | Emoji | PartialEmoji | None = MISSING,
         moderated: bool = MISSING,
     ) -> Self:
         """Returns a new instance with the given changes applied,

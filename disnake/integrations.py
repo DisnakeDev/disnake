@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 from .enums import ExpireBehaviour, try_enum
 from .user import User
@@ -104,7 +104,7 @@ class PartialIntegration:
         self.type: IntegrationType = data["type"]
         self.name: str = data["name"]
         self.account: IntegrationAccount = IntegrationAccount(data["account"])
-        self.application_id: Optional[int] = _get_as_snowflake(data, "application_id")
+        self.application_id: int | None = _get_as_snowflake(data, "application_id")
 
     @property
     def created_at(self) -> datetime.datetime:
@@ -154,7 +154,7 @@ class Integration(PartialIntegration):
         self.enabled: bool = data["enabled"]
 
     @deprecated("Guild.leave")
-    async def delete(self, *, reason: Optional[str] = None) -> None:
+    async def delete(self, *, reason: str | None = None) -> None:
         """|coro|
 
         .. deprecated:: 2.5
@@ -233,7 +233,7 @@ class StreamIntegration(Integration):
         self.expire_behaviour: ExpireBehaviour = try_enum(ExpireBehaviour, data["expire_behavior"])
         self.expire_grace_period: int = data["expire_grace_period"]
         self.synced_at: datetime.datetime = parse_time(data["synced_at"])
-        self._role_id: Optional[int] = _get_as_snowflake(data, "role_id")
+        self._role_id: int | None = _get_as_snowflake(data, "role_id")
         self.syncing: bool = data["syncing"]
         self.enable_emoticons: bool = data["enable_emoticons"]
         self.subscriber_count: int = data["subscriber_count"]
@@ -244,7 +244,7 @@ class StreamIntegration(Integration):
         return self.expire_behaviour
 
     @property
-    def role(self) -> Optional[Role]:
+    def role(self) -> Role | None:
         """:class:`Role` | :data:`None` The role which the integration uses for subscribers."""
         return self.guild.get_role(self._role_id)  # pyright: ignore[reportArgumentType]
 
@@ -359,11 +359,11 @@ class IntegrationApplication:
     def __init__(self, *, data: IntegrationApplicationPayload, state) -> None:
         self.id: int = int(data["id"])
         self.name: str = data["name"]
-        self.icon: Optional[str] = data["icon"]
+        self.icon: str | None = data["icon"]
         self.description: str = data["description"]
         self._summary: str = data.get("summary", "")
         user = data.get("bot")
-        self.user: Optional[User] = User(state=state, data=user) if user else None
+        self.user: User | None = User(state=state, data=user) if user else None
 
     @property
     def summary(self) -> str:

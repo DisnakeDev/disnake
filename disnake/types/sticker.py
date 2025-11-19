@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Literal, Optional, TypedDict, Union
+from typing import Literal, TypedDict, Union
 
 from typing_extensions import NotRequired
 
@@ -21,7 +21,7 @@ class StickerItem(TypedDict):
 class BaseSticker(TypedDict):
     id: Snowflake
     name: str
-    description: Optional[str]
+    description: str | None
     tags: str
     format_type: StickerFormatType
 
@@ -61,7 +61,7 @@ class CreateGuildSticker(TypedDict):
 class EditGuildSticker(TypedDict, total=False):
     name: str
     tags: str
-    description: Optional[str]
+    description: str | None
 
 
 class ListStickerPacks(TypedDict):

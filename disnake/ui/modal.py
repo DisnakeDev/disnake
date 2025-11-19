@@ -6,8 +6,9 @@ import asyncio
 import os
 import sys
 import traceback
+from collections.abc import Callable
 from functools import partial
-from typing import TYPE_CHECKING, Callable, Optional, TypeVar, Union, cast
+from typing import TYPE_CHECKING, TypeVar, Union, cast
 
 from ..enums import TextInputStyle
 from ..utils import MISSING
@@ -109,9 +110,9 @@ class Modal:
         self.timeout: float = timeout
 
         # function for the modal to remove itself from the store, if any
-        self.__remove_callback: Optional[Callable[[Modal], None]] = None
+        self.__remove_callback: Callable[[Modal], None] | None = None
         # timer handle for the scheduled timeout
-        self.__timeout_handle: Optional[asyncio.TimerHandle] = None
+        self.__timeout_handle: asyncio.TimerHandle | None = None
 
     def __repr__(self) -> str:
         return (
@@ -120,7 +121,7 @@ class Modal:
         )
 
     def append_component(
-        self, component: Union[ModalTopLevelComponentInput, list[ModalTopLevelComponentInput]]
+        self, component: ModalTopLevelComponentInput | list[ModalTopLevelComponentInput]
     ) -> None:
         """Adds one or multiple component(s) to the modal.
 
@@ -166,11 +167,11 @@ class Modal:
         label: str,
         custom_id: str = MISSING,
         style: TextInputStyle = TextInputStyle.short,
-        placeholder: Optional[str] = None,
-        value: Optional[str] = None,
+        placeholder: str | None = None,
+        value: str | None = None,
         required: bool = True,
-        min_length: Optional[int] = None,
-        max_length: Optional[int] = None,
+        min_length: int | None = None,
+        max_length: int | None = None,
     ) -> None:
         """Creates and adds a text input component to the modal.
 
@@ -278,7 +279,7 @@ class Modal:
                 # Otherwise, the modal closed for the user; remove it from the store.
                 self._stop_listening()
 
-    def _start_listening(self, remove_callback: Optional[Callable[[Modal], None]]) -> None:
+    def _start_listening(self, remove_callback: Callable[[Modal], None] | None) -> None:
         self.__remove_callback = remove_callback
 
         loop = asyncio.get_running_loop()

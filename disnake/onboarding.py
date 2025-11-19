@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING
 
 from .enums import OnboardingPromptType, try_enum
 from .mixins import Hashable
@@ -160,7 +160,7 @@ class OnboardingPromptOption(Hashable):
 
         self.id: int = int(data["id"])
         self.title: str = data["title"]
-        self.description: Optional[str] = data["description"]
+        self.description: str | None = data["description"]
         self.role_ids: frozenset[int] = (
             frozenset(map(int, roles_ids)) if (roles_ids := data.get("role_ids")) else frozenset()
         )
@@ -170,7 +170,7 @@ class OnboardingPromptOption(Hashable):
             else frozenset()
         )
 
-        self.emoji: Optional[Union[Emoji, PartialEmoji, str]]
+        self.emoji: Emoji | PartialEmoji | str | None
         if emoji_data := data.get("emoji"):
             self.emoji = guild._state.get_reaction_emoji(emoji_data)
         else:

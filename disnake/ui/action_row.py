@@ -9,9 +9,7 @@ from typing import (
     ClassVar,
     Generic,
     NoReturn,
-    Optional,
     TypeVar,
-    Union,
     cast,
     overload,
 )
@@ -63,7 +61,9 @@ from .text_input import TextInput
 from .thumbnail import Thumbnail
 
 if TYPE_CHECKING:
-    from typing_extensions import Self, TypeAlias
+    from typing import TypeAlias
+
+    from typing_extensions import Self
 
     from ..abc import AnyChannel
     from ..emoji import Emoji
@@ -102,15 +102,15 @@ StrictActionRowChildT = TypeVar(
 # this is cursed
 ButtonCompatibleActionRowT = TypeVar(
     "ButtonCompatibleActionRowT",
-    bound="Union[ActionRow[ActionRowMessageComponent], ActionRow[WrappedComponent]]",
+    bound="ActionRow[ActionRowMessageComponent] | ActionRow[WrappedComponent]",
 )
 SelectCompatibleActionRowT = TypeVar(
     "SelectCompatibleActionRowT",
-    bound="Union[ActionRow[ActionRowMessageComponent], ActionRow[WrappedComponent]]",
+    bound="ActionRow[ActionRowMessageComponent] | ActionRow[WrappedComponent]",
 )
 TextInputCompatibleActionRowT = TypeVar(
     "TextInputCompatibleActionRowT",
-    bound="Union[ActionRow[ActionRowModalComponent], ActionRow[WrappedComponent]]",
+    bound="ActionRow[ActionRowModalComponent] | ActionRow[WrappedComponent]",
 )
 
 
@@ -282,15 +282,15 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
 
     def add_button(
         self: ButtonCompatibleActionRowT,
-        index: Optional[int] = None,
+        index: int | None = None,
         *,
         style: ButtonStyle = ButtonStyle.secondary,
-        label: Optional[str] = None,
+        label: str | None = None,
         disabled: bool = False,
-        custom_id: Optional[str] = None,
-        url: Optional[str] = None,
-        emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
-        sku_id: Optional[int] = None,
+        custom_id: str | None = None,
+        url: str | None = None,
+        emoji: str | Emoji | PartialEmoji | None = None,
+        sku_id: int | None = None,
         id: int = 0,
     ) -> ButtonCompatibleActionRowT:
         """Add a button to the action row. Can only be used if the action
@@ -359,7 +359,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         self: SelectCompatibleActionRowT,
         *,
         custom_id: str = MISSING,
-        placeholder: Optional[str] = None,
+        placeholder: str | None = None,
         min_values: int = 1,
         max_values: int = 1,
         options: SelectOptionInput = MISSING,
@@ -427,11 +427,11 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         self: SelectCompatibleActionRowT,
         *,
         custom_id: str = MISSING,
-        placeholder: Optional[str] = None,
+        placeholder: str | None = None,
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
-        default_values: Optional[Sequence[SelectDefaultValueInputType[Union[User, Member]]]] = None,
+        default_values: Sequence[SelectDefaultValueInputType[User | Member]] | None = None,
         id: int = 0,
     ) -> SelectCompatibleActionRowT:
         """Add a user select menu to the action row. Can only be used if the action
@@ -493,11 +493,11 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         self: SelectCompatibleActionRowT,
         *,
         custom_id: str = MISSING,
-        placeholder: Optional[str] = None,
+        placeholder: str | None = None,
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
-        default_values: Optional[Sequence[SelectDefaultValueInputType[Role]]] = None,
+        default_values: Sequence[SelectDefaultValueInputType[Role]] | None = None,
         id: int = 0,
     ) -> SelectCompatibleActionRowT:
         """Add a role select menu to the action row. Can only be used if the action
@@ -559,13 +559,12 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         self: SelectCompatibleActionRowT,
         *,
         custom_id: str = MISSING,
-        placeholder: Optional[str] = None,
+        placeholder: str | None = None,
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
-        default_values: Optional[
-            Sequence[SelectDefaultValueMultiInputType[Union[User, Member, Role]]]
-        ] = None,
+        default_values: Sequence[SelectDefaultValueMultiInputType[User | Member | Role]]
+        | None = None,
         id: int = 0,
     ) -> SelectCompatibleActionRowT:
         """Add a mentionable (user/member/role) select menu to the action row. Can only be used if the action
@@ -629,12 +628,12 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         self: SelectCompatibleActionRowT,
         *,
         custom_id: str = MISSING,
-        placeholder: Optional[str] = None,
+        placeholder: str | None = None,
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
-        channel_types: Optional[list[ChannelType]] = None,
-        default_values: Optional[Sequence[SelectDefaultValueInputType[AnyChannel]]] = None,
+        channel_types: list[ChannelType] | None = None,
+        default_values: Sequence[SelectDefaultValueInputType[AnyChannel]] | None = None,
         id: int = 0,
     ) -> SelectCompatibleActionRowT:
         """Add a channel select menu to the action row. Can only be used if the action
@@ -703,11 +702,11 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         label: str,
         custom_id: str,
         style: TextInputStyle = TextInputStyle.short,
-        placeholder: Optional[str] = None,
-        value: Optional[str] = None,
+        placeholder: str | None = None,
+        value: str | None = None,
         required: bool = True,
-        min_length: Optional[int] = None,
-        max_length: Optional[int] = None,
+        min_length: int | None = None,
+        max_length: int | None = None,
         id: int = 0,
     ) -> TextInputCompatibleActionRowT:
         """Add a text input to the action row. Can only be used if the action
@@ -840,7 +839,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
             id=action_row.id,
         )
 
-    def __delitem__(self, index: Union[int, slice]) -> None:
+    def __delitem__(self, index: int | slice) -> None:
         del self._children[index]
 
     @overload
@@ -849,9 +848,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
     @overload
     def __getitem__(self, index: slice) -> Sequence[ActionRowChildT]: ...
 
-    def __getitem__(
-        self, index: Union[int, slice]
-    ) -> Union[ActionRowChildT, Sequence[ActionRowChildT]]:
+    def __getitem__(self, index: int | slice) -> ActionRowChildT | Sequence[ActionRowChildT]:
         return self._children[index]
 
     def __iter__(self) -> Iterator[ActionRowChildT]:
@@ -992,12 +989,12 @@ def normalize_components(
 @overload
 def normalize_components(
     components: ComponentInput[ActionRowChildT, NonActionRowChildT], /, modal: bool = False
-) -> Sequence[Union[ActionRow[ActionRowChildT], NonActionRowChildT]]: ...
+) -> Sequence[ActionRow[ActionRowChildT] | NonActionRowChildT]: ...
 
 
 def normalize_components(
     components: ComponentInput[ActionRowChildT, NonActionRowChildT], /, modal: bool = False
-) -> Sequence[Union[ActionRow[ActionRowChildT], NonActionRowChildT]]:
+) -> Sequence[ActionRow[ActionRowChildT] | NonActionRowChildT]:
     """Wraps consecutive actionrow-compatible components or lists in `ActionRow`s,
     while respecting the width limit. Other components are returned as-is.
 
@@ -1007,7 +1004,7 @@ def normalize_components(
     if not isinstance(components, Sequence):
         components = [components]
 
-    result: list[Union[ActionRow[ActionRowChildT], NonActionRowChildT]] = []
+    result: list[ActionRow[ActionRowChildT] | NonActionRowChildT] = []
     auto_row: ActionRow[ActionRowChildT] = ActionRow[ActionRowChildT]()
 
     wrap_types = TextInput if modal else WrappedComponent
@@ -1176,7 +1173,7 @@ def _to_ui_component(component: Component) -> UIComponent:
 
 def _message_component_to_item(
     component: ActionRowMessageComponentRaw,
-) -> Optional[ActionRowMessageComponent]:
+) -> ActionRowMessageComponent | None:
     if isinstance(
         component,
         (

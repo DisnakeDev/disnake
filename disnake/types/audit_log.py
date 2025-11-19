@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import datetime
-from typing import Literal, Optional, TypedDict, Union
+from typing import Literal, TypedDict, Union
 
 from typing_extensions import NotRequired
 
@@ -309,7 +309,7 @@ AuditLogChange = Union[
 class AuditEntryInfo(TypedDict):
     delete_member_days: str
     members_removed: str
-    channel_id: Optional[Snowflake]
+    channel_id: Snowflake | None
     message_id: Snowflake
     count: str
     id: Snowflake
@@ -322,9 +322,9 @@ class AuditEntryInfo(TypedDict):
 
 
 class AuditLogEntry(TypedDict):
-    target_id: Optional[str]
+    target_id: str | None
     changes: NotRequired[list[AuditLogChange]]
-    user_id: Optional[Snowflake]
+    user_id: Snowflake | None
     id: Snowflake
     action_type: AuditLogEvent
     options: NotRequired[AuditEntryInfo]

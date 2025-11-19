@@ -12,20 +12,18 @@ import itertools
 import math
 import types
 from abc import ABC, abstractmethod
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from enum import Enum, EnumMeta
 from types import EllipsisType, UnionType
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     ClassVar,
     Final,
     Generic,
     Literal,
     NoReturn,
-    Optional,
     TypeVar,
     Union,
     cast,
@@ -52,7 +50,9 @@ from .converter import CONVERTER_MAPPING
 T_ = TypeVar("T_")
 
 if TYPE_CHECKING:
-    from typing_extensions import Concatenate, ParamSpec, Self, TypeGuard
+    from typing import Concatenate, TypeGuard
+
+    from typing_extensions import ParamSpec, Self
 
     from disnake.app_commands import Choices
     from disnake.i18n import LocalizationValue, LocalizedOptional
@@ -102,7 +102,7 @@ __all__ = (
 )
 
 
-def issubclass_(obj: Any, tp: Union[TypeT, tuple[TypeT, ...]]) -> TypeGuard[TypeT]:
+def issubclass_(obj: Any, tp: TypeT | tuple[TypeT, ...]) -> TypeGuard[TypeT]:
     """Similar to the builtin `issubclass`, but more lenient.
     Can also handle unions (`issubclass(int | str, int)`) and
     generic types (`issubclass(X[T], X)`) in the first argument.
@@ -137,7 +137,7 @@ def remove_optionals(annotation: Any) -> Any:
     return annotation
 
 
-def _xt_to_xe(xe: Optional[float], xt: Optional[float], direction: float = 1) -> Optional[float]:
+def _xt_to_xe(xe: float | None, xt: float | None, direction: float = 1) -> float | None:
     """Function for combining xt and xe
 
     * x > xt && x >= xe ; x >= f(xt, xe, 1)
@@ -179,7 +179,7 @@ class Injection(Generic[P, T_]):
         self,
         function: InjectionCallback[CogT, P, T_],
         *,
-        autocompleters: Optional[dict[str, Callable]] = None,
+        autocompleters: dict[str, Callable] | None = None,
     ) -> None:
         if autocompleters is not None:
             for autocomp in autocompleters.values():
@@ -187,9 +187,9 @@ class Injection(Generic[P, T_]):
 
         self.function: InjectionCallback[Any, P, T_] = function
         self.autocompleters: dict[str, Callable] = autocompleters or {}
-        self._injected: Optional[Cog] = None
+        self._injected: Cog | None = None
 
-    def __get__(self, obj: Optional[Any], _: type[Any]) -> Self:
+    def __get__(self, obj: Any | None, _: type[Any]) -> Self:
         if obj is None:
             return self
 
@@ -215,7 +215,7 @@ class Injection(Generic[P, T_]):
         function: InjectionCallback[CogT, P, T_],
         annotation: Any,
         *,
-        autocompleters: Optional[dict[str, Callable]] = None,
+        autocompleters: dict[str, Callable] | None = None,
     ) -> Injection[P, T_]:
         self = cls(function, autocompleters=autocompleters)
         cls._registered[annotation] = self
@@ -261,8 +261,8 @@ class _BaseRange(ABC):
     _allowed_types: ClassVar[tuple[type[Any], ...]]
 
     underlying_type: type[Any]
-    min_value: Optional[Union[int, float]]
-    max_value: Optional[Union[int, float]]
+    min_value: int | float | None
+    max_value: int | float | None
 
     def __class_getitem__(cls, params: tuple[Any, ...]) -> Self:
         # deconstruct type arguments
@@ -319,7 +319,7 @@ class _BaseRange(ABC):
         return cls(underlying_type=underlying_type, min_value=min_value, max_value=max_value)
 
     @staticmethod
-    def _coerce_bound(value: Any, name: str) -> Optional[Union[int, float]]:
+    def _coerce_bound(value: Any, name: str) -> int | float | None:
         if value is None or isinstance(value, EllipsisType):
             return None
         elif isinstance(value, (int, float)):
@@ -473,7 +473,7 @@ class ParamInfo:
         .. versionadded:: 2.6
     """
 
-    TYPES: ClassVar[dict[Union[type, UnionType], int]] = {
+    TYPES: ClassVar[dict[type | UnionType, int]] = {
         str:                                               OptionType.string.value,
         int:                                               OptionType.integer.value,
         bool:                                              OptionType.boolean.value,
@@ -495,30 +495,30 @@ class ParamInfo:
 
     def __init__(
         self,
-        default: Union[Any, Callable[[ApplicationCommandInteraction[BotT]], Any]] = ...,
+        default: Any | Callable[[ApplicationCommandInteraction[BotT]], Any] = ...,
         *,
         name: LocalizedOptional = None,
         description: LocalizedOptional = None,
-        converter: Optional[Callable[[ApplicationCommandInteraction[BotT], Any], Any]] = None,
+        converter: Callable[[ApplicationCommandInteraction[BotT], Any], Any] | None = None,
         convert_default: bool = False,
-        autocomplete: Optional[AnyAutocompleter] = None,
-        choices: Optional[Choices] = None,
-        type: Optional[type] = None,
-        channel_types: Optional[list[ChannelType]] = None,
-        lt: Optional[float] = None,
-        le: Optional[float] = None,
-        gt: Optional[float] = None,
-        ge: Optional[float] = None,
+        autocomplete: AnyAutocompleter | None = None,
+        choices: Choices | None = None,
+        type: type | None = None,
+        channel_types: list[ChannelType] | None = None,
+        lt: float | None = None,
+        le: float | None = None,
+        gt: float | None = None,
+        ge: float | None = None,
         large: bool = False,
-        min_length: Optional[int] = None,
-        max_length: Optional[int] = None,
+        min_length: int | None = None,
+        max_length: int | None = None,
     ) -> None:
         name_loc = Localized._cast(name, False)
         self.name: str = name_loc.string or ""
         self.name_localizations: LocalizationValue = name_loc.localizations
 
         desc_loc = Localized._cast(description, False)
-        self.description: Optional[str] = desc_loc.string
+        self.description: str | None = desc_loc.string
         self.description_localizations: LocalizationValue = desc_loc.localizations
 
         self.default = default
@@ -588,7 +588,7 @@ class ParamInfo:
         cls,
         param: inspect.Parameter,
         type_hints: dict[str, Any],
-        parsed_docstring: Optional[dict[str, disnake.utils._DocstringParam]] = None,
+        parsed_docstring: dict[str, disnake.utils._DocstringParam] | None = None,
     ) -> Self:
         # hopefully repeated parsing won't cause any problems
         parsed_docstring = parsed_docstring or {}
@@ -684,7 +684,7 @@ class ParamInfo:
         self.type = type(self.choices[0].value)
 
     def _parse_guild_channel(
-        self, *channels: Union[type[disnake.abc.GuildChannel], type[disnake.Thread]]
+        self, *channels: type[disnake.abc.GuildChannel] | type[disnake.Thread]
     ) -> None:
         # this variable continues to be GuildChannel because the type is still
         # determined from the TYPE mapping in the class definition
@@ -728,8 +728,8 @@ class ParamInfo:
             self.max_value = annotation.max_value
             annotation = annotation.underlying_type
         if isinstance(annotation, _String):
-            self.min_length = cast("Optional[int]", annotation.min_value)
-            self.max_length = cast("Optional[int]", annotation.max_value)
+            self.min_length = cast("int | None", annotation.min_value)
+            self.max_length = cast("int | None", annotation.max_value)
             annotation = annotation.underlying_type
         if issubclass_(annotation, LargeInt):
             self.large = True
@@ -895,8 +895,8 @@ def safe_call(function: Callable[..., T], /, *possible_args: Any, **possible_kwa
 
 def isolate_self(
     function: Callable[..., Any],
-    parameters: Optional[dict[str, inspect.Parameter]] = None,
-) -> tuple[tuple[Optional[inspect.Parameter], ...], dict[str, inspect.Parameter]]:
+    parameters: dict[str, inspect.Parameter] | None = None,
+) -> tuple[tuple[inspect.Parameter | None, ...], dict[str, inspect.Parameter]]:
     """Create parameters without self and the first interaction.
 
     Optionally accepts a `{str: inspect.Parameter}` dict as an optimization,
@@ -910,8 +910,8 @@ def isolate_self(
     parameters = dict(parameters)  # shallow copy
     parametersl = list(parameters.values())
 
-    cog_param: Optional[inspect.Parameter] = None
-    inter_param: Optional[inspect.Parameter] = None
+    cog_param: inspect.Parameter | None = None
+    inter_param: inspect.Parameter | None = None
 
     if signature_has_self_param(function):
         cog_param = parameters.pop(parametersl[0].name)
@@ -961,8 +961,8 @@ def classify_autocompleter(autocompleter: AnyAutocompleter) -> None:
 
 def collect_params(
     function: Callable[..., Any],
-    parameters: Optional[dict[str, inspect.Parameter]] = None,
-) -> tuple[Optional[str], Optional[str], list[ParamInfo], dict[str, Injection]]:
+    parameters: dict[str, inspect.Parameter] | None = None,
+) -> tuple[str | None, str | None, list[ParamInfo], dict[str, Injection]]:
     """Collect all parameters in a function.
 
     Optionally accepts a `{str: inspect.Parameter}` dict as an optimization.
@@ -1025,8 +1025,8 @@ def collect_nested_params(function: Callable[..., Any]) -> list[ParamInfo]:
 
 def format_kwargs(
     interaction: ApplicationCommandInteraction,
-    cog_param: Optional[str] = None,
-    inter_param: Optional[str] = None,
+    cog_param: str | None = None,
+    inter_param: str | None = None,
     /,
     *args: Any,
     **kwargs: Any,
@@ -1041,7 +1041,7 @@ def format_kwargs(
         msg = "Method slash commands may be created only in cog subclasses"
         raise TypeError(msg)
 
-    cog: Optional[commands.Cog] = first
+    cog: commands.Cog | None = first
 
     if cog_param:
         kwargs[cog_param] = cog
@@ -1133,22 +1133,22 @@ def expand_params(command: AnySlashCommand) -> list[Option]:
 
 
 def Param(
-    default: Union[Any, Callable[[ApplicationCommandInteraction[BotT]], Any]] = ...,
+    default: Any | Callable[[ApplicationCommandInteraction[BotT]], Any] = ...,
     *,
     name: LocalizedOptional = None,
     description: LocalizedOptional = None,
-    choices: Optional[Choices] = None,
-    converter: Optional[Callable[[ApplicationCommandInteraction[BotT], Any], Any]] = None,
+    choices: Choices | None = None,
+    converter: Callable[[ApplicationCommandInteraction[BotT], Any], Any] | None = None,
     convert_defaults: bool = False,
-    autocomplete: Optional[AnyAutocompleter] = None,
-    channel_types: Optional[list[ChannelType]] = None,
-    lt: Optional[float] = None,
-    le: Optional[float] = None,
-    gt: Optional[float] = None,
-    ge: Optional[float] = None,
+    autocomplete: AnyAutocompleter | None = None,
+    channel_types: list[ChannelType] | None = None,
+    lt: float | None = None,
+    le: float | None = None,
+    gt: float | None = None,
+    ge: float | None = None,
     large: bool = False,
-    min_length: Optional[int] = None,
-    max_length: Optional[int] = None,
+    min_length: int | None = None,
+    max_length: int | None = None,
     **kwargs: Any,
 ) -> Any:
     """A special function that creates an instance of :class:`ParamInfo` that contains some information about a
@@ -1267,7 +1267,7 @@ param = Param
 def inject(
     function: Callable[..., Any],
     *,
-    autocompleters: Optional[dict[str, Callable]] = None,
+    autocompleters: dict[str, Callable] | None = None,
 ) -> Any:
     """A special function to use the provided function for injections.
     This should be assigned to a parameter of a function representing your slash command.
@@ -1304,7 +1304,7 @@ def inject(
 
 def injection(
     *,
-    autocompleters: Optional[dict[str, Callable]] = None,
+    autocompleters: dict[str, Callable] | None = None,
 ) -> Callable[[Callable[..., Any]], Any]:
     """Decorator interface for :func:`inject`.
     You can then assign this value to your slash commands' parameters.
@@ -1336,9 +1336,7 @@ def injection(
     return decorator
 
 
-def option_enum(
-    choices: Union[dict[str, TChoice], list[TChoice]], **kwargs: TChoice
-) -> type[TChoice]:
+def option_enum(choices: dict[str, TChoice] | list[TChoice], **kwargs: TChoice) -> type[TChoice]:
     """A utility function to create an enum type.
     Returns a new :class:`~enum.Enum` based on the provided parameters.
 
@@ -1386,7 +1384,7 @@ else:
 def register_injection(
     function: InjectionCallback[CogT, P, T_],
     *,
-    autocompleters: Optional[dict[str, Callable]] = None,
+    autocompleters: dict[str, Callable] | None = None,
 ) -> Injection[P, T_]:
     """A decorator to register a global injection.
 

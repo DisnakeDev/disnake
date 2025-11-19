@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, Optional, TypedDict, Union
+from typing import TYPE_CHECKING, Literal, TypedDict, Union
 
 from .appinfo import ApplicationIntegrationType
 from .channel import ChannelType
@@ -17,7 +17,9 @@ from .threads import ThreadMetadata
 from .user import User
 
 if TYPE_CHECKING:
-    from typing_extensions import NotRequired, TypeAlias
+    from typing import TypeAlias
+
+    from typing_extensions import NotRequired
 
     from .message import AllowedMentions, Attachment, Message
 
@@ -33,16 +35,16 @@ class ApplicationCommand(TypedDict):
     application_id: Snowflake
     guild_id: NotRequired[Snowflake]
     name: str
-    name_localizations: NotRequired[Optional[LocalizationDict]]
+    name_localizations: NotRequired[LocalizationDict | None]
     description: str
-    description_localizations: NotRequired[Optional[LocalizationDict]]
+    description_localizations: NotRequired[LocalizationDict | None]
     options: NotRequired[list[ApplicationCommandOption]]
-    default_member_permissions: NotRequired[Optional[str]]
-    dm_permission: NotRequired[Optional[bool]]  # deprecated
+    default_member_permissions: NotRequired[str | None]
+    dm_permission: NotRequired[bool | None]  # deprecated
     default_permission: NotRequired[bool]  # deprecated
     nsfw: NotRequired[bool]
     integration_types: NotRequired[list[ApplicationIntegrationType]]
-    contexts: NotRequired[Optional[list[InteractionContextType]]]
+    contexts: NotRequired[list[InteractionContextType] | None]
     version: Snowflake
 
 
@@ -52,9 +54,9 @@ ApplicationCommandOptionType = Literal[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
 class ApplicationCommandOption(TypedDict):
     type: ApplicationCommandOptionType
     name: str
-    name_localizations: NotRequired[Optional[LocalizationDict]]
+    name_localizations: NotRequired[LocalizationDict | None]
     description: str
-    description_localizations: NotRequired[Optional[LocalizationDict]]
+    description_localizations: NotRequired[LocalizationDict | None]
     required: NotRequired[bool]
     choices: NotRequired[list[ApplicationCommandOptionChoice]]
     options: NotRequired[list[ApplicationCommandOption]]
@@ -71,7 +73,7 @@ ApplicationCommandOptionChoiceValue = Union[str, int, float]
 
 class ApplicationCommandOptionChoice(TypedDict):
     name: str
-    name_localizations: NotRequired[Optional[LocalizationDict]]
+    name_localizations: NotRequired[LocalizationDict | None]
     value: ApplicationCommandOptionChoiceValue
 
 
@@ -433,10 +435,9 @@ class MessageComponentInteractionMetadata(_BaseInteractionMetadata):
 
 
 class ModalInteractionMetadata(_BaseInteractionMetadata):
-    triggering_interaction_metadata: Union[
-        ApplicationCommandInteractionMetadata,
-        MessageComponentInteractionMetadata,
-    ]
+    triggering_interaction_metadata: (
+        ApplicationCommandInteractionMetadata | MessageComponentInteractionMetadata
+    )
 
 
 InteractionMetadata = Union[
@@ -448,15 +449,15 @@ InteractionMetadata = Union[
 
 class EditApplicationCommand(TypedDict):
     name: str
-    name_localizations: NotRequired[Optional[LocalizationDict]]
+    name_localizations: NotRequired[LocalizationDict | None]
     description: NotRequired[str]
-    description_localizations: NotRequired[Optional[LocalizationDict]]
-    options: NotRequired[Optional[list[ApplicationCommandOption]]]
-    default_member_permissions: NotRequired[Optional[str]]
+    description_localizations: NotRequired[LocalizationDict | None]
+    options: NotRequired[list[ApplicationCommandOption] | None]
+    default_member_permissions: NotRequired[str | None]
     dm_permission: NotRequired[bool]  # deprecated
     default_permission: NotRequired[bool]  # deprecated
     nsfw: NotRequired[bool]
-    integration_types: NotRequired[Optional[list[ApplicationIntegrationType]]]
-    contexts: NotRequired[Optional[list[InteractionContextType]]]
+    integration_types: NotRequired[list[ApplicationIntegrationType] | None]
+    contexts: NotRequired[list[InteractionContextType] | None]
     # n.b. this cannot be changed
     type: NotRequired[ApplicationCommandType]

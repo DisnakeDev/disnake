@@ -254,7 +254,7 @@ class TestIsolateSelf:
 
     def test_inter_union(self) -> None:
         def func(
-            inter: Union[commands.Context, disnake.ApplicationCommandInteraction[commands.Bot]],
+            inter: commands.Context | disnake.ApplicationCommandInteraction[commands.Bot],
             a: int,
         ) -> None: ...
 

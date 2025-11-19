@@ -7,12 +7,12 @@ import inspect
 import os
 import sys
 import warnings
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import timedelta, timezone
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     Literal,
     Optional,
     TypeVar,
@@ -615,7 +615,7 @@ def test_escape_mentions(text: str, expected) -> None:
         ),
     ],
 )
-def test_parse_docstring_desc(docstring: Optional[str], expected) -> None:
+def test_parse_docstring_desc(docstring: str | None, expected) -> None:
     def f() -> None: ...
 
     f.__doc__ = docstring
@@ -828,7 +828,7 @@ class TestResolveAnnotationTypeAliasType:
         resolved = utils.resolve_annotation(
             utils_helper_module.ListWithForwardRefAlias, globals(), locals(), {}
         )
-        assert resolved == list[Union[int, str]]
+        assert resolved == list[int | str]
 
     # combination of the previous two, alias in other module scope and arg in local scope
     def test_forwardref_mixed(self) -> None:

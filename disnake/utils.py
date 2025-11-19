@@ -17,19 +17,25 @@ import unicodedata
 import warnings
 from base64 import b64encode
 from bisect import bisect_left
-from collections.abc import AsyncIterator, Awaitable, Iterable, Iterator, Mapping, Sequence
+from collections.abc import (
+    AsyncIterator,
+    Awaitable,
+    Callable,
+    Iterable,
+    Iterator,
+    Mapping,
+    Sequence,
+)
 from inspect import getdoc as _getdoc, isawaitable as _isawaitable, signature as _signature
 from operator import attrgetter
 from types import UnionType
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     ForwardRef,
     Generic,
     Literal,
     NoReturn,
-    Optional,
     Protocol,
     TypedDict,
     TypeVar,
@@ -116,7 +122,7 @@ MISSING: Any = _MissingSentinel()
 class _cached_property:
     def __init__(self, function) -> None:
         self.function = function
-        self.__doc__: Optional[str] = function.__doc__
+        self.__doc__: str | None = function.__doc__
 
     def __get__(self, instance, owner):
         if instance is None:
@@ -168,7 +174,7 @@ class CachedSlotProperty(Generic[T, T_co]):
     @overload
     def __get__(self, instance: T, owner: type[Any]) -> T_co: ...
 
-    def __get__(self, instance: Optional[T], owner: type[Any]) -> Any:
+    def __get__(self, instance: T | None, owner: type[Any]) -> Any:
         if instance is None:
             return self
 
@@ -184,7 +190,7 @@ class classproperty(Generic[T_co]):
     def __init__(self, fget: Callable[[Any], T_co]) -> None:
         self.fget = fget
 
-    def __get__(self, instance: Optional[Any], owner: type[Any]) -> T_co:
+    def __get__(self, instance: Any | None, owner: type[Any]) -> T_co:
         return self.fget(owner)
 
     def __set__(self, instance, value) -> NoReturn:
@@ -236,10 +242,10 @@ def parse_time(timestamp: str) -> datetime.datetime: ...
 
 
 @overload
-def parse_time(timestamp: Optional[str]) -> Optional[datetime.datetime]: ...
+def parse_time(timestamp: str | None) -> datetime.datetime | None: ...
 
 
-def parse_time(timestamp: Optional[str]) -> Optional[datetime.datetime]:
+def parse_time(timestamp: str | None) -> datetime.datetime | None:
     if timestamp:
         return datetime.datetime.fromisoformat(timestamp)
     return None
@@ -250,16 +256,16 @@ def isoformat_utc(dt: datetime.datetime) -> str: ...
 
 
 @overload
-def isoformat_utc(dt: Optional[datetime.datetime]) -> Optional[str]: ...
+def isoformat_utc(dt: datetime.datetime | None) -> str | None: ...
 
 
-def isoformat_utc(dt: Optional[datetime.datetime]) -> Optional[str]:
+def isoformat_utc(dt: datetime.datetime | None) -> str | None:
     if dt:
         return dt.astimezone(datetime.timezone.utc).isoformat()
     return None
 
 
-def copy_doc(original: Union[Callable[..., Any], property]) -> Callable[[T], T]:
+def copy_doc(original: Callable[..., Any] | property) -> Callable[[T], T]:
     def decorator(overridden: T) -> T:
         overridden.__doc__ = original.__doc__
         if callable(original):
@@ -270,7 +276,7 @@ def copy_doc(original: Union[Callable[..., Any], property]) -> Callable[[T], T]:
 
 
 def deprecated(
-    instead: Optional[str] = None, *, skip_internal_frames: bool = False
+    instead: str | None = None, *, skip_internal_frames: bool = False
 ) -> Callable[[Callable[P, T]], Callable[P, T]]:
     def actual_decorator(func: Callable[P, T]) -> Callable[P, T]:
         @functools.wraps(func)
@@ -310,7 +316,7 @@ def warn_deprecated(
 
 
 def oauth_url(
-    client_id: Union[int, str],
+    client_id: int | str,
     *,
     permissions: Permissions = MISSING,
     guild: Snowflake = MISSING,
@@ -408,7 +414,7 @@ def time_snowflake(dt: datetime.datetime, high: bool = False) -> int:
     return (discord_millis << 22) + (2**22 - 1 if high else 0)
 
 
-def find(predicate: Callable[[T], Any], seq: Iterable[T]) -> Optional[T]:
+def find(predicate: Callable[[T], Any], seq: Iterable[T]) -> T | None:
     """A helper to return the first element found in the sequence
     that meets the predicate. For example: ::
 
@@ -433,7 +439,7 @@ def find(predicate: Callable[[T], Any], seq: Iterable[T]) -> Optional[T]:
     return None
 
 
-def get(iterable: Iterable[T], **attrs: Any) -> Optional[T]:
+def get(iterable: Iterable[T], **attrs: Any) -> T | None:
     """A helper that returns the first element in the iterable that meets
     all the traits passed in ``attrs``. This is an alternative for
     :func:`~disnake.utils.find`.
@@ -500,7 +506,7 @@ def _unique(iterable: Iterable[T]) -> list[T]:
     return list(dict.fromkeys(iterable))
 
 
-def _get_as_snowflake(data: Any, key: str) -> Optional[int]:
+def _get_as_snowflake(data: Any, key: str) -> int | None:
     try:
         value = data[key]
     except KeyError:
@@ -509,7 +515,7 @@ def _get_as_snowflake(data: Any, key: str) -> Optional[int]:
         return value and int(value)
 
 
-def _maybe_cast(value: V, converter: Callable[[V], T], default: T = None) -> Optional[T]:
+def _maybe_cast(value: V, converter: Callable[[V], T], default: T = None) -> T | None:
     if value is MISSING:
         return default
     return converter(value)
@@ -554,7 +560,7 @@ def _bytes_to_base64_data(data: _BytesLike) -> str:
     return fmt.format(mime=mime, data=b64)
 
 
-def _get_extension_for_data(data: _BytesLike) -> Optional[str]:
+def _get_extension_for_data(data: _BytesLike) -> str | None:
     try:
         mime_type = _get_mime_type_for_data(data)
     except ValueError:
@@ -570,7 +576,7 @@ async def _assetbytes_to_base64_data(data: None) -> None: ...
 async def _assetbytes_to_base64_data(data: AssetBytes) -> str: ...
 
 
-async def _assetbytes_to_base64_data(data: Optional[AssetBytes]) -> Optional[str]:
+async def _assetbytes_to_base64_data(data: AssetBytes | None) -> str | None:
     if data is None:
         return None
     if not isinstance(data, (bytes, bytearray, memoryview)):
@@ -594,7 +600,7 @@ else:
 
 
 def _parse_ratelimit_header(request: Any, *, use_clock: bool = False) -> float:
-    reset_after: Optional[str] = request.headers.get("X-Ratelimit-Reset-After")
+    reset_after: str | None = request.headers.get("X-Ratelimit-Reset-After")
     if use_clock or not reset_after:
         utc = datetime.timezone.utc
         now = datetime.datetime.now(utc)
@@ -605,7 +611,7 @@ def _parse_ratelimit_header(request: Any, *, use_clock: bool = False) -> float:
 
 
 async def maybe_coroutine(
-    f: Callable[P, Union[Awaitable[T], T]], /, *args: P.args, **kwargs: P.kwargs
+    f: Callable[P, Awaitable[T] | T], /, *args: P.args, **kwargs: P.kwargs
 ) -> T:
     value = f(*args, **kwargs)
     if _isawaitable(value):
@@ -614,7 +620,7 @@ async def maybe_coroutine(
         return value
 
 
-async def async_all(gen: Iterable[Union[Awaitable[bool], bool]]) -> bool:
+async def async_all(gen: Iterable[Awaitable[bool] | bool]) -> bool:
     check = _isawaitable
     for elem in gen:
         if check(elem):
@@ -650,7 +656,7 @@ def compute_timedelta(dt: datetime.datetime) -> float:
     return max((dt - now).total_seconds(), 0)
 
 
-async def sleep_until(when: datetime.datetime, result: Optional[T] = None) -> Optional[T]:
+async def sleep_until(when: datetime.datetime, result: T | None = None) -> T | None:
     """|coro|
 
     Sleep until a specified time.
@@ -717,7 +723,7 @@ class SnowflakeList(array.array):
         i = bisect_left(self, element)
         self.insert(i, element)
 
-    def get(self, element: int) -> Optional[int]:
+    def get(self, element: int) -> int | None:
         i = bisect_left(self, element)
         return self[i] if i != len(self) and self[i] == element else None
 
@@ -741,18 +747,18 @@ def _string_width(string: str, *, _IS_ASCII=_IS_ASCII) -> int:
 
 
 @overload
-def resolve_invite(invite: Union[Invite, str], *, with_params: Literal[False] = False) -> str: ...
+def resolve_invite(invite: Invite | str, *, with_params: Literal[False] = False) -> str: ...
 
 
 @overload
 def resolve_invite(
-    invite: Union[Invite, str], *, with_params: Literal[True]
+    invite: Invite | str, *, with_params: Literal[True]
 ) -> tuple[str, dict[str, str]]: ...
 
 
 def resolve_invite(
-    invite: Union[Invite, str], *, with_params: bool = False
-) -> Union[str, tuple[str, dict[str, str]]]:
+    invite: Invite | str, *, with_params: bool = False
+) -> str | tuple[str, dict[str, str]]:
     """Resolves an invite from a :class:`~disnake.Invite`, URL or code.
 
     Parameters
@@ -788,7 +794,7 @@ def resolve_invite(
     return (code, params) if with_params else code
 
 
-def resolve_template(code: Union[Template, str]) -> str:
+def resolve_template(code: Template | str) -> str:
     """Resolves a template code from a :class:`~disnake.Template`, URL or code.
 
     .. versionadded:: 1.4
@@ -936,8 +942,8 @@ def escape_mentions(text: str) -> str:
 
 
 class _DocstringLocalizationsMixin(TypedDict):
-    localization_key_name: Optional[str]
-    localization_key_desc: Optional[str]
+    localization_key_name: str | None
+    localization_key_desc: str | None
 
 
 class _DocstringParam(_DocstringLocalizationsMixin):
@@ -988,7 +994,7 @@ def _get_description(lines: list[str]) -> str:
     return "\n".join(lines[:end]).strip()
 
 
-def _extract_localization_key(desc: str) -> tuple[str, tuple[Optional[str], Optional[str]]]:
+def _extract_localization_key(desc: str) -> tuple[str, tuple[str | None, str | None]]:
     match = re.search(r"\{\{(.*?)\}\}", desc)
     if match:
         desc = desc.replace(match.group(0), "").strip()
@@ -1005,10 +1011,10 @@ def _get_option_desc(lines: list[str]) -> dict[str, _DocstringParam]:
     # Read option descriptions
     options: dict[str, _DocstringParam] = {}
 
-    def add_param(param: Optional[str], desc_lines: list[str], maybe_type: Optional[str]) -> None:
+    def add_param(param: str | None, desc_lines: list[str], maybe_type: str | None) -> None:
         if param is None:
             return
-        desc: Optional[str] = None
+        desc: str | None = None
         if desc_lines:
             desc = "\n".join(desc_lines)
         elif maybe_type:
@@ -1025,8 +1031,8 @@ def _get_option_desc(lines: list[str]) -> dict[str, _DocstringParam]:
             }
 
     desc_lines: list[str] = []
-    param: Optional[str] = None
-    maybe_type: Optional[str] = None
+    param: str | None = None
+    maybe_type: str | None = None
     for line in lines[start:end]:
         spaces = _count_left_spaces(line)
         if spaces == 0:
@@ -1246,8 +1252,8 @@ def evaluate_annotation(
 def resolve_annotation(
     annotation: Any,
     globalns: dict[str, Any],
-    localns: Optional[dict[str, Any]],
-    cache: Optional[dict[str, Any]],
+    localns: dict[str, Any] | None,
+    cache: dict[str, Any] | None,
 ) -> Any:
     if annotation is None:
         return type(None)
@@ -1284,7 +1290,7 @@ _inspect_empty = inspect.Parameter.empty
 
 def get_signature_parameters(
     function: Callable[..., Any],
-    globalns: Optional[dict[str, Any]] = None,
+    globalns: dict[str, Any] | None = None,
     *,
     skip_standard_params: bool = False,
 ) -> dict[str, inspect.Parameter]:
@@ -1393,7 +1399,7 @@ def signature_has_self_param(function: Callable[..., Any]) -> bool:
 TimestampStyle = Literal["t", "T", "d", "D", "f", "F", "s", "S", "R"]
 
 
-def format_dt(dt: Union[datetime.datetime, float], /, style: TimestampStyle = "f") -> str:
+def format_dt(dt: datetime.datetime | float, /, style: TimestampStyle = "f") -> str:
     """Format a :class:`datetime.datetime`, :class:`int` or :class:`float` (seconds) for presentation within Discord.
 
     This allows for a locale-independent way of presenting data using Discord specific Markdown.
@@ -1482,7 +1488,7 @@ def search_directory(path: str) -> Iterator[str]:
             yield prefix + name
 
 
-def as_valid_locale(locale: str) -> Optional[str]:
+def as_valid_locale(locale: str) -> str | None:
     """Converts the provided locale name to a name that is valid for use with the API,
     for example by returning ``en-US`` for ``en_US``.
     Returns :data:`None` for invalid names.

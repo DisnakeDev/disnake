@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import Any, Literal, Optional, TypedDict, Union
+from typing import Any, Literal, TypedDict, Union
 
 from typing_extensions import NotRequired
 
@@ -55,8 +55,8 @@ class GatewayBot(Gateway):
 class GatewayPayload(TypedDict):
     op: Literal[0, 1, 7, 9, 10, 11]
     d: Any  # event data
-    s: Optional[int]  # sequence number
-    t: Optional[str]  # event name
+    s: int | None  # sequence number
+    t: str | None  # event name
 
 
 #####
@@ -69,7 +69,7 @@ class GatewayPayload(TypedDict):
 class HeartbeatCommand(TypedDict):
     op: Literal[1, 3]  # normal ws and voice ws have different heartbeat opcodes
     # normal ws uses a plain int seq, voice ws uses {t: <nonce>, seq_ack: <seq>}
-    d: Union[Optional[int], VoiceHeartbeatData]
+    d: int | None | VoiceHeartbeatData
 
 
 # opcode 2
@@ -100,7 +100,7 @@ class IdentifyCommand(TypedDict):
 
 
 class PresenceUpdateData(TypedDict):
-    since: Optional[int]
+    since: int | None
     activities: Sequence[SendableActivity]
     status: str
     afk: bool
@@ -116,7 +116,7 @@ class PresenceUpdateCommand(TypedDict):
 
 class VoiceStateData(TypedDict):
     guild_id: Snowflake
-    channel_id: Optional[Snowflake]
+    channel_id: Snowflake | None
     self_mute: bool
     self_deaf: bool
 
@@ -148,7 +148,7 @@ class RequestMembersData(TypedDict):
     query: NotRequired[str]
     limit: int
     presences: NotRequired[bool]
-    user_ids: NotRequired[Union[Snowflake, SnowflakeList]]
+    user_ids: NotRequired[Snowflake | SnowflakeList]
     nonce: NotRequired[str]
 
 
@@ -436,7 +436,7 @@ ChannelDeleteEvent = Channel
 class ChannelPinsUpdateEvent(TypedDict):
     guild_id: NotRequired[Snowflake]
     channel_id: Snowflake
-    last_pin_timestamp: NotRequired[Optional[str]]
+    last_pin_timestamp: NotRequired[str | None]
 
 
 # https://discord.com/developers/docs/topics/gateway-events#thread-create
@@ -494,17 +494,17 @@ class GuildMemberUpdateEvent(TypedDict):
     guild_id: Snowflake
     roles: list[Snowflake]
     user: User
-    nick: NotRequired[Optional[str]]
-    avatar: Optional[str]
-    banner: Optional[str]
-    joined_at: Optional[str]
-    premium_since: NotRequired[Optional[str]]
+    nick: NotRequired[str | None]
+    avatar: str | None
+    banner: str | None
+    joined_at: str | None
+    premium_since: NotRequired[str | None]
     deaf: NotRequired[bool]
     mute: NotRequired[bool]
     pending: NotRequired[bool]
-    communication_disabled_until: NotRequired[Optional[str]]
+    communication_disabled_until: NotRequired[str | None]
     flags: int
-    avatar_decoration_data: NotRequired[Optional[AvatarDecorationData]]
+    avatar_decoration_data: NotRequired[AvatarDecorationData | None]
 
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-emojis-update
@@ -653,7 +653,7 @@ VoiceStateUpdateEvent = GuildVoiceState
 class VoiceServerUpdateEvent(TypedDict):
     token: str
     guild_id: Snowflake
-    endpoint: Optional[str]
+    endpoint: str | None
 
 
 # https://discord.com/developers/docs/topics/gateway-events#voice-channel-effect-send
@@ -691,12 +691,12 @@ class AutoModerationActionExecutionEvent(TypedDict):
     rule_id: Snowflake
     rule_trigger_type: AutoModTriggerType
     user_id: Snowflake
-    channel_id: NotRequired[Optional[Snowflake]]
-    message_id: NotRequired[Optional[Snowflake]]
-    alert_system_message_id: NotRequired[Optional[Snowflake]]
+    channel_id: NotRequired[Snowflake | None]
+    message_id: NotRequired[Snowflake | None]
+    alert_system_message_id: NotRequired[Snowflake | None]
     content: NotRequired[str]
-    matched_content: NotRequired[Optional[str]]
-    matched_keyword: NotRequired[Optional[str]]
+    matched_content: NotRequired[str | None]
+    matched_keyword: NotRequired[str | None]
 
 
 # https://discord.com/developers/docs/events/gateway-events#entitlement-create
