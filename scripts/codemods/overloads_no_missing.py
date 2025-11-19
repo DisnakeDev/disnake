@@ -1,11 +1,15 @@
 # SPDX-License-Identifier: MIT
 
-from collections.abc import Sequence
+
+from typing import TYPE_CHECKING
 
 import libcst as cst
 import libcst.matchers as m
 
 from .base import BaseCodemodCommand
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
 
 EllipsisType = type(Ellipsis)
 

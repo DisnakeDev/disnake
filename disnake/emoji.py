@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterator
 from typing import TYPE_CHECKING, Any
 
 from .asset import Asset, AssetMixin
@@ -14,6 +13,7 @@ from .utils import MISSING, SnowflakeList, snowflake_time
 __all__ = ("Emoji",)
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
     from datetime import datetime
 
     from .abc import Snowflake

@@ -2,21 +2,26 @@
 
 from __future__ import annotations
 
-from typing import Literal, TypedDict
+from typing import TYPE_CHECKING, Literal, TypedDict
 
 from typing_extensions import NotRequired
 
-from .channel import ChannelType
-from .components import MessageTopLevelComponent
-from .embed import Embed
-from .emoji import PartialEmoji
-from .interactions import InteractionDataResolved, InteractionMessageReference, InteractionMetadata
-from .member import Member, UserWithMember
-from .poll import Poll
-from .snowflake import Snowflake, SnowflakeList
-from .sticker import StickerItem
-from .threads import Thread
-from .user import User
+if TYPE_CHECKING:
+    from .channel import ChannelType
+    from .components import MessageTopLevelComponent
+    from .embed import Embed
+    from .emoji import PartialEmoji
+    from .interactions import (
+        InteractionDataResolved,
+        InteractionMessageReference,
+        InteractionMetadata,
+    )
+    from .member import Member, UserWithMember
+    from .poll import Poll
+    from .snowflake import Snowflake, SnowflakeList
+    from .sticker import StickerItem
+    from .threads import Thread
+    from .user import User
 
 
 class ChannelMention(TypedDict):

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Mapping, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -11,20 +10,23 @@ from typing import (
     overload,
 )
 
-from ...abc import GuildChannel, Snowflake
+from ...abc import GuildChannel
 from ...channel import DMChannel, GroupChannel, PartialMessageable
 from ...components import ChannelSelectMenu
 from ...enums import ChannelType, ComponentType, SelectDefaultValueType
 from ...object import Object
 from ...threads import Thread
 from ...utils import MISSING
-from .base import BaseSelect, P, SelectDefaultValueInputType, V_co, _create_decorator
+from .base import BaseSelect, V_co, _create_decorator
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Mapping, Sequence
+
     from typing_extensions import Self
 
-    from ...abc import AnyChannel
+    from ...abc import AnyChannel, Snowflake
     from ..item import DecoratedItem, ItemCallbackType
+    from .base import P, SelectDefaultValueInputType
 
 
 __all__ = (

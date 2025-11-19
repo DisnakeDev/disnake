@@ -1,12 +1,14 @@
 # SPDX-License-Identifier: MIT
+from __future__ import annotations
 
-from typing import Literal, TypedDict
+from typing import TYPE_CHECKING, Literal, TypedDict
 
 from typing_extensions import NotRequired
 
-from .member import Member
-from .snowflake import Snowflake
-from .user import User
+if TYPE_CHECKING:
+    from .member import Member
+    from .snowflake import Snowflake
+    from .user import User
 
 GuildScheduledEventPrivacyLevel = Literal[2]
 GuildScheduledEventStatus = Literal[1, 2, 3, 4]

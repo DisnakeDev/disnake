@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import datetime
 from typing import TYPE_CHECKING
 
 from .enums import SubscriptionStatus, try_enum
@@ -10,6 +9,8 @@ from .mixins import Hashable
 from .utils import parse_time, snowflake_time
 
 if TYPE_CHECKING:
+    import datetime
+
     from .state import ConnectionState
     from .types.subscription import Subscription as SubscriptionPayload
     from .user import User

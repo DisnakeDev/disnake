@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
 from typing import TYPE_CHECKING, Any, cast
 
 from .enums import MessageType
@@ -10,6 +9,8 @@ from .enums import MessageType
 __all__ = ("AllowedMentions",)
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
     from typing_extensions import Self
 
     from .abc import Snowflake

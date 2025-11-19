@@ -5,7 +5,6 @@ from __future__ import annotations
 import copy
 import datetime
 import unicodedata
-from collections.abc import Iterable, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -19,7 +18,6 @@ from typing import (
 )
 
 from . import abc, utils
-from .app_commands import GuildApplicationCommandPermissions
 from .asset import Asset
 from .automod import AutoModAction, AutoModRule
 from .bans import BanEntry, BulkBanResult
@@ -36,8 +34,6 @@ from .channel import (
 from .colour import Colour
 from .emoji import Emoji
 from .enums import (
-    AuditLogAction,
-    AutoModEventType,
     AutoModTriggerType,
     ChannelType,
     ContentFilter,
@@ -46,19 +42,15 @@ from .enums import (
     Locale,
     NotificationLevel,
     NSFWLevel,
-    ThreadLayout,
-    ThreadSortOrder,
     VerificationLevel,
-    VideoQualityMode,
     WidgetStyle,
     try_enum,
     try_enum_to_int,
 )
 from .errors import ClientException, HTTPException, InvalidData
-from .file import File
 from .flags import SystemChannelFlags
 from .guild_scheduled_event import GuildScheduledEvent, GuildScheduledEventMetadata
-from .integrations import Integration, _integration_factory
+from .integrations import _integration_factory
 from .invite import Invite
 from .iterators import AuditLogIterator, BanIterator, MemberIterator
 from .member import Member, VoiceState
@@ -87,10 +79,21 @@ VocalGuildChannel: TypeAlias = VoiceChannel | StageChannel
 MISSING = utils.MISSING
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable, Sequence
+
     from .abc import Snowflake, SnowflakeTime
-    from .app_commands import APIApplicationCommand
+    from .app_commands import APIApplicationCommand, GuildApplicationCommandPermissions
     from .asset import AssetBytes
     from .automod import AutoModTriggerMetadata
+    from .enums import (
+        AuditLogAction,
+        AutoModEventType,
+        ThreadLayout,
+        ThreadSortOrder,
+        VideoQualityMode,
+    )
+    from .file import File
+    from .integrations import Integration
     from .permissions import Permissions
     from .state import ConnectionState
     from .template import Template

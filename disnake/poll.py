@@ -6,8 +6,7 @@ from datetime import timedelta
 from typing import TYPE_CHECKING
 
 from . import utils
-from .abc import Snowflake
-from .emoji import Emoji, _EmojiTag
+from .emoji import _EmojiTag
 from .enums import PollLayoutType, try_enum
 from .iterators import PollAnswerIterator
 from .partial_emoji import PartialEmoji
@@ -15,6 +14,8 @@ from .partial_emoji import PartialEmoji
 if TYPE_CHECKING:
     from datetime import datetime
 
+    from .abc import Snowflake
+    from .emoji import Emoji
     from .message import Message
     from .state import ConnectionState
     from .types.poll import (

@@ -5,7 +5,6 @@ from __future__ import annotations
 import functools
 import inspect
 import re
-from collections.abc import Callable, Iterable
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -20,7 +19,7 @@ from typing import (
 
 import disnake
 
-from .context import AnyContext, Context
+from .context import Context
 from .errors import (
     BadArgument,
     BadBoolArgument,
@@ -48,7 +47,11 @@ from .errors import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Iterable
+
     from disnake.abc import MessageableChannel
+
+    from .context import AnyContext
 
 
 # TODO: USE ACTUAL FUNCTIONS INSTEAD OF USELESS CLASSES

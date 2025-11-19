@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Generator, Sequence
+from collections.abc import Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -11,13 +11,16 @@ from typing import (
 
 from ..components import _SELECT_COMPONENT_TYPE_VALUES
 from ..enums import ComponentType
-from ..message import Attachment, Message
+from ..message import Message
 from ..utils import cached_slot_property
 from .base import ClientT, Interaction, InteractionDataResolved
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Generator
+
     from ..abc import AnyChannel
     from ..member import Member
+    from ..message import Attachment
     from ..role import Role
     from ..state import ConnectionState
     from ..types.interactions import (

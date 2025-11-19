@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Iterator
 from functools import wraps
 from typing import (
     TYPE_CHECKING,
@@ -15,6 +14,8 @@ from .flags import BaseFlags, alias_flag_value, flag_value
 from .utils import _generated, _overload_with_permissions
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Iterator
+
     from typing_extensions import Self
 
 

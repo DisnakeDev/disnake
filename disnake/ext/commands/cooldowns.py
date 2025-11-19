@@ -5,7 +5,6 @@ from __future__ import annotations
 import asyncio
 import time
 from collections import deque
-from collections.abc import Callable
 from typing import TYPE_CHECKING, Any
 
 from disnake.enums import Enum
@@ -14,6 +13,8 @@ from disnake.member import Member
 from .errors import MaxConcurrencyReached
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from typing_extensions import Self
 
     from ...message import Message

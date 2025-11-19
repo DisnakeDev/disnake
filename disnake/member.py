@@ -5,7 +5,6 @@ from __future__ import annotations
 import datetime
 import itertools
 import sys
-from collections.abc import Callable, Sequence
 from operator import attrgetter
 from typing import (
     TYPE_CHECKING,
@@ -19,8 +18,8 @@ from typing import (
 import disnake.abc
 
 from . import utils
-from .activity import ActivityTypes, create_activity
-from .asset import Asset, AssetBytes
+from .activity import create_activity
+from .asset import Asset
 from .colour import Colour
 from .enums import Status, try_enum
 from .flags import MemberFlags
@@ -35,9 +34,13 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Sequence
+
     from typing_extensions import Self
 
     from .abc import Snowflake
+    from .activity import ActivityTypes
+    from .asset import AssetBytes
     from .channel import DMChannel, StageChannel, VoiceChannel
     from .flags import PublicUserFlags
     from .guild import Guild

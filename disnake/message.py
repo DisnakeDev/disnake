@@ -3,12 +3,9 @@
 from __future__ import annotations
 
 import asyncio
-import datetime
 import io
 import re
 from base64 import b64decode, b64encode
-from collections.abc import Callable
-from os import PathLike
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -20,7 +17,7 @@ from typing import (
 
 from . import utils
 from .channel import PartialMessageable
-from .components import MessageTopLevelComponent, _message_component_factory
+from .components import _message_component_factory
 from .embeds import Embed
 from .emoji import Emoji
 from .enums import (
@@ -42,14 +39,18 @@ from .poll import Poll
 from .reaction import Reaction
 from .sticker import StickerItem
 from .threads import Thread
-from .user import User
 from .utils import MISSING, _get_as_snowflake, assert_never, deprecated, escape_mentions
 
 if TYPE_CHECKING:
+    import datetime
+    from collections.abc import Callable
+    from os import PathLike
+
     from typing_extensions import Self
 
     from .abc import GuildChannel, MessageableChannel, Snowflake
     from .channel import DMChannel, GroupChannel
+    from .components import MessageTopLevelComponent
     from .guild import GuildMessageable
     from .mentions import AllowedMentions
     from .role import Role
@@ -83,6 +84,7 @@ if TYPE_CHECKING:
     from .types.user import User as UserPayload
     from .ui._types import MessageComponents
     from .ui.view import View
+    from .user import User
 
     EmojiInputType: TypeAlias = Emoji | PartialEmoji | str
 

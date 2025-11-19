@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import datetime
 from typing import TYPE_CHECKING
 
 from .enums import StagePrivacyLevel, try_enum
@@ -12,6 +11,8 @@ from .utils import MISSING, _get_as_snowflake, cached_slot_property, snowflake_t
 __all__ = ("StageInstance",)
 
 if TYPE_CHECKING:
+    import datetime
+
     from .channel import StageChannel
     from .guild import Guild
     from .guild_scheduled_event import GuildScheduledEvent

@@ -6,7 +6,6 @@ import asyncio
 import datetime
 import functools
 from abc import ABC
-from collections.abc import Callable
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -16,7 +15,6 @@ from typing import (
     overload,
 )
 
-from disnake.app_commands import ApplicationCommand
 from disnake.enums import ApplicationCommandType
 from disnake.flags import ApplicationInstallTypes, InteractionContextTypes
 from disnake.permissions import Permissions
@@ -28,18 +26,21 @@ from disnake.utils import (
     maybe_coroutine,
 )
 
-from .cooldowns import BucketType, CooldownMapping, MaxConcurrency
+from .cooldowns import BucketType, CooldownMapping
 from .errors import CheckFailure, CommandError, CommandInvokeError, CommandOnCooldown
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
     from typing import Concatenate
 
     from typing_extensions import ParamSpec, Self
 
+    from disnake.app_commands import ApplicationCommand
     from disnake.interactions import ApplicationCommandInteraction
 
     from ._types import AppCheck, Coro, Error, Hook
     from .cog import Cog
+    from .cooldowns import MaxConcurrency
     from .interaction_bot_base import InteractionBotBase
 
     ApplicationCommandInteractionT = TypeVar(

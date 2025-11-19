@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
 from typing import TYPE_CHECKING, Any
 
 from disnake.errors import ClientException, DiscordException
 from disnake.utils import humanize_list
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
     from inspect import Parameter
 
     from disnake.abc import GuildChannel
