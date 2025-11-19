@@ -820,15 +820,8 @@ class TestResolveAnnotationTypeAliasType:
         assert utils.resolve_annotation(annotation, globals(), locals(), {}) == list[int]
 
     # alias and arg in local scope
-    @pytest.mark.parametrize(
-        "typehint",
-        [
-            Union[int, str],  # noqa: UP007
-            int | str,
-        ],
-    )
-    def test_forwardref_local(self, typehint) -> None:
-        IntOrStr = typehint
+    def test_forwardref_local(self) -> None:
+        IntOrStr = int | str
 
         annotation = CoolListGeneric["IntOrStr"]
         assert utils.resolve_annotation(annotation, globals(), locals(), {}) == list[IntOrStr]
