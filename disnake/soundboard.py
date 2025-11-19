@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Optional, Union
 
 from .asset import Asset, AssetMixin
 from .mixins import Hashable
@@ -228,7 +228,7 @@ class GuildSoundboardSound(SoundboardSound):
     def guild(self) -> Guild:
         """:class:`Guild`: The guild that this sound is from."""
         # this will most likely never return None
-        return self._state._get_guild(self.guild_id)  # type: ignore
+        return self._state._get_guild(self.guild_id)  # pyright: ignore[reportReturnType]
 
     async def edit(
         self,
@@ -272,7 +272,7 @@ class GuildSoundboardSound(SoundboardSound):
         :class:`GuildSoundboardSound`
             The newly modified soundboard sound.
         """
-        payload: Dict[str, Any] = {}
+        payload: dict[str, Any] = {}
 
         if name is not MISSING:
             payload["name"] = name

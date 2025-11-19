@@ -22,7 +22,7 @@ import logging
 import socket
 import struct
 import threading
-from typing import TYPE_CHECKING, Any, Callable, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Callable, Optional
 
 from . import opus, utils
 from .backoff import ExponentialBackoff
@@ -193,7 +193,7 @@ class VoiceClient(VoiceProtocol):
 
     endpoint_ip: str
     voice_port: int
-    secret_key: List[int]
+    secret_key: list[int]
     ssrc: int
     ip: str
     port: int
@@ -229,7 +229,7 @@ class VoiceClient(VoiceProtocol):
         self.ws: DiscordVoiceWebSocket = MISSING
 
     warn_nacl = not has_nacl
-    supported_modes: Tuple[SupportedModes, ...] = ("aead_xchacha20_poly1305_rtpsize",)
+    supported_modes: tuple[SupportedModes, ...] = ("aead_xchacha20_poly1305_rtpsize",)
 
     @property
     def guild(self) -> Guild:
@@ -261,9 +261,10 @@ class VoiceClient(VoiceProtocol):
             if channel_id is None:
                 # We're being disconnected so cleanup
                 await self.disconnect()
+            elif self.guild is None:  # pyright: ignore[reportUnnecessaryComparison]
+                self.channel = None  # pyright: ignore[reportAttributeAccessIssue]
             else:
-                guild = self.guild
-                self.channel = channel_id and guild and guild.get_channel(int(channel_id))  # type: ignore
+                self.channel = self.guild.get_channel(int(channel_id))  # pyright: ignore[reportAttributeAccessIssue]
         else:
             self._voice_state_complete.set()
 
@@ -283,10 +284,7 @@ class VoiceClient(VoiceProtocol):
             )
             return
 
-        self.endpoint = endpoint
-        if self.endpoint.startswith("wss://"):
-            # Just in case, strip it off since we're going to add it later
-            self.endpoint = self.endpoint[6:]
+        self.endpoint = endpoint.removeprefix("wss://")
 
         # This gets set later
         self.endpoint_ip = MISSING
@@ -328,10 +326,13 @@ class VoiceClient(VoiceProtocol):
         self._voice_server_complete.clear()
         self._voice_state_complete.clear()
 
-    async def connect_websocket(self) -> DiscordVoiceWebSocket:
-        ws = await DiscordVoiceWebSocket.from_client(self)
+    async def connect_websocket(self, *, resume: bool = False) -> DiscordVoiceWebSocket:
+        seq = self.ws.sequence if resume and self.ws is not MISSING else None
+        ws = await DiscordVoiceWebSocket.from_client(self, sequence=seq, resume=resume)
+
         self._connected.clear()
-        while ws.secret_key is None:
+        event = ws._resumed if resume else ws._ready
+        while not event.is_set():
             await ws.poll_event()
         self._connected.set()
         return ws
@@ -369,8 +370,7 @@ class VoiceClient(VoiceProtocol):
                     await asyncio.sleep(1 + i * 2.0)
                     await self.voice_disconnect()
                     continue
-                else:
-                    raise
+                raise
 
         if self._runner is MISSING:
             self._runner = self.loop.create_task(self.poll_voice_ws(reconnect))
@@ -430,11 +430,10 @@ class VoiceClient(VoiceProtocol):
                     self.ws._keep_alive = None
 
                 if isinstance(exc, ConnectionClosed):
-                    # The following close codes are undocumented so I will document them here.
                     # 1000 - normal closure (obviously)
                     # 4014 - voice channel has been deleted.
                     # 4015 - voice server has crashed
-                    if exc.code in (1000, 4015):
+                    if exc.code == 1000:
                         _log.info("Disconnecting from voice normally, close code %d.", exc.code)
                         await self.disconnect()
                         break
@@ -447,7 +446,27 @@ class VoiceClient(VoiceProtocol):
                             )
                             await self.disconnect()
                             break
+                        continue
+                    # only attempt to resume if the session is valid/established
+                    if exc.code == 4015 and self.ws._ready.is_set():
+                        _log.info("Disconnected from voice, trying to resume session...")
+                        self._connected.clear()
+                        try:
+                            self.ws = await self.connect_websocket(resume=True)
+                        except (ConnectionClosed, asyncio.TimeoutError) as e:
+                            # .connect() re-raises errors, fall back to reconnecting (or disconnecting) below as usual
+                            if isinstance(e, ConnectionClosed):
+                                msg = f"Received {e!r} error"
+                            else:
+                                msg = "Timed out"
+
+                            _log.error(
+                                "%s trying to resume voice connection, %s normally...",
+                                msg,
+                                "reconnecting" if reconnect else "disconnecting",
+                            )
                         else:
+                            _log.info("Successfully resumed voice session")
                             continue
 
                 if not reconnect:
@@ -518,7 +537,7 @@ class VoiceClient(VoiceProtocol):
         encrypt_packet = getattr(self, f"_encrypt_{self.mode}")
         return encrypt_packet(header, data)
 
-    def _get_nonce(self, pad: int) -> Tuple[bytes, bytes]:
+    def _get_nonce(self, pad: int) -> tuple[bytes, bytes]:
         # returns (nonce, padded_nonce).
         # n.b. all currently implemented modes use the same nonce size (192 bits / 24 bytes)
         nonce = struct.pack(">I", self._lite_nonce)
@@ -530,8 +549,8 @@ class VoiceClient(VoiceProtocol):
         return (nonce, nonce.ljust(pad, b"\0"))
 
     def _encrypt_aead_xchacha20_poly1305_rtpsize(self, header: bytes, data) -> bytes:
-        box = nacl.secret.Aead(bytes(self.secret_key))  # type: ignore[reportPossiblyUnboundVariable]
-        nonce, padded_nonce = self._get_nonce(nacl.secret.Aead.NONCE_SIZE)  # type: ignore[reportPossiblyUnboundVariable]
+        box = nacl.secret.Aead(bytes(self.secret_key))  # pyright: ignore[reportPossiblyUnboundVariable]
+        nonce, padded_nonce = self._get_nonce(nacl.secret.Aead.NONCE_SIZE)  # pyright: ignore[reportPossiblyUnboundVariable]
 
         return (
             header

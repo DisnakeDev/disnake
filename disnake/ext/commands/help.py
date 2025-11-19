@@ -6,19 +6,14 @@ import copy
 import functools
 import itertools
 import re
+from collections.abc import Generator, Iterable, Mapping, Sequence
+from re import Match
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
     ClassVar,
-    Dict,
-    Generator,
-    Iterable,
-    List,
-    Mapping,
-    Match,
     Optional,
-    Sequence,
     TypeVar,
     Union,
 )
@@ -112,12 +107,12 @@ class Paginator:
     def clear(self) -> None:
         """Clears the paginator to have no pages."""
         if self.prefix is not None:
-            self._current_page: List[str] = [self.prefix]
+            self._current_page: list[str] = [self.prefix]
             self._count: int = len(self.prefix) + self._linesep_len  # prefix + newline
         else:
             self._current_page = []
             self._count = 0
-        self._pages: List[str] = []
+        self._pages: list[str] = []
 
     @property
     def _prefix_len(self) -> int:
@@ -182,7 +177,7 @@ class Paginator:
         return total + self._count
 
     @property
-    def pages(self) -> List[str]:
+    def pages(self) -> list[str]:
         """:class:`list`\\[:class:`str`]: Returns the rendered list of pages."""
         # we have more than just the prefix in our current page
         if len(self._current_page) > (0 if self.prefix is None else 1):
@@ -244,7 +239,7 @@ class _HelpCommandImpl(Command[Optional[CogT], Any, None]):
         original_get_commands = cog.get_commands
         original_walk_commands = cog.walk_commands
 
-        def wrapped_get_commands() -> List[Command[Any, ..., Any]]:
+        def wrapped_get_commands() -> list[Command[Any, ..., Any]]:
             ret = original_get_commands()
             ret.append(self)  # pyright: ignore[reportArgumentType]
             return ret
@@ -326,8 +321,8 @@ class HelpCommand:
         # The keys can be safely copied as-is since they're 99.99% certain of being
         # string keys
         deepcopy = copy.deepcopy
-        self.__original_kwargs__ = {k: deepcopy(v) for k, v in kwargs.items()}  # type: ignore
-        self.__original_args__ = deepcopy(args)  # type: ignore
+        self.__original_kwargs__ = {k: deepcopy(v) for k, v in kwargs.items()}  # pyright: ignore[reportAttributeAccessIssue]
+        self.__original_args__ = deepcopy(args)  # pyright: ignore[reportAttributeAccessIssue]
         return self
 
     def __init__(self, **options: Any) -> None:
@@ -337,13 +332,13 @@ class HelpCommand:
         attrs = options.pop("command_attrs", {})
         attrs.setdefault("name", "help")
         attrs.setdefault("help", "Shows this message")
-        self.command_attrs: Dict[str, Any] = attrs
+        self.command_attrs: dict[str, Any] = attrs
 
         self.context: Context[AnyBot] = disnake.utils.MISSING
         self._command_impl: _HelpCommandImpl = _HelpCommandImpl(self, **self.command_attrs)
 
     def copy(self) -> Self:
-        obj = self.__class__(*self.__original_args__, **self.__original_kwargs__)  # type: ignore
+        obj = self.__class__(*self.__original_args__, **self.__original_kwargs__)  # pyright: ignore[reportAttributeAccessIssue]
         obj._command_impl = self._command_impl
         return obj
 
@@ -383,10 +378,10 @@ class HelpCommand:
         """
         self._command_impl.remove_check(func)
 
-    def get_bot_mapping(self) -> Dict[Optional[Cog], List[Command[Any, ..., Any]]]:
+    def get_bot_mapping(self) -> dict[Optional[Cog], list[Command[Any, ..., Any]]]:
         """Retrieves the bot mapping passed to :meth:`send_bot_help`."""
         bot = self.context.bot
-        mapping: Dict[Optional[Cog], List[Command[Any, ..., Any]]] = {
+        mapping: dict[Optional[Cog], list[Command[Any, ..., Any]]] = {
             cog: cog.get_commands() for cog in bot.cogs.values()
         }
         mapping[None] = [c for c in bot.commands if c.cog is None]
@@ -430,14 +425,14 @@ class HelpCommand:
         :class:`str`
             The signature for the command.
         """
-        parent: Optional[Group[Any, ..., Any]] = command.parent  # type: ignore
+        parent: Optional[Group[Any, ..., Any]] = command.parent  # pyright: ignore[reportAssignmentType]
         entries = []
         while parent is not None:
             if not parent.signature or parent.invoke_without_command:
                 entries.append(parent.name)
             else:
                 entries.append(f"{parent.name} {parent.signature}")
-            parent = parent.parent  # type: ignore
+            parent = parent.parent  # pyright: ignore[reportAssignmentType]
         parent_sig = " ".join(reversed(entries))
 
         if len(command.aliases) > 0:
@@ -552,7 +547,7 @@ class HelpCommand:
         *,
         sort: bool = False,
         key: Optional[Callable[[Command[Any, ..., Any]], Any]] = None,
-    ) -> List[Command[Any, ..., Any]]:
+    ) -> list[Command[Any, ..., Any]]:
         """|coro|
 
         Returns a filtered list of commands and optionally sorts them.
@@ -600,7 +595,7 @@ class HelpCommand:
             except CommandError:
                 return False
 
-        ret: List[Command[Any, ..., Any]] = []
+        ret: list[Command[Any, ..., Any]] = []
         for cmd in iterator:
             valid = await predicate(cmd)
             if valid:
@@ -686,7 +681,7 @@ class HelpCommand:
         pass
 
     async def send_bot_help(
-        self, mapping: Mapping[Optional[Cog], List[Command[Any, ..., Any]]]
+        self, mapping: Mapping[Optional[Cog], list[Command[Any, ..., Any]]]
     ) -> None:
         """|coro|
 
@@ -714,7 +709,7 @@ class HelpCommand:
             The key of the mapping is the :class:`~.commands.Cog` that the command belongs to, or
             :data:`None` if there isn't one, and the value is a list of commands that belongs to that cog.
         """
-        return None
+        return
 
     async def send_cog_help(self, cog: Cog) -> None:
         """|coro|
@@ -742,7 +737,7 @@ class HelpCommand:
         cog: :class:`Cog`
             The cog that was requested for help.
         """
-        return None
+        return
 
     async def send_group_help(self, group: Group[Any, ..., Any]) -> None:
         """|coro|
@@ -770,7 +765,7 @@ class HelpCommand:
         group: :class:`Group`
             The group that was requested for help.
         """
-        return None
+        return
 
     async def send_command_help(self, command: Command[Any, ..., Any]) -> None:
         """|coro|
@@ -808,7 +803,7 @@ class HelpCommand:
         command: :class:`Command`
             The command that was requested for help.
         """
-        return None
+        return
 
     async def prepare_help_command(self, ctx: Context[BotT], command: Optional[str] = None) -> None:
         """|coro|
@@ -879,7 +874,7 @@ class HelpCommand:
 
         for key in keys[1:]:
             try:
-                found = cmd.all_commands.get(key)  # type: ignore  # cmd may be a Group here
+                found = cmd.all_commands.get(key)  # pyright: ignore[reportAttributeAccessIssue]  # cmd may be a Group here
             except AttributeError:
                 string = await maybe_coro(self.subcommand_not_found, cmd, self.remove_mentions(key))
                 return await self.send_error_message(string)
@@ -1048,7 +1043,7 @@ class DefaultHelpCommand(HelpCommand):
         await super().prepare_help_command(ctx, command)
 
     async def send_bot_help(
-        self, mapping: Mapping[Optional[Cog], List[Command[Any, ..., Any]]]
+        self, mapping: Mapping[Optional[Cog], list[Command[Any, ..., Any]]]
     ) -> None:
         ctx = self.context
         bot = ctx.bot
@@ -1296,7 +1291,7 @@ class MinimalHelpCommand(HelpCommand):
         await super().prepare_help_command(ctx, command)
 
     async def send_bot_help(
-        self, mapping: Mapping[Optional[Cog], List[Command[Any, ..., Any]]]
+        self, mapping: Mapping[Optional[Cog], list[Command[Any, ..., Any]]]
     ) -> None:
         ctx = self.context
         bot = ctx.bot

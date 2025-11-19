@@ -5,20 +5,15 @@ from __future__ import annotations
 import copy
 import datetime
 import unicodedata
+from collections.abc import Iterable, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
     ClassVar,
-    Dict,
-    Iterable,
-    List,
     Literal,
     NamedTuple,
     NewType,
     Optional,
-    Sequence,
-    Set,
-    Tuple,
     Union,
     cast,
     overload,
@@ -126,7 +121,7 @@ if TYPE_CHECKING:
     GuildChannel = Union[
         VoiceChannel, StageChannel, TextChannel, CategoryChannel, ForumChannel, MediaChannel
     ]
-    ByCategoryItem = Tuple[Optional[CategoryChannel], List[GuildChannel]]
+    ByCategoryItem = tuple[Optional[CategoryChannel], list[GuildChannel]]
 
 
 class _GuildLimit(NamedTuple):
@@ -472,7 +467,7 @@ class Guild(Hashable):
         "_safety_alerts_channel_id",
     )
 
-    _PREMIUM_GUILD_LIMITS: ClassVar[Dict[Optional[int], _GuildLimit]] = {
+    _PREMIUM_GUILD_LIMITS: ClassVar[dict[Optional[int], _GuildLimit]] = {
         None: _GuildLimit(emoji=50, stickers=5, bitrate=96e3, filesize=10485760, sounds=8),
         0: _GuildLimit(emoji=50, stickers=5, bitrate=96e3, filesize=10485760, sounds=8),
         1: _GuildLimit(emoji=100, stickers=15, bitrate=128e3, filesize=10485760, sounds=24),
@@ -481,12 +476,12 @@ class Guild(Hashable):
     }
 
     def __init__(self, *, data: GuildPayload, state: ConnectionState) -> None:
-        self._channels: Dict[int, GuildChannel] = {}
-        self._members: Dict[int, Member] = {}
-        self._voice_states: Dict[int, VoiceState] = {}
-        self._threads: Dict[int, Thread] = {}
-        self._stage_instances: Dict[int, StageInstance] = {}
-        self._scheduled_events: Dict[int, GuildScheduledEvent] = {}
+        self._channels: dict[int, GuildChannel] = {}
+        self._members: dict[int, Member] = {}
+        self._voice_states: dict[int, VoiceState] = {}
+        self._threads: dict[int, Thread] = {}
+        self._stage_instances: dict[int, StageInstance] = {}
+        self._scheduled_events: dict[int, GuildScheduledEvent] = {}
         self._state: ConnectionState = state
         self._from_data(data)
 
@@ -524,8 +519,8 @@ class Guild(Hashable):
         for k in to_remove:
             del self._threads[k]
 
-    def _filter_threads(self, channel_ids: Set[int]) -> Dict[int, Thread]:
-        to_remove: Dict[int, Thread] = {
+    def _filter_threads(self, channel_ids: set[int]) -> dict[int, Thread]:
+        to_remove: dict[int, Thread] = {
             k: t for k, t in self._threads.items() if t.parent_id in channel_ids
         }
         for k in to_remove:
@@ -548,9 +543,9 @@ class Guild(Hashable):
 
     def _update_voice_state(
         self, data: GuildVoiceState, channel_id: Optional[int]
-    ) -> Tuple[Optional[Member], VoiceState, VoiceState]:
+    ) -> tuple[Optional[Member], VoiceState, VoiceState]:
         user_id = int(data["user_id"])
-        channel: Optional[VocalGuildChannel] = self.get_channel(channel_id)  # type: ignore
+        channel: Optional[VocalGuildChannel] = self.get_channel(channel_id)  # pyright: ignore[reportAssignmentType, reportArgumentType]
         try:
             # check if we should remove the voice state from cache
             if channel is None:
@@ -648,23 +643,23 @@ class Guild(Hashable):
         self._banner: Optional[str] = guild.get("banner")
         self.unavailable: bool = guild.get("unavailable", False)
         self.id: int = int(guild["id"])
-        self._roles: Dict[int, Role] = {}
+        self._roles: dict[int, Role] = {}
         state = self._state  # speed up attribute access
         for r in guild.get("roles", []):
             role = Role(guild=self, data=r, state=state)
             self._roles[role.id] = role
 
         self.mfa_level: MFALevel = guild.get("mfa_level", 0)
-        self.emojis: Tuple[Emoji, ...] = tuple(
+        self.emojis: tuple[Emoji, ...] = tuple(
             state.store_emoji(self, d) for d in guild.get("emojis", [])
         )
-        self.stickers: Tuple[GuildSticker, ...] = tuple(
+        self.stickers: tuple[GuildSticker, ...] = tuple(
             state.store_sticker(self, d) for d in guild.get("stickers", [])
         )
-        self.soundboard_sounds: Tuple[GuildSoundboardSound, ...] = tuple(
+        self.soundboard_sounds: tuple[GuildSoundboardSound, ...] = tuple(
             state.store_soundboard_sound(self, d) for d in guild.get("soundboard_sounds", [])
         )
-        self.features: List[GuildFeature] = guild.get("features", [])
+        self.features: list[GuildFeature] = guild.get("features", [])
         self._splash: Optional[str] = guild.get("splash")
         self._system_channel_id: Optional[int] = utils._get_as_snowflake(guild, "system_channel_id")
         self.description: Optional[str] = guild.get("description")
@@ -717,7 +712,7 @@ class Guild(Hashable):
         self_id = self._state.self_id
         for mdata in guild.get("members", []):
             # NOTE: Are we sure it's fine to not have the user part here?
-            member = Member(data=mdata, guild=self, state=state)  # type: ignore
+            member = Member(data=mdata, guild=self, state=state)  # pyright: ignore[reportArgumentType]
             if cache_joined or member.id == self_id:
                 self._add_member(member)
 
@@ -726,7 +721,7 @@ class Guild(Hashable):
 
         self.owner_id: Optional[int] = utils._get_as_snowflake(guild, "owner_id")
         self.afk_channel: Optional[VocalGuildChannel] = self.get_channel(
-            utils._get_as_snowflake(guild, "afk_channel_id")  # type: ignore
+            utils._get_as_snowflake(guild, "afk_channel_id")  # pyright: ignore[reportAttributeAccessIssue, reportArgumentType]
         )
 
         for obj in guild.get("voice_states", []):
@@ -742,14 +737,14 @@ class Guild(Hashable):
             user_id = int(presence["user"]["id"])
             member = self.get_member(user_id)
             if member is not None:
-                member._presence_update(presence, empty_tuple)  # type: ignore
+                member._presence_update(presence, empty_tuple)  # pyright: ignore[reportArgumentType]
 
         if "channels" in data:
             channels = data["channels"]
             for c in channels:
                 factory, _ = _guild_channel_factory(c["type"])
                 if factory:
-                    self._add_channel(factory(guild=self, data=c, state=self._state))  # type: ignore
+                    self._add_channel(factory(guild=self, data=c, state=self._state))  # pyright: ignore[reportArgumentType]
 
         if "threads" in data:
             threads = data["threads"]
@@ -757,12 +752,12 @@ class Guild(Hashable):
                 self._add_thread(Thread(guild=self, state=self._state, data=thread))
 
     @property
-    def channels(self) -> List[GuildChannel]:
+    def channels(self) -> list[GuildChannel]:
         """:class:`list`\\[:class:`abc.GuildChannel`]: A list of channels that belong to this guild."""
         return list(self._channels.values())
 
     @property
-    def threads(self) -> List[Thread]:
+    def threads(self) -> list[Thread]:
         """:class:`list`\\[:class:`Thread`]: A list of threads that you have permission to view.
 
         .. versionadded:: 2.0
@@ -784,7 +779,7 @@ class Guild(Hashable):
         return self._large
 
     @property
-    def voice_channels(self) -> List[VoiceChannel]:
+    def voice_channels(self) -> list[VoiceChannel]:
         """:class:`list`\\[:class:`VoiceChannel`]: A list of voice channels that belong to this guild.
 
         This is sorted by the position and are in UI order from top to bottom.
@@ -794,7 +789,7 @@ class Guild(Hashable):
         return r
 
     @property
-    def stage_channels(self) -> List[StageChannel]:
+    def stage_channels(self) -> list[StageChannel]:
         """:class:`list`\\[:class:`StageChannel`]: A list of stage channels that belong to this guild.
 
         .. versionadded:: 1.7
@@ -806,7 +801,7 @@ class Guild(Hashable):
         return r
 
     @property
-    def forum_channels(self) -> List[ForumChannel]:
+    def forum_channels(self) -> list[ForumChannel]:
         """:class:`list`\\[:class:`ForumChannel`]: A list of forum channels that belong to this guild.
 
         This is sorted by the position and are in UI order from top to bottom.
@@ -818,7 +813,7 @@ class Guild(Hashable):
         return r
 
     @property
-    def media_channels(self) -> List[MediaChannel]:
+    def media_channels(self) -> list[MediaChannel]:
         """:class:`list`\\[:class:`MediaChannel`]: A list of media channels that belong to this guild.
 
         This is sorted by the position and are in UI order from top to bottom.
@@ -836,7 +831,7 @@ class Guild(Hashable):
         """
         self_id = self._state.user.id
         # The self member is *always* cached
-        return self.get_member(self_id)  # type: ignore
+        return self.get_member(self_id)  # pyright: ignore[reportReturnType]
 
     @property
     def voice_client(self) -> Optional[VoiceProtocol]:
@@ -844,7 +839,7 @@ class Guild(Hashable):
         return self._state._get_voice_client(self.id)
 
     @property
-    def text_channels(self) -> List[TextChannel]:
+    def text_channels(self) -> list[TextChannel]:
         """:class:`list`\\[:class:`TextChannel`]: A list of text channels that belong to this guild.
 
         This is sorted by the position and are in UI order from top to bottom.
@@ -854,7 +849,7 @@ class Guild(Hashable):
         return r
 
     @property
-    def categories(self) -> List[CategoryChannel]:
+    def categories(self) -> list[CategoryChannel]:
         """:class:`list`\\[:class:`CategoryChannel`]: A list of categories that belong to this guild.
 
         This is sorted by the position and are in UI order from top to bottom.
@@ -863,7 +858,7 @@ class Guild(Hashable):
         r.sort(key=lambda c: (c.position, c.id))
         return r
 
-    def by_category(self) -> List[ByCategoryItem]:
+    def by_category(self) -> list[ByCategoryItem]:
         """Returns every :class:`CategoryChannel` and their associated channels.
 
         These channels and categories are sorted in the official Discord UI order.
@@ -876,7 +871,7 @@ class Guild(Hashable):
         :class:`list`\\[:class:`tuple`\\[:class:`CategoryChannel` | :data:`None`, :class:`list`\\[:class:`abc.GuildChannel`]]]:
             The categories and their associated channels.
         """
-        grouped: Dict[Optional[int], List[GuildChannel]] = {}
+        grouped: dict[Optional[int], list[GuildChannel]] = {}
         for channel in self._channels.values():
             if isinstance(channel, CategoryChannel):
                 grouped.setdefault(channel.id, [])
@@ -887,12 +882,12 @@ class Guild(Hashable):
             except KeyError:
                 grouped[channel.category_id] = [channel]
 
-        def key(t: ByCategoryItem) -> Tuple[Tuple[int, int], List[GuildChannel]]:
+        def key(t: ByCategoryItem) -> tuple[tuple[int, int], list[GuildChannel]]:
             k, v = t
             return ((k.position, k.id) if k else (-1, -1), v)
 
         _get = self._channels.get
-        as_list: List[ByCategoryItem] = [(_get(k), v) for k, v in grouped.items()]  # type: ignore
+        as_list: list[ByCategoryItem] = [(_get(k), v) for k, v in grouped.items()]  # pyright: ignore[reportAssignmentType, reportArgumentType]
         as_list.sort(key=key)
         for _, channels in as_list:
             channels.sort(key=lambda c: (c._sorting_bucket, c.position, c.id))
@@ -900,7 +895,7 @@ class Guild(Hashable):
 
     def _resolve_channel(self, id: Optional[int], /) -> Optional[Union[GuildChannel, Thread]]:
         if id is None:
-            return
+            return None
 
         return self._channels.get(id) or self._threads.get(id)
 
@@ -964,7 +959,7 @@ class Guild(Hashable):
         If no channel is set, then this returns :data:`None`.
         """
         channel_id = self._system_channel_id
-        return channel_id and self._channels.get(channel_id)  # type: ignore
+        return channel_id and self._channels.get(channel_id)  # pyright: ignore[reportReturnType]
 
     @property
     def system_channel_flags(self) -> SystemChannelFlags:
@@ -981,7 +976,7 @@ class Guild(Hashable):
         .. versionadded:: 1.3
         """
         channel_id = self._rules_channel_id
-        return channel_id and self._channels.get(channel_id)  # type: ignore
+        return channel_id and self._channels.get(channel_id)  # pyright: ignore[reportReturnType]
 
     @property
     def public_updates_channel(self) -> Optional[TextChannel]:
@@ -994,7 +989,7 @@ class Guild(Hashable):
         .. versionadded:: 1.4
         """
         channel_id = self._public_updates_channel_id
-        return channel_id and self._channels.get(channel_id)  # type: ignore
+        return channel_id and self._channels.get(channel_id)  # pyright: ignore[reportReturnType]
 
     @property
     def safety_alerts_channel(self) -> Optional[TextChannel]:
@@ -1007,7 +1002,7 @@ class Guild(Hashable):
         .. versionadded:: 2.9
         """
         channel_id = self._safety_alerts_channel_id
-        return channel_id and self._channels.get(channel_id)  # type: ignore
+        return channel_id and self._channels.get(channel_id)  # pyright: ignore[reportReturnType]
 
     @property
     def emoji_limit(self) -> int:
@@ -1051,7 +1046,7 @@ class Guild(Hashable):
         return max(more_soundboard, self._PREMIUM_GUILD_LIMITS[self.premium_tier].sounds)
 
     @property
-    def members(self) -> List[Member]:
+    def members(self) -> list[Member]:
         """:class:`list`\\[:class:`Member`]: A list of members that belong to this guild."""
         return list(self._members.values())
 
@@ -1071,12 +1066,12 @@ class Guild(Hashable):
         return self._members.get(user_id)
 
     @property
-    def premium_subscribers(self) -> List[Member]:
+    def premium_subscribers(self) -> list[Member]:
         """:class:`list`\\[:class:`Member`]: A list of members who have "boosted" this guild."""
         return [member for member in self.members if member.premium_since is not None]
 
     @property
-    def roles(self) -> List[Role]:
+    def roles(self) -> list[Role]:
         """:class:`list`\\[:class:`Role`]: Returns a :class:`list` of the guild's roles in hierarchy order.
 
         The first element of this list will be the lowest role in the
@@ -1103,7 +1098,7 @@ class Guild(Hashable):
     def default_role(self) -> Role:
         """:class:`Role`: Gets the @everyone role that all members have by default."""
         # The @everyone role is *always* given
-        return self.get_role(self.id)  # type: ignore
+        return self.get_role(self.id)  # pyright: ignore[reportReturnType]
 
     @property
     def premium_subscriber_role(self) -> Optional[Role]:
@@ -1130,7 +1125,7 @@ class Guild(Hashable):
         return None
 
     @property
-    def stage_instances(self) -> List[StageInstance]:
+    def stage_instances(self) -> list[StageInstance]:
         """:class:`list`\\[:class:`StageInstance`]: Returns a :class:`list` of the guild's stage instances that
         are currently running.
 
@@ -1156,7 +1151,7 @@ class Guild(Hashable):
         return self._stage_instances.get(stage_instance_id)
 
     @property
-    def scheduled_events(self) -> List[GuildScheduledEvent]:
+    def scheduled_events(self) -> list[GuildScheduledEvent]:
         """:class:`list`\\[:class:`GuildScheduledEvent`]: Returns a :class:`list` of existing guild scheduled events.
 
         .. versionadded:: 2.3
@@ -1183,7 +1178,7 @@ class Guild(Hashable):
     @property
     def owner(self) -> Optional[Member]:
         """:class:`Member` | :data:`None`: Returns the member that owns the guild."""
-        return self.get_member(self.owner_id)  # type: ignore
+        return self.get_member(self.owner_id)  # pyright: ignore[reportArgumentType]
 
     @property
     def icon(self) -> Optional[Asset]:
@@ -1321,7 +1316,7 @@ class Guild(Hashable):
         self,
         name: str,
         channel_type: ChannelType,
-        overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
+        overwrites: dict[Union[Role, Member], PermissionOverwrite] = MISSING,
         category: Optional[Snowflake] = None,
         **options: Any,
     ) -> Any:
@@ -1370,7 +1365,7 @@ class Guild(Hashable):
         default_auto_archive_duration: AnyThreadArchiveDuration = MISSING,
         nsfw: bool = MISSING,
         news: bool = MISSING,
-        overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
+        overwrites: dict[Union[Role, Member], PermissionOverwrite] = MISSING,
     ) -> TextChannel:
         """|coro|
 
@@ -1524,7 +1519,7 @@ class Guild(Hashable):
         video_quality_mode: VideoQualityMode = MISSING,
         nsfw: bool = MISSING,
         slowmode_delay: int = MISSING,
-        overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
+        overwrites: dict[Union[Role, Member], PermissionOverwrite] = MISSING,
         reason: Optional[str] = None,
     ) -> VoiceChannel:
         """|coro|
@@ -1639,7 +1634,7 @@ class Guild(Hashable):
         user_limit: int = MISSING,
         rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
         video_quality_mode: VideoQualityMode = MISSING,
-        overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
+        overwrites: dict[Union[Role, Member], PermissionOverwrite] = MISSING,
         category: Optional[Snowflake] = None,
         nsfw: bool = MISSING,
         slowmode_delay: int = MISSING,
@@ -1716,7 +1711,7 @@ class Guild(Hashable):
         :class:`StageChannel`
             The channel that was just created.
         """
-        options: Dict[str, Any] = {}
+        options: dict[str, Any] = {}
 
         if topic is not MISSING:
             options["topic"] = topic
@@ -1767,7 +1762,7 @@ class Guild(Hashable):
         default_thread_slowmode_delay: int = MISSING,
         default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = None,
         nsfw: bool = MISSING,
-        overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
+        overwrites: dict[Union[Role, Member], PermissionOverwrite] = MISSING,
         available_tags: Optional[Sequence[ForumTag]] = None,
         default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = None,
         default_sort_order: Optional[ThreadSortOrder] = None,
@@ -1917,7 +1912,7 @@ class Guild(Hashable):
         default_thread_slowmode_delay: int = MISSING,
         default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = None,
         nsfw: bool = MISSING,
-        overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
+        overwrites: dict[Union[Role, Member], PermissionOverwrite] = MISSING,
         available_tags: Optional[Sequence[ForumTag]] = None,
         default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = None,
         default_sort_order: Optional[ThreadSortOrder] = None,
@@ -2036,7 +2031,7 @@ class Guild(Hashable):
         self,
         name: str,
         *,
-        overwrites: Dict[Union[Role, Member], PermissionOverwrite] = MISSING,
+        overwrites: dict[Union[Role, Member], PermissionOverwrite] = MISSING,
         reason: Optional[str] = None,
         position: int = MISSING,
     ) -> CategoryChannel:
@@ -2079,7 +2074,7 @@ class Guild(Hashable):
         :class:`CategoryChannel`
             The channel that was just created.
         """
-        options: Dict[str, Any] = {}
+        options: dict[str, Any] = {}
         if position is not MISSING:
             options["position"] = position
 
@@ -2367,7 +2362,7 @@ class Guild(Hashable):
             if payload:
                 await http.edit_guild_incident_actions(self.id, payload)
 
-        fields: Dict[str, Any] = {}
+        fields: dict[str, Any] = {}
         if name is not MISSING:
             fields["name"] = name
 
@@ -2549,16 +2544,15 @@ class Guild(Hashable):
             if factory is None:
                 raise InvalidData("Unknown channel type {type} for channel ID {id}.".format_map(d))
 
-            channel = factory(
+            return factory(
                 guild=self,
                 state=self._state,
-                data=d,  # type: ignore
+                data=d,  # pyright: ignore[reportArgumentType]
             )
-            return channel
 
         return [convert(d) for d in data]
 
-    async def active_threads(self) -> List[Thread]:
+    async def active_threads(self) -> list[Thread]:
         """|coro|
 
         Returns a list of active :class:`Thread` that the client can access.
@@ -2579,7 +2573,7 @@ class Guild(Hashable):
         """
         data = await self._state.http.get_active_threads(self.id)
         threads = [Thread(guild=self, state=self._state, data=d) for d in data.get("threads", [])]
-        thread_lookup: Dict[int, Thread] = {thread.id: thread for thread in threads}
+        thread_lookup: dict[int, Thread] = {thread.id: thread for thread in threads}
         for member in data.get("members", []):
             thread = thread_lookup.get(int(member["id"]))
             if thread is not None:
@@ -2589,7 +2583,7 @@ class Guild(Hashable):
 
     async def fetch_scheduled_events(
         self, *, with_user_count: bool = False
-    ) -> List[GuildScheduledEvent]:
+    ) -> list[GuildScheduledEvent]:
         """|coro|
 
         Retrieves a list of all :class:`GuildScheduledEvent` instances that the guild has.
@@ -2822,7 +2816,7 @@ class Guild(Hashable):
             msg = "privacy_level must be an instance of GuildScheduledEventPrivacyLevel"
             raise TypeError(msg)
 
-        fields: Dict[str, Any] = {
+        fields: dict[str, Any] = {
             "name": name,
             "privacy_level": privacy_level.value,
             "scheduled_start_time": utils.isoformat_utc(scheduled_start_time),
@@ -2884,7 +2878,7 @@ class Guild(Hashable):
         self,
         *,
         enabled: bool = MISSING,
-        channels: Optional[List[WelcomeScreenChannel]] = MISSING,
+        channels: Optional[list[WelcomeScreenChannel]] = MISSING,
         description: Optional[str] = MISSING,
         reason: Optional[str] = None,
     ) -> WelcomeScreen:
@@ -3109,12 +3103,17 @@ class Guild(Hashable):
             msg = "Channel ID resolved to a private channel"
             raise InvalidData(msg)
 
-        guild_id = int(data["guild_id"])  # type: ignore
+        assert "guild_id" in data
+        guild_id = int(data["guild_id"])
         if self.id != guild_id:
             msg = "Guild ID resolved to a different guild"
             raise InvalidData(msg)
 
-        channel: GuildChannel = factory(guild=self, state=self._state, data=data)  # type: ignore
+        channel: GuildChannel = factory(  # pyright: ignore[reportAssignmentType]
+            guild=self,
+            state=self._state,
+            data=data,  # pyright: ignore[reportArgumentType]
+        )
         return channel
 
     def bans(
@@ -3178,7 +3177,7 @@ class Guild(Hashable):
         *,
         days: int,
         compute_prune_count: bool = True,
-        roles: List[Snowflake] = MISSING,
+        roles: list[Snowflake] = MISSING,
         reason: Optional[str] = None,
     ) -> Optional[int]:
         """|coro|
@@ -3246,7 +3245,7 @@ class Guild(Hashable):
         )
         return data["pruned"]
 
-    async def templates(self) -> List[Template]:
+    async def templates(self) -> list[Template]:
         """|coro|
 
         Gets the list of templates from this guild.
@@ -3271,7 +3270,7 @@ class Guild(Hashable):
         data = await self._state.http.guild_templates(self.id)
         return [Template(data=d, state=self._state) for d in data]
 
-    async def webhooks(self) -> List[Webhook]:
+    async def webhooks(self) -> list[Webhook]:
         """|coro|
 
         Gets the list of webhooks from this guild.
@@ -3294,7 +3293,7 @@ class Guild(Hashable):
         data = await self._state.http.guild_webhooks(self.id)
         return [Webhook.from_state(d, state=self._state) for d in data]
 
-    async def estimate_pruned_members(self, *, days: int, roles: List[Snowflake] = MISSING) -> int:
+    async def estimate_pruned_members(self, *, days: int, roles: list[Snowflake] = MISSING) -> int:
         """|coro|
 
         Similar to :meth:`prune_members` except instead of actually
@@ -3340,7 +3339,7 @@ class Guild(Hashable):
         data = await self._state.http.estimate_pruned_members(self.id, days, role_ids)
         return data["pruned"]
 
-    async def invites(self) -> List[Invite]:
+    async def invites(self) -> list[Invite]:
         """|coro|
 
         Returns a list of all active instant invites from the guild.
@@ -3368,7 +3367,7 @@ class Guild(Hashable):
             The list of invites that are currently active.
         """
         data = await self._state.http.invites_from(self.id)
-        result: List[Invite] = []
+        result: list[Invite] = []
         for invite in data:
             if channel_data := invite.get("channel"):
                 channel = self.get_channel(int(channel_data["id"]))
@@ -3441,7 +3440,7 @@ class Guild(Hashable):
         """
         await self._state.http.create_integration(self.id, type, id)
 
-    async def integrations(self) -> List[Integration]:
+    async def integrations(self) -> list[Integration]:
         """|coro|
 
         Returns a list of all integrations attached to the guild.
@@ -3471,7 +3470,7 @@ class Guild(Hashable):
 
         return [convert(d) for d in data]
 
-    async def fetch_stickers(self) -> List[GuildSticker]:
+    async def fetch_stickers(self) -> list[GuildSticker]:
         """|coro|
 
         Retrieves a list of all :class:`Sticker`\\s that the guild has.
@@ -3611,7 +3610,7 @@ class Guild(Hashable):
         """
         await self._state.http.delete_guild_sticker(self.id, sticker.id, reason=reason)
 
-    async def fetch_emojis(self) -> List[Emoji]:
+    async def fetch_emojis(self) -> list[Emoji]:
         """|coro|
 
         Retrieves all custom :class:`Emoji`\\s that the guild has.
@@ -3797,7 +3796,7 @@ class Guild(Hashable):
         data = await self._state.http.get_role(self.id, role_id=role_id)
         return Role(guild=self, state=self._state, data=data)
 
-    async def fetch_roles(self) -> List[Role]:
+    async def fetch_roles(self) -> list[Role]:
         """|coro|
 
         Retrieves all :class:`Role` that the guild has.
@@ -3821,7 +3820,7 @@ class Guild(Hashable):
         data = await self._state.http.get_roles(self.id)
         return [Role(guild=self, state=self._state, data=d) for d in data]
 
-    async def fetch_role_member_counts(self) -> Dict[Union[Role, Object], int]:
+    async def fetch_role_member_counts(self) -> dict[Union[Role, Object], int]:
         """|coro|
 
         Retrieves the member counts of all :class:`Role`\\s that the guild has.
@@ -3845,7 +3844,7 @@ class Guild(Hashable):
             :class:`Object` with the corresponding ID instead.
         """
         data = await self._state.http.get_role_member_counts(self.id)
-        counts: Dict[Union[Role, Object], int] = {}
+        counts: dict[Union[Role, Object], int] = {}
         for id_str, count in data.items():
             id = int(id_str)
             if id == self.id:
@@ -4075,14 +4074,13 @@ class Guild(Hashable):
             fields["unicode_emoji"] = emoji
 
         data = await self._state.http.create_role(self.id, reason=reason, **fields)
-        role = Role(guild=self, data=data, state=self._state)
 
         # TODO: add to cache
-        return role
+        return Role(guild=self, data=data, state=self._state)
 
     async def edit_role_positions(
-        self, positions: Dict[Snowflake, int], *, reason: Optional[str] = None
-    ) -> List[Role]:
+        self, positions: dict[Snowflake, int], *, reason: Optional[str] = None
+    ) -> list[Role]:
         """|coro|
 
         Bulk edits a list of :class:`Role` in the guild.
@@ -4133,14 +4131,14 @@ class Guild(Hashable):
             msg = "positions parameter expects a dict."
             raise TypeError(msg)
 
-        role_positions: List[Any] = []
+        role_positions: list[Any] = []
         for role, position in positions.items():
             payload = {"id": role.id, "position": position}
 
             role_positions.append(payload)
 
         data = await self._state.http.move_role_position(self.id, role_positions, reason=reason)
-        roles: List[Role] = []
+        roles: list[Role] = []
         for d in data:
             role = Role(guild=self, data=d, state=self._state)
             roles.append(role)
@@ -4671,7 +4669,7 @@ class Guild(Hashable):
         # return value unused
         await self._state.http.edit_mfa_level(self.id, mfa_level, reason=reason)
 
-    async def chunk(self, *, cache: bool = True) -> Optional[List[Member]]:
+    async def chunk(self, *, cache: bool = True) -> Optional[list[Member]]:
         """|coro|
 
         Returns a :class:`list` of all guild members.
@@ -4704,16 +4702,17 @@ class Guild(Hashable):
 
         if not self._state.is_guild_evicted(self):
             return await self._state.chunk_guild(self, cache=cache)
+        return None
 
     async def query_members(
         self,
         query: Optional[str] = None,
         *,
         limit: int = 5,
-        user_ids: Optional[List[int]] = None,
+        user_ids: Optional[list[int]] = None,
         presences: bool = False,
         cache: bool = True,
-    ) -> List[Member]:
+    ) -> list[Member]:
         """|coro|
 
         Request members that belong to this guild whose name starts with
@@ -4793,7 +4792,7 @@ class Guild(Hashable):
         *,
         limit: int = 1,
         cache: bool = True,
-    ) -> List[Member]:
+    ) -> list[Member]:
         """|coro|
 
         Retrieves members that belong to this guild whose name starts with
@@ -4834,7 +4833,7 @@ class Guild(Hashable):
             raise ValueError(msg)
         limit = min(1000, limit)
         members = await self._state.http.search_guild_members(self.id, query=query, limit=limit)
-        resp: List[Member] = []
+        resp: list[Member] = []
         for member in members:
             member = Member(state=self._state, data=member, guild=self)
             if cache and member.id not in self._members:
@@ -4844,11 +4843,11 @@ class Guild(Hashable):
 
     async def get_or_fetch_members(
         self,
-        user_ids: List[int],
+        user_ids: list[int],
         *,
         presences: bool = False,
         cache: bool = True,
-    ) -> List[Member]:
+    ) -> list[Member]:
         """|coro|
 
         Tries to get the guild members matching the provided IDs from cache.
@@ -4888,8 +4887,8 @@ class Guild(Hashable):
             msg = "Intents.presences must be enabled to use this."
             raise ClientException(msg)
 
-        members: List[Member] = []
-        unresolved_ids: List[int] = []
+        members: list[Member] = []
+        unresolved_ids: list[int] = []
 
         for user_id in user_ids:
             member = self.get_member(user_id)
@@ -4928,7 +4927,7 @@ class Guild(Hashable):
 
     getch_members = get_or_fetch_members
 
-    async def fetch_voice_regions(self) -> List[VoiceRegion]:
+    async def fetch_voice_regions(self) -> list[VoiceRegion]:
         """|coro|
 
         Retrieves a list of :class:`VoiceRegion` for this guild.
@@ -4980,7 +4979,7 @@ class Guild(Hashable):
             data = await self._state.http.get_voice_state(self.id, member_id)
 
         channel_id = utils._get_as_snowflake(data, "channel_id")
-        channel: Optional[VocalGuildChannel] = self.get_channel(channel_id)  # type: ignore
+        channel: Optional[VocalGuildChannel] = self.get_channel(channel_id)  # pyright: ignore[reportAssignmentType, reportArgumentType]
         return VoiceState(data=data, channel=channel)
 
     async def change_voice_state(
@@ -5007,7 +5006,7 @@ class Guild(Hashable):
 
     # Application command permissions
 
-    async def bulk_fetch_command_permissions(self) -> List[GuildApplicationCommandPermissions]:
+    async def bulk_fetch_command_permissions(self) -> list[GuildApplicationCommandPermissions]:
         """|coro|
 
         Requests a list of :class:`GuildApplicationCommandPermissions` configured for this guild.
@@ -5109,7 +5108,7 @@ class Guild(Hashable):
             msg = "Exactly one of `duration` and `until` must be provided"
             raise ValueError(msg)
 
-        payload: Dict[str, Any] = {}
+        payload: dict[str, Any] = {}
 
         if duration is not MISSING:
             if duration is None:
@@ -5152,7 +5151,7 @@ class Guild(Hashable):
         data = await self._state.http.get_auto_moderation_rule(self.id, rule_id)
         return AutoModRule(data=data, guild=self)
 
-    async def fetch_automod_rules(self) -> List[AutoModRule]:
+    async def fetch_automod_rules(self) -> list[AutoModRule]:
         """|coro|
 
         Retrieves the guild's auto moderation rules.
@@ -5389,7 +5388,7 @@ class Guild(Hashable):
         data = await self._state.http.get_guild_soundboard_sound(self.id, sound_id)
         return GuildSoundboardSound(data=data, state=self._state, guild_id=self.id)
 
-    async def fetch_soundboard_sounds(self) -> List[GuildSoundboardSound]:
+    async def fetch_soundboard_sounds(self) -> list[GuildSoundboardSound]:
         """|coro|
 
         Retrieves all :class:`GuildSoundboardSound`\\s that the guild has.
@@ -5507,8 +5506,8 @@ class GuildBuilder:
         self.name: str = name
 
         # note: the first role corresponds to @everyone
-        self._roles: List[CreateGuildPlaceholderRole] = []
-        self._channels: List[CreateGuildPlaceholderChannel] = []
+        self._roles: list[CreateGuildPlaceholderRole] = []
+        self._channels: list[CreateGuildPlaceholderChannel] = []
 
         self.icon: Optional[AssetBytes] = None
         self.verification_level: Optional[VerificationLevel] = None
@@ -5532,12 +5531,12 @@ class GuildBuilder:
         *,
         type: ChannelType,
         name: str,
-        overwrites: Dict[PlaceholderID, PermissionOverwrite] = MISSING,
+        overwrites: dict[PlaceholderID, PermissionOverwrite] = MISSING,
         category: PlaceholderID = MISSING,
         topic: Optional[str] = MISSING,
         slowmode_delay: int = MISSING,
         nsfw: bool = MISSING,
-    ) -> Tuple[PlaceholderID, CreateGuildPlaceholderChannel]:
+    ) -> tuple[PlaceholderID, CreateGuildPlaceholderChannel]:
         _id = self._next_id()
         data: CreateGuildPlaceholderChannel = {
             "id": _id,
@@ -5546,7 +5545,7 @@ class GuildBuilder:
         }
 
         if overwrites is not MISSING:
-            overwrites_data: List[PermissionOverwritePayload] = []
+            overwrites_data: list[PermissionOverwritePayload] = []
             for target, perm in overwrites.items():
                 allow, deny = perm.pair()
                 overwrites_data.append(
@@ -5701,9 +5700,9 @@ class GuildBuilder:
 
         actual_colour = colour or color or Colour.default()
         if isinstance(actual_colour, int):
-            data["color"] = actual_colour  # type: ignore
+            data["color"] = actual_colour  # pyright: ignore[reportGeneralTypeIssues]
         else:
-            data["color"] = actual_colour.value  # type: ignore
+            data["color"] = actual_colour.value  # pyright: ignore[reportGeneralTypeIssues]
 
         if hoist is not MISSING:
             data["hoist"] = hoist
@@ -5718,7 +5717,7 @@ class GuildBuilder:
         self,
         name: str,
         *,
-        overwrites: Dict[PlaceholderID, PermissionOverwrite] = MISSING,
+        overwrites: dict[PlaceholderID, PermissionOverwrite] = MISSING,
     ) -> PlaceholderID:
         """Adds a category channel to the guild builder.
 
@@ -5745,7 +5744,7 @@ class GuildBuilder:
         self,
         name: str,
         *,
-        overwrites: Dict[PlaceholderID, PermissionOverwrite] = MISSING,
+        overwrites: dict[PlaceholderID, PermissionOverwrite] = MISSING,
         category: PlaceholderID = MISSING,
         topic: Optional[str] = MISSING,
         slowmode_delay: int = MISSING,
@@ -5805,7 +5804,7 @@ class GuildBuilder:
         self,
         name: str,
         *,
-        overwrites: Dict[PlaceholderID, PermissionOverwrite] = MISSING,
+        overwrites: dict[PlaceholderID, PermissionOverwrite] = MISSING,
         category: PlaceholderID = MISSING,
         slowmode_delay: int = MISSING,
         nsfw: bool = MISSING,

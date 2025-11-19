@@ -5,17 +5,13 @@ from __future__ import annotations
 import asyncio
 import copy
 from abc import ABC
+from collections.abc import Mapping, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    Dict,
-    List,
-    Mapping,
     Optional,
     Protocol,
-    Sequence,
-    Tuple,
     TypeVar,
     Union,
     cast,
@@ -264,7 +260,7 @@ class GuildChannel(ABC):
     category_id: Optional[int]
     _flags: int
     _state: ConnectionState
-    _overwrites: List[_Overwrites]
+    _overwrites: list[_Overwrites]
 
     if TYPE_CHECKING:
 
@@ -279,7 +275,7 @@ class GuildChannel(ABC):
     def _sorting_bucket(self) -> int:
         raise NotImplementedError
 
-    def _update(self, guild: Guild, data: Dict[str, Any]) -> None:
+    def _update(self, guild: Guild, data: dict[str, Any]) -> None:
         raise NotImplementedError
 
     async def _move(
@@ -297,7 +293,7 @@ class GuildChannel(ABC):
         http = self._state.http
         bucket = self._sorting_bucket
         channels = [c for c in self.guild.channels if c._sorting_bucket == bucket]
-        channels = cast("List[GuildChannel]", channels)
+        channels = cast("list[GuildChannel]", channels)
 
         channels.sort(key=lambda c: c.position)
 
@@ -314,7 +310,7 @@ class GuildChannel(ABC):
             # add ourselves at our designated position
             channels.insert(index, self)
 
-        payload: List[ChannelPositionUpdatePayload] = []
+        payload: list[ChannelPositionUpdatePayload] = []
         for index, c in enumerate(channels):
             d: ChannelPositionUpdatePayload = {"id": c.id, "position": index}
             if parent_id is not MISSING and c.id == self.id:
@@ -380,7 +376,7 @@ class GuildChannel(ABC):
 
         lock_permissions: bool = bool(sync_permissions)
 
-        overwrites_payload: List[PermissionOverwritePayload] = MISSING
+        overwrites_payload: list[PermissionOverwritePayload] = MISSING
 
         if position is not MISSING:
             await self._move(
@@ -430,7 +426,7 @@ class GuildChannel(ABC):
         else:
             flags_payload = MISSING
 
-        available_tags_payload: List[PartialForumTagPayload] = MISSING
+        available_tags_payload: list[PartialForumTagPayload] = MISSING
         if available_tags is not MISSING:
             available_tags_payload = [tag.to_dict() for tag in available_tags]
 
@@ -455,7 +451,7 @@ class GuildChannel(ABC):
         if default_layout is not MISSING:
             default_layout_payload = try_enum_to_int(default_layout)
 
-        options: Dict[str, Any] = {
+        options: dict[str, Any] = {
             "name": name,
             "parent_id": parent_id,
             "topic": topic,
@@ -480,6 +476,7 @@ class GuildChannel(ABC):
 
         if options:
             return await self._state.http.edit_channel(self.id, reason=reason, **options)
+        return None
 
     def _fill_overwrites(self, data: GuildChannelPayload) -> None:
         self._overwrites = []
@@ -507,11 +504,11 @@ class GuildChannel(ABC):
             tmp[everyone_index], tmp[0] = tmp[0], tmp[everyone_index]
 
     @property
-    def changed_roles(self) -> List[Role]:
+    def changed_roles(self) -> list[Role]:
         """:class:`list`\\[:class:`.Role`]: Returns a list of roles that have been overridden from
         their default values in the :attr:`.Guild.roles` attribute.
         """
-        ret: List[Role] = []
+        ret: list[Role] = []
         g = self.guild
         for overwrite in filter(lambda o: o.is_role(), self._overwrites):
             role = g.get_role(overwrite.id)
@@ -564,7 +561,7 @@ class GuildChannel(ABC):
         return PermissionOverwrite()
 
     @property
-    def overwrites(self) -> Dict[Union[Role, Member], PermissionOverwrite]:
+    def overwrites(self) -> dict[Union[Role, Member], PermissionOverwrite]:
         """Returns all of the channel's overwrites.
 
         This is returned as a dictionary where the key contains the target which
@@ -605,7 +602,7 @@ class GuildChannel(ABC):
         """
         if isinstance(self.guild, Object):
             return None
-        return self.guild.get_channel(self.category_id)  # type: ignore
+        return self.guild.get_channel(self.category_id)  # pyright: ignore[reportArgumentType, reportReturnType]
 
     @property
     def permissions_synced(self) -> bool:
@@ -1043,7 +1040,7 @@ class GuildChannel(ABC):
 
     async def _clone_impl(
         self,
-        base_attrs: Dict[str, Any],
+        base_attrs: dict[str, Any],
         *,
         name: Optional[str] = None,
         category: Optional[Snowflake] = MISSING,
@@ -1052,7 +1049,7 @@ class GuildChannel(ABC):
     ) -> Self:
         # if the overwrites are MISSING, defaults to the
         # original permissions of the channel
-        overwrites_payload: List[PermissionOverwritePayload]
+        overwrites_payload: list[PermissionOverwritePayload]
         if overwrites is not MISSING:
             if not isinstance(overwrites, dict):
                 msg = "overwrites parameter expects a dict."
@@ -1090,7 +1087,7 @@ class GuildChannel(ABC):
         obj = cls(state=self._state, guild=self.guild, data=data)
 
         # temporarily add it to the cache
-        self.guild._channels[obj.id] = obj  # type: ignore
+        self.guild._channels[obj.id] = obj  # pyright: ignore[reportArgumentType]
         return obj
 
     async def clone(self, *, name: Optional[str] = None, reason: Optional[str] = None) -> Self:
@@ -1259,7 +1256,7 @@ class GuildChannel(ABC):
             ]
 
         channels.sort(key=lambda c: (c.position, c.id))
-        channels = cast("List[GuildChannel]", channels)
+        channels = cast("list[GuildChannel]", channels)
 
         try:
             # Try to remove ourselves from the channel list
@@ -1283,7 +1280,7 @@ class GuildChannel(ABC):
             raise ValueError(msg)
 
         channels.insert(max((index + offset), 0), self)
-        payload: List[ChannelPositionUpdatePayload] = []
+        payload: list[ChannelPositionUpdatePayload] = []
         lock_permissions = kwargs.get("sync_permissions", False)
         reason = kwargs.get("reason")
         for index, channel in enumerate(channels):
@@ -1389,7 +1386,7 @@ class GuildChannel(ABC):
         invite.guild_scheduled_event = guild_scheduled_event
         return invite
 
-    async def invites(self) -> List[Invite]:
+    async def invites(self) -> list[Invite]:
         """|coro|
 
         Returns a list of all active instant invites from this channel.
@@ -1465,7 +1462,7 @@ class Messageable:
         *,
         tts: bool = ...,
         embed: Embed = ...,
-        files: List[File] = ...,
+        files: list[File] = ...,
         stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
         delete_after: float = ...,
         nonce: Union[str, int] = ...,
@@ -1485,7 +1482,7 @@ class Messageable:
         content: Optional[str] = ...,
         *,
         tts: bool = ...,
-        embeds: List[Embed] = ...,
+        embeds: list[Embed] = ...,
         file: File = ...,
         stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
         delete_after: float = ...,
@@ -1506,8 +1503,8 @@ class Messageable:
         content: Optional[str] = ...,
         *,
         tts: bool = ...,
-        embeds: List[Embed] = ...,
-        files: List[File] = ...,
+        embeds: list[Embed] = ...,
+        files: list[File] = ...,
         stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
         delete_after: float = ...,
         nonce: Union[str, int] = ...,
@@ -1527,9 +1524,9 @@ class Messageable:
         *,
         tts: bool = False,
         embed: Optional[Embed] = None,
-        embeds: Optional[List[Embed]] = None,
+        embeds: Optional[list[Embed]] = None,
         file: Optional[File] = None,
-        files: Optional[List[File]] = None,
+        files: Optional[list[File]] = None,
         stickers: Optional[Sequence[Union[GuildSticker, StandardSticker, StickerItem]]] = None,
         delete_after: Optional[float] = None,
         nonce: Optional[Union[str, int]] = None,
@@ -2033,10 +2030,10 @@ class Connectable(Protocol):
     guild: Guild
     id: int
 
-    def _get_voice_client_key(self) -> Tuple[int, str]:
+    def _get_voice_client_key(self) -> tuple[int, str]:
         raise NotImplementedError
 
-    def _get_voice_state_pair(self) -> Tuple[int, int]:
+    def _get_voice_state_pair(self) -> tuple[int, int]:
         raise NotImplementedError
 
     async def connect(

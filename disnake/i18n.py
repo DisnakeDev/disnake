@@ -11,13 +11,9 @@ from pathlib import Path
 from typing import (
     TYPE_CHECKING,
     Any,
-    DefaultDict,
-    Dict,
     Generic,
     Literal,
     Optional,
-    Set,
-    Type,
     TypeVar,
     Union,
     overload,
@@ -48,7 +44,7 @@ MISSING = utils.MISSING
 _log = logging.getLogger(__name__)
 
 
-LocalizationsDict = Union[Dict[Locale, str], Dict[str, str]]
+LocalizationsDict = Union[dict[Locale, str], dict[str, str]]
 Localizations = Union[str, LocalizationsDict]
 
 StringT = TypeVar("StringT", str, Optional[str], covariant=True)
@@ -139,7 +135,7 @@ class Localized(Generic[StringT]):
 
     @classmethod
     def _cast(
-        cls: Type[Localized[Any]], string: Union[Optional[str], Localized[Any]], required: bool
+        cls: type[Localized[Any]], string: Union[Optional[str], Localized[Any]], required: bool
     ) -> Localized[Any]:
         if not isinstance(string, Localized):
             string = cls(string, data=None)
@@ -184,7 +180,7 @@ class LocalizationValue:
 
     def __init__(self, localizations: Optional[Localizations]) -> None:
         self._key: Optional[str]
-        self._data: Optional[Dict[str, str]]
+        self._data: Optional[dict[str, str]]
 
         if localizations is None:
             # no localization
@@ -234,7 +230,7 @@ class LocalizationValue:
         return ins
 
     @property
-    def data(self) -> Optional[Dict[str, str]]:
+    def data(self) -> Optional[dict[str, str]]:
         """:class:`dict`\\[:class:`str`, :class:`str`] | :data:`None`: A dict with a locale -> localization mapping, if available."""
         if self._data is MISSING:
             # This will happen when `_link(store)` hasn't been called yet, which *shouldn't* occur under normal circumstances.
@@ -267,7 +263,7 @@ class LocalizationProtocol(ABC):
     """
 
     @abstractmethod
-    def get(self, key: str) -> Optional[Dict[str, str]]:
+    def get(self, key: str) -> Optional[dict[str, str]]:
         """Returns localizations for the specified key.
 
         Parameters
@@ -327,10 +323,10 @@ class LocalizationStore(LocalizationProtocol):
     def __init__(self, *, strict: bool) -> None:
         self.strict = strict
 
-        self._loc: DefaultDict[str, Dict[str, str]] = defaultdict(dict)
-        self._paths: Set[Path] = set()
+        self._loc: defaultdict[str, dict[str, str]] = defaultdict(dict)
+        self._paths: set[Path] = set()
 
-    def get(self, key: str) -> Optional[Dict[str, str]]:
+    def get(self, key: str) -> Optional[dict[str, str]]:
         """Returns localizations for the specified key.
 
         Parameters
@@ -419,7 +415,7 @@ class LocalizationStore(LocalizationProtocol):
             msg = f"Unable to load '{path}': {e}"
             raise RuntimeError(msg) from e
 
-    def _load_dict(self, data: Dict[str, Optional[str]], locale: str) -> None:
+    def _load_dict(self, data: dict[str, Optional[str]], locale: str) -> None:
         if not isinstance(data, dict) or not all(
             o is None or isinstance(o, str) for o in data.values()
         ):

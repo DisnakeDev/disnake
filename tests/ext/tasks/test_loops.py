@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
 
 import datetime
-from typing import Any, Tuple
+from typing import Any
 
 import pytest
 
@@ -20,7 +20,7 @@ class TestLoops:
 
         with pytest.raises(TypeError, match="must be a coroutine function"):
 
-            @loop()  # type: ignore
+            @loop()  # pyright: ignore[reportArgumentType]
             def task() -> None: ...
 
     def test_mixing_time(self) -> None:
@@ -37,7 +37,7 @@ class TestLoops:
 
     def test_inheritance(self) -> None:
         class HyperLoop(Loop[LF]):
-            def __init__(self, coro: LF, time_tup: Tuple[float, float, float]) -> None:
+            def __init__(self, coro: LF, time_tup: tuple[float, float, float]) -> None:
                 s, m, h = time_tup
                 super().__init__(coro, seconds=s, minutes=m, hours=h)
 
@@ -70,5 +70,5 @@ class TestLoops:
 
         with pytest.raises(TypeError, match="subclass of Loop"):
 
-            @loop(cls=WhileTrueLoop)  # type: ignore
+            @loop(cls=WhileTrueLoop)  # pyright: ignore[reportUntypedFunctionDecorator, reportArgumentType]
             async def task() -> None: ...

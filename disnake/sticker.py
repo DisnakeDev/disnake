@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import unicodedata
-from typing import TYPE_CHECKING, List, Literal, Optional, Tuple, Type, Union
+from typing import TYPE_CHECKING, Literal, Optional, Union
 
 from .asset import Asset, AssetMixin
 from .enums import StickerFormatType, StickerType, try_enum
@@ -95,7 +95,7 @@ class StickerPack(Hashable):
     def _from_data(self, data: StickerPackPayload) -> None:
         self.id: int = int(data["id"])
         stickers = data["stickers"]
-        self.stickers: List[StandardSticker] = [
+        self.stickers: list[StandardSticker] = [
             StandardSticker(state=self._state, data=sticker) for sticker in stickers
         ]
         self.name: str = data["name"]
@@ -220,7 +220,7 @@ class StickerItem(_StickerTag):
             The retrieved sticker.
         """
         data: StickerPayload = await self._state.http.get_sticker(self.id)
-        cls, _ = _sticker_factory(data["type"])  # type: ignore
+        cls, _ = _sticker_factory(data["type"])  # pyright: ignore[reportGeneralTypeIssues]
         return cls(state=self._state, data=data)
 
 
@@ -327,7 +327,7 @@ class StandardSticker(Sticker):
         self.type: StickerType = StickerType.standard
 
         try:
-            self.tags: List[str] = [tag.strip() for tag in data["tags"].split(",")]
+            self.tags: list[str] = [tag.strip() for tag in data["tags"].split(",")]
         except KeyError:
             self.tags = []
 
@@ -511,7 +511,7 @@ class GuildSticker(Sticker):
 
 def _sticker_factory(
     sticker_type: Literal[1, 2],
-) -> Tuple[Type[Union[StandardSticker, GuildSticker, Sticker]], StickerType]:
+) -> tuple[type[Union[StandardSticker, GuildSticker, Sticker]], StickerType]:
     value = try_enum(StickerType, sticker_type)
     if value == StickerType.standard:
         return StandardSticker, value

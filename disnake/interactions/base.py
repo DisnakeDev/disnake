@@ -3,17 +3,13 @@
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Mapping, Sequence
 from datetime import timedelta
 from typing import (
     TYPE_CHECKING,
     Any,
-    Dict,
     Generic,
-    List,
-    Mapping,
     Optional,
-    Sequence,
-    Tuple,
     TypeVar,
     Union,
     cast,
@@ -87,6 +83,7 @@ if TYPE_CHECKING:
     )
     from ..types.snowflake import Snowflake
     from ..types.user import User as UserPayload
+    from ..types.webhook import Webhook as WebhookPayload
     from ..ui._types import MessageComponents, ModalComponents, ModalTopLevelComponent
     from ..ui.modal import Modal
     from ..ui.view import View
@@ -200,7 +197,7 @@ class Interaction(Generic[ClientT]):
         .. versionadded:: 2.11
     """
 
-    __slots__: Tuple[str, ...] = (
+    __slots__: tuple[str, ...] = (
         "data",
         "id",
         "type",
@@ -232,7 +229,7 @@ class Interaction(Generic[ClientT]):
         self.data: Mapping[str, Any] = data.get("data") or {}
         self._state: ConnectionState = state
         # TODO: Maybe use a unique session
-        self._session: ClientSession = state.http._HTTPClient__session  # type: ignore
+        self._session: ClientSession = state.http._HTTPClient__session  # pyright: ignore[reportAttributeAccessIssue]
         self.client: ClientT = cast("ClientT", state._get_client())
         self._original_response: Optional[InteractionMessage] = None
 
@@ -264,7 +261,7 @@ class Interaction(Generic[ClientT]):
                 and guild_fallback.get_member(int(member["user"]["id"]))
             ) or Member(
                 state=self._state,
-                guild=guild_fallback,  # type: ignore  # may be `Object`
+                guild=guild_fallback,  # pyright: ignore[reportArgumentType]  # may be `Object`
                 data=member,
             )
             self._permissions = int(member.get("permissions", 0))
@@ -276,7 +273,7 @@ class Interaction(Generic[ClientT]):
             data["channel"], guild_fallback, return_messageable=True
         )
 
-        self.entitlements: List[Entitlement] = (
+        self.entitlements: list[Entitlement] = (
             [Entitlement(data=e, state=state) for e in entitlements_data]
             if (entitlements_data := data.get("entitlements"))
             else []
@@ -377,7 +374,7 @@ class Interaction(Generic[ClientT]):
     @utils.cached_slot_property("_cs_followup")
     def followup(self) -> Webhook:
         """:class:`Webhook`: Returns the follow up webhook for follow up interactions."""
-        payload = {
+        payload: WebhookPayload = {
             "id": self.application_id,
             "type": WebhookType.application.value,
             "token": self.token,
@@ -436,7 +433,7 @@ class Interaction(Generic[ClientT]):
             session=self._session,
         )
         state = _InteractionMessageState(self, self._state)
-        message = InteractionMessage(state=state, channel=self.channel, data=data)  # type: ignore
+        message = InteractionMessage(state=state, channel=self.channel, data=data)  # pyright: ignore[reportArgumentType]
         self._original_response = message
         return message
 
@@ -445,10 +442,10 @@ class Interaction(Generic[ClientT]):
         content: Optional[str] = MISSING,
         *,
         embed: Optional[Embed] = MISSING,
-        embeds: List[Embed] = MISSING,
+        embeds: list[Embed] = MISSING,
         file: File = MISSING,
-        files: List[File] = MISSING,
-        attachments: Optional[List[Attachment]] = MISSING,
+        files: list[File] = MISSING,
+        attachments: Optional[list[Attachment]] = MISSING,
         view: Optional[View] = MISSING,
         components: Optional[MessageComponents] = MISSING,
         poll: Poll = MISSING,
@@ -619,7 +616,7 @@ class Interaction(Generic[ClientT]):
 
         # The message channel types should always match
         state = _InteractionMessageState(self, self._state)
-        message = InteractionMessage(state=state, channel=self.channel, data=data)  # type: ignore
+        message = InteractionMessage(state=state, channel=self.channel, data=data)  # pyright: ignore[reportArgumentType]
 
         if view and not view.is_finished():
             self._state.store_view(view, message.id)
@@ -695,9 +692,9 @@ class Interaction(Generic[ClientT]):
         content: Optional[str] = None,
         *,
         embed: Embed = MISSING,
-        embeds: List[Embed] = MISSING,
+        embeds: list[Embed] = MISSING,
         file: File = MISSING,
-        files: List[File] = MISSING,
+        files: list[File] = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         view: View = MISSING,
         components: MessageComponents = MISSING,
@@ -834,7 +831,7 @@ class InteractionResponse:
     .. versionadded:: 2.0
     """
 
-    __slots__: Tuple[str, ...] = (
+    __slots__: tuple[str, ...] = (
         "_parent",
         "_response_type",
     )
@@ -916,7 +913,7 @@ class InteractionResponse:
             raise InteractionResponded(self._parent)
 
         defer_type: Optional[InteractionResponseType] = None
-        data: Dict[str, Any] = {}
+        data: dict[str, Any] = {}
         parent = self._parent
 
         if parent.type is InteractionType.application_command:
@@ -985,9 +982,9 @@ class InteractionResponse:
         content: Optional[str] = None,
         *,
         embed: Embed = MISSING,
-        embeds: List[Embed] = MISSING,
+        embeds: list[Embed] = MISSING,
         file: File = MISSING,
-        files: List[File] = MISSING,
+        files: list[File] = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         view: View = MISSING,
         components: MessageComponents = MISSING,
@@ -1086,7 +1083,7 @@ class InteractionResponse:
         if self._response_type is not None:
             raise InteractionResponded(self._parent)
 
-        payload: Dict[str, Any] = {
+        payload: dict[str, Any] = {
             "tts": tts,
         }
 
@@ -1200,10 +1197,10 @@ class InteractionResponse:
         content: Optional[str] = MISSING,
         *,
         embed: Optional[Embed] = MISSING,
-        embeds: List[Embed] = MISSING,
+        embeds: list[Embed] = MISSING,
         file: File = MISSING,
-        files: List[File] = MISSING,
-        attachments: Optional[List[Attachment]] = MISSING,
+        files: list[File] = MISSING,
+        attachments: Optional[list[Attachment]] = MISSING,
         view: Optional[View] = MISSING,
         components: Optional[MessageComponents] = MISSING,
         flags: MessageFlags = MISSING,
@@ -1439,7 +1436,7 @@ class InteractionResponse:
         if self._response_type is not None:
             raise InteractionResponded(self._parent)
 
-        choices_data: List[ApplicationCommandOptionChoicePayload]
+        choices_data: list[ApplicationCommandOptionChoicePayload]
         if isinstance(choices, Mapping):
             choices_data = [{"name": n, "value": v} for n, v in choices.items()]
         else:
@@ -1546,7 +1543,7 @@ class InteractionResponse:
         parent = self._parent
 
         if parent.type is InteractionType.modal_submit:
-            raise ModalChainNotSupported(parent)  # type: ignore
+            raise ModalChainNotSupported(parent)  # pyright: ignore[reportArgumentType]
 
         if self._response_type is not None:
             raise InteractionResponded(parent)
@@ -1565,7 +1562,7 @@ class InteractionResponse:
                 "title": title,
                 "custom_id": custom_id,
                 "components": cast(
-                    "List[ModalTopLevelComponentPayload]",
+                    "list[ModalTopLevelComponentPayload]",
                     [component.to_component_dict() for component in items],
                 ),
             }
@@ -1580,7 +1577,7 @@ class InteractionResponse:
             parent.token,
             session=parent._session,
             type=response_type.value,
-            data=modal_data,  # type: ignore
+            data=modal_data,  # pyright: ignore[reportArgumentType]
         )
         self._response_type = response_type
 
@@ -1743,7 +1740,7 @@ class InteractionMessage(Message):
         *,
         embed: Optional[Embed] = ...,
         file: File = ...,
-        attachments: Optional[List[Attachment]] = ...,
+        attachments: Optional[list[Attachment]] = ...,
         suppress_embeds: bool = ...,
         flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
@@ -1758,8 +1755,8 @@ class InteractionMessage(Message):
         content: Optional[str] = ...,
         *,
         embed: Optional[Embed] = ...,
-        files: List[File] = ...,
-        attachments: Optional[List[Attachment]] = ...,
+        files: list[File] = ...,
+        attachments: Optional[list[Attachment]] = ...,
         suppress_embeds: bool = ...,
         flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
@@ -1773,9 +1770,9 @@ class InteractionMessage(Message):
         self,
         content: Optional[str] = ...,
         *,
-        embeds: List[Embed] = ...,
+        embeds: list[Embed] = ...,
         file: File = ...,
-        attachments: Optional[List[Attachment]] = ...,
+        attachments: Optional[list[Attachment]] = ...,
         suppress_embeds: bool = ...,
         flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
@@ -1789,9 +1786,9 @@ class InteractionMessage(Message):
         self,
         content: Optional[str] = ...,
         *,
-        embeds: List[Embed] = ...,
-        files: List[File] = ...,
-        attachments: Optional[List[Attachment]] = ...,
+        embeds: list[Embed] = ...,
+        files: list[File] = ...,
+        attachments: Optional[list[Attachment]] = ...,
         suppress_embeds: bool = ...,
         flags: MessageFlags = ...,
         allowed_mentions: Optional[AllowedMentions] = ...,
@@ -1805,10 +1802,10 @@ class InteractionMessage(Message):
         content: Optional[str] = MISSING,
         *,
         embed: Optional[Embed] = MISSING,
-        embeds: List[Embed] = MISSING,
+        embeds: list[Embed] = MISSING,
         file: File = MISSING,
-        files: List[File] = MISSING,
-        attachments: Optional[List[Attachment]] = MISSING,
+        files: list[File] = MISSING,
+        attachments: Optional[list[Attachment]] = MISSING,
         suppress_embeds: bool = MISSING,
         flags: MessageFlags = MISSING,
         allowed_mentions: Optional[AllowedMentions] = MISSING,
@@ -1981,7 +1978,8 @@ class InteractionMessage(Message):
             Deleting the message failed.
         """
         if self._state._interaction.is_expired():
-            return await super().delete(delay=delay)
+            await super().delete(delay=delay)
+            return
         if delay is not None:
 
             async def inner_call(delay: float = delay) -> None:
@@ -1996,7 +1994,7 @@ class InteractionMessage(Message):
             await self._state._interaction.delete_original_response()
 
 
-class InteractionDataResolved(Dict[str, Any]):
+class InteractionDataResolved(dict[str, Any]):
     """Represents the resolved data related to an interaction.
 
     .. versionadded:: 2.1
@@ -2034,12 +2032,12 @@ class InteractionDataResolved(Dict[str, Any]):
         data = data or {}
         super().__init__(data)
 
-        self.members: Dict[int, Member] = {}
-        self.users: Dict[int, User] = {}
-        self.roles: Dict[int, Role] = {}
-        self.channels: Dict[int, AnyChannel] = {}
-        self.messages: Dict[int, Message] = {}
-        self.attachments: Dict[int, Attachment] = {}
+        self.members: dict[int, Member] = {}
+        self.users: dict[int, User] = {}
+        self.roles: dict[int, Role] = {}
+        self.channels: dict[int, AnyChannel] = {}
+        self.messages: dict[int, Message] = {}
+        self.attachments: dict[int, Attachment] = {}
 
         users = data.get("users", {})
         members = data.get("members", {})
@@ -2066,7 +2064,7 @@ class InteractionDataResolved(Dict[str, Any]):
                 self.members[user_id] = (guild and guild.get_member(user_id)) or Member(
                     data=member,
                     user_data=user,
-                    guild=guild_fallback,  # type: ignore
+                    guild=guild_fallback,  # pyright: ignore[reportArgumentType]
                     state=state,
                 )
             else:
@@ -2074,7 +2072,7 @@ class InteractionDataResolved(Dict[str, Any]):
 
         for str_id, role in roles.items():
             self.roles[int(str_id)] = Role(
-                guild=guild_fallback,  # type: ignore
+                guild=guild_fallback,  # pyright: ignore[reportArgumentType]
                 state=state,
                 data=role,
             )

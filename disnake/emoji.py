@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Iterator, List, Optional, Tuple, Union
+from collections.abc import Iterator
+from typing import TYPE_CHECKING, Any, Optional, Union
 
 from .asset import Asset, AssetMixin
 from .errors import InvalidData
@@ -82,7 +83,7 @@ class Emoji(_EmojiTag, AssetMixin):
         or the bot user if created using :meth:`Client.create_application_emoji`.
     """
 
-    __slots__: Tuple[str, ...] = (
+    __slots__: tuple[str, ...] = (
         "require_colons",
         "animated",
         "managed",
@@ -108,8 +109,9 @@ class Emoji(_EmojiTag, AssetMixin):
     def _from_data(self, emoji: EmojiPayload) -> None:
         self.require_colons: bool = emoji.get("require_colons", False)
         self.managed: bool = emoji.get("managed", False)
-        self.id: int = int(emoji["id"])  # type: ignore
-        self.name: str = emoji["name"]  # type: ignore
+        assert emoji["id"] is not None
+        self.id: int = int(emoji["id"])
+        self.name: str = emoji["name"]  # pyright: ignore[reportAttributeAccessIssue]
         self.animated: bool = emoji.get("animated", False)
         self.available: bool = emoji.get("available", True)
         self._roles: SnowflakeList = SnowflakeList(map(int, emoji.get("roles", [])))
@@ -119,7 +121,7 @@ class Emoji(_EmojiTag, AssetMixin):
     def _to_partial(self) -> PartialEmoji:
         return PartialEmoji(name=self.name, animated=self.animated, id=self.id)
 
-    def __iter__(self) -> Iterator[Tuple[str, Any]]:
+    def __iter__(self) -> Iterator[tuple[str, Any]]:
         for attr in self.__slots__:
             if attr[0] != "_":
                 value = getattr(self, attr, None)
@@ -160,7 +162,7 @@ class Emoji(_EmojiTag, AssetMixin):
         return f"{Asset.BASE}/emojis/{self.id}.{fmt}"
 
     @property
-    def roles(self) -> List[Role]:
+    def roles(self) -> list[Role]:
         """:class:`list`\\[:class:`Role`]: A :class:`list` of roles that are allowed to use this emoji.
 
         If roles is empty, the emoji is unrestricted.
@@ -168,11 +170,10 @@ class Emoji(_EmojiTag, AssetMixin):
         Emojis with :attr:`subscription roles <RoleTags.integration_id>` are considered premium emojis,
         and count towards a separate limit of 25 emojis.
         """
-        guild = self.guild
-        if guild is None:
+        if self.guild is None:
             return []
 
-        return [role for role in guild.roles if self._roles.has(role.id)]
+        return [role for role in self.guild.roles if self._roles.has(role.id)]
 
     @property
     def guild(self) -> Optional[Guild]:
@@ -253,21 +254,21 @@ class Emoji(_EmojiTag, AssetMixin):
         InvalidData
             The emoji data is invalid and cannot be processed.
         """
-        if self.guild_id is None:
-            # this is an app emoji
-            if self.application_id is None:
-                # should never happen
-                msg = (
-                    f"guild_id and application_id are both None when attempting to delete emoji with ID {self.id}."
-                    " This may be a library bug! Open an issue on GitHub."
-                )
-                raise InvalidData(msg)
-
-            return await self._state.http.delete_app_emoji(self.application_id, self.id)
-        await self._state.http.delete_custom_emoji(self.guild_id, self.id, reason=reason)
+        if self.guild_id is not None:
+            await self._state.http.delete_custom_emoji(self.guild_id, self.id, reason=reason)
+            return
+        if self.application_id is not None:
+            await self._state.http.delete_app_emoji(self.application_id, self.id)
+            return
+        # should never happen
+        msg = (
+            f"guild_id and application_id are both None when attempting to delete emoji with ID {self.id}."
+            " This may be a library bug! Open an issue on GitHub."
+        )
+        raise InvalidData(msg)
 
     async def edit(
-        self, *, name: str = MISSING, roles: List[Snowflake] = MISSING, reason: Optional[str] = None
+        self, *, name: str = MISSING, roles: list[Snowflake] = MISSING, reason: Optional[str] = None
     ) -> Emoji:
         """|coro|
 

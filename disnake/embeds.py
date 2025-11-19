@@ -3,17 +3,14 @@
 from __future__ import annotations
 
 import datetime
+from collections.abc import Mapping, Sized
 from typing import (
     TYPE_CHECKING,
     Any,
     ClassVar,
-    Dict,
-    List,
     Literal,
-    Mapping,
     Optional,
     Protocol,
-    Sized,
     Union,
     cast,
     overload,
@@ -36,7 +33,7 @@ if not TYPE_CHECKING:
                 "`EmptyEmbed` is deprecated and will be removed in a future version. Use `None` instead.",
                 stacklevel=2,
             )
-            return None
+            return None  # noqa: RET501
         msg = f"module '{__name__}' has no attribute '{name}'"
         raise AttributeError(msg)
 
@@ -220,9 +217,9 @@ class Embed:
         self._author: Optional[EmbedAuthorPayload] = None
         self._image: Optional[EmbedImagePayload] = None
         self._footer: Optional[EmbedFooterPayload] = None
-        self._fields: Optional[List[EmbedFieldPayload]] = None
+        self._fields: Optional[list[EmbedFieldPayload]] = None
 
-        self._files: Dict[_FileKey, File] = {}
+        self._files: dict[_FileKey, File] = {}
 
     # see `EmptyEmbed` above
     if not TYPE_CHECKING:
@@ -233,7 +230,7 @@ class Embed:
                 "`Embed.Empty` is deprecated and will be removed in a future version. Use `None` instead.",
                 stacklevel=3,
             )
-            return None
+            return None  # noqa: RET501
 
     @classmethod
     def from_dict(cls, data: EmbedData) -> Self:
@@ -654,14 +651,14 @@ class Embed:
         return self
 
     @property
-    def fields(self) -> List[_EmbedFieldProxy]:
+    def fields(self) -> list[_EmbedFieldProxy]:
         """:class:`list`\\[``EmbedProxy``]: Returns a :class:`list` of ``EmbedProxy`` denoting the field contents.
 
         See :meth:`add_field` for possible values you can access.
 
         If an attribute is not set, it will be :data:`None`.
         """
-        return cast("List[_EmbedFieldProxy]", [EmbedProxy(d) for d in (self._fields or [])])
+        return cast("list[_EmbedFieldProxy]", [EmbedProxy(d) for d in (self._fields or [])])
 
     def add_field(self, name: Any, value: Any, *, inline: bool = True) -> Self:
         """Adds a field to the embed object.

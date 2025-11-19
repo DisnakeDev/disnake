@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type
+from typing import TYPE_CHECKING, Any, Optional
 
 from .enums import ExpireBehaviour, try_enum
 from .user import User
@@ -246,7 +246,7 @@ class StreamIntegration(Integration):
     @property
     def role(self) -> Optional[Role]:
         """:class:`Role` | :data:`None` The role which the integration uses for subscribers."""
-        return self.guild.get_role(self._role_id)  # type: ignore
+        return self.guild.get_role(self._role_id)  # pyright: ignore[reportArgumentType]
 
     @deprecated()
     async def edit(
@@ -287,7 +287,7 @@ class StreamIntegration(Integration):
         TypeError
             ``expire_behaviour`` did not receive a :class:`ExpireBehaviour`.
         """
-        payload: Dict[str, Any] = {}
+        payload: dict[str, Any] = {}
         if expire_behaviour is not MISSING:
             if not isinstance(expire_behaviour, ExpireBehaviour):
                 msg = "expire_behaviour field must be of type ExpireBehaviour"
@@ -416,13 +416,13 @@ class BotIntegration(Integration):
         self.application: IntegrationApplication = IntegrationApplication(
             data=data["application"], state=self._state
         )
-        self.scopes: List[str] = data.get("scopes") or []
+        self.scopes: list[str] = data.get("scopes") or []
 
     def __repr__(self) -> str:
         return f"<{self.__class__.__name__} id={self.id} name={self.name!r} scopes={self.scopes!r}>"
 
 
-def _integration_factory(value: str) -> Tuple[Type[Integration], str]:
+def _integration_factory(value: str) -> tuple[type[Integration], str]:
     if value == "discord":
         return BotIntegration, value
     elif value in ("twitch", "youtube"):

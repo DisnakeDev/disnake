@@ -10,10 +10,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    Dict,
-    List,
     Optional,
-    Tuple,
     TypeVar,
     Union,
     cast,
@@ -84,7 +81,7 @@ def wrap_callback(coro):
         except CommandError:
             raise
         except asyncio.CancelledError:
-            return
+            return None
         except Exception as exc:
             raise CommandInvokeError(exc) from exc
         return ret
@@ -134,7 +131,7 @@ class InvokableApplicationCommand(ABC):
         .. versionadded:: 2.5
     """
 
-    __original_kwargs__: Dict[str, Any]
+    __original_kwargs__: dict[str, Any]
     body: ApplicationCommand
 
     def __new__(cls, *args: Any, **kwargs: Any) -> Self:
@@ -151,7 +148,7 @@ class InvokableApplicationCommand(ABC):
         # Annotation parser needs this attribute because body doesn't exist at this moment.
         # We will use this attribute later in order to set the allowed contexts.
         self._guild_only: bool = kwargs.get("guild_only", False)
-        self.extras: Dict[str, Any] = kwargs.get("extras") or {}
+        self.extras: dict[str, Any] = kwargs.get("extras") or {}
 
         if not isinstance(self.name, str):
             msg = "Name of a command must be a string."
@@ -178,7 +175,7 @@ class InvokableApplicationCommand(ABC):
         except AttributeError:
             checks = kwargs.get("checks", [])
 
-        self.checks: List[AppCheck] = checks
+        self.checks: list[AppCheck] = checks
 
         try:
             cooldown = func.__commands_cooldown__
@@ -202,7 +199,7 @@ class InvokableApplicationCommand(ABC):
         self._max_concurrency: Optional[MaxConcurrency] = max_concurrency
 
         self.cog: Optional[Cog] = None
-        self.guild_ids: Optional[Tuple[int, ...]] = None
+        self.guild_ids: Optional[tuple[int, ...]] = None
         self.auto_sync: bool = True
 
         self._before_invoke: Optional[Hook] = None
@@ -261,7 +258,7 @@ class InvokableApplicationCommand(ABC):
         copy = type(self)(self.callback, **self.__original_kwargs__)
         return self._ensure_assignment_on_copy(copy)
 
-    def _update_copy(self: AppCommandT, kwargs: Dict[str, Any]) -> AppCommandT:
+    def _update_copy(self: AppCommandT, kwargs: dict[str, Any]) -> AppCommandT:
         if kwargs:
             kw = kwargs.copy()
             kw.update(self.__original_kwargs__)
@@ -377,11 +374,11 @@ class InvokableApplicationCommand(ABC):
         if self._buckets.valid:
             dt = inter.created_at
             current = dt.replace(tzinfo=datetime.timezone.utc).timestamp()
-            bucket = self._buckets.get_bucket(inter, current)  # type: ignore
+            bucket = self._buckets.get_bucket(inter, current)  # pyright: ignore[reportArgumentType]
             if bucket is not None:  # pyright: ignore[reportUnnecessaryComparison]
                 retry_after = bucket.update_rate_limit(current)
                 if retry_after:
-                    raise CommandOnCooldown(bucket, retry_after, self._buckets.type)  # type: ignore
+                    raise CommandOnCooldown(bucket, retry_after, self._buckets.type)  # pyright: ignore[reportArgumentType]
 
     async def prepare(self, inter: ApplicationCommandInteraction) -> None:
         inter.application_command = self
@@ -391,14 +388,14 @@ class InvokableApplicationCommand(ABC):
             raise CheckFailure(msg)
 
         if self._max_concurrency is not None:
-            await self._max_concurrency.acquire(inter)  # type: ignore
+            await self._max_concurrency.acquire(inter)  # pyright: ignore[reportArgumentType]
 
         try:
             self._prepare_cooldowns(inter)
             await self.call_before_hooks(inter)
         except Exception:
             if self._max_concurrency is not None:
-                await self._max_concurrency.release(inter)  # type: ignore
+                await self._max_concurrency.release(inter)  # pyright: ignore[reportArgumentType]
             raise
 
     def is_on_cooldown(self, inter: ApplicationCommandInteraction) -> bool:
@@ -417,7 +414,7 @@ class InvokableApplicationCommand(ABC):
         if not self._buckets.valid:
             return False
 
-        bucket = self._buckets.get_bucket(inter)  # type: ignore
+        bucket = self._buckets.get_bucket(inter)  # pyright: ignore[reportArgumentType]
         dt = inter.created_at
         current = dt.replace(tzinfo=datetime.timezone.utc).timestamp()
         return bucket.get_tokens(current) == 0
@@ -431,7 +428,7 @@ class InvokableApplicationCommand(ABC):
             The interaction with this application command
         """
         if self._buckets.valid:
-            bucket = self._buckets.get_bucket(inter)  # type: ignore
+            bucket = self._buckets.get_bucket(inter)  # pyright: ignore[reportArgumentType]
             bucket.reset()
 
     def get_cooldown_retry_after(self, inter: ApplicationCommandInteraction) -> float:
@@ -449,7 +446,7 @@ class InvokableApplicationCommand(ABC):
             If this is ``0.0`` then the command isn't on cooldown.
         """
         if self._buckets.valid:
-            bucket = self._buckets.get_bucket(inter)  # type: ignore
+            bucket = self._buckets.get_bucket(inter)  # pyright: ignore[reportArgumentType]
             dt = inter.created_at
             current = dt.replace(tzinfo=datetime.timezone.utc).timestamp()
             return bucket.get_retry_after(current)
@@ -473,7 +470,7 @@ class InvokableApplicationCommand(ABC):
             raise CommandInvokeError(exc) from exc
         finally:
             if self._max_concurrency is not None:
-                await self._max_concurrency.release(inter)  # type: ignore
+                await self._max_concurrency.release(inter)  # pyright: ignore[reportArgumentType]
 
             await self.call_after_hooks(inter)
 
@@ -507,7 +504,7 @@ class InvokableApplicationCommand(ABC):
         self, inter: ApplicationCommandInteraction, error: CommandError
     ) -> Any:
         if not self.has_error_handler():
-            return
+            return None
 
         injected = wrap_callback(self.on_error)
         if self.cog is not None:
@@ -537,9 +534,9 @@ class InvokableApplicationCommand(ABC):
             # __self__ only exists for methods, not functions
             # however, if @command.before_invoke is used, it will be a function
             if instance:
-                await self._before_invoke(instance, inter)  # type: ignore
+                await self._before_invoke(instance, inter)  # pyright: ignore[reportCallIssue, reportArgumentType]
             else:
-                await self._before_invoke(inter)  # type: ignore
+                await self._before_invoke(inter)  # pyright: ignore[reportArgumentType, reportCallIssue]
 
         if inter.data.type is ApplicationCommandType.chat_input:
             partial_attr_name = "slash_command"
@@ -567,9 +564,9 @@ class InvokableApplicationCommand(ABC):
         if self._after_invoke is not None:
             instance = getattr(self._after_invoke, "__self__", cog)
             if instance:
-                await self._after_invoke(instance, inter)  # type: ignore
+                await self._after_invoke(instance, inter)  # pyright: ignore[reportCallIssue, reportArgumentType]
             else:
-                await self._after_invoke(inter)  # type: ignore
+                await self._after_invoke(inter)  # pyright: ignore[reportArgumentType, reportCallIssue]
 
         if inter.data.type is ApplicationCommandType.chat_input:
             partial_attr_name = "slash_command"
@@ -698,7 +695,7 @@ class InvokableApplicationCommand(ABC):
                 # since we have no checks, then we just return True.
                 return True
 
-            return await async_all(predicate(inter) for predicate in predicates)  # type: ignore
+            return await async_all(predicate(inter) for predicate in predicates)  # pyright: ignore[reportCallIssue]
         finally:
             inter.application_command = original
 
@@ -833,7 +830,7 @@ def default_member_permissions(value: int = 0, **permissions: bool) -> Callable[
                 raise ValueError(msg)
             func.body._default_member_permissions = perms_value
         else:
-            func.__default_member_permissions__ = perms_value  # type: ignore
+            func.__default_member_permissions__ = perms_value  # pyright: ignore[reportAttributeAccessIssue]
         return func
 
     return decorator
@@ -872,7 +869,7 @@ def install_types(*, guild: bool = False, user: bool = False) -> Callable[[T], T
                     raise ValueError(msg)
                 func.body.install_types = install_types
         else:
-            func.__install_types__ = install_types  # type: ignore
+            func.__install_types__ = install_types  # pyright: ignore[reportAttributeAccessIssue]
         return func
 
     return decorator
@@ -917,7 +914,7 @@ def contexts(
                     raise ValueError(msg)
                 func.body.contexts = contexts
         else:
-            func.__contexts__ = contexts  # type: ignore
+            func.__contexts__ = contexts  # pyright: ignore[reportAttributeAccessIssue]
         return func
 
     return decorator

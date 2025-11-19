@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 
 from .appinfo import PartialAppInfo
 from .asset import Asset
@@ -95,7 +95,7 @@ class PartialInviteChannel:
         self.name: Optional[str] = data.get("name")
         self.type: ChannelType = try_enum(ChannelType, data["type"])
         if self.type is ChannelType.group:
-            self._recipients: List[GroupInviteRecipientPayload] = data.get("recipients", [])
+            self._recipients: list[GroupInviteRecipientPayload] = data.get("recipients", [])
         else:
             self._recipients = []
         self._icon: Optional[str] = data.get("icon")
@@ -202,7 +202,7 @@ class PartialInviteGuild:
         self._state: ConnectionState = state
         self.id: int = id
         self.name: str = data["name"]
-        self.features: List[GuildFeature] = data.get("features", [])
+        self.features: list[GuildFeature] = data.get("features", [])
         self._icon: Optional[str] = data.get("icon")
         self._banner: Optional[str] = data.get("banner")
         self._splash: Optional[str] = data.get("splash")
@@ -438,7 +438,7 @@ class Invite(Hashable):
 
         inviter_data = data.get("inviter")
         self.inviter: Optional[User] = (
-            None if inviter_data is None else self._state.create_user(inviter_data)  # type: ignore
+            None if inviter_data is None else self._state.create_user(inviter_data)  # pyright: ignore[reportArgumentType]
         )
 
         self.channel: Optional[InviteChannelType] = self._resolve_channel(
@@ -455,14 +455,14 @@ class Invite(Hashable):
             self.guild_welcome_screen: Optional[WelcomeScreen] = WelcomeScreen(
                 state=self._state,
                 data=guild_data["welcome_screen"],
-                guild=self.guild,  # type: ignore
+                guild=self.guild,  # pyright: ignore[reportArgumentType]
             )
         else:
             self.guild_welcome_screen: Optional[WelcomeScreen] = None
 
         target_user_data = data.get("target_user")
         self.target_user: Optional[User] = (
-            None if target_user_data is None else self._state.create_user(target_user_data)  # type: ignore
+            None if target_user_data is None else self._state.create_user(target_user_data)  # pyright: ignore[reportArgumentType]
         )
 
         self.target_type: InviteTarget = try_enum(InviteTarget, data.get("target_type", 0))
@@ -517,8 +517,8 @@ class Invite(Hashable):
             state=state,
             data=data,
             # objects may be partial due to missing cache
-            guild=guild,  # type: ignore
-            channel=channel,  # type: ignore
+            guild=guild,  # pyright: ignore[reportArgumentType]
+            channel=channel,  # pyright: ignore[reportArgumentType]
         )
 
     def _resolve_guild(

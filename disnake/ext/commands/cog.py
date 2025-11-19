@@ -4,17 +4,13 @@ from __future__ import annotations
 
 import inspect
 import logging
+from collections.abc import Generator
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
     ClassVar,
-    Dict,
-    Generator,
-    List,
     Optional,
-    Tuple,
-    Type,
     Union,
 )
 
@@ -138,15 +134,15 @@ class CogMeta(type):
     """
 
     __cog_name__: str
-    __cog_settings__: Dict[str, Any]
-    __cog_slash_settings__: Dict[str, Any]
-    __cog_user_settings__: Dict[str, Any]
-    __cog_message_settings__: Dict[str, Any]
-    __cog_commands__: List[Command[Any, ..., Any]]
-    __cog_app_commands__: List[InvokableApplicationCommand]
-    __cog_listeners__: List[Tuple[str, str]]
+    __cog_settings__: dict[str, Any]
+    __cog_slash_settings__: dict[str, Any]
+    __cog_user_settings__: dict[str, Any]
+    __cog_message_settings__: dict[str, Any]
+    __cog_commands__: list[Command[Any, ..., Any]]
+    __cog_app_commands__: list[InvokableApplicationCommand]
+    __cog_listeners__: list[tuple[str, str]]
 
-    def __new__(cls: Type[CogMeta], *args: Any, **kwargs: Any) -> CogMeta:
+    def __new__(cls: type[CogMeta], *args: Any, **kwargs: Any) -> CogMeta:
         name, bases, attrs = args
         attrs["__cog_name__"] = kwargs.pop("name", name)
         attrs["__cog_settings__"] = kwargs.pop("command_attrs", {})
@@ -229,10 +225,10 @@ class Cog(metaclass=CogMeta):
     """
 
     __cog_name__: ClassVar[str]
-    __cog_settings__: ClassVar[Dict[str, Any]]
-    __cog_commands__: ClassVar[List[Command[Self, ..., Any]]]
-    __cog_app_commands__: ClassVar[List[InvokableApplicationCommand]]
-    __cog_listeners__: ClassVar[List[Tuple[str, str]]]
+    __cog_settings__: ClassVar[dict[str, Any]]
+    __cog_commands__: ClassVar[list[Command[Self, ..., Any]]]
+    __cog_app_commands__: ClassVar[list[InvokableApplicationCommand]]
+    __cog_listeners__: ClassVar[list[tuple[str, str]]]
 
     def __new__(cls, *args: Any, **kwargs: Any) -> Self:
         # For issue 426, we need to store a copy of the command objects
@@ -245,7 +241,7 @@ class Cog(metaclass=CogMeta):
         message_cmd_attrs = cls.__cog_message_settings__
 
         # Either update the command with the cog provided defaults or copy it.
-        cog_app_commands: List[InvokableApplicationCommand] = []
+        cog_app_commands: list[InvokableApplicationCommand] = []
         for c in cls.__cog_app_commands__:
             if isinstance(c, InvokableSlashCommand):
                 c = c._update_copy(slash_cmd_attrs)
@@ -256,12 +252,13 @@ class Cog(metaclass=CogMeta):
 
             cog_app_commands.append(c)
 
-        self.__cog_app_commands__ = tuple(cog_app_commands)  # type: ignore  # overriding ClassVar
+        # FIXME: __cog_app_commands__ is annotated as List, assigning tuple here?
+        self.__cog_app_commands__ = tuple(cog_app_commands)  # pyright: ignore[reportAttributeAccessIssue]  # overriding ClassVar
         # Replace the old command objects with the new copies
         for app_command in self.__cog_app_commands__:
             setattr(self, app_command.callback.__name__, app_command)
 
-        self.__cog_commands__ = tuple(c._update_copy(cmd_attrs) for c in cls.__cog_commands__)  # type: ignore  # overriding ClassVar
+        self.__cog_commands__ = tuple(c._update_copy(cmd_attrs) for c in cls.__cog_commands__)  # pyright: ignore[reportAttributeAccessIssue]  # overriding ClassVar
 
         lookup = {cmd.qualified_name: cmd for cmd in self.__cog_commands__}
         for command in self.__cog_commands__:
@@ -269,15 +266,15 @@ class Cog(metaclass=CogMeta):
             parent = command.parent
             if parent is not None:
                 # Get the latest parent reference
-                parent = lookup[parent.qualified_name]  # type: ignore
+                parent = lookup[parent.qualified_name]  # pyright: ignore[reportAttributeAccessIssue]
 
                 # Update our parent's reference to our self
-                parent.remove_command(command.name)  # type: ignore
-                parent.add_command(command)  # type: ignore
+                parent.remove_command(command.name)  # pyright: ignore[reportAttributeAccessIssue]
+                parent.add_command(command)  # pyright: ignore[reportAttributeAccessIssue]
 
         return self
 
-    def get_commands(self) -> List[Command[Self, ..., Any]]:
+    def get_commands(self) -> list[Command[Self, ..., Any]]:
         """Returns a list of commands the cog has.
 
         Returns
@@ -292,7 +289,7 @@ class Cog(metaclass=CogMeta):
         """
         return [c for c in self.__cog_commands__ if c.parent is None]
 
-    def get_application_commands(self) -> List[InvokableApplicationCommand]:
+    def get_application_commands(self) -> list[InvokableApplicationCommand]:
         """Returns a list of application commands the cog has.
 
         Returns
@@ -307,7 +304,7 @@ class Cog(metaclass=CogMeta):
         """
         return list(self.__cog_app_commands__)
 
-    def get_slash_commands(self) -> List[InvokableSlashCommand]:
+    def get_slash_commands(self) -> list[InvokableSlashCommand]:
         """Returns a list of slash commands the cog has.
 
         Returns
@@ -322,7 +319,7 @@ class Cog(metaclass=CogMeta):
         """
         return [c for c in self.__cog_app_commands__ if isinstance(c, InvokableSlashCommand)]
 
-    def get_user_commands(self) -> List[InvokableUserCommand]:
+    def get_user_commands(self) -> list[InvokableUserCommand]:
         """Returns a list of user commands the cog has.
 
         Returns
@@ -333,7 +330,7 @@ class Cog(metaclass=CogMeta):
         """
         return [c for c in self.__cog_app_commands__ if isinstance(c, InvokableUserCommand)]
 
-    def get_message_commands(self) -> List[InvokableMessageCommand]:
+    def get_message_commands(self) -> list[InvokableMessageCommand]:
         """Returns a list of message commands the cog has.
 
         Returns
@@ -374,7 +371,7 @@ class Cog(metaclass=CogMeta):
                 if isinstance(command, GroupMixin):
                     yield from command.walk_commands()
 
-    def get_listeners(self) -> List[Tuple[str, Callable[..., Any]]]:
+    def get_listeners(self) -> list[tuple[str, Callable[..., Any]]]:
         """Returns a :class:`list` of (name, function) listener pairs the cog has.
 
         Returns
@@ -738,12 +735,12 @@ class Cog(metaclass=CogMeta):
             command.cog = self
             if command.parent is None:
                 try:
-                    bot.add_command(command)  # type: ignore
+                    bot.add_command(command)  # pyright: ignore[reportAttributeAccessIssue]
                 except Exception:
                     # undo our additions
                     for to_undo in self.__cog_commands__[:index]:
                         if to_undo.parent is None:
-                            bot.remove_command(to_undo.name)  # type: ignore
+                            bot.remove_command(to_undo.name)  # pyright: ignore[reportAttributeAccessIssue]
                     raise
 
         for index, command in enumerate(self.__cog_app_commands__):
@@ -835,7 +832,7 @@ class Cog(metaclass=CogMeta):
         try:
             for command in self.__cog_commands__:
                 if command.parent is None:
-                    bot.remove_command(command.name)  # type: ignore
+                    bot.remove_command(command.name)  # pyright: ignore[reportAttributeAccessIssue]
 
             for app_command in self.__cog_app_commands__:
                 if isinstance(app_command, InvokableSlashCommand):
@@ -849,10 +846,10 @@ class Cog(metaclass=CogMeta):
                 bot.remove_listener(getattr(self, method_name), name)
 
             if cls.bot_check is not Cog.bot_check:
-                bot.remove_check(self.bot_check)  # type: ignore
+                bot.remove_check(self.bot_check)  # pyright: ignore[reportAttributeAccessIssue]
 
             if cls.bot_check_once is not Cog.bot_check_once:
-                bot.remove_check(self.bot_check_once, call_once=True)  # type: ignore
+                bot.remove_check(self.bot_check_once, call_once=True)  # pyright: ignore[reportAttributeAccessIssue]
 
             # Remove application command checks
             if cls.bot_slash_command_check is not Cog.bot_slash_command_check:

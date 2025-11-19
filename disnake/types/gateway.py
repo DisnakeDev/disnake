@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import Any, List, Literal, Optional, Sequence, Tuple, TypedDict, Union
+from collections.abc import Sequence
+from typing import Any, Literal, Optional, TypedDict, Union
 
 from typing_extensions import NotRequired
 
@@ -67,7 +68,8 @@ class GatewayPayload(TypedDict):
 
 class HeartbeatCommand(TypedDict):
     op: Literal[1, 3]  # normal ws and voice ws have different heartbeat opcodes
-    d: Optional[int]
+    # normal ws uses a plain int seq, voice ws uses {t: <nonce>, seq_ack: <seq>}
+    d: Union[Optional[int], VoiceHeartbeatData]
 
 
 # opcode 2
@@ -84,7 +86,7 @@ class IdentifyData(TypedDict):
     properties: IdentifyProperties
     compress: NotRequired[bool]
     large_threshold: NotRequired[int]
-    shard: NotRequired[Tuple[int, int]]
+    shard: NotRequired[tuple[int, int]]
     presence: NotRequired[PresenceUpdateData]
     intents: int
 
@@ -163,18 +165,45 @@ class RequestMembersCommand(TypedDict):
 class VoicePayload(TypedDict):
     op: Literal[2, 4, 6, 8, 9]
     d: Any
+    seq: NotRequired[int]  # only present in some messages
+
+
+# voice opcode 2
 
 
 class VoiceReadyPayload(TypedDict):
     ssrc: int
     ip: str
     port: int
-    modes: List[str]
+    modes: list[str]
+
+
+# voice opcode 4
 
 
 class VoiceSessionDescriptionPayload(TypedDict):
     mode: SupportedModes
-    secret_key: List[int]
+    secret_key: list[int]
+
+
+# voice opcode 6
+
+
+class VoiceHeartbeatAckPayload(TypedDict):
+    t: int
+
+
+# voice opcode 8
+
+
+class VoiceHelloPayload(TypedDict):
+    heartbeat_interval: int
+
+
+# voice opcode 9
+
+
+VoiceResumedPayload = None
 
 
 #####
@@ -215,6 +244,19 @@ class VoiceSelectProtocolCommand(TypedDict):
     d: VoiceSelectProtocolData
 
 
+# voice opcode 3
+
+
+class VoiceHeartbeatData(TypedDict):
+    t: int  # nonce
+    seq_ack: int
+
+
+class VoiceHeartbeatCommand(TypedDict):
+    op: Literal[3]
+    d: VoiceHeartbeatData
+
+
 # voice opcode 5
 
 
@@ -236,6 +278,7 @@ class VoiceResumeData(TypedDict):
     server_id: str
     session_id: str
     token: str
+    seq_ack: int
 
 
 class VoiceResumeCommand(TypedDict):
@@ -252,10 +295,10 @@ class VoiceResumeCommand(TypedDict):
 class ReadyEvent(TypedDict):
     v: int
     user: User
-    guilds: List[UnavailableGuild]
+    guilds: list[UnavailableGuild]
     session_id: str
     resume_gateway_url: str
-    shard: NotRequired[Tuple[int, int]]
+    shard: NotRequired[tuple[int, int]]
     application: PartialGatewayAppInfo
 
 
@@ -285,7 +328,7 @@ class MessageDeleteEvent(TypedDict):
 
 # https://discord.com/developers/docs/topics/gateway-events#message-delete-bulk
 class MessageDeleteBulkEvent(TypedDict):
-    ids: List[Snowflake]
+    ids: list[Snowflake]
     channel_id: Snowflake
     guild_id: NotRequired[Snowflake]
 
@@ -416,9 +459,9 @@ class ThreadDeleteEvent(TypedDict):
 # https://discord.com/developers/docs/topics/gateway-events#thread-list-sync
 class ThreadListSyncEvent(TypedDict):
     guild_id: Snowflake
-    channel_ids: NotRequired[List[Snowflake]]
-    threads: List[Thread]
-    members: List[ThreadMember]
+    channel_ids: NotRequired[list[Snowflake]]
+    threads: list[Thread]
+    members: list[ThreadMember]
 
 
 # https://discord.com/developers/docs/topics/gateway-events#thread-member-update
@@ -431,8 +474,8 @@ class ThreadMembersUpdateEvent(TypedDict):
     id: Snowflake
     guild_id: Snowflake
     member_count: int
-    added_members: NotRequired[List[ThreadMemberWithPresence]]
-    removed_member_ids: NotRequired[List[Snowflake]]
+    added_members: NotRequired[list[ThreadMemberWithPresence]]
+    removed_member_ids: NotRequired[list[Snowflake]]
 
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-member-add
@@ -449,7 +492,7 @@ class GuildMemberRemoveEvent(TypedDict):
 # https://discord.com/developers/docs/topics/gateway-events#guild-member-update
 class GuildMemberUpdateEvent(TypedDict):
     guild_id: Snowflake
-    roles: List[Snowflake]
+    roles: list[Snowflake]
     user: User
     nick: NotRequired[Optional[str]]
     avatar: Optional[str]
@@ -467,13 +510,13 @@ class GuildMemberUpdateEvent(TypedDict):
 # https://discord.com/developers/docs/topics/gateway-events#guild-emojis-update
 class GuildEmojisUpdateEvent(TypedDict):
     guild_id: Snowflake
-    emojis: List[Emoji]
+    emojis: list[Emoji]
 
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-stickers-update
 class GuildStickersUpdateEvent(TypedDict):
     guild_id: Snowflake
-    stickers: List[GuildSticker]
+    stickers: list[GuildSticker]
 
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-create
@@ -553,11 +596,11 @@ GuildScheduledEventUserRemoveEvent = _GuildScheduledEventUserEvent
 # https://discord.com/developers/docs/topics/gateway-events#guild-members-chunk
 class GuildMembersChunkEvent(TypedDict):
     guild_id: Snowflake
-    members: List[MemberWithUser]
+    members: list[MemberWithUser]
     chunk_index: int
     chunk_count: int
-    not_found: NotRequired[List[Snowflake]]
-    presences: NotRequired[List[PresenceData]]
+    not_found: NotRequired[list[Snowflake]]
+    presences: NotRequired[list[PresenceData]]
     nonce: NotRequired[str]
 
 
@@ -697,4 +740,4 @@ class GuildSoundboardSoundDelete(TypedDict):
 # https://discord.com/developers/docs/topics/gateway-events#guild-soundboard-sounds-update
 class GuildSoundboardSoundsUpdate(TypedDict):
     guild_id: Snowflake
-    soundboard_sounds: List[GuildSoundboardSound]
+    soundboard_sounds: list[GuildSoundboardSound]

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, List, NoReturn, Optional
+from typing import TYPE_CHECKING, Any, NoReturn, Optional
 
 from .guild import Guild, Member
 from .utils import MISSING, _assetbytes_to_base64_data, parse_time
@@ -61,7 +61,7 @@ class _PartialTemplateState:
     def _get_guild(self, id) -> Optional[Guild]:
         return self.__state._get_guild(id)
 
-    async def query_members(self, **kwargs: Any) -> List[Member]:
+    async def query_members(self, **kwargs: Any) -> list[Member]:
         return []
 
     def __getattr__(self, attr) -> NoReturn:
@@ -138,7 +138,7 @@ class Template:
             source_serialised["id"] = guild_id
             state = _PartialTemplateState(state=self._state)
             # Guild expects a ConnectionState, we're passing a _PartialTemplateState
-            self.source_guild = Guild(data=source_serialised, state=state)  # type: ignore
+            self.source_guild = Guild(data=source_serialised, state=state)  # pyright: ignore[reportArgumentType]
         else:
             self.source_guild = guild
 

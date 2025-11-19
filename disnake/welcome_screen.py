@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 
 from . import utils
 from .partial_emoji import PartialEmoji, _EmojiTag
@@ -84,9 +84,10 @@ class WelcomeScreenChannel:
         return cls(id=int(data["channel_id"]), description=data["description"], emoji=emoji)
 
     def to_dict(self) -> WelcomeScreenChannelPayload:
-        result: WelcomeScreenChannelPayload = {}  # type: ignore
-        result["channel_id"] = self.id
-        result["description"] = self.description
+        result: WelcomeScreenChannelPayload = {
+            "channel_id": self.id,
+            "description": self.description,
+        }  # pyright: ignore[reportAssignmentType]
 
         if self.emoji is not None:
             if self.emoji.id:
@@ -126,7 +127,7 @@ class WelcomeScreen:
         self._state = state
         self._guild = guild
         self.description: Optional[str] = data.get("description")
-        self.channels: List[WelcomeScreenChannel] = [
+        self.channels: list[WelcomeScreenChannel] = [
             WelcomeScreenChannel._from_data(data=channel, state=state)
             for channel in data["welcome_channels"]
         ]
@@ -146,7 +147,7 @@ class WelcomeScreen:
         *,
         enabled: bool = MISSING,
         description: Optional[str] = MISSING,
-        channels: Optional[List[WelcomeScreenChannel]] = MISSING,
+        channels: Optional[list[WelcomeScreenChannel]] = MISSING,
         reason: Optional[str] = None,
     ) -> WelcomeScreen:
         """|coro|

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import List, Literal, Optional, TypedDict, Union
+from typing import Literal, Optional, TypedDict, Union
 
 from typing_extensions import NotRequired
 
@@ -57,7 +57,7 @@ class StreamIntegration(BaseIntegration):
 
 class BotIntegration(BaseIntegration):
     application: IntegrationApplication
-    scopes: List[str]
+    scopes: list[str]
 
 
 Integration = Union[BaseIntegration, StreamIntegration, BotIntegration]

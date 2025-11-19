@@ -1,8 +1,8 @@
 #!/usr/bin/env -S uv run --script
 # /// script
-# requires-python = ">=3.9"
+# requires-python = ">=3.10"
 # dependencies = [
-#     "nox==2025.10.14",
+#     "nox==2025.10.16",
 # ]
 # ///
 # SPDX-License-Identifier: MIT
@@ -16,11 +16,9 @@ import shutil
 from typing import (
     TYPE_CHECKING,
     Any,
-    Dict,
     Final,
-    List,
     Optional,
-    Tuple,
+    Sequence,
 )
 
 import nox
@@ -34,9 +32,9 @@ nox.options.default_venv_backend = "uv|virtualenv"
 
 PYPROJECT = nox.project.load_toml()
 
-SUPPORTED_PYTHONS: Final[List[str]] = nox.project.python_versions(PYPROJECT)
-EXPERIMENTAL_PYTHON_VERSIONS: Final[List[str]] = ["3.14"]
-ALL_PYTHONS: Final[List[str]] = [*SUPPORTED_PYTHONS, *EXPERIMENTAL_PYTHON_VERSIONS]
+SUPPORTED_PYTHONS: Final[Sequence[str]] = nox.project.python_versions(PYPROJECT)
+EXPERIMENTAL_PYTHON_VERSIONS: Final[Sequence[str]] = ["3.14"]
+ALL_PYTHONS: Final[Sequence[str]] = [*SUPPORTED_PYTHONS, *EXPERIMENTAL_PYTHON_VERSIONS]
 MIN_PYTHON: Final[str] = SUPPORTED_PYTHONS[0]
 CI: Final[bool] = "CI" in os.environ
 
@@ -46,19 +44,19 @@ reset_coverage = True
 if TYPE_CHECKING:
     ExecutionGroupType = object
 else:
-    ExecutionGroupType = Dict[str, Any]
+    ExecutionGroupType = dict[str, Any]
 
 
 @dataclasses.dataclass
 class ExecutionGroup(ExecutionGroupType):
-    sessions: Tuple[str, ...] = ()
+    sessions: tuple[str, ...] = ()
     python: str = MIN_PYTHON
     project: bool = True
-    extras: Tuple[str, ...] = ()
-    groups: Tuple[str, ...] = ()
-    dependencies: Tuple[str, ...] = ()
+    extras: tuple[str, ...] = ()
+    groups: tuple[str, ...] = ()
+    dependencies: tuple[str, ...] = ()
     experimental: bool = False
-    pyright_paths: Tuple[str, ...] = ()
+    pyright_paths: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         if self.pyright_paths and "pyright" not in self.sessions:
@@ -67,20 +65,20 @@ class ExecutionGroup(ExecutionGroupType):
         if self.python in EXPERIMENTAL_PYTHON_VERSIONS:
             self.experimental = True
         for key in self.__dataclass_fields__:
-            self[key] = getattr(self, key)  # type: ignore
+            self[key] = getattr(self, key)  # pyright: ignore[reportIndexIssue]
 
 
-EXECUTION_GROUPS: List[ExecutionGroup] = [
+EXECUTION_GROUPS: Sequence[ExecutionGroup] = [
     ## pyright
     *(
         ExecutionGroup(
             sessions=("pyright",),
             python=python,
-            pyright_paths=("disnake", "tests", "examples", "noxfile.py", "setup.py"),
+            pyright_paths=("disnake", "tests", "examples", "noxfile.py"),
             project=True,
             extras=("speed", "voice"),
             groups=("test", "nox"),
-            dependencies=("setuptools", "pytz", "requests"),  # needed for type checking
+            dependencies=("pytz", "requests"),  # needed for type checking
         )
         for python in ALL_PYTHONS
     ),
@@ -88,22 +86,23 @@ EXECUTION_GROUPS: List[ExecutionGroup] = [
     ExecutionGroup(
         sessions=("docs", "pyright"),
         pyright_paths=("docs",),
-        extras=("docs",),
+        groups=("docs",),
     ),
     # codemodding and pyright
     ExecutionGroup(
         sessions=("codemod", "autotyping", "pyright"),
-        pyright_paths=("scripts",),
+        pyright_paths=("scripts/codemods", "scripts/ci"),
         groups=("codemod",),
     ),
     # the other sessions, they don't need pyright, but they need to run
     ExecutionGroup(
-        sessions=("lint", "slotscheck", "check-manifest"),
+        sessions=("lint", "slotscheck", "check-wheel-contents"),
         groups=("tools",),
     ),
     # build
     ExecutionGroup(
-        sessions=("build",),
+        sessions=("build", "pyright"),
+        pyright_paths=("scripts/versioning.py",),
         groups=("build",),
     ),
     ## testing
@@ -124,7 +123,7 @@ EXECUTION_GROUPS: List[ExecutionGroup] = [
 ]
 
 
-def get_groups_for_session(name: str) -> List[ExecutionGroup]:
+def get_groups_for_session(name: str) -> Sequence[ExecutionGroup]:
     return [g for g in EXECUTION_GROUPS if name in g.sessions]
 
 
@@ -152,7 +151,7 @@ def install_deps(session: nox.Session, *, execution_group: Optional[ExecutionGro
         msg = "Cannot install extras without also installing the project"
         raise TypeError(msg)
 
-    command: List[str]
+    command: list[str]
 
     # If not using uv, install with pip
     if os.getenv("INSTALL_WITH_PIP") is not None:
@@ -179,7 +178,7 @@ def install_deps(session: nox.Session, *, execution_group: Optional[ExecutionGro
         "sync",
         "--no-default-groups",
     ]
-    env: Dict[str, Any] = {}
+    env: dict[str, Any] = {}
 
     if session.venv_backend != "none":
         command.append(f"--python={session.virtualenv.location}")
@@ -252,21 +251,14 @@ def lint(session: nox.Session) -> None:
     session.run("prek", "run", "--all-files", *session.posargs)
 
 
-@nox.session(name="check-manifest")
-def check_manifest(session: nox.Session) -> None:
-    """Run check-manifest."""
-    install_deps(session)
-    session.run("check-manifest", "-v")
-
-
-@nox.session(python=get_version_for_session("slotscheck"))
+@nox.session(python=get_version_for_session("slotscheck"), tags=["misc"])
 def slotscheck(session: nox.Session) -> None:
     """Run slotscheck."""
     install_deps(session)
     session.run("python", "-m", "slotscheck", "--verbose", "-m", "disnake")
 
 
-@nox.session(requires=["check-manifest"])
+@nox.session(tags=["misc"])
 def build(session: nox.Session) -> None:
     """Build a dist."""
     install_deps(session)
@@ -275,6 +267,13 @@ def build(session: nox.Session) -> None:
     if dist_path.exists():
         shutil.rmtree(dist_path)
     session.run("python", "-m", "build", "--outdir", "dist")
+
+
+@nox.session(name="check-wheel-contents", requires=["build"], tags=["misc"])
+def check_wheel_contents(session: nox.Session) -> None:
+    """Run check-wheel-contents."""
+    install_deps(session)
+    session.run("check-wheel-contents", "dist")
 
 
 @nox.session(python=get_version_for_session("autotyping"))
@@ -289,7 +288,7 @@ def autotyping(session: nox.Session) -> None:
     if not session.interactive:
         base_command += ["--hide-progress"]
 
-    dir_options: Dict[Tuple[str, ...], Tuple[str, ...]] = {
+    dir_options: dict[tuple[str, ...], tuple[str, ...]] = {
         (
             "disnake",
             "scripts",

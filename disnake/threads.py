@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import asyncio
 import time
-from typing import TYPE_CHECKING, Callable, Dict, Iterable, List, Literal, Optional, Sequence, Union
+from collections.abc import Iterable, Sequence
+from typing import TYPE_CHECKING, Callable, Literal, Optional, Union
 
 from .abc import GuildChannel, Messageable
 from .enums import ChannelType, ThreadArchiveDuration, try_enum, try_enum_to_int
@@ -167,7 +168,7 @@ class Thread(Messageable, Hashable):
     def __init__(self, *, guild: Guild, state: ConnectionState, data: ThreadPayload) -> None:
         self._state: ConnectionState = state
         self.guild: Guild = guild
-        self._members: Dict[int, ThreadMember] = {}
+        self._members: dict[int, ThreadMember] = {}
         self._from_data(data)
 
     async def _get_channel(self) -> Self:
@@ -188,7 +189,7 @@ class Thread(Messageable, Hashable):
         self.parent_id: int = int(data["parent_id"])
         self.owner_id: Optional[int] = _get_as_snowflake(data, "owner_id")
         self.name: str = data["name"]
-        self._type: ThreadType = try_enum(ChannelType, data["type"])  # type: ignore
+        self._type: ThreadType = try_enum(ChannelType, data["type"])  # pyright: ignore[reportAttributeAccessIssue]
         self.last_message_id: Optional[int] = _get_as_snowflake(data, "last_message_id")
         self.slowmode_delay: int = data.get("rate_limit_per_user", 0)
         self.message_count: int = data.get("message_count") or 0
@@ -198,7 +199,7 @@ class Thread(Messageable, Hashable):
             data.get("last_pin_timestamp")
         )
         self._flags: int = data.get("flags", 0)
-        self._applied_tags: List[int] = list(map(int, data.get("applied_tags", [])))
+        self._applied_tags: list[int] = list(map(int, data.get("applied_tags", [])))
         self._unroll_metadata(data["thread_metadata"])
 
         if "member" in data:
@@ -245,7 +246,7 @@ class Thread(Messageable, Hashable):
         """:class:`TextChannel` | :class:`ForumChannel` | :class:`MediaChannel` | :data:`None`: The parent channel this thread belongs to."""
         if isinstance(self.guild, Object):
             return None
-        return self.guild.get_channel(self.parent_id)  # type: ignore
+        return self.guild.get_channel(self.parent_id)  # pyright: ignore[reportReturnType]
 
     @property
     def owner(self) -> Optional[Member]:
@@ -260,7 +261,7 @@ class Thread(Messageable, Hashable):
         return f"<#{self.id}>"
 
     @property
-    def members(self) -> List[ThreadMember]:
+    def members(self) -> list[ThreadMember]:
         """:class:`list`\\[:class:`ThreadMember`]: A list of thread members in this thread.
 
         This requires :attr:`Intents.members` to be properly filled. Most of the time however,
@@ -400,7 +401,7 @@ class Thread(Messageable, Hashable):
         return self.flags.pinned
 
     @property
-    def applied_tags(self) -> List[ForumTag]:
+    def applied_tags(self) -> list[ForumTag]:
         """:class:`list`\\[:class:`ForumTag`]: The tags currently applied to this thread.
         Only applicable to threads in channels of type :class:`ForumChannel` or :class:`MediaChannel`.
 
@@ -560,7 +561,7 @@ class Thread(Messageable, Hashable):
         around: Optional[SnowflakeTime] = None,
         oldest_first: Optional[bool] = False,
         bulk: bool = True,
-    ) -> List[Message]:
+    ) -> list[Message]:
         """|coro|
 
         Purges a list of messages that meet the criteria given by the predicate
@@ -621,7 +622,7 @@ class Thread(Messageable, Hashable):
         iterator = self.history(
             limit=limit, before=before, after=after, oldest_first=oldest_first, around=around
         )
-        ret: List[Message] = []
+        ret: list[Message] = []
         count = 0
 
         minimum_time = int((time.time() - 14 * 24 * 60 * 60) * 1000.0 - 1420070400000) << 22
@@ -780,7 +781,7 @@ class Thread(Messageable, Hashable):
 
         data = await self._state.http.edit_channel(self.id, **payload, reason=reason)
         # The data payload will always be a Thread payload
-        return Thread(data=data, state=self._state, guild=self.guild)  # type: ignore
+        return Thread(data=data, state=self._state, guild=self.guild)  # pyright: ignore[reportArgumentType]
 
     async def join(self) -> None:
         """|coro|
@@ -881,7 +882,7 @@ class Thread(Messageable, Hashable):
         member_data = await self._state.http.get_thread_member(self.id, member_id)
         return ThreadMember(parent=self, data=member_data)
 
-    async def fetch_members(self) -> List[ThreadMember]:
+    async def fetch_members(self) -> list[ThreadMember]:
         """|coro|
 
         Retrieves all :class:`ThreadMember` that are in this thread.
@@ -958,7 +959,7 @@ class Thread(Messageable, Hashable):
         if not tags:
             return
 
-        new_tags: List[int] = self._applied_tags.copy()
+        new_tags: list[int] = self._applied_tags.copy()
         new_tags.extend(t.id for t in tags)
         new_tags = _unique(new_tags)
 
@@ -996,7 +997,7 @@ class Thread(Messageable, Hashable):
             return
 
         to_remove = {t.id for t in tags}
-        new_tags: List[int] = [tag_id for tag_id in self._applied_tags if tag_id not in to_remove]
+        new_tags: list[int] = [tag_id for tag_id in self._applied_tags if tag_id not in to_remove]
 
         await self._state.http.edit_channel(self.id, applied_tags=new_tags, reason=reason)
 

@@ -8,22 +8,16 @@ import signal
 import sys
 import traceback
 import types
+from collections.abc import Coroutine, Generator, Mapping, Sequence
 from datetime import datetime, timedelta
 from errno import ECONNRESET
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    Coroutine,
-    Dict,
-    Generator,
-    List,
     Literal,
-    Mapping,
     NamedTuple,
     Optional,
-    Sequence,
-    Tuple,
     TypedDict,
     TypeVar,
     Union,
@@ -170,7 +164,7 @@ class SessionStartLimit:
         The approximate time at which which the :attr:`.remaining` limit resets.
     """
 
-    __slots__: Tuple[str, ...] = (
+    __slots__: tuple[str, ...] = (
         "total",
         "remaining",
         "reset_after",
@@ -403,7 +397,7 @@ class Client:
         member_cache_flags: Optional[MemberCacheFlags] = None,
     ) -> None:
         # self.ws is set in the connect method
-        self.ws: DiscordWebSocket = None  # type: ignore
+        self.ws: DiscordWebSocket = None  # pyright: ignore[reportAttributeAccessIssue]
 
         if loop is None:
             self.loop: asyncio.AbstractEventLoop = utils.get_event_loop()
@@ -411,7 +405,7 @@ class Client:
             self.loop: asyncio.AbstractEventLoop = loop
 
         self.loop.set_debug(asyncio_debug)
-        self._listeners: Dict[str, List[Tuple[asyncio.Future, Callable[..., bool]]]] = {}
+        self._listeners: dict[str, list[tuple[asyncio.Future, Callable[..., bool]]]] = {}
         self.session_start_limit: Optional[SessionStartLimit] = None
 
         self.http: HTTPClient = HTTPClient(
@@ -422,12 +416,12 @@ class Client:
             loop=self.loop,
         )
 
-        self._handlers: Dict[str, Callable[..., Any]] = {
+        self._handlers: dict[str, Callable[..., Any]] = {
             "ready": self._handle_ready,
             "connect_internal": self._handle_first_connect,
         }
 
-        self._hooks: Dict[str, Callable[..., Any]] = {
+        self._hooks: dict[str, Callable[..., Any]] = {
             "before_identify": self._call_before_identify_hook
         }
 
@@ -478,7 +472,7 @@ class Client:
             msg = "Gateway encodings other than `json` are currently not supported."
             raise ValueError(msg)
 
-        self.extra_events: Dict[str, List[CoroFunc]] = {}
+        self.extra_events: dict[str, list[CoroFunc]] = {}
 
     # internals
 
@@ -556,17 +550,17 @@ class Client:
         return self._connection.user
 
     @property
-    def guilds(self) -> List[Guild]:
+    def guilds(self) -> list[Guild]:
         """:class:`list`\\[:class:`.Guild`]: The guilds that the connected client is a member of."""
         return self._connection.guilds
 
     @property
-    def emojis(self) -> List[Emoji]:
+    def emojis(self) -> list[Emoji]:
         """:class:`list`\\[:class:`.Emoji`]: The emojis that the connected client has."""
         return self._connection.emojis
 
     @property
-    def stickers(self) -> List[GuildSticker]:
+    def stickers(self) -> list[GuildSticker]:
         """:class:`list`\\[:class:`.GuildSticker`]: The stickers that the connected client has.
 
         .. versionadded:: 2.0
@@ -574,7 +568,7 @@ class Client:
         return self._connection.stickers
 
     @property
-    def soundboard_sounds(self) -> List[GuildSoundboardSound]:
+    def soundboard_sounds(self) -> list[GuildSoundboardSound]:
         """:class:`list`\\[:class:`.GuildSoundboardSound`]: The soundboard sounds that the connected client has.
 
         .. versionadded:: 2.10
@@ -590,7 +584,7 @@ class Client:
         return utils.SequenceProxy(self._connection._messages or [])
 
     @property
-    def private_channels(self) -> List[PrivateChannel]:
+    def private_channels(self) -> list[PrivateChannel]:
         """:class:`list`\\[:class:`.abc.PrivateChannel`]: The private channels that the connected client is participating on.
 
         .. note::
@@ -601,7 +595,7 @@ class Client:
         return self._connection.private_channels
 
     @property
-    def voice_clients(self) -> List[VoiceProtocol]:
+    def voice_clients(self) -> list[VoiceProtocol]:
         """:class:`list`\\[:class:`.VoiceProtocol`]: Represents a list of voice connections.
 
         These are usually :class:`.VoiceClient` instances.
@@ -618,7 +612,7 @@ class Client:
 
         .. versionadded:: 2.0
         """
-        return self._connection.application_id  # type: ignore
+        return self._connection.application_id  # pyright: ignore[reportReturnType]
 
     @property
     def application_flags(self) -> ApplicationFlags:
@@ -629,12 +623,12 @@ class Client:
         return self._connection.application_flags
 
     @property
-    def global_application_commands(self) -> List[APIApplicationCommand]:
+    def global_application_commands(self) -> list[APIApplicationCommand]:
         """:class:`list`\\[:class:`.APIUserCommand` | :class:`.APIMessageCommand` | :class:`.APISlashCommand`]: The client's global application commands."""
         return list(self._connection._global_application_commands.values())
 
     @property
-    def global_slash_commands(self) -> List[APISlashCommand]:
+    def global_slash_commands(self) -> list[APISlashCommand]:
         """:class:`list`\\[:class:`.APISlashCommand`]: The client's global slash commands."""
         return [
             cmd
@@ -643,7 +637,7 @@ class Client:
         ]
 
     @property
-    def global_user_commands(self) -> List[APIUserCommand]:
+    def global_user_commands(self) -> list[APIUserCommand]:
         """:class:`list`\\[:class:`.APIUserCommand`]: The client's global user commands."""
         return [
             cmd
@@ -652,7 +646,7 @@ class Client:
         ]
 
     @property
-    def global_message_commands(self) -> List[APIMessageCommand]:
+    def global_message_commands(self) -> list[APIMessageCommand]:
         """:class:`list`\\[:class:`.APIMessageCommand`]: The client's global message commands."""
         return [
             cmd
@@ -932,7 +926,7 @@ class Client:
 
         return decorator
 
-    def get_listeners(self) -> Mapping[str, List[CoroFunc]]:
+    def get_listeners(self) -> Mapping[str, list[CoroFunc]]:
         """:class:`~collections.abc.Mapping`\\[:class:`str`, :class:`list`\\[:class:`~collections.abc.Callable`]]: A read-only mapping of event names to listeners.
 
         .. note::
@@ -1317,10 +1311,10 @@ class Client:
 
         if not future.cancelled():
             try:
-                return future.result()
+                future.result()
             except KeyboardInterrupt:
                 # I am unsure why this gets raised here but suppress it anyway
-                return None
+                pass
 
     # properties
 
@@ -1341,8 +1335,7 @@ class Client:
         if value is None:
             self._connection._activity = None
         elif isinstance(value, BaseActivity):
-            # ConnectionState._activity is typehinted as ActivityPayload, we're passing Dict[str, Any]
-            self._connection._activity = value.to_dict()  # type: ignore
+            self._connection._activity = value.to_dict()
         else:
             msg = "activity must derive from BaseActivity."
             raise TypeError(msg)
@@ -1394,7 +1387,7 @@ class Client:
     # helpers/getters
 
     @property
-    def users(self) -> List[User]:
+    def users(self) -> list[User]:
         """:class:`list`\\[:class:`~disnake.User`]: Returns a list of all the users the bot can see."""
         return list(self._connection._users.values())
 
@@ -1458,6 +1451,7 @@ class Client:
 
         if isinstance(channel, StageChannel):
             return channel.instance
+        return None
 
     def get_guild(self, id: int, /) -> Optional[Guild]:
         """Returns a guild with the given ID.
@@ -1577,7 +1571,7 @@ class Client:
         for guild in self.guilds:
             yield from guild.members
 
-    def get_guild_application_commands(self, guild_id: int) -> List[APIApplicationCommand]:
+    def get_guild_application_commands(self, guild_id: int) -> list[APIApplicationCommand]:
         """Returns a list of all application commands in the guild with the given ID.
 
         Parameters
@@ -1593,7 +1587,7 @@ class Client:
         data = self._connection._guild_application_commands.get(guild_id, {})
         return list(data.values())
 
-    def get_guild_slash_commands(self, guild_id: int) -> List[APISlashCommand]:
+    def get_guild_slash_commands(self, guild_id: int) -> list[APISlashCommand]:
         """Returns a list of all slash commands in the guild with the given ID.
 
         Parameters
@@ -1609,7 +1603,7 @@ class Client:
         data = self._connection._guild_application_commands.get(guild_id, {})
         return [cmd for cmd in data.values() if isinstance(cmd, APISlashCommand)]
 
-    def get_guild_user_commands(self, guild_id: int) -> List[APIUserCommand]:
+    def get_guild_user_commands(self, guild_id: int) -> list[APIUserCommand]:
         """Returns a list of all user commands in the guild with the given ID.
 
         Parameters
@@ -1625,7 +1619,7 @@ class Client:
         data = self._connection._guild_application_commands.get(guild_id, {})
         return [cmd for cmd in data.values() if isinstance(cmd, APIUserCommand)]
 
-    def get_guild_message_commands(self, guild_id: int) -> List[APIMessageCommand]:
+    def get_guild_message_commands(self, guild_id: int) -> list[APIMessageCommand]:
         """Returns a list of all message commands in the guild with the given ID.
 
         Parameters
@@ -1935,8 +1929,8 @@ class Client:
                 # may happen if guild is unavailable
                 continue
 
-            # Member.activities is typehinted as Tuple[ActivityType, ...], we may be setting it as Tuple[BaseActivity, ...]
-            me.activities = activities  # type: ignore
+            # Member.activities is typehinted as tuple[ActivityType, ...], we may be setting it as tuple[BaseActivity, ...]
+            me.activities = activities  # pyright: ignore[reportAttributeAccessIssue]
             me.status = status
 
     # Guild stuff
@@ -2232,7 +2226,11 @@ class Client:
         """
         data = await self.http.get_stage_instance(channel_id)
         guild = self.get_guild(int(data["guild_id"]))
-        return StageInstance(guild=guild, state=self._connection, data=data)  # type: ignore
+        return StageInstance(
+            guild=guild,  # pyright: ignore[reportArgumentType]
+            state=self._connection,
+            data=data,
+        )
 
     # Invite management
 
@@ -2332,7 +2330,7 @@ class Client:
 
     # Voice region stuff
 
-    async def fetch_voice_regions(self, guild_id: Optional[int] = None) -> List[VoiceRegion]:
+    async def fetch_voice_regions(self, guild_id: Optional[int] = None) -> list[VoiceRegion]:
         """Retrieves a list of :class:`.VoiceRegion`\\s.
 
         Retrieves voice regions for the user, or a guild if provided.
@@ -2388,7 +2386,7 @@ class Client:
         data = await self.http.get_widget(guild_id)
         return Widget(state=self._connection, data=data)
 
-    async def fetch_default_soundboard_sounds(self) -> List[SoundboardSound]:
+    async def fetch_default_soundboard_sounds(self) -> list[SoundboardSound]:
         """|coro|
 
         Retrieves the list of default :class:`.SoundboardSound`\\s provided by Discord.
@@ -2488,7 +2486,7 @@ class Client:
         data = await self.http.create_app_emoji(self.application_id, name=name, image=img)
         return Emoji(guild=None, state=self._connection, data=data)
 
-    async def fetch_application_emojis(self) -> List[Emoji]:
+    async def fetch_application_emojis(self) -> list[Emoji]:
         """|coro|
 
         Retrieves all the :class:`.Emoji` of the application.
@@ -2586,13 +2584,21 @@ class Client:
 
         if ch_type in (ChannelType.group, ChannelType.private):
             # the factory will be a DMChannel or GroupChannel here
-            channel = factory(me=self.user, data=data, state=self._connection)  # type: ignore
+            channel = factory(
+                me=self.user,  # pyright: ignore[reportCallIssue]
+                data=data,  # pyright: ignore[reportArgumentType]
+                state=self._connection,
+            )
         else:
             # the factory can't be a DMChannel or GroupChannel here
-            guild_id = int(data["guild_id"])  # type: ignore
+            guild_id = int(data["guild_id"])  # pyright: ignore[reportGeneralTypeIssues]
             guild = self.get_guild(guild_id) or Object(id=guild_id)
             # GuildChannels expect a Guild, we may be passing an Object
-            channel = factory(guild=guild, state=self._connection, data=data)  # type: ignore
+            channel = factory(  # pyright: ignore[reportCallIssue]
+                guild=guild,  # pyright: ignore[reportArgumentType, reportCallIssue]
+                data=data,  # pyright: ignore[reportArgumentType]
+                state=self._connection,
+            )
 
         return channel
 
@@ -2648,8 +2654,8 @@ class Client:
             The sticker you requested.
         """
         data = await self.http.get_sticker(sticker_id)
-        cls, _ = _sticker_factory(data["type"])  # type: ignore
-        return cls(state=self._connection, data=data)  # type: ignore
+        cls, _ = _sticker_factory(data["type"])  # pyright: ignore[reportGeneralTypeIssues]
+        return cls(state=self._connection, data=data)  # pyright: ignore[reportReturnType]
 
     async def fetch_sticker_pack(self, pack_id: int, /) -> StickerPack:
         """|coro|
@@ -2678,7 +2684,7 @@ class Client:
         data = await self.http.get_sticker_pack(pack_id)
         return StickerPack(state=self._connection, data=data)
 
-    async def fetch_sticker_packs(self) -> List[StickerPack]:
+    async def fetch_sticker_packs(self) -> list[StickerPack]:
         """|coro|
 
         Retrieves all available sticker packs.
@@ -2702,7 +2708,7 @@ class Client:
         return [StickerPack(state=self._connection, data=pack) for pack in data["sticker_packs"]]
 
     @deprecated("fetch_sticker_packs")
-    async def fetch_premium_sticker_packs(self) -> List[StickerPack]:
+    async def fetch_premium_sticker_packs(self) -> list[StickerPack]:
         """An alias of :meth:`fetch_sticker_packs`.
 
         .. deprecated:: 2.10
@@ -2786,7 +2792,7 @@ class Client:
         self,
         *,
         with_localizations: bool = True,
-    ) -> List[APIApplicationCommand]:
+    ) -> list[APIApplicationCommand]:
         """|coro|
 
         Retrieves a list of global application commands.
@@ -2923,8 +2929,8 @@ class Client:
         await self._connection.delete_global_command(command_id)
 
     async def bulk_overwrite_global_commands(
-        self, application_commands: List[ApplicationCommand]
-    ) -> List[APIApplicationCommand]:
+        self, application_commands: list[ApplicationCommand]
+    ) -> list[APIApplicationCommand]:
         """|coro|
 
         Overwrites several global application commands in one API request.
@@ -2952,7 +2958,7 @@ class Client:
         guild_id: int,
         *,
         with_localizations: bool = True,
-    ) -> List[APIApplicationCommand]:
+    ) -> list[APIApplicationCommand]:
         """|coro|
 
         Retrieves a list of guild application commands.
@@ -3105,8 +3111,8 @@ class Client:
         await self._connection.delete_guild_command(guild_id, command_id)
 
     async def bulk_overwrite_guild_commands(
-        self, guild_id: int, application_commands: List[ApplicationCommand]
-    ) -> List[APIApplicationCommand]:
+        self, guild_id: int, application_commands: list[ApplicationCommand]
+    ) -> list[APIApplicationCommand]:
         """|coro|
 
         Overwrites several guild application commands in one API request.
@@ -3133,7 +3139,7 @@ class Client:
 
     async def bulk_fetch_command_permissions(
         self, guild_id: int
-    ) -> List[GuildApplicationCommandPermissions]:
+    ) -> list[GuildApplicationCommandPermissions]:
         """|coro|
 
         Retrieves a list of :class:`.GuildApplicationCommandPermissions` configured for the guild with the given ID.
@@ -3173,7 +3179,7 @@ class Client:
         """
         return await self._connection.fetch_command_permissions(guild_id, command_id)
 
-    async def fetch_role_connection_metadata(self) -> List[ApplicationRoleConnectionMetadata]:
+    async def fetch_role_connection_metadata(self) -> list[ApplicationRoleConnectionMetadata]:
         """|coro|
 
         Retrieves the :class:`.ApplicationRoleConnectionMetadata` records for the application.
@@ -3195,7 +3201,7 @@ class Client:
 
     async def edit_role_connection_metadata(
         self, records: Sequence[ApplicationRoleConnectionMetadata]
-    ) -> List[ApplicationRoleConnectionMetadata]:
+    ) -> list[ApplicationRoleConnectionMetadata]:
         """|coro|
 
         Edits the :class:`.ApplicationRoleConnectionMetadata` records for the application.
@@ -3224,7 +3230,7 @@ class Client:
         :class:`list`\\[:class:`.ApplicationRoleConnectionMetadata`]
             The list of newly edited metadata records.
         """
-        payload: List[ApplicationRoleConnectionMetadataPayload] = []
+        payload: list[ApplicationRoleConnectionMetadataPayload] = []
         for record in records:
             record._localize(self.i18n)
             payload.append(record.to_dict())
@@ -3234,7 +3240,7 @@ class Client:
         )
         return [ApplicationRoleConnectionMetadata._from_data(record) for record in data]
 
-    async def skus(self) -> List[SKU]:
+    async def skus(self) -> list[SKU]:
         """|coro|
 
         Retrieves the :class:`.SKU`\\s for the application.

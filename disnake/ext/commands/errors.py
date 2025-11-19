@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, Optional, Union
 
 from disnake.errors import ClientException, DiscordException
 from disnake.utils import humanize_list
@@ -207,10 +207,10 @@ class CheckAnyFailure(CheckFailure):
     """
 
     def __init__(
-        self, checks: List[CheckFailure], errors: List[Callable[[AnyContext], bool]]
+        self, checks: list[CheckFailure], errors: list[Callable[[AnyContext], bool]]
     ) -> None:
-        self.checks: List[CheckFailure] = checks
-        self.errors: List[Callable[[AnyContext], bool]] = errors
+        self.checks: list[CheckFailure] = checks
+        self.errors: list[Callable[[AnyContext], bool]] = errors
         super().__init__("You do not have permission to run this command.")
 
 
@@ -766,8 +766,8 @@ class MissingPermissions(CheckFailure):
         The required permissions that are missing.
     """
 
-    def __init__(self, missing_permissions: List[str], *args: Any) -> None:
-        self.missing_permissions: List[str] = missing_permissions
+    def __init__(self, missing_permissions: list[str], *args: Any) -> None:
+        self.missing_permissions: list[str] = missing_permissions
 
         missing = [
             perm.replace("_", " ").replace("guild", "server").title()
@@ -791,8 +791,8 @@ class BotMissingPermissions(CheckFailure):
         The required permissions that are missing.
     """
 
-    def __init__(self, missing_permissions: List[str], *args: Any) -> None:
-        self.missing_permissions: List[str] = missing_permissions
+    def __init__(self, missing_permissions: list[str], *args: Any) -> None:
+        self.missing_permissions: list[str] = missing_permissions
 
         missing = [
             perm.replace("_", " ").replace("guild", "server").title()
@@ -821,11 +821,11 @@ class BadUnionArgument(UserInputError):
     """
 
     def __init__(
-        self, param: Parameter, converters: Tuple[type, ...], errors: List[CommandError]
+        self, param: Parameter, converters: tuple[type, ...], errors: list[CommandError]
     ) -> None:
         self.param: Parameter = param
-        self.converters: Tuple[type, ...] = converters
-        self.errors: List[CommandError] = errors
+        self.converters: tuple[type, ...] = converters
+        self.errors: list[CommandError] = errors
 
         def _get_name(x):
             try:
@@ -860,11 +860,11 @@ class BadLiteralArgument(UserInputError):
     """
 
     def __init__(
-        self, param: Parameter, literals: Tuple[Any, ...], errors: List[CommandError]
+        self, param: Parameter, literals: tuple[Any, ...], errors: list[CommandError]
     ) -> None:
         self.param: Parameter = param
-        self.literals: Tuple[Any, ...] = literals
-        self.errors: List[CommandError] = errors
+        self.literals: tuple[Any, ...] = literals
+        self.errors: list[CommandError] = errors
 
         to_string = [repr(literal) for literal in literals]
         fmt = humanize_list(to_string, "or")
@@ -1070,9 +1070,9 @@ class TooManyFlags(FlagError):
         The values that were passed.
     """
 
-    def __init__(self, flag: Flag, values: List[str]) -> None:
+    def __init__(self, flag: Flag, values: list[str]) -> None:
         self.flag: Flag = flag
-        self.values: List[str] = values
+        self.values: list[str] = values
         super().__init__(
             f"Too many flag values, expected {flag.max_args} but received {len(values)}."
         )

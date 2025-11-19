@@ -12,14 +12,16 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
+import importlib.metadata
 import importlib.util
 import inspect
 import os
 import re
 import subprocess  # noqa: TID251
 import sys
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
+import versioningit
 from sphinx.application import Sphinx
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -106,15 +108,18 @@ copyright = "2015-2021, Rapptz, 2021-present, Disnake Development"
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
-# The short X.Y version.
-
-version = ""
-with open("../disnake/__init__.py") as f:
-    version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE).group(1)  # type: ignore
-
 # The full version, including alpha/beta/rc tags.
-release = version
+release = importlib.metadata.version("disnake")
+# The short X.Y version.
+version = ".".join(release.split(".")[:2])
+# The release for the next release
+next_release = versioningit.get_next_version(os.path.abspath(".."))
+next_version = ".".join((next_release).split(".", 2)[:2])
 
+rst_prolog += f"""
+.. |vnext_full| replace:: {next_release}
+.. |vnext| replace:: {next_version}
+"""
 
 _IS_READTHEDOCS = bool(os.getenv("READTHEDOCS"))
 
@@ -208,7 +213,7 @@ if not (_spec and _spec.origin):
 _disnake_module_path = os.path.dirname(_spec.origin)
 
 
-def linkcode_resolve(domain: str, info: Dict[str, Any]) -> Optional[str]:
+def linkcode_resolve(domain: str, info: dict[str, Any]) -> Optional[str]:
     if domain != "py":
         return None
 
@@ -219,9 +224,13 @@ def linkcode_resolve(domain: str, info: Dict[str, Any]) -> Optional[str]:
         obj = inspect.unwrap(obj)
 
         if isinstance(obj, property):
-            obj = inspect.unwrap(obj.fget)  # type: ignore
+            assert obj.fget is not None
+            obj = inspect.unwrap(obj.fget)
 
-        path = os.path.relpath(inspect.getsourcefile(obj), start=_disnake_module_path)  # type: ignore
+        path = os.path.relpath(  # pyright: ignore[reportCallIssue]
+            inspect.getsourcefile(obj),  # pyright: ignore[reportArgumentType]
+            start=_disnake_module_path,
+        )
         src, lineno = inspect.getsourcelines(obj)
     except Exception:
         return None
@@ -505,4 +514,4 @@ def setup(app: Sphinx) -> None:
     # HACK: avoid deprecation warnings caused by sphinx always iterating over all class attributes
     import disnake
 
-    del disnake.Embed.Empty  # type: ignore
+    del disnake.Embed.Empty  # pyright: ignore[reportAttributeAccessIssue]

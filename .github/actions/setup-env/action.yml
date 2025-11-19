@@ -6,7 +6,7 @@ inputs:
   python-version:
     description: The python version to install
     required: false
-    default: '3.9'
+    default: '3.10'
   use-cached-uv-lock:
     description: Whether to download the uv lock cache.
     required: false
@@ -41,7 +41,7 @@ runs:
 
     - name: Set up uv with Python ${{ inputs.python-version }}
       id: setup-python
-      uses: astral-sh/setup-uv@3259c6206f993105e3a61b142c2d97bf4b9ef83d # v7.1.0
+      uses: astral-sh/setup-uv@85856786d1ce8acfbcc2f13a5f3fbd6b938f9f41 # v7.1.2
       with:
         version: '0.9.2'
         enable-cache: true
@@ -58,8 +58,9 @@ runs:
 
     - name: Install nox
       shell: bash
+      # This version should match the dependencies.nox version in noxfile.py's script metadata
       run: |
-        uv tool install nox
+        uv tool install 'nox==2025.10.16'
 
     - name: Lock dependencies
       id: lock-uv-deps

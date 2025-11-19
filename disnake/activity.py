@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union, overload
+from typing import TYPE_CHECKING, Any, Literal, Optional, Union, overload
 
 from .asset import Asset
 from .colour import Colour
@@ -37,7 +37,7 @@ assets: dict
     small_text: str (max: 128)
 party: dict
     id: str (max: 128),
-    size: List[int] (max-length: 2)
+    size: list[int] (max-length: 2)
         elem: int (min: 1)
 secrets: dict
     match: str (max: 128)
@@ -103,6 +103,7 @@ class _BaseActivity:
             return datetime.datetime.fromtimestamp(
                 self._created_at / 1000, tz=datetime.timezone.utc
             )
+        return None
 
     @property
     def start(self) -> Optional[datetime.datetime]:
@@ -288,7 +289,7 @@ class Activity(BaseActivity):
         .. versionadded:: 2.0
 
         .. versionchanged:: 2.6
-            Changed type to ``List[str]`` to match API types.
+            Changed type to ``list[str]`` to match API types.
 
     emoji: :class:`PartialEmoji` | :data:`None`
         The emoji that belongs to this activity.
@@ -339,7 +340,7 @@ class Activity(BaseActivity):
         party: Optional[ActivityParty] = None,
         application_id: Optional[Union[str, int]] = None,
         flags: Optional[int] = None,
-        buttons: Optional[List[str]] = None,
+        buttons: Optional[list[str]] = None,
         emoji: Optional[Union[PartialEmojiPayload, ActivityEmojiPayload]] = None,
         id: Optional[str] = None,
         platform: Optional[str] = None,
@@ -360,7 +361,7 @@ class Activity(BaseActivity):
         self.name: Optional[str] = name
         self.url: Optional[str] = url
         self.flags: int = flags or 0
-        self.buttons: List[str] = buttons or []
+        self.buttons: list[str] = buttons or []
 
         # undocumented fields:
         self.id: Optional[str] = id
@@ -398,8 +399,8 @@ class Activity(BaseActivity):
         inner = " ".join(f"{k!s}={v!r}" for k, v in attrs)
         return f"<Activity {inner}>"
 
-    def to_dict(self) -> Dict[str, Any]:
-        ret: Dict[str, Any] = {}
+    def to_dict(self) -> ActivityPayload:
+        ret: ActivityPayload = {}  # pyright: ignore[reportAssignmentType]
         for attr in self.__slots__:
             value = getattr(self, attr, None)
             if value is None:
@@ -408,16 +409,16 @@ class Activity(BaseActivity):
             if isinstance(value, dict) and len(value) == 0:
                 continue
 
-            ret[attr] = value
+            ret[attr] = value  # pyright: ignore[reportGeneralTypeIssues]
 
         # fix type field
-        ret["type"] = int(self.type)
+        ret["type"] = int(self.type)  # pyright: ignore[reportGeneralTypeIssues]  # ActivityPayload.type does not include -1
 
         if self.status_display_type:
-            ret["status_display_type"] = int(self.status_display_type)
+            ret["status_display_type"] = int(self.status_display_type)  # pyright: ignore[reportGeneralTypeIssues]
 
         if self.emoji:
-            ret["emoji"] = self.emoji.to_dict()
+            ret["emoji"] = self.emoji.to_dict()  # pyright: ignore[reportGeneralTypeIssues]
         # defined in base class slots
         if self._timestamps:
             ret["timestamps"] = self._timestamps
@@ -608,8 +609,8 @@ class Streaming(BaseActivity):
         name = self.assets["large_image"]
         return name[7:] if name[:7] == "twitch:" else None
 
-    def to_dict(self) -> Dict[str, Any]:
-        ret: Dict[str, Any] = {
+    def to_dict(self) -> ActivityPayload:
+        ret: ActivityPayload = {
             "type": ActivityType.streaming.value,
             "name": str(self.name),
             "url": str(self.url),
@@ -700,7 +701,7 @@ class Spotify(_BaseActivity):
         """
         return self.colour
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "flags": 48,  # SYNC | PLAY
             "name": "Spotify",
@@ -744,7 +745,7 @@ class Spotify(_BaseActivity):
         return self._details
 
     @property
-    def artists(self) -> List[str]:
+    def artists(self) -> list[str]:
         """:class:`list`\\[:class:`str`]: The artists of the song being played."""
         return self._state.split("; ")
 
@@ -890,7 +891,7 @@ class CustomActivity(BaseActivity):
             }
 
         if self.emoji:
-            o["emoji"] = self.emoji.to_dict()  # type: ignore
+            o["emoji"] = self.emoji.to_dict()  # pyright: ignore[reportGeneralTypeIssues]
         return o
 
     def __eq__(self, other: Any) -> bool:
@@ -944,16 +945,16 @@ def create_activity(
     if game_type is ActivityType.playing and not (
         "application_id" in data or "session_id" in data or "state" in data
     ):
-        activity = Game(**data)  # type: ignore  # pyright bug(?)
+        activity = Game(**data)  # pyright: ignore[reportArgumentType]  # pyright bug(?)
     elif game_type is ActivityType.custom and "name" in data:
-        activity = CustomActivity(**data)  # type: ignore
+        activity = CustomActivity(**data)  # pyright: ignore[reportArgumentType]
     elif game_type is ActivityType.streaming and "url" in data:
         # url won't be None here
-        activity = Streaming(**data)  # type: ignore
+        activity = Streaming(**data)  # pyright: ignore[reportArgumentType]
     elif game_type is ActivityType.listening and "sync_id" in data and "session_id" in data:
         activity = Spotify(**data)
     else:
-        activity = Activity(**data)  # type: ignore
+        activity = Activity(**data)  # pyright: ignore[reportArgumentType]
 
     if isinstance(activity, (Activity, CustomActivity)) and activity.emoji and state:
         activity.emoji._state = state

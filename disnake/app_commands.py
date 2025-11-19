@@ -5,7 +5,8 @@ from __future__ import annotations
 import math
 import re
 from abc import ABC
-from typing import TYPE_CHECKING, ClassVar, List, Mapping, Optional, Sequence, Tuple, Union, cast
+from collections.abc import Mapping, Sequence
+from typing import TYPE_CHECKING, ClassVar, Optional, Union
 
 from .enums import (
     ApplicationCommandPermissionType,
@@ -266,8 +267,8 @@ class Option:
         type: Optional[Union[OptionType, int]] = None,
         required: bool = False,
         choices: Optional[Choices] = None,
-        options: Optional[List[Option]] = None,
-        channel_types: Optional[List[ChannelType]] = None,
+        options: Optional[list[Option]] = None,
+        channel_types: Optional[list[ChannelType]] = None,
         autocomplete: bool = False,
         min_value: Optional[float] = None,
         max_value: Optional[float] = None,
@@ -285,7 +286,7 @@ class Option:
 
         self.type: OptionType = enum_if_int(OptionType, type) or OptionType.string
         self.required: bool = required
-        self.options: List[Option] = options or []
+        self.options: list[Option] = options or []
 
         if min_value and self.type is OptionType.integer:
             min_value = math.ceil(min_value)
@@ -302,9 +303,9 @@ class Option:
             msg = "channel_types must be a list of `ChannelType`s"
             raise TypeError(msg)
 
-        self.channel_types: List[ChannelType] = channel_types or []
+        self.channel_types: list[ChannelType] = channel_types or []
 
-        self.choices: List[OptionChoice] = []
+        self.choices: list[OptionChoice] = []
         if choices is not None:
             if autocomplete:
                 msg = "can not specify both choices and autocomplete args"
@@ -399,8 +400,8 @@ class Option:
         type: Optional[OptionType] = None,
         required: bool = False,
         choices: Optional[Choices] = None,
-        options: Optional[List[Option]] = None,
-        channel_types: Optional[List[ChannelType]] = None,
+        options: Optional[list[Option]] = None,
+        channel_types: Optional[list[ChannelType]] = None,
         autocomplete: bool = False,
         min_value: Optional[float] = None,
         max_value: Optional[float] = None,
@@ -512,7 +513,7 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
         .. versionadded:: 2.10
     """
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (
         "type",
         "name",
         "default_member_permissions",
@@ -708,17 +709,15 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
             "nsfw": self.nsfw,
         }
 
-        install_types: Optional[List[ApplicationIntegrationTypePayload]] = (
-            cast("List[ApplicationIntegrationTypePayload]", self._install_types_with_default.values)
+        install_types: Optional[list[ApplicationIntegrationTypePayload]] = (
+            self._install_types_with_default.values
             if self._install_types_with_default is not None
             else None
         )
         data["integration_types"] = install_types
 
-        contexts: Optional[List[InteractionContextTypePayload]] = (
-            cast("List[InteractionContextTypePayload]", self._contexts_with_default.values)
-            if self._contexts_with_default is not None
-            else None
+        contexts: Optional[list[InteractionContextTypePayload]] = (
+            self._contexts_with_default.values if self._contexts_with_default is not None else None
         )
         data["contexts"] = contexts
 
@@ -736,7 +735,7 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
 
 
 class _APIApplicationCommandMixin:
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = ("id",)
+    __repr_attributes__: ClassVar[tuple[str, ...]] = ("id",)
 
     def _update_common(self, data: ApplicationCommandPayload) -> None:
         if not isinstance(self, ApplicationCommand):
@@ -787,7 +786,7 @@ class UserCommand(ApplicationCommand):
         .. versionadded:: 2.10
     """
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = tuple(
+    __repr_attributes__: ClassVar[tuple[str, ...]] = tuple(
         n for n in ApplicationCommand.__repr_attributes__ if n != "type"
     )
 
@@ -853,7 +852,7 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
         Autoincrementing version identifier updated during substantial record changes.
     """
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (
         *UserCommand.__repr_attributes__,
         *_APIApplicationCommandMixin.__repr_attributes__,
     )
@@ -916,7 +915,7 @@ class MessageCommand(ApplicationCommand):
         .. versionadded:: 2.10
     """
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = tuple(
+    __repr_attributes__: ClassVar[tuple[str, ...]] = tuple(
         n for n in ApplicationCommand.__repr_attributes__ if n != "type"
     )
 
@@ -982,7 +981,7 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
         Autoincrementing version identifier updated during substantial record changes.
     """
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (
         *MessageCommand.__repr_attributes__,
         *_APIApplicationCommandMixin.__repr_attributes__,
     )
@@ -1055,7 +1054,7 @@ class SlashCommand(ApplicationCommand):
         The list of options the slash command has.
     """
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (
         *tuple(n for n in ApplicationCommand.__repr_attributes__ if n != "type"),
         "description",
         "options",
@@ -1065,7 +1064,7 @@ class SlashCommand(ApplicationCommand):
         self,
         name: LocalizedRequired,
         description: LocalizedRequired,
-        options: Optional[List[Option]] = None,
+        options: Optional[list[Option]] = None,
         dm_permission: Optional[bool] = None,  # deprecated
         default_member_permissions: Optional[Union[Permissions, int]] = None,
         nsfw: Optional[bool] = None,
@@ -1087,7 +1086,7 @@ class SlashCommand(ApplicationCommand):
         self.description: str = desc_loc.string
         self.description_localizations: LocalizationValue = desc_loc.localizations
 
-        self.options: List[Option] = options or []
+        self.options: list[Option] = options or []
 
     def __eq__(self, other) -> bool:
         return (
@@ -1105,7 +1104,7 @@ class SlashCommand(ApplicationCommand):
         required: bool = False,
         choices: Optional[Choices] = None,
         options: Optional[list] = None,
-        channel_types: Optional[List[ChannelType]] = None,
+        channel_types: Optional[list[ChannelType]] = None,
         autocomplete: bool = False,
         min_value: Optional[float] = None,
         max_value: Optional[float] = None,
@@ -1203,7 +1202,7 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
         Autoincrementing version identifier updated during substantial record changes.
     """
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (
         *SlashCommand.__repr_attributes__,
         *_APIApplicationCommandMixin.__repr_attributes__,
     )
@@ -1264,13 +1263,13 @@ class ApplicationCommandPermissions:
     def __repr__(self) -> str:
         return f"<ApplicationCommandPermissions id={self.id!r} type={self.type!r} permission={self.permission!r}>"
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: ApplicationCommandPermissions) -> bool:
         return (
             self.id == other.id and self.type == other.type and self.permission == other.permission
         )
 
     def to_dict(self) -> ApplicationCommandPermissionsPayload:
-        return {"id": self.id, "type": int(self.type), "permission": self.permission}  # type: ignore
+        return {"id": self.id, "type": self.type.value, "permission": self.permission}
 
     def is_everyone(self) -> bool:
         """Whether this permission object is affecting the @everyone role.
@@ -1319,7 +1318,7 @@ class GuildApplicationCommandPermissions:
         self.application_id: int = int(data["application_id"])
         self.guild_id: int = int(data["guild_id"])
 
-        self.permissions: List[ApplicationCommandPermissions] = [
+        self.permissions: list[ApplicationCommandPermissions] = [
             ApplicationCommandPermissions(data=elem, guild_id=self.guild_id)
             for elem in data["permissions"]
         ]

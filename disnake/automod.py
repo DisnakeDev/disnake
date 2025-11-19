@@ -3,15 +3,10 @@
 from __future__ import annotations
 
 import datetime
+from collections.abc import Iterable, Sequence
 from typing import (
     TYPE_CHECKING,
-    Dict,
-    FrozenSet,
-    Iterable,
-    List,
     Optional,
-    Sequence,
-    Type,
     Union,
     overload,
 )
@@ -355,7 +350,7 @@ class AutoModTriggerMetadata:
         :class:`AutoModTriggerMetadata`
             The new metadata instance.
         """
-        return self.__class__(  # type: ignore  # call doesn't match any overloads
+        return self.__class__(
             keyword_filter=self.keyword_filter if keyword_filter is MISSING else keyword_filter,
             regex_patterns=self.regex_patterns if regex_patterns is MISSING else regex_patterns,
             presets=self.presets if presets is MISSING else presets,
@@ -368,7 +363,7 @@ class AutoModTriggerMetadata:
                 if mention_raid_protection_enabled is MISSING
                 else mention_raid_protection_enabled
             ),
-        )
+        )  # pyright: ignore[reportCallIssue]  # call doesn't match any overloads
 
     @classmethod
     def _from_dict(cls, data: AutoModTriggerMetadataPayload) -> Self:
@@ -377,14 +372,14 @@ class AutoModTriggerMetadata:
         else:
             presets = None
 
-        return cls(  # type: ignore  # call doesn't match any overloads
+        return cls(
             keyword_filter=data.get("keyword_filter"),
             regex_patterns=data.get("regex_patterns"),
             presets=presets,
             allow_list=data.get("allow_list"),
             mention_total_limit=data.get("mention_total_limit"),
             mention_raid_protection_enabled=data.get("mention_raid_protection_enabled"),
-        )
+        )  # pyright: ignore[reportCallIssue]  # call doesn't match any overloads
 
     def to_dict(self) -> AutoModTriggerMetadataPayload:
         data: AutoModTriggerMetadataPayload = {}
@@ -393,7 +388,7 @@ class AutoModTriggerMetadata:
         if self.regex_patterns is not None:
             data["regex_patterns"] = list(self.regex_patterns)
         if self.presets is not None:
-            data["presets"] = self.presets.values  # type: ignore  # `values` contains ints instead of preset literal values
+            data["presets"] = self.presets.values
         if self.allow_list is not None:
             data["allow_list"] = list(self.allow_list)
         if self.mention_total_limit is not None:
@@ -471,18 +466,18 @@ class AutoModRule:
         self.creator_id: int = int(data["creator_id"])
         self.event_type: AutoModEventType = try_enum(AutoModEventType, data["event_type"])
         self.trigger_type: AutoModTriggerType = try_enum(AutoModTriggerType, data["trigger_type"])
-        self._actions: List[AutoModAction] = [
+        self._actions: list[AutoModAction] = [
             _automod_action_factory(action) for action in data["actions"]
         ]
         self.trigger_metadata: AutoModTriggerMetadata = AutoModTriggerMetadata._from_dict(
             data.get("trigger_metadata", {})
         )
-        self.exempt_role_ids: FrozenSet[int] = (
+        self.exempt_role_ids: frozenset[int] = (
             frozenset(map(int, exempt_roles))
             if (exempt_roles := data.get("exempt_roles"))
             else frozenset()
         )
-        self.exempt_channel_ids: FrozenSet[int] = (
+        self.exempt_channel_ids: frozenset[int] = (
             frozenset(map(int, exempt_channels))
             if (exempt_channels := data.get("exempt_channels"))
             else frozenset()
@@ -497,7 +492,7 @@ class AutoModRule:
         return snowflake_time(self.id)
 
     @property
-    def actions(self) -> List[AutoModAction]:
+    def actions(self) -> list[AutoModAction]:
         """:class:`list`\\[:class:`AutoModBlockMessageAction` | :class:`AutoModSendAlertAction` | :class:`AutoModTimeoutAction` | :class:`AutoModAction`]:
         The list of actions that will execute if a matching event triggered this rule.
         """
@@ -511,12 +506,12 @@ class AutoModRule:
         return self.guild.get_member(self.creator_id)
 
     @property
-    def exempt_roles(self) -> List[Role]:
+    def exempt_roles(self) -> list[Role]:
         """:class:`list`\\[:class:`Role`]: The list of roles that are exempt from this rule."""
         return list(filter(None, map(self.guild.get_role, self.exempt_role_ids)))
 
     @property
-    def exempt_channels(self) -> List[GuildChannel]:
+    def exempt_channels(self) -> list[GuildChannel]:
         """:class:`list`\\[:class:`abc.GuildChannel`]: The list of channels that are exempt from this rule."""
         return list(filter(None, map(self.guild.get_channel, self.exempt_channel_ids)))
 
@@ -791,7 +786,7 @@ class AutoModActionExecution:
         return self.guild._state._get_message(self.alert_message_id)
 
 
-_action_map: Dict[int, Type[AutoModAction]] = {
+_action_map: dict[int, type[AutoModAction]] = {
     AutoModActionType.block_message.value: AutoModBlockMessageAction,
     AutoModActionType.send_alert_message.value: AutoModSendAlertAction,
     AutoModActionType.timeout.value: AutoModTimeoutAction,

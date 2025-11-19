@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING, Any, Callable, ClassVar, Optional, Tuple, TypeVar, Union, overload
+from typing import TYPE_CHECKING, Any, Callable, ClassVar, Optional, TypeVar, Union, overload
 
 from ..components import Button as ButtonComponent
 from ..enums import ButtonStyle, ComponentType
@@ -71,7 +71,7 @@ class Button(Item[V_co]):
         ordering. The row number must be between 0 and 4 (i.e. zero indexed).
     """
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (
         "style",
         "url",
         "disabled",
@@ -363,6 +363,6 @@ def button(
 
         func.__discord_ui_model_type__ = cls
         func.__discord_ui_model_kwargs__ = kwargs
-        return func  # type: ignore
+        return func  # pyright: ignore[reportReturnType]
 
     return decorator

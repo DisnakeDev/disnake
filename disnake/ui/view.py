@@ -8,9 +8,10 @@ import os
 import sys
 import time
 import traceback
+from collections.abc import Sequence
 from functools import partial
 from itertools import groupby
-from typing import TYPE_CHECKING, Callable, ClassVar, Dict, List, Optional, Sequence, Tuple
+from typing import TYPE_CHECKING, Callable, ClassVar, Optional
 
 from ..components import (
     VALID_ACTION_ROW_MESSAGE_COMPONENT_TYPES,
@@ -50,8 +51,8 @@ def _component_to_item(component: ActionRowMessageComponent) -> Item:
 class _ViewWeights:
     __slots__ = ("weights",)
 
-    def __init__(self, children: List[Item]) -> None:
-        self.weights: List[int] = [0, 0, 0, 0, 0]
+    def __init__(self, children: list[Item]) -> None:
+        self.weights: list[int] = [0, 0, 0, 0, 0]
 
         key: Callable[[Item[View]], int] = lambda i: sys.maxsize if i.row is None else i.row
         children = sorted(children, key=key)
@@ -116,10 +117,10 @@ class View:
     """
 
     __discord_ui_view__: ClassVar[bool] = True
-    __view_children_items__: ClassVar[List[ItemCallbackType[Self, Item[Self]]]] = []
+    __view_children_items__: ClassVar[list[ItemCallbackType[Self, Item[Self]]]] = []
 
     def __init_subclass__(cls) -> None:
-        children: List[ItemCallbackType[Self, Item[Self]]] = []
+        children: list[ItemCallbackType[Self, Item[Self]]] = []
         for base in reversed(cls.__mro__):
             for member in base.__dict__.values():
                 if hasattr(member, "__discord_ui_model_type__"):
@@ -133,10 +134,10 @@ class View:
 
     def __init__(self, *, timeout: Optional[float] = 180.0) -> None:
         self.timeout = timeout
-        self.children: List[Item[Self]] = []
+        self.children: list[Item[Self]] = []
         for func in self.__view_children_items__:
             item: Item[Self] = func.__discord_ui_model_type__(**func.__discord_ui_model_kwargs__)
-            item.callback = partial(func, self, item)  # type: ignore
+            item.callback = partial(func, self, item)  # pyright: ignore[reportAttributeAccessIssue]
             item._view = self
             setattr(self, func.__name__, item)
             self.children.append(item)
@@ -159,22 +160,24 @@ class View:
                 return
 
             if self.__timeout_expiry is None:
-                return self._dispatch_timeout()
+                self._dispatch_timeout()
+                return
 
             # Check if we've elapsed our currently set timeout
             now = time.monotonic()
             if now >= self.__timeout_expiry:
-                return self._dispatch_timeout()
+                self._dispatch_timeout()
+                return
 
             # Wait N seconds to see if timeout data has been refreshed
             await asyncio.sleep(self.__timeout_expiry - now)
 
-    def to_components(self) -> List[ActionRowPayload]:
+    def to_components(self) -> list[ActionRowPayload]:
         def key(item: Item) -> int:
             return item._rendered_row or 0
 
         children = sorted(self.children, key=key)
-        components: List[ActionRowPayload] = []
+        components: list[ActionRowPayload] = []
         for _, group in groupby(children, key=key):
             children = [item.to_component_dict() for item in group]
             if not children:
@@ -223,7 +226,7 @@ class View:
         for component in walk_components(message.components):
             if isinstance(component, ActionRowComponent):
                 continue
-            elif not isinstance(component, VALID_ACTION_ROW_MESSAGE_COMPONENT_TYPES):
+            if not isinstance(component, VALID_ACTION_ROW_MESSAGE_COMPONENT_TYPES):
                 # can happen if message uses components v2
                 msg = f"Cannot construct view from message - unexpected {type(component).__name__}"
                 raise TypeError(msg)
@@ -360,7 +363,7 @@ class View:
 
             allow = await self.interaction_check(interaction)
             if not allow:
-                return
+                return None
 
             await item.callback(interaction)
         except Exception as e:
@@ -391,19 +394,19 @@ class View:
             self._scheduled_task(item, interaction), name=f"disnake-ui-view-dispatch-{self.id}"
         )
 
-    def refresh(self, components: List[ActionRowComponent[ActionRowMessageComponent]]) -> None:
+    def refresh(self, components: list[ActionRowComponent[ActionRowMessageComponent]]) -> None:
         # TODO: this is pretty hacky at the moment, see https://github.com/DisnakeDev/disnake/commit/9384a72acb8c515b13a600592121357e165368da
-        old_state: Dict[Tuple[int, str], Item] = {
-            (item.type.value, item.custom_id): item  # type: ignore
+        old_state: dict[tuple[int, str], Item] = {
+            (item.type.value, item.custom_id): item  # pyright: ignore[reportAttributeAccessIssue]
             for item in self.children
             if item.is_dispatchable()
         }
 
-        children: List[Item] = []
+        children: list[Item] = []
         for component in (c for row in components for c in row.children):
             older: Optional[Item] = None
             try:
-                older = old_state[(component.type.value, component.custom_id)]  # type: ignore
+                older = old_state[component.type.value, component.custom_id]  # pyright: ignore[reportArgumentType]
             except (KeyError, AttributeError):
                 # workaround for non-interactive buttons, since they're not part of `old_state`
                 if isinstance(component, ButtonComponent):
@@ -419,7 +422,7 @@ class View:
                             break
 
             if older:
-                older.refresh_component(component)  # type: ignore  # this is fine, pyright is trying to be smart
+                older.refresh_component(component)  # pyright: ignore[reportArgumentType]  # this is fine, pyright is trying to be smart
                 children.append(older)
             else:
                 # fallback, should not happen as long as implementation covers all cases
@@ -487,9 +490,9 @@ class View:
 class ViewStore:
     def __init__(self, state: ConnectionState) -> None:
         # (component_type, message_id, custom_id): (View, Item)
-        self._views: Dict[Tuple[int, Optional[int], str], Tuple[View, Item]] = {}
+        self._views: dict[tuple[int, Optional[int], str], tuple[View, Item]] = {}
         # message_id: View
-        self._synced_message_views: Dict[int, View] = {}
+        self._synced_message_views: dict[int, View] = {}
         self._state: ConnectionState = state
 
     @property
@@ -498,7 +501,7 @@ class ViewStore:
         return list(views.values())
 
     def __verify_integrity(self) -> None:
-        to_remove: List[Tuple[int, Optional[int], str]] = []
+        to_remove: list[tuple[int, Optional[int], str]] = []
         for k, (view, _) in self._views.items():
             if view.is_finished():
                 to_remove.append(k)
@@ -512,7 +515,7 @@ class ViewStore:
         view._start_listening_from_store(self)
         for item in view.children:
             if item.is_dispatchable():
-                self._views[(item.type.value, message_id, item.custom_id)] = (view, item)  # type: ignore
+                self._views[item.type.value, message_id, item.custom_id] = (view, item)  # pyright: ignore[reportAttributeAccessIssue]
 
         if message_id is not None:
             self._synced_message_views[message_id] = view
@@ -520,7 +523,10 @@ class ViewStore:
     def remove_view(self, view: View) -> None:
         for item in view.children:
             if item.is_dispatchable():
-                self._views.pop((item.type.value, item.custom_id), None)  # type: ignore
+                self._views.pop(  # pyright: ignore[reportCallIssue]
+                    (item.type.value, item.custom_id),  # pyright: ignore[reportArgumentType, reportAttributeAccessIssue]
+                    None,
+                )
 
         for key, value in self._synced_message_views.items():
             if value.id == view.id:
