@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: MIT
 
 [build-system]
-requires = ["setuptools>=77.0.3"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling>=1.27.0", "versioningit>=3.3.0,<4", "packaging"]
+build-backend = "hatchling.build"
 
 [project]
 name = "disnake"
@@ -73,7 +73,7 @@ ruff = [
 tools = [
     "prek>=0.2.0",
     "slotscheck==0.19.1",
-    "check-manifest==0.50",
+    "check-wheel-contents~=0.6.3",
     { include-group = "ruff" },
 ]
 changelog = [
@@ -100,6 +100,7 @@ test = [
 build = [
     "build>=1.2.2.post1",
     "twine>=6.1.0",
+    "versioningit>=3.3.0,<4",
 ]
 docs = [
     "sphinx==7.0.1",
@@ -110,15 +111,60 @@ docs = [
     "sphinxcontrib-towncrier==0.3.2a0",
     "sphinx-notfound-page==0.8.3",
     "sphinxext-opengraph==0.9.1",
+    "versioningit>=3.3.0,<4",
     { include-group = "changelog" },
 ]
 
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["disnake*"]
-
 [tool.uv]
 required-version = ">=0.9.2"
+
+[tool.hatch.build]
+artifacts = ["disnake/_version.py"]
+
+[tool.hatch.build.targets.sdist]
+only-include = [
+    "disnake",
+    "scripts/versioning.py",
+]
+
+[tool.hatch.version]
+source = "versioningit"
+
+[tool.versioningit]
+default-version = "0.0.0"
+
+[tool.versioningit.vcs]
+method = "git-archive"
+describe-subst = "$Format:%(describe:tags,match=v*)$"
+
+[tool.versioningit.format]
+distance = "{base_version}a{distance}+{vcs}{rev}"
+dirty = "{base_version}+d{build_date:%Y%m%d}"
+distance-dirty = "{base_version}a{distance}+{vcs}{rev}.d{build_date:%Y%m%d}"
+
+[tool.versioningit.template-fields]
+method = { module = "scripts.versioning", value = "template_fields"}
+
+[tool.versioningit.write]
+file = "disnake/_version.py"
+template = """
+# SPDX-License-Identifier: MIT
+
+from typing import Literal, NamedTuple
+
+__version__ = "{version}"
+
+
+class VersionInfo(NamedTuple):
+    major: int
+    minor: int
+    micro: int
+    releaselevel: Literal["alpha", "beta", "candidate", "final"]
+    serial: int
+
+version_info: VersionInfo = VersionInfo{version_tuple}
+"""
+
 
 [tool.ruff]
 line-length = 100
@@ -416,21 +462,6 @@ exclude_lines = [
 ]
 
 
-[tool.check-manifest]
-ignore = [
-    # CI
-    ".pre-commit-config.yaml",
-    ".readthedocs.yml",
-    ".libcst.codemod.yaml",
-    "noxfile.py",
-    # docs
-    "CONTRIBUTING.md",
-    "RELEASE.md",
-    "assets/**",
-    "changelog/**",
-    "docs/**",
-    "examples/**",
-    # tests
-    "tests/**",
-    "scripts/**",
-]
+[tool.check-wheel-contents]
+toplevel = ["disnake"]
+package = "disnake"
