@@ -231,16 +231,21 @@ class ApplicationCommandInteractionData(dict[str, Any]):
         All resolved objects related to this interaction.
     options: :class:`list`\\[:class:`ApplicationCommandInteractionDataOption`]
         A list of options from the API.
+    guild_id: Optional[:class:`int`]
+        ID of the guild the command is registered to.
+
+        .. versionadded:: 2.12
     target_id: :class:`int`
-        ID of the user or message targeted by a user or message command
+        ID of the user or message targeted by a user or message command.
     target: :class:`User` | :class:`Member` | :class:`Message`
-        The user or message targeted by a user or message command
+        The user or message targeted by a user or message command.
     """
 
     __slots__ = (
         "id",
         "name",
         "type",
+        "guild_id",
         "target_id",
         "target",
         "resolved",
@@ -251,7 +256,9 @@ class ApplicationCommandInteractionData(dict[str, Any]):
         self,
         *,
         data: ApplicationCommandInteractionDataPayload,
-        parent: ApplicationCommandInteraction[ClientT],
+        parent: ApplicationCommandInteraction[
+            ClientT
+        ],  # the ID of the guild where this command has been invoked
     ) -> None:
         super().__init__(data)
         self.id: int = int(data["id"])
@@ -259,6 +266,7 @@ class ApplicationCommandInteractionData(dict[str, Any]):
         self.type: ApplicationCommandType = try_enum(ApplicationCommandType, data["type"])
 
         self.resolved = InteractionDataResolved(data=data.get("resolved", {}), parent=parent)
+        self.guild_id: Optional[int] = utils._get_as_snowflake(data, "guild_id")
         self.target_id: Optional[int] = utils._get_as_snowflake(data, "target_id")
         target = self.resolved.get_by_id(self.target_id)
         self.target: Optional[Union[User, Member, Message]] = target  # pyright: ignore[reportAttributeAccessIssue]
