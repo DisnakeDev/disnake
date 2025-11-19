@@ -14,7 +14,7 @@ import types
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum, EnumMeta
-from types import EllipsisType, UnionType
+from types import UnionType
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -55,7 +55,7 @@ P = ParamSpec("P")
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Sequence
-    from typing import Concatenate, TypeGuard
+    from types import EllipsisType
 
     from disnake.app_commands import Choices
     from disnake.enums import ChannelType
@@ -173,7 +173,7 @@ def _range_to_str_len(min_value: int, max_value: int) -> tuple[int, int]:
 
 def _unbound_range_to_str_len(
     min_value: int | None, max_value: int | None
-) -> tuple[int | None, int | None]:
+) -> tuple[int, int | None]:
     if min_value is not None and max_value is not None:
         return _range_to_str_len(min_value, max_value)
 
@@ -183,9 +183,9 @@ def _unbound_range_to_str_len(
 
     elif max_value is not None and max_value < 0:
         # -inf == min_value <= max_value < 0
-        return None, _int_to_str_len(max_value)
+        return 1, _int_to_str_len(max_value)
 
-    return None, None
+    return 1, None
 
 
 class Injection(Generic[P, T]):
@@ -420,11 +420,11 @@ else:
 
                 if self.underlying_type is int and abs(value) >= 2**53 - 1:
                     msg = (
-                        "Discord has upper input limit on integer input type of +/-2**53.\n"
+                        "Discord has upper input limit on integer input type of ±2**53.\n"
                         "For larger values, use Range[commands.LargeInt, ...], which will use"
                         " a string input type with length limited to the minimum and maximum"
                         " string representations of the range bounds, and will automatically"
-                        " convert it into an integer locally."
+                        " convert user input into an integer locally."
                     )
                     raise ValueError(msg)
 
@@ -467,7 +467,15 @@ else:
 
 
 class LargeInt(int):
-    """Type representing integers `<=-2**53`, `>=2**53` in slash commands."""
+    """Type representing integers that may exceed the Discord limit of ``[-2**53+1, 2**53-1]``.
+
+    Uses a string option on the Discord API side and parses user received content to an integer.
+    This inevitably means that users are able to input *any* string;
+    if the input is not a valid integer, :exc:`LargeIntConversionFailure` is raised.
+
+    You can combine this with ``commands.Range[LargeInt, ...]`` for
+    an *approximate length* limit on the string option.
+    """
 
 
 # option types that require additional handling in verify_type
@@ -522,23 +530,24 @@ class ParamInfo:
         .. versionadded:: 2.6
     """
 
+    # sorted according to https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-type
     TYPES: ClassVar[dict[type | UnionType, int]] = {
         str:                                               OptionType.string.value,
         int:                                               OptionType.integer.value,
         bool:                                              OptionType.boolean.value,
-        float:                                             OptionType.number.value,
         disnake.abc.User:                                  OptionType.user.value,
         disnake.User:                                      OptionType.user.value,
         disnake.Member:                                    OptionType.user.value,
         Union[disnake.User, disnake.Member]:               OptionType.user.value,  # noqa: UP007
+        # channels handled separately
+        disnake.abc.GuildChannel:                          OptionType.channel.value,
         disnake.Role:                                      OptionType.role.value,
         disnake.abc.Snowflake:                             OptionType.mentionable.value,
         Union[disnake.Member, disnake.Role]:               OptionType.mentionable.value,  # noqa: UP007
         Union[disnake.User, disnake.Role]:                 OptionType.mentionable.value,  # noqa: UP007
         Union[disnake.User, disnake.Member, disnake.Role]: OptionType.mentionable.value,  # noqa: UP007
+        float:                                             OptionType.number.value,
         disnake.Attachment:                                OptionType.attachment.value,
-        # channels handled separately
-        disnake.abc.GuildChannel:                          OptionType.channel.value,
     }  # fmt: skip
     _registered_converters: ClassVar[dict[type, Callable[..., Any]]] = {}
 
@@ -710,7 +719,13 @@ class ParamInfo:
             max_value = math.inf if self.max_value is None else self.max_value
 
             if not min_value <= argument <= max_value:
-                raise errors.LargeIntOutOfRange(argument, self.min_value, self.max_value) from None
+                raise errors.LargeIntOutOfRange(
+                    argument,
+                    # If we get a float here, the user did something hacky.
+                    # We stringify the values, so this is fine.
+                    self.min_value,  # pyright: ignore[reportArgumentType]
+                    self.max_value,  # pyright: ignore[reportArgumentType]
+                ) from None
 
         if self.converter is None:
             # TODO: Custom validators
@@ -797,9 +812,13 @@ class ParamInfo:
                 msg = "Large integers must be annotated with int or LargeInt"
                 raise TypeError(msg)
             self.type = str
+
+            if isinstance(self.min_value, float) or isinstance(self.max_value, float):
+                msg = "Cannot use min_value/max_value of type float with Param(large=True)/LargeInt"
+                raise TypeError(msg)
+
             self.min_length, self.max_length = _unbound_range_to_str_len(
-                self.min_value,  # pyright: ignore[reportArgumentType]
-                self.max_value,  # pyright: ignore[reportArgumentType]
+                self.min_value, self.max_value
             )
 
         elif annotation in self.TYPES:

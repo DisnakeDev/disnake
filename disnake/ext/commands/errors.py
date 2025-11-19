@@ -55,6 +55,7 @@ __all__ = (
     "PartialEmojiConversionFailure",
     "BadBoolArgument",
     "LargeIntConversionFailure",
+    "LargeIntOutOfRange",
     "MissingRole",
     "BotMissingRole",
     "MissingAnyRole",
@@ -570,13 +571,13 @@ class LargeIntConversionFailure(BadArgument):
 
     def __init__(self, argument: str) -> None:
         self.argument: str = argument
-        super().__init__(f"{argument} is not able to be converted to an integer")
+        super().__init__(f"{argument} is not a valid base 10 integer")
 
 
-class LargeIntOutOfRange(BadArgument):
+class LargeIntOutOfRange(LargeIntConversionFailure):
     """Exception raised when an argument to a large integer option exceeds given range.
 
-    This inherits from :exc:`BadArgument`
+    This inherits from :exc:`LargeIntConversionFailure`
 
     .. versionadded:: |vnext|
 
@@ -584,24 +585,24 @@ class LargeIntOutOfRange(BadArgument):
     ----------
     argument: :class:`str`
         The argument that exceeded the defined range.
-    min_value: Optional[Union[:class:`int`, :class:`float`]]
+    min_value: :class:`int` | :data:`None`
         The minimum allowed value.
-    max_value: Optional[Union[:class:`int`, :class:`float`]]
+    max_value: :class:`int` | :data:`None`
         The maximum allowed value.
     """
 
     def __init__(
         self,
         argument: str,
-        min_value: Union[int, float, None],
-        max_value: Union[int, float, None],
+        min_value: int | None,
+        max_value: int | None,
     ) -> None:
         self.argument: str = argument
-        self.min_value: Union[int, float, None] = min_value
-        self.max_value: Union[int, float, None] = max_value
+        self.min_value: int | None = min_value
+        self.max_value: int | None = max_value
         a = "..." if min_value is None else min_value
         b = "..." if max_value is None else max_value
-        super().__init__(f"{argument} is not in range [{a}, {b}]")
+        BadArgument.__init__(self, f"{argument} is not in range [{a}, {b}]")
 
 
 class DisabledCommand(CommandError):
