@@ -1,0 +1,1 @@
+|commands| Add :attr:`.Context.app_permissions` and :attr:`.Context.permissions` as a shorthands similar to :attr:`.Interaction.app_permissions` and :attr:`.Interaction.permissions`.
