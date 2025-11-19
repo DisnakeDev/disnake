@@ -69,9 +69,10 @@ class UserSelect(BaseSelect[UserSelectMenu, "User | Member", V_co]):
 
         .. versionadded:: 2.11
     id: :class:`int`
-        The numeric identifier for the component. Must be unique within the message.
+        The numeric identifier for the component. Must be unique within a message or modal.
+        This is always present in components received from the API.
         If set to ``0`` (the default) when sending a component, the API will assign
-        sequential identifiers to the components in the message.
+        sequential identifiers to the components in the message or modal.
 
         .. versionadded:: 2.11
     row: :class:`int` | :data:`None`
@@ -193,7 +194,7 @@ def user_select(
 ) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]:
     r"""A decorator that attaches a user select menu to a component.
 
-    The function being decorated should have three parameters, ``self`` representing
+    The function being decorated should have three parameters: ``self`` representing
     the :class:`disnake.ui.View`, the :class:`disnake.ui.UserSelect` that was
     interacted with, and the :class:`disnake.MessageInteraction`.
 
@@ -205,9 +206,9 @@ def user_select(
     Parameters
     ----------
     cls: :class:`~collections.abc.Callable`\[..., :class:`UserSelect`]
-        A callable (may be a :class:`UserSelect` subclass) to create a new instance of this component.
+        A callable (such as a :class:`UserSelect` subclass) returning an instance of a :class:`UserSelect`.
         If provided, the other parameters described below do not apply.
-        Instead, this decorator will accept the same keywords as the passed callable/class does.
+        Instead, this decorator will accept the same keyword arguments as the passed callable does.
     placeholder: :class:`str` | :data:`None`
         The placeholder text that is shown if nothing is selected, if any.
     custom_id: :class:`str`
@@ -227,9 +228,9 @@ def user_select(
 
         .. versionadded:: 2.10
     id: :class:`int`
-        The numeric identifier for the component. Must be unique within the message.
+        The numeric identifier for the component. Must be unique within a view.
         If set to ``0`` (the default) when sending a component, the API will assign
-        sequential identifiers to the components in the message.
+        sequential identifiers to the components in the view.
 
         .. versionadded:: 2.11
     row: :class:`int` | :data:`None`
@@ -238,5 +239,11 @@ def user_select(
         like to control the relative positioning of the row then passing an index is advised.
         For example, row=1 will show up before row=2. Defaults to :data:`None`, which is automatic
         ordering. The row number must be between 0 and 4 (i.e. zero indexed).
+
+    Raises
+    ------
+    TypeError
+        The decorated function was not a coroutine function,
+        or the ``cls`` parameter was not a callable or a subclass of :class:`UserSelect`.
     """
     return _create_decorator(cls, **kwargs)

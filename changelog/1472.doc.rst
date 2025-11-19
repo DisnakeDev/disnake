@@ -1,0 +1,1 @@
+Unify the description of the ``id`` parameter between the members of :ref:`components <disnake_api_components>` and :ref:`UI <disnake_api_ui>` packages.
