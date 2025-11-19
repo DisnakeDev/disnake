@@ -1,15 +1,18 @@
 # SPDX-License-Identifier: MIT
+from __future__ import annotations
 
 import datetime
 import functools
 import inspect
-import types
+from collections.abc import Callable
 from contextlib import AbstractContextManager
-from typing import TYPE_CHECKING, Callable, Optional, TypeVar
+from typing import TYPE_CHECKING, TypeVar
 from unittest import mock
 
 if TYPE_CHECKING:
     # for pyright
+    import types
+
     from typing_extensions import reveal_type as reveal_type
 else:
     # to avoid flake8 noqas
@@ -38,7 +41,7 @@ class freeze_time(AbstractContextManager):
     # i know `freezegun` exists, but it's rather complex and does much more than
     # we really need here, and I'm unsure if it would interfere with `looptime`
 
-    def __init__(self, dt: Optional[datetime.datetime] = None) -> None:
+    def __init__(self, dt: datetime.datetime | None = None) -> None:
         dt = dt or datetime.datetime.now(datetime.timezone.utc)
         assert dt.tzinfo
 
@@ -54,10 +57,10 @@ class freeze_time(AbstractContextManager):
 
     def __exit__(
         self,
-        typ: Optional[type[BaseException]],
-        value: Optional[BaseException],
-        tb: Optional[types.TracebackType],
-    ) -> Optional[bool]:
+        typ: type[BaseException] | None,
+        value: BaseException | None,
+        tb: types.TracebackType | None,
+    ) -> bool | None:
         return type(self._mock).__exit__(self._mock, typ, value, tb)
 
     def __call__(self, func: CallableT) -> CallableT:

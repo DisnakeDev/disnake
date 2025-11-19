@@ -2,33 +2,35 @@
 
 from __future__ import annotations
 
-import datetime
-from typing import Literal, Optional, TypedDict, Union
+from typing import TYPE_CHECKING, Literal, TypeAlias, TypedDict
 
 from typing_extensions import NotRequired
 
-from .automod import (
-    AutoModAction,
-    AutoModEventType,
-    AutoModRule,
-    AutoModTriggerMetadata,
-    AutoModTriggerType,
-)
-from .channel import ChannelType, PermissionOverwrite, VideoQualityMode
-from .guild import (
-    DefaultMessageNotificationLevel,
-    ExplicitContentFilterLevel,
-    MFALevel,
-    VerificationLevel,
-)
-from .guild_scheduled_event import GuildScheduledEvent
-from .integration import IntegrationExpireBehavior, PartialIntegration
-from .interactions import ApplicationCommand, ApplicationCommandPermissions
-from .role import Role
-from .snowflake import Snowflake
-from .threads import Thread
-from .user import User
-from .webhook import Webhook
+if TYPE_CHECKING:
+    import datetime
+
+    from .automod import (
+        AutoModAction,
+        AutoModEventType,
+        AutoModRule,
+        AutoModTriggerMetadata,
+        AutoModTriggerType,
+    )
+    from .channel import ChannelType, PermissionOverwrite, VideoQualityMode
+    from .guild import (
+        DefaultMessageNotificationLevel,
+        ExplicitContentFilterLevel,
+        MFALevel,
+        VerificationLevel,
+    )
+    from .guild_scheduled_event import GuildScheduledEvent
+    from .integration import IntegrationExpireBehavior, PartialIntegration
+    from .interactions import ApplicationCommand, ApplicationCommandPermissions
+    from .role import Role
+    from .snowflake import Snowflake
+    from .threads import Thread
+    from .user import User
+    from .webhook import Webhook
 
 AuditLogEvent = Literal[
     1,
@@ -279,29 +281,29 @@ class _AuditLogChange_AutoModTriggerMetadata(TypedDict):
     old_value: NotRequired[AutoModTriggerMetadata]
 
 
-AuditLogChange = Union[
-    _AuditLogChange_Str,
-    _AuditLogChange_AssetHash,
-    _AuditLogChange_Snowflake,
-    _AuditLogChange_Int,
-    _AuditLogChange_Bool,
-    _AuditLogChange_ListSnowflake,
-    _AuditLogChange_ListRole,
-    _AuditLogChange_MFALevel,
-    _AuditLogChange_VerificationLevel,
-    _AuditLogChange_ExplicitContentFilter,
-    _AuditLogChange_DefaultMessageNotificationLevel,
-    _AuditLogChange_ChannelType,
-    _AuditLogChange_IntegrationExpireBehaviour,
-    _AuditLogChange_VideoQualityMode,
-    _AuditLogChange_Overwrites,
-    _AuditLogChange_Datetime,
-    _AuditLogChange_ApplicationCommandPermissions,
-    _AuditLogChange_AutoModTriggerType,
-    _AuditLogChange_AutoModEventType,
-    _AuditLogChange_AutoModActions,
-    _AuditLogChange_AutoModTriggerMetadata,
-]
+AuditLogChange: TypeAlias = (
+    _AuditLogChange_Str
+    | _AuditLogChange_AssetHash
+    | _AuditLogChange_Snowflake
+    | _AuditLogChange_Int
+    | _AuditLogChange_Bool
+    | _AuditLogChange_ListSnowflake
+    | _AuditLogChange_ListRole
+    | _AuditLogChange_MFALevel
+    | _AuditLogChange_VerificationLevel
+    | _AuditLogChange_ExplicitContentFilter
+    | _AuditLogChange_DefaultMessageNotificationLevel
+    | _AuditLogChange_ChannelType
+    | _AuditLogChange_IntegrationExpireBehaviour
+    | _AuditLogChange_VideoQualityMode
+    | _AuditLogChange_Overwrites
+    | _AuditLogChange_Datetime
+    | _AuditLogChange_ApplicationCommandPermissions
+    | _AuditLogChange_AutoModTriggerType
+    | _AuditLogChange_AutoModEventType
+    | _AuditLogChange_AutoModActions
+    | _AuditLogChange_AutoModTriggerMetadata
+)
 
 
 # All of these are technically only required for matching event types,
@@ -309,7 +311,7 @@ AuditLogChange = Union[
 class AuditEntryInfo(TypedDict):
     delete_member_days: str
     members_removed: str
-    channel_id: Optional[Snowflake]
+    channel_id: Snowflake | None
     message_id: Snowflake
     count: str
     id: Snowflake
@@ -322,9 +324,9 @@ class AuditEntryInfo(TypedDict):
 
 
 class AuditLogEntry(TypedDict):
-    target_id: Optional[str]
+    target_id: str | None
     changes: NotRequired[list[AuditLogChange]]
-    user_id: Optional[Snowflake]
+    user_id: Snowflake | None
     id: Snowflake
     action_type: AuditLogEvent
     options: NotRequired[AuditEntryInfo]

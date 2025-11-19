@@ -3,14 +3,11 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from collections.abc import Coroutine
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     ClassVar,
     Generic,
-    Optional,
     Protocol,
     TypeVar,
     overload,
@@ -23,9 +20,11 @@ __all__ = (
 )
 
 I = TypeVar("I", bound="Item[Any]")  # noqa: E741
-V_co = TypeVar("V_co", bound="Optional[View]", covariant=True)
+V_co = TypeVar("V_co", bound="View | None", covariant=True)
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Coroutine
+
     from typing_extensions import Self
 
     from ..client import Client
@@ -114,7 +113,7 @@ class UIComponent(ABC):
 
 # Essentially the same as the base `UIComponent`, with the addition of `width`.
 class WrappedComponent(UIComponent):
-    """Represents the base UI component that all :class:`ActionRow`\\-compatible
+    r"""Represents the base UI component that all :class:`ActionRow`\-compatible
     UI components inherit from.
 
     This class adds more functionality on top of the :class:`UIComponent` base class,
@@ -167,8 +166,8 @@ class Item(WrappedComponent, Generic[V_co]):
 
     def __init__(self) -> None:
         self._view: V_co = None  # pyright: ignore[reportAttributeAccessIssue]
-        self._row: Optional[int] = None
-        self._rendered_row: Optional[int] = None
+        self._row: int | None = None
+        self._rendered_row: int | None = None
         # This works mostly well but there is a gotcha with
         # the interaction with from_component, since that technically provides
         # a custom_id most dispatchable items would get this set to True even though
@@ -190,11 +189,11 @@ class Item(WrappedComponent, Generic[V_co]):
         return self._provided_custom_id
 
     @property
-    def row(self) -> Optional[int]:
+    def row(self) -> int | None:
         return self._row
 
     @row.setter
-    def row(self, value: Optional[int]) -> None:
+    def row(self, value: int | None) -> None:
         if value is None:
             self._row = None
         elif 5 > value >= 0:
@@ -223,7 +222,7 @@ class Item(WrappedComponent, Generic[V_co]):
         pass
 
 
-SelfViewT = TypeVar("SelfViewT", bound="Optional[View]")
+SelfViewT = TypeVar("SelfViewT", bound="View | None")
 
 
 # While the decorators don't actually return a descriptor that matches this protocol,

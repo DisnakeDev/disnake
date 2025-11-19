@@ -2,31 +2,30 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     ClassVar,
-    Optional,
     TypeVar,
-    Union,
     overload,
 )
 
-from ...abc import Snowflake
 from ...components import UserSelectMenu
 from ...enums import ComponentType, SelectDefaultValueType
 from ...member import Member
 from ...object import Object
 from ...user import ClientUser, User
 from ...utils import MISSING
-from .base import BaseSelect, P, SelectDefaultValueInputType, V_co, _create_decorator
+from .base import BaseSelect, V_co, _create_decorator
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Mapping, Sequence
+
     from typing_extensions import Self
 
+    from ...abc import Snowflake
     from ..item import DecoratedItem, ItemCallbackType
+    from .base import P, SelectDefaultValueInputType
 
 
 __all__ = (
@@ -35,8 +34,8 @@ __all__ = (
 )
 
 
-class UserSelect(BaseSelect[UserSelectMenu, "Union[User, Member]", V_co]):
-    """Represents a UI user select menu.
+class UserSelect(BaseSelect[UserSelectMenu, "User | Member", V_co]):
+    r"""Represents a UI user select menu.
 
     This is usually represented as a drop down menu.
 
@@ -59,7 +58,7 @@ class UserSelect(BaseSelect[UserSelectMenu, "Union[User, Member]", V_co]):
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select is disabled.
-    default_values: :class:`~collections.abc.Sequence`\\[:class:`~disnake.User` | :class:`.Member` | :class:`.SelectDefaultValue` | :class:`.Object`] | :data:`None`
+    default_values: :class:`~collections.abc.Sequence`\[:class:`~disnake.User` | :class:`.Member` | :class:`.SelectDefaultValue` | :class:`.Object`] | :data:`None`
         The list of values (users/members) that are selected by default.
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
@@ -85,7 +84,7 @@ class UserSelect(BaseSelect[UserSelectMenu, "Union[User, Member]", V_co]):
 
     Attributes
     ----------
-    values: :class:`list`\\[:class:`~disnake.User`, :class:`.Member`]
+    values: :class:`list`\[:class:`~disnake.User`, :class:`.Member`]
         A list of users/members that have been selected by the user.
     """
 
@@ -100,14 +99,14 @@ class UserSelect(BaseSelect[UserSelectMenu, "Union[User, Member]", V_co]):
         self: UserSelect[None],
         *,
         custom_id: str = ...,
-        placeholder: Optional[str] = None,
+        placeholder: str | None = None,
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
-        default_values: Optional[Sequence[SelectDefaultValueInputType[Union[User, Member]]]] = None,
+        default_values: Sequence[SelectDefaultValueInputType[User | Member]] | None = None,
         required: bool = True,
         id: int = 0,
-        row: Optional[int] = None,
+        row: int | None = None,
     ) -> None: ...
 
     @overload
@@ -115,28 +114,28 @@ class UserSelect(BaseSelect[UserSelectMenu, "Union[User, Member]", V_co]):
         self: UserSelect[V_co],
         *,
         custom_id: str = ...,
-        placeholder: Optional[str] = None,
+        placeholder: str | None = None,
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
-        default_values: Optional[Sequence[SelectDefaultValueInputType[Union[User, Member]]]] = None,
+        default_values: Sequence[SelectDefaultValueInputType[User | Member]] | None = None,
         required: bool = True,
         id: int = 0,
-        row: Optional[int] = None,
+        row: int | None = None,
     ) -> None: ...
 
     def __init__(
         self,
         *,
         custom_id: str = MISSING,
-        placeholder: Optional[str] = None,
+        placeholder: str | None = None,
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
-        default_values: Optional[Sequence[SelectDefaultValueInputType[Union[User, Member]]]] = None,
+        default_values: Sequence[SelectDefaultValueInputType[User | Member]] | None = None,
         required: bool = True,
         id: int = 0,
-        row: Optional[int] = None,
+        row: int | None = None,
     ) -> None:
         super().__init__(
             UserSelectMenu,
@@ -173,14 +172,14 @@ S_co = TypeVar("S_co", bound="UserSelect", covariant=True)
 @overload
 def user_select(
     *,
-    placeholder: Optional[str] = None,
+    placeholder: str | None = None,
     custom_id: str = ...,
     min_values: int = 1,
     max_values: int = 1,
     disabled: bool = False,
-    default_values: Optional[Sequence[SelectDefaultValueInputType[Union[User, Member]]]] = None,
+    default_values: Sequence[SelectDefaultValueInputType[User | Member]] | None = None,
     id: int = 0,
-    row: Optional[int] = None,
+    row: int | None = None,
 ) -> Callable[[ItemCallbackType[V_co, UserSelect[V_co]]], DecoratedItem[UserSelect[V_co]]]: ...
 
 
@@ -193,7 +192,7 @@ def user_select(
 def user_select(
     cls: Callable[..., S_co] = UserSelect[Any], **kwargs: Any
 ) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]:
-    """A decorator that attaches a user select menu to a component.
+    r"""A decorator that attaches a user select menu to a component.
 
     The function being decorated should have three parameters: ``self`` representing
     the :class:`disnake.ui.View`, the :class:`disnake.ui.UserSelect` that was
@@ -206,7 +205,7 @@ def user_select(
 
     Parameters
     ----------
-    cls: :class:`~collections.abc.Callable`\\[..., :class:`UserSelect`]
+    cls: :class:`~collections.abc.Callable`\[..., :class:`UserSelect`]
         A callable (such as a :class:`UserSelect` subclass) returning an instance of a :class:`UserSelect`.
         If provided, the other parameters described below do not apply.
         Instead, this decorator will accept the same keyword arguments as the passed callable does.
@@ -223,7 +222,7 @@ def user_select(
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select is disabled. Defaults to ``False``.
-    default_values: :class:`~collections.abc.Sequence`\\[:class:`~disnake.User` | :class:`.Member` | :class:`.SelectDefaultValue` | :class:`.Object`] | :data:`None`
+    default_values: :class:`~collections.abc.Sequence`\[:class:`~disnake.User` | :class:`.Member` | :class:`.SelectDefaultValue` | :class:`.Object`] | :data:`None`
         The list of values (users/members) that are selected by default.
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 

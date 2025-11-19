@@ -2,33 +2,41 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
-from typing import Any, Literal, Optional, TypedDict, Union
+from typing import TYPE_CHECKING, Any, Literal, TypeAlias, TypedDict
 
 from typing_extensions import NotRequired
 
-from .activity import PartialPresenceUpdate, PresenceData, SendableActivity
-from .appinfo import PartialAppInfo, PartialGatewayAppInfo
+from .activity import PartialPresenceUpdate
 from .audit_log import AuditLogEntry
-from .automod import AutoModAction, AutoModRule, AutoModTriggerType
+from .automod import AutoModRule
 from .channel import Channel, GuildChannel, StageInstance
-from .emoji import Emoji, PartialEmoji
 from .entitlement import Entitlement
 from .guild import Guild, UnavailableGuild
 from .guild_scheduled_event import GuildScheduledEvent
 from .integration import BaseIntegration
 from .interactions import BaseInteraction, GuildApplicationCommandPermissions
-from .invite import InviteTargetType, InviteType
 from .member import MemberWithUser
 from .message import Message
-from .role import Role
-from .snowflake import Snowflake, SnowflakeList
 from .soundboard import GuildSoundboardSound
-from .sticker import GuildSticker
 from .subscription import Subscription
-from .threads import Thread, ThreadMember, ThreadMemberWithPresence, ThreadType
-from .user import AvatarDecorationData, User
-from .voice import GuildVoiceState, SupportedModes, VoiceChannelEffect
+from .threads import Thread, ThreadMember
+from .user import User
+from .voice import GuildVoiceState, VoiceChannelEffect
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
+
+    from .activity import PresenceData, SendableActivity
+    from .appinfo import PartialAppInfo, PartialGatewayAppInfo
+    from .automod import AutoModAction, AutoModTriggerType
+    from .emoji import Emoji, PartialEmoji
+    from .invite import InviteTargetType, InviteType
+    from .role import Role
+    from .snowflake import Snowflake, SnowflakeList
+    from .sticker import GuildSticker
+    from .threads import ThreadMemberWithPresence, ThreadType
+    from .user import AvatarDecorationData
+    from .voice import SupportedModes
 
 
 class SessionStartLimit(TypedDict):
@@ -55,8 +63,8 @@ class GatewayBot(Gateway):
 class GatewayPayload(TypedDict):
     op: Literal[0, 1, 7, 9, 10, 11]
     d: Any  # event data
-    s: Optional[int]  # sequence number
-    t: Optional[str]  # event name
+    s: int | None  # sequence number
+    t: str | None  # event name
 
 
 #####
@@ -69,7 +77,7 @@ class GatewayPayload(TypedDict):
 class HeartbeatCommand(TypedDict):
     op: Literal[1, 3]  # normal ws and voice ws have different heartbeat opcodes
     # normal ws uses a plain int seq, voice ws uses {t: <nonce>, seq_ack: <seq>}
-    d: Union[Optional[int], VoiceHeartbeatData]
+    d: int | None | VoiceHeartbeatData
 
 
 # opcode 2
@@ -100,7 +108,7 @@ class IdentifyCommand(TypedDict):
 
 
 class PresenceUpdateData(TypedDict):
-    since: Optional[int]
+    since: int | None
     activities: Sequence[SendableActivity]
     status: str
     afk: bool
@@ -116,7 +124,7 @@ class PresenceUpdateCommand(TypedDict):
 
 class VoiceStateData(TypedDict):
     guild_id: Snowflake
-    channel_id: Optional[Snowflake]
+    channel_id: Snowflake | None
     self_mute: bool
     self_deaf: bool
 
@@ -148,7 +156,7 @@ class RequestMembersData(TypedDict):
     query: NotRequired[str]
     limit: int
     presences: NotRequired[bool]
-    user_ids: NotRequired[Union[Snowflake, SnowflakeList]]
+    user_ids: NotRequired[Snowflake | SnowflakeList]
     nonce: NotRequired[str]
 
 
@@ -307,16 +315,16 @@ class ResumedEvent(TypedDict): ...
 
 
 # https://discord.com/developers/docs/topics/gateway-events#application-command-permissions-update
-ApplicationCommandPermissionsUpdateEvent = GuildApplicationCommandPermissions
+ApplicationCommandPermissionsUpdateEvent: TypeAlias = GuildApplicationCommandPermissions
 
 
 # https://discord.com/developers/docs/topics/gateway-events#message-create
-MessageCreateEvent = Message
+MessageCreateEvent: TypeAlias = Message
 
 
 # https://discord.com/developers/docs/topics/gateway-events#message-update
 # This does not necessarily contain all message fields, but `id` and `channel_id` always exist
-MessageUpdateEvent = Message
+MessageUpdateEvent: TypeAlias = Message
 
 
 # https://discord.com/developers/docs/topics/gateway-events#message-delete
@@ -385,15 +393,15 @@ class PollVoteRemoveEvent(TypedDict):
 
 
 # https://discord.com/developers/docs/topics/gateway-events#interaction-create
-InteractionCreateEvent = BaseInteraction
+InteractionCreateEvent: TypeAlias = BaseInteraction
 
 
 # https://discord.com/developers/docs/topics/gateway-events#presence-update
-PresenceUpdateEvent = PartialPresenceUpdate
+PresenceUpdateEvent: TypeAlias = PartialPresenceUpdate
 
 
 # https://discord.com/developers/docs/topics/gateway-events#user-update
-UserUpdateEvent = User
+UserUpdateEvent: TypeAlias = User
 
 
 # https://discord.com/developers/docs/topics/gateway-events#invite-create
@@ -421,22 +429,22 @@ class InviteDeleteEvent(TypedDict):
 
 
 # https://discord.com/developers/docs/topics/gateway-events#channel-create
-ChannelCreateEvent = GuildChannel
+ChannelCreateEvent: TypeAlias = GuildChannel
 
 
 # https://discord.com/developers/docs/topics/gateway-events#channel-update
-ChannelUpdateEvent = Channel
+ChannelUpdateEvent: TypeAlias = Channel
 
 
 # https://discord.com/developers/docs/topics/gateway-events#channel-delete
-ChannelDeleteEvent = Channel
+ChannelDeleteEvent: TypeAlias = Channel
 
 
 # https://discord.com/developers/docs/topics/gateway-events#channel-pins-update
 class ChannelPinsUpdateEvent(TypedDict):
     guild_id: NotRequired[Snowflake]
     channel_id: Snowflake
-    last_pin_timestamp: NotRequired[Optional[str]]
+    last_pin_timestamp: NotRequired[str | None]
 
 
 # https://discord.com/developers/docs/topics/gateway-events#thread-create
@@ -445,7 +453,7 @@ class ThreadCreateEvent(Thread):
 
 
 # https://discord.com/developers/docs/topics/gateway-events#thread-update
-ThreadUpdateEvent = Thread
+ThreadUpdateEvent: TypeAlias = Thread
 
 
 # https://discord.com/developers/docs/topics/gateway-events#thread-delete
@@ -494,17 +502,17 @@ class GuildMemberUpdateEvent(TypedDict):
     guild_id: Snowflake
     roles: list[Snowflake]
     user: User
-    nick: NotRequired[Optional[str]]
-    avatar: Optional[str]
-    banner: Optional[str]
-    joined_at: Optional[str]
-    premium_since: NotRequired[Optional[str]]
+    nick: NotRequired[str | None]
+    avatar: str | None
+    banner: str | None
+    joined_at: str | None
+    premium_since: NotRequired[str | None]
     deaf: NotRequired[bool]
     mute: NotRequired[bool]
     pending: NotRequired[bool]
-    communication_disabled_until: NotRequired[Optional[str]]
+    communication_disabled_until: NotRequired[str | None]
     flags: int
-    avatar_decoration_data: NotRequired[Optional[AvatarDecorationData]]
+    avatar_decoration_data: NotRequired[AvatarDecorationData | None]
 
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-emojis-update
@@ -520,15 +528,15 @@ class GuildStickersUpdateEvent(TypedDict):
 
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-create
-GuildCreateEvent = Union[Guild, UnavailableGuild]
+GuildCreateEvent: TypeAlias = Guild | UnavailableGuild
 
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-update
-GuildUpdateEvent = Guild
+GuildUpdateEvent: TypeAlias = Guild
 
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-delete
-GuildDeleteEvent = UnavailableGuild
+GuildDeleteEvent: TypeAlias = UnavailableGuild
 
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-audit-log-entry-create
@@ -542,11 +550,11 @@ class _GuildBanEvent(TypedDict):
 
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-ban-add
-GuildBanAddEvent = _GuildBanEvent
+GuildBanAddEvent: TypeAlias = _GuildBanEvent
 
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-ban-remove
-GuildBanRemoveEvent = _GuildBanEvent
+GuildBanRemoveEvent: TypeAlias = _GuildBanEvent
 
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-role-create
@@ -568,15 +576,15 @@ class GuildRoleUpdateEvent(TypedDict):
 
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-scheduled-event-create
-GuildScheduledEventCreateEvent = GuildScheduledEvent
+GuildScheduledEventCreateEvent: TypeAlias = GuildScheduledEvent
 
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-scheduled-event-update
-GuildScheduledEventUpdateEvent = GuildScheduledEvent
+GuildScheduledEventUpdateEvent: TypeAlias = GuildScheduledEvent
 
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-scheduled-event-delete
-GuildScheduledEventDeleteEvent = GuildScheduledEvent
+GuildScheduledEventDeleteEvent: TypeAlias = GuildScheduledEvent
 
 
 class _GuildScheduledEventUserEvent(TypedDict):
@@ -586,11 +594,11 @@ class _GuildScheduledEventUserEvent(TypedDict):
 
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-scheduled-event-user-add
-GuildScheduledEventUserAddEvent = _GuildScheduledEventUserEvent
+GuildScheduledEventUserAddEvent: TypeAlias = _GuildScheduledEventUserEvent
 
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-scheduled-event-user-remove
-GuildScheduledEventUserRemoveEvent = _GuildScheduledEventUserEvent
+GuildScheduledEventUserRemoveEvent: TypeAlias = _GuildScheduledEventUserEvent
 
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-members-chunk
@@ -637,23 +645,23 @@ StageInstanceCreateEvent = StageInstance
 
 
 # https://discord.com/developers/docs/topics/gateway-events#stage-instance-update
-StageInstanceUpdateEvent = StageInstance
+StageInstanceUpdateEvent: TypeAlias = StageInstance
 
 
 # https://discord.com/developers/docs/topics/gateway-events#stage-instance-delete
-StageInstanceDeleteEvent = StageInstance
+StageInstanceDeleteEvent: TypeAlias = StageInstance
 
 
 # https://discord.com/developers/docs/topics/gateway-events#voice-state-update
 # We assume that we'll only receive voice states for guilds
-VoiceStateUpdateEvent = GuildVoiceState
+VoiceStateUpdateEvent: TypeAlias = GuildVoiceState
 
 
 # https://discord.com/developers/docs/topics/gateway-events#voice-server-update
 class VoiceServerUpdateEvent(TypedDict):
     token: str
     guild_id: Snowflake
-    endpoint: Optional[str]
+    endpoint: str | None
 
 
 # https://discord.com/developers/docs/topics/gateway-events#voice-channel-effect-send
@@ -673,15 +681,15 @@ class TypingStartEvent(TypedDict):
 
 
 # https://discord.com/developers/docs/topics/gateway-events#auto-moderation-rule-create
-AutoModerationRuleCreateEvent = AutoModRule
+AutoModerationRuleCreateEvent: TypeAlias = AutoModRule
 
 
 # https://discord.com/developers/docs/topics/gateway-events#auto-moderation-rule-update
-AutoModerationRuleUpdateEvent = AutoModRule
+AutoModerationRuleUpdateEvent: TypeAlias = AutoModRule
 
 
 # https://discord.com/developers/docs/topics/gateway-events#auto-moderation-rule-delete
-AutoModerationRuleDeleteEvent = AutoModRule
+AutoModerationRuleDeleteEvent: TypeAlias = AutoModRule
 
 
 # https://discord.com/developers/docs/topics/gateway-events#auto-moderation-action-execution
@@ -691,44 +699,44 @@ class AutoModerationActionExecutionEvent(TypedDict):
     rule_id: Snowflake
     rule_trigger_type: AutoModTriggerType
     user_id: Snowflake
-    channel_id: NotRequired[Optional[Snowflake]]
-    message_id: NotRequired[Optional[Snowflake]]
-    alert_system_message_id: NotRequired[Optional[Snowflake]]
+    channel_id: NotRequired[Snowflake | None]
+    message_id: NotRequired[Snowflake | None]
+    alert_system_message_id: NotRequired[Snowflake | None]
     content: NotRequired[str]
-    matched_content: NotRequired[Optional[str]]
-    matched_keyword: NotRequired[Optional[str]]
+    matched_content: NotRequired[str | None]
+    matched_keyword: NotRequired[str | None]
 
 
 # https://discord.com/developers/docs/events/gateway-events#entitlement-create
-EntitlementCreate = Entitlement
+EntitlementCreate: TypeAlias = Entitlement
 
 
 # https://discord.com/developers/docs/events/gateway-events#entitlement-update
-EntitlementUpdate = Entitlement
+EntitlementUpdate: TypeAlias = Entitlement
 
 
 # https://discord.com/developers/docs/events/gateway-events#entitlement-delete
-EntitlementDelete = Entitlement
+EntitlementDelete: TypeAlias = Entitlement
 
 
 # https://discord.com/developers/docs/events/gateway-events#subscription-create
-SubscriptionCreate = Subscription
+SubscriptionCreate: TypeAlias = Subscription
 
 
 # https://discord.com/developers/docs/events/gateway-events#subscription-update
-SubscriptionUpdate = Subscription
+SubscriptionUpdate: TypeAlias = Subscription
 
 
 # https://discord.com/developers/docs/events/gateway-events#subscription-delete
-SubscriptionDelete = Subscription
+SubscriptionDelete: TypeAlias = Subscription
 
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-soundboard-sound-create
-GuildSoundboardSoundCreate = GuildSoundboardSound
+GuildSoundboardSoundCreate: TypeAlias = GuildSoundboardSound
 
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-soundboard-sound-update
-GuildSoundboardSoundUpdate = GuildSoundboardSound
+GuildSoundboardSoundUpdate: TypeAlias = GuildSoundboardSound
 
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-soundboard-sound-delete

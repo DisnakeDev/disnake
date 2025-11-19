@@ -17,11 +17,12 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Final,
-    Optional,
-    Sequence,
 )
 
 import nox
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
 
 nox.needs_version = ">=2025.5.1"
 
@@ -86,7 +87,7 @@ EXECUTION_GROUPS: Sequence[ExecutionGroup] = [
     ExecutionGroup(
         sessions=("docs", "pyright"),
         pyright_paths=("docs",),
-        extras=("docs",),
+        groups=("docs",),
     ),
     # codemodding and pyright
     ExecutionGroup(
@@ -135,7 +136,7 @@ def get_version_for_session(name: str) -> str:
     return versions.pop()
 
 
-def install_deps(session: nox.Session, *, execution_group: Optional[ExecutionGroup] = None) -> None:
+def install_deps(session: nox.Session, *, execution_group: ExecutionGroup | None = None) -> None:
     """Helper to install dependencies from a group."""
     if not execution_group:
         results = get_groups_for_session(session.name)
@@ -178,7 +179,7 @@ def install_deps(session: nox.Session, *, execution_group: Optional[ExecutionGro
         "sync",
         "--no-default-groups",
     ]
-    env: dict[str, Any] = {}
+    env: dict[str, str] = {}
 
     if session.venv_backend != "none":
         command.append(f"--python={session.virtualenv.location}")

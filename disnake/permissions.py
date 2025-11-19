@@ -2,14 +2,11 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterator
 from functools import wraps
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     ClassVar,
-    Optional,
     overload,
 )
 
@@ -17,6 +14,8 @@ from .flags import BaseFlags, alias_flag_value, flag_value
 from .utils import _generated, _overload_with_permissions
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Iterator
+
     from typing_extensions import Self
 
 
@@ -1102,10 +1101,10 @@ def _augment_from_permissions(cls):
             continue
 
         # god bless Python
-        def getter(self, x: str = key) -> Optional[bool]:
+        def getter(self, x: str = key) -> bool | None:
             return self._values.get(x)
 
-        def setter(self, value: Optional[bool], x: str = key) -> None:
+        def setter(self, value: bool | None, x: str = key) -> None:
             self._set(x, value)
 
         prop = property(getter, setter)
@@ -1117,9 +1116,9 @@ def _augment_from_permissions(cls):
 
 @_augment_from_permissions
 class PermissionOverwrite:
-    """A type that is used to represent a channel specific permission.
+    r"""A type that is used to represent a channel specific permission.
 
-    Unlike a regular :class:`Permissions`\\, the default value of a
+    Unlike a regular :class:`Permissions`\, the default value of a
     permission is equivalent to :data:`None` and not ``False``. Setting
     a value to ``False`` is **explicitly** denying that permission,
     while setting a value to ``True`` is **explicitly** allowing
@@ -1152,65 +1151,65 @@ class PermissionOverwrite:
 
     # n. b. this typechecking block must be first and separate from the secondary one, due to codemodding
     if TYPE_CHECKING:
-        add_reactions: Optional[bool]
-        administrator: Optional[bool]
-        attach_files: Optional[bool]
-        ban_members: Optional[bool]
-        change_nickname: Optional[bool]
-        connect: Optional[bool]
-        create_events: Optional[bool]
-        create_forum_threads: Optional[bool]
-        create_guild_expressions: Optional[bool]
-        create_instant_invite: Optional[bool]
-        create_private_threads: Optional[bool]
-        create_public_threads: Optional[bool]
-        deafen_members: Optional[bool]
-        embed_links: Optional[bool]
-        external_emojis: Optional[bool]
-        external_stickers: Optional[bool]
-        kick_members: Optional[bool]
-        manage_channels: Optional[bool]
-        manage_emojis: Optional[bool]
-        manage_emojis_and_stickers: Optional[bool]
-        manage_events: Optional[bool]
-        manage_guild: Optional[bool]
-        manage_guild_expressions: Optional[bool]
-        manage_messages: Optional[bool]
-        manage_nicknames: Optional[bool]
-        manage_permissions: Optional[bool]
-        manage_roles: Optional[bool]
-        manage_threads: Optional[bool]
-        manage_webhooks: Optional[bool]
-        mention_everyone: Optional[bool]
-        moderate_members: Optional[bool]
-        move_members: Optional[bool]
-        mute_members: Optional[bool]
-        pin_messages: Optional[bool]
-        priority_speaker: Optional[bool]
-        read_message_history: Optional[bool]
-        read_messages: Optional[bool]
-        request_to_speak: Optional[bool]
-        send_messages: Optional[bool]
-        send_messages_in_threads: Optional[bool]
-        send_polls: Optional[bool]
-        send_tts_messages: Optional[bool]
-        send_voice_messages: Optional[bool]
-        speak: Optional[bool]
-        start_embedded_activities: Optional[bool]
-        stream: Optional[bool]
-        use_application_commands: Optional[bool]
-        use_embedded_activities: Optional[bool]
-        use_external_apps: Optional[bool]
-        use_external_emojis: Optional[bool]
-        use_external_sounds: Optional[bool]
-        use_external_stickers: Optional[bool]
-        use_slash_commands: Optional[bool]
-        use_soundboard: Optional[bool]
-        use_voice_activation: Optional[bool]
-        view_audit_log: Optional[bool]
-        view_channel: Optional[bool]
-        view_creator_monetization_analytics: Optional[bool]
-        view_guild_insights: Optional[bool]
+        add_reactions: bool | None
+        administrator: bool | None
+        attach_files: bool | None
+        ban_members: bool | None
+        change_nickname: bool | None
+        connect: bool | None
+        create_events: bool | None
+        create_forum_threads: bool | None
+        create_guild_expressions: bool | None
+        create_instant_invite: bool | None
+        create_private_threads: bool | None
+        create_public_threads: bool | None
+        deafen_members: bool | None
+        embed_links: bool | None
+        external_emojis: bool | None
+        external_stickers: bool | None
+        kick_members: bool | None
+        manage_channels: bool | None
+        manage_emojis: bool | None
+        manage_emojis_and_stickers: bool | None
+        manage_events: bool | None
+        manage_guild: bool | None
+        manage_guild_expressions: bool | None
+        manage_messages: bool | None
+        manage_nicknames: bool | None
+        manage_permissions: bool | None
+        manage_roles: bool | None
+        manage_threads: bool | None
+        manage_webhooks: bool | None
+        mention_everyone: bool | None
+        moderate_members: bool | None
+        move_members: bool | None
+        mute_members: bool | None
+        pin_messages: bool | None
+        priority_speaker: bool | None
+        read_message_history: bool | None
+        read_messages: bool | None
+        request_to_speak: bool | None
+        send_messages: bool | None
+        send_messages_in_threads: bool | None
+        send_polls: bool | None
+        send_tts_messages: bool | None
+        send_voice_messages: bool | None
+        speak: bool | None
+        start_embedded_activities: bool | None
+        stream: bool | None
+        use_application_commands: bool | None
+        use_embedded_activities: bool | None
+        use_external_apps: bool | None
+        use_external_emojis: bool | None
+        use_external_sounds: bool | None
+        use_external_stickers: bool | None
+        use_slash_commands: bool | None
+        use_soundboard: bool | None
+        use_voice_activation: bool | None
+        view_audit_log: bool | None
+        view_channel: bool | None
+        view_creator_monetization_analytics: bool | None
+        view_guild_insights: bool | None
 
     if TYPE_CHECKING:
         VALID_NAMES: ClassVar[set[str]]
@@ -1221,65 +1220,65 @@ class PermissionOverwrite:
     def __init__(
         self,
         *,
-        add_reactions: Optional[bool] = ...,
-        administrator: Optional[bool] = ...,
-        attach_files: Optional[bool] = ...,
-        ban_members: Optional[bool] = ...,
-        change_nickname: Optional[bool] = ...,
-        connect: Optional[bool] = ...,
-        create_events: Optional[bool] = ...,
-        create_forum_threads: Optional[bool] = ...,
-        create_guild_expressions: Optional[bool] = ...,
-        create_instant_invite: Optional[bool] = ...,
-        create_private_threads: Optional[bool] = ...,
-        create_public_threads: Optional[bool] = ...,
-        deafen_members: Optional[bool] = ...,
-        embed_links: Optional[bool] = ...,
-        external_emojis: Optional[bool] = ...,
-        external_stickers: Optional[bool] = ...,
-        kick_members: Optional[bool] = ...,
-        manage_channels: Optional[bool] = ...,
-        manage_emojis: Optional[bool] = ...,
-        manage_emojis_and_stickers: Optional[bool] = ...,
-        manage_events: Optional[bool] = ...,
-        manage_guild: Optional[bool] = ...,
-        manage_guild_expressions: Optional[bool] = ...,
-        manage_messages: Optional[bool] = ...,
-        manage_nicknames: Optional[bool] = ...,
-        manage_permissions: Optional[bool] = ...,
-        manage_roles: Optional[bool] = ...,
-        manage_threads: Optional[bool] = ...,
-        manage_webhooks: Optional[bool] = ...,
-        mention_everyone: Optional[bool] = ...,
-        moderate_members: Optional[bool] = ...,
-        move_members: Optional[bool] = ...,
-        mute_members: Optional[bool] = ...,
-        pin_messages: Optional[bool] = ...,
-        priority_speaker: Optional[bool] = ...,
-        read_message_history: Optional[bool] = ...,
-        read_messages: Optional[bool] = ...,
-        request_to_speak: Optional[bool] = ...,
-        send_messages: Optional[bool] = ...,
-        send_messages_in_threads: Optional[bool] = ...,
-        send_polls: Optional[bool] = ...,
-        send_tts_messages: Optional[bool] = ...,
-        send_voice_messages: Optional[bool] = ...,
-        speak: Optional[bool] = ...,
-        start_embedded_activities: Optional[bool] = ...,
-        stream: Optional[bool] = ...,
-        use_application_commands: Optional[bool] = ...,
-        use_embedded_activities: Optional[bool] = ...,
-        use_external_apps: Optional[bool] = ...,
-        use_external_emojis: Optional[bool] = ...,
-        use_external_sounds: Optional[bool] = ...,
-        use_external_stickers: Optional[bool] = ...,
-        use_slash_commands: Optional[bool] = ...,
-        use_soundboard: Optional[bool] = ...,
-        use_voice_activation: Optional[bool] = ...,
-        view_audit_log: Optional[bool] = ...,
-        view_channel: Optional[bool] = ...,
-        view_creator_monetization_analytics: Optional[bool] = ...,
-        view_guild_insights: Optional[bool] = ...,
+        add_reactions: bool | None = ...,
+        administrator: bool | None = ...,
+        attach_files: bool | None = ...,
+        ban_members: bool | None = ...,
+        change_nickname: bool | None = ...,
+        connect: bool | None = ...,
+        create_events: bool | None = ...,
+        create_forum_threads: bool | None = ...,
+        create_guild_expressions: bool | None = ...,
+        create_instant_invite: bool | None = ...,
+        create_private_threads: bool | None = ...,
+        create_public_threads: bool | None = ...,
+        deafen_members: bool | None = ...,
+        embed_links: bool | None = ...,
+        external_emojis: bool | None = ...,
+        external_stickers: bool | None = ...,
+        kick_members: bool | None = ...,
+        manage_channels: bool | None = ...,
+        manage_emojis: bool | None = ...,
+        manage_emojis_and_stickers: bool | None = ...,
+        manage_events: bool | None = ...,
+        manage_guild: bool | None = ...,
+        manage_guild_expressions: bool | None = ...,
+        manage_messages: bool | None = ...,
+        manage_nicknames: bool | None = ...,
+        manage_permissions: bool | None = ...,
+        manage_roles: bool | None = ...,
+        manage_threads: bool | None = ...,
+        manage_webhooks: bool | None = ...,
+        mention_everyone: bool | None = ...,
+        moderate_members: bool | None = ...,
+        move_members: bool | None = ...,
+        mute_members: bool | None = ...,
+        pin_messages: bool | None = ...,
+        priority_speaker: bool | None = ...,
+        read_message_history: bool | None = ...,
+        read_messages: bool | None = ...,
+        request_to_speak: bool | None = ...,
+        send_messages: bool | None = ...,
+        send_messages_in_threads: bool | None = ...,
+        send_polls: bool | None = ...,
+        send_tts_messages: bool | None = ...,
+        send_voice_messages: bool | None = ...,
+        speak: bool | None = ...,
+        start_embedded_activities: bool | None = ...,
+        stream: bool | None = ...,
+        use_application_commands: bool | None = ...,
+        use_embedded_activities: bool | None = ...,
+        use_external_apps: bool | None = ...,
+        use_external_emojis: bool | None = ...,
+        use_external_sounds: bool | None = ...,
+        use_external_stickers: bool | None = ...,
+        use_slash_commands: bool | None = ...,
+        use_soundboard: bool | None = ...,
+        use_voice_activation: bool | None = ...,
+        view_audit_log: bool | None = ...,
+        view_channel: bool | None = ...,
+        view_creator_monetization_analytics: bool | None = ...,
+        view_guild_insights: bool | None = ...,
     ) -> None: ...
 
     @overload
@@ -1289,8 +1288,8 @@ class PermissionOverwrite:
     ) -> None: ...
 
     @_overload_with_permissions
-    def __init__(self, **kwargs: Optional[bool]) -> None:
-        self._values: dict[str, Optional[bool]] = {}
+    def __init__(self, **kwargs: bool | None) -> None:
+        self._values: dict[str, bool | None] = {}
 
         for key, value in kwargs.items():
             if key not in self.VALID_NAMES:
@@ -1299,10 +1298,10 @@ class PermissionOverwrite:
 
             setattr(self, key, value)
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         return isinstance(other, PermissionOverwrite) and self._values == other._values
 
-    def _set(self, key: str, value: Optional[bool]) -> None:
+    def _set(self, key: str, value: bool | None) -> None:
         if value not in (True, None, False):
             msg = f"Expected bool or NoneType, received {value.__class__.__name__}"
             raise TypeError(msg)
@@ -1313,7 +1312,7 @@ class PermissionOverwrite:
             self._values[key] = value
 
     def pair(self) -> tuple[Permissions, Permissions]:
-        """:class:`tuple`\\[:class:`Permissions`, :class:`Permissions`]: Returns the (allow, deny) pair from this overwrite."""
+        r""":class:`tuple`\[:class:`Permissions`, :class:`Permissions`]: Returns the (allow, deny) pair from this overwrite."""
         allow = Permissions.none()
         deny = Permissions.none()
 
@@ -1357,65 +1356,65 @@ class PermissionOverwrite:
     def update(
         self,
         *,
-        add_reactions: Optional[bool] = ...,
-        administrator: Optional[bool] = ...,
-        attach_files: Optional[bool] = ...,
-        ban_members: Optional[bool] = ...,
-        change_nickname: Optional[bool] = ...,
-        connect: Optional[bool] = ...,
-        create_events: Optional[bool] = ...,
-        create_forum_threads: Optional[bool] = ...,
-        create_guild_expressions: Optional[bool] = ...,
-        create_instant_invite: Optional[bool] = ...,
-        create_private_threads: Optional[bool] = ...,
-        create_public_threads: Optional[bool] = ...,
-        deafen_members: Optional[bool] = ...,
-        embed_links: Optional[bool] = ...,
-        external_emojis: Optional[bool] = ...,
-        external_stickers: Optional[bool] = ...,
-        kick_members: Optional[bool] = ...,
-        manage_channels: Optional[bool] = ...,
-        manage_emojis: Optional[bool] = ...,
-        manage_emojis_and_stickers: Optional[bool] = ...,
-        manage_events: Optional[bool] = ...,
-        manage_guild: Optional[bool] = ...,
-        manage_guild_expressions: Optional[bool] = ...,
-        manage_messages: Optional[bool] = ...,
-        manage_nicknames: Optional[bool] = ...,
-        manage_permissions: Optional[bool] = ...,
-        manage_roles: Optional[bool] = ...,
-        manage_threads: Optional[bool] = ...,
-        manage_webhooks: Optional[bool] = ...,
-        mention_everyone: Optional[bool] = ...,
-        moderate_members: Optional[bool] = ...,
-        move_members: Optional[bool] = ...,
-        mute_members: Optional[bool] = ...,
-        pin_messages: Optional[bool] = ...,
-        priority_speaker: Optional[bool] = ...,
-        read_message_history: Optional[bool] = ...,
-        read_messages: Optional[bool] = ...,
-        request_to_speak: Optional[bool] = ...,
-        send_messages: Optional[bool] = ...,
-        send_messages_in_threads: Optional[bool] = ...,
-        send_polls: Optional[bool] = ...,
-        send_tts_messages: Optional[bool] = ...,
-        send_voice_messages: Optional[bool] = ...,
-        speak: Optional[bool] = ...,
-        start_embedded_activities: Optional[bool] = ...,
-        stream: Optional[bool] = ...,
-        use_application_commands: Optional[bool] = ...,
-        use_embedded_activities: Optional[bool] = ...,
-        use_external_apps: Optional[bool] = ...,
-        use_external_emojis: Optional[bool] = ...,
-        use_external_sounds: Optional[bool] = ...,
-        use_external_stickers: Optional[bool] = ...,
-        use_slash_commands: Optional[bool] = ...,
-        use_soundboard: Optional[bool] = ...,
-        use_voice_activation: Optional[bool] = ...,
-        view_audit_log: Optional[bool] = ...,
-        view_channel: Optional[bool] = ...,
-        view_creator_monetization_analytics: Optional[bool] = ...,
-        view_guild_insights: Optional[bool] = ...,
+        add_reactions: bool | None = ...,
+        administrator: bool | None = ...,
+        attach_files: bool | None = ...,
+        ban_members: bool | None = ...,
+        change_nickname: bool | None = ...,
+        connect: bool | None = ...,
+        create_events: bool | None = ...,
+        create_forum_threads: bool | None = ...,
+        create_guild_expressions: bool | None = ...,
+        create_instant_invite: bool | None = ...,
+        create_private_threads: bool | None = ...,
+        create_public_threads: bool | None = ...,
+        deafen_members: bool | None = ...,
+        embed_links: bool | None = ...,
+        external_emojis: bool | None = ...,
+        external_stickers: bool | None = ...,
+        kick_members: bool | None = ...,
+        manage_channels: bool | None = ...,
+        manage_emojis: bool | None = ...,
+        manage_emojis_and_stickers: bool | None = ...,
+        manage_events: bool | None = ...,
+        manage_guild: bool | None = ...,
+        manage_guild_expressions: bool | None = ...,
+        manage_messages: bool | None = ...,
+        manage_nicknames: bool | None = ...,
+        manage_permissions: bool | None = ...,
+        manage_roles: bool | None = ...,
+        manage_threads: bool | None = ...,
+        manage_webhooks: bool | None = ...,
+        mention_everyone: bool | None = ...,
+        moderate_members: bool | None = ...,
+        move_members: bool | None = ...,
+        mute_members: bool | None = ...,
+        pin_messages: bool | None = ...,
+        priority_speaker: bool | None = ...,
+        read_message_history: bool | None = ...,
+        read_messages: bool | None = ...,
+        request_to_speak: bool | None = ...,
+        send_messages: bool | None = ...,
+        send_messages_in_threads: bool | None = ...,
+        send_polls: bool | None = ...,
+        send_tts_messages: bool | None = ...,
+        send_voice_messages: bool | None = ...,
+        speak: bool | None = ...,
+        start_embedded_activities: bool | None = ...,
+        stream: bool | None = ...,
+        use_application_commands: bool | None = ...,
+        use_embedded_activities: bool | None = ...,
+        use_external_apps: bool | None = ...,
+        use_external_emojis: bool | None = ...,
+        use_external_sounds: bool | None = ...,
+        use_external_stickers: bool | None = ...,
+        use_slash_commands: bool | None = ...,
+        use_soundboard: bool | None = ...,
+        use_voice_activation: bool | None = ...,
+        view_audit_log: bool | None = ...,
+        view_channel: bool | None = ...,
+        view_creator_monetization_analytics: bool | None = ...,
+        view_guild_insights: bool | None = ...,
     ) -> None: ...
 
     @overload
@@ -1425,7 +1424,7 @@ class PermissionOverwrite:
     ) -> None: ...
 
     @_overload_with_permissions
-    def update(self, **kwargs: Optional[bool]) -> None:
+    def update(self, **kwargs: bool | None) -> None:
         """Bulk updates this permission overwrite object.
 
         Allows you to set multiple attributes by using keyword
@@ -1443,6 +1442,6 @@ class PermissionOverwrite:
 
             setattr(self, key, value)
 
-    def __iter__(self) -> Iterator[tuple[str, Optional[bool]]]:
+    def __iter__(self) -> Iterator[tuple[str, bool | None]]:
         for key in self.PURE_FLAGS:
             yield key, self._values.get(key)

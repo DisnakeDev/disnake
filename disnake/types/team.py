@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
-from typing import Literal, Optional, TypedDict
+from typing import TYPE_CHECKING, Literal, TypedDict
 
-from .snowflake import Snowflake
-from .user import PartialUser
+if TYPE_CHECKING:
+    from .snowflake import Snowflake
+    from .user import PartialUser
 
 TeamMembershipState = Literal[1, 2]
 TeamMemberRole = Literal["admin", "developer", "read_only"]
@@ -23,4 +24,4 @@ class Team(TypedDict):
     name: str
     owner_user_id: Snowflake
     members: list[TeamMember]
-    icon: Optional[str]
+    icon: str | None

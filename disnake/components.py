@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -10,7 +9,7 @@ from typing import (
     Final,
     Generic,
     Literal,
-    Optional,
+    TypeAlias,
     TypeVar,
     Union,
     cast,
@@ -31,7 +30,10 @@ from .partial_emoji import PartialEmoji, _EmojiTag
 from .utils import MISSING, _get_as_snowflake, assert_never, get_slots
 
 if TYPE_CHECKING:
-    from typing_extensions import Self, TypeAlias
+    from collections.abc import Mapping
+    from typing import TypeAlias
+
+    from typing_extensions import Self
 
     from .emoji import Emoji
     from .message import Attachment
@@ -113,20 +115,20 @@ SelectMenuType = Literal[
 ]
 
 # valid `ActionRow.components` item types in a message/modal
-ActionRowMessageComponent = Union["Button", "AnySelectMenu"]
+ActionRowMessageComponent: TypeAlias = Union["Button", "AnySelectMenu"]
 ActionRowModalComponent: TypeAlias = "TextInput"
 
 # any child component type of action rows
-ActionRowChildComponent = Union[ActionRowMessageComponent, ActionRowModalComponent]
+ActionRowChildComponent: TypeAlias = Union[ActionRowMessageComponent, ActionRowModalComponent]  # noqa: UP007
 ActionRowChildComponentT = TypeVar("ActionRowChildComponentT", bound=ActionRowChildComponent)
 
 # valid `Section.accessory` types
-SectionAccessoryComponent = Union["Thumbnail", "Button"]
+SectionAccessoryComponent: TypeAlias = Union["Thumbnail", "Button"]
 # valid `Section.components` item types
 SectionChildComponent: TypeAlias = "TextDisplay"
 
 # valid `Container.components` item types
-ContainerChildComponent = Union[
+ContainerChildComponent: TypeAlias = Union[
     "ActionRow[ActionRowMessageComponent]",
     "Section",
     "TextDisplay",
@@ -152,7 +154,7 @@ MessageTopLevelComponentV2 = Union[
     "Separator",
     "Container",
 ]
-MessageTopLevelComponent = Union[MessageTopLevelComponentV1, MessageTopLevelComponentV2]
+MessageTopLevelComponent: TypeAlias = Union[MessageTopLevelComponentV1, MessageTopLevelComponentV2]  # noqa: UP007
 
 
 _SELECT_COMPONENT_TYPES = frozenset(
@@ -244,7 +246,7 @@ class Component:
 
 
 class ActionRow(Component, Generic[ActionRowChildComponentT]):
-    """Represents an action row.
+    r"""Represents an action row.
 
     This is a component that holds up to 5 children components in a row.
 
@@ -254,7 +256,7 @@ class ActionRow(Component, Generic[ActionRowChildComponentT]):
 
     Attributes
     ----------
-    children: :class:`list`\\[:class:`Button` | :class:`BaseSelectMenu` | :class:`TextInput`]
+    children: :class:`list`\[:class:`Button` | :class:`BaseSelectMenu` | :class:`TextInput`]
         The children components that this holds, if any.
     id: :class:`int`
         The numeric identifier for the component. Must be unique within a message.
@@ -342,15 +344,15 @@ class Button(Component):
         self.id = data.get("id", 0)
 
         self.style: ButtonStyle = try_enum(ButtonStyle, data["style"])
-        self.custom_id: Optional[str] = data.get("custom_id")
-        self.url: Optional[str] = data.get("url")
+        self.custom_id: str | None = data.get("custom_id")
+        self.url: str | None = data.get("url")
         self.disabled: bool = data.get("disabled", False)
-        self.label: Optional[str] = data.get("label")
-        self.emoji: Optional[PartialEmoji] = None
+        self.label: str | None = data.get("label")
+        self.emoji: PartialEmoji | None = None
         if emoji_data := data.get("emoji"):
             self.emoji = PartialEmoji.from_dict(emoji_data)
 
-        self.sku_id: Optional[int] = _get_as_snowflake(data, "sku_id")
+        self.sku_id: int | None = _get_as_snowflake(data, "sku_id")
 
     def to_dict(self) -> ButtonComponentPayload:
         payload: ButtonComponentPayload = {
@@ -379,7 +381,7 @@ class Button(Component):
 
 
 class BaseSelectMenu(Component):
-    """Represents an abstract select menu from the Discord Bot UI Kit.
+    r"""Represents an abstract select menu from the Discord Bot UI Kit.
 
     A select menu is functionally the same as a dropdown, however
     on mobile it renders a bit differently.
@@ -406,11 +408,11 @@ class BaseSelectMenu(Component):
     max_values: :class:`int`
         The maximum number of items that must be chosen for this select menu.
         Defaults to 1 and must be between 1 and 25.
-    options: :class:`list`\\[:class:`SelectOption`]
+    options: :class:`list`\[:class:`SelectOption`]
         A list of options that can be selected in this select menu.
     disabled: :class:`bool`
         Whether the select menu is disabled or not.
-    default_values: :class:`list`\\[:class:`SelectDefaultValue`]
+    default_values: :class:`list`\[:class:`SelectDefaultValue`]
         The list of values (users/roles/channels) that are selected by default.
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
         Only available for auto-populated select menus.
@@ -454,7 +456,7 @@ class BaseSelectMenu(Component):
         self.id = data.get("id", 0)
 
         self.custom_id: str = data["custom_id"]
-        self.placeholder: Optional[str] = data.get("placeholder")
+        self.placeholder: str | None = data.get("placeholder")
         self.min_values: int = data.get("min_values", 1)
         self.max_values: int = data.get("max_values", 1)
         self.disabled: bool = data.get("disabled", False)
@@ -484,7 +486,7 @@ class BaseSelectMenu(Component):
 
 
 class StringSelectMenu(BaseSelectMenu):
-    """Represents a string select menu from the Discord Bot UI Kit.
+    r"""Represents a string select menu from the Discord Bot UI Kit.
 
     .. note::
         The user constructible and usable type to create a
@@ -509,7 +511,7 @@ class StringSelectMenu(BaseSelectMenu):
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select menu is disabled or not.
-    options: :class:`list`\\[:class:`SelectOption`]
+    options: :class:`list`\[:class:`SelectOption`]
         A list of options that can be selected in this select menu.
     required: :class:`bool`
         Whether the select menu is required. Only applies to components in modals.
@@ -549,7 +551,7 @@ SelectMenu = StringSelectMenu  # backwards compatibility
 
 
 class UserSelectMenu(BaseSelectMenu):
-    """Represents a user select menu from the Discord Bot UI Kit.
+    r"""Represents a user select menu from the Discord Bot UI Kit.
 
     .. note::
         The user constructible and usable type to create a
@@ -571,7 +573,7 @@ class UserSelectMenu(BaseSelectMenu):
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select menu is disabled or not.
-    default_values: :class:`list`\\[:class:`SelectDefaultValue`]
+    default_values: :class:`list`\[:class:`SelectDefaultValue`]
         The list of values (users/members) that are selected by default.
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
@@ -601,7 +603,7 @@ class UserSelectMenu(BaseSelectMenu):
 
 
 class RoleSelectMenu(BaseSelectMenu):
-    """Represents a role select menu from the Discord Bot UI Kit.
+    r"""Represents a role select menu from the Discord Bot UI Kit.
 
     .. note::
         The user constructible and usable type to create a
@@ -623,7 +625,7 @@ class RoleSelectMenu(BaseSelectMenu):
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select menu is disabled or not.
-    default_values: :class:`list`\\[:class:`SelectDefaultValue`]
+    default_values: :class:`list`\[:class:`SelectDefaultValue`]
         The list of values (roles) that are selected by default.
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
@@ -653,7 +655,7 @@ class RoleSelectMenu(BaseSelectMenu):
 
 
 class MentionableSelectMenu(BaseSelectMenu):
-    """Represents a mentionable (user/member/role) select menu from the Discord Bot UI Kit.
+    r"""Represents a mentionable (user/member/role) select menu from the Discord Bot UI Kit.
 
     .. note::
         The user constructible and usable type to create a
@@ -675,7 +677,7 @@ class MentionableSelectMenu(BaseSelectMenu):
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select menu is disabled or not.
-    default_values: :class:`list`\\[:class:`SelectDefaultValue`]
+    default_values: :class:`list`\[:class:`SelectDefaultValue`]
         The list of values (users/roles) that are selected by default.
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
@@ -705,7 +707,7 @@ class MentionableSelectMenu(BaseSelectMenu):
 
 
 class ChannelSelectMenu(BaseSelectMenu):
-    """Represents a channel select menu from the Discord Bot UI Kit.
+    r"""Represents a channel select menu from the Discord Bot UI Kit.
 
     .. note::
         The user constructible and usable type to create a
@@ -727,10 +729,10 @@ class ChannelSelectMenu(BaseSelectMenu):
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select menu is disabled or not.
-    channel_types: :class:`list`\\[:class:`ChannelType`] | :data:`None`
+    channel_types: :class:`list`\[:class:`ChannelType`] | :data:`None`
         A list of channel types that can be selected in this select menu.
         If :data:`None`, channels of all types may be selected.
-    default_values: :class:`list`\\[:class:`SelectDefaultValue`]
+    default_values: :class:`list`\[:class:`SelectDefaultValue`]
         The list of values (channels) that are selected by default.
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
@@ -761,7 +763,7 @@ class ChannelSelectMenu(BaseSelectMenu):
         super().__init__(data)
         # on the API side, an empty list is (currently) equivalent to no value
         channel_types = data.get("channel_types")
-        self.channel_types: Optional[list[ChannelType]] = (
+        self.channel_types: list[ChannelType] | None = (
             [try_enum(ChannelType, t) for t in channel_types] if channel_types else None
         )
 
@@ -810,8 +812,8 @@ class SelectOption:
         *,
         label: str,
         value: str = MISSING,
-        description: Optional[str] = None,
-        emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
+        description: str | None = None,
+        emoji: str | Emoji | PartialEmoji | None = None,
         default: bool = False,
     ) -> None:
         self.label = label
@@ -974,12 +976,12 @@ class TextInput(Component):
         self.style: TextInputStyle = try_enum(
             TextInputStyle, data.get("style", TextInputStyle.short.value)
         )
-        self.label: Optional[str] = data.get("label")  # deprecated
-        self.placeholder: Optional[str] = data.get("placeholder")
-        self.value: Optional[str] = data.get("value")
+        self.label: str | None = data.get("label")  # deprecated
+        self.placeholder: str | None = data.get("placeholder")
+        self.value: str | None = data.get("value")
         self.required: bool = data.get("required", True)
-        self.min_length: Optional[int] = data.get("min_length")
-        self.max_length: Optional[int] = data.get("max_length")
+        self.min_length: int | None = data.get("min_length")
+        self.max_length: int | None = data.get("max_length")
 
     def to_dict(self) -> TextInputPayload:
         payload: TextInputPayload = {
@@ -1007,7 +1009,7 @@ class TextInput(Component):
 
 
 class Section(Component):
-    """Represents a section from the Discord Bot UI Kit (v2).
+    r"""Represents a section from the Discord Bot UI Kit (v2).
 
     This allows displaying an accessory (thumbnail or button) next to a block of text.
 
@@ -1019,7 +1021,7 @@ class Section(Component):
 
     Attributes
     ----------
-    children: :class:`list`\\[:class:`TextDisplay`]
+    children: :class:`list`\[:class:`TextDisplay`]
         The text items in this section.
     accessory: :class:`Thumbnail` | :class:`Button`
         The accessory component displayed next to the section text.
@@ -1136,11 +1138,11 @@ class UnfurledMediaItem:
     # an UnfurledMediaItem instance; this is largely for internal use
     def __init__(self, url: str) -> None:
         self.url: str = url
-        self.proxy_url: Optional[str] = None
-        self.height: Optional[int] = None
-        self.width: Optional[int] = None
-        self.content_type: Optional[str] = None
-        self.attachment_id: Optional[int] = None
+        self.proxy_url: str | None = None
+        self.height: int | None = None
+        self.width: int | None = None
+        self.content_type: str | None = None
+        self.attachment_id: int | None = None
 
     @classmethod
     def from_dict(cls, data: UnfurledMediaItemPayload) -> Self:
@@ -1204,7 +1206,7 @@ class Thumbnail(Component):
         self.id = data.get("id", 0)
 
         self.media: UnfurledMediaItem = UnfurledMediaItem.from_dict(data["media"])
-        self.description: Optional[str] = data.get("description")
+        self.description: str | None = data.get("description")
         self.spoiler: bool = data.get("spoiler", False)
 
     def to_dict(self) -> ThumbnailComponentPayload:
@@ -1222,7 +1224,7 @@ class Thumbnail(Component):
 
 
 class MediaGallery(Component):
-    """Represents a media gallery from the Discord Bot UI Kit (v2).
+    r"""Represents a media gallery from the Discord Bot UI Kit (v2).
 
     This allows displaying up to 10 images in a gallery.
 
@@ -1234,7 +1236,7 @@ class MediaGallery(Component):
 
     Attributes
     ----------
-    items: :class:`list`\\[:class:`MediaGalleryItem`]
+    items: :class:`list`\[:class:`MediaGalleryItem`]
         The images in this gallery.
     id: :class:`int`
         The numeric identifier for the component. Must be unique within a message.
@@ -1290,12 +1292,12 @@ class MediaGalleryItem:
     def __init__(
         self,
         media: MediaItemInput,
-        description: Optional[str] = None,
+        description: str | None = None,
         *,
         spoiler: bool = False,
     ) -> None:
         self.media: UnfurledMediaItem = handle_media_item_input(media)
-        self.description: Optional[str] = description
+        self.description: str | None = description
         self.spoiler: bool = spoiler
 
     @classmethod
@@ -1367,8 +1369,8 @@ class FileComponent(Component):
         self.file: UnfurledMediaItem = UnfurledMediaItem.from_dict(data["file"])
         self.spoiler: bool = data.get("spoiler", False)
 
-        self.name: Optional[str] = data.get("name")
-        self.size: Optional[int] = data.get("size")
+        self.name: str | None = data.get("name")
+        self.size: int | None = data.get("size")
 
     def to_dict(self) -> FileComponentPayload:
         return {
@@ -1429,9 +1431,9 @@ class Separator(Component):
 
 
 class Container(Component):
-    """Represents a container from the Discord Bot UI Kit (v2).
+    r"""Represents a container from the Discord Bot UI Kit (v2).
 
-    This is visually similar to :class:`Embed`\\s, and contains other components.
+    This is visually similar to :class:`Embed`\s, and contains other components.
 
     .. note::
         The user constructible and usable type to create a
@@ -1441,7 +1443,7 @@ class Container(Component):
 
     Attributes
     ----------
-    children: :class:`list`\\[:class:`ActionRow` | :class:`Section` | :class:`TextDisplay` | :class:`MediaGallery` | :class:`FileComponent` | :class:`Separator`]
+    children: :class:`list`\[:class:`ActionRow` | :class:`Section` | :class:`TextDisplay` | :class:`MediaGallery` | :class:`FileComponent` | :class:`Separator`]
         The child components in this container.
     accent_colour: :class:`Colour` | :data:`None`
         The accent colour of the container. An alias exists under ``accent_color``.
@@ -1473,7 +1475,7 @@ class Container(Component):
         components = [_component_factory(d) for d in data.get("components", [])]
         self.children: list[ContainerChildComponent] = components  # pyright: ignore[reportAttributeAccessIssue]
 
-        self.accent_colour: Optional[Colour] = (
+        self.accent_colour: Colour | None = (
             Colour(accent_color) if (accent_color := data.get("accent_color")) is not None else None
         )
         self.spoiler: bool = data.get("spoiler", False)
@@ -1492,7 +1494,7 @@ class Container(Component):
         return payload
 
     @property
-    def accent_color(self) -> Optional[Colour]:
+    def accent_color(self) -> Colour | None:
         """:class:`Colour` | :data:`None`: The accent color of the container.
         An alias exists under ``accent_colour``.
         """
@@ -1540,7 +1542,7 @@ class Label(Component):
         self.id = data.get("id", 0)
 
         self.text: str = data["label"]
-        self.description: Optional[str] = data.get("description")
+        self.description: str | None = data.get("description")
 
         component = _component_factory(data["component"])
         self.component: LabelChildComponent = component  # pyright: ignore[reportAttributeAccessIssue]
