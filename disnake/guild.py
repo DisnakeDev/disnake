@@ -3825,6 +3825,11 @@ class Guild(Hashable):
 
         Retrieves the member counts of all :class:`Role`\s that the guild has.
 
+        .. caution::
+            This uses an endpoint that is currently in public preview,
+            it should not be considered stable and is exempt from version guarantees:
+            https://github.com/discord/discord-api-docs/discussions/3306#discussioncomment-14681890.
+
         .. note::
 
             This method is an API call. For general usage, consider :attr:`roles` instead.
