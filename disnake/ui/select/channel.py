@@ -34,7 +34,7 @@ __all__ = (
 
 
 class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
-    """Represents a UI channel select menu.
+    r"""Represents a UI channel select menu.
 
     This is usually represented as a drop down menu.
 
@@ -57,10 +57,10 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select is disabled.
-    channel_types: :class:`list`\\[:class:`.ChannelType`] | :data:`None`
+    channel_types: :class:`list`\[:class:`.ChannelType`] | :data:`None`
         The list of channel types that can be selected in this select menu.
         Defaults to all types (i.e. :data:`None`).
-    default_values: :class:`~collections.abc.Sequence`\\[:class:`.abc.GuildChannel` | :class:`.Thread` | :class:`.abc.PrivateChannel` | :class:`.PartialMessageable` | :class:`.SelectDefaultValue` | :class:`.Object`] | :data:`None`
+    default_values: :class:`~collections.abc.Sequence`\[:class:`.abc.GuildChannel` | :class:`.Thread` | :class:`.abc.PrivateChannel` | :class:`.PartialMessageable` | :class:`.SelectDefaultValue` | :class:`.Object`] | :data:`None`
         The list of values (channels) that are selected by default.
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
@@ -85,7 +85,7 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
 
     Attributes
     ----------
-    values: :class:`list`\\[:class:`.abc.GuildChannel` | :class:`.Thread` | :class:`.abc.PrivateChannel` | :class:`.PartialMessageable`]
+    values: :class:`list`\[:class:`.abc.GuildChannel` | :class:`.Thread` | :class:`.abc.PrivateChannel` | :class:`.PartialMessageable`]
         A list of channels that have been selected by the user.
     """
 
@@ -185,7 +185,7 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
 
     @property
     def channel_types(self) -> list[ChannelType] | None:
-        """:class:`list`\\[:class:`disnake.ChannelType`] | :data:`None`: A list of channel types that can be selected in this select menu."""
+        r""":class:`list`\[:class:`disnake.ChannelType`] | :data:`None`: A list of channel types that can be selected in this select menu."""
         return self._underlying.channel_types
 
     @channel_types.setter
@@ -230,7 +230,7 @@ def channel_select(
 def channel_select(
     cls: Callable[..., S_co] = ChannelSelect[Any], **kwargs: Any
 ) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]:
-    """A decorator that attaches a channel select menu to a component.
+    r"""A decorator that attaches a channel select menu to a component.
 
     The function being decorated should have three parameters, ``self`` representing
     the :class:`disnake.ui.View`, the :class:`disnake.ui.ChannelSelect` that was
@@ -243,7 +243,7 @@ def channel_select(
 
     Parameters
     ----------
-    cls: :class:`~collections.abc.Callable`\\[..., :class:`ChannelSelect`]
+    cls: :class:`~collections.abc.Callable`\[..., :class:`ChannelSelect`]
         A callable (may be a :class:`ChannelSelect` subclass) to create a new instance of this component.
         If provided, the other parameters described below do not apply.
         Instead, this decorator will accept the same keywords as the passed callable/class does.
@@ -260,10 +260,10 @@ def channel_select(
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select is disabled. Defaults to ``False``.
-    channel_types: :class:`list`\\[:class:`.ChannelType`] | :data:`None`
+    channel_types: :class:`list`\[:class:`.ChannelType`] | :data:`None`
         The list of channel types that can be selected in this select menu.
         Defaults to all types (i.e. :data:`None`).
-    default_values: :class:`~collections.abc.Sequence`\\[:class:`.abc.GuildChannel` | :class:`.Thread` | :class:`.abc.PrivateChannel` | :class:`.PartialMessageable` | :class:`.SelectDefaultValue` | :class:`.Object`] | :data:`None`
+    default_values: :class:`~collections.abc.Sequence`\[:class:`.abc.GuildChannel` | :class:`.Thread` | :class:`.abc.PrivateChannel` | :class:`.PartialMessageable` | :class:`.SelectDefaultValue` | :class:`.Object`] | :data:`None`
         The list of values (channels) that are selected by default.
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 

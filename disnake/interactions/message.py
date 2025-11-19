@@ -30,7 +30,7 @@ if TYPE_CHECKING:
 
 
 class MessageInteraction(Interaction[ClientT]):
-    """Represents an interaction with a message component.
+    r"""Represents an interaction with a message component.
 
     Current examples are buttons and dropdowns.
 
@@ -70,7 +70,7 @@ class MessageInteraction(Interaction[ClientT]):
 
         .. note::
             In scenarios where an interaction occurs in a guild but :attr:`.guild` is unavailable,
-            such as with user-installed applications in guilds, some attributes of :class:`Member`\\s
+            such as with user-installed applications in guilds, some attributes of :class:`Member`\s
             that depend on the guild/role cache will not work due to an API limitation.
             This includes :attr:`~Member.roles`, :attr:`~Member.top_role`, :attr:`~Member.role_icon`,
             and :attr:`~Member.guild_permissions`.
@@ -94,7 +94,7 @@ class MessageInteraction(Interaction[ClientT]):
 
     client: :class:`Client`
         The interaction client.
-    entitlements: :class:`list`\\[:class:`Entitlement`]
+    entitlements: :class:`list`\[:class:`Entitlement`]
         The entitlements for the invoking user and guild,
         representing access to an application subscription.
 
@@ -138,7 +138,7 @@ class MessageInteraction(Interaction[ClientT]):
 
     @property
     def values(self) -> list[str] | None:
-        """:class:`list`\\[:class:`str`] | :data:`None`: The values the user selected.
+        r""":class:`list`\[:class:`str`] | :data:`None`: The values the user selected.
 
         For select menus of type :attr:`~ComponentType.string_select`,
         these are just the string values the user selected.
@@ -152,7 +152,7 @@ class MessageInteraction(Interaction[ClientT]):
     def resolved_values(
         self,
     ) -> Sequence[str | Member | User | Role | AnyChannel] | None:
-        """:class:`~collections.abc.Sequence`\\[:class:`str` | :class:`Member` | :class:`User` | :class:`Role` | :class:`abc.GuildChannel` | :class:`Thread` | :class:`PartialMessageable`] | :data:`None`: The (resolved) values the user selected.
+        r""":class:`~collections.abc.Sequence`\[:class:`str` | :class:`Member` | :class:`User` | :class:`Role` | :class:`abc.GuildChannel` | :class:`Thread` | :class:`PartialMessageable`] | :data:`None`: The (resolved) values the user selected.
 
         For select menus of type :attr:`~ComponentType.string_select`,
         this is equivalent to :attr:`values`.
@@ -192,7 +192,7 @@ class MessageInteraction(Interaction[ClientT]):
 
 
 class MessageInteractionData(dict[str, Any]):
-    """Represents the data of an interaction with a message component.
+    r"""Represents the data of an interaction with a message component.
 
     .. versionadded:: 2.1
 
@@ -202,7 +202,7 @@ class MessageInteractionData(dict[str, Any]):
         The custom ID of the component.
     component_type: :class:`ComponentType`
         The type of the component.
-    values: :class:`list`\\[:class:`str`] | :data:`None`
+    values: :class:`list`\[:class:`str`] | :data:`None`
         The values the user has selected in a select menu.
         For non-string select menus, this contains IDs for use with :attr:`resolved`.
     resolved: :class:`InteractionDataResolved`

@@ -32,7 +32,7 @@ __all__ = (
 
 
 class RoleSelect(BaseSelect[RoleSelectMenu, "Role", V_co]):
-    """Represents a UI role select menu.
+    r"""Represents a UI role select menu.
 
     This is usually represented as a drop down menu.
 
@@ -55,7 +55,7 @@ class RoleSelect(BaseSelect[RoleSelectMenu, "Role", V_co]):
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select is disabled.
-    default_values: :class:`~collections.abc.Sequence`\\[:class:`.Role` | :class:`.SelectDefaultValue` | :class:`.Object`] | :data:`None`
+    default_values: :class:`~collections.abc.Sequence`\[:class:`.Role` | :class:`.SelectDefaultValue` | :class:`.Object`] | :data:`None`
         The list of values (roles) that are selected by default.
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
@@ -80,7 +80,7 @@ class RoleSelect(BaseSelect[RoleSelectMenu, "Role", V_co]):
 
     Attributes
     ----------
-    values: :class:`list`\\[:class:`.Role`]
+    values: :class:`list`\[:class:`.Role`]
         A list of roles that have been selected by the user.
     """
 
@@ -188,7 +188,7 @@ def role_select(
 def role_select(
     cls: Callable[..., S_co] = RoleSelect[Any], **kwargs: Any
 ) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]:
-    """A decorator that attaches a role select menu to a component.
+    r"""A decorator that attaches a role select menu to a component.
 
     The function being decorated should have three parameters, ``self`` representing
     the :class:`disnake.ui.View`, the :class:`disnake.ui.RoleSelect` that was
@@ -201,7 +201,7 @@ def role_select(
 
     Parameters
     ----------
-    cls: :class:`~collections.abc.Callable`\\[..., :class:`RoleSelect`]
+    cls: :class:`~collections.abc.Callable`\[..., :class:`RoleSelect`]
         A callable (may be a :class:`RoleSelect` subclass) to create a new instance of this component.
         If provided, the other parameters described below do not apply.
         Instead, this decorator will accept the same keywords as the passed callable/class does.
@@ -218,7 +218,7 @@ def role_select(
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select is disabled. Defaults to ``False``.
-    default_values: :class:`~collections.abc.Sequence`\\[:class:`.Role` | :class:`.SelectDefaultValue` | :class:`.Object`] | :data:`None`
+    default_values: :class:`~collections.abc.Sequence`\[:class:`.Role` | :class:`.SelectDefaultValue` | :class:`.Object`] | :data:`None`
         The list of values (roles) that are selected by default.
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 

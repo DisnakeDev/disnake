@@ -219,7 +219,7 @@ class AutoModTimeoutAction(AutoModAction):
 
 
 class AutoModTriggerMetadata:
-    """Metadata for an auto moderation trigger.
+    r"""Metadata for an auto moderation trigger.
 
     Based on the trigger type, different fields can be used with various limits:
 
@@ -235,14 +235,14 @@ class AutoModTriggerMetadata:
 
     Attributes
     ----------
-    keyword_filter: :class:`~collections.abc.Sequence`\\[:class:`str`] | :data:`None`
+    keyword_filter: :class:`~collections.abc.Sequence`\[:class:`str`] | :data:`None`
         The list of keywords to check for, up to 1000 keywords. Used with :attr:`AutoModTriggerType.keyword`.
 
         See :ddocs:`api docs <resources/auto-moderation#auto-moderation-rule-object-keyword-matching-strategies>`
         for details about how keyword matching works.
         Each keyword must be 60 characters or less.
 
-    regex_patterns: :class:`~collections.abc.Sequence`\\[:class:`str`] | :data:`None`
+    regex_patterns: :class:`~collections.abc.Sequence`\[:class:`str`] | :data:`None`
         The list of regular expressions to check for. Used with :attr:`AutoModTriggerType.keyword`.
 
         A maximum of 10 regexes can be added, each with up to 260 characters.
@@ -256,7 +256,7 @@ class AutoModTriggerMetadata:
     presets: :class:`AutoModKeywordPresets` | :data:`None`
         The keyword presets. Used with :attr:`AutoModTriggerType.keyword_preset`.
 
-    allow_list: :class:`~collections.abc.Sequence`\\[:class:`str`] | :data:`None`
+    allow_list: :class:`~collections.abc.Sequence`\[:class:`str`] | :data:`None`
         The keywords that should be exempt from a preset.
         Used with :attr:`AutoModTriggerType.keyword` (up to 100 exemptions) and :attr:`AutoModTriggerType.keyword_preset` (up to 1000 exemptions).
 
@@ -413,7 +413,7 @@ class AutoModTriggerMetadata:
 
 
 class AutoModRule:
-    """Represents an auto moderation rule.
+    r"""Represents an auto moderation rule.
 
     .. versionadded:: 2.6
 
@@ -435,9 +435,9 @@ class AutoModRule:
         The type of trigger that determines whether this rule's actions should run for a specific event.
     trigger_metadata: :class:`AutoModTriggerMetadata`
         Additional metadata associated with this rule's :attr:`.trigger_type`.
-    exempt_role_ids: :class:`frozenset`\\[:class:`int`]
+    exempt_role_ids: :class:`frozenset`\[:class:`int`]
         The role IDs that are exempt from this rule.
-    exempt_channel_ids: :class:`frozenset`\\[:class:`int`]
+    exempt_channel_ids: :class:`frozenset`\[:class:`int`]
         The channel IDs that are exempt from this rule.
     """
 
@@ -491,7 +491,7 @@ class AutoModRule:
 
     @property
     def actions(self) -> list[AutoModAction]:
-        """:class:`list`\\[:class:`AutoModBlockMessageAction` | :class:`AutoModSendAlertAction` | :class:`AutoModTimeoutAction` | :class:`AutoModAction`]:
+        r""":class:`list`\[:class:`AutoModBlockMessageAction` | :class:`AutoModSendAlertAction` | :class:`AutoModTimeoutAction` | :class:`AutoModAction`]:
         The list of actions that will execute if a matching event triggered this rule.
         """
         return list(self._actions)  # return a copy
@@ -505,12 +505,12 @@ class AutoModRule:
 
     @property
     def exempt_roles(self) -> list[Role]:
-        """:class:`list`\\[:class:`Role`]: The list of roles that are exempt from this rule."""
+        r""":class:`list`\[:class:`Role`]: The list of roles that are exempt from this rule."""
         return list(filter(None, map(self.guild.get_role, self.exempt_role_ids)))
 
     @property
     def exempt_channels(self) -> list[GuildChannel]:
-        """:class:`list`\\[:class:`abc.GuildChannel`]: The list of channels that are exempt from this rule."""
+        r""":class:`list`\[:class:`abc.GuildChannel`]: The list of channels that are exempt from this rule."""
         return list(filter(None, map(self.guild.get_channel, self.exempt_channel_ids)))
 
     def __repr__(self) -> str:
@@ -533,7 +533,7 @@ class AutoModRule:
         exempt_channels: Iterable[Snowflake] | None = MISSING,
         reason: str | None = None,
     ) -> AutoModRule:
-        """|coro|
+        r"""|coro|
 
         Edits the auto moderation rule.
 
@@ -579,15 +579,15 @@ class AutoModRule:
             The rule's new event type.
         trigger_metadata: :class:`AutoModTriggerMetadata`
             The rule's new associated trigger metadata.
-        actions: :class:`~collections.abc.Sequence`\\[:class:`AutoModBlockMessageAction` | :class:`AutoModSendAlertAction` | :class:`AutoModTimeoutAction` | :class:`AutoModAction`]
+        actions: :class:`~collections.abc.Sequence`\[:class:`AutoModBlockMessageAction` | :class:`AutoModSendAlertAction` | :class:`AutoModTimeoutAction` | :class:`AutoModAction`]
             The rule's new actions.
             If provided, must contain at least one action.
         enabled: :class:`bool`
             Whether to enable the rule.
-        exempt_roles: :class:`~collections.abc.Iterable`\\[:class:`abc.Snowflake`] | :data:`None`
+        exempt_roles: :class:`~collections.abc.Iterable`\[:class:`abc.Snowflake`] | :data:`None`
             The rule's new exempt roles, up to 20.
             If ``[]`` or :data:`None` is passed then all role exemptions are removed.
-        exempt_channels: :class:`~collections.abc.Iterable`\\[:class:`abc.Snowflake`] | :data:`None`
+        exempt_channels: :class:`~collections.abc.Iterable`\[:class:`abc.Snowflake`] | :data:`None`
             The rule's new exempt channels, up to 50.
             Can also include categories, in which case all channels inside that category will be exempt.
             If ``[]`` or :data:`None` is passed then all channel exemptions are removed.

@@ -20,7 +20,7 @@ __all__ = ("Entitlement",)
 
 
 class Entitlement(Hashable):
-    """Represents an entitlement.
+    r"""Represents an entitlement.
 
     This is usually retrieved using :meth:`Client.entitlements`, from
     :attr:`Interaction.entitlements` when using interactions, or provided by
@@ -36,11 +36,11 @@ class Entitlement(Hashable):
 
         .. describe:: x == y
 
-            Checks if two :class:`Entitlement`\\s are equal.
+            Checks if two :class:`Entitlement`\s are equal.
 
         .. describe:: x != y
 
-            Checks if two :class:`Entitlement`\\s are not equal.
+            Checks if two :class:`Entitlement`\s are not equal.
 
         .. describe:: hash(x)
 

@@ -326,7 +326,7 @@ def oauth_url(
     disable_guild_select: bool = False,
     integration_type: ApplicationIntegrationTypeLiteral = MISSING,
 ) -> str:
-    """A helper function that returns the OAuth2 URL for authorizing the application.
+    r"""A helper function that returns the OAuth2 URL for authorizing the application.
 
     Parameters
     ----------
@@ -339,7 +339,7 @@ def oauth_url(
         The guild to pre-select in the authorization screen, if available.
     redirect_uri: :class:`str`
         An optional valid redirect URI.
-    scopes: :class:`~collections.abc.Iterable`\\[:class:`str`]
+    scopes: :class:`~collections.abc.Iterable`\[:class:`str`]
         An optional valid list of scopes. Defaults to ``('bot',)``.
 
         .. versionadded:: 1.7
@@ -760,7 +760,7 @@ def resolve_invite(
 def resolve_invite(
     invite: Invite | str, *, with_params: bool = False
 ) -> str | tuple[str, dict[str, str]]:
-    """Resolves an invite from a :class:`~disnake.Invite`, URL or code.
+    r"""Resolves an invite from a :class:`~disnake.Invite`, URL or code.
 
     Parameters
     ----------
@@ -773,7 +773,7 @@ def resolve_invite(
 
     Returns
     -------
-    :class:`str` | :class:`tuple`\\[:class:`str`, :class:`dict`\\[:class:`str`, :class:`str`]]
+    :class:`str` | :class:`tuple`\[:class:`str`, :class:`dict`\[:class:`str`, :class:`str`]]
         The invite code if ``with_params`` is ``False``, otherwise a tuple containing the
         invite code and the url's query parameters, if applicable.
     """
@@ -872,7 +872,7 @@ def remove_markdown(text: str, *, ignore_links: bool = True) -> str:
 
 
 def escape_markdown(text: str, *, as_needed: bool = False, ignore_links: bool = True) -> str:
-    """A helper function that escapes Discord's markdown.
+    r"""A helper function that escapes Discord's markdown.
 
     Parameters
     ----------
@@ -881,8 +881,8 @@ def escape_markdown(text: str, *, as_needed: bool = False, ignore_links: bool = 
     as_needed: :class:`bool`
         Whether to escape the markdown characters as needed. This
         means that it does not escape extraneous characters if it's
-        not necessary, e.g. ``**hello**`` is escaped into ``\\*\\*hello**``
-        instead of ``\\*\\*hello\\*\\*``. Note however that this can open
+        not necessary, e.g. ``**hello**`` is escaped into ``\*\*hello**``
+        instead of ``\*\*hello\*\*``. Note however that this can open
         you up to some clever syntax abuse. Defaults to ``False``.
     ignore_links: :class:`bool`
         Whether to leave links alone when escaping markdown. For example,

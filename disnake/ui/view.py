@@ -91,11 +91,11 @@ class _ViewWeights:
 
 
 class View:
-    """Represents a UI view.
+    r"""Represents a UI view.
 
     This object must be inherited to create a UI within Discord.
 
-    Alternatively, components can be handled with :class:`disnake.ui.ActionRow`\\s and event
+    Alternatively, components can be handled with :class:`disnake.ui.ActionRow`\s and event
     listeners for a more low-level approach. Relevant events are :func:`disnake.on_button_click`,
     :func:`disnake.on_dropdown`, and the more generic :func:`disnake.on_message_interaction`.
 
@@ -112,7 +112,7 @@ class View:
     timeout: :class:`float` | :data:`None`
         Timeout from last interaction with the UI before no longer accepting input.
         If :data:`None` then there is no timeout.
-    children: :class:`list`\\[:class:`Item`]
+    children: :class:`list`\[:class:`Item`]
         The list of children attached to this view.
     """
 

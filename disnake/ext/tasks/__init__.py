@@ -254,7 +254,7 @@ class Loop(Generic[LF]):
 
     @property
     def time(self) -> list[datetime.time] | None:
-        """:class:`list`\\[:class:`datetime.time`] | :data:`None`: Read-only list for the exact times this loop runs at.
+        r""":class:`list`\[:class:`datetime.time`] | :data:`None`: Read-only list for the exact times this loop runs at.
         :data:`None` if relative times were passed instead.
 
         .. versionadded:: 2.0
@@ -331,9 +331,9 @@ class Loop(Generic[LF]):
         return self._task
 
     def stop(self) -> None:
-        """Gracefully stops the task from running.
+        r"""Gracefully stops the task from running.
 
-        Unlike :meth:`cancel`\\, this allows the task to finish its
+        Unlike :meth:`cancel`\, this allows the task to finish its
         current iteration before gracefully exiting.
 
         .. note::
@@ -384,10 +384,10 @@ class Loop(Generic[LF]):
             self._task.cancel()
 
     def add_exception_type(self, *exceptions: type[BaseException]) -> None:
-        """Adds exception types to be handled during the reconnect logic.
+        r"""Adds exception types to be handled during the reconnect logic.
 
         By default the exception types handled are those handled by
-        :meth:`disnake.Client.connect`\\, which includes a lot of internet disconnection
+        :meth:`disnake.Client.connect`\, which includes a lot of internet disconnection
         errors.
 
         This function is useful if you're interacting with a 3rd party library that
@@ -395,7 +395,7 @@ class Loop(Generic[LF]):
 
         Parameters
         ----------
-        *exceptions: :class:`type`\\[:class:`BaseException`]
+        *exceptions: :class:`type`\[:class:`BaseException`]
             An argument list of exception classes to handle.
 
         Raises
@@ -423,11 +423,11 @@ class Loop(Generic[LF]):
         self._valid_exception = ()
 
     def remove_exception_type(self, *exceptions: type[BaseException]) -> bool:
-        """Removes exception types from being handled during the reconnect logic.
+        r"""Removes exception types from being handled during the reconnect logic.
 
         Parameters
         ----------
-        *exceptions: :class:`type`\\[:class:`BaseException`]
+        *exceptions: :class:`type`\[:class:`BaseException`]
             An argument list of exception classes to handle.
 
         Returns
@@ -640,7 +640,7 @@ class Loop(Generic[LF]):
         hours: float = 0,
         time: datetime.time | Sequence[datetime.time] = MISSING,
     ) -> None:
-        """Changes the interval for the sleep time.
+        r"""Changes the interval for the sleep time.
 
         .. versionadded:: 1.2
 
@@ -652,7 +652,7 @@ class Loop(Generic[LF]):
             The number of minutes between every iteration.
         hours: :class:`float`
             The number of hours between every iteration.
-        time: :class:`datetime.time` | :class:`~collections.abc.Sequence`\\[:class:`datetime.time`]
+        time: :class:`datetime.time` | :class:`~collections.abc.Sequence`\[:class:`datetime.time`]
             The exact times to run this loop at. Either a non-empty list or a single
             value of :class:`datetime.time` should be passed.
             This cannot be used in conjunction with the relative time parameters.
@@ -738,12 +738,12 @@ def loop(
     cls: type[Object[L_co, Concatenate[LF, P]]] = Loop[Any],
     **kwargs: Any,
 ) -> Callable[[LF], L_co]:
-    """A decorator that schedules a task in the background for you with
+    r"""A decorator that schedules a task in the background for you with
     optional reconnect logic. The decorator returns a :class:`Loop`.
 
     Parameters
     ----------
-    cls: :class:`type`\\[:class:`Loop`]
+    cls: :class:`type`\[:class:`Loop`]
         The loop subclass to create an instance of. If provided, the following parameters
         described below do not apply. Instead, this decorator will accept the same keywords
         as the passed cls does.
@@ -756,7 +756,7 @@ def loop(
         The number of minutes between every iteration.
     hours: :class:`float`
         The number of hours between every iteration.
-    time: :class:`datetime.time` | :class:`~collections.abc.Sequence`\\[:class:`datetime.time`]
+    time: :class:`datetime.time` | :class:`~collections.abc.Sequence`\[:class:`datetime.time`]
         The exact times to run this loop at. Either a non-empty list or a single
         value of :class:`datetime.time` should be passed. Timezones are supported.
         If no timezone is given for the times, it is assumed to represent UTC time.

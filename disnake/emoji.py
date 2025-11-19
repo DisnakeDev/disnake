@@ -163,7 +163,7 @@ class Emoji(_EmojiTag, AssetMixin):
 
     @property
     def roles(self) -> list[Role]:
-        """:class:`list`\\[:class:`Role`]: A :class:`list` of roles that are allowed to use this emoji.
+        r""":class:`list`\[:class:`Role`]: A :class:`list` of roles that are allowed to use this emoji.
 
         If roles is empty, the emoji is unrestricted.
 
@@ -270,7 +270,7 @@ class Emoji(_EmojiTag, AssetMixin):
     async def edit(
         self, *, name: str = MISSING, roles: list[Snowflake] = MISSING, reason: str | None = None
     ) -> Emoji:
-        """|coro|
+        r"""|coro|
 
         Edits the emoji.
 
@@ -284,7 +284,7 @@ class Emoji(_EmojiTag, AssetMixin):
         ----------
         name: :class:`str`
             The new emoji name.
-        roles: :class:`list`\\[:class:`~disnake.abc.Snowflake`] | :data:`None`
+        roles: :class:`list`\[:class:`~disnake.abc.Snowflake`] | :data:`None`
             A list of roles that can use this emoji. An empty list can be passed to make it available to everyone.
 
             An emoji cannot have both subscription roles (see :attr:`RoleTags.integration_id`) and

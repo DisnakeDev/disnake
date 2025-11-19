@@ -518,7 +518,7 @@ class _AuditLogProxyKickOrMemberRoleAction:
 
 
 class AuditLogEntry(Hashable):
-    """Represents an Audit Log entry.
+    r"""Represents an Audit Log entry.
 
     You can retrieve these via :meth:`Guild.audit_logs`,
     or via the :func:`on_audit_log_entry_create` event.
@@ -545,7 +545,7 @@ class AuditLogEntry(Hashable):
     action: :class:`AuditLogAction`
         The action that was done.
     user: :class:`Member` | :class:`User` | :class:`Object` | :data:`None`
-        The user who initiated this action. Usually :class:`Member`\\, unless gone
+        The user who initiated this action. Usually :class:`Member`\, unless gone
         then it's a :class:`User`.
 
         .. versionchanged:: 2.8

@@ -45,7 +45,7 @@ def _parse_select_options(options: SelectOptionInput) -> list[SelectOption]:
 
 
 class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
-    """Represents a UI string select menu.
+    r"""Represents a UI string select menu.
 
     This is usually represented as a drop down menu.
 
@@ -71,8 +71,8 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select is disabled.
-    options: :class:`list`\\[:class:`disnake.SelectOption`] | :class:`list`\\[:class:`str`] | :class:`dict`\\[:class:`str`, :class:`str`]
-        A list of options that can be selected in this menu. Use explicit :class:`.SelectOption`\\s
+    options: :class:`list`\[:class:`disnake.SelectOption`] | :class:`list`\[:class:`str`] | :class:`dict`\[:class:`str`, :class:`str`]
+        A list of options that can be selected in this menu. Use explicit :class:`.SelectOption`\s
         for fine-grained control over the options. Alternatively, a list of strings will be treated
         as a list of labels, and a dict will be treated as a mapping of labels to values.
 
@@ -100,7 +100,7 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
 
     Attributes
     ----------
-    values: :class:`list`\\[:class:`str`]
+    values: :class:`list`\[:class:`str`]
         A list of values that have been selected by the user.
     """
 
@@ -185,7 +185,7 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
 
     @property
     def options(self) -> list[SelectOption]:
-        """:class:`list`\\[:class:`disnake.SelectOption`]: A list of options that can be selected in this select menu."""
+        r""":class:`list`\[:class:`disnake.SelectOption`]: A list of options that can be selected in this select menu."""
         return self._underlying.options
 
     @options.setter
@@ -294,7 +294,7 @@ def string_select(
 def string_select(
     cls: Callable[..., S_co] = StringSelect[Any], **kwargs: Any
 ) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]:
-    """A decorator that attaches a string select menu to a component.
+    r"""A decorator that attaches a string select menu to a component.
 
     The function being decorated should have three parameters, ``self`` representing
     the :class:`disnake.ui.View`, the :class:`disnake.ui.StringSelect` that was
@@ -308,7 +308,7 @@ def string_select(
 
     Parameters
     ----------
-    cls: :class:`~collections.abc.Callable`\\[..., :class:`StringSelect`]
+    cls: :class:`~collections.abc.Callable`\[..., :class:`StringSelect`]
         A callable (may be a :class:`StringSelect` subclass) to create a new instance of this component.
         If provided, the other parameters described below do not apply.
         Instead, this decorator will accept the same keywords as the passed callable/class does.
@@ -325,8 +325,8 @@ def string_select(
     max_values: :class:`int`
         The maximum number of items that must be chosen for this select menu.
         Defaults to 1 and must be between 1 and 25.
-    options: :class:`list`\\[:class:`disnake.SelectOption`] | :class:`list`\\[:class:`str`] | :class:`dict`\\[:class:`str`, :class:`str`]
-        A list of options that can be selected in this menu. Use explicit :class:`.SelectOption`\\s
+    options: :class:`list`\[:class:`disnake.SelectOption`] | :class:`list`\[:class:`str`] | :class:`dict`\[:class:`str`, :class:`str`]
+        A list of options that can be selected in this menu. Use explicit :class:`.SelectOption`\s
         for fine-grained control over the options. Alternatively, a list of strings will be treated
         as a list of labels, and a dict will be treated as a mapping of labels to values.
 

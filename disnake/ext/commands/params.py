@@ -154,7 +154,7 @@ def _xt_to_xe(xe: float | None, xt: float | None, direction: float = 1) -> float
 
 
 class Injection(Generic[P, T_]):
-    """Represents a slash command injection.
+    r"""Represents a slash command injection.
 
     .. versionadded:: 2.3
 
@@ -165,7 +165,7 @@ class Injection(Generic[P, T_]):
     ----------
     function: Callable
         The underlying injection function.
-    autocompleters: :class:`dict`\\[:class:`str`, Callable]
+    autocompleters: :class:`dict`\[:class:`str`, Callable]
         A mapping of injection's option names to their respective autocompleters.
 
         .. versionadded:: 2.6
@@ -424,13 +424,13 @@ _VERIFY_TYPES: Final[frozenset[OptionType]] = frozenset((OptionType.user, Option
 
 
 class ParamInfo:
-    """A class that basically connects function params with slash command options.
+    r"""A class that basically connects function params with slash command options.
     The instances of this class are not created manually, but via the functional interface instead.
     See :func:`Param`.
 
     Parameters
     ----------
-    default: Any | :class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`], :data:`~typing.Any`]
+    default: Any | :class:`~collections.abc.Callable`\[[:class:`.ApplicationCommandInteraction`], :data:`~typing.Any`]
         The actual default value for the corresponding function param.
         Can be a sync/async callable taking an interaction and returning a dynamic default value,
         if the user didn't pass a value for this parameter.
@@ -446,7 +446,7 @@ class ParamInfo:
         .. versionchanged:: 2.5
             Added support for localizations.
 
-    choices: :class:`~collections.abc.Sequence`\\[:class:`.OptionChoice`] | :class:`~collections.abc.Sequence`\\[:class:`str` | :class:`int` | :class:`float`] | :class:`~collections.abc.Mapping`\\[:class:`str`, :class:`str` | :class:`int` | :class:`float`]
+    choices: :class:`~collections.abc.Sequence`\[:class:`.OptionChoice`] | :class:`~collections.abc.Sequence`\[:class:`str` | :class:`int` | :class:`float`] | :class:`~collections.abc.Mapping`\[:class:`str`, :class:`str` | :class:`int` | :class:`float`]
         The pre-defined choices for this option.
     ge: :class:`float`
         The lowest allowed value for this option.
@@ -454,11 +454,11 @@ class ParamInfo:
         The greatest allowed value for this option.
     type: :class:`~typing.Any`
         The type of the parameter.
-    channel_types: :class:`list`\\[:class:`.ChannelType`]
+    channel_types: :class:`list`\[:class:`.ChannelType`]
         The list of channel types supported by this slash command option.
-    autocomplete: :class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`, :class:`str`], :data:`~typing.Any`]
+    autocomplete: :class:`~collections.abc.Callable`\[[:class:`.ApplicationCommandInteraction`, :class:`str`], :data:`~typing.Any`]
         The function that will suggest possible autocomplete options while typing.
-    converter: :class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`, :data:`~typing.Any`], :data:`~typing.Any`]
+    converter: :class:`~collections.abc.Callable`\[[:class:`.ApplicationCommandInteraction`, :data:`~typing.Any`], :data:`~typing.Any`]
         The function that will convert the original input to a desired format.
     min_length: :class:`int`
         The minimum length for this option, if it is a string option.
@@ -1149,14 +1149,14 @@ def Param(
     max_length: int | None = None,
     **kwargs: Any,
 ) -> Any:
-    """A special function that creates an instance of :class:`ParamInfo` that contains some information about a
+    r"""A special function that creates an instance of :class:`ParamInfo` that contains some information about a
     slash command option. This instance should be assigned to a parameter of a function representing your slash command.
 
     See :ref:`param_syntax` for more info.
 
     Parameters
     ----------
-    default: Any | :class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`], :data:`~typing.Any`]
+    default: Any | :class:`~collections.abc.Callable`\[[:class:`.ApplicationCommandInteraction`], :data:`~typing.Any`]
         The actual default value of the function parameter that should be passed instead of the :class:`ParamInfo` instance.
         Can be a sync/async callable taking an interaction and returning a dynamic default value,
         if the user didn't pass a value for this parameter.
@@ -1173,9 +1173,9 @@ def Param(
         .. versionchanged:: 2.5
             Added support for localizations.
 
-    choices: :class:`~collections.abc.Sequence`\\[:class:`.OptionChoice`] | :class:`~collections.abc.Sequence`\\[:class:`str` | :class:`int` | :class:`float`] | :class:`~collections.abc.Mapping`\\[:class:`str`, :class:`str` | :class:`int` | :class:`float`]
+    choices: :class:`~collections.abc.Sequence`\[:class:`.OptionChoice`] | :class:`~collections.abc.Sequence`\[:class:`str` | :class:`int` | :class:`float`] | :class:`~collections.abc.Mapping`\[:class:`str`, :class:`str` | :class:`int` | :class:`float`]
         The pre-defined choices for this slash command option.
-    converter: :class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`, :data:`~typing.Any`], :data:`~typing.Any`]
+    converter: :class:`~collections.abc.Callable`\[[:class:`.ApplicationCommandInteraction`, :data:`~typing.Any`], :data:`~typing.Any`]
         A function that will convert the original input to a desired format.
         Kwarg aliases: ``conv``.
     convert_defaults: :class:`bool`
@@ -1183,10 +1183,10 @@ def Param(
         Defaults to ``False``.
 
         .. versionadded:: 2.3
-    autocomplete: :class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`, :class:`str`], :data:`~typing.Any`]
+    autocomplete: :class:`~collections.abc.Callable`\[[:class:`.ApplicationCommandInteraction`, :class:`str`], :data:`~typing.Any`]
         A function that will suggest possible autocomplete options while typing.
         See :ref:`param_syntax`. Kwarg aliases: ``autocomp``.
-    channel_types: :class:`~collections.abc.Iterable`\\[:class:`.ChannelType`]
+    channel_types: :class:`~collections.abc.Iterable`\[:class:`.ChannelType`]
         A list of channel types that should be allowed.
         By default these are discerned from the annotation.
     lt: :class:`float`
@@ -1267,7 +1267,7 @@ def inject(
     *,
     autocompleters: dict[str, Callable] | None = None,
 ) -> Any:
-    """A special function to use the provided function for injections.
+    r"""A special function to use the provided function for injections.
     This should be assigned to a parameter of a function representing your slash command.
 
     .. versionadded:: 2.3
@@ -1279,7 +1279,7 @@ def inject(
     ----------
     function: Callable
         The injection function.
-    autocompleters: :class:`dict`\\[:class:`str`, Callable]
+    autocompleters: :class:`dict`\[:class:`str`, Callable]
         A mapping of the injection's option names to their respective autocompleters.
 
         See also :func:`Injection.autocomplete`.
@@ -1304,21 +1304,21 @@ def injection(
     *,
     autocompleters: dict[str, Callable] | None = None,
 ) -> Callable[[Callable[..., Any]], Any]:
-    """Decorator interface for :func:`inject`.
+    r"""Decorator interface for :func:`inject`.
     You can then assign this value to your slash commands' parameters.
 
     .. versionadded:: 2.6
 
     Parameters
     ----------
-    autocompleters: :class:`dict`\\[:class:`str`, Callable]
+    autocompleters: :class:`dict`\[:class:`str`, Callable]
         A mapping of the injection's option names to their respective autocompleters.
 
         See also :func:`Injection.autocomplete`.
 
     Returns
     -------
-    :class:`~collections.abc.Callable`\\[[:class:`~collections.abc.Callable`\\[..., :data:`~typing.Any`]], :class:`Injection`]
+    :class:`~collections.abc.Callable`\[[:class:`~collections.abc.Callable`\[..., :data:`~typing.Any`]], :class:`Injection`]
         Decorator which turns your injection function into actual :class:`Injection`.
 
         .. note::
@@ -1335,14 +1335,14 @@ def injection(
 
 
 def option_enum(choices: dict[str, TChoice] | list[TChoice], **kwargs: TChoice) -> type[TChoice]:
-    """A utility function to create an enum type.
+    r"""A utility function to create an enum type.
     Returns a new :class:`~enum.Enum` based on the provided parameters.
 
     .. versionadded:: 2.1
 
     Parameters
     ----------
-    choices: :class:`dict`\\[:class:`str`, :class:`Any`] | :class:`list`\\[:class:`Any`]
+    choices: :class:`dict`\[:class:`str`, :class:`Any`] | :class:`list`\[:class:`Any`]
         A name/value mapping of choices, or a list of values whose stringified representations
         will be used as the names.
     **kwargs

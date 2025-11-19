@@ -247,7 +247,7 @@ class Component:
 
 
 class ActionRow(Component, Generic[ActionRowChildComponentT]):
-    """Represents an action row.
+    r"""Represents an action row.
 
     This is a component that holds up to 5 children components in a row.
 
@@ -257,7 +257,7 @@ class ActionRow(Component, Generic[ActionRowChildComponentT]):
 
     Attributes
     ----------
-    children: :class:`list`\\[:class:`Button` | :class:`BaseSelectMenu` | :class:`TextInput`]
+    children: :class:`list`\[:class:`Button` | :class:`BaseSelectMenu` | :class:`TextInput`]
         The children components that this holds, if any.
     id: :class:`int`
         The numeric identifier for the component.
@@ -380,7 +380,7 @@ class Button(Component):
 
 
 class BaseSelectMenu(Component):
-    """Represents an abstract select menu from the Discord Bot UI Kit.
+    r"""Represents an abstract select menu from the Discord Bot UI Kit.
 
     A select menu is functionally the same as a dropdown, however
     on mobile it renders a bit differently.
@@ -407,11 +407,11 @@ class BaseSelectMenu(Component):
     max_values: :class:`int`
         The maximum number of items that must be chosen for this select menu.
         Defaults to 1 and must be between 1 and 25.
-    options: :class:`list`\\[:class:`SelectOption`]
+    options: :class:`list`\[:class:`SelectOption`]
         A list of options that can be selected in this select menu.
     disabled: :class:`bool`
         Whether the select menu is disabled or not.
-    default_values: :class:`list`\\[:class:`SelectDefaultValue`]
+    default_values: :class:`list`\[:class:`SelectDefaultValue`]
         The list of values (users/roles/channels) that are selected by default.
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
         Only available for auto-populated select menus.
@@ -484,7 +484,7 @@ class BaseSelectMenu(Component):
 
 
 class StringSelectMenu(BaseSelectMenu):
-    """Represents a string select menu from the Discord Bot UI Kit.
+    r"""Represents a string select menu from the Discord Bot UI Kit.
 
     .. note::
         The user constructible and usable type to create a
@@ -509,7 +509,7 @@ class StringSelectMenu(BaseSelectMenu):
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select menu is disabled or not.
-    options: :class:`list`\\[:class:`SelectOption`]
+    options: :class:`list`\[:class:`SelectOption`]
         A list of options that can be selected in this select menu.
     required: :class:`bool`
         Whether the select menu is required. Only applies to components in modals.
@@ -548,7 +548,7 @@ SelectMenu = StringSelectMenu  # backwards compatibility
 
 
 class UserSelectMenu(BaseSelectMenu):
-    """Represents a user select menu from the Discord Bot UI Kit.
+    r"""Represents a user select menu from the Discord Bot UI Kit.
 
     .. note::
         The user constructible and usable type to create a
@@ -570,7 +570,7 @@ class UserSelectMenu(BaseSelectMenu):
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select menu is disabled or not.
-    default_values: :class:`list`\\[:class:`SelectDefaultValue`]
+    default_values: :class:`list`\[:class:`SelectDefaultValue`]
         The list of values (users/members) that are selected by default.
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
@@ -599,7 +599,7 @@ class UserSelectMenu(BaseSelectMenu):
 
 
 class RoleSelectMenu(BaseSelectMenu):
-    """Represents a role select menu from the Discord Bot UI Kit.
+    r"""Represents a role select menu from the Discord Bot UI Kit.
 
     .. note::
         The user constructible and usable type to create a
@@ -621,7 +621,7 @@ class RoleSelectMenu(BaseSelectMenu):
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select menu is disabled or not.
-    default_values: :class:`list`\\[:class:`SelectDefaultValue`]
+    default_values: :class:`list`\[:class:`SelectDefaultValue`]
         The list of values (roles) that are selected by default.
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
@@ -650,7 +650,7 @@ class RoleSelectMenu(BaseSelectMenu):
 
 
 class MentionableSelectMenu(BaseSelectMenu):
-    """Represents a mentionable (user/member/role) select menu from the Discord Bot UI Kit.
+    r"""Represents a mentionable (user/member/role) select menu from the Discord Bot UI Kit.
 
     .. note::
         The user constructible and usable type to create a
@@ -672,7 +672,7 @@ class MentionableSelectMenu(BaseSelectMenu):
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select menu is disabled or not.
-    default_values: :class:`list`\\[:class:`SelectDefaultValue`]
+    default_values: :class:`list`\[:class:`SelectDefaultValue`]
         The list of values (users/roles) that are selected by default.
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
@@ -701,7 +701,7 @@ class MentionableSelectMenu(BaseSelectMenu):
 
 
 class ChannelSelectMenu(BaseSelectMenu):
-    """Represents a channel select menu from the Discord Bot UI Kit.
+    r"""Represents a channel select menu from the Discord Bot UI Kit.
 
     .. note::
         The user constructible and usable type to create a
@@ -723,10 +723,10 @@ class ChannelSelectMenu(BaseSelectMenu):
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select menu is disabled or not.
-    channel_types: :class:`list`\\[:class:`ChannelType`] | :data:`None`
+    channel_types: :class:`list`\[:class:`ChannelType`] | :data:`None`
         A list of channel types that can be selected in this select menu.
         If :data:`None`, channels of all types may be selected.
-    default_values: :class:`list`\\[:class:`SelectDefaultValue`]
+    default_values: :class:`list`\[:class:`SelectDefaultValue`]
         The list of values (channels) that are selected by default.
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
@@ -1001,7 +1001,7 @@ class TextInput(Component):
 
 
 class Section(Component):
-    """Represents a section from the Discord Bot UI Kit (v2).
+    r"""Represents a section from the Discord Bot UI Kit (v2).
 
     This allows displaying an accessory (thumbnail or button) next to a block of text.
 
@@ -1013,7 +1013,7 @@ class Section(Component):
 
     Attributes
     ----------
-    children: :class:`list`\\[:class:`TextDisplay`]
+    children: :class:`list`\[:class:`TextDisplay`]
         The text items in this section.
     accessory: :class:`Thumbnail` | :class:`Button`
         The accessory component displayed next to the section text.
@@ -1213,7 +1213,7 @@ class Thumbnail(Component):
 
 
 class MediaGallery(Component):
-    """Represents a media gallery from the Discord Bot UI Kit (v2).
+    r"""Represents a media gallery from the Discord Bot UI Kit (v2).
 
     This allows displaying up to 10 images in a gallery.
 
@@ -1225,7 +1225,7 @@ class MediaGallery(Component):
 
     Attributes
     ----------
-    items: :class:`list`\\[:class:`MediaGalleryItem`]
+    items: :class:`list`\[:class:`MediaGalleryItem`]
         The images in this gallery.
     id: :class:`int`
         The numeric identifier for the component.
@@ -1417,9 +1417,9 @@ class Separator(Component):
 
 
 class Container(Component):
-    """Represents a container from the Discord Bot UI Kit (v2).
+    r"""Represents a container from the Discord Bot UI Kit (v2).
 
-    This is visually similar to :class:`Embed`\\s, and contains other components.
+    This is visually similar to :class:`Embed`\s, and contains other components.
 
     .. note::
         The user constructible and usable type to create a
@@ -1429,7 +1429,7 @@ class Container(Component):
 
     Attributes
     ----------
-    children: :class:`list`\\[:class:`ActionRow` | :class:`Section` | :class:`TextDisplay` | :class:`MediaGallery` | :class:`FileComponent` | :class:`Separator`]
+    children: :class:`list`\[:class:`ActionRow` | :class:`Section` | :class:`TextDisplay` | :class:`MediaGallery` | :class:`FileComponent` | :class:`Separator`]
         The child components in this container.
     accent_colour: :class:`Colour` | :data:`None`
         The accent colour of the container. An alias exists under ``accent_color``.

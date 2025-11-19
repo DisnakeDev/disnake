@@ -450,7 +450,7 @@ class FFmpegOpusAudio(FFmpegAudio):
         method: str | Callable[[str, str], tuple[str | None, int | None]] | None = None,
         **kwargs: Any,
     ) -> Self:
-        """|coro|
+        r"""|coro|
 
         A factory method that creates a :class:`FFmpegOpusAudio` after probing
         the input source for audio codec and bitrate information.
@@ -481,7 +481,7 @@ class FFmpegOpusAudio(FFmpegAudio):
         ----------
         source
             Identical to the ``source`` parameter for the constructor.
-        method: :class:`str` | :class:`~collections.abc.Callable`\\[[:class:`str`, :class:`str`], :class:`tuple`\\[:class:`str` | :data:`None`, :class:`int` | :data:`None`]] | :data:`None`
+        method: :class:`str` | :class:`~collections.abc.Callable`\[[:class:`str`, :class:`str`], :class:`tuple`\[:class:`str` | :data:`None`, :class:`int` | :data:`None`]] | :data:`None`
             The probing method used to determine bitrate and codec information. As a string, valid
             values are ``native`` to use ffprobe (or avprobe) and ``fallback`` to use ffmpeg
             (or avconv).  As a callable, it must take two string arguments, ``source`` and
@@ -516,7 +516,7 @@ class FFmpegOpusAudio(FFmpegAudio):
         method: str | Callable[[str, str], tuple[str | None, int | None]] | None = None,
         executable: str | None = None,
     ) -> tuple[str | None, int | None]:
-        """|coro|
+        r"""|coro|
 
         Probes the input source for bitrate and codec information.
 
@@ -538,7 +538,7 @@ class FFmpegOpusAudio(FFmpegAudio):
 
         Returns
         -------
-        :class:`tuple`\\[:class:`str` | :data:`None`, :class:`int` | :data:`None`] | :data:`None`
+        :class:`tuple`\[:class:`str` | :data:`None`, :class:`int` | :data:`None`] | :data:`None`
             A 2-tuple with the codec and bitrate of the input source.
         """
         method = method or "native"

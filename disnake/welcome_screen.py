@@ -98,7 +98,7 @@ class WelcomeScreenChannel:
 
 
 class WelcomeScreen:
-    """Represents a Discord welcome screen for a :class:`Guild`.
+    r"""Represents a Discord welcome screen for a :class:`Guild`.
 
     .. versionadded:: 2.5
 
@@ -106,7 +106,7 @@ class WelcomeScreen:
     ----------
     description: :class:`str` | :data:`None`
         The guild description in the welcome screen.
-    channels: :class:`list`\\[:class:`WelcomeScreenChannel`]
+    channels: :class:`list`\[:class:`WelcomeScreenChannel`]
         The welcome screen's channels.
     """
 
@@ -150,7 +150,7 @@ class WelcomeScreen:
         channels: list[WelcomeScreenChannel] | None = MISSING,
         reason: str | None = None,
     ) -> WelcomeScreen:
-        """|coro|
+        r"""|coro|
 
         Edits the welcome screen.
 
@@ -165,7 +165,7 @@ class WelcomeScreen:
             Whether the welcome screen is enabled.
         description: :class:`str` | :data:`None`
             The new guild description in the welcome screen.
-        channels: :class:`list`\\[:class:`WelcomeScreenChannel`] | :data:`None`
+        channels: :class:`list`\[:class:`WelcomeScreenChannel`] | :data:`None`
             The new welcome channels.
         reason: :class:`str` | :data:`None`
             The reason for editing the welcome screen. Shows up on the audit log.

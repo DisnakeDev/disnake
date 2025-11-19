@@ -36,7 +36,7 @@ __all__ = (
 
 
 class InstallParams:
-    """Represents the installation parameters for the application, provided by Discord.
+    r"""Represents the installation parameters for the application, provided by Discord.
 
     .. versionadded:: 2.5
 
@@ -45,7 +45,7 @@ class InstallParams:
 
     Attributes
     ----------
-    scopes: :class:`list`\\[:class:`str`]
+    scopes: :class:`list`\[:class:`str`]
         The scopes requested by the application.
     permissions: :class:`Permissions`
         The permissions requested for the bot role.
@@ -163,7 +163,7 @@ class InstallTypeConfiguration:
 
 
 class AppInfo:
-    """Represents the application info for the bot provided by Discord.
+    r"""Represents the application info for the bot provided by Discord.
 
     Attributes
     ----------
@@ -186,7 +186,7 @@ class AppInfo:
     bot_require_code_grant: :class:`bool`
         Whether the bot requires the completion of the full oauth2 code
         grant flow to join.
-    rpc_origins: :class:`list`\\[:class:`str`] | :data:`None`
+    rpc_origins: :class:`list`\[:class:`str`] | :data:`None`
         A list of RPC origin URLs, if RPC is enabled.
     verify_key: :class:`str`
         The hex encoded key for verification in interactions and the
@@ -227,7 +227,7 @@ class AppInfo:
 
         .. versionadded:: 2.3
 
-    tags: :class:`list`\\[:class:`str`] | :data:`None`
+    tags: :class:`list`\[:class:`str`] | :data:`None`
         The application's tags.
 
         .. versionadded:: 2.5
@@ -264,7 +264,7 @@ class AppInfo:
         The approximate number of users that have authorized the app with OAuth2.
 
         .. versionadded:: 2.11
-    redirect_uris: :class:`list`\\[:class:`str`] | :data:`None`
+    redirect_uris: :class:`list`\[:class:`str`] | :data:`None`
         The application's OAuth2 redirect URIs.
 
         .. versionadded:: 2.11
@@ -284,7 +284,7 @@ class AppInfo:
 
         .. versionadded:: 2.11
 
-    event_webhooks_types: :class:`list`\\[:class:`str`] | :data:`None`
+    event_webhooks_types: :class:`list`\[:class:`str`] | :data:`None`
         The application's event webhook types, if any.
 
         .. versionadded:: 2.11
@@ -473,7 +473,7 @@ class AppInfo:
         event_webhooks_status: ApplicationEventWebhookStatus = MISSING,
         event_webhooks_types: Sequence[str] = MISSING,
     ) -> AppInfo:
-        """|coro|
+        r"""|coro|
 
         Edit's the application's information.
 
@@ -531,13 +531,13 @@ class AppInfo:
             Update the cover_image for rich presence integrations.
         interactions_endpoint_url: :class:`str` | :data:`None`
             The application's interactions endpoint URL.
-        tags: :class:`list`\\[:class:`str`]
+        tags: :class:`list`\[:class:`str`]
             The application's tags.
         event_webhooks_url: :class:`str` | :data:`None`
             The application's event webhooks URL.
         event_webhooks_status: :class:`ApplicationEventWebhookStatus`
             The application's event webhooks status.
-        event_webhooks_types: :class:`list`\\[:class:`str`] | :data:`None`
+        event_webhooks_types: :class:`list`\[:class:`str`] | :data:`None`
             The application's event webhook types. See `webhook event types <https://discord.com/developers/docs/events/webhook-events#event-types>`_
             for a list of valid events.
 
@@ -644,7 +644,7 @@ class AppInfo:
 
 
 class PartialAppInfo:
-    """Represents a partial AppInfo given by :func:`~disnake.abc.GuildChannel.create_invite`.
+    r"""Represents a partial AppInfo given by :func:`~disnake.abc.GuildChannel.create_invite`.
 
     .. versionadded:: 2.0
 
@@ -656,7 +656,7 @@ class PartialAppInfo:
         The application's name.
     description: :class:`str`
         The application's description.
-    rpc_origins: :class:`list`\\[:class:`str`] | :data:`None`
+    rpc_origins: :class:`list`\[:class:`str`] | :data:`None`
         A list of RPC origin URLs, if RPC is enabled.
     verify_key: :class:`str`
         The hex encoded key for verification in interactions and the
