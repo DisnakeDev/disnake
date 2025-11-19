@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Optional, Union
+from typing import TYPE_CHECKING, Any
 
-from .activity import BaseActivity, Spotify, create_activity
+from .activity import create_activity
 from .asset import Asset
 from .enums import Status, WidgetStyle, try_enum
 from .invite import Invite
@@ -15,6 +15,7 @@ if TYPE_CHECKING:
     import datetime
 
     from .abc import GuildChannel, Snowflake
+    from .activity import BaseActivity, Spotify
     from .guild import Guild
     from .state import ConnectionState
     from .types.widget import (
@@ -149,20 +150,20 @@ class WidgetMember(BaseUser):
         *,
         state: ConnectionState,
         data: WidgetMemberPayload,
-        connected_channel: Optional[WidgetChannel] = None,
+        connected_channel: WidgetChannel | None = None,
     ) -> None:
         super().__init__(state=state, data=data)
         self.status: Status = try_enum(Status, data.get("status"))
-        self.deafened: Optional[bool] = data.get("deaf", False) or data.get("self_deaf", False)
-        self.muted: Optional[bool] = data.get("mute", False) or data.get("self_mute", False)
-        self.suppress: Optional[bool] = data.get("suppress", False)
-        self._avatar_url: Optional[str] = data.get("avatar_url")
+        self.deafened: bool | None = data.get("deaf", False) or data.get("self_deaf", False)
+        self.muted: bool | None = data.get("mute", False) or data.get("self_mute", False)
+        self.suppress: bool | None = data.get("suppress", False)
+        self._avatar_url: str | None = data.get("avatar_url")
 
-        self.activity: Optional[Union[BaseActivity, Spotify]] = None
+        self.activity: BaseActivity | Spotify | None = None
         if activity := (data.get("activity") or data.get("game")):
             self.activity = create_activity(activity, state=state)
 
-        self.connected_channel: Optional[WidgetChannel] = connected_channel
+        self.connected_channel: WidgetChannel | None = connected_channel
 
     def __repr__(self) -> str:
         return f"<WidgetMember name={self.name!r} discriminator={self.discriminator!r}"
@@ -170,7 +171,7 @@ class WidgetMember(BaseUser):
     # overwrite base type's @property since widget members always seem to have `avatar: null`,
     # and instead a separate `avatar_url` field with a full url
     @property
-    def avatar(self) -> Optional[Asset]:
+    def avatar(self) -> Asset | None:
         """:class:`Asset` | :data:`None`: The user's avatar.
         The size can be chosen using :func:`Asset.with_size`, however the format is always
         static and cannot be changed through :func:`Asset.with_format` or similar methods.
@@ -209,13 +210,13 @@ class WidgetSettings:
         self._state: ConnectionState = state
         self.guild: Guild = guild
         self.enabled: bool = data["enabled"]
-        self.channel_id: Optional[int] = _get_as_snowflake(data, "channel_id")
+        self.channel_id: int | None = _get_as_snowflake(data, "channel_id")
 
     def __repr__(self) -> str:
         return f"<WidgetSettings enabled={self.enabled!r} channel_id={self.channel_id!r} guild={self.guild!r}>"
 
     @property
-    def channel(self) -> Optional[GuildChannel]:
+    def channel(self) -> GuildChannel | None:
         """:class:`abc.GuildChannel` | :data:`None`: The widget channel, if set."""
         return self.guild.get_channel(self.channel_id) if self.channel_id is not None else None
 
@@ -223,8 +224,8 @@ class WidgetSettings:
         self,
         *,
         enabled: bool = MISSING,
-        channel: Optional[Snowflake] = MISSING,
-        reason: Optional[str] = None,
+        channel: Snowflake | None = MISSING,
+        reason: str | None = None,
     ) -> WidgetSettings:
         """|coro|
 
@@ -260,7 +261,7 @@ class WidgetSettings:
 
 
 class Widget:
-    """Represents a :class:`Guild` widget.
+    r"""Represents a :class:`Guild` widget.
 
     .. collapse:: operations
 
@@ -282,9 +283,9 @@ class Widget:
         The guild's ID.
     name: :class:`str`
         The guild's name.
-    channels: :class:`list`\\[:class:`WidgetChannel`]
+    channels: :class:`list`\[:class:`WidgetChannel`]
         The publicly accessible voice and stage channels in the guild.
-    members: :class:`list`\\[:class:`WidgetMember`]
+    members: :class:`list`\[:class:`WidgetMember`]
         The online members in the server. Offline members
         do not appear in the widget.
 
@@ -332,7 +333,7 @@ class Widget:
     def __str__(self) -> str:
         return self.json_url
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         if isinstance(other, Widget):
             return self.id == other.id
         return False
@@ -354,11 +355,11 @@ class Widget:
         return f"https://discord.com/api/guilds/{self.id}/widget.json"
 
     @property
-    def invite_url(self) -> Optional[str]:
+    def invite_url(self) -> str | None:
         """:class:`str` | :data:`None`: The invite URL for the guild, if available."""
         return self._invite
 
-    async def fetch_invite(self, *, with_counts: bool = True) -> Optional[Invite]:
+    async def fetch_invite(self, *, with_counts: bool = True) -> Invite | None:
         """|coro|
 
         Retrieves an :class:`Invite` from the widget's invite URL.
@@ -392,8 +393,8 @@ class Widget:
         self,
         *,
         enabled: bool = MISSING,
-        channel: Optional[Snowflake] = MISSING,
-        reason: Optional[str] = None,
+        channel: Snowflake | None = MISSING,
+        reason: str | None = None,
     ) -> None:
         """|coro|
 

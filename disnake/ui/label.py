@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, ClassVar, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, ClassVar, TypeAlias, cast
 
 from ..components import Label as LabelComponent
 from ..enums import ComponentType
@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from .file_upload import FileUpload
     from .text_input import TextInput
 
-    LabelChildUIComponent = Union[TextInput, FileUpload, AnySelect[Any]]
+    LabelChildUIComponent: TypeAlias = TextInput | FileUpload | AnySelect[Any]
 
 __all__ = ("Label",)
 
@@ -40,9 +40,10 @@ class Label(UIComponent):
     description: :class:`str` | :data:`None`
         The description text for the label.
     id: :class:`int`
-        The numeric identifier for the component. Must be unique within the message.
+        The numeric identifier for the component. Must be unique within a modal.
+        This is always present in components received from the API.
         If set to ``0`` (the default) when sending a component, the API will assign
-        sequential identifiers to the components in the message.
+        sequential identifiers to the components in the modal.
 
     Attributes
     ----------
@@ -65,13 +66,13 @@ class Label(UIComponent):
         text: str,
         component: LabelChildUIComponent,
         *,
-        description: Optional[str] = None,
+        description: str | None = None,
         id: int = 0,
     ) -> None:
         self._id: int = id
 
         self.text: str = text
-        self.description: Optional[str] = description
+        self.description: str | None = description
         self.component: LabelChildUIComponent = ensure_ui_component(component)
 
     # these are reimplemented here to store the value in a separate attribute,

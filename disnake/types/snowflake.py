@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-from typing import Union
+from typing import TypeAlias
 
-Snowflake = Union[str, int]
-SnowflakeList = Union[list[str], list[int]]  # keep separate for variance
+Snowflake: TypeAlias = str | int
+SnowflakeList: TypeAlias = list[str] | list[int]  # keep separate for variance

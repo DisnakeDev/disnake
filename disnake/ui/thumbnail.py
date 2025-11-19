@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, Optional
+from typing import TYPE_CHECKING, ClassVar
 
-from ..components import Thumbnail as ThumbnailComponent, UnfurledMediaItem, handle_media_item_input
+from ..components import Thumbnail as ThumbnailComponent, handle_media_item_input
 from ..enums import ComponentType
 from ..utils import MISSING
 from .item import UIComponent
@@ -12,7 +12,7 @@ from .item import UIComponent
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from ..components import MediaItemInput
+    from ..components import MediaItemInput, UnfurledMediaItem
 
 __all__ = ("Thumbnail",)
 
@@ -34,7 +34,8 @@ class Thumbnail(UIComponent):
     spoiler: :class:`bool`
         Whether the thumbnail is marked as a spoiler. Defaults to ``False``.
     id: :class:`int`
-        The numeric identifier for the component. Must be unique within the message.
+        The numeric identifier for the component. Must be unique within a message.
+        This is always present in components received from the API.
         If set to ``0`` (the default) when sending a component, the API will assign
         sequential identifiers to the components in the message.
     """
@@ -50,7 +51,7 @@ class Thumbnail(UIComponent):
     def __init__(
         self,
         media: MediaItemInput,
-        description: Optional[str] = None,
+        description: str | None = None,
         *,
         spoiler: bool = False,
         id: int = 0,
@@ -73,12 +74,12 @@ class Thumbnail(UIComponent):
         self._underlying.media = handle_media_item_input(value)
 
     @property
-    def description(self) -> Optional[str]:
+    def description(self) -> str | None:
         """:class:`str` | :data:`None`: The thumbnail's description ("alt text"), if any."""
         return self._underlying.description
 
     @description.setter
-    def description(self, value: Optional[str]) -> None:
+    def description(self, value: str | None) -> None:
         self._underlying.description = value
 
     @property

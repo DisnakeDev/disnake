@@ -2,14 +2,15 @@
 
 from __future__ import annotations
 
-import datetime
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from .enums import EntitlementType, try_enum
 from .mixins import Hashable
 from .utils import _get_as_snowflake, parse_time, snowflake_time, utcnow
 
 if TYPE_CHECKING:
+    import datetime
+
     from .guild import Guild
     from .state import ConnectionState
     from .types.entitlement import Entitlement as EntitlementPayload
@@ -20,7 +21,7 @@ __all__ = ("Entitlement",)
 
 
 class Entitlement(Hashable):
-    """Represents an entitlement.
+    r"""Represents an entitlement.
 
     This is usually retrieved using :meth:`Client.entitlements`, from
     :attr:`Interaction.entitlements` when using interactions, or provided by
@@ -36,11 +37,11 @@ class Entitlement(Hashable):
 
         .. describe:: x == y
 
-            Checks if two :class:`Entitlement`\\s are equal.
+            Checks if two :class:`Entitlement`\s are equal.
 
         .. describe:: x != y
 
-            Checks if two :class:`Entitlement`\\s are not equal.
+            Checks if two :class:`Entitlement`\s are not equal.
 
         .. describe:: hash(x)
 
@@ -99,14 +100,14 @@ class Entitlement(Hashable):
 
         self.id: int = int(data["id"])
         self.sku_id: int = int(data["sku_id"])
-        self.user_id: Optional[int] = _get_as_snowflake(data, "user_id")
-        self.guild_id: Optional[int] = _get_as_snowflake(data, "guild_id")
+        self.user_id: int | None = _get_as_snowflake(data, "user_id")
+        self.guild_id: int | None = _get_as_snowflake(data, "guild_id")
         self.application_id: int = int(data["application_id"])
         self.type: EntitlementType = try_enum(EntitlementType, data["type"])
         self.deleted: bool = data.get("deleted", False)
         self.consumed: bool = data.get("consumed", False)
-        self.starts_at: Optional[datetime.datetime] = parse_time(data.get("starts_at"))
-        self.ends_at: Optional[datetime.datetime] = parse_time(data.get("ends_at"))
+        self.starts_at: datetime.datetime | None = parse_time(data.get("starts_at"))
+        self.ends_at: datetime.datetime | None = parse_time(data.get("ends_at"))
 
     def __repr__(self) -> str:
         # presumably one of these is set
@@ -124,14 +125,14 @@ class Entitlement(Hashable):
         return snowflake_time(self.id)
 
     @property
-    def guild(self) -> Optional[Guild]:
+    def guild(self) -> Guild | None:
         """:class:`Guild` | :data:`None`: The guild that is granted access to
         this entitlement's SKU, if applicable.
         """
         return self._state._get_guild(self.guild_id)
 
     @property
-    def user(self) -> Optional[User]:
+    def user(self) -> User | None:
         """:class:`User` | :data:`None`: The user that is granted access to
         this entitlement's SKU, if applicable.
 

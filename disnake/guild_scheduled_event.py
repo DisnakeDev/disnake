@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime
-from typing import TYPE_CHECKING, Any, Literal, Optional, overload
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 from .asset import Asset
 from .enums import (
@@ -25,6 +24,8 @@ from .utils import (
 )
 
 if TYPE_CHECKING:
+    from datetime import datetime
+
     from .abc import GuildChannel, Snowflake
     from .asset import AssetBytes
     from .guild import Guild
@@ -54,8 +55,8 @@ class GuildScheduledEventMetadata:
 
     __slots__ = ("location",)
 
-    def __init__(self, *, location: Optional[str] = None) -> None:
-        self.location: Optional[str] = location
+    def __init__(self, *, location: str | None = None) -> None:
+        self.location: str | None = location
 
     def __repr__(self) -> str:
         return f"<GuildScheduledEventMetadata location={self.location!r}>"
@@ -158,12 +159,12 @@ class GuildScheduledEvent(Hashable):
     def _update(self, data: GuildScheduledEventPayload) -> None:
         self.id: int = int(data["id"])
         self.guild_id: int = int(data["guild_id"])
-        self.channel_id: Optional[int] = _get_as_snowflake(data, "channel_id")
-        self.creator_id: Optional[int] = _get_as_snowflake(data, "creator_id")
+        self.channel_id: int | None = _get_as_snowflake(data, "channel_id")
+        self.creator_id: int | None = _get_as_snowflake(data, "creator_id")
         self.name: str = data["name"]
-        self.description: Optional[str] = data.get("description")
+        self.description: str | None = data.get("description")
         self.scheduled_start_time: datetime = parse_time(data["scheduled_start_time"])
-        self.scheduled_end_time: Optional[datetime] = parse_time(data["scheduled_end_time"])
+        self.scheduled_end_time: datetime | None = parse_time(data["scheduled_end_time"])
         self.privacy_level: GuildScheduledEventPrivacyLevel = try_enum(
             GuildScheduledEventPrivacyLevel, data["privacy_level"]
         )
@@ -171,22 +172,22 @@ class GuildScheduledEvent(Hashable):
         self.entity_type: GuildScheduledEventEntityType = try_enum(
             GuildScheduledEventEntityType, data["entity_type"]
         )
-        self.entity_id: Optional[int] = _get_as_snowflake(data, "entity_id")
+        self.entity_id: int | None = _get_as_snowflake(data, "entity_id")
 
         metadata = data.get("entity_metadata")
-        self.entity_metadata: Optional[GuildScheduledEventMetadata] = (
+        self.entity_metadata: GuildScheduledEventMetadata | None = (
             None if metadata is None else GuildScheduledEventMetadata.from_dict(metadata)
         )
 
         creator_data = data.get("creator")
-        self.creator: Optional[User]
+        self.creator: User | None
         if creator_data is not None:
             self.creator = self._state.create_user(creator_data)
         else:
             self.creator = self._state.get_user(self.creator_id)
 
-        self.user_count: Optional[int] = data.get("user_count")
-        self._image: Optional[str] = data.get("image")
+        self.user_count: int | None = data.get("user_count")
+        self._image: str | None = data.get("image")
 
     def __repr__(self) -> str:
         attrs = (
@@ -226,12 +227,12 @@ class GuildScheduledEvent(Hashable):
         return f"https://discord.com/events/{self.guild_id}/{self.id}"
 
     @cached_slot_property("_cs_guild")
-    def guild(self) -> Optional[Guild]:
+    def guild(self) -> Guild | None:
         """:class:`Guild` | :data:`None`: The guild which the guild scheduled event belongs to."""
         return self._state._get_guild(self.guild_id)
 
     @cached_slot_property("_cs_channel")
-    def channel(self) -> Optional[GuildChannel]:
+    def channel(self) -> GuildChannel | None:
         """:class:`abc.GuildChannel` | :data:`None`: The channel in which the guild scheduled event will be hosted.
 
         This will be :data:`None` if :attr:`entity_type` is :class:`GuildScheduledEventEntityType.external`.
@@ -242,7 +243,7 @@ class GuildScheduledEvent(Hashable):
         return None if guild is None else guild.get_channel(self.channel_id)
 
     @property
-    def image(self) -> Optional[Asset]:
+    def image(self) -> Asset | None:
         """:class:`Asset` | :data:`None`: The cover image asset of the guild scheduled event, if available."""
         if self._image is None:
             return None
@@ -276,15 +277,15 @@ class GuildScheduledEvent(Hashable):
         self,
         *,
         name: str = ...,
-        description: Optional[str] = ...,
-        image: Optional[AssetBytes] = ...,
-        channel: Optional[Snowflake] = ...,
+        description: str | None = ...,
+        image: AssetBytes | None = ...,
+        channel: Snowflake | None = ...,
         privacy_level: GuildScheduledEventPrivacyLevel = ...,
         scheduled_start_time: datetime = ...,
-        scheduled_end_time: Optional[datetime] = ...,
-        entity_metadata: Optional[GuildScheduledEventMetadata] = ...,
+        scheduled_end_time: datetime | None = ...,
+        entity_metadata: GuildScheduledEventMetadata | None = ...,
         status: GuildScheduledEventStatus = ...,
-        reason: Optional[str] = ...,
+        reason: str | None = ...,
     ) -> GuildScheduledEvent: ...
 
     # new entity_type is `external`, no channel
@@ -295,14 +296,14 @@ class GuildScheduledEvent(Hashable):
         entity_type: Literal[GuildScheduledEventEntityType.external],
         channel: None = ...,
         name: str = ...,
-        description: Optional[str] = ...,
-        image: Optional[AssetBytes] = ...,
+        description: str | None = ...,
+        image: AssetBytes | None = ...,
         privacy_level: GuildScheduledEventPrivacyLevel = ...,
         scheduled_start_time: datetime = ...,
         scheduled_end_time: datetime = ...,
         entity_metadata: GuildScheduledEventMetadata = ...,
         status: GuildScheduledEventStatus = ...,
-        reason: Optional[str] = ...,
+        reason: str | None = ...,
     ) -> GuildScheduledEvent: ...
 
     # new entity_type is `voice` or `stage_instance`, no entity_metadata
@@ -315,14 +316,14 @@ class GuildScheduledEvent(Hashable):
             GuildScheduledEventEntityType.stage_instance,
         ],
         name: str = ...,
-        description: Optional[str] = ...,
-        image: Optional[AssetBytes] = ...,
+        description: str | None = ...,
+        image: AssetBytes | None = ...,
         channel: Snowflake = ...,
         privacy_level: GuildScheduledEventPrivacyLevel = ...,
         scheduled_start_time: datetime = ...,
-        scheduled_end_time: Optional[datetime] = ...,
+        scheduled_end_time: datetime | None = ...,
         status: GuildScheduledEventStatus = ...,
-        reason: Optional[str] = ...,
+        reason: str | None = ...,
     ) -> GuildScheduledEvent: ...
 
     # channel=None, no entity_type
@@ -332,14 +333,14 @@ class GuildScheduledEvent(Hashable):
         *,
         channel: None,
         name: str = ...,
-        description: Optional[str] = ...,
-        image: Optional[AssetBytes] = ...,
+        description: str | None = ...,
+        image: AssetBytes | None = ...,
         privacy_level: GuildScheduledEventPrivacyLevel = ...,
         scheduled_start_time: datetime = ...,
         scheduled_end_time: datetime = ...,
         entity_metadata: GuildScheduledEventMetadata = ...,
         status: GuildScheduledEventStatus = ...,
-        reason: Optional[str] = ...,
+        reason: str | None = ...,
     ) -> GuildScheduledEvent: ...
 
     # valid channel, no entity_type
@@ -349,29 +350,29 @@ class GuildScheduledEvent(Hashable):
         *,
         channel: Snowflake,
         name: str = ...,
-        description: Optional[str] = ...,
-        image: Optional[AssetBytes] = ...,
+        description: str | None = ...,
+        image: AssetBytes | None = ...,
         privacy_level: GuildScheduledEventPrivacyLevel = ...,
         scheduled_start_time: datetime = ...,
-        scheduled_end_time: Optional[datetime] = ...,
+        scheduled_end_time: datetime | None = ...,
         status: GuildScheduledEventStatus = ...,
-        reason: Optional[str] = ...,
+        reason: str | None = ...,
     ) -> GuildScheduledEvent: ...
 
     async def edit(
         self,
         *,
         name: str = MISSING,
-        description: Optional[str] = MISSING,
-        image: Optional[AssetBytes] = MISSING,
-        channel: Optional[Snowflake] = MISSING,
+        description: str | None = MISSING,
+        image: AssetBytes | None = MISSING,
+        channel: Snowflake | None = MISSING,
         privacy_level: GuildScheduledEventPrivacyLevel = MISSING,
         scheduled_start_time: datetime = MISSING,
-        scheduled_end_time: Optional[datetime] = MISSING,
+        scheduled_end_time: datetime | None = MISSING,
         entity_type: GuildScheduledEventEntityType = MISSING,
-        entity_metadata: Optional[GuildScheduledEventMetadata] = MISSING,
+        entity_metadata: GuildScheduledEventMetadata | None = MISSING,
         status: GuildScheduledEventStatus = MISSING,
-        reason: Optional[str] = None,
+        reason: str | None = None,
     ) -> GuildScheduledEvent:
         """|coro|
 
@@ -525,7 +526,7 @@ class GuildScheduledEvent(Hashable):
         )
         return GuildScheduledEvent(state=self._state, data=data)
 
-    async def start(self, *, reason: Optional[str] = None) -> GuildScheduledEvent:
+    async def start(self, *, reason: str | None = None) -> GuildScheduledEvent:
         """|coro|
 
         Starts the guild scheduled event.
@@ -560,7 +561,7 @@ class GuildScheduledEvent(Hashable):
             raise ValueError(msg)
         return await self._edit_status(GuildScheduledEventStatus.active, reason=reason)
 
-    async def end(self, *, reason: Optional[str] = None) -> GuildScheduledEvent:
+    async def end(self, *, reason: str | None = None) -> GuildScheduledEvent:
         """|coro|
 
         Ends the guild scheduled event.
@@ -595,7 +596,7 @@ class GuildScheduledEvent(Hashable):
             raise ValueError(msg)
         return await self._edit_status(GuildScheduledEventStatus.completed, reason=reason)
 
-    async def cancel(self, *, reason: Optional[str] = None) -> GuildScheduledEvent:
+    async def cancel(self, *, reason: str | None = None) -> GuildScheduledEvent:
         """|coro|
 
         Cancels the guild scheduled event.
@@ -632,7 +633,7 @@ class GuildScheduledEvent(Hashable):
 
     # shortcut for editing just the event status, bypasses other edit logic
     async def _edit_status(
-        self, status: GuildScheduledEventStatus, *, reason: Optional[str]
+        self, status: GuildScheduledEventStatus, *, reason: str | None
     ) -> GuildScheduledEvent:
         data = await self._state.http.edit_guild_scheduled_event(
             guild_id=self.guild_id,
@@ -645,10 +646,10 @@ class GuildScheduledEvent(Hashable):
     def fetch_users(
         self,
         *,
-        limit: Optional[int] = None,
+        limit: int | None = None,
         with_members: bool = True,
-        before: Optional[Snowflake] = None,
-        after: Optional[Snowflake] = None,
+        before: Snowflake | None = None,
+        after: Snowflake | None = None,
     ) -> GuildScheduledEventUserIterator:
         """|coro|
 

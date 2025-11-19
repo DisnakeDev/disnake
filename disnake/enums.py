@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import types
-from collections.abc import Iterator
 from functools import total_ordering
 from typing import (
     TYPE_CHECKING,
@@ -10,11 +9,12 @@ from typing import (
     ClassVar,
     NamedTuple,
     NoReturn,
-    Optional,
     TypeVar,
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
+
     from typing_extensions import Self
 
 __all__ = (
@@ -512,7 +512,7 @@ class SpeakingState(Enum):
 
 
 class VerificationLevel(Enum, comparable=True):
-    """Specifies a :class:`Guild`\\'s verification level, which is the criteria in
+    r"""Specifies a :class:`Guild`\'s verification level, which is the criteria in
     which a member must meet before being able to send messages to the guild.
 
     .. collapse:: operations
@@ -557,7 +557,7 @@ class VerificationLevel(Enum, comparable=True):
 
 
 class ContentFilter(Enum, comparable=True):
-    """Specifies a :class:`Guild`\\'s explicit content filter, which is the machine
+    r"""Specifies a :class:`Guild`\'s explicit content filter, which is the machine
     learning algorithms that Discord uses to detect if an image contains NSFW content.
 
     .. collapse:: operations
@@ -594,7 +594,7 @@ class ContentFilter(Enum, comparable=True):
 
 
 class Status(Enum):
-    """Specifies a :class:`Member`\\'s status."""
+    r"""Specifies a :class:`Member`\'s status."""
 
     online = "online"
     """The member is online."""
@@ -711,7 +711,7 @@ class AuditLogActionCategory(Enum):
 # NOTE: these fields are only fully documented in audit_logs.rst,
 # as the docstrings alone would be ~1000-1500 additional lines
 class AuditLogAction(Enum):
-    """Represents the type of action being done for a :class:`AuditLogEntry`\\,
+    r"""Represents the type of action being done for a :class:`AuditLogEntry`\,
     which is retrievable via :meth:`Guild.audit_logs` or via the :func:`on_audit_log_entry_create` event.
     """
 
@@ -779,9 +779,9 @@ class AuditLogAction(Enum):
     # fmt: on
 
     @property
-    def category(self) -> Optional[AuditLogActionCategory]:
+    def category(self) -> AuditLogActionCategory | None:
         # fmt: off
-        lookup: dict[AuditLogAction, Optional[AuditLogActionCategory]] = {
+        lookup: dict[AuditLogAction, AuditLogActionCategory | None] = {
             AuditLogAction.guild_update:                          AuditLogActionCategory.update,
             AuditLogAction.channel_create:                        AuditLogActionCategory.create,
             AuditLogAction.channel_update:                        AuditLogActionCategory.update,
@@ -847,7 +847,7 @@ class AuditLogAction(Enum):
         return lookup[self]
 
     @property
-    def target_type(self) -> Optional[str]:
+    def target_type(self) -> str | None:
         v = self.value
         if v == -1:  # pyright: ignore[reportUnnecessaryComparison]
             return "all"
@@ -1745,7 +1745,7 @@ class ThreadSortOrder(Enum):
 
 
 class ThreadLayout(Enum):
-    """Represents the layout of threads in :class:`ForumChannel`\\s.
+    r"""Represents the layout of threads in :class:`ForumChannel`\s.
 
     .. versionadded:: 2.8
     """

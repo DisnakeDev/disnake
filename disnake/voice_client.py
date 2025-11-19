@@ -22,7 +22,7 @@ import logging
 import socket
 import struct
 import threading
-from typing import TYPE_CHECKING, Any, Callable, Optional
+from typing import TYPE_CHECKING, Any
 
 from . import opus, utils
 from .backoff import ExponentialBackoff
@@ -32,6 +32,8 @@ from .player import AudioPlayer, AudioSource
 from .utils import MISSING
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from . import abc
     from .client import Client
     from .guild import Guild
@@ -223,7 +225,7 @@ class VoiceClient(VoiceProtocol):
         self.timestamp: int = 0
         self.timeout: float = 0
         self._runner: asyncio.Task = MISSING
-        self._player: Optional[AudioPlayer] = None
+        self._player: AudioPlayer | None = None
         self.encoder: Encoder = MISSING
         self._lite_nonce: int = 0
         self.ws: DiscordVoiceWebSocket = MISSING
@@ -559,9 +561,9 @@ class VoiceClient(VoiceProtocol):
         )
 
     def play(
-        self, source: AudioSource, *, after: Optional[Callable[[Optional[Exception]], Any]] = None
+        self, source: AudioSource, *, after: Callable[[Exception | None], Any] | None = None
     ) -> None:
-        """Plays an :class:`AudioSource`.
+        r"""Plays an :class:`AudioSource`.
 
         The finalizer, ``after`` is called after the source has been exhausted
         or an error occurred.
@@ -574,7 +576,7 @@ class VoiceClient(VoiceProtocol):
         ----------
         source: :class:`AudioSource`
             The audio source we're reading from.
-        after: :class:`~collections.abc.Callable`\\[[:class:`Exception` | :data:`None`], :data:`~typing.Any`]
+        after: :class:`~collections.abc.Callable`\[[:class:`Exception` | :data:`None`], :data:`~typing.Any`]
             The finalizer that is called after the stream is exhausted.
             This function must have a single parameter, ``error``, that
             denotes an optional exception that was raised during playing.
@@ -631,7 +633,7 @@ class VoiceClient(VoiceProtocol):
             self._player.resume()
 
     @property
-    def source(self) -> Optional[AudioSource]:
+    def source(self) -> AudioSource | None:
         """:class:`AudioSource` | :data:`None`: The audio source being played, if playing.
 
         This property can also be used to change the audio source currently being played.

@@ -4,14 +4,11 @@ from __future__ import annotations
 
 import inspect
 import logging
-from collections.abc import Generator
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     ClassVar,
-    Optional,
-    Union,
+    TypeAlias,
 )
 
 import disnake
@@ -24,6 +21,8 @@ from .ctx_menus_core import InvokableMessageCommand, InvokableUserCommand
 from .slash_core import InvokableSlashCommand
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Generator
+
     from typing_extensions import Self
 
     from disnake.interactions import ApplicationCommandInteraction
@@ -33,7 +32,7 @@ if TYPE_CHECKING:
     from .context import Context
     from .core import Command
 
-    AnyBot = Union[Bot, AutoShardedBot, InteractionBot, AutoShardedInteractionBot]
+    AnyBot: TypeAlias = Bot | AutoShardedBot | InteractionBot | AutoShardedInteractionBot
 
 
 __all__ = (
@@ -51,7 +50,7 @@ def _cog_special_method(func: FuncT) -> FuncT:
 
 
 class CogMeta(type):
-    """A metaclass for defining a cog.
+    r"""A metaclass for defining a cog.
 
     Note that you should probably not use this directly. It is exposed
     purely for documentation purposes along with making custom metaclasses to intermix
@@ -92,7 +91,7 @@ class CogMeta(type):
 
         .. versionadded:: 1.6
 
-    command_attrs: :class:`dict`\\[:class:`str`, :data:`~typing.Any`]
+    command_attrs: :class:`dict`\[:class:`str`, :data:`~typing.Any`]
         A list of attributes to apply to every command inside this cog. The dictionary
         is passed into the :class:`Command` options at ``__init__``.
         If you specify attributes inside the command attribute in the class, it will
@@ -109,7 +108,7 @@ class CogMeta(type):
                 async def bar(self, ctx):
                     pass # hidden -> False
 
-    slash_command_attrs: :class:`dict`\\[:class:`str`, :data:`~typing.Any`]
+    slash_command_attrs: :class:`dict`\[:class:`str`, :data:`~typing.Any`]
         A list of attributes to apply to every slash command inside this cog. The dictionary
         is passed into the options of every :class:`InvokableSlashCommand` at ``__init__``.
         Usage of this kwarg is otherwise the same as with ``command_attrs``.
@@ -118,14 +117,14 @@ class CogMeta(type):
 
         .. versionadded:: 2.5
 
-    user_command_attrs: :class:`dict`\\[:class:`str`, :data:`~typing.Any`]
+    user_command_attrs: :class:`dict`\[:class:`str`, :data:`~typing.Any`]
         A list of attributes to apply to every user command inside this cog. The dictionary
         is passed into the options of every :class:`InvokableUserCommand` at ``__init__``.
         Usage of this kwarg is otherwise the same as with ``command_attrs``.
 
         .. versionadded:: 2.5
 
-    message_command_attrs: :class:`dict`\\[:class:`str`, :data:`~typing.Any`]
+    message_command_attrs: :class:`dict`\[:class:`str`, :data:`~typing.Any`]
         A list of attributes to apply to every message command inside this cog. The dictionary
         is passed into the options of every :class:`InvokableMessageCommand` at ``__init__``.
         Usage of this kwarg is otherwise the same as with ``command_attrs``.
@@ -275,12 +274,12 @@ class Cog(metaclass=CogMeta):
         return self
 
     def get_commands(self) -> list[Command[Self, ..., Any]]:
-        """Returns a list of commands the cog has.
+        r"""Returns a list of commands the cog has.
 
         Returns
         -------
-        :class:`list`\\[:class:`.Command`]
-            A :class:`list` of :class:`.Command`\\s that are
+        :class:`list`\[:class:`.Command`]
+            A :class:`list` of :class:`.Command`\s that are
             defined inside this cog.
 
             .. note::
@@ -290,12 +289,12 @@ class Cog(metaclass=CogMeta):
         return [c for c in self.__cog_commands__ if c.parent is None]
 
     def get_application_commands(self) -> list[InvokableApplicationCommand]:
-        """Returns a list of application commands the cog has.
+        r"""Returns a list of application commands the cog has.
 
         Returns
         -------
-        :class:`list`\\[:class:`.InvokableApplicationCommand`]
-            A :class:`list` of :class:`.InvokableApplicationCommand`\\s that are
+        :class:`list`\[:class:`.InvokableApplicationCommand`]
+            A :class:`list` of :class:`.InvokableApplicationCommand`\s that are
             defined inside this cog.
 
             .. note::
@@ -305,12 +304,12 @@ class Cog(metaclass=CogMeta):
         return list(self.__cog_app_commands__)
 
     def get_slash_commands(self) -> list[InvokableSlashCommand]:
-        """Returns a list of slash commands the cog has.
+        r"""Returns a list of slash commands the cog has.
 
         Returns
         -------
-        :class:`list`\\[:class:`.InvokableSlashCommand`]
-            A :class:`list` of :class:`.InvokableSlashCommand`\\s that are
+        :class:`list`\[:class:`.InvokableSlashCommand`]
+            A :class:`list` of :class:`.InvokableSlashCommand`\s that are
             defined inside this cog.
 
             .. note::
@@ -320,23 +319,23 @@ class Cog(metaclass=CogMeta):
         return [c for c in self.__cog_app_commands__ if isinstance(c, InvokableSlashCommand)]
 
     def get_user_commands(self) -> list[InvokableUserCommand]:
-        """Returns a list of user commands the cog has.
+        r"""Returns a list of user commands the cog has.
 
         Returns
         -------
-        :class:`list`\\[:class:`.InvokableUserCommand`]
-            A :class:`list` of :class:`.InvokableUserCommand`\\s that are
+        :class:`list`\[:class:`.InvokableUserCommand`]
+            A :class:`list` of :class:`.InvokableUserCommand`\s that are
             defined inside this cog.
         """
         return [c for c in self.__cog_app_commands__ if isinstance(c, InvokableUserCommand)]
 
     def get_message_commands(self) -> list[InvokableMessageCommand]:
-        """Returns a list of message commands the cog has.
+        r"""Returns a list of message commands the cog has.
 
         Returns
         -------
-        :class:`list`\\[:class:`.InvokableMessageCommand`]
-            A :class:`list` of :class:`.InvokableMessageCommand`\\s that are
+        :class:`list`\[:class:`.InvokableMessageCommand`]
+            A :class:`list` of :class:`.InvokableMessageCommand`\s that are
             defined inside this cog.
         """
         return [c for c in self.__cog_app_commands__ if isinstance(c, InvokableMessageCommand)]
@@ -355,7 +354,7 @@ class Cog(metaclass=CogMeta):
     def description(self, description: str) -> None:
         self.__cog_description__ = description
 
-    def walk_commands(self) -> Generator[Command[Self, ..., Any], None, None]:
+    def walk_commands(self) -> Generator[Command[Self, ..., Any]]:
         """An iterator that recursively walks through this cog's commands and subcommands.
 
         Yields
@@ -372,22 +371,22 @@ class Cog(metaclass=CogMeta):
                     yield from command.walk_commands()
 
     def get_listeners(self) -> list[tuple[str, Callable[..., Any]]]:
-        """Returns a :class:`list` of (name, function) listener pairs the cog has.
+        r"""Returns a :class:`list` of (name, function) listener pairs the cog has.
 
         Returns
         -------
-        :class:`list`\\[:class:`tuple`\\[:class:`str`, :ref:`coroutine function <coroutine>`]]
+        :class:`list`\[:class:`tuple`\[:class:`str`, :ref:`coroutine function <coroutine>`]]
             The listeners defined in this cog.
         """
         return [(name, getattr(self, method_name)) for name, method_name in self.__cog_listeners__]
 
     @classmethod
-    def _get_overridden_method(cls, method: FuncT) -> Optional[FuncT]:
+    def _get_overridden_method(cls, method: FuncT) -> FuncT | None:
         """Return None if the method is not overridden. Otherwise returns the overridden method."""
         return getattr(method.__func__, "__cog_special_method__", method)
 
     @classmethod
-    def listener(cls, name: Union[str, Event] = MISSING) -> Callable[[FuncT], FuncT]:
+    def listener(cls, name: str | Event = MISSING) -> Callable[[FuncT], FuncT]:
         """A decorator that marks a function as a listener.
 
         This is the cog equivalent of :meth:`.Bot.listen`.
