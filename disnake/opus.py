@@ -13,9 +13,7 @@ import sys
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     Literal,
-    Optional,
     TypedDict,
     TypeVar,
     overload,
@@ -25,6 +23,8 @@ from .errors import DiscordException
 from .utils import MISSING
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     T = TypeVar("T")
     BAND_CTL = Literal["narrow", "medium", "wide", "superwide", "full"]
     SIGNAL_CTL = Literal["auto", "voice", "music"]
@@ -126,7 +126,7 @@ def _err_ne(result: T, func: Callable[..., Any], args: list[Any]) -> T:
 # The third is the result type.
 # The fourth is the error handler.
 exported_functions: list[
-    tuple[str, Optional[list[type[ctypes._CData]]], Optional[type[ctypes._CData]], Any]
+    tuple[str, list[type[ctypes._CData]] | None, type[ctypes._CData] | None, Any]
 ] = [
     # Generic
     ("opus_get_version_string", [], ctypes.c_char_p, None),
@@ -463,7 +463,7 @@ class Decoder(_OpusStruct):
     @overload
     def decode(self, data: Literal[None], *, fec: Literal[False]) -> bytes: ...
 
-    def decode(self, data: Optional[bytes], *, fec: bool = False) -> bytes:
+    def decode(self, data: bytes | None, *, fec: bool = False) -> bytes:
         if data is None and fec:
             msg = "Invalid arguments: FEC cannot be used with null data"
             raise TypeError(msg)

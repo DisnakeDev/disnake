@@ -1,10 +1,12 @@
 # SPDX-License-Identifier: MIT
+from __future__ import annotations
 
-from typing import Literal, Optional, TypedDict
+from typing import TYPE_CHECKING, Literal, TypedDict
 
 from typing_extensions import NotRequired
 
-from .snowflake import Snowflake
+if TYPE_CHECKING:
+    from .snowflake import Snowflake
 
 PaletteType = Literal[
     "crimson",
@@ -41,21 +43,21 @@ class Collectibles(TypedDict, total=False):
 # but we made it optional because on certain circumstances the API
 # is not sending it (not sure if it's a bug, better safe than sorry)
 class UserPrimaryGuild(TypedDict, total=False):
-    identity_guild_id: Optional[Snowflake]
-    identity_enabled: Optional[bool]
-    tag: Optional[str]
-    badge: Optional[str]
+    identity_guild_id: Snowflake | None
+    identity_enabled: bool | None
+    tag: str | None
+    badge: str | None
 
 
 class PartialUser(TypedDict):
     id: Snowflake
     username: str
     discriminator: str  # may be removed in future API versions
-    global_name: NotRequired[Optional[str]]
-    avatar: Optional[str]
-    avatar_decoration_data: NotRequired[Optional[AvatarDecorationData]]
-    collectibles: NotRequired[Optional[Collectibles]]
-    primary_guild: NotRequired[Optional[UserPrimaryGuild]]
+    global_name: NotRequired[str | None]
+    avatar: str | None
+    avatar_decoration_data: NotRequired[AvatarDecorationData | None]
+    collectibles: NotRequired[Collectibles | None]
+    primary_guild: NotRequired[UserPrimaryGuild | None]
 
 
 PremiumType = Literal[0, 1, 2]
@@ -65,11 +67,11 @@ class User(PartialUser, total=False):
     bot: bool
     system: bool
     mfa_enabled: bool
-    banner: Optional[str]
-    accent_color: Optional[int]
+    banner: str | None
+    accent_color: int | None
     locale: str
     verified: bool
-    email: Optional[str]
+    email: str | None
     flags: int
     premium_type: PremiumType
     public_flags: int

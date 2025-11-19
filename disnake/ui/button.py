@@ -3,13 +3,13 @@
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING, Any, Callable, ClassVar, Optional, TypeVar, Union, overload
+from typing import TYPE_CHECKING, Any, ClassVar, TypeVar, overload
 
 from ..components import Button as ButtonComponent
 from ..enums import ButtonStyle, ComponentType
 from ..partial_emoji import PartialEmoji, _EmojiTag
 from ..utils import MISSING, iscoroutinefunction
-from .item import DecoratedItem, Item
+from .item import Item
 
 __all__ = (
     "Button",
@@ -17,10 +17,12 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from typing_extensions import ParamSpec, Self
 
     from ..emoji import Emoji
-    from .item import ItemCallbackType
+    from .item import DecoratedItem, ItemCallbackType
     from .view import View
 
 else:
@@ -28,7 +30,7 @@ else:
 
 B = TypeVar("B", bound="Button")
 B_co = TypeVar("B_co", bound="Button", covariant=True)
-V_co = TypeVar("V_co", bound="Optional[View]", covariant=True)
+V_co = TypeVar("V_co", bound="View | None", covariant=True)
 P = ParamSpec("P")
 
 
@@ -58,7 +60,8 @@ class Button(Item[V_co]):
 
         .. versionadded:: 2.11
     id: :class:`int`
-        The numeric identifier for the component. Must be unique within the message.
+        The numeric identifier for the component. Must be unique within a message.
+        This is always present in components received from the API.
         If set to ``0`` (the default) when sending a component, the API will assign
         sequential identifiers to the components in the message.
 
@@ -88,14 +91,14 @@ class Button(Item[V_co]):
         self: Button[None],
         *,
         style: ButtonStyle = ButtonStyle.secondary,
-        label: Optional[str] = None,
+        label: str | None = None,
         disabled: bool = False,
-        custom_id: Optional[str] = None,
-        url: Optional[str] = None,
-        emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
-        sku_id: Optional[int] = None,
+        custom_id: str | None = None,
+        url: str | None = None,
+        emoji: str | Emoji | PartialEmoji | None = None,
+        sku_id: int | None = None,
         id: int = 0,
-        row: Optional[int] = None,
+        row: int | None = None,
     ) -> None: ...
 
     @overload
@@ -103,28 +106,28 @@ class Button(Item[V_co]):
         self: Button[V_co],
         *,
         style: ButtonStyle = ButtonStyle.secondary,
-        label: Optional[str] = None,
+        label: str | None = None,
         disabled: bool = False,
-        custom_id: Optional[str] = None,
-        url: Optional[str] = None,
-        emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
-        sku_id: Optional[int] = None,
+        custom_id: str | None = None,
+        url: str | None = None,
+        emoji: str | Emoji | PartialEmoji | None = None,
+        sku_id: int | None = None,
         id: int = 0,
-        row: Optional[int] = None,
+        row: int | None = None,
     ) -> None: ...
 
     def __init__(
         self,
         *,
         style: ButtonStyle = ButtonStyle.secondary,
-        label: Optional[str] = None,
+        label: str | None = None,
         disabled: bool = False,
-        custom_id: Optional[str] = None,
-        url: Optional[str] = None,
-        emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
-        sku_id: Optional[int] = None,
+        custom_id: str | None = None,
+        url: str | None = None,
+        emoji: str | Emoji | PartialEmoji | None = None,
+        sku_id: int | None = None,
         id: int = 0,
-        row: Optional[int] = None,
+        row: int | None = None,
     ) -> None:
         super().__init__()
 
@@ -178,7 +181,7 @@ class Button(Item[V_co]):
         self._underlying.style = value
 
     @property
-    def custom_id(self) -> Optional[str]:
+    def custom_id(self) -> str | None:
         """:class:`str` | :data:`None`: The ID of the button that gets received during an interaction.
 
         If this button is for a URL or an SKU, it does not have a custom ID.
@@ -186,7 +189,7 @@ class Button(Item[V_co]):
         return self._underlying.custom_id
 
     @custom_id.setter
-    def custom_id(self, value: Optional[str]) -> None:
+    def custom_id(self, value: str | None) -> None:
         if value is not None and not isinstance(value, str):
             msg = "custom_id must be None or str"
             raise TypeError(msg)
@@ -194,12 +197,12 @@ class Button(Item[V_co]):
         self._underlying.custom_id = value
 
     @property
-    def url(self) -> Optional[str]:
+    def url(self) -> str | None:
         """:class:`str` | :data:`None`: The URL this button sends you to."""
         return self._underlying.url
 
     @url.setter
-    def url(self, value: Optional[str]) -> None:
+    def url(self, value: str | None) -> None:
         if value is not None and not isinstance(value, str):
             msg = "url must be None or str"
             raise TypeError(msg)
@@ -215,21 +218,21 @@ class Button(Item[V_co]):
         self._underlying.disabled = bool(value)
 
     @property
-    def label(self) -> Optional[str]:
+    def label(self) -> str | None:
         """:class:`str` | :data:`None`: The label of the button, if available."""
         return self._underlying.label
 
     @label.setter
-    def label(self, value: Optional[str]) -> None:
+    def label(self, value: str | None) -> None:
         self._underlying.label = str(value) if value is not None else value
 
     @property
-    def emoji(self) -> Optional[PartialEmoji]:
+    def emoji(self) -> PartialEmoji | None:
         """:class:`.PartialEmoji` | :data:`None`: The emoji of the button, if available."""
         return self._underlying.emoji
 
     @emoji.setter
-    def emoji(self, value: Optional[Union[str, Emoji, PartialEmoji]]) -> None:
+    def emoji(self, value: str | Emoji | PartialEmoji | None) -> None:
         if value is not None:
             if isinstance(value, str):
                 self._underlying.emoji = PartialEmoji.from_str(value)
@@ -242,7 +245,7 @@ class Button(Item[V_co]):
             self._underlying.emoji = None
 
     @property
-    def sku_id(self) -> Optional[int]:
+    def sku_id(self) -> int | None:
         """:class:`int` | :data:`None`: The ID of a purchasable SKU, for premium buttons.
 
         .. versionadded:: 2.11
@@ -250,7 +253,7 @@ class Button(Item[V_co]):
         return self._underlying.sku_id
 
     @sku_id.setter
-    def sku_id(self, value: Optional[int]) -> None:
+    def sku_id(self, value: int | None) -> None:
         if value is not None and not isinstance(value, int):
             msg = "sku_id must be None or int"
             raise TypeError(msg)
@@ -287,13 +290,13 @@ class Button(Item[V_co]):
 @overload
 def button(
     *,
-    label: Optional[str] = None,
-    custom_id: Optional[str] = None,
+    label: str | None = None,
+    custom_id: str | None = None,
     disabled: bool = False,
     style: ButtonStyle = ButtonStyle.secondary,
-    emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
+    emoji: str | Emoji | PartialEmoji | None = None,
     id: int = 0,
-    row: Optional[int] = None,
+    row: int | None = None,
 ) -> Callable[[ItemCallbackType[V_co, Button[V_co]]], DecoratedItem[Button[V_co]]]: ...
 
 
@@ -306,9 +309,9 @@ def button(
 def button(
     cls: Callable[..., B_co] = Button[Any], **kwargs: Any
 ) -> Callable[[ItemCallbackType[V_co, B_co]], DecoratedItem[B_co]]:
-    """A decorator that attaches a button to a component.
+    r"""A decorator that attaches a button to a component.
 
-    The function being decorated should have three parameters, ``self`` representing
+    The function being decorated should have three parameters: ``self`` representing
     the :class:`disnake.ui.View`, the :class:`disnake.ui.Button` that was
     interacted with, and the :class:`disnake.MessageInteraction`.
 
@@ -321,10 +324,10 @@ def button(
 
     Parameters
     ----------
-    cls: :class:`~collections.abc.Callable`\\[..., :class:`Button`]
-        A callable (may be a :class:`Button` subclass) to create a new instance of this component.
+    cls: :class:`~collections.abc.Callable`\[..., :class:`Button`]
+        A callable (such as a :class:`Button` subclass) returning an instance of a :class:`Button`.
         If provided, the other parameters described below do not apply.
-        Instead, this decorator will accept the same keywords as the passed callable/class does.
+        Instead, this decorator will accept the same keyword arguments as the passed callable does.
 
         .. versionadded:: 2.6
     label: :class:`str` | :data:`None`
@@ -340,9 +343,9 @@ def button(
         The emoji of the button. This can be in string form or a :class:`.PartialEmoji`
         or a full :class:`.Emoji`.
     id: :class:`int`
-        The numeric identifier for the component. Must be unique within the message.
+        The numeric identifier for the component. Must be unique within a view.
         If set to ``0`` (the default) when sending a component, the API will assign
-        sequential identifiers to the components in the message.
+        sequential identifiers to the components in the view.
 
         .. versionadded:: 2.11
     row: :class:`int` | :data:`None`
@@ -351,6 +354,12 @@ def button(
         like to control the relative positioning of the row then passing an index is advised.
         For example, row=1 will show up before row=2. Defaults to :data:`None`, which is automatic
         ordering. The row number must be between 0 and 4 (i.e. zero indexed).
+
+    Raises
+    ------
+    TypeError
+        The decorated function was not a coroutine function,
+        or the ``cls`` parameter was not a callable or a subclass of :class:`Button`.
     """
     if not callable(cls):
         msg = "cls argument must be callable"

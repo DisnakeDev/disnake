@@ -1,12 +1,14 @@
 # SPDX-License-Identifier: MIT
+from __future__ import annotations
 
-from typing import Literal, Optional, TypedDict
+from typing import TYPE_CHECKING, Literal, TypedDict
 
 from typing_extensions import NotRequired
 
-from .member import Member
-from .snowflake import Snowflake
-from .user import User
+if TYPE_CHECKING:
+    from .member import Member
+    from .snowflake import Snowflake
+    from .user import User
 
 GuildScheduledEventPrivacyLevel = Literal[2]
 GuildScheduledEventStatus = Literal[1, 2, 3, 4]
@@ -26,17 +28,17 @@ class GuildScheduledEventEntityMetadata(TypedDict, total=False):
 class GuildScheduledEvent(TypedDict):
     id: Snowflake
     guild_id: Snowflake
-    channel_id: Optional[Snowflake]
-    creator_id: NotRequired[Optional[Snowflake]]
+    channel_id: Snowflake | None
+    creator_id: NotRequired[Snowflake | None]
     name: str
-    description: NotRequired[Optional[str]]
+    description: NotRequired[str | None]
     scheduled_start_time: str
-    scheduled_end_time: Optional[str]
+    scheduled_end_time: str | None
     privacy_level: GuildScheduledEventPrivacyLevel
     status: GuildScheduledEventStatus
     entity_type: GuildScheduledEventEntityType
-    entity_id: Optional[Snowflake]
-    entity_metadata: Optional[GuildScheduledEventEntityMetadata]
+    entity_id: Snowflake | None
+    entity_metadata: GuildScheduledEventEntityMetadata | None
     creator: NotRequired[User]
     user_count: NotRequired[int]
-    image: NotRequired[Optional[str]]
+    image: NotRequired[str | None]

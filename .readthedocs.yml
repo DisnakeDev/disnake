@@ -12,9 +12,19 @@ build:
       - asdf plugin add uv
       - asdf install uv latest
       - asdf global uv latest
-      - UV_PROJECT_ENVIRONMENT=$READTHEDOCS_VIRTUALENV_PATH uv sync --no-default-groups --extra docs
+      - UV_PROJECT_ENVIRONMENT=$READTHEDOCS_VIRTUALENV_PATH uv sync --no-default-groups --group docs
     install:
       - "true"
+    post_checkout:
+      - |
+        while true; do
+          TAG=$(git tag --merged HEAD --sort=-committerdate 'v*' | head -n 1)
+          if [ -n "$TAG" ]; then
+              echo "✅ Found first reachable tag: $TAG"
+              break
+          fi
+          git fetch --deepen=50
+        done
 
 sphinx:
   configuration: docs/conf.py

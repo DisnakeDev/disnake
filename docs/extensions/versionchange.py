@@ -18,8 +18,7 @@ class VersionAddedNext(sphinx.domains.changeset.VersionChange):
         # If the argument is |vnext|, replace with config version
         if self.arguments and self.arguments[0] == "|vnext|":
             # Get the version from the Sphinx config
-            version = self.env.config.version
-            self.arguments[0] = version
+            self.arguments[0] = self.env.config.next_version
         return super().run()
 
 
@@ -27,6 +26,8 @@ def setup(app: Sphinx) -> SphinxExtensionMeta:
     app.add_directive("versionadded", VersionAddedNext, override=True)
     app.add_directive("versionchanged", VersionAddedNext, override=True)
     app.add_directive("deprecated", VersionAddedNext, override=True)
+
+    app.add_config_value("next_version", None, "env", types=[str])
 
     return {
         "parallel_read_safe": True,

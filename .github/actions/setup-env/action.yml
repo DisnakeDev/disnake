@@ -58,8 +58,9 @@ runs:
 
     - name: Install nox
       shell: bash
+      # This version should match the dependencies.nox version in noxfile.py's script metadata
       run: |
-        uv tool install nox
+        uv tool install 'nox==2025.10.16'
 
     - name: Lock dependencies
       id: lock-uv-deps
