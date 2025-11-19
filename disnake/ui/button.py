@@ -17,18 +17,23 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
-    from typing_extensions import ParamSpec, Self
+    from typing_extensions import (
+        ParamSpec,
+        Self,
+        TypeVar,  # noqa: TC004
+    )
 
     from ..emoji import Emoji
     from .item import ItemCallbackType
     from .view import View
 
+    V_co = TypeVar("V_co", bound="Optional[View]", covariant=True, default=Optional[View])
 else:
     ParamSpec = TypeVar
+    V_co = TypeVar("V_co", bound="Optional[View]", covariant=True)
 
 B = TypeVar("B", bound="Button")
 B_co = TypeVar("B_co", bound="Button", covariant=True)
-V_co = TypeVar("V_co", bound="Optional[View]", covariant=True)
 P = ParamSpec("P")
 
 
@@ -82,36 +87,6 @@ class Button(Item[V_co]):
     )
     # We have to set this to MISSING in order to overwrite the abstract property from UIComponent
     _underlying: ButtonComponent = MISSING
-
-    @overload
-    def __init__(
-        self: Button[None],
-        *,
-        style: ButtonStyle = ButtonStyle.secondary,
-        label: Optional[str] = None,
-        disabled: bool = False,
-        custom_id: Optional[str] = None,
-        url: Optional[str] = None,
-        emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
-        sku_id: Optional[int] = None,
-        id: int = 0,
-        row: Optional[int] = None,
-    ) -> None: ...
-
-    @overload
-    def __init__(
-        self: Button[V_co],
-        *,
-        style: ButtonStyle = ButtonStyle.secondary,
-        label: Optional[str] = None,
-        disabled: bool = False,
-        custom_id: Optional[str] = None,
-        url: Optional[str] = None,
-        emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
-        sku_id: Optional[int] = None,
-        id: int = 0,
-        row: Optional[int] = None,
-    ) -> None: ...
 
     def __init__(
         self,
