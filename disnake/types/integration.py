@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Literal, TypedDict, Union
+from typing import Literal, TypeAlias, TypedDict
 
 from typing_extensions import NotRequired
 
@@ -60,4 +60,4 @@ class BotIntegration(BaseIntegration):
     scopes: list[str]
 
 
-Integration = Union[BaseIntegration, StreamIntegration, BotIntegration]
+Integration: TypeAlias = BaseIntegration | StreamIntegration | BotIntegration

@@ -24,6 +24,7 @@ from typing import (
     Generic,
     Literal,
     NoReturn,
+    TypeAlias,
     TypeVar,
     Union,
     cast,
@@ -63,19 +64,16 @@ if TYPE_CHECKING:
     from .cog import Cog
     from .slash_core import InvokableSlashCommand, SubCommand
 
-    AnySlashCommand = Union[InvokableSlashCommand, SubCommand]
+    AnySlashCommand: TypeAlias = InvokableSlashCommand | SubCommand
 
     P = ParamSpec("P")
 
-    InjectionCallback = Union[
-        Callable[Concatenate[CogT, P], T_],
-        Callable[P, T_],
-    ]
-    AnyAutocompleter = Union[
-        Sequence[Any],
-        Callable[Concatenate[ApplicationCommandInteraction, str, P], Any],
-        Callable[Concatenate[CogT, ApplicationCommandInteraction, str, P], Any],
-    ]
+    InjectionCallback: TypeAlias = Callable[Concatenate[CogT, P], T_] | Callable[P, T_]
+    AnyAutocompleter: TypeAlias = (
+        Sequence[Any]
+        | Callable[Concatenate[ApplicationCommandInteraction, str, P], Any]
+        | Callable[Concatenate[CogT, ApplicationCommandInteraction, str, P], Any]
+    )
 
     TChoice = TypeVar("TChoice", bound=ApplicationCommandOptionChoiceValue)
 else:
@@ -132,7 +130,7 @@ def remove_optionals(annotation: Any) -> Any:
         if len(args) == 1:
             annotation = args[0]
         else:
-            annotation = Union[args]
+            annotation = Union[args]  # noqa: UP007
 
     return annotation
 
@@ -347,7 +345,7 @@ class _BaseRange(ABC):
 
     # support new union syntax for `Range[int, 1, 2] | None`
     def __or__(self, other):
-        return Union[self, other]
+        return Union[self, other]  # noqa: UP007
 
 
 if TYPE_CHECKING:
@@ -480,14 +478,14 @@ class ParamInfo:
         disnake.abc.User:                                  OptionType.user.value,
         disnake.User:                                      OptionType.user.value,
         disnake.Member:                                    OptionType.user.value,
-        Union[disnake.User, disnake.Member]:               OptionType.user.value,
+        Union[disnake.User, disnake.Member]:               OptionType.user.value,  # noqa: UP007
         # channels handled separately
         disnake.abc.GuildChannel:                          OptionType.channel.value,
         disnake.Role:                                      OptionType.role.value,
         disnake.abc.Snowflake:                             OptionType.mentionable.value,
-        Union[disnake.Member, disnake.Role]:               OptionType.mentionable.value,
-        Union[disnake.User, disnake.Role]:                 OptionType.mentionable.value,
-        Union[disnake.User, disnake.Member, disnake.Role]: OptionType.mentionable.value,
+        Union[disnake.Member, disnake.Role]:               OptionType.mentionable.value,  # noqa: UP007
+        Union[disnake.User, disnake.Role]:                 OptionType.mentionable.value,  # noqa: UP007
+        Union[disnake.User, disnake.Member, disnake.Role]: OptionType.mentionable.value,  # noqa: UP007
         float:                                             OptionType.number.value,
         disnake.Attachment:                                OptionType.attachment.value,
     }  # fmt: skip

@@ -10,6 +10,7 @@ from typing import (
     Final,
     Generic,
     Literal,
+    TypeAlias,
     TypeVar,
     Union,
     cast,
@@ -114,7 +115,7 @@ SelectMenuType = Literal[
 ]
 
 # valid `ActionRow.components` item types in a message/modal
-ActionRowMessageComponent = Union["Button", "AnySelectMenu"]
+ActionRowMessageComponent: TypeAlias = Union["Button", "AnySelectMenu"]
 ActionRowModalComponent: TypeAlias = "TextInput"
 
 # any child component type of action rows
@@ -122,12 +123,12 @@ ActionRowChildComponent: TypeAlias = Union[ActionRowMessageComponent, ActionRowM
 ActionRowChildComponentT = TypeVar("ActionRowChildComponentT", bound=ActionRowChildComponent)
 
 # valid `Section.accessory` types
-SectionAccessoryComponent = Union["Thumbnail", "Button"]
+SectionAccessoryComponent: TypeAlias = Union["Thumbnail", "Button"]
 # valid `Section.components` item types
 SectionChildComponent: TypeAlias = "TextDisplay"
 
 # valid `Container.components` item types
-ContainerChildComponent = Union[
+ContainerChildComponent: TypeAlias = Union[
     "ActionRow[ActionRowMessageComponent]",
     "Section",
     "TextDisplay",

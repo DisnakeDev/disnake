@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, Union, cast
+from typing import TYPE_CHECKING, ClassVar, TypeAlias, cast
 
 from ..colour import Colour
 from ..components import Container as ContainerComponent
@@ -20,14 +20,14 @@ if TYPE_CHECKING:
     from .separator import Separator
     from .text_display import TextDisplay
 
-    ContainerChildUIComponent = Union[
-        ActionRow[ActionRowMessageComponent],
-        Section,
-        TextDisplay,
-        MediaGallery,
-        File,
-        Separator,
-    ]
+    ContainerChildUIComponent: TypeAlias = (
+        ActionRow[ActionRowMessageComponent]
+        | Section
+        | TextDisplay
+        | MediaGallery
+        | File
+        | Separator
+    )
 
 __all__ = ("Container",)
 

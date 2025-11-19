@@ -7,8 +7,8 @@ from typing import (
     TYPE_CHECKING,
     Any,
     ClassVar,
+    TypeAlias,
     TypeVar,
-    Union,
     overload,
 )
 
@@ -34,7 +34,7 @@ __all__ = (
 )
 
 
-SelectOptionInput = Union[list[SelectOption], list[str], dict[str, str]]
+SelectOptionInput: TypeAlias = list[SelectOption] | list[str] | dict[str, str]
 
 
 def _parse_select_options(options: SelectOptionInput) -> list[SelectOption]:

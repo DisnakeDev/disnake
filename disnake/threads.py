@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 import time
 from collections.abc import Callable, Iterable, Sequence
-from typing import TYPE_CHECKING, Literal, Union
+from typing import TYPE_CHECKING, Literal, TypeAlias
 
 from .abc import GuildChannel, Messageable
 from .enums import ChannelType, ThreadArchiveDuration, try_enum, try_enum_to_int
@@ -46,7 +46,7 @@ if TYPE_CHECKING:
         ThreadMetadata,
     )
 
-    AnyThreadArchiveDuration = Union[ThreadArchiveDuration, ThreadArchiveDurationLiteral]
+    AnyThreadArchiveDuration: TypeAlias = ThreadArchiveDuration | ThreadArchiveDurationLiteral
 
     ThreadType = Literal[
         ChannelType.news_thread, ChannelType.public_thread, ChannelType.private_thread

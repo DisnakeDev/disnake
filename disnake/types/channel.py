@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-from typing import Literal, TypedDict, Union
+from typing import Literal, TypeAlias, TypedDict
 
 from typing_extensions import NotRequired
 
@@ -138,16 +138,16 @@ class MediaChannel(_BaseThreadOnlyGuildChannel):
     type: Literal[16]
 
 
-GuildChannel = Union[
-    TextChannel,
-    NewsChannel,
-    VoiceChannel,
-    CategoryChannel,
-    StageChannel,
-    ThreadChannel,
-    ForumChannel,
-    MediaChannel,
-]
+GuildChannel: TypeAlias = (
+    TextChannel
+    | NewsChannel
+    | VoiceChannel
+    | CategoryChannel
+    | StageChannel
+    | ThreadChannel
+    | ForumChannel
+    | MediaChannel
+)
 
 
 class DMChannel(_BaseChannel):
@@ -163,9 +163,9 @@ class GroupDMChannel(_BaseChannel):
     owner_id: Snowflake
 
 
-Channel = Union[GuildChannel, DMChannel, GroupDMChannel]
+Channel: TypeAlias = GuildChannel | DMChannel | GroupDMChannel
 
-PrivacyLevel = Literal[1, 2]
+PrivacyLevel: TypeAlias = Literal[1, 2]
 
 
 class StageInstance(TypedDict):

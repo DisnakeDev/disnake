@@ -11,7 +11,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Literal,
-    Union,
+    TypeAlias,
     cast,
     overload,
 )
@@ -60,7 +60,7 @@ if TYPE_CHECKING:
     )
     from .user import Collectibles, PrimaryGuild
 
-    VocalGuildChannel = Union[VoiceChannel, StageChannel]
+    VocalGuildChannel: TypeAlias = VoiceChannel | StageChannel
 
 
 class VoiceState:

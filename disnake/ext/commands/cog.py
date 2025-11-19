@@ -9,7 +9,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     ClassVar,
-    Union,
+    TypeAlias,
 )
 
 import disnake
@@ -31,7 +31,7 @@ if TYPE_CHECKING:
     from .context import Context
     from .core import Command
 
-    AnyBot = Union[Bot, AutoShardedBot, InteractionBot, AutoShardedInteractionBot]
+    AnyBot: TypeAlias = Bot | AutoShardedBot | InteractionBot | AutoShardedInteractionBot
 
 
 __all__ = (

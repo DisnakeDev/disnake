@@ -6,7 +6,7 @@ import math
 import re
 from abc import ABC
 from collections.abc import Mapping, Sequence
-from typing import TYPE_CHECKING, ClassVar, Union
+from typing import TYPE_CHECKING, ClassVar, TypeAlias
 
 from .enums import (
     ApplicationCommandPermissionType,
@@ -40,14 +40,14 @@ if TYPE_CHECKING:
         InteractionContextType as InteractionContextTypePayload,
     )
 
-    Choices = Union[
-        Sequence["OptionChoice"],
-        Sequence[ApplicationCommandOptionChoiceValue],
-        Mapping[str, ApplicationCommandOptionChoiceValue],
-        Sequence[Localized[str]],
-    ]
+    Choices: TypeAlias = (
+        Sequence["OptionChoice"]
+        | Sequence[ApplicationCommandOptionChoiceValue]
+        | Mapping[str, ApplicationCommandOptionChoiceValue]
+        | Sequence[Localized[str]]
+    )
 
-    APIApplicationCommand = Union["APIUserCommand", "APIMessageCommand", "APISlashCommand"]
+    APIApplicationCommand: TypeAlias = "APIUserCommand" | "APIMessageCommand" | "APISlashCommand"
 
 
 __all__ = (

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, TypedDict, Union
+from typing import TYPE_CHECKING, Literal, TypeAlias, TypedDict
 
 from .appinfo import ApplicationIntegrationType
 from .channel import ChannelType
@@ -68,7 +68,7 @@ class ApplicationCommandOption(TypedDict):
     autocomplete: NotRequired[bool]
 
 
-ApplicationCommandOptionChoiceValue = Union[str, int, float]
+ApplicationCommandOptionChoiceValue: TypeAlias = str | int | float
 
 
 class ApplicationCommandOptionChoice(TypedDict):
@@ -153,14 +153,14 @@ class _ApplicationCommandInteractionDataOptionNumber(_ApplicationCommandInteract
     value: float
 
 
-ApplicationCommandInteractionDataOption = Union[
-    _ApplicationCommandInteractionDataOptionString,
-    _ApplicationCommandInteractionDataOptionInteger,
-    _ApplicationCommandInteractionDataOptionSubcommand,
-    _ApplicationCommandInteractionDataOptionBoolean,
-    _ApplicationCommandInteractionDataOptionSnowflake,
-    _ApplicationCommandInteractionDataOptionNumber,
-]
+ApplicationCommandInteractionDataOption: TypeAlias = (
+    _ApplicationCommandInteractionDataOptionString
+    | _ApplicationCommandInteractionDataOptionInteger
+    | _ApplicationCommandInteractionDataOptionSubcommand
+    | _ApplicationCommandInteractionDataOptionBoolean
+    | _ApplicationCommandInteractionDataOptionSnowflake
+    | _ApplicationCommandInteractionDataOptionNumber
+)
 
 
 class ApplicationCommandInteractionData(TypedDict):
@@ -220,14 +220,14 @@ class MessageComponentInteractionChannelSelectData(_BaseSnowflakeMessageComponen
     component_type: Literal[8]
 
 
-MessageComponentInteractionData = Union[
-    MessageComponentInteractionButtonData,
-    MessageComponentInteractionStringSelectData,
-    MessageComponentInteractionUserSelectData,
-    MessageComponentInteractionRoleSelectData,
-    MessageComponentInteractionMentionableSelectData,
-    MessageComponentInteractionChannelSelectData,
-]
+MessageComponentInteractionData: TypeAlias = (
+    MessageComponentInteractionButtonData
+    | MessageComponentInteractionStringSelectData
+    | MessageComponentInteractionUserSelectData
+    | MessageComponentInteractionRoleSelectData
+    | MessageComponentInteractionMentionableSelectData
+    | MessageComponentInteractionChannelSelectData
+)
 
 
 ### Modal interaction components
@@ -281,15 +281,15 @@ class ModalInteractionTextDisplayData(_BaseComponentInteractionData):
     type: Literal[10]
 
 
-ModalInteractionLabelChildData = Union[
-    ModalInteractionStringSelectData,
-    ModalInteractionTextInputData,
-    ModalInteractionUserSelectData,
-    ModalInteractionRoleSelectData,
-    ModalInteractionMentionableSelectData,
-    ModalInteractionChannelSelectData,
-    ModalInteractionFileUploadData,
-]
+ModalInteractionLabelChildData: TypeAlias = (
+    ModalInteractionStringSelectData
+    | ModalInteractionTextInputData
+    | ModalInteractionUserSelectData
+    | ModalInteractionRoleSelectData
+    | ModalInteractionMentionableSelectData
+    | ModalInteractionChannelSelectData
+    | ModalInteractionFileUploadData
+)
 
 
 class ModalInteractionLabelData(_BaseComponentInteractionData):
@@ -298,17 +298,14 @@ class ModalInteractionLabelData(_BaseComponentInteractionData):
 
 
 # innermost (non-layout) components, i.e. those containing user input
-ModalInteractionInnerComponentData = Union[
-    ModalInteractionActionRowChildData,
-    ModalInteractionLabelChildData,
-]
+ModalInteractionInnerComponentData: TypeAlias = (
+    ModalInteractionActionRowChildData | ModalInteractionLabelChildData
+)
 
 # top-level components
-ModalInteractionComponentData = Union[
-    ModalInteractionActionRowData,
-    ModalInteractionTextDisplayData,
-    ModalInteractionLabelData,
-]
+ModalInteractionComponentData: TypeAlias = (
+    ModalInteractionActionRowData | ModalInteractionTextDisplayData | ModalInteractionLabelData
+)
 
 
 class ModalInteractionData(TypedDict):
@@ -372,13 +369,9 @@ class ModalInteraction(_BaseUserInteraction):
     message: NotRequired[Message]
 
 
-Interaction = Union[
-    ApplicationCommandInteraction,
-    MessageInteraction,
-    ModalInteraction,
-]
+Interaction: TypeAlias = ApplicationCommandInteraction | MessageInteraction | ModalInteraction
 
-BaseInteraction = Union[Interaction, PingInteraction]
+BaseInteraction: TypeAlias = Interaction | PingInteraction
 
 
 class InteractionApplicationCommandCallbackData(TypedDict, total=False):
@@ -395,13 +388,11 @@ class InteractionAutocompleteCallbackData(TypedDict):
     choices: list[ApplicationCommandOptionChoice]
 
 
-InteractionResponseType = Literal[1, 4, 5, 6, 7, 10]
+InteractionResponseType: TypeAlias = Literal[1, 4, 5, 6, 7, 10]
 
-InteractionCallbackData = Union[
-    InteractionApplicationCommandCallbackData,
-    InteractionAutocompleteCallbackData,
-    Modal,
-]
+InteractionCallbackData: TypeAlias = (
+    InteractionApplicationCommandCallbackData | InteractionAutocompleteCallbackData | Modal
+)
 
 
 class InteractionResponse(TypedDict):
@@ -440,11 +431,11 @@ class ModalInteractionMetadata(_BaseInteractionMetadata):
     )
 
 
-InteractionMetadata = Union[
-    ApplicationCommandInteractionMetadata,
-    MessageComponentInteractionMetadata,
-    ModalInteractionMetadata,
-]
+InteractionMetadata: TypeAlias = (
+    ApplicationCommandInteractionMetadata
+    | MessageComponentInteractionMetadata
+    | ModalInteractionMetadata
+)
 
 
 class EditApplicationCommand(TypedDict):

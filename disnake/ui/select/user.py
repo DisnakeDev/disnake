@@ -8,7 +8,6 @@ from typing import (
     Any,
     ClassVar,
     TypeVar,
-    Union,
     overload,
 )
 

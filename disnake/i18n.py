@@ -13,8 +13,8 @@ from typing import (
     Any,
     Generic,
     Literal,
+    TypeAlias,
     TypeVar,
-    Union,
     overload,
 )
 
@@ -26,8 +26,8 @@ from .errors import LocalizationKeyError
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    LocalizedRequired = Union[str, "Localized[str]"]
-    LocalizedOptional = Union[str | None, "Localized[str | None]"]
+    LocalizedRequired: TypeAlias = "str | Localized[str]"
+    LocalizedOptional: TypeAlias = "str | None | Localized[str | None]"
 
 
 __all__ = (
@@ -43,8 +43,8 @@ MISSING = utils.MISSING
 _log = logging.getLogger(__name__)
 
 
-LocalizationsDict = Union[dict[Locale, str], dict[str, str]]
-Localizations = Union[str, LocalizationsDict]
+LocalizationsDict: TypeAlias = dict[Locale, str] | dict[str, str]
+Localizations: TypeAlias = str | LocalizationsDict
 
 StringT = TypeVar("StringT", str, str | None, covariant=True)
 

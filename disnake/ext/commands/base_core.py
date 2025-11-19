@@ -10,8 +10,8 @@ from collections.abc import Callable
 from typing import (
     TYPE_CHECKING,
     Any,
+    TypeAlias,
     TypeVar,
-    Union,
     cast,
     overload,
 )
@@ -48,11 +48,11 @@ if TYPE_CHECKING:
 
     P = ParamSpec("P")
 
-    CommandCallback = Callable[..., Coro[Any]]
-    InteractionCommandCallback = Union[
-        Callable[Concatenate["CogT", ApplicationCommandInteractionT, P], Coro[Any]],
-        Callable[Concatenate[ApplicationCommandInteractionT, P], Coro[Any]],
-    ]
+    CommandCallback: TypeAlias = Callable[..., Coro[Any]]
+    InteractionCommandCallback: TypeAlias = (
+        Callable[Concatenate["CogT", ApplicationCommandInteractionT, P], Coro[Any]]
+        | Callable[Concatenate[ApplicationCommandInteractionT, P], Coro[Any]]
+    )
 
 
 __all__ = (

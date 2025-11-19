@@ -13,7 +13,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     ClassVar,
-    Union,
+    TypeAlias,
     cast,
     overload,
 )
@@ -84,7 +84,7 @@ if TYPE_CHECKING:
     from .ui._types import MessageComponents
     from .ui.view import View
 
-    EmojiInputType = Union[Emoji, PartialEmoji, str]
+    EmojiInputType: TypeAlias = Emoji | PartialEmoji | str
 
 __all__ = (
     "Attachment",

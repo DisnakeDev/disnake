@@ -12,9 +12,8 @@ from typing import (
     TYPE_CHECKING,
     Any,
     ClassVar,
-    Optional,
+    TypeAlias,
     TypeVar,
-    Union,
 )
 
 import disnake.abc
@@ -33,7 +32,7 @@ if TYPE_CHECKING:
     from .cog import Cog
 
     # note: no InteractionBot
-    AnyBot = Union[Bot, AutoShardedBot]
+    AnyBot: TypeAlias = Bot | AutoShardedBot
 
 CogT = TypeVar("CogT", bound="Cog")
 
@@ -193,7 +192,7 @@ def _not_overriden(f: FuncT) -> FuncT:
     return f
 
 
-class _HelpCommandImpl(Command[Optional[CogT], Any, None]):
+class _HelpCommandImpl(Command[CogT | None, Any, None]):
     def __init__(self, inject: HelpCommand, *args: Any, **kwargs: Any) -> None:
         super().__init__(inject.command_callback, *args, **kwargs)
         self._original: HelpCommand = inject

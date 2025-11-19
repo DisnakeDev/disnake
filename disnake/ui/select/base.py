@@ -9,8 +9,8 @@ from typing import (
     TYPE_CHECKING,
     ClassVar,
     Generic,
+    TypeAlias,
     TypeVar,
-    Union,
 )
 
 from ...components import AnySelectMenu, SelectDefaultValue
@@ -39,9 +39,9 @@ SelectMenuT = TypeVar("SelectMenuT", bound=AnySelectMenu)
 SelectValueT = TypeVar("SelectValueT")
 P = ParamSpec("P")
 
-SelectDefaultValueMultiInputType = Union[SelectValueT, SelectDefaultValue]
+SelectDefaultValueMultiInputType: TypeAlias = SelectValueT | SelectDefaultValue
 # almost the same as above, but with `Object`; used for selects where the type isn't ambiguous (i.e. all except mentionable select)
-SelectDefaultValueInputType = Union[SelectDefaultValueMultiInputType[SelectValueT], Object]
+SelectDefaultValueInputType: TypeAlias = SelectDefaultValueMultiInputType[SelectValueT] | Object
 
 
 class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):

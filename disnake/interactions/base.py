@@ -9,8 +9,8 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Generic,
+    TypeAlias,
     TypeVar,
-    Union,
     cast,
     overload,
 )
@@ -89,7 +89,7 @@ if TYPE_CHECKING:
     from .message import MessageInteraction
     from .modal import ModalInteraction
 
-    AnyBot = Union[Bot, AutoShardedBot]
+    AnyBot: TypeAlias = Bot | AutoShardedBot
 
 
 MISSING: Any = utils.MISSING

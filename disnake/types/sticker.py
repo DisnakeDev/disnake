@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Literal, TypedDict, Union
+from typing import Literal, TypeAlias, TypedDict
 
 from typing_extensions import NotRequired
 
@@ -39,7 +39,7 @@ class GuildSticker(BaseSticker):
     user: NotRequired[User]
 
 
-Sticker = Union[BaseSticker, StandardSticker, GuildSticker]
+Sticker: TypeAlias = BaseSticker | StandardSticker | GuildSticker
 
 
 class StickerPack(TypedDict):

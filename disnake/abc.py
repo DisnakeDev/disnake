@@ -10,8 +10,8 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Protocol,
+    TypeAlias,
     TypeVar,
-    Union,
     cast,
     overload,
     runtime_checkable,
@@ -84,11 +84,11 @@ if TYPE_CHECKING:
     from .user import ClientUser
     from .voice_region import VoiceRegion
 
-    MessageableChannel = Union[GuildMessageable, DMChannel, GroupChannel, PartialMessageable]
+    MessageableChannel: TypeAlias = GuildMessageable | DMChannel | GroupChannel | PartialMessageable
     # include non-messageable channels, e.g. category/forum
-    AnyChannel = Union[MessageableChannel, AnyGuildChannel]
+    AnyChannel: TypeAlias = MessageableChannel | AnyGuildChannel
 
-    SnowflakeTime = Union["Snowflake", datetime]
+    SnowflakeTime: TypeAlias = "Snowflake" | datetime
 
 MISSING = utils.MISSING
 

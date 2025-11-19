@@ -37,6 +37,7 @@ from typing import (
     Literal,
     NoReturn,
     Protocol,
+    TypeAlias,
     TypedDict,
     TypeVar,
     Union,
@@ -158,8 +159,8 @@ else:
 T = TypeVar("T")
 V = TypeVar("V")
 T_co = TypeVar("T_co", covariant=True)
-_Iter = Union[Iterator[T], AsyncIterator[T]]
-_BytesLike = Union[bytes, bytearray, memoryview]
+_Iter: TypeAlias = Iterator[T] | AsyncIterator[T]
+_BytesLike: TypeAlias = bytes | bytearray | memoryview
 
 
 class CachedSlotProperty(Generic[T, T_co]):
@@ -1195,7 +1196,7 @@ def evaluate_annotation(
     if hasattr(tp, "__args__"):
         if not hasattr(tp, "__origin__"):
             if tp.__class__ is UnionType:
-                converted = Union[tp.__args__]
+                converted = Union[tp.__args__]  # noqa: UP007
                 return evaluate_annotation(converted, globals, locals, cache)
 
             return tp

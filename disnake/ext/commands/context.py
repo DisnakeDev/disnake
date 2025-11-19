@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import inspect
 import re
-from typing import TYPE_CHECKING, Any, Generic, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Generic, TypeAlias, TypeVar
 
 import disnake.abc
 import disnake.utils
@@ -405,4 +405,4 @@ class GuildContext(Context):
     me: Member
 
 
-AnyContext = Union[Context, ApplicationCommandInteraction]
+AnyContext: TypeAlias = Context | ApplicationCommandInteraction

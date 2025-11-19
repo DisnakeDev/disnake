@@ -17,8 +17,8 @@ from typing import (
     Any,
     Generic,
     Literal,
+    TypeAlias,
     TypeVar,
-    Union,
     overload,
 )
 
@@ -111,8 +111,8 @@ if TYPE_CHECKING:
     from .types.webhook import Webhook as WebhookPayload
     from .voice_client import VoiceProtocol
 
-    Channel = Union[GuildChannel, VocalGuildChannel, PrivateChannel]
-    PartialChannel = Union[Channel, PartialMessageable]
+    Channel: TypeAlias = GuildChannel | VocalGuildChannel | PrivateChannel
+    PartialChannel: TypeAlias = Channel | PartialMessageable
 
 T = TypeVar("T")
 

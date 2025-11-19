@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, TypeAlias
 
 from .appinfo import PartialAppInfo
 from .asset import Asset
@@ -36,9 +36,9 @@ if TYPE_CHECKING:
     from .types.invite import Invite as InvitePayload, InviteGuild as InviteGuildPayload
     from .user import User
 
-    GatewayInvitePayload = Union[InviteCreateEvent, InviteDeleteEvent]
-    InviteGuildType = Union[Guild, "PartialInviteGuild", Object]
-    InviteChannelType = Union[GuildChannel, "PartialInviteChannel", Object]
+    GatewayInvitePayload: TypeAlias = InviteCreateEvent | InviteDeleteEvent
+    InviteGuildType: TypeAlias = "Guild | PartialInviteGuild | Object"
+    InviteChannelType: TypeAlias = "GuildChannel | PartialInviteChannel | Object"
 
 
 class PartialInviteChannel:

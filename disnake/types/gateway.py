@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import Any, Literal, TypedDict, Union
+from typing import Any, Literal, TypeAlias, TypedDict
 
 from typing_extensions import NotRequired
 
@@ -307,16 +307,16 @@ class ResumedEvent(TypedDict): ...
 
 
 # https://discord.com/developers/docs/topics/gateway-events#application-command-permissions-update
-ApplicationCommandPermissionsUpdateEvent = GuildApplicationCommandPermissions
+ApplicationCommandPermissionsUpdateEvent: TypeAlias = GuildApplicationCommandPermissions
 
 
 # https://discord.com/developers/docs/topics/gateway-events#message-create
-MessageCreateEvent = Message
+MessageCreateEvent: TypeAlias = Message
 
 
 # https://discord.com/developers/docs/topics/gateway-events#message-update
 # This does not necessarily contain all message fields, but `id` and `channel_id` always exist
-MessageUpdateEvent = Message
+MessageUpdateEvent: TypeAlias = Message
 
 
 # https://discord.com/developers/docs/topics/gateway-events#message-delete
@@ -385,15 +385,15 @@ class PollVoteRemoveEvent(TypedDict):
 
 
 # https://discord.com/developers/docs/topics/gateway-events#interaction-create
-InteractionCreateEvent = BaseInteraction
+InteractionCreateEvent: TypeAlias = BaseInteraction
 
 
 # https://discord.com/developers/docs/topics/gateway-events#presence-update
-PresenceUpdateEvent = PartialPresenceUpdate
+PresenceUpdateEvent: TypeAlias = PartialPresenceUpdate
 
 
 # https://discord.com/developers/docs/topics/gateway-events#user-update
-UserUpdateEvent = User
+UserUpdateEvent: TypeAlias = User
 
 
 # https://discord.com/developers/docs/topics/gateway-events#invite-create
@@ -421,15 +421,15 @@ class InviteDeleteEvent(TypedDict):
 
 
 # https://discord.com/developers/docs/topics/gateway-events#channel-create
-ChannelCreateEvent = GuildChannel
+ChannelCreateEvent: TypeAlias = GuildChannel
 
 
 # https://discord.com/developers/docs/topics/gateway-events#channel-update
-ChannelUpdateEvent = Channel
+ChannelUpdateEvent: TypeAlias = Channel
 
 
 # https://discord.com/developers/docs/topics/gateway-events#channel-delete
-ChannelDeleteEvent = Channel
+ChannelDeleteEvent: TypeAlias = Channel
 
 
 # https://discord.com/developers/docs/topics/gateway-events#channel-pins-update
@@ -445,7 +445,7 @@ class ThreadCreateEvent(Thread):
 
 
 # https://discord.com/developers/docs/topics/gateway-events#thread-update
-ThreadUpdateEvent = Thread
+ThreadUpdateEvent: TypeAlias = Thread
 
 
 # https://discord.com/developers/docs/topics/gateway-events#thread-delete
@@ -520,15 +520,15 @@ class GuildStickersUpdateEvent(TypedDict):
 
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-create
-GuildCreateEvent = Union[Guild, UnavailableGuild]
+GuildCreateEvent: TypeAlias = Guild | UnavailableGuild
 
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-update
-GuildUpdateEvent = Guild
+GuildUpdateEvent: TypeAlias = Guild
 
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-delete
-GuildDeleteEvent = UnavailableGuild
+GuildDeleteEvent: TypeAlias = UnavailableGuild
 
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-audit-log-entry-create
@@ -542,11 +542,11 @@ class _GuildBanEvent(TypedDict):
 
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-ban-add
-GuildBanAddEvent = _GuildBanEvent
+GuildBanAddEvent: TypeAlias = _GuildBanEvent
 
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-ban-remove
-GuildBanRemoveEvent = _GuildBanEvent
+GuildBanRemoveEvent: TypeAlias = _GuildBanEvent
 
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-role-create
@@ -568,15 +568,15 @@ class GuildRoleUpdateEvent(TypedDict):
 
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-scheduled-event-create
-GuildScheduledEventCreateEvent = GuildScheduledEvent
+GuildScheduledEventCreateEvent: TypeAlias = GuildScheduledEvent
 
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-scheduled-event-update
-GuildScheduledEventUpdateEvent = GuildScheduledEvent
+GuildScheduledEventUpdateEvent: TypeAlias = GuildScheduledEvent
 
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-scheduled-event-delete
-GuildScheduledEventDeleteEvent = GuildScheduledEvent
+GuildScheduledEventDeleteEvent: TypeAlias = GuildScheduledEvent
 
 
 class _GuildScheduledEventUserEvent(TypedDict):
@@ -586,11 +586,11 @@ class _GuildScheduledEventUserEvent(TypedDict):
 
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-scheduled-event-user-add
-GuildScheduledEventUserAddEvent = _GuildScheduledEventUserEvent
+GuildScheduledEventUserAddEvent: TypeAlias = _GuildScheduledEventUserEvent
 
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-scheduled-event-user-remove
-GuildScheduledEventUserRemoveEvent = _GuildScheduledEventUserEvent
+GuildScheduledEventUserRemoveEvent: TypeAlias = _GuildScheduledEventUserEvent
 
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-members-chunk
@@ -637,16 +637,16 @@ StageInstanceCreateEvent = StageInstance
 
 
 # https://discord.com/developers/docs/topics/gateway-events#stage-instance-update
-StageInstanceUpdateEvent = StageInstance
+StageInstanceUpdateEvent: TypeAlias = StageInstance
 
 
 # https://discord.com/developers/docs/topics/gateway-events#stage-instance-delete
-StageInstanceDeleteEvent = StageInstance
+StageInstanceDeleteEvent: TypeAlias = StageInstance
 
 
 # https://discord.com/developers/docs/topics/gateway-events#voice-state-update
 # We assume that we'll only receive voice states for guilds
-VoiceStateUpdateEvent = GuildVoiceState
+VoiceStateUpdateEvent: TypeAlias = GuildVoiceState
 
 
 # https://discord.com/developers/docs/topics/gateway-events#voice-server-update
@@ -673,15 +673,15 @@ class TypingStartEvent(TypedDict):
 
 
 # https://discord.com/developers/docs/topics/gateway-events#auto-moderation-rule-create
-AutoModerationRuleCreateEvent = AutoModRule
+AutoModerationRuleCreateEvent: TypeAlias = AutoModRule
 
 
 # https://discord.com/developers/docs/topics/gateway-events#auto-moderation-rule-update
-AutoModerationRuleUpdateEvent = AutoModRule
+AutoModerationRuleUpdateEvent: TypeAlias = AutoModRule
 
 
 # https://discord.com/developers/docs/topics/gateway-events#auto-moderation-rule-delete
-AutoModerationRuleDeleteEvent = AutoModRule
+AutoModerationRuleDeleteEvent: TypeAlias = AutoModRule
 
 
 # https://discord.com/developers/docs/topics/gateway-events#auto-moderation-action-execution
@@ -700,35 +700,35 @@ class AutoModerationActionExecutionEvent(TypedDict):
 
 
 # https://discord.com/developers/docs/events/gateway-events#entitlement-create
-EntitlementCreate = Entitlement
+EntitlementCreate: TypeAlias = Entitlement
 
 
 # https://discord.com/developers/docs/events/gateway-events#entitlement-update
-EntitlementUpdate = Entitlement
+EntitlementUpdate: TypeAlias = Entitlement
 
 
 # https://discord.com/developers/docs/events/gateway-events#entitlement-delete
-EntitlementDelete = Entitlement
+EntitlementDelete: TypeAlias = Entitlement
 
 
 # https://discord.com/developers/docs/events/gateway-events#subscription-create
-SubscriptionCreate = Subscription
+SubscriptionCreate: TypeAlias = Subscription
 
 
 # https://discord.com/developers/docs/events/gateway-events#subscription-update
-SubscriptionUpdate = Subscription
+SubscriptionUpdate: TypeAlias = Subscription
 
 
 # https://discord.com/developers/docs/events/gateway-events#subscription-delete
-SubscriptionDelete = Subscription
+SubscriptionDelete: TypeAlias = Subscription
 
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-soundboard-sound-create
-GuildSoundboardSoundCreate = GuildSoundboardSound
+GuildSoundboardSoundCreate: TypeAlias = GuildSoundboardSound
 
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-soundboard-sound-update
-GuildSoundboardSoundUpdate = GuildSoundboardSound
+GuildSoundboardSoundUpdate: TypeAlias = GuildSoundboardSound
 
 
 # https://discord.com/developers/docs/topics/gateway-events#guild-soundboard-sound-delete

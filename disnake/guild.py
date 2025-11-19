@@ -13,7 +13,7 @@ from typing import (
     Literal,
     NamedTuple,
     NewType,
-    Union,
+    TypeAlias,
     cast,
     overload,
 )
@@ -83,7 +83,7 @@ __all__ = (
     "GuildBuilder",
 )
 
-VocalGuildChannel = Union[VoiceChannel, StageChannel]
+VocalGuildChannel: TypeAlias = VoiceChannel | StageChannel
 MISSING = utils.MISSING
 
 if TYPE_CHECKING:
@@ -116,11 +116,11 @@ if TYPE_CHECKING:
     from .voice_client import VoiceProtocol
     from .webhook import Webhook
 
-    GuildMessageable = Union[TextChannel, Thread, VoiceChannel, StageChannel]
-    GuildChannel = Union[
-        VoiceChannel, StageChannel, TextChannel, CategoryChannel, ForumChannel, MediaChannel
-    ]
-    ByCategoryItem = tuple[CategoryChannel | None, list[GuildChannel]]
+    GuildMessageable: TypeAlias = TextChannel | Thread | VoiceChannel | StageChannel
+    GuildChannel: TypeAlias = (
+        VoiceChannel | StageChannel | TextChannel | CategoryChannel | ForumChannel | MediaChannel
+    )
+    ByCategoryItem: TypeAlias = tuple[CategoryChannel | None, list[GuildChannel]]
 
 
 class _GuildLimit(NamedTuple):
