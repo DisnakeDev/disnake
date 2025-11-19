@@ -12,6 +12,7 @@ from dataclasses import dataclass
 from datetime import timedelta, timezone
 from typing import (
     TYPE_CHECKING,
+    Annotated,
     Any,
     Literal,
     Optional,
@@ -777,6 +778,8 @@ def test_normalise_optional_params(params, expected) -> None:
         # forward refs
         ("bool", bool, True),
         ("tuple[dict, list[Literal[42, 99]]]", tuple[dict, list[Literal[42, 99]]], True),
+        # Annotated[X, Y] -> Y
+        (Annotated[str, str.casefold], str.casefold, False),
         # 3.10 union syntax
         ("int | float", Union[int, float], True),  # noqa: UP007
         ("int | float", int | float, True),

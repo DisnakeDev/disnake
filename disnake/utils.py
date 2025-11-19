@@ -27,6 +27,7 @@ from operator import attrgetter
 from types import UnionType
 from typing import (
     TYPE_CHECKING,
+    Annotated,
     Any,
     ForwardRef,
     Generic,
@@ -37,6 +38,7 @@ from typing import (
     TypedDict,
     TypeVar,
     Union,
+    get_origin,
     overload,
 )
 from urllib.parse import parse_qs, urlencode
@@ -1195,9 +1197,14 @@ def evaluate_annotation(
         cache[tp] = evaluated
         return evaluated
 
+    # Annotated[X, Y], where Y is the converter we need
+    if get_origin(tp) is Annotated:
+        return evaluate_annotation(tp.__metadata__[0], globals, locals, cache)
+
     # GenericAlias / UnionType
     if hasattr(tp, "__args__"):
         if not hasattr(tp, "__origin__"):
+            # n.b. this became obsolete in Python 3.14+, as `UnionType` and `Union` are the same thing now.
             if tp.__class__ is UnionType:
                 converted = Union[tp.__args__]  # noqa: UP007
                 return evaluate_annotation(converted, globals, locals, cache)
