@@ -7,14 +7,13 @@ from __future__ import annotations
 import asyncio
 import collections.abc
 import copy
+import enum
 import inspect
 import itertools
 import math
 import types
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from enum import Enum, EnumMeta
-from types import UnionType
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -55,7 +54,6 @@ P = ParamSpec("P")
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Sequence
-    from types import EllipsisType
 
     from disnake.app_commands import Choices
     from disnake.enums import ChannelType
@@ -95,6 +93,10 @@ __all__ = (
 )
 
 
+_EnumMetas = (enum.EnumMeta, disnake.enums.EnumMeta)
+_UnionTypes = (Union, types.UnionType)
+
+
 def issubclass_(obj: Any, tp: TypeT | tuple[TypeT, ...]) -> TypeGuard[TypeT]:
     """Similar to the builtin `issubclass`, but more lenient.
     Can also handle unions (`issubclass(int | str, int)`) and
@@ -110,7 +112,7 @@ def issubclass_(obj: Any, tp: TypeT | tuple[TypeT, ...]) -> TypeGuard[TypeT]:
     if (origin := get_origin(obj)) is None:
         return False
 
-    if origin in (Union, UnionType):
+    if origin in _UnionTypes:
         # If we have a Union, try matching any of its args
         # (recursively, to handle possibly generic types inside this union)
         return any(issubclass_(o, tp) for o in obj.__args__)
@@ -120,7 +122,7 @@ def issubclass_(obj: Any, tp: TypeT | tuple[TypeT, ...]) -> TypeGuard[TypeT]:
 
 def remove_optionals(annotation: Any) -> Any:
     """Remove unwanted optionals from an annotation."""
-    if get_origin(annotation) in (Union, UnionType):
+    if get_origin(annotation) in _UnionTypes:
         args = tuple(i for i in annotation.__args__ if i not in (None, type(None)))
         if len(args) == 1:
             annotation = args[0]
@@ -309,7 +311,9 @@ class _BaseRange(ABC, Generic[NumT]):
         if not isinstance(params, tuple):
             params = (params,)
 
-        name = cls.__name__
+        # the classes are public, but at the same time we don't want the users using them
+        # via the "private" names, since those conflict with type checkers
+        name = cls.__name__ = cls.__name__.removeprefix("_")
 
         if len(params) == 2:
             # backwards compatibility for `Range[1, 2]`
@@ -358,7 +362,7 @@ class _BaseRange(ABC, Generic[NumT]):
         return cls(underlying_type=underlying_type, min_value=min_value, max_value=max_value)
 
     @staticmethod
-    def _coerce_bound(value: NumT | EllipsisType | None, name: str) -> NumT | None:
+    def _coerce_bound(value: NumT | types.EllipsisType | None, name: str) -> NumT | None:
         if value is None or value is ...:
             return None
         elif isinstance(value, (int, float)):
@@ -377,7 +381,7 @@ class _BaseRange(ABC, Generic[NumT]):
 
     @staticmethod
     @abstractmethod
-    def _infer_type(params: tuple[object, ...]) -> type[Any]:
+    def _infer_type(params: tuple[object, ...]) -> type[object]:
         raise NotImplementedError
 
     # hack to get `typing._type_check` to pass, e.g. when using `Range` as a generic parameter
@@ -385,85 +389,88 @@ class _BaseRange(ABC, Generic[NumT]):
         raise NotImplementedError
 
     # support new union syntax for `Range[int, 1, 2] | None`
-    def __or__(self, other: type[Any]) -> UnionType:
+    def __or__(self, other: type[Any]) -> types.UnionType:
         return Union[self, other]  # noqa: UP007
+
+
+@dataclass(frozen=True, repr=False)
+class _Range(_BaseRange[int | float]):
+    """Type representing a number with a limited range of allowed values.
+
+    See :ref:`param_ranges` for more information.
+
+    .. versionadded:: 2.4
+
+    .. versionchanged:: 2.9
+        Syntax changed from ``Range[5, 10]`` to ``Range[int, 5, 10]``;
+        the type (:class:`int` or :class:`float`) must now be specified explicitly.
+    """
+
+    _allowed_types = (int, float)
+
+    def __post_init__(self) -> None:
+        for value in (self.min_value, self.max_value):
+            if value is None:
+                continue
+
+            if self.underlying_type is not float and not isinstance(value, int):
+                msg = "Range[int, ...] bounds must be int, not float"
+                raise TypeError(msg)
+
+            if self.underlying_type is int and abs(value) >= 2**53 - 1:
+                msg = (
+                    "Discord has upper input limit on integer input type of ±2**53.\n"
+                    "For larger values, use Range[commands.LargeInt, ...], which will use"
+                    " a string input type with length limited to the minimum and maximum"
+                    " string representations of the range bounds, and will automatically"
+                    " convert user input into an integer locally."
+                )
+                raise ValueError(msg)
+
+    @staticmethod
+    def _infer_type(params: tuple[object, ...]) -> type[int | float]:
+        if any(isinstance(p, float) for p in params):
+            return float
+        return int
+
+
+@dataclass(frozen=True, repr=False)
+class _String(_BaseRange[int]):
+    """Type representing a string option with a limited length.
+
+    See :ref:`string_lengths` for more information.
+
+    .. versionadded:: 2.6
+
+    .. versionchanged:: 2.9
+        Syntax changed from ``String[5, 10]`` to ``String[str, 5, 10]``;
+        the type (:class:`str`) must now be specified explicitly.
+    """
+
+    _allowed_types = (str,)
+
+    def __post_init__(self) -> None:
+        for value in (self.min_value, self.max_value):
+            if value is None:
+                continue
+
+            if not isinstance(value, int):
+                msg = "String bounds must be int, not float"
+                raise TypeError(msg)
+            if value < 0:
+                msg = "String bounds may not be negative"
+                raise ValueError(msg)
+
+    @staticmethod
+    def _infer_type(params: tuple[object, ...]) -> type[str]:
+        return str
 
 
 if TYPE_CHECKING:
     # aliased import since mypy doesn't understand `Range = Annotated`
     from typing import Annotated as Range, Annotated as String
 else:
-
-    @dataclass(frozen=True, repr=False)
-    class Range(_BaseRange[int | float]):
-        """Type representing a number with a limited range of allowed values.
-
-        See :ref:`param_ranges` for more information.
-
-        .. versionadded:: 2.4
-
-        .. versionchanged:: 2.9
-            Syntax changed from ``Range[5, 10]`` to ``Range[int, 5, 10]``;
-            the type (:class:`int` or :class:`float`) must now be specified explicitly.
-        """
-
-        _allowed_types = (int, float)
-
-        def __post_init__(self) -> None:
-            for value in (self.min_value, self.max_value):
-                if value is None:
-                    continue
-
-                if self.underlying_type is not float and not isinstance(value, int):
-                    msg = "Range[int, ...] bounds must be int, not float"
-                    raise TypeError(msg)
-
-                if self.underlying_type is int and abs(value) >= 2**53 - 1:
-                    msg = (
-                        "Discord has upper input limit on integer input type of ±2**53.\n"
-                        "For larger values, use Range[commands.LargeInt, ...], which will use"
-                        " a string input type with length limited to the minimum and maximum"
-                        " string representations of the range bounds, and will automatically"
-                        " convert user input into an integer locally."
-                    )
-                    raise ValueError(msg)
-
-        @staticmethod
-        def _infer_type(params: tuple[object, ...]) -> type[int | float]:
-            if any(isinstance(p, float) for p in params):
-                return float
-            return int
-
-    @dataclass(frozen=True, repr=False)
-    class String(_BaseRange[int]):
-        """Type representing a string option with a limited length.
-
-        See :ref:`string_lengths` for more information.
-
-        .. versionadded:: 2.6
-
-        .. versionchanged:: 2.9
-            Syntax changed from ``String[5, 10]`` to ``String[str, 5, 10]``;
-            the type (:class:`str`) must now be specified explicitly.
-        """
-
-        _allowed_types = (str,)
-
-        def __post_init__(self) -> None:
-            for value in (self.min_value, self.max_value):
-                if value is None:
-                    continue
-
-                if not isinstance(value, int):
-                    msg = "String bounds must be int, not float"
-                    raise TypeError(msg)
-                if value < 0:
-                    msg = "String bounds may not be negative"
-                    raise ValueError(msg)
-
-        @staticmethod
-        def _infer_type(params: tuple[object, ...]) -> type[str]:
-            return str
+    Range, String = _Range, _String
 
 
 class LargeInt(int):
@@ -531,7 +538,7 @@ class ParamInfo:
     """
 
     # sorted according to https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-type
-    TYPES: ClassVar[dict[type | UnionType, int]] = {
+    TYPES: ClassVar[dict[type | types.UnionType, int]] = {
         str:                                               OptionType.string.value,
         int:                                               OptionType.integer.value,
         bool:                                              OptionType.boolean.value,
@@ -695,8 +702,8 @@ class ParamInfo:
             return argument
 
         # The API may return a `User` for options annotated with `Member`,
-        # including `Member` (user option), `Union[User, Member]` (user option) and
-        # `Union[Member, Role]` (mentionable option).
+        # including `Member` (user option), `User | Member` (user option) and
+        # `Member | Role` (mentionable option).
         # If we received a `User` but didn't expect one, raise.
         if (
             isinstance(argument, disnake.User)
@@ -743,7 +750,7 @@ class ParamInfo:
             raise errors.ConversionError(self.converter, e) from e
 
     def _parse_enum(self, annotation: Any) -> None:
-        if isinstance(annotation, (EnumMeta, disnake.enums.EnumMeta)):
+        if isinstance(annotation, _EnumMetas):
             self.choices = [
                 OptionChoice(name, value.value)  # pyright: ignore[reportAttributeAccessIssue]
                 for name, value in annotation.__members__.items()
@@ -754,14 +761,14 @@ class ParamInfo:
         self.type = type(self.choices[0].value)
 
     def _parse_guild_channel(
-        self, *channels: type[disnake.abc.GuildChannel] | type[disnake.Thread]
+        self, *channels: type[disnake.abc.GuildChannel | disnake.Thread]
     ) -> None:
         # this variable continues to be GuildChannel because the type is still
         # determined from the TYPE mapping in the class definition
         self.type = disnake.abc.GuildChannel
 
         if not self.channel_types:
-            channel_types = set()
+            channel_types: set[ChannelType] = set()
             for channel in channels:
                 channel_types.update(_channel_type_factory(channel))
             self.channel_types = list(channel_types)
@@ -783,14 +790,6 @@ class ParamInfo:
         # short circuit if user forgot to provide annotations
         if annotation is inspect.Parameter.empty or annotation is Any:
             return False
-
-        # Range and String are aliased to Annotated for type-checking, which breaks
-        # the `isinstance` below for pyright, so alias them back to a known type.
-        if TYPE_CHECKING:
-            _Range = _String = _BaseRange
-        else:
-            _Range = Range
-            _String = String
 
         # resolve type aliases and special types
         if isinstance(annotation, _Range):
@@ -823,12 +822,9 @@ class ParamInfo:
 
         elif annotation in self.TYPES:
             self.type = annotation
-        elif (
-            isinstance(annotation, (EnumMeta, disnake.enums.EnumMeta))
-            or get_origin(annotation) is Literal
-        ):
+        elif isinstance(annotation, _EnumMetas) or get_origin(annotation) is Literal:
             self._parse_enum(annotation)
-        elif get_origin(annotation) in (Union, UnionType):
+        elif get_origin(annotation) in _UnionTypes:
             args = annotation.__args__
             if all(
                 issubclass_(channel, (disnake.abc.GuildChannel, disnake.Thread)) for channel in args
@@ -1439,7 +1435,7 @@ def option_enum(choices: dict[str, TChoice] | list[TChoice], **kwargs: TChoice) 
 
     choices = choices or kwargs
     first, *_ = choices.values()
-    return Enum("", choices, type=type(first))  # pyright: ignore[reportReturnType]
+    return enum.Enum("", choices, type=type(first))  # pyright: ignore[reportReturnType]
 
 
 class ConverterMethod(classmethod):
