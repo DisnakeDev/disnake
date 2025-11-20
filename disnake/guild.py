@@ -3852,10 +3852,6 @@ class Guild(Hashable):
         counts: dict[Role | Object, int] = {}
         for id_str, count in data.items():
             id = int(id_str)
-            if id == self.id:
-                # skip @everyone role, since it's a synthetic role and always has a member count of 0
-                continue
-
             obj = self.get_role(id) or Object(id)
             counts[obj] = count
 
