@@ -131,6 +131,48 @@ def test_deprecated_skip() -> None:
 
 
 @pytest.mark.parametrize(
+    "msg",
+    ["This is a deprecated function"],
+)
+def test_deprecated_warn(msg: str) -> None:
+    # Just test if works
+    # first clear existing filters - these will be restored at the end as this is probably messing with the global warning filters
+    filters = warnings.filters[:]
+
+    warnings.resetwarnings()
+    with warnings.catch_warnings(record=True) as result:
+        warnings.filterwarnings("always", category=DeprecationWarning, module=r"disnake\..*")
+        utils.warn_deprecated(msg)
+
+    assert len(result) == 1, "Expected one warning to be raised."
+    assert result[0].category is DeprecationWarning
+    assert result[0].message.args[0] == msg  # pyright: ignore[reportAttributeAccessIssue]
+
+    # Reset With empty filters.
+    # Expected behaviour is that a warning is forced because it's empty.
+    warnings.resetwarnings()
+    with warnings.catch_warnings(record=True) as result:
+        utils.warn_deprecated(msg)
+
+    assert len(result) == 1, "Expected one warning to be raised."
+    assert result[0].category is DeprecationWarning
+    assert result[0].message.args[0] == msg  # pyright: ignore[reportAttributeAccessIssue]
+
+    # Reset With empty filters and add disnake ignore rule.
+    # Expected behaviour is that there is no warning because it's ignored.
+    warnings.resetwarnings()
+    with warnings.catch_warnings(record=True) as result:
+        warnings.filterwarnings("ignore", category=DeprecationWarning, module=r"disnake\..*")
+        utils.warn_deprecated(msg)
+
+    assert len(result) == 0, (
+        "Expected no warnings to be raised when declaring disnake to be ignored."
+    )
+
+    warnings.filters[:] = filters  # pyright: ignore[reportIndexIssue]
+
+
+@pytest.mark.parametrize(
     ("params", "expected"),
     [
         (
