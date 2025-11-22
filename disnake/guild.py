@@ -3820,6 +3820,43 @@ class Guild(Hashable):
         data = await self._state.http.get_roles(self.id)
         return [Role(guild=self, state=self._state, data=d) for d in data]
 
+    async def fetch_role_member_counts(self) -> dict[Role | Object, int]:
+        r"""|coro|
+
+        Retrieves the member counts of all :class:`Role`\s that the guild has.
+
+        .. caution::
+            This uses an endpoint that is currently in public preview,
+            it should not be considered stable and is exempt from version guarantees:
+            https://github.com/discord/discord-api-docs/discussions/3306#discussioncomment-14681890.
+
+        .. note::
+
+            This method is an API call. For general usage, consider :attr:`roles` instead.
+
+        .. versionadded:: |vnext|
+
+        Raises
+        ------
+        HTTPException
+            Retrieving the role member counts failed.
+
+        Returns
+        -------
+        :class:`dict`\[:class:`Role` | :class:`Object`, :class:`int`]
+            The member counts of the roles.
+            Roles that could not be found in the bot's cache are
+            :class:`Object` with the corresponding ID instead.
+        """
+        data = await self._state.http.get_role_member_counts(self.id)
+        counts: dict[Role | Object, int] = {}
+        for id_str, count in data.items():
+            id = int(id_str)
+            obj = self.get_role(id) or Object(id)
+            counts[obj] = count
+
+        return counts
+
     @overload
     async def get_or_fetch_member(
         self, member_id: int, *, strict: Literal[False] = ...
