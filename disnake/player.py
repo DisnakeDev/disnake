@@ -664,9 +664,7 @@ class PCMVolumeTransformer(AudioSource, Generic[AT]):
 
     def __init__(self, original: AT, volume: float = 1.0) -> None:
         if not has_audioop:
-            msg = (
-                f"audioop-lts library needed in Python >=3.13 in order to use {type(self).__name__}"
-            )
+            msg = f"audioop-lts library needed in Python >=3.13 in order to use {self.__class__.__name__}"
             raise RuntimeError(msg)
 
         if not isinstance(original, AudioSource):

@@ -333,7 +333,7 @@ class _BaseRange(ABC):
     def __repr__(self) -> str:
         a = "..." if self.min_value is None else self.min_value
         b = "..." if self.max_value is None else self.max_value
-        return f"{type(self).__name__}[{self.underlying_type.__name__}, {a}, {b}]"
+        return f"{self.__class__.__name__}[{self.underlying_type.__name__}, {a}, {b}]"
 
     @classmethod
     @abstractmethod
@@ -614,7 +614,7 @@ class ParamInfo:
 
     def __repr__(self) -> str:
         args = ", ".join(f"{k}={'...' if v is ... else repr(v)}" for k, v in vars(self).items())
-        return f"{type(self).__name__}({args})"
+        return f"{self.__class__.__name__}({args})"
 
     async def get_default(self, inter: ApplicationCommandInteraction) -> Any:
         """Gets the default for an interaction"""

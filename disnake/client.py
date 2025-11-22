@@ -1039,7 +1039,7 @@ class Client:
         """
         _log.info("logging in using static token")
         if not isinstance(token, str):
-            msg = f"token must be of type str, got {type(token).__name__} instead"
+            msg = f"token must be of type str, got {token.__class__.__name__} instead"
             raise TypeError(msg)
 
         data = await self.http.static_login(token.strip())

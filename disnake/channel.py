@@ -3345,7 +3345,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
             ("flags", self.flags),
         )
         joined = " ".join(f"{k!s}={v!r}" for k, v in attrs)
-        return f"<{type(self).__name__} {joined}>"
+        return f"<{self.__class__.__name__} {joined}>"
 
     def _update(self, guild: Guild, data: ForumChannelPayload | MediaChannelPayload) -> None:
         self.guild: Guild = guild
