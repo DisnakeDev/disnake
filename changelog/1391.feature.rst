@@ -1,1 +1,1 @@
-Add :attr:`.Permissions.set_voice_channel_status` permission.
+Add :attr:`Permissions.set_voice_channel_status`.
