@@ -1096,6 +1096,8 @@ class Permissions(BaseFlags):
     def bypass_slowmode(self) -> int:
         """:class:`bool`: Returns ``True`` if a user can bypass slowmode restrictions.
 
+        Bots are unaffected by slowmode regardless of this permission.
+
         .. versionadded:: |vnext|
         """
         return 1 << 52
