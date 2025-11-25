@@ -2708,7 +2708,7 @@ class Guild(Hashable):
 
         Creates a :class:`GuildScheduledEvent`.
 
-        You must have :attr:`~Permissions.manage_events` permission to do this.
+        You must have :attr:`~Permissions.create_events` permission to do this.
 
         Based on the channel/entity type, there are different restrictions regarding
         other parameter values, as shown in this table:
@@ -3539,7 +3539,7 @@ class Guild(Hashable):
 
         Creates a :class:`Sticker` for the guild.
 
-        You must have :attr:`~Permissions.manage_guild_expressions` permission to
+        You must have :attr:`~Permissions.create_guild_expressions` permission to
         do this.
 
         .. versionadded:: 2.0
@@ -3688,7 +3688,7 @@ class Guild(Hashable):
         Emojis with subscription roles (see ``roles`` below) are considered premium emoji,
         and count towards a separate limit of 25 emojis.
 
-        You must have :attr:`~Permissions.manage_guild_expressions` permission to
+        You must have :attr:`~Permissions.create_guild_expressions` permission to
         do this.
 
         Parameters
