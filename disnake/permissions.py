@@ -406,9 +406,13 @@ class Permissions(BaseFlags):
 
         .. versionchanged:: 2.10
             Moved :attr:`use_application_commands` permission to :attr:`apps`.
+            Added :attr:`send_polls` permission.
 
         .. versionchanged:: 2.11
             Added :attr:`pin_messages` permission.
+
+        .. versionchanged:: |vnext|
+            Added :attr:`bypass_slowmode` permission.
         """
         return cls(
             send_messages=True,
@@ -428,6 +432,7 @@ class Permissions(BaseFlags):
             send_voice_messages=True,
             pin_messages=True,
             send_polls=True,
+            bypass_slowmode=True,
         )
 
     @classmethod
