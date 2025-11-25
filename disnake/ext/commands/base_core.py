@@ -711,6 +711,7 @@ def default_member_permissions(
     administrator: bool = ...,
     attach_files: bool = ...,
     ban_members: bool = ...,
+    bypass_slowmode: bool = ...,
     change_nickname: bool = ...,
     connect: bool = ...,
     create_events: bool = ...,

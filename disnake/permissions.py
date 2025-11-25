@@ -158,6 +158,7 @@ class Permissions(BaseFlags):
         administrator: bool = ...,
         attach_files: bool = ...,
         ban_members: bool = ...,
+        bypass_slowmode: bool = ...,
         change_nickname: bool = ...,
         connect: bool = ...,
         create_events: bool = ...,
@@ -563,6 +564,7 @@ class Permissions(BaseFlags):
         administrator: bool = ...,
         attach_files: bool = ...,
         ban_members: bool = ...,
+        bypass_slowmode: bool = ...,
         change_nickname: bool = ...,
         connect: bool = ...,
         create_events: bool = ...,
@@ -1085,6 +1087,14 @@ class Permissions(BaseFlags):
         """
         return 1 << 51
 
+    @flag_value
+    def bypass_slowmode(self) -> int:
+        """:class:`bool`: Returns ``True`` if a user can bypass slowmode restrictions.
+
+        .. versionadded:: |vnext|
+        """
+        return 1 << 52
+
 
 def _augment_from_permissions(cls):
     cls.VALID_NAMES = set(Permissions.VALID_FLAGS)
@@ -1155,6 +1165,7 @@ class PermissionOverwrite:
         administrator: bool | None
         attach_files: bool | None
         ban_members: bool | None
+        bypass_slowmode: bool | None
         change_nickname: bool | None
         connect: bool | None
         create_events: bool | None
@@ -1224,6 +1235,7 @@ class PermissionOverwrite:
         administrator: bool | None = ...,
         attach_files: bool | None = ...,
         ban_members: bool | None = ...,
+        bypass_slowmode: bool | None = ...,
         change_nickname: bool | None = ...,
         connect: bool | None = ...,
         create_events: bool | None = ...,
@@ -1360,6 +1372,7 @@ class PermissionOverwrite:
         administrator: bool | None = ...,
         attach_files: bool | None = ...,
         ban_members: bool | None = ...,
+        bypass_slowmode: bool | None = ...,
         change_nickname: bool | None = ...,
         connect: bool | None = ...,
         create_events: bool | None = ...,
