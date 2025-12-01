@@ -116,6 +116,14 @@ class Colour:
         return cls(0)
 
     @classmethod
+    def from_hex_str(cls, hex_str: str, /) -> Self:
+        """Constructs a :class:`Colour` from a hex color code (``#RRGGBB``).
+
+        .. versionadded:: |vnext|
+        """
+        return cls(int(hex_str.removeprefix("#"), 16))
+
+    @classmethod
     def random(cls, *, seed: int | str | float | bytes | bytearray | None = None) -> Self:
         """A factory method that returns a :class:`Colour` with a random hue.
 
