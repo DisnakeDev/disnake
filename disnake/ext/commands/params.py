@@ -413,8 +413,8 @@ class _Range(_BaseRange[int | float]):
             if value is None:
                 continue
 
-            if self.underlying_type is not float and not isinstance(value, int):
-                msg = f"Range[{self.underlying_type.__name__}, ...] bounds must be int, not float"
+            if self.underlying_type in (int, LargeInt) and not isinstance(value, int):
+                msg = f"Range[{self.underlying_type.__name__}, ...] bounds must be int, not {value.__class__.__name__}"
                 raise TypeError(msg)
 
             if self.underlying_type is int and abs(value) >= 2**53 - 1:
