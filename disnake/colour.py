@@ -116,7 +116,7 @@ class Colour:
         return cls(0)
 
     @classmethod
-    def from_hex_str(cls, hex_str: str, /) -> Self:
+    def from_hex(cls, hex_str: str, /) -> Self:
         """Constructs a :class:`Colour` from a hex color code (``#RRGGBB``).
 
         .. versionadded:: |vnext|

@@ -1,1 +1,1 @@
-Add :meth:`Colour.from_hex_str` to create :class:`Colour` from hex color codes (``#RRGGBB``).
+Add :meth:`Colour.from_hex` to create :class:`Colour` from hex color codes (``#RRGGBB``).
