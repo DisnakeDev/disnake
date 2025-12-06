@@ -72,7 +72,7 @@ if TYPE_CHECKING:
     from collections.abc import Generator, Mapping, Sequence
     from datetime import datetime
 
-    from typing_extensions import Never, NotRequired
+    from typing_extensions import NotRequired
 
     from .abc import GuildChannel, PrivateChannel, Snowflake, SnowflakeTime
     from .activity import ActivityTypes
@@ -206,7 +206,7 @@ class Client:
 
         .. versionchanged:: 1.3
             Allow disabling the message cache and change the default size to ``1000``.
-    connector: Optional[:class:`aiohttp.BaseConnector`]
+    connector: :class:`aiohttp.BaseConnector` | :data:`None`
         The connector to use for connection pooling.
     proxy: :class:`str` | :data:`None`
         Proxy URL.
@@ -322,8 +322,8 @@ class Client:
     Attributes
     ----------
     ws
-        The websocket gateway the client is currently connected to. Could be ``None``.
-    session_start_limit: Optional[:class:`SessionStartLimit`]
+        The websocket gateway the client is currently connected to. Could be :data:`None`.
+    session_start_limit: :class:`SessionStartLimit` | :data:`None`
         Information about the current session start limit.
         Only available after initiating the connection.
 
@@ -504,12 +504,13 @@ class Client:
         return asyncio.get_running_loop()
 
     @loop.setter
-    def loop(self, _value: Never) -> None:
+    def loop(self, value: asyncio.AbstractEventLoop) -> None:
         warnings.warn(
-            "Setting `Client.loop` is deprecated and has no effect. Use `asyncio.get_running_loop()` instead.",
+            "Assigning to `Client.loop` is deprecated. Use `asyncio.set_event_loop()` instead.",
             category=DeprecationWarning,
             stacklevel=2,
         )
+        asyncio.set_event_loop(value)
 
     @property
     def latency(self) -> float:

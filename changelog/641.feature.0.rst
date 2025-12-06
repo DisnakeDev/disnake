@@ -1,1 +1,1 @@
-|commands| :meth:`.ext.commands.Cog.cog_load` and :meth:`.ext.commands.Cog.cog_unload` can now be either asynchronous or not.
+|commands| :meth:`.ext.commands.Cog.cog_load` and :meth:`.ext.commands.Cog.cog_unload` can now be either sync or ``async``.
