@@ -2,7 +2,7 @@
 
 import os
 from dataclasses import dataclass
-from typing import Any, Literal, Optional
+from typing import Any, Literal
 
 import disnake
 
@@ -25,7 +25,7 @@ class Config:
 
 async def get_config(
     inter: disnake.CommandInteraction,
-    locale: Optional[str] = None,
+    locale: str | None = None,
     timezone: str = "UTC",
     theme: Literal["light", "dark", "amoled"] = "dark",
 ) -> Config:
@@ -37,9 +37,9 @@ async def get_config(
 
     Parameters
     ----------
-    locale: The prefered locale, defaults to the server's locale
+    locale: The preferred locale, defaults to the server's locale
     timezone: Your current timezone, must be in the format of "US/Eastern" or "Europe/London"
-    theme: Your prefered theme, defaults to the dark theme
+    theme: Your preferred theme, defaults to the dark theme
     """
     # if a locale is not provided use the guild's locale
     if locale is None:
@@ -99,8 +99,8 @@ class GameUser:
 @commands.register_injection
 async def get_game_user(
     inter: disnake.CommandInteraction,
-    user: Optional[str] = None,
-    server: Optional[Literal["eu", "us", "cn"]] = None,
+    user: str | None = None,
+    server: Literal["eu", "us", "cn"] | None = None,
 ) -> GameUser:
     """Search a game user from the database
 
@@ -114,7 +114,7 @@ async def get_game_user(
     if user is None:
         return await db.get_game_user(id=inter.author.id)
 
-    game_user: Optional[GameUser] = await db.search_game_user(username=user, server=server)
+    game_user: GameUser | None = await db.search_game_user(username=user, server=server)
     if game_user is None:
         raise commands.CommandError(f"User with username {user!r} could not be found")
 

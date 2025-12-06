@@ -3,23 +3,12 @@
 from __future__ import annotations
 
 import asyncio
-import datetime
 import time
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
-    Dict,
-    Iterable,
-    List,
     Literal,
-    Mapping,
     NamedTuple,
-    Optional,
-    Sequence,
-    Tuple,
-    Type,
-    Union,
     cast,
     overload,
 )
@@ -41,12 +30,13 @@ from .enums import (
 )
 from .errors import ClientException
 from .file import File
-from .flags import ChannelFlags, MessageFlags
+from .flags import ChannelFlags
 from .iterators import ArchivedThreadIterator
 from .mixins import Hashable
+from .object import Object
 from .partial_emoji import PartialEmoji
-from .permissions import PermissionOverwrite, Permissions
-from .soundboard import GuildSoundboardSound, PartialSoundboardSound, SoundboardSound
+from .permissions import Permissions
+from .soundboard import GuildSoundboardSound, PartialSoundboardSound
 from .stage_instance import StageInstance
 from .threads import ForumTag, Thread
 from .utils import MISSING
@@ -67,16 +57,22 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
+    import datetime
+    from collections.abc import Callable, Iterable, Mapping, Sequence
+
     from typing_extensions import Never, Self
 
     from .abc import Snowflake, SnowflakeTime
     from .asset import AssetBytes
     from .embeds import Embed
     from .emoji import Emoji
+    from .flags import MessageFlags
     from .guild import Guild, GuildChannel as GuildChannelType
     from .member import Member, VoiceState
     from .message import AllowedMentions, Message, PartialMessage
+    from .permissions import PermissionOverwrite
     from .role import Role
+    from .soundboard import SoundboardSound
     from .state import ConnectionState
     from .sticker import GuildSticker, StandardSticker, StickerItem
     from .threads import AnyThreadArchiveDuration, ThreadType
@@ -95,7 +91,7 @@ if TYPE_CHECKING:
     from .types.soundboard import PartialSoundboardSound as PartialSoundboardSoundPayload
     from .types.threads import ThreadArchiveDurationLiteral
     from .types.voice import VoiceChannelEffect as VoiceChannelEffectPayload
-    from .ui.action_row import Components, MessageUIComponent
+    from .ui._types import MessageComponents
     from .ui.view import View
     from .user import BaseUser, ClientUser, User
     from .voice_region import VoiceRegion
@@ -111,13 +107,13 @@ class VoiceChannelEffect:
 
     Attributes
     ----------
-    emoji: Optional[Union[:class:`Emoji`, :class:`PartialEmoji`]]
+    emoji: :class:`Emoji` | :class:`PartialEmoji` | :data:`None`
         The emoji, for emoji reaction effects and soundboard effects.
-    animation_type: Optional[:class:`VoiceChannelEffectAnimationType`]
+    animation_type: :class:`VoiceChannelEffectAnimationType` | :data:`None`
         The emoji animation type, for emoji reaction and soundboard effects.
-    animation_id: Optional[:class:`int`]
+    animation_id: :class:`int` | :data:`None`
         The emoji animation ID, for emoji reaction and soundboard effects.
-    sound: Optional[Union[:class:`GuildSoundboardSound`, :class:`PartialSoundboardSound`]]
+    sound: :class:`GuildSoundboardSound` | :class:`PartialSoundboardSound` | :data:`None`
         The sound data, for soundboard effects.
         This will be a :class:`PartialSoundboardSound` if it's a default sound
         or from an external guild.
@@ -131,7 +127,7 @@ class VoiceChannelEffect:
     )
 
     def __init__(self, *, data: VoiceChannelEffectPayload, state: ConnectionState) -> None:
-        self.emoji: Optional[Union[Emoji, PartialEmoji]] = None
+        self.emoji: Emoji | PartialEmoji | None = None
         if emoji_data := data.get("emoji"):
             emoji = state._get_emoji_from_data(emoji_data)
             if isinstance(emoji, str):
@@ -143,16 +139,16 @@ class VoiceChannelEffect:
             if (value := data.get("animation_type")) is not None
             else None
         )
-        self.animation_id: Optional[int] = utils._get_as_snowflake(data, "animation_id")
+        self.animation_id: int | None = utils._get_as_snowflake(data, "animation_id")
 
-        self.sound: Optional[Union[GuildSoundboardSound, PartialSoundboardSound]] = None
+        self.sound: GuildSoundboardSound | PartialSoundboardSound | None = None
         if sound_id := utils._get_as_snowflake(data, "sound_id"):
             if sound := state.get_soundboard_sound(sound_id):
                 self.sound = sound
             else:
                 sound_data: PartialSoundboardSoundPayload = {
                     "sound_id": sound_id,
-                    "volume": data.get("sound_volume"),  # type: ignore  # assume this exists if sound_id is set
+                    "volume": data.get("sound_volume"),  # pyright: ignore[reportAssignmentType]  # assume this exists if sound_id is set
                 }
                 self.sound = PartialSoundboardSound(data=sound_data, state=state)
 
@@ -197,14 +193,14 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         The guild the channel belongs to.
     id: :class:`int`
         The channel's ID.
-    category_id: Optional[:class:`int`]
+    category_id: :class:`int` | :data:`None`
         The category channel ID this channel belongs to, if applicable.
-    topic: Optional[:class:`str`]
-        The channel's topic. ``None`` if it doesn't exist.
+    topic: :class:`str` | :data:`None`
+        The channel's topic. :data:`None` if it doesn't exist.
     position: :class:`int`
         The position in the channel list. This is a number that starts at 0. e.g. the
         top channel is position 0.
-    last_message_id: Optional[:class:`int`]
+    last_message_id: :class:`int` | :data:`None`
         The last message ID of the message sent to this channel. It may
         *not* point to an existing or valid message.
     slowmode_delay: :class:`int`
@@ -238,8 +234,8 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
         .. versionadded:: 2.0
 
-    last_pin_timestamp: Optional[:class:`datetime.datetime`]
-        The time the most recent message was pinned, or ``None`` if no message is currently pinned.
+    last_pin_timestamp: :class:`datetime.datetime` | :data:`None`
+        The time the most recent message was pinned, or :data:`None` if no message is currently pinned.
 
         .. versionadded:: 2.5
     """
@@ -287,8 +283,8 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         self.guild: Guild = guild
         # apparently this can be nullable in the case of a bad api deploy
         self.name: str = data.get("name") or ""
-        self.category_id: Optional[int] = utils._get_as_snowflake(data, "parent_id")
-        self.topic: Optional[str] = data.get("topic")
+        self.category_id: int | None = utils._get_as_snowflake(data, "parent_id")
+        self.topic: str | None = data.get("topic")
         self.position: int = data["position"]
         self._flags = data.get("flags", 0)
         self.nsfw: bool = data.get("nsfw", False)
@@ -299,13 +295,13 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             "default_auto_archive_duration", 1440
         )
         self._type: Literal[0, 5] = data.get("type", self._type)
-        self.last_message_id: Optional[int] = utils._get_as_snowflake(data, "last_message_id")
-        self.last_pin_timestamp: Optional[datetime.datetime] = utils.parse_time(
+        self.last_message_id: int | None = utils._get_as_snowflake(data, "last_message_id")
+        self.last_pin_timestamp: datetime.datetime | None = utils.parse_time(
             data.get("last_pin_timestamp")
         )
         self._fill_overwrites(data)
 
-    async def _get_channel(self):
+    async def _get_channel(self) -> Self:
         return self
 
     @property
@@ -325,7 +321,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
     @utils.copy_doc(disnake.abc.GuildChannel.permissions_for)
     def permissions_for(
         self,
-        obj: Union[Member, Role],
+        obj: Member | Role,
         /,
         *,
         ignore_timeout: bool = MISSING,
@@ -339,16 +335,20 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         return base
 
     @property
-    def members(self) -> List[Member]:
-        """List[:class:`Member`]: Returns all members that can see this channel."""
+    def members(self) -> list[Member]:
+        r""":class:`list`\[:class:`Member`]: Returns all members that can see this channel."""
+        if isinstance(self.guild, Object):
+            return []
         return [m for m in self.guild.members if self.permissions_for(m).view_channel]
 
     @property
-    def threads(self) -> List[Thread]:
-        """List[:class:`Thread`]: Returns all the threads that you can see.
+    def threads(self) -> list[Thread]:
+        r""":class:`list`\[:class:`Thread`]: Returns all the threads that you can see.
 
         .. versionadded:: 2.0
         """
+        if isinstance(self.guild, Object):
+            return []
         return [thread for thread in self.guild._threads.values() if thread.parent_id == self.id]
 
     def is_nsfw(self) -> bool:
@@ -366,7 +366,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         return self._type == ChannelType.news.value
 
     @property
-    def last_message(self) -> Optional[Message]:
+    def last_message(self) -> Message | None:
         """Gets the last message in this channel from the cache.
 
         The message might not be valid or point to an existing message.
@@ -381,8 +381,8 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
         Returns
         -------
-        Optional[:class:`Message`]
-            The last message in this channel or ``None`` if not found.
+        :class:`Message` | :data:`None`
+            The last message in this channel or :data:`None` if not found.
         """
         return self._state._get_message(self.last_message_id) if self.last_message_id else None
 
@@ -392,9 +392,9 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         self,
         *,
         position: int,
-        category: Optional[Snowflake] = ...,
+        category: Snowflake | None = ...,
         sync_permissions: bool = ...,
-        reason: Optional[str] = ...,
+        reason: str | None = ...,
     ) -> None: ...
 
     # only passing `sync_permissions` may or may not return a channel,
@@ -404,47 +404,47 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         self,
         *,
         sync_permissions: bool,
-        reason: Optional[str] = ...,
-    ) -> Optional[TextChannel]: ...
+        reason: str | None = ...,
+    ) -> TextChannel | None: ...
 
     @overload
     async def edit(
         self,
         *,
         name: str = ...,
-        topic: Optional[str] = ...,
+        topic: str | None = ...,
         position: int = ...,
         nsfw: bool = ...,
         sync_permissions: bool = ...,
-        category: Optional[Snowflake] = ...,
-        slowmode_delay: Optional[int] = ...,
-        default_thread_slowmode_delay: Optional[int] = ...,
-        default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = ...,
+        category: Snowflake | None = ...,
+        slowmode_delay: int | None = ...,
+        default_thread_slowmode_delay: int | None = ...,
+        default_auto_archive_duration: AnyThreadArchiveDuration | None = ...,
         type: ChannelType = ...,
-        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = ...,
+        overwrites: Mapping[Role | Member, PermissionOverwrite] = ...,
         flags: ChannelFlags = ...,
-        reason: Optional[str] = ...,
+        reason: str | None = ...,
     ) -> TextChannel: ...
 
     async def edit(
         self,
         *,
         name: str = MISSING,
-        topic: Optional[str] = MISSING,
+        topic: str | None = MISSING,
         position: int = MISSING,
         nsfw: bool = MISSING,
         sync_permissions: bool = MISSING,
-        category: Optional[Snowflake] = MISSING,
-        slowmode_delay: Optional[int] = MISSING,
-        default_thread_slowmode_delay: Optional[int] = MISSING,
-        default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = MISSING,
+        category: Snowflake | None = MISSING,
+        slowmode_delay: int | None = MISSING,
+        default_thread_slowmode_delay: int | None = MISSING,
+        default_auto_archive_duration: AnyThreadArchiveDuration | None = MISSING,
         type: ChannelType = MISSING,
-        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
+        overwrites: Mapping[Role | Member, PermissionOverwrite] = MISSING,
         flags: ChannelFlags = MISSING,
-        reason: Optional[str] = None,
+        reason: str | None = None,
         **kwargs: Never,
-    ) -> Optional[TextChannel]:
-        """|coro|
+    ) -> TextChannel | None:
+        r"""|coro|
 
         Edits the channel.
 
@@ -467,7 +467,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         ----------
         name: :class:`str`
             The new channel's name.
-        topic: Optional[:class:`str`]
+        topic: :class:`str` | :data:`None`
             The new channel's topic.
         position: :class:`int`
             The new channel's position.
@@ -476,27 +476,27 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         sync_permissions: :class:`bool`
             Whether to sync permissions with the channel's new or pre-existing
             category. Defaults to ``False``.
-        category: Optional[:class:`abc.Snowflake`]
-            The new category for this channel. Can be ``None`` to remove the
+        category: :class:`abc.Snowflake` | :data:`None`
+            The new category for this channel. Can be :data:`None` to remove the
             category.
-        slowmode_delay: Optional[:class:`int`]
+        slowmode_delay: :class:`int` | :data:`None`
             Specifies the slowmode rate limit for users in this channel, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
-        default_thread_slowmode_delay: Optional[:class:`int`]
+        default_thread_slowmode_delay: :class:`int` | :data:`None`
             Specifies the slowmode rate limit at which users can send messages
             in newly created threads in this channel, in seconds.
             This does not apply retroactively to existing threads.
-            A value of ``0`` or ``None`` disables slowmode. The maximum value possible is ``21600``.
+            A value of ``0`` or :data:`None` disables slowmode. The maximum value possible is ``21600``.
 
             .. versionadded:: 2.8
         type: :class:`ChannelType`
             The new type of this text channel. Currently, only conversion between
             :attr:`ChannelType.text` and :attr:`ChannelType.news` is supported. This
             is only available to guilds that contain ``NEWS`` in :attr:`Guild.features`.
-        overwrites: :class:`Mapping`
+        overwrites: :class:`~collections.abc.Mapping`\[:class:`~.Member` | :class:`~.Role`, :class:`PermissionOverwrite`]
             A :class:`Mapping` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply to the channel.
-        default_auto_archive_duration: Optional[Union[:class:`int`, :class:`ThreadArchiveDuration`]]
+        default_auto_archive_duration: :class:`int` | :class:`ThreadArchiveDuration` | :data:`None`
             The new default auto archive duration in minutes for threads created in this channel.
             Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
         flags: :class:`ChannelFlags`
@@ -504,7 +504,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
             .. versionadded:: 2.6
 
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason for editing this channel. Shows up on the audit log.
 
         Raises
@@ -520,9 +520,9 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
         Returns
         -------
-        Optional[:class:`.TextChannel`]
+        :class:`.TextChannel` | :data:`None`
             The newly edited text channel. If the edit was only positional
-            then ``None`` is returned instead.
+            then :data:`None` is returned instead.
         """
         payload = await self._edit(
             name=name,
@@ -538,28 +538,29 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             overwrites=overwrites,
             flags=flags,
             reason=reason,
-            **kwargs,  # type: ignore
+            **kwargs,
         )
         if payload is not None:
             # the payload will always be the proper channel payload
-            return self.__class__(state=self._state, guild=self.guild, data=payload)  # type: ignore
+            return self.__class__(state=self._state, guild=self.guild, data=payload)  # pyright: ignore[reportArgumentType]
+        return None
 
     async def clone(
         self,
         *,
-        name: Optional[str] = None,
-        topic: Optional[str] = MISSING,
+        name: str | None = None,
+        topic: str | None = MISSING,
         position: int = MISSING,
         nsfw: bool = MISSING,
-        category: Optional[Snowflake] = MISSING,
+        category: Snowflake | None = MISSING,
         slowmode_delay: int = MISSING,
-        default_thread_slowmode_delay: Optional[int] = MISSING,
+        default_thread_slowmode_delay: int | None = MISSING,
         default_auto_archive_duration: AnyThreadArchiveDuration = MISSING,
-        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
+        overwrites: Mapping[Role | Member, PermissionOverwrite] = MISSING,
         news: bool = MISSING,
-        reason: Optional[str] = None,
+        reason: str | None = None,
     ) -> TextChannel:
-        """|coro|
+        r"""|coro|
 
         Clones this channel. This creates a channel with the same properties
         as this channel.
@@ -578,33 +579,33 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
         Parameters
         ----------
-        name: Optional[:class:`str`]
+        name: :class:`str` | :data:`None`
             The name of the new channel. If not provided, defaults to this channel's name.
-        topic: Optional[:class:`str`]
+        topic: :class:`str` | :data:`None`
             The topic of the new channel. If not provided, defaults to this channel's topic.
         position: :class:`int`
             The position of the new channel. If not provided, defaults to this channel's position.
         nsfw: :class:`bool`
             Whether the new channel should be marked as NSFW. If not provided, defaults to this channel's NSFW value.
-        category: Optional[:class:`abc.Snowflake`]
+        category: :class:`abc.Snowflake` | :data:`None`
             The category where the new channel should be grouped. If not provided, defaults to this channel's category.
         slowmode_delay: :class:`int`
             The slowmode of the new channel. If not provided, defaults to this channel's slowmode.
-        default_thread_slowmode_delay: Optional[:class:`int`]
+        default_thread_slowmode_delay: :class:`int` | :data:`None`
             Specifies the slowmode rate limit at which users can send messages
             in newly created threads in this channel, in seconds.
             This does not apply retroactively to existing threads.
-            A value of ``0`` or ``None`` disables slowmode. The maximum value possible is ``21600``. If not provided, defaults
+            A value of ``0`` or :data:`None` disables slowmode. The maximum value possible is ``21600``. If not provided, defaults
             to this channel's default thread slowmode delay.
-        default_auto_archive_duration: Union[:class:`int`, :class:`ThreadArchiveDuration`]
+        default_auto_archive_duration: :class:`int` | :class:`ThreadArchiveDuration`
             The default auto archive duration of the new channel. If not provided, defaults to this channel's default auto archive duration.
-        overwrites: :class:`Mapping`
+        overwrites: :class:`~collections.abc.Mapping`\[:class:`~.Member` | :class:`~.Role`, :class:`PermissionOverwrite`]
             A :class:`Mapping` of target (either a role or a member) to :class:`PermissionOverwrite`
             to apply to the channel. If not provided, defaults to this channel's overwrites.
         news: :class:`bool`
             Whether the new channel should be a news channel. News channels are text channels that can be followed.
             This is only available to guilds that contain ``NEWS`` in :attr:`Guild.features`. If not provided, defaults to the current type of this channel.
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason for cloning this channel. Shows up on the audit log.
 
         Raises
@@ -653,7 +654,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         )
 
     async def delete_messages(self, messages: Iterable[Snowflake]) -> None:
-        """|coro|
+        r"""|coro|
 
         Deletes a list of messages. This is similar to :meth:`Message.delete`
         except it bulk deletes multiple messages.
@@ -670,7 +671,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
         Parameters
         ----------
-        messages: Iterable[:class:`abc.Snowflake`]
+        messages: :class:`~collections.abc.Iterable`\[:class:`abc.Snowflake`]
             An iterable of messages denoting which ones to bulk delete.
 
         Raises
@@ -696,7 +697,8 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             return
 
         if len(messages) > 100:
-            raise ClientException("Can only bulk delete messages up to 100 messages")
+            msg = "Can only bulk delete messages up to 100 messages"
+            raise ClientException(msg)
 
         message_ids: SnowflakeList = [m.id for m in messages]
         await self._state.http.delete_messages(self.id, message_ids)
@@ -704,15 +706,15 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
     async def purge(
         self,
         *,
-        limit: Optional[int] = 100,
+        limit: int | None = 100,
         check: Callable[[Message], bool] = MISSING,
-        before: Optional[SnowflakeTime] = None,
-        after: Optional[SnowflakeTime] = None,
-        around: Optional[SnowflakeTime] = None,
-        oldest_first: Optional[bool] = False,
+        before: SnowflakeTime | None = None,
+        after: SnowflakeTime | None = None,
+        around: SnowflakeTime | None = None,
+        oldest_first: bool | None = False,
         bulk: bool = True,
-    ) -> List[Message]:
-        """|coro|
+    ) -> list[Message]:
+        r"""|coro|
 
         Purges a list of messages that meet the criteria given by the predicate
         ``check``. If a ``check`` is not provided then all messages are deleted
@@ -735,19 +737,19 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
         Parameters
         ----------
-        limit: Optional[:class:`int`]
+        limit: :class:`int` | :data:`None`
             The number of messages to search through. This is not the number
             of messages that will be deleted, though it can be.
-        check: Callable[[:class:`Message`], :class:`bool`]
+        check: :class:`~collections.abc.Callable`\[[:class:`Message`], :class:`bool`]
             The function used to check if a message should be deleted.
             It must take a :class:`Message` as its sole parameter.
-        before: Optional[Union[:class:`abc.Snowflake`, :class:`datetime.datetime`]]
+        before: :class:`abc.Snowflake` | :class:`datetime.datetime` | :data:`None`
             Same as ``before`` in :meth:`history`.
-        after: Optional[Union[:class:`abc.Snowflake`, :class:`datetime.datetime`]]
+        after: :class:`abc.Snowflake` | :class:`datetime.datetime` | :data:`None`
             Same as ``after`` in :meth:`history`.
-        around: Optional[Union[:class:`abc.Snowflake`, :class:`datetime.datetime`]]
+        around: :class:`abc.Snowflake` | :class:`datetime.datetime` | :data:`None`
             Same as ``around`` in :meth:`history`.
-        oldest_first: Optional[:class:`bool`]
+        oldest_first: :class:`bool` | :data:`None`
             Same as ``oldest_first`` in :meth:`history`.
         bulk: :class:`bool`
             If ``True``, use bulk delete. Setting this to ``False`` is useful for mass-deleting
@@ -763,7 +765,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
         Returns
         -------
-        List[:class:`.Message`]
+        :class:`list`\[:class:`.Message`]
             A list of messages that were deleted.
         """
         if check is MISSING:
@@ -772,7 +774,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         iterator = self.history(
             limit=limit, before=before, after=after, oldest_first=oldest_first, around=around
         )
-        ret: List[Message] = []
+        ret: list[Message] = []
         count = 0
 
         minimum_time = int((time.time() - 14 * 24 * 60 * 60) * 1000.0 - 1420070400000) << 22
@@ -813,8 +815,8 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
         return ret
 
-    async def webhooks(self) -> List[Webhook]:
-        """|coro|
+    async def webhooks(self) -> list[Webhook]:
+        r"""|coro|
 
         Retrieves the list of webhooks this channel has.
 
@@ -828,7 +830,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
         Returns
         -------
-        List[:class:`Webhook`]
+        :class:`list`\[:class:`Webhook`]
             The list of webhooks this channel has.
         """
         from .webhook import Webhook
@@ -837,7 +839,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         return [Webhook.from_state(d, state=self._state) for d in data]
 
     async def create_webhook(
-        self, *, name: str, avatar: Optional[AssetBytes] = None, reason: Optional[str] = None
+        self, *, name: str, avatar: AssetBytes | None = None, reason: str | None = None
     ) -> Webhook:
         """|coro|
 
@@ -853,14 +855,14 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         ----------
         name: :class:`str`
             The webhook's name.
-        avatar: Optional[|resource_type|]
+        avatar: |resource_type| | :data:`None`
             The webhook's default avatar.
             This operates similarly to :meth:`~ClientUser.edit`.
 
             .. versionchanged:: 2.5
                 Now accepts various resource types in addition to :class:`bytes`.
 
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason for creating this webhook. Shows up in the audit logs.
 
         Raises
@@ -888,7 +890,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         )
         return Webhook.from_state(data, state=self._state)
 
-    async def follow(self, *, destination: TextChannel, reason: Optional[str] = None) -> Webhook:
+    async def follow(self, *, destination: TextChannel, reason: str | None = None) -> Webhook:
         """|coro|
 
         Follows a channel using a webhook.
@@ -909,7 +911,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         ----------
         destination: :class:`TextChannel`
             The channel you would like to follow from.
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason for following the channel. Shows up on the destination guild's audit log.
 
             .. versionadded:: 1.4
@@ -929,10 +931,12 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             The newly created webhook.
         """
         if not self.is_news():
-            raise TypeError("This channel must be a news channel.")
+            msg = "This channel must be a news channel."
+            raise TypeError(msg)
 
         if not isinstance(destination, TextChannel):
-            raise TypeError(f"Expected TextChannel received {destination.__class__.__name__}")
+            msg = f"Expected TextChannel received {destination.__class__.__name__}"
+            raise TypeError(msg)
 
         from .webhook import Webhook
 
@@ -963,7 +967,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
         return PartialMessage(channel=self, id=message_id)
 
-    def get_thread(self, thread_id: int, /) -> Optional[Thread]:
+    def get_thread(self, thread_id: int, /) -> Thread | None:
         """Returns a thread with the given ID.
 
         .. versionadded:: 2.0
@@ -975,9 +979,11 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
         Returns
         -------
-        Optional[:class:`Thread`]
-            The returned thread or ``None`` if not found.
+        :class:`Thread` | :data:`None`
+            The returned thread or :data:`None` if not found.
         """
+        if isinstance(self.guild, Object):
+            return None
         return self.guild.get_thread(thread_id)
 
     @overload
@@ -986,9 +992,9 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         *,
         name: str,
         message: Snowflake,
-        auto_archive_duration: Optional[AnyThreadArchiveDuration] = None,
-        slowmode_delay: Optional[int] = None,
-        reason: Optional[str] = None,
+        auto_archive_duration: AnyThreadArchiveDuration | None = None,
+        slowmode_delay: int | None = None,
+        reason: str | None = None,
     ) -> Thread: ...
 
     @overload
@@ -997,22 +1003,22 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         *,
         name: str,
         type: ThreadType,
-        auto_archive_duration: Optional[AnyThreadArchiveDuration] = None,
-        invitable: Optional[bool] = None,
-        slowmode_delay: Optional[int] = None,
-        reason: Optional[str] = None,
+        auto_archive_duration: AnyThreadArchiveDuration | None = None,
+        invitable: bool | None = None,
+        slowmode_delay: int | None = None,
+        reason: str | None = None,
     ) -> Thread: ...
 
     async def create_thread(
         self,
         *,
         name: str,
-        message: Optional[Snowflake] = None,
-        auto_archive_duration: Optional[AnyThreadArchiveDuration] = None,
-        type: Optional[ThreadType] = None,
-        invitable: Optional[bool] = None,
-        slowmode_delay: Optional[int] = None,
-        reason: Optional[str] = None,
+        message: Snowflake | None = None,
+        auto_archive_duration: AnyThreadArchiveDuration | None = None,
+        type: ThreadType | None = None,
+        invitable: bool | None = None,
+        slowmode_delay: int | None = None,
+        reason: str | None = None,
     ) -> Thread:
         """|coro|
 
@@ -1048,7 +1054,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
                 Cannot be provided with ``message``.
                 Now required if message is not provided.
 
-        auto_archive_duration: Union[:class:`int`, :class:`ThreadArchiveDuration`]
+        auto_archive_duration: :class:`int` | :class:`ThreadArchiveDuration`
             The duration in minutes before a thread is automatically archived for inactivity.
             If not provided, the channel's default auto archive duration is used.
             Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
@@ -1061,15 +1067,15 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
             .. versionadded:: 2.3
 
-        slowmode_delay: Optional[:class:`int`]
+        slowmode_delay: :class:`int` | :data:`None`
             Specifies the slowmode rate limit for users in this thread, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
-            If set to ``None`` or not provided, slowmode is inherited from the parent's
+            If set to :data:`None` or not provided, slowmode is inherited from the parent's
             :attr:`~TextChannel.default_thread_slowmode_delay`.
 
             .. versionadded:: 2.3
 
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason for creating the thread. Shows up on the audit log.
 
         Raises
@@ -1084,25 +1090,22 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         :class:`Thread`
             The newly created thread
         """
-        if not ((message is None) ^ (type is None)):
-            raise ValueError("Exactly one of message and type must be provided.")
-
         if auto_archive_duration is not None:
             auto_archive_duration = cast(
                 "ThreadArchiveDurationLiteral", try_enum_to_int(auto_archive_duration)
             )
 
-        if message is None:
+        if message is None and type is not None:
             data = await self._state.http.start_thread_without_message(
                 self.id,
                 name=name,
                 auto_archive_duration=auto_archive_duration or self.default_auto_archive_duration,
-                type=type.value,  # type: ignore
+                type=type.value,
                 invitable=invitable if invitable is not None else True,
                 rate_limit_per_user=slowmode_delay,
                 reason=reason,
             )
-        else:
+        elif message is not None and type is None:
             data = await self._state.http.start_thread_with_message(
                 self.id,
                 message.id,
@@ -1111,6 +1114,9 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
                 rate_limit_per_user=slowmode_delay,
                 reason=reason,
             )
+        else:
+            msg = "Exactly one of message and type must be provided."
+            raise ValueError(msg)
 
         return Thread(guild=self.guild, state=self._state, data=data)
 
@@ -1119,8 +1125,8 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         *,
         private: bool = False,
         joined: bool = False,
-        limit: Optional[int] = 50,
-        before: Optional[Union[Snowflake, datetime.datetime]] = None,
+        limit: int | None = 50,
+        before: Snowflake | datetime.datetime | None = None,
     ) -> ArchivedThreadIterator:
         """Returns an :class:`~disnake.AsyncIterator` that iterates over all archived threads in the channel.
 
@@ -1131,11 +1137,11 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
 
         Parameters
         ----------
-        limit: Optional[:class:`int`]
+        limit: :class:`int` | :data:`None`
             The number of threads to retrieve.
-            If ``None``, retrieves every archived thread in the channel. Note, however,
+            If :data:`None`, retrieves every archived thread in the channel. Note, however,
             that this would make it a slow operation.
-        before: Optional[Union[:class:`abc.Snowflake`, :class:`datetime.datetime`]]
+        before: :class:`abc.Snowflake` | :class:`datetime.datetime` | :data:`None`
             Retrieve archived channels before the given date or ID.
         private: :class:`bool`
             Whether to retrieve private archived threads.
@@ -1181,29 +1187,29 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
         *,
         state: ConnectionState,
         guild: Guild,
-        data: Union[VoiceChannelPayload, StageChannelPayload],
+        data: VoiceChannelPayload | StageChannelPayload,
     ) -> None:
         self._state: ConnectionState = state
         self.id: int = int(data["id"])
         self._update(guild, data)
 
-    def _get_voice_client_key(self) -> Tuple[int, str]:
+    def _get_voice_client_key(self) -> tuple[int, str]:
         return self.guild.id, "guild_id"
 
-    def _get_voice_state_pair(self) -> Tuple[int, int]:
+    def _get_voice_state_pair(self) -> tuple[int, int]:
         return self.guild.id, self.id
 
-    def _update(self, guild: Guild, data: Union[VoiceChannelPayload, StageChannelPayload]) -> None:
+    def _update(self, guild: Guild, data: VoiceChannelPayload | StageChannelPayload) -> None:
         self.guild = guild
         # apparently this can be nullable in the case of a bad api deploy
         self.name: str = data.get("name") or ""
         rtc = data.get("rtc_region")
-        self.rtc_region: Optional[str] = rtc
+        self.rtc_region: str | None = rtc
         self.video_quality_mode: VideoQualityMode = try_enum(
             VideoQualityMode, data.get("video_quality_mode", 1)
         )
         self._flags = data.get("flags", 0)
-        self.category_id: Optional[int] = utils._get_as_snowflake(data, "parent_id")
+        self.category_id: int | None = utils._get_as_snowflake(data, "parent_id")
         self.position: int = data["position"]
         # these don't exist in partial channel objects of slash command options
         self.bitrate: int = data.get("bitrate", 0)
@@ -1215,9 +1221,12 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
         return ChannelType.voice.value
 
     @property
-    def members(self) -> List[Member]:
-        """List[:class:`Member`]: Returns all members that are currently inside this voice channel."""
-        ret = []
+    def members(self) -> list[Member]:
+        r""":class:`list`\[:class:`Member`]: Returns all members that are currently inside this voice channel."""
+        if isinstance(self.guild, Object):
+            return []
+
+        ret: list[Member] = []
         for user_id, state in self.guild._voice_states.items():
             if state.channel and state.channel.id == self.id:
                 member = self.guild.get_member(user_id)
@@ -1226,8 +1235,8 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
         return ret
 
     @property
-    def voice_states(self) -> Dict[int, VoiceState]:
-        """Returns a mapping of member IDs who have voice states in this channel.
+    def voice_states(self) -> dict[int, VoiceState]:
+        r"""Returns a mapping of member IDs who have voice states in this channel.
 
         .. versionadded:: 1.3
 
@@ -1238,9 +1247,12 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
 
         Returns
         -------
-        Mapping[:class:`int`, :class:`VoiceState`]
+        :class:`~collections.abc.Mapping`\[:class:`int`, :class:`VoiceState`]
             The mapping of member ID to a voice state.
         """
+        if isinstance(self.guild, Object):
+            return {}
+
         return {
             key: value
             for key, value in self.guild._voice_states.items()
@@ -1250,7 +1262,7 @@ class VocalGuildChannel(disnake.abc.Connectable, disnake.abc.GuildChannel, Hasha
     @utils.copy_doc(disnake.abc.GuildChannel.permissions_for)
     def permissions_for(
         self,
-        obj: Union[Member, Role],
+        obj: Member | Role,
         /,
         *,
         ignore_timeout: bool = MISSING,
@@ -1307,7 +1319,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         The guild the channel belongs to.
     id: :class:`int`
         The channel's ID.
-    category_id: Optional[:class:`int`]
+    category_id: :class:`int` | :data:`None`
         The category channel ID this channel belongs to, if applicable.
     position: :class:`int`
         The position in the channel list. This is a number that starts at 0. e.g. the
@@ -1316,9 +1328,9 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         The channel's preferred audio bitrate in bits per second.
     user_limit: :class:`int`
         The channel's limit for number of members that can be in a voice channel.
-    rtc_region: Optional[:class:`str`]
+    rtc_region: :class:`str` | :data:`None`
         The region for the voice channel's voice communication.
-        A value of ``None`` indicates automatic voice region detection.
+        A value of :data:`None` indicates automatic voice region detection.
 
         .. versionadded:: 1.7
 
@@ -1344,7 +1356,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         .. versionadded:: 2.3
 
-    last_message_id: Optional[:class:`int`]
+    last_message_id: :class:`int` | :data:`None`
         The last message ID of the message sent to this channel. It may
         *not* point to an existing or valid message.
 
@@ -1377,9 +1389,9 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         super()._update(guild, data)
         self.nsfw: bool = data.get("nsfw", False)
         self.slowmode_delay: int = data.get("rate_limit_per_user", 0)
-        self.last_message_id: Optional[int] = utils._get_as_snowflake(data, "last_message_id")
+        self.last_message_id: int | None = utils._get_as_snowflake(data, "last_message_id")
 
-    async def _get_channel(self):
+    async def _get_channel(self: Self) -> Self:
         return self
 
     @property
@@ -1393,19 +1405,19 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
     async def clone(
         self,
         *,
-        name: Optional[str] = None,
+        name: str | None = None,
         bitrate: int = MISSING,
         user_limit: int = MISSING,
         position: int = MISSING,
-        category: Optional[Snowflake] = MISSING,
-        rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
+        category: Snowflake | None = MISSING,
+        rtc_region: str | VoiceRegion | None = MISSING,
         video_quality_mode: VideoQualityMode = MISSING,
         nsfw: bool = MISSING,
-        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
-        slowmode_delay: Optional[int] = MISSING,
-        reason: Optional[str] = None,
+        overwrites: Mapping[Role | Member, PermissionOverwrite] = MISSING,
+        slowmode_delay: int | None = MISSING,
+        reason: str | None = None,
     ) -> VoiceChannel:
-        """|coro|
+        r"""|coro|
 
         Clones this channel. This creates a channel with the same properties
         as this channel.
@@ -1424,7 +1436,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         Parameters
         ----------
-        name: Optional[:class:`str`]
+        name: :class:`str` | :data:`None`
             The name of the new channel. If not provided, defaults to this channel's name.
         bitrate: :class:`int`
             The bitrate of the new channel. If not provided, defaults to this channel's bitrate.
@@ -1432,20 +1444,20 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
             The user limit of the new channel. If not provided, defaults to this channel's user limit.
         position: :class:`int`
             The position of the new channel. If not provided, defaults to this channel's position.
-        category: Optional[:class:`abc.Snowflake`]
+        category: :class:`abc.Snowflake` | :data:`None`
             The category where the new channel should be grouped. If not provided, defaults to this channel's category.
-        rtc_region: Optional[Union[:class:`str`, :class:`VoiceRegion`]]
+        rtc_region: :class:`str` | :class:`VoiceRegion` | :data:`None`
             The rtc region of the new channel. If not provided, defaults to this channel's rtc region.
         video_quality_mode: :class:`VideoQualityMode`
             The video quality mode of the new channel. If not provided, defaults to this channel's video quality mode.
         nsfw: :class:`bool`
             Whether the new channel should be nsfw or not. If not provided, defaults to this channel's NSFW value.
-        overwrites: :class:`Mapping`
+        overwrites: :class:`~collections.abc.Mapping`\[:class:`~.Member` | :class:`~.Role`, :class:`PermissionOverwrite`]
             A :class:`Mapping` of target (either a role or a member) to :class:`PermissionOverwrite` to apply
             to the channel. If not provided, defaults to this channel's overwrites.
-        slowmode_delay: Optional[:class:`int`]
+        slowmode_delay: :class:`int` | :data:`None`
             The slowmode of the new channel. If not provided, defaults to this channel's slowmode.
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason for cloning this channel. Shows up on the audit log.
 
         Raises
@@ -1492,7 +1504,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         return self.nsfw
 
     @property
-    def last_message(self) -> Optional[Message]:
+    def last_message(self) -> Message | None:
         """Gets the last message in this channel from the cache.
 
         The message might not be valid or point to an existing message.
@@ -1509,8 +1521,8 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         Returns
         -------
-        Optional[:class:`Message`]
-            The last message in this channel or ``None`` if not found.
+        :class:`Message` | :data:`None`
+            The last message in this channel or :data:`None` if not found.
         """
         return self._state._get_message(self.last_message_id) if self.last_message_id else None
 
@@ -1542,9 +1554,9 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         self,
         *,
         position: int,
-        category: Optional[Snowflake] = ...,
+        category: Snowflake | None = ...,
         sync_permissions: bool = ...,
-        reason: Optional[str] = ...,
+        reason: str | None = ...,
     ) -> None: ...
 
     # only passing `sync_permissions` may or may not return a channel,
@@ -1554,8 +1566,8 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         self,
         *,
         sync_permissions: bool,
-        reason: Optional[str] = ...,
-    ) -> Optional[VoiceChannel]: ...
+        reason: str | None = ...,
+    ) -> VoiceChannel | None: ...
 
     @overload
     async def edit(
@@ -1566,14 +1578,14 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         user_limit: int = ...,
         position: int = ...,
         sync_permissions: bool = ...,
-        category: Optional[Snowflake] = ...,
-        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = ...,
-        rtc_region: Optional[Union[str, VoiceRegion]] = ...,
+        category: Snowflake | None = ...,
+        overwrites: Mapping[Role | Member, PermissionOverwrite] = ...,
+        rtc_region: str | VoiceRegion | None = ...,
         video_quality_mode: VideoQualityMode = ...,
         nsfw: bool = ...,
-        slowmode_delay: Optional[int] = ...,
+        slowmode_delay: int | None = ...,
         flags: ChannelFlags = ...,
-        reason: Optional[str] = ...,
+        reason: str | None = ...,
     ) -> VoiceChannel: ...
 
     async def edit(
@@ -1584,17 +1596,17 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         user_limit: int = MISSING,
         position: int = MISSING,
         sync_permissions: bool = MISSING,
-        category: Optional[Snowflake] = MISSING,
-        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
-        rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
+        category: Snowflake | None = MISSING,
+        overwrites: Mapping[Role | Member, PermissionOverwrite] = MISSING,
+        rtc_region: str | VoiceRegion | None = MISSING,
         video_quality_mode: VideoQualityMode = MISSING,
         nsfw: bool = MISSING,
-        slowmode_delay: Optional[int] = MISSING,
+        slowmode_delay: int | None = MISSING,
         flags: ChannelFlags = MISSING,
-        reason: Optional[str] = None,
+        reason: str | None = None,
         **kwargs: Never,
-    ) -> Optional[VoiceChannel]:
-        """|coro|
+    ) -> VoiceChannel | None:
+        r"""|coro|
 
         Edits the channel.
 
@@ -1623,17 +1635,17 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         sync_permissions: :class:`bool`
             Whether to sync permissions with the channel's new or pre-existing
             category. Defaults to ``False``.
-        category: Optional[:class:`abc.Snowflake`]
-            The new category for this channel. Can be ``None`` to remove the
+        category: :class:`abc.Snowflake` | :data:`None`
+            The new category for this channel. Can be :data:`None` to remove the
             category.
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason for editing this channel. Shows up on the audit log.
-        overwrites: :class:`Mapping`
+        overwrites: :class:`~collections.abc.Mapping`\[:class:`~.Member` | :class:`~.Role`, :class:`PermissionOverwrite`]
             A :class:`Mapping` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply to the channel.
-        rtc_region: Optional[Union[:class:`str`, :class:`VoiceRegion`]]
+        rtc_region: :class:`str` | :class:`VoiceRegion` | :data:`None`
             The new region for the voice channel's voice communication.
-            A value of ``None`` indicates automatic voice region detection.
+            A value of :data:`None` indicates automatic voice region detection.
 
             .. versionadded:: 1.7
 
@@ -1647,7 +1659,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
 
             .. versionadded:: 2.3
 
-        slowmode_delay: Optional[:class:`int`]
+        slowmode_delay: :class:`int` | :data:`None`
             Specifies the slowmode rate limit for users in this channel, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
 
@@ -1671,9 +1683,9 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         Returns
         -------
-        Optional[:class:`.VoiceChannel`]
+        :class:`.VoiceChannel` | :data:`None`
             The newly edited voice channel. If the edit was only positional
-            then ``None`` is returned instead.
+            then :data:`None` is returned instead.
         """
         payload = await self._edit(
             name=name,
@@ -1689,14 +1701,15 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
             slowmode_delay=slowmode_delay,
             flags=flags,
             reason=reason,
-            **kwargs,  # type: ignore
+            **kwargs,
         )
         if payload is not None:
             # the payload will always be the proper channel payload
-            return self.__class__(state=self._state, guild=self.guild, data=payload)  # type: ignore
+            return self.__class__(state=self._state, guild=self.guild, data=payload)  # pyright: ignore[reportArgumentType]
+        return None
 
     async def delete_messages(self, messages: Iterable[Snowflake]) -> None:
-        """|coro|
+        r"""|coro|
 
         Deletes a list of messages. This is similar to :meth:`Message.delete`
         except it bulk deletes multiple messages.
@@ -1715,7 +1728,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         Parameters
         ----------
-        messages: Iterable[:class:`abc.Snowflake`]
+        messages: :class:`~collections.abc.Iterable`\[:class:`abc.Snowflake`]
             An iterable of messages denoting which ones to bulk delete.
 
         Raises
@@ -1741,7 +1754,8 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
             return
 
         if len(messages) > 100:
-            raise ClientException("Can only bulk delete messages up to 100 messages")
+            msg = "Can only bulk delete messages up to 100 messages"
+            raise ClientException(msg)
 
         message_ids: SnowflakeList = [m.id for m in messages]
         await self._state.http.delete_messages(self.id, message_ids)
@@ -1749,15 +1763,15 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
     async def purge(
         self,
         *,
-        limit: Optional[int] = 100,
+        limit: int | None = 100,
         check: Callable[[Message], bool] = MISSING,
-        before: Optional[SnowflakeTime] = None,
-        after: Optional[SnowflakeTime] = None,
-        around: Optional[SnowflakeTime] = None,
-        oldest_first: Optional[bool] = False,
+        before: SnowflakeTime | None = None,
+        after: SnowflakeTime | None = None,
+        around: SnowflakeTime | None = None,
+        oldest_first: bool | None = False,
         bulk: bool = True,
-    ) -> List[Message]:
-        """|coro|
+    ) -> list[Message]:
+        r"""|coro|
 
         Purges a list of messages that meet the criteria given by the predicate
         ``check``. If a ``check`` is not provided then all messages are deleted
@@ -1776,19 +1790,19 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         Parameters
         ----------
-        limit: Optional[:class:`int`]
+        limit: :class:`int` | :data:`None`
             The number of messages to search through. This is not the number
             of messages that will be deleted, though it can be.
-        check: Callable[[:class:`Message`], :class:`bool`]
+        check: :class:`~collections.abc.Callable`\[[:class:`Message`], :class:`bool`]
             The function used to check if a message should be deleted.
             It must take a :class:`Message` as its sole parameter.
-        before: Optional[Union[:class:`abc.Snowflake`, :class:`datetime.datetime`]]
+        before: :class:`abc.Snowflake` | :class:`datetime.datetime` | :data:`None`
             Same as ``before`` in :meth:`history`.
-        after: Optional[Union[:class:`abc.Snowflake`, :class:`datetime.datetime`]]
+        after: :class:`abc.Snowflake` | :class:`datetime.datetime` | :data:`None`
             Same as ``after`` in :meth:`history`.
-        around: Optional[Union[:class:`abc.Snowflake`, :class:`datetime.datetime`]]
+        around: :class:`abc.Snowflake` | :class:`datetime.datetime` | :data:`None`
             Same as ``around`` in :meth:`history`.
-        oldest_first: Optional[:class:`bool`]
+        oldest_first: :class:`bool` | :data:`None`
             Same as ``oldest_first`` in :meth:`history`.
         bulk: :class:`bool`
             If ``True``, use bulk delete. Setting this to ``False`` is useful for mass-deleting
@@ -1804,7 +1818,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         Returns
         -------
-        List[:class:`.Message`]
+        :class:`list`\[:class:`.Message`]
             A list of messages that were deleted.
         """
         if check is MISSING:
@@ -1813,7 +1827,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         iterator = self.history(
             limit=limit, before=before, after=after, oldest_first=oldest_first, around=around
         )
-        ret: List[Message] = []
+        ret: list[Message] = []
         count = 0
 
         minimum_time = int((time.time() - 14 * 24 * 60 * 60) * 1000.0 - 1420070400000) << 22
@@ -1854,8 +1868,8 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         return ret
 
-    async def webhooks(self) -> List[Webhook]:
-        """|coro|
+    async def webhooks(self) -> list[Webhook]:
+        r"""|coro|
 
         Retrieves the list of webhooks this channel has.
 
@@ -1871,7 +1885,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         Returns
         -------
-        List[:class:`Webhook`]
+        :class:`list`\[:class:`Webhook`]
             The list of webhooks this channel has.
         """
         from .webhook import Webhook
@@ -1880,7 +1894,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         return [Webhook.from_state(d, state=self._state) for d in data]
 
     async def create_webhook(
-        self, *, name: str, avatar: Optional[bytes] = None, reason: Optional[str] = None
+        self, *, name: str, avatar: bytes | None = None, reason: str | None = None
     ) -> Webhook:
         """|coro|
 
@@ -1895,10 +1909,10 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         ----------
         name: :class:`str`
             The webhook's name.
-        avatar: Optional[:class:`bytes`]
+        avatar: :class:`bytes` | :data:`None`
             The webhook's default avatar.
             This operates similarly to :meth:`~ClientUser.edit`.
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason for creating this webhook. Shows up in the audit logs.
 
         Raises
@@ -1938,7 +1952,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         Parameters
         ----------
-        sound: Union[:class:`SoundboardSound`, :class:`GuildSoundboardSound`]
+        sound: :class:`SoundboardSound` | :class:`GuildSoundboardSound`
             The sound to send in the channel.
 
         Raises
@@ -1989,9 +2003,9 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         The guild the channel belongs to.
     id: :class:`int`
         The channel's ID.
-    topic: Optional[:class:`str`]
-        The channel's topic. ``None`` if it isn't set.
-    category_id: Optional[:class:`int`]
+    topic: :class:`str` | :data:`None`
+        The channel's topic. :data:`None` if it isn't set.
+    category_id: :class:`int` | :data:`None`
         The category channel ID this channel belongs to, if applicable.
     position: :class:`int`
         The position in the channel list. This is a number that starts at 0. e.g. the
@@ -2000,9 +2014,9 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         The channel's preferred audio bitrate in bits per second.
     user_limit: :class:`int`
         The channel's limit for number of members that can be in a stage channel.
-    rtc_region: Optional[:class:`str`]
+    rtc_region: :class:`str` | :data:`None`
         The region for the stage channel's voice communication.
-        A value of ``None`` indicates automatic voice region detection.
+        A value of :data:`None` indicates automatic voice region detection.
 
         .. versionchanged:: 2.5
             No longer a ``VoiceRegion`` instance.
@@ -2028,7 +2042,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         .. versionadded:: 2.9
 
-    last_message_id: Optional[:class:`int`]
+    last_message_id: :class:`int` | :data:`None`
         The last message ID of the message sent to this channel. It may
         *not* point to an existing or valid message.
 
@@ -2061,17 +2075,17 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
 
     def _update(self, guild: Guild, data: StageChannelPayload) -> None:
         super()._update(guild, data)
-        self.topic: Optional[str] = data.get("topic")
+        self.topic: str | None = data.get("topic")
         self.nsfw: bool = data.get("nsfw", False)
         self.slowmode_delay: int = data.get("rate_limit_per_user", 0)
-        self.last_message_id: Optional[int] = utils._get_as_snowflake(data, "last_message_id")
+        self.last_message_id: int | None = utils._get_as_snowflake(data, "last_message_id")
 
-    async def _get_channel(self):
+    async def _get_channel(self) -> Self:
         return self
 
     @property
-    def requesting_to_speak(self) -> List[Member]:
-        """List[:class:`Member`]: A list of members who are requesting to speak in the stage channel."""
+    def requesting_to_speak(self) -> list[Member]:
+        r""":class:`list`\[:class:`Member`]: A list of members who are requesting to speak in the stage channel."""
         return [
             member
             for member in self.members
@@ -2079,8 +2093,8 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         ]
 
     @property
-    def speakers(self) -> List[Member]:
-        """List[:class:`Member`]: A list of members who have been permitted to speak in the stage channel.
+    def speakers(self) -> list[Member]:
+        r""":class:`list`\[:class:`Member`]: A list of members who have been permitted to speak in the stage channel.
 
         .. versionadded:: 2.0
         """
@@ -2093,16 +2107,16 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         ]
 
     @property
-    def listeners(self) -> List[Member]:
-        """List[:class:`Member`]: A list of members who are listening in the stage channel.
+    def listeners(self) -> list[Member]:
+        r""":class:`list`\[:class:`Member`]: A list of members who are listening in the stage channel.
 
         .. versionadded:: 2.0
         """
         return [member for member in self.members if member.voice and member.voice.suppress]
 
     @property
-    def moderators(self) -> List[Member]:
-        """List[:class:`Member`]: A list of members who are moderating the stage channel.
+    def moderators(self) -> list[Member]:
+        r""":class:`list`\[:class:`Member`]: A list of members who are moderating the stage channel.
 
         .. versionadded:: 2.0
         """
@@ -2124,19 +2138,19 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
     async def clone(
         self,
         *,
-        name: Optional[str] = None,
+        name: str | None = None,
         bitrate: int = MISSING,
         # user_limit: int = MISSING,
         position: int = MISSING,
-        category: Optional[Snowflake] = MISSING,
+        category: Snowflake | None = MISSING,
         slowmode_delay: int = MISSING,
-        rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
+        rtc_region: str | VoiceRegion | None = MISSING,
         video_quality_mode: VideoQualityMode = MISSING,
         nsfw: bool = MISSING,
-        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
-        reason: Optional[str] = None,
+        overwrites: Mapping[Role | Member, PermissionOverwrite] = MISSING,
+        reason: str | None = None,
     ) -> StageChannel:
-        """|coro|
+        r"""|coro|
 
         Clones this channel. This creates a channel with the same properties
         as this channel.
@@ -2159,26 +2173,26 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         Parameters
         ----------
-        name: Optional[:class:`str`]
+        name: :class:`str` | :data:`None`
             The name of the new channel. If not provided, defaults to this channel's name.
         bitrate: :class:`int`
             The bitrate of the new channel. If not provided, defaults to this channel's bitrate.
         position: :class:`int`
             The position of the new channel. If not provided, defaults to this channel's position.
-        category: Optional[:class:`abc.Snowflake`]
+        category: :class:`abc.Snowflake` | :data:`None`
             The category where the new channel should be grouped. If not provided, defaults to this channel's category.
         slowmode_delay: :class:`int`
             The slowmode of the new channel. If not provided, defaults to this channel's slowmode.
-        rtc_region: Optional[Union[:class:`str`, :class:`VoiceRegion`]]
+        rtc_region: :class:`str` | :class:`VoiceRegion` | :data:`None`
             The rtc region of the new channel. If not provided, defaults to this channel's rtc region.
         video_quality_mode: :class:`VideoQualityMode`
             The video quality mode of the new channel. If not provided, defaults to this channel's video quality mode.
         nsfw: :class:`bool`
             Whether the new channel should be nsfw or not. If not provided, defaults to this channel's NSFW value.
-        overwrites: :class:`Mapping`
+        overwrites: :class:`~collections.abc.Mapping`\[:class:`~.Member` | :class:`~.Role`, :class:`PermissionOverwrite`]
             A :class:`Mapping` of target (either a role or a member) to :class:`PermissionOverwrite`
             to apply to the channel. If not provided, defaults to this channel's overwrites.
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason for cloning this channel. Shows up on the audit log.
 
         Raises
@@ -2227,7 +2241,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         return self.nsfw
 
     @property
-    def last_message(self) -> Optional[Message]:
+    def last_message(self) -> Message | None:
         """Gets the last message in this channel from the cache.
 
         The message might not be valid or point to an existing message.
@@ -2244,8 +2258,8 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         Returns
         -------
-        Optional[:class:`Message`]
-            The last message in this channel or ``None`` if not found.
+        :class:`Message` | :data:`None`
+            The last message in this channel or :data:`None` if not found.
         """
         return self._state._get_message(self.last_message_id) if self.last_message_id else None
 
@@ -2272,11 +2286,13 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         return PartialMessage(channel=self, id=message_id)
 
     @property
-    def instance(self) -> Optional[StageInstance]:
-        """Optional[:class:`StageInstance`]: The running stage instance of the stage channel.
+    def instance(self) -> StageInstance | None:
+        """:class:`StageInstance` | :data:`None`: The running stage instance of the stage channel.
 
         .. versionadded:: 2.0
         """
+        if isinstance(self.guild, Object):
+            return None
         return utils.get(self.guild.stage_instances, channel_id=self.id)
 
     async def create_instance(
@@ -2286,7 +2302,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         privacy_level: StagePrivacyLevel = MISSING,
         notify_everyone: bool = False,
         guild_scheduled_event: Snowflake = MISSING,
-        reason: Optional[str] = None,
+        reason: str | None = None,
     ) -> StageInstance:
         """|coro|
 
@@ -2319,7 +2335,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
 
             .. versionadded:: 2.10
 
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason the stage instance was created. Shows up on the audit log.
 
         Raises
@@ -2336,7 +2352,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         :class:`StageInstance`
             The newly created stage instance.
         """
-        payload: Dict[str, Any] = {
+        payload: dict[str, Any] = {
             "channel_id": self.id,
             "topic": topic,
             "send_start_notification": notify_everyone,
@@ -2344,7 +2360,8 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         if privacy_level is not MISSING:
             if not isinstance(privacy_level, StagePrivacyLevel):
-                raise TypeError("privacy_level field must be of type PrivacyLevel")
+                msg = "privacy_level field must be of type PrivacyLevel"
+                raise TypeError(msg)
             if privacy_level is StagePrivacyLevel.public:
                 utils.warn_deprecated(
                     "Setting privacy_level to public is deprecated and will be removed in a future version.",
@@ -2387,9 +2404,9 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         self,
         *,
         position: int,
-        category: Optional[Snowflake] = ...,
+        category: Snowflake | None = ...,
         sync_permissions: bool = ...,
-        reason: Optional[str] = ...,
+        reason: str | None = ...,
     ) -> None: ...
 
     # only passing `sync_permissions` may or may not return a channel,
@@ -2399,8 +2416,8 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         self,
         *,
         sync_permissions: bool,
-        reason: Optional[str] = ...,
-    ) -> Optional[StageChannel]: ...
+        reason: str | None = ...,
+    ) -> StageChannel | None: ...
 
     @overload
     async def edit(
@@ -2411,14 +2428,14 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         user_limit: int = ...,
         position: int = ...,
         sync_permissions: bool = ...,
-        category: Optional[Snowflake] = ...,
-        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = ...,
-        rtc_region: Optional[Union[str, VoiceRegion]] = ...,
+        category: Snowflake | None = ...,
+        overwrites: Mapping[Role | Member, PermissionOverwrite] = ...,
+        rtc_region: str | VoiceRegion | None = ...,
         video_quality_mode: VideoQualityMode = ...,
         nsfw: bool = ...,
-        slowmode_delay: Optional[int] = ...,
+        slowmode_delay: int | None = ...,
         flags: ChannelFlags = ...,
-        reason: Optional[str] = ...,
+        reason: str | None = ...,
     ) -> StageChannel: ...
 
     async def edit(
@@ -2429,17 +2446,17 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         user_limit: int = MISSING,
         position: int = MISSING,
         sync_permissions: bool = MISSING,
-        category: Optional[Snowflake] = MISSING,
-        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
-        rtc_region: Optional[Union[str, VoiceRegion]] = MISSING,
+        category: Snowflake | None = MISSING,
+        overwrites: Mapping[Role | Member, PermissionOverwrite] = MISSING,
+        rtc_region: str | VoiceRegion | None = MISSING,
         video_quality_mode: VideoQualityMode = MISSING,
         nsfw: bool = MISSING,
-        slowmode_delay: Optional[int] = MISSING,
+        slowmode_delay: int | None = MISSING,
         flags: ChannelFlags = MISSING,
-        reason: Optional[str] = None,
+        reason: str | None = None,
         **kwargs: Never,
-    ) -> Optional[StageChannel]:
-        """|coro|
+    ) -> StageChannel | None:
+        r"""|coro|
 
         Edits the channel.
 
@@ -2478,15 +2495,15 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         sync_permissions: :class:`bool`
             Whether to sync permissions with the channel's new or pre-existing
             category. Defaults to ``False``.
-        category: Optional[:class:`abc.Snowflake`]
-            The new category for this channel. Can be ``None`` to remove the
+        category: :class:`abc.Snowflake` | :data:`None`
+            The new category for this channel. Can be :data:`None` to remove the
             category.
-        overwrites: :class:`Mapping`
+        overwrites: :class:`~collections.abc.Mapping`\[:class:`~.Member` | :class:`~.Role`, :class:`PermissionOverwrite`]
             A :class:`Mapping` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply to the channel.
-        rtc_region: Optional[Union[:class:`str`, :class:`VoiceRegion`]]
+        rtc_region: :class:`str` | :class:`VoiceRegion` | :data:`None`
             The new region for the stage channel's voice communication.
-            A value of ``None`` indicates automatic voice region detection.
+            A value of :data:`None` indicates automatic voice region detection.
         video_quality_mode: :class:`VideoQualityMode`
             The camera video quality for the stage channel's participants.
 
@@ -2497,7 +2514,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
 
             .. versionadded:: 2.9
 
-        slowmode_delay: Optional[:class:`int`]
+        slowmode_delay: :class:`int` | :data:`None`
             Specifies the slowmode rate limit for users in this channel, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
 
@@ -2508,7 +2525,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
 
             .. versionadded:: 2.6
 
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason for editing this channel. Shows up on the audit log.
 
         Raises
@@ -2524,9 +2541,9 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         Returns
         -------
-        Optional[:class:`.StageChannel`]
+        :class:`.StageChannel` | :data:`None`
             The newly edited stage channel. If the edit was only positional
-            then ``None`` is returned instead.
+            then :data:`None` is returned instead.
         """
         payload = await self._edit(
             name=name,
@@ -2542,14 +2559,15 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
             flags=flags,
             slowmode_delay=slowmode_delay,
             reason=reason,
-            **kwargs,  # type: ignore
+            **kwargs,
         )
         if payload is not None:
             # the payload will always be the proper channel payload
-            return self.__class__(state=self._state, guild=self.guild, data=payload)  # type: ignore
+            return self.__class__(state=self._state, guild=self.guild, data=payload)  # pyright: ignore[reportArgumentType]
+        return None
 
     async def delete_messages(self, messages: Iterable[Snowflake]) -> None:
-        """|coro|
+        r"""|coro|
 
         Deletes a list of messages. This is similar to :meth:`Message.delete`
         except it bulk deletes multiple messages.
@@ -2568,7 +2586,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         Parameters
         ----------
-        messages: Iterable[:class:`abc.Snowflake`]
+        messages: :class:`~collections.abc.Iterable`\[:class:`abc.Snowflake`]
             An iterable of messages denoting which ones to bulk delete.
 
         Raises
@@ -2594,7 +2612,8 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
             return
 
         if len(messages) > 100:
-            raise ClientException("Can only bulk delete messages up to 100 messages")
+            msg = "Can only bulk delete messages up to 100 messages"
+            raise ClientException(msg)
 
         message_ids: SnowflakeList = [m.id for m in messages]
         await self._state.http.delete_messages(self.id, message_ids)
@@ -2602,15 +2621,15 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
     async def purge(
         self,
         *,
-        limit: Optional[int] = 100,
+        limit: int | None = 100,
         check: Callable[[Message], bool] = MISSING,
-        before: Optional[SnowflakeTime] = None,
-        after: Optional[SnowflakeTime] = None,
-        around: Optional[SnowflakeTime] = None,
-        oldest_first: Optional[bool] = False,
+        before: SnowflakeTime | None = None,
+        after: SnowflakeTime | None = None,
+        around: SnowflakeTime | None = None,
+        oldest_first: bool | None = False,
         bulk: bool = True,
-    ) -> List[Message]:
-        """|coro|
+    ) -> list[Message]:
+        r"""|coro|
 
         Purges a list of messages that meet the criteria given by the predicate
         ``check``. If a ``check`` is not provided then all messages are deleted
@@ -2629,19 +2648,19 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         Parameters
         ----------
-        limit: Optional[:class:`int`]
+        limit: :class:`int` | :data:`None`
             The number of messages to search through. This is not the number
             of messages that will be deleted, though it can be.
-        check: Callable[[:class:`Message`], :class:`bool`]
+        check: :class:`~collections.abc.Callable`\[[:class:`Message`], :class:`bool`]
             The function used to check if a message should be deleted.
             It must take a :class:`Message` as its sole parameter.
-        before: Optional[Union[:class:`abc.Snowflake`, :class:`datetime.datetime`]]
+        before: :class:`abc.Snowflake` | :class:`datetime.datetime` | :data:`None`
             Same as ``before`` in :meth:`history`.
-        after: Optional[Union[:class:`abc.Snowflake`, :class:`datetime.datetime`]]
+        after: :class:`abc.Snowflake` | :class:`datetime.datetime` | :data:`None`
             Same as ``after`` in :meth:`history`.
-        around: Optional[Union[:class:`abc.Snowflake`, :class:`datetime.datetime`]]
+        around: :class:`abc.Snowflake` | :class:`datetime.datetime` | :data:`None`
             Same as ``around`` in :meth:`history`.
-        oldest_first: Optional[:class:`bool`]
+        oldest_first: :class:`bool` | :data:`None`
             Same as ``oldest_first`` in :meth:`history`.
         bulk: :class:`bool`
             If ``True``, use bulk delete. Setting this to ``False`` is useful for mass-deleting
@@ -2657,7 +2676,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         Returns
         -------
-        List[:class:`.Message`]
+        :class:`list`\[:class:`.Message`]
             A list of messages that were deleted.
         """
         if check is MISSING:
@@ -2666,7 +2685,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         iterator = self.history(
             limit=limit, before=before, after=after, oldest_first=oldest_first, around=around
         )
-        ret: List[Message] = []
+        ret: list[Message] = []
         count = 0
 
         minimum_time = int((time.time() - 14 * 24 * 60 * 60) * 1000.0 - 1420070400000) << 22
@@ -2707,8 +2726,8 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         return ret
 
-    async def webhooks(self) -> List[Webhook]:
-        """|coro|
+    async def webhooks(self) -> list[Webhook]:
+        r"""|coro|
 
         Retrieves the list of webhooks this channel has.
 
@@ -2724,7 +2743,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
 
         Returns
         -------
-        List[:class:`Webhook`]
+        :class:`list`\[:class:`Webhook`]
             The list of webhooks this channel has.
         """
         from .webhook import Webhook
@@ -2733,7 +2752,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         return [Webhook.from_state(d, state=self._state) for d in data]
 
     async def create_webhook(
-        self, *, name: str, avatar: Optional[bytes] = None, reason: Optional[str] = None
+        self, *, name: str, avatar: bytes | None = None, reason: str | None = None
     ) -> Webhook:
         """|coro|
 
@@ -2748,10 +2767,10 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         ----------
         name: :class:`str`
             The webhook's name.
-        avatar: Optional[:class:`bytes`]
+        avatar: :class:`bytes` | :data:`None`
             The webhook's default avatar.
             This operates similarly to :meth:`~ClientUser.edit`.
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason for creating this webhook. Shows up in the audit logs.
 
         Raises
@@ -2848,7 +2867,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         self.guild: Guild = guild
         # apparently this can be nullable in the case of a bad api deploy
         self.name: str = data.get("name") or ""
-        self.category_id: Optional[int] = utils._get_as_snowflake(data, "parent_id")
+        self.category_id: int | None = utils._get_as_snowflake(data, "parent_id")
         self._flags = data.get("flags", 0)
         self.nsfw: bool = data.get("nsfw", False)
         self.position: int = data["position"]
@@ -2869,7 +2888,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
     @utils.copy_doc(disnake.abc.GuildChannel.permissions_for)
     def permissions_for(
         self,
-        obj: Union[Member, Role],
+        obj: Member | Role,
         /,
         *,
         ignore_timeout: bool = MISSING,
@@ -2889,12 +2908,12 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
     async def clone(
         self,
         *,
-        name: Optional[str] = None,
+        name: str | None = None,
         position: int = MISSING,
-        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
-        reason: Optional[str] = None,
+        overwrites: Mapping[Role | Member, PermissionOverwrite] = MISSING,
+        reason: str | None = None,
     ) -> CategoryChannel:
-        """|coro|
+        r"""|coro|
 
         Clones this channel. This creates a channel with the same properties
         as this channel.
@@ -2911,14 +2930,14 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
 
         Parameters
         ----------
-        name: Optional[:class:`str`]
+        name: :class:`str` | :data:`None`
             The name of the new channel. If not provided, defaults to this channel's name.
         position: :class:`int`
             The position of the new channel. If not provided, defaults to this channel's position.
-        overwrites: :class:`Mapping`
+        overwrites: :class:`~collections.abc.Mapping`\[:class:`~.Member` | :class:`~.Role`, :class:`PermissionOverwrite`]
             A :class:`Mapping` of target (either a role or a member) to :class:`PermissionOverwrite`
             to apply to the channel. If not provided, defaults to this channel's overwrites.
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason for cloning this channel. Shows up on the audit log.
 
         Raises
@@ -2948,7 +2967,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         self,
         *,
         position: int,
-        reason: Optional[str] = ...,
+        reason: str | None = ...,
     ) -> None: ...
 
     @overload
@@ -2958,9 +2977,9 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         name: str = ...,
         position: int = ...,
         nsfw: bool = ...,
-        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = ...,
+        overwrites: Mapping[Role | Member, PermissionOverwrite] = ...,
         flags: ChannelFlags = ...,
-        reason: Optional[str] = ...,
+        reason: str | None = ...,
     ) -> CategoryChannel: ...
 
     async def edit(
@@ -2969,12 +2988,12 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         name: str = MISSING,
         position: int = MISSING,
         nsfw: bool = MISSING,
-        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
+        overwrites: Mapping[Role | Member, PermissionOverwrite] = MISSING,
         flags: ChannelFlags = MISSING,
-        reason: Optional[str] = None,
+        reason: str | None = None,
         **kwargs: Never,
-    ) -> Optional[CategoryChannel]:
-        """|coro|
+    ) -> CategoryChannel | None:
+        r"""|coro|
 
         Edits the category.
 
@@ -2998,7 +3017,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
             The new category's position.
         nsfw: :class:`bool`
             Whether to mark the category as NSFW.
-        overwrites: :class:`Mapping`
+        overwrites: :class:`~collections.abc.Mapping`\[:class:`~.Member` | :class:`~.Role`, :class:`PermissionOverwrite`]
             A :class:`Mapping` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply to the category.
         flags: :class:`ChannelFlags`
@@ -3006,7 +3025,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
 
             .. versionadded:: 2.6
 
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason for editing this category. Shows up on the audit log.
 
         Raises
@@ -3022,9 +3041,9 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
 
         Returns
         -------
-        Optional[:class:`.CategoryChannel`]
+        :class:`.CategoryChannel` | :data:`None`
             The newly edited category channel. If the edit was only positional
-            then ``None`` is returned instead.
+            then :data:`None` is returned instead.
         """
         payload = await self._edit(
             name=name,
@@ -3033,11 +3052,12 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
             overwrites=overwrites,
             flags=flags,
             reason=reason,
-            **kwargs,  # type: ignore
+            **kwargs,
         )
         if payload is not None:
             # the payload will always be the proper channel payload
-            return self.__class__(state=self._state, guild=self.guild, data=payload)  # type: ignore
+            return self.__class__(state=self._state, guild=self.guild, data=payload)  # pyright: ignore[reportArgumentType]
+        return None
 
     @overload
     async def move(
@@ -3046,7 +3066,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         beginning: bool,
         offset: int = ...,
         sync_permissions: bool = ...,
-        reason: Optional[str] = ...,
+        reason: str | None = ...,
     ) -> None: ...
 
     @overload
@@ -3056,7 +3076,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         end: bool,
         offset: int = ...,
         sync_permissions: bool = ...,
-        reason: Optional[str] = ...,
+        reason: str | None = ...,
     ) -> None: ...
 
     @overload
@@ -3066,7 +3086,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         before: Snowflake,
         offset: int = ...,
         sync_permissions: bool = ...,
-        reason: Optional[str] = ...,
+        reason: str | None = ...,
     ) -> None: ...
 
     @overload
@@ -3076,7 +3096,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         after: Snowflake,
         offset: int = ...,
         sync_permissions: bool = ...,
-        reason: Optional[str] = ...,
+        reason: str | None = ...,
     ) -> None: ...
 
     @utils.copy_doc(disnake.abc.GuildChannel.move)
@@ -3085,13 +3105,15 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         return await super().move(**kwargs)
 
     @property
-    def channels(self) -> List[GuildChannelType]:
-        """List[:class:`abc.GuildChannel`]: Returns the channels that are under this category.
+    def channels(self) -> list[GuildChannelType]:
+        r""":class:`list`\[:class:`abc.GuildChannel`]: Returns the channels that are under this category.
 
         These are sorted by the official Discord UI, which places voice channels below the text channels.
         """
+        if isinstance(self.guild, Object):
+            return []
 
-        def comparator(channel):
+        def comparator(channel: GuildChannelType) -> tuple[bool, int]:
             return (
                 not isinstance(channel, (TextChannel, ThreadOnlyGuildChannel)),
                 channel.position,
@@ -3102,8 +3124,11 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         return ret
 
     @property
-    def text_channels(self) -> List[TextChannel]:
-        """List[:class:`TextChannel`]: Returns the text channels that are under this category."""
+    def text_channels(self) -> list[TextChannel]:
+        r""":class:`list`\[:class:`TextChannel`]: Returns the text channels that are under this category."""
+        if isinstance(self.guild, Object):
+            return []
+
         ret = [
             c
             for c in self.guild.channels
@@ -3113,8 +3138,11 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         return ret
 
     @property
-    def voice_channels(self) -> List[VoiceChannel]:
-        """List[:class:`VoiceChannel`]: Returns the voice channels that are under this category."""
+    def voice_channels(self) -> list[VoiceChannel]:
+        r""":class:`list`\[:class:`VoiceChannel`]: Returns the voice channels that are under this category."""
+        if isinstance(self.guild, Object):
+            return []
+
         ret = [
             c
             for c in self.guild.channels
@@ -3124,11 +3152,14 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         return ret
 
     @property
-    def stage_channels(self) -> List[StageChannel]:
-        """List[:class:`StageChannel`]: Returns the stage channels that are under this category.
+    def stage_channels(self) -> list[StageChannel]:
+        r""":class:`list`\[:class:`StageChannel`]: Returns the stage channels that are under this category.
 
         .. versionadded:: 1.7
         """
+        if isinstance(self.guild, Object):
+            return []
+
         ret = [
             c
             for c in self.guild.channels
@@ -3138,11 +3169,14 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         return ret
 
     @property
-    def forum_channels(self) -> List[ForumChannel]:
-        """List[:class:`ForumChannel`]: Returns the forum channels that are under this category.
+    def forum_channels(self) -> list[ForumChannel]:
+        r""":class:`list`\[:class:`ForumChannel`]: Returns the forum channels that are under this category.
 
         .. versionadded:: 2.5
         """
+        if isinstance(self.guild, Object):
+            return []
+
         ret = [
             c
             for c in self.guild.channels
@@ -3152,11 +3186,14 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
         return ret
 
     @property
-    def media_channels(self) -> List[MediaChannel]:
-        """List[:class:`MediaChannel`]: Returns the media channels that are under this category.
+    def media_channels(self) -> list[MediaChannel]:
+        r""":class:`list`\[:class:`MediaChannel`]: Returns the media channels that are under this category.
 
         .. versionadded:: 2.10
         """
+        if isinstance(self.guild, Object):
+            return []
+
         ret = [
             c
             for c in self.guild.channels
@@ -3176,7 +3213,8 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
             The newly created text channel.
         """
         if "category" in options:
-            raise TypeError("got an unexpected keyword argument 'category'")
+            msg = "got an unexpected keyword argument 'category'"
+            raise TypeError(msg)
         return await self.guild.create_text_channel(name, category=self, **options)
 
     async def create_voice_channel(self, name: str, **options: Any) -> VoiceChannel:
@@ -3190,7 +3228,8 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
             The newly created voice channel.
         """
         if "category" in options:
-            raise TypeError("got an unexpected keyword argument 'category'")
+            msg = "got an unexpected keyword argument 'category'"
+            raise TypeError(msg)
         return await self.guild.create_voice_channel(name, category=self, **options)
 
     async def create_stage_channel(self, name: str, **options: Any) -> StageChannel:
@@ -3206,7 +3245,8 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
             The newly created stage channel.
         """
         if "category" in options:
-            raise TypeError("got an unexpected keyword argument 'category'")
+            msg = "got an unexpected keyword argument 'category'"
+            raise TypeError(msg)
         return await self.guild.create_stage_channel(name, category=self, **options)
 
     async def create_forum_channel(self, name: str, **options: Any) -> ForumChannel:
@@ -3222,7 +3262,8 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
             The newly created forum channel.
         """
         if "category" in options:
-            raise TypeError("got an unexpected keyword argument 'category'")
+            msg = "got an unexpected keyword argument 'category'"
+            raise TypeError(msg)
         return await self.guild.create_forum_channel(name, category=self, **options)
 
     async def create_media_channel(self, name: str, **options: Any) -> MediaChannel:
@@ -3238,7 +3279,8 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
             The newly created media channel.
         """
         if "category" in options:
-            raise TypeError("got an unexpected keyword argument 'category'")
+            msg = "got an unexpected keyword argument 'category'"
+            raise TypeError(msg)
         return await self.guild.create_media_channel(name, category=self, **options)
 
 
@@ -3284,7 +3326,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         *,
         state: ConnectionState,
         guild: Guild,
-        data: Union[ForumChannelPayload, MediaChannelPayload],
+        data: ForumChannelPayload | MediaChannelPayload,
     ) -> None:
         self._state: ConnectionState = state
         self.id: int = int(data["id"])
@@ -3305,16 +3347,16 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         joined = " ".join(f"{k!s}={v!r}" for k, v in attrs)
         return f"<{type(self).__name__} {joined}>"
 
-    def _update(self, guild: Guild, data: Union[ForumChannelPayload, MediaChannelPayload]) -> None:
+    def _update(self, guild: Guild, data: ForumChannelPayload | MediaChannelPayload) -> None:
         self.guild: Guild = guild
         # apparently this can be nullable in the case of a bad api deploy
         self.name: str = data.get("name") or ""
-        self.category_id: Optional[int] = utils._get_as_snowflake(data, "parent_id")
-        self.topic: Optional[str] = data.get("topic")
+        self.category_id: int | None = utils._get_as_snowflake(data, "parent_id")
+        self.topic: str | None = data.get("topic")
         self.position: int = data["position"]
         self._flags = data.get("flags", 0)
         self.nsfw: bool = data.get("nsfw", False)
-        self.last_thread_id: Optional[int] = utils._get_as_snowflake(data, "last_message_id")
+        self.last_thread_id: int | None = utils._get_as_snowflake(data, "last_message_id")
         self.default_auto_archive_duration: ThreadArchiveDurationLiteral = data.get(
             "default_auto_archive_duration", 1440
         )
@@ -3325,16 +3367,16 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
             ForumTag._from_data(data=tag, state=self._state)
             for tag in data.get("available_tags", [])
         ]
-        self._available_tags: Dict[int, ForumTag] = {tag.id: tag for tag in tags}
+        self._available_tags: dict[int, ForumTag] = {tag.id: tag for tag in tags}
 
         default_reaction_emoji = data.get("default_reaction_emoji") or {}
         # emoji_id may be `0`, use `None` instead
-        self._default_reaction_emoji_id: Optional[int] = (
+        self._default_reaction_emoji_id: int | None = (
             utils._get_as_snowflake(default_reaction_emoji, "emoji_id") or None
         )
-        self._default_reaction_emoji_name: Optional[str] = default_reaction_emoji.get("emoji_name")
+        self._default_reaction_emoji_name: str | None = default_reaction_emoji.get("emoji_name")
 
-        self.default_sort_order: Optional[ThreadSortOrder] = (
+        self.default_sort_order: ThreadSortOrder | None = (
             try_enum(ThreadSortOrder, order)
             if (order := data.get("default_sort_order")) is not None
             else None
@@ -3352,7 +3394,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
     @utils.copy_doc(disnake.abc.GuildChannel.permissions_for)
     def permissions_for(
         self,
-        obj: Union[Member, Role],
+        obj: Member | Role,
         /,
         *,
         ignore_timeout: bool = MISSING,
@@ -3366,13 +3408,17 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         return base
 
     @property
-    def members(self) -> List[Member]:
-        """List[:class:`Member`]: Returns all members that can see this channel."""
+    def members(self) -> list[Member]:
+        r""":class:`list`\[:class:`Member`]: Returns all members that can see this channel."""
+        if isinstance(self.guild, Object):
+            return []
         return [m for m in self.guild.members if self.permissions_for(m).view_channel]
 
     @property
-    def threads(self) -> List[Thread]:
-        """List[:class:`Thread`]: Returns all the threads that you can see."""
+    def threads(self) -> list[Thread]:
+        r""":class:`list`\[:class:`Thread`]: Returns all the threads that you can see."""
+        if isinstance(self.guild, Object):
+            return []
         return [thread for thread in self.guild._threads.values() if thread.parent_id == self.id]
 
     def is_nsfw(self) -> bool:
@@ -3394,8 +3440,8 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         return self.flags.require_tag
 
     @property
-    def default_reaction(self) -> Optional[Union[Emoji, PartialEmoji]]:
-        """Optional[Union[:class:`Emoji`, :class:`PartialEmoji`]]:
+    def default_reaction(self) -> Emoji | PartialEmoji | None:
+        """:class:`Emoji` | :class:`PartialEmoji` | :data:`None`:
         The default emoji shown for reacting to threads.
 
         Due to a Discord limitation, this will have an empty
@@ -3409,7 +3455,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         )
 
     @property
-    def last_thread(self) -> Optional[Thread]:
+    def last_thread(self) -> Thread | None:
         """Gets the last created thread in this channel from the cache.
 
         The thread might not be valid or point to an existing thread.
@@ -3423,14 +3469,14 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
 
         Returns
         -------
-        Optional[:class:`Thread`]
-            The last created thread in this channel or ``None`` if not found.
+        :class:`Thread` | :data:`None`
+            The last created thread in this channel or :data:`None` if not found.
         """
-        return self._state.get_channel(self.last_thread_id) if self.last_thread_id else None  # type: ignore
+        return self._state.get_channel(self.last_thread_id) if self.last_thread_id else None  # pyright: ignore[reportReturnType]
 
     @property
-    def available_tags(self) -> List[ForumTag]:
-        """List[:class:`ForumTag`]: The available tags for threads in this channel.
+    def available_tags(self) -> list[ForumTag]:
+        r""":class:`list`\[:class:`ForumTag`]: The available tags for threads in this channel.
 
         To create/edit/delete tags, use :func:`edit`.
 
@@ -3442,7 +3488,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
     async def trigger_typing(self) -> None:
         """|coro|
 
-        Triggers a *typing* indicator to the desination.
+        Triggers a *typing* indicator to the destination.
 
         *Typing* indicator will go away after 10 seconds.
         """
@@ -3453,7 +3499,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
     def typing(self) -> Typing:
         return Typing(self)
 
-    def get_thread(self, thread_id: int, /) -> Optional[Thread]:
+    def get_thread(self, thread_id: int, /) -> Thread | None:
         """Returns a thread with the given ID.
 
         Parameters
@@ -3463,9 +3509,11 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
 
         Returns
         -------
-        Optional[:class:`Thread`]
-            The returned thread of ``None`` if not found.
+        :class:`Thread` | :data:`None`
+            The returned thread of :data:`None` if not found.
         """
+        if isinstance(self.guild, Object):
+            return None
         return self.guild.get_thread(thread_id)
 
     @overload
@@ -3474,18 +3522,18 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         *,
         name: str,
         auto_archive_duration: AnyThreadArchiveDuration = ...,
-        slowmode_delay: Optional[int] = ...,
+        slowmode_delay: int | None = ...,
         applied_tags: Sequence[Snowflake] = ...,
         content: str = ...,
         embed: Embed = ...,
         file: File = ...,
         suppress_embeds: bool = ...,
         flags: MessageFlags = ...,
-        stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
+        stickers: Sequence[GuildSticker | StandardSticker | StickerItem] = ...,
         allowed_mentions: AllowedMentions = ...,
         view: View = ...,
-        components: Components = ...,
-        reason: Optional[str] = None,
+        components: MessageComponents = ...,
+        reason: str | None = None,
     ) -> ThreadWithMessage: ...
 
     @overload
@@ -3494,18 +3542,18 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         *,
         name: str,
         auto_archive_duration: AnyThreadArchiveDuration = ...,
-        slowmode_delay: Optional[int] = ...,
+        slowmode_delay: int | None = ...,
         applied_tags: Sequence[Snowflake] = ...,
         content: str = ...,
         embed: Embed = ...,
-        files: List[File] = ...,
+        files: list[File] = ...,
         suppress_embeds: bool = ...,
         flags: MessageFlags = ...,
-        stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
+        stickers: Sequence[GuildSticker | StandardSticker | StickerItem] = ...,
         allowed_mentions: AllowedMentions = ...,
         view: View = ...,
-        components: Components = ...,
-        reason: Optional[str] = None,
+        components: MessageComponents = ...,
+        reason: str | None = None,
     ) -> ThreadWithMessage: ...
 
     @overload
@@ -3514,18 +3562,18 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         *,
         name: str,
         auto_archive_duration: AnyThreadArchiveDuration = ...,
-        slowmode_delay: Optional[int] = ...,
+        slowmode_delay: int | None = ...,
         applied_tags: Sequence[Snowflake] = ...,
         content: str = ...,
-        embeds: List[Embed] = ...,
+        embeds: list[Embed] = ...,
         file: File = ...,
         suppress_embeds: bool = ...,
         flags: MessageFlags = ...,
-        stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
+        stickers: Sequence[GuildSticker | StandardSticker | StickerItem] = ...,
         allowed_mentions: AllowedMentions = ...,
         view: View = ...,
-        components: Components = ...,
-        reason: Optional[str] = None,
+        components: MessageComponents = ...,
+        reason: str | None = None,
     ) -> ThreadWithMessage: ...
 
     @overload
@@ -3534,18 +3582,18 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         *,
         name: str,
         auto_archive_duration: AnyThreadArchiveDuration = ...,
-        slowmode_delay: Optional[int] = ...,
+        slowmode_delay: int | None = ...,
         applied_tags: Sequence[Snowflake] = ...,
         content: str = ...,
-        embeds: List[Embed] = ...,
-        files: List[File] = ...,
+        embeds: list[Embed] = ...,
+        files: list[File] = ...,
         suppress_embeds: bool = ...,
         flags: MessageFlags = ...,
-        stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = ...,
+        stickers: Sequence[GuildSticker | StandardSticker | StickerItem] = ...,
         allowed_mentions: AllowedMentions = ...,
         view: View = ...,
-        components: Components = ...,
-        reason: Optional[str] = None,
+        components: MessageComponents = ...,
+        reason: str | None = None,
     ) -> ThreadWithMessage: ...
 
     async def create_thread(
@@ -3553,22 +3601,22 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         *,
         name: str,
         auto_archive_duration: AnyThreadArchiveDuration = MISSING,
-        slowmode_delay: Optional[int] = MISSING,
+        slowmode_delay: int | None = MISSING,
         applied_tags: Sequence[Snowflake] = MISSING,
         content: str = MISSING,
         embed: Embed = MISSING,
-        embeds: List[Embed] = MISSING,
+        embeds: list[Embed] = MISSING,
         file: File = MISSING,
-        files: List[File] = MISSING,
+        files: list[File] = MISSING,
         suppress_embeds: bool = MISSING,
         flags: MessageFlags = MISSING,
-        stickers: Sequence[Union[GuildSticker, StandardSticker, StickerItem]] = MISSING,
+        stickers: Sequence[GuildSticker | StandardSticker | StickerItem] = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         view: View = MISSING,
-        components: Components[MessageUIComponent] = MISSING,
-        reason: Optional[str] = None,
+        components: MessageComponents = MISSING,
+        reason: str | None = None,
     ) -> ThreadWithMessage:
-        """|coro|
+        r"""|coro|
 
         Creates a thread (with an initial message) in this channel.
 
@@ -3591,16 +3639,16 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         ----------
         name: :class:`str`
             The name of the thread.
-        auto_archive_duration: Union[:class:`int`, :class:`ThreadArchiveDuration`]
+        auto_archive_duration: :class:`int` | :class:`ThreadArchiveDuration`
             The duration in minutes before the thread is automatically archived for inactivity.
             If not provided, the channel's default auto archive duration is used.
             Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
-        slowmode_delay: Optional[:class:`int`]
+        slowmode_delay: :class:`int` | :data:`None`
             Specifies the slowmode rate limit for users in this thread, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
-            If set to ``None`` or not provided, slowmode is inherited from the parent's
+            If set to :data:`None` or not provided, slowmode is inherited from the parent's
             :attr:`default_thread_slowmode_delay`.
-        applied_tags: Sequence[:class:`abc.Snowflake`]
+        applied_tags: :class:`~collections.abc.Sequence`\[:class:`abc.Snowflake`]
             The tags to apply to the new thread. Maximum of 5.
 
             .. versionadded:: 2.6
@@ -3610,7 +3658,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         embed: :class:`.Embed`
             The rich embed for the content to send. This cannot be mixed with the
             ``embeds`` parameter.
-        embeds: List[:class:`.Embed`]
+        embeds: :class:`list`\[:class:`.Embed`]
             A list of embeds to send with the content. Must be a maximum of 10.
             This cannot be mixed with the ``embed`` parameter.
         suppress_embeds: :class:`bool`
@@ -3618,19 +3666,20 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
             all the embeds from the UI if set to ``True``.
         flags: :class:`MessageFlags`
             The flags to set for this message.
-            Only :attr:`~MessageFlags.suppress_embeds` is supported.
+            Only :attr:`~MessageFlags.suppress_embeds` and :attr:`~MessageFlags.is_components_v2`
+            are supported.
 
             If parameter ``suppress_embeds`` is provided,
             that will override the setting of :attr:`MessageFlags.suppress_embeds`.
 
             .. versionadded:: 2.9
 
-        file: :class:`.File`
+        file: :class:`~disnake.File`
             The file to upload. This cannot be mixed with the ``files`` parameter.
-        files: List[:class:`.File`]
+        files: :class:`list`\[:class:`~disnake.File`]
             A list of files to upload. Must be a maximum of 10.
             This cannot be mixed with the ``file`` parameter.
-        stickers: Sequence[Union[:class:`.GuildSticker`, :class:`.StandardSticker`, :class:`.StickerItem`]]
+        stickers: :class:`~collections.abc.Sequence`\[:class:`.GuildSticker` | :class:`.StandardSticker` | :class:`.StickerItem`]
             A list of stickers to upload. Must be a maximum of 3.
         allowed_mentions: :class:`.AllowedMentions`
             Controls the mentions being processed in this message. If this is
@@ -3643,7 +3692,13 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
             A Discord UI View to add to the message. This cannot be mixed with ``components``.
         components: |components_type|
             A list of components to include in the message. This cannot be mixed with ``view``.
-        reason: Optional[:class:`str`]
+
+            .. note::
+                Passing v2 components here automatically sets the :attr:`~MessageFlags.is_components_v2` flag.
+                Setting this flag cannot be reverted. Note that this also disables the
+                ``content``, ``embeds``, and ``stickers`` fields.
+
+        reason: :class:`str` | :data:`None`
             The reason for creating the thread. Shows up on the audit log.
 
         Raises
@@ -3655,11 +3710,11 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         TypeError
             Specified both ``file`` and ``files``,
             or you specified both ``embed`` and ``embeds``,
-            or you specified both ``view`` and ``components``.
+            or you specified both ``view`` and ``components``,
             or you have passed an object that is not :class:`File` to ``file`` or ``files``.
         ValueError
-            Specified more than 10 embeds,
-            or more than 10 files.
+            Specified more than 10 embeds, or more than 10 files, or
+            you tried to send v2 components together with ``content``, ``embeds``, or ``stickers``.
 
         Returns
         -------
@@ -3691,9 +3746,11 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         tag_ids = [t.id for t in applied_tags] if applied_tags else []
 
         if params.files and len(params.files) > 10:
-            raise ValueError("files parameter must be a list of up to 10 elements")
+            msg = "files parameter must be a list of up to 10 elements"
+            raise ValueError(msg)
         elif params.files and not all(isinstance(file, File) for file in params.files):
-            raise TypeError("files parameter must be a list of File")
+            msg = "files parameter must be a list of File"
+            raise TypeError(msg)
 
         channel_data = {
             "name": name,
@@ -3728,8 +3785,8 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
     def archived_threads(
         self,
         *,
-        limit: Optional[int] = 50,
-        before: Optional[Union[Snowflake, datetime.datetime]] = None,
+        limit: int | None = 50,
+        before: Snowflake | datetime.datetime | None = None,
     ) -> ArchivedThreadIterator:
         """Returns an :class:`~disnake.AsyncIterator` that iterates over all archived threads in the channel.
 
@@ -3737,11 +3794,11 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
 
         Parameters
         ----------
-        limit: Optional[:class:`int`]
+        limit: :class:`int` | :data:`None`
             The number of threads to retrieve.
-            If ``None``, retrieves every archived thread in the channel. Note, however,
+            If :data:`None`, retrieves every archived thread in the channel. Note, however,
             that this would make it a slow operation.
-        before: Optional[Union[:class:`abc.Snowflake`, :class:`datetime.datetime`]]
+        before: :class:`abc.Snowflake` | :class:`datetime.datetime` | :data:`None`
             Retrieve archived channels before the given date or ID.
 
         Raises
@@ -3760,8 +3817,8 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
             self.id, self.guild, limit=limit, joined=False, private=False, before=before
         )
 
-    async def webhooks(self) -> List[Webhook]:
-        """|coro|
+    async def webhooks(self) -> list[Webhook]:
+        r"""|coro|
 
         Retrieves the list of webhooks this channel has.
 
@@ -3777,7 +3834,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
 
         Returns
         -------
-        List[:class:`Webhook`]
+        :class:`list`\[:class:`Webhook`]
             The list of webhooks this channel has.
         """
         from .webhook import Webhook
@@ -3786,7 +3843,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         return [Webhook.from_state(d, state=self._state) for d in data]
 
     async def create_webhook(
-        self, *, name: str, avatar: Optional[bytes] = None, reason: Optional[str] = None
+        self, *, name: str, avatar: bytes | None = None, reason: str | None = None
     ) -> Webhook:
         """|coro|
 
@@ -3801,10 +3858,10 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         ----------
         name: :class:`str`
             The webhook's name.
-        avatar: Optional[:class:`bytes`]
+        avatar: :class:`bytes` | :data:`None`
             The webhook's default avatar.
             This operates similarly to :meth:`~ClientUser.edit`.
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason for creating this webhook. Shows up in the audit logs.
 
         Raises
@@ -3832,7 +3889,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         )
         return Webhook.from_state(data, state=self._state)
 
-    def get_tag(self, tag_id: int, /) -> Optional[ForumTag]:
+    def get_tag(self, tag_id: int, /) -> ForumTag | None:
         """Returns a thread tag with the given ID.
 
         .. versionadded:: 2.6
@@ -3844,12 +3901,12 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
 
         Returns
         -------
-        Optional[:class:`ForumTag`]
-            The tag with the given ID, or ``None`` if not found.
+        :class:`ForumTag` | :data:`None`
+            The tag with the given ID, or :data:`None` if not found.
         """
         return self._available_tags.get(tag_id)
 
-    def get_tag_by_name(self, name: str, /) -> Optional[ForumTag]:
+    def get_tag_by_name(self, name: str, /) -> ForumTag | None:
         """Returns a thread tag with the given name.
 
         Tags can be uniquely identified based on the name, as tag names
@@ -3864,8 +3921,8 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
 
         Returns
         -------
-        Optional[:class:`ForumTag`]
-            The tag with the given name, or ``None`` if not found.
+        :class:`ForumTag` | :data:`None`
+            The tag with the given name, or :data:`None` if not found.
         """
         return utils.get(self._available_tags.values(), name=name)
 
@@ -3901,9 +3958,9 @@ class ForumChannel(ThreadOnlyGuildChannel):
         The channel's name.
     guild: :class:`Guild`
         The guild the channel belongs to.
-    topic: Optional[:class:`str`]
-        The channel's topic. ``None`` if it isn't set.
-    category_id: Optional[:class:`int`]
+    topic: :class:`str` | :data:`None`
+        The channel's topic. :data:`None` if it isn't set.
+    category_id: :class:`int` | :data:`None`
         The category channel ID this channel belongs to, if applicable.
     position: :class:`int`
         The position in the channel list. This is a number that starts at 0. e.g. the
@@ -3914,7 +3971,7 @@ class ForumChannel(ThreadOnlyGuildChannel):
         .. note::
 
             To check if the channel or the guild of that channel are marked as NSFW, consider :meth:`is_nsfw` instead.
-    last_thread_id: Optional[:class:`int`]
+    last_thread_id: :class:`int` | :data:`None`
         The ID of the last created thread in this channel. It may
         *not* point to an existing or valid thread.
     default_auto_archive_duration: :class:`int`
@@ -3939,7 +3996,7 @@ class ForumChannel(ThreadOnlyGuildChannel):
 
         .. versionadded:: 2.6
 
-    default_sort_order: Optional[:class:`ThreadSortOrder`]
+    default_sort_order: :class:`ThreadSortOrder` | :data:`None`
         The default sort order of threads in this channel.
         Members will still be able to change this locally.
 
@@ -3976,9 +4033,9 @@ class ForumChannel(ThreadOnlyGuildChannel):
         self,
         *,
         position: int,
-        category: Optional[Snowflake] = ...,
+        category: Snowflake | None = ...,
         sync_permissions: bool = ...,
-        reason: Optional[str] = ...,
+        reason: str | None = ...,
     ) -> None: ...
 
     # only passing `sync_permissions` may or may not return a channel,
@@ -3988,55 +4045,55 @@ class ForumChannel(ThreadOnlyGuildChannel):
         self,
         *,
         sync_permissions: bool,
-        reason: Optional[str] = ...,
-    ) -> Optional[ForumChannel]: ...
+        reason: str | None = ...,
+    ) -> ForumChannel | None: ...
 
     @overload
     async def edit(
         self,
         *,
         name: str = ...,
-        topic: Optional[str] = ...,
+        topic: str | None = ...,
         position: int = ...,
         nsfw: bool = ...,
         sync_permissions: bool = ...,
-        category: Optional[Snowflake] = ...,
-        slowmode_delay: Optional[int] = ...,
-        default_thread_slowmode_delay: Optional[int] = ...,
-        default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = ...,
-        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = ...,
+        category: Snowflake | None = ...,
+        slowmode_delay: int | None = ...,
+        default_thread_slowmode_delay: int | None = ...,
+        default_auto_archive_duration: AnyThreadArchiveDuration | None = ...,
+        overwrites: Mapping[Role | Member, PermissionOverwrite] = ...,
         flags: ChannelFlags = ...,
         require_tag: bool = ...,
         available_tags: Sequence[ForumTag] = ...,
-        default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = ...,
-        default_sort_order: Optional[ThreadSortOrder] = ...,
+        default_reaction: str | Emoji | PartialEmoji | None = ...,
+        default_sort_order: ThreadSortOrder | None = ...,
         default_layout: ThreadLayout = ...,
-        reason: Optional[str] = ...,
+        reason: str | None = ...,
     ) -> ForumChannel: ...
 
     async def edit(
         self,
         *,
         name: str = MISSING,
-        topic: Optional[str] = MISSING,
+        topic: str | None = MISSING,
         position: int = MISSING,
         nsfw: bool = MISSING,
         sync_permissions: bool = MISSING,
-        category: Optional[Snowflake] = MISSING,
-        slowmode_delay: Optional[int] = MISSING,
-        default_thread_slowmode_delay: Optional[int] = MISSING,
-        default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = MISSING,
-        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
+        category: Snowflake | None = MISSING,
+        slowmode_delay: int | None = MISSING,
+        default_thread_slowmode_delay: int | None = MISSING,
+        default_auto_archive_duration: AnyThreadArchiveDuration | None = MISSING,
+        overwrites: Mapping[Role | Member, PermissionOverwrite] = MISSING,
         flags: ChannelFlags = MISSING,
         require_tag: bool = MISSING,
         available_tags: Sequence[ForumTag] = MISSING,
-        default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = MISSING,
-        default_sort_order: Optional[ThreadSortOrder] = MISSING,
+        default_reaction: str | Emoji | PartialEmoji | None = MISSING,
+        default_sort_order: ThreadSortOrder | None = MISSING,
         default_layout: ThreadLayout = MISSING,
-        reason: Optional[str] = None,
+        reason: str | None = None,
         **kwargs: Never,
-    ) -> Optional[ForumChannel]:
-        """|coro|
+    ) -> ForumChannel | None:
+        r"""|coro|
 
         Edits the channel.
 
@@ -4050,7 +4107,7 @@ class ForumChannel(ThreadOnlyGuildChannel):
         ----------
         name: :class:`str`
             The channel's new name.
-        topic: Optional[:class:`str`]
+        topic: :class:`str` | :data:`None`
             The channel's new topic.
         position: :class:`int`
             The channel's new position.
@@ -4059,25 +4116,25 @@ class ForumChannel(ThreadOnlyGuildChannel):
         sync_permissions: :class:`bool`
             Whether to sync permissions with the channel's new or pre-existing
             category. Defaults to ``False``.
-        category: Optional[:class:`abc.Snowflake`]
-            The new category for this channel. Can be ``None`` to remove the
+        category: :class:`abc.Snowflake` | :data:`None`
+            The new category for this channel. Can be :data:`None` to remove the
             category.
-        slowmode_delay: Optional[:class:`int`]
+        slowmode_delay: :class:`int` | :data:`None`
             Specifies the slowmode rate limit at which users can create
             threads in this channel, in seconds.
-            A value of ``0`` or ``None`` disables slowmode. The maximum value possible is ``21600``.
-        default_thread_slowmode_delay: Optional[:class:`int`]
+            A value of ``0`` or :data:`None` disables slowmode. The maximum value possible is ``21600``.
+        default_thread_slowmode_delay: :class:`int` | :data:`None`
             Specifies the slowmode rate limit at which users can send messages
             in newly created threads in this channel, in seconds.
             This does not apply retroactively to existing threads.
-            A value of ``0`` or ``None`` disables slowmode. The maximum value possible is ``21600``.
+            A value of ``0`` or :data:`None` disables slowmode. The maximum value possible is ``21600``.
 
             .. versionadded:: 2.6
 
-        overwrites: :class:`Mapping`
+        overwrites: :class:`~collections.abc.Mapping`\[:class:`~.Member` | :class:`~.Role`, :class:`PermissionOverwrite`]
             A :class:`Mapping` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply to the channel.
-        default_auto_archive_duration: Optional[Union[:class:`int`, :class:`ThreadArchiveDuration`]]
+        default_auto_archive_duration: :class:`int` | :class:`ThreadArchiveDuration` | :data:`None`
             The new default auto archive duration in minutes for threads created in this channel.
             Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
         flags: :class:`ChannelFlags`
@@ -4091,8 +4148,8 @@ class ForumChannel(ThreadOnlyGuildChannel):
 
             .. versionadded:: 2.6
 
-        available_tags: Sequence[:class:`ForumTag`]
-            The new :class:`ForumTag`\\s available for threads in this channel.
+        available_tags: :class:`~collections.abc.Sequence`\[:class:`ForumTag`]
+            The new :class:`ForumTag`\s available for threads in this channel.
             Can be used to create new tags and edit/reorder/delete existing tags.
             Maximum of 20.
 
@@ -4102,12 +4159,12 @@ class ForumChannel(ThreadOnlyGuildChannel):
 
             .. versionadded:: 2.6
 
-        default_reaction: Optional[Union[:class:`str`, :class:`Emoji`, :class:`PartialEmoji`]]
+        default_reaction: :class:`str` | :class:`Emoji` | :class:`PartialEmoji` | :data:`None`
             The new default emoji shown for reacting to threads.
 
             .. versionadded:: 2.6
 
-        default_sort_order: Optional[:class:`ThreadSortOrder`]
+        default_sort_order: :class:`ThreadSortOrder` | :data:`None`
             The new default sort order of threads in this channel.
 
             .. versionadded:: 2.6
@@ -4117,7 +4174,7 @@ class ForumChannel(ThreadOnlyGuildChannel):
 
             .. versionadded:: 2.8
 
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason for editing this channel. Shows up on the audit log.
 
         Raises
@@ -4133,9 +4190,9 @@ class ForumChannel(ThreadOnlyGuildChannel):
 
         Returns
         -------
-        Optional[:class:`ForumChannel`]
+        :class:`ForumChannel` | :data:`None`
             The newly edited forum channel. If the edit was only positional
-            then ``None`` is returned instead.
+            then :data:`None` is returned instead.
         """
         if require_tag is not MISSING:
             # create base flags if flags are provided, otherwise use the internal flags.
@@ -4159,31 +4216,32 @@ class ForumChannel(ThreadOnlyGuildChannel):
             default_sort_order=default_sort_order,
             default_layout=default_layout,
             reason=reason,
-            **kwargs,  # type: ignore
+            **kwargs,
         )
         if payload is not None:
             # the payload will always be the proper channel payload
-            return self.__class__(state=self._state, guild=self.guild, data=payload)  # type: ignore
+            return self.__class__(state=self._state, guild=self.guild, data=payload)  # pyright: ignore[reportArgumentType]
+        return None
 
     async def clone(
         self,
         *,
-        name: Optional[str] = None,
-        topic: Optional[str] = MISSING,
+        name: str | None = None,
+        topic: str | None = MISSING,
         position: int = MISSING,
         nsfw: bool = MISSING,
-        category: Optional[Snowflake] = MISSING,
-        slowmode_delay: Optional[int] = MISSING,
-        default_thread_slowmode_delay: Optional[int] = MISSING,
-        default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = MISSING,
+        category: Snowflake | None = MISSING,
+        slowmode_delay: int | None = MISSING,
+        default_thread_slowmode_delay: int | None = MISSING,
+        default_auto_archive_duration: AnyThreadArchiveDuration | None = MISSING,
         available_tags: Sequence[ForumTag] = MISSING,
-        default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = MISSING,
-        default_sort_order: Optional[ThreadSortOrder] = MISSING,
+        default_reaction: str | Emoji | PartialEmoji | None = MISSING,
+        default_sort_order: ThreadSortOrder | None = MISSING,
         default_layout: ThreadLayout = MISSING,
-        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
-        reason: Optional[str] = None,
+        overwrites: Mapping[Role | Member, PermissionOverwrite] = MISSING,
+        reason: str | None = None,
     ) -> ForumChannel:
-        """|coro|
+        r"""|coro|
 
         Clones this channel. This creates a channel with the same properties
         as this channel.
@@ -4206,34 +4264,34 @@ class ForumChannel(ThreadOnlyGuildChannel):
 
         Parameters
         ----------
-        name: Optional[:class:`str`]
+        name: :class:`str` | :data:`None`
             The name of the new channel. If not provided, defaults to this channel's name.
-        topic: Optional[:class:`str`]
+        topic: :class:`str` | :data:`None`
             The topic of the new channel. If not provided, defaults to this channel's topic.
         position: :class:`int`
             The position of the new channel. If not provided, defaults to this channel's position.
         nsfw: :class:`bool`
             Whether the new channel should be nsfw or not. If not provided, defaults to this channel's NSFW value.
-        category: Optional[:class:`abc.Snowflake`]
+        category: :class:`abc.Snowflake` | :data:`None`
             The category where the new channel should be grouped. If not provided, defaults to this channel's category.
-        slowmode_delay: Optional[:class:`int`]
+        slowmode_delay: :class:`int` | :data:`None`
             The slowmode delay of the new channel. If not provided, defaults to this channel's slowmode delay.
-        default_thread_slowmode_delay: Optional[:class:`int`]
+        default_thread_slowmode_delay: :class:`int` | :data:`None`
             The default thread slowmode delay of the new channel. If not provided, defaults to this channel's default thread slowmode delay.
-        default_auto_archive_duration: Optional[Union[:class:`int`, :class:`ThreadArchiveDuration`]]
+        default_auto_archive_duration: :class:`int` | :class:`ThreadArchiveDuration` | :data:`None`
             The default auto archive duration of the new channel. If not provided, defaults to this channel's default auto archive duration.
-        available_tags: Sequence[:class:`ForumTag`]
+        available_tags: :class:`~collections.abc.Sequence`\[:class:`ForumTag`]
             The applicable tags of the new channel. If not provided, defaults to this channel's available tags.
-        default_reaction: Optional[Union[:class:`str`, :class:`Emoji`, :class:`PartialEmoji`]]
+        default_reaction: :class:`str` | :class:`Emoji` | :class:`PartialEmoji` | :data:`None`
             The default reaction of the new channel. If not provided, defaults to this channel's default reaction.
-        default_sort_order: Optional[:class:`ThreadSortOrder`]
+        default_sort_order: :class:`ThreadSortOrder` | :data:`None`
             The default sort order of the new channel. If not provided, defaults to this channel's default sort order.
         default_layout: :class:`ThreadLayout`
             The default layout of threads in the new channel. If not provided, defaults to this channel's default layout.
-        overwrites: :class:`Mapping`
+        overwrites: :class:`~collections.abc.Mapping`\[:class:`~.Member` | :class:`~.Role`, :class:`PermissionOverwrite`]
             A :class:`Mapping` of target (either a role or a member) to :class:`PermissionOverwrite`
             to apply to the channel. If not provided, defaults to this channel's overwrites.
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason for cloning this channel. Shows up on the audit log.
 
         Raises
@@ -4248,7 +4306,7 @@ class ForumChannel(ThreadOnlyGuildChannel):
         :class:`MediaChannel`
             The channel that was created.
         """
-        default_reaction_emoji_payload: Optional[DefaultReactionPayload] = MISSING
+        default_reaction_emoji_payload: DefaultReactionPayload | None = MISSING
         if default_reaction is MISSING:
             default_reaction = self.default_reaction
 
@@ -4337,9 +4395,9 @@ class MediaChannel(ThreadOnlyGuildChannel):
         The channel's name.
     guild: :class:`Guild`
         The guild the channel belongs to.
-    topic: Optional[:class:`str`]
-        The channel's topic. ``None`` if it isn't set.
-    category_id: Optional[:class:`int`]
+    topic: :class:`str` | :data:`None`
+        The channel's topic. :data:`None` if it isn't set.
+    category_id: :class:`int` | :data:`None`
         The category channel ID this channel belongs to, if applicable.
     position: :class:`int`
         The position in the channel list. This is a number that starts at 0. e.g. the
@@ -4350,7 +4408,7 @@ class MediaChannel(ThreadOnlyGuildChannel):
         .. note::
 
             To check if the channel or the guild of that channel are marked as NSFW, consider :meth:`is_nsfw` instead.
-    last_thread_id: Optional[:class:`int`]
+    last_thread_id: :class:`int` | :data:`None`
         The ID of the last created thread in this channel. It may
         *not* point to an existing or valid thread.
     default_auto_archive_duration: :class:`int`
@@ -4373,7 +4431,7 @@ class MediaChannel(ThreadOnlyGuildChannel):
         Bots, and users with :attr:`~Permissions.manage_channels` or
         :attr:`~Permissions.manage_messages`, bypass slowmode.
 
-    default_sort_order: Optional[:class:`ThreadSortOrder`]
+    default_sort_order: :class:`ThreadSortOrder` | :data:`None`
         The default sort order of threads in this channel.
         Members will still be able to change this locally.
     """
@@ -4403,9 +4461,9 @@ class MediaChannel(ThreadOnlyGuildChannel):
         self,
         *,
         position: int,
-        category: Optional[Snowflake] = ...,
+        category: Snowflake | None = ...,
         sync_permissions: bool = ...,
-        reason: Optional[str] = ...,
+        reason: str | None = ...,
     ) -> None: ...
 
     # only passing `sync_permissions` may or may not return a channel,
@@ -4415,53 +4473,53 @@ class MediaChannel(ThreadOnlyGuildChannel):
         self,
         *,
         sync_permissions: bool,
-        reason: Optional[str] = ...,
-    ) -> Optional[MediaChannel]: ...
+        reason: str | None = ...,
+    ) -> MediaChannel | None: ...
 
     @overload
     async def edit(
         self,
         *,
         name: str = ...,
-        topic: Optional[str] = ...,
+        topic: str | None = ...,
         position: int = ...,
         nsfw: bool = ...,
         sync_permissions: bool = ...,
-        category: Optional[Snowflake] = ...,
-        slowmode_delay: Optional[int] = ...,
-        default_thread_slowmode_delay: Optional[int] = ...,
-        default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = ...,
-        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = ...,
+        category: Snowflake | None = ...,
+        slowmode_delay: int | None = ...,
+        default_thread_slowmode_delay: int | None = ...,
+        default_auto_archive_duration: AnyThreadArchiveDuration | None = ...,
+        overwrites: Mapping[Role | Member, PermissionOverwrite] = ...,
         flags: ChannelFlags = ...,
         require_tag: bool = ...,
         available_tags: Sequence[ForumTag] = ...,
-        default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = ...,
-        default_sort_order: Optional[ThreadSortOrder] = ...,
-        reason: Optional[str] = ...,
+        default_reaction: str | Emoji | PartialEmoji | None = ...,
+        default_sort_order: ThreadSortOrder | None = ...,
+        reason: str | None = ...,
     ) -> MediaChannel: ...
 
     async def edit(
         self,
         *,
         name: str = MISSING,
-        topic: Optional[str] = MISSING,
+        topic: str | None = MISSING,
         position: int = MISSING,
         nsfw: bool = MISSING,
         sync_permissions: bool = MISSING,
-        category: Optional[Snowflake] = MISSING,
-        slowmode_delay: Optional[int] = MISSING,
-        default_thread_slowmode_delay: Optional[int] = MISSING,
-        default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = MISSING,
-        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
+        category: Snowflake | None = MISSING,
+        slowmode_delay: int | None = MISSING,
+        default_thread_slowmode_delay: int | None = MISSING,
+        default_auto_archive_duration: AnyThreadArchiveDuration | None = MISSING,
+        overwrites: Mapping[Role | Member, PermissionOverwrite] = MISSING,
         flags: ChannelFlags = MISSING,
         require_tag: bool = MISSING,
         available_tags: Sequence[ForumTag] = MISSING,
-        default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = MISSING,
-        default_sort_order: Optional[ThreadSortOrder] = MISSING,
-        reason: Optional[str] = None,
+        default_reaction: str | Emoji | PartialEmoji | None = MISSING,
+        default_sort_order: ThreadSortOrder | None = MISSING,
+        reason: str | None = None,
         **kwargs: Never,
-    ) -> Optional[MediaChannel]:
-        """|coro|
+    ) -> MediaChannel | None:
+        r"""|coro|
 
         Edits the channel.
 
@@ -4472,7 +4530,7 @@ class MediaChannel(ThreadOnlyGuildChannel):
         ----------
         name: :class:`str`
             The channel's new name.
-        topic: Optional[:class:`str`]
+        topic: :class:`str` | :data:`None`
             The channel's new topic.
         position: :class:`int`
             The channel's new position.
@@ -4481,22 +4539,22 @@ class MediaChannel(ThreadOnlyGuildChannel):
         sync_permissions: :class:`bool`
             Whether to sync permissions with the channel's new or pre-existing
             category. Defaults to ``False``.
-        category: Optional[:class:`abc.Snowflake`]
-            The new category for this channel. Can be ``None`` to remove the
+        category: :class:`abc.Snowflake` | :data:`None`
+            The new category for this channel. Can be :data:`None` to remove the
             category.
-        slowmode_delay: Optional[:class:`int`]
+        slowmode_delay: :class:`int` | :data:`None`
             Specifies the slowmode rate limit at which users can create
             threads in this channel, in seconds.
-            A value of ``0`` or ``None`` disables slowmode. The maximum value possible is ``21600``.
-        default_thread_slowmode_delay: Optional[:class:`int`]
+            A value of ``0`` or :data:`None` disables slowmode. The maximum value possible is ``21600``.
+        default_thread_slowmode_delay: :class:`int` | :data:`None`
             Specifies the slowmode rate limit at which users can send messages
             in newly created threads in this channel, in seconds.
             This does not apply retroactively to existing threads.
-            A value of ``0`` or ``None`` disables slowmode. The maximum value possible is ``21600``.
-        overwrites: :class:`Mapping`
+            A value of ``0`` or :data:`None` disables slowmode. The maximum value possible is ``21600``.
+        overwrites: :class:`~collections.abc.Mapping`\[:class:`~.Member` | :class:`~.Role`, :class:`PermissionOverwrite`]
             A :class:`Mapping` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply to the channel.
-        default_auto_archive_duration: Optional[Union[:class:`int`, :class:`ThreadArchiveDuration`]]
+        default_auto_archive_duration: :class:`int` | :class:`ThreadArchiveDuration` | :data:`None`
             The new default auto archive duration in minutes for threads created in this channel.
             Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
         flags: :class:`ChannelFlags`
@@ -4504,19 +4562,19 @@ class MediaChannel(ThreadOnlyGuildChannel):
             If parameter ``require_tag`` is provided, that will override the setting of :attr:`ChannelFlags.require_tag`.
         require_tag: :class:`bool`
             Whether all newly created threads are required to have a tag.
-        available_tags: Sequence[:class:`ForumTag`]
-            The new :class:`ForumTag`\\s available for threads in this channel.
+        available_tags: :class:`~collections.abc.Sequence`\[:class:`ForumTag`]
+            The new :class:`ForumTag`\s available for threads in this channel.
             Can be used to create new tags and edit/reorder/delete existing tags.
             Maximum of 20.
 
             Note that this overwrites all tags, removing existing tags unless they're passed as well.
 
             See :class:`ForumTag` for examples regarding creating/editing tags.
-        default_reaction: Optional[Union[:class:`str`, :class:`Emoji`, :class:`PartialEmoji`]]
+        default_reaction: :class:`str` | :class:`Emoji` | :class:`PartialEmoji` | :data:`None`
             The new default emoji shown for reacting to threads.
-        default_sort_order: Optional[:class:`ThreadSortOrder`]
+        default_sort_order: :class:`ThreadSortOrder` | :data:`None`
             The new default sort order of threads in this channel.
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason for editing this channel. Shows up on the audit log.
 
         Raises
@@ -4532,9 +4590,9 @@ class MediaChannel(ThreadOnlyGuildChannel):
 
         Returns
         -------
-        Optional[:class:`MediaChannel`]
+        :class:`MediaChannel` | :data:`None`
             The newly edited media channel. If the edit was only positional
-            then ``None`` is returned instead.
+            then :data:`None` is returned instead.
         """
         if require_tag is not MISSING:
             # create base flags if flags are provided, otherwise use the internal flags.
@@ -4557,30 +4615,31 @@ class MediaChannel(ThreadOnlyGuildChannel):
             default_reaction=default_reaction,
             default_sort_order=default_sort_order,
             reason=reason,
-            **kwargs,  # type: ignore
+            **kwargs,
         )
         if payload is not None:
             # the payload will always be the proper channel payload
-            return self.__class__(state=self._state, guild=self.guild, data=payload)  # type: ignore
+            return self.__class__(state=self._state, guild=self.guild, data=payload)  # pyright: ignore[reportArgumentType]
+        return None
 
     async def clone(
         self,
         *,
-        name: Optional[str] = None,
-        topic: Optional[str] = MISSING,
+        name: str | None = None,
+        topic: str | None = MISSING,
         position: int = MISSING,
         nsfw: bool = MISSING,
-        category: Optional[Snowflake] = MISSING,
-        slowmode_delay: Optional[int] = MISSING,
-        default_thread_slowmode_delay: Optional[int] = MISSING,
-        default_auto_archive_duration: Optional[AnyThreadArchiveDuration] = MISSING,
+        category: Snowflake | None = MISSING,
+        slowmode_delay: int | None = MISSING,
+        default_thread_slowmode_delay: int | None = MISSING,
+        default_auto_archive_duration: AnyThreadArchiveDuration | None = MISSING,
         available_tags: Sequence[ForumTag] = MISSING,
-        default_reaction: Optional[Union[str, Emoji, PartialEmoji]] = MISSING,
-        default_sort_order: Optional[ThreadSortOrder] = MISSING,
-        overwrites: Mapping[Union[Role, Member], PermissionOverwrite] = MISSING,
-        reason: Optional[str] = None,
+        default_reaction: str | Emoji | PartialEmoji | None = MISSING,
+        default_sort_order: ThreadSortOrder | None = MISSING,
+        overwrites: Mapping[Role | Member, PermissionOverwrite] = MISSING,
+        reason: str | None = None,
     ) -> MediaChannel:
-        """|coro|
+        r"""|coro|
 
         Clones this channel. This creates a channel with the same properties
         as this channel.
@@ -4594,32 +4653,32 @@ class MediaChannel(ThreadOnlyGuildChannel):
 
         Parameters
         ----------
-        name: Optional[:class:`str`]
+        name: :class:`str` | :data:`None`
             The name of the new channel. If not provided, defaults to this channel's name.
-        topic: Optional[:class:`str`]
+        topic: :class:`str` | :data:`None`
             The topic of the new channel. If not provided, defaults to this channel's topic.
         position: :class:`int`
             The position of the new channel. If not provided, defaults to this channel's position.
         nsfw: :class:`bool`
             Whether the new channel should be nsfw or not. If not provided, defaults to this channel's NSFW value.
-        category: Optional[:class:`abc.Snowflake`]
+        category: :class:`abc.Snowflake` | :data:`None`
             The category where the new channel should be grouped. If not provided, defaults to this channel's category.
-        slowmode_delay: Optional[:class:`int`]
+        slowmode_delay: :class:`int` | :data:`None`
             The slowmode delay of the new channel. If not provided, defaults to this channel's slowmode delay.
-        default_thread_slowmode_delay: Optional[:class:`int`]
+        default_thread_slowmode_delay: :class:`int` | :data:`None`
             The default thread slowmode delay of the new channel. If not provided, defaults to this channel's default thread slowmode delay.
-        default_auto_archive_duration: Optional[Union[:class:`int`, :class:`ThreadArchiveDuration`]]
+        default_auto_archive_duration: :class:`int` | :class:`ThreadArchiveDuration` | :data:`None`
             The default auto archive duration of the new channel. If not provided, defaults to this channel's default auto archive duration.
-        available_tags: Sequence[:class:`ForumTag`]
+        available_tags: :class:`~collections.abc.Sequence`\[:class:`ForumTag`]
             The applicable tags of the new channel. If not provided, defaults to this channel's available tags.
-        default_reaction: Optional[Union[:class:`str`, :class:`Emoji`, :class:`PartialEmoji`]]
+        default_reaction: :class:`str` | :class:`Emoji` | :class:`PartialEmoji` | :data:`None`
             The default reaction of the new channel. If not provided, defaults to this channel's default reaction.
-        default_sort_order: Optional[:class:`ThreadSortOrder`]
+        default_sort_order: :class:`ThreadSortOrder` | :data:`None`
             The default sort order of the new channel. If not provided, defaults to this channel's default sort order.
-        overwrites: :class:`Mapping`
+        overwrites: :class:`~collections.abc.Mapping`\[:class:`~.Member` | :class:`~.Role`, :class:`PermissionOverwrite`]
             A :class:`Mapping` of target (either a role or a member) to :class:`PermissionOverwrite`
             to apply to the channel. If not provided, defaults to this channel's overwrites.
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason for cloning this channel. Shows up on the audit log.
 
         Raises
@@ -4634,7 +4693,7 @@ class MediaChannel(ThreadOnlyGuildChannel):
         :class:`MediaChannel`
             The channel that was created.
         """
-        default_reaction_emoji_payload: Optional[DefaultReactionPayload] = MISSING
+        default_reaction_emoji_payload: DefaultReactionPayload | None = MISSING
         if default_reaction is MISSING:
             default_reaction = self.default_reaction
 
@@ -4708,7 +4767,7 @@ class DMChannel(disnake.abc.Messageable, Hashable):
 
     Attributes
     ----------
-    recipient: Optional[:class:`User`]
+    recipient: :class:`User` | :data:`None`
         The user you are participating with in the direct message channel.
         If this channel is received through the gateway, the recipient information
         may not be always available.
@@ -4716,8 +4775,8 @@ class DMChannel(disnake.abc.Messageable, Hashable):
         The user presenting yourself.
     id: :class:`int`
         The direct message channel ID.
-    last_pin_timestamp: Optional[:class:`datetime.datetime`]
-        The time the most recent message was pinned, or ``None`` if no message is currently pinned.
+    last_pin_timestamp: :class:`datetime.datetime` | :data:`None`
+        The time the most recent message was pinned, or :data:`None` if no message is currently pinned.
 
         .. versionadded:: 2.5
     """
@@ -4733,18 +4792,18 @@ class DMChannel(disnake.abc.Messageable, Hashable):
 
     def __init__(self, *, me: ClientUser, state: ConnectionState, data: DMChannelPayload) -> None:
         self._state: ConnectionState = state
-        self.recipient: Optional[User] = None
+        self.recipient: User | None = None
         if recipients := data.get("recipients"):
-            self.recipient = state.store_user(recipients[0])  # type: ignore
+            self.recipient = state.store_user(recipients[0])  # pyright: ignore[reportArgumentType]
 
         self.me: ClientUser = me
         self.id: int = int(data["id"])
-        self.last_pin_timestamp: Optional[datetime.datetime] = utils.parse_time(
+        self.last_pin_timestamp: datetime.datetime | None = utils.parse_time(
             data.get("last_pin_timestamp")
         )
         self._flags: int = data.get("flags", 0)
 
-    async def _get_channel(self):
+    async def _get_channel(self) -> Self:
         return self
 
     def __str__(self) -> str:
@@ -4798,7 +4857,7 @@ class DMChannel(disnake.abc.Messageable, Hashable):
 
     def permissions_for(
         self,
-        obj: Any = None,
+        obj: object = None,
         /,
         *,
         ignore_timeout: bool = MISSING,
@@ -4852,7 +4911,7 @@ class DMChannel(disnake.abc.Messageable, Hashable):
 
 
 class GroupChannel(disnake.abc.Messageable, Hashable):
-    """Represents a Discord group channel.
+    r"""Represents a Discord group channel.
 
     .. collapse:: operations
 
@@ -4874,7 +4933,7 @@ class GroupChannel(disnake.abc.Messageable, Hashable):
 
     Attributes
     ----------
-    recipients: List[:class:`User`]
+    recipients: :class:`list`\[:class:`User`]
         The users you are participating with in the group channel.
         If this channel is received through the gateway, the recipient information
         may not be always available.
@@ -4882,14 +4941,14 @@ class GroupChannel(disnake.abc.Messageable, Hashable):
         The user representing yourself.
     id: :class:`int`
         The group channel ID.
-    owner: Optional[:class:`User`]
+    owner: :class:`User` | :data:`None`
         The user that owns the group channel.
     owner_id: :class:`int`
         The owner ID that owns the group channel.
 
         .. versionadded:: 2.0
 
-    name: Optional[:class:`str`]
+    name: :class:`str` | :data:`None`
         The group channel's name if provided.
     """
 
@@ -4904,20 +4963,20 @@ class GroupChannel(disnake.abc.Messageable, Hashable):
         self._update_group(data)
 
     def _update_group(self, data: GroupChannelPayload) -> None:
-        self.owner_id: Optional[int] = utils._get_as_snowflake(data, "owner_id")
-        self._icon: Optional[str] = data.get("icon")
-        self.name: Optional[str] = data.get("name")
-        self.recipients: List[User] = [
+        self.owner_id: int | None = utils._get_as_snowflake(data, "owner_id")
+        self._icon: str | None = data.get("icon")
+        self.name: str | None = data.get("name")
+        self.recipients: list[User] = [
             self._state.store_user(u) for u in data.get("recipients", [])
         ]
 
-        self.owner: Optional[BaseUser]
+        self.owner: BaseUser | None
         if self.owner_id == self.me.id:
             self.owner = self.me
         else:
             self.owner = utils.find(lambda u: u.id == self.owner_id, self.recipients)
 
-    async def _get_channel(self):
+    async def _get_channel(self) -> Self:
         return self
 
     def __str__(self) -> str:
@@ -4941,8 +5000,8 @@ class GroupChannel(disnake.abc.Messageable, Hashable):
         return ChannelType.group
 
     @property
-    def icon(self) -> Optional[Asset]:
-        """Optional[:class:`Asset`]: Returns the channel's icon asset if available."""
+    def icon(self) -> Asset | None:
+        """:class:`Asset` | :data:`None`: Returns the channel's icon asset if available."""
         if self._icon is None:
             return None
         return Asset._from_icon(self._state, self.id, self._icon, path="channel")
@@ -5055,14 +5114,14 @@ class PartialMessageable(disnake.abc.Messageable, Hashable):
     ----------
     id: :class:`int`
         The channel ID associated with this partial messageable.
-    type: Optional[:class:`ChannelType`]
+    type: :class:`ChannelType` | :data:`None`
         The channel type associated with this partial messageable, if given.
     """
 
-    def __init__(self, state: ConnectionState, id: int, type: Optional[ChannelType] = None) -> None:
+    def __init__(self, state: ConnectionState, id: int, type: ChannelType | None = None) -> None:
         self._state: ConnectionState = state
         self.id: int = id
-        self.type: Optional[ChannelType] = type
+        self.type: ChannelType | None = type
 
     async def _get_channel(self) -> PartialMessageable:
         return self
@@ -5088,7 +5147,9 @@ class PartialMessageable(disnake.abc.Messageable, Hashable):
         return PartialMessage(channel=self, id=message_id)
 
 
-def _guild_channel_factory(channel_type: int):
+def _guild_channel_factory(
+    channel_type: int,
+) -> tuple[type[GuildChannelType] | None, ChannelType]:
     value = try_enum(ChannelType, channel_type)
     if value is ChannelType.text:
         return TextChannel, value
@@ -5108,7 +5169,9 @@ def _guild_channel_factory(channel_type: int):
         return None, value
 
 
-def _channel_factory(channel_type: int):
+def _channel_factory(
+    channel_type: int,
+) -> tuple[type[GuildChannelType | DMChannel | GroupChannel] | None, ChannelType]:
     cls, value = _guild_channel_factory(channel_type)
     if value is ChannelType.private:
         return DMChannel, value
@@ -5118,23 +5181,25 @@ def _channel_factory(channel_type: int):
         return cls, value
 
 
-def _threaded_channel_factory(channel_type: int):
+def _threaded_channel_factory(
+    channel_type: int,
+) -> tuple[type[GuildChannelType | DMChannel | GroupChannel | Thread] | None, ChannelType]:
     cls, value = _channel_factory(channel_type)
     if value in (ChannelType.private_thread, ChannelType.public_thread, ChannelType.news_thread):
         return Thread, value
     return cls, value
 
 
-def _threaded_guild_channel_factory(channel_type: int):
+def _threaded_guild_channel_factory(
+    channel_type: int,
+) -> tuple[type[GuildChannelType | Thread] | None, ChannelType]:
     cls, value = _guild_channel_factory(channel_type)
     if value in (ChannelType.private_thread, ChannelType.public_thread, ChannelType.news_thread):
         return Thread, value
     return cls, value
 
 
-def _channel_type_factory(
-    cls: Union[Type[disnake.abc.GuildChannel], Type[Thread]],
-) -> List[ChannelType]:
+def _channel_type_factory(cls: type[disnake.abc.GuildChannel | Thread]) -> list[ChannelType]:
     return {
         # FIXME: this includes private channels; improve this once there's a common base type for all channels
         disnake.abc.GuildChannel: list(ChannelType.__members__.values()),

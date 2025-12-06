@@ -9,14 +9,14 @@
 
 import asyncio
 import os
-from typing import Any, Dict
+from typing import Any
 
 import disnake
-import youtube_dl  # type: ignore
+import youtube_dl  # pyright: ignore[reportMissingImports]
 from disnake.ext import commands
 
 # Suppress noise about console usage from errors
-youtube_dl.utils.bug_reports_message = lambda: ""
+youtube_dl.utils.bug_reports_message = lambda *args, **kwargs: ""
 
 
 ytdl_format_options = {
@@ -37,7 +37,7 @@ ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
 
 
 class YTDLSource(disnake.PCMVolumeTransformer):
-    def __init__(self, source: disnake.AudioSource, *, data: Dict[str, Any], volume: float = 0.5):
+    def __init__(self, source: disnake.AudioSource, *, data: dict[str, Any], volume: float = 0.5):
         super().__init__(source, volume)
 
         self.title = data.get("title")
@@ -65,7 +65,8 @@ class Music(commands.Cog):
     async def join(self, ctx, *, channel: disnake.VoiceChannel):
         """Joins a voice channel"""
         if ctx.voice_client is not None:
-            return await ctx.voice_client.move_to(channel)
+            await ctx.voice_client.move_to(channel)
+            return
 
         await channel.connect()
 
@@ -102,7 +103,8 @@ class Music(commands.Cog):
     async def volume(self, ctx, volume: int):
         """Changes the player's volume"""
         if ctx.voice_client is None:
-            return await ctx.send("Not connected to a voice channel.")
+            await ctx.send("Not connected to a voice channel.")
+            return
 
         ctx.voice_client.source.volume = volume / 100
         await ctx.send(f"Changed volume to {volume}%")

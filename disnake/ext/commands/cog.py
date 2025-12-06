@@ -2,22 +2,13 @@
 
 from __future__ import annotations
 
-import asyncio
 import inspect
 import logging
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     ClassVar,
-    Dict,
-    Generator,
-    List,
-    Optional,
-    Tuple,
-    Type,
-    TypeVar,
-    Union,
+    TypeAlias,
 )
 
 import disnake
@@ -30,24 +21,24 @@ from .ctx_menus_core import InvokableMessageCommand, InvokableUserCommand
 from .slash_core import InvokableSlashCommand
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Generator
+
     from typing_extensions import Self
 
     from disnake.interactions import ApplicationCommandInteraction
 
-    from ._types import MaybeCoro
+    from ._types import FuncT, MaybeCoro
     from .bot import AutoShardedBot, AutoShardedInteractionBot, Bot, InteractionBot
     from .context import Context
     from .core import Command
 
-    AnyBot = Union[Bot, AutoShardedBot, InteractionBot, AutoShardedInteractionBot]
+    AnyBot: TypeAlias = Bot | AutoShardedBot | InteractionBot | AutoShardedInteractionBot
 
 
 __all__ = (
     "CogMeta",
     "Cog",
 )
-
-FuncT = TypeVar("FuncT", bound=Callable[..., Any])
 
 MISSING: Any = disnake.utils.MISSING
 _log = logging.getLogger(__name__)
@@ -59,7 +50,7 @@ def _cog_special_method(func: FuncT) -> FuncT:
 
 
 class CogMeta(type):
-    """A metaclass for defining a cog.
+    r"""A metaclass for defining a cog.
 
     Note that you should probably not use this directly. It is exposed
     purely for documentation purposes along with making custom metaclasses to intermix
@@ -100,7 +91,7 @@ class CogMeta(type):
 
         .. versionadded:: 1.6
 
-    command_attrs: Dict[:class:`str`, Any]
+    command_attrs: :class:`dict`\[:class:`str`, :data:`~typing.Any`]
         A list of attributes to apply to every command inside this cog. The dictionary
         is passed into the :class:`Command` options at ``__init__``.
         If you specify attributes inside the command attribute in the class, it will
@@ -117,7 +108,7 @@ class CogMeta(type):
                 async def bar(self, ctx):
                     pass # hidden -> False
 
-    slash_command_attrs: Dict[:class:`str`, Any]
+    slash_command_attrs: :class:`dict`\[:class:`str`, :data:`~typing.Any`]
         A list of attributes to apply to every slash command inside this cog. The dictionary
         is passed into the options of every :class:`InvokableSlashCommand` at ``__init__``.
         Usage of this kwarg is otherwise the same as with ``command_attrs``.
@@ -126,14 +117,14 @@ class CogMeta(type):
 
         .. versionadded:: 2.5
 
-    user_command_attrs: Dict[:class:`str`, Any]
+    user_command_attrs: :class:`dict`\[:class:`str`, :data:`~typing.Any`]
         A list of attributes to apply to every user command inside this cog. The dictionary
         is passed into the options of every :class:`InvokableUserCommand` at ``__init__``.
         Usage of this kwarg is otherwise the same as with ``command_attrs``.
 
         .. versionadded:: 2.5
 
-    message_command_attrs: Dict[:class:`str`, Any]
+    message_command_attrs: :class:`dict`\[:class:`str`, :data:`~typing.Any`]
         A list of attributes to apply to every message command inside this cog. The dictionary
         is passed into the options of every :class:`InvokableMessageCommand` at ``__init__``.
         Usage of this kwarg is otherwise the same as with ``command_attrs``.
@@ -142,15 +133,15 @@ class CogMeta(type):
     """
 
     __cog_name__: str
-    __cog_settings__: Dict[str, Any]
-    __cog_slash_settings__: Dict[str, Any]
-    __cog_user_settings__: Dict[str, Any]
-    __cog_message_settings__: Dict[str, Any]
-    __cog_commands__: List[Command]
-    __cog_app_commands__: List[InvokableApplicationCommand]
-    __cog_listeners__: List[Tuple[str, str]]
+    __cog_settings__: dict[str, Any]
+    __cog_slash_settings__: dict[str, Any]
+    __cog_user_settings__: dict[str, Any]
+    __cog_message_settings__: dict[str, Any]
+    __cog_commands__: list[Command[Any, ..., Any]]
+    __cog_app_commands__: list[InvokableApplicationCommand]
+    __cog_listeners__: list[tuple[str, str]]
 
-    def __new__(cls: Type[CogMeta], *args: Any, **kwargs: Any) -> CogMeta:
+    def __new__(cls: type[CogMeta], *args: Any, **kwargs: Any) -> CogMeta:
         name, bases, attrs = args
         attrs["__cog_name__"] = kwargs.pop("name", name)
         attrs["__cog_settings__"] = kwargs.pop("command_attrs", {})
@@ -173,33 +164,28 @@ class CogMeta(type):
         new_cls = super().__new__(cls, name, bases, attrs, **kwargs)
         for base in reversed(new_cls.__mro__):
             for elem, value in base.__dict__.items():
-                if elem in commands:
-                    del commands[elem]
-                if elem in app_commands:
-                    del app_commands[elem]
-                if elem in listeners:
-                    del listeners[elem]
+                commands.pop(elem, None)
+                app_commands.pop(elem, None)
+                listeners.pop(elem, None)
 
                 is_static_method = isinstance(value, staticmethod)
                 if is_static_method:
                     value = value.__func__
                 if isinstance(value, _BaseCommand):
                     if is_static_method:
-                        raise TypeError(
-                            f"Command in method {base}.{elem!r} must not be staticmethod."
-                        )
+                        msg = f"Command in method {base}.{elem!r} must not be staticmethod."
+                        raise TypeError(msg)
                     if elem.startswith(("cog_", "bot_")):
                         raise TypeError(no_bot_cog.format(base, elem))
                     commands[elem] = value
                 elif isinstance(value, InvokableApplicationCommand):
                     if is_static_method:
-                        raise TypeError(
-                            f"Application command in method {base}.{elem!r} must not be staticmethod."
-                        )
+                        msg = f"Application command in method {base}.{elem!r} must not be staticmethod."
+                        raise TypeError(msg)
                     if elem.startswith(("cog_", "bot_")):
                         raise TypeError(no_bot_cog.format(base, elem))
                     app_commands[elem] = value
-                elif asyncio.iscoroutinefunction(value):
+                elif disnake.utils.iscoroutinefunction(value):
                     if hasattr(value, "__cog_listener__"):
                         if elem.startswith(("cog_", "bot_")):
                             raise TypeError(no_bot_cog.format(base, elem))
@@ -238,10 +224,10 @@ class Cog(metaclass=CogMeta):
     """
 
     __cog_name__: ClassVar[str]
-    __cog_settings__: ClassVar[Dict[str, Any]]
-    __cog_commands__: ClassVar[List[Command]]
-    __cog_app_commands__: ClassVar[List[InvokableApplicationCommand]]
-    __cog_listeners__: ClassVar[List[Tuple[str, str]]]
+    __cog_settings__: ClassVar[dict[str, Any]]
+    __cog_commands__: ClassVar[list[Command[Self, ..., Any]]]
+    __cog_app_commands__: ClassVar[list[InvokableApplicationCommand]]
+    __cog_listeners__: ClassVar[list[tuple[str, str]]]
 
     def __new__(cls, *args: Any, **kwargs: Any) -> Self:
         # For issue 426, we need to store a copy of the command objects
@@ -254,7 +240,7 @@ class Cog(metaclass=CogMeta):
         message_cmd_attrs = cls.__cog_message_settings__
 
         # Either update the command with the cog provided defaults or copy it.
-        cog_app_commands: List[InvokableApplicationCommand] = []
+        cog_app_commands: list[InvokableApplicationCommand] = []
         for c in cls.__cog_app_commands__:
             if isinstance(c, InvokableSlashCommand):
                 c = c._update_copy(slash_cmd_attrs)
@@ -265,12 +251,13 @@ class Cog(metaclass=CogMeta):
 
             cog_app_commands.append(c)
 
-        self.__cog_app_commands__ = tuple(cog_app_commands)  # type: ignore  # overriding ClassVar
+        # FIXME: __cog_app_commands__ is annotated as List, assigning tuple here?
+        self.__cog_app_commands__ = tuple(cog_app_commands)  # pyright: ignore[reportAttributeAccessIssue]  # overriding ClassVar
         # Replace the old command objects with the new copies
         for app_command in self.__cog_app_commands__:
             setattr(self, app_command.callback.__name__, app_command)
 
-        self.__cog_commands__ = tuple(c._update_copy(cmd_attrs) for c in cls.__cog_commands__)  # type: ignore  # overriding ClassVar
+        self.__cog_commands__ = tuple(c._update_copy(cmd_attrs) for c in cls.__cog_commands__)  # pyright: ignore[reportAttributeAccessIssue]  # overriding ClassVar
 
         lookup = {cmd.qualified_name: cmd for cmd in self.__cog_commands__}
         for command in self.__cog_commands__:
@@ -278,21 +265,21 @@ class Cog(metaclass=CogMeta):
             parent = command.parent
             if parent is not None:
                 # Get the latest parent reference
-                parent = lookup[parent.qualified_name]  # type: ignore
+                parent = lookup[parent.qualified_name]  # pyright: ignore[reportAttributeAccessIssue]
 
                 # Update our parent's reference to our self
-                parent.remove_command(command.name)  # type: ignore
-                parent.add_command(command)  # type: ignore
+                parent.remove_command(command.name)  # pyright: ignore[reportAttributeAccessIssue]
+                parent.add_command(command)  # pyright: ignore[reportAttributeAccessIssue]
 
         return self
 
-    def get_commands(self) -> List[Command]:
-        """Returns a list of commands the cog has.
+    def get_commands(self) -> list[Command[Self, ..., Any]]:
+        r"""Returns a list of commands the cog has.
 
         Returns
         -------
-        List[:class:`.Command`]
-            A :class:`list` of :class:`.Command`\\s that are
+        :class:`list`\[:class:`.Command`]
+            A :class:`list` of :class:`.Command`\s that are
             defined inside this cog.
 
             .. note::
@@ -301,13 +288,13 @@ class Cog(metaclass=CogMeta):
         """
         return [c for c in self.__cog_commands__ if c.parent is None]
 
-    def get_application_commands(self) -> List[InvokableApplicationCommand]:
-        """Returns a list of application commands the cog has.
+    def get_application_commands(self) -> list[InvokableApplicationCommand]:
+        r"""Returns a list of application commands the cog has.
 
         Returns
         -------
-        List[:class:`.InvokableApplicationCommand`]
-            A :class:`list` of :class:`.InvokableApplicationCommand`\\s that are
+        :class:`list`\[:class:`.InvokableApplicationCommand`]
+            A :class:`list` of :class:`.InvokableApplicationCommand`\s that are
             defined inside this cog.
 
             .. note::
@@ -316,13 +303,13 @@ class Cog(metaclass=CogMeta):
         """
         return list(self.__cog_app_commands__)
 
-    def get_slash_commands(self) -> List[InvokableSlashCommand]:
-        """Returns a list of slash commands the cog has.
+    def get_slash_commands(self) -> list[InvokableSlashCommand]:
+        r"""Returns a list of slash commands the cog has.
 
         Returns
         -------
-        List[:class:`.InvokableSlashCommand`]
-            A :class:`list` of :class:`.InvokableSlashCommand`\\s that are
+        :class:`list`\[:class:`.InvokableSlashCommand`]
+            A :class:`list` of :class:`.InvokableSlashCommand`\s that are
             defined inside this cog.
 
             .. note::
@@ -331,24 +318,24 @@ class Cog(metaclass=CogMeta):
         """
         return [c for c in self.__cog_app_commands__ if isinstance(c, InvokableSlashCommand)]
 
-    def get_user_commands(self) -> List[InvokableUserCommand]:
-        """Returns a list of user commands the cog has.
+    def get_user_commands(self) -> list[InvokableUserCommand]:
+        r"""Returns a list of user commands the cog has.
 
         Returns
         -------
-        List[:class:`.InvokableUserCommand`]
-            A :class:`list` of :class:`.InvokableUserCommand`\\s that are
+        :class:`list`\[:class:`.InvokableUserCommand`]
+            A :class:`list` of :class:`.InvokableUserCommand`\s that are
             defined inside this cog.
         """
         return [c for c in self.__cog_app_commands__ if isinstance(c, InvokableUserCommand)]
 
-    def get_message_commands(self) -> List[InvokableMessageCommand]:
-        """Returns a list of message commands the cog has.
+    def get_message_commands(self) -> list[InvokableMessageCommand]:
+        r"""Returns a list of message commands the cog has.
 
         Returns
         -------
-        List[:class:`.InvokableMessageCommand`]
-            A :class:`list` of :class:`.InvokableMessageCommand`\\s that are
+        :class:`list`\[:class:`.InvokableMessageCommand`]
+            A :class:`list` of :class:`.InvokableMessageCommand`\s that are
             defined inside this cog.
         """
         return [c for c in self.__cog_app_commands__ if isinstance(c, InvokableMessageCommand)]
@@ -367,12 +354,12 @@ class Cog(metaclass=CogMeta):
     def description(self, description: str) -> None:
         self.__cog_description__ = description
 
-    def walk_commands(self) -> Generator[Command, None, None]:
+    def walk_commands(self) -> Generator[Command[Self, ..., Any]]:
         """An iterator that recursively walks through this cog's commands and subcommands.
 
         Yields
         ------
-        Union[:class:`.Command`, :class:`.Group`]
+        :class:`.Command` | :class:`.Group`
             A command or group from the cog.
         """
         from .core import GroupMixin
@@ -383,30 +370,30 @@ class Cog(metaclass=CogMeta):
                 if isinstance(command, GroupMixin):
                     yield from command.walk_commands()
 
-    def get_listeners(self) -> List[Tuple[str, Callable[..., Any]]]:
-        """Returns a :class:`list` of (name, function) listener pairs the cog has.
+    def get_listeners(self) -> list[tuple[str, Callable[..., Any]]]:
+        r"""Returns a :class:`list` of (name, function) listener pairs the cog has.
 
         Returns
         -------
-        List[Tuple[:class:`str`, :ref:`coroutine <coroutine>`]]
+        :class:`list`\[:class:`tuple`\[:class:`str`, :ref:`coroutine function <coroutine>`]]
             The listeners defined in this cog.
         """
         return [(name, getattr(self, method_name)) for name, method_name in self.__cog_listeners__]
 
     @classmethod
-    def _get_overridden_method(cls, method: FuncT) -> Optional[FuncT]:
+    def _get_overridden_method(cls, method: FuncT) -> FuncT | None:
         """Return None if the method is not overridden. Otherwise returns the overridden method."""
         return getattr(method.__func__, "__cog_special_method__", method)
 
     @classmethod
-    def listener(cls, name: Union[str, Event] = MISSING) -> Callable[[FuncT], FuncT]:
+    def listener(cls, name: str | Event = MISSING) -> Callable[[FuncT], FuncT]:
         """A decorator that marks a function as a listener.
 
         This is the cog equivalent of :meth:`.Bot.listen`.
 
         Parameters
         ----------
-        name: Union[:class:`str`, :class:`.Event`]
+        name: :class:`str` | :class:`.Event`
             The name of the event being listened to. If not provided, it
             defaults to the function's name.
 
@@ -417,16 +404,16 @@ class Cog(metaclass=CogMeta):
             the name.
         """
         if name is not MISSING and not isinstance(name, (str, Event)):
-            raise TypeError(
-                f"Cog.listener expected str or Enum but received {name.__class__.__name__!r} instead."
-            )
+            msg = f"Cog.listener expected str or Enum but received {name.__class__.__name__!r} instead."
+            raise TypeError(msg)
 
         def decorator(func: FuncT) -> FuncT:
             actual = func
             if isinstance(actual, staticmethod):
                 actual = actual.__func__
-            if not asyncio.iscoroutinefunction(actual):
-                raise TypeError("Listener function must be a coroutine function.")
+            if not disnake.utils.iscoroutinefunction(actual):
+                msg = "Listener function must be a coroutine function."
+                raise TypeError(msg)
             actual.__cog_listener__ = True
             to_assign = (
                 actual.__name__
@@ -477,10 +464,10 @@ class Cog(metaclass=CogMeta):
 
     @_cog_special_method
     async def cog_load(self) -> None:
-        """A special method that is called when the cog is added.
+        r"""A special method that is called when the cog is added.
 
         .. versionchanged:: 3.0
-            This is now ``await``\\ed directly instead of being scheduled as a task.
+            This is now ``await``\ed directly instead of being scheduled as a task.
 
             This is now run when the cog has fully finished loading.
         """
@@ -740,7 +727,8 @@ class Cog(metaclass=CogMeta):
             isinstance(bot, (InteractionBot, AutoShardedInteractionBot))
             and len(self.__cog_commands__) > 0
         ):
-            raise TypeError("@commands.command is not supported for interaction bots.")
+            msg = "@commands.command is not supported for interaction bots."
+            raise TypeError(msg)
 
         # realistically, the only thing that can cause loading errors
         # is essentially just the command loading, which raises if there are
@@ -750,12 +738,12 @@ class Cog(metaclass=CogMeta):
             command.cog = self
             if command.parent is None:
                 try:
-                    bot.add_command(command)  # type: ignore
+                    bot.add_command(command)  # pyright: ignore[reportAttributeAccessIssue]
                 except Exception:
                     # undo our additions
                     for to_undo in self.__cog_commands__[:index]:
                         if to_undo.parent is None:
-                            bot.remove_command(to_undo.name)  # type: ignore
+                            bot.remove_command(to_undo.name)  # pyright: ignore[reportAttributeAccessIssue]
                     raise
 
         for index, command in enumerate(self.__cog_app_commands__):
@@ -781,13 +769,15 @@ class Cog(metaclass=CogMeta):
         # check if we're overriding the default
         if cls.bot_check is not Cog.bot_check:
             if isinstance(bot, (InteractionBot, AutoShardedInteractionBot)):
-                raise TypeError("Cog.bot_check is not supported for interaction bots.")
+                msg = "Cog.bot_check is not supported for interaction bots."
+                raise TypeError(msg)
 
             bot.add_check(self.bot_check)
 
         if cls.bot_check_once is not Cog.bot_check_once:
             if isinstance(bot, (InteractionBot, AutoShardedInteractionBot)):
-                raise TypeError("Cog.bot_check_once is not supported for interaction bots.")
+                msg = "Cog.bot_check_once is not supported for interaction bots."
+                raise TypeError(msg)
 
             bot.add_check(self.bot_check_once, call_once=True)
 
@@ -845,7 +835,7 @@ class Cog(metaclass=CogMeta):
         try:
             for command in self.__cog_commands__:
                 if command.parent is None:
-                    bot.remove_command(command.name)  # type: ignore
+                    bot.remove_command(command.name)  # pyright: ignore[reportAttributeAccessIssue]
 
             for app_command in self.__cog_app_commands__:
                 if isinstance(app_command, InvokableSlashCommand):
@@ -859,10 +849,10 @@ class Cog(metaclass=CogMeta):
                 bot.remove_listener(getattr(self, method_name), name)
 
             if cls.bot_check is not Cog.bot_check:
-                bot.remove_check(self.bot_check)  # type: ignore
+                bot.remove_check(self.bot_check)  # pyright: ignore[reportAttributeAccessIssue]
 
             if cls.bot_check_once is not Cog.bot_check_once:
-                bot.remove_check(self.bot_check_once, call_once=True)  # type: ignore
+                bot.remove_check(self.bot_check_once, call_once=True)  # pyright: ignore[reportAttributeAccessIssue]
 
             # Remove application command checks
             if cls.bot_slash_command_check is not Cog.bot_slash_command_check:

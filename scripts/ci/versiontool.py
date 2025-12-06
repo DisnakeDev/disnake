@@ -33,7 +33,8 @@ class VersionInfo(NamedTuple):
     def from_str(cls, s: str) -> VersionInfo:
         match = version_re.fullmatch(s)
         if not match:
-            raise ValueError(f"invalid version: '{s}'")
+            msg = f"invalid version: '{s}'"
+            raise ValueError(msg)
 
         major, minor, micro, releaselevel, serial = match.groups()
         return VersionInfo(
@@ -66,7 +67,7 @@ def get_current_version() -> VersionInfo:
 
 
 def replace_line(text: str, regex: str, repl: str) -> str:
-    lines = []
+    lines: list[str] = []
     found = False
 
     for line in text.split("\n"):

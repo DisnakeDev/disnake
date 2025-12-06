@@ -29,7 +29,7 @@ of a parent page.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from docutils import nodes
 from sphinx import addnodes
@@ -46,7 +46,9 @@ if TYPE_CHECKING:
 GROUPED_SECTIONS = {"api/": "api/index", "ext/commands/api/": "ext/commands/api/index"}
 
 
-def html_page_context(app: Sphinx, docname: str, templatename, context, doctree):
+def html_page_context(
+    app: Sphinx, docname: str, templatename: str, context: Any, doctree: Any
+) -> None:
     """Event handler for the html-page-context signal.
 
     Modifies the context directly, if `docname` matches one of the items in `GROUPED_SECTIONS`.
@@ -68,7 +70,7 @@ def html_page_context(app: Sphinx, docname: str, templatename, context, doctree)
         return
 
     rendered_toc = get_rendered_toctree(
-        app.builder,  # type: ignore
+        app.builder,  # pyright: ignore[reportArgumentType]
         docname,
         index,
         # don't prune tree at a certain depth; always include all entries
@@ -85,7 +87,9 @@ def html_page_context(app: Sphinx, docname: str, templatename, context, doctree)
     context["parent_index"] = index
 
 
-def get_rendered_toctree(builder: StandaloneHTMLBuilder, docname: str, index: str, **kwargs):
+def get_rendered_toctree(
+    builder: StandaloneHTMLBuilder, docname: str, index: str, **kwargs: Any
+) -> str:
     """Build the toctree relative to the named document,
     with the given parameters, and then return the rendered
     HTML fragment.
@@ -96,11 +100,12 @@ def get_rendered_toctree(builder: StandaloneHTMLBuilder, docname: str, index: st
         index,
         **kwargs,
     )
-    rendered_toc = builder.render_partial(fulltoc)["fragment"]
-    return rendered_toc
+    return builder.render_partial(fulltoc)["fragment"]
 
 
-def build_full_toctree(builder: StandaloneHTMLBuilder, docname: str, index: str, **kwargs):
+def build_full_toctree(
+    builder: StandaloneHTMLBuilder, docname: str, index: str, **kwargs: Any
+) -> nodes.bullet_list:
     """Return a single toctree starting from docname containing all
     sub-document doctrees.
 
@@ -110,8 +115,8 @@ def build_full_toctree(builder: StandaloneHTMLBuilder, docname: str, index: str,
     """
     env: BuildEnvironment = builder.env
     doctree = env.get_doctree(index)
-    toctrees: List[nodes.Element] = []
-    for toctreenode in doctree.traverse(addnodes.toctree):
+    toctrees: list[nodes.Element] = []
+    for toctreenode in doctree.findall(addnodes.toctree):
         toctree = env.resolve_toctree(
             docname,
             builder,
@@ -119,10 +124,11 @@ def build_full_toctree(builder: StandaloneHTMLBuilder, docname: str, index: str,
             **kwargs,
         )
         if toctree is not None:
-            toctrees.append(cast(nodes.Element, toctree))
+            toctrees.append(cast("nodes.Element", toctree))
 
     if not toctrees:
-        raise RuntimeError("Expected at least one toctree")
+        msg = "Expected at least one toctree"
+        raise RuntimeError(msg)
 
     result = toctrees[0]
     for toctree in toctrees[1:]:

@@ -45,6 +45,14 @@ WrappedComponent
 .. autoclass:: WrappedComponent
     :members:
 
+UIComponent
+~~~~~~~~~~~
+
+.. attributetable:: UIComponent
+
+.. autoclass:: UIComponent
+    :members:
+
 Button
 ~~~~~~
 
@@ -59,7 +67,7 @@ BaseSelect
 
 .. attributetable:: BaseSelect
 
-.. autoclass:: BaseSelect
+.. autoclass:: BaseSelect()
     :members:
     :inherited-members:
 
@@ -125,6 +133,87 @@ TextInput
 .. autoclass:: TextInput
     :members:
 
+Section
+~~~~~~~
+
+.. attributetable:: Section
+
+.. autoclass:: Section
+    :members:
+    :inherited-members:
+
+TextDisplay
+~~~~~~~~~~~
+
+.. attributetable:: TextDisplay
+
+.. autoclass:: TextDisplay
+    :members:
+    :inherited-members:
+
+Thumbnail
+~~~~~~~~~
+
+.. attributetable:: Thumbnail
+
+.. autoclass:: Thumbnail
+    :members:
+    :inherited-members:
+
+MediaGallery
+~~~~~~~~~~~~
+
+.. attributetable:: MediaGallery
+
+.. autoclass:: MediaGallery
+    :members:
+    :inherited-members:
+
+File
+~~~~
+
+.. attributetable:: File
+
+.. autoclass:: File
+    :members:
+    :inherited-members:
+
+Separator
+~~~~~~~~~
+
+.. attributetable:: Separator
+
+.. autoclass:: Separator
+    :members:
+    :inherited-members:
+
+Container
+~~~~~~~~~
+
+.. attributetable:: Container
+
+.. autoclass:: Container
+    :members:
+    :inherited-members:
+
+Label
+~~~~~
+
+.. attributetable:: Label
+
+.. autoclass:: Label
+    :members:
+    :inherited-members:
+
+FileUpload
+~~~~~~~~~~
+
+.. attributetable:: FileUpload
+
+.. autoclass:: FileUpload
+    :members:
+    :inherited-members:
+
 
 Functions
 ---------
@@ -146,3 +235,7 @@ Functions
 
 .. autofunction:: user_select(cls=UserSelect, *, custom_id=..., placeholder=None, min_values=1, max_values=1, disabled=False, default_values=None, row=None)
     :decorator:
+
+.. autofunction:: walk_components
+
+.. autofunction:: components_from_message

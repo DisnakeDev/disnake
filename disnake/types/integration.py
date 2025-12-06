@@ -2,18 +2,19 @@
 
 from __future__ import annotations
 
-from typing import List, Literal, Optional, TypedDict, Union
+from typing import TYPE_CHECKING, Literal, TypeAlias, TypedDict
 
 from typing_extensions import NotRequired
 
-from .snowflake import Snowflake
-from .user import User
+if TYPE_CHECKING:
+    from .snowflake import Snowflake
+    from .user import User
 
 
 class IntegrationApplication(TypedDict):
     id: Snowflake
     name: str
-    icon: Optional[str]
+    icon: str | None
     description: str
     summary: str
     bot: NotRequired[User]
@@ -49,7 +50,7 @@ class BaseIntegration(PartialIntegration):
 
 
 class StreamIntegration(BaseIntegration):
-    role_id: Optional[Snowflake]
+    role_id: Snowflake | None
     enable_emoticons: bool
     subscriber_count: int
     revoked: bool
@@ -57,7 +58,7 @@ class StreamIntegration(BaseIntegration):
 
 class BotIntegration(BaseIntegration):
     application: IntegrationApplication
-    scopes: List[str]
+    scopes: list[str]
 
 
-Integration = Union[BaseIntegration, StreamIntegration, BotIntegration]
+Integration: TypeAlias = BaseIntegration | StreamIntegration | BotIntegration

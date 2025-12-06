@@ -1,0 +1,1 @@
+The ``cls`` parameter of the :func:`ext.tasks.loop` decorator now accepts any matching callable, in addition to :class:`~ext.tasks.Loop` subclasses.

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import logging
-import os
 import warnings
 from abc import ABC, abstractmethod
 from collections import defaultdict
@@ -11,14 +10,10 @@ from pathlib import Path
 from typing import (
     TYPE_CHECKING,
     Any,
-    DefaultDict,
-    Dict,
     Generic,
     Literal,
-    Optional,
-    Set,
+    TypeAlias,
     TypeVar,
-    Union,
     overload,
 )
 
@@ -28,10 +23,12 @@ from .enums import Locale
 from .errors import LocalizationKeyError
 
 if TYPE_CHECKING:
+    import os
+
     from typing_extensions import Self
 
-    LocalizedRequired = Union[str, "Localized[str]"]
-    LocalizedOptional = Union[Optional[str], "Localized[Optional[str]]"]
+    LocalizedRequired: TypeAlias = "str | Localized[str]"
+    LocalizedOptional: TypeAlias = "str | None | Localized[str | None]"
 
 
 __all__ = (
@@ -47,10 +44,10 @@ MISSING = utils.MISSING
 _log = logging.getLogger(__name__)
 
 
-LocalizationsDict = Union[Dict[Locale, str], Dict[str, str]]
-Localizations = Union[str, LocalizationsDict]
+LocalizationsDict: TypeAlias = dict[Locale, str] | dict[str, str]
+Localizations: TypeAlias = str | LocalizationsDict
 
-StringT = TypeVar("StringT", str, Optional[str], covariant=True)
+StringT = TypeVar("StringT", str, str | None, covariant=True)
 
 
 # This is generic over `string`, as some localized strings can be optional, e.g. option descriptions.
@@ -63,7 +60,7 @@ StringT = TypeVar("StringT", str, Optional[str], covariant=True)
 
 
 class Localized(Generic[StringT]):
-    """A container type used for localized parameters.
+    r"""A container type used for localized parameters.
 
     Exactly one of ``key`` or ``data`` must be provided.
 
@@ -73,13 +70,13 @@ class Localized(Generic[StringT]):
 
     Parameters
     ----------
-    string: Optional[:class:`str`]
+    string: :class:`str` | :data:`None`
         The default (non-localized) value of the string.
         Whether this is optional or not depends on the localized parameter type.
     key: :class:`str`
         A localization key used for lookups.
         Incompatible with ``data``.
-    data: Union[Dict[:class:`.Locale`, :class:`str`], Dict[:class:`str`, :class:`str`]]
+    data: :class:`dict`\[:class:`.Locale`, :class:`str`] | :class:`dict`\[:class:`str`, :class:`str`]
         A mapping of locales to localized values.
         Incompatible with ``key``.
     """
@@ -90,21 +87,21 @@ class Localized(Generic[StringT]):
     def __init__(self: Localized[StringT], string: StringT, *, key: str) -> None: ...
 
     @overload
-    def __init__(self: Localized[Optional[str]], *, key: str) -> None: ...
+    def __init__(self: Localized[str | None], *, key: str) -> None: ...
 
     @overload
     def __init__(
         self: Localized[StringT],
         string: StringT,
         *,
-        data: Union[Optional[LocalizationsDict], LocalizationValue],
+        data: LocalizationsDict | None | LocalizationValue,
     ) -> None: ...
 
     @overload
     def __init__(
-        self: Localized[Optional[str]],
+        self: Localized[str | None],
         *,
-        data: Union[Optional[LocalizationsDict], LocalizationValue],
+        data: LocalizationsDict | None | LocalizationValue,
     ) -> None: ...
 
     # note: `data` accepting `LocalizationValue` is intentionally undocumented,
@@ -114,12 +111,13 @@ class Localized(Generic[StringT]):
         string: StringT = None,
         *,
         key: str = MISSING,
-        data: Union[Optional[LocalizationsDict], LocalizationValue] = MISSING,
+        data: LocalizationsDict | None | LocalizationValue = MISSING,
     ) -> None:
         self.string: StringT = string
 
         if not (key is MISSING) ^ (data is MISSING):
-            raise TypeError("Exactly one of `key` or `data` must be provided")
+            msg = "Exactly one of `key` or `data` must be provided"
+            raise TypeError(msg)
         if isinstance(data, LocalizationValue):
             self.localizations = data
         else:
@@ -129,30 +127,33 @@ class Localized(Generic[StringT]):
     @classmethod
     def _cast(
         cls, string: LocalizedOptional, required: Literal[False]
-    ) -> Localized[Optional[str]]: ...
+    ) -> Localized[str | None]: ...
 
     @overload
     @classmethod
     def _cast(cls, string: LocalizedRequired, required: Literal[True]) -> Localized[str]: ...
 
     @classmethod
-    def _cast(cls, string: Union[Optional[str], Localized[Any]], required: bool) -> Localized[Any]:
+    def _cast(
+        cls: type[Localized[Any]], string: str | None | Localized[Any], required: bool
+    ) -> Localized[Any]:
         if not isinstance(string, Localized):
             string = cls(string, data=None)
 
         # enforce the `StringT` type at runtime
         if required and string.string is None:
-            raise ValueError("`string` parameter must be provided")
+            msg = "`string` parameter must be provided"
+            raise ValueError(msg)
         return string
 
     @overload
-    def _upgrade(self, *, key: Optional[str]) -> Self: ...
+    def _upgrade(self, *, key: str | None) -> Self: ...
 
     @overload
-    def _upgrade(self, string: str, *, key: Optional[str] = None) -> Localized[str]: ...
+    def _upgrade(self, string: str, *, key: str | None = None) -> Localized[str]: ...
 
     def _upgrade(
-        self: Localized[Any], string: Optional[str] = None, *, key: Optional[str] = None
+        self: Localized[Any], string: str | None = None, *, key: str | None = None
     ) -> Localized[Any]:
         # update key if provided and not already set
         self.localizations._upgrade(key)
@@ -177,9 +178,9 @@ class LocalizationValue:
 
     __slots__ = ("_key", "_data")
 
-    def __init__(self, localizations: Optional[Localizations]) -> None:
-        self._key: Optional[str]
-        self._data: Optional[Dict[str, str]]
+    def __init__(self, localizations: Localizations | None) -> None:
+        self._key: str | None
+        self._data: dict[str, str] | None
 
         if localizations is None:
             # no localization
@@ -194,9 +195,10 @@ class LocalizationValue:
             self._key = None
             self._data = {str(k): v for k, v in localizations.items()}
         else:
-            raise TypeError(f"Invalid localizations type: {type(localizations).__name__}")
+            msg = f"Invalid localizations type: {type(localizations).__name__}"
+            raise TypeError(msg)
 
-    def _upgrade(self, key: Optional[str]) -> None:
+    def _upgrade(self, key: str | None) -> None:
         if not key:
             return
 
@@ -212,7 +214,8 @@ class LocalizationValue:
 
         # at this point, the keys don't match, which either means that they're different strings,
         # or that there is no existing `_key` but `_data` is set
-        raise ValueError("Can't specify multiple localization keys or dicts")
+        msg = "Can't specify multiple localization keys or dicts"
+        raise ValueError(msg)
 
     def _link(self, store: LocalizationProtocol) -> None:
         """Loads localizations from the specified store if this object has a key."""
@@ -227,8 +230,8 @@ class LocalizationValue:
         return ins
 
     @property
-    def data(self) -> Optional[Dict[str, str]]:
-        """Optional[Dict[:class:`str`, :class:`str`]]: A dict with a locale -> localization mapping, if available."""
+    def data(self) -> dict[str, str] | None:
+        r""":class:`dict`\[:class:`str`, :class:`str`] | :data:`None`: A dict with a locale -> localization mapping, if available."""
         if self._data is MISSING:
             # This will happen when `_link(store)` hasn't been called yet, which *shouldn't* occur under normal circumstances.
             warnings.warn(
@@ -239,7 +242,7 @@ class LocalizationValue:
             return None
         return self._data
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: LocalizationValue) -> bool:
         # if both are pending, compare keys instead
         if self._data is MISSING and other._data is MISSING:
             return self._key == other._key
@@ -260,8 +263,8 @@ class LocalizationProtocol(ABC):
     """
 
     @abstractmethod
-    def get(self, key: str) -> Optional[Dict[str, str]]:
-        """Returns localizations for the specified key.
+    def get(self, key: str) -> dict[str, str] | None:
+        r"""Returns localizations for the specified key.
 
         Parameters
         ----------
@@ -276,19 +279,19 @@ class LocalizationProtocol(ABC):
 
         Returns
         -------
-        Optional[Dict[:class:`str`, :class:`str`]]
+        :class:`dict`\[:class:`str`, :class:`str`] | :data:`None`
             The localizations for the provided key.
-            May return ``None`` if no localizations could be found.
+            May return :data:`None` if no localizations could be found.
         """
         raise NotImplementedError
 
     # subtypes don't have to implement this
-    def load(self, path: Union[str, os.PathLike]) -> None:
+    def load(self, path: str | os.PathLike[str]) -> None:
         """Adds localizations from the provided path.
 
         Parameters
         ----------
-        path: Union[:class:`str`, :class:`os.PathLike`]
+        path: :class:`str` | :class:`os.PathLike`
             The path to the file/directory to load.
 
         Raises
@@ -299,7 +302,7 @@ class LocalizationProtocol(ABC):
         raise NotImplementedError
 
     # subtypes don't have to implement this
-    def reload(self) -> None:
+    def reload(self) -> None:  # noqa: B027
         """Clears localizations and reloads all previously loaded sources again.
         If an exception occurs, the previous data gets restored and the exception is re-raised.
         """
@@ -320,11 +323,11 @@ class LocalizationStore(LocalizationProtocol):
     def __init__(self, *, strict: bool) -> None:
         self.strict = strict
 
-        self._loc: DefaultDict[str, Dict[str, str]] = defaultdict(dict)
-        self._paths: Set[Path] = set()
+        self._loc: defaultdict[str, dict[str, str]] = defaultdict(dict)
+        self._paths: set[Path] = set()
 
-    def get(self, key: str) -> Optional[Dict[str, str]]:
-        """Returns localizations for the specified key.
+    def get(self, key: str) -> dict[str, str] | None:
+        r"""Returns localizations for the specified key.
 
         Parameters
         ----------
@@ -335,27 +338,27 @@ class LocalizationStore(LocalizationProtocol):
         ------
         LocalizationKeyError
             No localizations for the provided key were found.
-            Raised only if :attr:`strict` is enabled, returns ``None`` otherwise.
+            Raised only if :attr:`strict` is enabled, returns :data:`None` otherwise.
 
         Returns
         -------
-        Optional[Dict[:class:`str`, :class:`str`]]
+        :class:`dict`\[:class:`str`, :class:`str`] | :data:`None`
             The localizations for the provided key.
-            Returns ``None`` if no localizations could be found and :attr:`strict` is disabled.
+            Returns :data:`None` if no localizations could be found and :attr:`strict` is disabled.
         """
         data = self._loc.get(key)
         if data is None and self.strict:
             raise LocalizationKeyError(key)
         return data
 
-    def load(self, path: Union[str, os.PathLike]) -> None:
+    def load(self, path: str | os.PathLike[str]) -> None:
         """Adds localizations from the provided path to the store.
         If the path points to a file, the file gets loaded.
         If it's a directory, all ``.json`` files in that directory get loaded (non-recursive).
 
         Parameters
         ----------
-        path: Union[:class:`str`, :class:`os.PathLike`]
+        path: :class:`str` | :class:`os.PathLike`
             The path to the file/directory to load.
 
         Raises
@@ -373,7 +376,8 @@ class LocalizationStore(LocalizationProtocol):
                     continue
                 self._load_file(file)
         else:
-            raise RuntimeError(f"Path '{path}' does not exist or is not a directory/file")
+            msg = f"Path '{path}' does not exist or is not a directory/file"
+            raise RuntimeError(msg)
 
         self._paths.add(path)
 
@@ -395,24 +399,28 @@ class LocalizationStore(LocalizationProtocol):
     def _load_file(self, path: Path) -> None:
         try:
             if path.suffix != ".json":
-                raise ValueError("not a .json file")
+                msg = "not a .json file"
+                raise ValueError(msg)
             locale = path.stem
 
             if not (api_locale := utils.as_valid_locale(locale)):
-                raise ValueError(f"invalid locale '{locale}'")
+                msg = f"invalid locale '{locale}'"
+                raise ValueError(msg)
             locale = api_locale
 
             data = utils._from_json(path.read_text("utf-8"))
             self._load_dict(data, locale)
             _log.debug(f"Loaded localizations from '{path}'")
         except Exception as e:
-            raise RuntimeError(f"Unable to load '{path}': {e}") from e
+            msg = f"Unable to load '{path}': {e}"
+            raise RuntimeError(msg) from e
 
-    def _load_dict(self, data: Dict[str, Optional[str]], locale: str) -> None:
+    def _load_dict(self, data: dict[str, str | None], locale: str) -> None:
         if not isinstance(data, dict) or not all(
             o is None or isinstance(o, str) for o in data.values()
         ):
-            raise TypeError("data must be a flat dict with string/null values")
+            msg = "data must be a flat dict with string/null values"
+            raise TypeError(msg)
         for key, value in data.items():
             d = self._loc[key]  # always create dict, regardless of value
             if value is not None:

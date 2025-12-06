@@ -2,14 +2,10 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any
 
 from .. import utils
-from ..enums import ApplicationCommandType, Locale, OptionType, try_enum
-from ..guild import Guild
-from ..member import Member
-from ..message import Message
-from ..user import User
+from ..enums import ApplicationCommandType, OptionType, try_enum
 from .base import ClientT, Interaction, InteractionDataResolved
 
 __all__ = (
@@ -33,16 +29,23 @@ __all__ = (
 MISSING = utils.MISSING
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
+    from ..enums import Locale
     from ..ext.commands import InvokableApplicationCommand
+    from ..guild import Guild
+    from ..member import Member
+    from ..message import Message
     from ..state import ConnectionState
     from ..types.interactions import (
         ApplicationCommandInteraction as ApplicationCommandInteractionPayload,
         ApplicationCommandInteractionData as ApplicationCommandInteractionDataPayload,
     )
+    from ..user import User
 
 
 class ApplicationCommandInteraction(Interaction[ClientT]):
-    """Represents an interaction with an application command.
+    r"""Represents an interaction with an application command.
 
     Current examples are slash commands, user commands and message commands.
 
@@ -56,9 +59,9 @@ class ApplicationCommandInteraction(Interaction[ClientT]):
         The interaction's type.
     application_id: :class:`int`
         The application ID that the interaction was for.
-    guild_id: Optional[:class:`int`]
+    guild_id: :class:`int` | :data:`None`
         The guild ID the interaction was sent from.
-    channel: Union[:class:`abc.GuildChannel`, :class:`Thread`, :class:`abc.PrivateChannel`, :class:`PartialMessageable`]
+    channel: :class:`abc.GuildChannel` | :class:`Thread` | :class:`abc.PrivateChannel` | :class:`PartialMessageable`
         The channel the interaction was sent from.
 
         Note that due to a Discord limitation, DM channels
@@ -75,12 +78,12 @@ class ApplicationCommandInteraction(Interaction[ClientT]):
             If you want to compute the interaction author's or bot's permissions in the channel,
             consider using :attr:`permissions` or :attr:`app_permissions`.
 
-    author: Union[:class:`User`, :class:`Member`]
+    author: :class:`User` | :class:`Member`
         The user or member that sent the interaction.
 
         .. note::
             In scenarios where an interaction occurs in a guild but :attr:`.guild` is unavailable,
-            such as with user-installed applications in guilds, some attributes of :class:`Member`\\s
+            such as with user-installed applications in guilds, some attributes of :class:`Member`\s
             that depend on the guild/role cache will not work due to an API limitation.
             This includes :attr:`~Member.roles`, :attr:`~Member.top_role`, :attr:`~Member.role_icon`,
             and :attr:`~Member.guild_permissions`.
@@ -92,10 +95,10 @@ class ApplicationCommandInteraction(Interaction[ClientT]):
         .. versionchanged:: 2.5
             Changed to :class:`Locale` instead of :class:`str`.
 
-    guild_locale: Optional[:class:`Locale`]
+    guild_locale: :class:`Locale` | :data:`None`
         The selected language of the interaction's guild.
         This value is only meaningful in guilds with ``COMMUNITY`` feature and receives a default value otherwise.
-        If the interaction was in a DM, then this value is ``None``.
+        If the interaction was in a DM, then this value is :data:`None`.
 
         .. versionadded:: 2.4
 
@@ -106,7 +109,7 @@ class ApplicationCommandInteraction(Interaction[ClientT]):
         The token to continue the interaction. These are valid for 15 minutes.
     client: :class:`Client`
         The interaction client.
-    entitlements: List[:class:`Entitlement`]
+    entitlements: :class:`list`\[:class:`Entitlement`]
         The entitlements for the invoking user and guild,
         representing access to an application subscription.
 
@@ -127,6 +130,14 @@ class ApplicationCommandInteraction(Interaction[ClientT]):
 
         .. versionadded:: 2.10
 
+    attachment_size_limit: :class:`int`
+        The maximum number of bytes files can have in responses to this interaction.
+
+        This may be higher than the default limit, depending on the guild's boost
+        status or the invoking user's nitro status.
+
+        .. versionadded:: 2.11
+
     data: :class:`ApplicationCommandInteractionData`
         The wrapped interaction data.
     application_command: :class:`.InvokableApplicationCommand`
@@ -146,18 +157,18 @@ class ApplicationCommandInteraction(Interaction[ClientT]):
         self.command_failed: bool = False
 
     @property
-    def target(self) -> Optional[Union[User, Member, Message]]:
-        """Optional[Union[:class:`abc.User`, :class:`Message`]]: The user or message targetted by a user or message command"""
+    def target(self) -> User | Member | Message | None:
+        """:class:`abc.User` | :class:`Message` | :data:`None`: The user or message targeted by a user or message command"""
         return self.data.target
 
     @property
-    def options(self) -> Dict[str, Any]:
-        """Dict[:class:`str`, :class:`Any`]: The full option tree, including nestings"""
+    def options(self) -> dict[str, Any]:
+        r""":class:`dict`\[:class:`str`, :class:`Any`]: The full option tree, including nestings"""
         return {opt.name: opt._simplified_value() for opt in self.data.options}
 
     @property
-    def filled_options(self) -> Dict[str, Any]:
-        """Dict[:class:`str`, :class:`Any`]: The options of the command (or sub-command) being invoked"""
+    def filled_options(self) -> dict[str, Any]:
+        r""":class:`dict`\[:class:`str`, :class:`Any`]: The options of the command (or sub-command) being invoked"""
         _, kwargs = self.data._get_chain_and_kwargs()
         return kwargs
 
@@ -191,7 +202,7 @@ class UserCommandInteraction(ApplicationCommandInteraction[ClientT]):
     are modified to match the expected type with user commands.
     """
 
-    target: Union[User, Member]
+    target: User | Member
 
 
 class MessageCommandInteraction(ApplicationCommandInteraction[ClientT]):
@@ -205,8 +216,8 @@ class MessageCommandInteraction(ApplicationCommandInteraction[ClientT]):
     target: Message
 
 
-class ApplicationCommandInteractionData(Dict[str, Any]):
-    """Represents the data of an interaction with an application command.
+class ApplicationCommandInteractionData(dict[str, Any]):
+    r"""Represents the data of an interaction with an application command.
 
     .. versionadded:: 2.1
 
@@ -220,12 +231,12 @@ class ApplicationCommandInteractionData(Dict[str, Any]):
         The application command type.
     resolved: :class:`InteractionDataResolved`
         All resolved objects related to this interaction.
-    options: List[:class:`ApplicationCommandInteractionDataOption`]
+    options: :class:`list`\[:class:`ApplicationCommandInteractionDataOption`]
         A list of options from the API.
     target_id: :class:`int`
-        ID of the user or message targetted by a user or message command
-    target: Union[:class:`User`, :class:`Member`, :class:`Message`]
-        The user or message targetted by a user or message command
+        ID of the user or message targeted by a user or message command
+    target: :class:`User` | :class:`Member` | :class:`Message`
+        The user or message targeted by a user or message command
     """
 
     __slots__ = (
@@ -250,11 +261,11 @@ class ApplicationCommandInteractionData(Dict[str, Any]):
         self.type: ApplicationCommandType = try_enum(ApplicationCommandType, data["type"])
 
         self.resolved = InteractionDataResolved(data=data.get("resolved", {}), parent=parent)
-        self.target_id: Optional[int] = utils._get_as_snowflake(data, "target_id")
+        self.target_id: int | None = utils._get_as_snowflake(data, "target_id")
         target = self.resolved.get_by_id(self.target_id)
-        self.target: Optional[Union[User, Member, Message]] = target  # type: ignore
+        self.target: User | Member | Message | None = target  # pyright: ignore[reportAttributeAccessIssue]
 
-        self.options: List[ApplicationCommandInteractionDataOption] = [
+        self.options: list[ApplicationCommandInteractionDataOption] = [
             ApplicationCommandInteractionDataOption(data=d, resolved=self.resolved)
             for d in data.get("options", [])
         ]
@@ -266,19 +277,19 @@ class ApplicationCommandInteractionData(Dict[str, Any]):
         )
 
     def _get_chain_and_kwargs(
-        self, chain: Optional[Tuple[str, ...]] = None
-    ) -> Tuple[Tuple[str, ...], Dict[str, Any]]:
+        self, chain: tuple[str, ...] | None = None
+    ) -> tuple[tuple[str, ...], dict[str, Any]]:
         """Returns a chain of sub-command names and a dict of filled options."""
         if chain is None:
             chain = ()
         for option in self.options:
             if option.value is None:
                 # Extend the chain and collect kwargs in the nesting
-                return option._get_chain_and_kwargs(chain + (option.name,))
+                return option._get_chain_and_kwargs((*chain, option.name))
             return chain, {o.name: o.value for o in self.options}
         return chain, {}
 
-    def _get_focused_option(self) -> Optional[ApplicationCommandInteractionDataOption]:
+    def _get_focused_option(self) -> ApplicationCommandInteractionDataOption | None:
         for option in self.options:
             if option.focused:
                 return option
@@ -292,13 +303,13 @@ class ApplicationCommandInteractionData(Dict[str, Any]):
 
     @property
     def focused_option(self) -> ApplicationCommandInteractionDataOption:
-        """The focused option"""
+        """The focused option."""
         # don't annotate as None for user experience
-        return self._get_focused_option()  # type: ignore
+        return self._get_focused_option()  # pyright: ignore[reportReturnType]
 
 
-class ApplicationCommandInteractionDataOption(Dict[str, Any]):
-    """Represents the structure of an interaction data option from the API.
+class ApplicationCommandInteractionDataOption(dict[str, Any]):
+    r"""Represents the structure of an interaction data option from the API.
 
     Attributes
     ----------
@@ -308,7 +319,7 @@ class ApplicationCommandInteractionDataOption(Dict[str, Any]):
         The option's type.
     value: :class:`Any`
         The option's value.
-    options: List[:class:`ApplicationCommandInteractionDataOption`]
+    options: :class:`list`\[:class:`ApplicationCommandInteractionDataOption`]
         The list of options of this option. Only exists for subcommands and groups.
     focused: :class:`bool`
         Whether this option is focused by the user. May be ``True`` in
@@ -326,7 +337,7 @@ class ApplicationCommandInteractionDataOption(Dict[str, Any]):
         if (value := data.get("value")) is not None:
             self.value: Any = resolved.get_with_type(value, self.type, value)
 
-        self.options: List[ApplicationCommandInteractionDataOption] = [
+        self.options: list[ApplicationCommandInteractionDataOption] = [
             ApplicationCommandInteractionDataOption(data=d, resolved=resolved)
             for d in data.get("options", [])
         ]
@@ -343,7 +354,7 @@ class ApplicationCommandInteractionDataOption(Dict[str, Any]):
             return self.value
         return {opt.name: opt._simplified_value() for opt in self.options}
 
-    def _get_focused_option(self) -> Optional[ApplicationCommandInteractionDataOption]:
+    def _get_focused_option(self) -> ApplicationCommandInteractionDataOption | None:
         for option in self.options:
             if option.focused:
                 return option
@@ -352,14 +363,14 @@ class ApplicationCommandInteractionDataOption(Dict[str, Any]):
         return None
 
     def _get_chain_and_kwargs(
-        self, chain: Optional[Tuple[str, ...]] = None
-    ) -> Tuple[Tuple[str, ...], Dict[str, Any]]:
+        self, chain: tuple[str, ...] | None = None
+    ) -> tuple[tuple[str, ...], dict[str, Any]]:
         if chain is None:
             chain = ()
         for option in self.options:
             if option.value is None:
                 # Extend the chain and collect kwargs in the nesting
-                return option._get_chain_and_kwargs(chain + (option.name,))
+                return option._get_chain_and_kwargs((*chain, option.name))
             return chain, {o.name: o.value for o in self.options}
         return chain, {}
 
@@ -369,10 +380,10 @@ ApplicationCommandInteractionDataResolved = InteractionDataResolved
 
 
 # People asked about shorter aliases, let's see which one catches on the most
-CommandInteraction = ApplicationCommandInteraction
-CmdInteraction = ApplicationCommandInteraction
-CommandInter = ApplicationCommandInteraction
-CmdInter = ApplicationCommandInteraction
-AppCommandInteraction = ApplicationCommandInteraction
-AppCommandInter = ApplicationCommandInteraction
-AppCmdInter = ApplicationCommandInteraction
+CommandInteraction = ApplicationCommandInteraction[ClientT]
+CmdInteraction = ApplicationCommandInteraction[ClientT]
+CommandInter = ApplicationCommandInteraction[ClientT]
+CmdInter = ApplicationCommandInteraction[ClientT]
+AppCommandInteraction = ApplicationCommandInteraction[ClientT]
+AppCommandInter = ApplicationCommandInteraction[ClientT]
+AppCmdInter = ApplicationCommandInteraction[ClientT]

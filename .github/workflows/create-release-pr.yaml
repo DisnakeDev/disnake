@@ -14,7 +14,7 @@ permissions: {}
 
 jobs:
   create-release-pr:
-    name: Create Release PR
+    name: Create release PR
     runs-on: ubuntu-latest
 
     env:
@@ -24,12 +24,12 @@ jobs:
       # https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/making-authenticated-api-requests-with-a-github-app-in-a-github-actions-workflow
       - name: Generate app token
         id: generate_token
-        uses: actions/create-github-app-token@f2acddfb5195534d487896a656232b016a682f3c  # v1.9.0
+        uses: actions/create-github-app-token@7e473efe3cb98aa54f8d4bac15400b15fad77d94  # v2.2.0
         with:
           app-id: ${{ secrets.BOT_APP_ID }}
           private-key: ${{ secrets.BOT_PRIVATE_KEY }}
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           token: ${{ steps.generate_token.outputs.token }}
           persist-credentials: false
@@ -45,10 +45,10 @@ jobs:
       - name: Set up environment
         uses: ./.github/actions/setup-env
         with:
-          python-version: 3.8
+          python-version: 3.10
 
       - name: Install dependencies
-        run: pdm install -dG changelog
+        run: uv sync --no-default-groups --group changelog
 
       - name: Update version
         run: |
@@ -57,11 +57,11 @@ jobs:
 
       - name: Build changelog
         run: |
-          pdm run towncrier build --yes --version "$VERSION_INPUT"
+          uv run towncrier build --yes --version "$VERSION_INPUT"
           git commit -a -m "docs: build changelog"
 
       - name: Create pull request
-        uses: peter-evans/create-pull-request@70a41aba780001da0a30141984ae2a0c95d8704e  # v6.0.2
+        uses: peter-evans/create-pull-request@84ae59a2cdc2258d6fa0732dd66352dddae2a412  # v7.0.9
         with:
           token: ${{ steps.generate_token.outputs.token }}
           branch: auto/release-v${{ inputs.version }}

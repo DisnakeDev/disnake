@@ -3,7 +3,6 @@
 """Some examples showing how to customize slash command options."""
 
 import os
-from typing import Union
 
 import disnake
 from disnake.ext import commands
@@ -35,7 +34,7 @@ async def other_types(
     inter: disnake.CommandInteraction,
     user: disnake.User,
     emoji: disnake.Emoji,
-    member_or_role: Union[disnake.Member, disnake.Role],
+    member_or_role: disnake.Member | disnake.Role,
 ): ...
 
 
@@ -68,7 +67,7 @@ async def defaults(
 
 
 # You may limit numbers to a certain range using `commands.Range`.
-# "..." is impicitly infinity. Range[int, 0, ...] therefore means any integer from 0 to infinity,
+# "..." is implicitly infinity. Range[int, 0, ...] therefore means any integer from 0 to infinity,
 # and Range[int, ..., 0] means anything from -inf to 0.
 # All of these bounds are inclusive, meaning `Range[int, 1, 4]` would allow any of 1, 2, 3, or 4.
 @bot.slash_command()

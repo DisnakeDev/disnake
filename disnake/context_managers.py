@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING, Optional, Type, Union
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from types import TracebackType
@@ -25,8 +25,8 @@ def _typing_done_callback(fut: asyncio.Future) -> None:
 
 
 class Typing:
-    def __init__(self, messageable: Union[Messageable, ThreadOnlyGuildChannel]) -> None:
-        self.messageable: Union[Messageable, ThreadOnlyGuildChannel] = messageable
+    def __init__(self, messageable: Messageable | ThreadOnlyGuildChannel) -> None:
+        self.messageable: Messageable | ThreadOnlyGuildChannel = messageable
 
     async def do_typing(self) -> None:
         try:
@@ -47,9 +47,9 @@ class Typing:
 
     def __exit__(
         self,
-        exc_type: Optional[Type[BaseException]],
-        exc_value: Optional[BaseException],
-        traceback: Optional[TracebackType],
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: TracebackType | None,
     ) -> None:
         self.task.cancel()
 
@@ -60,8 +60,8 @@ class Typing:
 
     async def __aexit__(
         self,
-        exc_type: Optional[Type[BaseException]],
-        exc_value: Optional[BaseException],
-        traceback: Optional[TracebackType],
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: TracebackType | None,
     ) -> None:
         self.task.cancel()

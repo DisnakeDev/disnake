@@ -2,25 +2,30 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, List, Union
+from typing import TYPE_CHECKING, Any, cast
 
 from .enums import MessageType
 
 __all__ = ("AllowedMentions",)
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
     from typing_extensions import Self
 
     from .abc import Snowflake
     from .message import Message
-    from .types.message import AllowedMentions as AllowedMentionsPayload
+    from .types.message import (
+        AllowedMentions as AllowedMentionsPayload,
+        AllowedMentionType as AllowedMentionTypePayload,
+    )
 
 
 class _FakeBool:
     def __repr__(self) -> str:
         return "True"
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: object) -> bool:
         return other is True
 
     def __bool__(self) -> bool:
@@ -31,7 +36,7 @@ default: Any = _FakeBool()
 
 
 class AllowedMentions:
-    """A class that represents what mentions are allowed in a message.
+    r"""A class that represents what mentions are allowed in a message.
 
     This class can be set during :class:`Client` initialisation to apply
     to every message sent. It can also be applied on a per message basis
@@ -41,13 +46,13 @@ class AllowedMentions:
     ----------
     everyone: :class:`bool`
         Whether to allow everyone and here mentions. Defaults to ``True``.
-    users: Union[:class:`bool`, List[:class:`abc.Snowflake`]]
+    users: :class:`bool` | :class:`list`\[:class:`abc.Snowflake`]
         Controls the users being mentioned. If ``True`` (the default) then
         users are mentioned based on the message content. If ``False`` then
         users are not mentioned at all. If a list of :class:`abc.Snowflake`
         is given then only the users provided will be mentioned, provided those
         users are in the message content.
-    roles: Union[:class:`bool`, List[:class:`abc.Snowflake`]]
+    roles: :class:`bool` | :class:`list`\[:class:`abc.Snowflake`]
         Controls the roles being mentioned. If ``True`` (the default) then
         roles are mentioned based on the message content. If ``False`` then
         roles are not mentioned at all. If a list of :class:`abc.Snowflake`
@@ -66,13 +71,22 @@ class AllowedMentions:
         self,
         *,
         everyone: bool = default,
-        users: Union[bool, List[Snowflake]] = default,
-        roles: Union[bool, List[Snowflake]] = default,
+        users: bool | Sequence[Snowflake] = default,
+        roles: bool | Sequence[Snowflake] = default,
         replied_user: bool = default,
     ) -> None:
         self.everyone = everyone
-        self.users = users
-        self.roles = roles
+        # TODO(3.0): annotate attributes as `Sequence` instead of copying to list
+        self.users: bool | list[Snowflake]
+        self.roles: bool | list[Snowflake]
+        if users is default or isinstance(users, bool):
+            self.users = cast("bool", users)
+        else:
+            self.users = list(users)
+        if roles is default or isinstance(roles, bool):
+            self.roles = cast("bool", roles)
+        else:
+            self.roles = list(roles)
         self.replied_user = replied_user
 
     @classmethod
@@ -105,8 +119,8 @@ class AllowedMentions:
 
         return cls(
             everyone=message.mention_everyone,
-            users=message.mentions.copy(),  # type: ignore # mentions is a list of Snowflakes
-            roles=message.role_mentions.copy(),  # type: ignore # mentions is a list of Snowflakes
+            users=list(message.mentions),
+            roles=list(message.role_mentions),
             replied_user=bool(
                 message.type is MessageType.reply
                 and message.reference
@@ -116,12 +130,14 @@ class AllowedMentions:
         )
 
     def to_dict(self) -> AllowedMentionsPayload:
-        parse = []
-        data = {}
+        # n.b. this runs nearly every time a message is sent
+        parse: list[AllowedMentionTypePayload] = []
+        data: AllowedMentionsPayload = {"parse": parse}  # pyright: ignore[reportAssignmentType]
 
         if self.everyone:
             parse.append("everyone")
 
+        # n.b. not using is True/False on account of _FakeBool
         if self.users == True:  # noqa: E712
             parse.append("users")
         elif self.users != False:  # noqa: E712
@@ -135,8 +151,7 @@ class AllowedMentions:
         if self.replied_user:
             data["replied_user"] = True
 
-        data["parse"] = parse
-        return data  # type: ignore
+        return data
 
     def merge(self, other: AllowedMentions) -> AllowedMentions:
         # Creates a new AllowedMentions by merging from another one.

@@ -1,14 +1,17 @@
 # SPDX-License-Identifier: MIT
+from __future__ import annotations
 
 from abc import ABC
 from contextlib import contextmanager
 from contextvars import ContextVar
-from typing import TYPE_CHECKING, ClassVar, Optional
+from typing import TYPE_CHECKING, ClassVar
 
 import libcst as cst
 import libcst.codemod as codemod
 
 if TYPE_CHECKING:
+    from collections.abc import Generator
+
     base_type = codemod.Codemod
 else:
     base_type = object
@@ -21,7 +24,7 @@ class NoMetadataWrapperMixin(base_type):
     # deepcopying the entire module on initialization
 
     @contextmanager
-    def _handle_metadata_reference(self, tree: cst.Module):
+    def _handle_metadata_reference(self, tree: cst.Module) -> Generator[cst.Module]:
         ctx_unsafe_skip_copy.set(True)
         with super()._handle_metadata_reference(tree) as res:
             ctx_unsafe_skip_copy.set(False)
@@ -40,7 +43,7 @@ cst.MetadataWrapper.__init__ = patched_init
 # similar to `VisitorBasedCodemodCommand`,
 # except without the `MatcherDecoratableTransformer` base for performance reasons
 class BaseCodemodCommand(NoMetadataWrapperMixin, cst.CSTTransformer, codemod.CodemodCommand, ABC):
-    CHECK_MARKER: ClassVar[Optional[str]] = None
+    CHECK_MARKER: ClassVar[str | None] = None
 
     def transform_module(self, tree: cst.Module) -> cst.Module:
         if self.CHECK_MARKER:
@@ -48,13 +51,12 @@ class BaseCodemodCommand(NoMetadataWrapperMixin, cst.CSTTransformer, codemod.Cod
 
             # n.b. doing it this way is faster than using `tree.code`,
             # which codegen's the entire module again
-            with open(self.context.filename, "r", encoding="utf-8") as f:
+            with open(self.context.filename, encoding="utf-8") as f:
                 code = f.read()
 
             if self.CHECK_MARKER not in code:
-                raise codemod.SkipFile(
-                    f"this module does not contain the required marker: `{self.CHECK_MARKER}`."
-                )
+                msg = f"this module does not contain the required marker: `{self.CHECK_MARKER}`."
+                raise codemod.SkipFile(msg)
 
         return super().transform_module(tree)
 

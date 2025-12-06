@@ -2,20 +2,22 @@
 
 from __future__ import annotations
 
-from typing import List, Literal, Optional, TypedDict
+from typing import TYPE_CHECKING, Literal, TypedDict
 
 from typing_extensions import NotRequired
 
-from .snowflake import Snowflake
-from .user import User
+if TYPE_CHECKING:
+    from .snowflake import Snowflake
+    from .user import User
 
 StatusType = Literal["idle", "dnd", "online", "offline"]
+StatusDisplayType = Literal[0, 1, 2]
 
 
 class PresenceData(TypedDict):
     user: User
     status: StatusType
-    activities: List[Activity]
+    activities: list[Activity]
     client_status: ClientStatus
 
 
@@ -36,7 +38,7 @@ class ActivityTimestamps(TypedDict, total=False):
 
 class ActivityParty(TypedDict, total=False):
     id: str
-    size: List[int]  # (current size, max size)
+    size: list[int]  # (current size, max size)
 
 
 class ActivityAssets(TypedDict, total=False):
@@ -44,8 +46,10 @@ class ActivityAssets(TypedDict, total=False):
     # https://discord.com/developers/docs/topics/gateway-events#activity-object-activity-asset-image
     large_image: str
     large_text: str
+    large_url: str
     small_image: str
     small_text: str
+    small_url: str
 
 
 class ActivitySecrets(TypedDict, total=False):
@@ -66,7 +70,7 @@ ActivityType = Literal[0, 1, 2, 3, 4, 5]
 class SendableActivity(TypedDict):
     name: str
     type: ActivityType
-    url: NotRequired[Optional[str]]
+    url: NotRequired[str | None]
 
 
 class Activity(SendableActivity, total=False):
@@ -74,9 +78,11 @@ class Activity(SendableActivity, total=False):
     created_at: int
     timestamps: ActivityTimestamps
     application_id: Snowflake
-    details: Optional[str]
-    state: Optional[str]
-    emoji: Optional[ActivityEmoji]
+    details: str | None
+    details_url: str | None
+    state: str | None
+    state_url: str | None
+    emoji: ActivityEmoji | None
     party: ActivityParty
     assets: ActivityAssets
     secrets: ActivitySecrets
@@ -84,9 +90,10 @@ class Activity(SendableActivity, total=False):
     flags: int
     # `buttons` is a list of strings when received over gw,
     # bots cannot access the full button data (like urls)
-    buttons: List[str]
+    buttons: list[str]
     # all of these are undocumented, but still useful in some cases:
-    id: Optional[str]
-    platform: Optional[str]
-    sync_id: Optional[str]
-    session_id: Optional[str]
+    id: str | None
+    platform: str | None
+    sync_id: str | None
+    session_id: str | None
+    status_display_type: StatusDisplayType | None

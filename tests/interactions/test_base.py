@@ -26,7 +26,7 @@ class TestInteractionResponse:
         return disnake.InteractionResponse(inter)
 
     @pytest.fixture
-    def adapter(self):
+    def adapter(self) -> mock.AsyncMock:
         adapter = mock.AsyncMock()
         disnake.interactions.base.async_context.set(adapter)
         return adapter
@@ -132,14 +132,14 @@ class TestInteractionResponse:
 class TestInteractionDataResolved:
     # TODO: use proper mock models once we have state/guild mocks
     @pytest.fixture
-    def state(self):
+    def state(self) -> mock.Mock:
         s = mock.Mock(spec=ConnectionState)
         s._get_guild.return_value = None
         s.user = mock.Mock()
         return s
 
     @pytest.fixture
-    def interaction(self, state):
+    def interaction(self, state) -> mock.Mock:
         i = mock.Mock(spec_set=Interaction)
         i._state = state
         i.guild_id = 1234

@@ -9,33 +9,38 @@ from abc import ABC
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
-    Dict,
-    List,
-    Optional,
-    Tuple,
+    TypeAlias,
     TypeVar,
-    Union,
     cast,
     overload,
 )
 
-from disnake.app_commands import ApplicationCommand
 from disnake.enums import ApplicationCommandType
 from disnake.flags import ApplicationInstallTypes, InteractionContextTypes
 from disnake.permissions import Permissions
-from disnake.utils import _generated, _overload_with_permissions, async_all, maybe_coroutine
+from disnake.utils import (
+    _generated,
+    _overload_with_permissions,
+    async_all,
+    iscoroutinefunction,
+    maybe_coroutine,
+)
 
-from .cooldowns import BucketType, CooldownMapping, MaxConcurrency
+from .cooldowns import BucketType, CooldownMapping
 from .errors import CheckFailure, CommandError, CommandInvokeError, CommandOnCooldown
 
 if TYPE_CHECKING:
-    from typing_extensions import Concatenate, ParamSpec, Self
+    from collections.abc import Callable
+    from typing import Concatenate
 
+    from typing_extensions import ParamSpec, Self
+
+    from disnake.app_commands import ApplicationCommand
     from disnake.interactions import ApplicationCommandInteraction
 
     from ._types import AppCheck, Coro, Error, Hook
     from .cog import Cog
+    from .cooldowns import MaxConcurrency
     from .interaction_bot_base import InteractionBotBase
 
     ApplicationCommandInteractionT = TypeVar(
@@ -44,11 +49,11 @@ if TYPE_CHECKING:
 
     P = ParamSpec("P")
 
-    CommandCallback = Callable[..., Coro[Any]]
-    InteractionCommandCallback = Union[
-        Callable[Concatenate["CogT", ApplicationCommandInteractionT, P], Coro[Any]],
-        Callable[Concatenate[ApplicationCommandInteractionT, P], Coro[Any]],
-    ]
+    CommandCallback: TypeAlias = Callable[..., Coro[Any]]
+    InteractionCommandCallback: TypeAlias = (
+        Callable[Concatenate["CogT", ApplicationCommandInteractionT, P], Coro[Any]]
+        | Callable[Concatenate[ApplicationCommandInteractionT, P], Coro[Any]]
+    )
 
 
 __all__ = (
@@ -78,7 +83,7 @@ def wrap_callback(coro):
         except CommandError:
             raise
         except asyncio.CancelledError:
-            return
+            return None
         except Exception as exc:
             raise CommandInvokeError(exc) from exc
         return ret
@@ -87,7 +92,7 @@ def wrap_callback(coro):
 
 
 class InvokableApplicationCommand(ABC):
-    """A base class that implements the protocol for a bot application command.
+    r"""A base class that implements the protocol for a bot application command.
 
     These are not created manually, instead they are created via the
     decorator or functional interface.
@@ -107,28 +112,28 @@ class InvokableApplicationCommand(ABC):
         For example, the qualified name for ``/one two three`` would be ``one two three``.
     body: :class:`.ApplicationCommand`
         An object being registered in the API.
-    callback: :ref:`coroutine <coroutine>`
-        The coroutine that is executed when the command is called.
-    cog: Optional[:class:`Cog`]
-        The cog that this command belongs to. ``None`` if there isn't one.
-    checks: List[Callable[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
+    callback: :ref:`coroutine function <coroutine>`
+        The coroutine function that is executed when the command is called.
+    cog: :class:`Cog` | :data:`None`
+        The cog that this command belongs to. :data:`None` if there isn't one.
+    checks: :class:`list`\[:class:`~collections.abc.Callable`\[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
         A list of predicates that verifies if the command could be executed
         with the given :class:`.ApplicationCommandInteraction` as the sole parameter. If an exception
         is necessary to be thrown to signal failure, then one inherited from
         :exc:`.CommandError` should be used. Note that if the checks fail then
         :exc:`.CheckFailure` exception is raised to the :func:`.on_slash_command_error`
         event.
-    guild_ids: Optional[Tuple[:class:`int`, ...]]
-        The list of IDs of the guilds where the command is synced. ``None`` if this command is global.
+    guild_ids: :class:`tuple`\[:class:`int`, ...] | :data:`None`
+        The list of IDs of the guilds where the command is synced. :data:`None` if this command is global.
     auto_sync: :class:`bool`
         Whether to automatically register the command.
-    extras: Dict[:class:`str`, Any]
+    extras: :class:`dict`\[:class:`str`, :data:`~typing.Any`]
         A dict of user provided extras to attach to the command.
 
         .. versionadded:: 2.5
     """
 
-    __original_kwargs__: Dict[str, Any]
+    __original_kwargs__: dict[str, Any]
     body: ApplicationCommand
 
     def __new__(cls, *args: Any, **kwargs: Any) -> Self:
@@ -137,7 +142,7 @@ class InvokableApplicationCommand(ABC):
         self.__original_kwargs__ = {k: v for k, v in kwargs.items() if v is not None}
         return self
 
-    def __init__(self, func: CommandCallback, *, name: Optional[str] = None, **kwargs: Any) -> None:
+    def __init__(self, func: CommandCallback, *, name: str | None = None, **kwargs: Any) -> None:
         self.__command_flag__ = None
         self._callback: CommandCallback = func
         self.name: str = name or func.__name__
@@ -145,23 +150,26 @@ class InvokableApplicationCommand(ABC):
         # Annotation parser needs this attribute because body doesn't exist at this moment.
         # We will use this attribute later in order to set the allowed contexts.
         self._guild_only: bool = kwargs.get("guild_only", False)
-        self.extras: Dict[str, Any] = kwargs.get("extras") or {}
+        self.extras: dict[str, Any] = kwargs.get("extras") or {}
 
         if not isinstance(self.name, str):
-            raise TypeError("Name of a command must be a string.")
+            msg = "Name of a command must be a string."
+            raise TypeError(msg)
 
         if "default_permission" in kwargs:
-            raise TypeError(
+            msg = (
                 "`default_permission` is deprecated and will always be set to `True`. "
                 "See `default_member_permissions` and `contexts` instead."
             )
+            raise TypeError(msg)
 
         # XXX: remove in next major/minor version
         # the parameter was called `integration_types` in earlier stages of the user apps PR.
         # since unknown kwargs unfortunately get silently ignored, at least try to warn users
         # in this specific case
         if "integration_types" in kwargs:
-            raise TypeError("`integration_types` has been renamed to `install_types`.")
+            msg = "`integration_types` has been renamed to `install_types`."
+            raise TypeError(msg)
 
         try:
             checks = func.__commands_checks__
@@ -169,7 +177,7 @@ class InvokableApplicationCommand(ABC):
         except AttributeError:
             checks = kwargs.get("checks", [])
 
-        self.checks: List[AppCheck] = checks
+        self.checks: list[AppCheck] = checks
 
         try:
             cooldown = func.__commands_cooldown__
@@ -182,21 +190,22 @@ class InvokableApplicationCommand(ABC):
         elif isinstance(cooldown, CooldownMapping):
             buckets = cooldown
         else:
-            raise TypeError("Cooldown must be a an instance of CooldownMapping or None.")
+            msg = "Cooldown must be a an instance of CooldownMapping or None."
+            raise TypeError(msg)
         self._buckets: CooldownMapping = buckets
 
         try:
             max_concurrency = func.__commands_max_concurrency__
         except AttributeError:
             max_concurrency = kwargs.get("max_concurrency")
-        self._max_concurrency: Optional[MaxConcurrency] = max_concurrency
+        self._max_concurrency: MaxConcurrency | None = max_concurrency
 
-        self.cog: Optional[Cog] = None
-        self.guild_ids: Optional[Tuple[int, ...]] = None
+        self.cog: Cog | None = None
+        self.guild_ids: tuple[int, ...] | None = None
         self.auto_sync: bool = True
 
-        self._before_invoke: Optional[Hook] = None
-        self._after_invoke: Optional[Hook] = None
+        self._before_invoke: Hook | None = None
+        self._after_invoke: Hook | None = None
 
     # this should copy all attributes that can be changed after instantiation via decorators
     def _ensure_assignment_on_copy(self, other: AppCommandT) -> AppCommandT:
@@ -208,7 +217,7 @@ class InvokableApplicationCommand(ABC):
             other._buckets = self._buckets.copy()
         if self._max_concurrency != other._max_concurrency:
             # _max_concurrency won't be None at this point
-            other._max_concurrency = cast(MaxConcurrency, self._max_concurrency).copy()
+            other._max_concurrency = cast("MaxConcurrency", self._max_concurrency).copy()
 
         if (
             # see https://github.com/DisnakeDev/disnake/pull/678#discussion_r938113624:
@@ -251,7 +260,7 @@ class InvokableApplicationCommand(ABC):
         copy = type(self)(self.callback, **self.__original_kwargs__)
         return self._ensure_assignment_on_copy(copy)
 
-    def _update_copy(self: AppCommandT, kwargs: Dict[str, Any]) -> AppCommandT:
+    def _update_copy(self: AppCommandT, kwargs: dict[str, Any]) -> AppCommandT:
         if kwargs:
             kw = kwargs.copy()
             kw.update(self.__original_kwargs__)
@@ -279,14 +288,14 @@ class InvokableApplicationCommand(ABC):
         return self.body.dm_permission
 
     @property
-    def default_member_permissions(self) -> Optional[Permissions]:
-        """Optional[:class:`.Permissions`]: The default required member permissions for this command.
+    def default_member_permissions(self) -> Permissions | None:
+        """:class:`.Permissions` | :data:`None`: The default required member permissions for this command.
         A member must have *all* these permissions to be able to invoke the command in a guild.
 
         This is a default value, the set of users/roles that may invoke this command can be
         overridden by moderators on a guild-specific basis, disregarding this setting.
 
-        If ``None`` is returned, it means everyone can use the command by default.
+        If :data:`None` is returned, it means everyone can use the command by default.
         If an empty :class:`.Permissions` object is returned (that is, all permissions set to ``False``),
         this means no one can use the command.
 
@@ -295,8 +304,8 @@ class InvokableApplicationCommand(ABC):
         return self.body.default_member_permissions
 
     @property
-    def install_types(self) -> Optional[ApplicationInstallTypes]:
-        """Optional[:class:`.ApplicationInstallTypes`]: The installation types
+    def install_types(self) -> ApplicationInstallTypes | None:
+        """:class:`.ApplicationInstallTypes` | :data:`None`: The installation types
         where the command is available. Only available for global commands.
 
         .. versionadded:: 2.10
@@ -304,8 +313,8 @@ class InvokableApplicationCommand(ABC):
         return self.body.install_types
 
     @property
-    def contexts(self) -> Optional[InteractionContextTypes]:
-        """Optional[:class:`.InteractionContextTypes`]: The interaction contexts
+    def contexts(self) -> InteractionContextTypes | None:
+        """:class:`.InteractionContextTypes` | :data:`None`: The interaction contexts
         where the command can be used. Only available for global commands.
 
         .. versionadded:: 2.10
@@ -367,27 +376,28 @@ class InvokableApplicationCommand(ABC):
         if self._buckets.valid:
             dt = inter.created_at
             current = dt.replace(tzinfo=datetime.timezone.utc).timestamp()
-            bucket = self._buckets.get_bucket(inter, current)  # type: ignore
+            bucket = self._buckets.get_bucket(inter, current)  # pyright: ignore[reportArgumentType]
             if bucket is not None:  # pyright: ignore[reportUnnecessaryComparison]
                 retry_after = bucket.update_rate_limit(current)
                 if retry_after:
-                    raise CommandOnCooldown(bucket, retry_after, self._buckets.type)  # type: ignore
+                    raise CommandOnCooldown(bucket, retry_after, self._buckets.type)  # pyright: ignore[reportArgumentType]
 
     async def prepare(self, inter: ApplicationCommandInteraction) -> None:
         inter.application_command = self
 
         if not await self.can_run(inter):
-            raise CheckFailure(f"The check functions for command {self.qualified_name!r} failed.")
+            msg = f"The check functions for command {self.qualified_name!r} failed."
+            raise CheckFailure(msg)
 
         if self._max_concurrency is not None:
-            await self._max_concurrency.acquire(inter)  # type: ignore
+            await self._max_concurrency.acquire(inter)  # pyright: ignore[reportArgumentType]
 
         try:
             self._prepare_cooldowns(inter)
             await self.call_before_hooks(inter)
         except Exception:
             if self._max_concurrency is not None:
-                await self._max_concurrency.release(inter)  # type: ignore
+                await self._max_concurrency.release(inter)  # pyright: ignore[reportArgumentType]
             raise
 
     def is_on_cooldown(self, inter: ApplicationCommandInteraction) -> bool:
@@ -406,7 +416,7 @@ class InvokableApplicationCommand(ABC):
         if not self._buckets.valid:
             return False
 
-        bucket = self._buckets.get_bucket(inter)  # type: ignore
+        bucket = self._buckets.get_bucket(inter)  # pyright: ignore[reportArgumentType]
         dt = inter.created_at
         current = dt.replace(tzinfo=datetime.timezone.utc).timestamp()
         return bucket.get_tokens(current) == 0
@@ -420,7 +430,7 @@ class InvokableApplicationCommand(ABC):
             The interaction with this application command
         """
         if self._buckets.valid:
-            bucket = self._buckets.get_bucket(inter)  # type: ignore
+            bucket = self._buckets.get_bucket(inter)  # pyright: ignore[reportArgumentType]
             bucket.reset()
 
     def get_cooldown_retry_after(self, inter: ApplicationCommandInteraction) -> float:
@@ -438,7 +448,7 @@ class InvokableApplicationCommand(ABC):
             If this is ``0.0`` then the command isn't on cooldown.
         """
         if self._buckets.valid:
-            bucket = self._buckets.get_bucket(inter)  # type: ignore
+            bucket = self._buckets.get_bucket(inter)  # pyright: ignore[reportArgumentType]
             dt = inter.created_at
             current = dt.replace(tzinfo=datetime.timezone.utc).timestamp()
             return bucket.get_retry_after(current)
@@ -462,27 +472,28 @@ class InvokableApplicationCommand(ABC):
             raise CommandInvokeError(exc) from exc
         finally:
             if self._max_concurrency is not None:
-                await self._max_concurrency.release(inter)  # type: ignore
+                await self._max_concurrency.release(inter)  # pyright: ignore[reportArgumentType]
 
             await self.call_after_hooks(inter)
 
     def error(self, coro: ErrorT) -> ErrorT:
-        """A decorator that registers a coroutine as a local error handler.
+        """A decorator that registers a coroutine function as a local error handler.
 
         A local error handler is an error event limited to a single application command.
 
         Parameters
         ----------
-        coro: :ref:`coroutine <coroutine>`
-            The coroutine to register as the local error handler.
+        coro: :ref:`coroutine function <coroutine>`
+            The coroutine function to register as the local error handler.
 
         Raises
         ------
         TypeError
-            The coroutine passed is not actually a coroutine.
+            The argument passed is not actually a coroutine function.
         """
-        if not asyncio.iscoroutinefunction(coro):
-            raise TypeError("The error handler must be a coroutine.")
+        if not iscoroutinefunction(coro):
+            msg = "The error handler must be a coroutine function."
+            raise TypeError(msg)
 
         self.on_error: Error = coro
         return coro
@@ -495,7 +506,7 @@ class InvokableApplicationCommand(ABC):
         self, inter: ApplicationCommandInteraction, error: CommandError
     ) -> Any:
         if not self.has_error_handler():
-            return
+            return None
 
         injected = wrap_callback(self.on_error)
         if self.cog is not None:
@@ -525,9 +536,9 @@ class InvokableApplicationCommand(ABC):
             # __self__ only exists for methods, not functions
             # however, if @command.before_invoke is used, it will be a function
             if instance:
-                await self._before_invoke(instance, inter)  # type: ignore
+                await self._before_invoke(instance, inter)  # pyright: ignore[reportCallIssue, reportArgumentType]
             else:
-                await self._before_invoke(inter)  # type: ignore
+                await self._before_invoke(inter)  # pyright: ignore[reportArgumentType, reportCallIssue]
 
         if inter.data.type is ApplicationCommandType.chat_input:
             partial_attr_name = "slash_command"
@@ -555,9 +566,9 @@ class InvokableApplicationCommand(ABC):
         if self._after_invoke is not None:
             instance = getattr(self._after_invoke, "__self__", cog)
             if instance:
-                await self._after_invoke(instance, inter)  # type: ignore
+                await self._after_invoke(instance, inter)  # pyright: ignore[reportCallIssue, reportArgumentType]
             else:
-                await self._after_invoke(inter)  # type: ignore
+                await self._after_invoke(inter)  # pyright: ignore[reportArgumentType, reportCallIssue]
 
         if inter.data.type is ApplicationCommandType.chat_input:
             partial_attr_name = "slash_command"
@@ -581,7 +592,7 @@ class InvokableApplicationCommand(ABC):
             await hook(inter)
 
     def before_invoke(self, coro: HookT) -> HookT:
-        """A decorator that registers a coroutine as a pre-invoke hook.
+        """A decorator that registers a coroutine function as a pre-invoke hook.
 
         A pre-invoke hook is called directly before the command is called.
 
@@ -589,22 +600,23 @@ class InvokableApplicationCommand(ABC):
 
         Parameters
         ----------
-        coro: :ref:`coroutine <coroutine>`
-            The coroutine to register as the pre-invoke hook.
+        coro: :ref:`coroutine function <coroutine>`
+            The coroutine function to register as the pre-invoke hook.
 
         Raises
         ------
         TypeError
-            The coroutine passed is not actually a coroutine.
+            The argument passed is not a coroutine function.
         """
-        if not asyncio.iscoroutinefunction(coro):
-            raise TypeError("The pre-invoke hook must be a coroutine.")
+        if not iscoroutinefunction(coro):
+            msg = "The pre-invoke hook must be a coroutine function."
+            raise TypeError(msg)
 
         self._before_invoke = coro
         return coro
 
     def after_invoke(self, coro: HookT) -> HookT:
-        """A decorator that registers a coroutine as a post-invoke hook.
+        """A decorator that registers a coroutine function as a post-invoke hook.
 
         A post-invoke hook is called directly after the command is called.
 
@@ -612,23 +624,24 @@ class InvokableApplicationCommand(ABC):
 
         Parameters
         ----------
-        coro: :ref:`coroutine <coroutine>`
-            The coroutine to register as the post-invoke hook.
+        coro: :ref:`coroutine function <coroutine>`
+            The coroutine function to register as the post-invoke hook.
 
         Raises
         ------
         TypeError
-            The coroutine passed is not actually a coroutine.
+            The argument passed is not actually a coroutine function.
         """
-        if not asyncio.iscoroutinefunction(coro):
-            raise TypeError("The post-invoke hook must be a coroutine.")
+        if not iscoroutinefunction(coro):
+            msg = "The post-invoke hook must be a coroutine function."
+            raise TypeError(msg)
 
         self._after_invoke = coro
         return coro
 
     @property
-    def cog_name(self) -> Optional[str]:
-        """Optional[:class:`str`]: The name of the cog this application command belongs to, if any."""
+    def cog_name(self) -> str | None:
+        """:class:`str` | :data:`None`: The name of the cog this application command belongs to, if any."""
         return type(self.cog).__cog_name__ if self.cog is not None else None
 
     async def can_run(self, inter: ApplicationCommandInteraction) -> bool:
@@ -667,9 +680,8 @@ class InvokableApplicationCommand(ABC):
 
         try:
             if inter.bot and not await inter.bot.application_command_can_run(inter):
-                raise CheckFailure(
-                    f"The global check functions for command {self.qualified_name} failed."
-                )
+                msg = f"The global check functions for command {self.qualified_name} failed."
+                raise CheckFailure(msg)
 
             cog = self.cog
             if cog is not None:
@@ -685,7 +697,7 @@ class InvokableApplicationCommand(ABC):
                 # since we have no checks, then we just return True.
                 return True
 
-            return await async_all(predicate(inter) for predicate in predicates)  # type: ignore
+            return await async_all(predicate(inter) for predicate in predicates)  # pyright: ignore[reportCallIssue]
         finally:
             inter.application_command = original
 
@@ -728,6 +740,7 @@ def default_member_permissions(
     moderate_members: bool = ...,
     move_members: bool = ...,
     mute_members: bool = ...,
+    pin_messages: bool = ...,
     priority_speaker: bool = ...,
     read_message_history: bool = ...,
     read_messages: bool = ...,
@@ -803,7 +816,8 @@ def default_member_permissions(value: int = 0, **permissions: bool) -> Callable[
         Setting a permission to ``False`` does not affect the result.
     """
     if isinstance(value, bool):
-        raise TypeError("`value` cannot be a bool value")
+        msg = "`value` cannot be a bool value"
+        raise TypeError(msg)
     perms_value = Permissions(value, **permissions).value
 
     def decorator(func: T) -> T:
@@ -811,16 +825,14 @@ def default_member_permissions(value: int = 0, **permissions: bool) -> Callable[
 
         if isinstance(func, InvokableApplicationCommand):
             if isinstance(func, (SubCommand, SubCommandGroup)):
-                raise TypeError(
-                    "Cannot set `default_member_permissions` on subcommands or subcommand groups"
-                )
+                msg = "Cannot set `default_member_permissions` on subcommands or subcommand groups"
+                raise TypeError(msg)
             if func.body._default_member_permissions is not None:
-                raise ValueError(
-                    "Cannot set `default_member_permissions` in both parameter and decorator"
-                )
+                msg = "Cannot set `default_member_permissions` in both parameter and decorator"
+                raise ValueError(msg)
             func.body._default_member_permissions = perms_value
         else:
-            func.__default_member_permissions__ = perms_value  # type: ignore
+            func.__default_member_permissions__ = perms_value  # pyright: ignore[reportAttributeAccessIssue]
         return func
 
     return decorator
@@ -850,14 +862,16 @@ def install_types(*, guild: bool = False, user: bool = False) -> Callable[[T], T
         install_types = ApplicationInstallTypes(guild=guild, user=user)
         if isinstance(func, InvokableApplicationCommand):
             if isinstance(func, (SubCommand, SubCommandGroup)):
-                raise TypeError("Cannot set `install_types` on subcommands or subcommand groups")
+                msg = "Cannot set `install_types` on subcommands or subcommand groups"
+                raise TypeError(msg)
             # special case - don't overwrite if `_guild_only` was set, since that takes priority
             if not func._guild_only:
                 if func.body.install_types is not None:
-                    raise ValueError("Cannot set `install_types` in both parameter and decorator")
+                    msg = "Cannot set `install_types` in both parameter and decorator"
+                    raise ValueError(msg)
                 func.body.install_types = install_types
         else:
-            func.__install_types__ = install_types  # type: ignore
+            func.__install_types__ = install_types  # pyright: ignore[reportAttributeAccessIssue]
         return func
 
     return decorator
@@ -890,18 +904,19 @@ def contexts(
         )
         if isinstance(func, InvokableApplicationCommand):
             if isinstance(func, (SubCommand, SubCommandGroup)):
-                raise TypeError("Cannot set `contexts` on subcommands or subcommand groups")
+                msg = "Cannot set `contexts` on subcommands or subcommand groups"
+                raise TypeError(msg)
             # special case - don't overwrite if `_guild_only` was set, since that takes priority
             if not func._guild_only:
                 if func.body._dm_permission is not None:
-                    raise ValueError(
-                        "Cannot use both `dm_permission` and `contexts` at the same time"
-                    )
+                    msg = "Cannot use both `dm_permission` and `contexts` at the same time"
+                    raise ValueError(msg)
                 if func.body.contexts is not None:
-                    raise ValueError("Cannot set `contexts` in both parameter and decorator")
+                    msg = "Cannot set `contexts` in both parameter and decorator"
+                    raise ValueError(msg)
                 func.body.contexts = contexts
         else:
-            func.__contexts__ = contexts  # type: ignore
+            func.__contexts__ = contexts  # pyright: ignore[reportAttributeAccessIssue]
         return func
 
     return decorator

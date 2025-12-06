@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 import collections
 import collections.abc
 import inspect
@@ -10,9 +9,11 @@ import logging
 import sys
 import traceback
 import warnings
-from typing import TYPE_CHECKING, Any, Callable, Iterable, List, Optional, Type, TypeVar, Union
+from collections.abc import Iterable
+from typing import TYPE_CHECKING, Any, TypeAlias, TypeVar
 
 import disnake
+from disnake.utils import iscoroutinefunction
 
 from . import errors
 from .common_bot_base import CommonBotBase
@@ -23,6 +24,8 @@ from .help import DefaultHelpCommand, HelpCommand
 from .view import StringView
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from typing_extensions import Self
 
     from disnake.message import Message
@@ -41,21 +44,21 @@ T = TypeVar("T")
 CFT = TypeVar("CFT", bound="CoroFunc")
 CXT = TypeVar("CXT", bound="Context")
 
-PrefixType = Union[str, Iterable[str]]
+PrefixType: TypeAlias = str | Iterable[str]
 
 _log = logging.getLogger(__name__)
 
 
-def when_mentioned(bot: BotBase, msg: Message) -> List[str]:
+def when_mentioned(bot: BotBase, msg: Message) -> list[str]:
     """A callable that implements a command prefix equivalent to being mentioned.
 
     These are meant to be passed into the :attr:`.Bot.command_prefix` attribute.
     """
     # bot.user will never be None when this is called
-    return [f"<@{bot.user.id}> ", f"<@!{bot.user.id}> "]  # type: ignore
+    return [f"<@{bot.user.id}> ", f"<@!{bot.user.id}> "]  # pyright: ignore[reportAttributeAccessIssue]
 
 
-def when_mentioned_or(*prefixes: str) -> Callable[[BotBase, Message], List[str]]:
+def when_mentioned_or(*prefixes: str) -> Callable[[BotBase, Message], list[str]]:
     """A callable that implements when mentioned or other prefixes provided.
 
     These are meant to be passed into the :attr:`.Bot.command_prefix` attribute.
@@ -84,10 +87,9 @@ def when_mentioned_or(*prefixes: str) -> Callable[[BotBase, Message], List[str]]
     :func:`.when_mentioned`
     """
 
-    def inner(bot, msg):
+    def inner(bot: BotBase, msg: Message) -> list[str]:
         r = list(prefixes)
-        r = when_mentioned(bot, msg) + r
-        return r
+        return when_mentioned(bot, msg) + r
 
     return inner
 
@@ -107,11 +109,9 @@ _default: Any = _DefaultRepr()
 class BotBase(CommonBotBase, GroupMixin):
     def __init__(
         self,
-        command_prefix: Optional[
-            Union[PrefixType, Callable[[Self, Message], MaybeCoro[PrefixType]]]
-        ] = None,
-        help_command: Optional[HelpCommand] = _default,
-        description: Optional[str] = None,
+        command_prefix: PrefixType | Callable[[Self, Message], MaybeCoro[PrefixType]] | None = None,
+        help_command: HelpCommand | None = _default,
+        description: str | None = None,
         *,
         strip_after_prefix: bool = False,
         **options: Any,
@@ -119,7 +119,8 @@ class BotBase(CommonBotBase, GroupMixin):
         super().__init__(**options)
 
         if not isinstance(self, disnake.Client):
-            raise RuntimeError("BotBase mixin must be used with disnake.Client")  # noqa: TRY004
+            msg = "BotBase mixin must be used with disnake.Client"
+            raise RuntimeError(msg)  # noqa: TRY004
 
         alternative = (
             "AutoShardedInteractionBot"
@@ -150,13 +151,13 @@ class BotBase(CommonBotBase, GroupMixin):
 
         self.command_prefix = command_prefix
 
-        self._checks: List[Check] = []
-        self._check_once: List[Check] = []
+        self._checks: list[Check] = []
+        self._check_once: list[Check] = []
 
-        self._before_invoke: Optional[CoroFunc] = None
-        self._after_invoke: Optional[CoroFunc] = None
+        self._before_invoke: CoroFunc | None = None
+        self._after_invoke: CoroFunc | None = None
 
-        self._help_command: Optional[HelpCommand] = None
+        self._help_command: HelpCommand | None = None
         self.description: str = inspect.cleandoc(description) if description else ""
         self.strip_after_prefix: bool = strip_after_prefix
 
@@ -250,7 +251,7 @@ class BotBase(CommonBotBase, GroupMixin):
             pass
 
     def check(self, func: T) -> T:
-        """A decorator that adds a global check to the bot.
+        r"""A decorator that adds a global check to the bot.
 
         This is for text commands only, and doesn't apply to application commands.
 
@@ -260,9 +261,9 @@ class BotBase(CommonBotBase, GroupMixin):
 
         .. note::
 
-            This function can either be a regular function or a coroutine.
+            This function can either be a regular function or a coroutine function.
 
-        Similar to a command :func:`.check`\\, this takes a single parameter
+        Similar to a command :func:`.check`\, this takes a single parameter
         of type :class:`.Context` and can only raise exceptions inherited from
         :exc:`.CommandError`.
 
@@ -276,11 +277,11 @@ class BotBase(CommonBotBase, GroupMixin):
 
         """
         # T was used instead of Check to ensure the type matches on return
-        self.add_check(func)  # type: ignore
+        self.add_check(func)  # pyright: ignore[reportArgumentType]
         return func
 
     def check_once(self, func: CFT) -> CFT:
-        """A decorator that adds a "call once" global check to the bot.
+        r"""A decorator that adds a "call once" global check to the bot.
 
         This is for text commands only, and doesn't apply to application commands.
 
@@ -300,9 +301,9 @@ class BotBase(CommonBotBase, GroupMixin):
 
         .. note::
 
-            This function can either be a regular function or a coroutine.
+            This function can either be a regular function or a coroutine function.
 
-        Similar to a command :func:`.check`\\, this takes a single parameter
+        Similar to a command :func:`.check`\, this takes a single parameter
         of type :class:`.Context` and can only raise exceptions inherited from
         :exc:`.CommandError`.
 
@@ -325,10 +326,10 @@ class BotBase(CommonBotBase, GroupMixin):
             return True
 
         # type-checker doesn't distinguish between functions and methods
-        return await disnake.utils.async_all(f(ctx) for f in data)  # type: ignore
+        return await disnake.utils.async_all(f(ctx) for f in data)  # pyright: ignore[reportCallIssue]
 
     def before_invoke(self, coro: CFT) -> CFT:
-        """A decorator that registers a coroutine as a pre-invoke hook.
+        """A decorator that registers a coroutine function as a pre-invoke hook.
 
         This is for text commands only, and doesn't apply to application commands.
 
@@ -347,22 +348,23 @@ class BotBase(CommonBotBase, GroupMixin):
 
         Parameters
         ----------
-        coro: :ref:`coroutine <coroutine>`
-            The coroutine to register as the pre-invoke hook.
+        coro: :ref:`coroutine function <coroutine>`
+            The coroutine function to register as the pre-invoke hook.
 
         Raises
         ------
         TypeError
-            The coroutine passed is not actually a coroutine.
+            The argument passed is not actually a coroutine function.
         """
-        if not asyncio.iscoroutinefunction(coro):
-            raise TypeError("The pre-invoke hook must be a coroutine.")
+        if not iscoroutinefunction(coro):
+            msg = "The pre-invoke hook must be a coroutine function."
+            raise TypeError(msg)
 
         self._before_invoke = coro
         return coro
 
     def after_invoke(self, coro: CFT) -> CFT:
-        """A decorator that registers a coroutine as a post-invoke hook.
+        r"""A decorator that registers a coroutine function as a post-invoke hook.
 
         This is for text commands only, and doesn't apply to application commands.
 
@@ -374,24 +376,25 @@ class BotBase(CommonBotBase, GroupMixin):
 
         .. note::
 
-            Similar to :meth:`~.Bot.before_invoke`\\, this is not called unless
+            Similar to :meth:`~.Bot.before_invoke`\, this is not called unless
             checks and argument parsing procedures succeed. This hook is,
             however, **always** called regardless of the internal command
-            callback raising an error (i.e. :exc:`.CommandInvokeError`\\).
+            callback raising an error (i.e. :exc:`.CommandInvokeError`\).
             This makes it ideal for clean-up scenarios.
 
         Parameters
         ----------
-        coro: :ref:`coroutine <coroutine>`
-            The coroutine to register as the post-invoke hook.
+        coro: :ref:`coroutine function <coroutine>`
+            The coroutine function to register as the post-invoke hook.
 
         Raises
         ------
         TypeError
-            The coroutine passed is not actually a coroutine.
+            The argument passed is not actually a coroutine function.
         """
-        if not asyncio.iscoroutinefunction(coro):
-            raise TypeError("The post-invoke hook must be a coroutine.")
+        if not iscoroutinefunction(coro):
+            msg = "The post-invoke hook must be a coroutine function."
+            raise TypeError(msg)
 
         self._after_invoke = coro
         return coro
@@ -410,13 +413,14 @@ class BotBase(CommonBotBase, GroupMixin):
     # help command stuff
 
     @property
-    def help_command(self) -> Optional[HelpCommand]:
+    def help_command(self) -> HelpCommand | None:
         return self._help_command
 
     @help_command.setter
-    def help_command(self, value: Optional[HelpCommand]) -> None:
+    def help_command(self, value: HelpCommand | None) -> None:
         if value is not None and not isinstance(value, HelpCommand):
-            raise TypeError("help_command must be a subclass of HelpCommand or None")
+            msg = "help_command must be a subclass of HelpCommand or None"
+            raise TypeError(msg)
 
         if self._help_command is not None:
             self._help_command._remove_from_bot(self)
@@ -428,8 +432,8 @@ class BotBase(CommonBotBase, GroupMixin):
 
     # command processing
 
-    async def get_prefix(self, message: Message) -> Optional[Union[List[str], str]]:
-        """|coro|
+    async def get_prefix(self, message: Message) -> list[str] | str | None:
+        r"""|coro|
 
         Retrieves the prefix the bot is listening to
         with the message as a context.
@@ -441,7 +445,7 @@ class BotBase(CommonBotBase, GroupMixin):
 
         Returns
         -------
-        Optional[Union[List[:class:`str`], :class:`str`]]
+        :class:`list`\[:class:`str`] | :class:`str` | :data:`None`
             A list of prefixes or a single prefix that the bot is
             listening for. None if the bot isn't listening for prefixes.
         """
@@ -461,18 +465,20 @@ class BotBase(CommonBotBase, GroupMixin):
                 if isinstance(ret, collections.abc.Iterable):
                     raise
 
-                raise TypeError(
+                msg = (
                     "command_prefix must be plain string, iterable of strings, or callable "
                     f"returning either of these, not {ret.__class__.__name__}"
-                ) from None
+                )
+                raise TypeError(msg) from None
 
             if not ret:
-                raise ValueError("Iterable command_prefix must contain at least one prefix")
+                msg = "Iterable command_prefix must contain at least one prefix"
+                raise ValueError(msg)
 
         return ret
 
-    async def get_context(self, message: Message, *, cls: Type[CXT] = Context) -> CXT:
-        """|coro|
+    async def get_context(self, message: Message, *, cls: type[CXT] = Context) -> CXT:
+        r"""|coro|
 
         Returns the invocation context from the message.
 
@@ -503,7 +509,7 @@ class BotBase(CommonBotBase, GroupMixin):
         view = StringView(message.content)
         ctx = cls(prefix=None, view=view, bot=self, message=message)
 
-        if message.author.id == self.user.id:  # type: ignore
+        if message.author.id == self.user.id:  # pyright: ignore[reportAttributeAccessIssue]
             return ctx
 
         prefix = await self.get_prefix(message)
@@ -525,18 +531,20 @@ class BotBase(CommonBotBase, GroupMixin):
 
             except TypeError:
                 if not isinstance(prefix, list):
-                    raise TypeError(
+                    msg = (
                         "get_prefix must return either a string or a list of string, "
                         f"not {prefix.__class__.__name__}"
-                    ) from None
+                    )
+                    raise TypeError(msg) from None
 
                 # It's possible a bad command_prefix got us here.
                 for value in prefix:
                     if not isinstance(value, str):
-                        raise TypeError(
+                        msg = (
                             "Iterable command_prefix or list returned from get_prefix must "
                             f"contain only strings, not {value.__class__.__name__}"
-                        ) from None
+                        )
+                        raise TypeError(msg) from None
 
                 # Getting here shouldn't happen
                 raise
@@ -547,7 +555,7 @@ class BotBase(CommonBotBase, GroupMixin):
         invoker = view.get_word()
         ctx.invoked_with = invoker
         # type-checker fails to narrow invoked_prefix type.
-        ctx.prefix = invoked_prefix  # type: ignore
+        ctx.prefix = invoked_prefix  # pyright: ignore[reportAttributeAccessIssue]
         ctx.command = self.all_commands.get(invoker)
         return ctx
 
@@ -568,7 +576,8 @@ class BotBase(CommonBotBase, GroupMixin):
                 if await self.can_run(ctx, call_once=True):
                     await ctx.command.invoke(ctx)
                 else:
-                    raise errors.CheckFailure("The global check once functions failed.")
+                    msg = "The global check once functions failed."
+                    raise errors.CheckFailure(msg)
             except errors.CommandError as exc:
                 await ctx.command.dispatch_error(ctx, exc)
             else:
@@ -605,5 +614,5 @@ class BotBase(CommonBotBase, GroupMixin):
         ctx = await self.get_context(message)
         await self.invoke(ctx)
 
-    async def on_message(self, message) -> None:
+    async def on_message(self, message: Message) -> None:
         await self.process_commands(message)

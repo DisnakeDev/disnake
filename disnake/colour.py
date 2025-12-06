@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import colorsys
 import random
-from typing import TYPE_CHECKING, Any, Optional, Tuple, Union
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -54,17 +54,18 @@ class Colour:
 
     def __init__(self, value: int) -> None:
         if not isinstance(value, int):
-            raise TypeError(f"Expected int parameter, received {value.__class__.__name__} instead.")
+            msg = f"Expected int parameter, received {value.__class__.__name__} instead."
+            raise TypeError(msg)
 
         self.value: int = value
 
     def _get_byte(self, byte: int) -> int:
         return (self.value >> (8 * byte)) & 0xFF
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         return isinstance(other, Colour) and self.value == other.value
 
-    def __ne__(self, other: Any) -> bool:
+    def __ne__(self, other: object) -> bool:
         return not self.__eq__(other)
 
     def __str__(self) -> str:
@@ -94,8 +95,8 @@ class Colour:
         """:class:`int`: Returns the blue component of the colour."""
         return self._get_byte(0)
 
-    def to_rgb(self) -> Tuple[int, int, int]:
-        """Tuple[:class:`int`, :class:`int`, :class:`int`]: Returns an (r, g, b) tuple representing the colour."""
+    def to_rgb(self) -> tuple[int, int, int]:
+        r""":class:`tuple`\[:class:`int`, :class:`int`, :class:`int`]: Returns an (r, g, b) tuple representing the colour."""
         return (self.r, self.g, self.b)
 
     @classmethod
@@ -115,7 +116,7 @@ class Colour:
         return cls(0)
 
     @classmethod
-    def random(cls, *, seed: Optional[Union[int, str, float, bytes, bytearray]] = None) -> Self:
+    def random(cls, *, seed: int | str | float | bytes | bytearray | None = None) -> Self:
         """A factory method that returns a :class:`Colour` with a random hue.
 
         .. note::
@@ -127,8 +128,8 @@ class Colour:
 
         Parameters
         ----------
-        seed: Optional[Union[:class:`int`, :class:`str`, :class:`float`, :class:`bytes`, :class:`bytearray`]]
-            The seed to initialize the RNG with. If ``None`` is passed the default RNG is used.
+        seed: :class:`int` | :class:`str` | :class:`float` | :class:`bytes` | :class:`bytearray` | :data:`None`
+            The seed to initialize the RNG with. If :data:`None` is passed the default RNG is used.
 
             .. versionadded:: 1.7
         """
@@ -318,6 +319,19 @@ class Colour:
         .. versionadded:: 2.10
         """
         return cls(0x2B2D31)
+
+    @classmethod
+    def holographic_style(cls) -> tuple[Self, Self, Self]:
+        """A factory method that returns a tuple of :class:`Colour` with values of
+        ``0xA9C9FF``, ``0xFFBBEC``, ``0xFFC3A0``. This matches the holographic colour style
+        for roles.
+
+        The first value represents the ``colour`` (``primary_color``), the second and the third
+        represents the ``secondary_colour`` and ``tertiary_colour`` respectively.
+
+        .. versionadded:: 2.11
+        """
+        return cls(0xA9C9FF), cls(0xFFBBEC), cls(0xFFC3A0)
 
 
 Color = Colour

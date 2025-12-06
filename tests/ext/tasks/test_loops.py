@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
 
 import datetime
-from typing import Any, Tuple
+from typing import Any
 
 import pytest
 
@@ -18,9 +18,9 @@ class TestLoops:
         for c in (Cog, Cog()):
             assert c.task.seconds == 30
 
-        with pytest.raises(TypeError, match="must be a coroutine"):
+        with pytest.raises(TypeError, match="must be a coroutine function"):
 
-            @loop()  # type: ignore
+            @loop()  # pyright: ignore[reportArgumentType]
             def task() -> None: ...
 
     def test_mixing_time(self) -> None:
@@ -37,7 +37,7 @@ class TestLoops:
 
     def test_inheritance(self) -> None:
         class HyperLoop(Loop[LF]):
-            def __init__(self, coro: LF, time_tup: Tuple[float, float, float]) -> None:
+            def __init__(self, coro: LF, time_tup: tuple[float, float, float]) -> None:
                 s, m, h = time_tup
                 super().__init__(coro, seconds=s, minutes=m, hours=h)
 
@@ -52,9 +52,6 @@ class TestLoops:
                 instance._injected = self._injected
                 return instance
 
-        class WhileTrueLoop:
-            def __init__(self, coro: Any) -> None: ...
-
         async def callback() -> None:
             pass
 
@@ -67,7 +64,9 @@ class TestLoops:
         for c in (Cog, Cog()):
             assert (c.task.seconds, c.task.minutes, c.task.hours) == (1, 2, 3)
 
-        with pytest.raises(TypeError, match="subclass of Loop"):
+    def test_factory(self) -> None:
+        with pytest.raises(TypeError, match="must be callable"):
+            loop(cls=...)  # pyright: ignore[reportArgumentType, reportCallIssue]
 
-            @loop(cls=WhileTrueLoop)  # type: ignore
-            async def task() -> None: ...
+        @loop(lambda lf: Loop(lf))
+        async def task() -> None: ...

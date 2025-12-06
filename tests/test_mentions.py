@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: MIT
 
-from typing import Dict, Union
 from unittest import mock
 
 import pytest
@@ -49,7 +48,7 @@ def test_classmethod_all() -> None:
         (AllowedMentions.none(), {"parse": []}),
     ],
 )
-def test_to_dict(am: AllowedMentions, expected: Dict[str, Union[bool, list]]) -> None:
+def test_to_dict(am: AllowedMentions, expected: dict[str, bool | list]) -> None:
     assert expected == am.to_dict()
 
 
@@ -109,6 +108,7 @@ def test_from_message_replied_user() -> None:
     message = mock.Mock(Message)
     author = Object(123)
     message.mentions = [author]
+    message.role_mentions = []
     assert AllowedMentions.from_message(message).replied_user is False
 
     message.type = MessageType.reply

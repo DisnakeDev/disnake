@@ -13,9 +13,127 @@ Changelog
 This page keeps a detailed human friendly rendering of what's new and changed
 in specific versions. Please see :ref:`version_guarantees` for more information.
 
-.. towncrier-draft-entries:: |release| [UNRELEASED]
+.. towncrier-draft-entries:: |vnext_full| [UNRELEASED]
 
 .. towncrier release notes start
+
+.. _vp2p11p0:
+
+v2.11.0
+-------
+
+This version adds the new `v2 components <https://discord.com/developers/docs/components/overview>`_
+to create fully component-driven messages, select menus in modals,
+support for setting a guild-specific avatar/banner/bio, user nameplates and tags,
+new message pin endpoints (now with up to 250 pins!), and includes many other improvements and several bugfixes.
+
+Deprecations
+~~~~~~~~~~~~
+- :meth:`InteractionResponse.require_premium` is deprecated in favour of premium buttons (see :attr:`ui.Button.sku_id`). (:issue:`1276`)
+- Deprecate ``with_expiration`` query parameter of :meth:`Client.fetch_invite` as it is no longer supported from the discord API. (:issue:`1296`)
+- Deprecate awaiting :meth:`.Messageable.pins` in favour of ``async for msg in channel.pins()``. (:issue:`1305`)
+- Using :class:`~ui.ActionRow`\s (or plain :class:`~ui.TextInput`\s, which implicitly get wrapped in action rows) in modals is now deprecated in favor of :class:`ui.Label`. (:issue:`1321`)
+    - This deprecates :meth:`ui.ActionRow.add_text_input`, :meth:`ui.ActionRow.with_modal_components`.
+    - Using :class:`TextInput.label` is also deprecated in favor of ``Label("<text>", TextInput(...))``.
+
+New Features
+~~~~~~~~~~~~
+- Add support for guild incident actions. (:issue:`1230`)
+    - Add :class:`IncidentsData` and :attr:`Guild.incidents_data` attribute.
+    - New ``invites_disabled_until`` and ``dms_disabled_until`` parameters for :meth:`Guild.edit`.
+- |commands| Allow passing autocompleters that take a :class:`~ext.commands.Cog` as first argument to :class:`~ext.commands.Param`. (:issue:`1269`)
+- Support premium buttons using :attr:`ui.Button.sku_id`. (:issue:`1276`)
+- Add support for :ddocs:`components v2 <components/reference>` (`example <https://github.com/DisnakeDev/disnake/blob/master/examples/components_v2.py>`_): (:issue:`1294`)
+    - These components allow you to have more control over the layout of your messages, and are used instead of the classic ``content`` and ``embeds`` fields.
+    - New top-level components:
+        - :class:`ui.Section`: Displays an accessory (:class:`ui.Thumbnail` or :class:`ui.Button`) alongside some text.
+        - :class:`ui.TextDisplay`: Text component, similar to the ``content`` field of messages.
+        - :class:`ui.MediaGallery`: A gallery/mosaic of up to 10 :class:`MediaGalleryItem`\s.
+        - :class:`ui.File`: Display an uploaded file as an attachment.
+        - :class:`ui.Separator`: A spacer/separator adding vertical padding.
+        - :class:`ui.Container`: Contains other components, visually similar to :class:`Embed`\s.
+        - Each component has a corresponding new :class:`ComponentType`.
+    - New :attr:`MessageFlags.is_components_v2` flag. This is set automatically when sending v2 components, and cannot be reverted once set.
+    - New :func:`ui.walk_components` and :func:`ui.components_from_message` utility functions.
+    - All ``ui.*`` components now inherit from a common :class:`ui.UIComponent` base class.
+    - Components now have an :attr:`~ui.UIComponent.id` attribute, which is a unique (per-message) optional numeric identifier.
+- Add :attr:`AppInfo.approximate_user_authorization_count`. (:issue:`1299`)
+- Add :class:`Nameplate` and :class:`Collectibles` classes, as well as :attr:`User.collectibles` and :attr:`ClientUser.collectibles` attributes. (:issue:`1302`)
+- Update the :meth:`.Messageable.pins`, :meth:`Message.pin` and :meth:`Message.unpin` methods to use the new API endpoints. :meth:`.Messageable.pins` returns now an asynchronous iterator to yield all pinned messages. (:issue:`1305`)
+- Add the new :attr:`Activity.details_url`, :attr:`Activity.state_url`, :attr:`Activity.status_display_type` and :class:`StatusDisplayType` RPC attributes and enum. (:issue:`1307`)
+- Add ``flags`` parameter to :meth:`Webhook.edit_message`, :meth:`WebhookMessage.edit`, and :meth:`InteractionResponse.edit_message`. (:issue:`1310`)
+- Add :meth:`Role.primary_colour`, :meth:`Role.secondary_colour`, :meth:`Role.tertiary_colour`, :meth:`Colour.holographic_style`, and aliases, as well as ``primary_colour``, ``secondary_colour``, ``tertiary_colour`` arguments, and aliases, to :meth:`Role.edit` and :meth:`Guild.create_role`. (:issue:`1311`)
+- Add the :attr:`~Permissions.pin_messages` permission. (:issue:`1313`)
+- Add :meth:`MemberFlags.automod_quarantined_guild_tag` member flag. (:issue:`1315`)
+- Add :attr:`AuditLogAction.automod_quarantine_user` action type. (:issue:`1317`)
+- Add :attr:`Interaction.attachment_size_limit`. (:issue:`1319`)
+- Add support for new components in :class:`~ui.Modal`\s. (:issue:`1321`, :issue:`1361`)
+    - The new top-level :class:`ui.Label` component wraps other components (currently :class:`~ui.TextInput` and select menus) in a modal with a label and description.
+    - :class:`ui.TextDisplay` can now be used as a top-level component in modals.
+    - :class:`ui.StringSelect` and auto-populated select menus such as :class:`ui.UserSelect` are now usable in modals when placed inside a :class:`ui.Label`.
+    - The new modal-specific :attr:`~ui.StringSelect.required` field can be used to make a select menu optional.
+    - The values provided by users on modal submit are available in :attr:`ModalInteraction.resolved_values` (raw values in :attr:`ModalInteraction.resolved_values`).
+- Add :class:`PrimaryGuild` and :meth:`User.primary_guild`. (:issue:`1333`)
+- Add preliminary support for Python 3.14. (:issue:`1337`)
+- Support setting a guild-specific nickname, avatar, and banner using :meth:`Member.edit`. (:issue:`1364`)
+- Implement missing fields on :class:`AppInfo`: :attr:`~.AppInfo.event_webhooks_url`, :attr:`~.AppInfo.event_webhooks_status`, :attr:`~.AppInfo.event_webhooks_types`, :attr:`~.AppInfo.redirect_uris`. (:issue:`1369`)
+- Added support for emoji added system messages. (:issue:`1370`)
+    - New message type :attr:`.MessageType.emoji_added`
+    - New system channel flag attr :attr:`.SystemChannelFlags.emoji_added_notifications`
+
+Bug Fixes
+~~~~~~~~~
+- Prevent :class:`py:DeprecationWarning` related to :attr:`Message.interaction` field on shard reconnect. (:issue:`1267`)
+- Fix missing/faulty :class:`Subscription`\-related gateway events. (:issue:`1275`)
+- |commands| Fix extracting localization key for :meth:`~ext.commands.InvokableSlashCommand.sub_command_group`\s from docstring, to be more consistent with top-level slash commands and sub commands. (:issue:`1285`)
+- Improve checks for partial :class:`Guild`\s in guild-dependent attributes of channels and threads, which could previously raise errors with user-installed apps, as they don't always receive complete guild data. (:issue:`1287`)
+- |tasks| Correctly handle :meth:`Loop.change_interval <ext.tasks.Loop.change_interval>` when called from :meth:`~ext.tasks.Loop.before_loop` or through other means before initial loop run. (:issue:`1290`)
+- Avoid stripping port from voice websocket endpoints. (:issue:`1301`)
+- Properly support aiohttp 3.11 without deprecation warnings. (:issue:`1324`)
+- Depend on typing_extensions explicitly, rather than through aiohttp. (:issue:`1328`)
+- Fix :meth:`Guild.fetch_members` and :meth:`TextChannel.archived_threads` iterators returning more elements than specified by ``limit`` under certain circumstances. (:issue:`1331`)
+- Fix missing :attr:`~Member.avatar_decoration` on the old :class:`Member` in :func:`on_member_update` events. (:issue:`1350`)
+
+Documentation
+~~~~~~~~~~~~~
+- Add `OpenGraph <https://ogp.me/>`_ tags to all pages. (:issue:`860`)
+- Update required permissions for :meth:`Guild.invites` and in the invite attribute :ref:`table <invite_attr_table>`. (:issue:`1348`)
+
+Miscellaneous
+~~~~~~~~~~~~~
+- |commands| Add typing annotations to :class:`~ext.commands.HelpCommand` and related types. (:issue:`828`)
+- Add the first 25 characters of :attr:`Message.content` to the repr of ``Message``. (:issue:`884`)
+- Decrease the default :attr:`Guild.filesize_limit` from 25MB to 10MB. (:issue:`1272`)
+- Update internal package management tooling to latest versions, speed up CI by caching dependency metadata. (:issue:`1278`)
+- Remove bad example code snippet that can cause bugs using yt_dlp lib. (:issue:`1304`)
+- Bump ruff to 0.12.11. (:issue:`1326`)
+- Bump pytest and the rest of the test suite to the latest supported versions on Python 3.8. (:issue:`1327`)
+- Add more typing to most modules, increasing type completeness. (:issue:`1329`)
+- Migrate determining which packages to include in the built wheel and package from a static setup.py list to dynamic configured in pyproject.toml. (:issue:`1356`)
+- Rework the ``nox -s coverage`` session to allow providing arguments directly to coverage.py. (:issue:`1359`)
+
+
+.. _vp2p10p2:
+
+v2.10.2
+-------
+
+This is a maintenance release with several bugfixes.
+
+Bug Fixes
+~~~~~~~~~
+- Fix missing/faulty :class:`Subscription`\-related gateway events. (:issue:`1275`)
+- |commands| Fix extracting localization key for :meth:`~ext.commands.InvokableSlashCommand.sub_command_group`\s from docstring, to be more consistent with top-level slash commands and sub commands. (:issue:`1285`)
+- Improve checks for partial :class:`Guild`\s in guild-dependent attributes of channels and threads, which could previously raise errors with user-installed apps, as they don't always receive complete guild data. (:issue:`1287`)
+- |tasks| Correctly handle :meth:`Loop.change_interval <ext.tasks.Loop.change_interval>` when called from :meth:`~ext.tasks.Loop.before_loop` or through other means before initial loop run. (:issue:`1290`)
+- Avoid stripping port from voice websocket endpoints. (:issue:`1301`)
+- Properly support aiohttp 3.11 without deprecation warnings. (:issue:`1324`)
+
+Miscellaneous
+~~~~~~~~~~~~~
+- Decrease the default :attr:`Guild.filesize_limit` from 25MB to 10MB. (:issue:`1272`)
+- Remove bad example code snippet that can cause bugs using yt_dlp lib. (:issue:`1304`)
+
 
 .. _vp2p10p1:
 
@@ -188,7 +306,7 @@ Miscellaneous
 v2.9.3
 ------
 
-This is a maintainance release with several minor bugfixes.
+This is a maintenance release with several minor bugfixes.
 Notably, this includes support for a newer voice encryption mode;
 all modes supported in previous versions are scheduled to be :ddocs:`discontinued <change-log#voice-encryption-modes>` on 18th November 2024,
 and voice connections using the builtin :class:`VoiceClient` will fail to connect.
@@ -380,7 +498,7 @@ Miscellaneous
 v2.8.2
 ------
 
-This maintainence release contains backports from v2.9.0.
+This maintenance release contains backports from v2.9.0.
 
 Bug Fixes
 ~~~~~~~~~
@@ -572,7 +690,7 @@ Miscellaneous
 v2.6.3
 ------
 
-This maintainence release contains backports from v2.8.0.
+This maintenance release contains backports from v2.8.0.
 
 Bug Fixes
 ~~~~~~~~~
@@ -586,7 +704,7 @@ Bug Fixes
 v2.6.2
 ------
 
-This maintainence release contains backports from v2.7.0.
+This maintenance release contains backports from v2.7.0.
 
 Bug Fixes
 ~~~~~~~~~
@@ -599,7 +717,7 @@ Bug Fixes
 v2.6.1
 ------
 
-This maintainence release contains backports from v2.7.0.
+This maintenance release contains backports from v2.7.0.
 
 Bug Fixes
 ~~~~~~~~~
@@ -699,7 +817,7 @@ New Features
 - Add :attr:`.AllowedMentions.from_message` for constructing an allowed mentions object from a :class:`Message`. (:issue:`603`)
 - Add support of more operators to all ``Flag`` classes. This list includes :class:`Intents` and :class:`Permissions`. (:issue:`605`, :issue:`615`, :issue:`616`)
     - ``&``, ``|``, ``^``, and ``~`` bitwise operator support.
-    - ``<``, ``<=``, ``>``, and ``>=`` comparsion operator support.
+    - ``<``, ``<=``, ``>``, and ``>=`` comparison operator support.
     - Support ``|`` operators between flag instances and flag values.
     - Support ``~`` operator on flag values, which create a flag instance with all except this specific flag enabled.
     - Support ``|`` operators between flag values which create a flag instance with both flag values enabled.
@@ -786,7 +904,7 @@ Bug Fixes
 - Don't count initial message in forum threads towards :attr:`Thread.message_count` and :attr:`Thread.total_message_sent`. (:issue:`747`)
 - |commands| Handle :class:`.VoiceChannel` in :func:`commands.is_nsfw`. (:issue:`536`)
 - |commands| Handle ``Union[User, Member]`` annotations on slash commands arguments when using the decorator interface. (:issue:`584`)
-- |commands| Change :func:`has_permissions <ext.commands.has_permissions>` and :func:`bot_has_permissions <ext.commands.bot_has_permissions>` checks to work with interations in guilds that only added the ``applications.commands`` scope, and in DMs. (:issue:`673`)
+- |commands| Change :func:`has_permissions <ext.commands.has_permissions>` and :func:`bot_has_permissions <ext.commands.bot_has_permissions>` checks to work with interactions in guilds that only added the ``applications.commands`` scope, and in DMs. (:issue:`673`)
 - |commands| Fix edge case with parsing command annotations that contain a union of non-type objects, like ``Optional[Literal[1, 2, 3]]``. (:issue:`770`)
 
 Documentation
@@ -831,7 +949,7 @@ Miscellaneous
 - Add ``flake8`` as our linter. (:issue:`557`)
 - Update pyright to 1.1.254. (:issue:`559`)
 - Add generic parameters to user/message command decorators. (:issue:`563`)
-    - Update default parameter type to improve compatibilty with callable/dynamic defaults.
+    - Update default parameter type to improve compatibility with callable/dynamic defaults.
 - Run docs creation in GitHub actions to test for warnings before a pull is merged. (:issue:`564`)
 - Add more typing overrides to :class:`GuildCommandInteraction`. (:issue:`580`)
 - Rework internal typings for interaction payloads. (:issue:`588`)
@@ -843,7 +961,7 @@ Miscellaneous
 - Add flake8-comprehensions for catching inefficient comphrehensions. (:issue:`602`)
 - Resolve minor flake8 issues. (:issue:`606`)
     - Don't use star imports except in ``__init__.py`` files.
-    - Don't use ambigious variable names.
+    - Don't use ambiguous variable names.
     - Don't use setattr and getattr with constant variable names.
 - Add ``flake8-pytest-style`` for linting pytest specific features with flake8. (:issue:`608`)
 - Replace all :class:`TypeVar` instances with ``typing_extensions.Self`` across the entire library where possible. (:issue:`610`)
@@ -1080,7 +1198,7 @@ Bug Fixes
 - Update some types/parameters of roles, scheduled events and voice states (:issue:`407`)
 - Allow ``content`` parameters in send/edit methods to be positional (:issue:`411`)
 - Fix gateway ratelimiter being too strict (:issue:`413`)
-- Fix caching of stage instances andd scheduled events (:issue:`416`)
+- Fix caching of stage instances and scheduled events (:issue:`416`)
 - Fix memory leaks on shard reconnect (:issue:`424`, :issue:`425`)
 - Improve :class:`PartialMessageable` channel handling (:issue:`426`)
 - Use :func:`asyncio.iscoroutinefunction` instead of :func:`inspect.iscoroutinefunction` (:issue:`427`)
@@ -1145,7 +1263,7 @@ Bug Fixes
 - Update some types/parameters of roles, scheduled events and voice states (:issue:`407`)
 - Allow ``content`` parameters in send/edit methods to be positional (:issue:`411`)
 - Fix gateway ratelimiter being too strict (:issue:`413`)
-- Fix caching of stage instances andd scheduled events (:issue:`416`)
+- Fix caching of stage instances and scheduled events (:issue:`416`)
 - Fix memory leaks on shard reconnect (:issue:`424`, :issue:`425`)
 - Improve :class:`PartialMessageable` channel handling (:issue:`426`)
 - Fix :func:`~PartialEmoji.read` for activity emojis (:issue:`430`)
@@ -1635,7 +1753,7 @@ New Features
 - Add :attr:`Client.global_user_commands`
 - Add :attr:`Client.global_message_commands`
 - |commands| Support for slash commands and context menus.
-- |commands| Add :class:`InvokableApplicationCommand <ext.commands.InvokableApplicationCommand>` - the base class for invokable slash commands and context menus.
+- |commands| Add :class:`InvokableApplicationCommand <ext.commands.InvokableApplicationCommand>` - the base class for invocable slash commands and context menus.
 - |commands| Add :class:`InvokableSlashCommand <ext.commands.InvokableSlashCommand>` for slash command management.
 - |commands| Add :class:`SubCommand <ext.commands.SubCommand>` for slash sub-command management.
 - |commands| Add :class:`SubCommandGroup <ext.commands.SubCommandGroup>` for slash sub-command group management.
