@@ -704,6 +704,7 @@ class AudioPlayer(threading.Thread):
         self,
         source: AudioSource,
         client: VoiceClient,
+        # see KeepAliveHandler's reasoning for sharing the loop
         loop: asyncio.AbstractEventLoop,
         *,
         after=None,

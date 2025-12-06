@@ -165,6 +165,11 @@ class KeepAliveHandler(threading.Thread):
         *args: Any,
         ws: HeartbeatWebSocket,
         interval: float,
+        # this loop sharing is necessary because KeepAliveHandler calls HeartbeatWebSocket's
+        # async methods and you can't run tasks made using one loop in another
+        # ("task attached to a different loop"), so the KeepAliveHandler's thread has to
+        # have access to main (this) thread's asyncio loop, and the only way for it to
+        # access said loop is to directly pass it as an object
         loop: asyncio.AbstractEventLoop,
         shard_id: int | None = None,
         **kwargs: Any,
@@ -587,7 +592,7 @@ class DiscordWebSocket:
                     ws=self,
                     interval=interval,
                     shard_id=self.shard_id,
-                    loop=asyncio.get_running_loop(),  # share loop to the thread
+                    loop=asyncio.get_running_loop(),
                 )
                 self._keep_alive.name = "disnake heartbeat thread"
                 # send a heartbeat immediately
