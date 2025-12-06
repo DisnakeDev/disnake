@@ -1,1 +1,1 @@
-Removed ``loop`` and ``asyncio_debug`` parameters from :class:`Client`.
+Removed the ``loop`` and ``asyncio_debug`` parameters from :class:`Client`.
