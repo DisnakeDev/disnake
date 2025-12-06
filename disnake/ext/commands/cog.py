@@ -468,8 +468,8 @@ class Cog(metaclass=CogMeta):
 
         .. versionchanged:: 3.0
             This is now ``await``\ed directly instead of being scheduled as a task.
-
-            This is now run when the cog has fully finished loading.
+            This means that this is also now guaranteed to run after the cog has
+            fully finished loading.
         """
         pass
 

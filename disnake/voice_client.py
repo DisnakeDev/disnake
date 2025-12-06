@@ -189,6 +189,9 @@ class VoiceClient(VoiceProtocol):
         The endpoint we are connecting to.
     channel: :class:`abc.Connectable`
         The voice channel connected to.
+
+    .. versionremoved:: 3.0
+        ``VoiceClient.loop`` has been removed.
     """
 
     endpoint_ip: str

@@ -728,6 +728,9 @@ def loop(
     r"""A decorator that schedules a task in the background for you with
     optional reconnect logic. The decorator returns a :class:`Loop`.
 
+    .. versionchanged:: 3.0
+        The ``loop`` parameter has been removed. Change the loop using :py:func:`asyncio.set_event_loop`.
+
     Parameters
     ----------
     cls: :class:`~collections.abc.Callable`\[..., :class:`Loop`]

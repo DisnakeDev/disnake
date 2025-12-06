@@ -298,6 +298,7 @@ class CommonBotBase(Generic[CogT]):
             pass
         else:
             try:
+                # use partial to avoid accidental blocking
                 await disnake.utils.maybe_coroutine(partial(func, self))
             except Exception as error:
                 error.__suppress_context__ = True
@@ -328,6 +329,7 @@ class CommonBotBase(Generic[CogT]):
             raise errors.NoEntryPointError(key) from None
 
         try:
+            # use partial to avoid accidental blocking
             await disnake.utils.maybe_coroutine(partial(setup, self))
         except Exception as e:
             del sys.modules[key]

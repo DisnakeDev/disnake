@@ -42,9 +42,8 @@ def test_event(client_or_bot: disnake.Client) -> None:
 # Client.wait_for
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize("event", ["thread_create", Event.thread_create])
-async def test_wait_for(client_or_bot: disnake.Client, event) -> None:
+def test_wait_for(client_or_bot: disnake.Client, event) -> None:
     coro = client_or_bot.wait_for(event)
     assert len(client_or_bot._listeners["thread_create"]) == 1
     coro.close()  # close coroutine to avoid warning

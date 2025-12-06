@@ -198,6 +198,9 @@ class Client:
 
     A number of options can be passed to the :class:`Client`.
 
+    .. versionchanged:: 3.0
+        The ``asyncio_debug`` parameter has been removed. Use :meth:`asyncio.loop.set_debug` directly.
+
     Parameters
     ----------
     max_messages: :class:`int` | :data:`None`
@@ -999,7 +1002,7 @@ class Client:
     async def setup_hook(self) -> None:
         """A hook that allows you to perform asynchronous setup like
         initiating database connections or loading cogs/extensions after
-        the bot is logged in but before it has connected to the websocket.
+        the bot has logged in but before it has connected to the websocket.
 
         This is only called once, in :meth:`.login`, before any events are
         dispatched, making it a better solution than doing such setup in
@@ -1251,14 +1254,10 @@ class Client:
         TypeError
             An unexpected keyword argument was received.
         """
-        try:
-            await self.login(token)
-            await self.connect(
-                reconnect=reconnect, ignore_session_start_limit=ignore_session_start_limit
-            )
-        finally:
-            if not self.is_closed():
-                await self.close()
+        await self.login(token)
+        await self.connect(
+            reconnect=reconnect, ignore_session_start_limit=ignore_session_start_limit
+        )
 
     def run(self, *args: Any, **kwargs: Any) -> None:
         """A blocking call that abstracts away the event loop
@@ -1277,13 +1276,12 @@ class Client:
 
         .. warning::
 
-            This function must be the last function to call due to the fact that it
-            is blocking. That means that registration of events or anything being
-            called after this function call will not execute until it returns.
+            This function should be the last function to be called because it is blocking.
+            That means that registration of commands, events or any code after this function
+            call will not execute until it returns.
 
         .. versionchanged:: 3.0
-            Changed to use :func:`asyncio.run`, instead of custom logic.
-            called after this function call will not execute until it returns
+            Changed to use :func:`asyncio.run` instead of custom logic.
         """
         try:
             asyncio.run(self.start(*args, **kwargs))
