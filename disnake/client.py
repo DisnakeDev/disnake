@@ -1722,6 +1722,9 @@ class Client:
 
         This function returns the **first event that meets the requirements**.
 
+        .. important::
+            Requires an :mod:`asyncio` loop to be running.
+
         Examples
         --------
         Waiting for a user reply: ::
@@ -1785,6 +1788,8 @@ class Client:
 
         Raises
         ------
+        RuntimeError
+            No running ``asyncio`` loop.
         asyncio.TimeoutError
             If a timeout is provided and it was reached.
 
