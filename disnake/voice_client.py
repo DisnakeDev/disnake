@@ -172,6 +172,9 @@ class VoiceClient(VoiceProtocol):
     You do not create these, you typically get them from
     e.g. :meth:`VoiceChannel.connect`.
 
+    .. versionchanged:: 3.0
+        ``VoiceClient.loop`` has been removed.
+
     Warning
     -------
     In order to use PCM based AudioSources, you must have the opus library
@@ -189,9 +192,6 @@ class VoiceClient(VoiceProtocol):
         The endpoint we are connecting to.
     channel: :class:`abc.Connectable`
         The voice channel connected to.
-
-    .. versionremoved:: 3.0
-        ``VoiceClient.loop`` has been removed.
     """
 
     endpoint_ip: str
