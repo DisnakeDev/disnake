@@ -758,7 +758,9 @@ class ColourConverter(Converter[disnake.Colour]):
         result = method()
 
         if not isinstance(result, disnake.Color):
-            error_msg = f"The colour method '{argument}' returned an invalid type: {type(result).__name__}"
+            error_msg = (
+                f"The colour method '{argument}' returned an invalid type: {type(result).__name__}"
+            )
             raise BadColourArgument(error_msg)
 
         return result
