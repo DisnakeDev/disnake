@@ -14,7 +14,6 @@ import zlib
 from collections import deque
 from typing import (
     TYPE_CHECKING,
-    AbstractSet,
     Any,
     Final,
     Literal,
@@ -32,7 +31,7 @@ from .enums import SpeakingState
 from .errors import ConnectionClosed
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
+    from collections.abc import Callable, Set
 
     from typing_extensions import Self
 
@@ -1254,13 +1253,13 @@ class DaveState:
             "",  # auth_session_id, same thing
             lambda source, reason: _log.error("MLS failure: %s - %s", source, reason),
         )
-        self._encryptor: Optional[dave.Encryptor] = None
+        self._encryptor: dave.Encryptor | None = None
 
     @property
     def _self_id(self) -> int:
         return self.vc.user.id
 
-    def _get_recognized_users(self, *, with_self: bool) -> AbstractSet[int]:
+    def _get_recognized_users(self, *, with_self: bool) -> Set[int]:
         if with_self:
             return self._recognized_users | {self._self_id}
         return self._recognized_users
