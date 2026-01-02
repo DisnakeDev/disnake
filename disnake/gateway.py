@@ -1321,6 +1321,17 @@ class DaveState:
         d = await self._session.get_pairwise_fingerprint(0, str(user_id))
         return dave.generate_displayable_code(d, 45, 5)
 
+    # TODO: documentation
+    def can_encrypt(self) -> bool:
+        return bool(self._encryptor and self._encryptor.has_key_ratchet())
+
+    # TODO: documentation
+    def encrypt(self, data: bytes) -> bytes | None:
+        if not self._encryptor:
+            msg = "Cannot encrypt audio frame, encryptor is not initialized"
+            raise RuntimeError(msg)
+        return self._encryptor.encrypt(dave.MediaType.audio, self.vc.ssrc, data)
+
     def handle_mls_external_sender(self, data: bytes) -> None:
         _log.debug("received MLS external sender")
         self._session.set_external_sender(data)

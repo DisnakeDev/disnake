@@ -24,8 +24,6 @@ import struct
 import threading
 from typing import TYPE_CHECKING, Any
 
-import dave
-
 from . import opus, utils
 from .backoff import ExponentialBackoff
 from .errors import ClientException, ConnectionClosed
@@ -530,13 +528,15 @@ class VoiceClient(VoiceProtocol):
     # audio related
 
     def _get_voice_packet(self, data: bytes) -> bytes:
-        # TODO: very temporary test setup
-        if self.ws and (encryptor := self.dave._encryptor) and encryptor.has_key_ratchet():
-            e2ee_data = encryptor.encrypt(dave.MediaType.audio, self.ssrc, data)
-            if e2ee_data is not None:
-                data = e2ee_data
-            else:
-                _log.error("failed to encrypt frame data")
+        if self.dave.can_encrypt():
+            frame = self.dave.encrypt(data)
+            if frame is None:
+                # There isn't really a way to recover from this, so just raise at this point
+                msg = "Failed to encrypt voice packet for DAVE"
+                raise RuntimeError(msg)
+        else:
+            # non-e2ee voice connections
+            frame = data
 
         header = bytearray(12)
 
@@ -548,7 +548,7 @@ class VoiceClient(VoiceProtocol):
         struct.pack_into(">I", header, 8, self.ssrc)
 
         encrypt_packet = getattr(self, f"_encrypt_{self.mode}")
-        return encrypt_packet(header, data)
+        return encrypt_packet(header, frame)
 
     def _get_nonce(self, pad: int) -> tuple[bytes, bytes]:
         # returns (nonce, padded_nonce).
