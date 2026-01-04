@@ -1249,9 +1249,7 @@ class DaveState:
 
         self.vc: VoiceClient = vc
         self._session: dave.Session = dave.Session(
-            "",  # `context`, unused without persistent keys
-            "",  # auth_session_id, same thing
-            lambda source, reason: _log.error("MLS failure: %s - %s", source, reason),
+            lambda source, reason: _log.error("MLS failure: %s - %s", source, reason)
         )
         self._encryptor: dave.Encryptor | None = None
 
