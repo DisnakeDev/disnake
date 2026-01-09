@@ -1266,7 +1266,7 @@ class DaveState:
         if user_id != self._self_id:
             return  # decryption is not implemented, ignore
 
-        if version != dave.k_disabled_version:
+        if self._session.has_established_group():
             ratchet = self._session.get_key_ratchet(str(user_id))
         else:
             ratchet = None
@@ -1307,23 +1307,26 @@ class DaveState:
         self._recognized_users.discard(user_id)
 
     # TODO: should be publicly accessible/documented on VoiceClient
-    # FIXME: don't print and raise error if called before MLS group is established
     @property
-    def voice_privacy_code(self) -> str:
+    def voice_privacy_code(self) -> str | None:
+        if not self._session.has_established_group():
+            return None
+
         authenticator = self._session.get_last_epoch_authenticator()
         return dave.generate_displayable_code(authenticator, 30, 5)
 
     # TODO: see voice_privacy_code
-    async def get_user_verification_code(self, user_id: int) -> str:
+    async def get_user_verification_code(self, user_id: int) -> str | None:
+        if not self._session.has_established_group():
+            return None
+
         # version is currently always 0
         d = await self._session.get_pairwise_fingerprint(0, str(user_id))
         return dave.generate_displayable_code(d, 45, 5)
 
-    # TODO: documentation
     def can_encrypt(self) -> bool:
         return bool(self._encryptor and self._encryptor.has_key_ratchet())
 
-    # TODO: documentation
     def encrypt(self, data: bytes) -> bytes | None:
         if not self._encryptor:
             msg = "Cannot encrypt audio frame, encryptor is not initialized"
@@ -1412,9 +1415,6 @@ class DaveState:
         self._prepared_transitions[transition_id] = version
         if transition_id == self.INIT_TRANSITION_ID:
             # "Upon receiving dave_protocol_prepare_transition opcode (21) with transition_id = 0, the client immediately executes the transition."
-            # TODO: consider whether resetting the session for version = 0 is correct here,
-            #       or if we should *only* clear the ratchet without resetting
-            #       (see also https://daveprotocol.com/#sole-member-reset third paragraph)
             self.execute_transition(transition_id)
         else:
             _log.debug("sending ready for transition ID %d", transition_id)
