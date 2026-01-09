@@ -1129,7 +1129,8 @@ class DiscordVoiceWebSocket:
 
     async def received_message_binary(self, msg: bytes) -> None:
         _log.debug("Voice websocket frame (binary) received: %s", msg.hex())
-        if len(msg) == 0:
+        if len(msg) < 3:
+            _log.error("Voice websocket received invalid frame (length %d)", len(msg))
             return  # this should not happen.
 
         self.sequence = int.from_bytes(msg[0:2], "big", signed=False)
