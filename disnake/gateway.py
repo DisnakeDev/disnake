@@ -1247,6 +1247,7 @@ class DaveState:
 
         self._prepared_transitions: dict[int, int] = {}
         self._recognized_users: set[int] = set()
+        self._transient_keys: dict[int, dave.SignatureKeyPair] = {}
 
         self.vc: VoiceClient = vc
         self._session: dave.Session = dave.Session(
@@ -1278,6 +1279,11 @@ class DaveState:
             _log.error("attempted to set new ratchet without encryptor")
             return
         self._encryptor.set_key_ratchet(ratchet)
+
+    def _get_transient_key(self, version: int) -> dave.SignatureKeyPair:
+        if (key := self._transient_keys.get(version)) is None:
+            self._transient_keys[version] = key = dave.SignatureKeyPair.generate(version)
+        return key
 
     async def reinit_state(self, version: int) -> None:
         if version > self.max_version:
@@ -1397,8 +1403,7 @@ class DaveState:
                 version,
                 self.vc.channel.id,
                 str(self._self_id),
-                # XXX: retain key between resets?
-                None,
+                self._get_transient_key(version),
             )
 
             # "The client must send a new key package after any of the following events:
