@@ -487,6 +487,10 @@ class VoiceClient(VoiceProtocol):
                     # at this point we've retried 5 times... let's continue the loop.
                     _log.warning("Could not connect to voice... Retrying...")
                     continue
+            except Exception:
+                _log.exception("Error occurred while polling voice websocket:")
+                # at this point we can't do much else, just re-raise the exception into the aether
+                raise
 
     async def disconnect(self, *, force: bool = False) -> None:
         """|coro|

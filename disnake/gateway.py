@@ -1208,12 +1208,7 @@ class DiscordVoiceWebSocket:
         if msg.type is aiohttp.WSMsgType.TEXT:
             await self.received_message(utils._from_json(msg.data))
         elif msg.type is aiohttp.WSMsgType.BINARY:
-            # TODO: improve exception handling, this obviously isn't a good solution
-            try:
-                await self.received_message_binary(msg.data)
-            except Exception:
-                _log.exception("Failed to process binary voice websocket frame:")
-                raise
+            await self.received_message_binary(msg.data)
         elif msg.type is aiohttp.WSMsgType.ERROR:
             _log.debug("Received %s", msg)
             raise ConnectionClosed(self.ws, shard_id=None, voice=True) from msg.data
