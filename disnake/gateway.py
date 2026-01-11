@@ -1135,7 +1135,6 @@ class DiscordVoiceWebSocket:
 
         self.sequence = int.from_bytes(msg[0:2], "big", signed=False)
         op = msg[2]
-        # TODO: consider memoryviews
         if op == self.DAVE_MLS_EXTERNAL_SENDER:
             self._connection.dave.handle_mls_external_sender(msg[3:])
         elif op == self.DAVE_MLS_PROPOSALS:
@@ -1292,9 +1291,7 @@ class DaveState:
 
         if version > dave.k_disabled_version:
             await self.prepare_epoch(self.NEW_MLS_GROUP_EPOCH, version)
-            # TODO: consider race conditions if encryptor is set up too late here
             self._encryptor = dave.Encryptor()
-            # FIXME: move this somewhere else(?)
             self._encryptor.assign_ssrc_to_codec(self.vc.ssrc, dave.Codec.opus)
             _log.debug("created new encryptor")
         else:
