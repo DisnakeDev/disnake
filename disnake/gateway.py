@@ -31,7 +31,7 @@ from .enums import SpeakingState
 from .errors import ConnectionClosed
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Set
+    from collections.abc import Callable
 
     from typing_extensions import Self
 
@@ -1245,24 +1245,25 @@ class DaveState:
             self.MAX_SUPPORTED_VERSION, dave.get_max_supported_protocol_version()
         )
 
-        self._prepared_transitions: dict[int, int] = {}
-        self._recognized_users: set[int] = set()
-        self._transient_keys: dict[int, dave.SignatureKeyPair] = {}
-
         self.vc: VoiceClient = vc
         self._session: dave.Session = dave.Session(
             lambda source, reason: _log.error("MLS failure: %s - %s", source, reason)
         )
         self._encryptor: dave.Encryptor | None = None
 
+        # we should always recognize ourselves (...cue existential crisis?)
+        self._recognized_users: set[int] = {self._self_id}
+        """Set of user IDs expected to be in media session"""
+
+        self._prepared_transitions: dict[int, int] = {}
+        """{transition_id: protocol_version}"""
+
+        self._transient_keys: dict[int, dave.SignatureKeyPair] = {}
+        """{protocol_version: keypair}"""
+
     @property
     def _self_id(self) -> int:
         return self.vc.user.id
-
-    def _get_recognized_users(self, *, with_self: bool) -> Set[int]:
-        if with_self:
-            return self._recognized_users | {self._self_id}
-        return self._recognized_users
 
     def _setup_ratchet_for_user(self, user_id: int, version: int) -> None:
         if user_id != self._self_id:
@@ -1306,11 +1307,11 @@ class DaveState:
             await self.prepare_transition(self.INIT_TRANSITION_ID, dave.k_disabled_version)
 
     def add_recognized_user(self, user_id: int) -> None:
-        if user_id == self._self_id:
-            return  # in case the gateway ever messes up, ignore CLIENTS_CONNECT for our own user
         self._recognized_users.add(user_id)
 
     def remove_recognized_user(self, user_id: int) -> None:
+        if user_id == self._self_id:
+            return  # in case the gateway ever messes up, ignore CLIENT_DISCONNECT for our own user
         self._recognized_users.discard(user_id)
 
     # TODO: should be publicly accessible/documented on VoiceClient
@@ -1347,8 +1348,7 @@ class DaveState:
     async def handle_mls_proposals(self, data: bytes) -> None:
         commit_welcome = self._session.process_proposals(
             data,
-            # TODO: improve type casting, or store IDs as strings?
-            {str(u) for u in self._get_recognized_users(with_self=True)},
+            {str(u) for u in self._recognized_users},
         )
         if commit_welcome is not None:
             _log.debug("sending commit + welcome message")
@@ -1377,7 +1377,7 @@ class DaveState:
         _log.debug("received welcome, transition ID %d", transition_id)
         roster = self._session.process_welcome(
             data,
-            {str(u) for u in self._get_recognized_users(with_self=True)},
+            {str(u) for u in self._recognized_users},
         )
 
         if roster is None:
