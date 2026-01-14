@@ -1231,8 +1231,9 @@ class DaveState:
     # this implementation currently only supports DAVE v1, even if the native component may be newer
     MAX_SUPPORTED_VERSION: Final[int] = 1
 
-    NEW_MLS_GROUP_EPOCH: Final[Literal[1]] = 1
+    DISABLED_VERSION: Final[Literal[0]] = 0
     INIT_TRANSITION_ID: Final[Literal[0]] = 0
+    NEW_MLS_GROUP_EPOCH: Final[Literal[1]] = 1
 
     def __init__(self, vc: VoiceClient) -> None:
         self.max_version: Final[int] = min(
@@ -1289,14 +1290,14 @@ class DaveState:
 
         _log.debug("re-initializing with DAVE version %d", version)
 
-        if version > dave.k_disabled_version:
+        if version > self.DISABLED_VERSION:
             await self.prepare_epoch(self.NEW_MLS_GROUP_EPOCH, version)
             self._encryptor = dave.Encryptor()
             self._encryptor.assign_ssrc_to_codec(self.vc.ssrc, dave.Codec.opus)
             _log.debug("created new encryptor")
         else:
             # `INIT_TRANSITION_ID` is executed immediately, no need to `.execute_transition()` here
-            await self.prepare_transition(self.INIT_TRANSITION_ID, dave.k_disabled_version)
+            await self.prepare_transition(self.INIT_TRANSITION_ID, self.DISABLED_VERSION)
 
     def add_recognized_user(self, user_id: int) -> None:
         self._recognized_users.add(user_id)
@@ -1428,7 +1429,7 @@ class DaveState:
         _log.debug("executing transition ID %d to version %d", transition_id, version)
 
         # https://daveprotocol.com/#downgrade-to-transport-only-encryption
-        if version == dave.k_disabled_version:
+        if version == self.DISABLED_VERSION:
             self._session.reset()
 
         self._setup_ratchet_for_user(self._self_id, version)
