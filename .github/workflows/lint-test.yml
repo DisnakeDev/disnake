@@ -56,7 +56,7 @@ jobs:
           use-cached-uv-lock: 'false' # we don't need the lock here, we will automatically download it below
 
       - name: Restore uv lock
-        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        uses: actions/cache/restore@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
         id: cache-uv-lock
         with:
           key: uv-lock-resolved-${{ env.UV_RESOLUTION }}
@@ -79,7 +79,7 @@ jobs:
           UV_LOCKED: 0
         run: uv lock --refresh
 
-      - uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+      - uses: actions/cache/save@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
         if: steps.lock-uv-deps.outcome == 'success'
         name: upload-uv-lock
         with:
@@ -131,7 +131,7 @@ jobs:
           persist-credentials: false
 
       - name: Cache pip cache
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
         with:
           key: ${{ runner.os }}-prek-pip-${{ hashFiles('**/pyproject.toml') }}
           path: ~/.cache/pip
@@ -139,7 +139,7 @@ jobs:
 
       - name: Run prek
         id: prek
-        uses: j178/prek-action@91fd7d7cf70ae1dee9f4f44e7dfa5d1073fe6623 # v1.0.11
+        uses: j178/prek-action@9d6a3097e0c1865ecce00cfb89fe80f2ee91b547 # v1.0.12
         # given the interoperability and the nature of prek, we stay unpinned for now
         # note that this action by default uses the latest version of prek
         # this is exactly how the pre-commit action worked, and we never had any issues
