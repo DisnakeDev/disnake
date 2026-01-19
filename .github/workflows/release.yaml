@@ -46,7 +46,7 @@ jobs:
           echo -e "\n</details>\n" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload artifact
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: dist
           path: dist/
@@ -66,7 +66,7 @@ jobs:
 
     steps:
       - name: Download build artifact
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: dist
           path: dist/
@@ -108,7 +108,7 @@ jobs:
 
     steps:
       - name: Download build artifact
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: dist
           path: dist/
@@ -148,7 +148,7 @@ jobs:
 
     steps:
       - name: Download build artifact
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: dist
           path: dist/
@@ -200,7 +200,7 @@ jobs:
           echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
 
       - name: Create pull request
-        uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676  # v7.0.11
+        uses: peter-evans/create-pull-request@98357b18bf14b5342f975ff684046ec3b2a07725  # v8.0.0
         with:
           token: ${{ steps.generate_token.outputs.token }}
           branch: auto/dev-v${{ steps.update-version.outputs.new_version }}
