@@ -5,13 +5,15 @@ from __future__ import annotations
 import os
 from typing import TYPE_CHECKING, ClassVar
 
-from ..components import CheckboxGroup as CheckboxGroupComponent, GroupOption
+from ..components import CheckboxGroup as CheckboxGroupComponent, GroupOption, _parse_group_options
 from ..enums import ComponentType
 from ..utils import MISSING
 from .item import UIComponent
 
 if TYPE_CHECKING:
     from typing_extensions import Self
+
+    from ..components import GroupOptionInput
 
 __all__ = ("CheckboxGroup",)
 
@@ -29,7 +31,9 @@ class CheckboxGroup(UIComponent):
         The ID of the checkbox group that gets received during an interaction.
         If not given then one is generated for you.
     options: :class:`list`\[:class:`.GroupOption`]
-        A list of options that can be selected in this group (1-10).
+        A list of options that can be selected in this group (1-10). Use explicit :class:`.GroupOption`\s
+        for fine-grained control over the options. Alternatively, a list of strings will be treated
+        as a list of labels, and a dict will be treated as a mapping of labels to values.
     min_values: :class:`int`
         The minimum number of options that must be selected in this group.
         Defaults to 1 and must be between 0 and 10.
@@ -58,8 +62,7 @@ class CheckboxGroup(UIComponent):
 
     def __init__(
         self,
-        # TODO: allow list or dict, similar to StringSelect
-        options: list[GroupOption],
+        options: GroupOptionInput,
         *,
         custom_id: str = MISSING,
         min_values: int = 1,
@@ -72,7 +75,7 @@ class CheckboxGroup(UIComponent):
             type=ComponentType.checkbox_group,
             id=id,
             custom_id=custom_id,
-            options=options,
+            options=_parse_group_options(options),
             min_values=min_values,
             max_values=max_values if max_values is not MISSING else len(options),
             required=required,

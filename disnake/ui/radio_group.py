@@ -5,13 +5,15 @@ from __future__ import annotations
 import os
 from typing import TYPE_CHECKING, ClassVar
 
-from ..components import GroupOption, RadioGroup as RadioGroupComponent
+from ..components import GroupOption, RadioGroup as RadioGroupComponent, _parse_group_options
 from ..enums import ComponentType
 from ..utils import MISSING
 from .item import UIComponent
 
 if TYPE_CHECKING:
     from typing_extensions import Self
+
+    from ..components import GroupOptionInput
 
 __all__ = ("RadioGroup",)
 
@@ -26,8 +28,10 @@ class RadioGroup(UIComponent):
     custom_id: :class:`str`
         The ID of the radio group that gets received during an interaction.
         If not given then one is generated for you.
-    options: :class:`list`\[:class:`.GroupOption`]
-        A list of options that can be selected in this group (2-10).
+    options: :class:`list`\[:class:`.GroupOption`] | :class:`list`\[:class:`str`] | :class:`dict`\[:class:`str`, :class:`str`]
+        A list of options that can be selected in this group (2-10). Use explicit :class:`.GroupOption`\s
+        for fine-grained control over the options. Alternatively, a list of strings will be treated
+        as a list of labels, and a dict will be treated as a mapping of labels to values.
     required: :class:`bool`
         Whether the radio group is required.
         Defaults to ``True``.
@@ -44,8 +48,7 @@ class RadioGroup(UIComponent):
 
     def __init__(
         self,
-        # TODO: allow list or dict, similar to StringSelect
-        options: list[GroupOption],
+        options: GroupOptionInput,
         *,
         custom_id: str = MISSING,
         required: bool = True,
@@ -56,7 +59,7 @@ class RadioGroup(UIComponent):
             type=ComponentType.radio_group,
             id=id,
             custom_id=custom_id,
-            options=options,
+            options=_parse_group_options(options),
             required=required,
         )
 

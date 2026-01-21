@@ -1666,7 +1666,6 @@ class GroupOption:
         "default",
     )
 
-    # TODO: revisit kwarg-only
     def __init__(
         self,
         *,
@@ -1706,6 +1705,16 @@ class GroupOption:
             f"<GroupOption label={self.label!r} value={self.value!r} "
             f"description={self.description!r} default={self.default!r}>"
         )
+
+
+GroupOptionInput: TypeAlias = list[GroupOption] | list[str] | dict[str, str]
+
+
+def _parse_group_options(options: GroupOptionInput) -> list[GroupOption]:
+    if isinstance(options, dict):
+        return [GroupOption(label=key, value=val) for key, val in options.items()]
+
+    return [opt if isinstance(opt, GroupOption) else GroupOption(label=opt) for opt in options]
 
 
 class RadioGroup(Component):
