@@ -1795,9 +1795,10 @@ class CheckboxGroup(Component):
     min_values: :class:`int`
         The minimum number of options that must be selected in this group.
         Defaults to 1 and must be between 0 and 10.
-    max_values: :class:`int`
+    max_values: :class:`int` | :data:`None`
         The maximum number of options that must be selected in this group.
-        Defaults to the total number of options and must be between 1 and 10.
+        Must be between 1 and 10. If set to :data:`None` (the default),
+        all options can be selected.
     required: :class:`bool`
         Whether selecting an option in this checkbox group is required.
         Defaults to ``True``.
@@ -1827,19 +1828,23 @@ class CheckboxGroup(Component):
             GroupOption.from_dict(option) for option in data.get("options", [])
         ]
         self.min_values: int = data.get("min_values", 1)
-        self.max_values: int = data.get("max_values", len(self.options))
+        self.max_values: int | None = data.get("max_values")
         self.required: bool = data.get("required", True)
 
     def to_dict(self) -> CheckboxGroupComponentPayload:
-        return {
+        payload: CheckboxGroupComponentPayload = {
             "type": self.type.value,
             "id": self.id,
             "custom_id": self.custom_id,
             "options": [op.to_dict() for op in self.options],
             "min_values": self.min_values,
-            "max_values": self.max_values,
             "required": self.required,
         }
+
+        if self.max_values is not None:
+            payload["max_values"] = self.max_values
+
+        return payload
 
 
 class Checkbox(Component):

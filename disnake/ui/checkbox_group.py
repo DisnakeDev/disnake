@@ -40,7 +40,6 @@ class CheckboxGroup(UIComponent):
     max_values: :class:`int`
         The maximum number of options that must be selected in this group.
         Defaults to the total number of options and must be between 1 and 10.
-        TODO: revisit max_values default, this is set at instantiation which may be confusing
     required: :class:`bool`
         Whether the checkbox group is required.
         Defaults to ``True``.
@@ -66,7 +65,7 @@ class CheckboxGroup(UIComponent):
         *,
         custom_id: str = MISSING,
         min_values: int = 1,
-        max_values: int = MISSING,
+        max_values: int | None = None,
         required: bool = True,
         id: int = 0,
     ) -> None:
@@ -116,13 +115,15 @@ class CheckboxGroup(UIComponent):
         self._underlying.min_values = int(value)
 
     @property
-    def max_values(self) -> int:
-        """:class:`int`: The maximum number of options that must be selected in this group."""
+    def max_values(self) -> int | None:
+        """:class:`int`: The maximum number of options that must be selected in this group.
+        If set to :data:`None`, all options can be selected.
+        """
         return self._underlying.max_values
 
     @max_values.setter
-    def max_values(self, value: int) -> None:
-        self._underlying.max_values = int(value)
+    def max_values(self, value: int | None) -> None:
+        self._underlying.max_values = int(value) if value is not None else None
 
     @property
     def required(self) -> bool:
