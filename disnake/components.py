@@ -1724,8 +1724,7 @@ class RadioGroup(Component):
     custom_id: :class:`str`
         The ID of the radio group that gets received during an interaction.
     options: :class:`list`\[:class:`GroupOption`]
-        A list of options that can be selected in this group.
-        This can contain up to 10 options, but must have at least 2.
+        A list of options that can be selected in this group (2-10).
     required: :class:`bool`
         Whether selecting an option in this radio group is required.
         Defaults to ``True``.
@@ -1781,7 +1780,7 @@ class CheckboxGroup(Component):
     custom_id: :class:`str`
         The ID of the checkbox group that gets received during an interaction.
     options: :class:`list`\[:class:`GroupOption`]
-        A list of options that can be selected in this group.
+        A list of options that can be selected in this group (1-10).
     min_values: :class:`int`
         The minimum number of options that must be selected in this group.
         Defaults to 1 and must be between 0 and 10.
