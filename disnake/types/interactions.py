@@ -268,6 +268,22 @@ class ModalInteractionFileUploadData(_BaseSnowflakeModalComponentInteractionData
     type: Literal[19]
 
 
+class ModalInteractionRadioGroupData(_BaseCustomIdComponentInteractionData):
+    type: Literal[21]
+    # if `RadioGroup.required = False` and the user didn't select anything, this will be missing
+    value: NotRequired[str]
+
+
+class ModalInteractionCheckboxGroupData(_BaseCustomIdComponentInteractionData):
+    type: Literal[22]
+    values: list[str]
+
+
+class ModalInteractionCheckboxData(_BaseCustomIdComponentInteractionData):
+    type: Literal[23]
+    value: bool
+
+
 # top-level modal component data
 
 ModalInteractionActionRowChildData: TypeAlias = ModalInteractionTextInputData
@@ -290,6 +306,9 @@ ModalInteractionLabelChildData: TypeAlias = (
     | ModalInteractionMentionableSelectData
     | ModalInteractionChannelSelectData
     | ModalInteractionFileUploadData
+    | ModalInteractionRadioGroupData
+    | ModalInteractionCheckboxGroupData
+    | ModalInteractionCheckboxData
 )
 
 

@@ -37,8 +37,8 @@ __all__ = ("ModalInteraction", "ModalInteractionData")
 
 T = TypeVar("T")
 
-# {custom_id: text_input_value | select_values | attachments}
-ResolvedValues = dict[str, str | Sequence[T]]
+# {custom_id: text_input_value | select_values | attachments | radio_values | checkbox_value}
+ResolvedValues = dict[str, str | bool | None | Sequence[T]]
 
 
 class ModalInteraction(Interaction[ClientT]):
@@ -187,51 +187,55 @@ class ModalInteraction(Interaction[ClientT]):
     ) -> ResolvedValues[str | T]:
         values: ResolvedValues[str | T] = {}
         for component in self.walk_raw_components():
-            if component["type"] == ComponentType.text_input.value:
-                value = component.get("value")
-            elif component["type"] == ComponentType.string_select.value:
-                value = component.get("values")
-            elif (
-                component["type"] in _SELECT_COMPONENT_TYPE_VALUES
-                or component["type"] == ComponentType.file_upload.value
-            ):
-                # auto-populated selects
-                component_type = ComponentType(component["type"])
-                value = [resolve(v, component_type) for v in component.get("values") or []]
-            else:
-                continue
+            match component["type"]:
+                case (
+                    ComponentType.text_input.value
+                    | ComponentType.radio_group.value
+                    | ComponentType.checkbox.value
+                ):
+                    value = component.get("value")
+                case ComponentType.string_select.value | ComponentType.checkbox_group.value:
+                    value = component.get("values")
+                case t if (
+                    t in _SELECT_COMPONENT_TYPE_VALUES or t == ComponentType.file_upload.value
+                ):
+                    # auto-populated selects or file upload
+                    component_type = ComponentType(component["type"])
+                    value = [resolve(v, component_type) for v in component.get("values") or []]
+                case _:
+                    continue
             values[component["custom_id"]] = value
         return values
 
     @cached_slot_property("_cs_values")
     def values(self) -> ResolvedValues[str]:
-        r""":class:`dict`\[:class:`str`, :class:`str` | :class:`~collections.abc.Sequence`\[:class:`str`]]: Returns all raw values the user has entered in the modal.
-        This is a dict of the form ``{custom_id: value}``.
+        r""":class:`dict`\[:class:`str`, :class:`str` | :class:`bool` | :data:`None` | :class:`~collections.abc.Sequence`\[:class:`str`]]: Returns all raw values the user has entered in the modal.
 
-        For select menus, the corresponding dict value is a list of the values the user has selected.
-        For select menus of type :attr:`~ComponentType.string_select`,
-        these are just the string values the user selected;
-        for other select menu types, these are the IDs of the selected entities.
-
-        See also :attr:`resolved_values`.
+        This is similar to :attr:`resolved_values`, except the values are not resolved to their
+        corresponding objects, and are instead plain snowflakes (i.e. the objects' IDs).
 
         .. versionadded:: 2.11
         """
         return self._resolve_values(lambda id, type: str(id))
 
+    # FIXME: this is currently quite the typing nightmare, should probably have some utility accessors for each component type
     @cached_slot_property("_cs_resolved_values")
     def resolved_values(
         self,
     ) -> ResolvedValues[str | Member | User | Role | AnyChannel | Attachment]:
-        r""":class:`dict`\[:class:`str`, :class:`str` | :class:`~collections.abc.Sequence`\[:class:`str` | :class:`Member` | :class:`User` | :class:`Role` | :class:`abc.GuildChannel` | :class:`Thread` | :class:`PartialMessageable` | :class:`Attachment`]]: The (resolved) values the user entered in the modal.
+        r""":class:`dict`\[:class:`str`, :class:`str` | :class:`bool` | :data:`None` | :class:`~collections.abc.Sequence`\[:class:`str` | :class:`Member` | :class:`User` | :class:`Role` | :class:`abc.GuildChannel` | :class:`Thread` | :class:`PartialMessageable` | :class:`Attachment`]]: The (resolved) values the user entered in the modal.
         This is a dict of the form ``{custom_id: value}``.
 
-        For select menus, the corresponding dict value is a list of the values the user has selected.
-        For select menus of type :attr:`~ComponentType.string_select`,
-        this is equivalent to :attr:`values`;
-        for other select menu types, these are full objects corresponding to the selected entities.
+        The value type depends on the component associated with that ``custom_id``:
 
-        For file uploads, the corresponding dict value is a list of files the user has uploaded.
+        - Select Menus: The list of the values the user has selected.
+          For select menus of type :attr:`~ComponentType.string_select`, this is equivalent to :attr:`values`;
+          for other select menu types, these are full objects corresponding to the selected entities.
+        - :class:`FileUpload`: The list of files the user has uploaded.
+        - :class:`RadioGroup`: The :attr:`value <GroupOption>` of the option the user selected,
+          or :data:`None` if the radio group wasn't required and the user didn't select any.
+        - :class:`CheckboxGroup`: The :attr:`value <GroupOption>`\s of the options the user selected.
+        - :class:`Checkbox`: ``True`` if the user selected the checkbox, ``False`` otherwise.
 
         .. versionadded:: 2.11
         """

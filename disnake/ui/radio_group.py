@@ -26,7 +26,7 @@ class RadioGroup(UIComponent):
     custom_id: :class:`str`
         The ID of the radio group that gets received during an interaction.
         If not given then one is generated for you.
-    options: :class:`list`\[:class:`GroupOption`]
+    options: :class:`list`\[:class:`.GroupOption`]
         A list of options that can be selected in this group (2-10).
     required: :class:`bool`
         Whether the radio group is required.
