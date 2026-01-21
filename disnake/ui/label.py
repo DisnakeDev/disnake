@@ -40,10 +40,14 @@ class Label(UIComponent):
         The label text.
     component: :class:`TextInput` | :class:`FileUpload` | :class:`BaseSelect` | :class:`RadioGroup` | :class:`CheckboxGroup` | :class:`Checkbox`
         The component within the label.
-        TODO: markdown list for better readability, probably.
-        Currently supports :class:`.ui.TextInput`, :class:`.ui.FileUpload`,
-        select menus (e.g. :class:`.ui.StringSelect`), :class:`RadioGroup`,
-        :class:`CheckboxGroup`, and :class:`Checkbox`.
+
+        Currently supports the following components:
+            - :class:`.ui.TextInput`
+            - :class:`.ui.FileUpload`
+            - select menus (e.g. :class:`.ui.StringSelect`)
+            - :class:`.ui.RadioGroup`
+            - :class:`.ui.CheckboxGroup`
+            - :class:`.ui.Checkbox`
     description: :class:`str` | :data:`None`
         The description text for the label.
     id: :class:`int`
