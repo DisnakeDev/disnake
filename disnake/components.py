@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -1639,7 +1640,6 @@ class FileUpload(Component):
 AnyGroupOptionPayload = Union["RadioGroupOptionPayload", "CheckboxGroupOptionPayload"]
 
 
-# TODO: reconsider whether these should only use this one common type or be split
 class GroupOption:
     """Represents an option inside a :class:`RadioGroup` or :class:`CheckboxGroup`.
 
@@ -1709,7 +1709,7 @@ class GroupOption:
         )
 
 
-GroupOptionInput: TypeAlias = list[GroupOption] | list[str] | dict[str, str]
+GroupOptionInput: TypeAlias = Sequence[GroupOption | str] | dict[str, str]
 
 
 def _parse_group_options(options: GroupOptionInput) -> list[GroupOption]:
