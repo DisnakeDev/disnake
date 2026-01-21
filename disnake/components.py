@@ -1648,15 +1648,17 @@ class GroupOption:
     Parameters
     ----------
     label: :class:`str`
-        TODO
+        The label of the option. This is displayed to users.
+        Can be up to 100 characters.
     value: :class:`str`
-        TODO
+        The value of the option. This is not displayed to users.
+        If not provided when constructed then it defaults to the
+        label. Can be up to 100 characters.
     description: :class:`str` | :data:`None`
         The options's description, if any.
     default: :class:`bool`
         Whether this option is selected by default.
         Defaults to ``False``.
-        TODO: should be nullable?
     """
 
     __slots__: tuple[str, ...] = (
