@@ -45,7 +45,7 @@ jobs:
     env:
       UV_RESOLUTION: highest
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
 
@@ -56,7 +56,7 @@ jobs:
           use-cached-uv-lock: 'false' # we don't need the lock here, we will automatically download it below
 
       - name: Restore uv lock
-        uses: actions/cache/restore@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
+        uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         id: cache-uv-lock
         with:
           key: uv-lock-resolved-${{ env.UV_RESOLUTION }}
@@ -79,7 +79,7 @@ jobs:
           UV_LOCKED: 0
         run: uv lock --refresh
 
-      - uses: actions/cache/save@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
+      - uses: actions/cache/save@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         if: steps.lock-uv-deps.outcome == 'success'
         name: upload-uv-lock
         with:
@@ -100,7 +100,7 @@ jobs:
       pyright-sessions: ${{ steps.set-matrix.outputs.pyright-sessions }}
       test-sessions: ${{ steps.set-matrix.outputs.test-sessions }}
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
       - name: Set up environment
@@ -126,12 +126,12 @@ jobs:
       RUFF_OUTPUT_FORMAT: github
     steps:
 
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
 
       - name: Cache pip cache
-        uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           key: ${{ runner.os }}-prek-pip-${{ hashFiles('**/pyproject.toml') }}
           path: ~/.cache/pip
@@ -139,7 +139,7 @@ jobs:
 
       - name: Run prek
         id: prek
-        uses: j178/prek-action@9d6a3097e0c1865ecce00cfb89fe80f2ee91b547 # v1.0.12
+        uses: j178/prek-action@564dda4cfa5e96aafdc4a5696c4bf7b46baae5ac # v1.1.0
         # given the interoperability and the nature of prek, we stay unpinned for now
         # note that this action by default uses the latest version of prek
         # this is exactly how the pre-commit action worked, and we never had any issues
@@ -154,7 +154,7 @@ jobs:
       - lock-dependencies
       - lint
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: '0'
           persist-credentials: false
@@ -181,7 +181,7 @@ jobs:
       fail-fast: false
     continue-on-error: ${{ matrix.session.experimental }}
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
 
@@ -242,7 +242,7 @@ jobs:
       - lock-dependencies
       - lint
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: '0'
           persist-credentials: false
@@ -273,7 +273,7 @@ jobs:
       - lock-dependencies
       - lint
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
 
@@ -319,7 +319,7 @@ jobs:
     env:
       NOXSESSION: ${{ matrix.session.name }}
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
 
