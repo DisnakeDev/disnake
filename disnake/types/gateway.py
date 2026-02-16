@@ -171,7 +171,7 @@ class RequestMembersCommand(TypedDict):
 
 
 class VoicePayload(TypedDict):
-    op: Literal[2, 4, 6, 8, 9]
+    op: Literal[2, 4, 6, 8, 9, 11, 13, 21, 22, 24]
     d: Any
     seq: NotRequired[int]  # only present in some messages
 
