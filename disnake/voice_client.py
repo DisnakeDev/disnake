@@ -22,12 +22,14 @@ import logging
 import socket
 import struct
 import threading
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Final, Literal
+
+import dave
 
 from . import opus, utils
 from .backoff import ExponentialBackoff
 from .errors import ClientException, ConnectionClosed
-from .gateway import DaveState, DiscordVoiceWebSocket
+from .gateway import DiscordVoiceWebSocket
 from .player import AudioPlayer, AudioSource
 from .utils import MISSING
 
@@ -700,3 +702,211 @@ class VoiceClient(VoiceProtocol):
             )
 
         self.checked_add("timestamp", opus.Encoder.SAMPLES_PER_FRAME, 4294967295)
+
+
+class DaveState:
+    # this implementation currently only supports DAVE v1, even if the native component may be newer
+    MAX_SUPPORTED_VERSION: Final[int] = 1
+
+    DISABLED_VERSION: Final[Literal[0]] = 0
+    INIT_TRANSITION_ID: Final[Literal[0]] = 0
+    NEW_MLS_GROUP_EPOCH: Final[Literal[1]] = 1
+
+    def __init__(self, vc: VoiceClient) -> None:
+        self.max_version: Final[int] = min(
+            self.MAX_SUPPORTED_VERSION, dave.get_max_supported_protocol_version()
+        )
+
+        self.vc: VoiceClient = vc
+        self._session: dave.Session = dave.Session(
+            lambda source, reason: _log.error("MLS failure: %s - %s", source, reason)
+        )
+        self._encryptor: dave.Encryptor | None = None
+
+        # we should always recognize ourselves (...cue existential crisis?)
+        self._recognized_users: set[int] = {self._self_id}
+        """Set of user IDs expected to be in media session"""
+
+        self._prepared_transitions: dict[int, int] = {}
+        """{transition_id: protocol_version}"""
+
+        self._transient_keys: dict[int, dave.SignatureKeyPair] = {}
+        """{protocol_version: keypair}"""
+
+    @property
+    def _self_id(self) -> int:
+        return self.vc.user.id
+
+    def _setup_ratchet_for_user(self, user_id: int, version: int) -> None:
+        if user_id != self._self_id:
+            return  # decryption is not implemented, ignore
+
+        if self._session.has_established_group():
+            ratchet = self._session.get_key_ratchet(str(user_id))
+        else:
+            ratchet = None
+
+        _log.debug("updating encryption ratchet to %r", ratchet)
+        if self._encryptor is None:
+            # should never happen
+            _log.error("attempted to set new ratchet without encryptor")
+            return
+        self._encryptor.set_key_ratchet(ratchet)
+
+    def _get_transient_key(self, version: int) -> dave.SignatureKeyPair:
+        if (key := self._transient_keys.get(version)) is None:
+            self._transient_keys[version] = key = dave.SignatureKeyPair.generate(version)
+        return key
+
+    async def reinit_state(self, version: int) -> None:
+        if version > self.max_version:
+            msg = (
+                f"DAVE version {version} requested, maximum supported version is {self.max_version}"
+            )
+            raise RuntimeError(msg)
+
+        _log.debug("re-initializing with DAVE version %d", version)
+
+        if version > self.DISABLED_VERSION:
+            await self.prepare_epoch(self.NEW_MLS_GROUP_EPOCH, version)
+            self._encryptor = dave.Encryptor()
+            self._encryptor.assign_ssrc_to_codec(self.vc.ssrc, dave.Codec.opus)
+            _log.debug("created new encryptor")
+        else:
+            # `INIT_TRANSITION_ID` is executed immediately, no need to `.execute_transition()` here
+            await self.prepare_transition(self.INIT_TRANSITION_ID, self.DISABLED_VERSION)
+
+    def add_recognized_user(self, user_id: int) -> None:
+        self._recognized_users.add(user_id)
+
+    def remove_recognized_user(self, user_id: int) -> None:
+        if user_id == self._self_id:
+            return  # in case the gateway ever messes up, ignore CLIENT_DISCONNECT for our own user
+        self._recognized_users.discard(user_id)
+
+    # TODO: should be publicly accessible/documented on VoiceClient
+    @property
+    def voice_privacy_code(self) -> str | None:
+        if not self._session.has_established_group():
+            return None
+
+        authenticator = self._session.get_last_epoch_authenticator()
+        return dave.generate_displayable_code(authenticator, 30, 5)
+
+    # TODO: see voice_privacy_code
+    async def get_user_verification_code(self, user_id: int) -> str | None:
+        if not self._session.has_established_group():
+            return None
+
+        # version is currently always 0
+        d = await self._session.get_pairwise_fingerprint(0, str(user_id))
+        return dave.generate_displayable_code(d, 45, 5)
+
+    def can_encrypt(self) -> bool:
+        return bool(self._encryptor and self._encryptor.has_key_ratchet())
+
+    def encrypt(self, data: bytes) -> bytes | None:
+        if not self._encryptor:
+            msg = "Cannot encrypt audio frame, encryptor is not initialized"
+            raise RuntimeError(msg)
+        return self._encryptor.encrypt(dave.MediaType.audio, self.vc.ssrc, data)
+
+    def handle_mls_external_sender(self, data: bytes) -> None:
+        _log.debug("received MLS external sender")
+        self._session.set_external_sender(data)
+
+    async def handle_mls_proposals(self, data: bytes) -> None:
+        commit_welcome = self._session.process_proposals(
+            data,
+            {str(u) for u in self._recognized_users},
+        )
+        if commit_welcome is not None:
+            _log.debug("sending commit + welcome message")
+            await self.vc.ws.send_dave_mls_commit_welcome(commit_welcome)
+
+    async def handle_mls_announce_commit_transition(self, transition_id: int, data: bytes) -> None:
+        _log.debug("group participants are changing with transition ID %d", transition_id)
+        maybe_roster = self._session.process_commit(data)
+
+        if maybe_roster is dave.RejectType.ignored:
+            _log.debug("ignored commit for unexpected group ID")
+            return
+        elif maybe_roster is dave.RejectType.failed:
+            # "If the client receives a welcome or commit they cannot process, they send the dave_mls_invalid_commit_welcome opcode (31) to the voice gateway to flag the invalid message."
+            # "The client receiving the invalid commit or welcome locally resets their MLS state and generates a new key package to be delivered to the voice gateway via dave_mls_key_package opcode (26)."
+            _log.error("failed to process commit")
+            await self.vc.ws.send_dave_mls_invalid_commit_welcome(transition_id)
+            await self.reinit_state(self._session.get_protocol_version())
+        else:
+            # joined group
+            _log.debug("processed commit, roster: %r", list(maybe_roster.keys()))
+            await self.prepare_transition(transition_id, self._session.get_protocol_version())
+
+    # very similar to mls_announce_commit_transition, just slightly different error handling
+    async def handle_mls_welcome(self, transition_id: int, data: bytes) -> None:
+        _log.debug("received welcome, transition ID %d", transition_id)
+        roster = self._session.process_welcome(
+            data,
+            {str(u) for u in self._recognized_users},
+        )
+
+        if roster is None:
+            _log.error("failed to process welcome")
+            await self.vc.ws.send_dave_mls_invalid_commit_welcome(transition_id)
+            await self.reinit_state(self._session.get_protocol_version())
+        else:
+            # joined group
+            _log.debug("processed welcome, roster: %r", list(roster.keys()))
+            await self.prepare_transition(transition_id, self._session.get_protocol_version())
+
+    async def prepare_epoch(self, epoch: int, version: int) -> None:
+        _log.debug("preparing epoch %d, version %d", epoch, version)
+
+        # "When the epoch ID is equal to 1, this message indicates that a new MLS group is to be created for the given protocol version."
+        if epoch == self.NEW_MLS_GROUP_EPOCH:
+            _log.info(
+                "re-initializing MLS session with version %d, group ID %d",
+                version,
+                self.vc.channel.id,
+            )
+            self._session.init(
+                version,
+                self.vc.channel.id,
+                str(self._self_id),
+                self._get_transient_key(version),
+            )
+
+            # "The client must send a new key package after any of the following events:
+            #  - The voice gateway sends a select_protocol_ack opcode (4) that includes a non-zero protocol version [in which case we call `prepare_epoch(1)`]
+            #  - The voice gateway announces that a group is being created or re-created via the dave_protocol_prepare_epoch opcode (24) with epoch_id = 1"
+            key_package = self._session.get_marshalled_key_package()
+            await self.vc.ws.send_dave_mls_key_package(key_package)
+
+            _log.debug("finished re-initializing MLS session")
+
+    async def prepare_transition(self, transition_id: int, version: int) -> None:
+        # since we don't currently implement decryption, no need to reset ratchets for other members here
+        _log.debug("preparing transition ID %d to version %d", transition_id, version)
+
+        self._prepared_transitions[transition_id] = version
+        if transition_id == self.INIT_TRANSITION_ID:
+            # "Upon receiving dave_protocol_prepare_transition opcode (21) with transition_id = 0, the client immediately executes the transition."
+            self.execute_transition(transition_id)
+        else:
+            _log.debug("sending ready for transition ID %d", transition_id)
+            await self.vc.ws.send_dave_transition_ready(transition_id)
+
+    def execute_transition(self, transition_id: int) -> None:
+        if (version := self._prepared_transitions.pop(transition_id, None)) is None:
+            _log.error(
+                "transition ID %d was requested to be executed, but was not prepared?",
+                transition_id,
+            )
+            return
+        _log.debug("executing transition ID %d to version %d", transition_id, version)
+
+        # https://daveprotocol.com/#downgrade-to-transport-only-encryption
+        if version == self.DISABLED_VERSION:
+            self._session.reset()
+
+        self._setup_ratchet_for_user(self._self_id, version)
