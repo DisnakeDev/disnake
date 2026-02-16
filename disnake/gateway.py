@@ -1002,7 +1002,7 @@ class DiscordVoiceWebSocket:
                 "user_id": str(state.user.id),
                 "session_id": state.session_id,
                 "token": state.token,
-                "max_dave_protocol_version": self._connection.dave.max_version,
+                "max_dave_protocol_version": self._connection.dave_max_version,
             },
         }
         await self.send_as_json(payload)
@@ -1103,26 +1103,28 @@ class DiscordVoiceWebSocket:
         elif op == self.SESSION_DESCRIPTION:
             self._connection.mode = data["mode"]
             await self.load_secret_key(data)
-            if (dave_version := data.get("dave_protocol_version")) is not None:
+            if (
+                self._connection.dave
+                and (dave_version := data.get("dave_protocol_version")) is not None
+            ):
                 await self._connection.dave.reinit_state(dave_version)
             self._ready.set()
         elif op == self.HELLO:
             interval: float = data["heartbeat_interval"] / 1000.0
             self._keep_alive = VoiceKeepAliveHandler(ws=self, interval=min(interval, 5.0))
             self._keep_alive.start()
-        elif op == self.CLIENTS_CONNECT:
-            for user_id in map(int, data["user_ids"]):
-                self._connection.dave.add_recognized_user(user_id)
-        elif op == self.CLIENT_DISCONNECT:
-            self._connection.dave.remove_recognized_user(int(data["user_id"]))
-        elif op == self.DAVE_PREPARE_TRANSITION:
-            await self._connection.dave.prepare_transition(
-                data["transition_id"], data["protocol_version"]
-            )
-        elif op == self.DAVE_EXECUTE_TRANSITION:
-            self._connection.dave.execute_transition(data["transition_id"])
-        elif op == self.DAVE_MLS_PREPARE_EPOCH:
-            await self._connection.dave.prepare_epoch(data["epoch"], data["protocol_version"])
+        elif dave_state := self._connection.dave:
+            if op == self.CLIENTS_CONNECT:
+                for user_id in map(int, data["user_ids"]):
+                    dave_state.add_recognized_user(user_id)
+            elif op == self.CLIENT_DISCONNECT:
+                dave_state.remove_recognized_user(int(data["user_id"]))
+            elif op == self.DAVE_PREPARE_TRANSITION:
+                await dave_state.prepare_transition(data["transition_id"], data["protocol_version"])
+            elif op == self.DAVE_EXECUTE_TRANSITION:
+                dave_state.execute_transition(data["transition_id"])
+            elif op == self.DAVE_MLS_PREPARE_EPOCH:
+                await dave_state.prepare_epoch(data["epoch"], data["protocol_version"])
 
         await self._hook(self, msg)
 
@@ -1132,7 +1134,11 @@ class DiscordVoiceWebSocket:
             _log.error("Voice websocket received invalid frame (length %d)", len(msg))
             return  # this should not happen.
 
+        # always update current seq just in case, even if we don't support dave
         self.sequence = int.from_bytes(msg[0:2], "big", signed=False)
+        if self._connection.dave is None:
+            return
+
         op = msg[2]
         if op == self.DAVE_MLS_EXTERNAL_SENDER:
             self._connection.dave.handle_mls_external_sender(msg[3:])

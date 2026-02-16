@@ -24,8 +24,6 @@ import struct
 import threading
 from typing import TYPE_CHECKING, Any, Final, Literal
 
-import dave
-
 from . import opus, utils
 from .backoff import ExponentialBackoff
 from .errors import ClientException, ConnectionClosed
@@ -47,6 +45,7 @@ if TYPE_CHECKING:
 
 
 has_nacl: bool
+has_dave: bool
 
 try:
     import nacl.secret
@@ -54,6 +53,17 @@ try:
     has_nacl = True
 except ImportError:
     has_nacl = False
+
+if TYPE_CHECKING:
+    import dave
+else:
+    try:
+        import dave
+
+        has_dave = True
+    except ImportError:
+        has_dave = False
+
 
 __all__ = (
     "VoiceProtocol",
@@ -231,8 +241,7 @@ class VoiceClient(VoiceProtocol):
         self.encoder: Encoder = MISSING
         self._lite_nonce: int = 0
         self.ws: DiscordVoiceWebSocket = MISSING
-        # TODO: consider not initializing until actually needed?
-        self.dave: DaveState = DaveState(self)
+        self.dave: DaveState | None = DaveState(self) if has_dave else None
 
     warn_nacl = not has_nacl
     supported_modes: tuple[SupportedModes, ...] = ("aead_xchacha20_poly1305_rtpsize",)
@@ -534,7 +543,7 @@ class VoiceClient(VoiceProtocol):
     # audio related
 
     def _get_voice_packet(self, data: bytes) -> bytes:
-        if self.dave.can_encrypt():
+        if self.dave is not None and self.dave.can_encrypt():
             frame = self.dave.encrypt(data)
             if frame is None:
                 # There isn't really a way to recover from this, so just raise at this point
@@ -703,6 +712,16 @@ class VoiceClient(VoiceProtocol):
 
         self.checked_add("timestamp", opus.Encoder.SAMPLES_PER_FRAME, 4294967295)
 
+    @property
+    def dave_max_version(self) -> int:
+        if not has_dave:
+            return 0
+
+        return min(
+            DaveState.MAX_SUPPORTED_VERSION,
+            dave.get_max_supported_protocol_version(),
+        )
+
 
 class DaveState:
     # this implementation currently only supports DAVE v1, even if the native component may be newer
@@ -712,11 +731,9 @@ class DaveState:
     INIT_TRANSITION_ID: Final[Literal[0]] = 0
     NEW_MLS_GROUP_EPOCH: Final[Literal[1]] = 1
 
+    # NOTE: all instantiations of this should be gated by `has_dave`,
+    # everything in this class assumes the dependency is installed.
     def __init__(self, vc: VoiceClient) -> None:
-        self.max_version: Final[int] = min(
-            self.MAX_SUPPORTED_VERSION, dave.get_max_supported_protocol_version()
-        )
-
         self.vc: VoiceClient = vc
         self._session: dave.Session = dave.Session(
             lambda source, reason: _log.error("MLS failure: %s - %s", source, reason)
@@ -759,10 +776,9 @@ class DaveState:
         return key
 
     async def reinit_state(self, version: int) -> None:
-        if version > self.max_version:
-            msg = (
-                f"DAVE version {version} requested, maximum supported version is {self.max_version}"
-            )
+        max_version = self.vc.dave_max_version
+        if version > max_version:
+            msg = f"DAVE version {version} requested, maximum supported version is {max_version}"
             raise RuntimeError(msg)
 
         _log.debug("re-initializing with DAVE version %d", version)
@@ -803,7 +819,7 @@ class DaveState:
         return dave.generate_displayable_code(d, 45, 5)
 
     def can_encrypt(self) -> bool:
-        return bool(self._encryptor and self._encryptor.has_key_ratchet())
+        return self._encryptor is not None and self._encryptor.has_key_ratchet()
 
     def encrypt(self, data: bytes) -> bytes | None:
         if not self._encryptor:
