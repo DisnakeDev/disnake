@@ -929,7 +929,7 @@ class ConnectionState:
             id=emoji_id,
             animated=emoji.get("animated", False),
             # may be `None` in gateway events if custom emoji data isn't available anymore
-            # https://discord.com/developers/docs/resources/emoji#emoji-object-custom-emoji-examples
+            # https://docs.discord.com/developers/resources/emoji#emoji-object-custom-emoji-examples
             name=emoji["name"],  # pyright: ignore[reportArgumentType]
         )
         raw = RawReactionActionEvent(data, emoji, "REACTION_REMOVE")
@@ -957,7 +957,7 @@ class ConnectionState:
             id=emoji_id,
             animated=emoji.get("animated", False),
             # may be `None` in gateway events if custom emoji data isn't available anymore
-            # https://discord.com/developers/docs/resources/emoji#emoji-object-custom-emoji-examples
+            # https://docs.discord.com/developers/resources/emoji#emoji-object-custom-emoji-examples
             name=emoji["name"],  # pyright: ignore[reportArgumentType]
         )
         raw = RawReactionClearEmojiEvent(data, emoji)

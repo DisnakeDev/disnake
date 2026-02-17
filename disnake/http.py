@@ -134,7 +134,7 @@ def set_attachments(payload: dict[str, Any], files: Sequence[File]) -> None:
 
 def to_multipart(payload: dict[str, Any], files: Sequence[File]) -> list[dict[str, Any]]:
     """Converts the payload and list of files to a multipart payload,
-    as specified by https://discord.com/developers/docs/reference#uploading-files
+    as specified by https://docs.discord.com/developers/reference#uploading-files
     """
     multipart: list[dict[str, Any]] = []
     for index, file in enumerate(files):

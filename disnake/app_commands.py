@@ -85,7 +85,7 @@ def application_command_factory(data: ApplicationCommandPayload) -> APIApplicati
 
 def _validate_name(name: str) -> None:
     # used for slash command names and option names
-    # see https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-naming
+    # see https://docs.discord.com/developers/interactions/application-commands#application-command-object-application-command-naming
 
     if not isinstance(name, str):
         msg = f"Slash command name and option names must be an instance of class 'str', received '{name.__class__}'"
