@@ -825,7 +825,7 @@ def slash_command(
             Added support for localizations.
 
     nsfw: :class:`bool`
-        Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
+        Whether this command is :ddocs:`age-restricted <interactions/application-commands#age-restricted-commands>`.
         Defaults to ``False``.
 
         .. versionadded:: 2.8

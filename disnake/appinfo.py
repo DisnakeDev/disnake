@@ -192,7 +192,7 @@ class AppInfo:
         A list of RPC origin URLs, if RPC is enabled.
     verify_key: :class:`str`
         The hex encoded key for verification in interactions and the
-        GameSDK's :ddocs:`GetTicket <game-sdk/applications#getticket>`.
+        GameSDK's `GetTicket <https://github.com/discord/discord-api-docs/blob/legacy-gamesdk/docs/game_sdk/Applications.md#getticket>`_.
 
         .. versionadded:: 1.3
 
@@ -540,7 +540,7 @@ class AppInfo:
         event_webhooks_status: :class:`ApplicationEventWebhookStatus`
             The application's event webhooks status.
         event_webhooks_types: :class:`list`\[:class:`str`] | :data:`None`
-            The application's event webhook types. See `webhook event types <https://discord.com/developers/docs/events/webhook-events#event-types>`_
+            The application's event webhook types. See :ddocs:`webhook event types <events/webhook-events#event-types>`
             for a list of valid events.
 
         Raises
@@ -662,7 +662,7 @@ class PartialAppInfo:
         A list of RPC origin URLs, if RPC is enabled.
     verify_key: :class:`str`
         The hex encoded key for verification in interactions and the
-        GameSDK's :ddocs:`GetTicket <game-sdk/applications#getticket>`.
+        GameSDK's `GetTicket <https://github.com/discord/discord-api-docs/blob/legacy-gamesdk/docs/game_sdk/Applications.md#getticket>`_.
     terms_of_service_url: :class:`str` | :data:`None`
         The application's terms of service URL, if set.
     privacy_policy_url: :class:`str` | :data:`None`

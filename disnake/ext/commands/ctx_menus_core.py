@@ -293,7 +293,7 @@ def user_command(
         .. versionadded:: 2.5
 
     nsfw: :class:`bool`
-        Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
+        Whether this command is :ddocs:`age-restricted <interactions/application-commands#age-restricted-commands>`.
         Defaults to ``False``.
 
         .. versionadded:: 2.8
@@ -404,7 +404,7 @@ def message_command(
         .. versionadded:: 2.5
 
     nsfw: :class:`bool`
-        Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
+        Whether this command is :ddocs:`age-restricted <interactions/application-commands#age-restricted-commands>`.
         Defaults to ``False``.
 
         .. versionadded:: 2.8

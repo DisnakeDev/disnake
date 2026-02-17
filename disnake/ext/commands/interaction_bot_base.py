@@ -546,7 +546,7 @@ class InteractionBotBase(CommonBotBase):
             .. versionadded:: 2.5
 
         nsfw: :class:`bool`
-            Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
+            Whether this command is :ddocs:`age-restricted <interactions/application-commands#age-restricted-commands>`.
             Defaults to ``False``.
 
             .. versionadded:: 2.8
@@ -656,7 +656,7 @@ class InteractionBotBase(CommonBotBase):
             .. versionadded:: 2.5
 
         nsfw: :class:`bool`
-            Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
+            Whether this command is :ddocs:`age-restricted <interactions/application-commands#age-restricted-commands>`.
             Defaults to ``False``.
 
             .. versionadded:: 2.8
@@ -759,7 +759,7 @@ class InteractionBotBase(CommonBotBase):
             .. versionadded:: 2.5
 
         nsfw: :class:`bool`
-            Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
+            Whether this command is :ddocs:`age-restricted <interactions/application-commands#age-restricted-commands>`.
             Defaults to ``False``.
 
             .. versionadded:: 2.8
