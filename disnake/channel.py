@@ -208,8 +208,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         in this channel.
 
         A value of `0` denotes that it is disabled.
-        Bots, and users with :attr:`~Permissions.manage_channels` or
-        :attr:`~Permissions.manage_messages` permissions, bypass slowmode.
+        Bots, and users with :attr:`~Permissions.bypass_slowmode` permissions, bypass slowmode.
 
         See also :attr:`default_thread_slowmode_delay`.
 
@@ -218,8 +217,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         in newly created threads in this channel.
 
         A value of ``0`` denotes that it is disabled.
-        Bots, and users with :attr:`~Permissions.manage_channels` or
-        :attr:`~Permissions.manage_messages`, bypass slowmode.
+        Bots, and users with :attr:`~Permissions.bypass_slowmode` permissions, bypass slowmode.
 
         .. versionadded:: 2.8
 
@@ -1350,9 +1348,10 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
 
     slowmode_delay: :class:`int`
         The number of seconds a member must wait between sending messages
-        in this channel. A value of `0` denotes that it is disabled.
-        Bots, and users with :attr:`~Permissions.manage_channels` or
-        :attr:`~Permissions.manage_messages`, bypass slowmode.
+        in this channel.
+
+        A value of `0` denotes that it is disabled.
+        Bots, and users with :attr:`~Permissions.bypass_slowmode` permissions, bypass slowmode.
 
         .. versionadded:: 2.3
 
@@ -2036,9 +2035,10 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
 
     slowmode_delay: :class:`int`
         The number of seconds a member must wait between sending messages
-        in this channel. A value of `0` denotes that it is disabled.
-        Bots, and users with :attr:`~Permissions.manage_channels` or
-        :attr:`~Permissions.manage_messages`, bypass slowmode.
+        in this channel.
+
+        A value of `0` denotes that it is disabled.
+        Bots, and users with :attr:`~Permissions.bypass_slowmode` permissions, bypass slowmode.
 
         .. versionadded:: 2.9
 
@@ -3981,8 +3981,7 @@ class ForumChannel(ThreadOnlyGuildChannel):
         in this channel.
 
         A value of ``0`` denotes that it is disabled.
-        Bots, and users with :attr:`~Permissions.manage_channels` or
-        :attr:`~Permissions.manage_messages`, bypass slowmode.
+        Bots, and users with :attr:`~Permissions.bypass_slowmode` permissions, bypass slowmode.
 
         See also :attr:`default_thread_slowmode_delay`.
 
@@ -3991,8 +3990,7 @@ class ForumChannel(ThreadOnlyGuildChannel):
         in newly created threads in this channel.
 
         A value of ``0`` denotes that it is disabled.
-        Bots, and users with :attr:`~Permissions.manage_channels` or
-        :attr:`~Permissions.manage_messages`, bypass slowmode.
+        Bots, and users with :attr:`~Permissions.bypass_slowmode` permissions, bypass slowmode.
 
         .. versionadded:: 2.6
 
@@ -4418,8 +4416,7 @@ class MediaChannel(ThreadOnlyGuildChannel):
         in this channel.
 
         A value of ``0`` denotes that it is disabled.
-        Bots, and users with :attr:`~Permissions.manage_channels` or
-        :attr:`~Permissions.manage_messages`, bypass slowmode.
+        Bots, and users with :attr:`~Permissions.bypass_slowmode` permissions, bypass slowmode.
 
         See also :attr:`default_thread_slowmode_delay`.
 
@@ -4428,8 +4425,7 @@ class MediaChannel(ThreadOnlyGuildChannel):
         in newly created threads in this channel.
 
         A value of ``0`` denotes that it is disabled.
-        Bots, and users with :attr:`~Permissions.manage_channels` or
-        :attr:`~Permissions.manage_messages`, bypass slowmode.
+        Bots, and users with :attr:`~Permissions.bypass_slowmode` permissions, bypass slowmode.
 
     default_sort_order: :class:`ThreadSortOrder` | :data:`None`
         The default sort order of threads in this channel.

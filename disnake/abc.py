@@ -865,6 +865,7 @@ class GuildChannel(ABC):
         administrator: bool | None = ...,
         attach_files: bool | None = ...,
         ban_members: bool | None = ...,
+        bypass_slowmode: bool | None = ...,
         change_nickname: bool | None = ...,
         connect: bool | None = ...,
         create_events: bool | None = ...,
