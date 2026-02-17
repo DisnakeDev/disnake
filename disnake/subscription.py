@@ -2,14 +2,15 @@
 
 from __future__ import annotations
 
-import datetime
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from .enums import SubscriptionStatus, try_enum
 from .mixins import Hashable
 from .utils import parse_time, snowflake_time
 
 if TYPE_CHECKING:
+    import datetime
+
     from .state import ConnectionState
     from .types.subscription import Subscription as SubscriptionPayload
     from .user import User
@@ -18,13 +19,13 @@ __all__ = ("Subscription",)
 
 
 class Subscription(Hashable):
-    """Represents a subscription.
+    r"""Represents a subscription.
 
     This can only be retrieved using :meth:`SKU.subscriptions` or :meth:`SKU.fetch_subscription`,
     or provided by events (e.g. :func:`on_subscription_create`).
 
     .. warning::
-        :class:`Subscription`\\s should not be used to grant perks. Use :class:`Entitlement`\\s as a way of determining whether a user should have access to a specific :class:`SKU`.
+        :class:`Subscription`\s should not be used to grant perks. Use :class:`Entitlement`\s as a way of determining whether a user should have access to a specific :class:`SKU`.
 
     .. note::
         Some subscriptions may have been canceled already; consider using :meth:`is_canceled` to check whether a given subscription was canceled.
@@ -33,11 +34,11 @@ class Subscription(Hashable):
 
         .. describe:: x == y
 
-            Checks if two :class:`Subscription`\\s are equal.
+            Checks if two :class:`Subscription`\s are equal.
 
         .. describe:: x != y
 
-            Checks if two :class:`Subscription`\\s are not equal.
+            Checks if two :class:`Subscription`\s are not equal.
 
         .. describe:: hash(x)
 
@@ -53,11 +54,11 @@ class Subscription(Hashable):
         The ID of the user who is subscribed to the :attr:`sku_ids`.
 
         See also :attr:`user`.
-    sku_ids: :class:`list`\\[:class:`int`]
+    sku_ids: :class:`list`\[:class:`int`]
         The ID of the SKUs the user is subscribed to.
-    renewal_sku_ids: :class:`list`\\[:class:`int`]
+    renewal_sku_ids: :class:`list`\[:class:`int`]
         The IDs of the SKUs that will be renewed at the start of the new period.
-    entitlement_ids: :class:`list`\\[:class:`int`]
+    entitlement_ids: :class:`list`\[:class:`int`]
         The IDs of the entitlements the user has as part of this subscription.
     current_period_start: :class:`datetime.datetime`
         The time at which the current period for the given subscription started.
@@ -91,7 +92,7 @@ class Subscription(Hashable):
         self.user_id: int = int(data["user_id"])
         self.sku_ids: list[int] = list(map(int, data["sku_ids"]))
         self.entitlement_ids: list[int] = list(map(int, data["entitlement_ids"]))
-        self.renewal_sku_ids: Optional[list[int]] = (
+        self.renewal_sku_ids: list[int] | None = (
             list(map(int, renewal_sku_ids))
             if (renewal_sku_ids := data.get("renewal_sku_ids")) is not None
             else None
@@ -99,7 +100,7 @@ class Subscription(Hashable):
         self.current_period_start: datetime.datetime = parse_time(data["current_period_start"])
         self.current_period_end: datetime.datetime = parse_time(data["current_period_end"])
         self.status: SubscriptionStatus = try_enum(SubscriptionStatus, data["status"])
-        self.canceled_at: Optional[datetime.datetime] = parse_time(data["canceled_at"])
+        self.canceled_at: datetime.datetime | None = parse_time(data["canceled_at"])
 
     @property
     def created_at(self) -> datetime.datetime:
@@ -107,7 +108,7 @@ class Subscription(Hashable):
         return snowflake_time(self.id)
 
     @property
-    def user(self) -> Optional[User]:
+    def user(self) -> User | None:
         """:class:`User` | :data:`None`: The user who is subscribed to the :attr:`sku_ids`.
 
         Requires the user to be cached.

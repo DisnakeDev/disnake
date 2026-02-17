@@ -4,11 +4,10 @@ from __future__ import annotations
 
 import asyncio
 import time
-from collections.abc import Iterable, Sequence
-from typing import TYPE_CHECKING, Callable, Literal, Optional, Union
+from typing import TYPE_CHECKING, Literal, TypeAlias
 
 from .abc import GuildChannel, Messageable
-from .enums import ChannelType, ThreadArchiveDuration, try_enum, try_enum_to_int
+from .enums import ChannelType, try_enum, try_enum_to_int
 from .errors import ClientException
 from .flags import ChannelFlags
 from .mixins import Hashable
@@ -25,12 +24,14 @@ __all__ = (
 
 if TYPE_CHECKING:
     import datetime
+    from collections.abc import Callable, Iterable, Sequence
 
     from typing_extensions import Self
 
     from .abc import Snowflake, SnowflakeTime
     from .channel import CategoryChannel, ForumChannel, MediaChannel, TextChannel
     from .emoji import Emoji
+    from .enums import ThreadArchiveDuration
     from .guild import Guild
     from .member import Member
     from .message import Message, PartialMessage
@@ -46,7 +47,7 @@ if TYPE_CHECKING:
         ThreadMetadata,
     )
 
-    AnyThreadArchiveDuration = Union[ThreadArchiveDuration, ThreadArchiveDurationLiteral]
+    AnyThreadArchiveDuration: TypeAlias = ThreadArchiveDuration | ThreadArchiveDurationLiteral
 
     ThreadType = Literal[
         ChannelType.news_thread, ChannelType.public_thread, ChannelType.private_thread
@@ -93,9 +94,10 @@ class Thread(Messageable, Hashable):
         *not* point to an existing or valid message.
     slowmode_delay: :class:`int`
         The number of seconds a member must wait between sending messages
-        in this thread. A value of `0` denotes that it is disabled.
-        Bots, and users with :attr:`~Permissions.manage_channels` or
-        :attr:`~Permissions.manage_messages`, bypass slowmode.
+        in this thread.
+
+        A value of `0` denotes that it is disabled.
+        Bots, and users with :attr:`~Permissions.bypass_slowmode` permissions, bypass slowmode.
     message_count: :class:`int` | :data:`None`
         An approximate number of messages in this thread.
 
@@ -187,15 +189,15 @@ class Thread(Messageable, Hashable):
     def _from_data(self, data: ThreadPayload) -> None:
         self.id: int = int(data["id"])
         self.parent_id: int = int(data["parent_id"])
-        self.owner_id: Optional[int] = _get_as_snowflake(data, "owner_id")
+        self.owner_id: int | None = _get_as_snowflake(data, "owner_id")
         self.name: str = data["name"]
         self._type: ThreadType = try_enum(ChannelType, data["type"])  # pyright: ignore[reportAttributeAccessIssue]
-        self.last_message_id: Optional[int] = _get_as_snowflake(data, "last_message_id")
+        self.last_message_id: int | None = _get_as_snowflake(data, "last_message_id")
         self.slowmode_delay: int = data.get("rate_limit_per_user", 0)
         self.message_count: int = data.get("message_count") or 0
         self.total_message_sent: int = data.get("total_message_sent") or 0
-        self.member_count: Optional[int] = data.get("member_count")
-        self.last_pin_timestamp: Optional[datetime.datetime] = parse_time(
+        self.member_count: int | None = data.get("member_count")
+        self.last_pin_timestamp: datetime.datetime | None = parse_time(
             data.get("last_pin_timestamp")
         )
         self._flags: int = data.get("flags", 0)
@@ -213,9 +215,7 @@ class Thread(Messageable, Hashable):
         self.archive_timestamp: datetime.datetime = parse_time(data["archive_timestamp"])
         self.locked: bool = data.get("locked", False)
         self.invitable: bool = data.get("invitable", True)
-        self.create_timestamp: Optional[datetime.datetime] = parse_time(
-            data.get("create_timestamp")
-        )
+        self.create_timestamp: datetime.datetime | None = parse_time(data.get("create_timestamp"))
 
     def _update(self, data: ThreadPayload) -> None:
         try:
@@ -242,14 +242,14 @@ class Thread(Messageable, Hashable):
         return self._type
 
     @property
-    def parent(self) -> Optional[Union[TextChannel, ForumChannel, MediaChannel]]:
+    def parent(self) -> TextChannel | ForumChannel | MediaChannel | None:
         """:class:`TextChannel` | :class:`ForumChannel` | :class:`MediaChannel` | :data:`None`: The parent channel this thread belongs to."""
         if isinstance(self.guild, Object):
             return None
         return self.guild.get_channel(self.parent_id)  # pyright: ignore[reportReturnType]
 
     @property
-    def owner(self) -> Optional[Member]:
+    def owner(self) -> Member | None:
         """:class:`Member` | :data:`None`: The member this thread belongs to."""
         if self.owner_id is None or isinstance(self.guild, Object):
             return None
@@ -262,7 +262,7 @@ class Thread(Messageable, Hashable):
 
     @property
     def members(self) -> list[ThreadMember]:
-        """:class:`list`\\[:class:`ThreadMember`]: A list of thread members in this thread.
+        r""":class:`list`\[:class:`ThreadMember`]: A list of thread members in this thread.
 
         This requires :attr:`Intents.members` to be properly filled. Most of the time however,
         this data is not provided by the gateway and a call to :meth:`fetch_members` is
@@ -271,7 +271,7 @@ class Thread(Messageable, Hashable):
         return list(self._members.values())
 
     @property
-    def last_message(self) -> Optional[Message]:
+    def last_message(self) -> Message | None:
         """Gets the last message in this channel from the cache.
 
         The message might not be valid or point to an existing message.
@@ -292,7 +292,7 @@ class Thread(Messageable, Hashable):
         return self._state._get_message(self.last_message_id) if self.last_message_id else None
 
     @property
-    def category(self) -> Optional[CategoryChannel]:
+    def category(self) -> CategoryChannel | None:
         """The category channel the parent channel belongs to, if applicable.
 
         Raises
@@ -312,7 +312,7 @@ class Thread(Messageable, Hashable):
         return parent.category
 
     @property
-    def category_id(self) -> Optional[int]:
+    def category_id(self) -> int | None:
         """The category channel ID the parent channel belongs to, if applicable.
 
         Raises
@@ -402,7 +402,7 @@ class Thread(Messageable, Hashable):
 
     @property
     def applied_tags(self) -> list[ForumTag]:
-        """:class:`list`\\[:class:`ForumTag`]: The tags currently applied to this thread.
+        r""":class:`list`\[:class:`ForumTag`]: The tags currently applied to this thread.
         Only applicable to threads in channels of type :class:`ForumChannel` or :class:`MediaChannel`.
 
         .. versionadded:: 2.6
@@ -418,7 +418,7 @@ class Thread(Messageable, Hashable):
 
     def permissions_for(
         self,
-        obj: Union[Member, Role],
+        obj: Member | Role,
         /,
         *,
         ignore_timeout: bool = MISSING,
@@ -499,7 +499,7 @@ class Thread(Messageable, Hashable):
         return base
 
     async def delete_messages(self, messages: Iterable[Snowflake]) -> None:
-        """|coro|
+        r"""|coro|
 
         Deletes a list of messages. This is similar to :meth:`Message.delete`
         except it bulk deletes multiple messages.
@@ -518,7 +518,7 @@ class Thread(Messageable, Hashable):
 
         Parameters
         ----------
-        messages: :class:`~collections.abc.Iterable`\\[:class:`abc.Snowflake`]
+        messages: :class:`~collections.abc.Iterable`\[:class:`abc.Snowflake`]
             An iterable of messages denoting which ones to bulk delete.
 
         Raises
@@ -554,15 +554,15 @@ class Thread(Messageable, Hashable):
     async def purge(
         self,
         *,
-        limit: Optional[int] = 100,
+        limit: int | None = 100,
         check: Callable[[Message], bool] = MISSING,
-        before: Optional[SnowflakeTime] = None,
-        after: Optional[SnowflakeTime] = None,
-        around: Optional[SnowflakeTime] = None,
-        oldest_first: Optional[bool] = False,
+        before: SnowflakeTime | None = None,
+        after: SnowflakeTime | None = None,
+        around: SnowflakeTime | None = None,
+        oldest_first: bool | None = False,
         bulk: bool = True,
     ) -> list[Message]:
-        """|coro|
+        r"""|coro|
 
         Purges a list of messages that meet the criteria given by the predicate
         ``check``. If a ``check`` is not provided then all messages are deleted
@@ -588,7 +588,7 @@ class Thread(Messageable, Hashable):
         limit: :class:`int` | :data:`None`
             The number of messages to search through. This is not the number
             of messages that will be deleted, though it can be.
-        check: :class:`~collections.abc.Callable`\\[[:class:`Message`], :class:`bool`]
+        check: :class:`~collections.abc.Callable`\[[:class:`Message`], :class:`bool`]
             The function used to check if a message should be deleted.
             It must take a :class:`Message` as its sole parameter.
         before: :class:`abc.Snowflake` | :class:`datetime.datetime` | :data:`None`
@@ -613,7 +613,7 @@ class Thread(Messageable, Hashable):
 
         Returns
         -------
-        :class:`list`\\[:class:`.Message`]
+        :class:`list`\[:class:`.Message`]
             The list of messages that were deleted.
         """
         if check is MISSING:
@@ -680,9 +680,9 @@ class Thread(Messageable, Hashable):
         pinned: bool = MISSING,
         flags: ChannelFlags = MISSING,
         applied_tags: Sequence[Snowflake] = MISSING,
-        reason: Optional[str] = None,
+        reason: str | None = None,
     ) -> Thread:
-        """|coro|
+        r"""|coro|
 
         Edits the thread.
 
@@ -721,7 +721,7 @@ class Thread(Messageable, Hashable):
 
             .. versionadded:: 2.6
 
-        applied_tags: :class:`~collections.abc.Sequence`\\[:class:`abc.Snowflake`]
+        applied_tags: :class:`~collections.abc.Sequence`\[:class:`abc.Snowflake`]
             The new tags of the thread. Maximum of 5.
             Can also be used to reorder existing tags.
 
@@ -820,7 +820,7 @@ class Thread(Messageable, Hashable):
         You must have :attr:`~.Permissions.send_messages` permission to add a user to a public thread.
         If the thread is private then :attr:`~.Permissions.send_messages` and either :attr:`~.Permissions.create_private_threads`
         or :attr:`~.Permissions.manage_messages` permissions
-        is required to add a user to the thread.
+        are required to add a user to the thread.
 
         Parameters
         ----------
@@ -883,7 +883,7 @@ class Thread(Messageable, Hashable):
         return ThreadMember(parent=self, data=member_data)
 
     async def fetch_members(self) -> list[ThreadMember]:
-        """|coro|
+        r"""|coro|
 
         Retrieves all :class:`ThreadMember` that are in this thread.
 
@@ -897,13 +897,13 @@ class Thread(Messageable, Hashable):
 
         Returns
         -------
-        :class:`list`\\[:class:`ThreadMember`]
+        :class:`list`\[:class:`ThreadMember`]
             All thread members in the thread.
         """
         members = await self._state.http.get_thread_members(self.id)
         return [ThreadMember(parent=self, data=data) for data in members]
 
-    async def delete(self, *, reason: Optional[str] = None) -> None:
+    async def delete(self, *, reason: str | None = None) -> None:
         """|coro|
 
         Deletes this thread.
@@ -928,8 +928,8 @@ class Thread(Messageable, Hashable):
         """
         await self._state.http.delete_channel(self.id, reason=reason)
 
-    async def add_tags(self, *tags: Snowflake, reason: Optional[str] = None) -> None:
-        """|coro|
+    async def add_tags(self, *tags: Snowflake, reason: str | None = None) -> None:
+        r"""|coro|
 
         Adds the given tags to this thread, up to 5 in total.
 
@@ -944,7 +944,7 @@ class Thread(Messageable, Hashable):
         Parameters
         ----------
         *tags: :class:`abc.Snowflake`
-            An argument list of :class:`abc.Snowflake` representing the :class:`ForumTag`\\s
+            An argument list of :class:`abc.Snowflake` representing the :class:`ForumTag`\s
             to add to the thread.
         reason: :class:`str` | :data:`None`
             The reason for editing this thread. Shows up on the audit log.
@@ -965,8 +965,8 @@ class Thread(Messageable, Hashable):
 
         await self._state.http.edit_channel(self.id, applied_tags=new_tags, reason=reason)
 
-    async def remove_tags(self, *tags: Snowflake, reason: Optional[str] = None) -> None:
-        """|coro|
+    async def remove_tags(self, *tags: Snowflake, reason: str | None = None) -> None:
+        r"""|coro|
 
         Removes the given tags from this thread.
 
@@ -981,7 +981,7 @@ class Thread(Messageable, Hashable):
         Parameters
         ----------
         *tags: :class:`abc.Snowflake`
-            An argument list of :class:`abc.Snowflake` representing the :class:`ForumTag`\\s
+            An argument list of :class:`abc.Snowflake` representing the :class:`ForumTag`\s
             to remove from the thread.
         reason: :class:`str` | :data:`None`
             The reason for editing this thread. Shows up on the audit log.
@@ -1026,7 +1026,7 @@ class Thread(Messageable, Hashable):
     def _add_member(self, member: ThreadMember) -> None:
         self._members[member.id] = member
 
-    def _pop_member(self, member_id: int) -> Optional[ThreadMember]:
+    def _pop_member(self, member_id: int) -> ThreadMember | None:
         return self._members.pop(member_id, None)
 
 
@@ -1173,14 +1173,14 @@ class ForumTag(Hashable):
         self,
         *,
         name: str,
-        emoji: Optional[Union[str, PartialEmoji, Emoji]] = None,
+        emoji: str | PartialEmoji | Emoji | None = None,
         moderated: bool = False,
     ) -> None:
         self.id: int = 0
         self.name: str = name
         self.moderated: bool = moderated
 
-        self.emoji: Optional[Union[Emoji, PartialEmoji]] = None
+        self.emoji: Emoji | PartialEmoji | None = None
         if emoji is None:
             self.emoji = None
         elif isinstance(emoji, str):
@@ -1242,7 +1242,7 @@ class ForumTag(Hashable):
         self,
         *,
         name: str = MISSING,
-        emoji: Optional[Union[str, Emoji, PartialEmoji]] = MISSING,
+        emoji: str | Emoji | PartialEmoji | None = MISSING,
         moderated: bool = MISSING,
     ) -> Self:
         """Returns a new instance with the given changes applied,

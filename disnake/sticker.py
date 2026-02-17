@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import unicodedata
-from typing import TYPE_CHECKING, Literal, Optional, Union
+from typing import TYPE_CHECKING, Literal
 
 from .asset import Asset, AssetMixin
 from .enums import StickerFormatType, StickerType, try_enum
@@ -37,7 +37,7 @@ if TYPE_CHECKING:
 
 
 class StickerPack(Hashable):
-    """Represents a sticker pack.
+    r"""Represents a sticker pack.
 
     .. versionadded:: 2.0
 
@@ -66,7 +66,7 @@ class StickerPack(Hashable):
         The description of the sticker pack.
     id: :class:`int`
         The id of the sticker pack.
-    stickers: :class:`list`\\[:class:`StandardSticker`]
+    stickers: :class:`list`\[:class:`StandardSticker`]
         The stickers of this sticker pack.
     sku_id: :class:`int`
         The SKU ID of the sticker pack.
@@ -100,13 +100,13 @@ class StickerPack(Hashable):
         ]
         self.name: str = data["name"]
         self.sku_id: int = int(data["sku_id"])
-        self.cover_sticker_id: Optional[int] = _get_as_snowflake(data, "cover_sticker_id")
-        self.cover_sticker: Optional[StandardSticker] = get(self.stickers, id=self.cover_sticker_id)
+        self.cover_sticker_id: int | None = _get_as_snowflake(data, "cover_sticker_id")
+        self.cover_sticker: StandardSticker | None = get(self.stickers, id=self.cover_sticker_id)
         self.description: str = data["description"]
-        self._banner: Optional[int] = _get_as_snowflake(data, "banner_asset_id")
+        self._banner: int | None = _get_as_snowflake(data, "banner_asset_id")
 
     @property
-    def banner(self) -> Optional[Asset]:
+    def banner(self) -> Asset | None:
         """:class:`Asset` | :data:`None`: The banner asset of the sticker pack, if any."""
         if not self._banner:
             return None
@@ -204,7 +204,7 @@ class StickerItem(_StickerTag):
     def __str__(self) -> str:
         return self.name
 
-    async def fetch(self) -> Union[Sticker, StandardSticker, GuildSticker]:
+    async def fetch(self) -> Sticker | StandardSticker | GuildSticker:
         """|coro|
 
         Attempts to retrieve the full sticker data of the sticker item.
@@ -282,7 +282,7 @@ class Sticker(_StickerTag):
 
 
 class StandardSticker(Sticker):
-    """Represents a sticker that is found in a standard sticker pack.
+    r"""Represents a sticker that is found in a standard sticker pack.
 
     .. versionadded:: 2.0
 
@@ -312,7 +312,7 @@ class StandardSticker(Sticker):
         The ID of the sticker's pack.
     format: :class:`StickerFormatType`
         The format for the sticker's image.
-    tags: :class:`list`\\[:class:`str`]
+    tags: :class:`list`\[:class:`str`]
         A list of tags for the sticker.
     sort_value: :class:`int`
         The sticker's sort order within its pack.
@@ -409,7 +409,7 @@ class GuildSticker(Sticker):
         self.available: bool = data.get("available", True)
         self.guild_id: int = int(data["guild_id"])
         user = data.get("user")
-        self.user: Optional[User] = self._state.store_user(user) if user else None
+        self.user: User | None = self._state.store_user(user) if user else None
         self.emoji: str = data["tags"]
         self.type: StickerType = StickerType.guild
 
@@ -417,7 +417,7 @@ class GuildSticker(Sticker):
         return f"<GuildSticker name={self.name!r} id={self.id} guild_id={self.guild_id} user={self.user!r}>"
 
     @cached_slot_property("_cs_guild")
-    def guild(self) -> Optional[Guild]:
+    def guild(self) -> Guild | None:
         """:class:`Guild` | :data:`None`: The guild that this sticker is from.
         Could be :data:`None` if the bot is not in the guild.
 
@@ -429,9 +429,9 @@ class GuildSticker(Sticker):
         self,
         *,
         name: str = MISSING,
-        description: Optional[str] = MISSING,
+        description: str | None = MISSING,
         emoji: str = MISSING,
-        reason: Optional[str] = None,
+        reason: str | None = None,
     ) -> GuildSticker:
         """|coro|
 
@@ -486,7 +486,7 @@ class GuildSticker(Sticker):
         )
         return GuildSticker(state=self._state, data=data)
 
-    async def delete(self, *, reason: Optional[str] = None) -> None:
+    async def delete(self, *, reason: str | None = None) -> None:
         """|coro|
 
         Deletes the custom :class:`Sticker` from the guild.
@@ -511,7 +511,7 @@ class GuildSticker(Sticker):
 
 def _sticker_factory(
     sticker_type: Literal[1, 2],
-) -> tuple[type[Union[StandardSticker, GuildSticker, Sticker]], StickerType]:
+) -> tuple[type[StandardSticker | GuildSticker | Sticker], StickerType]:
     value = try_enum(StickerType, sticker_type)
     if value == StickerType.standard:
         return StandardSticker, value

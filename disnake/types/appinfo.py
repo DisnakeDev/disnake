@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
-from typing import Literal, Optional, TypedDict
+from typing import TYPE_CHECKING, Literal, TypedDict
 
 from typing_extensions import NotRequired
 
-from .snowflake import Snowflake
-from .team import Team
-from .user import User
+if TYPE_CHECKING:
+    from .snowflake import Snowflake
+    from .team import Team
+    from .user import User
 
 # (also called "installation context", which seems more accurate)
 ApplicationIntegrationType = Literal[0, 1]  # GUILD_INSTALL, USER_INSTALL
@@ -18,7 +19,7 @@ ApplicationEventWebhookStatus = Literal[0, 1, 2]  # disabled, enabled, disabled 
 class BaseAppInfo(TypedDict):
     id: Snowflake
     name: str
-    icon: Optional[str]
+    icon: str | None
     description: str
     terms_of_service_url: NotRequired[str]
     privacy_policy_url: NotRequired[str]
@@ -56,8 +57,8 @@ class AppInfo(BaseAppInfo):
     approximate_user_install_count: NotRequired[int]
     approximate_user_authorization_count: NotRequired[int]
     redirect_uris: NotRequired[list[str]]
-    interactions_endpoint_url: NotRequired[Optional[str]]
-    event_webhooks_url: NotRequired[Optional[str]]
+    interactions_endpoint_url: NotRequired[str | None]
+    event_webhooks_url: NotRequired[str | None]
     event_webhooks_status: NotRequired[ApplicationEventWebhookStatus]
     event_webhooks_type: NotRequired[list[str]]
     # values in this dict generally shouldn't be null, but they can be empty dicts
@@ -77,16 +78,16 @@ class PartialGatewayAppInfo(TypedDict):
 
 
 class EditAppInfo(TypedDict, total=False):
-    custom_install_url: Optional[str]
+    custom_install_url: str | None
     description: str
-    role_connections_verification_url: Optional[str]
-    install_params: Optional[InstallParams]
+    role_connections_verification_url: str | None
+    install_params: InstallParams | None
     integration_types_config: dict[str, ApplicationIntegrationTypeConfiguration]
     flags: int
-    icon: Optional[str]
-    cover_image: Optional[str]
-    interactions_endpoint_url: Optional[str]
-    tags: Optional[list[str]]
-    event_webhooks_url: Optional[str]
+    icon: str | None
+    cover_image: str | None
+    interactions_endpoint_url: str | None
+    tags: list[str] | None
+    event_webhooks_url: str | None
     event_webhooks_status: ApplicationEventWebhookStatus
-    event_webhooks_types: Optional[list[str]]
+    event_webhooks_types: list[str] | None

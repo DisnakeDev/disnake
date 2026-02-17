@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
-from typing import Literal, Optional, TypedDict, Union
+from typing import TYPE_CHECKING, Literal, TypeAlias, TypedDict, Union
 
-from typing_extensions import NotRequired, ReadOnly, Required, TypeAlias
+from typing_extensions import NotRequired, ReadOnly, Required
 
-from .channel import ChannelType
-from .emoji import PartialEmoji
-from .snowflake import Snowflake
+if TYPE_CHECKING:
+    from .channel import ChannelType
+    from .emoji import PartialEmoji
+    from .snowflake import Snowflake
 
 ComponentType = Literal[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 17, 18, 19]
 ButtonStyle = Literal[1, 2, 3, 4, 5, 6]
@@ -52,7 +53,7 @@ LabelChildComponent = Union[
 # valid message component types (v1/v2)
 MessageTopLevelComponentV1: TypeAlias = "ActionRow"
 # currently, all v2 components except Thumbnail
-MessageTopLevelComponentV2 = Union[
+MessageTopLevelComponentV2: TypeAlias = Union[
     "SectionComponent",
     "TextDisplayComponent",
     "MediaGalleryComponent",
@@ -60,10 +61,10 @@ MessageTopLevelComponentV2 = Union[
     "SeparatorComponent",
     "ContainerComponent",
 ]
-MessageTopLevelComponent = Union[MessageTopLevelComponentV1, MessageTopLevelComponentV2]
+MessageTopLevelComponent: TypeAlias = MessageTopLevelComponentV1 | MessageTopLevelComponentV2
 
 # valid modal component types
-ModalTopLevelComponent = Union[
+ModalTopLevelComponent: TypeAlias = Union[
     "ActionRow",  # deprecated
     "TextDisplayComponent",
     "LabelComponent",
@@ -150,13 +151,9 @@ class ChannelSelectMenu(_SelectMenu):
     channel_types: NotRequired[list[ChannelType]]
 
 
-AnySelectMenu = Union[
-    StringSelectMenu,
-    UserSelectMenu,
-    RoleSelectMenu,
-    MentionableSelectMenu,
-    ChannelSelectMenu,
-]
+AnySelectMenu: TypeAlias = (
+    StringSelectMenu | UserSelectMenu | RoleSelectMenu | MentionableSelectMenu | ChannelSelectMenu
+)
 
 
 # modal
@@ -172,7 +169,7 @@ class TextInput(_BaseComponent):
     type: Literal[4]
     custom_id: str
     style: TextInputStyle
-    label: NotRequired[Optional[str]]
+    label: NotRequired[str | None]
     min_length: NotRequired[int]
     max_length: NotRequired[int]
     required: NotRequired[bool]
@@ -201,8 +198,8 @@ class FileUploadComponent(_BaseComponent):
 class UnfurledMediaItem(TypedDict, total=False):
     url: Required[str]  # this is the only field required for sending
     proxy_url: str
-    height: Optional[int]
-    width: Optional[int]
+    height: int | None
+    width: int | None
     content_type: str
     attachment_id: Snowflake
 
@@ -215,7 +212,7 @@ class SectionComponent(_BaseComponent):
     # note: this may be expanded to more component types in the future
     components: list[TextDisplayComponent]
     # note: same as above
-    accessory: Union[ThumbnailComponent, ButtonComponent]
+    accessory: ThumbnailComponent | ButtonComponent
 
 
 class TextDisplayComponent(_BaseComponent):
@@ -261,12 +258,10 @@ class ContainerComponent(_BaseComponent):
     accent_color: NotRequired[int]
     spoiler: NotRequired[bool]
     components: list[
-        Union[
-            ActionRow,
-            SectionComponent,
-            TextDisplayComponent,
-            MediaGalleryComponent,
-            FileComponent,
-            SeparatorComponent,
-        ]
+        ActionRow
+        | SectionComponent
+        | TextDisplayComponent
+        | MediaGalleryComponent
+        | FileComponent
+        | SeparatorComponent
     ]

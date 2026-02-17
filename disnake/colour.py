@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import colorsys
 import random
-from typing import TYPE_CHECKING, Any, Optional, Union
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -62,10 +62,10 @@ class Colour:
     def _get_byte(self, byte: int) -> int:
         return (self.value >> (8 * byte)) & 0xFF
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         return isinstance(other, Colour) and self.value == other.value
 
-    def __ne__(self, other: Any) -> bool:
+    def __ne__(self, other: object) -> bool:
         return not self.__eq__(other)
 
     def __str__(self) -> str:
@@ -96,7 +96,7 @@ class Colour:
         return self._get_byte(0)
 
     def to_rgb(self) -> tuple[int, int, int]:
-        """:class:`tuple`\\[:class:`int`, :class:`int`, :class:`int`]: Returns an (r, g, b) tuple representing the colour."""
+        r""":class:`tuple`\[:class:`int`, :class:`int`, :class:`int`]: Returns an (r, g, b) tuple representing the colour."""
         return (self.r, self.g, self.b)
 
     @classmethod
@@ -116,7 +116,15 @@ class Colour:
         return cls(0)
 
     @classmethod
-    def random(cls, *, seed: Optional[Union[int, str, float, bytes, bytearray]] = None) -> Self:
+    def from_hex(cls, hex_str: str, /) -> Self:
+        """Constructs a :class:`Colour` from a hex color code (``#RRGGBB``).
+
+        .. versionadded:: |vnext|
+        """
+        return cls(int(hex_str.removeprefix("#"), 16))
+
+    @classmethod
+    def random(cls, *, seed: int | str | float | bytes | bytearray | None = None) -> Self:
         """A factory method that returns a :class:`Colour` with a random hue.
 
         .. note::

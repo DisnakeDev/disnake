@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: MIT
+from __future__ import annotations
 
 import importlib
 import textwrap
-import types
-from typing import Optional, cast
+from typing import TYPE_CHECKING, cast
 
 import libcst as cst
 import libcst.codemod.visitors as codevisitors
@@ -13,6 +13,9 @@ from libcst import codemod
 from disnake import flags
 
 from .base import BaseCodemodCommand
+
+if TYPE_CHECKING:
+    import types
 
 BASE_FLAG_CLASSES = (flags.BaseFlags, flags.ListBaseFlags)
 
@@ -54,7 +57,7 @@ class FlagTypings(BaseCodemodCommand):
 
         return super().transform_module(tree)
 
-    def visit_ClassDef(self, node: cst.ClassDef) -> Optional[bool]:
+    def visit_ClassDef(self, node: cst.ClassDef) -> bool | None:
         # no reason to continue into classes
         return False
 
@@ -80,8 +83,8 @@ class FlagTypings(BaseCodemodCommand):
         # insert it near the beginning of the class body.
         # we also decorate with @_generated so we can delete it later.
 
-        if_block: Optional[cst.If] = None
-        init: Optional[cst.FunctionDef] = None
+        if_block: cst.If | None = None
+        init: cst.FunctionDef | None = None
         body = list(node.body.body)
         kwonly_params = [
             cst.Param(cst.Name(flag_name), cst.Annotation(cst.Name("bool")), default=cst.Ellipsis())

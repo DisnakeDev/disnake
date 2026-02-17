@@ -2,30 +2,31 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     ClassVar,
-    Optional,
+    TypeAlias,
     TypeVar,
-    Union,
     overload,
 )
 
-from ...abc import Snowflake
 from ...components import SelectOption, StringSelectMenu
-from ...enums import ComponentType, SelectDefaultValueType
+from ...enums import ComponentType
 from ...utils import MISSING
-from .base import BaseSelect, P, V_co, _create_decorator
+from .base import BaseSelect, V_co, _create_decorator
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Mapping
+
     from typing_extensions import Self
 
+    from ...abc import Snowflake
     from ...emoji import Emoji
+    from ...enums import SelectDefaultValueType
     from ...partial_emoji import PartialEmoji
     from ..item import DecoratedItem, ItemCallbackType
+    from .base import P
 
 
 __all__ = (
@@ -36,7 +37,7 @@ __all__ = (
 )
 
 
-SelectOptionInput = Union[list[SelectOption], list[str], dict[str, str]]
+SelectOptionInput: TypeAlias = list[SelectOption] | list[str] | dict[str, str]
 
 
 def _parse_select_options(options: SelectOptionInput) -> list[SelectOption]:
@@ -47,7 +48,7 @@ def _parse_select_options(options: SelectOptionInput) -> list[SelectOption]:
 
 
 class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
-    """Represents a UI string select menu.
+    r"""Represents a UI string select menu.
 
     This is usually represented as a drop down menu.
 
@@ -73,8 +74,8 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select is disabled.
-    options: :class:`list`\\[:class:`disnake.SelectOption`] | :class:`list`\\[:class:`str`] | :class:`dict`\\[:class:`str`, :class:`str`]
-        A list of options that can be selected in this menu. Use explicit :class:`.SelectOption`\\s
+    options: :class:`list`\[:class:`disnake.SelectOption`] | :class:`list`\[:class:`str`] | :class:`dict`\[:class:`str`, :class:`str`]
+        A list of options that can be selected in this menu. Use explicit :class:`.SelectOption`\s
         for fine-grained control over the options. Alternatively, a list of strings will be treated
         as a list of labels, and a dict will be treated as a mapping of labels to values.
 
@@ -88,9 +89,10 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
 
         .. versionadded:: 2.11
     id: :class:`int`
-        The numeric identifier for the component. Must be unique within the message.
+        The numeric identifier for the component. Must be unique within a message or modal.
+        This is always present in components received from the API.
         If set to ``0`` (the default) when sending a component, the API will assign
-        sequential identifiers to the components in the message.
+        sequential identifiers to the components in the message or modal.
 
         .. versionadded:: 2.11
     row: :class:`int` | :data:`None`
@@ -102,7 +104,7 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
 
     Attributes
     ----------
-    values: :class:`list`\\[:class:`str`]
+    values: :class:`list`\[:class:`str`]
         A list of values that have been selected by the user.
     """
 
@@ -118,14 +120,14 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
         self: StringSelect[None],
         *,
         custom_id: str = ...,
-        placeholder: Optional[str] = None,
+        placeholder: str | None = None,
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
         options: SelectOptionInput = ...,
         required: bool = True,
         id: int = 0,
-        row: Optional[int] = None,
+        row: int | None = None,
     ) -> None: ...
 
     @overload
@@ -133,28 +135,28 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
         self: StringSelect[V_co],
         *,
         custom_id: str = ...,
-        placeholder: Optional[str] = None,
+        placeholder: str | None = None,
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
         options: SelectOptionInput = ...,
         required: bool = True,
         id: int = 0,
-        row: Optional[int] = None,
+        row: int | None = None,
     ) -> None: ...
 
     def __init__(
         self,
         *,
         custom_id: str = MISSING,
-        placeholder: Optional[str] = None,
+        placeholder: str | None = None,
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
         options: SelectOptionInput = MISSING,
         required: bool = True,
         id: int = 0,
-        row: Optional[int] = None,
+        row: int | None = None,
     ) -> None:
         super().__init__(
             StringSelectMenu,
@@ -187,7 +189,7 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
 
     @property
     def options(self) -> list[SelectOption]:
-        """:class:`list`\\[:class:`disnake.SelectOption`]: A list of options that can be selected in this select menu."""
+        r""":class:`list`\[:class:`disnake.SelectOption`]: A list of options that can be selected in this select menu."""
         return self._underlying.options
 
     @options.setter
@@ -206,8 +208,8 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
         *,
         label: str,
         value: str = MISSING,
-        description: Optional[str] = None,
-        emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
+        description: str | None = None,
+        emoji: str | Emoji | PartialEmoji | None = None,
         default: bool = False,
     ) -> None:
         """Adds an option to the select menu.
@@ -276,14 +278,14 @@ S_co = TypeVar("S_co", bound="StringSelect", covariant=True)
 @overload
 def string_select(
     *,
-    placeholder: Optional[str] = None,
+    placeholder: str | None = None,
     custom_id: str = ...,
     min_values: int = 1,
     max_values: int = 1,
     options: SelectOptionInput = ...,
     disabled: bool = False,
     id: int = 0,
-    row: Optional[int] = None,
+    row: int | None = None,
 ) -> Callable[[ItemCallbackType[V_co, StringSelect[V_co]]], DecoratedItem[StringSelect[V_co]]]: ...
 
 
@@ -296,9 +298,9 @@ def string_select(
 def string_select(
     cls: Callable[..., S_co] = StringSelect[Any], **kwargs: Any
 ) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]:
-    """A decorator that attaches a string select menu to a component.
+    r"""A decorator that attaches a string select menu to a component.
 
-    The function being decorated should have three parameters, ``self`` representing
+    The function being decorated should have three parameters: ``self`` representing
     the :class:`disnake.ui.View`, the :class:`disnake.ui.StringSelect` that was
     interacted with, and the :class:`disnake.MessageInteraction`.
 
@@ -310,10 +312,10 @@ def string_select(
 
     Parameters
     ----------
-    cls: :class:`~collections.abc.Callable`\\[..., :class:`StringSelect`]
-        A callable (may be a :class:`StringSelect` subclass) to create a new instance of this component.
+    cls: :class:`~collections.abc.Callable`\[..., :class:`StringSelect`]
+        A callable (such as a :class:`StringSelect` subclass) returning an instance of a :class:`StringSelect`.
         If provided, the other parameters described below do not apply.
-        Instead, this decorator will accept the same keywords as the passed callable/class does.
+        Instead, this decorator will accept the same keyword arguments as the passed callable does.
 
         .. versionadded:: 2.6
     placeholder: :class:`str` | :data:`None`
@@ -327,8 +329,8 @@ def string_select(
     max_values: :class:`int`
         The maximum number of items that must be chosen for this select menu.
         Defaults to 1 and must be between 1 and 25.
-    options: :class:`list`\\[:class:`disnake.SelectOption`] | :class:`list`\\[:class:`str`] | :class:`dict`\\[:class:`str`, :class:`str`]
-        A list of options that can be selected in this menu. Use explicit :class:`.SelectOption`\\s
+    options: :class:`list`\[:class:`disnake.SelectOption`] | :class:`list`\[:class:`str`] | :class:`dict`\[:class:`str`, :class:`str`]
+        A list of options that can be selected in this menu. Use explicit :class:`.SelectOption`\s
         for fine-grained control over the options. Alternatively, a list of strings will be treated
         as a list of labels, and a dict will be treated as a mapping of labels to values.
 
@@ -339,9 +341,9 @@ def string_select(
     disabled: :class:`bool`
         Whether the select is disabled. Defaults to ``False``.
     id: :class:`int`
-        The numeric identifier for the component. Must be unique within the message.
+        The numeric identifier for the component. Must be unique within a view.
         If set to ``0`` (the default) when sending a component, the API will assign
-        sequential identifiers to the components in the message.
+        sequential identifiers to the components in the view.
 
         .. versionadded:: 2.11
     row: :class:`int` | :data:`None`
@@ -350,6 +352,12 @@ def string_select(
         like to control the relative positioning of the row then passing an index is advised.
         For example, row=1 will show up before row=2. Defaults to :data:`None`, which is automatic
         ordering. The row number must be between 0 and 4 (i.e. zero indexed).
+
+    Raises
+    ------
+    TypeError
+        The decorated function was not a coroutine function,
+        or the ``cls`` parameter was not a callable or a subclass of :class:`StringSelect`.
     """
     return _create_decorator(cls, **kwargs)
 

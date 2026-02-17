@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
-from typing import TYPE_CHECKING, Any, Optional, Union
+from typing import TYPE_CHECKING, Any
 
-from ..components import VALID_ACTION_ROW_MESSAGE_COMPONENT_TYPES, ActionRowMessageComponent
+from ..components import VALID_ACTION_ROW_MESSAGE_COMPONENT_TYPES
 from ..enums import ComponentType, try_enum
 from ..message import Message
 from ..ui.action_row import walk_components
@@ -18,7 +17,10 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
     from ..abc import AnyChannel
+    from ..components import ActionRowMessageComponent
     from ..member import Member
     from ..role import Role
     from ..state import ConnectionState
@@ -30,7 +32,7 @@ if TYPE_CHECKING:
 
 
 class MessageInteraction(Interaction[ClientT]):
-    """Represents an interaction with a message component.
+    r"""Represents an interaction with a message component.
 
     Current examples are buttons and dropdowns.
 
@@ -70,7 +72,7 @@ class MessageInteraction(Interaction[ClientT]):
 
         .. note::
             In scenarios where an interaction occurs in a guild but :attr:`.guild` is unavailable,
-            such as with user-installed applications in guilds, some attributes of :class:`Member`\\s
+            such as with user-installed applications in guilds, some attributes of :class:`Member`\s
             that depend on the guild/role cache will not work due to an API limitation.
             This includes :attr:`~Member.roles`, :attr:`~Member.top_role`, :attr:`~Member.role_icon`,
             and :attr:`~Member.guild_permissions`.
@@ -94,7 +96,7 @@ class MessageInteraction(Interaction[ClientT]):
 
     client: :class:`Client`
         The interaction client.
-    entitlements: :class:`list`\\[:class:`Entitlement`]
+    entitlements: :class:`list`\[:class:`Entitlement`]
         The entitlements for the invoking user and guild,
         representing access to an application subscription.
 
@@ -137,8 +139,8 @@ class MessageInteraction(Interaction[ClientT]):
         self.message = Message(state=self._state, channel=self.channel, data=data["message"])
 
     @property
-    def values(self) -> Optional[list[str]]:
-        """:class:`list`\\[:class:`str`] | :data:`None`: The values the user selected.
+    def values(self) -> list[str] | None:
+        r""":class:`list`\[:class:`str`] | :data:`None`: The values the user selected.
 
         For select menus of type :attr:`~ComponentType.string_select`,
         these are just the string values the user selected.
@@ -151,8 +153,8 @@ class MessageInteraction(Interaction[ClientT]):
     @cached_slot_property("_cs_resolved_values")
     def resolved_values(
         self,
-    ) -> Optional[Sequence[Union[str, Member, User, Role, AnyChannel]]]:
-        """:class:`~collections.abc.Sequence`\\[:class:`str` | :class:`Member` | :class:`User` | :class:`Role` | :class:`abc.GuildChannel` | :class:`Thread` | :class:`PartialMessageable`] | :data:`None`: The (resolved) values the user selected.
+    ) -> Sequence[str | Member | User | Role | AnyChannel] | None:
+        r""":class:`~collections.abc.Sequence`\[:class:`str` | :class:`Member` | :class:`User` | :class:`Role` | :class:`abc.GuildChannel` | :class:`Thread` | :class:`PartialMessageable`] | :data:`None`: The (resolved) values the user selected.
 
         For select menus of type :attr:`~ComponentType.string_select`,
         this is equivalent to :attr:`values`.
@@ -169,7 +171,7 @@ class MessageInteraction(Interaction[ClientT]):
             return self.data.values
 
         resolved = self.data.resolved
-        values: list[Union[Member, User, Role, AnyChannel]] = []
+        values: list[Member | User | Role | AnyChannel] = []
         for key in self.data.values:
             # force upcast to avoid typing issues; we expect the api to only provide valid values
             value: Any = resolved.get_with_type(key, component_type, key)
@@ -192,7 +194,7 @@ class MessageInteraction(Interaction[ClientT]):
 
 
 class MessageInteractionData(dict[str, Any]):
-    """Represents the data of an interaction with a message component.
+    r"""Represents the data of an interaction with a message component.
 
     .. versionadded:: 2.1
 
@@ -202,7 +204,7 @@ class MessageInteractionData(dict[str, Any]):
         The custom ID of the component.
     component_type: :class:`ComponentType`
         The type of the component.
-    values: :class:`list`\\[:class:`str`] | :data:`None`
+    values: :class:`list`\[:class:`str`] | :data:`None`
         The values the user has selected in a select menu.
         For non-string select menus, this contains IDs for use with :attr:`resolved`.
     resolved: :class:`InteractionDataResolved`
@@ -222,7 +224,7 @@ class MessageInteractionData(dict[str, Any]):
         super().__init__(data)
         self.custom_id: str = data["custom_id"]
         self.component_type: ComponentType = try_enum(ComponentType, data["component_type"])
-        self.values: Optional[list[str]] = (
+        self.values: list[str] | None = (
             list(map(str, values)) if (values := data.get("values")) else None
         )
 

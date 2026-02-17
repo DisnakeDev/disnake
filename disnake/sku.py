@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-import datetime
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from .enums import SKUType, try_enum
 from .flags import SKUFlags
@@ -13,6 +12,8 @@ from .subscription import Subscription
 from .utils import snowflake_time
 
 if TYPE_CHECKING:
+    import datetime
+
     from .abc import Snowflake, SnowflakeTime
     from .state import ConnectionState
     from .types.sku import SKU as SKUPayload
@@ -22,7 +23,7 @@ __all__ = ("SKU",)
 
 
 class SKU(Hashable):
-    """Represents an SKU.
+    r"""Represents an SKU.
 
     This can be retrieved using :meth:`Client.skus`.
 
@@ -30,11 +31,11 @@ class SKU(Hashable):
 
         .. describe:: x == y
 
-            Checks if two :class:`SKU`\\s are equal.
+            Checks if two :class:`SKU`\s are equal.
 
         .. describe:: x != y
 
-            Checks if two :class:`SKU`\\s are not equal.
+            Checks if two :class:`SKU`\s are not equal.
 
         .. describe:: hash(x)
 
@@ -91,9 +92,9 @@ class SKU(Hashable):
         self,
         user: Snowflake,
         *,
-        limit: Optional[int] = 50,
-        before: Optional[SnowflakeTime] = None,
-        after: Optional[SnowflakeTime] = None,
+        limit: int | None = 50,
+        before: SnowflakeTime | None = None,
+        after: SnowflakeTime | None = None,
     ) -> SubscriptionIterator:
         """Retrieves an :class:`.AsyncIterator` that enables receiving subscriptions for the SKU.
 

@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
-from typing import Literal, TypedDict, Union
+from typing import TYPE_CHECKING, Literal, TypeAlias, TypedDict
 
 from typing_extensions import NotRequired
 
-from .snowflake import Snowflake, SnowflakeList
+if TYPE_CHECKING:
+    from .snowflake import Snowflake, SnowflakeList
 
 AutoModTriggerType = Literal[1, 3, 4, 5, 6]
 AutoModEventType = Literal[1, 2]
@@ -29,12 +30,12 @@ class AutoModTimeoutActionMetadata(TypedDict):
 class AutoModBlockInteractionActionMetadata(TypedDict): ...  # currently empty
 
 
-AutoModActionMetadata = Union[
-    AutoModBlockMessageActionMetadata,
-    AutoModSendAlertActionMetadata,
-    AutoModTimeoutActionMetadata,
-    AutoModBlockInteractionActionMetadata,
-]
+AutoModActionMetadata: TypeAlias = (
+    AutoModBlockMessageActionMetadata
+    | AutoModSendAlertActionMetadata
+    | AutoModTimeoutActionMetadata
+    | AutoModBlockInteractionActionMetadata
+)
 
 
 class AutoModAction(TypedDict):

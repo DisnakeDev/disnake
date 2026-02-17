@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-import datetime
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from .enums import StagePrivacyLevel, try_enum
 from .mixins import Hashable
@@ -12,6 +11,8 @@ from .utils import MISSING, _get_as_snowflake, cached_slot_property, snowflake_t
 __all__ = ("StageInstance",)
 
 if TYPE_CHECKING:
+    import datetime
+
     from .channel import StageChannel
     from .guild import Guild
     from .guild_scheduled_event import GuildScheduledEvent
@@ -78,7 +79,7 @@ class StageInstance(Hashable):
         self.topic: str = data["topic"]
         self.privacy_level: StagePrivacyLevel = try_enum(StagePrivacyLevel, data["privacy_level"])
         self._discoverable_disabled: bool = data.get("discoverable_disabled", False)
-        self.guild_scheduled_event_id: Optional[int] = _get_as_snowflake(
+        self.guild_scheduled_event_id: int | None = _get_as_snowflake(
             data, "guild_scheduled_event_id"
         )
 
@@ -94,7 +95,7 @@ class StageInstance(Hashable):
         return snowflake_time(self.id)
 
     @cached_slot_property("_cs_channel")
-    def channel(self) -> Optional[StageChannel]:
+    def channel(self) -> StageChannel | None:
         """:class:`StageChannel` | :data:`None`: The channel that stage instance is running in."""
         # the returned channel will always be a StageChannel or None
         return self._state.get_channel(self.channel_id)  # pyright: ignore[reportReturnType]
@@ -129,7 +130,7 @@ class StageInstance(Hashable):
         return self.privacy_level is StagePrivacyLevel.public
 
     @property
-    def guild_scheduled_event(self) -> Optional[GuildScheduledEvent]:
+    def guild_scheduled_event(self) -> GuildScheduledEvent | None:
         """:class:`GuildScheduledEvent` | :data:`None`: The stage instance's scheduled event.
 
         This is only set if this stage instance has an associated scheduled event,
@@ -145,7 +146,7 @@ class StageInstance(Hashable):
         *,
         topic: str = MISSING,
         privacy_level: StagePrivacyLevel = MISSING,
-        reason: Optional[str] = None,
+        reason: str | None = None,
     ) -> None:
         """|coro|
 
@@ -195,7 +196,7 @@ class StageInstance(Hashable):
         if payload:
             await self._state.http.edit_stage_instance(self.channel_id, **payload, reason=reason)
 
-    async def delete(self, *, reason: Optional[str] = None) -> None:
+    async def delete(self, *, reason: str | None = None) -> None:
         """|coro|
 
         Deletes the stage instance.

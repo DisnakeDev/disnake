@@ -9,15 +9,12 @@ from abc import ABC
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
-    Optional,
+    TypeAlias,
     TypeVar,
-    Union,
     cast,
     overload,
 )
 
-from disnake.app_commands import ApplicationCommand
 from disnake.enums import ApplicationCommandType
 from disnake.flags import ApplicationInstallTypes, InteractionContextTypes
 from disnake.permissions import Permissions
@@ -29,16 +26,21 @@ from disnake.utils import (
     maybe_coroutine,
 )
 
-from .cooldowns import BucketType, CooldownMapping, MaxConcurrency
+from .cooldowns import BucketType, CooldownMapping
 from .errors import CheckFailure, CommandError, CommandInvokeError, CommandOnCooldown
 
 if TYPE_CHECKING:
-    from typing_extensions import Concatenate, ParamSpec, Self
+    from collections.abc import Callable
+    from typing import Concatenate
 
+    from typing_extensions import ParamSpec, Self
+
+    from disnake.app_commands import ApplicationCommand
     from disnake.interactions import ApplicationCommandInteraction
 
     from ._types import AppCheck, Coro, Error, Hook
     from .cog import Cog
+    from .cooldowns import MaxConcurrency
     from .interaction_bot_base import InteractionBotBase
 
     ApplicationCommandInteractionT = TypeVar(
@@ -47,11 +49,11 @@ if TYPE_CHECKING:
 
     P = ParamSpec("P")
 
-    CommandCallback = Callable[..., Coro[Any]]
-    InteractionCommandCallback = Union[
-        Callable[Concatenate["CogT", ApplicationCommandInteractionT, P], Coro[Any]],
-        Callable[Concatenate[ApplicationCommandInteractionT, P], Coro[Any]],
-    ]
+    CommandCallback: TypeAlias = Callable[..., Coro[Any]]
+    InteractionCommandCallback: TypeAlias = (
+        Callable[Concatenate["CogT", ApplicationCommandInteractionT, P], Coro[Any]]
+        | Callable[Concatenate[ApplicationCommandInteractionT, P], Coro[Any]]
+    )
 
 
 __all__ = (
@@ -90,7 +92,7 @@ def wrap_callback(coro):
 
 
 class InvokableApplicationCommand(ABC):
-    """A base class that implements the protocol for a bot application command.
+    r"""A base class that implements the protocol for a bot application command.
 
     These are not created manually, instead they are created via the
     decorator or functional interface.
@@ -114,18 +116,18 @@ class InvokableApplicationCommand(ABC):
         The coroutine function that is executed when the command is called.
     cog: :class:`Cog` | :data:`None`
         The cog that this command belongs to. :data:`None` if there isn't one.
-    checks: :class:`list`\\[:class:`~collections.abc.Callable`\\[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
+    checks: :class:`list`\[:class:`~collections.abc.Callable`\[[:class:`.ApplicationCommandInteraction`], :class:`bool`]]
         A list of predicates that verifies if the command could be executed
         with the given :class:`.ApplicationCommandInteraction` as the sole parameter. If an exception
         is necessary to be thrown to signal failure, then one inherited from
         :exc:`.CommandError` should be used. Note that if the checks fail then
         :exc:`.CheckFailure` exception is raised to the :func:`.on_slash_command_error`
         event.
-    guild_ids: :class:`tuple`\\[:class:`int`, ...] | :data:`None`
+    guild_ids: :class:`tuple`\[:class:`int`, ...] | :data:`None`
         The list of IDs of the guilds where the command is synced. :data:`None` if this command is global.
     auto_sync: :class:`bool`
         Whether to automatically register the command.
-    extras: :class:`dict`\\[:class:`str`, :data:`~typing.Any`]
+    extras: :class:`dict`\[:class:`str`, :data:`~typing.Any`]
         A dict of user provided extras to attach to the command.
 
         .. versionadded:: 2.5
@@ -140,7 +142,7 @@ class InvokableApplicationCommand(ABC):
         self.__original_kwargs__ = {k: v for k, v in kwargs.items() if v is not None}
         return self
 
-    def __init__(self, func: CommandCallback, *, name: Optional[str] = None, **kwargs: Any) -> None:
+    def __init__(self, func: CommandCallback, *, name: str | None = None, **kwargs: Any) -> None:
         self.__command_flag__ = None
         self._callback: CommandCallback = func
         self.name: str = name or func.__name__
@@ -196,14 +198,14 @@ class InvokableApplicationCommand(ABC):
             max_concurrency = func.__commands_max_concurrency__
         except AttributeError:
             max_concurrency = kwargs.get("max_concurrency")
-        self._max_concurrency: Optional[MaxConcurrency] = max_concurrency
+        self._max_concurrency: MaxConcurrency | None = max_concurrency
 
-        self.cog: Optional[Cog] = None
-        self.guild_ids: Optional[tuple[int, ...]] = None
+        self.cog: Cog | None = None
+        self.guild_ids: tuple[int, ...] | None = None
         self.auto_sync: bool = True
 
-        self._before_invoke: Optional[Hook] = None
-        self._after_invoke: Optional[Hook] = None
+        self._before_invoke: Hook | None = None
+        self._after_invoke: Hook | None = None
 
     # this should copy all attributes that can be changed after instantiation via decorators
     def _ensure_assignment_on_copy(self, other: AppCommandT) -> AppCommandT:
@@ -286,7 +288,7 @@ class InvokableApplicationCommand(ABC):
         return self.body.dm_permission
 
     @property
-    def default_member_permissions(self) -> Optional[Permissions]:
+    def default_member_permissions(self) -> Permissions | None:
         """:class:`.Permissions` | :data:`None`: The default required member permissions for this command.
         A member must have *all* these permissions to be able to invoke the command in a guild.
 
@@ -302,7 +304,7 @@ class InvokableApplicationCommand(ABC):
         return self.body.default_member_permissions
 
     @property
-    def install_types(self) -> Optional[ApplicationInstallTypes]:
+    def install_types(self) -> ApplicationInstallTypes | None:
         """:class:`.ApplicationInstallTypes` | :data:`None`: The installation types
         where the command is available. Only available for global commands.
 
@@ -311,7 +313,7 @@ class InvokableApplicationCommand(ABC):
         return self.body.install_types
 
     @property
-    def contexts(self) -> Optional[InteractionContextTypes]:
+    def contexts(self) -> InteractionContextTypes | None:
         """:class:`.InteractionContextTypes` | :data:`None`: The interaction contexts
         where the command can be used. Only available for global commands.
 
@@ -638,7 +640,7 @@ class InvokableApplicationCommand(ABC):
         return coro
 
     @property
-    def cog_name(self) -> Optional[str]:
+    def cog_name(self) -> str | None:
         """:class:`str` | :data:`None`: The name of the cog this application command belongs to, if any."""
         return type(self.cog).__cog_name__ if self.cog is not None else None
 
@@ -709,6 +711,7 @@ def default_member_permissions(
     administrator: bool = ...,
     attach_files: bool = ...,
     ban_members: bool = ...,
+    bypass_slowmode: bool = ...,
     change_nickname: bool = ...,
     connect: bool = ...,
     create_events: bool = ...,
