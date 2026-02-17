@@ -1768,7 +1768,7 @@ class AutoModTriggerType(Enum):
     This trigger type requires additional :class:`metadata <AutoModTriggerMetadata>`.
     """
     member_profile = 6
-    """The rule will filter member profiles based on a custom keyword list.
+    """The rule will filter member profile names based on a custom keyword list.
 
     This trigger type requires additional :class:`metadata <AutoModTriggerMetadata>`.
 
