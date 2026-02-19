@@ -7,6 +7,7 @@ import logging
 import re
 import sys
 import weakref
+from collections.abc import Coroutine, Iterable, Sequence
 from errno import ECONNRESET
 from typing import (
     TYPE_CHECKING,
@@ -36,7 +37,6 @@ from .utils import MISSING
 _log = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from collections.abc import Coroutine, Iterable, Sequence
     from types import TracebackType
 
     from typing_extensions import Self

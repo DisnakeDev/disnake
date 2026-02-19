@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import types
+from collections.abc import Iterator
 from functools import total_ordering
 from typing import (
     TYPE_CHECKING,
@@ -13,8 +14,6 @@ from typing import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
-
     from typing_extensions import Self
 
 __all__ = (

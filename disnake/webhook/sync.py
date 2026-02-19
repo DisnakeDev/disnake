@@ -12,6 +12,7 @@ import logging
 import re
 import threading
 import time
+from collections.abc import Sequence
 from errno import ECONNRESET
 from typing import (
     TYPE_CHECKING,
@@ -24,6 +25,7 @@ from urllib.parse import quote as urlquote
 from .. import utils
 from ..channel import PartialMessageable
 from ..errors import DiscordServerError, Forbidden, HTTPException, NotFound, WebhookTokenMissing
+from ..flags import MessageFlags
 from ..http import Route
 from ..message import Message
 from ..object import Object
@@ -37,7 +39,6 @@ __all__ = (
 _log = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
     from types import TracebackType
 
     from typing_extensions import Self
@@ -45,7 +46,6 @@ if TYPE_CHECKING:
     from ..abc import Snowflake
     from ..embeds import Embed
     from ..file import File
-    from ..flags import MessageFlags
     from ..mentions import AllowedMentions
     from ..message import Attachment
     from ..types.message import Message as MessagePayload

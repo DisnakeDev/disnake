@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import os
 import warnings
 from abc import ABC, abstractmethod
 from collections import defaultdict
@@ -23,8 +24,6 @@ from .enums import Locale
 from .errors import LocalizationKeyError
 
 if TYPE_CHECKING:
-    import os
-
     from typing_extensions import Self
 
     LocalizedRequired: TypeAlias = "str | Localized[str]"

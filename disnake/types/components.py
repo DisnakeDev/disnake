@@ -2,14 +2,13 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, TypeAlias, TypedDict, Union
+from typing import Literal, TypeAlias, TypedDict, Union
 
 from typing_extensions import NotRequired, ReadOnly, Required
 
-if TYPE_CHECKING:
-    from .channel import ChannelType
-    from .emoji import PartialEmoji
-    from .snowflake import Snowflake
+from .channel import ChannelType
+from .emoji import PartialEmoji
+from .snowflake import Snowflake
 
 ComponentType = Literal[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 17, 18, 19]
 ButtonStyle = Literal[1, 2, 3, 4, 5, 6]

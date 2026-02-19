@@ -2,12 +2,11 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, TypedDict
+from typing import TypedDict
 
-if TYPE_CHECKING:
-    from .guild import Guild
-    from .snowflake import Snowflake
-    from .user import User
+from .guild import Guild
+from .snowflake import Snowflake
+from .user import User
 
 
 class CreateTemplate(TypedDict):
