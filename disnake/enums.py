@@ -1588,7 +1588,7 @@ class WidgetStyle(Enum):
         return self.value
 
 
-# reference: https://discord.com/developers/docs/reference#locales
+# reference: https://docs.discord.com/developers/reference#locales
 class Locale(Enum):
     """Represents supported locales by Discord.
 

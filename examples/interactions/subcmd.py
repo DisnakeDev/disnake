@@ -19,7 +19,7 @@ bot = commands.Bot(command_prefix=commands.when_mentioned)
 # Parent slash commands and groups cannot be invoked by users directly,
 # but their callback will be invoked before any of their children are called.
 #
-# For a full explanation, see https://discord.com/developers/docs/interactions/application-commands#subcommands-and-subcommand-groups
+# For a full explanation, see https://docs.discord.com/developers/interactions/application-commands#subcommands-and-subcommand-groups
 
 
 # Define a new command with two children:

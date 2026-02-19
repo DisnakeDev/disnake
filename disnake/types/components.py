@@ -76,7 +76,7 @@ ModalTopLevelComponent: TypeAlias = Union[
 
 class _BaseComponent(TypedDict):
     type: ReadOnly[ComponentType]
-    id: int  # note: technically optional when sending, we just default to 0 for simplicity, which is equivalent (https://discord.com/developers/docs/components/reference#anatomy-of-a-component)
+    id: int  # note: technically optional when sending, we just default to 0 for simplicity, which is equivalent (https://docs.discord.com/developers/components/reference#anatomy-of-a-component)
 
 
 class ActionRow(_BaseComponent):

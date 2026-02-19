@@ -363,7 +363,7 @@ class Poll:
             poll.duration = utils.parse_time(expiry) - utils.snowflake_time(poll.message.id)
         else:
             # future support for non-expiring polls
-            # read the foot note https://discord.com/developers/docs/resources/poll#poll-object-poll-object-structure
+            # read the foot note https://docs.discord.com/developers/resources/poll#poll-object-poll-object-structure
             poll.duration = None
 
         if results := data.get("results"):

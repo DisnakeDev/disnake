@@ -71,7 +71,7 @@ class PartialAppInfo(BaseAppInfo, total=False):
     flags: int
 
 
-# see https://discord.com/developers/docs/topics/gateway-events#ready-ready-event-fields
+# see https://docs.discord.com/developers/events/gateway-events#ready-ready-event-fields
 class PartialGatewayAppInfo(TypedDict):
     id: Snowflake
     flags: int
