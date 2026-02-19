@@ -75,7 +75,7 @@ dpy_github_repo = "https://github.com/Rapptz/discord.py"
 extlinks = {
     "issue": (f"{github_repo}/issues/%s", "#%s"),
     "issue-dpy": (f"{dpy_github_repo}/issues/%s", "#%s"),
-    "ddocs": ("https://discord.com/developers/docs/%s", None),
+    "ddocs": ("https://docs.discord.com/developers/%s", None),
 }
 
 extlinks_detect_hardcoded_links = True

@@ -2708,7 +2708,7 @@ class Guild(Hashable):
 
         Creates a :class:`GuildScheduledEvent`.
 
-        You must have :attr:`~Permissions.manage_events` permission to do this.
+        You must have :attr:`~Permissions.create_events` permission to do this.
 
         Based on the channel/entity type, there are different restrictions regarding
         other parameter values, as shown in this table:
@@ -3539,7 +3539,7 @@ class Guild(Hashable):
 
         Creates a :class:`Sticker` for the guild.
 
-        You must have :attr:`~Permissions.manage_guild_expressions` permission to
+        You must have :attr:`~Permissions.create_guild_expressions` permission to
         do this.
 
         .. versionadded:: 2.0
@@ -3688,7 +3688,7 @@ class Guild(Hashable):
         Emojis with subscription roles (see ``roles`` below) are considered premium emoji,
         and count towards a separate limit of 25 emojis.
 
-        You must have :attr:`~Permissions.manage_guild_expressions` permission to
+        You must have :attr:`~Permissions.create_guild_expressions` permission to
         do this.
 
         Parameters
@@ -3824,11 +3824,6 @@ class Guild(Hashable):
         r"""|coro|
 
         Retrieves the member counts of all :class:`Role`\s that the guild has.
-
-        .. caution::
-            This uses an endpoint that is currently in public preview,
-            it should not be considered stable and is exempt from version guarantees:
-            https://github.com/discord/discord-api-docs/discussions/3306#discussioncomment-14681890.
 
         .. note::
 
@@ -5195,6 +5190,7 @@ class Guild(Hashable):
         Creates a new :class:`AutoModRule` for the guild.
 
         You must have :attr:`.Permissions.manage_guild` permission to do this.
+        Specific ``actions`` may require additional permissions.
 
         The maximum number of rules for each trigger type is limited, see the
         :ddocs:`api docs <resources/auto-moderation#auto-moderation-rule-object-trigger-types>`
@@ -5210,13 +5206,19 @@ class Guild(Hashable):
         name: :class:`str`
             The rule name.
         event_type: :class:`AutoModEventType`
-            The type of events that this rule will be applied to.
+            The type of event that this rule will be applied to.
+
+            Refer to :ref:`this table <automod_trigger_event_table>` to see how event types can be used.
         trigger_type: :class:`AutoModTriggerType`
             The type of trigger that determines whether this rule's actions should run for a specific event.
+            Must be compatible with the given ``event_type``.
+
             If set to :attr:`~AutoModTriggerType.keyword`, :attr:`~AutoModTriggerType.keyword_preset`,
-            or :attr:`~AutoModTriggerType.mention_spam`, ``trigger_metadata`` must be set accordingly.
+            :attr:`~AutoModTriggerType.mention_spam`, or :attr:`~AutoModTriggerType.member_profile`,
+            ``trigger_metadata`` must be set accordingly.
+
             This cannot be changed after creation.
-        actions: :class:`~collections.abc.Sequence`\[:class:`AutoModBlockMessageAction` | :class:`AutoModSendAlertAction` | :class:`AutoModTimeoutAction` | :class:`AutoModAction`]
+        actions: :class:`~collections.abc.Sequence`\[:class:`AutoModBlockMessageAction` | :class:`AutoModSendAlertAction` | :class:`AutoModTimeoutAction` | :class:`AutoModBlockInteractionAction` | :class:`AutoModAction`]
             The list of actions that will execute if a matching event triggered this rule.
             Must contain at least one action.
         trigger_metadata: :class:`AutoModTriggerMetadata` | :data:`None`
@@ -5253,6 +5255,7 @@ class Guild(Hashable):
             AutoModTriggerType.keyword.value,
             AutoModTriggerType.keyword_preset.value,
             AutoModTriggerType.mention_spam.value,
+            AutoModTriggerType.member_profile.value,
         ):
             msg = "Specified trigger type requires `trigger_metadata` to not be empty"
             raise ValueError(msg)

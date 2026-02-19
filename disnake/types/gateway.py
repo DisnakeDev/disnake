@@ -299,7 +299,7 @@ class VoiceResumeCommand(TypedDict):
 #####
 
 
-# https://discord.com/developers/docs/topics/gateway-events#ready
+# https://docs.discord.com/developers/events/gateway-events#ready
 class ReadyEvent(TypedDict):
     v: int
     user: User
@@ -310,31 +310,31 @@ class ReadyEvent(TypedDict):
     application: PartialGatewayAppInfo
 
 
-# https://discord.com/developers/docs/topics/gateway-events#resumed
+# https://docs.discord.com/developers/events/gateway-events#resumed
 class ResumedEvent(TypedDict): ...
 
 
-# https://discord.com/developers/docs/topics/gateway-events#application-command-permissions-update
+# https://docs.discord.com/developers/events/gateway-events#application-command-permissions-update
 ApplicationCommandPermissionsUpdateEvent: TypeAlias = GuildApplicationCommandPermissions
 
 
-# https://discord.com/developers/docs/topics/gateway-events#message-create
+# https://docs.discord.com/developers/events/gateway-events#message-create
 MessageCreateEvent: TypeAlias = Message
 
 
-# https://discord.com/developers/docs/topics/gateway-events#message-update
+# https://docs.discord.com/developers/events/gateway-events#message-update
 # This does not necessarily contain all message fields, but `id` and `channel_id` always exist
 MessageUpdateEvent: TypeAlias = Message
 
 
-# https://discord.com/developers/docs/topics/gateway-events#message-delete
+# https://docs.discord.com/developers/events/gateway-events#message-delete
 class MessageDeleteEvent(TypedDict):
     id: Snowflake
     channel_id: Snowflake
     guild_id: NotRequired[Snowflake]
 
 
-# https://discord.com/developers/docs/topics/gateway-events#message-delete-bulk
+# https://docs.discord.com/developers/events/gateway-events#message-delete-bulk
 class MessageDeleteBulkEvent(TypedDict):
     ids: list[Snowflake]
     channel_id: Snowflake
@@ -349,24 +349,24 @@ class _BaseReactionEvent(TypedDict):
     emoji: PartialEmoji
 
 
-# https://discord.com/developers/docs/topics/gateway-events#message-reaction-add
+# https://docs.discord.com/developers/events/gateway-events#message-reaction-add
 class MessageReactionAddEvent(_BaseReactionEvent):
     member: NotRequired[MemberWithUser]
     message_author_id: NotRequired[Snowflake]
 
 
-# https://discord.com/developers/docs/topics/gateway-events#message-reaction-remove
+# https://docs.discord.com/developers/events/gateway-events#message-reaction-remove
 class MessageReactionRemoveEvent(_BaseReactionEvent): ...
 
 
-# https://discord.com/developers/docs/topics/gateway-events#message-reaction-remove-all
+# https://docs.discord.com/developers/events/gateway-events#message-reaction-remove-all
 class MessageReactionRemoveAllEvent(TypedDict):
     channel_id: Snowflake
     message_id: Snowflake
     guild_id: NotRequired[Snowflake]
 
 
-# https://discord.com/developers/docs/topics/gateway-events#message-reaction-remove-emoji
+# https://docs.discord.com/developers/events/gateway-events#message-reaction-remove-emoji
 class MessageReactionRemoveEmojiEvent(TypedDict):
     channel_id: Snowflake
     guild_id: NotRequired[Snowflake]
@@ -374,7 +374,7 @@ class MessageReactionRemoveEmojiEvent(TypedDict):
     emoji: PartialEmoji
 
 
-# https://discord.com/developers/docs/topics/gateway-events#message-poll-vote-add
+# https://docs.discord.com/developers/events/gateway-events#message-poll-vote-add
 class PollVoteAddEvent(TypedDict):
     channel_id: Snowflake
     guild_id: NotRequired[Snowflake]
@@ -383,7 +383,7 @@ class PollVoteAddEvent(TypedDict):
     answer_id: int
 
 
-# https://discord.com/developers/docs/topics/gateway-events#message-poll-vote-remove
+# https://docs.discord.com/developers/events/gateway-events#message-poll-vote-remove
 class PollVoteRemoveEvent(TypedDict):
     channel_id: Snowflake
     guild_id: NotRequired[Snowflake]
@@ -392,19 +392,19 @@ class PollVoteRemoveEvent(TypedDict):
     answer_id: int
 
 
-# https://discord.com/developers/docs/topics/gateway-events#interaction-create
+# https://docs.discord.com/developers/events/gateway-events#interaction-create
 InteractionCreateEvent: TypeAlias = BaseInteraction
 
 
-# https://discord.com/developers/docs/topics/gateway-events#presence-update
+# https://docs.discord.com/developers/events/gateway-events#presence-update
 PresenceUpdateEvent: TypeAlias = PartialPresenceUpdate
 
 
-# https://discord.com/developers/docs/topics/gateway-events#user-update
+# https://docs.discord.com/developers/events/gateway-events#user-update
 UserUpdateEvent: TypeAlias = User
 
 
-# https://discord.com/developers/docs/topics/gateway-events#invite-create
+# https://docs.discord.com/developers/events/gateway-events#invite-create
 class InviteCreateEvent(TypedDict):
     channel_id: Snowflake
     code: str
@@ -421,42 +421,42 @@ class InviteCreateEvent(TypedDict):
     uses: int  # always 0
 
 
-# https://discord.com/developers/docs/topics/gateway-events#invite-delete
+# https://docs.discord.com/developers/events/gateway-events#invite-delete
 class InviteDeleteEvent(TypedDict):
     channel_id: Snowflake
     guild_id: NotRequired[Snowflake]
     code: str
 
 
-# https://discord.com/developers/docs/topics/gateway-events#channel-create
+# https://docs.discord.com/developers/events/gateway-events#channel-create
 ChannelCreateEvent: TypeAlias = GuildChannel
 
 
-# https://discord.com/developers/docs/topics/gateway-events#channel-update
+# https://docs.discord.com/developers/events/gateway-events#channel-update
 ChannelUpdateEvent: TypeAlias = Channel
 
 
-# https://discord.com/developers/docs/topics/gateway-events#channel-delete
+# https://docs.discord.com/developers/events/gateway-events#channel-delete
 ChannelDeleteEvent: TypeAlias = Channel
 
 
-# https://discord.com/developers/docs/topics/gateway-events#channel-pins-update
+# https://docs.discord.com/developers/events/gateway-events#channel-pins-update
 class ChannelPinsUpdateEvent(TypedDict):
     guild_id: NotRequired[Snowflake]
     channel_id: Snowflake
     last_pin_timestamp: NotRequired[str | None]
 
 
-# https://discord.com/developers/docs/topics/gateway-events#thread-create
+# https://docs.discord.com/developers/events/gateway-events#thread-create
 class ThreadCreateEvent(Thread):
     newly_created: NotRequired[bool]
 
 
-# https://discord.com/developers/docs/topics/gateway-events#thread-update
+# https://docs.discord.com/developers/events/gateway-events#thread-update
 ThreadUpdateEvent: TypeAlias = Thread
 
 
-# https://discord.com/developers/docs/topics/gateway-events#thread-delete
+# https://docs.discord.com/developers/events/gateway-events#thread-delete
 class ThreadDeleteEvent(TypedDict):
     id: Snowflake
     guild_id: Snowflake
@@ -464,7 +464,7 @@ class ThreadDeleteEvent(TypedDict):
     type: ThreadType
 
 
-# https://discord.com/developers/docs/topics/gateway-events#thread-list-sync
+# https://docs.discord.com/developers/events/gateway-events#thread-list-sync
 class ThreadListSyncEvent(TypedDict):
     guild_id: Snowflake
     channel_ids: NotRequired[list[Snowflake]]
@@ -472,12 +472,12 @@ class ThreadListSyncEvent(TypedDict):
     members: list[ThreadMember]
 
 
-# https://discord.com/developers/docs/topics/gateway-events#thread-member-update
+# https://docs.discord.com/developers/events/gateway-events#thread-member-update
 class ThreadMemberUpdateEvent(ThreadMember):
     guild_id: Snowflake
 
 
-# https://discord.com/developers/docs/topics/gateway-events#thread-members-update
+# https://docs.discord.com/developers/events/gateway-events#thread-members-update
 class ThreadMembersUpdateEvent(TypedDict):
     id: Snowflake
     guild_id: Snowflake
@@ -486,18 +486,18 @@ class ThreadMembersUpdateEvent(TypedDict):
     removed_member_ids: NotRequired[list[Snowflake]]
 
 
-# https://discord.com/developers/docs/topics/gateway-events#guild-member-add
+# https://docs.discord.com/developers/events/gateway-events#guild-member-add
 class GuildMemberAddEvent(MemberWithUser):
     guild_id: Snowflake
 
 
-# https://discord.com/developers/docs/topics/gateway-events#guild-member-remove
+# https://docs.discord.com/developers/events/gateway-events#guild-member-remove
 class GuildMemberRemoveEvent(TypedDict):
     guild_id: Snowflake
     user: User
 
 
-# https://discord.com/developers/docs/topics/gateway-events#guild-member-update
+# https://docs.discord.com/developers/events/gateway-events#guild-member-update
 class GuildMemberUpdateEvent(TypedDict):
     guild_id: Snowflake
     roles: list[Snowflake]
@@ -515,31 +515,31 @@ class GuildMemberUpdateEvent(TypedDict):
     avatar_decoration_data: NotRequired[AvatarDecorationData | None]
 
 
-# https://discord.com/developers/docs/topics/gateway-events#guild-emojis-update
+# https://docs.discord.com/developers/events/gateway-events#guild-emojis-update
 class GuildEmojisUpdateEvent(TypedDict):
     guild_id: Snowflake
     emojis: list[Emoji]
 
 
-# https://discord.com/developers/docs/topics/gateway-events#guild-stickers-update
+# https://docs.discord.com/developers/events/gateway-events#guild-stickers-update
 class GuildStickersUpdateEvent(TypedDict):
     guild_id: Snowflake
     stickers: list[GuildSticker]
 
 
-# https://discord.com/developers/docs/topics/gateway-events#guild-create
+# https://docs.discord.com/developers/events/gateway-events#guild-create
 GuildCreateEvent: TypeAlias = Guild | UnavailableGuild
 
 
-# https://discord.com/developers/docs/topics/gateway-events#guild-update
+# https://docs.discord.com/developers/events/gateway-events#guild-update
 GuildUpdateEvent: TypeAlias = Guild
 
 
-# https://discord.com/developers/docs/topics/gateway-events#guild-delete
+# https://docs.discord.com/developers/events/gateway-events#guild-delete
 GuildDeleteEvent: TypeAlias = UnavailableGuild
 
 
-# https://discord.com/developers/docs/topics/gateway-events#guild-audit-log-entry-create
+# https://docs.discord.com/developers/events/gateway-events#guild-audit-log-entry-create
 class AuditLogEntryCreate(AuditLogEntry):
     guild_id: Snowflake
 
@@ -549,41 +549,41 @@ class _GuildBanEvent(TypedDict):
     user: User
 
 
-# https://discord.com/developers/docs/topics/gateway-events#guild-ban-add
+# https://docs.discord.com/developers/events/gateway-events#guild-ban-add
 GuildBanAddEvent: TypeAlias = _GuildBanEvent
 
 
-# https://discord.com/developers/docs/topics/gateway-events#guild-ban-remove
+# https://docs.discord.com/developers/events/gateway-events#guild-ban-remove
 GuildBanRemoveEvent: TypeAlias = _GuildBanEvent
 
 
-# https://discord.com/developers/docs/topics/gateway-events#guild-role-create
+# https://docs.discord.com/developers/events/gateway-events#guild-role-create
 class GuildRoleCreateEvent(TypedDict):
     guild_id: Snowflake
     role: Role
 
 
-# https://discord.com/developers/docs/topics/gateway-events#guild-role-delete
+# https://docs.discord.com/developers/events/gateway-events#guild-role-delete
 class GuildRoleDeleteEvent(TypedDict):
     guild_id: Snowflake
     role_id: Snowflake
 
 
-# https://discord.com/developers/docs/topics/gateway-events#guild-role-update
+# https://docs.discord.com/developers/events/gateway-events#guild-role-update
 class GuildRoleUpdateEvent(TypedDict):
     guild_id: Snowflake
     role: Role
 
 
-# https://discord.com/developers/docs/topics/gateway-events#guild-scheduled-event-create
+# https://docs.discord.com/developers/events/gateway-events#guild-scheduled-event-create
 GuildScheduledEventCreateEvent: TypeAlias = GuildScheduledEvent
 
 
-# https://discord.com/developers/docs/topics/gateway-events#guild-scheduled-event-update
+# https://docs.discord.com/developers/events/gateway-events#guild-scheduled-event-update
 GuildScheduledEventUpdateEvent: TypeAlias = GuildScheduledEvent
 
 
-# https://discord.com/developers/docs/topics/gateway-events#guild-scheduled-event-delete
+# https://docs.discord.com/developers/events/gateway-events#guild-scheduled-event-delete
 GuildScheduledEventDeleteEvent: TypeAlias = GuildScheduledEvent
 
 
@@ -593,15 +593,15 @@ class _GuildScheduledEventUserEvent(TypedDict):
     guild_id: Snowflake
 
 
-# https://discord.com/developers/docs/topics/gateway-events#guild-scheduled-event-user-add
+# https://docs.discord.com/developers/events/gateway-events#guild-scheduled-event-user-add
 GuildScheduledEventUserAddEvent: TypeAlias = _GuildScheduledEventUserEvent
 
 
-# https://discord.com/developers/docs/topics/gateway-events#guild-scheduled-event-user-remove
+# https://docs.discord.com/developers/events/gateway-events#guild-scheduled-event-user-remove
 GuildScheduledEventUserRemoveEvent: TypeAlias = _GuildScheduledEventUserEvent
 
 
-# https://discord.com/developers/docs/topics/gateway-events#guild-members-chunk
+# https://docs.discord.com/developers/events/gateway-events#guild-members-chunk
 class GuildMembersChunkEvent(TypedDict):
     guild_id: Snowflake
     members: list[MemberWithUser]
@@ -612,66 +612,66 @@ class GuildMembersChunkEvent(TypedDict):
     nonce: NotRequired[str]
 
 
-# https://discord.com/developers/docs/topics/gateway-events#guild-integrations-update
+# https://docs.discord.com/developers/events/gateway-events#guild-integrations-update
 class GuildIntegrationsUpdateEvent(TypedDict):
     guild_id: Snowflake
 
 
-# https://discord.com/developers/docs/topics/gateway-events#integration-create
+# https://docs.discord.com/developers/events/gateway-events#integration-create
 class IntegrationCreateEvent(BaseIntegration):
     guild_id: Snowflake
 
 
-# https://discord.com/developers/docs/topics/gateway-events#integration-update
+# https://docs.discord.com/developers/events/gateway-events#integration-update
 class IntegrationUpdateEvent(BaseIntegration):
     guild_id: Snowflake
 
 
-# https://discord.com/developers/docs/topics/gateway-events#integration-delete
+# https://docs.discord.com/developers/events/gateway-events#integration-delete
 class IntegrationDeleteEvent(TypedDict):
     id: Snowflake
     guild_id: Snowflake
     application_id: NotRequired[Snowflake]
 
 
-# https://discord.com/developers/docs/topics/gateway-events#webhooks-update
+# https://docs.discord.com/developers/events/gateway-events#webhooks-update
 class WebhooksUpdateEvent(TypedDict):
     guild_id: Snowflake
     channel_id: Snowflake
 
 
-# https://discord.com/developers/docs/topics/gateway-events#stage-instance-create
+# https://docs.discord.com/developers/events/gateway-events#stage-instance-create
 StageInstanceCreateEvent = StageInstance
 
 
-# https://discord.com/developers/docs/topics/gateway-events#stage-instance-update
+# https://docs.discord.com/developers/events/gateway-events#stage-instance-update
 StageInstanceUpdateEvent: TypeAlias = StageInstance
 
 
-# https://discord.com/developers/docs/topics/gateway-events#stage-instance-delete
+# https://docs.discord.com/developers/events/gateway-events#stage-instance-delete
 StageInstanceDeleteEvent: TypeAlias = StageInstance
 
 
-# https://discord.com/developers/docs/topics/gateway-events#voice-state-update
+# https://docs.discord.com/developers/events/gateway-events#voice-state-update
 # We assume that we'll only receive voice states for guilds
 VoiceStateUpdateEvent: TypeAlias = GuildVoiceState
 
 
-# https://discord.com/developers/docs/topics/gateway-events#voice-server-update
+# https://docs.discord.com/developers/events/gateway-events#voice-server-update
 class VoiceServerUpdateEvent(TypedDict):
     token: str
     guild_id: Snowflake
     endpoint: str | None
 
 
-# https://discord.com/developers/docs/topics/gateway-events#voice-channel-effect-send
+# https://docs.discord.com/developers/events/gateway-events#voice-channel-effect-send
 class VoiceChannelEffectSendEvent(VoiceChannelEffect):
     channel_id: Snowflake
     guild_id: Snowflake
     user_id: Snowflake
 
 
-# https://discord.com/developers/docs/topics/gateway-events#typing-start
+# https://docs.discord.com/developers/events/gateway-events#typing-start
 class TypingStartEvent(TypedDict):
     channel_id: Snowflake
     guild_id: NotRequired[Snowflake]
@@ -680,19 +680,19 @@ class TypingStartEvent(TypedDict):
     member: NotRequired[MemberWithUser]
 
 
-# https://discord.com/developers/docs/topics/gateway-events#auto-moderation-rule-create
+# https://docs.discord.com/developers/events/gateway-events#auto-moderation-rule-create
 AutoModerationRuleCreateEvent: TypeAlias = AutoModRule
 
 
-# https://discord.com/developers/docs/topics/gateway-events#auto-moderation-rule-update
+# https://docs.discord.com/developers/events/gateway-events#auto-moderation-rule-update
 AutoModerationRuleUpdateEvent: TypeAlias = AutoModRule
 
 
-# https://discord.com/developers/docs/topics/gateway-events#auto-moderation-rule-delete
+# https://docs.discord.com/developers/events/gateway-events#auto-moderation-rule-delete
 AutoModerationRuleDeleteEvent: TypeAlias = AutoModRule
 
 
-# https://discord.com/developers/docs/topics/gateway-events#auto-moderation-action-execution
+# https://docs.discord.com/developers/events/gateway-events#auto-moderation-action-execution
 class AutoModerationActionExecutionEvent(TypedDict):
     guild_id: Snowflake
     action: AutoModAction
@@ -707,45 +707,45 @@ class AutoModerationActionExecutionEvent(TypedDict):
     matched_keyword: NotRequired[str | None]
 
 
-# https://discord.com/developers/docs/events/gateway-events#entitlement-create
+# https://docs.discord.com/developers/events/gateway-events#entitlement-create
 EntitlementCreate: TypeAlias = Entitlement
 
 
-# https://discord.com/developers/docs/events/gateway-events#entitlement-update
+# https://docs.discord.com/developers/events/gateway-events#entitlement-update
 EntitlementUpdate: TypeAlias = Entitlement
 
 
-# https://discord.com/developers/docs/events/gateway-events#entitlement-delete
+# https://docs.discord.com/developers/events/gateway-events#entitlement-delete
 EntitlementDelete: TypeAlias = Entitlement
 
 
-# https://discord.com/developers/docs/events/gateway-events#subscription-create
+# https://docs.discord.com/developers/events/gateway-events#subscription-create
 SubscriptionCreate: TypeAlias = Subscription
 
 
-# https://discord.com/developers/docs/events/gateway-events#subscription-update
+# https://docs.discord.com/developers/events/gateway-events#subscription-update
 SubscriptionUpdate: TypeAlias = Subscription
 
 
-# https://discord.com/developers/docs/events/gateway-events#subscription-delete
+# https://docs.discord.com/developers/events/gateway-events#subscription-delete
 SubscriptionDelete: TypeAlias = Subscription
 
 
-# https://discord.com/developers/docs/topics/gateway-events#guild-soundboard-sound-create
+# https://docs.discord.com/developers/events/gateway-events#guild-soundboard-sound-create
 GuildSoundboardSoundCreate: TypeAlias = GuildSoundboardSound
 
 
-# https://discord.com/developers/docs/topics/gateway-events#guild-soundboard-sound-update
+# https://docs.discord.com/developers/events/gateway-events#guild-soundboard-sound-update
 GuildSoundboardSoundUpdate: TypeAlias = GuildSoundboardSound
 
 
-# https://discord.com/developers/docs/topics/gateway-events#guild-soundboard-sound-delete
+# https://docs.discord.com/developers/events/gateway-events#guild-soundboard-sound-delete
 class GuildSoundboardSoundDelete(TypedDict):
     guild_id: Snowflake
     sound_id: Snowflake
 
 
-# https://discord.com/developers/docs/topics/gateway-events#guild-soundboard-sounds-update
+# https://docs.discord.com/developers/events/gateway-events#guild-soundboard-sounds-update
 class GuildSoundboardSoundsUpdate(TypedDict):
     guild_id: Snowflake
     soundboard_sounds: list[GuildSoundboardSound]

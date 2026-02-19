@@ -1,0 +1,1 @@
+Update descriptions of ``slowmode_delay`` fields and :meth:`Guild.create_custom_emoji`/:meth:`~Guild.create_sticker`/:meth:`~Guild.create_scheduled_event` methods to account for the permission split on 2026-02-23.

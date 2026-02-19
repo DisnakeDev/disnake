@@ -1,0 +1,1 @@
+Add :attr:`.Permissions.bypass_slowmode` which allows a user to bypass slowmode. Note that bot users are not impacted by slowmode regardless of this permission.

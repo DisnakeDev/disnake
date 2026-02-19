@@ -158,6 +158,7 @@ class Permissions(BaseFlags):
         administrator: bool = ...,
         attach_files: bool = ...,
         ban_members: bool = ...,
+        bypass_slowmode: bool = ...,
         change_nickname: bool = ...,
         connect: bool = ...,
         create_events: bool = ...,
@@ -405,9 +406,13 @@ class Permissions(BaseFlags):
 
         .. versionchanged:: 2.10
             Moved :attr:`use_application_commands` permission to :attr:`apps`.
+            Added :attr:`send_polls` permission.
 
         .. versionchanged:: 2.11
             Added :attr:`pin_messages` permission.
+
+        .. versionchanged:: |vnext|
+            Added :attr:`bypass_slowmode` permission.
         """
         return cls(
             send_messages=True,
@@ -427,6 +432,7 @@ class Permissions(BaseFlags):
             send_voice_messages=True,
             pin_messages=True,
             send_polls=True,
+            bypass_slowmode=True,
         )
 
     @classmethod
@@ -536,11 +542,12 @@ class Permissions(BaseFlags):
         This is equivalent to :meth:`Permissions.text` with :attr:`~Permissions.view_channel` with the following set to False:
 
         - :attr:`~Permissions.send_tts_messages`: You cannot send TTS messages in a DM.
-        - :attr:`~Permissions.manage_messages`: You cannot delete others messages in a DM.
+        - :attr:`~Permissions.manage_messages`: You cannot delete others' messages in a DM.
         - :attr:`~Permissions.manage_threads`: You cannot manage threads in a DM.
         - :attr:`~Permissions.send_messages_in_threads`: You cannot make threads in a DM.
         - :attr:`~Permissions.create_public_threads`: You cannot make public threads in a DM.
         - :attr:`~Permissions.create_private_threads`: You cannot make private threads in a DM.
+        - :attr:`~Permissions.bypass_slowmode`: You cannot enable slowmode in a DM.
 
         .. versionadded:: 2.4
         """
@@ -552,6 +559,7 @@ class Permissions(BaseFlags):
         base.send_messages_in_threads = False
         base.create_public_threads = False
         base.create_private_threads = False
+        base.bypass_slowmode = False
         return base
 
     @overload
@@ -563,6 +571,7 @@ class Permissions(BaseFlags):
         administrator: bool = ...,
         attach_files: bool = ...,
         ban_members: bool = ...,
+        bypass_slowmode: bool = ...,
         change_nickname: bool = ...,
         connect: bool = ...,
         create_events: bool = ...,
@@ -1085,6 +1094,16 @@ class Permissions(BaseFlags):
         """
         return 1 << 51
 
+    @flag_value
+    def bypass_slowmode(self) -> int:
+        """:class:`bool`: Returns ``True`` if a user can bypass slowmode restrictions.
+
+        Bots are unaffected by slowmode regardless of this permission.
+
+        .. versionadded:: |vnext|
+        """
+        return 1 << 52
+
 
 def _augment_from_permissions(cls):
     cls.VALID_NAMES = set(Permissions.VALID_FLAGS)
@@ -1155,6 +1174,7 @@ class PermissionOverwrite:
         administrator: bool | None
         attach_files: bool | None
         ban_members: bool | None
+        bypass_slowmode: bool | None
         change_nickname: bool | None
         connect: bool | None
         create_events: bool | None
@@ -1224,6 +1244,7 @@ class PermissionOverwrite:
         administrator: bool | None = ...,
         attach_files: bool | None = ...,
         ban_members: bool | None = ...,
+        bypass_slowmode: bool | None = ...,
         change_nickname: bool | None = ...,
         connect: bool | None = ...,
         create_events: bool | None = ...,
@@ -1360,6 +1381,7 @@ class PermissionOverwrite:
         administrator: bool | None = ...,
         attach_files: bool | None = ...,
         ban_members: bool | None = ...,
+        bypass_slowmode: bool | None = ...,
         change_nickname: bool | None = ...,
         connect: bool | None = ...,
         create_events: bool | None = ...,
