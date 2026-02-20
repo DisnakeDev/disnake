@@ -5,30 +5,32 @@
 from __future__ import annotations
 
 import asyncio
-import collections.abc
 import copy
+import enum
 import inspect
 import itertools
 import math
 import types
 from abc import ABC, abstractmethod
+from collections.abc import Sequence
 from dataclasses import dataclass
-from enum import Enum, EnumMeta
-from types import EllipsisType, UnionType
 from typing import (
     TYPE_CHECKING,
     Any,
     ClassVar,
+    Concatenate,
     Final,
     Generic,
     Literal,
     NoReturn,
     TypeAlias,
+    TypeGuard,
     TypeVar,
     Union,
-    cast,
     get_origin,
 )
+
+from typing_extensions import ParamSpec, Self
 
 import disnake
 from disnake.app_commands import Option, OptionChoice
@@ -47,13 +49,11 @@ from disnake.utils import (
 from . import errors
 from .converter import CONVERTER_MAPPING
 
-T_ = TypeVar("T_")
+T = TypeVar("T")
+P = ParamSpec("P")
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Sequence
-    from typing import Concatenate, TypeGuard
-
-    from typing_extensions import ParamSpec, Self
+    from collections.abc import Callable
 
     from disnake.app_commands import Choices
     from disnake.enums import ChannelType
@@ -67,21 +67,13 @@ if TYPE_CHECKING:
 
     AnySlashCommand: TypeAlias = InvokableSlashCommand | SubCommand
 
-    P = ParamSpec("P")
-
-    InjectionCallback: TypeAlias = Callable[Concatenate[CogT, P], T_] | Callable[P, T_]
+    InjectionCallback: TypeAlias = Callable[Concatenate[CogT, P], T] | Callable[P, T]
     AnyAutocompleter: TypeAlias = (
         Sequence[Any]
         | Callable[Concatenate[ApplicationCommandInteraction, str, P], Any]
         | Callable[Concatenate[CogT, ApplicationCommandInteraction, str, P], Any]
     )
 
-    TChoice = TypeVar("TChoice", bound=ApplicationCommandOptionChoiceValue)
-else:
-    P = TypeVar("P")
-
-
-T = TypeVar("T")
 TypeT = TypeVar("TypeT", bound=type[object])
 BotT = TypeVar("BotT", bound="disnake.Client", covariant=True)
 
@@ -101,6 +93,10 @@ __all__ = (
 )
 
 
+_EnumMetas = (enum.EnumMeta, disnake.enums.EnumMeta)
+_UnionTypes = (Union, types.UnionType)
+
+
 def issubclass_(obj: Any, tp: TypeT | tuple[TypeT, ...]) -> TypeGuard[TypeT]:
     """Similar to the builtin `issubclass`, but more lenient.
     Can also handle unions (`issubclass(int | str, int)`) and
@@ -116,7 +112,7 @@ def issubclass_(obj: Any, tp: TypeT | tuple[TypeT, ...]) -> TypeGuard[TypeT]:
     if (origin := get_origin(obj)) is None:
         return False
 
-    if origin in (Union, UnionType):
+    if origin in _UnionTypes:
         # If we have a Union, try matching any of its args
         # (recursively, to handle possibly generic types inside this union)
         return any(issubclass_(o, tp) for o in obj.__args__)
@@ -125,8 +121,8 @@ def issubclass_(obj: Any, tp: TypeT | tuple[TypeT, ...]) -> TypeGuard[TypeT]:
 
 
 def remove_optionals(annotation: Any) -> Any:
-    """Remove unwanted optionals from an annotation"""
-    if get_origin(annotation) in (Union, UnionType):
+    """Remove unwanted optionals from an annotation."""
+    if get_origin(annotation) in _UnionTypes:
         args = tuple(i for i in annotation.__args__ if i not in (None, type(None)))
         if len(args) == 1:
             annotation = args[0]
@@ -154,7 +150,47 @@ def _xt_to_xe(xe: float | None, xt: float | None, direction: float = 1) -> float
         return None
 
 
-class Injection(Generic[P, T_]):
+def _int_to_str_len(number: int) -> int:
+    """Returns `len(str(number))`, i.e. character count of base 10 signed repr of `number`."""
+    # Desmos equivalent: floor(log(max(abs(x), 1))) + 1 + max(-sign(x), 0)
+    return (
+        int(math.log10(abs(number) or 1))
+        # 0 -> 0, 1 -> 0, 9 -> 0, 10 -> 1
+        + 1
+        + (number < 0)
+    )
+
+
+def _range_to_str_len(min_value: int, max_value: int) -> tuple[int, int]:
+    min_ = _int_to_str_len(min_value)
+    max_ = _int_to_str_len(max_value)
+    opposite_sign = (min_value < 0) ^ (max_value < 0)
+    # both bounds positive: len(str(min_value)) <= len(str(max_value))
+    # smaller bound negative: the range includes 0, which sets the minimum length to 1
+    # both bounds negative: len(str(min_value)) >= len(str(max_value))
+    if opposite_sign:
+        return 1, max(min_, max_)
+    return min(min_, max_), max(min_, max_)
+
+
+def _unbound_range_to_str_len(
+    min_value: int | None, max_value: int | None
+) -> tuple[int, int | None]:
+    if min_value is not None and max_value is not None:
+        return _range_to_str_len(min_value, max_value)
+
+    elif min_value is not None and min_value > 0:
+        # 0 < min_value <= max_value == inf
+        return _int_to_str_len(min_value), None
+
+    elif max_value is not None and max_value < 0:
+        # -inf == min_value <= max_value < 0
+        return 1, _int_to_str_len(max_value)
+
+    return 1, None
+
+
+class Injection(Generic[P, T]):
     r"""Represents a slash command injection.
 
     .. versionadded:: 2.3
@@ -176,7 +212,7 @@ class Injection(Generic[P, T_]):
 
     def __init__(
         self,
-        function: InjectionCallback[CogT, P, T_],
+        function: InjectionCallback[CogT, P, T],
         *,
         autocompleters: dict[str, Callable] | None = None,
     ) -> None:
@@ -184,7 +220,7 @@ class Injection(Generic[P, T_]):
             for autocomp in autocompleters.values():
                 classify_autocompleter(autocomp)
 
-        self.function: InjectionCallback[Any, P, T_] = function
+        self.function: InjectionCallback[Any, P, T] = function
         self.autocompleters: dict[str, Callable] = autocompleters or {}
         self._injected: Cog | None = None
 
@@ -198,7 +234,7 @@ class Injection(Generic[P, T_]):
 
         return copy
 
-    def __call__(self, *args: P.args, **kwargs: P.kwargs) -> T_:
+    def __call__(self, *args: P.args, **kwargs: P.kwargs) -> T:
         """Calls the underlying function that the injection holds.
 
         .. versionadded:: 2.6
@@ -211,11 +247,11 @@ class Injection(Generic[P, T_]):
     @classmethod
     def register(
         cls,
-        function: InjectionCallback[CogT, P, T_],
+        function: InjectionCallback[CogT, P, T],
         annotation: Any,
         *,
         autocompleters: dict[str, Callable] | None = None,
-    ) -> Injection[P, T_]:
+    ) -> Injection[P, T]:
         self = cls(function, autocompleters=autocompleters)
         cls._registered[annotation] = self
         return self
@@ -253,22 +289,31 @@ class Injection(Generic[P, T_]):
         return decorator
 
 
+NumT = TypeVar("NumT", bound=int | float)
+
+
 @dataclass(frozen=True)
-class _BaseRange(ABC):
+class _BaseRange(ABC, Generic[NumT]):
     """Internal base type for supporting ``Range[...]`` and ``String[...]``."""
 
     _allowed_types: ClassVar[tuple[type[Any], ...]]
 
     underlying_type: type[Any]
-    min_value: int | float | None
-    max_value: int | float | None
+    min_value: NumT | None
+    max_value: NumT | None
 
     def __class_getitem__(cls, params: tuple[Any, ...]) -> Self:
+        if cls is _BaseRange:
+            # needed since made generic
+            return super().__class_getitem__(params)  # pyright: ignore[reportAttributeAccessIssue]
+
         # deconstruct type arguments
         if not isinstance(params, tuple):
             params = (params,)
 
-        name = cls.__name__
+        # the classes are public, but at the same time we don't want the users using them
+        # via the "private" names, since those conflict with type checkers
+        name = cls.__name__ = cls.__name__.removeprefix("_")
 
         if len(params) == 2:
             # backwards compatibility for `Range[1, 2]`
@@ -281,12 +326,11 @@ class _BaseRange(ABC):
                 f"Use `{name}[<type>, <min>, <max>]` instead.",
                 stacklevel=2,
             )
-
             # infer type from min/max values
             params = (cls._infer_type(params), *params)
 
         if len(params) != 3:
-            msg = f"`{name}` expects 3 type arguments ({name}[<type>, <min>, <max>]), got {len(params)}"
+            msg = f"`{name}` expects 3 arguments ({name}[<type>, <min>, <max>]), got {len(params)}"
             raise TypeError(msg)
 
         underlying_type, min_value, max_value = params
@@ -296,7 +340,7 @@ class _BaseRange(ABC):
             msg = f"First `{name}` argument must be a type, not `{underlying_type!r}`"
             raise TypeError(msg)
 
-        if not issubclass(underlying_type, cls._allowed_types):
+        if not issubclass_(underlying_type, cls._allowed_types):
             allowed = "/".join(t.__name__ for t in cls._allowed_types)
             msg = f"First `{name}` argument must be {allowed}, not `{underlying_type!r}`"
             raise TypeError(msg)
@@ -318,8 +362,8 @@ class _BaseRange(ABC):
         return cls(underlying_type=underlying_type, min_value=min_value, max_value=max_value)
 
     @staticmethod
-    def _coerce_bound(value: Any, name: str) -> int | float | None:
-        if value is None or isinstance(value, EllipsisType):
+    def _coerce_bound(value: NumT | types.EllipsisType | None, name: str) -> NumT | None:
+        if value is None or value is ...:
             return None
         elif isinstance(value, (int, float)):
             if not math.isfinite(value):
@@ -335,9 +379,9 @@ class _BaseRange(ABC):
         b = "..." if self.max_value is None else self.max_value
         return f"{type(self).__name__}[{self.underlying_type.__name__}, {a}, {b}]"
 
-    @classmethod
+    @staticmethod
     @abstractmethod
-    def _infer_type(cls, params: tuple[object, ...]) -> type[Any]:
+    def _infer_type(params: tuple[object, ...]) -> type[object]:
         raise NotImplementedError
 
     # hack to get `typing._type_check` to pass, e.g. when using `Range` as a generic parameter
@@ -345,79 +389,95 @@ class _BaseRange(ABC):
         raise NotImplementedError
 
     # support new union syntax for `Range[int, 1, 2] | None`
-    def __or__(self, other):
+    def __or__(self, other: type[Any]) -> types.UnionType:
         return Union[self, other]  # noqa: UP007
+
+
+@dataclass(frozen=True, repr=False)
+class _Range(_BaseRange[int | float]):
+    """Type representing a number with a limited range of allowed values.
+
+    See :ref:`param_ranges` for more information.
+
+    .. versionadded:: 2.4
+
+    .. versionchanged:: 2.9
+        Syntax changed from ``Range[5, 10]`` to ``Range[int, 5, 10]``;
+        the type (:class:`int` or :class:`float`) must now be specified explicitly.
+    """
+
+    _allowed_types = (int, float)
+
+    def __post_init__(self) -> None:
+        for value in (self.min_value, self.max_value):
+            if value is None:
+                continue
+
+            if self.underlying_type in (int, LargeInt) and not isinstance(value, int):
+                msg = f"Range[{self.underlying_type.__name__}, ...] bounds must be int, not {value.__class__.__name__}"
+                raise TypeError(msg)
+
+            if self.underlying_type is int and abs(value) >= 2**53 - 1:
+                msg = (
+                    "Discord has upper input limit on integer input type of ±2**53.\n"
+                    "For larger values, use Range[commands.LargeInt, ...], which will use"
+                    " a string input type with length limited to the minimum and maximum"
+                    " string representations of the range bounds, and will automatically"
+                    " convert user input into an integer locally."
+                )
+                raise ValueError(msg)
+
+    @staticmethod
+    def _infer_type(params: tuple[object, ...]) -> type[int | float]:
+        if any(isinstance(p, float) for p in params):
+            return float
+        return int
+
+
+@dataclass(frozen=True, repr=False)
+class _String(_BaseRange[int]):
+    """Type representing a string option with a limited length.
+
+    See :ref:`string_lengths` for more information.
+
+    .. versionadded:: 2.6
+
+    .. versionchanged:: 2.9
+        Syntax changed from ``String[5, 10]`` to ``String[str, 5, 10]``;
+        the type (:class:`str`) must now be specified explicitly.
+    """
+
+    _allowed_types = (str,)
+
+    def __post_init__(self) -> None:
+        for value in (self.min_value, self.max_value):
+            if value is None:
+                continue
+
+            if not isinstance(value, int):
+                msg = "String bounds must be int, not float"
+                raise TypeError(msg)
+            if value < 0:
+                msg = "String bounds may not be negative"
+                raise ValueError(msg)
+
+    @staticmethod
+    def _infer_type(params: tuple[object, ...]) -> type[str]:
+        return str
 
 
 if TYPE_CHECKING:
     # aliased import since mypy doesn't understand `Range = Annotated`
     from typing import Annotated as Range, Annotated as String
 else:
-
-    @dataclass(frozen=True, repr=False)
-    class Range(_BaseRange):
-        """Type representing a number with a limited range of allowed values.
-
-        See :ref:`param_ranges` for more information.
-
-        .. versionadded:: 2.4
-
-        .. versionchanged:: 2.9
-            Syntax changed from ``Range[5, 10]`` to ``Range[int, 5, 10]``;
-            the type (:class:`int` or :class:`float`) must now be specified explicitly.
-        """
-
-        _allowed_types = (int, float)
-
-        def __post_init__(self) -> None:
-            for value in (self.min_value, self.max_value):
-                if value is None:
-                    continue
-
-                if self.underlying_type is int and not isinstance(value, int):
-                    msg = "Range[int, ...] bounds must be int, not float"
-                    raise TypeError(msg)
-
-        @classmethod
-        def _infer_type(cls, params: tuple[object, ...]) -> type[int | float]:
-            if any(isinstance(p, float) for p in params):
-                return float
-            return int
-
-    @dataclass(frozen=True, repr=False)
-    class String(_BaseRange):
-        """Type representing a string option with a limited length.
-
-        See :ref:`string_lengths` for more information.
-
-        .. versionadded:: 2.6
-
-        .. versionchanged:: 2.9
-            Syntax changed from ``String[5, 10]`` to ``String[str, 5, 10]``;
-            the type (:class:`str`) must now be specified explicitly.
-        """
-
-        _allowed_types = (str,)
-
-        def __post_init__(self) -> None:
-            for value in (self.min_value, self.max_value):
-                if value is None:
-                    continue
-
-                if not isinstance(value, int):
-                    msg = "String bounds must be int, not float"
-                    raise TypeError(msg)
-                if value < 0:
-                    msg = "String bounds may not be negative"
-                    raise ValueError(msg)
-
-        @classmethod
-        def _infer_type(cls, params: tuple[object, ...]) -> type[str]:
-            return str
+    Range, String = _Range, _String
 
 
 class LargeInt(int):
-    """Type for large integers in slash commands."""
+    """Type representing integers that may exceed the Discord limit of ``[-2**53+1, 2**53-1]``.
+
+    See :ref:`large_integers` for more info.
+    """
 
 
 # option types that require additional handling in verify_type
@@ -453,6 +513,11 @@ class ParamInfo:
         The lowest allowed value for this option.
     le: :class:`float`
         The greatest allowed value for this option.
+    large: :class:`bool`
+        For a parameter of type :class:`int`, this controls whether to accept values outside the
+        range of ``[-2**53+1, 2**53-1]``, at the cost of reduced Discord-side input validation.
+
+        See :ref:`large_integers` for more info.
     type: :class:`~typing.Any`
         The type of the parameter.
     channel_types: :class:`list`\[:class:`.ChannelType`]
@@ -472,7 +537,8 @@ class ParamInfo:
         .. versionadded:: 2.6
     """
 
-    TYPES: ClassVar[dict[type | UnionType, int]] = {
+    # sorted according to https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-type
+    TYPES: ClassVar[dict[type | types.UnionType, int]] = {
         str:                                               OptionType.string.value,
         int:                                               OptionType.integer.value,
         bool:                                              OptionType.boolean.value,
@@ -504,10 +570,10 @@ class ParamInfo:
         choices: Choices | None = None,
         type: type | None = None,
         channel_types: list[ChannelType] | None = None,
-        lt: float | None = None,
-        le: float | None = None,
-        gt: float | None = None,
-        ge: float | None = None,
+        lt: int | float | None = None,
+        le: int | float | None = None,
+        gt: int | float | None = None,
+        ge: int | float | None = None,
         large: bool = False,
         min_length: int | None = None,
         max_length: int | None = None,
@@ -532,10 +598,10 @@ class ParamInfo:
         self.choices = choices or []
         self.type = type or str
         self.channel_types = channel_types or []
-        self.max_value = _xt_to_xe(le, lt, -1)
-        self.min_value = _xt_to_xe(ge, gt, 1)
-        self.min_length = min_length
-        self.max_length = max_length
+        self.min_value: int | float | None = _xt_to_xe(ge, gt, 1)
+        self.max_value: int | float | None = _xt_to_xe(le, lt, -1)
+        self.min_length: int | None = min_length
+        self.max_length: int | None = max_length
         self.large = large
 
     def copy(self) -> Self:
@@ -617,7 +683,7 @@ class ParamInfo:
         return f"{type(self).__name__}({args})"
 
     async def get_default(self, inter: ApplicationCommandInteraction) -> Any:
-        """Gets the default for an interaction"""
+        """Gets the default for an interaction."""
         default = self.default
         if callable(self.default):
             default = self.default(inter)
@@ -636,8 +702,8 @@ class ParamInfo:
             return argument
 
         # The API may return a `User` for options annotated with `Member`,
-        # including `Member` (user option), `Union[User, Member]` (user option) and
-        # `Union[Member, Role]` (mentionable option).
+        # including `Member` (user option), `User | Member` (user option) and
+        # `Member | Role` (mentionable option).
         # If we received a `User` but didn't expect one, raise.
         if (
             isinstance(argument, disnake.User)
@@ -649,12 +715,24 @@ class ParamInfo:
         return argument
 
     async def convert_argument(self, inter: ApplicationCommandInteraction, argument: Any) -> Any:
-        """Convert a value if a converter is given"""
+        """Convert a value if a converter is given."""
         if self.large:
             try:
                 argument = int(argument)
             except ValueError:
                 raise errors.LargeIntConversionFailure(argument) from None
+
+            min_value = -math.inf if self.min_value is None else self.min_value
+            max_value = math.inf if self.max_value is None else self.max_value
+
+            if not min_value <= argument <= max_value:
+                raise errors.LargeIntOutOfRange(
+                    argument,
+                    # If we get a float here, the user did something hacky.
+                    # We stringify the values, so this is fine.
+                    self.min_value,  # pyright: ignore[reportArgumentType]
+                    self.max_value,  # pyright: ignore[reportArgumentType]
+                ) from None
 
         if self.converter is None:
             # TODO: Custom validators
@@ -672,7 +750,7 @@ class ParamInfo:
             raise errors.ConversionError(self.converter, e) from e
 
     def _parse_enum(self, annotation: Any) -> None:
-        if isinstance(annotation, (EnumMeta, disnake.enums.EnumMeta)):
+        if isinstance(annotation, _EnumMetas):
             self.choices = [
                 OptionChoice(name, value.value)  # pyright: ignore[reportAttributeAccessIssue]
                 for name, value in annotation.__members__.items()
@@ -683,14 +761,14 @@ class ParamInfo:
         self.type = type(self.choices[0].value)
 
     def _parse_guild_channel(
-        self, *channels: type[disnake.abc.GuildChannel] | type[disnake.Thread]
+        self, *channels: type[disnake.abc.GuildChannel | disnake.Thread]
     ) -> None:
         # this variable continues to be GuildChannel because the type is still
         # determined from the TYPE mapping in the class definition
         self.type = disnake.abc.GuildChannel
 
         if not self.channel_types:
-            channel_types = set()
+            channel_types: set[ChannelType] = set()
             for channel in channels:
                 channel_types.update(_channel_type_factory(channel))
             self.channel_types = list(channel_types)
@@ -713,40 +791,40 @@ class ParamInfo:
         if annotation is inspect.Parameter.empty or annotation is Any:
             return False
 
-        # Range and String are aliased to Annotated for type-checking, which breaks
-        # the `isinstance` below for pyright, so alias them back to a known type.
-        if TYPE_CHECKING:
-            _Range = _String = _BaseRange
-        else:
-            _Range = Range
-            _String = String
-
         # resolve type aliases and special types
         if isinstance(annotation, _Range):
             self.min_value = annotation.min_value
             self.max_value = annotation.max_value
             annotation = annotation.underlying_type
-        if isinstance(annotation, _String):
-            self.min_length = cast("int | None", annotation.min_value)
-            self.max_length = cast("int | None", annotation.max_value)
+
+        elif isinstance(annotation, _String):
+            self.min_length = annotation.min_value
+            self.max_length = annotation.max_value
             annotation = annotation.underlying_type
+
         if issubclass_(annotation, LargeInt):
             self.large = True
             annotation = int
 
         if self.large:
-            self.type = str
             if annotation is not int:
                 msg = "Large integers must be annotated with int or LargeInt"
                 raise TypeError(msg)
+            self.type = str
+
+            if isinstance(self.min_value, float) or isinstance(self.max_value, float):
+                msg = "Cannot use min_value/max_value of type float with Param(large=True)/LargeInt"
+                raise TypeError(msg)
+
+            self.min_length, self.max_length = _unbound_range_to_str_len(
+                self.min_value, self.max_value
+            )
+
         elif annotation in self.TYPES:
             self.type = annotation
-        elif (
-            isinstance(annotation, (EnumMeta, disnake.enums.EnumMeta))
-            or get_origin(annotation) is Literal
-        ):
+        elif isinstance(annotation, _EnumMetas) or get_origin(annotation) is Literal:
             self._parse_enum(annotation)
-        elif get_origin(annotation) in (Union, UnionType):
+        elif get_origin(annotation) in _UnionTypes:
             args = annotation.__args__
             if all(
                 issubclass_(channel, (disnake.abc.GuildChannel, disnake.Thread)) for channel in args
@@ -757,7 +835,7 @@ class ParamInfo:
                 raise TypeError(msg)
         elif issubclass_(annotation, (disnake.abc.GuildChannel, disnake.Thread)):
             self._parse_guild_channel(annotation)
-        elif issubclass_(get_origin(annotation), collections.abc.Sequence):
+        elif issubclass_(get_origin(annotation), Sequence):
             msg = f"List arguments have not been implemented yet and therefore {annotation!r} is invalid"
             raise TypeError(msg)
 
@@ -837,8 +915,8 @@ class ParamInfo:
             choices=self.choices or None,
             channel_types=self.channel_types,
             autocomplete=self.autocomplete is not None,
-            min_value=self.min_value,
-            max_value=self.max_value,
+            min_value=None if self.large else self.min_value,
+            max_value=None if self.large else self.max_value,
             min_length=self.min_length,
             max_length=self.max_length,
         )
@@ -1199,8 +1277,10 @@ def Param(
     ge: :class:`float`
         The (inclusive) lower bound of values for this option (greater-than-or-equal). Kwarg aliases: ``min_value``.
     large: :class:`bool`
-        Whether to accept large :class:`int` values (if this is ``False``, only
-        values in the range ``(-2^53, 2^53)`` would be accepted due to an API limitation).
+        For a parameter of type :class:`int`, this controls whether to accept values outside the
+        range of ``[-2**53+1, 2**53-1]``, at the cost of reduced Discord-side input validation.
+
+        See :ref:`large_integers` for more info.
 
         .. versionadded:: 2.3
 
@@ -1335,6 +1415,9 @@ def injection(
     return decorator
 
 
+TChoice = TypeVar("TChoice", bound="ApplicationCommandOptionChoiceValue")
+
+
 def option_enum(choices: dict[str, TChoice] | list[TChoice], **kwargs: TChoice) -> type[TChoice]:
     r"""A utility function to create an enum type.
     Returns a new :class:`~enum.Enum` based on the provided parameters.
@@ -1354,7 +1437,7 @@ def option_enum(choices: dict[str, TChoice] | list[TChoice], **kwargs: TChoice) 
 
     choices = choices or kwargs
     first, *_ = choices.values()
-    return Enum("", choices, type=type(first))  # pyright: ignore[reportReturnType]
+    return enum.Enum("", choices, type=type(first))  # pyright: ignore[reportReturnType]
 
 
 class ConverterMethod(classmethod):
@@ -1381,10 +1464,10 @@ else:
 
 
 def register_injection(
-    function: InjectionCallback[CogT, P, T_],
+    function: InjectionCallback[CogT, P, T],
     *,
     autocompleters: dict[str, Callable] | None = None,
-) -> Injection[P, T_]:
+) -> Injection[P, T]:
     """A decorator to register a global injection.
 
     .. versionadded:: 2.3
