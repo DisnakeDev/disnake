@@ -787,6 +787,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             if self._max_concurrency is not None:
                 await self._max_concurrency.release(inter)  # pyright: ignore[reportArgumentType]
 
+            inter.application_command = self
             await self.call_after_hooks(inter)
 
 
