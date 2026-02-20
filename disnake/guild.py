@@ -4259,7 +4259,7 @@ class Guild(Hashable):
         else:
             msg = (
                 "`clean_history_duration` should be int or timedelta, "
-                f"not {type(clean_history_duration).__name__}"
+                f"not {clean_history_duration.__class__.__name__}"
             )
             raise TypeError(msg)
 
@@ -4348,7 +4348,7 @@ class Guild(Hashable):
         else:
             msg = (
                 "`clean_history_duration` should be int or timedelta, "
-                f"not {type(clean_history_duration).__name__}"
+                f"not {clean_history_duration.__class__.__name__}"
             )
             raise TypeError(msg)
 
@@ -4655,7 +4655,7 @@ class Guild(Hashable):
             You are not the owner of the guild.
         """
         if isinstance(mfa_level, bool) or not isinstance(mfa_level, int):
-            msg = f"`mfa_level` must be of type int, got {type(mfa_level).__name__}"
+            msg = f"`mfa_level` must be of type int, got {mfa_level.__class__.__name__}"
             raise TypeError(msg)
         if self.owner_id != self._state.self_id:
             msg = "To edit the 2FA level, you must be the owner of the guild."
