@@ -741,7 +741,6 @@ class ColourConverter(Converter[disnake.Colour]):
 
         if argument[0:2] == "0x":
             rest = argument[2:]
-            # Legacy backwards compatible syntax
             if rest.startswith("#"):
                 return self.parse_hex_number(rest[1:])
             return self.parse_hex_number(rest)
@@ -752,9 +751,19 @@ class ColourConverter(Converter[disnake.Colour]):
 
         arg = arg.replace(" ", "_")
         method = getattr(disnake.Colour, arg, None)
-        if arg.startswith("from_") or method is None or not inspect.ismethod(method):
+
+        if arg.startswith("from_") or method is None or not callable(method):
             raise BadColourArgument(arg)
-        return method()
+
+        result = method()
+
+        if not isinstance(result, disnake.Color):
+            error_msg = (
+                f"The colour method '{argument}' returned an invalid type: {type(result).__name__}"
+            )
+            raise BadColourArgument(error_msg)
+
+        return result
 
 
 ColorConverter = ColourConverter
