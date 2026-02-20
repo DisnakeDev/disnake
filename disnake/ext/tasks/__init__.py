@@ -42,18 +42,21 @@ ET = TypeVar("ET", bound=Callable[[Any, BaseException], Coroutine[Any, Any, Any]
 
 
 class SleepHandle:
-    __slots__ = ("future", "loop", "handle")
+    __slots__ = ("future", "handle")
 
-    def __init__(self, dt: datetime.datetime, *, loop: asyncio.AbstractEventLoop) -> None:
-        self.loop = loop
-        self.future: asyncio.Future[bool] = loop.create_future()
+    def __init__(self, dt: datetime.datetime) -> None:
+        self.future: asyncio.Future[bool] = asyncio.get_running_loop().create_future()
         relative_delta = disnake.utils.compute_timedelta(dt)
-        self.handle = loop.call_later(relative_delta, self.future.set_result, True)
+        self.handle = asyncio.get_running_loop().call_later(
+            relative_delta, self.future.set_result, True
+        )
 
     def recalculate(self, dt: datetime.datetime) -> None:
         self.handle.cancel()
         relative_delta = disnake.utils.compute_timedelta(dt)
-        self.handle = self.loop.call_later(relative_delta, self.future.set_result, True)
+        self.handle = asyncio.get_running_loop().call_later(
+            relative_delta, self.future.set_result, True
+        )
 
     def wait(self) -> asyncio.Future[bool]:
         return self.future
@@ -82,14 +85,12 @@ class Loop(Generic[LF]):
         time: datetime.time | Sequence[datetime.time] = MISSING,
         count: int | None = None,
         reconnect: bool = True,
-        loop: asyncio.AbstractEventLoop = MISSING,
     ) -> None:
         """.. note:
         If you overwrite ``__init__`` arguments, make sure to redefine .clone too.
         """
         self.coro: LF = coro
         self.reconnect: bool = reconnect
-        self.loop: asyncio.AbstractEventLoop = loop
         self.count: int | None = count
         self._current_loop = 0
         self._handle: SleepHandle = MISSING
@@ -133,7 +134,7 @@ class Loop(Generic[LF]):
             await coro(*args, **kwargs)
 
     def _try_sleep_until(self, dt: datetime.datetime) -> asyncio.Future[bool]:
-        self._handle = SleepHandle(dt=dt, loop=self.loop)
+        self._handle = SleepHandle(dt=dt)
         return self._handle.wait()
 
     async def _loop(self, *args: Any, **kwargs: Any) -> None:
@@ -208,7 +209,6 @@ class Loop(Generic[LF]):
             time=self._time,
             count=self.count,
             reconnect=self.reconnect,
-            loop=self.loop,
         )
         instance._before_loop = self._before_loop
         instance._after_loop = self._after_loop
@@ -321,10 +321,8 @@ class Loop(Generic[LF]):
         if self._injected is not None:
             args = (self._injected, *args)
 
-        if self.loop is MISSING:
-            self.loop = disnake.utils.get_event_loop()
+        self._task = asyncio.create_task(self._loop(*args, **kwargs))
 
-        self._task = self.loop.create_task(self._loop(*args, **kwargs))
         return self._task
 
     def stop(self) -> None:
@@ -714,7 +712,6 @@ def loop(
     time: datetime.time | Sequence[datetime.time] = ...,
     count: int | None = None,
     reconnect: bool = True,
-    loop: asyncio.AbstractEventLoop = ...,
 ) -> Callable[[LF], Loop[LF]]: ...
 
 
@@ -730,6 +727,9 @@ def loop(
 ) -> Callable[[LF], L_co]:
     r"""A decorator that schedules a task in the background for you with
     optional reconnect logic. The decorator returns a :class:`Loop`.
+
+    .. versionchanged:: 3.0
+        The ``loop`` parameter has been removed. Change the loop using :func:`asyncio.set_event_loop`.
 
     Parameters
     ----------
@@ -764,9 +764,6 @@ def loop(
     reconnect: :class:`bool`
         Whether to handle errors and restart the task using an exponential back-off algorithm
         similar to the one used in :meth:`disnake.Client.connect`.
-    loop: :class:`asyncio.AbstractEventLoop`
-        The loop to use to register the task, if not given defaults to the current event loop
-        or creates a new one if there is none.
 
     Raises
     ------

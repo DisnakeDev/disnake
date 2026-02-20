@@ -172,6 +172,9 @@ class VoiceClient(VoiceProtocol):
     You do not create these, you typically get them from
     e.g. :meth:`VoiceChannel.connect`.
 
+    .. versionchanged:: 3.0
+        ``VoiceClient.loop`` has been removed.
+
     Warning
     -------
     In order to use PCM based AudioSources, you must have the opus library
@@ -189,8 +192,6 @@ class VoiceClient(VoiceProtocol):
         The endpoint we are connecting to.
     channel: :class:`abc.Connectable`
         The voice channel connected to.
-    loop: :class:`asyncio.AbstractEventLoop`
-        The event loop that the voice client is running on.
     """
 
     endpoint_ip: str
@@ -209,7 +210,6 @@ class VoiceClient(VoiceProtocol):
         state = client._connection
         self.token: str = MISSING
         self.socket: socket.socket = MISSING
-        self.loop: asyncio.AbstractEventLoop = state.loop
         self._state: ConnectionState = state
         # this will be used in the AudioPlayer thread
         self._connected: threading.Event = threading.Event()
@@ -375,7 +375,7 @@ class VoiceClient(VoiceProtocol):
                 raise
 
         if self._runner is MISSING:
-            self._runner = self.loop.create_task(self.poll_voice_ws(reconnect))
+            self._runner = asyncio.create_task(self.poll_voice_ws(reconnect))
 
     async def potential_reconnect(self) -> bool:
         # Attempt to stop the player thread from playing early
@@ -605,7 +605,7 @@ class VoiceClient(VoiceProtocol):
         if not self.encoder and not source.is_opus():
             self.encoder = opus.Encoder()
 
-        self._player = AudioPlayer(source, self, after=after)
+        self._player = AudioPlayer(source, self, asyncio.get_running_loop(), after=after)
         self._player.start()
 
     def is_playing(self) -> bool:

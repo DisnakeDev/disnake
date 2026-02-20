@@ -883,7 +883,7 @@ class InteractionBotBase(CommonBotBase):
             msg = "This method is only usable in disnake.Client subclasses"
             raise NotImplementedError(msg)
 
-        if not self._command_sync_flags._sync_enabled or self._is_closed or self.loop.is_closed():
+        if not self._command_sync_flags._sync_enabled or self._is_closed:
             return
 
         # We assume that all commands are already cached.
@@ -989,7 +989,6 @@ class InteractionBotBase(CommonBotBase):
             or self._sync_queued.locked()
             or not self.is_ready()
             or self._is_closed
-            or self.loop.is_closed()
         ):
             return
         # We don't do this task on login or in parallel with a similar task
@@ -1003,7 +1002,7 @@ class InteractionBotBase(CommonBotBase):
             msg = "Command sync is only possible in disnake.Client subclasses"
             raise NotImplementedError(msg)
 
-        self.loop.create_task(
+        asyncio.create_task(
             self._prepare_application_commands(), name="disnake: app_command_preparation"
         )
 
@@ -1012,7 +1011,7 @@ class InteractionBotBase(CommonBotBase):
             msg = "This method is only usable in disnake.Client subclasses"
             raise NotImplementedError(msg)
 
-        self.loop.create_task(self._delayed_command_sync(), name="disnake: delayed_command_sync")
+        asyncio.create_task(self._delayed_command_sync(), name="disnake: delayed_command_sync")
 
     # Error handlers
 

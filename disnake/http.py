@@ -224,12 +224,10 @@ class HTTPClient:
         self,
         connector: aiohttp.BaseConnector | None = None,
         *,
-        loop: asyncio.AbstractEventLoop,
         proxy: str | None = None,
         proxy_auth: aiohttp.BasicAuth | None = None,
         unsync_clock: bool = True,
     ) -> None:
-        self.loop: asyncio.AbstractEventLoop = loop
         self.connector = connector
         self.__session: aiohttp.ClientSession = MISSING  # filled in static_login
         self._locks: weakref.WeakValueDictionary[str, asyncio.Lock] = weakref.WeakValueDictionary()
@@ -366,7 +364,7 @@ class HTTPClient:
                                 delta,
                             )
                             maybe_lock.defer()
-                            self.loop.call_later(delta, lock.release)
+                            asyncio.get_running_loop().call_later(delta, lock.release)
 
                         # the request was successful so just return the text/json
                         if 300 > response.status >= 200:

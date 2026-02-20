@@ -165,6 +165,12 @@ class KeepAliveHandler(threading.Thread):
         *args: Any,
         ws: HeartbeatWebSocket,
         interval: float,
+        # this loop sharing is necessary because KeepAliveHandler calls HeartbeatWebSocket's
+        # async methods and you can't run tasks made using one loop in another
+        # ("task attached to a different loop"), so the KeepAliveHandler's thread has to
+        # have access to main (this) thread's asyncio loop, and the only way for it to
+        # access said loop is to directly pass it as an object
+        loop: asyncio.AbstractEventLoop,
         shard_id: int | None = None,
         **kwargs: Any,
     ) -> None:
@@ -172,6 +178,7 @@ class KeepAliveHandler(threading.Thread):
         self.ws: HeartbeatWebSocket = ws
         self._main_thread_id: int = ws.thread_id
         self.interval: float = interval
+        self.loop = loop
         self.daemon: bool = True
         self.shard_id: int | None = shard_id
         self.msg = "Keeping shard ID %s websocket alive with sequence %s."
@@ -192,7 +199,7 @@ class KeepAliveHandler(threading.Thread):
                     self.shard_id,
                 )
                 coro = self.ws.close(4000)
-                f = asyncio.run_coroutine_threadsafe(coro, loop=self.ws.loop)
+                f = asyncio.run_coroutine_threadsafe(coro, loop=self.loop)
 
                 try:
                     f.result()
@@ -208,7 +215,7 @@ class KeepAliveHandler(threading.Thread):
             data = self.get_payload()
             _log.debug(self.msg, self.shard_id, data["d"])
             coro = self.ws.send_heartbeat(data)
-            f = asyncio.run_coroutine_threadsafe(coro, loop=self.ws.loop)
+            f = asyncio.run_coroutine_threadsafe(coro, loop=self.loop)
             try:
                 # block until sending is complete
                 total = 0
@@ -276,7 +283,6 @@ class HeartbeatWebSocket(Protocol):
     HEARTBEAT: Final[Literal[1, 3]] = 1
 
     thread_id: int
-    loop: asyncio.AbstractEventLoop
     _max_heartbeat_timeout: float
 
     async def close(self, code: int) -> None: ...
@@ -341,10 +347,10 @@ class DiscordWebSocket:
     GUILD_SYNC: Final[Literal[12]] = 12
 
     def __init__(
-        self, socket: aiohttp.ClientWebSocketResponse, *, loop: asyncio.AbstractEventLoop
+        self,
+        socket: aiohttp.ClientWebSocketResponse,
     ) -> None:
         self.socket: aiohttp.ClientWebSocketResponse = socket
-        self.loop: asyncio.AbstractEventLoop = loop
 
         # an empty dispatcher to prevent crashes
         self._dispatch: DispatchFunc = lambda event, *args: None
@@ -416,7 +422,7 @@ class DiscordWebSocket:
             gateway = await client.http.get_gateway(encoding=params.encoding, zlib=params.zlib)
 
         socket = await client.http.ws_connect(gateway)
-        ws = cls(socket, loop=client.loop)
+        ws = cls(socket)
 
         # dynamically add attributes needed
         ws.token = client.http.token  # pyright: ignore[reportAttributeAccessIssue]
@@ -479,7 +485,7 @@ class DiscordWebSocket:
         asyncio.Future
             A future to wait for.
         """
-        future = self.loop.create_future()
+        future = asyncio.get_running_loop().create_future()
         entry = EventListener(event=event, predicate=predicate, result=result, future=future)
         self._dispatch_listeners.append(entry)
         return future
@@ -583,8 +589,12 @@ class DiscordWebSocket:
             if op == self.HELLO:
                 interval: float = data["heartbeat_interval"] / 1000.0
                 self._keep_alive = KeepAliveHandler(
-                    ws=self, interval=interval, shard_id=self.shard_id
+                    ws=self,
+                    interval=interval,
+                    shard_id=self.shard_id,
+                    loop=asyncio.get_running_loop(),
                 )
+                self._keep_alive.name = "disnake heartbeat thread"
                 # send a heartbeat immediately
                 await self.send_as_json(self._keep_alive.get_payload())
                 self._keep_alive.start()
@@ -900,13 +910,10 @@ class DiscordVoiceWebSocket:
     def __init__(
         self,
         socket: aiohttp.ClientWebSocketResponse,
-        loop: asyncio.AbstractEventLoop,
         *,
         hook: HookFunc | None = None,
     ) -> None:
         self.ws: aiohttp.ClientWebSocketResponse = socket
-        self.loop: asyncio.AbstractEventLoop = loop
-
         self._keep_alive: VoiceKeepAliveHandler | None = None
         self.sequence: int = -1
 
@@ -974,7 +981,7 @@ class DiscordVoiceWebSocket:
         gateway = f"wss://{client.endpoint}/?v={_VOICE_VERSION}"
         http = client._state.http
         socket = await http.ws_connect(gateway, compress=15)
-        ws = cls(socket, loop=client.loop, hook=hook)
+        ws = cls(socket, hook=hook)
         ws.gateway = gateway
         ws._connection = client
         ws._max_heartbeat_timeout = 60.0
@@ -1038,7 +1045,9 @@ class DiscordVoiceWebSocket:
             self._ready.set()
         elif op == self.HELLO:
             interval: float = data["heartbeat_interval"] / 1000.0
-            self._keep_alive = VoiceKeepAliveHandler(ws=self, interval=min(interval, 5.0))
+            self._keep_alive = VoiceKeepAliveHandler(
+                ws=self, interval=min(interval, 5.0), loop=asyncio.get_running_loop()
+            )
             self._keep_alive.start()
 
         await self._hook(self, msg)
@@ -1054,7 +1063,7 @@ class DiscordVoiceWebSocket:
         struct.pack_into(">H", packet, 2, 70)  # 70 = Length
         struct.pack_into(">I", packet, 4, state.ssrc)
         state.socket.sendto(packet, (state.endpoint_ip, state.voice_port))
-        recv = await self.loop.sock_recv(state.socket, 74)
+        recv = await asyncio.get_running_loop().sock_recv(state.socket, 74)
         _log.debug("received packet in initial_connection: %s", recv)
 
         # the ip is ascii starting at the 8th byte and ending at the first null

@@ -144,12 +144,11 @@ class View:
             self.children.append(item)
 
         self.__weights = _ViewWeights(self.children)
-        loop = asyncio.get_running_loop()
         self.id: str = os.urandom(16).hex()
         self.__cancel_callback: Callable[[View], None] | None = None
         self.__timeout_expiry: float | None = None
         self.__timeout_task: asyncio.Task[None] | None = None
-        self.__stopped: asyncio.Future[bool] = loop.create_future()
+        self.__stopped: asyncio.Future[bool] = asyncio.get_running_loop().create_future()
 
     def __repr__(self) -> str:
         return f"<{self.__class__.__name__} timeout={self.timeout} children={len(self.children)}>"
@@ -373,12 +372,11 @@ class View:
     def _start_listening_from_store(self, store: ViewStore) -> None:
         self.__cancel_callback = partial(store.remove_view)
         if self.timeout:
-            loop = asyncio.get_running_loop()
             if self.__timeout_task is not None:
                 self.__timeout_task.cancel()
 
             self.__timeout_expiry = time.monotonic() + self.timeout
-            self.__timeout_task = loop.create_task(self.__timeout_task_impl())
+            self.__timeout_task = asyncio.create_task(self.__timeout_task_impl())
 
     def _dispatch_timeout(self) -> None:
         if self.__stopped.done():

@@ -700,11 +700,20 @@ class PCMVolumeTransformer(AudioSource, Generic[AT]):
 class AudioPlayer(threading.Thread):
     DELAY: float = OpusEncoder.FRAME_LENGTH / 1000.0
 
-    def __init__(self, source: AudioSource, client: VoiceClient, *, after=None) -> None:
+    def __init__(
+        self,
+        source: AudioSource,
+        client: VoiceClient,
+        # see KeepAliveHandler's reasoning for sharing the loop
+        loop: asyncio.AbstractEventLoop,
+        *,
+        after=None,
+    ) -> None:
         threading.Thread.__init__(self)
         self.daemon: bool = True
         self.source: AudioSource = source
         self.client: VoiceClient = client
+        self.loop = loop
         self.after: Callable[[Exception | None], Any] | None = after
 
         self._end: threading.Event = threading.Event()
@@ -815,6 +824,6 @@ class AudioPlayer(threading.Thread):
 
     def _speak(self, speaking: bool) -> None:
         try:
-            asyncio.run_coroutine_threadsafe(self.client.ws.speak(speaking), self.client.loop)
+            asyncio.run_coroutine_threadsafe(self.client.ws.speak(speaking), self.loop)
         except Exception as e:
             _log.info("Speaking call in player failed: %s", e)

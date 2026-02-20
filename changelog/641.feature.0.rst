@@ -1,0 +1,1 @@
+|commands| :meth:`Cog.cog_load <ext.commands.Cog.cog_load>` and :meth:`Cog.cog_unload <ext.commands.Cog.cog_unload>` can now be either sync or async.

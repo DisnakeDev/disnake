@@ -10,7 +10,6 @@ from .bot_base import BotBase, when_mentioned, when_mentioned_or
 from .interaction_bot_base import InteractionBotBase
 
 if TYPE_CHECKING:
-    import asyncio
     from collections.abc import Callable, Sequence
 
     import aiohttp
@@ -268,7 +267,6 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
             default_install_types: ApplicationInstallTypes | None = None,
             default_contexts: InteractionContextTypes | None = None,
             asyncio_debug: bool = False,
-            loop: asyncio.AbstractEventLoop | None = None,
             shard_id: int | None = None,
             shard_count: int | None = None,
             enable_debug_events: bool = False,
@@ -321,7 +319,6 @@ class AutoShardedBot(BotBase, InteractionBotBase, disnake.AutoShardedClient):
             default_install_types: ApplicationInstallTypes | None = None,
             default_contexts: InteractionContextTypes | None = None,
             asyncio_debug: bool = False,
-            loop: asyncio.AbstractEventLoop | None = None,
             shard_ids: list[int] | None = None,  # instead of shard_id
             shard_count: int | None = None,
             enable_debug_events: bool = False,
@@ -493,7 +490,6 @@ class InteractionBot(InteractionBotBase, disnake.Client):
             default_install_types: ApplicationInstallTypes | None = None,
             default_contexts: InteractionContextTypes | None = None,
             asyncio_debug: bool = False,
-            loop: asyncio.AbstractEventLoop | None = None,
             shard_id: int | None = None,
             shard_count: int | None = None,
             enable_debug_events: bool = False,
@@ -539,7 +535,6 @@ class AutoShardedInteractionBot(InteractionBotBase, disnake.AutoShardedClient):
             default_install_types: ApplicationInstallTypes | None = None,
             default_contexts: InteractionContextTypes | None = None,
             asyncio_debug: bool = False,
-            loop: asyncio.AbstractEventLoop | None = None,
             shard_ids: list[int] | None = None,  # instead of shard_id
             shard_count: int | None = None,
             enable_debug_events: bool = False,

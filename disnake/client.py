@@ -4,10 +4,10 @@ from __future__ import annotations
 
 import asyncio
 import logging
-import signal
 import sys
 import traceback
 import types
+import warnings
 from collections.abc import Callable, Coroutine
 from datetime import timedelta
 from errno import ECONNRESET
@@ -117,41 +117,6 @@ CoroT = TypeVar("CoroT", bound=Callable[..., Coroutine[Any, Any, Any]])
 _log = logging.getLogger(__name__)
 
 
-def _cancel_tasks(loop: asyncio.AbstractEventLoop) -> None:
-    tasks = {t for t in asyncio.all_tasks(loop=loop) if not t.done()}
-
-    if not tasks:
-        return
-
-    _log.info("Cleaning up after %d tasks.", len(tasks))
-    for task in tasks:
-        task.cancel()
-
-    loop.run_until_complete(asyncio.gather(*tasks, return_exceptions=True))
-    _log.info("All tasks finished cancelling.")
-
-    for task in tasks:
-        if task.cancelled():
-            continue
-        if task.exception() is not None:
-            loop.call_exception_handler(
-                {
-                    "message": "Unhandled exception during Client.run shutdown.",
-                    "exception": task.exception(),
-                    "task": task,
-                }
-            )
-
-
-def _cleanup_loop(loop: asyncio.AbstractEventLoop) -> None:
-    try:
-        _cancel_tasks(loop)
-        loop.run_until_complete(loop.shutdown_asyncgens())
-    finally:
-        _log.info("Closing the event loop.")
-        loop.close()
-
-
 class SessionStartLimit:
     """A class that contains information about the current session start limit,
     at the time when the client connected for the first time.
@@ -233,6 +198,9 @@ class Client:
 
     A number of options can be passed to the :class:`Client`.
 
+    .. versionchanged:: 3.0
+        The ``asyncio_debug`` parameter has been removed. Use :meth:`asyncio.loop.set_debug` directly.
+
     Parameters
     ----------
     max_messages: :class:`int` | :data:`None`
@@ -241,13 +209,6 @@ class Client:
 
         .. versionchanged:: 1.3
             Allow disabling the message cache and change the default size to ``1000``.
-    loop: :class:`asyncio.AbstractEventLoop` | :data:`None`
-        The :class:`asyncio.AbstractEventLoop` to use for asynchronous operations.
-        Defaults to :data:`None`, in which case the current event loop is
-        used, or a new loop is created if there is none.
-    asyncio_debug: :class:`bool`
-        Whether to enable asyncio debugging when the client starts.
-        Defaults to False.
     connector: :class:`aiohttp.BaseConnector` | :data:`None`
         The connector to use for connection pooling.
     proxy: :class:`str` | :data:`None`
@@ -365,8 +326,6 @@ class Client:
     ----------
     ws
         The websocket gateway the client is currently connected to. Could be :data:`None`.
-    loop: :class:`asyncio.AbstractEventLoop`
-        The event loop that the client uses for asynchronous operations.
     session_start_limit: :class:`SessionStartLimit` | :data:`None`
         Information about the current session start limit.
         Only available after initiating the connection.
@@ -382,8 +341,6 @@ class Client:
     def __init__(
         self,
         *,
-        asyncio_debug: bool = False,
-        loop: asyncio.AbstractEventLoop | None = None,
         shard_id: int | None = None,
         shard_count: int | None = None,
         enable_debug_events: bool = False,
@@ -409,21 +366,26 @@ class Client:
         # self.ws is set in the connect method
         self.ws: DiscordWebSocket = None  # pyright: ignore[reportAttributeAccessIssue]
 
-        if loop is None:
-            self.loop: asyncio.AbstractEventLoop = utils.get_event_loop()
-        else:
-            self.loop: asyncio.AbstractEventLoop = loop
-
-        self.loop.set_debug(asyncio_debug)
         self._listeners: dict[str, list[tuple[asyncio.Future, Callable[..., bool]]]] = {}
         self.session_start_limit: SessionStartLimit | None = None
+
+        if connector:
+            try:
+                asyncio.get_running_loop()
+            except RuntimeError:
+                msg = (
+                    "`connector` was created outside of an asyncio loop, which will likely cause"
+                    "issues later down the line due to the client and `connector` running on"
+                    "different asyncio loops; consider moving client instantiation to an '`async"
+                    "main`' function and then manually asyncio.run it"
+                )
+                raise RuntimeError(msg) from None
 
         self.http: HTTPClient = HTTPClient(
             connector,
             proxy=proxy,
             proxy_auth=proxy_auth,
             unsync_clock=assume_unsync_clock,
-            loop=self.loop,
         )
 
         self._handlers: dict[str, Callable[..., Any]] = {
@@ -510,7 +472,6 @@ class Client:
             handlers=self._handlers,
             hooks=self._hooks,
             http=self.http,
-            loop=self.loop,
             max_messages=max_messages,
             application_id=application_id,
             heartbeat_timeout=heartbeat_timeout,
@@ -530,6 +491,29 @@ class Client:
         if self._first_connect.is_set():
             return
         self._first_connect.set()
+
+    @property
+    def loop(self):
+        """:class:`asyncio.AbstractEventLoop`: Same as :func:`asyncio.get_running_loop`.
+
+        .. deprecated:: 3.0
+            Use :func:`asyncio.get_running_loop` directly.
+        """
+        warnings.warn(
+            "Accessing `Client.loop` is deprecated. Use `asyncio.get_running_loop()` instead.",
+            category=DeprecationWarning,
+            stacklevel=2,
+        )
+        return asyncio.get_running_loop()
+
+    @loop.setter
+    def loop(self, value: asyncio.AbstractEventLoop) -> None:
+        warnings.warn(
+            "Assigning to `Client.loop` is deprecated. Use `asyncio.set_event_loop()` instead.",
+            category=DeprecationWarning,
+            stacklevel=2,
+        )
+        asyncio.set_event_loop(value)
 
     @property
     def latency(self) -> float:
@@ -1015,12 +999,34 @@ class Client:
         if not initial:
             await asyncio.sleep(5.0)
 
+    async def setup_hook(self) -> None:
+        """A hook that allows you to perform asynchronous setup like
+        initiating database connections or loading cogs/extensions after
+        the bot has logged in but before it has connected to the websocket.
+
+        This is only called once, in :meth:`.login`, before any events are
+        dispatched, making it a better solution than doing such setup in
+        the :func:`disnake.on_ready` event.
+
+        .. warning::
+            Since this is called *before* the websocket connection is made,
+            anything that waits for the websocket will deadlock, which includes
+            methods like :meth:`.wait_for`, :meth:`.wait_until_ready`
+            and :meth:`.wait_until_first_connect`.
+
+        .. versionadded:: 3.0
+        """
+
     # login state management
 
     async def login(self, token: str) -> None:
         """|coro|
 
-        Logs in the client with the specified credentials.
+        Logs in the client with the specified credentials and calls
+        :meth:`.setup_hook`.
+
+        .. versionchanged:: 3.0
+            Now also calls :meth:`.setup_hook`.
 
         Parameters
         ----------
@@ -1044,6 +1050,8 @@ class Client:
 
         data = await self.http.static_login(token.strip())
         self._connection.user = ClientUser(state=self._connection, data=data)
+
+        await self.setup_hook()
 
     async def connect(
         self, *, reconnect: bool = True, ignore_session_start_limit: bool = False
@@ -1259,62 +1267,26 @@ class Client:
         function should not be used. Use :meth:`start` coroutine
         or :meth:`connect` + :meth:`login`.
 
-        Roughly Equivalent to: ::
+        Equivalent to: ::
 
             try:
-                loop.run_until_complete(start(*args, **kwargs))
+                asyncio.run(start(*args, **kwargs))
             except KeyboardInterrupt:
-                loop.run_until_complete(close())
-                # cancel all tasks lingering
-            finally:
-                loop.close()
+                return
 
         .. warning::
 
-            This function must be the last function to call due to the fact that it
-            is blocking. That means that registration of events or anything being
-            called after this function call will not execute until it returns
+            This function should be the last function to be called because it is blocking.
+            That means that registration of commands, events or any code after this function
+            call will not execute until it returns.
 
-        Parameters
-        ----------
-        token: :class:`str`
-            The discord token of the bot that is being ran.
+        .. versionchanged:: 3.0
+            Changed to use :func:`asyncio.run` instead of custom logic.
         """
-        loop = self.loop
-
         try:
-            loop.add_signal_handler(signal.SIGINT, lambda: loop.stop())
-            loop.add_signal_handler(signal.SIGTERM, lambda: loop.stop())
-        except NotImplementedError:
-            pass
-
-        async def runner() -> None:
-            try:
-                await self.start(*args, **kwargs)
-            finally:
-                if not self.is_closed():
-                    await self.close()
-
-        def stop_loop_on_completion(f) -> None:
-            loop.stop()
-
-        future = asyncio.ensure_future(runner(), loop=loop)
-        future.add_done_callback(stop_loop_on_completion)
-        try:
-            loop.run_forever()
+            asyncio.run(self.start(*args, **kwargs))
         except KeyboardInterrupt:
-            _log.info("Received signal to terminate bot and event loop.")
-        finally:
-            future.remove_done_callback(stop_loop_on_completion)
-            _log.info("Cleaning up tasks.")
-            _cleanup_loop(loop)
-
-        if not future.cancelled():
-            try:
-                future.result()
-            except KeyboardInterrupt:
-                # I am unsure why this gets raised here but suppress it anyway
-                pass
+            return
 
     # properties
 
@@ -1750,6 +1722,9 @@ class Client:
 
         This function returns the **first event that meets the requirements**.
 
+        .. important::
+            Requires an :mod:`asyncio` loop to be running.
+
         Examples
         --------
         Waiting for a user reply: ::
@@ -1813,6 +1788,8 @@ class Client:
 
         Raises
         ------
+        RuntimeError
+            No running ``asyncio`` loop.
         asyncio.TimeoutError
             If a timeout is provided and it was reached.
 
@@ -1823,7 +1800,7 @@ class Client:
             arguments that mirrors the parameters passed in the
             :ref:`event <disnake_api_events>`.
         """
-        future = self.loop.create_future()
+        future = asyncio.get_running_loop().create_future()
         if check is None:
 
             def _check(*args) -> bool:

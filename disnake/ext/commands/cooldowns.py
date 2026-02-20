@@ -298,11 +298,10 @@ class _Semaphore:
     overkill for what is basically a counter.
     """
 
-    __slots__ = ("value", "loop", "_waiters")
+    __slots__ = ("value", "_waiters")
 
     def __init__(self, number: int) -> None:
         self.value: int = number
-        self.loop: asyncio.AbstractEventLoop = asyncio.get_running_loop()
         self._waiters: deque[asyncio.Future] = deque()
 
     def __repr__(self) -> str:
@@ -327,7 +326,7 @@ class _Semaphore:
             return False
 
         while self.value <= 0:
-            future = self.loop.create_future()
+            future = asyncio.get_running_loop().create_future()
             self._waiters.append(future)
             try:
                 await future

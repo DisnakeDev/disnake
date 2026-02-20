@@ -77,9 +77,7 @@ tools = [
     "check-wheel-contents~=0.6.3",
     { include-group = "ruff" },
 ]
-changelog = [
-    "towncrier==23.6.0",
-]
+changelog = ["towncrier==23.6.0"]
 codemod = [
     # run codemods on the repository (mostly automated typing)
     "libcst==1.8.5",
@@ -334,35 +332,35 @@ title_format = false
 underlines = "-~"
 issue_format = ":issue:`{issue}`"
 
-    [[tool.towncrier.type]]
-    directory = "breaking"
-    name = "Breaking Changes"
-    showcontent = true
+[[tool.towncrier.type]]
+directory = "breaking"
+name = "Breaking Changes"
+showcontent = true
 
-    [[tool.towncrier.type]]
-    directory = "deprecate"
-    name = "Deprecations"
-    showcontent = true
+[[tool.towncrier.type]]
+directory = "deprecate"
+name = "Deprecations"
+showcontent = true
 
-    [[tool.towncrier.type]]
-    directory = "feature"
-    name = "New Features"
-    showcontent = true
+[[tool.towncrier.type]]
+directory = "feature"
+name = "New Features"
+showcontent = true
 
-    [[tool.towncrier.type]]
-    directory = "bugfix"
-    name = "Bug Fixes"
-    showcontent = true
+[[tool.towncrier.type]]
+directory = "bugfix"
+name = "Bug Fixes"
+showcontent = true
 
-    [[tool.towncrier.type]]
-    directory = "doc"
-    name = "Documentation"
-    showcontent = true
+[[tool.towncrier.type]]
+directory = "doc"
+name = "Documentation"
+showcontent = true
 
-    [[tool.towncrier.type]]
-    directory = "misc"
-    name = "Miscellaneous"
-    showcontent = true
+[[tool.towncrier.type]]
+directory = "misc"
+name = "Miscellaneous"
+showcontent = true
 
 
 [tool.slotscheck]
@@ -433,15 +431,8 @@ asyncio_mode = "strict"
 
 [tool.coverage.run]
 branch = true
-include = [
-    "disnake/*",
-    "tests/*",
-]
-omit = [
-    "disnake/ext/mypy_plugin/*",
-    "disnake/types/*",
-    "disnake/__main__.py",
-]
+include = ["disnake/*", "tests/*"]
+omit = ["disnake/ext/mypy_plugin/*", "disnake/types/*", "disnake/__main__.py"]
 
 [tool.coverage.report]
 precision = 1
