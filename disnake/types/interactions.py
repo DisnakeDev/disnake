@@ -270,8 +270,8 @@ class ModalInteractionFileUploadData(_BaseSnowflakeModalComponentInteractionData
 
 class ModalInteractionRadioGroupData(_BaseCustomIdComponentInteractionData):
     type: Literal[21]
-    # if `RadioGroup.required = False` and the user didn't select anything, this will be missing
-    value: NotRequired[str]
+    # if `RadioGroup.required = False` and the user didn't select anything, this will be null
+    value: str | None
 
 
 class ModalInteractionCheckboxGroupData(_BaseCustomIdComponentInteractionData):
