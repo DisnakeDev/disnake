@@ -19,7 +19,11 @@ from base64 import b64encode
 from bisect import bisect_left
 from collections.abc import (
     AsyncIterator,
+    Awaitable,
+    Callable,
+    Iterable,
     Iterator,
+    Mapping,
     Sequence,
 )
 from inspect import getdoc as _getdoc, isawaitable as _isawaitable, signature as _signature
@@ -44,13 +48,6 @@ from typing import (
 from urllib.parse import parse_qs, urlencode
 
 if TYPE_CHECKING:
-    from collections.abc import (
-        Awaitable,
-        Callable,
-        Iterable,
-        Mapping,
-    )
-
     from typing_extensions import Self
 
 from .enums import Locale

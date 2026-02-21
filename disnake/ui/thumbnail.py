@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, ClassVar
 
-from ..components import Thumbnail as ThumbnailComponent, handle_media_item_input
+from ..components import Thumbnail as ThumbnailComponent, UnfurledMediaItem, handle_media_item_input
 from ..enums import ComponentType
 from ..utils import MISSING
 from .item import UIComponent
@@ -12,7 +12,7 @@ from .item import UIComponent
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from ..components import MediaItemInput, UnfurledMediaItem
+    from ..components import MediaItemInput
 
 __all__ = ("Thumbnail",)
 

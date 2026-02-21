@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from collections.abc import Callable, Coroutine
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -23,8 +24,6 @@ I = TypeVar("I", bound="Item[Any]")  # noqa: E741
 V_co = TypeVar("V_co", bound="View | None", covariant=True)
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Coroutine
-
     from typing_extensions import Self
 
     from ..client import Client
@@ -65,6 +64,9 @@ class UIComponent(ABC):
     - :class:`disnake.ui.Container`
     - :class:`disnake.ui.Label`
     - :class:`disnake.ui.FileUpload`
+    - :class:`disnake.ui.RadioGroup`
+    - :class:`disnake.ui.CheckboxGroup`
+    - :class:`disnake.ui.Checkbox`
 
     .. versionadded:: 2.11
     """

@@ -2,31 +2,30 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable, Sequence
 from typing import TYPE_CHECKING, Any
 
 from disnake.app_commands import MessageCommand, UserCommand
+from disnake.flags import ApplicationInstallTypes, InteractionContextTypes
 from disnake.i18n import Localized
+from disnake.permissions import Permissions
 from disnake.utils import iscoroutinefunction
 
 from .base_core import InvokableApplicationCommand, _get_overridden_method
+from .errors import CommandError
 from .params import safe_call
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Sequence
-
     from typing_extensions import ParamSpec
 
-    from disnake.flags import ApplicationInstallTypes, InteractionContextTypes
     from disnake.i18n import LocalizedOptional
     from disnake.interactions import (
         ApplicationCommandInteraction,
         MessageCommandInteraction,
         UserCommandInteraction,
     )
-    from disnake.permissions import Permissions
 
     from .base_core import CogT, InteractionCommandCallback
-    from .errors import CommandError
 
     P = ParamSpec("P")
 
@@ -293,7 +292,7 @@ def user_command(
         .. versionadded:: 2.5
 
     nsfw: :class:`bool`
-        Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
+        Whether this command is :ddocs:`age-restricted <interactions/application-commands#age-restricted-commands>`.
         Defaults to ``False``.
 
         .. versionadded:: 2.8
@@ -404,7 +403,7 @@ def message_command(
         .. versionadded:: 2.5
 
     nsfw: :class:`bool`
-        Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
+        Whether this command is :ddocs:`age-restricted <interactions/application-commands#age-restricted-commands>`.
         Defaults to ``False``.
 
         .. versionadded:: 2.8

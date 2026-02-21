@@ -22,6 +22,7 @@ import logging
 import socket
 import struct
 import threading
+from collections.abc import Callable
 from typing import TYPE_CHECKING, Any, Final, Literal
 
 from . import opus, utils
@@ -32,8 +33,6 @@ from .player import AudioPlayer, AudioSource
 from .utils import MISSING
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
-
     from . import abc
     from .client import Client
     from .guild import Guild
@@ -121,7 +120,7 @@ class VoiceProtocol:
         Parameters
         ----------
         data: :class:`dict`
-            The raw :ddocs:`voice server update payload <topics/gateway-events#voice-server-update>`.
+            The raw :ddocs:`voice server update payload <events/gateway-events#voice-server-update>`.
         """
         raise NotImplementedError
 

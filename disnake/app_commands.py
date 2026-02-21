@@ -5,13 +5,14 @@ from __future__ import annotations
 import math
 import re
 from abc import ABC
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from typing import TYPE_CHECKING, ClassVar, TypeAlias
 
 from .enums import (
     ApplicationCommandPermissionType,
     ApplicationCommandType,
     ChannelType,
+    Locale,
     OptionType,
     enum_if_int,
     try_enum,
@@ -23,13 +24,8 @@ from .permissions import Permissions
 from .utils import MISSING, _get_as_snowflake, _maybe_cast, deprecated, warn_deprecated
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
-
     from typing_extensions import Self
 
-    from .enums import (
-        Locale,
-    )
     from .i18n import LocalizationProtocol, LocalizationValue, LocalizedOptional, LocalizedRequired
     from .state import ConnectionState
     from .types.interactions import (
@@ -85,7 +81,7 @@ def application_command_factory(data: ApplicationCommandPayload) -> APIApplicati
 
 def _validate_name(name: str) -> None:
     # used for slash command names and option names
-    # see https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-naming
+    # see https://docs.discord.com/developers/interactions/application-commands#application-command-object-application-command-naming
 
     if not isinstance(name, str):
         msg = f"Slash command name and option names must be an instance of class 'str', received '{name.__class__}'"
@@ -498,7 +494,7 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
         .. versionadded:: 2.5
 
     nsfw: :class:`bool`
-        Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
+        Whether this command is :ddocs:`age-restricted <interactions/application-commands#age-restricted-commands>`.
         Defaults to ``False``.
 
         .. versionadded:: 2.8
@@ -771,7 +767,7 @@ class UserCommand(ApplicationCommand):
         .. versionadded:: 2.5
 
     nsfw: :class:`bool`
-        Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
+        Whether this command is :ddocs:`age-restricted <interactions/application-commands#age-restricted-commands>`.
         Defaults to ``False``.
 
         .. versionadded:: 2.8
@@ -829,7 +825,7 @@ class APIUserCommand(UserCommand, _APIApplicationCommandMixin):
         .. versionadded:: 2.5
 
     nsfw: :class:`bool`
-        Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
+        Whether this command is :ddocs:`age-restricted <interactions/application-commands#age-restricted-commands>`.
 
         .. versionadded:: 2.8
 
@@ -900,7 +896,7 @@ class MessageCommand(ApplicationCommand):
         .. versionadded:: 2.5
 
     nsfw: :class:`bool`
-        Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
+        Whether this command is :ddocs:`age-restricted <interactions/application-commands#age-restricted-commands>`.
         Defaults to ``False``.
 
         .. versionadded:: 2.8
@@ -958,7 +954,7 @@ class APIMessageCommand(MessageCommand, _APIApplicationCommandMixin):
         .. versionadded:: 2.5
 
     nsfw: :class:`bool`
-        Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
+        Whether this command is :ddocs:`age-restricted <interactions/application-commands#age-restricted-commands>`.
 
         .. versionadded:: 2.8
 
@@ -1036,7 +1032,7 @@ class SlashCommand(ApplicationCommand):
         .. versionadded:: 2.5
 
     nsfw: :class:`bool`
-        Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
+        Whether this command is :ddocs:`age-restricted <interactions/application-commands#age-restricted-commands>`.
         Defaults to ``False``.
 
         .. versionadded:: 2.8
@@ -1177,7 +1173,7 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
         .. versionadded:: 2.5
 
     nsfw: :class:`bool`
-        Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
+        Whether this command is :ddocs:`age-restricted <interactions/application-commands#age-restricted-commands>`.
 
         .. versionadded:: 2.8
 

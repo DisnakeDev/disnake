@@ -217,6 +217,10 @@ ignore = [
     "TID252", # we still use relative imports
     ## flake8-todos
     "TD", # similar to flake8-fixme, though they may conflict
+    ## flake8-typechecking
+    "TC001", # typing-only first party import
+    "TC002", # typing only third party import
+    "TC003", # typing only standard library import
     ## flake8-unused-arguments
     "ARG", # most unused arguments are intentional
     ## flake8-use-pathlib

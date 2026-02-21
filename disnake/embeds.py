@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import datetime
+from collections.abc import Mapping, Sized
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -15,12 +16,8 @@ from typing import (
 
 from . import utils
 from .colour import Colour
+from .file import File
 from .utils import MISSING, classproperty, warn_deprecated
-
-if TYPE_CHECKING:
-    from collections.abc import Mapping, Sized
-
-    from .file import File
 
 __all__ = ("Embed",)
 
@@ -151,7 +148,7 @@ class Embed:
     type: :class:`str` | :data:`None`
         The type of embed. Usually "rich".
         Possible strings for embed types can be found on Discord's
-        :ddocs:`api-docs <resources/channel#embed-object-embed-types>`.
+        :ddocs:`api-docs <resources/message#embed-object-embed-types>`.
     description: :class:`str` | :data:`None`
         The description of the embed.
     url: :class:`str` | :data:`None`
@@ -239,7 +236,7 @@ class Embed:
         format that Discord expects it to be in.
 
         You can find out about this format in the
-        :ddocs:`official Discord documentation <resources/channel#embed-object>`.
+        :ddocs:`official Discord documentation <resources/message#embed-object>`.
 
         Parameters
         ----------

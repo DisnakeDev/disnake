@@ -2,11 +2,10 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, TypedDict
+from typing import Literal, TypedDict
 
-if TYPE_CHECKING:
-    from .snowflake import Snowflake
-    from .user import PartialUser
+from .snowflake import Snowflake
+from .user import PartialUser
 
 TeamMembershipState = Literal[1, 2]
 TeamMemberRole = Literal["admin", "developer", "read_only"]

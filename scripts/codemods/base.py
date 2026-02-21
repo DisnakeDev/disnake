@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
-from __future__ import annotations
 
 from abc import ABC
+from collections.abc import Generator
 from contextlib import contextmanager
 from contextvars import ContextVar
 from typing import TYPE_CHECKING, ClassVar
@@ -10,8 +10,6 @@ import libcst as cst
 import libcst.codemod as codemod
 
 if TYPE_CHECKING:
-    from collections.abc import Generator
-
     base_type = codemod.Codemod
 else:
     base_type = object

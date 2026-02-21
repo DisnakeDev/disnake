@@ -12,6 +12,7 @@ import time
 import traceback
 import zlib
 from collections import deque
+from collections.abc import Callable
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -30,8 +31,6 @@ from .enums import SpeakingState
 from .errors import ConnectionClosed
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
-
     from typing_extensions import Self
 
     from .client import Client

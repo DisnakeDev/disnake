@@ -3,13 +3,14 @@
 from __future__ import annotations
 
 import os
+from collections.abc import Callable
 from typing import TYPE_CHECKING, Any, ClassVar, TypeVar, overload
 
 from ..components import Button as ButtonComponent
 from ..enums import ButtonStyle, ComponentType
 from ..partial_emoji import PartialEmoji, _EmojiTag
 from ..utils import MISSING, iscoroutinefunction
-from .item import Item
+from .item import DecoratedItem, Item
 
 __all__ = (
     "Button",
@@ -17,12 +18,10 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
-
     from typing_extensions import ParamSpec, Self
 
     from ..emoji import Emoji
-    from .item import DecoratedItem, ItemCallbackType
+    from .item import ItemCallbackType
     from .view import View
 
 else:

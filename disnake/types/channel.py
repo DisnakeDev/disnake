@@ -1,15 +1,13 @@
 # SPDX-License-Identifier: MIT
-from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, TypeAlias, TypedDict
+from typing import Literal, TypeAlias, TypedDict
 
 from typing_extensions import NotRequired
 
-if TYPE_CHECKING:
-    from .message import MessagePin
-    from .snowflake import Snowflake
-    from .threads import ForumTag, ThreadArchiveDurationLiteral, ThreadMember, ThreadMetadata
-    from .user import PartialUser
+from .message import MessagePin
+from .snowflake import Snowflake
+from .threads import ForumTag, ThreadArchiveDurationLiteral, ThreadMember, ThreadMetadata
+from .user import PartialUser
 
 OverwriteType = Literal[0, 1]
 

@@ -1,11 +1,9 @@
 # SPDX-License-Identifier: MIT
-from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, TypedDict
+from typing import Literal, TypedDict
 
-if TYPE_CHECKING:
-    from .emoji import Emoji
-    from .snowflake import Snowflake, SnowflakeList
+from .emoji import Emoji
+from .snowflake import Snowflake, SnowflakeList
 
 OnboardingPromptType = Literal[0, 1]
 

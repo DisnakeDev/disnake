@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Generator, Iterator, Mapping, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -16,8 +16,12 @@ from typing import (
 
 from ..components import (
     ActionRow as ActionRowComponent,
+    ActionRowChildComponent,
+    ActionRowMessageComponent as ActionRowMessageComponentRaw,
     Button as ButtonComponent,
     ChannelSelectMenu as ChannelSelectComponent,
+    Checkbox as CheckboxComponent,
+    CheckboxGroup as CheckboxGroupComponent,
     Component,
     Container as ContainerComponent,
     FileComponent as FileComponent,
@@ -25,6 +29,7 @@ from ..components import (
     Label as LabelComponent,
     MediaGallery as MediaGalleryComponent,
     MentionableSelectMenu as MentionableSelectComponent,
+    RadioGroup as RadioGroupComponent,
     RoleSelectMenu as RoleSelectComponent,
     Section as SectionComponent,
     Separator as SeparatorComponent,
@@ -34,21 +39,26 @@ from ..components import (
     Thumbnail as ThumbnailComponent,
     UserSelectMenu as UserSelectComponent,
 )
-from ..enums import ButtonStyle, ComponentType, TextInputStyle
+from ..enums import ButtonStyle, ChannelType, ComponentType, TextInputStyle
 from ..utils import MISSING, SequenceProxy, assert_never, copy_doc, deprecated
 from ._types import (
     ActionRowChildT,
     ActionRowMessageComponent,
     ActionRowModalComponent,
     ComponentInput,
+    MessageTopLevelComponent,
+    NonActionRowChildT,
 )
 from .button import Button
+from .checkbox import Checkbox
+from .checkbox_group import CheckboxGroup
 from .container import Container
 from .file import File
 from .file_upload import FileUpload
 from .item import UIComponent, WrappedComponent
 from .label import Label
 from .media_gallery import MediaGallery
+from .radio_group import RadioGroup
 from .section import Section
 from .select import ChannelSelect, MentionableSelect, RoleSelect, StringSelect, UserSelect
 from .separator import Separator
@@ -57,18 +67,12 @@ from .text_input import TextInput
 from .thumbnail import Thumbnail
 
 if TYPE_CHECKING:
-    from collections.abc import Generator, Iterator, Mapping
     from typing import TypeAlias
 
     from typing_extensions import Self
 
     from ..abc import AnyChannel
-    from ..components import (
-        ActionRowChildComponent,
-        ActionRowMessageComponent as ActionRowMessageComponentRaw,
-    )
     from ..emoji import Emoji
-    from ..enums import ChannelType
     from ..member import Member
     from ..message import Message
     from ..partial_emoji import PartialEmoji
@@ -78,10 +82,6 @@ if TYPE_CHECKING:
         MessageTopLevelComponent as MessageTopLevelComponentPayload,
     )
     from ..user import User
-    from ._types import (
-        MessageTopLevelComponent,
-        NonActionRowChildT,
-    )
     from .select.base import SelectDefaultValueInputType, SelectDefaultValueMultiInputType
     from .select.string import SelectOptionInput
 
@@ -1164,6 +1164,9 @@ UI_COMPONENT_LOOKUP: Mapping[type[Component], type[UIComponent]] = {
     ContainerComponent: Container,
     LabelComponent: Label,
     FileUploadComponent: FileUpload,
+    RadioGroupComponent: RadioGroup,
+    CheckboxGroupComponent: CheckboxGroup,
+    CheckboxComponent: Checkbox,
 }
 
 

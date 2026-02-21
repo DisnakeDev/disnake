@@ -2,11 +2,10 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any, ClassVar, TypeAlias
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
-
     from aiohttp import ClientResponse, ClientWebSocketResponse
     from requests import Response
 
@@ -224,7 +223,7 @@ class ConnectionClosed(ClientException):
         The shard ID that got closed if applicable.
     """
 
-    # https://discord.com/developers/docs/topics/opcodes-and-status-codes#gateway-gateway-close-event-codes
+    # https://docs.discord.com/developers/topics/opcodes-and-status-codes#gateway-gateway-close-event-codes
     GATEWAY_CLOSE_EVENT_REASONS: ClassVar[Mapping[int, str]] = {
         4000: "Unknown error",
         4001: "Unknown opcode",
@@ -242,7 +241,7 @@ class ConnectionClosed(ClientException):
         4014: "Disallowed intents - you tried to specify an intent that you have not enabled or are not approved for.",
     }
 
-    # https://discord.com/developers/docs/topics/opcodes-and-status-codes#voice-voice-close-event-codes
+    # https://docs.discord.com/developers/topics/opcodes-and-status-codes#voice-voice-close-event-codes
     GATEWAY_VOICE_CLOSE_EVENT_REASONS: ClassVar[Mapping[int, str]] = {
         **GATEWAY_CLOSE_EVENT_REASONS,
         4002: "Failed to decode payload",

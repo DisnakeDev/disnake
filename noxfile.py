@@ -13,6 +13,7 @@ import dataclasses
 import os
 import pathlib
 import shutil
+from collections.abc import Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -20,9 +21,6 @@ from typing import (
 )
 
 import nox
-
-if TYPE_CHECKING:
-    from collections.abc import Sequence
 
 nox.needs_version = ">=2025.5.1"
 

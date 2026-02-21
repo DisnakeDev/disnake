@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import types
+from collections.abc import Iterator
 from functools import total_ordering
 from typing import (
     TYPE_CHECKING,
@@ -13,8 +14,6 @@ from typing import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
-
     from typing_extensions import Self
 
 __all__ = (
@@ -1290,6 +1289,21 @@ class ComponentType(Enum):
 
     .. versionadded:: |vnext|
     """
+    radio_group = 21
+    """Represents a radio group component.
+
+    .. versionadded:: |vnext|
+    """
+    checkbox_group = 22
+    """Represents a checkbox group component.
+
+    .. versionadded:: |vnext|
+    """
+    checkbox = 23
+    """Represents a checkbox component.
+
+    .. versionadded:: |vnext|
+    """
 
     def __int__(self) -> int:
         return self.value
@@ -1588,7 +1602,7 @@ class WidgetStyle(Enum):
         return self.value
 
 
-# reference: https://discord.com/developers/docs/reference#locales
+# reference: https://docs.discord.com/developers/reference#locales
 class Locale(Enum):
     """Represents supported locales by Discord.
 
@@ -1673,6 +1687,19 @@ class Locale(Enum):
 class AutoModActionType(Enum):
     """Represents the type of action an auto moderation rule will take upon execution.
 
+    .. _automod_trigger_action_table:
+
+    Based on the trigger type, different action types can be used:
+
+    .. csv-table::
+        :header: "Trigger Type", ``block_message``, ``send_alert_message``, ``timeout``, ``block_member_interaction``
+
+        :attr:`~AutoModTriggerType.keyword`,        ✅, ✅, ✅, ❌
+        :attr:`~AutoModTriggerType.spam`,           ✅, ✅, ❌, ❌
+        :attr:`~AutoModTriggerType.keyword_preset`, ✅, ✅, ❌, ❌
+        :attr:`~AutoModTriggerType.mention_spam`,   ✅, ✅, ✅, ❌
+        :attr:`~AutoModTriggerType.member_profile`, ❌, ✅, ❌, ✅
+
     .. versionadded:: 2.6
     """
 
@@ -1684,24 +1711,48 @@ class AutoModActionType(Enum):
     """The rule will timeout the user that sent the message.
 
     .. note::
-        This action type is only available for rules with trigger type
-        :attr:`~AutoModTriggerType.keyword` or :attr:`~AutoModTriggerType.mention_spam`,
-        and :attr:`~Permissions.moderate_members` permissions are required to use it.
+        Configuring this action type requires :attr:`~Permissions.moderate_members` permissions.
+    """
+    block_member_interaction = 4
+    """The rule will prevent the user from using text, voice, or other interactions.
+
+    .. versionadded:: |vnext|
     """
 
 
 class AutoModEventType(Enum):
     """Represents the type of event/context an auto moderation rule will be checked in.
 
+    .. _automod_trigger_event_table:
+
+    Based on the trigger type, different event types are used:
+
+    .. csv-table::
+        :header: "Trigger Type", ``message_send``, ``member_update``
+
+        :attr:`~AutoModTriggerType.keyword`,        ✅, ❌
+        :attr:`~AutoModTriggerType.spam`,           ✅, ❌
+        :attr:`~AutoModTriggerType.keyword_preset`, ✅, ❌
+        :attr:`~AutoModTriggerType.mention_spam`,   ✅, ❌
+        :attr:`~AutoModTriggerType.member_profile`, ❌, ✅
+
     .. versionadded:: 2.6
     """
 
     message_send = 1
     """The rule will apply when a member sends or edits a message in the guild."""
+    member_update = 2
+    """The rule will apply when a member joins or edits their profile.
+
+    .. versionadded:: |vnext|
+    """
 
 
 class AutoModTriggerType(Enum):
     """Represents the type of content that can trigger an auto moderation rule.
+
+    Trigger types only work with specific event types,
+    refer to :ref:`this table <automod_trigger_event_table>` for more.
 
     .. versionadded:: 2.6
 
@@ -1729,6 +1780,13 @@ class AutoModTriggerType(Enum):
     """The rule will filter messages based on the number of member/role mentions they contain.
 
     This trigger type requires additional :class:`metadata <AutoModTriggerMetadata>`.
+    """
+    member_profile = 6
+    """The rule will filter member profile names based on a custom keyword list.
+
+    This trigger type requires additional :class:`metadata <AutoModTriggerMetadata>`.
+
+    .. versionadded:: |vnext|
     """
 
 

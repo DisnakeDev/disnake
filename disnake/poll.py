@@ -6,7 +6,8 @@ from datetime import timedelta
 from typing import TYPE_CHECKING
 
 from . import utils
-from .emoji import _EmojiTag
+from .abc import Snowflake
+from .emoji import Emoji, _EmojiTag
 from .enums import PollLayoutType, try_enum
 from .iterators import PollAnswerIterator
 from .partial_emoji import PartialEmoji
@@ -14,8 +15,6 @@ from .partial_emoji import PartialEmoji
 if TYPE_CHECKING:
     from datetime import datetime
 
-    from .abc import Snowflake
-    from .emoji import Emoji
     from .message import Message
     from .state import ConnectionState
     from .types.poll import (
@@ -363,7 +362,7 @@ class Poll:
             poll.duration = utils.parse_time(expiry) - utils.snowflake_time(poll.message.id)
         else:
             # future support for non-expiring polls
-            # read the foot note https://discord.com/developers/docs/resources/poll#poll-object-poll-object-structure
+            # read the foot note https://docs.discord.com/developers/resources/poll#poll-object-poll-object-structure
             poll.duration = None
 
         if results := data.get("results"):

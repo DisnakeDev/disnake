@@ -128,7 +128,7 @@ class RawMessageUpdateEvent(_RawReprMixin):
         .. versionadded:: 1.7
 
     data: :class:`dict`
-        The raw data given by the :ddocs:`gateway <topics/gateway-events#message-update>`.
+        The raw data given by the :ddocs:`gateway <events/gateway-events#message-update>`.
     cached_message: :class:`Message` | :data:`None`
         The cached message, if found in the internal message cache. Represents the message before
         it is modified by the data in :attr:`RawMessageUpdateEvent.data`.
@@ -497,7 +497,7 @@ class RawPresenceUpdateEvent(_RawReprMixin):
     guild_id: :class:`int`
         The ID of the guild where the user's presence changed.
     data: :class:`dict`
-        The raw data given by the :ddocs:`gateway <topics/gateway-events#presence-update>`.
+        The raw data given by the :ddocs:`gateway <events/gateway-events#presence-update>`.
     """
 
     __slots__ = (
