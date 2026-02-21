@@ -13,10 +13,15 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from ._types import AnySelect
+    from .checkbox import Checkbox
+    from .checkbox_group import CheckboxGroup
     from .file_upload import FileUpload
+    from .radio_group import RadioGroup
     from .text_input import TextInput
 
-    LabelChildUIComponent: TypeAlias = TextInput | FileUpload | AnySelect[Any]
+    LabelChildUIComponent: TypeAlias = (
+        TextInput | FileUpload | AnySelect[Any] | RadioGroup | CheckboxGroup | Checkbox
+    )
 
 __all__ = ("Label",)
 
@@ -33,10 +38,16 @@ class Label(UIComponent):
     ----------
     text: :class:`str`
         The label text.
-    component: :class:`TextInput` | :class:`FileUpload` | :class:`BaseSelect`
+    component: :class:`TextInput` | :class:`FileUpload` | :class:`BaseSelect` | :class:`RadioGroup` | :class:`CheckboxGroup` | :class:`Checkbox`
         The component within the label.
-        Currently supports :class:`.ui.TextInput`, :class:`.ui.FileUpload`,
-        and select menus (e.g. :class:`.ui.StringSelect`).
+
+        Currently supports the following components:
+            - :class:`.ui.TextInput`
+            - :class:`.ui.FileUpload`
+            - select menus (e.g. :class:`.ui.StringSelect`)
+            - :class:`.ui.RadioGroup`
+            - :class:`.ui.CheckboxGroup`
+            - :class:`.ui.Checkbox`
     description: :class:`str` | :data:`None`
         The description text for the label.
     id: :class:`int`
@@ -49,7 +60,7 @@ class Label(UIComponent):
     ----------
     text: :class:`str`
         The label text.
-    component: :class:`TextInput` | :class:`FileUpload` | :class:`BaseSelect`
+    component: :class:`TextInput` | :class:`FileUpload` | :class:`BaseSelect` | :class:`RadioGroup` | :class:`CheckboxGroup` | :class:`Checkbox`
         The component within the label.
     description: :class:`str` | :data:`None`
         The description text for the label.
