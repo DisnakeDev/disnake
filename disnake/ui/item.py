@@ -64,6 +64,9 @@ class UIComponent(ABC):
     - :class:`disnake.ui.Container`
     - :class:`disnake.ui.Label`
     - :class:`disnake.ui.FileUpload`
+    - :class:`disnake.ui.RadioGroup`
+    - :class:`disnake.ui.CheckboxGroup`
+    - :class:`disnake.ui.Checkbox`
 
     .. versionadded:: 2.11
     """

@@ -50,9 +50,13 @@ class Modal:
 
         Currently supports the following components:
             - :class:`.ui.TextDisplay`
-            - :class:`.ui.TextInput`, in a :class:`.ui.Label`
-            - :class:`.ui.FileUpload`, in a :class:`.ui.Label`
-            - select menus (e.g. :class:`.ui.StringSelect`), in a :class:`.ui.Label`
+            - Inside a :class:`.ui.Label`, respectively:
+                - :class:`.ui.TextInput`
+                - :class:`.ui.FileUpload`
+                - select menus (e.g. :class:`.ui.StringSelect`)
+                - :class:`.ui.RadioGroup`
+                - :class:`.ui.CheckboxGroup`
+                - :class:`.ui.Checkbox`
 
         .. versionchanged:: 2.11
             Using action rows in modals or passing :class:`.ui.TextInput` directly

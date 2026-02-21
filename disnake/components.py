@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -43,6 +43,9 @@ if TYPE_CHECKING:
         BaseSelectMenu as BaseSelectMenuPayload,
         ButtonComponent as ButtonComponentPayload,
         ChannelSelectMenu as ChannelSelectMenuPayload,
+        CheckboxComponent as CheckboxComponentPayload,
+        CheckboxGroupComponent as CheckboxGroupComponentPayload,
+        CheckboxGroupOption as CheckboxGroupOptionPayload,
         Component as ComponentPayload,
         ComponentType as ComponentTypeLiteral,
         ContainerComponent as ContainerComponentPayload,
@@ -53,6 +56,8 @@ if TYPE_CHECKING:
         MediaGalleryItem as MediaGalleryItemPayload,
         MentionableSelectMenu as MentionableSelectMenuPayload,
         MessageTopLevelComponent as MessageTopLevelComponentPayload,
+        RadioGroupComponent as RadioGroupComponentPayload,
+        RadioGroupOption as RadioGroupOptionPayload,
         RoleSelectMenu as RoleSelectMenuPayload,
         SectionComponent as SectionComponentPayload,
         SelectDefaultValue as SelectDefaultValuePayload,
@@ -91,6 +96,10 @@ __all__ = (
     "Container",
     "Label",
     "FileUpload",
+    "GroupOption",
+    "RadioGroup",
+    "CheckboxGroup",
+    "Checkbox",
 )
 
 # miscellaneous components-related type aliases
@@ -142,6 +151,9 @@ LabelChildComponent = Union[
     "TextInput",
     "FileUpload",
     "AnySelectMenu",
+    "RadioGroup",
+    "CheckboxGroup",
+    "Checkbox",
 ]
 
 # valid `Message.components` item types (v1/v2)
@@ -197,6 +209,9 @@ class Component:
     - :class:`Container`
     - :class:`Label`
     - :class:`FileUpload`
+    - :class:`RadioGroup`
+    - :class:`CheckboxGroup`
+    - :class:`Checkbox`
 
     This class is abstract and cannot be instantiated.
 
@@ -1520,7 +1535,7 @@ class Label(Component):
         The label text.
     description: :class:`str` | :data:`None`
         The description text for the label.
-    component: :class:`TextInput` | :class:`FileUpload` | :class:`BaseSelectMenu`
+    component: :class:`TextInput` | :class:`FileUpload` | :class:`BaseSelectMenu` | :class:`RadioGroup` | :class:`CheckboxGroup` | :class:`Checkbox`
         The component within the label.
     id: :class:`int`
         The numeric identifier for the component. Must be unique within a modal.
@@ -1621,6 +1636,262 @@ class FileUpload(Component):
         }
 
 
+AnyGroupOptionPayload = Union["RadioGroupOptionPayload", "CheckboxGroupOptionPayload"]
+
+
+class GroupOption:
+    """Represents an option inside a :class:`RadioGroup` or :class:`CheckboxGroup`.
+
+    .. versionadded:: |vnext|
+
+    Parameters
+    ----------
+    label: :class:`str`
+        The label of the option. This is displayed to users.
+        Can be up to 100 characters.
+    value: :class:`str`
+        The value of the option. This is not displayed to users.
+        If not provided when constructed then it defaults to the
+        label. Can be up to 100 characters.
+    description: :class:`str` | :data:`None`
+        The options's description, if any.
+    default: :class:`bool`
+        Whether this option is selected by default.
+        Defaults to ``False``.
+    """
+
+    __slots__: tuple[str, ...] = (
+        "value",
+        "label",
+        "description",
+        "default",
+    )
+
+    def __init__(
+        self,
+        *,
+        label: str,
+        value: str = MISSING,
+        description: str | None = None,
+        default: bool = False,
+    ) -> None:
+        self.label: str = label
+        self.value: str = label if value is MISSING else value
+        self.description: str | None = description
+        self.default: bool = default
+
+    @classmethod
+    def from_dict(cls, data: AnyGroupOptionPayload) -> Self:
+        return cls(
+            label=data["label"],
+            value=data["value"],
+            description=data.get("description"),
+            default=data.get("default", False),
+        )
+
+    def to_dict(self) -> AnyGroupOptionPayload:
+        payload: AnyGroupOptionPayload = {
+            "label": self.label,
+            "value": self.value,
+            "default": self.default,
+        }
+
+        if self.description:
+            payload["description"] = self.description
+
+        return payload
+
+    def __repr__(self) -> str:
+        return (
+            f"<GroupOption label={self.label!r} value={self.value!r} "
+            f"description={self.description!r} default={self.default!r}>"
+        )
+
+
+GroupOptionInput: TypeAlias = Sequence[GroupOption | str] | dict[str, str]
+
+
+def _parse_group_options(options: GroupOptionInput) -> list[GroupOption]:
+    if isinstance(options, dict):
+        return [GroupOption(label=key, value=val) for key, val in options.items()]
+
+    return [opt if isinstance(opt, GroupOption) else GroupOption(label=opt) for opt in options]
+
+
+class RadioGroup(Component):
+    r"""Represents a component containing radio buttons/options from the Discord Bot UI Kit.
+
+    This requires users to select exactly one out of the given options, and can only be used in modals.
+
+    .. note::
+        The user constructible and usable type to create a
+        radio group is :class:`disnake.ui.RadioGroup`.
+
+    .. versionadded:: |vnext|
+
+    Attributes
+    ----------
+    custom_id: :class:`str`
+        The ID of the radio group that gets received during an interaction.
+    options: :class:`list`\[:class:`GroupOption`]
+        A list of options that can be selected in this group (2-10).
+    required: :class:`bool`
+        Whether selecting an option in this radio group is required.
+        Defaults to ``True``.
+    id: :class:`int`
+        The numeric identifier for the component. Must be unique within a modal.
+        This is always present in components received from the API.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the modal.
+    """
+
+    __slots__: tuple[str, ...] = (
+        "custom_id",
+        "options",
+        "required",
+    )
+
+    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
+
+    def __init__(self, data: RadioGroupComponentPayload) -> None:
+        self.type: Literal[ComponentType.radio_group] = ComponentType.radio_group
+        self.id = data.get("id", 0)
+
+        self.custom_id: str = data["custom_id"]
+        self.options: list[GroupOption] = [
+            GroupOption.from_dict(option) for option in data.get("options", [])
+        ]
+        self.required: bool = data.get("required", True)
+
+    def to_dict(self) -> RadioGroupComponentPayload:
+        return {
+            "type": self.type.value,
+            "id": self.id,
+            "custom_id": self.custom_id,
+            "options": [op.to_dict() for op in self.options],
+            "required": self.required,
+        }
+
+
+class CheckboxGroup(Component):
+    r"""Represents a component containing checkboxes from the Discord Bot UI Kit.
+
+    This requires users to select up to 10 checkboxes, and can only be used in modals.
+    For single checkboxes, see :class:`Checkbox`.
+
+    .. note::
+        The user constructible and usable type to create a
+        checkbox group is :class:`disnake.ui.CheckboxGroup`.
+
+    .. versionadded:: |vnext|
+
+    Attributes
+    ----------
+    custom_id: :class:`str`
+        The ID of the checkbox group that gets received during an interaction.
+    options: :class:`list`\[:class:`GroupOption`]
+        A list of options that can be selected in this group (1-10).
+    min_values: :class:`int`
+        The minimum number of options that must be selected in this group.
+        Defaults to 1 and must be between 0 and 10.
+    max_values: :class:`int` | :data:`None`
+        The maximum number of options that must be selected in this group.
+        Must be between 1 and 10. If set to :data:`None` (the default),
+        all options can be selected.
+    required: :class:`bool`
+        Whether selecting an option in this checkbox group is required.
+        Defaults to ``True``.
+    id: :class:`int`
+        The numeric identifier for the component. Must be unique within a modal.
+        This is always present in components received from the API.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the modal.
+    """
+
+    __slots__: tuple[str, ...] = (
+        "custom_id",
+        "options",
+        "min_values",
+        "max_values",
+        "required",
+    )
+
+    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
+
+    def __init__(self, data: CheckboxGroupComponentPayload) -> None:
+        self.type: Literal[ComponentType.checkbox_group] = ComponentType.checkbox_group
+        self.id = data.get("id", 0)
+
+        self.custom_id: str = data["custom_id"]
+        self.options: list[GroupOption] = [
+            GroupOption.from_dict(option) for option in data.get("options", [])
+        ]
+        self.min_values: int = data.get("min_values", 1)
+        self.max_values: int | None = data.get("max_values")
+        self.required: bool = data.get("required", True)
+
+    def to_dict(self) -> CheckboxGroupComponentPayload:
+        payload: CheckboxGroupComponentPayload = {
+            "type": self.type.value,
+            "id": self.id,
+            "custom_id": self.custom_id,
+            "options": [op.to_dict() for op in self.options],
+            "min_values": self.min_values,
+            "required": self.required,
+        }
+
+        if self.max_values is not None:
+            payload["max_values"] = self.max_values
+
+        return payload
+
+
+class Checkbox(Component):
+    r"""Represents a single checkbox component from the Discord Bot UI Kit.
+
+    This can only be used in modals.
+    For a group of multiple checkboxes, see :class:`CheckboxGroup`.
+
+    .. note::
+        The user constructible and usable type to create a
+        checkbox is :class:`disnake.ui.Checkbox`.
+
+    .. versionadded:: |vnext|
+
+    Attributes
+    ----------
+    custom_id: :class:`str`
+        The ID of the checkbox that gets received during an interaction.
+    default: :class:`bool`
+        Whether this checkbox is selected by default.
+        Defaults to ``False``.
+    id: :class:`int`
+        The numeric identifier for the component. Must be unique within a modal.
+        This is always present in components received from the API.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the modal.
+    """
+
+    __slots__: tuple[str, ...] = ("custom_id", "default")
+
+    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
+
+    def __init__(self, data: CheckboxComponentPayload) -> None:
+        self.type: Literal[ComponentType.checkbox] = ComponentType.checkbox
+        self.id = data.get("id", 0)
+
+        self.custom_id: str = data["custom_id"]
+        self.default: bool = data.get("default", False)
+
+    def to_dict(self) -> CheckboxComponentPayload:
+        return {
+            "type": self.type.value,
+            "id": self.id,
+            "custom_id": self.custom_id,
+            "default": self.default,
+        }
+
+
 # types of components that are allowed in a message's action rows;
 # see also `ActionRowMessageComponent` type alias
 VALID_ACTION_ROW_MESSAGE_COMPONENT_TYPES: Final = (
@@ -1671,6 +1942,9 @@ COMPONENT_LOOKUP: Mapping[ComponentTypeLiteral, type[Component]] = {
     ComponentType.container.value: Container,
     ComponentType.label.value: Label,
     ComponentType.file_upload.value: FileUpload,
+    ComponentType.radio_group.value: RadioGroup,
+    ComponentType.checkbox_group.value: CheckboxGroup,
+    ComponentType.checkbox.value: Checkbox,
 }
 
 

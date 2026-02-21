@@ -1289,6 +1289,21 @@ class ComponentType(Enum):
 
     .. versionadded:: |vnext|
     """
+    radio_group = 21
+    """Represents a radio group component.
+
+    .. versionadded:: |vnext|
+    """
+    checkbox_group = 22
+    """Represents a checkbox group component.
+
+    .. versionadded:: |vnext|
+    """
+    checkbox = 23
+    """Represents a checkbox component.
+
+    .. versionadded:: |vnext|
+    """
 
     def __int__(self) -> int:
         return self.value

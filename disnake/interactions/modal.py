@@ -11,14 +11,11 @@ from typing import (
 
 from ..components import _SELECT_COMPONENT_TYPE_VALUES
 from ..enums import ComponentType
-from ..message import Attachment, Message
+from ..message import Message
 from ..utils import cached_slot_property
 from .base import ClientT, Interaction, InteractionDataResolved
 
 if TYPE_CHECKING:
-    from ..abc import AnyChannel
-    from ..member import Member
-    from ..role import Role
     from ..state import ConnectionState
     from ..types.interactions import (
         ModalInteraction as ModalInteractionPayload,
@@ -27,15 +24,10 @@ if TYPE_CHECKING:
         ModalInteractionInnerComponentData as ModalInteractionInnerComponentDataPayload,
     )
     from ..types.snowflake import Snowflake
-    from ..user import User
 
 __all__ = ("ModalInteraction", "ModalInteractionData")
 
-
 T = TypeVar("T")
-
-# {custom_id: text_input_value | select_values | attachments}
-ResolvedValues = dict[str, str | Sequence[T]]
 
 
 class ModalInteraction(Interaction[ClientT]):
@@ -181,60 +173,64 @@ class ModalInteraction(Interaction[ClientT]):
 
     def _resolve_values(
         self, resolve: Callable[[Snowflake, ComponentType], T]
-    ) -> ResolvedValues[str | T]:
-        values: ResolvedValues[str | T] = {}
+    ) -> dict[str, str | bool | None | Sequence[str | T]]:
+        values: dict[str, str | bool | None | Sequence[str | T]] = {}
         for component in self.walk_raw_components():
-            if component["type"] == ComponentType.text_input.value:
-                value = component.get("value")
-            elif component["type"] == ComponentType.string_select.value:
-                value = component.get("values")
-            elif (
-                component["type"] in _SELECT_COMPONENT_TYPE_VALUES
-                or component["type"] == ComponentType.file_upload.value
-            ):
-                # auto-populated selects
-                component_type = ComponentType(component["type"])
-                value = [resolve(v, component_type) for v in component.get("values") or []]
-            else:
-                continue
+            match component["type"]:
+                case (
+                    ComponentType.text_input.value
+                    | ComponentType.radio_group.value
+                    | ComponentType.checkbox.value
+                ):
+                    value = component.get("value")
+                case ComponentType.string_select.value | ComponentType.checkbox_group.value:
+                    value = component.get("values")
+                case t if (
+                    t in _SELECT_COMPONENT_TYPE_VALUES or t == ComponentType.file_upload.value
+                ):
+                    # auto-populated selects or file upload
+                    component_type = ComponentType(component["type"])
+                    value = [resolve(v, component_type) for v in component.get("values") or []]
+                case _:
+                    continue
             values[component["custom_id"]] = value
         return values
 
     @cached_slot_property("_cs_values")
-    def values(self) -> ResolvedValues[str]:
-        r""":class:`dict`\[:class:`str`, :class:`str` | :class:`~collections.abc.Sequence`\[:class:`str`]]: Returns all raw values the user has entered in the modal.
-        This is a dict of the form ``{custom_id: value}``.
+    def values(self) -> dict[str, Any]:
+        r""":class:`dict`\[:class:`str`, :data:`~typing.Any`]: Returns all raw values the user has entered in the modal.
 
-        For select menus, the corresponding dict value is a list of the values the user has selected.
-        For select menus of type :attr:`~ComponentType.string_select`,
-        these are just the string values the user selected;
-        for other select menu types, these are the IDs of the selected entities.
-
-        See also :attr:`resolved_values`.
+        This is similar to :attr:`resolved_values`, except the values for e.g. user select menus or
+        file uploads are not resolved to their corresponding objects,
+        and are instead plain snowflakes (i.e. the objects' IDs).
 
         .. versionadded:: 2.11
         """
         return self._resolve_values(lambda id, type: str(id))
 
     @cached_slot_property("_cs_resolved_values")
-    def resolved_values(
-        self,
-    ) -> ResolvedValues[str | Member | User | Role | AnyChannel | Attachment]:
-        r""":class:`dict`\[:class:`str`, :class:`str` | :class:`~collections.abc.Sequence`\[:class:`str` | :class:`Member` | :class:`User` | :class:`Role` | :class:`abc.GuildChannel` | :class:`Thread` | :class:`PartialMessageable` | :class:`Attachment`]]: The (resolved) values the user entered in the modal.
+    def resolved_values(self) -> dict[str, Any]:
+        r""":class:`dict`\[:class:`str`, :data:`~typing.Any`]: The (resolved) values the user entered in the modal.
         This is a dict of the form ``{custom_id: value}``.
 
-        For select menus, the corresponding dict value is a list of the values the user has selected.
-        For select menus of type :attr:`~ComponentType.string_select`,
-        this is equivalent to :attr:`values`;
-        for other select menu types, these are full objects corresponding to the selected entities.
+        The value type of each item depends on the component associated with that ``custom_id``:
 
-        For file uploads, the corresponding dict value is a list of files the user has uploaded.
+        - :class:`TextInput`: :class:`str` - The value the user entered.
+        - Select Menus: :class:`~collections.abc.Sequence`\[:class:`str` | :class:`Member` | :class:`User` | :class:`Role` | :class:`abc.GuildChannel` | :class:`Thread` | :class:`PartialMessageable`] -
+          The list of the values the user has selected.
+          For select menus of type :attr:`~ComponentType.string_select`, this is equivalent to :attr:`values`;
+          for other select menu types, these are full objects corresponding to the selected entities.
+        - :class:`FileUpload`: :class:`~collections.abc.Sequence`\[:class:`Attachment`] - The list of files the user has uploaded.
+        - :class:`RadioGroup`: :class:`str` | :data:`None` - The :attr:`value <GroupOption>` of the option the user selected,
+          or :data:`None` if the radio group wasn't required and the user didn't select any.
+        - :class:`CheckboxGroup`: :class:`~collections.abc.Sequence`\[:class:`str`] - The :attr:`value <GroupOption>`\s of the options the user selected.
+        - :class:`Checkbox`: :class:`bool` - ``True`` if the user selected the checkbox, ``False`` otherwise.
 
         .. versionadded:: 2.11
         """
         resolved_data = self.data.resolved
         # we expect the api to only provide valid values; there won't be any messages/attachments here.
-        return self._resolve_values(lambda id, type: resolved_data.get_with_type(id, type, str(id)))  # pyright: ignore[reportReturnType]
+        return self._resolve_values(lambda id, type: resolved_data.get_with_type(id, type, str(id)))
 
     @cached_slot_property("_cs_text_values")
     def text_values(self) -> dict[str, str]:

@@ -135,10 +135,8 @@ class Emoji(_EmojiTag, AssetMixin):
 
     def __repr__(self) -> str:
         return (
-            f"<Emoji id={self.id} name={self.name!r} animated={self.animated} managed={self.managed} "
-            + (f"{self.guild_id=}" if self.guild_id else "")
-            + (f"{self.application_id=}" if self.application_id else "")
-            + ">"
+            f"<Emoji id={self.id} name={self.name!r} animated={self.animated} managed={self.managed}"
+            f" guild_id={self.guild_id!r}>"
         )
 
     def __eq__(self, other: object) -> bool:
@@ -185,17 +183,6 @@ class Emoji(_EmojiTag, AssetMixin):
             application owned emoji.
         """
         return self._state._get_guild(self.guild_id)
-
-    @property
-    def application_id(self) -> int | None:
-        """:class:`int` | :data:`None`: The ID of the application which owns this emoji,
-        if this is an app emoji.
-
-        .. versionadded:: |vnext|
-        """
-        if self.guild_id:
-            return None
-        return self._state.application_id
 
     def is_guild_emoji(self) -> bool:
         """Whether this emoji is a guild emoji.
@@ -257,8 +244,8 @@ class Emoji(_EmojiTag, AssetMixin):
         if self.guild_id is not None:
             await self._state.http.delete_custom_emoji(self.guild_id, self.id, reason=reason)
             return
-        if self.application_id is not None:
-            await self._state.http.delete_app_emoji(self.application_id, self.id)
+        if self._state.application_id is not None:
+            await self._state.http.delete_app_emoji(self._state.application_id, self.id)
             return
         # should never happen
         msg = (
@@ -313,7 +300,7 @@ class Emoji(_EmojiTag, AssetMixin):
         """
         if self.guild_id is None:
             # this is an app emoji
-            if self.application_id is None:
+            if self._state.application_id is None:
                 # should never happen
                 msg = (
                     f"guild_id and application_id are both None when attempting to edit emoji with ID {self.id}."
@@ -321,7 +308,9 @@ class Emoji(_EmojiTag, AssetMixin):
                 )
                 raise InvalidData(msg)
 
-            data = await self._state.http.edit_app_emoji(self.application_id, self.id, name=name)
+            data = await self._state.http.edit_app_emoji(
+                self._state.application_id, self.id, name=name
+            )
         else:
             payload = {}
             if name is not MISSING:
