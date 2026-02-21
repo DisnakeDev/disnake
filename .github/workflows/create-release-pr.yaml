@@ -33,6 +33,7 @@ jobs:
         with:
           token: ${{ steps.generate_token.outputs.token }}
           persist-credentials: false
+          fetch-depth: '0'
 
       - name: Set git name/email
         env:
@@ -45,15 +46,10 @@ jobs:
       - name: Set up environment
         uses: ./.github/actions/setup-env
         with:
-          python-version: 3.10
+          python-version: '3.10'
 
       - name: Install dependencies
         run: uv sync --no-default-groups --group changelog
-
-      - name: Update version
-        run: |
-          python scripts/ci/versiontool.py --set "$VERSION_INPUT"
-          git commit -a -m "chore: update version to $VERSION_INPUT"
 
       - name: Build changelog
         run: |
@@ -72,6 +68,7 @@ jobs:
 
             ### Tasks
             - [ ] Add changelogs from backports, if applicable.
+            - [ ] Update `|vnext|` in documentation.
             - [ ] Once merged, create + push a tag.
 
             <sub>https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}</sub>

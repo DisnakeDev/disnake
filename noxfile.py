@@ -90,7 +90,7 @@ EXECUTION_GROUPS: Sequence[ExecutionGroup] = [
     # codemodding and pyright
     ExecutionGroup(
         sessions=("codemod", "autotyping", "pyright"),
-        pyright_paths=("scripts/codemods", "scripts/ci"),
+        pyright_paths=("scripts/codemods",),
         groups=("codemod",),
     ),
     # the other sessions, they don't need pyright, but they need to run
