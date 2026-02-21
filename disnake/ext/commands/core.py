@@ -6,6 +6,7 @@ import asyncio
 import datetime
 import functools
 import inspect
+from collections.abc import Callable, Generator
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -30,7 +31,7 @@ from disnake.utils import (
 
 from ._types import _BaseCommand
 from .cog import Cog
-from .context import Context
+from .context import AnyContext, Context
 from .converter import Greedy, get_converter, run_converters
 from .cooldowns import BucketType, Cooldown, CooldownMapping, DynamicCooldownMapping, MaxConcurrency
 from .errors import (
@@ -57,7 +58,6 @@ from .errors import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Generator
     from typing import Concatenate
 
     from typing_extensions import ParamSpec, Self
@@ -65,7 +65,6 @@ if TYPE_CHECKING:
     from disnake.message import Message
 
     from ._types import AppCheck, Check, Coro, CoroFunc, Error, Hook
-    from .context import AnyContext
 
 
 __all__ = (

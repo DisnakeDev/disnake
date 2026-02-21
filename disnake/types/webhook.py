@@ -2,14 +2,13 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, TypedDict
+from typing import Literal, TypedDict
 
 from typing_extensions import NotRequired
 
-if TYPE_CHECKING:
-    from .channel import PartialChannel
-    from .snowflake import Snowflake
-    from .user import User
+from .channel import PartialChannel
+from .snowflake import Snowflake
+from .user import User
 
 
 class SourceGuild(TypedDict):

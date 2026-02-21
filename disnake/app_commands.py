@@ -5,13 +5,14 @@ from __future__ import annotations
 import math
 import re
 from abc import ABC
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from typing import TYPE_CHECKING, ClassVar, TypeAlias
 
 from .enums import (
     ApplicationCommandPermissionType,
     ApplicationCommandType,
     ChannelType,
+    Locale,
     OptionType,
     enum_if_int,
     try_enum,
@@ -23,13 +24,8 @@ from .permissions import Permissions
 from .utils import MISSING, _get_as_snowflake, _maybe_cast, deprecated, warn_deprecated
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
-
     from typing_extensions import Self
 
-    from .enums import (
-        Locale,
-    )
     from .i18n import LocalizationProtocol, LocalizationValue, LocalizedOptional, LocalizedRequired
     from .state import ConnectionState
     from .types.interactions import (

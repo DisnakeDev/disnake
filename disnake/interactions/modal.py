@@ -2,7 +2,12 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, TypeVar
+from collections.abc import Callable, Generator, Sequence
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    TypeVar,
+)
 
 from ..components import _SELECT_COMPONENT_TYPE_VALUES
 from ..enums import ComponentType
@@ -11,8 +16,6 @@ from ..utils import cached_slot_property
 from .base import ClientT, Interaction, InteractionDataResolved
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Generator, Sequence
-
     from ..state import ConnectionState
     from ..types.interactions import (
         ModalInteraction as ModalInteractionPayload,

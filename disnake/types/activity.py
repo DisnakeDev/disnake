@@ -2,13 +2,12 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, TypedDict
+from typing import Literal, TypedDict
 
 from typing_extensions import NotRequired
 
-if TYPE_CHECKING:
-    from .snowflake import Snowflake
-    from .user import User
+from .snowflake import Snowflake
+from .user import User
 
 StatusType = Literal["idle", "dnd", "online", "offline"]
 StatusDisplayType = Literal[0, 1, 2]

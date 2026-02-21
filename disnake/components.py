@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -31,7 +31,6 @@ from .partial_emoji import PartialEmoji, _EmojiTag
 from .utils import MISSING, _get_as_snowflake, assert_never, get_slots
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
     from typing import TypeAlias
 
     from typing_extensions import Self

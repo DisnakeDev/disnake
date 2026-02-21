@@ -2,11 +2,10 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any, ClassVar, TypeAlias
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
-
     from aiohttp import ClientResponse, ClientWebSocketResponse
     from requests import Response
 

@@ -22,6 +22,7 @@ import logging
 import socket
 import struct
 import threading
+from collections.abc import Callable
 from typing import TYPE_CHECKING, Any
 
 from . import opus, utils
@@ -32,8 +33,6 @@ from .player import AudioPlayer, AudioSource
 from .utils import MISSING
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
-
     from . import abc
     from .client import Client
     from .guild import Guild

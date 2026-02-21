@@ -1,14 +1,12 @@
 # SPDX-License-Identifier: MIT
-from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, TypedDict
+from typing import Literal, TypedDict
 
 from typing_extensions import NotRequired
 
-if TYPE_CHECKING:
-    from .emoji import PartialEmoji
-    from .member import MemberWithUser
-    from .snowflake import Snowflake
+from .emoji import PartialEmoji
+from .member import MemberWithUser
+from .snowflake import Snowflake
 
 SupportedModes = Literal[
     # "aead_aes256_gcm_rtpsize",  # supported in libsodium, but not exposed by pynacl

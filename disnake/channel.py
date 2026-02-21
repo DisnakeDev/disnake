@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import asyncio
+import datetime
 import time
+from collections.abc import Callable, Iterable, Mapping, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -30,13 +32,13 @@ from .enums import (
 )
 from .errors import ClientException
 from .file import File
-from .flags import ChannelFlags
+from .flags import ChannelFlags, MessageFlags
 from .iterators import ArchivedThreadIterator
 from .mixins import Hashable
 from .object import Object
 from .partial_emoji import PartialEmoji
-from .permissions import Permissions
-from .soundboard import GuildSoundboardSound, PartialSoundboardSound
+from .permissions import PermissionOverwrite, Permissions
+from .soundboard import GuildSoundboardSound, PartialSoundboardSound, SoundboardSound
 from .stage_instance import StageInstance
 from .threads import ForumTag, Thread
 from .utils import MISSING
@@ -57,22 +59,16 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
-    import datetime
-    from collections.abc import Callable, Iterable, Mapping, Sequence
-
     from typing_extensions import Never, Self
 
     from .abc import Snowflake, SnowflakeTime
     from .asset import AssetBytes
     from .embeds import Embed
     from .emoji import Emoji
-    from .flags import MessageFlags
     from .guild import Guild, GuildChannel as GuildChannelType
     from .member import Member, VoiceState
     from .message import AllowedMentions, Message, PartialMessage
-    from .permissions import PermissionOverwrite
     from .role import Role
-    from .soundboard import SoundboardSound
     from .state import ConnectionState
     from .sticker import GuildSticker, StandardSticker, StickerItem
     from .threads import AnyThreadArchiveDuration, ThreadType

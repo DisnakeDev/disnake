@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Generator, Iterator, Mapping, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -16,6 +16,8 @@ from typing import (
 
 from ..components import (
     ActionRow as ActionRowComponent,
+    ActionRowChildComponent,
+    ActionRowMessageComponent as ActionRowMessageComponentRaw,
     Button as ButtonComponent,
     ChannelSelectMenu as ChannelSelectComponent,
     Checkbox as CheckboxComponent,
@@ -37,13 +39,15 @@ from ..components import (
     Thumbnail as ThumbnailComponent,
     UserSelectMenu as UserSelectComponent,
 )
-from ..enums import ButtonStyle, ComponentType, TextInputStyle
+from ..enums import ButtonStyle, ChannelType, ComponentType, TextInputStyle
 from ..utils import MISSING, SequenceProxy, assert_never, copy_doc, deprecated
 from ._types import (
     ActionRowChildT,
     ActionRowMessageComponent,
     ActionRowModalComponent,
     ComponentInput,
+    MessageTopLevelComponent,
+    NonActionRowChildT,
 )
 from .button import Button
 from .checkbox import Checkbox
@@ -63,18 +67,12 @@ from .text_input import TextInput
 from .thumbnail import Thumbnail
 
 if TYPE_CHECKING:
-    from collections.abc import Generator, Iterator, Mapping
     from typing import TypeAlias
 
     from typing_extensions import Self
 
     from ..abc import AnyChannel
-    from ..components import (
-        ActionRowChildComponent,
-        ActionRowMessageComponent as ActionRowMessageComponentRaw,
-    )
     from ..emoji import Emoji
-    from ..enums import ChannelType
     from ..member import Member
     from ..message import Message
     from ..partial_emoji import PartialEmoji
@@ -84,10 +82,6 @@ if TYPE_CHECKING:
         MessageTopLevelComponent as MessageTopLevelComponentPayload,
     )
     from ..user import User
-    from ._types import (
-        MessageTopLevelComponent,
-        NonActionRowChildT,
-    )
     from .select.base import SelectDefaultValueInputType, SelectDefaultValueMultiInputType
     from .select.string import SelectOptionInput
 

@@ -11,6 +11,7 @@ import logging
 import os
 import weakref
 from collections import OrderedDict, deque
+from collections.abc import Callable, Coroutine, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -42,13 +43,14 @@ from .channel import (
 from .components import _SELECT_COMPONENT_TYPES
 from .emoji import Emoji
 from .entitlement import Entitlement
-from .enums import ChannelType, ComponentType, MessageType, Status, try_enum
+from .enums import ApplicationCommandType, ChannelType, ComponentType, MessageType, Status, try_enum
 from .flags import ApplicationFlags, Intents, MemberCacheFlags
 from .guild import Guild
 from .guild_scheduled_event import GuildScheduledEvent
 from .integrations import _integration_factory
 from .interactions import (
     ApplicationCommandInteraction,
+    Interaction,
     MessageInteraction,
     ModalInteraction,
 )
@@ -81,26 +83,21 @@ from .stage_instance import StageInstance
 from .sticker import GuildSticker
 from .subscription import Subscription
 from .threads import Thread, ThreadMember
-from .ui.modal import ModalStore
-from .ui.view import ViewStore
+from .ui.modal import Modal, ModalStore
+from .ui.view import View, ViewStore
 from .user import ClientUser, User
 from .utils import MISSING
 from .webhook import Webhook
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Coroutine, Sequence
     from typing import Concatenate
 
     from .abc import AnyChannel, MessageableChannel, PrivateChannel
     from .app_commands import APIApplicationCommand, ApplicationCommand
     from .client import Client
-    from .enums import ApplicationCommandType
     from .gateway import DiscordWebSocket
     from .guild import GuildChannel, VocalGuildChannel
     from .http import HTTPClient
-    from .interactions import (
-        Interaction,
-    )
     from .types import gateway
     from .types.activity import Activity as ActivityPayload
     from .types.channel import DMChannel as DMChannelPayload
@@ -112,8 +109,6 @@ if TYPE_CHECKING:
     from .types.sticker import GuildSticker as GuildStickerPayload
     from .types.user import User as UserPayload
     from .types.webhook import Webhook as WebhookPayload
-    from .ui.modal import Modal
-    from .ui.view import View
     from .voice_client import VoiceProtocol
 
     Channel: TypeAlias = GuildChannel | VocalGuildChannel | PrivateChannel
