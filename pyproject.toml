@@ -276,9 +276,6 @@ ignore = [
 "scripts/*.py" = [
     "S101", # flake8-bandit: allow scripts to use assertions
 ]
-"scripts/ci/*.py" = [
-    "T20", # allow print temporarily before shifting to logging
-]
 
 ## tests
 "!tests/*" = [ "PT" ] # enable PT in only the tests directory
