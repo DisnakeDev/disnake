@@ -50,7 +50,8 @@ speed = [
 ]
 voice = [
     "PyNaCl>=1.5.0,<1.7",
-    'audioop-lts>=0.2.1; python_version >= "3.13"'
+    "dave.py~=0.1.1",
+    'audioop-lts>=0.2.1; python_version >= "3.13"',
 ]
 
 [dependency-groups]

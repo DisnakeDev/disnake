@@ -163,7 +163,7 @@ class RequestMembersCommand(TypedDict):
 
 
 class VoicePayload(TypedDict):
-    op: Literal[2, 4, 6, 8, 9]
+    op: Literal[2, 4, 6, 8, 9, 11, 13, 21, 22, 24]
     d: Any
     seq: NotRequired[int]  # only present in some messages
 
@@ -184,6 +184,7 @@ class VoiceReadyPayload(TypedDict):
 class VoiceSessionDescriptionPayload(TypedDict):
     mode: SupportedModes
     secret_key: list[int]
+    dave_protocol_version: int
 
 
 # voice opcode 6
@@ -206,6 +207,43 @@ class VoiceHelloPayload(TypedDict):
 VoiceResumedPayload = None
 
 
+# voice opcode 11
+
+
+class VoiceClientsConnectPayload(TypedDict):
+    user_ids: list[Snowflake]
+
+
+# voice opcode 13
+
+
+class VoiceClientDisconnectPayload(TypedDict):
+    user_id: Snowflake
+
+
+# voice opcode 21
+
+
+class VoiceDavePrepareTransitionPayload(TypedDict):
+    transition_id: int
+    protocol_version: int
+
+
+# voice opcode 22
+
+
+class VoiceDaveExecuteTransitionPayload(TypedDict):
+    transition_id: int
+
+
+# voice opcode 24
+
+
+class VoiceDavePrepareEpochPayload(TypedDict):
+    epoch: int
+    protocol_version: int
+
+
 #####
 # Voice payloads (send)
 #####
@@ -218,6 +256,7 @@ class VoiceIdentifyData(TypedDict):
     user_id: str
     session_id: str
     token: str
+    max_dave_protocol_version: NotRequired[int]
 
 
 class VoiceIdentifyCommand(TypedDict):
@@ -284,6 +323,30 @@ class VoiceResumeData(TypedDict):
 class VoiceResumeCommand(TypedDict):
     op: Literal[7]
     d: VoiceResumeData
+
+
+# voice opcode 23
+
+
+class VoiceDaveTransitionReadyData(TypedDict):
+    transition_id: int
+
+
+class VoiceDaveTransitionReadyCommand(TypedDict):
+    op: Literal[23]
+    d: VoiceDaveTransitionReadyData
+
+
+# voice opcode 31
+
+
+class VoiceDaveMlsInvalidCommitWelcomeData(TypedDict):
+    transition_id: int
+
+
+class VoiceDaveMlsInvalidCommitWelcomeCommand(TypedDict):
+    op: Literal[31]
+    d: VoiceDaveMlsInvalidCommitWelcomeData
 
 
 #####
