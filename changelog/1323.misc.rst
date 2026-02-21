@@ -1,1 +1,0 @@
-Use hatchling and versioningit for building disnake rather than using setuptools.

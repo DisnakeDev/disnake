@@ -289,7 +289,7 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
     def app_permissions(self) -> Permissions:
         """:class:`.Permissions`: Returns the permissions the bot has in the context's channel.
 
-        .. versionadded: |vnext|
+        .. versionadded:: 2.12
         """
         # This probably won't ever error.
         # `permissions_for` exists on all except PartialMessageable, which we shouldn't get here
@@ -300,7 +300,7 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
     def permissions(self) -> Permissions:
         """:class:`.Permissions`: Returns the permissions the author has in the context's channel.
 
-        .. versionadded: |vnext|
+        .. versionadded:: 2.12
         """
         return self.channel.permissions_for(self.author)  # pyright: ignore[reportArgumentType]
 

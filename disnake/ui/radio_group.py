@@ -21,7 +21,7 @@ __all__ = ("RadioGroup",)
 class RadioGroup(UIComponent):
     r"""Represents a UI radio group.
 
-    .. versionadded:: |vnext|
+    .. versionadded:: 2.12
 
     Parameters
     ----------

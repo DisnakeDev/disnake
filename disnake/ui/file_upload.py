@@ -19,7 +19,7 @@ __all__ = ("FileUpload",)
 class FileUpload(UIComponent):
     """Represents a UI file upload.
 
-    .. versionadded:: |vnext|
+    .. versionadded:: 2.12
 
     Parameters
     ----------

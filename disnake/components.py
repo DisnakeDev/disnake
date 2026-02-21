@@ -1585,7 +1585,7 @@ class FileUpload(Component):
         The user constructible and usable type to create a
         file upload is :class:`disnake.ui.FileUpload`.
 
-    .. versionadded:: |vnext|
+    .. versionadded:: 2.12
 
     Attributes
     ----------
@@ -1642,7 +1642,7 @@ AnyGroupOptionPayload = Union["RadioGroupOptionPayload", "CheckboxGroupOptionPay
 class GroupOption:
     """Represents an option inside a :class:`RadioGroup` or :class:`CheckboxGroup`.
 
-    .. versionadded:: |vnext|
+    .. versionadded:: 2.12
 
     Parameters
     ----------
@@ -1727,7 +1727,7 @@ class RadioGroup(Component):
         The user constructible and usable type to create a
         radio group is :class:`disnake.ui.RadioGroup`.
 
-    .. versionadded:: |vnext|
+    .. versionadded:: 2.12
 
     Attributes
     ----------
@@ -1783,7 +1783,7 @@ class CheckboxGroup(Component):
         The user constructible and usable type to create a
         checkbox group is :class:`disnake.ui.CheckboxGroup`.
 
-    .. versionadded:: |vnext|
+    .. versionadded:: 2.12
 
     Attributes
     ----------
@@ -1856,7 +1856,7 @@ class Checkbox(Component):
         The user constructible and usable type to create a
         checkbox is :class:`disnake.ui.Checkbox`.
 
-    .. versionadded:: |vnext|
+    .. versionadded:: 2.12
 
     Attributes
     ----------

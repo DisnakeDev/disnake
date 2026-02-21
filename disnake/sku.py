@@ -99,7 +99,7 @@ class SKU(Hashable):
 
         All parameters, except ``user``, are optional.
 
-        .. versionchanged:: |vnext|
+        .. versionchanged:: 2.12
             Now returns an async iterator, like all other iterator methods.
             Previously, this mistakenly returned a coroutine.
 
