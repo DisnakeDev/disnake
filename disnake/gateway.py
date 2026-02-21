@@ -42,6 +42,8 @@ if TYPE_CHECKING:
         PresenceUpdateCommand,
         RequestMembersCommand,
         ResumeCommand,
+        VoiceDaveMlsInvalidCommitWelcomeCommand,
+        VoiceDaveTransitionReadyCommand,
         VoiceHeartbeatData,
         VoiceIdentifyCommand,
         VoicePayload,
@@ -880,8 +882,33 @@ class DiscordVoiceWebSocket:
         Receive only. Tells you that your websocket connection was acknowledged.
     RESUMED
         Receive only. Tells you that your RESUME request has succeeded.
+    CLIENTS_CONNECT
+        Receive only. Indicates one or more users has connected to voice.
     CLIENT_DISCONNECT
-        Receive only.  Indicates a user has disconnected from voice.
+        Receive only. Indicates a user has disconnected from voice.
+
+    DAVE_PREPARE_TRANSITION
+        Receive only. Indicates that a DAVE protocol downgrade is upcoming.
+    DAVE_EXECUTE_TRANSITION
+        Receive only. Tells you to execute a previously announced transition.
+    DAVE_TRANSITION_READY
+        Sent only. Notifies the gateway that you're ready to execute an announced transition.
+    DAVE_MLS_PREPARE_EPOCH
+        Receive only. Indicates a protocol version change or group change is upcoming.
+    DAVE_MLS_EXTERNAL_SENDER
+        Receive only. Gives you credentials for MLS external sender.
+    DAVE_MLS_KEY_PACKAGE
+        Sent only. Provides your MLS key package to the gateway.
+    DAVE_MLS_PROPOSALS
+        Receive only. Gives you MLS proposals to be appended or revoked.
+    DAVE_MLS_COMMIT_WELCOME
+        Sent only.
+    DAVE_MLS_ANNOUNCE_COMMIT_TRANSITION
+        Receive only. Gives you an MLS commit to process for an upcoming transition.
+    DAVE_MLS_WELCOME
+        Receive only. Gives you an MLS welcome for an upcoming transition.
+    DAVE_MLS_INVALID_COMMIT_WELCOME
+        Sent only. Notifies the gateway of an invalid commit or welcome, requests being re-added.
     """
 
     IDENTIFY: Final[Literal[0]] = 0
@@ -894,7 +921,21 @@ class DiscordVoiceWebSocket:
     RESUME: Final[Literal[7]] = 7
     HELLO: Final[Literal[8]] = 8
     RESUMED: Final[Literal[9]] = 9
+    CLIENTS_CONNECT: Final[Literal[11]] = 11
     CLIENT_DISCONNECT: Final[Literal[13]] = 13
+
+    # DAVE-specific opcodes
+    DAVE_PREPARE_TRANSITION: Final[Literal[21]] = 21
+    DAVE_EXECUTE_TRANSITION: Final[Literal[22]] = 22
+    DAVE_TRANSITION_READY: Final[Literal[23]] = 23
+    DAVE_MLS_PREPARE_EPOCH: Final[Literal[24]] = 24
+    DAVE_MLS_EXTERNAL_SENDER: Final[Literal[25]] = 25
+    DAVE_MLS_KEY_PACKAGE: Final[Literal[26]] = 26
+    DAVE_MLS_PROPOSALS: Final[Literal[27]] = 27
+    DAVE_MLS_COMMIT_WELCOME: Final[Literal[28]] = 28
+    DAVE_MLS_ANNOUNCE_COMMIT_TRANSITION: Final[Literal[29]] = 29
+    DAVE_MLS_WELCOME: Final[Literal[30]] = 30
+    DAVE_MLS_INVALID_COMMIT_WELCOME: Final[Literal[31]] = 31
 
     def __init__(
         self,
@@ -929,6 +970,10 @@ class DiscordVoiceWebSocket:
         _log.debug("Sending voice websocket frame: %s.", data)
         await self.ws.send_str(utils._to_json(data))
 
+    async def send_as_bytes(self, data: bytes) -> None:
+        _log.debug("Sending voice websocket frame (binary): %s.", data.hex())
+        await self.ws.send_bytes(data)
+
     send_heartbeat = send_as_json
 
     def get_heartbeat_data(self) -> VoiceHeartbeatData:
@@ -956,6 +1001,7 @@ class DiscordVoiceWebSocket:
                 "user_id": str(state.user.id),
                 "session_id": state.session_id,
                 "token": state.token,
+                "max_dave_protocol_version": self._connection.dave_max_version,
             },
         }
         await self.send_as_json(payload)
@@ -1013,6 +1059,28 @@ class DiscordVoiceWebSocket:
 
         await self.send_as_json(payload)
 
+    async def send_dave_mls_key_package(self, key_package: bytes) -> None:
+        data = struct.pack(">B", self.DAVE_MLS_KEY_PACKAGE) + key_package
+        await self.send_as_bytes(data)
+
+    async def send_dave_transition_ready(self, transition_id: int) -> None:
+        payload: VoiceDaveTransitionReadyCommand = {
+            "op": self.DAVE_TRANSITION_READY,
+            "d": {"transition_id": transition_id},
+        }
+        await self.send_as_json(payload)
+
+    async def send_dave_mls_commit_welcome(self, commit_welcome: bytes) -> None:
+        data = struct.pack(">B", self.DAVE_MLS_COMMIT_WELCOME) + commit_welcome
+        await self.send_as_bytes(data)
+
+    async def send_dave_mls_invalid_commit_welcome(self, transition_id: int) -> None:
+        payload: VoiceDaveMlsInvalidCommitWelcomeCommand = {
+            "op": self.DAVE_MLS_INVALID_COMMIT_WELCOME,
+            "d": {"transition_id": transition_id},
+        }
+        await self.send_as_json(payload)
+
     async def received_message(self, msg: VoicePayload) -> None:
         _log.debug("Voice websocket frame received: %s", msg)
         op = msg["op"]
@@ -1034,13 +1102,55 @@ class DiscordVoiceWebSocket:
         elif op == self.SESSION_DESCRIPTION:
             self._connection.mode = data["mode"]
             await self.load_secret_key(data)
+            if (
+                self._connection.dave
+                and (dave_version := data.get("dave_protocol_version")) is not None
+            ):
+                await self._connection.dave.reinit_state(dave_version)
             self._ready.set()
         elif op == self.HELLO:
             interval: float = data["heartbeat_interval"] / 1000.0
             self._keep_alive = VoiceKeepAliveHandler(ws=self, interval=min(interval, 5.0))
             self._keep_alive.start()
+        elif dave_state := self._connection.dave:
+            if op == self.CLIENTS_CONNECT:
+                for user_id in map(int, data["user_ids"]):
+                    dave_state.add_recognized_user(user_id)
+            elif op == self.CLIENT_DISCONNECT:
+                dave_state.remove_recognized_user(int(data["user_id"]))
+            elif op == self.DAVE_PREPARE_TRANSITION:
+                await dave_state.prepare_transition(data["transition_id"], data["protocol_version"])
+            elif op == self.DAVE_EXECUTE_TRANSITION:
+                dave_state.execute_transition(data["transition_id"])
+            elif op == self.DAVE_MLS_PREPARE_EPOCH:
+                await dave_state.prepare_epoch(data["epoch"], data["protocol_version"])
 
         await self._hook(self, msg)
+
+    async def received_message_binary(self, msg: bytes) -> None:
+        _log.debug("Voice websocket frame (binary) received: %s", msg.hex())
+        if len(msg) < 3:
+            _log.error("Voice websocket received invalid frame (length %d)", len(msg))
+            return  # this should not happen.
+
+        # always update current seq just in case, even if we don't support dave
+        self.sequence = int.from_bytes(msg[0:2], "big", signed=False)
+        if self._connection.dave is None:
+            return
+
+        op = msg[2]
+        if op == self.DAVE_MLS_EXTERNAL_SENDER:
+            self._connection.dave.handle_mls_external_sender(msg[3:])
+        elif op == self.DAVE_MLS_PROPOSALS:
+            await self._connection.dave.handle_mls_proposals(msg[3:])
+        elif op == self.DAVE_MLS_ANNOUNCE_COMMIT_TRANSITION:
+            transition_id = int.from_bytes(msg[3:5], "big", signed=False)
+            await self._connection.dave.handle_mls_announce_commit_transition(
+                transition_id, msg[5:]
+            )
+        elif op == self.DAVE_MLS_WELCOME:
+            transition_id = int.from_bytes(msg[3:5], "big", signed=False)
+            await self._connection.dave.handle_mls_welcome(transition_id, msg[5:])
 
     async def initial_connection(self, data: VoiceReadyPayload) -> None:
         state = self._connection
@@ -1100,6 +1210,8 @@ class DiscordVoiceWebSocket:
         msg = await asyncio.wait_for(self.ws.receive(), timeout=30.0)
         if msg.type is aiohttp.WSMsgType.TEXT:
             await self.received_message(utils._from_json(msg.data))
+        elif msg.type is aiohttp.WSMsgType.BINARY:
+            await self.received_message_binary(msg.data)
         elif msg.type is aiohttp.WSMsgType.ERROR:
             _log.debug("Received %s", msg)
             raise ConnectionClosed(self.ws, shard_id=None, voice=True) from msg.data
