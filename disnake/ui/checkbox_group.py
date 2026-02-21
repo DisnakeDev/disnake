@@ -23,7 +23,7 @@ class CheckboxGroup(UIComponent):
 
     For single checkboxes, see :class:`.ui.Checkbox`.
 
-    .. versionadded:: |vnext|
+    .. versionadded:: 2.12
 
     Parameters
     ----------

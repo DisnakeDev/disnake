@@ -1287,22 +1287,22 @@ class ComponentType(Enum):
     file_upload = 19
     """Represents a file upload component.
 
-    .. versionadded:: |vnext|
+    .. versionadded:: 2.12
     """
     radio_group = 21
     """Represents a radio group component.
 
-    .. versionadded:: |vnext|
+    .. versionadded:: 2.12
     """
     checkbox_group = 22
     """Represents a checkbox group component.
 
-    .. versionadded:: |vnext|
+    .. versionadded:: 2.12
     """
     checkbox = 23
     """Represents a checkbox component.
 
-    .. versionadded:: |vnext|
+    .. versionadded:: 2.12
     """
 
     def __int__(self) -> int:
@@ -1716,7 +1716,7 @@ class AutoModActionType(Enum):
     block_member_interaction = 4
     """The rule will prevent the user from using text, voice, or other interactions.
 
-    .. versionadded:: |vnext|
+    .. versionadded:: 2.12
     """
 
 
@@ -1744,7 +1744,7 @@ class AutoModEventType(Enum):
     member_update = 2
     """The rule will apply when a member joins or edits their profile.
 
-    .. versionadded:: |vnext|
+    .. versionadded:: 2.12
     """
 
 
@@ -1786,7 +1786,7 @@ class AutoModTriggerType(Enum):
 
     This trigger type requires additional :class:`metadata <AutoModTriggerMetadata>`.
 
-    .. versionadded:: |vnext|
+    .. versionadded:: 2.12
     """
 
 

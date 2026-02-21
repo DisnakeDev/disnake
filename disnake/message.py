@@ -972,7 +972,7 @@ class MessageCall:
     r"""
     Represents a call in a message.
 
-    .. versionadded:: |vnext|
+    .. versionadded:: 2.12
 
     Attributes
     ----------
@@ -1141,7 +1141,7 @@ class Message(Hashable):
         The call contained in this message.
         Only present when :attr:`type` is :attr:`MessageType.call`.
 
-        .. versionadded:: |vnext|
+        .. versionadded:: 2.12
     """
 
     __slots__ = (

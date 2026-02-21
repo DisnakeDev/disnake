@@ -240,7 +240,7 @@ class AutoModBlockInteractionAction(AutoModAction):
     To see which trigger types this can be used with,
     refer to :ref:`this table <automod_trigger_action_table>`.
 
-    .. versionadded:: |vnext|
+    .. versionadded:: 2.12
 
     Attributes
     ----------

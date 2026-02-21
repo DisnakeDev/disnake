@@ -119,7 +119,7 @@ class Colour:
     def from_hex(cls, hex_str: str, /) -> Self:
         """Constructs a :class:`Colour` from a hex color code (``#RRGGBB``).
 
-        .. versionadded:: |vnext|
+        .. versionadded:: 2.12
         """
         return cls(int(hex_str.removeprefix("#"), 16))
 

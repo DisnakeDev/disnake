@@ -3826,7 +3826,7 @@ class Guild(Hashable):
 
             This method is an API call. For general usage, consider :attr:`roles` instead.
 
-        .. versionadded:: |vnext|
+        .. versionadded:: 2.12
 
         Raises
         ------

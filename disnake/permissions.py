@@ -410,7 +410,7 @@ class Permissions(BaseFlags):
         .. versionchanged:: 2.11
             Added :attr:`pin_messages` permission.
 
-        .. versionchanged:: |vnext|
+        .. versionchanged:: 2.12
             Added :attr:`bypass_slowmode` permission.
         """
         return cls(
@@ -1099,7 +1099,7 @@ class Permissions(BaseFlags):
 
         Bots are unaffected by slowmode regardless of this permission.
 
-        .. versionadded:: |vnext|
+        .. versionadded:: 2.12
         """
         return 1 << 52
 

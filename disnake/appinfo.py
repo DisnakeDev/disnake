@@ -40,7 +40,7 @@ class InstallParams:
 
     .. versionadded:: 2.5
 
-    .. versionchanged:: |vnext|
+    .. versionchanged:: 2.12
         This class can now be created by users.
 
     Attributes
@@ -121,7 +121,7 @@ class InstallTypeConfiguration:
 
     .. versionadded:: 2.10
 
-    .. versionchanged:: |vnext|
+    .. versionchanged:: 2.12
 
         This class can now be created by users.
 
@@ -479,7 +479,7 @@ class AppInfo:
 
         All parameters are optional.
 
-        .. versionadded:: |vnext|
+        .. versionadded:: 2.12
 
         Parameters
         ----------
