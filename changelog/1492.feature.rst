@@ -1,2 +1,0 @@
-Support end-to-end-encrypted voice connections using DAVE, "Discord's Audio and Video End-to-End Encryption".
-- This makes use of `dave.py <https://pypi.org/project/dave.py/>`_ as the Python binding to Discord's C++ implementation of the protocol, `libdave <https://github.com/discord/libdave>`_.

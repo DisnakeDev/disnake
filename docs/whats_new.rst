@@ -17,6 +17,72 @@ in specific versions. Please see :ref:`version_guarantees` for more information.
 
 .. towncrier release notes start
 
+.. _vp2p12p0:
+
+v2.12.0
+-------
+
+Breaking Changes
+~~~~~~~~~~~~~~~~
+- :attr:`Emoji.guild_id` can now be ``None`` if the emoji is owned by an application. You can use :meth:`Emoji.is_guild_emoji` and :meth:`Emoji.is_app_emoji` to check if this is a Guild or App Emoji. (:issue:`1223`)
+- :meth:`SKU.subscriptions` mistakenly returned a coroutine, unlike other iterator methods. Instead of ``async for x in await sku.subscriptions():``, correct usage now is ``async for x in sku.subscriptions():``. (:issue:`1274`)
+- Drop support for Python 3.8 as it reached end of life in October 2024 and no longer receives security updates. (:issue:`1394`)
+- Drop support for Python 3.9 as it reached end of life in October 2025 and no longer receives security updates. (:issue:`1427`)
+- Move ``docs`` from ``[project.optional-dependencies]`` to ``[dependency-groups]`` removing the ``docs`` data from distribution. (:issue:`1454`)
+
+New Features
+~~~~~~~~~~~~
+- Add member profile auto moderation types. (:issue:`1004`)
+    - New event/trigger type: :attr:`AutoModEventType.member_update`, :attr:`AutoModTriggerType.member_profile`
+    - New action: :attr:`AutoModActionType.block_member_interaction` / :class:`AutoModBlockInteractionAction`
+- Add support to :class:`.Emoji` to represent application-owned emojis. (:issue:`1223`, :issue:`1388`, :issue:`1397`)
+    - New methods on :class:`Client`: :meth:`Client.fetch_application_emoji`, :meth:`Client.fetch_application_emojis` and :meth:`Client.create_application_emoji`.
+    - New attributes/methods on :class:`.Emoji`: :attr:`Emoji.application_id`, :meth:`Emoji.is_guild_emoji` and :meth:`Emoji.is_app_emoji`.
+- Add support for modifying application info using :meth:`AppInfo.edit`. (:issue:`1237`)
+- Add new modal components: :class:`ui.FileUpload`, :class:`ui.RadioGroup`, :class:`ui.CheckboxGroup`, and :class:`ui.Checkbox`. (:issue:`1390`, :issue:`1495`)
+- Upgrade to voice websocket version 8, implement voice connection resuming. (:issue:`1399`)
+- Improve error messaging when a command parameter's annotation cannot be resolved at runtime. (:issue:`1411`)
+- Add new :class:`MessageCall` object and associated :attr:`Message.call` attribute for viewing information about a call in private channels. (:issue:`1414`)
+- |commands| Add :attr:`.Context.app_permissions` and :attr:`.Context.permissions` as a shorthands similar to :attr:`.Interaction.app_permissions` and :attr:`.Interaction.permissions`. (:issue:`1429`)
+- |commands| Support :data:`typing.Annotated` for specifying converters in prefix commands in a more type-safe way. See :ref:`Special Converters <ext_commands_converters_annotated>` for details. (:issue:`1431`)
+- Add :meth:`Guild.fetch_role_member_counts` to retrieve member counts for each :class:`Role` without requiring members to be cached. (:issue:`1438`, :issue:`1501`)
+- The ``cls`` parameter of the :func:`ext.tasks.loop` decorator now accepts any matching callable, in addition to :class:`~ext.tasks.Loop` subclasses. (:issue:`1471`)
+- Add :attr:`.Permissions.bypass_slowmode` which allows a user to bypass slowmode. Note that bot users are not impacted by slowmode regardless of this permission. (:issue:`1484`)
+- Add :meth:`Colour.from_hex` to create :class:`Colour` from hex color codes (``#RRGGBB``). (:issue:`1487`)
+- Support end-to-end-encrypted voice connections using DAVE, "Discord's Audio and Video End-to-End Encryption". (:issue:`1492`)
+    - This makes use of `dave.py <https://pypi.org/project/dave.py/>`_ as the Python binding to Discord's C++ implementation of the protocol, `libdave <https://github.com/discord/libdave>`_.
+
+Bug Fixes
+~~~~~~~~~
+- Change :meth:`SKU.subscriptions` to be a synchronous method (returning an async iterator), to match other iterator methods. (:issue:`1274`)
+- Add a ``__repr__`` method to :class:`.InstallTypeConfiguration`. (:issue:`1398`)
+- :class:`AllowedMentions` now takes a Sequence rather than a List for users and roles in order to support covariance. (:issue:`1410`)
+- Fix enum member aliases being wrongly considered canonical by pyright. (:issue:`1473`)
+
+Documentation
+~~~~~~~~~~~~~
+- Update references to :class:`~typing.Dict` and other collections in the documentation to use built-in PEP 585 syntax (``dict``, ``list``, ``set``, etc.) instead of the :mod:`typing` counterparts (``Dict``, ``List``, ``Set``, etc.). (:issue:`1395`)
+- Update all references to :py:class:`~typing.Union` and :py:data:`~typing.Optional` in the documentation to use PEP 604 syntax (``X | Y`` and ``X | None`` respectively). (:issue:`1395`)
+- Update version resolution in ``docs/conf.py`` to use :py:class:`importlib.metadata` instead of regex. (:issue:`1446`)
+- Add new ``s`` and ``S`` timestamp styles to :func:`utils.format_dt`. (:issue:`1468`)
+- Add a ``Raises`` section to the docstrings of :func:`ui.button` and :func:`ui.*_select() <ui.string_select>` decorators. (:issue:`1472`)
+- Unify the description of the ``id`` parameter between the members of :ref:`components <disnake_api_components>` and :ref:`UI <disnake_api_ui>` packages. (:issue:`1472`)
+- Update descriptions of ``slowmode_delay`` fields and :meth:`Guild.create_custom_emoji`/:meth:`~Guild.create_sticker`/:meth:`~Guild.create_scheduled_event` methods to account for the permission split on 2026-02-23. (:issue:`1485`)
+- Update links/references to Discord API docs. (:issue:`1502`)
+
+Miscellaneous
+~~~~~~~~~~~~~
+- Use hatchling and versioningit for building disnake rather than using setuptools. (:issue:`1323`)
+- Migrate away from pdm and replace with ``uv`` and ``nox``. See `CONTRIBUTING.md <https://github.com/DisnakeDev/disnake/blob/master/CONTRIBUTING.md>`_ for additional information. (:issue:`1362`)
+- Update minimum required setuptools version to ``>=77.0.3``. (:issue:`1366`)
+- Remove upper bound on audioop-lts version and allow v0.2.x. (:issue:`1378`)
+- Update all standard library types to use built-in generics (such as ``list[int]`` instead of ``List[int]``) where applicable. (:issue:`1396`)
+- Update all typehints to use Python 3.10 union syntax, eg ``int | str``. (:issue:`1449`)
+- Explicitly use ``aiohttp[speedups]`` for ``speed`` extra. (:issue:`1461`)
+- Reduce the usage of ``typing.Any`` by replacing it with ``object`` where applicable. (:issue:`1465`)
+- Support PyNaCl ``v1.6.x``. (:issue:`1499`)
+
+
 .. _vp2p11p0:
 
 v2.11.0
