@@ -94,7 +94,7 @@ class FileUpload(UIComponent):
 
     @property
     def required(self) -> bool:
-        """:class:`bool`: Whether the select menu is required."""
+        """:class:`bool`: Whether the file upload is required."""
         return self._underlying.required
 
     @required.setter

@@ -49,18 +49,15 @@ class MyModal(disnake.ui.Modal):
             ),
             disnake.ui.Label(
                 "Send ephemerally?",
-                component=disnake.ui.StringSelect(
-                    custom_id="send_ephemeral",
-                    options=["yes", "no"],
-                ),
+                component=disnake.ui.Checkbox(custom_id="send_ephemeral"),
             ),
         ]
         super().__init__(title="Create Tag", components=components)
 
     async def callback(self, inter: disnake.ModalInteraction) -> None:
-        tag_name = inter.values["name"]
-        tag_content = inter.values["content"]
-        send_ephemeral = inter.values["send_ephemeral"] == ["yes"]
+        tag_name: str = inter.values["name"]
+        tag_content: str = inter.values["content"]
+        send_ephemeral: bool = inter.values["send_ephemeral"]
 
         embed = disnake.Embed(title=f"Tag created: `{tag_name}`")
         embed.add_field(name="Content", value=tag_content)
@@ -116,10 +113,7 @@ async def create_tag_low(inter: disnake.CommandInteraction):
             ),
             disnake.ui.Label(
                 "Send ephemerally?",
-                component=disnake.ui.StringSelect(
-                    custom_id="send_ephemeral",
-                    options=["yes", "no"],
-                ),
+                component=disnake.ui.Checkbox(custom_id="send_ephemeral"),
             ),
         ],
     )
@@ -136,9 +130,9 @@ async def create_tag_low(inter: disnake.CommandInteraction):
         # This is done since Discord doesn't dispatch any event for when a modal is closed/dismissed.
         return
 
-    tag_name = modal_inter.values["name"]
-    tag_content = modal_inter.values["content"]
-    send_ephemeral = modal_inter.values["send_ephemeral"] == ["yes"]
+    tag_name: str = modal_inter.values["name"]
+    tag_content: str = modal_inter.values["content"]
+    send_ephemeral: bool = modal_inter.values["send_ephemeral"]
 
     embed = disnake.Embed(title=f"Tag created: `{tag_name}`")
     embed.add_field(name="Content", value=tag_content)

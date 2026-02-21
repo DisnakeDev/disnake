@@ -18,6 +18,8 @@ from ..components import (
     ActionRow as ActionRowComponent,
     Button as ButtonComponent,
     ChannelSelectMenu as ChannelSelectComponent,
+    Checkbox as CheckboxComponent,
+    CheckboxGroup as CheckboxGroupComponent,
     Component,
     Container as ContainerComponent,
     FileComponent as FileComponent,
@@ -25,6 +27,7 @@ from ..components import (
     Label as LabelComponent,
     MediaGallery as MediaGalleryComponent,
     MentionableSelectMenu as MentionableSelectComponent,
+    RadioGroup as RadioGroupComponent,
     RoleSelectMenu as RoleSelectComponent,
     Section as SectionComponent,
     Separator as SeparatorComponent,
@@ -43,12 +46,15 @@ from ._types import (
     ComponentInput,
 )
 from .button import Button
+from .checkbox import Checkbox
+from .checkbox_group import CheckboxGroup
 from .container import Container
 from .file import File
 from .file_upload import FileUpload
 from .item import UIComponent, WrappedComponent
 from .label import Label
 from .media_gallery import MediaGallery
+from .radio_group import RadioGroup
 from .section import Section
 from .select import ChannelSelect, MentionableSelect, RoleSelect, StringSelect, UserSelect
 from .separator import Separator
@@ -1164,6 +1170,9 @@ UI_COMPONENT_LOOKUP: Mapping[type[Component], type[UIComponent]] = {
     ContainerComponent: Container,
     LabelComponent: Label,
     FileUploadComponent: FileUpload,
+    RadioGroupComponent: RadioGroup,
+    CheckboxGroupComponent: CheckboxGroup,
+    CheckboxComponent: Checkbox,
 }
 
 
