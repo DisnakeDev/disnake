@@ -1364,8 +1364,8 @@ class GuildChannel(ABC):
 
         roles: :class:`list`\[:class:`.Role`] | :data:`None`
             A list of roles added to the user upon accepting the invite.
-            You must have the :attr:`.Permissions.manage_roles` permission and cannot assign roles with
-            higher permissions than you to do this.
+            You must have the :attr:`.Permissions.manage_roles` permission, and the roles must be
+            below the bot's top-most role.
 
             .. versionadded:: |vnext|
 
