@@ -1340,7 +1340,7 @@ class GuildChannel(ABC):
 
         target_users_file: :class:`~disnake.File` | :data:`None`
             A csv file with a list of users able to accept the invite.
-            This file must only have valid user ids separated by ``/n``.
+            This file must only have valid user ids separated by ``\n``.
             A valid file content would look like this: ::
 
                 710570210159099984
