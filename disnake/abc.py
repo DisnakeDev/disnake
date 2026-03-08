@@ -1347,7 +1347,7 @@ class GuildChannel(ABC):
                 1081815963990761542
                 ... other user ids
 
-            .. versionadded:: 2.13
+            .. versionadded:: |vnext|
 
         target_application: :class:`.Snowflake` | :data:`None`
             The ID of the embedded application for the invite, required if ``target_type`` is :attr:`.InviteTarget.embedded_application`.
