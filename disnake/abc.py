@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 import copy
 from abc import ABC
-from collections.abc import Callable, Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence, Collection
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -1303,7 +1303,7 @@ class GuildChannel(ABC):
         target_users_file: File | None = None,
         target_application: Snowflake | PartyType | None = None,
         guild_scheduled_event: GuildScheduledEvent | None = None,
-        roles: list[Role] | None = None,
+        roles: Collection[Role] | None = None,
     ) -> Invite:
         r"""|coro|
 
