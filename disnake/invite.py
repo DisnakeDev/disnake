@@ -683,7 +683,7 @@ class Invite(Hashable):
         You must have the :attr:`~Permissions.manage_guild` or :attr:`~Permissions.view_audit_log`
         permissions or to be the inviter to do this.
 
-        .. versionadded:: 2.13
+        .. versionadded:: |vnext|
 
         Raises
         ------
