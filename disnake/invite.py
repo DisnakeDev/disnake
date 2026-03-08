@@ -660,7 +660,7 @@ class Invite(Hashable):
         ----------
         file: :class:`File`
             The csv file containing the new user ids to target.
-            This file must only have valid user ids separated by ``/n``.
+            This file must only have valid user ids separated by ``\n``.
             A valid file content would look like this: ::
 
                 710570210159099984
