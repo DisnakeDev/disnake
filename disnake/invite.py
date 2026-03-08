@@ -654,7 +654,7 @@ class Invite(Hashable):
         Update the target users for this invite.
         You must have the :attr:`~Permissions.manage_guild` permission or to be the inviter to do this.
 
-        .. versionadded:: 2.13
+        .. versionadded:: |vnext|
 
         Parameters
         ----------
