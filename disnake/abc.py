@@ -1340,14 +1340,14 @@ class GuildChannel(ABC):
 
         target_users_file: :class:`~disnake.File` | :data:`None`
             A csv file with a list of users able to accept the invite.
-            This file must only have valid user ids separated by ``/n``.
+            This file must only have valid user ids separated by ``\n``.
             A valid file content would look like this: ::
 
                 710570210159099984
                 1081815963990761542
                 ... other user ids
 
-            .. versionadded:: 2.13
+            .. versionadded:: |vnext|
 
         target_application: :class:`.Snowflake` | :data:`None`
             The ID of the embedded application for the invite, required if ``target_type`` is :attr:`.InviteTarget.embedded_application`.
@@ -1364,10 +1364,10 @@ class GuildChannel(ABC):
 
         roles: :class:`list`\[:class:`.Role`] | :data:`None`
             A list of roles added to the user upon accepting the invite.
-            You must have the :attr:`.Permissions.manage_roles` permission and cannot assign roles with
-            higher permissions than you to do this.
+            You must have the :attr:`.Permissions.manage_roles` permission, and the roles must be
+            below the bot's top-most role.
 
-            .. versionadded:: 2.13
+            .. versionadded:: |vnext|
 
         reason: :class:`str` | :data:`None`
             The reason for creating this invite. Shows up on the audit log.

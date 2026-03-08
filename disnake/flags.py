@@ -2982,7 +2982,7 @@ class GuildInviteFlags(BaseFlags):
 
             Returns a GuildInviteFlags instance with all flags except ``y`` inverted from their default value.
 
-    .. versionadded:: 2.13
+    .. versionadded:: |vnext|
 
     Attributes
     ----------

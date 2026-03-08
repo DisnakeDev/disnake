@@ -396,12 +396,12 @@ class Invite(Hashable):
     flags: :class:`GuildInviteFlags`
         The flags of this invite.
 
-        .. versionadded:: 2.13
+        .. versionadded:: |vnext|
 
     roles: :class:`list`\[:class:`Role`]
         A list of roles that will be assigned to the users when joining, if any.
 
-        .. versionadded:: 2.13
+        .. versionadded:: |vnext|
     """
 
     __slots__ = (
@@ -632,7 +632,7 @@ class Invite(Hashable):
         You must have the :attr:`~Permissions.manage_guild` or :attr:`~Permissions.view_audit_log`
         permissions or to be the inviter to do this.
 
-        .. versionadded:: 2.13
+        .. versionadded:: |vnext|
 
         Raises
         ------
@@ -654,13 +654,13 @@ class Invite(Hashable):
         Update the target users for this invite.
         You must have the :attr:`~Permissions.manage_guild` permission or to be the inviter to do this.
 
-        .. versionadded:: 2.13
+        .. versionadded:: |vnext|
 
         Parameters
         ----------
         file: :class:`File`
             The csv file containing the new user ids to target.
-            This file must only have valid user ids separated by ``/n``.
+            This file must only have valid user ids separated by ``\n``.
             A valid file content would look like this: ::
 
                 710570210159099984
@@ -681,9 +681,9 @@ class Invite(Hashable):
 
         Get the target users job status.
         You must have the :attr:`~Permissions.manage_guild` or :attr:`~Permissions.view_audit_log`
-        permissions or to be the inviter to do this.
+        permissions or be the inviter to do this.
 
-        .. versionadded:: 2.13
+        .. versionadded:: |vnext|
 
         Raises
         ------
