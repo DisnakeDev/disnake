@@ -396,12 +396,12 @@ class Invite(Hashable):
     flags: :class:`GuildInviteFlags`
         The flags of this invite.
 
-        .. versionadded:: 2.13
+        .. versionadded:: |vnext|
 
     roles: :class:`list`\[:class:`Role`]
         A list of roles that will be assigned to the users when joining, if any.
 
-        .. versionadded:: 2.13
+        .. versionadded:: |vnext|
     """
 
     __slots__ = (
