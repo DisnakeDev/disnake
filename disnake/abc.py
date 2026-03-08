@@ -1300,10 +1300,12 @@ class GuildChannel(ABC):
         unique: bool = True,
         target_type: InviteTarget | None = None,
         target_user: User | None = None,
+        target_users_file: File | None = None,
         target_application: Snowflake | PartyType | None = None,
         guild_scheduled_event: GuildScheduledEvent | None = None,
+        roles: list[Role] | None = None,
     ) -> Invite:
-        """|coro|
+        r"""|coro|
 
         Creates an instant invite from a text or voice channel.
 
@@ -1336,6 +1338,17 @@ class GuildChannel(ABC):
 
             .. versionadded:: 2.0
 
+        target_users_file: :class:`~disnake.File` | :data:`None`
+            A csv file with a list of users able to accept the invite.
+            This file must only have valid user ids separated by ``/n``.
+            A valid file content would look like this: ::
+
+                710570210159099984
+                1081815963990761542
+                ... other user ids
+
+            .. versionadded:: 2.13
+
         target_application: :class:`.Snowflake` | :data:`None`
             The ID of the embedded application for the invite, required if ``target_type`` is :attr:`.InviteTarget.embedded_application`.
 
@@ -1348,6 +1361,13 @@ class GuildChannel(ABC):
             The guild scheduled event to include with the invite.
 
             .. versionadded:: 2.3
+
+        roles: :class:`list`\[:class:`.Role`] | :data:`None`
+            A list of roles added to the user upon accepting the invite.
+            You must have the :attr:`.Permissions.manage_roles` permission and cannot assign roles with
+            higher permissions than you to do this.
+
+            .. versionadded:: 2.13
 
         reason: :class:`str` | :data:`None`
             The reason for creating this invite. Shows up on the audit log.
@@ -1379,7 +1399,9 @@ class GuildChannel(ABC):
             unique=unique,
             target_type=try_enum_to_int(target_type),
             target_user_id=target_user.id if target_user else None,
+            target_users_file=target_users_file,
             target_application_id=target_application.id if target_application else None,
+            role_ids=[r.id for r in roles] if roles else None,
         )
         invite = Invite.from_incomplete(data=data, state=self._state)
         invite.guild_scheduled_event = guild_scheduled_event
