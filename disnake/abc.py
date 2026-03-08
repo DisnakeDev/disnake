@@ -1367,7 +1367,7 @@ class GuildChannel(ABC):
             You must have the :attr:`.Permissions.manage_roles` permission and cannot assign roles with
             higher permissions than you to do this.
 
-            .. versionadded:: 2.13
+            .. versionadded:: |vnext|
 
         reason: :class:`str` | :data:`None`
             The reason for creating this invite. Shows up on the audit log.
