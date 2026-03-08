@@ -138,21 +138,22 @@ def to_multipart(
     """Converts the payload and list of files to a multipart payload,
     as specified by https://docs.discord.com/developers/reference#uploading-files
     """
-    multipart: list[dict[str, Any]] = []
-    for index, file in enumerate(files):
-        if is_csv:
-            multipart.append(
-                {"name": "target_users_file", "value": file.fp, "content_type": "text/csv"}
-            )
-        else:
-            multipart.append(
-                {
-                    "name": f"files[{index}]",
-                    "value": file.fp,
-                    "filename": file.filename,
-                    "content_type": "application/octet-stream",
-                }
-            )
+    multipart: list[dict[str, Any]]
+    if is_csv:
+        multipart = [
+            {"name": "target_users_file", "value": file.fp, "content_type": "text/csv"}
+            for file in files
+        ]
+    else:
+        multipart = [
+            {
+                "name": f"files[{index}]",
+                "value": file.fp,
+                "filename": file.filename,
+                "content_type": "application/octet-stream",
+            }
+            for index, file in enumerate(files)
+        ]
 
     multipart.append({"name": "payload_json", "value": utils._to_json(payload)})
     return multipart
