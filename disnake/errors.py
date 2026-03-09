@@ -251,6 +251,7 @@ class ConnectionClosed(ClientException):
         4014: "Disconnected (you were kicked, the main gateway session was dropped, etc.)",
         4015: "Voice server crashed",
         4016: "Unknown encryption mode",
+        4017: "E2EE/DAVE protocol required",
         4020: "Bad request - you sent a malformed request",
         4021: "Disconnected: Rate Limited",
         4022: "Disconnected: Call Terminated (channel deleted, voice server changed, etc.)",
