@@ -721,6 +721,38 @@ class VoiceClient(VoiceProtocol):
             dave.get_max_supported_protocol_version(),
         )
 
+    @property
+    def voice_privacy_code(self) -> str | None:
+        """:class:`str` | :obj:`None`: The E2EE voice privacy code of the current voice session, if any.
+
+        This code changes whenever a user joins or leaves the voice channel.
+
+        .. versionadded:: |vnext|
+        """
+        return self.dave and self.dave.voice_privacy_code
+
+    async def get_user_verification_code(self, user: abc.Snowflake) -> str | None:
+        """|coro|
+
+        Retrieves the E2EE verification code for the given user, if any.
+
+        This code changes whenever the bot joins a new call with the given user
+        (as bots currently do not implement persistent verification keys).
+
+        .. versionadded:: 2.13
+
+        Parameters
+        ----------
+        user: :class:`.abc.Snowflake`
+            The target user.
+
+        Returns
+        -------
+        :class:`str` | :obj:`None`
+            The verification code.
+        """
+        return self.dave and await self.dave.get_user_verification_code(user.id)
+
 
 class DaveState:
     # this implementation currently only supports DAVE v1, even if the native component may be newer
@@ -799,7 +831,6 @@ class DaveState:
             return  # in case the gateway ever messes up, ignore CLIENT_DISCONNECT for our own user
         self._recognized_users.discard(user_id)
 
-    # TODO: should be publicly accessible/documented on VoiceClient
     @property
     def voice_privacy_code(self) -> str | None:
         if not self._session.has_established_group():
@@ -808,7 +839,6 @@ class DaveState:
         authenticator = self._session.get_last_epoch_authenticator()
         return dave.generate_displayable_code(authenticator, 30, 5)
 
-    # TODO: see voice_privacy_code
     async def get_user_verification_code(self, user_id: int) -> str | None:
         if not self._session.has_established_group():
             return None
