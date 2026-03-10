@@ -217,6 +217,9 @@ class VoiceClient(VoiceProtocol):
         if not has_nacl:
             msg = "PyNaCl library needed in order to use voice"
             raise RuntimeError(msg)
+        if not has_dave:
+            msg = "dave.py library needed in order to use voice"
+            raise RuntimeError(msg)
 
         super().__init__(client, channel)
         state = client._connection
