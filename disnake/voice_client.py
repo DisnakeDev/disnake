@@ -444,13 +444,23 @@ class VoiceClient(VoiceProtocol):
 
                 if isinstance(exc, ConnectionClosed):
                     # 1000 - normal closure (obviously)
-                    # 4014 - voice channel has been deleted.
+                    # 4014 - potentially kicked or moved from voice channel
                     # 4015 - voice server has crashed
+                    # 4017 - E2EE required (should be caught earlier and usually not happen in the first place)
+                    # 4021 - rate limited
+                    # 4022 - similar to 4014 (only happens when bot is the only remaining user in voice channel)
                     if exc.code == 1000:
                         _log.info("Disconnecting from voice normally, close code %d.", exc.code)
                         await self.disconnect()
                         break
-                    if exc.code == 4014:
+
+                    if exc.code in (4017, 4021):
+                        _log.info(
+                            "Disconnected from voice with close code %d, not reconnecting", exc.code
+                        )
+                        break
+
+                    if exc.code in (4014, 4022):
                         _log.info("Disconnected from voice by force... potentially reconnecting.")
                         successful = await self.potential_reconnect()
                         if not successful:
@@ -460,6 +470,7 @@ class VoiceClient(VoiceProtocol):
                             await self.disconnect()
                             break
                         continue
+
                     # only attempt to resume if the session is valid/established
                     if exc.code == 4015 and self.ws._ready.is_set():
                         _log.info("Disconnected from voice, trying to resume session...")
