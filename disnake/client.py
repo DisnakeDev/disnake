@@ -446,9 +446,20 @@ class Client:
         self._connection._get_websocket = self._get_websocket
         self._connection._get_client = lambda: self
 
-        if VoiceClient.warn_nacl:
-            VoiceClient.warn_nacl = False
-            _log.warning("PyNaCl is not installed, voice will NOT be supported")
+        if VoiceClient.warn_nacl or VoiceClient.warn_dave:
+            missing: list[str] = []
+            if VoiceClient.warn_nacl:
+                missing.append("PyNaCl")
+            if VoiceClient.warn_dave:
+                missing.append("dave.py")
+
+            _log.warning(
+                "%s %s not installed, voice will NOT be supported",
+                " and ".join(missing),
+                "are" if len(missing) > 1 else "is",
+            )
+
+            VoiceClient.warn_nacl = VoiceClient.warn_dave = False
 
         if strict_localization and localization_provider is not None:
             msg = (
