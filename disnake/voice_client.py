@@ -739,7 +739,7 @@ class VoiceClient(VoiceProtocol):
         This code changes whenever the bot joins a new call with the given user
         (as bots currently do not implement persistent verification keys).
 
-        .. versionadded:: 2.13
+        .. versionadded:: |vnext|
 
         Parameters
         ----------
