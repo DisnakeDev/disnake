@@ -23,7 +23,7 @@ import socket
 import struct
 import threading
 from collections.abc import Callable
-from typing import TYPE_CHECKING, Any, Final, Literal
+from typing import TYPE_CHECKING, Any, Final, Literal, cast
 
 from . import opus, utils
 from .backoff import ExponentialBackoff
@@ -55,6 +55,8 @@ except ImportError:
 
 if TYPE_CHECKING:
     import dave
+
+    has_dave = cast("bool", ...)  # prevent pyright from trying to be smart
 else:
     try:
         import dave
@@ -243,6 +245,7 @@ class VoiceClient(VoiceProtocol):
         self.dave: DaveState | None = DaveState(self) if has_dave else None
 
     warn_nacl = not has_nacl
+    warn_dave = not has_dave
     supported_modes: tuple[SupportedModes, ...] = ("aead_xchacha20_poly1305_rtpsize",)
 
     @property
