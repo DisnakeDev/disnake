@@ -1,0 +1,1 @@
+Add missing guild features to ``GuildFeature`` literal type
