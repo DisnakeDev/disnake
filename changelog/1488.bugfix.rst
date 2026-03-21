@@ -1,0 +1,1 @@
+Fix ``ColourConverter`` accepting non-factory classmethods like ``holographic_style``, which returns a tuple instead of a single :class:`Colour`.

@@ -669,6 +669,51 @@ class ThreadConverter(IDConverter[disnake.Thread]):
         return GuildChannelConverter._resolve_thread(ctx, argument, "threads", disnake.Thread)
 
 
+# valid colour factory method names accepted by ColourConverter, used to
+# prevent non-factory classmethods (like holographic_style) from being invoked
+_COLOUR_FACTORY_NAMES: frozenset[str] = frozenset(
+    {
+        "default",
+        "random",
+        "teal",
+        "dark_teal",
+        "brand_green",
+        "green",
+        "dark_green",
+        "blue",
+        "dark_blue",
+        "purple",
+        "dark_purple",
+        "magenta",
+        "dark_magenta",
+        "gold",
+        "dark_gold",
+        "orange",
+        "dark_orange",
+        "brand_red",
+        "red",
+        "dark_red",
+        "lighter_grey",
+        "lighter_gray",
+        "dark_grey",
+        "dark_gray",
+        "light_grey",
+        "light_gray",
+        "darker_grey",
+        "darker_gray",
+        "og_blurple",
+        "old_blurple",
+        "blurple",
+        "greyple",
+        "dark_theme",
+        "fuchsia",
+        "yellow",
+        "light_embed",
+        "dark_embed",
+    }
+)
+
+
 class ColourConverter(Converter[disnake.Colour]):
     """Converts to a :class:`~disnake.Colour`.
 
@@ -748,10 +793,9 @@ class ColourConverter(Converter[disnake.Colour]):
             return self.parse_rgb(arg)
 
         arg = arg.replace(" ", "_")
-        method = getattr(disnake.Colour, arg, None)
-        if arg.startswith("from_") or method is None or not inspect.ismethod(method):
+        if arg not in _COLOUR_FACTORY_NAMES:
             raise BadColourArgument(arg)
-        return method()
+        return getattr(disnake.Colour, arg)()
 
 
 ColorConverter = ColourConverter
