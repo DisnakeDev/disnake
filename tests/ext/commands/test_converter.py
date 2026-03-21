@@ -9,12 +9,12 @@ from disnake.ext.commands import BadColourArgument
 from disnake.ext.commands.converter import ColourConverter
 
 
-@pytest.fixture()
+@pytest.fixture
 def converter() -> ColourConverter:
     return ColourConverter()
 
 
-@pytest.fixture()
+@pytest.fixture
 def ctx() -> mock.Mock:
     return mock.Mock()
 
