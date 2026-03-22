@@ -669,8 +669,7 @@ class ThreadConverter(IDConverter[disnake.Thread]):
         return GuildChannelConverter._resolve_thread(ctx, argument, "threads", disnake.Thread)
 
 
-# valid colour factory method names accepted by ColourConverter, used to
-# prevent non-factory classmethods (like holographic_style) from being invoked
+# set of Colour.xyz() method names supported by ColourConverter
 _COLOUR_FACTORY_NAMES: frozenset[str] = frozenset(
     {
         "default",

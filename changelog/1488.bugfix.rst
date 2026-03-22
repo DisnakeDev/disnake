@@ -1,1 +1,1 @@
-Fix ``ColourConverter`` accepting non-factory classmethods like ``holographic_style``, which returns a tuple instead of a single :class:`Colour`.
+Fix :class:`~disnake.ext.commands.ColourConverter` accepting ``classmethod`` names that do not return :class:`Colour`, for example ``holographic_style``.
