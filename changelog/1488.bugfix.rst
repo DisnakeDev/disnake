@@ -1,0 +1,1 @@
+Fix :class:`~disnake.ext.commands.ColourConverter` accepting ``classmethod`` names that do not return :class:`Colour`, for example ``holographic_style``.
