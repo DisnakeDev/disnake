@@ -328,6 +328,9 @@ class Colour:
         """
         return cls(0x2B2D31)
 
+    # NOTE: when adding new factory methods, also update _COLOUR_FACTORY_NAMES
+    # in disnake/ext/commands/converter.py
+
     @classmethod
     def holographic_style(cls) -> tuple[Self, Self, Self]:
         """A factory method that returns a tuple of :class:`Colour` with values of
