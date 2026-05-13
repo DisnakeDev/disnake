@@ -768,7 +768,7 @@ class ConnectionState:
         else:
             if self.application_id is None:
                 self.application_id = utils._get_as_snowflake(application, "id")
-            self.application_flags = ApplicationFlags._from_value(application["flags"])
+            self.application_flags = ApplicationFlags._from_value(int(application["flags_new"]))
 
         for guild_data in data["guilds"]:
             self._add_guild_from_data(guild_data)
@@ -2580,7 +2580,7 @@ class AutoShardedConnectionState(ConnectionState):
         else:
             if self.application_id is None:
                 self.application_id = utils._get_as_snowflake(application, "id")
-            self.application_flags = ApplicationFlags._from_value(application["flags"])
+            self.application_flags = ApplicationFlags._from_value(int(application["flags_new"]))
 
         for guild_data in data["guilds"]:
             self._add_guild_from_data(guild_data)
