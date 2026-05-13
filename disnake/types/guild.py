@@ -43,6 +43,7 @@ PremiumTier = Literal[0, 1, 2, 3]
 GuildFeature = Literal[
     "ANIMATED_BANNER",
     "ANIMATED_ICON",
+    "APPLICATION_COMMAND_PERMISSIONS_V2",
     "AUTO_MODERATION",
     "BANNER",
     "COMMUNITY",
@@ -84,6 +85,9 @@ GuildFeature = Literal[
     "VERIFIED",
     "VIP_REGIONS",
     "WELCOME_SCREEN_ENABLED",
+    "GUESTS_ENABLED",
+    "GUILD_TAGS",
+    "ENHANCED_ROLE_COLORS",
 ]
 
 
