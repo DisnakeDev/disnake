@@ -23,7 +23,7 @@ import socket
 import struct
 import threading
 from collections.abc import Callable
-from typing import TYPE_CHECKING, Any, Final, Literal
+from typing import TYPE_CHECKING, Any, Final, Literal, cast
 
 from . import opus, utils
 from .backoff import ExponentialBackoff
@@ -55,6 +55,8 @@ except ImportError:
 
 if TYPE_CHECKING:
     import dave
+
+    has_dave = cast("bool", ...)  # prevent pyright from trying to be smart
 else:
     try:
         import dave
@@ -215,6 +217,9 @@ class VoiceClient(VoiceProtocol):
         if not has_nacl:
             msg = "PyNaCl library needed in order to use voice"
             raise RuntimeError(msg)
+        if not has_dave:
+            msg = "dave.py library needed in order to use voice"
+            raise RuntimeError(msg)
 
         super().__init__(client, channel)
         state = client._connection
@@ -243,6 +248,7 @@ class VoiceClient(VoiceProtocol):
         self.dave: DaveState | None = DaveState(self) if has_dave else None
 
     warn_nacl = not has_nacl
+    warn_dave = not has_dave
     supported_modes: tuple[SupportedModes, ...] = ("aead_xchacha20_poly1305_rtpsize",)
 
     @property
@@ -444,13 +450,23 @@ class VoiceClient(VoiceProtocol):
 
                 if isinstance(exc, ConnectionClosed):
                     # 1000 - normal closure (obviously)
-                    # 4014 - voice channel has been deleted.
+                    # 4014 - potentially kicked or moved from voice channel
                     # 4015 - voice server has crashed
+                    # 4017 - E2EE required (should be caught earlier and usually not happen in the first place)
+                    # 4021 - rate limited
+                    # 4022 - similar to 4014 (only happens when bot is the only remaining user in voice channel)
                     if exc.code == 1000:
                         _log.info("Disconnecting from voice normally, close code %d.", exc.code)
                         await self.disconnect()
                         break
-                    if exc.code == 4014:
+
+                    if exc.code in (4017, 4021):
+                        _log.info(
+                            "Disconnected from voice with close code %d, not reconnecting", exc.code
+                        )
+                        break
+
+                    if exc.code in (4014, 4022):
                         _log.info("Disconnected from voice by force... potentially reconnecting.")
                         successful = await self.potential_reconnect()
                         if not successful:
@@ -460,6 +476,7 @@ class VoiceClient(VoiceProtocol):
                             await self.disconnect()
                             break
                         continue
+
                     # only attempt to resume if the session is valid/established
                     if exc.code == 4015 and self.ws._ready.is_set():
                         _log.info("Disconnected from voice, trying to resume session...")
