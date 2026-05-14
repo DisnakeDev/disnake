@@ -903,6 +903,7 @@ class GuildChannel(ABC):
         send_polls: bool | None = ...,
         send_tts_messages: bool | None = ...,
         send_voice_messages: bool | None = ...,
+        set_voice_channel_status: bool | None = ...,
         speak: bool | None = ...,
         start_embedded_activities: bool | None = ...,
         stream: bool | None = ...,
