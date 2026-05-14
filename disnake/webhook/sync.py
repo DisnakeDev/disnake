@@ -98,7 +98,7 @@ class WebhookAdapter:
         auth_token: str | None = None,
         params: dict[str, Any] | None = None,
     ) -> Any:
-        headers: dict[str, str] = {}
+        headers: dict[str, Any] = {}
         files = files or []
         to_send: str | dict[str, Any] | None = None
         bucket = (route.webhook_id, route.webhook_token)
