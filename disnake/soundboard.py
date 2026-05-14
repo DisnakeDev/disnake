@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any
 
 from .asset import Asset, AssetMixin
 from .mixins import Hashable
@@ -30,9 +30,9 @@ __all__ = (
 
 
 class PartialSoundboardSound(Hashable, AssetMixin):
-    """Represents a partial soundboard sound.
+    r"""Represents a partial soundboard sound.
 
-    Used for sounds in :class:`VoiceChannelEffect`\\s,
+    Used for sounds in :class:`VoiceChannelEffect`\s,
     and as the base for full :class:`SoundboardSound`/:class:`GuildSoundboardSound` objects.
 
     .. versionadded:: 2.10
@@ -68,7 +68,7 @@ class PartialSoundboardSound(Hashable, AssetMixin):
         self,
         *,
         data: PartialSoundboardSoundPayload,
-        state: Optional[ConnectionState] = None,
+        state: ConnectionState | None = None,
     ) -> None:
         self._state = state
         self.id: int = int(data["sound_id"])
@@ -78,7 +78,7 @@ class PartialSoundboardSound(Hashable, AssetMixin):
         return f"<{self.__class__.__name__} id={self.id!r}>"
 
     @property
-    def created_at(self) -> Optional[datetime.datetime]:
+    def created_at(self) -> datetime.datetime | None:
         """:class:`datetime.datetime` | :data:`None`: Returns the sound's creation time in UTC.
         Can be :data:`None` if this is a default sound.
         """
@@ -149,7 +149,7 @@ class SoundboardSound(PartialSoundboardSound):
         super().__init__(data=data, state=state)
 
         self.name: str = data["name"]
-        self.emoji: Optional[Union[Emoji, PartialEmoji]] = self._state._get_emoji_from_fields(
+        self.emoji: Emoji | PartialEmoji | None = self._state._get_emoji_from_fields(
             name=data.get("emoji_name"),
             id=_get_as_snowflake(data, "emoji_id"),
         )
@@ -214,7 +214,7 @@ class GuildSoundboardSound(SoundboardSound):
         super().__init__(data=data, state=state)
 
         self.guild_id: int = guild_id
-        self.user: Optional[User] = (
+        self.user: User | None = (
             state.store_user(user_data) if (user_data := data.get("user")) is not None else None
         )
 
@@ -228,15 +228,15 @@ class GuildSoundboardSound(SoundboardSound):
     def guild(self) -> Guild:
         """:class:`Guild`: The guild that this sound is from."""
         # this will most likely never return None
-        return self._state._get_guild(self.guild_id)  # type: ignore
+        return self._state._get_guild(self.guild_id)  # pyright: ignore[reportReturnType]
 
     async def edit(
         self,
         *,
         name: str = MISSING,
         volume: float = MISSING,
-        emoji: Optional[Union[str, Emoji, PartialEmoji]] = MISSING,
-        reason: Optional[str] = None,
+        emoji: str | Emoji | PartialEmoji | None = MISSING,
+        reason: str | None = None,
     ) -> GuildSoundboardSound:
         """|coro|
 
@@ -272,7 +272,7 @@ class GuildSoundboardSound(SoundboardSound):
         :class:`GuildSoundboardSound`
             The newly modified soundboard sound.
         """
-        payload: Dict[str, Any] = {}
+        payload: dict[str, Any] = {}
 
         if name is not MISSING:
             payload["name"] = name
@@ -288,7 +288,7 @@ class GuildSoundboardSound(SoundboardSound):
         )
         return GuildSoundboardSound(data=data, state=self._state, guild_id=self.guild_id)
 
-    async def delete(self, *, reason: Optional[str] = None) -> None:
+    async def delete(self, *, reason: str | None = None) -> None:
         """|coro|
 
         Deletes the :class:`GuildSoundboardSound` from the guild.

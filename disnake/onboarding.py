@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, FrozenSet, List, Optional, Union
+from typing import TYPE_CHECKING
 
 from .enums import OnboardingPromptType, try_enum
 from .mixins import Hashable
@@ -24,7 +24,7 @@ __all__ = (
 
 
 class Onboarding:
-    """Represents a guild onboarding object.
+    r"""Represents a guild onboarding object.
 
     .. versionadded:: 2.9
 
@@ -32,11 +32,11 @@ class Onboarding:
     ----------
     guild: :class:`Guild`
         The guild this onboarding is part of.
-    prompts: :class:`list`\\[:class:`OnboardingPrompt`]
+    prompts: :class:`list`\[:class:`OnboardingPrompt`]
         The prompts shown during onboarding and in community customization.
     enabled: :class:`bool`
         Whether onboarding is enabled.
-    default_channel_ids: :class:`frozenset`\\[:class:`int`]
+    default_channel_ids: :class:`frozenset`\[:class:`int`]
         The IDs of the channels that will be shown to new members by default.
     """
 
@@ -52,11 +52,11 @@ class Onboarding:
         self._from_data(data)
 
     def _from_data(self, data: OnboardingPayload) -> None:
-        self.prompts: List[OnboardingPrompt] = [
+        self.prompts: list[OnboardingPrompt] = [
             OnboardingPrompt(data=prompt, guild=self.guild) for prompt in data["prompts"]
         ]
         self.enabled: bool = data["enabled"]
-        self.default_channel_ids: FrozenSet[int] = (
+        self.default_channel_ids: frozenset[int] = (
             frozenset(map(int, exempt_channels))
             if (exempt_channels := data["default_channel_ids"])
             else frozenset()
@@ -68,13 +68,13 @@ class Onboarding:
         )
 
     @property
-    def default_channels(self) -> List[GuildChannel]:
-        """:class:`list`\\[:class:`abc.GuildChannel`]: The list of channels that will be shown to new members by default."""
+    def default_channels(self) -> list[GuildChannel]:
+        r""":class:`list`\[:class:`abc.GuildChannel`]: The list of channels that will be shown to new members by default."""
         return list(filter(None, map(self.guild.get_channel, self.default_channel_ids)))
 
 
 class OnboardingPrompt(Hashable):
-    """Represents an onboarding prompt.
+    r"""Represents an onboarding prompt.
 
     .. versionadded:: 2.9
 
@@ -84,7 +84,7 @@ class OnboardingPrompt(Hashable):
         The onboarding prompt's ID.
     type: :class:`OnboardingPromptType`
         The onboarding prompt's type.
-    options: :class:`list`\\[:class:`OnboardingPromptOption`]
+    options: :class:`list`\[:class:`OnboardingPromptOption`]
         The onboarding prompt's options.
     title: :class:`str`
         The onboarding prompt's title.
@@ -113,7 +113,7 @@ class OnboardingPrompt(Hashable):
 
         self.id: int = int(data["id"])
         self.title: str = data["title"]
-        self.options: List[OnboardingPromptOption] = [
+        self.options: list[OnboardingPromptOption] = [
             OnboardingPromptOption(data=option, guild=guild) for option in data["options"]
         ]
         self.single_select: bool = data["single_select"]
@@ -133,7 +133,7 @@ class OnboardingPrompt(Hashable):
 
 
 class OnboardingPromptOption(Hashable):
-    """Represents an onboarding prompt option.
+    r"""Represents an onboarding prompt option.
 
     .. versionadded:: 2.9
 
@@ -147,9 +147,9 @@ class OnboardingPromptOption(Hashable):
         The prompt option's title.
     description: :class:`str` | :data:`None`
         The prompt option's description.
-    role_ids: :class:`frozenset`\\[:class:`int`]
+    role_ids: :class:`frozenset`\[:class:`int`]
         The IDs of the roles that will be added to the user when they select this option.
-    channel_ids: :class:`frozenset`\\[:class:`int`]
+    channel_ids: :class:`frozenset`\[:class:`int`]
         The IDs of the channels that the user will see when they select this option.
     """
 
@@ -160,17 +160,17 @@ class OnboardingPromptOption(Hashable):
 
         self.id: int = int(data["id"])
         self.title: str = data["title"]
-        self.description: Optional[str] = data["description"]
-        self.role_ids: FrozenSet[int] = (
+        self.description: str | None = data["description"]
+        self.role_ids: frozenset[int] = (
             frozenset(map(int, roles_ids)) if (roles_ids := data.get("role_ids")) else frozenset()
         )
-        self.channel_ids: FrozenSet[int] = (
+        self.channel_ids: frozenset[int] = (
             frozenset(map(int, channels_ids))
             if (channels_ids := data.get("channel_ids"))
             else frozenset()
         )
 
-        self.emoji: Optional[Union[Emoji, PartialEmoji, str]]
+        self.emoji: Emoji | PartialEmoji | str | None
         if emoji_data := data.get("emoji"):
             self.emoji = guild._state.get_reaction_emoji(emoji_data)
         else:
@@ -186,11 +186,11 @@ class OnboardingPromptOption(Hashable):
         )
 
     @property
-    def roles(self) -> List[Role]:
-        """:class:`list`\\[:class:`Role`]: A list of roles that will be added to the user when they select this option."""
+    def roles(self) -> list[Role]:
+        r""":class:`list`\[:class:`Role`]: A list of roles that will be added to the user when they select this option."""
         return list(filter(None, map(self.guild.get_role, self.role_ids)))
 
     @property
-    def channels(self) -> List[GuildChannel]:
-        """:class:`list`\\[:class:`abc.GuildChannel`]: A list of channels that the user will see when they select this option."""
+    def channels(self) -> list[GuildChannel]:
+        r""":class:`list`\[:class:`abc.GuildChannel`]: A list of channels that the user will see when they select this option."""
         return list(filter(None, map(self.guild.get_channel, self.channel_ids)))

@@ -138,7 +138,7 @@ Discord itself supports only a few built-in types which are guaranteed to be enf
 - :class:`disnake.Attachment`
 - :class:`disnake.abc.Snowflake`\*\*\*
 
-All the other types may be converted implicitly, similarly to :ref:`ext_commands_basic_converters`
+Other types may be converted implicitly, using the builtin :ref:`ext_commands_discord_converters`:
 
 .. code-block:: python3
 

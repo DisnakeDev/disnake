@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, ClassVar, Optional, Tuple, Union, cast
+from typing import TYPE_CHECKING, Any, ClassVar, TypeAlias, cast
 
 from ..components import Label as LabelComponent
 from ..enums import ComponentType
@@ -13,9 +13,15 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from ._types import AnySelect
+    from .checkbox import Checkbox
+    from .checkbox_group import CheckboxGroup
+    from .file_upload import FileUpload
+    from .radio_group import RadioGroup
     from .text_input import TextInput
 
-    LabelChildUIComponent = Union[TextInput, AnySelect[Any]]
+    LabelChildUIComponent: TypeAlias = (
+        TextInput | FileUpload | AnySelect[Any] | RadioGroup | CheckboxGroup | Checkbox
+    )
 
 __all__ = ("Label",)
 
@@ -32,28 +38,35 @@ class Label(UIComponent):
     ----------
     text: :class:`str`
         The label text.
-    component: :class:`TextInput` | :class:`BaseSelect`
+    component: :class:`TextInput` | :class:`FileUpload` | :class:`BaseSelect` | :class:`RadioGroup` | :class:`CheckboxGroup` | :class:`Checkbox`
         The component within the label.
-        Currently supports :class:`.ui.TextInput` and
-        select menus (e.g. :class:`.ui.StringSelect`).
+
+        Currently supports the following components:
+            - :class:`.ui.TextInput`
+            - :class:`.ui.FileUpload`
+            - select menus (e.g. :class:`.ui.StringSelect`)
+            - :class:`.ui.RadioGroup`
+            - :class:`.ui.CheckboxGroup`
+            - :class:`.ui.Checkbox`
     description: :class:`str` | :data:`None`
         The description text for the label.
     id: :class:`int`
-        The numeric identifier for the component. Must be unique within the message.
+        The numeric identifier for the component. Must be unique within a modal.
+        This is always present in components received from the API.
         If set to ``0`` (the default) when sending a component, the API will assign
-        sequential identifiers to the components in the message.
+        sequential identifiers to the components in the modal.
 
     Attributes
     ----------
     text: :class:`str`
         The label text.
-    component: :class:`TextInput` | :class:`BaseSelect`
+    component: :class:`TextInput` | :class:`FileUpload` | :class:`BaseSelect` | :class:`RadioGroup` | :class:`CheckboxGroup` | :class:`Checkbox`
         The component within the label.
     description: :class:`str` | :data:`None`
         The description text for the label.
     """
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (
         "text",
         "description",
         "component",
@@ -64,13 +77,13 @@ class Label(UIComponent):
         text: str,
         component: LabelChildUIComponent,
         *,
-        description: Optional[str] = None,
+        description: str | None = None,
         id: int = 0,
     ) -> None:
         self._id: int = id
 
         self.text: str = text
-        self.description: Optional[str] = description
+        self.description: str | None = description
         self.component: LabelChildUIComponent = ensure_ui_component(component)
 
     # these are reimplemented here to store the value in a separate attribute,

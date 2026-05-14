@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import copy
-from typing import TYPE_CHECKING, ClassVar, Optional, Tuple
+from typing import TYPE_CHECKING, ClassVar
 
 from ..components import FileComponent, UnfurledMediaItem, handle_media_item_input
 from ..enums import ComponentType
@@ -31,12 +31,13 @@ class File(UIComponent):
     spoiler: :class:`bool`
         Whether the file is marked as a spoiler. Defaults to ``False``.
     id: :class:`int`
-        The numeric identifier for the component. Must be unique within the message.
+        The numeric identifier for the component. Must be unique within a message.
+        This is always present in components received from the API.
         If set to ``0`` (the default) when sending a component, the API will assign
         sequential identifiers to the components in the message.
     """
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (
         "file",
         "spoiler",
     )
@@ -87,14 +88,14 @@ class File(UIComponent):
         self._underlying.spoiler = value
 
     @property
-    def name(self) -> Optional[str]:
+    def name(self) -> str | None:
         """:class:`str` | :data:`None`: The name of the file.
         This is available in objects from the API, and ignored when sending.
         """
         return self._underlying.name
 
     @property
-    def size(self) -> Optional[int]:
+    def size(self) -> int | None:
         """:class:`int` | :data:`None`: The size of the file.
         This is available in objects from the API, and ignored when sending.
         """

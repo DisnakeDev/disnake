@@ -181,9 +181,7 @@ def apply_replacements(s: str, *, include_double_backslash: bool = False) -> str
             part = ANY.sub(r"\1:data:`~typing.Any`", part)
         s += part
 
-    s = NONE.sub(r":data:`None`", s)
-
-    return s
+    return NONE.sub(r":data:`None`", s)
 
 
 def process_file(file_path) -> None:

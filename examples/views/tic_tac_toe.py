@@ -4,7 +4,6 @@
 
 import os
 from enum import IntEnum
-from typing import List, Optional
 
 import disnake
 from disnake.ext import commands
@@ -76,7 +75,7 @@ class TicTacToeButton(disnake.ui.Button["TicTacToe"]):
 class TicTacToe(disnake.ui.View):
     # This tells the IDE or linter that all our children will be TicTacToeButtons
     # (this is not required)
-    children: List[TicTacToeButton]
+    children: list[TicTacToeButton]
 
     def __init__(self):
         super().__init__()
@@ -84,7 +83,7 @@ class TicTacToe(disnake.ui.View):
         self.current_player: Player = Player.X
 
         u = Player.unknown
-        self.board: List[List[Player]] = [
+        self.board: list[list[Player]] = [
             [u, u, u],
             [u, u, u],
             [u, u, u],
@@ -98,10 +97,10 @@ class TicTacToe(disnake.ui.View):
 
     # This method checks for the board winner -- it is used by the TicTacToeButton
     def check_board_winner(self):
-        def check_winner(value: int) -> Optional[Player]:
+        def check_winner(value: int) -> Player | None:
             if value == Player.O * 3:
                 return Player.O
-            elif value == Player.X * 3:
+            if value == Player.X * 3:
                 return Player.X
             return None
 

@@ -2,19 +2,15 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
     ClassVar,
-    Dict,
     Final,
     Generic,
-    List,
     Literal,
-    Mapping,
-    Optional,
-    Tuple,
-    Type,
+    TypeAlias,
     TypeVar,
     Union,
     cast,
@@ -35,7 +31,9 @@ from .partial_emoji import PartialEmoji, _EmojiTag
 from .utils import MISSING, _get_as_snowflake, assert_never, get_slots
 
 if TYPE_CHECKING:
-    from typing_extensions import Self, TypeAlias
+    from typing import TypeAlias
+
+    from typing_extensions import Self
 
     from .emoji import Emoji
     from .message import Attachment
@@ -45,15 +43,21 @@ if TYPE_CHECKING:
         BaseSelectMenu as BaseSelectMenuPayload,
         ButtonComponent as ButtonComponentPayload,
         ChannelSelectMenu as ChannelSelectMenuPayload,
+        CheckboxComponent as CheckboxComponentPayload,
+        CheckboxGroupComponent as CheckboxGroupComponentPayload,
+        CheckboxGroupOption as CheckboxGroupOptionPayload,
         Component as ComponentPayload,
         ComponentType as ComponentTypeLiteral,
         ContainerComponent as ContainerComponentPayload,
         FileComponent as FileComponentPayload,
+        FileUploadComponent as FileUploadComponentPayload,
         LabelComponent as LabelComponentPayload,
         MediaGalleryComponent as MediaGalleryComponentPayload,
         MediaGalleryItem as MediaGalleryItemPayload,
         MentionableSelectMenu as MentionableSelectMenuPayload,
         MessageTopLevelComponent as MessageTopLevelComponentPayload,
+        RadioGroupComponent as RadioGroupComponentPayload,
+        RadioGroupOption as RadioGroupOptionPayload,
         RoleSelectMenu as RoleSelectMenuPayload,
         SectionComponent as SectionComponentPayload,
         SelectDefaultValue as SelectDefaultValuePayload,
@@ -91,6 +95,11 @@ __all__ = (
     "Separator",
     "Container",
     "Label",
+    "FileUpload",
+    "GroupOption",
+    "RadioGroup",
+    "CheckboxGroup",
+    "Checkbox",
 )
 
 # miscellaneous components-related type aliases
@@ -115,20 +124,20 @@ SelectMenuType = Literal[
 ]
 
 # valid `ActionRow.components` item types in a message/modal
-ActionRowMessageComponent = Union["Button", "AnySelectMenu"]
+ActionRowMessageComponent: TypeAlias = Union["Button", "AnySelectMenu"]
 ActionRowModalComponent: TypeAlias = "TextInput"
 
 # any child component type of action rows
-ActionRowChildComponent = Union[ActionRowMessageComponent, ActionRowModalComponent]
+ActionRowChildComponent: TypeAlias = Union[ActionRowMessageComponent, ActionRowModalComponent]  # noqa: UP007
 ActionRowChildComponentT = TypeVar("ActionRowChildComponentT", bound=ActionRowChildComponent)
 
 # valid `Section.accessory` types
-SectionAccessoryComponent = Union["Thumbnail", "Button"]
+SectionAccessoryComponent: TypeAlias = Union["Thumbnail", "Button"]
 # valid `Section.components` item types
 SectionChildComponent: TypeAlias = "TextDisplay"
 
 # valid `Container.components` item types
-ContainerChildComponent = Union[
+ContainerChildComponent: TypeAlias = Union[
     "ActionRow[ActionRowMessageComponent]",
     "Section",
     "TextDisplay",
@@ -140,7 +149,11 @@ ContainerChildComponent = Union[
 # valid `Label.component` types
 LabelChildComponent = Union[
     "TextInput",
+    "FileUpload",
     "AnySelectMenu",
+    "RadioGroup",
+    "CheckboxGroup",
+    "Checkbox",
 ]
 
 # valid `Message.components` item types (v1/v2)
@@ -153,7 +166,7 @@ MessageTopLevelComponentV2 = Union[
     "Separator",
     "Container",
 ]
-MessageTopLevelComponent = Union[MessageTopLevelComponentV1, MessageTopLevelComponentV2]
+MessageTopLevelComponent: TypeAlias = Union[MessageTopLevelComponentV1, MessageTopLevelComponentV2]  # noqa: UP007
 
 
 _SELECT_COMPONENT_TYPES = frozenset(
@@ -195,6 +208,10 @@ class Component:
     - :class:`Separator`
     - :class:`Container`
     - :class:`Label`
+    - :class:`FileUpload`
+    - :class:`RadioGroup`
+    - :class:`CheckboxGroup`
+    - :class:`Checkbox`
 
     This class is abstract and cannot be instantiated.
 
@@ -205,18 +222,17 @@ class Component:
     type: :class:`ComponentType`
         The type of component.
     id: :class:`int`
-        The numeric identifier for the component.
-        This is always present in components received from the API,
-        and unique within a message.
-        If set to ``0`` (the default) when sending a component, the API will assign sequential
-        identifiers to the components in the message.
+        The numeric identifier for the component. Must be unique within a message or modal.
+        This is always present in components received from the API.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the message or modal.
 
         .. versionadded:: 2.11
     """
 
-    __slots__: Tuple[str, ...] = ("type", "id")
+    __slots__: tuple[str, ...] = ("type", "id")
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]]
+    __repr_attributes__: ClassVar[tuple[str, ...]]
 
     # subclasses are expected to overwrite this if they're only usable with `MessageFlags.is_components_v2`
     is_v2: ClassVar[bool] = False
@@ -240,12 +256,12 @@ class Component:
                 setattr(self, slot, value)
         return self
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         raise NotImplementedError
 
 
 class ActionRow(Component, Generic[ActionRowChildComponentT]):
-    """Represents an action row.
+    r"""Represents an action row.
 
     This is a component that holds up to 5 children components in a row.
 
@@ -255,26 +271,27 @@ class ActionRow(Component, Generic[ActionRowChildComponentT]):
 
     Attributes
     ----------
-    children: :class:`list`\\[:class:`Button` | :class:`BaseSelectMenu` | :class:`TextInput`]
+    children: :class:`list`\[:class:`Button` | :class:`BaseSelectMenu` | :class:`TextInput`]
         The children components that this holds, if any.
     id: :class:`int`
-        The numeric identifier for the component.
-        This is always present in components received from the API,
-        and unique within a message.
+        The numeric identifier for the component. Must be unique within a message.
+        This is always present in components received from the API.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the message.
 
         .. versionadded:: 2.11
     """
 
-    __slots__: Tuple[str, ...] = ("children",)
+    __slots__: tuple[str, ...] = ("children",)
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
 
     def __init__(self, data: ActionRowPayload) -> None:
         self.type: Literal[ComponentType.action_row] = ComponentType.action_row
         self.id = data.get("id", 0)
 
         children = [_component_factory(d) for d in data.get("components", [])]
-        self.children: List[ActionRowChildComponentT] = children  # type: ignore
+        self.children: list[ActionRowChildComponentT] = children  # pyright: ignore[reportAttributeAccessIssue]
 
     def to_dict(self) -> ActionRowPayload:
         return {
@@ -317,14 +334,15 @@ class Button(Component):
 
         .. versionadded:: 2.11
     id: :class:`int`
-        The numeric identifier for the component.
-        This is always present in components received from the API,
-        and unique within a message.
+        The numeric identifier for the component. Must be unique within a message.
+        This is always present in components received from the API.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the message.
 
         .. versionadded:: 2.11
     """
 
-    __slots__: Tuple[str, ...] = (
+    __slots__: tuple[str, ...] = (
         "style",
         "custom_id",
         "url",
@@ -334,22 +352,22 @@ class Button(Component):
         "sku_id",
     )
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
 
     def __init__(self, data: ButtonComponentPayload) -> None:
         self.type: Literal[ComponentType.button] = ComponentType.button
         self.id = data.get("id", 0)
 
         self.style: ButtonStyle = try_enum(ButtonStyle, data["style"])
-        self.custom_id: Optional[str] = data.get("custom_id")
-        self.url: Optional[str] = data.get("url")
+        self.custom_id: str | None = data.get("custom_id")
+        self.url: str | None = data.get("url")
         self.disabled: bool = data.get("disabled", False)
-        self.label: Optional[str] = data.get("label")
-        self.emoji: Optional[PartialEmoji] = None
+        self.label: str | None = data.get("label")
+        self.emoji: PartialEmoji | None = None
         if emoji_data := data.get("emoji"):
             self.emoji = PartialEmoji.from_dict(emoji_data)
 
-        self.sku_id: Optional[int] = _get_as_snowflake(data, "sku_id")
+        self.sku_id: int | None = _get_as_snowflake(data, "sku_id")
 
     def to_dict(self) -> ButtonComponentPayload:
         payload: ButtonComponentPayload = {
@@ -378,7 +396,7 @@ class Button(Component):
 
 
 class BaseSelectMenu(Component):
-    """Represents an abstract select menu from the Discord Bot UI Kit.
+    r"""Represents an abstract select menu from the Discord Bot UI Kit.
 
     A select menu is functionally the same as a dropdown, however
     on mobile it renders a bit differently.
@@ -405,11 +423,11 @@ class BaseSelectMenu(Component):
     max_values: :class:`int`
         The maximum number of items that must be chosen for this select menu.
         Defaults to 1 and must be between 1 and 25.
-    options: :class:`list`\\[:class:`SelectOption`]
+    options: :class:`list`\[:class:`SelectOption`]
         A list of options that can be selected in this select menu.
     disabled: :class:`bool`
         Whether the select menu is disabled or not.
-    default_values: :class:`list`\\[:class:`SelectDefaultValue`]
+    default_values: :class:`list`\[:class:`SelectDefaultValue`]
         The list of values (users/roles/channels) that are selected by default.
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
         Only available for auto-populated select menus.
@@ -421,14 +439,15 @@ class BaseSelectMenu(Component):
 
         .. versionadded:: 2.11
     id: :class:`int`
-        The numeric identifier for the component.
-        This is always present in components received from the API,
-        and unique within a message.
+        The numeric identifier for the component. Must be unique within a message or modal.
+        This is always present in components received from the API.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the message or modal.
 
         .. versionadded:: 2.11
     """
 
-    __slots__: Tuple[str, ...] = (
+    __slots__: tuple[str, ...] = (
         "custom_id",
         "placeholder",
         "min_values",
@@ -439,7 +458,7 @@ class BaseSelectMenu(Component):
     )
 
     # FIXME: this isn't pretty; we should decouple __repr__ from slots
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = tuple(
+    __repr_attributes__: ClassVar[tuple[str, ...]] = tuple(
         s for s in __slots__ if s != "default_values"
     )
 
@@ -448,15 +467,15 @@ class BaseSelectMenu(Component):
     # fully support readonly items yet (which would help avoid this)
     def __init__(self, data: AnySelectMenuPayload) -> None:
         component_type = try_enum(ComponentType, data["type"])
-        self.type: SelectMenuType = component_type  # type: ignore
+        self.type: SelectMenuType = component_type  # pyright: ignore[reportAttributeAccessIssue]
         self.id = data.get("id", 0)
 
         self.custom_id: str = data["custom_id"]
-        self.placeholder: Optional[str] = data.get("placeholder")
+        self.placeholder: str | None = data.get("placeholder")
         self.min_values: int = data.get("min_values", 1)
         self.max_values: int = data.get("max_values", 1)
         self.disabled: bool = data.get("disabled", False)
-        self.default_values: List[SelectDefaultValue] = [
+        self.default_values: list[SelectDefaultValue] = [
             SelectDefaultValue._from_dict(d) for d in (data.get("default_values") or [])
         ]
         self.required: bool = data.get("required", True)
@@ -482,7 +501,7 @@ class BaseSelectMenu(Component):
 
 
 class StringSelectMenu(BaseSelectMenu):
-    """Represents a string select menu from the Discord Bot UI Kit.
+    r"""Represents a string select menu from the Discord Bot UI Kit.
 
     .. note::
         The user constructible and usable type to create a
@@ -507,7 +526,7 @@ class StringSelectMenu(BaseSelectMenu):
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select menu is disabled or not.
-    options: :class:`list`\\[:class:`SelectOption`]
+    options: :class:`list`\[:class:`SelectOption`]
         A list of options that can be selected in this select menu.
     required: :class:`bool`
         Whether the select menu is required. Only applies to components in modals.
@@ -515,16 +534,17 @@ class StringSelectMenu(BaseSelectMenu):
 
         .. versionadded:: 2.11
     id: :class:`int`
-        The numeric identifier for the component.
-        This is always present in components received from the API,
-        and unique within a message.
+        The numeric identifier for the component. Must be unique within a message or modal.
+        This is always present in components received from the API.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the message or modal.
 
         .. versionadded:: 2.11
     """
 
-    __slots__: Tuple[str, ...] = ("options",)
+    __slots__: tuple[str, ...] = ("options",)
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (
         *BaseSelectMenu.__repr_attributes__,
         *__slots__,
     )
@@ -532,7 +552,7 @@ class StringSelectMenu(BaseSelectMenu):
 
     def __init__(self, data: StringSelectMenuPayload) -> None:
         super().__init__(data)
-        self.options: List[SelectOption] = [
+        self.options: list[SelectOption] = [
             SelectOption.from_dict(option) for option in data.get("options", [])
         ]
 
@@ -546,7 +566,7 @@ SelectMenu = StringSelectMenu  # backwards compatibility
 
 
 class UserSelectMenu(BaseSelectMenu):
-    """Represents a user select menu from the Discord Bot UI Kit.
+    r"""Represents a user select menu from the Discord Bot UI Kit.
 
     .. note::
         The user constructible and usable type to create a
@@ -568,7 +588,7 @@ class UserSelectMenu(BaseSelectMenu):
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select menu is disabled or not.
-    default_values: :class:`list`\\[:class:`SelectDefaultValue`]
+    default_values: :class:`list`\[:class:`SelectDefaultValue`]
         The list of values (users/members) that are selected by default.
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
@@ -579,14 +599,15 @@ class UserSelectMenu(BaseSelectMenu):
 
         .. versionadded:: 2.11
     id: :class:`int`
-        The numeric identifier for the component.
-        This is always present in components received from the API,
-        and unique within a message.
+        The numeric identifier for the component. Must be unique within a message or modal.
+        This is always present in components received from the API.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the message or modal.
 
         .. versionadded:: 2.11
     """
 
-    __slots__: Tuple[str, ...] = ()
+    __slots__: tuple[str, ...] = ()
 
     type: Literal[ComponentType.user_select]
 
@@ -597,7 +618,7 @@ class UserSelectMenu(BaseSelectMenu):
 
 
 class RoleSelectMenu(BaseSelectMenu):
-    """Represents a role select menu from the Discord Bot UI Kit.
+    r"""Represents a role select menu from the Discord Bot UI Kit.
 
     .. note::
         The user constructible and usable type to create a
@@ -619,7 +640,7 @@ class RoleSelectMenu(BaseSelectMenu):
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select menu is disabled or not.
-    default_values: :class:`list`\\[:class:`SelectDefaultValue`]
+    default_values: :class:`list`\[:class:`SelectDefaultValue`]
         The list of values (roles) that are selected by default.
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
@@ -630,14 +651,15 @@ class RoleSelectMenu(BaseSelectMenu):
 
         .. versionadded:: 2.11
     id: :class:`int`
-        The numeric identifier for the component.
-        This is always present in components received from the API,
-        and unique within a message.
+        The numeric identifier for the component. Must be unique within a message or modal.
+        This is always present in components received from the API.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the message or modal.
 
         .. versionadded:: 2.11
     """
 
-    __slots__: Tuple[str, ...] = ()
+    __slots__: tuple[str, ...] = ()
 
     type: Literal[ComponentType.role_select]
 
@@ -648,7 +670,7 @@ class RoleSelectMenu(BaseSelectMenu):
 
 
 class MentionableSelectMenu(BaseSelectMenu):
-    """Represents a mentionable (user/member/role) select menu from the Discord Bot UI Kit.
+    r"""Represents a mentionable (user/member/role) select menu from the Discord Bot UI Kit.
 
     .. note::
         The user constructible and usable type to create a
@@ -670,7 +692,7 @@ class MentionableSelectMenu(BaseSelectMenu):
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select menu is disabled or not.
-    default_values: :class:`list`\\[:class:`SelectDefaultValue`]
+    default_values: :class:`list`\[:class:`SelectDefaultValue`]
         The list of values (users/roles) that are selected by default.
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
@@ -681,14 +703,15 @@ class MentionableSelectMenu(BaseSelectMenu):
 
         .. versionadded:: 2.11
     id: :class:`int`
-        The numeric identifier for the component.
-        This is always present in components received from the API,
-        and unique within a message.
+        The numeric identifier for the component. Must be unique within a message or modal.
+        This is always present in components received from the API.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the message or modal.
 
         .. versionadded:: 2.11
     """
 
-    __slots__: Tuple[str, ...] = ()
+    __slots__: tuple[str, ...] = ()
 
     type: Literal[ComponentType.mentionable_select]
 
@@ -699,7 +722,7 @@ class MentionableSelectMenu(BaseSelectMenu):
 
 
 class ChannelSelectMenu(BaseSelectMenu):
-    """Represents a channel select menu from the Discord Bot UI Kit.
+    r"""Represents a channel select menu from the Discord Bot UI Kit.
 
     .. note::
         The user constructible and usable type to create a
@@ -721,10 +744,10 @@ class ChannelSelectMenu(BaseSelectMenu):
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select menu is disabled or not.
-    channel_types: :class:`list`\\[:class:`ChannelType`] | :data:`None`
+    channel_types: :class:`list`\[:class:`ChannelType`] | :data:`None`
         A list of channel types that can be selected in this select menu.
         If :data:`None`, channels of all types may be selected.
-    default_values: :class:`list`\\[:class:`SelectDefaultValue`]
+    default_values: :class:`list`\[:class:`SelectDefaultValue`]
         The list of values (channels) that are selected by default.
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
@@ -735,16 +758,17 @@ class ChannelSelectMenu(BaseSelectMenu):
 
         .. versionadded:: 2.11
     id: :class:`int`
-        The numeric identifier for the component.
-        This is always present in components received from the API,
-        and unique within a message.
+        The numeric identifier for the component. Must be unique within a message or modal.
+        This is always present in components received from the API.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the message or modal.
 
         .. versionadded:: 2.11
     """
 
-    __slots__: Tuple[str, ...] = ("channel_types",)
+    __slots__: tuple[str, ...] = ("channel_types",)
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (
         *BaseSelectMenu.__repr_attributes__,
         *__slots__,
     )
@@ -754,7 +778,7 @@ class ChannelSelectMenu(BaseSelectMenu):
         super().__init__(data)
         # on the API side, an empty list is (currently) equivalent to no value
         channel_types = data.get("channel_types")
-        self.channel_types: Optional[List[ChannelType]] = (
+        self.channel_types: list[ChannelType] | None = (
             [try_enum(ChannelType, t) for t in channel_types] if channel_types else None
         )
 
@@ -790,7 +814,7 @@ class SelectOption:
         Whether this option is selected by default.
     """
 
-    __slots__: Tuple[str, ...] = (
+    __slots__: tuple[str, ...] = (
         "label",
         "value",
         "description",
@@ -803,8 +827,8 @@ class SelectOption:
         *,
         label: str,
         value: str = MISSING,
-        description: Optional[str] = None,
-        emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
+        description: str | None = None,
+        emoji: str | Emoji | PartialEmoji | None = None,
         default: bool = False,
     ) -> None:
         self.label = label
@@ -885,7 +909,7 @@ class SelectDefaultValue:
         The type of the target object.
     """
 
-    __slots__: Tuple[str, ...] = ("id", "type")
+    __slots__: tuple[str, ...] = ("id", "type")
 
     def __init__(self, id: int, type: SelectDefaultValueType) -> None:
         self.id: int = id
@@ -938,14 +962,15 @@ class TextInput(Component):
     max_length: :class:`int` | :data:`None`
         The maximum length of the text input.
     id: :class:`int`
-        The numeric identifier for the component.
-        This is always present in components received from the API,
-        and unique within a message.
+        The numeric identifier for the component. Must be unique within a modal.
+        This is always present in components received from the API.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the modal.
 
         .. versionadded:: 2.11
     """
 
-    __slots__: Tuple[str, ...] = (
+    __slots__: tuple[str, ...] = (
         "style",
         "custom_id",
         "label",
@@ -956,7 +981,7 @@ class TextInput(Component):
         "min_length",
     )
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
 
     def __init__(self, data: TextInputPayload) -> None:
         self.type: Literal[ComponentType.text_input] = ComponentType.text_input
@@ -966,12 +991,12 @@ class TextInput(Component):
         self.style: TextInputStyle = try_enum(
             TextInputStyle, data.get("style", TextInputStyle.short.value)
         )
-        self.label: Optional[str] = data.get("label")  # deprecated
-        self.placeholder: Optional[str] = data.get("placeholder")
-        self.value: Optional[str] = data.get("value")
+        self.label: str | None = data.get("label")  # deprecated
+        self.placeholder: str | None = data.get("placeholder")
+        self.value: str | None = data.get("value")
         self.required: bool = data.get("required", True)
-        self.min_length: Optional[int] = data.get("min_length")
-        self.max_length: Optional[int] = data.get("max_length")
+        self.min_length: int | None = data.get("min_length")
+        self.max_length: int | None = data.get("max_length")
 
     def to_dict(self) -> TextInputPayload:
         payload: TextInputPayload = {
@@ -999,7 +1024,7 @@ class TextInput(Component):
 
 
 class Section(Component):
-    """Represents a section from the Discord Bot UI Kit (v2).
+    r"""Represents a section from the Discord Bot UI Kit (v2).
 
     This allows displaying an accessory (thumbnail or button) next to a block of text.
 
@@ -1011,21 +1036,22 @@ class Section(Component):
 
     Attributes
     ----------
-    children: :class:`list`\\[:class:`TextDisplay`]
+    children: :class:`list`\[:class:`TextDisplay`]
         The text items in this section.
     accessory: :class:`Thumbnail` | :class:`Button`
         The accessory component displayed next to the section text.
     id: :class:`int`
-        The numeric identifier for the component.
-        This is always present in components received from the API,
-        and unique within a message.
+        The numeric identifier for the component. Must be unique within a message.
+        This is always present in components received from the API.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the message.
 
         .. versionadded:: 2.11
     """
 
-    __slots__: Tuple[str, ...] = ("children", "accessory")
+    __slots__: tuple[str, ...] = ("children", "accessory")
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
 
     is_v2 = True
 
@@ -1033,12 +1059,12 @@ class Section(Component):
         self.type: Literal[ComponentType.section] = ComponentType.section
         self.id = data.get("id", 0)
 
-        self.children: List[SectionChildComponent] = [
+        self.children: list[SectionChildComponent] = [
             _component_factory(d, type=SectionChildComponent) for d in data.get("components", [])
         ]
 
         accessory = _component_factory(data["accessory"])
-        self.accessory: SectionAccessoryComponent = accessory  # type: ignore
+        self.accessory: SectionAccessoryComponent = accessory  # pyright: ignore[reportAttributeAccessIssue]
 
     def to_dict(self) -> SectionComponentPayload:
         return {
@@ -1063,16 +1089,17 @@ class TextDisplay(Component):
     content: :class:`str`
         The text displayed by this component.
     id: :class:`int`
-        The numeric identifier for the component.
-        This is always present in components received from the API,
-        and unique within a message.
+        The numeric identifier for the component. Must be unique within a message.
+        This is always present in components received from the API.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the message.
 
         .. versionadded:: 2.11
     """
 
-    __slots__: Tuple[str, ...] = ("content",)
+    __slots__: tuple[str, ...] = ("content",)
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
 
     is_v2 = True
 
@@ -1113,7 +1140,7 @@ class UnfurledMediaItem:
         uploaded as an attachment.
     """
 
-    __slots__: Tuple[str, ...] = (
+    __slots__: tuple[str, ...] = (
         "url",
         "proxy_url",
         "height",
@@ -1126,11 +1153,11 @@ class UnfurledMediaItem:
     # an UnfurledMediaItem instance; this is largely for internal use
     def __init__(self, url: str) -> None:
         self.url: str = url
-        self.proxy_url: Optional[str] = None
-        self.height: Optional[int] = None
-        self.width: Optional[int] = None
-        self.content_type: Optional[str] = None
-        self.attachment_id: Optional[int] = None
+        self.proxy_url: str | None = None
+        self.height: int | None = None
+        self.width: int | None = None
+        self.content_type: str | None = None
+        self.attachment_id: int | None = None
 
     @classmethod
     def from_dict(cls, data: UnfurledMediaItemPayload) -> Self:
@@ -1171,20 +1198,21 @@ class Thumbnail(Component):
     spoiler: :class:`bool`
         Whether the thumbnail is marked as a spoiler. Defaults to ``False``.
     id: :class:`int`
-        The numeric identifier for the component.
-        This is always present in components received from the API,
-        and unique within a message.
+        The numeric identifier for the component. Must be unique within a message.
+        This is always present in components received from the API.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the message.
 
         .. versionadded:: 2.11
     """
 
-    __slots__: Tuple[str, ...] = (
+    __slots__: tuple[str, ...] = (
         "media",
         "description",
         "spoiler",
     )
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
 
     is_v2 = True
 
@@ -1193,7 +1221,7 @@ class Thumbnail(Component):
         self.id = data.get("id", 0)
 
         self.media: UnfurledMediaItem = UnfurledMediaItem.from_dict(data["media"])
-        self.description: Optional[str] = data.get("description")
+        self.description: str | None = data.get("description")
         self.spoiler: bool = data.get("spoiler", False)
 
     def to_dict(self) -> ThumbnailComponentPayload:
@@ -1211,7 +1239,7 @@ class Thumbnail(Component):
 
 
 class MediaGallery(Component):
-    """Represents a media gallery from the Discord Bot UI Kit (v2).
+    r"""Represents a media gallery from the Discord Bot UI Kit (v2).
 
     This allows displaying up to 10 images in a gallery.
 
@@ -1223,19 +1251,20 @@ class MediaGallery(Component):
 
     Attributes
     ----------
-    items: :class:`list`\\[:class:`MediaGalleryItem`]
+    items: :class:`list`\[:class:`MediaGalleryItem`]
         The images in this gallery.
     id: :class:`int`
-        The numeric identifier for the component.
-        This is always present in components received from the API,
-        and unique within a message.
+        The numeric identifier for the component. Must be unique within a message.
+        This is always present in components received from the API.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the message.
 
         .. versionadded:: 2.11
     """
 
-    __slots__: Tuple[str, ...] = ("items",)
+    __slots__: tuple[str, ...] = ("items",)
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
 
     is_v2 = True
 
@@ -1243,7 +1272,7 @@ class MediaGallery(Component):
         self.type: Literal[ComponentType.media_gallery] = ComponentType.media_gallery
         self.id = data.get("id", 0)
 
-        self.items: List[MediaGalleryItem] = [MediaGalleryItem.from_dict(i) for i in data["items"]]
+        self.items: list[MediaGalleryItem] = [MediaGalleryItem.from_dict(i) for i in data["items"]]
 
     def to_dict(self) -> MediaGalleryComponentPayload:
         return {
@@ -1269,7 +1298,7 @@ class MediaGalleryItem:
         Whether the item is marked as a spoiler. Defaults to ``False``.
     """
 
-    __slots__: Tuple[str, ...] = (
+    __slots__: tuple[str, ...] = (
         "media",
         "description",
         "spoiler",
@@ -1278,12 +1307,12 @@ class MediaGalleryItem:
     def __init__(
         self,
         media: MediaItemInput,
-        description: Optional[str] = None,
+        description: str | None = None,
         *,
         spoiler: bool = False,
     ) -> None:
         self.media: UnfurledMediaItem = handle_media_item_input(media)
-        self.description: Optional[str] = description
+        self.description: str | None = description
         self.spoiler: bool = spoiler
 
     @classmethod
@@ -1334,16 +1363,17 @@ class FileComponent(Component):
         The size of the file.
         This is available in objects from the API, and ignored when sending.
     id: :class:`int`
-        The numeric identifier for the component.
-        This is always present in components received from the API,
-        and unique within a message.
+        The numeric identifier for the component. Must be unique within a message.
+        This is always present in components received from the API.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the message.
 
         .. versionadded:: 2.11
     """
 
-    __slots__: Tuple[str, ...] = ("file", "spoiler", "name", "size")
+    __slots__: tuple[str, ...] = ("file", "spoiler", "name", "size")
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
 
     is_v2 = True
 
@@ -1354,8 +1384,8 @@ class FileComponent(Component):
         self.file: UnfurledMediaItem = UnfurledMediaItem.from_dict(data["file"])
         self.spoiler: bool = data.get("spoiler", False)
 
-        self.name: Optional[str] = data.get("name")
-        self.size: Optional[int] = data.get("size")
+        self.name: str | None = data.get("name")
+        self.size: int | None = data.get("size")
 
     def to_dict(self) -> FileComponentPayload:
         return {
@@ -1385,16 +1415,17 @@ class Separator(Component):
     spacing: :class:`SeparatorSpacing`
         The size of the separator padding.
     id: :class:`int`
-        The numeric identifier for the component.
-        This is always present in components received from the API,
-        and unique within a message.
+        The numeric identifier for the component. Must be unique within a message.
+        This is always present in components received from the API.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the message.
 
         .. versionadded:: 2.11
     """
 
-    __slots__: Tuple[str, ...] = ("divider", "spacing")
+    __slots__: tuple[str, ...] = ("divider", "spacing")
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
 
     is_v2 = True
 
@@ -1415,9 +1446,9 @@ class Separator(Component):
 
 
 class Container(Component):
-    """Represents a container from the Discord Bot UI Kit (v2).
+    r"""Represents a container from the Discord Bot UI Kit (v2).
 
-    This is visually similar to :class:`Embed`\\s, and contains other components.
+    This is visually similar to :class:`Embed`\s, and contains other components.
 
     .. note::
         The user constructible and usable type to create a
@@ -1427,27 +1458,28 @@ class Container(Component):
 
     Attributes
     ----------
-    children: :class:`list`\\[:class:`ActionRow` | :class:`Section` | :class:`TextDisplay` | :class:`MediaGallery` | :class:`FileComponent` | :class:`Separator`]
+    children: :class:`list`\[:class:`ActionRow` | :class:`Section` | :class:`TextDisplay` | :class:`MediaGallery` | :class:`FileComponent` | :class:`Separator`]
         The child components in this container.
     accent_colour: :class:`Colour` | :data:`None`
         The accent colour of the container. An alias exists under ``accent_color``.
     spoiler: :class:`bool`
         Whether the container is marked as a spoiler. Defaults to ``False``.
     id: :class:`int`
-        The numeric identifier for the component.
-        This is always present in components received from the API,
-        and unique within a message.
+        The numeric identifier for the component. Must be unique within a message.
+        This is always present in components received from the API.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the message.
 
         .. versionadded:: 2.11
     """
 
-    __slots__: Tuple[str, ...] = (
+    __slots__: tuple[str, ...] = (
         "children",
         "accent_colour",
         "spoiler",
     )
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
 
     is_v2 = True
 
@@ -1456,9 +1488,9 @@ class Container(Component):
         self.id = data.get("id", 0)
 
         components = [_component_factory(d) for d in data.get("components", [])]
-        self.children: List[ContainerChildComponent] = components  # type: ignore
+        self.children: list[ContainerChildComponent] = components  # pyright: ignore[reportAttributeAccessIssue]
 
-        self.accent_colour: Optional[Colour] = (
+        self.accent_colour: Colour | None = (
             Colour(accent_color) if (accent_color := data.get("accent_color")) is not None else None
         )
         self.spoiler: bool = data.get("spoiler", False)
@@ -1477,7 +1509,7 @@ class Container(Component):
         return payload
 
     @property
-    def accent_color(self) -> Optional[Colour]:
+    def accent_color(self) -> Colour | None:
         """:class:`Colour` | :data:`None`: The accent color of the container.
         An alias exists under ``accent_colour``.
         """
@@ -1503,31 +1535,32 @@ class Label(Component):
         The label text.
     description: :class:`str` | :data:`None`
         The description text for the label.
-    component: :class:`TextInput` | :class:`StringSelectMenu`
+    component: :class:`TextInput` | :class:`FileUpload` | :class:`BaseSelectMenu` | :class:`RadioGroup` | :class:`CheckboxGroup` | :class:`Checkbox`
         The component within the label.
     id: :class:`int`
-        The numeric identifier for the component.
-        This is always present in components received from the API,
-        and unique within a message.
+        The numeric identifier for the component. Must be unique within a modal.
+        This is always present in components received from the API.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the modal.
     """
 
-    __slots__: Tuple[str, ...] = (
+    __slots__: tuple[str, ...] = (
         "text",
         "description",
         "component",
     )
 
-    __repr_info__: ClassVar[Tuple[str, ...]] = __slots__
+    __repr_info__: ClassVar[tuple[str, ...]] = __slots__
 
     def __init__(self, data: LabelComponentPayload) -> None:
         self.type: Literal[ComponentType.label] = ComponentType.label
         self.id = data.get("id", 0)
 
         self.text: str = data["label"]
-        self.description: Optional[str] = data.get("description")
+        self.description: str | None = data.get("description")
 
         component = _component_factory(data["component"])
-        self.component: LabelChildComponent = component  # type: ignore
+        self.component: LabelChildComponent = component  # pyright: ignore[reportAttributeAccessIssue]
 
     def to_dict(self) -> LabelComponentPayload:
         payload: LabelComponentPayload = {
@@ -1541,6 +1574,322 @@ class Label(Component):
             payload["description"] = self.description
 
         return payload
+
+
+class FileUpload(Component):
+    """Represents a file upload component from the Discord Bot UI Kit.
+
+    This allows you to receive files from users, and can only be used in modals.
+
+    .. note::
+        The user constructible and usable type to create a
+        file upload is :class:`disnake.ui.FileUpload`.
+
+    .. versionadded:: 2.12
+
+    Attributes
+    ----------
+    custom_id: :class:`str`
+        The ID of the file upload that gets received during an interaction.
+    min_values: :class:`int`
+        The minimum number of files that must be uploaded.
+        Defaults to 1 and must be between 0 and 10.
+    max_values: :class:`int`
+        The maximum number of files that must be uploaded.
+        Defaults to 1 and must be between 1 and 10.
+    required: :class:`bool`
+        Whether the file upload is required.
+        Defaults to ``True``.
+    id: :class:`int`
+        The numeric identifier for the component. Must be unique within a modal.
+        This is always present in components received from the API.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the modal.
+    """
+
+    __slots__: tuple[str, ...] = (
+        "custom_id",
+        "min_values",
+        "max_values",
+        "required",
+    )
+
+    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
+
+    def __init__(self, data: FileUploadComponentPayload) -> None:
+        self.type: Literal[ComponentType.file_upload] = ComponentType.file_upload
+        self.id = data.get("id", 0)
+
+        self.custom_id: str = data["custom_id"]
+        self.min_values: int = data.get("min_values", 1)
+        self.max_values: int = data.get("max_values", 1)
+        self.required: bool = data.get("required", True)
+
+    def to_dict(self) -> FileUploadComponentPayload:
+        return {
+            "type": self.type.value,
+            "id": self.id,
+            "custom_id": self.custom_id,
+            "min_values": self.min_values,
+            "max_values": self.max_values,
+            "required": self.required,
+        }
+
+
+AnyGroupOptionPayload = Union["RadioGroupOptionPayload", "CheckboxGroupOptionPayload"]
+
+
+class GroupOption:
+    """Represents an option inside a :class:`RadioGroup` or :class:`CheckboxGroup`.
+
+    .. versionadded:: 2.12
+
+    Parameters
+    ----------
+    label: :class:`str`
+        The label of the option. This is displayed to users.
+        Can be up to 100 characters.
+    value: :class:`str`
+        The value of the option. This is not displayed to users.
+        If not provided when constructed then it defaults to the
+        label. Can be up to 100 characters.
+    description: :class:`str` | :data:`None`
+        The options's description, if any.
+    default: :class:`bool`
+        Whether this option is selected by default.
+        Defaults to ``False``.
+    """
+
+    __slots__: tuple[str, ...] = (
+        "value",
+        "label",
+        "description",
+        "default",
+    )
+
+    def __init__(
+        self,
+        *,
+        label: str,
+        value: str = MISSING,
+        description: str | None = None,
+        default: bool = False,
+    ) -> None:
+        self.label: str = label
+        self.value: str = label if value is MISSING else value
+        self.description: str | None = description
+        self.default: bool = default
+
+    @classmethod
+    def from_dict(cls, data: AnyGroupOptionPayload) -> Self:
+        return cls(
+            label=data["label"],
+            value=data["value"],
+            description=data.get("description"),
+            default=data.get("default", False),
+        )
+
+    def to_dict(self) -> AnyGroupOptionPayload:
+        payload: AnyGroupOptionPayload = {
+            "label": self.label,
+            "value": self.value,
+            "default": self.default,
+        }
+
+        if self.description:
+            payload["description"] = self.description
+
+        return payload
+
+    def __repr__(self) -> str:
+        return (
+            f"<GroupOption label={self.label!r} value={self.value!r} "
+            f"description={self.description!r} default={self.default!r}>"
+        )
+
+
+GroupOptionInput: TypeAlias = Sequence[GroupOption | str] | dict[str, str]
+
+
+def _parse_group_options(options: GroupOptionInput) -> list[GroupOption]:
+    if isinstance(options, dict):
+        return [GroupOption(label=key, value=val) for key, val in options.items()]
+
+    return [opt if isinstance(opt, GroupOption) else GroupOption(label=opt) for opt in options]
+
+
+class RadioGroup(Component):
+    r"""Represents a component containing radio buttons/options from the Discord Bot UI Kit.
+
+    This requires users to select exactly one out of the given options, and can only be used in modals.
+
+    .. note::
+        The user constructible and usable type to create a
+        radio group is :class:`disnake.ui.RadioGroup`.
+
+    .. versionadded:: 2.12
+
+    Attributes
+    ----------
+    custom_id: :class:`str`
+        The ID of the radio group that gets received during an interaction.
+    options: :class:`list`\[:class:`GroupOption`]
+        A list of options that can be selected in this group (2-10).
+    required: :class:`bool`
+        Whether selecting an option in this radio group is required.
+        Defaults to ``True``.
+    id: :class:`int`
+        The numeric identifier for the component. Must be unique within a modal.
+        This is always present in components received from the API.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the modal.
+    """
+
+    __slots__: tuple[str, ...] = (
+        "custom_id",
+        "options",
+        "required",
+    )
+
+    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
+
+    def __init__(self, data: RadioGroupComponentPayload) -> None:
+        self.type: Literal[ComponentType.radio_group] = ComponentType.radio_group
+        self.id = data.get("id", 0)
+
+        self.custom_id: str = data["custom_id"]
+        self.options: list[GroupOption] = [
+            GroupOption.from_dict(option) for option in data.get("options", [])
+        ]
+        self.required: bool = data.get("required", True)
+
+    def to_dict(self) -> RadioGroupComponentPayload:
+        return {
+            "type": self.type.value,
+            "id": self.id,
+            "custom_id": self.custom_id,
+            "options": [op.to_dict() for op in self.options],
+            "required": self.required,
+        }
+
+
+class CheckboxGroup(Component):
+    r"""Represents a component containing checkboxes from the Discord Bot UI Kit.
+
+    This requires users to select up to 10 checkboxes, and can only be used in modals.
+    For single checkboxes, see :class:`Checkbox`.
+
+    .. note::
+        The user constructible and usable type to create a
+        checkbox group is :class:`disnake.ui.CheckboxGroup`.
+
+    .. versionadded:: 2.12
+
+    Attributes
+    ----------
+    custom_id: :class:`str`
+        The ID of the checkbox group that gets received during an interaction.
+    options: :class:`list`\[:class:`GroupOption`]
+        A list of options that can be selected in this group (1-10).
+    min_values: :class:`int`
+        The minimum number of options that must be selected in this group.
+        Defaults to 1 and must be between 0 and 10.
+    max_values: :class:`int` | :data:`None`
+        The maximum number of options that must be selected in this group.
+        Must be between 1 and 10. If set to :data:`None` (the default),
+        all options can be selected.
+    required: :class:`bool`
+        Whether selecting an option in this checkbox group is required.
+        Defaults to ``True``.
+    id: :class:`int`
+        The numeric identifier for the component. Must be unique within a modal.
+        This is always present in components received from the API.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the modal.
+    """
+
+    __slots__: tuple[str, ...] = (
+        "custom_id",
+        "options",
+        "min_values",
+        "max_values",
+        "required",
+    )
+
+    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
+
+    def __init__(self, data: CheckboxGroupComponentPayload) -> None:
+        self.type: Literal[ComponentType.checkbox_group] = ComponentType.checkbox_group
+        self.id = data.get("id", 0)
+
+        self.custom_id: str = data["custom_id"]
+        self.options: list[GroupOption] = [
+            GroupOption.from_dict(option) for option in data.get("options", [])
+        ]
+        self.min_values: int = data.get("min_values", 1)
+        self.max_values: int | None = data.get("max_values")
+        self.required: bool = data.get("required", True)
+
+    def to_dict(self) -> CheckboxGroupComponentPayload:
+        payload: CheckboxGroupComponentPayload = {
+            "type": self.type.value,
+            "id": self.id,
+            "custom_id": self.custom_id,
+            "options": [op.to_dict() for op in self.options],
+            "min_values": self.min_values,
+            "required": self.required,
+        }
+
+        if self.max_values is not None:
+            payload["max_values"] = self.max_values
+
+        return payload
+
+
+class Checkbox(Component):
+    r"""Represents a single checkbox component from the Discord Bot UI Kit.
+
+    This can only be used in modals.
+    For a group of multiple checkboxes, see :class:`CheckboxGroup`.
+
+    .. note::
+        The user constructible and usable type to create a
+        checkbox is :class:`disnake.ui.Checkbox`.
+
+    .. versionadded:: 2.12
+
+    Attributes
+    ----------
+    custom_id: :class:`str`
+        The ID of the checkbox that gets received during an interaction.
+    default: :class:`bool`
+        Whether this checkbox is selected by default.
+        Defaults to ``False``.
+    id: :class:`int`
+        The numeric identifier for the component. Must be unique within a modal.
+        This is always present in components received from the API.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the modal.
+    """
+
+    __slots__: tuple[str, ...] = ("custom_id", "default")
+
+    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
+
+    def __init__(self, data: CheckboxComponentPayload) -> None:
+        self.type: Literal[ComponentType.checkbox] = ComponentType.checkbox
+        self.id = data.get("id", 0)
+
+        self.custom_id: str = data["custom_id"]
+        self.default: bool = data.get("default", False)
+
+    def to_dict(self) -> CheckboxComponentPayload:
+        return {
+            "type": self.type.value,
+            "id": self.id,
+            "custom_id": self.custom_id,
+            "default": self.default,
+        }
 
 
 # types of components that are allowed in a message's action rows;
@@ -1575,7 +1924,7 @@ def handle_media_item_input(value: MediaItemInput) -> UnfurledMediaItem:
 C = TypeVar("C", bound="Component")
 
 
-COMPONENT_LOOKUP: Mapping[ComponentTypeLiteral, Type[Component]] = {
+COMPONENT_LOOKUP: Mapping[ComponentTypeLiteral, type[Component]] = {
     ComponentType.action_row.value: ActionRow,
     ComponentType.button.value: Button,
     ComponentType.string_select.value: StringSelectMenu,
@@ -1592,12 +1941,16 @@ COMPONENT_LOOKUP: Mapping[ComponentTypeLiteral, Type[Component]] = {
     ComponentType.separator.value: Separator,
     ComponentType.container.value: Container,
     ComponentType.label.value: Label,
+    ComponentType.file_upload.value: FileUpload,
+    ComponentType.radio_group.value: RadioGroup,
+    ComponentType.checkbox_group.value: CheckboxGroup,
+    ComponentType.checkbox.value: Checkbox,
 }
 
 
 # NOTE: The type param is purely for type-checking, it has no implications on runtime behavior.
 # FIXME: could be improved with https://peps.python.org/pep-0747/
-def _component_factory(data: ComponentPayload, *, type: Type[C] = Component) -> C:
+def _component_factory(data: ComponentPayload, *, type: type[C] = Component) -> C:
     component_type = data["type"]
 
     try:
@@ -1605,9 +1958,9 @@ def _component_factory(data: ComponentPayload, *, type: Type[C] = Component) -> 
     except KeyError:
         # if we encounter an unknown component type, just construct a placeholder component for it
         as_enum = try_enum(ComponentType, component_type)
-        return Component._raw_construct(type=as_enum)  # type: ignore
+        return Component._raw_construct(type=as_enum)  # pyright: ignore[reportReturnType]
     else:
-        return component_cls(data)  # type: ignore
+        return component_cls(data)  # pyright: ignore[reportCallIssue, reportReturnType]
 
 
 # this is just a rebranded _component_factory, as a workaround to Python not supporting typescript-like mapped types

@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, List, Sequence, Tuple
+from collections.abc import Sequence
+from typing import TYPE_CHECKING, ClassVar
 
 from ..components import MediaGallery as MediaGalleryComponent, MediaGalleryItem
 from ..enums import ComponentType
@@ -27,12 +28,13 @@ class MediaGallery(UIComponent):
     *items: :class:`.MediaGalleryItem`
         The list of images in this gallery (up to 10).
     id: :class:`int`
-        The numeric identifier for the component. Must be unique within the message.
+        The numeric identifier for the component. Must be unique within a message.
+        This is always present in components received from the API.
         If set to ``0`` (the default) when sending a component, the API will assign
         sequential identifiers to the components in the message.
     """
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = ("items",)
+    __repr_attributes__: ClassVar[tuple[str, ...]] = ("items",)
     # We have to set this to MISSING in order to overwrite the abstract property from UIComponent
     _underlying: MediaGalleryComponent = MISSING
 
@@ -44,8 +46,8 @@ class MediaGallery(UIComponent):
         )
 
     @property
-    def items(self) -> List[MediaGalleryItem]:
-        """:class:`list`\\[:class:`.MediaGalleryItem`]: The images in this gallery."""
+    def items(self) -> list[MediaGalleryItem]:
+        r""":class:`list`\[:class:`.MediaGalleryItem`]: The images in this gallery."""
         return self._underlying.items
 
     @items.setter
