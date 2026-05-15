@@ -14,14 +14,17 @@ __title__ = "disnake"
 __author__ = "Rapptz, EQUENOS"
 __license__ = "MIT"
 __copyright__ = "Copyright 2015-present Rapptz, 2021-present EQUENOS"
-__version__ = "2.10.0a"
 
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 
 import logging
-from typing import Literal, NamedTuple
 
 from . import abc as abc, opus as opus, ui as ui, utils as utils  # explicitly re-export modules
+from ._version import (
+    VersionInfo as VersionInfo,
+    __version__ as __version__,
+    version_info as version_info,
+)
 from .activity import *
 from .app_commands import *
 from .appinfo import *
@@ -57,13 +60,16 @@ from .onboarding import *
 from .partial_emoji import *
 from .permissions import *
 from .player import *
+from .poll import *
 from .raw_models import *
 from .reaction import *
 from .role import *
 from .shard import *
 from .sku import *
+from .soundboard import *
 from .stage_instance import *
 from .sticker import *
+from .subscription import *
 from .team import *
 from .template import *
 from .threads import *
@@ -73,18 +79,5 @@ from .voice_region import *
 from .webhook import *
 from .welcome_screen import *
 from .widget import *
-
-
-class VersionInfo(NamedTuple):
-    major: int
-    minor: int
-    micro: int
-    releaselevel: Literal["alpha", "beta", "candidate", "final"]
-    serial: int
-
-
-# fmt: off
-version_info: VersionInfo = VersionInfo(major=2, minor=10, micro=0, releaselevel="alpha", serial=0)
-# fmt: on
 
 logging.getLogger(__name__).addHandler(logging.NullHandler())

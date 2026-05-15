@@ -1,1 +1,0 @@
-|commands| Support Python 3.12's ``type`` statement and :class:`py:typing.TypeAliasType` annotations in command signatures.

@@ -37,26 +37,17 @@ PartialInviteChannel
 Enumerations
 ------------
 
+InviteType
+~~~~~~~~~~
+
+.. autoclass:: InviteType()
+    :members:
+
 InviteTarget
 ~~~~~~~~~~~~
 
-.. class:: InviteTarget
-
-    Represents the invite type for voice channel invites.
-
-    .. versionadded:: 2.0
-
-    .. attribute:: unknown
-
-        The invite doesn't target anyone or anything.
-
-    .. attribute:: stream
-
-        A stream invite that targets a user.
-
-    .. attribute:: embedded_application
-
-        A stream invite that targets an embedded application.
+.. autoclass:: InviteTarget()
+    :members:
 
 Events
 ------

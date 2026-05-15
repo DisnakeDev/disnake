@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Literal, Optional, TypedDict
+from typing import Literal, TypedDict
 
 from typing_extensions import NotRequired
 
@@ -12,11 +12,12 @@ from .guild import InviteGuild
 from .guild_scheduled_event import GuildScheduledEvent
 from .user import PartialUser
 
+InviteType = Literal[0, 1, 2]
 InviteTargetType = Literal[1, 2]
 
 
 class VanityInvite(TypedDict):
-    code: Optional[str]
+    code: str | None
     uses: NotRequired[int]
 
 
@@ -30,13 +31,14 @@ class _InviteMetadata(TypedDict, total=False):
 
 class Invite(_InviteMetadata):
     code: str
+    type: InviteType
     guild: NotRequired[InviteGuild]
-    channel: InviteChannel
+    channel: InviteChannel | None
     inviter: NotRequired[PartialUser]
     target_type: NotRequired[InviteTargetType]
     target_user: NotRequired[PartialUser]
     target_application: NotRequired[PartialAppInfo]
     approximate_presence_count: NotRequired[int]
     approximate_member_count: NotRequired[int]
-    expires_at: NotRequired[Optional[str]]
+    expires_at: str | None
     guild_scheduled_event: NotRequired[GuildScheduledEvent]

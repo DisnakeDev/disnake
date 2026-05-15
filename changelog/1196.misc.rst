@@ -1,1 +1,0 @@
-Remove ``disnake[discord]`` extra; the shim is deprecated, and has not been updated for several versions.

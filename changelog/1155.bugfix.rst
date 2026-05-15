@@ -1,1 +1,0 @@
-Handle unexpected ``RECONNECT`` opcode where ``HELLO`` is expected during initial shard connection.

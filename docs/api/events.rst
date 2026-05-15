@@ -178,7 +178,7 @@ This section documents events related to :class:`Client` and its connectivity to
     :type data: :class:`Any`
 
     :param shard_id: The ID of the shard the exception occurred in, if applicable.
-    :type shard_id: Optional[:class:`int`]
+    :type shard_id: :class:`int` | :data:`None`
 
     :param exc: The exception that was raised.
     :type exc: :class:`Exception`
@@ -323,9 +323,9 @@ This section documents events related to Discord channels and threads.
     This requires :attr:`Intents.guilds` to be enabled.
 
     :param channel: The guild channel that had its pins updated.
-    :type channel: Union[:class:`abc.GuildChannel`, :class:`Thread`]
-    :param last_pin: The latest message that was pinned as an aware datetime in UTC. Could be ``None``.
-    :type last_pin: Optional[:class:`datetime.datetime`]
+    :type channel: :class:`abc.GuildChannel` | :class:`Thread`
+    :param last_pin: The latest message that was pinned as an aware datetime in UTC. Could be :data:`None`.
+    :type last_pin: :class:`datetime.datetime` | :data:`None`
 
 .. function:: on_private_channel_update(before, after)
 
@@ -344,8 +344,8 @@ This section documents events related to Discord channels and threads.
 
     :param channel: The private channel that had its pins updated.
     :type channel: :class:`abc.PrivateChannel`
-    :param last_pin: The latest message that was pinned as an aware datetime in UTC. Could be ``None``.
-    :type last_pin: Optional[:class:`datetime.datetime`]
+    :param last_pin: The latest message that was pinned as an aware datetime in UTC. Could be :data:`None`.
+    :type last_pin: :class:`datetime.datetime` | :data:`None`
 
 .. function:: on_thread_create(thread)
 
@@ -676,14 +676,14 @@ Emojis
 
     Called when a :class:`Guild` adds or removes :class:`Emoji`.
 
-    This requires :attr:`Intents.emojis_and_stickers` to be enabled.
+    This requires :attr:`Intents.expressions` to be enabled.
 
     :param guild: The guild who got their emojis updated.
     :type guild: :class:`Guild`
     :param before: A list of emojis before the update.
-    :type before: Sequence[:class:`Emoji`]
+    :type before: :class:`~collections.abc.Sequence`\[:class:`Emoji`]
     :param after: A list of emojis after the update.
-    :type after: Sequence[:class:`Emoji`]
+    :type after: :class:`~collections.abc.Sequence`\[:class:`Emoji`]
 
 Integrations
 ++++++++++++
@@ -840,7 +840,7 @@ Members
     :param user: The user that got banned.
                  Can be either :class:`User` or :class:`Member` depending on
                  whether the user was in the guild at the time of removal.
-    :type user: Union[:class:`User`, :class:`Member`]
+    :type user: :class:`User` | :class:`Member`
 
 .. function:: on_member_unban(guild, user)
 
@@ -972,7 +972,7 @@ Scheduled Events
     :param event: The guild scheduled event that the user subscribed to or unsubscribed from.
     :type event: :class:`GuildScheduledEvent`
     :param user: The user who subscribed to or unsubscribed from the event.
-    :type user: Union[:class:`Member`, :class:`User`]
+    :type user: :class:`Member` | :class:`User`
 
 .. function:: on_raw_guild_scheduled_event_subscribe(payload)
               on_raw_guild_scheduled_event_unsubscribe(payload)
@@ -983,6 +983,24 @@ Scheduled Events
 
     :param payload: The raw event payload data.
     :type payload: :class:`RawGuildScheduledEventUserActionEvent`
+
+Soundboard
+++++++++++
+
+.. function:: on_guild_soundboard_sounds_update(guild, before, after)
+
+    Called when a :class:`Guild` updates its soundboard sounds.
+
+    This requires :attr:`Intents.expressions` to be enabled.
+
+    .. versionadded:: 2.10
+
+    :param guild: The guild who got their soundboard sounds updated.
+    :type guild: :class:`Guild`
+    :param before: A list of soundboard sounds before the update.
+    :type before: :class:`~collections.abc.Sequence`\[:class:`GuildSoundboardSound`]
+    :param after: A list of soundboard sounds after the update.
+    :type after: :class:`~collections.abc.Sequence`\[:class:`GuildSoundboardSound`]
 
 Stage Instances
 +++++++++++++++
@@ -1020,16 +1038,16 @@ Stickers
 
     Called when a :class:`Guild` updates its stickers.
 
-    This requires :attr:`Intents.emojis_and_stickers` to be enabled.
+    This requires :attr:`Intents.expressions` to be enabled.
 
     .. versionadded:: 2.0
 
     :param guild: The guild who got their stickers updated.
     :type guild: :class:`Guild`
     :param before: A list of stickers before the update.
-    :type before: Sequence[:class:`GuildSticker`]
+    :type before: :class:`~collections.abc.Sequence`\[:class:`GuildSticker`]
     :param after: A list of stickers after the update.
-    :type after: Sequence[:class:`GuildSticker`]
+    :type after: :class:`~collections.abc.Sequence`\[:class:`GuildSticker`]
 
 Voice
 +++++
@@ -1053,6 +1071,36 @@ Voice
     :type before: :class:`VoiceState`
     :param after: The voice state after the changes.
     :type after: :class:`VoiceState`
+
+.. function:: on_voice_channel_effect(channel, member, effect)
+
+    Called when a :class:`Member` sends an effect in a voice channel the bot is connected to.
+
+    This requires :attr:`Intents.voice_states` and :attr:`Intents.members` to be enabled.
+
+    If the member is not found in the internal member cache, then this
+    event will not be called. Consider using :func:`on_raw_voice_channel_effect` instead.
+
+    .. versionadded:: 2.10
+
+    :param channel: The voice channel where the effect was sent.
+    :type channel: :class:`VoiceChannel`
+    :param member: The member that sent the effect.
+    :type member: :class:`Member`
+    :param effect: The effect that was sent.
+    :type effect: :class:`VoiceChannelEffect`
+
+.. function:: on_raw_voice_channel_effect(payload)
+
+    Called when a :class:`Member` sends an effect in a voice channel the bot is connected to.
+    Unlike :func:`on_voice_channel_effect`, this is called regardless of the member cache.
+
+    This requires :attr:`Intents.voice_states` to be enabled.
+
+    .. versionadded:: 2.10
+
+    :param payload: The raw event payload data.
+    :type payload: :class:`RawVoiceChannelEffectEvent`
 
 Interactions
 ~~~~~~~~~~~~
@@ -1247,7 +1295,39 @@ This section documents events related to Discord chat messages.
     This requires :attr:`Intents.messages` to be enabled.
 
     :param messages: The messages that have been deleted.
-    :type messages: List[:class:`Message`]
+    :type messages: :class:`list`\[:class:`Message`]
+
+.. function:: on_poll_vote_add(member, answer)
+
+    Called when a vote is added on a poll. If the member or message is not found in the internal cache, then this event will not be called.
+
+    This requires :attr:`Intents.guild_polls` or :attr:`Intents.dm_polls` to be enabled to receive events about polls sent in guilds or DMs.
+
+    .. note::
+
+        You can use :attr:`Intents.polls` to enable both :attr:`Intents.guild_polls` and :attr:`Intents.dm_polls` in one go.
+
+
+    :param member: The member who voted.
+    :type member: :class:`Member`
+    :param answer: The :class:`PollAnswer` object for which the vote was added.
+    :type answer: :class:`PollAnswer`
+
+.. function:: on_poll_vote_remove(member, answer)
+
+    Called when a vote is removed on a poll. If the member or message is not found in the internal cache, then this event will not be called.
+
+    This requires :attr:`Intents.guild_polls` or :attr:`Intents.dm_polls` to be enabled to receive events about polls sent in guilds or DMs.
+
+    .. note::
+
+        You can use :attr:`Intents.polls` to enable both :attr:`Intents.guild_polls` and :attr:`Intents.dm_polls` in one go.
+
+
+    :param member: The member who removed the vote.
+    :type member: :class:`Member`
+    :param answer: The :class:`PollAnswer` object for which the vote was removed.
+    :type answer: :class:`PollAnswer`
 
 .. function:: on_raw_message_edit(payload)
 
@@ -1261,7 +1341,7 @@ This section documents events related to Discord chat messages.
     will return a :class:`Message` object that represents the message before the content was modified.
 
     Due to the inherently raw nature of this event, the data parameter coincides with
-    the raw data given by the :ddocs:`gateway <topics/gateway-events#message-update>`.
+    the raw data given by the :ddocs:`gateway <events/gateway-events#message-update>`.
 
     Since the data payload can be partial, care must be taken when accessing stuff in the dictionary.
     One example of a common case of partial data is when the ``'content'`` key is inaccessible. This
@@ -1299,6 +1379,34 @@ This section documents events related to Discord chat messages.
     :param payload: The raw event payload data.
     :type payload: :class:`RawBulkMessageDeleteEvent`
 
+.. function:: on_raw_poll_vote_add(payload)
+
+    Called when a vote is added on a poll. Unlike :func:`on_poll_vote_add`, this is
+    called regardless of the guilds being in the internal guild cache or not.
+
+    This requires :attr:`Intents.guild_polls` or :attr:`Intents.dm_polls` to be enabled to receive events about polls sent in guilds or DMs.
+
+    .. note::
+
+        You can use :attr:`Intents.polls` to enable both :attr:`Intents.guild_polls` and :attr:`Intents.dm_polls` in one go.
+
+    :param payload: The raw event payload data.
+    :type payload: :class:`RawPollVoteActionEvent`
+
+.. function:: on_raw_poll_vote_remove(payload)
+
+    Called when a vote is removed on a poll. Unlike :func:`on_poll_vote_remove`, this is
+    called regardless of the guilds being in the internal guild cache or not.
+
+    This requires :attr:`Intents.guild_polls` or :attr:`Intents.dm_polls` to be enabled to receive events about polls sent in guilds or DMs.
+
+    .. note::
+
+        You can use :attr:`Intents.polls` to enable both :attr:`Intents.guild_polls` and :attr:`Intents.dm_polls` in one go.
+
+    :param payload: The raw event payload data.
+    :type payload: :class:`RawPollVoteActionEvent`
+
 .. function:: on_reaction_add(reaction, user)
 
     Called when a message has a reaction added to it. Similar to :func:`on_message_edit`,
@@ -1322,7 +1430,7 @@ This section documents events related to Discord chat messages.
     :param reaction: The current state of the reaction.
     :type reaction: :class:`Reaction`
     :param user: The user who added the reaction.
-    :type user: Union[:class:`Member`, :class:`User`]
+    :type user: :class:`Member` | :class:`User`
 
 .. function:: on_reaction_remove(reaction, user)
 
@@ -1344,7 +1452,7 @@ This section documents events related to Discord chat messages.
     :param reaction: The current state of the reaction.
     :type reaction: :class:`Reaction`
     :param user: The user who added the reaction.
-    :type user: Union[:class:`Member`, :class:`User`]
+    :type user: :class:`Member` | :class:`User`
 
 .. function:: on_reaction_clear(message, reactions)
 
@@ -1357,7 +1465,7 @@ This section documents events related to Discord chat messages.
     :param message: The message that had its reactions cleared.
     :type message: :class:`Message`
     :param reactions: The reactions that were removed.
-    :type reactions: List[:class:`Reaction`]
+    :type reactions: :class:`list`\[:class:`Reaction`]
 
 .. function:: on_reaction_clear_emoji(reaction)
 
@@ -1441,9 +1549,9 @@ This section documents events related to Discord chat messages.
         to enable the members intent.
 
     :param channel: The location where the typing originated from.
-    :type channel: Union[:class:`abc.Messageable`, :class:`ForumChannel`, :class:`MediaChannel`]
+    :type channel: :class:`abc.Messageable` | :class:`ForumChannel` | :class:`MediaChannel`
     :param user: The user that started typing.
-    :type user: Union[:class:`User`, :class:`Member`]
+    :type user: :class:`User` | :class:`Member`
     :param when: When the typing started as an aware datetime in UTC.
     :type when: :class:`datetime.datetime`
 
@@ -1457,10 +1565,11 @@ This section documents events related to Discord chat messages.
     :param data: The raw event payload data.
     :type data: :class:`RawTypingEvent`
 
-Entitlements
+Monetization
 ~~~~~~~~~~~~
 
-This section documents events related to entitlements, which are used for application subscriptions.
+This section documents events related to :ddocs:`monetization <monetization/overview>`,
+including application subscriptions and entitlements.
 
 .. function:: on_entitlement_create(entitlement)
 
@@ -1478,8 +1587,8 @@ This section documents events related to entitlements, which are used for applic
 
     Called when an entitlement is updated.
 
-    This happens e.g. when a user's subscription gets renewed (in which case the
-    :attr:`Entitlement.ends_at` attribute reflects the new expiration date).
+    This happens **only** when a user's subscription ends or is cancelled (in which case the
+    :attr:`Entitlement.ends_at` attribute reflects the expiration date).
 
     .. versionadded:: 2.10
 
@@ -1499,11 +1608,38 @@ This section documents events related to entitlements, which are used for applic
     :param entitlement: The entitlement that was deleted.
     :type entitlement: :class:`Entitlement`
 
+.. function:: on_subscription_create(subscription)
+
+    Called when a subscription is created.
+
+    .. versionadded:: 2.10
+
+    :param subscription: The subscription that was created.
+    :type subscription: :class:`Subscription`
+
+.. function:: on_subscription_update(subscription)
+
+    Called when a subscription is updated.
+
+    .. versionadded:: 2.10
+
+    :param subscription: The subscription that was updated.
+    :type subscription: :class:`Subscription`
+
+.. function:: on_subscription_delete(subscription)
+
+    Called when a subscription is deleted.
+
+    .. versionadded:: 2.10
+
+    :param subscription: The subscription that was deleted.
+    :type subscription: :class:`Subscription`
+
 Enumerations
 ------------
 
 Event
 ~~~~~
 
-.. autoclass:: Event
+.. autoclass:: Event()
     :members:

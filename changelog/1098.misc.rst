@@ -1,1 +1,0 @@
-Overhaul and simplify `contribution guide <https://github.com/DisnakeDev/disnake/tree/master/CONTRIBUTING.md>`__.

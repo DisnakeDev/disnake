@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, NamedTuple, Optional, Sequence
+from collections.abc import Sequence
+from typing import TYPE_CHECKING, NamedTuple
 
 __all__ = ("BanEntry",)
 
@@ -12,8 +13,8 @@ if TYPE_CHECKING:
 
 
 class BanEntry(NamedTuple):
-    reason: Optional[str]
-    user: "User"
+    reason: str | None
+    user: User
 
 
 class BulkBanResult(NamedTuple):

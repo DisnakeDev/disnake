@@ -1,1 +1,0 @@
-Reconnect gateway websocket on protocol errors.

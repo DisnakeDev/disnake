@@ -1,1 +1,0 @@
-Make typing more precise for :meth:`Client.create_global_command`, :meth:`Client.edit_global_command`, :meth:`Client.create_guild_command` and :meth:`Client.edit_guild_command`.

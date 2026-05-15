@@ -1,1 +1,0 @@
-Document the :class:`.Option` attributes, the ``description`` and ``options`` properties for :class:`.ext.commands.InvokableSlashCommand` and the ``description`` and ``body`` properties for :class:`.ext.commands.SubCommand`.

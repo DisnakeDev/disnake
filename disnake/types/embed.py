@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-from typing import List, Literal, TypedDict
+from typing import Literal, TypedDict
 
 from typing_extensions import NotRequired
 
@@ -50,7 +50,7 @@ class EmbedAuthor(TypedDict):
     proxy_icon_url: NotRequired[str]
 
 
-EmbedType = Literal["rich", "image", "video", "gifv", "article", "link"]
+EmbedType = Literal["rich", "image", "video", "gifv", "article", "link", "poll_result"]
 
 
 class Embed(TypedDict, total=False):
@@ -66,4 +66,4 @@ class Embed(TypedDict, total=False):
     video: EmbedVideo
     provider: EmbedProvider
     author: EmbedAuthor
-    fields: List[EmbedField]
+    fields: list[EmbedField]
