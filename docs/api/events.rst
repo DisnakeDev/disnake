@@ -505,9 +505,9 @@ This section documents events related to Discord channels and threads.
 
 .. function:: on_voice_channel_status_update(channel, status)
 
-    Called whenever a channel status is modified.
+    Called whenever a voice channel status is modified.
 
-    This requires :attr:`Intents.` to be enabled.
+    This requires :attr:`Intents.guilds` to be enabled.
 
     .. versionadded:: |vnext|
 
