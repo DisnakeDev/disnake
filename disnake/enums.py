@@ -2123,6 +2123,8 @@ class Event(Enum):
     voice_channel_status_update = "voice_channel_status_update"
     """Called when a voice channel status is updated.
     Represents the :func:`on_voice_channel_status_update` event.
+
+    .. versionadded:: |vnext|
     """
     stage_instance_create = "stage_instance_create"
     """Called when a `StageInstance` is created for a `StageChannel`.

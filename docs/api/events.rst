@@ -509,6 +509,8 @@ This section documents events related to Discord channels and threads.
 
     This requires :attr:`Intents.` to be enabled.
 
+    .. versionadded:: |vnext|
+
 Guilds
 ~~~~~~
 
