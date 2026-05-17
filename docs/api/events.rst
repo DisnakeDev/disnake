@@ -511,6 +511,11 @@ This section documents events related to Discord channels and threads.
 
     .. versionadded:: |vnext|
 
+    :param channel: The channel that had its status updated.
+    :type channel: :class:`abc.GuildChannel`
+    :param status: The new status.
+    :type status: :class:`str` | :data:`None`
+
 Guilds
 ~~~~~~
 

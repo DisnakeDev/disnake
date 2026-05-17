@@ -1900,7 +1900,7 @@ class ConnectionState:
                 channel_id,
             )
 
-        self.dispatch("voice_channel_status_update", channel, data["status"])
+        self.dispatch("voice_channel_status_update", channel, data.get("status"))
 
     # FIXME: this should be refactored. The `GroupChannel` path will never be hit,
     # `raw.timestamp` exists so no need to parse it twice, and `.get_user` should be used before falling back
