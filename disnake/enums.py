@@ -2126,6 +2126,12 @@ class Event(Enum):
 
     .. versionadded:: |vnext|
     """
+    voice_channel_start_time_update = "voice_channel_start_time_update"
+    """Called when a voice channel start time is updated.
+    Represents the :func:`on_voice_channel_start_time_update` event.
+
+    .. versionadded:: |vnext|
+    """
     stage_instance_create = "stage_instance_create"
     """Called when a `StageInstance` is created for a `StageChannel`.
     Represents the :func:`on_stage_instance_create` event.

@@ -516,6 +516,19 @@ This section documents events related to Discord channels and threads.
     :param status: The new status.
     :type status: :class:`str` | :data:`None`
 
+.. function:: on_voice_channel_start_time_update(channel, start_time)
+
+    Called whenever a voice channel's start time changes.
+
+    This requires :attr:`Intents.guilds` to be enabled.
+
+    .. versionadded:: |vnext|
+
+    :param channel: The channel that had its start time updated.
+    :type channel: :class:`abc.GuildChannel`
+    :param start_time: The new start time.
+    :type start_time: :class:`datetime.datetime` | :data:`None`
+
 Guilds
 ~~~~~~
 
