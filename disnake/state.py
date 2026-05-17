@@ -1899,7 +1899,9 @@ class ConnectionState:
                 "VOICE_CHANNEL_STATUS_UPDATE referencing an unknown channel ID: %s. Discarding",
                 channel_id,
             )
+            return
 
+        # TODO: consider `raw_` instead
         self.dispatch("voice_channel_status_update", channel, data.get("status"))
 
     # FIXME: this should be refactored. The `GroupChannel` path will never be hit,
