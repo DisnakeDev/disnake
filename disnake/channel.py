@@ -1356,12 +1356,20 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         *not* point to an existing or valid message.
 
         .. versionadded:: 2.3
+
+    status: :class:`str` | :data:`None`
+        The channel's status, if any.
+
+        This can be edited using :meth:`set_status`.
+
+        .. versionadded:: |vnext|
     """
 
     __slots__ = (
         "nsfw",
         "slowmode_delay",
         "last_message_id",
+        "status",
     )
 
     def __repr__(self) -> str:
@@ -1385,6 +1393,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         self.nsfw: bool = data.get("nsfw", False)
         self.slowmode_delay: int = data.get("rate_limit_per_user", 0)
         self.last_message_id: int | None = utils._get_as_snowflake(data, "last_message_id")
+        self.status: str | None = data.get("status")
 
     async def _get_channel(self: Self) -> Self:
         return self

@@ -1901,8 +1901,14 @@ class ConnectionState:
             )
             return
 
-        # TODO: consider `raw_` instead
-        self.dispatch("voice_channel_status_update", channel, data.get("status"))
+        if isinstance(channel, VoiceChannel):
+            # in case stage channels ever get statuses too
+            old_status = channel.status
+            channel.status = data.get("status")
+        else:
+            old_status = None
+
+        self.dispatch("voice_channel_status_update", channel, old_status, data.get("status"))
 
     def parse_voice_channel_start_time_update(
         self, data: gateway.VoiceChannelStartTimeUpdate
@@ -1931,7 +1937,6 @@ class ConnectionState:
             if (start_ts := data.get("voice_start_time"))
             else None
         )
-        # TODO: consider `raw_` instead
         self.dispatch("voice_channel_start_time_update", channel, timestamp)
 
     # FIXME: this should be refactored. The `GroupChannel` path will never be hit,

@@ -503,7 +503,7 @@ This section documents events related to Discord channels and threads.
     :param channel: The channel that had its webhooks updated.
     :type channel: :class:`abc.GuildChannel`
 
-.. function:: on_voice_channel_status_update(channel, status)
+.. function:: on_voice_channel_status_update(channel, old, new)
 
     Called whenever a voice channel status is modified.
 
@@ -513,8 +513,10 @@ This section documents events related to Discord channels and threads.
 
     :param channel: The channel that had its status updated.
     :type channel: :class:`abc.GuildChannel`
-    :param status: The new status.
-    :type status: :class:`str` | :data:`None`
+    :param old: The old status.
+    :type old: :class:`str` | :data:`None`
+    :param new: The new status.
+    :type new: :class:`str` | :data:`None`
 
 .. function:: on_voice_channel_start_time_update(channel, start_time)
 
