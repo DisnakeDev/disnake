@@ -517,6 +517,10 @@ class _AuditLogProxyKickOrMemberRoleAction:
     integration_type: str | None
 
 
+class _AuditLogProxyVoiceStatusUpdate:
+    status: str
+
+
 class AuditLogEntry(Hashable):
     r"""Represents an Audit Log entry.
 
@@ -679,6 +683,11 @@ class AuditLogEntry(Hashable):
                     "integration_type": extra.get("integration_type"),
                 }
                 self.extra = type("_AuditLogProxy", (), elems)()
+            elif self.action is enums.AuditLogAction.voice_channel_status_update:
+                elems = {
+                    "status": extra.get("status"),
+                }
+                self.extra = type("_AuditLogProxy", (), elems)()
 
         self.extra: Any
         # actually this but there's no reason to annoy users with this:
@@ -690,6 +699,7 @@ class AuditLogEntry(Hashable):
         #     _AuditLogProxyStageInstanceAction,
         #     _AuditLogProxyAutoModAction,
         #     _AuditLogProxyKickOrMemberRoleAction,
+        #     _AuditLogProxyVoiceStatusUpdate,
         #     Member, User, None,
         #     Role,
         # ]
