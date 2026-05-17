@@ -1945,6 +1945,8 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         :attr:`~Permissions.use_external_sounds` permission.
         Additionally, you may not be muted or deafened.
 
+        .. versionadded:: 2.10
+
         Parameters
         ----------
         sound: :class:`SoundboardSound` | :class:`GuildSoundboardSound`
@@ -1965,6 +1967,33 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         await self._state.http.send_soundboard_sound(
             self.id, sound.id, source_guild_id=source_guild_id
         )
+
+    async def set_status(self, status: str | None, /, *, reason: str | None = None) -> None:
+        """|coro|
+
+        Edits the channel's status.
+
+        You must either have :attr:`~Permissions.manage_channels` permission,
+        or be connected to this voice channel and have :attr:`~Permissions.set_voice_channel_status`
+        permission to do this.
+
+        .. versionadded:: |vnext|
+
+        Parameters
+        ----------
+        status: :class:`str` | :data:`None`
+            The new status to set for this channel. Up to 500 characters.
+        reason: :class:`str` | :data:`None`
+            The reason for changing this status. Shows up in the audit logs.
+
+        Raises
+        ------
+        Forbidden
+            You do not have permissions to edit the status.
+        HTTPException
+            Editing the channel status failed.
+        """
+        await self._state.http.set_voice_channel_status(self.id, status=status, reason=reason)
 
 
 class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
