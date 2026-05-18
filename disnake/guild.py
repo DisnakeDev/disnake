@@ -5458,6 +5458,7 @@ class Guild(Hashable):
         author_type: Sequence[MessageSearchAuthorType] | None = None,
         mentions: Sequence[Snowflake] | None = None,
         mentions_role: Sequence[Snowflake] | None = None,
+        mentions_everyone: bool | None = None,
         replied_to_user: Sequence[Snowflake] | None = None,
         replied_to_message: Sequence[Snowflake] | None = None,
         pinned: bool | None = None,
@@ -5481,6 +5482,7 @@ class Guild(Hashable):
             "author_type": author_type,
             "mentions": [m.id for m in mentions] if mentions else None,
             "mentions_role": [r.id for r in mentions_role] if mentions_role else None,
+            "mentions_everyone": mentions_everyone,
             "replied_to_user": [u.id for u in replied_to_user] if replied_to_user else None,
             "replied_to_message": (
                 [m.id for m in replied_to_message] if replied_to_message else None
