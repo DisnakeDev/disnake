@@ -5452,8 +5452,9 @@ class Guild(Hashable):
         # TODO: consider MISSING instead of None defaults?
         content: str | None = None,
         slop: int | None = None,
-        channel: Snowflake | None = None,
-        author: Snowflake | None = None,
+        # TODO: channel/author vs channels/authors
+        channel: Sequence[Snowflake] | None = None,
+        author: Sequence[Snowflake] | None = None,
         author_type: Sequence[MessageSearchAuthorType] | None = None,
         mentions: Sequence[Snowflake] | None = None,
         mentions_role: Sequence[Snowflake] | None = None,
@@ -5475,8 +5476,8 @@ class Guild(Hashable):
         query: dict[str, str | int | bool | Sequence[str | int] | None] = {
             "content": content,
             "slop": slop,
-            "channel": channel.id if channel else None,
-            "author": author.id if author else None,
+            "channel": [c.id for c in channel] if channel else None,
+            "author": [a.id for a in author] if author else None,
             "author_type": author_type,
             "mentions": [m.id for m in mentions] if mentions else None,
             "mentions_role": [r.id for r in mentions_role] if mentions_role else None,

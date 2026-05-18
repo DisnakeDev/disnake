@@ -1465,6 +1465,7 @@ class MessageSearchIterator(_AsyncIterator["Message"]):
                 self.limit -= self.retrieve
             self.offset += self.retrieve
 
+        # FIXME: "Clients should not rely on the length of the `messages` array to paginate results."
         if len(messages) < 25:
             self.limit = 0  # terminate loop
 
