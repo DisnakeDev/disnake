@@ -910,14 +910,14 @@ class HTTPClient:
         return self.request(r, params=params)
 
     def search_guild_messages(
-        self, guild_id: Snowflake, **query: Any
+        self, guild_id: Snowflake, params: dict[str, Any]
     ) -> Response[message.MessageSearchResult]:
         # turn bools into 0/1
-        query = {k: (int(v) if isinstance(v, bool) else v) for k, v in query.items()}
+        params = {k: (int(v) if isinstance(v, bool) else v) for k, v in params.items()}
 
         r = Route("GET", "/guilds/{guild_id}/messages/search", guild_id=guild_id)
         # TODO: handle 202?
-        return self.request(r, params=query)
+        return self.request(r, params=params)
 
     # Member management
 

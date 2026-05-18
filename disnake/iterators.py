@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import datetime
-from collections.abc import AsyncIterator, Awaitable, Callable, Generator
+from collections.abc import AsyncIterator, Awaitable, Callable, Generator, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -37,6 +37,7 @@ __all__ = (
     "EntitlementIterator",
     "SubscriptionIterator",
     "PollAnswerIterator",
+    "MessageSearchIterator",
 )
 
 if TYPE_CHECKING:
@@ -1398,3 +1399,82 @@ class ChannelPinsIterator(_AsyncIterator["Message"]):
                 message = self._state.create_message(channel=self.channel, data=element["message"])
                 message._pinned_at = parse_time(element["pinned_at"])
                 await self.messages.put(message)
+
+
+class MessageSearchIterator(_AsyncIterator["Message"]):
+    def __init__(
+        self,
+        guild: Guild,
+        query: dict[str, str | int | bool | Sequence[str | int]],
+        *,
+        limit: int | None,
+        before: Snowflake | datetime.datetime | None = None,
+        after: Snowflake | datetime.datetime | None = None,
+    ) -> None:
+        if isinstance(before, datetime.datetime):
+            before = Object(id=time_snowflake(before, high=False))
+        if isinstance(after, datetime.datetime):
+            after = Object(id=time_snowflake(after, high=True))
+
+        self.guild = guild
+        self._state = guild._state
+
+        self.limit = limit
+        self.offset: int = 0
+
+        self.query = query
+        # since the given `query` dict should always be ephemeral and only created by the lib,
+        # we can just mutate it directly
+        if before is not None:
+            self.query["max_id"] = before.id
+        if after is not None:
+            self.query["min_id"] = after.id
+
+        self.getter = self._state.http.search_guild_messages
+        self.messages: asyncio.Queue[Message] = asyncio.Queue()
+
+    async def next(self) -> Message:
+        if self.messages.empty():
+            await self.fill_messages()
+
+        try:
+            return self.messages.get_nowait()
+        except asyncio.QueueEmpty:
+            raise NoMoreItems from None
+
+    def _get_retrieve(self) -> bool:
+        self.retrieve = min(self.limit, 25) if self.limit is not None else 25
+        return self.retrieve > 0
+
+    async def fill_messages(self) -> None:
+        if not self._get_retrieve():
+            return
+
+        self.query["limit"] = self.retrieve
+        self.query["offset"] = self.offset
+
+        data = await self.getter(
+            guild_id=self.guild.id,
+            params=self.query,
+        )
+
+        messages = [m for ms in data["messages"] for m in ms]
+
+        if messages:
+            if self.limit is not None:
+                self.limit -= self.retrieve
+            self.offset += self.retrieve
+
+        if len(messages) < 25:
+            self.limit = 0  # terminate loop
+
+        from .abc import Messageable
+
+        for element in messages:
+            channel = self.guild.get_channel_or_thread(int(element["channel_id"]))
+            # TODO: take `data["threads"]` into account
+            if not isinstance(channel, Messageable):
+                continue
+
+            message = self._state.create_message(channel=channel, data=element)
+            await self.messages.put(message)

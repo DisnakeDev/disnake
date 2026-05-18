@@ -61,7 +61,7 @@ from .flags import SystemChannelFlags
 from .guild_scheduled_event import GuildScheduledEvent, GuildScheduledEventMetadata
 from .integrations import Integration, _integration_factory
 from .invite import Invite
-from .iterators import AuditLogIterator, BanIterator, MemberIterator
+from .iterators import AuditLogIterator, BanIterator, MemberIterator, MessageSearchIterator
 from .member import Member, VoiceState
 from .mixins import Hashable
 from .object import Object
@@ -5440,7 +5440,7 @@ class Guild(Hashable):
             GuildSoundboardSound(data=d, state=self._state, guild_id=self.id) for d in data["items"]
         ]
 
-    async def search_messages(
+    def search_messages(
         self,
         *,
         # common iterator params
@@ -5467,7 +5467,7 @@ class Guild(Hashable):
         attachment_filename: Sequence[str] | None = None,
         attachment_extension: Sequence[str] | None = None,
         include_nsfw: bool | None = None,
-    ) -> None:
+    ) -> MessageSearchIterator:
         """|coro|
 
         TODO
@@ -5493,8 +5493,16 @@ class Guild(Hashable):
             "attachment_extension": attachment_extension,
             "include_nsfw": include_nsfw,
         }
-        await self._state.http.search_guild_messages(
-            self.id, **{k: v for k, v in query.items() if v is not None}
+
+        query["sort_by"] = sort.sort_key
+        query["sort_order"] = sort.sort_order
+
+        return MessageSearchIterator(
+            self,
+            {k: v for k, v in query.items() if v is not None},
+            limit=limit,
+            before=before,
+            after=after,
         )
 
 
