@@ -15,7 +15,7 @@ from .member import Member, UserWithMember
 from .poll import Poll
 from .snowflake import Snowflake, SnowflakeList
 from .sticker import StickerItem
-from .threads import Thread
+from .threads import Thread, ThreadMember
 from .user import User
 
 
@@ -169,3 +169,12 @@ class MessagePin(TypedDict):
 class MessageCall(TypedDict):
     participants: SnowflakeList
     ended_timestamp: NotRequired[str | None]
+
+
+class MessageSearchResult(TypedDict):
+    doing_deep_historical_index: bool
+    documents_indexed: NotRequired[int]
+    total_results: int
+    messages: list[list[Message]]
+    threads: NotRequired[list[Thread]]
+    members: NotRequired[list[ThreadMember]]

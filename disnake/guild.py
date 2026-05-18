@@ -44,6 +44,7 @@ from .enums import (
     GuildScheduledEventEntityType,
     GuildScheduledEventPrivacyLevel,
     Locale,
+    MessageSearchSortBy,
     NotificationLevel,
     NSFWLevel,
     ThreadLayout,
@@ -78,6 +79,9 @@ from .welcome_screen import WelcomeScreen, WelcomeScreenChannel
 from .widget import Widget, WidgetSettings
 
 __all__ = (
+    "MessageSearchAuthorType",
+    "MessageSearchHasThing",
+    "MessageSearchEmbedType",
     "IncidentsData",
     "Guild",
     "GuildBuilder",
@@ -121,6 +125,29 @@ if TYPE_CHECKING:
         VoiceChannel | StageChannel | TextChannel | CategoryChannel | ForumChannel | MediaChannel
     )
     ByCategoryItem: TypeAlias = tuple[CategoryChannel | None, list[GuildChannel]]
+
+
+# XXX: these are here such that they can (in theory) be used at runtime; disnake.types isn't necessarily runtime-importable due to cycles
+# fmt: off
+MessageSearchAuthorType = Literal[
+    "user", "-user",
+    "bot", "-bot",
+    "webhook", "-webhook"
+]
+# TODO: name
+MessageSearchHasThing = Literal[
+    "image", "-image",
+    "sound", "-sound",
+    "video", "-video",
+    "file", "-file",
+    "sticker", "-sticker",
+    "embed", "-embed",
+    "link", "-link",
+    "poll", "-poll",
+    "snapshot", "-snapshot",
+]
+# fmt: on
+MessageSearchEmbedType = Literal["image", "video", "gif", "sound", "article"]
 
 
 class _GuildLimit(NamedTuple):
@@ -5412,6 +5439,63 @@ class Guild(Hashable):
         return [
             GuildSoundboardSound(data=d, state=self._state, guild_id=self.id) for d in data["items"]
         ]
+
+    async def search_messages(
+        self,
+        *,
+        # common iterator params
+        limit: int | None = 25,
+        before: SnowflakeTime | None = None,
+        after: SnowflakeTime | None = None,
+        sort: MessageSearchSortBy = MessageSearchSortBy.timestamp_desc,
+        # search filters
+        # TODO: consider MISSING instead of None defaults?
+        content: str | None = None,
+        slop: int | None = None,
+        channel: Snowflake | None = None,
+        author: Snowflake | None = None,
+        author_type: Sequence[MessageSearchAuthorType] | None = None,
+        mentions: Sequence[Snowflake] | None = None,
+        mentions_role: Sequence[Snowflake] | None = None,
+        replied_to_user: Sequence[Snowflake] | None = None,
+        replied_to_message: Sequence[Snowflake] | None = None,
+        pinned: bool | None = None,
+        has: Sequence[MessageSearchHasThing] | None = None,
+        embed_type: Sequence[MessageSearchEmbedType] | None = None,
+        embed_provider: Sequence[str] | None = None,
+        link_hostname: Sequence[str] | None = None,
+        attachment_filename: Sequence[str] | None = None,
+        attachment_extension: Sequence[str] | None = None,
+        include_nsfw: bool | None = None,
+    ) -> None:
+        """|coro|
+
+        TODO
+        """
+        query: dict[str, str | int | bool | Sequence[str | int] | None] = {
+            "content": content,
+            "slop": slop,
+            "channel": channel.id if channel else None,
+            "author": author.id if author else None,
+            "author_type": author_type,
+            "mentions": [m.id for m in mentions] if mentions else None,
+            "mentions_role": [r.id for r in mentions_role] if mentions_role else None,
+            "replied_to_user": [u.id for u in replied_to_user] if replied_to_user else None,
+            "replied_to_message": (
+                [m.id for m in replied_to_message] if replied_to_message else None
+            ),
+            "pinned": pinned,
+            "has": has,
+            "embed_type": embed_type,
+            "embed_provider": embed_provider,
+            "link_hostname": link_hostname,
+            "attachment_filename": attachment_filename,
+            "attachment_extension": attachment_extension,
+            "include_nsfw": include_nsfw,
+        }
+        await self._state.http.search_guild_messages(
+            self.id, **{k: v for k, v in query.items() if v is not None}
+        )
 
 
 PlaceholderID = NewType("PlaceholderID", int)

@@ -76,6 +76,7 @@ __all__ = (
     "MessageReferenceType",
     "SeparatorSpacing",
     "NameplatePalette",
+    "MessageSearchSortBy",
 )
 
 EnumMetaT = TypeVar("EnumMetaT", bound="EnumMeta")
@@ -2514,6 +2515,12 @@ class NameplatePalette(Enum):
     """Lemon color palette."""
     white = "white"
     """White color palette."""
+
+
+class MessageSearchSortBy(Enum):
+    timestamp_desc = "timestamp_desc"
+    timestamp_asc = "timestamp_asc"
+    relevance = "relevance"
 
 
 T = TypeVar("T", bound="Enum")
