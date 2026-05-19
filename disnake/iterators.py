@@ -1439,7 +1439,10 @@ class MessageSearchIterator(_AsyncIterator["Message"]):
         self.messages: asyncio.Queue[Message] = asyncio.Queue()
 
     async def next(self) -> Message:
-        if self.messages.empty():
+        # note: unlike other endpoints, this one can return empty pages,
+        # especially with higher offsets. therefore, continue iterating empty pages
+        # until we either get some results or reach the definitive end
+        while self.messages.empty() and self.limit != 0:
             await self.fill_messages()
 
         try:
@@ -1499,10 +1502,9 @@ class MessageSearchIterator(_AsyncIterator["Message"]):
         }
         message_data = [m for ms in data["messages"] for m in ms]
 
-        if message_data:
-            if self.limit is not None:
-                self.limit -= self.retrieve
-            self.offset += self.retrieve
+        if self.limit is not None:
+            self.limit -= self.retrieve
+        self.offset += self.retrieve
 
         # if the next offset would exceed the total number of results or maximum allowed offset, stop
         if self.offset >= data["total_results"] or self.offset > 9975:
