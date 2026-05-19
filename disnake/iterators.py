@@ -1503,7 +1503,7 @@ class MessageSearchIterator(_AsyncIterator["Message"]):
         message_data = [m for ms in data["messages"] for m in ms]
 
         if self.limit is not None:
-            self.limit -= self.retrieve
+            self.limit -= len(message_data)
         self.offset += self.retrieve
 
         # if the next offset would exceed the total number of results or maximum allowed offset, stop
