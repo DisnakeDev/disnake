@@ -5449,7 +5449,6 @@ class Guild(Hashable):
         after: SnowflakeTime | None = None,
         sort: MessageSearchSortBy = MessageSearchSortBy.timestamp_desc,
         # search filters
-        # TODO: consider MISSING instead of None defaults?
         content: str | None = None,
         slop: int | None = None,
         # TODO: channel/author vs channels/authors
@@ -5469,6 +5468,8 @@ class Guild(Hashable):
         attachment_filename: Sequence[str] | None = None,
         attachment_extension: Sequence[str] | None = None,
         include_nsfw: bool | None = None,
+        # for handling indexing errors
+        retries: int = 3,
     ) -> MessageSearchIterator:
         """|coro|
 
@@ -5503,6 +5504,7 @@ class Guild(Hashable):
         return MessageSearchIterator(
             self,
             {k: v for k, v in query.items() if v is not None},
+            retries=retries,
             limit=limit,
             before=before,
             after=after,

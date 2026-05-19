@@ -59,7 +59,7 @@ if TYPE_CHECKING:
         GuildScheduledEventUser as GuildScheduledEventUserPayload,
     )
     from .types.member import MemberWithUser as MemberWithUserPayload
-    from .types.message import Message as MessagePayload
+    from .types.message import Message as MessagePayload, MessageSearchResult
     from .types.subscription import Subscription as SubscriptionPayload
     from .types.threads import Thread as ThreadPayload
     from .types.user import PartialUser as PartialUserPayload
@@ -1407,6 +1407,7 @@ class MessageSearchIterator(_AsyncIterator["Message"]):
         guild: Guild,
         query: dict[str, str | int | bool | Sequence[str | int]],
         *,
+        retries: int,
         limit: int | None,
         before: Snowflake | datetime.datetime | None = None,
         after: Snowflake | datetime.datetime | None = None,
@@ -1430,6 +1431,7 @@ class MessageSearchIterator(_AsyncIterator["Message"]):
         if after is not None:
             self.query["min_id"] = after.id
 
+        self.max_retries = retries
         self.getter = self._state.http.search_guild_messages
         self.messages: asyncio.Queue[Message] = asyncio.Queue()
 
@@ -1446,6 +1448,33 @@ class MessageSearchIterator(_AsyncIterator["Message"]):
         self.retrieve = min(self.limit, 25) if self.limit is not None else 25
         return self.retrieve > 0
 
+    # this endpoint is somewhat special in that the guild/channel may still be in the
+    # process of being indexed, in which case we receive a `202 Accepted` with a `retry_after` field.
+    async def _try_fetch(self) -> MessageSearchResult:
+        retries = 0
+        while True:
+            data = await self.getter(
+                guild_id=self.guild.id,
+                params=self.query,
+            )
+
+            if "code" not in data:
+                return data
+
+            # if we have a `code`, this was a 202 response and message indexing is likely still in progress
+            if retries >= self.max_retries:
+                # TODO: custom error?
+                msg = "Exhausted retries while message search indexing is still in progress"
+                raise RuntimeError(msg)
+
+            retry_after = data["retry_after"]
+            # "If the retry_after field is 0, you should retry the request after a short delay."
+            retry_after = max(retry_after, 0.25)
+            # TODO: log
+
+            await asyncio.sleep(retry_after)
+            retries += 1
+
     async def fill_messages(self) -> None:
         if not self._get_retrieve():
             return
@@ -1453,10 +1482,7 @@ class MessageSearchIterator(_AsyncIterator["Message"]):
         self.query["limit"] = self.retrieve
         self.query["offset"] = self.offset
 
-        data = await self.getter(
-            guild_id=self.guild.id,
-            params=self.query,
-        )
+        data = await self._try_fetch()
 
         messages = [m for ms in data["messages"] for m in ms]
 

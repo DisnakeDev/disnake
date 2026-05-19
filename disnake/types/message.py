@@ -178,3 +178,10 @@ class MessageSearchResult(TypedDict):
     messages: list[list[Message]]
     threads: NotRequired[list[Thread]]
     members: NotRequired[list[ThreadMember]]
+
+
+class MessageSearchNotIndexedResult(TypedDict):
+    message: str
+    code: int
+    documents_indexed: int
+    retry_after: int
