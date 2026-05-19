@@ -228,7 +228,7 @@ class View:
                 continue
             if not isinstance(component, VALID_ACTION_ROW_MESSAGE_COMPONENT_TYPES):
                 # can happen if message uses components v2
-                msg = f"Cannot construct view from message - unexpected {type(component).__name__}"
+                msg = f"Cannot construct view from message - unexpected {component.__class__.__name__}"
                 raise TypeError(msg)
             view.add_item(_component_to_item(component))
         return view
@@ -568,7 +568,7 @@ class ViewStore:
                 _log.warning(
                     "cannot update view for message %d, unexpected %s",
                     message_id,
-                    type(row).__name__,
+                    row.__class__.__name__,
                 )
                 return
 
