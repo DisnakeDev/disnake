@@ -1463,8 +1463,11 @@ class MessageSearchIterator(_AsyncIterator["Message"]):
 
             if "code" not in data:
                 return data
+            if data["code"] != 110000:
+                msg = f"Received unexpected error code {data['code']}"
+                raise RuntimeError(msg)
 
-            # if we have a `code`, this was a 202 response and message indexing is likely still in progress
+            # if we have `"code": 110000`, this was a 202 response and message indexing is likely still in progress
             if retries >= self.max_retries:
                 # TODO: custom error?
                 msg = "Exhausted retries while message search indexing is still in progress"
