@@ -2518,9 +2518,17 @@ class NameplatePalette(Enum):
 
 
 class MessageSearchSortBy(Enum):
+    """Represents the sorting algorithm/direction used for :meth:`Guild.search_messages`.
+
+    .. versionadded:: |vnext|
+    """
+
     timestamp_desc = "timestamp_desc"
+    """Sort by message creation time, descending."""
     timestamp_asc = "timestamp_asc"
+    """Sort by message creation time, ascending."""
     relevance = "relevance"
+    """Sort by relevance of the message to the search query."""
 
     @property
     def sort_key(self) -> str:

@@ -184,6 +184,12 @@ OnboardingPromptType
 .. autoclass:: OnboardingPromptType()
     :members:
 
+MessageSearchSortBy
+~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: MessageSearchSortBy()
+    :members:
+
 Events
 ------
 
