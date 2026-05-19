@@ -5478,6 +5478,9 @@ class Guild(Hashable):
         Results are returned from newest to oldest by default; this is configurable using
         the ``sort`` parameter.
 
+        You must have :attr:`~Permissions.read_message_history` permissions to do this,
+        and the :attr:`~Intents.message_content` intent must be enabled for this bot.
+
         Parameters
         ----------
         limit: :class:`int` | :data:`None`
@@ -5542,7 +5545,23 @@ class Guild(Hashable):
         retries: :class:`int`
             The number of times to wait and retry fetching results in case the guild is still being indexed.
             Can be set to 0 to disable retries and raise an error immediately instead of retrying.
-            Defaults to ``3``.
+            Defaults to 3.
+
+        Raises
+        ------
+        Forbidden
+            You do not have permission to search messages,
+            or the :attr:`~Intents.message_content` intent is not enabled.
+        HTTPException
+            Retrieving the search results failed.
+        RuntimeError
+            FIXME
+            Exceeded maximum number of retries while waiting for messages to finish indexing.
+
+        Yields
+        ------
+        :class:`.Message`
+            The message matching the given query parameters.
         """
         query: dict[str, str | int | bool | Sequence[str | int] | None] = {
             "content": content,
