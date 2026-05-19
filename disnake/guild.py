@@ -5502,8 +5502,11 @@ class Guild(Hashable):
             Filter messages by channels (up to 500).
         author: :class:`~collections.abc.Sequence`\[:class:`.abc.Snowflake`] | :data:`None`
             Filter messages by authors (up to 100).
-        author_type: TODO | :data:`None`
+        author_type: :class:`~collections.abc.Sequence`\[:class:`str`] | :data:`None`
             Filter messages by author types.
+
+            Can be any subset of ``["user", "bot", "webhook"]``. Types can also be negated with a
+            ``-`` prefix to exclude that type, e.g. ``["bot", "-webhook"]`` would be a valid value.
         mentions: :class:`~collections.abc.Sequence`\[:class:`.abc.Snowflake`] | :data:`None`
             Filter messages that mention these users (up to 100).
         mentions_role: :class:`~collections.abc.Sequence`\[:class:`.abc.Snowflake`] | :data:`None`
@@ -5516,10 +5519,16 @@ class Guild(Hashable):
             Filter messages that reply to these messages (up to 100).
         pinned: :class:`bool` | :data:`None`
             Filter messages that are/aren't pinned.
-        has: TODO | :data:`None`
+        has: :class:`~collections.abc.Sequence`\[:class:`str`] | :data:`None`
             Filter messages by whether or not they have specific things.
-        embed_type: TODO | :data:`None`
+
+            Can be any subset of ``["image", "sound", "video", "file", "sticker", "embed", "link", "poll", "snapshot"]``.
+            Types can also be negated with a ``-`` prefix to exclude that type,
+            e.g. ``["image", "-link"]`` would be a valid value.
+        embed_type: :class:`~collections.abc.Sequence`\[:class:`str`] | :data:`None`
             Filter messages by embed type.
+
+            Can be any subset of ``["image", "video", "gif", "sound", "article"]``.
         embed_provider: :class:`~collections.abc.Sequence`\[:class:`str`] | :data:`None`
             Filter messages by embed provider (up to 100, with up to 256 characters each).
         link_hostname: :class:`~collections.abc.Sequence`\[:class:`str`] | :data:`None`
