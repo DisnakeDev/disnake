@@ -27,7 +27,11 @@ if TYPE_CHECKING:
     from .member import Member
     from .state import ConnectionState
     from .types.guild import RolePositionUpdate
-    from .types.role import Role as RolePayload, RoleTags as RoleTagPayload
+    from .types.role import (
+        PartialRole as PartialRolePayload,
+        Role as RolePayload,
+        RoleTags as RoleTagPayload,
+    )
 
 
 class RoleTags:
@@ -223,7 +227,9 @@ class Role(Hashable):
         "_tertiary_color",
     )
 
-    def __init__(self, *, guild: Guild, state: ConnectionState, data: RolePayload) -> None:
+    def __init__(
+        self, *, guild: Guild, state: ConnectionState, data: RolePayload | PartialRolePayload
+    ) -> None:
         self.guild: Guild = guild
         self._state: ConnectionState = state
         self.id: int = int(data["id"])
@@ -272,7 +278,7 @@ class Role(Hashable):
             return NotImplemented
         return not r
 
-    def _update(self, data: RolePayload) -> None:
+    def _update(self, data: RolePayload | PartialRolePayload) -> None:
         self.name: str = data["name"]
         self._permissions: int = int(data.get("permissions", 0))
         self.position: int = data.get("position", 0)

@@ -1,0 +1,1 @@
+Add the new :meth:`Invite.fetch_target_users`, :meth:`Invite.update_target_users`, :meth:`Invite.fetch_target_users_job_status` methods as well as :attr:`Invite.roles`, :attr:`Invite.flags`, :class:`GuildInviteFlags`. Update :meth:`abc.GuildChannel.create_invite` to be able to specify ``roles`` and the ``target_users_file``.

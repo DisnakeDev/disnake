@@ -132,20 +132,28 @@ def set_attachments(payload: dict[str, Any], files: Sequence[File]) -> None:
         payload["attachments"] = attachments
 
 
-def to_multipart(payload: dict[str, Any], files: Sequence[File]) -> list[dict[str, Any]]:
+def to_multipart(
+    payload: dict[str, Any], files: Sequence[File], *, is_csv: bool = False
+) -> list[dict[str, Any]]:
     """Converts the payload and list of files to a multipart payload,
     as specified by https://docs.discord.com/developers/reference#uploading-files
     """
-    multipart: list[dict[str, Any]] = []
-    for index, file in enumerate(files):
-        multipart.append(
+    multipart: list[dict[str, Any]]
+    if is_csv:
+        multipart = [
+            {"name": "target_users_file", "value": file.fp, "content_type": "text/csv"}
+            for file in files
+        ]
+    else:
+        multipart = [
             {
                 "name": f"files[{index}]",
                 "value": file.fp,
                 "filename": file.filename,
                 "content_type": "application/octet-stream",
             }
-        )
+            for index, file in enumerate(files)
+        ]
 
     multipart.append({"name": "payload_json", "value": utils._to_json(payload)})
     return multipart
@@ -1950,7 +1958,9 @@ class HTTPClient:
         unique: bool = True,
         target_type: invite.InviteTargetType | None = None,
         target_user_id: Snowflake | None = None,
+        target_users_file: File | None = None,
         target_application_id: Snowflake | None = None,
+        role_ids: list[Snowflake] | None = None,
     ) -> Response[invite.Invite]:
         r = Route("POST", "/channels/{channel_id}/invites", channel_id=channel_id)
         payload: dict[str, Any] = {
@@ -1969,6 +1979,16 @@ class HTTPClient:
         if target_application_id:
             payload["target_application_id"] = str(target_application_id)
 
+        if role_ids:
+            payload["role_ids"] = role_ids
+
+        if target_users_file:
+            return self.request(
+                r,
+                reason=reason,
+                form=to_multipart(payload=payload, files=[target_users_file], is_csv=True),
+            )
+
         return self.request(r, reason=reason, json=payload)
 
     def get_invite(
@@ -1986,6 +2006,22 @@ class HTTPClient:
 
         return self.request(
             Route("GET", "/invites/{invite_id}", invite_id=invite_id), params=params
+        )
+
+    def get_invite_target_users(self, invite_id: str) -> Response[str]:
+        return self.request(Route("GET", "/invites/{invite_id}/target-users", invite_id=invite_id))
+
+    def update_invite_target_users(self, invite_id: str, *, file: File) -> Response[None]:
+        return self.request(
+            Route("PUT", "/invites/{invite_id}/target-users", invite_id=invite_id),
+            form=to_multipart(payload={}, files=[file], is_csv=True),
+        )
+
+    def get_invite_target_users_job_status(
+        self, invite_id: str
+    ) -> Response[invite.TargetUsersJobPayload]:
+        return self.request(
+            Route("GET", "/invites/{invite_id}/target-users/job-status", invite_id=invite_id)
         )
 
     def invites_from(self, guild_id: Snowflake) -> Response[list[invite.Invite]]:
