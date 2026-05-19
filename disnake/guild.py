@@ -5463,17 +5463,77 @@ class Guild(Hashable):
         pinned: bool | None = None,
         has: Sequence[MessageSearchHasThing] | None = None,
         embed_type: Sequence[MessageSearchEmbedType] | None = None,
+        # XXX: `str` is also `Sequence[str]`, account for this
         embed_provider: Sequence[str] | None = None,
         link_hostname: Sequence[str] | None = None,
         attachment_filename: Sequence[str] | None = None,
         attachment_extension: Sequence[str] | None = None,
+        # TODO: make this not default to None
         include_nsfw: bool | None = None,
         # for handling indexing errors
         retries: int = 3,
     ) -> MessageSearchIterator:
-        """|coro|
+        r"""Returns an :class:`.AsyncIterator` representing the messages matching the query parameters.
 
-        TODO
+        Results are returned from newest to oldest by default; this is configurable using
+        the ``sort`` parameter.
+
+        Parameters
+        ----------
+        limit: :class:`int` | :data:`None`
+            The number of messages to retrieve, up to 10000.
+            If :data:`None`, retrieves the maximum number of matching messages.
+            Note, however, that this would make it a slow operation.
+            Defaults to ``25``.
+        before: :class:`.abc.Snowflake` | :class:`datetime.datetime` | :data:`None`
+            Retrieves messages created before this date or object.
+            If a datetime is provided, it is recommended to use a UTC aware datetime.
+            If the datetime is naive, it is assumed to be local time.
+        after: :class:`.abc.Snowflake` | :class:`datetime.datetime` | :data:`None`
+            Retrieve messages created after this date or object.
+            If a datetime is provided, it is recommended to use a UTC aware datetime.
+            If the datetime is naive, it is assumed to be local time.
+        sort: :class:`MessageSearchSortBy`
+            The sorting algorithm/direction to use for retrieving search results.
+            Defaults to :attr:`~MessageSearchSortBy.timestamp_desc`.
+        content: :class:`str` | :data:`None`
+            Filter messages by content (up to 1024 characters).
+        channel: :class:`~collections.abc.Sequence`\[:class:`.abc.Snowflake`] | :data:`None`
+            Filter messages by channels (up to 500).
+        author: :class:`~collections.abc.Sequence`\[:class:`.abc.Snowflake`] | :data:`None`
+            Filter messages by authors (up to 100).
+        author_type: TODO | :data:`None`
+            Filter messages by author types.
+        mentions: :class:`~collections.abc.Sequence`\[:class:`.abc.Snowflake`] | :data:`None`
+            Filter messages that mention these users (up to 100).
+        mentions_role: :class:`~collections.abc.Sequence`\[:class:`.abc.Snowflake`] | :data:`None`
+            Filter messages that mention these roles (up to 100).
+        mentions_everyone: :class:`bool` | :data:`None`
+            Filter messages that do/don't mention ``@everyone``.
+        replied_to_user: :class:`~collections.abc.Sequence`\[:class:`.abc.Snowflake`] | :data:`None`
+            Filter messages that reply to these users (up to 100).
+        replied_to_message: :class:`~collections.abc.Sequence`\[:class:`.abc.Snowflake`] | :data:`None`
+            Filter messages that reply to these messages (up to 100).
+        pinned: :class:`bool` | :data:`None`
+            Filter messages that are/aren't pinned.
+        has: TODO | :data:`None`
+            Filter messages by whether or not they have specific things.
+        embed_type: TODO | :data:`None`
+            Filter messages by embed type.
+        embed_provider: :class:`~collections.abc.Sequence`\[:class:`str`] | :data:`None`
+            Filter messages by embed provider (up to 100, with up to 256 characters each).
+        link_hostname: :class:`~collections.abc.Sequence`\[:class:`str`] | :data:`None`
+            Filter messages by link hostname, e.g. ``discordapp.com`` (up to 100, with up to 256 characters each).
+        attachment_filename: :class:`~collections.abc.Sequence`\[:class:`str`] | :data:`None`
+            Filter messages by attachment filename (up too 100, with up to 1024 characters each).
+        attachment_extension: :class:`~collections.abc.Sequence`\[:class:`str`] | :data:`None`
+            Filter messages by attachment extension, e.g. ``txt`` (up too 100, with up to 256 characters each).
+        include_nsfw: :class:`bool` | :data:`None`
+            Whether to include results from age-restricted channels. Defaults to ``False``.
+        retries: :class:`int`
+            The number of times to wait and retry fetching results in case the guild is still being indexed.
+            Can be set to 0 to disable retries and raise an error immediately instead of retrying.
+            Defaults to ``3``.
         """
         query: dict[str, str | int | bool | Sequence[str | int] | None] = {
             "content": content,
