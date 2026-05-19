@@ -1491,12 +1491,15 @@ class MessageSearchIterator(_AsyncIterator["Message"]):
 
         self.query["limit"] = self.retrieve
         self.query["offset"] = self.offset
-
         data = await self._try_fetch()
 
-        messages = [m for ms in data["messages"] for m in ms]
+        threads = {
+            int(t["id"]): Thread(guild=self.guild, state=self._state, data=t)
+            for t in data.get("threads") or []
+        }
+        message_data = [m for ms in data["messages"] for m in ms]
 
-        if messages:
+        if message_data:
             if self.limit is not None:
                 self.limit -= self.retrieve
             self.offset += self.retrieve
@@ -1507,10 +1510,12 @@ class MessageSearchIterator(_AsyncIterator["Message"]):
 
         from .abc import Messageable
 
-        for element in messages:
-            channel = self.guild.get_channel_or_thread(int(element["channel_id"]))
-            # TODO: take `data["threads"]` into account
+        for element in message_data:
+            channel_id = int(element["channel_id"])
+            channel = self.guild.get_channel_or_thread(channel_id) or threads.get(channel_id)
             if not isinstance(channel, Messageable):
+                # this should never happen. we're here either because the channel resolved to a
+                # non-messageable guild channel, or because we can't find the channel/thread
                 continue
 
             message = self._state.create_message(channel=channel, data=element)
