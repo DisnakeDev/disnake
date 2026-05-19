@@ -1510,15 +1510,18 @@ class MessageSearchIterator(_AsyncIterator["Message"]):
         if self.offset >= data["total_results"] or self.offset > 9975:
             self.limit = 0  # terminate loop
 
+        for element in message_data:
+            if message := self.create_message(element, threads):
+                await self.messages.put(message)
+
+    def create_message(self, data: MessagePayload, threads: dict[int, Thread]) -> Message | None:
         from .abc import Messageable
 
-        for element in message_data:
-            channel_id = int(element["channel_id"])
-            channel = self.guild.get_channel_or_thread(channel_id) or threads.get(channel_id)
-            if not isinstance(channel, Messageable):
-                # this should never happen. we're here either because the channel resolved to a
-                # non-messageable guild channel, or because we can't find the channel/thread
-                continue
+        channel_id = int(data["channel_id"])
+        channel = self.guild.get_channel_or_thread(channel_id) or threads.get(channel_id)
+        if not isinstance(channel, Messageable):
+            # this should never happen. we're here either because the channel resolved to a
+            # non-messageable guild channel, or because we can't find the channel/thread
+            return None
 
-            message = self._state.create_message(channel=channel, data=element)
-            await self.messages.put(message)
+        return self._state.create_message(channel=channel, data=data)
