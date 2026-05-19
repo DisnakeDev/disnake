@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import datetime
+import logging
 from collections.abc import AsyncIterator, Awaitable, Callable, Generator, Sequence
 from typing import (
     TYPE_CHECKING,
@@ -70,6 +71,8 @@ OT = TypeVar("OT")
 _Func = Callable[[T], OT | Awaitable[OT]]
 
 OLDEST_OBJECT = Object(id=0)
+
+_log = logging.getLogger(__name__)
 
 
 class _AsyncIterator(AsyncIterator[T]):
@@ -1470,7 +1473,11 @@ class MessageSearchIterator(_AsyncIterator["Message"]):
             retry_after = data["retry_after"]
             # "If the retry_after field is 0, you should retry the request after a short delay."
             retry_after = max(retry_after, 0.25)
-            # TODO: log
+            _log.info(
+                "Message search index for guild ID %d is not yet available. Retrying in %.2fs.",
+                self.guild.id,
+                retry_after,
+            )
 
             await asyncio.sleep(retry_after)
             retries += 1
