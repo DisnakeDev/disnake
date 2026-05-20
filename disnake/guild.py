@@ -5552,8 +5552,7 @@ class Guild(Hashable):
             or the :attr:`~Intents.message_content` intent is not enabled.
         HTTPException
             Retrieving the search results failed.
-        RuntimeError
-            FIXME
+        MessageSearchIndexUnavailableError
             Exceeded maximum number of retries while waiting for messages to finish indexing.
 
         Yields

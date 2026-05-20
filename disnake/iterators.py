@@ -19,7 +19,7 @@ from .audit_logs import AuditLogEntry
 from .automod import AutoModRule
 from .bans import BanEntry
 from .entitlement import Entitlement
-from .errors import NoMoreItems
+from .errors import MessageSearchIndexUnavailableError, NoMoreItems
 from .guild_scheduled_event import GuildScheduledEvent
 from .integrations import PartialIntegration
 from .object import Object
@@ -1465,16 +1465,16 @@ class MessageSearchIterator(_AsyncIterator["Message"]):
             )
 
             if "code" not in data:
+                # success
                 return data
+
             if data["code"] != 110000:
                 msg = f"Received unexpected error code {data['code']}"
                 raise RuntimeError(msg)
 
             # if we have `"code": 110000`, this was a 202 response and message indexing is likely still in progress
             if retries >= self.max_retries:
-                # TODO: custom error?
-                msg = "Exhausted retries while message search indexing is still in progress"
-                raise RuntimeError(msg)
+                raise MessageSearchIndexUnavailableError(self.guild)
 
             retry_after = data["retry_after"]
             # "If the retry_after field is 0, you should retry the request after a short delay."
