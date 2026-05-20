@@ -2532,18 +2532,23 @@ class MessageSearchSortMode(Enum):
 
     @property
     def sort_key(self) -> str:
-        return {
-            MessageSearchSortMode.timestamp_desc: "timestamp",
-            MessageSearchSortMode.timestamp_asc: "timestamp",
-            MessageSearchSortMode.relevance: "relevance",
-        }[self]
+        match self:
+            case MessageSearchSortMode.timestamp_desc:
+                return "timestamp"
+            case MessageSearchSortMode.timestamp_asc:
+                return "timestamp"
+            case MessageSearchSortMode.relevance:
+                return "relevance"
 
     @property
     def sort_order(self) -> str | None:
-        return {
-            MessageSearchSortMode.timestamp_desc: "desc",
-            MessageSearchSortMode.timestamp_asc: "asc",
-        }.get(self)
+        match self:
+            case MessageSearchSortMode.timestamp_desc:
+                return "desc"
+            case MessageSearchSortMode.timestamp_asc:
+                return "asc"
+            case MessageSearchSortMode.relevance:
+                return None
 
 
 T = TypeVar("T", bound="Enum")
