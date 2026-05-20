@@ -352,7 +352,7 @@ class AppInfo:
         self.terms_of_service_url: str | None = data.get("terms_of_service_url")
         self.privacy_policy_url: str | None = data.get("privacy_policy_url")
 
-        flags: int | None = data.get("flags")
+        flags: int | None = utils._get_as_snowflake(data, "flags_new")
         self.flags: ApplicationFlags | None = (
             ApplicationFlags._from_value(flags) if flags is not None else None
         )
