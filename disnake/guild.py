@@ -5452,7 +5452,6 @@ class Guild(Hashable):
         # search filters
         content: str | None = None,
         slop: int | None = None,
-        # TODO: channel/author vs channels/authors
         channel: Sequence[Snowflake] | Snowflake | None = None,
         author: Sequence[Snowflake] | Snowflake | None = None,
         author_type: Sequence[MessageSearchAuthorType] | MessageSearchAuthorType | None = None,
@@ -5562,6 +5561,17 @@ class Guild(Hashable):
         :class:`.Message`
             The message matching the given query parameters.
         """
+
+        def listify_snowflakes(arg: abc.Snowflake | Sequence[abc.Snowflake]) -> Sequence[int]:
+            if isinstance(arg, abc.Snowflake):
+                return [arg.id]
+            return [item.id for item in arg]
+
+        def listify_strs(arg: str | Sequence[str]) -> Sequence[str]:
+            if isinstance(arg, str):
+                return [arg]
+            return arg
+
         query: MessageSearchQuery = {"include_nsfw": include_nsfw}
 
         query["sort_by"] = sort.sort_key
@@ -5573,61 +5583,35 @@ class Guild(Hashable):
         if slop is not None:
             query["slop"] = slop
         if channel is not None:
-            if isinstance(channel, abc.Snowflake):
-                channel = [channel]
-            query["channel_id"] = [c.id for c in channel]
+            query["channel_id"] = listify_snowflakes(channel)
         if author is not None:
-            if isinstance(author, abc.Snowflake):
-                author = [author]
-            query["author_id"] = [a.id for a in author]
+            query["author_id"] = listify_snowflakes(author)
         if author_type is not None:
-            if isinstance(author_type, str):
-                author_type = [author_type]
-            query["author_type"] = author_type
+            query["author_type"] = listify_strs(author_type)
         if mentions is not None:
-            if isinstance(mentions, abc.Snowflake):
-                mentions = [mentions]
-            query["mentions"] = [m.id for m in mentions]
+            query["mentions"] = listify_snowflakes(mentions)
         if mentions_role is not None:
-            if isinstance(mentions_role, abc.Snowflake):
-                mentions_role = [mentions_role]
-            query["mentions_role"] = [r.id for r in mentions_role]
+            query["mentions_role"] = listify_snowflakes(mentions_role)
         if mentions_everyone is not None:
             query["mentions_everyone"] = mentions_everyone
         if replied_to_user is not None:
-            if isinstance(replied_to_user, abc.Snowflake):
-                replied_to_user = [replied_to_user]
-            query["replied_to_user_id"] = [u.id for u in replied_to_user]
+            query["replied_to_user_id"] = listify_snowflakes(replied_to_user)
         if replied_to_message is not None:
-            if isinstance(replied_to_message, abc.Snowflake):
-                replied_to_message = [replied_to_message]
-            query["replied_to_message_id"] = [m.id for m in replied_to_message]
+            query["replied_to_message_id"] = listify_snowflakes(replied_to_message)
         if pinned is not None:
             query["pinned"] = pinned
         if has is not None:
-            if isinstance(has, str):
-                has = [has]
-            query["has"] = has
+            query["has"] = listify_strs(has)
         if embed_type is not None:
-            if isinstance(embed_type, str):
-                embed_type = [embed_type]
-            query["embed_type"] = embed_type
+            query["embed_type"] = listify_strs(embed_type)
         if embed_provider is not None:
-            if isinstance(embed_provider, str):
-                embed_provider = [embed_provider]
-            query["embed_provider"] = embed_provider
+            query["embed_provider"] = listify_strs(embed_provider)
         if link_hostname is not None:
-            if isinstance(link_hostname, str):
-                link_hostname = [link_hostname]
-            query["link_hostname"] = link_hostname
+            query["link_hostname"] = listify_strs(link_hostname)
         if attachment_filename is not None:
-            if isinstance(attachment_filename, str):
-                attachment_filename = [attachment_filename]
-            query["attachment_filename"] = attachment_filename
+            query["attachment_filename"] = listify_strs(attachment_filename)
         if attachment_extension is not None:
-            if isinstance(attachment_extension, str):
-                attachment_extension = [attachment_extension]
-            query["attachment_extension"] = attachment_extension
+            query["attachment_extension"] = listify_strs(attachment_extension)
 
         return MessageSearchIterator(
             self, query, retries=retries, limit=limit, before=before, after=after
