@@ -5468,8 +5468,7 @@ class Guild(Hashable):
         link_hostname: Sequence[str] | None = None,
         attachment_filename: Sequence[str] | None = None,
         attachment_extension: Sequence[str] | None = None,
-        # TODO: make this not default to None
-        include_nsfw: bool | None = None,
+        include_nsfw: bool = False,
         # for handling indexing errors
         retries: int = 3,
     ) -> MessageSearchIterator:
@@ -5540,7 +5539,7 @@ class Guild(Hashable):
             Filter messages by attachment filename (up too 100, with up to 1024 characters each).
         attachment_extension: :class:`~collections.abc.Sequence`\[:class:`str`] | :data:`None`
             Filter messages by attachment extension, e.g. ``txt`` (up too 100, with up to 256 characters each).
-        include_nsfw: :class:`bool` | :data:`None`
+        include_nsfw: :class:`bool`
             Whether to include results from age-restricted channels. Defaults to ``False``.
         retries: :class:`int`
             The number of times to wait and retry fetching results in case the guild is still being indexed.
