@@ -1,0 +1,1 @@
+Fix ``tasks.loop`` running twice when a specific ``time`` is given, caused by a scheduling comparison that did not account for the task waking up at exactly the target time.
