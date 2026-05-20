@@ -5453,22 +5453,21 @@ class Guild(Hashable):
         content: str | None = None,
         slop: int | None = None,
         # TODO: channel/author vs channels/authors
-        channel: Sequence[Snowflake] | None = None,
-        author: Sequence[Snowflake] | None = None,
-        author_type: Sequence[MessageSearchAuthorType] | None = None,
-        mentions: Sequence[Snowflake] | None = None,
-        mentions_role: Sequence[Snowflake] | None = None,
+        channel: Sequence[Snowflake] | Snowflake | None = None,
+        author: Sequence[Snowflake] | Snowflake | None = None,
+        author_type: Sequence[MessageSearchAuthorType] | MessageSearchAuthorType | None = None,
+        mentions: Sequence[Snowflake] | Snowflake | None = None,
+        mentions_role: Sequence[Snowflake] | Snowflake | None = None,
         mentions_everyone: bool | None = None,
-        replied_to_user: Sequence[Snowflake] | None = None,
-        replied_to_message: Sequence[Snowflake] | None = None,
+        replied_to_user: Sequence[Snowflake] | Snowflake | None = None,
+        replied_to_message: Sequence[Snowflake] | Snowflake | None = None,
         pinned: bool | None = None,
-        has: Sequence[MessageSearchHasThing] | None = None,
-        embed_type: Sequence[MessageSearchEmbedType] | None = None,
-        # XXX: `str` is also `Sequence[str]`, account for this
-        embed_provider: Sequence[str] | None = None,
-        link_hostname: Sequence[str] | None = None,
-        attachment_filename: Sequence[str] | None = None,
-        attachment_extension: Sequence[str] | None = None,
+        has: Sequence[MessageSearchHasThing] | MessageSearchHasThing | None = None,
+        embed_type: Sequence[MessageSearchEmbedType] | MessageSearchEmbedType | None = None,
+        embed_provider: Sequence[str] | str | None = None,
+        link_hostname: Sequence[str] | str | None = None,
+        attachment_filename: Sequence[str] | str | None = None,
+        attachment_extension: Sequence[str] | str | None = None,
         include_nsfw: bool = False,
         # for handling indexing errors
         retries: int = 3,
@@ -5501,44 +5500,44 @@ class Guild(Hashable):
             Defaults to :attr:`~MessageSearchSortMode.timestamp_desc`.
         content: :class:`str` | :data:`None`
             Filter messages by content (up to 1024 characters).
-        channel: :class:`~collections.abc.Sequence`\[:class:`.abc.Snowflake`] | :data:`None`
+        channel: :class:`~collections.abc.Sequence`\[:class:`.abc.Snowflake`] | :class:`.abc.Snowflake` | :data:`None`
             Filter messages by channels (up to 500).
-        author: :class:`~collections.abc.Sequence`\[:class:`.abc.Snowflake`] | :data:`None`
+        author: :class:`~collections.abc.Sequence`\[:class:`.abc.Snowflake`] | :class:`.abc.Snowflake` | :data:`None`
             Filter messages by authors (up to 100).
-        author_type: :class:`~collections.abc.Sequence`\[:class:`str`] | :data:`None`
+        author_type: :class:`~collections.abc.Sequence`\[:class:`str`] | :class:`str` | :data:`None`
             Filter messages by author types.
 
             Can be any subset of ``["user", "bot", "webhook"]``. Types can also be negated with a
             ``-`` prefix to exclude that type, e.g. ``["bot", "-webhook"]`` would be a valid value.
-        mentions: :class:`~collections.abc.Sequence`\[:class:`.abc.Snowflake`] | :data:`None`
+        mentions: :class:`~collections.abc.Sequence`\[:class:`.abc.Snowflake`] | :class:`.abc.Snowflake` | :data:`None`
             Filter messages that mention these users (up to 100).
-        mentions_role: :class:`~collections.abc.Sequence`\[:class:`.abc.Snowflake`] | :data:`None`
+        mentions_role: :class:`~collections.abc.Sequence`\[:class:`.abc.Snowflake`] | :class:`.abc.Snowflake` | :data:`None`
             Filter messages that mention these roles (up to 100).
         mentions_everyone: :class:`bool` | :data:`None`
             Filter messages that do/don't mention ``@everyone``.
-        replied_to_user: :class:`~collections.abc.Sequence`\[:class:`.abc.Snowflake`] | :data:`None`
+        replied_to_user: :class:`~collections.abc.Sequence`\[:class:`.abc.Snowflake`] | :class:`.abc.Snowflake` | :data:`None`
             Filter messages that reply to these users (up to 100).
-        replied_to_message: :class:`~collections.abc.Sequence`\[:class:`.abc.Snowflake`] | :data:`None`
+        replied_to_message: :class:`~collections.abc.Sequence`\[:class:`.abc.Snowflake`] | :class:`.abc.Snowflake` | :data:`None`
             Filter messages that reply to these messages (up to 100).
         pinned: :class:`bool` | :data:`None`
             Filter messages that are/aren't pinned.
-        has: :class:`~collections.abc.Sequence`\[:class:`str`] | :data:`None`
+        has: :class:`~collections.abc.Sequence`\[:class:`str`] | :class:`str` | :data:`None`
             Filter messages by whether or not they have specific things.
 
             Can be any subset of ``["image", "sound", "video", "file", "sticker", "embed", "link", "poll", "snapshot"]``.
             Types can also be negated with a ``-`` prefix to exclude that type,
             e.g. ``["image", "-link"]`` would be a valid value.
-        embed_type: :class:`~collections.abc.Sequence`\[:class:`str`] | :data:`None`
+        embed_type: :class:`~collections.abc.Sequence`\[:class:`str`] | :class:`str` | :data:`None`
             Filter messages by embed type.
 
             Can be any subset of ``["image", "video", "gif", "sound", "article"]``.
-        embed_provider: :class:`~collections.abc.Sequence`\[:class:`str`] | :data:`None`
+        embed_provider: :class:`~collections.abc.Sequence`\[:class:`str`] | :class:`str` | :data:`None`
             Filter messages by embed provider (up to 100, with up to 256 characters each).
-        link_hostname: :class:`~collections.abc.Sequence`\[:class:`str`] | :data:`None`
+        link_hostname: :class:`~collections.abc.Sequence`\[:class:`str`] | :class:`str` | :data:`None`
             Filter messages by link hostname, e.g. ``discordapp.com`` (up to 100, with up to 256 characters each).
-        attachment_filename: :class:`~collections.abc.Sequence`\[:class:`str`] | :data:`None`
+        attachment_filename: :class:`~collections.abc.Sequence`\[:class:`str`] | :class:`str` | :data:`None`
             Filter messages by attachment filename (up too 100, with up to 1024 characters each).
-        attachment_extension: :class:`~collections.abc.Sequence`\[:class:`str`] | :data:`None`
+        attachment_extension: :class:`~collections.abc.Sequence`\[:class:`str`] | :class:`str` | :data:`None`
             Filter messages by attachment extension, e.g. ``txt`` (up too 100, with up to 256 characters each).
         include_nsfw: :class:`bool`
             Whether to include results from age-restricted channels. Defaults to ``False``.
@@ -5574,34 +5573,60 @@ class Guild(Hashable):
         if slop is not None:
             query["slop"] = slop
         if channel is not None:
+            if isinstance(channel, abc.Snowflake):
+                channel = [channel]
             query["channel_id"] = [c.id for c in channel]
         if author is not None:
+            if isinstance(author, abc.Snowflake):
+                author = [author]
             query["author_id"] = [a.id for a in author]
         if author_type is not None:
+            if isinstance(author_type, str):
+                author_type = [author_type]
             query["author_type"] = author_type
         if mentions is not None:
+            if isinstance(mentions, abc.Snowflake):
+                mentions = [mentions]
             query["mentions"] = [m.id for m in mentions]
         if mentions_role is not None:
+            if isinstance(mentions_role, abc.Snowflake):
+                mentions_role = [mentions_role]
             query["mentions_role"] = [r.id for r in mentions_role]
         if mentions_everyone is not None:
             query["mentions_everyone"] = mentions_everyone
         if replied_to_user is not None:
+            if isinstance(replied_to_user, abc.Snowflake):
+                replied_to_user = [replied_to_user]
             query["replied_to_user_id"] = [u.id for u in replied_to_user]
         if replied_to_message is not None:
+            if isinstance(replied_to_message, abc.Snowflake):
+                replied_to_message = [replied_to_message]
             query["replied_to_message_id"] = [m.id for m in replied_to_message]
         if pinned is not None:
             query["pinned"] = pinned
         if has is not None:
+            if isinstance(has, str):
+                has = [has]
             query["has"] = has
         if embed_type is not None:
+            if isinstance(embed_type, str):
+                embed_type = [embed_type]
             query["embed_type"] = embed_type
         if embed_provider is not None:
+            if isinstance(embed_provider, str):
+                embed_provider = [embed_provider]
             query["embed_provider"] = embed_provider
         if link_hostname is not None:
+            if isinstance(link_hostname, str):
+                link_hostname = [link_hostname]
             query["link_hostname"] = link_hostname
         if attachment_filename is not None:
+            if isinstance(attachment_filename, str):
+                attachment_filename = [attachment_filename]
             query["attachment_filename"] = attachment_filename
         if attachment_extension is not None:
+            if isinstance(attachment_extension, str):
+                attachment_extension = [attachment_extension]
             query["attachment_extension"] = attachment_extension
 
         return MessageSearchIterator(
