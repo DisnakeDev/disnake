@@ -76,7 +76,7 @@ __all__ = (
     "MessageReferenceType",
     "SeparatorSpacing",
     "NameplatePalette",
-    "MessageSearchSortBy",
+    "MessageSearchSortMode",
 )
 
 EnumMetaT = TypeVar("EnumMetaT", bound="EnumMeta")
@@ -2517,7 +2517,7 @@ class NameplatePalette(Enum):
     """White color palette."""
 
 
-class MessageSearchSortBy(Enum):
+class MessageSearchSortMode(Enum):
     """Represents the sorting algorithm/direction used for :meth:`Guild.search_messages`.
 
     .. versionadded:: |vnext|
@@ -2533,16 +2533,16 @@ class MessageSearchSortBy(Enum):
     @property
     def sort_key(self) -> str:
         return {
-            MessageSearchSortBy.timestamp_desc: "timestamp",
-            MessageSearchSortBy.timestamp_asc: "timestamp",
-            MessageSearchSortBy.relevance: "relevance",
+            MessageSearchSortMode.timestamp_desc: "timestamp",
+            MessageSearchSortMode.timestamp_asc: "timestamp",
+            MessageSearchSortMode.relevance: "relevance",
         }[self]
 
     @property
     def sort_order(self) -> str | None:
         return {
-            MessageSearchSortBy.timestamp_desc: "desc",
-            MessageSearchSortBy.timestamp_asc: "asc",
+            MessageSearchSortMode.timestamp_desc: "desc",
+            MessageSearchSortMode.timestamp_asc: "asc",
         }.get(self)
 
 

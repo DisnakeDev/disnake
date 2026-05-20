@@ -44,7 +44,7 @@ from .enums import (
     GuildScheduledEventEntityType,
     GuildScheduledEventPrivacyLevel,
     Locale,
-    MessageSearchSortBy,
+    MessageSearchSortMode,
     NotificationLevel,
     NSFWLevel,
     ThreadLayout,
@@ -5447,7 +5447,7 @@ class Guild(Hashable):
         limit: int | None = 25,
         before: SnowflakeTime | None = None,
         after: SnowflakeTime | None = None,
-        sort: MessageSearchSortBy = MessageSearchSortBy.timestamp_desc,
+        sort: MessageSearchSortMode = MessageSearchSortMode.timestamp_desc,
         # search filters
         content: str | None = None,
         slop: int | None = None,
@@ -5496,9 +5496,9 @@ class Guild(Hashable):
             Retrieve messages created after this date or object.
             If a datetime is provided, it is recommended to use a UTC aware datetime.
             If the datetime is naive, it is assumed to be local time.
-        sort: :class:`MessageSearchSortBy`
+        sort: :class:`MessageSearchSortMode`
             The sorting algorithm/direction to use for retrieving search results.
-            Defaults to :attr:`~MessageSearchSortBy.timestamp_desc`.
+            Defaults to :attr:`~MessageSearchSortMode.timestamp_desc`.
         content: :class:`str` | :data:`None`
             Filter messages by content (up to 1024 characters).
         channel: :class:`~collections.abc.Sequence`\[:class:`.abc.Snowflake`] | :data:`None`
