@@ -5479,6 +5479,8 @@ class Guild(Hashable):
         You must have :attr:`~Permissions.read_message_history` permissions to do this,
         and the :attr:`~Intents.message_content` intent must be enabled for this bot.
 
+        .. versionadded:: |vnext|
+
         Parameters
         ----------
         limit: :class:`int` | :data:`None`
