@@ -775,6 +775,8 @@ class AuditLogAction(Enum):
     automod_quarantine_user               = 146
     creator_monetization_request_created  = 150
     creator_monetization_terms_accepted   = 151
+    voice_channel_status_update           = 192
+    voice_channel_status_delete           = 193
     # fmt: on
 
     @property
@@ -841,6 +843,8 @@ class AuditLogAction(Enum):
             AuditLogAction.automod_quarantine_user:               None,
             AuditLogAction.creator_monetization_request_created:  None,
             AuditLogAction.creator_monetization_terms_accepted:   None,
+            AuditLogAction.voice_channel_status_update:           AuditLogActionCategory.update,
+            AuditLogAction.voice_channel_status_delete:           AuditLogActionCategory.delete,
         }
         # fmt: on
         return lookup[self]
@@ -886,8 +890,10 @@ class AuditLogAction(Enum):
             return "automod_rule"
         elif v < 147:
             return "user"
-        elif v < 152:
+        elif v < 192:
             return None
+        elif v < 194:
+            return "channel"
         else:
             return None
 
@@ -2119,6 +2125,18 @@ class Event(Enum):
     Represents the :func:`on_raw_voice_channel_effect` event.
 
     .. versionadded:: 2.10
+    """
+    voice_channel_status_update = "voice_channel_status_update"
+    """Called when a voice channel status is updated.
+    Represents the :func:`on_voice_channel_status_update` event.
+
+    .. versionadded:: |vnext|
+    """
+    voice_channel_start_time_update = "voice_channel_start_time_update"
+    """Called when a voice channel start time is updated.
+    Represents the :func:`on_voice_channel_start_time_update` event.
+
+    .. versionadded:: |vnext|
     """
     stage_instance_create = "stage_instance_create"
     """Called when a `StageInstance` is created for a `StageChannel`.

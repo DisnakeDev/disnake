@@ -1153,6 +1153,20 @@ class HTTPClient:
             Route("DELETE", "/channels/{channel_id}", channel_id=channel_id), reason=reason
         )
 
+    def set_voice_channel_status(
+        self,
+        channel_id: Snowflake,
+        *,
+        status: str | None,
+        reason: str | None = None,
+    ) -> Response[None]:
+        payload = {"status": status}
+        return self.request(
+            Route("PUT", "/channels/{channel_id}/voice-status", channel_id=channel_id),
+            json=payload,
+            reason=reason,
+        )
+
     # Thread management
 
     def start_thread_with_message(
