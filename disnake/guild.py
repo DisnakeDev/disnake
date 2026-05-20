@@ -113,6 +113,7 @@ if TYPE_CHECKING:
         MFALevel,
     )
     from .types.integration import Integration as IntegrationPayload, IntegrationType
+    from .types.message import MessageSearchQuery
     from .types.role import CreateRole as CreateRolePayload
     from .types.sticker import CreateGuildSticker as CreateStickerPayload
     from .types.threads import Thread as ThreadPayload, ThreadArchiveDurationLiteral
@@ -5562,39 +5563,49 @@ class Guild(Hashable):
         :class:`.Message`
             The message matching the given query parameters.
         """
-        query: dict[str, str | int | bool | Sequence[str | int] | None] = {
-            "content": content,
-            "slop": slop,
-            "channel": [c.id for c in channel] if channel else None,
-            "author": [a.id for a in author] if author else None,
-            "author_type": author_type,
-            "mentions": [m.id for m in mentions] if mentions else None,
-            "mentions_role": [r.id for r in mentions_role] if mentions_role else None,
-            "mentions_everyone": mentions_everyone,
-            "replied_to_user": [u.id for u in replied_to_user] if replied_to_user else None,
-            "replied_to_message": (
-                [m.id for m in replied_to_message] if replied_to_message else None
-            ),
-            "pinned": pinned,
-            "has": has,
-            "embed_type": embed_type,
-            "embed_provider": embed_provider,
-            "link_hostname": link_hostname,
-            "attachment_filename": attachment_filename,
-            "attachment_extension": attachment_extension,
-            "include_nsfw": include_nsfw,
-        }
+        query: MessageSearchQuery = {"include_nsfw": include_nsfw}
 
         query["sort_by"] = sort.sort_key
-        query["sort_order"] = sort.sort_order
+        if sort_order := sort.sort_order:
+            query["sort_order"] = sort_order
+
+        if content is not None:
+            query["content"] = content
+        if slop is not None:
+            query["slop"] = slop
+        if channel is not None:
+            query["channel_id"] = [c.id for c in channel]
+        if author is not None:
+            query["author_id"] = [a.id for a in author]
+        if author_type is not None:
+            query["author_type"] = author_type
+        if mentions is not None:
+            query["mentions"] = [m.id for m in mentions]
+        if mentions_role is not None:
+            query["mentions_role"] = [r.id for r in mentions_role]
+        if mentions_everyone is not None:
+            query["mentions_everyone"] = mentions_everyone
+        if replied_to_user is not None:
+            query["replied_to_user_id"] = [u.id for u in replied_to_user]
+        if replied_to_message is not None:
+            query["replied_to_message_id"] = [m.id for m in replied_to_message]
+        if pinned is not None:
+            query["pinned"] = pinned
+        if has is not None:
+            query["has"] = has
+        if embed_type is not None:
+            query["embed_type"] = embed_type
+        if embed_provider is not None:
+            query["embed_provider"] = embed_provider
+        if link_hostname is not None:
+            query["link_hostname"] = link_hostname
+        if attachment_filename is not None:
+            query["attachment_filename"] = attachment_filename
+        if attachment_extension is not None:
+            query["attachment_extension"] = attachment_extension
 
         return MessageSearchIterator(
-            self,
-            {k: v for k, v in query.items() if v is not None},
-            retries=retries,
-            limit=limit,
-            before=before,
-            after=after,
+            self, query, retries=retries, limit=limit, before=before, after=after
         )
 
 

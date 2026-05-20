@@ -7,7 +7,7 @@ import logging
 import re
 import sys
 import weakref
-from collections.abc import Coroutine, Iterable, Sequence
+from collections.abc import Coroutine, Iterable, Mapping, Sequence
 from errno import ECONNRESET
 from typing import (
     TYPE_CHECKING,
@@ -910,7 +910,7 @@ class HTTPClient:
         return self.request(r, params=params)
 
     def search_guild_messages(
-        self, guild_id: Snowflake, params: dict[str, Any]
+        self, guild_id: Snowflake, params: Mapping[str, Any]
     ) -> Response[message.MessageSearchResult | message.MessageSearchNotIndexedResult]:
         # turn bools into 0/1
         params = {k: (int(v) if isinstance(v, bool) else v) for k, v in params.items()}

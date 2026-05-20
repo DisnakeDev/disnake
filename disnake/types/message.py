@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from typing import Literal, TypedDict
 
 from typing_extensions import NotRequired
@@ -169,6 +170,35 @@ class MessagePin(TypedDict):
 class MessageCall(TypedDict):
     participants: SnowflakeList
     ended_timestamp: NotRequired[str | None]
+
+
+class MessageSearchQuery(TypedDict, total=False):
+    # pagination
+    limit: int
+    offset: int
+    max_id: Snowflake
+    min_id: Snowflake
+    # query
+    slop: int
+    content: str
+    channel_id: Sequence[Snowflake]
+    author_type: Sequence[str]
+    author_id: Sequence[Snowflake]
+    mentions: Sequence[Snowflake]
+    mentions_role: Sequence[Snowflake]
+    mentions_everyone: bool
+    replied_to_user_id: Sequence[Snowflake]
+    replied_to_message_id: Sequence[Snowflake]
+    pinned: bool
+    has: Sequence[str]
+    embed_type: Sequence[str]
+    embed_provider: Sequence[str]
+    link_hostname: Sequence[str]
+    attachment_filename: Sequence[str]
+    attachment_extension: Sequence[str]
+    sort_by: str
+    sort_order: str
+    include_nsfw: bool
 
 
 class MessageSearchResult(TypedDict):

@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 import datetime
 import logging
-from collections.abc import AsyncIterator, Awaitable, Callable, Generator, Sequence
+from collections.abc import AsyncIterator, Awaitable, Callable, Generator
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -60,7 +60,7 @@ if TYPE_CHECKING:
         GuildScheduledEventUser as GuildScheduledEventUserPayload,
     )
     from .types.member import MemberWithUser as MemberWithUserPayload
-    from .types.message import Message as MessagePayload, MessageSearchResult
+    from .types.message import Message as MessagePayload, MessageSearchQuery, MessageSearchResult
     from .types.subscription import Subscription as SubscriptionPayload
     from .types.threads import Thread as ThreadPayload
     from .types.user import PartialUser as PartialUserPayload
@@ -1408,7 +1408,7 @@ class MessageSearchIterator(_AsyncIterator["Message"]):
     def __init__(
         self,
         guild: Guild,
-        query: dict[str, str | int | bool | Sequence[str | int]],
+        query: MessageSearchQuery,
         *,
         retries: int,
         limit: int | None,
