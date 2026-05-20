@@ -44,6 +44,7 @@ from .enums import (
     GuildScheduledEventEntityType,
     GuildScheduledEventPrivacyLevel,
     Locale,
+    MessageSearchSortMode,
     NotificationLevel,
     NSFWLevel,
     ThreadLayout,
@@ -60,7 +61,7 @@ from .flags import SystemChannelFlags
 from .guild_scheduled_event import GuildScheduledEvent, GuildScheduledEventMetadata
 from .integrations import Integration, _integration_factory
 from .invite import Invite
-from .iterators import AuditLogIterator, BanIterator, MemberIterator
+from .iterators import AuditLogIterator, BanIterator, MemberIterator, MessageSearchIterator
 from .member import Member, VoiceState
 from .mixins import Hashable
 from .object import Object
@@ -78,6 +79,9 @@ from .welcome_screen import WelcomeScreen, WelcomeScreenChannel
 from .widget import Widget, WidgetSettings
 
 __all__ = (
+    "MessageSearchAuthorType",
+    "MessageSearchHasThing",
+    "MessageSearchEmbedType",
     "IncidentsData",
     "Guild",
     "GuildBuilder",
@@ -109,6 +113,7 @@ if TYPE_CHECKING:
         MFALevel,
     )
     from .types.integration import Integration as IntegrationPayload, IntegrationType
+    from .types.message import MessageSearchQuery
     from .types.role import CreateRole as CreateRolePayload
     from .types.sticker import CreateGuildSticker as CreateStickerPayload
     from .types.threads import Thread as ThreadPayload, ThreadArchiveDurationLiteral
@@ -121,6 +126,29 @@ if TYPE_CHECKING:
         VoiceChannel | StageChannel | TextChannel | CategoryChannel | ForumChannel | MediaChannel
     )
     ByCategoryItem: TypeAlias = tuple[CategoryChannel | None, list[GuildChannel]]
+
+
+# XXX: these are here such that they can (in theory) be used at runtime; disnake.types isn't necessarily runtime-importable due to cycles
+# fmt: off
+MessageSearchAuthorType = Literal[
+    "user", "-user",
+    "bot", "-bot",
+    "webhook", "-webhook"
+]
+# TODO: name
+MessageSearchHasThing = Literal[
+    "image", "-image",
+    "sound", "-sound",
+    "video", "-video",
+    "file", "-file",
+    "sticker", "-sticker",
+    "embed", "-embed",
+    "link", "-link",
+    "poll", "-poll",
+    "snapshot", "-snapshot",
+]
+# fmt: on
+MessageSearchEmbedType = Literal["image", "video", "gif", "sound", "article"]
 
 
 class _GuildLimit(NamedTuple):
@@ -5412,6 +5440,183 @@ class Guild(Hashable):
         return [
             GuildSoundboardSound(data=d, state=self._state, guild_id=self.id) for d in data["items"]
         ]
+
+    def search_messages(
+        self,
+        *,
+        # common iterator params
+        limit: int | None = 25,
+        before: SnowflakeTime | None = None,
+        after: SnowflakeTime | None = None,
+        sort: MessageSearchSortMode = MessageSearchSortMode.timestamp_desc,
+        # search filters
+        content: str | None = None,
+        slop: int | None = None,
+        channel: Sequence[Snowflake] | Snowflake | None = None,
+        author: Sequence[Snowflake] | Snowflake | None = None,
+        author_type: Sequence[MessageSearchAuthorType] | MessageSearchAuthorType | None = None,
+        mentions: Sequence[Snowflake] | Snowflake | None = None,
+        mentions_role: Sequence[Snowflake] | Snowflake | None = None,
+        mentions_everyone: bool | None = None,
+        replied_to_user: Sequence[Snowflake] | Snowflake | None = None,
+        replied_to_message: Sequence[Snowflake] | Snowflake | None = None,
+        pinned: bool | None = None,
+        has: Sequence[MessageSearchHasThing] | MessageSearchHasThing | None = None,
+        embed_type: Sequence[MessageSearchEmbedType] | MessageSearchEmbedType | None = None,
+        embed_provider: Sequence[str] | str | None = None,
+        link_hostname: Sequence[str] | str | None = None,
+        attachment_filename: Sequence[str] | str | None = None,
+        attachment_extension: Sequence[str] | str | None = None,
+        include_nsfw: bool = False,
+        # for handling indexing errors
+        retries: int = 3,
+    ) -> MessageSearchIterator:
+        r"""Returns an :class:`.AsyncIterator` representing the messages matching the query parameters.
+
+        Results are returned from newest to oldest by default; this is configurable using
+        the ``sort`` parameter.
+
+        You must have :attr:`~Permissions.read_message_history` permissions to do this,
+        and the :attr:`~Intents.message_content` intent must be enabled for this bot.
+
+        .. versionadded:: |vnext|
+
+        Parameters
+        ----------
+        limit: :class:`int` | :data:`None`
+            The number of messages to retrieve, up to 10000.
+            If :data:`None`, retrieves the maximum number of matching messages.
+            Note, however, that this would make it a slow operation.
+            Defaults to ``25``.
+        before: :class:`.abc.Snowflake` | :class:`datetime.datetime` | :data:`None`
+            Retrieves messages created before this date or object.
+            If a datetime is provided, it is recommended to use a UTC aware datetime.
+            If the datetime is naive, it is assumed to be local time.
+        after: :class:`.abc.Snowflake` | :class:`datetime.datetime` | :data:`None`
+            Retrieve messages created after this date or object.
+            If a datetime is provided, it is recommended to use a UTC aware datetime.
+            If the datetime is naive, it is assumed to be local time.
+        sort: :class:`MessageSearchSortMode`
+            The sorting algorithm/direction to use for retrieving search results.
+            Defaults to :attr:`~MessageSearchSortMode.timestamp_desc`.
+        content: :class:`str` | :data:`None`
+            Filter messages by content (up to 1024 characters).
+        channel: :class:`~collections.abc.Sequence`\[:class:`.abc.Snowflake`] | :class:`.abc.Snowflake` | :data:`None`
+            Filter messages by channels (up to 500).
+        author: :class:`~collections.abc.Sequence`\[:class:`.abc.Snowflake`] | :class:`.abc.Snowflake` | :data:`None`
+            Filter messages by authors (up to 100).
+        author_type: :class:`~collections.abc.Sequence`\[:class:`str`] | :class:`str` | :data:`None`
+            Filter messages by author types.
+
+            Can be any subset of ``["user", "bot", "webhook"]``. Types can also be negated with a
+            ``-`` prefix to exclude that type, e.g. ``["bot", "-webhook"]`` would be a valid value.
+        mentions: :class:`~collections.abc.Sequence`\[:class:`.abc.Snowflake`] | :class:`.abc.Snowflake` | :data:`None`
+            Filter messages that mention these users (up to 100).
+        mentions_role: :class:`~collections.abc.Sequence`\[:class:`.abc.Snowflake`] | :class:`.abc.Snowflake` | :data:`None`
+            Filter messages that mention these roles (up to 100).
+        mentions_everyone: :class:`bool` | :data:`None`
+            Filter messages that do/don't mention ``@everyone``.
+        replied_to_user: :class:`~collections.abc.Sequence`\[:class:`.abc.Snowflake`] | :class:`.abc.Snowflake` | :data:`None`
+            Filter messages that reply to these users (up to 100).
+        replied_to_message: :class:`~collections.abc.Sequence`\[:class:`.abc.Snowflake`] | :class:`.abc.Snowflake` | :data:`None`
+            Filter messages that reply to these messages (up to 100).
+        pinned: :class:`bool` | :data:`None`
+            Filter messages that are/aren't pinned.
+        has: :class:`~collections.abc.Sequence`\[:class:`str`] | :class:`str` | :data:`None`
+            Filter messages by whether or not they have specific things.
+
+            Can be any subset of ``["image", "sound", "video", "file", "sticker", "embed", "link", "poll", "snapshot"]``.
+            Types can also be negated with a ``-`` prefix to exclude that type,
+            e.g. ``["image", "-link"]`` would be a valid value.
+        embed_type: :class:`~collections.abc.Sequence`\[:class:`str`] | :class:`str` | :data:`None`
+            Filter messages by embed type.
+
+            Can be any subset of ``["image", "video", "gif", "sound", "article"]``.
+        embed_provider: :class:`~collections.abc.Sequence`\[:class:`str`] | :class:`str` | :data:`None`
+            Filter messages by embed provider (up to 100, with up to 256 characters each).
+        link_hostname: :class:`~collections.abc.Sequence`\[:class:`str`] | :class:`str` | :data:`None`
+            Filter messages by link hostname, e.g. ``discordapp.com`` (up to 100, with up to 256 characters each).
+        attachment_filename: :class:`~collections.abc.Sequence`\[:class:`str`] | :class:`str` | :data:`None`
+            Filter messages by attachment filename (up too 100, with up to 1024 characters each).
+        attachment_extension: :class:`~collections.abc.Sequence`\[:class:`str`] | :class:`str` | :data:`None`
+            Filter messages by attachment extension, e.g. ``txt`` (up too 100, with up to 256 characters each).
+        include_nsfw: :class:`bool`
+            Whether to include results from age-restricted channels. Defaults to ``False``.
+        retries: :class:`int`
+            The number of times to wait and retry fetching results in case the guild is still being indexed.
+            Can be set to 0 to disable retries and raise an error immediately instead of retrying.
+            Defaults to 3.
+
+        Raises
+        ------
+        Forbidden
+            You do not have permission to search messages,
+            or the :attr:`~Intents.message_content` intent is not enabled.
+        HTTPException
+            Retrieving the search results failed.
+        MessageSearchIndexUnavailableError
+            Exceeded maximum number of retries while waiting for messages to finish indexing.
+
+        Yields
+        ------
+        :class:`.Message`
+            The message matching the given query parameters.
+        """
+
+        def listify_snowflakes(arg: abc.Snowflake | Sequence[abc.Snowflake]) -> Sequence[int]:
+            if isinstance(arg, abc.Snowflake):
+                return [arg.id]
+            return [item.id for item in arg]
+
+        def listify_strs(arg: str | Sequence[str]) -> Sequence[str]:
+            if isinstance(arg, str):
+                return [arg]
+            return arg
+
+        query: MessageSearchQuery = {"include_nsfw": include_nsfw}
+
+        query["sort_by"] = sort.sort_key
+        if sort_order := sort.sort_order:
+            query["sort_order"] = sort_order
+
+        if content is not None:
+            query["content"] = content
+        if slop is not None:
+            query["slop"] = slop
+        if channel is not None:
+            query["channel_id"] = listify_snowflakes(channel)
+        if author is not None:
+            query["author_id"] = listify_snowflakes(author)
+        if author_type is not None:
+            query["author_type"] = listify_strs(author_type)
+        if mentions is not None:
+            query["mentions"] = listify_snowflakes(mentions)
+        if mentions_role is not None:
+            query["mentions_role"] = listify_snowflakes(mentions_role)
+        if mentions_everyone is not None:
+            query["mentions_everyone"] = mentions_everyone
+        if replied_to_user is not None:
+            query["replied_to_user_id"] = listify_snowflakes(replied_to_user)
+        if replied_to_message is not None:
+            query["replied_to_message_id"] = listify_snowflakes(replied_to_message)
+        if pinned is not None:
+            query["pinned"] = pinned
+        if has is not None:
+            query["has"] = listify_strs(has)
+        if embed_type is not None:
+            query["embed_type"] = listify_strs(embed_type)
+        if embed_provider is not None:
+            query["embed_provider"] = listify_strs(embed_provider)
+        if link_hostname is not None:
+            query["link_hostname"] = listify_strs(link_hostname)
+        if attachment_filename is not None:
+            query["attachment_filename"] = listify_strs(attachment_filename)
+        if attachment_extension is not None:
+            query["attachment_extension"] = listify_strs(attachment_extension)
+
+        return MessageSearchIterator(
+            self, query, retries=retries, limit=limit, before=before, after=after
+        )
 
 
 PlaceholderID = NewType("PlaceholderID", int)
