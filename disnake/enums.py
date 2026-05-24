@@ -890,18 +890,18 @@ class AuditLogAction(Enum):
             return "thread"
         elif v < 122:
             return "application_command_or_integration"
-        # FIXME: rework
-        elif v < 140 or v < 152 or v < 160:
+        elif v < 140:
             return None
         elif v < 143:
             return "automod_rule"
         elif v < 147:
             return "user"
-        # FIXME: rework
-        # elif v < 166:
-        #     return "onboarding_prompt"
-        # elif v < 168:
-        #     return "onboarding"
+        elif v < 163:
+            return None
+        elif v < 166:
+            return "onboarding_prompt"
+        elif v < 168:
+            return "onboarding"
         elif v < 192:
             return None
         elif v < 194:
