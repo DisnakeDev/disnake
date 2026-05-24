@@ -19,6 +19,7 @@ from typing import (
 )
 
 import disnake
+from disnake.colour import _convertible_colours
 
 from .context import AnyContext, Context
 from .errors import (
@@ -748,10 +749,9 @@ class ColourConverter(Converter[disnake.Colour]):
             return self.parse_rgb(arg)
 
         arg = arg.replace(" ", "_")
-        method = getattr(disnake.Colour, arg, None)
-        if method is None or not getattr(method, "__colour_factory__", None):
-            raise BadColourArgument(arg)
-        return method()
+        if method := _convertible_colours.get(arg):
+            return method(disnake.Colour)
+        raise BadColourArgument(arg)
 
 
 ColorConverter = ColourConverter
