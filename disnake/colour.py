@@ -137,6 +137,7 @@ class Colour:
         return cls(int(hex_str.removeprefix("#"), 16))
 
     @classmethod
+    @converter_target
     def random(cls, *, seed: int | str | float | bytes | bytearray | None = None) -> Self:
         """A factory method that returns a :class:`Colour` with a random hue.
 
