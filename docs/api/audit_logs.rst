@@ -1764,6 +1764,23 @@ AuditLogAction
 
         .. versionadded:: 2.10
 
+    .. attribute:: voice_channel_status_update
+
+        A voice channel status was updated.
+
+        When this is the action, the type of :attr:`~AuditLogEntry.extra` is
+        set to an unspecified proxy object with one attribute:
+
+        - ``status``: The voice channel's new status.
+
+        .. versionadded:: |vnext|
+
+    .. attribute:: voice_channel_status_delete
+
+        A voice channel status was deleted.
+
+        .. versionadded:: |vnext|
+
 AuditLogActionCategory
 ~~~~~~~~~~~~~~~~~~~~~~
 

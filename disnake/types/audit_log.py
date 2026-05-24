@@ -91,6 +91,8 @@ AuditLogEvent = Literal[
     146,
     150,
     151,
+    192,
+    193,
 ]
 
 
@@ -319,6 +321,7 @@ class AuditEntryInfo(TypedDict):
     auto_moderation_rule_name: str
     auto_moderation_rule_trigger_type: str
     integration_type: str
+    status: str
 
 
 class AuditLogEntry(TypedDict):
