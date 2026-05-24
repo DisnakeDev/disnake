@@ -749,7 +749,7 @@ class ColourConverter(Converter[disnake.Colour]):
 
         arg = arg.replace(" ", "_")
         method = getattr(disnake.Colour, arg, None)
-        if arg.startswith("from_") or method is None or not inspect.ismethod(method):
+        if method is None or not getattr(method, "__colour_factory__", None):
             raise BadColourArgument(arg)
         return method()
 
