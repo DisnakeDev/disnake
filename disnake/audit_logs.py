@@ -19,6 +19,7 @@ from .colour import Colour
 from .invite import Invite
 from .mixins import Hashable
 from .object import Object
+from .onboarding import OnboardingPrompt, OnboardingPromptOption
 from .partial_emoji import PartialEmoji
 from .permissions import PermissionOverwrite, Permissions
 from .threads import ForumTag, Thread
@@ -57,6 +58,10 @@ if TYPE_CHECKING:
         PermissionOverwrite as PermissionOverwritePayload,
     )
     from .types.invite import Invite as InvitePayload
+    from .types.onboarding import (
+        OnboardingPrompt as OnboardingPromptPayload,
+        OnboardingPromptOption as OnboardingPromptOptionPayload,
+    )
     from .types.role import Role as RolePayload
     from .types.snowflake import Snowflake
     from .types.threads import ForumTag as ForumTagPayload
@@ -218,7 +223,14 @@ def _list_transformer(
 
 def _transform_type(
     entry: AuditLogEntry, data: Any
-) -> enums.ChannelType | enums.StickerType | enums.WebhookType | str | int:
+) -> (
+    enums.ChannelType
+    | enums.StickerType
+    | enums.WebhookType
+    | enums.OnboardingPromptType
+    | str
+    | int
+):
     action_name = entry.action.name
     if action_name.startswith("sticker_"):
         return enums.try_enum(enums.StickerType, data)
@@ -227,6 +239,8 @@ def _transform_type(
     elif action_name.startswith(("integration_", "overwrite_")):
         # integration: str, overwrite: int
         return data
+    elif action_name.startswith("onboarding_prompt_"):
+        return enums.try_enum(enums.OnboardingPromptType, data)
     else:
         return enums.try_enum(enums.ChannelType, data)
 
@@ -277,6 +291,24 @@ def _transform_default_reaction(
         name=data.get("emoji_name"),
         id=utils._get_as_snowflake(data, "emoji_id"),
     )
+
+
+def _transform_onboarding_prompt_option(
+    entry: AuditLogEntry, data: OnboardingPromptOptionPayload | None
+) -> OnboardingPromptOption | None:
+    if data is None:
+        return None
+
+    return OnboardingPromptOption(data=data, guild=entry.guild)
+
+
+def _transform_onboarding_prompt(
+    entry: AuditLogEntry, data: OnboardingPromptPayload | None
+) -> OnboardingPrompt | None:
+    if data is None:
+        return None
+
+    return OnboardingPrompt(data=data, guild=entry.guild)
 
 
 class AuditLogDiff:
@@ -352,6 +384,9 @@ class AuditLogChanges:
         "available_tags":                     (None, _list_transformer(_transform_tag)),
         "default_reaction_emoji":             ("default_reaction", _transform_default_reaction),
         "default_sort_order":                 (None, _enum_transformer(enums.ThreadSortOrder)),
+        "options":                            (None, _list_transformer(_transform_onboarding_prompt_option)),
+        "prompts":                            (None, _list_transformer(_transform_onboarding_prompt)),
+        "default_channel_ids":                ("default_channels", _list_transformer(_transform_channel)),
         "sound_id":                           ("id", _transform_snowflake),
     }
     # fmt: on
@@ -885,3 +920,6 @@ class AuditLogEntry(Hashable):
 
     def _convert_target_automod_rule(self, target_id: int) -> AutoModRule | Object:
         return self._automod_rules.get(target_id) or Object(id=target_id)
+
+    def _convert_target_onboarding_prompt(self, target_id: int) -> Object:
+        return Object(id=target_id)
