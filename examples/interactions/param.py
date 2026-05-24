@@ -3,7 +3,6 @@
 """Some examples showing how to customize slash command options."""
 
 import os
-from typing import Union
 
 import disnake
 from disnake.ext import commands
@@ -35,7 +34,7 @@ async def other_types(
     inter: disnake.CommandInteraction,
     user: disnake.User,
     emoji: disnake.Emoji,
-    member_or_role: Union[disnake.Member, disnake.Role],
+    member_or_role: disnake.Member | disnake.Role,
 ): ...
 
 

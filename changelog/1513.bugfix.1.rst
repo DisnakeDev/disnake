@@ -1,0 +1,1 @@
+Raise early error if required dependencies for voice connections are not installed.
