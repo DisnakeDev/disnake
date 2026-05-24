@@ -724,19 +724,19 @@ AuditLogDiff
 
         The list of options of an onboarding prompt being changed.
 
-        :type: List[:class:`OnboardingPromptOption`]
+        :type: :class:`list`\[:class:`OnboardingPromptOption`]
 
     .. attribute:: prompts
 
         The list of prompts of an onboarding configuration being changed.
 
-        :type: List[:class:`OnboardingPrompt`]
+        :type: :class:`list`\[:class:`OnboardingPrompt`]
 
     .. attribute:: default_channels
 
         The list of default channels of an onboarding configuration being changed.
 
-        :type: List[Union[:class:`abc.GuildChannel`, :class:`Object`]]
+        :type: :class:`list`\[:class:`abc.GuildChannel` | :class:`Object`]
 
     .. attribute:: title
 
@@ -1823,7 +1823,7 @@ AuditLogAction
         - :attr:`~AuditLogDiff.in_onboarding`
         - :attr:`~AuditLogDiff.type`
 
-        .. versionadded:: 2.12
+        .. versionadded:: |vnext|
 
     .. attribute:: onboarding_prompt_update
 
@@ -1842,7 +1842,7 @@ AuditLogAction
         - :attr:`~AuditLogDiff.in_onboarding`
         - :attr:`~AuditLogDiff.type`
 
-        .. versionadded:: 2.12
+        .. versionadded:: |vnext|
 
     .. attribute:: onboarding_update
 
@@ -1856,7 +1856,7 @@ AuditLogAction
         - :attr:`~AuditLogDiff.default_channels`
         - :attr:`~AuditLogDiff.enabled`
 
-        .. versionadded:: 2.12
+        .. versionadded:: |vnext|
 
     .. attribute:: voice_channel_status_update
 

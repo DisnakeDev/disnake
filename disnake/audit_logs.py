@@ -294,8 +294,8 @@ def _transform_default_reaction(
 
 
 def _transform_onboarding_prompt_option(
-    entry: AuditLogEntry, data: Optional[OnboardingPromptOptionPayload]
-) -> Optional[OnboardingPromptOption]:
+    entry: AuditLogEntry, data: OnboardingPromptOptionPayload | None
+) -> OnboardingPromptOption | None:
     if data is None:
         return None
 
@@ -303,8 +303,8 @@ def _transform_onboarding_prompt_option(
 
 
 def _transform_onboarding_prompt(
-    entry: AuditLogEntry, data: Optional[OnboardingPromptPayload]
-) -> Optional[OnboardingPrompt]:
+    entry: AuditLogEntry, data: OnboardingPromptPayload | None
+) -> OnboardingPrompt | None:
     if data is None:
         return None
 
@@ -861,10 +861,7 @@ class AuditLogEntry(Hashable):
         }
 
         obj = Invite(
-            state=self._state,
-            data=fake_payload,
-            guild=self.guild,
-            channel=changeset.channel,
+            state=self._state, data=fake_payload, guild=self.guild, channel=changeset.channel
         )
         try:
             obj.inviter = changeset.inviter
