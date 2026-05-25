@@ -222,6 +222,41 @@ FileUpload
     :members:
     :inherited-members:
 
+GroupOption
+~~~~~~~~~~~
+
+.. attributetable:: GroupOption
+
+.. autoclass:: GroupOption()
+    :members:
+
+RadioGroup
+~~~~~~~~~~
+
+.. attributetable:: RadioGroup
+
+.. autoclass:: RadioGroup()
+    :members:
+    :inherited-members:
+
+CheckboxGroup
+~~~~~~~~~~~~~
+
+.. attributetable:: CheckboxGroup
+
+.. autoclass:: CheckboxGroup()
+    :members:
+    :inherited-members:
+
+Checkbox
+~~~~~~~~
+
+.. attributetable:: Checkbox
+
+.. autoclass:: Checkbox()
+    :members:
+    :inherited-members:
+
 
 Enumerations
 ------------

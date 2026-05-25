@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, NoReturn
 
-from .guild import Guild
+from .guild import Guild, Member
 from .utils import MISSING, _assetbytes_to_base64_data, parse_time
 
 __all__ = ("Template",)
@@ -14,7 +14,6 @@ if TYPE_CHECKING:
 
     from .asset import AssetBytes
     from .flags import MemberCacheFlags
-    from .guild import Member
     from .state import ConnectionState
     from .types.emoji import Emoji as EmojiPayload
     from .types.template import Template as TemplatePayload

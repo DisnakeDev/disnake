@@ -30,6 +30,9 @@ all_ui_component_objects: list[ui.UIComponent] = [
     ui.Container(),
     ui.Label("", ui.TextInput(label="", custom_id="")),
     ui.FileUpload(),
+    ui.RadioGroup([]),
+    ui.CheckboxGroup([]),
+    ui.Checkbox(),
 ]
 
 _missing = set(all_ui_component_types) ^ set(map(type, all_ui_component_objects))

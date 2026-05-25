@@ -19,7 +19,7 @@ __all__ = ("FileUpload",)
 class FileUpload(UIComponent):
     """Represents a UI file upload.
 
-    .. versionadded:: |vnext|
+    .. versionadded:: 2.12
 
     Parameters
     ----------
@@ -94,7 +94,7 @@ class FileUpload(UIComponent):
 
     @property
     def required(self) -> bool:
-        """:class:`bool`: Whether the select menu is required."""
+        """:class:`bool`: Whether the file upload is required."""
         return self._underlying.required
 
     @required.setter

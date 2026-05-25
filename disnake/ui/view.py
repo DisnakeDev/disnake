@@ -8,6 +8,7 @@ import os
 import sys
 import time
 import traceback
+from collections.abc import Callable, Sequence
 from functools import partial
 from itertools import groupby
 from typing import TYPE_CHECKING, ClassVar
@@ -28,8 +29,6 @@ __all__ = ("View",)
 
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Sequence
-
     from typing_extensions import Self
 
     from ..interactions import MessageInteraction

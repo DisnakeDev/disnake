@@ -7,6 +7,7 @@ import logging
 import re
 import sys
 import weakref
+from collections.abc import Coroutine, Iterable, Sequence
 from errno import ECONNRESET
 from typing import (
     TYPE_CHECKING,
@@ -36,7 +37,6 @@ from .utils import MISSING
 _log = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from collections.abc import Coroutine, Iterable, Sequence
     from types import TracebackType
 
     from typing_extensions import Self
@@ -134,7 +134,7 @@ def set_attachments(payload: dict[str, Any], files: Sequence[File]) -> None:
 
 def to_multipart(payload: dict[str, Any], files: Sequence[File]) -> list[dict[str, Any]]:
     """Converts the payload and list of files to a multipart payload,
-    as specified by https://discord.com/developers/docs/reference#uploading-files
+    as specified by https://docs.discord.com/developers/reference#uploading-files
     """
     multipart: list[dict[str, Any]] = []
     for index, file in enumerate(files):
@@ -1151,6 +1151,20 @@ class HTTPClient:
     ) -> Response[None]:
         return self.request(
             Route("DELETE", "/channels/{channel_id}", channel_id=channel_id), reason=reason
+        )
+
+    def set_voice_channel_status(
+        self,
+        channel_id: Snowflake,
+        *,
+        status: str | None,
+        reason: str | None = None,
+    ) -> Response[None]:
+        payload = {"status": status}
+        return self.request(
+            Route("PUT", "/channels/{channel_id}/voice-status", channel_id=channel_id),
+            json=payload,
+            reason=reason,
         )
 
     # Thread management

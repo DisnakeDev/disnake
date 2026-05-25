@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 from abc import ABC, abstractmethod
+from collections.abc import Callable, Mapping, Sequence
 from typing import (
     TYPE_CHECKING,
     ClassVar,
@@ -13,21 +14,19 @@ from typing import (
 )
 
 from ...components import AnySelectMenu, SelectDefaultValue
+from ...enums import ComponentType, SelectDefaultValueType
 from ...object import Object
 from ...utils import MISSING, humanize_list, iscoroutinefunction
-from ..item import Item
+from ..item import DecoratedItem, Item
 
 __all__ = ("BaseSelect",)
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Mapping, Sequence
-
     from typing_extensions import ParamSpec, Self
 
     from ...abc import Snowflake
-    from ...enums import ComponentType, SelectDefaultValueType
     from ...interactions import MessageInteraction
-    from ..item import DecoratedItem, ItemCallbackType
+    from ..item import ItemCallbackType
     from ..view import View
 
 else:

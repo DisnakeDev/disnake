@@ -1,1 +1,0 @@
-Move ``docs`` from ``[project.optional-dependencies]`` to ``[dependency-groups]`` removing the ``docs`` data from distribution.

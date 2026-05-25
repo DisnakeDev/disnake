@@ -2,13 +2,12 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, TypedDict
+from typing import Literal, TypedDict
 
 from typing_extensions import NotRequired
 
-if TYPE_CHECKING:
-    from .snowflake import Snowflake
-    from .user import User
+from .snowflake import Snowflake
+from .user import User
 
 StatusType = Literal["idle", "dnd", "online", "offline"]
 StatusDisplayType = Literal[0, 1, 2]
@@ -43,7 +42,7 @@ class ActivityParty(TypedDict, total=False):
 
 class ActivityAssets(TypedDict, total=False):
     # large_image/small_image may be a snowflake or prefixed media proxy ID, see:
-    # https://discord.com/developers/docs/topics/gateway-events#activity-object-activity-asset-image
+    # https://docs.discord.com/developers/events/gateway-events#activity-object-activity-asset-image
     large_image: str
     large_text: str
     large_url: str

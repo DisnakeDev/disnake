@@ -5,7 +5,7 @@ from __future__ import annotations
 import copy
 from typing import TYPE_CHECKING, ClassVar
 
-from ..components import FileComponent, handle_media_item_input
+from ..components import FileComponent, UnfurledMediaItem, handle_media_item_input
 from ..enums import ComponentType
 from ..utils import MISSING
 from .item import UIComponent
@@ -13,7 +13,7 @@ from .item import UIComponent
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from ..components import LocalMediaItemInput, UnfurledMediaItem
+    from ..components import LocalMediaItemInput
 
 __all__ = ("File",)
 

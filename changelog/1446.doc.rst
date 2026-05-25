@@ -1,1 +1,0 @@
-Update version resolution in ``docs/conf.py`` to use :py:class:`importlib.metadata` instead of regex.

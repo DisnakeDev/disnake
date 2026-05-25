@@ -9,7 +9,7 @@ import logging
 import sys
 import traceback
 import warnings
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from typing import TYPE_CHECKING, Any, TypeAlias, TypeVar
 
 import disnake
@@ -24,8 +24,6 @@ from .help import DefaultHelpCommand, HelpCommand
 from .view import StringView
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
-
     from typing_extensions import Self
 
     from disnake.message import Message

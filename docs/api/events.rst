@@ -503,6 +503,34 @@ This section documents events related to Discord channels and threads.
     :param channel: The channel that had its webhooks updated.
     :type channel: :class:`abc.GuildChannel`
 
+.. function:: on_voice_channel_status_update(channel, old, new)
+
+    Called whenever a voice channel status is modified.
+
+    This requires :attr:`Intents.guilds` to be enabled.
+
+    .. versionadded:: |vnext|
+
+    :param channel: The channel that had its status updated.
+    :type channel: :class:`abc.GuildChannel`
+    :param old: The old status.
+    :type old: :class:`str` | :data:`None`
+    :param new: The new status.
+    :type new: :class:`str` | :data:`None`
+
+.. function:: on_voice_channel_start_time_update(channel, start_time)
+
+    Called whenever a voice channel's start time changes.
+
+    This requires :attr:`Intents.guilds` to be enabled.
+
+    .. versionadded:: |vnext|
+
+    :param channel: The channel that had its start time updated.
+    :type channel: :class:`abc.GuildChannel`
+    :param start_time: The new start time.
+    :type start_time: :class:`datetime.datetime` | :data:`None`
+
 Guilds
 ~~~~~~
 
@@ -1335,7 +1363,7 @@ This section documents events related to Discord chat messages.
     will return a :class:`Message` object that represents the message before the content was modified.
 
     Due to the inherently raw nature of this event, the data parameter coincides with
-    the raw data given by the :ddocs:`gateway <topics/gateway-events#message-update>`.
+    the raw data given by the :ddocs:`gateway <events/gateway-events#message-update>`.
 
     Since the data payload can be partial, care must be taken when accessing stuff in the dictionary.
     One example of a common case of partial data is when the ``'content'`` key is inaccessible. This

@@ -6,6 +6,7 @@ import asyncio
 import datetime
 import functools
 import inspect
+from collections.abc import Callable, Generator
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -30,7 +31,7 @@ from disnake.utils import (
 
 from ._types import _BaseCommand
 from .cog import Cog
-from .context import Context
+from .context import AnyContext, Context
 from .converter import Greedy, get_converter, run_converters
 from .cooldowns import BucketType, Cooldown, CooldownMapping, DynamicCooldownMapping, MaxConcurrency
 from .errors import (
@@ -57,7 +58,6 @@ from .errors import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Generator
     from typing import Concatenate
 
     from typing_extensions import ParamSpec, Self
@@ -65,7 +65,6 @@ if TYPE_CHECKING:
     from disnake.message import Message
 
     from ._types import AppCheck, Check, Coro, CoroFunc, Error, Hook
-    from .context import AnyContext
 
 
 __all__ = (
@@ -2019,6 +2018,7 @@ def has_permissions(
     administrator: bool = ...,
     attach_files: bool = ...,
     ban_members: bool = ...,
+    bypass_slowmode: bool = ...,
     change_nickname: bool = ...,
     connect: bool = ...,
     create_events: bool = ...,
@@ -2058,6 +2058,7 @@ def has_permissions(
     send_polls: bool = ...,
     send_tts_messages: bool = ...,
     send_voice_messages: bool = ...,
+    set_voice_channel_status: bool = ...,
     speak: bool = ...,
     start_embedded_activities: bool = ...,
     stream: bool = ...,
@@ -2146,6 +2147,7 @@ def bot_has_permissions(
     administrator: bool = ...,
     attach_files: bool = ...,
     ban_members: bool = ...,
+    bypass_slowmode: bool = ...,
     change_nickname: bool = ...,
     connect: bool = ...,
     create_events: bool = ...,
@@ -2185,6 +2187,7 @@ def bot_has_permissions(
     send_polls: bool = ...,
     send_tts_messages: bool = ...,
     send_voice_messages: bool = ...,
+    set_voice_channel_status: bool = ...,
     speak: bool = ...,
     start_embedded_activities: bool = ...,
     stream: bool = ...,
@@ -2251,6 +2254,7 @@ def has_guild_permissions(
     administrator: bool = ...,
     attach_files: bool = ...,
     ban_members: bool = ...,
+    bypass_slowmode: bool = ...,
     change_nickname: bool = ...,
     connect: bool = ...,
     create_events: bool = ...,
@@ -2290,6 +2294,7 @@ def has_guild_permissions(
     send_polls: bool = ...,
     send_tts_messages: bool = ...,
     send_voice_messages: bool = ...,
+    set_voice_channel_status: bool = ...,
     speak: bool = ...,
     start_embedded_activities: bool = ...,
     stream: bool = ...,
@@ -2353,6 +2358,7 @@ def bot_has_guild_permissions(
     administrator: bool = ...,
     attach_files: bool = ...,
     ban_members: bool = ...,
+    bypass_slowmode: bool = ...,
     change_nickname: bool = ...,
     connect: bool = ...,
     create_events: bool = ...,
@@ -2392,6 +2398,7 @@ def bot_has_guild_permissions(
     send_polls: bool = ...,
     send_tts_messages: bool = ...,
     send_voice_messages: bool = ...,
+    set_voice_channel_status: bool = ...,
     speak: bool = ...,
     start_embedded_activities: bool = ...,
     stream: bool = ...,

@@ -6,6 +6,7 @@ import asyncio
 import os
 import sys
 import traceback
+from collections.abc import Callable
 from functools import partial
 from typing import TYPE_CHECKING, TypeAlias, TypeVar, cast
 
@@ -17,8 +18,6 @@ from .label import Label
 from .text_input import TextInput
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
-
     from ..client import Client
     from ..interactions.modal import ModalInteraction
     from ..state import ConnectionState
@@ -51,9 +50,13 @@ class Modal:
 
         Currently supports the following components:
             - :class:`.ui.TextDisplay`
-            - :class:`.ui.TextInput`, in a :class:`.ui.Label`
-            - :class:`.ui.FileUpload`, in a :class:`.ui.Label`
-            - select menus (e.g. :class:`.ui.StringSelect`), in a :class:`.ui.Label`
+            - Inside a :class:`.ui.Label`, respectively:
+                - :class:`.ui.TextInput`
+                - :class:`.ui.FileUpload`
+                - select menus (e.g. :class:`.ui.StringSelect`)
+                - :class:`.ui.RadioGroup`
+                - :class:`.ui.CheckboxGroup`
+                - :class:`.ui.Checkbox`
 
         .. versionchanged:: 2.11
             Using action rows in modals or passing :class:`.ui.TextInput` directly

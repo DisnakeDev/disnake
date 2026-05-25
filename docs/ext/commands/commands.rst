@@ -559,7 +559,7 @@ Note that ``typing.Literal[True]`` and ``typing.Literal[False]`` still follow th
 typing.Annotated
 ^^^^^^^^^^^^^^^^
 
-.. versionadded:: |vnext|
+.. versionadded:: 2.12
 
 With :data:`typing.Annotated`, you can use converters in a more type-safe way.
 Taking the example from :ref:`ext_commands_basic_converters` above, ``content`` is annotated

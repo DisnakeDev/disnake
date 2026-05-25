@@ -2,14 +2,10 @@
 
 # This script runs as part of the wheel building process,
 # all dependencies MUST be included in pyproject.toml
-from __future__ import annotations
-
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 import packaging.version
-
-if TYPE_CHECKING:
-    import versioningit
+import versioningit
 
 
 def template_fields(

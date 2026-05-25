@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import datetime
 from typing import TYPE_CHECKING
 
 from .enums import EntitlementType, try_enum
@@ -9,8 +10,6 @@ from .mixins import Hashable
 from .utils import _get_as_snowflake, parse_time, snowflake_time, utcnow
 
 if TYPE_CHECKING:
-    import datetime
-
     from .guild import Guild
     from .state import ConnectionState
     from .types.entitlement import Entitlement as EntitlementPayload

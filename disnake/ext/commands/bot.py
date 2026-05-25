@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable, Sequence
 from typing import TYPE_CHECKING, Any
 
 import disnake
@@ -11,7 +12,6 @@ from .interaction_bot_base import InteractionBotBase
 
 if TYPE_CHECKING:
     import asyncio
-    from collections.abc import Callable, Sequence
 
     import aiohttp
     from typing_extensions import Self
