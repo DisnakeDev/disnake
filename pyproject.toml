@@ -430,7 +430,8 @@ minversion = "9.0"
 pythonpath = ["."]  # legacy configuration, new pytest versions don't add the rootdir to path
 testpaths = ["tests"]
 addopts = ["--strict-markers", "-Werror", "-s"]
-xfail_strict = true
+strict = true
+strict_parametrization_ids = false
 asyncio_mode = "strict"
 
 [tool.coverage.run]
