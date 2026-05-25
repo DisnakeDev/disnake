@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import TYPE_CHECKING, Any, TypeAlias, TypeVar, Union
+from typing import TYPE_CHECKING, Any, TypeAlias, Union
+
+from typing_extensions import TypeVar
 
 if TYPE_CHECKING:
     from typing import TypeAlias
@@ -60,7 +62,14 @@ ModalTopLevelComponent: TypeAlias = Union[
     "ActionRow[ActionRowModalComponent]",  # deprecated
 ]
 
-ActionRowChildT = TypeVar("ActionRowChildT", bound="WrappedComponent")
+ActionRowChildT = TypeVar(
+    "ActionRowChildT",
+    "WrappedComponent",
+    ActionRowMessageComponent,
+    ActionRowModalComponent,
+    infer_variance=True,
+)
+
 NonActionRowChildT = TypeVar(
     "NonActionRowChildT",
     bound=MessageTopLevelComponentV2 | ModalTopLevelComponent_,
