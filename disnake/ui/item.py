@@ -35,10 +35,11 @@ if TYPE_CHECKING:
     from ..types.components import ActionRowChildComponent as ActionRowChildComponentPayload
     from .view import View
 
-    ItemCallbackType = Callable[[V_deco, I, MessageInteraction], Coroutine[Any, Any, Any]]
 
 ClientT = TypeVar("ClientT", bound="Client")
 UIComponentT = TypeVar("UIComponentT", bound="UIComponent")
+
+ItemCallbackType = Callable[[V_deco, I, "MessageInteraction"], Coroutine[Any, Any, Any]]
 
 
 def ensure_ui_component(obj: UIComponentT, name: str = "component") -> UIComponentT:
