@@ -1201,7 +1201,7 @@ class Greedy(list[T]):
             msg = f"Greedy[{name}] is invalid."
             raise TypeError(msg)
 
-        if origin in (Union, types.UnionType) and any(arg is type(None) for arg in args):
+        if origin in (Union, types.UnionType) and type(None) in args:
             msg = f"Greedy[{name}] is invalid."
             raise TypeError(msg)
 
