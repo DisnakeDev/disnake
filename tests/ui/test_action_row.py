@@ -214,6 +214,11 @@ class TestActionRow:
         assert_type(ActionRow(button1, select), ActionRow[ActionRowMessageComponent])
         assert_type(ActionRow(select, button1), ActionRow[ActionRowMessageComponent])
 
+        # TextInput cannot be mixed with message components
+        ActionRow(button1, text_input)  # pyright: ignore[reportArgumentType]
+        ActionRow(select, text_input)  # pyright: ignore[reportArgumentType]
+        ActionRow(text_input, select)  # pyright: ignore[reportArgumentType]
+
 
 @pytest.mark.parametrize(
     ("value", "expected"),
