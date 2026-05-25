@@ -14,9 +14,10 @@ from typing import (
     Generic,
     Literal,
     TypeAlias,
-    TypeVar,
     overload,
 )
+
+from typing_extensions import Self, TypeVar
 
 from . import utils
 from .custom_warnings import LocalizationWarning
@@ -24,8 +25,6 @@ from .enums import Locale
 from .errors import LocalizationKeyError
 
 if TYPE_CHECKING:
-    from typing_extensions import Self
-
     LocalizedRequired: TypeAlias = "str | Localized[str]"
     LocalizedOptional: TypeAlias = "str | None | Localized[str | None]"
 
@@ -46,7 +45,7 @@ _log = logging.getLogger(__name__)
 LocalizationsDict: TypeAlias = dict[Locale, str] | dict[str, str]
 Localizations: TypeAlias = str | LocalizationsDict
 
-StringT = TypeVar("StringT", str, str | None, covariant=True)
+StringT = TypeVar("StringT", str, str | None, covariant=True, default=str | None)
 
 
 # This is generic over `string`, as some localized strings can be optional, e.g. option descriptions.
@@ -83,22 +82,12 @@ class Localized(Generic[StringT]):
     __slots__ = ("string", "localizations")
 
     @overload
-    def __init__(self: Localized[StringT], string: StringT, *, key: str) -> None: ...
-
-    @overload
-    def __init__(self: Localized[str | None], *, key: str) -> None: ...
+    def __init__(self, string: StringT = None, *, key: str) -> None: ...
 
     @overload
     def __init__(
-        self: Localized[StringT],
-        string: StringT,
-        *,
-        data: LocalizationsDict | None | LocalizationValue,
-    ) -> None: ...
-
-    @overload
-    def __init__(
-        self: Localized[str | None],
+        self,
+        string: StringT = None,
         *,
         data: LocalizationsDict | None | LocalizationValue,
     ) -> None: ...
