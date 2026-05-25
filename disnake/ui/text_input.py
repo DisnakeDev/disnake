@@ -76,7 +76,7 @@ class TextInput(WrappedComponent):
         self,
         *,
         label: str | None,
-        custom_id: str = MISSING,
+        custom_id: str = ...,
         style: TextInputStyle = TextInputStyle.short,
         placeholder: str | None = None,
         value: str | None = None,
@@ -90,7 +90,7 @@ class TextInput(WrappedComponent):
     def __init__(
         self,
         *,
-        custom_id: str = MISSING,
+        custom_id: str = ...,
         style: TextInputStyle = TextInputStyle.short,
         placeholder: str | None = None,
         value: str | None = None,

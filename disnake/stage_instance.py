@@ -150,8 +150,8 @@ class StageInstance(Hashable):
     async def edit(
         self,
         *,
-        topic: str = MISSING,
-        privacy_level: StagePrivacyLevel = MISSING,
+        topic: str = ...,
+        privacy_level: StagePrivacyLevel = ...,
         reason: str | None = None,
     ) -> None: ...
 
