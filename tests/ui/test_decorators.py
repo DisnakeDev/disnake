@@ -12,7 +12,7 @@ from disnake import ui
 from disnake.ui.button import V_co
 
 V = TypeVar("V", bound=ui.View)
-I = TypeVar("I", bound=ui.Item)
+I = TypeVar("I", bound=ui.Item[Any])
 
 
 @contextlib.contextmanager
