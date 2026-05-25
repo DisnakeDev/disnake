@@ -702,7 +702,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         )
         return self
 
-    @deprecated('Label("<text>", TextInput(...))')
+    @deprecated('Use Label("<text>", TextInput(...)) instead.')
     def add_text_input(
         self: TextInputCompatibleActionRowT,
         *,
@@ -862,7 +862,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         return iter(self._children)
 
     @classmethod
-    @deprecated()
+    @deprecated("Use of action rows in modals is deprecated, compatible components can be passed directly to modals.")
     def with_modal_components(cls, *, id: int = 0) -> ActionRow[ActionRowModalComponent]:
         """Create an empty action row meant to store components compatible with
         :class:`disnake.ui.Modal`. Saves the need to import type specifiers to

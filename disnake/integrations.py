@@ -247,7 +247,7 @@ class StreamIntegration(Integration):
         """:class:`Role` | :data:`None` The role which the integration uses for subscribers."""
         return self.guild.get_role(self._role_id)  # pyright: ignore[reportArgumentType]
 
-    @deprecated()
+    @deprecated("No longer supported, bots cannot use this endpoint anymore.")
     async def edit(
         self,
         *,
@@ -304,7 +304,7 @@ class StreamIntegration(Integration):
         # Unsure if it returns the data or not as a result
         await self._state.http.edit_integration(self.guild.id, self.id, **payload)
 
-    @deprecated()
+    @deprecated("No longer supported, bots cannot use this endpoint anymore.")
     async def sync(self) -> None:
         """|coro|
 

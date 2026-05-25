@@ -3371,7 +3371,7 @@ class Guild(Hashable):
 
         return Template(state=self._state, data=data)
 
-    @utils.deprecated()
+    @utils.deprecated("No longer supported, bots cannot use this endpoint anymore.")
     async def create_integration(self, *, type: IntegrationType, id: int) -> None:
         """|coro|
 

@@ -603,7 +603,7 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
         return Permissions(self._default_member_permissions)
 
     @property
-    @deprecated("contexts")
+    @deprecated("Use .contexts instead.")
     def dm_permission(self) -> bool:
         """
         Whether this command can be used in DMs with the bot.
@@ -618,7 +618,7 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
         return self._dm_permission is not False
 
     @dm_permission.setter
-    @deprecated("contexts")
+    @deprecated("Use .contexts instead.")
     def dm_permission(self, value: bool) -> None:
         self._dm_permission = value
 

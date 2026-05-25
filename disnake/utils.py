@@ -47,8 +47,7 @@ from typing import (
 )
 from urllib.parse import parse_qs, urlencode
 
-if TYPE_CHECKING:
-    from typing_extensions import Self
+from typing_extensions import Never, ParamSpec, Self, deprecated as deprecated
 
 from .enums import Locale
 
@@ -140,8 +139,6 @@ class _cached_property:
 if TYPE_CHECKING:
     from functools import cached_property as cached_property
 
-    from typing_extensions import Never, ParamSpec, Self
-
     from .abc import Snowflake
     from .asset import AssetBytes
     from .invite import Invite
@@ -152,14 +149,13 @@ if TYPE_CHECKING:
     class _RequestLike(Protocol):
         headers: Mapping[str, Any]
 
-    P = ParamSpec("P")
-
 else:
     cached_property = _cached_property
 
 
 T = TypeVar("T")
 V = TypeVar("V")
+P = ParamSpec("P")
 T_co = TypeVar("T_co", covariant=True)
 _Iter: TypeAlias = Iterator[T] | AsyncIterator[T]
 _BytesLike: TypeAlias = bytes | bytearray | memoryview
@@ -276,25 +272,6 @@ def copy_doc(original: Callable[..., Any] | property) -> Callable[[T], T]:
         return overridden
 
     return decorator
-
-
-def deprecated(
-    instead: str | None = None, *, skip_internal_frames: bool = False
-) -> Callable[[Callable[P, T]], Callable[P, T]]:
-    def actual_decorator(func: Callable[P, T]) -> Callable[P, T]:
-        @functools.wraps(func)
-        def decorated(*args: P.args, **kwargs: P.kwargs) -> T:
-            if instead:
-                msg = f"{func.__name__} is deprecated, use {instead} instead."
-            else:
-                msg = f"{func.__name__} is deprecated."
-
-            warn_deprecated(msg, stacklevel=2, skip_internal_frames=skip_internal_frames)
-            return func(*args, **kwargs)
-
-        return decorated
-
-    return actual_decorator
 
 
 _root_module_path = os.path.join(os.path.dirname(__file__), "")  # add trailing slash

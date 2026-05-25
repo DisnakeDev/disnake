@@ -24,6 +24,7 @@ from disnake.utils import (
     _generated,
     _overload_with_permissions,
     async_all,
+    deprecated,
     iscoroutinefunction,
     maybe_coroutine,
 )
@@ -282,9 +283,16 @@ class InvokableApplicationCommand(ABC):
         self.body._default_contexts = bot._default_contexts
 
     @property
+    @deprecated("Use .contexts instead.")
     def dm_permission(self) -> bool:
-        """:class:`bool`: Whether this command can be used in DMs."""
-        return self.body.dm_permission
+        """:class:`bool`: Whether this command can be used in DMs.
+
+        .. deprecated:: 2.10
+            Use :attr:`contexts` instead.
+            This is equivalent to the :attr:`InteractionContextTypes.bot_dm` flag.
+        """
+        # TODO(eneg): 2.10 or current?
+        return self.body._dm_permission is not False
 
     @property
     def default_member_permissions(self) -> Permissions | None:
