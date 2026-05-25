@@ -205,6 +205,42 @@ Label
     :members:
     :inherited-members:
 
+FileUpload
+~~~~~~~~~~
+
+.. attributetable:: FileUpload
+
+.. autoclass:: FileUpload
+    :members:
+    :inherited-members:
+
+RadioGroup
+~~~~~~~~~~
+
+.. attributetable:: RadioGroup
+
+.. autoclass:: RadioGroup()
+    :members:
+    :inherited-members:
+
+CheckboxGroup
+~~~~~~~~~~~~~
+
+.. attributetable:: CheckboxGroup
+
+.. autoclass:: CheckboxGroup()
+    :members:
+    :inherited-members:
+
+Checkbox
+~~~~~~~~
+
+.. attributetable:: Checkbox
+
+.. autoclass:: Checkbox()
+    :members:
+    :inherited-members:
+
 
 Functions
 ---------

@@ -12,6 +12,7 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
+import importlib.metadata
 import importlib.util
 import inspect
 import logging
@@ -23,6 +24,7 @@ import warnings
 from typing import Any
 
 import sphinx.deprecation
+import versioningit
 from sphinx.application import Sphinx
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -73,19 +75,19 @@ dpy_github_repo = "https://github.com/Rapptz/discord.py"
 extlinks = {
     "issue": (f"{github_repo}/issues/%s", "#%s"),
     "issue-dpy": (f"{dpy_github_repo}/issues/%s", "#%s"),
-    "ddocs": ("https://discord.com/developers/docs/%s", None),
+    "ddocs": ("https://docs.discord.com/developers/%s", None),
 }
 
 extlinks_detect_hardcoded_links = True
 
 
-rst_prolog = """
+rst_prolog = r"""
 .. |coro| replace:: This function is a |coroutine_link|_.
 .. |maybecoro| replace:: This function *could be a* |coroutine_link|_.
 .. |coroutine_link| replace:: *coroutine*
-.. |components_type| replace:: Union[:class:`~disnake.ui.UIComponent`, List[Union[:class:`~disnake.ui.UIComponent`, List[:class:`~disnake.ui.WrappedComponent`]]]]
-.. |modal_components_type| replace:: Union[:class:`~disnake.ui.UIComponent`, List[:class:`~disnake.ui.UIComponent`]]
-.. |resource_type| replace:: Union[:class:`bytes`, :class:`.Asset`, :class:`.Emoji`, :class:`.PartialEmoji`, :class:`.StickerItem`, :class:`.Sticker`]
+.. |components_type| replace:: :class:`~disnake.ui.UIComponent` | :class:`list`\[:class:`~disnake.ui.UIComponent` | :class:`list`\[:class:`~disnake.ui.WrappedComponent`]]
+.. |modal_components_type| replace:: :class:`~disnake.ui.UIComponent` | :class:`list`\[:class:`~disnake.ui.UIComponent`]
+.. |resource_type| replace:: :class:`bytes` | :class:`.Asset` | :class:`.Emoji` | :class:`.PartialEmoji` | :class:`.StickerItem` | :class:`.Sticker`
 .. _coroutine_link: https://docs.python.org/3/library/asyncio-task.html#coroutine
 """
 
@@ -111,15 +113,18 @@ copyright = "2015-2021, Rapptz, 2021-present, Disnake Development"
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
-# The short X.Y version.
-
-version = ""
-with open("../disnake/__init__.py") as f:
-    version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE).group(1)  # type: ignore
-
 # The full version, including alpha/beta/rc tags.
-release = version
+release = importlib.metadata.version("disnake")
+# The short X.Y version.
+version = ".".join(release.split(".")[:2])
+# The release for the next release
+next_release = versioningit.get_next_version(os.path.abspath(".."))
+next_version = ".".join((next_release).split(".", 2)[:2])
 
+rst_prolog += f"""
+.. |vnext_full| replace:: {next_release}
+.. |vnext| replace:: {next_version}
+"""
 
 _IS_READTHEDOCS = bool(os.getenv("READTHEDOCS"))
 
@@ -224,9 +229,13 @@ def linkcode_resolve(domain: str, info: dict[str, Any]) -> str | None:
         obj = inspect.unwrap(obj)
 
         if isinstance(obj, property):
-            obj = inspect.unwrap(obj.fget)  # type: ignore
+            assert obj.fget is not None
+            obj = inspect.unwrap(obj.fget)
 
-        path = os.path.relpath(inspect.getsourcefile(obj), start=_disnake_module_path)  # type: ignore
+        path = os.path.relpath(  # pyright: ignore[reportCallIssue]
+            inspect.getsourcefile(obj),  # pyright: ignore[reportArgumentType]
+            start=_disnake_module_path,
+        )
         src, lineno = inspect.getsourcelines(obj)
     except Exception:
         return None
@@ -510,7 +519,7 @@ def setup(app: Sphinx) -> None:
     # HACK: avoid deprecation warnings caused by sphinx always iterating over all class attributes
     import disnake
 
-    del disnake.Embed.Empty  # type: ignore
+    del disnake.Embed.Empty  # pyright: ignore[reportAttributeAccessIssue]
 
     warnings.filterwarnings(
         "ignore",

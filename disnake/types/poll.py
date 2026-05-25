@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import List, Literal, Optional, TypedDict
+from typing import Literal, TypedDict
 
 from typing_extensions import NotRequired
 
@@ -33,17 +33,17 @@ class PollAnswerCount(TypedDict):
 
 class PollResult(TypedDict):
     is_finalized: bool
-    answer_counts: List[PollAnswerCount]
+    answer_counts: list[PollAnswerCount]
 
 
 class PollVoters(TypedDict):
-    users: List[User]
+    users: list[User]
 
 
 class Poll(TypedDict):
     question: PollMedia
-    answers: List[PollAnswer]
-    expiry: Optional[str]
+    answers: list[PollAnswer]
+    expiry: str | None
     allow_multiselect: bool
     layout_type: PollLayoutType
     # sent only as part of responses from Discord's API/Gateway
@@ -66,7 +66,7 @@ class PollCreateAnswerPayload(TypedDict):
 
 class PollCreatePayload(TypedDict):
     question: PollCreateMediaPayload
-    answers: List[PollCreateAnswerPayload]
+    answers: list[PollCreateAnswerPayload]
     duration: int
     allow_multiselect: bool
     layout_type: NotRequired[int]

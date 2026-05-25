@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from .enums import SKUType, try_enum
 from .flags import SKUFlags
@@ -22,7 +22,7 @@ __all__ = ("SKU",)
 
 
 class SKU(Hashable):
-    """Represents an SKU.
+    r"""Represents an SKU.
 
     This can be retrieved using :meth:`Client.skus`.
 
@@ -30,11 +30,11 @@ class SKU(Hashable):
 
         .. describe:: x == y
 
-            Checks if two :class:`SKU`\\s are equal.
+            Checks if two :class:`SKU`\s are equal.
 
         .. describe:: x != y
 
-            Checks if two :class:`SKU`\\s are not equal.
+            Checks if two :class:`SKU`\s are not equal.
 
         .. describe:: hash(x)
 
@@ -91,15 +91,15 @@ class SKU(Hashable):
         self,
         user: Snowflake,
         *,
-        limit: Optional[int] = 50,
-        before: Optional[SnowflakeTime] = None,
-        after: Optional[SnowflakeTime] = None,
+        limit: int | None = 50,
+        before: SnowflakeTime | None = None,
+        after: SnowflakeTime | None = None,
     ) -> SubscriptionIterator:
         """Retrieves an :class:`.AsyncIterator` that enables receiving subscriptions for the SKU.
 
         All parameters, except ``user``, are optional.
 
-        .. versionchanged:: |vnext|
+        .. versionchanged:: 2.12
             Now returns an async iterator, like all other iterator methods.
             Previously, this mistakenly returned a coroutine.
 
@@ -107,16 +107,16 @@ class SKU(Hashable):
         ----------
         user: :class:`abc.Snowflake`
             The user to retrieve subscriptions for.
-        limit: Optional[:class:`int`]
+        limit: :class:`int` | :data:`None`
             The number of subscriptions to retrieve.
-            If ``None``, retrieves every subscription.
+            If :data:`None`, retrieves every subscription.
             Note, however, that this would make it a slow operation.
             Defaults to ``50``.
-        before: Union[:class:`.abc.Snowflake`, :class:`datetime.datetime`]
+        before: :class:`.abc.Snowflake` | :class:`datetime.datetime`
             Retrieves subscriptions created before this date or object.
             If a datetime is provided, it is recommended to use a UTC aware datetime.
             If the datetime is naive, it is assumed to be local time.
-        after: Union[:class:`.abc.Snowflake`, :class:`datetime.datetime`]
+        after: :class:`.abc.Snowflake` | :class:`datetime.datetime`
             Retrieve subscriptions created after this date or object.
             If a datetime is provided, it is recommended to use a UTC aware datetime.
             If the datetime is naive, it is assumed to be local time.

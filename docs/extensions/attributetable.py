@@ -67,7 +67,7 @@ def visit_attributetablebadge_node(self: HTMLTranslator, node: nodes.Element) ->
     attributes = {
         "class": f"badge-{badge_type}",
     }
-    self.body.append(self.starttag(node, "span", **attributes))  # type: ignore[reportArgumentType]
+    self.body.append(self.starttag(node, "span", **attributes))  # pyright: ignore[reportArgumentType]
 
 
 def visit_attributetable_item_node(self: HTMLTranslator, node: nodes.Element) -> None:
@@ -189,7 +189,7 @@ def process_attributetable(app: Sphinx, doctree: nodes.document, docname: str) -
     env = app.builder.env
 
     lookup = build_lookup_table(env)
-    for node in doctree.traverse(attributetableplaceholder):
+    for node in doctree.findall(attributetableplaceholder):
         modulename, classname, fullname = (
             node["python-module"],
             node["python-class"],
