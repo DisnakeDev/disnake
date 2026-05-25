@@ -151,16 +151,14 @@ class Localized(Generic[StringT]):
     @overload
     def _upgrade(self, string: str, *, key: str | None = None) -> Localized[str]: ...
 
-    def _upgrade(
-        self: Localized[Any], string: str | None = None, *, key: str | None = None
-    ) -> Localized[Any]:
+    def _upgrade(self, string: str | None = None, *, key: str | None = None) -> Localized[Any]:
         # update key if provided and not already set
         self.localizations._upgrade(key)
 
         # Only overwrite if not already set (`Localized()` parameter value takes precedence over function names etc.)
         # Note: not checking whether `string` is an empty string, to keep generic typing correct
         if not self.string and string is not None:
-            self.string = string
+            self.string = string  # pyright: ignore[reportAttributeAccessIssue]
 
         # this is safe, see above
         return self
