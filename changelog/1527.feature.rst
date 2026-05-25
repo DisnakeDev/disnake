@@ -1,1 +1,1 @@
-The library now uses ``@typing_extensions.deprecated`` to mark deprecated functionality. This enables type checkers to statically report the use of such functionality within your codebase.
+The library now uses :func:`typing_extensions.deprecated <warnings.deprecated>` to mark deprecated functionality. This enables type checkers to report usage of deprecations within your codebase.
