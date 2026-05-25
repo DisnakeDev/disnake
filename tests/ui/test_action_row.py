@@ -23,7 +23,7 @@ button1 = Button()
 button2 = Button()
 button3 = Button()
 select = StringSelect()
-text_input = TextInput(label="a", custom_id="b")
+text_input = TextInput(label="a", custom_id="b")  # pyright: ignore[reportDeprecated]
 separator = Separator()
 label__text = Label("a", text_input)
 label__select = Label("a", select)

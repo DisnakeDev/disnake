@@ -2329,6 +2329,26 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
             return None
         return utils.get(self.guild.stage_instances, channel_id=self.id)
 
+    @overload
+    @utils.deprecated("Setting privacy_level to public is deprecated.")
+    async def create_instance(
+        self,
+        *,
+        privacy_level: Literal[StagePrivacyLevel.public],
+        **_: object,
+    ) -> StageInstance: ...
+
+    @overload
+    async def create_instance(
+        self,
+        *,
+        topic: str,
+        privacy_level: StagePrivacyLevel = ...,
+        notify_everyone: bool = False,
+        guild_scheduled_event: Snowflake = ...,
+        reason: str | None = None,
+    ) -> StageInstance: ...
+
     async def create_instance(
         self,
         *,

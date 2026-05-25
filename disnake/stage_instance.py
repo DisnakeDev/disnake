@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal, overload
 
+from . import utils
 from .enums import StagePrivacyLevel, try_enum
 from .mixins import Hashable
-from .utils import MISSING, _get_as_snowflake, cached_slot_property, snowflake_time, warn_deprecated
+from .utils import MISSING, _get_as_snowflake, cached_slot_property, snowflake_time
 
 __all__ = ("StageInstance",)
 
@@ -100,6 +101,7 @@ class StageInstance(Hashable):
         return self._state.get_channel(self.channel_id)  # pyright: ignore[reportReturnType]
 
     @property
+    @utils.deprecated("Stages can no longer be discoverable.")
     def discoverable_disabled(self) -> bool:
         """:class:`bool`: Whether discoverability for the stage instance is disabled.
 
@@ -107,12 +109,9 @@ class StageInstance(Hashable):
 
             Stages can no longer be discoverable.
         """
-        warn_deprecated(
-            "StageInstance.discoverable_disabled is deprecated and will be removed in a future version",
-            stacklevel=2,
-        )
         return self._discoverable_disabled
 
+    @utils.deprecated("Stages can no longer be public.")
     def is_public(self) -> bool:
         """Whether the stage instance is public.
 
@@ -122,10 +121,6 @@ class StageInstance(Hashable):
 
         :return type: :class:`bool`
         """
-        warn_deprecated(
-            "StageInstance.is_public is deprecated and will be removed in a future version",
-            stacklevel=2,
-        )
         return self.privacy_level is StagePrivacyLevel.public
 
     @property
@@ -139,6 +134,26 @@ class StageInstance(Hashable):
         if self.guild_scheduled_event_id is None:
             return None
         return self.guild.get_scheduled_event(self.guild_scheduled_event_id)
+
+    @overload
+    @utils.deprecated(
+        "Setting privacy_level to StagePrivacyLevel.public is deprecated. Stages can no longer be public."
+    )
+    async def edit(
+        self,
+        *,
+        privacy_level: Literal[StagePrivacyLevel.public],
+        **_: object,
+    ) -> None: ...
+
+    @overload
+    async def edit(
+        self,
+        *,
+        topic: str = MISSING,
+        privacy_level: StagePrivacyLevel = MISSING,
+        reason: str | None = None,
+    ) -> None: ...
 
     async def edit(
         self,
@@ -185,7 +200,7 @@ class StageInstance(Hashable):
                 msg = "privacy_level field must be of type PrivacyLevel"
                 raise TypeError(msg)
             if privacy_level is StagePrivacyLevel.public:
-                warn_deprecated(
+                utils.warn_deprecated(
                     "Setting privacy_level to public is deprecated and will be removed in a future version.",
                     stacklevel=2,
                 )

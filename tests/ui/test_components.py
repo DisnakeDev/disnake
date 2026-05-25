@@ -20,7 +20,7 @@ all_ui_component_objects: list[ui.UIComponent] = [
     ui.RoleSelect(),
     ui.StringSelect(),
     ui.UserSelect(),
-    ui.TextInput(label="", custom_id=""),
+    ui.TextInput(label="", custom_id=""),  # pyright: ignore[reportDeprecated]
     ui.Section(accessory=ui.Button()),
     ui.TextDisplay(""),
     ui.Thumbnail(""),
@@ -28,7 +28,7 @@ all_ui_component_objects: list[ui.UIComponent] = [
     ui.File("attachment://x"),
     ui.Separator(),
     ui.Container(),
-    ui.Label("", ui.TextInput(label="", custom_id="")),
+    ui.Label("", ui.TextInput(label="", custom_id="")),  # pyright: ignore[reportDeprecated]
     ui.FileUpload(),
     ui.RadioGroup([]),
     ui.CheckboxGroup([]),

@@ -36,7 +36,6 @@ from typing import (
     ForwardRef,
     Generic,
     Literal,
-    NoReturn,
     Protocol,
     TypeAlias,
     TypedDict,
@@ -189,12 +188,8 @@ class classproperty(Generic[T_co]):
     def __init__(self, fget: Callable[[Any], T_co]) -> None:
         self.fget = fget
 
-    def __get__(self, instance: object, owner: type[object]) -> T_co:
+    def __get__(self, instance: object | None, owner: type[object]) -> T_co:
         return self.fget(owner)
-
-    def __set__(self, instance: object, value: object) -> NoReturn:
-        msg = "cannot set attribute"
-        raise AttributeError(msg)
 
 
 def cached_slot_property(name: str) -> Callable[[Callable[[T], T_co]], CachedSlotProperty[T, T_co]]:
@@ -293,6 +288,15 @@ def warn_deprecated(
     finally:
         assert isinstance(warnings.filters, list)
         warnings.filters[:] = old_filters
+
+
+# use to mark classes users should no longer use,
+# but the library still needs to create instances of
+if TYPE_CHECKING:
+    noop_deprecated = deprecated
+else:
+    def noop_deprecated(*_: object, **__: object) -> Callable[[T], T]:
+        return lambda o: o
 
 
 def oauth_url(

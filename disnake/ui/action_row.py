@@ -761,7 +761,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
             The width of the action row exceeds 5.
         """
         self.append_item(
-            TextInput(
+            TextInput(  # pyright: ignore[reportDeprecated]
                 id=id,
                 label=label,
                 custom_id=custom_id,
@@ -862,7 +862,9 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         return iter(self._children)
 
     @classmethod
-    @deprecated("Use of action rows in modals is deprecated, compatible components can be passed directly to modals.")
+    @deprecated(
+        "Use of action rows in modals is deprecated, compatible components can be passed directly to modals."
+    )
     def with_modal_components(cls, *, id: int = 0) -> ActionRow[ActionRowModalComponent]:
         """Create an empty action row meant to store components compatible with
         :class:`disnake.ui.Modal`. Saves the need to import type specifiers to

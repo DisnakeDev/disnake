@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Sequence
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, overload
 
 import disnake
+from disnake import utils
 
 from .bot_base import BotBase, when_mentioned, when_mentioned_or
 from .interaction_bot_base import InteractionBotBase
@@ -214,7 +215,8 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
 
     if TYPE_CHECKING:
 
-        def __init__(
+        @overload
+        def __init__(  # pyright: ignore[reportNoOverloadImplementation]
             self,
             command_prefix: PrefixType
             | Callable[[Self, Message], MaybeCoro[PrefixType]]
@@ -256,6 +258,19 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
             strict_localization: bool = False,
         ) -> None: ...
 
+        @overload
+        @utils.deprecated(
+            "sync_commands{_debug,_on_cog_unload} are deprecated. Use command_sync_flags instead."
+        )
+        def __init__(
+            self,
+            *_: object,
+            sync_commands: bool = ...,
+            sync_commands_debug: bool = ...,
+            sync_commands_on_cog_unload: bool = ...,
+            **kw: object,
+        ) -> None: ...
+
 
 class AutoShardedBot(BotBase, InteractionBotBase, disnake.AutoShardedClient):
     """Similar to :class:`.Bot`, except that it is inherited from
@@ -264,7 +279,8 @@ class AutoShardedBot(BotBase, InteractionBotBase, disnake.AutoShardedClient):
 
     if TYPE_CHECKING:
 
-        def __init__(
+        @overload
+        def __init__(  # pyright: ignore[reportNoOverloadImplementation]
             self,
             command_prefix: PrefixType
             | Callable[[Self, Message], MaybeCoro[PrefixType]]
@@ -304,6 +320,19 @@ class AutoShardedBot(BotBase, InteractionBotBase, disnake.AutoShardedClient):
             member_cache_flags: MemberCacheFlags | None = None,
             localization_provider: LocalizationProtocol | None = None,
             strict_localization: bool = False,
+        ) -> None: ...
+
+        @overload
+        @utils.deprecated(
+            "sync_commands{_debug,_on_cog_unload} are deprecated. Use command_sync_flags instead."
+        )
+        def __init__(
+            self,
+            *_: object,
+            sync_commands: bool = ...,
+            sync_commands_debug: bool = ...,
+            sync_commands_on_cog_unload: bool = ...,
+            **kw: object,
         ) -> None: ...
 
 
@@ -407,7 +436,8 @@ class InteractionBot(InteractionBotBase, disnake.Client):
 
     if TYPE_CHECKING:
 
-        def __init__(
+        @overload
+        def __init__(  # pyright: ignore[reportNoOverloadImplementation]
             self,
             *,
             owner_id: int | None = None,
@@ -442,6 +472,19 @@ class InteractionBot(InteractionBotBase, disnake.Client):
             strict_localization: bool = False,
         ) -> None: ...
 
+        @overload
+        @utils.deprecated(
+            "sync_commands{_debug,_on_cog_unload} are deprecated. Use command_sync_flags instead."
+        )
+        def __init__(
+            self,
+            *_: object,
+            sync_commands: bool = ...,
+            sync_commands_debug: bool = ...,
+            sync_commands_on_cog_unload: bool = ...,
+            **kw: object,
+        ) -> None: ...
+
 
 class AutoShardedInteractionBot(InteractionBotBase, disnake.AutoShardedClient):
     """Similar to :class:`.InteractionBot`, except that it is inherited from
@@ -450,7 +493,8 @@ class AutoShardedInteractionBot(InteractionBotBase, disnake.AutoShardedClient):
 
     if TYPE_CHECKING:
 
-        def __init__(
+        @overload
+        def __init__(  # pyright: ignore[reportNoOverloadImplementation]
             self,
             *,
             owner_id: int | None = None,
@@ -483,4 +527,17 @@ class AutoShardedInteractionBot(InteractionBotBase, disnake.AutoShardedClient):
             member_cache_flags: MemberCacheFlags | None = None,
             localization_provider: LocalizationProtocol | None = None,
             strict_localization: bool = False,
+        ) -> None: ...
+
+        @overload
+        @utils.deprecated(
+            "sync_commands{_debug,_on_cog_unload} are deprecated. Use command_sync_flags instead."
+        )
+        def __init__(
+            self,
+            *_: object,
+            sync_commands: bool = ...,
+            sync_commands_debug: bool = ...,
+            sync_commands_on_cog_unload: bool = ...,
+            **kw: object,
         ) -> None: ...

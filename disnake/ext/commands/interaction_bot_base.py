@@ -14,9 +14,11 @@ from typing import (
     Any,
     TypedDict,
     TypeVar,
+    overload,
 )
 
 import disnake
+from disnake import utils
 from disnake.app_commands import ApplicationCommand, Option
 from disnake.custom_warnings import SyncWarning
 from disnake.enums import ApplicationCommandType
@@ -454,6 +456,30 @@ class InteractionBotBase(CommonBotBase):
         """
         return self.all_message_commands.get(name)
 
+    @overload
+    @utils.deprecated("dm_permission is deprecated. Use contexts instead.")
+    def slash_command(
+        self, *, dm_permission: bool | None, **_: object
+    ) -> Callable[[CommandCallback], InvokableSlashCommand]: ...
+
+    @overload
+    def slash_command(
+        self,
+        *,
+        name: LocalizedOptional = None,
+        description: LocalizedOptional = None,
+        default_member_permissions: Permissions | int | None = None,
+        nsfw: bool | None = None,
+        install_types: ApplicationInstallTypes | None = None,
+        contexts: InteractionContextTypes | None = None,
+        options: list[Option] | None = None,
+        guild_ids: Sequence[int] | None = None,
+        connectors: dict[str, str] | None = None,
+        auto_sync: bool | None = None,
+        extras: dict[str, Any] | None = None,
+        **kwargs: Any,
+    ) -> Callable[[CommandCallback], InvokableSlashCommand]: ...
+
     def slash_command(
         self,
         *,
@@ -554,7 +580,7 @@ class InteractionBotBase(CommonBotBase):
         """
 
         def decorator(func: CommandCallback) -> InvokableSlashCommand:
-            result = slash_command(
+            result = slash_command(  # pyright: ignore[reportDeprecated]
                 name=name,
                 description=description,
                 options=options,
@@ -573,6 +599,31 @@ class InteractionBotBase(CommonBotBase):
             return result
 
         return decorator
+
+    @overload
+    @utils.deprecated("dm_permission is deprecated. Use contexts instead.")
+    def user_command(
+        self, *, dm_permission: bool | None, **_: object
+    ) -> Callable[
+        [InteractionCommandCallback[CogT, UserCommandInteraction, P]], InvokableUserCommand
+    ]: ...
+
+    @overload
+    def user_command(
+        self,
+        *,
+        name: LocalizedOptional = None,
+        default_member_permissions: Permissions | int | None = None,
+        nsfw: bool | None = None,
+        install_types: ApplicationInstallTypes | None = None,
+        contexts: InteractionContextTypes | None = None,
+        guild_ids: Sequence[int] | None = None,
+        auto_sync: bool | None = None,
+        extras: dict[str, Any] | None = None,
+        **kwargs: Any,
+    ) -> Callable[
+        [InteractionCommandCallback[CogT, UserCommandInteraction, P]], InvokableUserCommand
+    ]: ...
 
     def user_command(
         self,
@@ -660,7 +711,7 @@ class InteractionBotBase(CommonBotBase):
         def decorator(
             func: InteractionCommandCallback[CogT, UserCommandInteraction, P],
         ) -> InvokableUserCommand:
-            result = user_command(
+            result = user_command(  # pyright: ignore[reportDeprecated]
                 name=name,
                 dm_permission=dm_permission,
                 default_member_permissions=default_member_permissions,
@@ -676,6 +727,31 @@ class InteractionBotBase(CommonBotBase):
             return result
 
         return decorator
+
+    @overload
+    @utils.deprecated("dm_permission is deprecated. Use contexts instead.")
+    def message_command(
+        self, *, dm_permission: bool | None, **_: object
+    ) -> Callable[
+        [InteractionCommandCallback[CogT, MessageCommandInteraction, P]], InvokableMessageCommand
+    ]: ...
+
+    @overload
+    def message_command(
+        self,
+        *,
+        name: LocalizedOptional = None,
+        default_member_permissions: Permissions | int | None = None,
+        nsfw: bool | None = None,
+        install_types: ApplicationInstallTypes | None = None,
+        contexts: InteractionContextTypes | None = None,
+        guild_ids: Sequence[int] | None = None,
+        auto_sync: bool | None = None,
+        extras: dict[str, Any] | None = None,
+        **kwargs: Any,
+    ) -> Callable[
+        [InteractionCommandCallback[CogT, MessageCommandInteraction, P]], InvokableMessageCommand
+    ]: ...
 
     def message_command(
         self,
@@ -763,7 +839,7 @@ class InteractionBotBase(CommonBotBase):
         def decorator(
             func: InteractionCommandCallback[CogT, MessageCommandInteraction, P],
         ) -> InvokableMessageCommand:
-            result = message_command(
+            result = message_command(  # pyright: ignore[reportDeprecated]
                 name=name,
                 dm_permission=dm_permission,
                 default_member_permissions=default_member_permissions,
