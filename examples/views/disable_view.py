@@ -26,7 +26,7 @@ class MyView(disnake.ui.View):
         await self.message.edit(view=self)
 
     @disnake.ui.button(label="Disable the view", style=disnake.ButtonStyle.grey)
-    async def disable_button(self, button: disnake.ui.Button, inter: disnake.MessageInteraction):
+    async def disable_button(self, button: object, inter: disnake.MessageInteraction):
         # We disable every single component in this view
         for child in self.children:
             if isinstance(child, disnake.ui.Button):
@@ -38,7 +38,7 @@ class MyView(disnake.ui.View):
         self.stop()
 
     @disnake.ui.button(label="Remove the view", style=disnake.ButtonStyle.red)
-    async def remove_button(self, button: disnake.ui.Button, inter: disnake.MessageInteraction):
+    async def remove_button(self, button: object, inter: disnake.MessageInteraction):
         # view=None removes the view
         await inter.response.edit_message(view=None)
 

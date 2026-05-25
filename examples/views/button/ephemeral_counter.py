@@ -8,6 +8,7 @@ import os
 
 import disnake
 from disnake.ext import commands
+from typing_extensions import Self
 
 
 # Define a simple View that gives us a counter button
@@ -15,7 +16,7 @@ class EphemeralCounter(disnake.ui.View):
     # Define the actual button
     # note: The name of the function does not matter to the library
     @disnake.ui.button(label="0", style=disnake.ButtonStyle.red)
-    async def count(self, button: disnake.ui.Button, inter: disnake.MessageInteraction):
+    async def count(self, button: disnake.ui.Button[Self], inter: disnake.MessageInteraction):
         # When pressed, this increments the number displayed until it hits 5.
         # When it hits 5, the counter button is disabled and it turns green.
         number = int(button.label) if button.label else 0
@@ -38,7 +39,7 @@ class CreateCounter(disnake.ui.View):
     # When this button is pressed, it will respond with a Counter view that will
     # give the user their own personal button they can press 5 times.
     @disnake.ui.button(label="Click", style=disnake.ButtonStyle.blurple)
-    async def receive(self, button: disnake.ui.Button, inter: disnake.MessageInteraction):
+    async def receive(self, button: object, inter: disnake.MessageInteraction):
         # ephemeral=True makes the message hidden from everyone except the button presser
         await inter.response.send_message("Enjoy!", view=EphemeralCounter(), ephemeral=True)
 
