@@ -11,19 +11,19 @@ from typing import (
     overload,
 )
 
+from typing_extensions import Self
+
 from ...abc import Snowflake
 from ...components import RoleSelectMenu
 from ...enums import ComponentType, SelectDefaultValueType
 from ...object import Object
 from ...role import Role
 from ...utils import MISSING
-from .base import BaseSelect, P, SelectDefaultValueInputType, V_co, _create_decorator
+from ..item import DecoratedItem, ItemCallbackType, P, V_co, V_deco
+from .base import BaseSelect, SelectDefaultValueInputType, _create_decorator
 
 if TYPE_CHECKING:
-    from typing_extensions import Self
-
-    from ..item import DecoratedItem, ItemCallbackType
-
+    from ..view import View
 
 __all__ = (
     "RoleSelect",
@@ -90,36 +90,6 @@ class RoleSelect(BaseSelect[RoleSelectMenu, "Role", V_co]):
         SelectDefaultValueType.role: (Role, Object),
     }
 
-    @overload
-    def __init__(
-        self: RoleSelect[None],
-        *,
-        custom_id: str = ...,
-        placeholder: str | None = None,
-        min_values: int = 1,
-        max_values: int = 1,
-        disabled: bool = False,
-        default_values: Sequence[SelectDefaultValueInputType[Role]] | None = None,
-        required: bool = True,
-        id: int = 0,
-        row: int | None = None,
-    ) -> None: ...
-
-    @overload
-    def __init__(
-        self: RoleSelect[V_co],
-        *,
-        custom_id: str = ...,
-        placeholder: str | None = None,
-        min_values: int = 1,
-        max_values: int = 1,
-        disabled: bool = False,
-        default_values: Sequence[SelectDefaultValueInputType[Role]] | None = None,
-        required: bool = True,
-        id: int = 0,
-        row: int | None = None,
-    ) -> None: ...
-
     def __init__(
         self,
         *,
@@ -162,7 +132,7 @@ class RoleSelect(BaseSelect[RoleSelectMenu, "Role", V_co]):
         )
 
 
-S_co = TypeVar("S_co", bound="RoleSelect", covariant=True)
+S_co = TypeVar("S_co", bound="RoleSelect[View]", covariant=True)
 
 
 @overload
@@ -176,18 +146,20 @@ def role_select(
     default_values: Sequence[SelectDefaultValueInputType[Role]] | None = None,
     id: int = 0,
     row: int | None = None,
-) -> Callable[[ItemCallbackType[V_co, RoleSelect[V_co]]], DecoratedItem[RoleSelect[V_co]]]: ...
+) -> Callable[
+    [ItemCallbackType[V_deco, RoleSelect[V_deco]]], DecoratedItem[RoleSelect[V_deco]]
+]: ...
 
 
 @overload
 def role_select(
     cls: Callable[P, S_co], *_: P.args, **kwargs: P.kwargs
-) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]: ...
+) -> Callable[[ItemCallbackType[V_deco, S_co]], DecoratedItem[S_co]]: ...
 
 
 def role_select(
     cls: Callable[..., S_co] = RoleSelect[Any], **kwargs: Any
-) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]:
+) -> Callable[[ItemCallbackType[V_deco, S_co]], DecoratedItem[S_co]]:
     r"""A decorator that attaches a role select menu to a component.
 
     The function being decorated should have three parameters: ``self`` representing
