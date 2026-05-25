@@ -295,6 +295,7 @@ def warn_deprecated(
 if TYPE_CHECKING:
     noop_deprecated = deprecated
 else:
+
     def noop_deprecated(*_: object, **__: object) -> Callable[[T], T]:
         return lambda o: o
 
