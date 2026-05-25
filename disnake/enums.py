@@ -775,6 +775,9 @@ class AuditLogAction(Enum):
     automod_quarantine_user               = 146
     creator_monetization_request_created  = 150
     creator_monetization_terms_accepted   = 151
+    onboarding_prompt_create              = 163
+    onboarding_prompt_update              = 164
+    onboarding_update                     = 167
     voice_channel_status_update           = 192
     voice_channel_status_delete           = 193
     # fmt: on
@@ -843,6 +846,9 @@ class AuditLogAction(Enum):
             AuditLogAction.automod_quarantine_user:               None,
             AuditLogAction.creator_monetization_request_created:  None,
             AuditLogAction.creator_monetization_terms_accepted:   None,
+            AuditLogAction.onboarding_prompt_create:              AuditLogActionCategory.create,
+            AuditLogAction.onboarding_prompt_update:              AuditLogActionCategory.update,
+            AuditLogAction.onboarding_update:                     AuditLogActionCategory.update,
             AuditLogAction.voice_channel_status_update:           AuditLogActionCategory.update,
             AuditLogAction.voice_channel_status_delete:           AuditLogActionCategory.delete,
         }
@@ -890,6 +896,12 @@ class AuditLogAction(Enum):
             return "automod_rule"
         elif v < 147:
             return "user"
+        elif v < 163:
+            return None
+        elif v < 166:
+            return "onboarding_prompt"
+        elif v < 168:
+            return "onboarding"
         elif v < 192:
             return None
         elif v < 194:
