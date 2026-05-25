@@ -17,23 +17,23 @@ class RowButtons(disnake.ui.View):
         super().__init__(timeout=None)
 
     @disnake.ui.button(label="Hi", style=ButtonStyle.red)
-    async def first_button(self, button: disnake.ui.Button, inter: disnake.MessageInteraction):
+    async def first_button(self, button: object, inter: disnake.MessageInteraction):
         await inter.response.send_message("This is the first button.")
 
     @disnake.ui.button(label="this is", style=ButtonStyle.red)
-    async def second_button(self, button: disnake.ui.Button, inter: disnake.MessageInteraction):
+    async def second_button(self, button: object, inter: disnake.MessageInteraction):
         await inter.response.send_message("This is the second button.")
 
     @disnake.ui.button(label="a row of", style=ButtonStyle.blurple, row=1)
-    async def third_button(self, button: disnake.ui.Button, inter: disnake.MessageInteraction):
+    async def third_button(self, button: object, inter: disnake.MessageInteraction):
         await inter.response.send_message("This is the third button.")
 
     @disnake.ui.button(label="buttons.", style=ButtonStyle.blurple, row=1)
-    async def fourth_button(self, button: disnake.ui.Button, inter: disnake.MessageInteraction):
+    async def fourth_button(self, button: object, inter: disnake.MessageInteraction):
         await inter.response.send_message("This is the fourth button.")
 
     @disnake.ui.button(emoji="🥳", style=ButtonStyle.green, row=2)
-    async def fifth_button(self, button: disnake.ui.Button, inter: disnake.MessageInteraction):
+    async def fifth_button(self, button: object, inter: disnake.MessageInteraction):
         await inter.response.send_message("This is the fifth button.")
 
 
