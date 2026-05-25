@@ -116,8 +116,13 @@ build = [
     "versioningit>=3.3.0,<4",
 ]
 
+
 [tool.uv]
 required-version = ">=0.9.2"
+
+[tool.uv.dependency-groups]
+docs = { requires-python = ">=3.11" }
+
 
 [tool.hatch.build]
 artifacts = ["disnake/_version.py"]
@@ -130,6 +135,7 @@ only-include = [
 
 [tool.hatch.version]
 source = "versioningit"
+
 
 [tool.versioningit]
 default-version = "0.0.0"
@@ -166,9 +172,6 @@ class VersionInfo(NamedTuple):
 version_info: VersionInfo = VersionInfo{version_tuple}
 """
 
-
-[tool.uv.dependency-groups]
-docs = { requires-python = ">=3.11" }
 
 [tool.ruff]
 line-length = 100
