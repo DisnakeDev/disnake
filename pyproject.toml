@@ -429,7 +429,12 @@ reportMissingTypeArgument = false
 minversion = "9.0"
 pythonpath = ["."]  # legacy configuration, new pytest versions don't add the rootdir to path
 testpaths = ["tests"]
-addopts = ["--strict-markers", "-Werror", "-s"]
+addopts = [
+    "--strict-markers",
+    "-s",
+    "-Werror",
+    "-Wignore:There is no current event loop:DeprecationWarning:looptime._internal.plugin",
+]
 strict = true
 strict_parametrization_ids = false
 asyncio_mode = "strict"
