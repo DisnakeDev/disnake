@@ -289,7 +289,7 @@ class InvokableApplicationCommand(ABC):
 
         .. deprecated:: 2.10
             Use :attr:`contexts` instead.
-            This is equivalent to the :attr:`InteractionContextTypes.bot_dm` flag.
+            This is equivalent to the :attr:`disnake.InteractionContextTypes.bot_dm` flag.
         """
         # TODO(eneg): 2.10 or current?
         return self.body._dm_permission is not False
