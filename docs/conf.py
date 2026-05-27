@@ -15,12 +15,15 @@
 import importlib.metadata
 import importlib.util
 import inspect
+import logging
 import os
 import re
 import subprocess  # noqa: TID251
 import sys
+import warnings
 from typing import Any
 
+import sphinx.deprecation
 import versioningit
 from sphinx.application import Sphinx
 
@@ -92,7 +95,9 @@ rst_prolog = r"""
 templates_path = ["_templates"]
 
 # The suffix of source filenames.
-source_suffix = ".rst"
+source_suffix = {
+    ".rst": "restructuredtext",
+}
 
 # The encoding of source files.
 # source_encoding = 'utf-8-sig'
@@ -515,3 +520,19 @@ def setup(app: Sphinx) -> None:
     import disnake
 
     del disnake.Embed.Empty  # pyright: ignore[reportAttributeAccessIssue]
+
+    warnings.filterwarnings(
+        "ignore",
+        category=sphinx.deprecation.RemovedInSphinx90Warning,
+        module="hoverxref.extension",
+    )
+
+    # silence somewhat verbose `Writing evaluated template result to ...` log
+    logging.getLogger("sphinx.sphinx.util.fileutil").addFilter(
+        lambda r: getattr(r, "subtype", None) != "template_evaluation"
+    )
+
+    # `document is referenced in multiple toctrees:` is fine and expected
+    logging.getLogger("sphinx.sphinx.environment").addFilter(
+        lambda r: getattr(r, "subtype", None) != "multiple_toc_parents"
+    )
