@@ -94,11 +94,11 @@ typing = [
     # all type-check only dependencies are defined in noxfile.py.
 ]
 test = [
-    "pytest~=8.4.2",
+    "pytest~=9.0.3",
     "pytest-cov~=7.0",
-    "pytest-asyncio~=0.24.0",
-    "looptime~=0.2.0",
-    "coverage[toml]~=7.10.0",
+    "pytest-asyncio~=1.3.0",
+    "looptime~=0.7.0",
+    "coverage[toml]~=7.14",
 ]
 build = [
     "build>=1.2.2.post1",
@@ -426,12 +426,18 @@ reportUnknownVariableType = false
 reportMissingTypeArgument = false
 
 
-[tool.pytest.ini_options]
-minversion = "8.2"
-pythonpath = "." # legacy configuration, new pytest versions don't add the rootdir to path
-testpaths = "tests"
-addopts = "--strict-markers -Werror -s"
-xfail_strict = true
+[tool.pytest]
+minversion = "9.0"
+pythonpath = ["."]  # legacy configuration, new pytest versions don't add the rootdir to path
+testpaths = ["tests"]
+addopts = [
+    "--strict-markers",
+    "-s",
+    "-Werror",
+    "-Wignore:There is no current event loop:DeprecationWarning:looptime._internal.plugin",
+]
+strict = true
+strict_parametrization_ids = false
 asyncio_mode = "strict"
 
 [tool.coverage.run]
