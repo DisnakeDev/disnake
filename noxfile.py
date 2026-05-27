@@ -84,6 +84,7 @@ EXECUTION_GROUPS: Sequence[ExecutionGroup] = [
     # docs and pyright
     ExecutionGroup(
         sessions=("docs", "pyright"),
+        python="3.11",
         pyright_paths=("docs",),
         groups=("docs",),
     ),
@@ -225,6 +226,8 @@ def docs(session: nox.Session) -> None:
                 "sphinx-autobuild",
                 "--ignore",
                 "_build",
+                "--re-ignore",
+                "__pycache__",
                 "--watch",
                 "../disnake",
                 "--watch",
@@ -474,7 +477,7 @@ def dev(session: nox.Session) -> None:
     """
     session.run("uv", "lock", external=True)
     session.run("uv", "venv", "--clear", external=True)
-    session.run("uv", "sync", "--all-extras", "--all-groups", external=True)
+    session.run("uv", "sync", "--all-extras", external=True)
     session.run("uv", "run", "prek", "install", "--overwrite", external=True)
 
 

@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any
 
 from docutils import nodes
 from sphinx.environment.adapters.indexentries import IndexEntries
-from sphinxext.opengraph.descriptionparser import DescriptionParser
+from sphinxext.opengraph._description_parser import DescriptionParser
 
 if TYPE_CHECKING:
     from sphinx.application import Sphinx
