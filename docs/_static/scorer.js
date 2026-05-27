@@ -17,7 +17,6 @@ function __score(haystack, regex) {
     }
     let subLength = match[0].length;
     let start = match.index;
-    // longer (and later) submatches get a higher score penalty
     return (subLength * 1000 + start) / 1000.0;
 }
 
@@ -39,29 +38,23 @@ function __setPattern() {
 
 Scorer = {
     // Implement the following function to further tweak the score for each result
-    // The function takes a result array [docname, title, anchor, descr, score, filename, kind]
+    // The function takes a result array [filename, title, anchor, descr, score]
     // and returns the new score.
     score: (result) => {
-        const [, title, , , score, , kind] = result;
+        // only inflate the score of things that are actual API reference things
+        const [, title, , , score,] = result;
 
         if (queryBeingDone === undefined) {
             __setPattern();
         }
 
-        // penalize text matches a little bit, sphinx scores pages that have a matching subtitle
-        // the same as pages that actually have the search term as the title, for some reason
-        if (kind === "text") return score - 1;
-
-        // only inflate the score of things that are actual API reference things
         if (pattern !== null && title.startsWith('disnake.')) {
-            const penalty = __score(title, pattern);
-            if (penalty === Number.MAX_VALUE) {
+            let _score = __score(title, pattern);
+            if (_score === Number.MAX_VALUE) {
                 return score;
             }
-            // calculate new score on top of title score; we want to rank *all* API results
-            // right below matching pages, and have pages with only a fulltext match appear last
-            const newScore = Scorer.title - (penalty / 1000);
-            // console.log(`${title}: ${score} -> ${newScore} (${penalty})`);
+            let newScore = 100 + queryBeingDone.length - _score;
+            // console.log(`${title}: ${score} -> ${newScore} (${_score})`);
             return newScore;
         }
         return score;
