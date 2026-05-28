@@ -1581,7 +1581,7 @@ class InteractionResponse:
         if modal is not None:
             parent._state.store_modal(parent.author.id, modal)
 
-    @utils.deprecated("Use premium buttons instead.")
+    @utils.deprecated("Use `ui.Button(sku_id=...)` instead.")
     async def require_premium(self) -> None:
         """|coro|
 

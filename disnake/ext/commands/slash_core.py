@@ -25,6 +25,8 @@ from .errors import CommandError, CommandInvokeError
 from .params import call_param_func, classify_autocompleter, expand_params
 
 if TYPE_CHECKING:
+    from typing_extensions import Never
+
     from disnake.app_commands import Choices
     from disnake.i18n import LocalizedOptional
 
@@ -447,10 +449,6 @@ class InvokableSlashCommand(InvokableApplicationCommand):
     """
 
     @overload
-    @utils.deprecated("dm_permission is deprecated. Use contexts instead.")
-    def __init__(self, func: ..., *, dm_permission: bool | None, **_: Any) -> None: ...
-
-    @overload
     def __init__(
         self,
         func: CommandCallback,
@@ -458,6 +456,27 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         name: LocalizedOptional = None,
         description: LocalizedOptional = None,
         options: list[Option] | None = None,
+        default_member_permissions: Permissions | int | None = None,
+        nsfw: bool | None = None,
+        install_types: ApplicationInstallTypes | None = None,
+        contexts: InteractionContextTypes | None = None,
+        guild_ids: Sequence[int] | None = None,
+        connectors: dict[str, str] | None = None,
+        auto_sync: bool | None = None,
+        dm_permission: Never = ...,
+        **kwargs: Any,
+    ) -> None: ...
+
+    @overload
+    @utils.deprecated("`dm_permission` is deprecated. Use `contexts` instead.")
+    def __init__(
+        self,
+        func: CommandCallback,
+        *,
+        name: LocalizedOptional = None,
+        description: LocalizedOptional = None,
+        options: list[Option] | None = None,
+        dm_permission: bool | None = None,  # deprecated
         default_member_permissions: Permissions | int | None = None,
         nsfw: bool | None = None,
         install_types: ApplicationInstallTypes | None = None,
@@ -813,17 +832,31 @@ class InvokableSlashCommand(InvokableApplicationCommand):
 
 
 @overload
-@utils.deprecated("dm_permission is deprecated. Use contexts instead.")
-def slash_command(
-    *, dm_permission: bool | None, **kwargs: Any
-) -> Callable[[CommandCallback], InvokableSlashCommand]: ...
-
-
-@overload
 def slash_command(
     *,
     name: LocalizedOptional = None,
     description: LocalizedOptional = None,
+    default_member_permissions: Permissions | int | None = None,
+    nsfw: bool | None = None,
+    install_types: ApplicationInstallTypes | None = None,
+    contexts: InteractionContextTypes | None = None,
+    options: list[Option] | None = None,
+    guild_ids: Sequence[int] | None = None,
+    connectors: dict[str, str] | None = None,
+    auto_sync: bool | None = None,
+    extras: dict[str, Any] | None = None,
+    dm_permission: Never = ...,
+    **kwargs: Any,
+) -> Callable[[CommandCallback], InvokableSlashCommand]: ...
+
+
+@overload
+@utils.deprecated("`dm_permission` is deprecated. Use `contexts` instead.")
+def slash_command(
+    *,
+    name: LocalizedOptional = None,
+    description: LocalizedOptional = None,
+    dm_permission: bool | None = None,  # deprecated
     default_member_permissions: Permissions | int | None = None,
     nsfw: bool | None = None,
     install_types: ApplicationInstallTypes | None = None,

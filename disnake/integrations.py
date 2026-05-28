@@ -147,7 +147,7 @@ class Integration(PartialIntegration):
         self.user = User(state=self._state, data=user) if user else None
         self.enabled: bool = data["enabled"]
 
-    @utils.deprecated("Use Guild.leave() instead.")
+    @utils.deprecated("Use `Guild.leave()` instead.")
     async def delete(self, *, reason: str | None = None) -> None:
         """|coro|
 

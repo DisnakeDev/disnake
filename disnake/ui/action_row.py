@@ -702,7 +702,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         )
         return self
 
-    @deprecated('Use Label("<text>", TextInput(...)) instead.')
+    @deprecated('Use `Label("<text>", TextInput(...))` instead.')
     def add_text_input(
         self: TextInputCompatibleActionRowT,
         *,

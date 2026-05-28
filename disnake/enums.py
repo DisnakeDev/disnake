@@ -8,11 +8,14 @@ from typing import (
     TYPE_CHECKING,
     Any,
     ClassVar,
+    Literal,
     NamedTuple,
     NoReturn,
+    TypeAlias,
     TypeVar,
 )
 
+# `noop_deprecated` not imported from utils.py to avoid circular imports
 if TYPE_CHECKING:
     from typing_extensions import Self
 
@@ -1445,6 +1448,9 @@ class StagePrivacyLevel(Enum):
     """The stage instance can only be joined by members of the guild."""
     guild_only = closed
     """An alias for :attr:`.closed`."""
+
+
+_StagePrivacyLevel: TypeAlias = Literal[StagePrivacyLevel.closed]
 
 
 class NSFWLevel(Enum, comparable=True):

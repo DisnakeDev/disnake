@@ -2147,14 +2147,15 @@ class Client:
 
     @overload
     @utils.deprecated(
-        "Using with_expiration is deprecated, Invite.expires_at field is always included now."
+        "Using `with_expiration` is deprecated, `Invite.expires_at` field is always included now."
     )
     async def fetch_invite(
         self,
         url: Invite | str,
         *,
-        with_expiration: bool,
-        **_: object,
+        with_counts: bool = True,
+        guild_scheduled_event_id: int | None = None,
+        with_expiration: bool = False,
     ) -> Invite: ...
 
     async def fetch_invite(
@@ -2630,7 +2631,7 @@ class Client:
         data = await self.http.list_sticker_packs()
         return [StickerPack(state=self._connection, data=pack) for pack in data["sticker_packs"]]
 
-    @deprecated("Use .fetch_sticker_packs() instead.")
+    @deprecated("Use `.fetch_sticker_packs()` instead.")
     async def fetch_premium_sticker_packs(self) -> list[StickerPack]:
         """An alias of :meth:`fetch_sticker_packs`.
 

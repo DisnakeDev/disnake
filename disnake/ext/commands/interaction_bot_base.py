@@ -39,7 +39,7 @@ from .flags import CommandSyncFlags
 from .slash_core import InvokableSlashCommand, SubCommand, SubCommandGroup, slash_command
 
 if TYPE_CHECKING:
-    from typing_extensions import NotRequired, ParamSpec
+    from typing_extensions import Never, NotRequired, ParamSpec
 
     from disnake.i18n import LocalizedOptional
     from disnake.interactions import (
@@ -457,12 +457,26 @@ class InteractionBotBase(CommonBotBase):
         return self.all_message_commands.get(name)
 
     @overload
-    @utils.deprecated("dm_permission is deprecated. Use contexts instead.")
     def slash_command(
-        self, *, dm_permission: bool | None, **_: object
+        self,
+        *,
+        name: LocalizedOptional = None,
+        description: LocalizedOptional = None,
+        default_member_permissions: Permissions | int | None = None,
+        nsfw: bool | None = None,
+        install_types: ApplicationInstallTypes | None = None,
+        contexts: InteractionContextTypes | None = None,
+        options: list[Option] | None = None,
+        guild_ids: Sequence[int] | None = None,
+        connectors: dict[str, str] | None = None,
+        auto_sync: bool | None = None,
+        extras: dict[str, Any] | None = None,
+        dm_permission: Never = ...,
+        **kwargs: Any,
     ) -> Callable[[CommandCallback], InvokableSlashCommand]: ...
 
     @overload
+    @utils.deprecated("`dm_permission` is deprecated. Use `contexts` instead.")
     def slash_command(
         self,
         *,
@@ -601,18 +615,30 @@ class InteractionBotBase(CommonBotBase):
         return decorator
 
     @overload
-    @utils.deprecated("dm_permission is deprecated. Use contexts instead.")
     def user_command(
-        self, *, dm_permission: bool | None, **_: object
+        self,
+        *,
+        name: LocalizedOptional = None,
+        default_member_permissions: Permissions | int | None = None,
+        nsfw: bool | None = None,
+        install_types: ApplicationInstallTypes | None = None,
+        contexts: InteractionContextTypes | None = None,
+        guild_ids: Sequence[int] | None = None,
+        auto_sync: bool | None = None,
+        extras: dict[str, Any] | None = None,
+        dm_permission: Never = ...,
+        **kwargs: Any,
     ) -> Callable[
         [InteractionCommandCallback[CogT, UserCommandInteraction, P]], InvokableUserCommand
     ]: ...
 
     @overload
+    @utils.deprecated("`dm_permission` is deprecated. Use `contexts` instead.")
     def user_command(
         self,
         *,
         name: LocalizedOptional = None,
+        dm_permission: bool | None = None,  # deprecated
         default_member_permissions: Permissions | int | None = None,
         nsfw: bool | None = None,
         install_types: ApplicationInstallTypes | None = None,
@@ -729,18 +755,30 @@ class InteractionBotBase(CommonBotBase):
         return decorator
 
     @overload
-    @utils.deprecated("dm_permission is deprecated. Use contexts instead.")
     def message_command(
-        self, *, dm_permission: bool | None, **_: object
+        self,
+        *,
+        name: LocalizedOptional = None,
+        default_member_permissions: Permissions | int | None = None,
+        nsfw: bool | None = None,
+        install_types: ApplicationInstallTypes | None = None,
+        contexts: InteractionContextTypes | None = None,
+        guild_ids: Sequence[int] | None = None,
+        auto_sync: bool | None = None,
+        extras: dict[str, Any] | None = None,
+        dm_permission: Never = ...,
+        **kwargs: Any,
     ) -> Callable[
         [InteractionCommandCallback[CogT, MessageCommandInteraction, P]], InvokableMessageCommand
     ]: ...
 
     @overload
+    @utils.deprecated("`dm_permission` is deprecated. Use `contexts` instead.")
     def message_command(
         self,
         *,
         name: LocalizedOptional = None,
+        dm_permission: bool | None = None,  # deprecated
         default_member_permissions: Permissions | int | None = None,
         nsfw: bool | None = None,
         install_types: ApplicationInstallTypes | None = None,

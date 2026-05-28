@@ -1216,7 +1216,8 @@ class Guild(Hashable):
 
     @property
     @utils.deprecated(
-        "VoiceRegion is no longer set on the guild. Use VoiceChannel.rtc_region and StageChannel.rtc_region instead."
+        "`VoiceRegion` is no longer set on the guild. "
+        "Use `VoiceChannel.rtc_region` and `StageChannel.rtc_region` instead."
     )
     def region(self) -> str:
         """:class:`str` | :data:`None`: The region the guild belongs on.
@@ -4137,7 +4138,7 @@ class Guild(Hashable):
     ) -> None: ...
 
     @overload
-    @utils.deprecated("delete_message_days is deprecated. Use clean_history_duration instead.")
+    @utils.deprecated("`delete_message_days` is deprecated. Use `clean_history_duration` instead.")
     async def ban(
         self,
         user: Snowflake,

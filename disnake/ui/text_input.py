@@ -71,11 +71,9 @@ class TextInput(WrappedComponent):
     _underlying: TextInputComponent = MISSING
 
     @overload
-    @utils.deprecated('label= is deprecated. Use ui.Label("<text>", ui.TextInput(...)) instead.')
     def __init__(
         self,
         *,
-        label: str | None,
         custom_id: str = ...,
         style: TextInputStyle = TextInputStyle.short,
         placeholder: str | None = None,
@@ -87,9 +85,11 @@ class TextInput(WrappedComponent):
     ) -> None: ...
 
     @overload
+    @utils.deprecated('`label` is deprecated. Use `ui.Label("<text>", ui.TextInput(...))` instead.')
     def __init__(
         self,
         *,
+        label: str | None,
         custom_id: str = ...,
         style: TextInputStyle = TextInputStyle.short,
         placeholder: str | None = None,
@@ -141,7 +141,7 @@ class TextInput(WrappedComponent):
         self._underlying.style = value
 
     @property
-    @deprecated('Use ui.Label("<text>", ui.TextInput(...)) instead.')
+    @deprecated('Use `ui.Label("<text>", ui.TextInput(...))` instead.')
     def label(self) -> str | None:
         """:class:`str`: The label of the text input.
 
@@ -151,7 +151,7 @@ class TextInput(WrappedComponent):
         return self._underlying.label
 
     @label.setter
-    @deprecated('Use ui.Label("<text>", ui.TextInput(...)) instead.')
+    @deprecated('Use `ui.Label("<text>", ui.TextInput(...))` instead.')
     def label(self, value: str) -> None:
         self._underlying.label = value
 

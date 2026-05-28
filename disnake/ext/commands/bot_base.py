@@ -110,7 +110,7 @@ class BotBase(CommonBotBase, GroupMixin):
     def __init__(
         self,
         command_prefix: PrefixType | Callable[[Self, Message], MaybeCoro[PrefixType]],
-        help_command: HelpCommand | None = _default,
+        help_command: HelpCommand | None = ...,
         description: str | None = None,
         *,
         strip_after_prefix: bool = False,
@@ -119,14 +119,16 @@ class BotBase(CommonBotBase, GroupMixin):
 
     @overload
     @utils.deprecated(
-        "Using command_prefix=None is deprecated. Use (AutoSharded)InteractionBot instead."
+        "Using `command_prefix=None` is deprecated. Use `(AutoSharded)InteractionBot` instead."
     )
     def __init__(
         self,
         command_prefix: None = None,
         help_command: HelpCommand | None = ...,
-        description: str | None = ...,
-        **_: object,
+        description: str | None = None,
+        *,
+        strip_after_prefix: bool = False,
+        **options: Any,
     ) -> None: ...
 
     def __init__(

@@ -535,7 +535,7 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
     ) -> None: ...
 
     @overload
-    @utils.deprecated("dm_permission is deprecated, use contexts instead.")
+    @utils.deprecated("`dm_permission` is deprecated, use `contexts` instead.")
     def __init__(
         self,
         type: ApplicationCommandType,
@@ -628,7 +628,7 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
         return Permissions(self._default_member_permissions)
 
     @property
-    @utils.deprecated("Use .contexts instead.")
+    @utils.deprecated("Use `.contexts` instead.")
     def dm_permission(self) -> bool:
         """
         Whether this command can be used in DMs with the bot.
@@ -643,7 +643,7 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
         return self._dm_permission is not False
 
     @dm_permission.setter
-    @utils.deprecated("Use .contexts instead.")
+    @utils.deprecated("Use `.contexts` instead.")
     def dm_permission(self, value: bool) -> None:
         self._dm_permission = value
 
@@ -816,11 +816,9 @@ class UserCommand(ApplicationCommand):
     )
 
     @overload
-    @utils.deprecated("dm_permission is deprecated, use contexts instead.")
     def __init__(
         self,
         name: LocalizedRequired,
-        dm_permission: bool | None,
         default_member_permissions: Permissions | int | None = None,
         nsfw: bool | None = None,
         install_types: ApplicationInstallTypes | None = None,
@@ -828,9 +826,11 @@ class UserCommand(ApplicationCommand):
     ) -> None: ...
 
     @overload
+    @utils.deprecated("`dm_permission` is deprecated, use `contexts` instead.")
     def __init__(
         self,
         name: LocalizedRequired,
+        dm_permission: bool | None = None,
         default_member_permissions: Permissions | int | None = None,
         nsfw: bool | None = None,
         install_types: ApplicationInstallTypes | None = None,
@@ -967,11 +967,9 @@ class MessageCommand(ApplicationCommand):
     )
 
     @overload
-    @utils.deprecated("dm_permission is deprecated, use contexts instead.")
     def __init__(
         self,
         name: LocalizedRequired,
-        dm_permission: bool | None,
         default_member_permissions: Permissions | int | None = None,
         nsfw: bool | None = None,
         install_types: ApplicationInstallTypes | None = None,
@@ -979,9 +977,11 @@ class MessageCommand(ApplicationCommand):
     ) -> None: ...
 
     @overload
+    @utils.deprecated("`dm_permission` is deprecated, use `contexts` instead.")
     def __init__(
         self,
         name: LocalizedRequired,
+        dm_permission: bool | None = None,
         default_member_permissions: Permissions | int | None = None,
         nsfw: bool | None = None,
         install_types: ApplicationInstallTypes | None = None,
@@ -1130,12 +1130,10 @@ class SlashCommand(ApplicationCommand):
     )
 
     @overload
-    @utils.deprecated("dm_permission is deprecated, use contexts instead.")
     def __init__(
         self,
         name: LocalizedRequired,
         description: LocalizedRequired,
-        dm_permission: bool | None,
         options: list[Option] | None = None,
         default_member_permissions: Permissions | int | None = None,
         nsfw: bool | None = None,
@@ -1144,10 +1142,12 @@ class SlashCommand(ApplicationCommand):
     ) -> None: ...
 
     @overload
+    @utils.deprecated("`dm_permission` is deprecated, use `contexts` instead.")
     def __init__(
         self,
         name: LocalizedRequired,
         description: LocalizedRequired,
+        dm_permission: bool | None = None,
         options: list[Option] | None = None,
         default_member_permissions: Permissions | int | None = None,
         nsfw: bool | None = None,
