@@ -1358,8 +1358,7 @@ class ChannelPinsIterator(_AsyncIterator["Message"]):
 
     # defined to maintain backward compatibility with the old `pins` method
     @utils.deprecated(
-        "`await channel.pins()` is deprecated. "
-        "Use `async for msg in channel.pins()` instead."
+        "`await channel.pins()` is deprecated. Use `async for msg in channel.pins()` instead."
     )
     def __await__(self) -> Generator[None, None, list[Message]]:
         return self.flatten().__await__()
