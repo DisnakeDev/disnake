@@ -16,6 +16,7 @@ from typing import (
     overload,
 )
 
+from disnake import utils
 from disnake.app_commands import ApplicationCommand
 from disnake.enums import ApplicationCommandType
 from disnake.flags import ApplicationInstallTypes, InteractionContextTypes
@@ -24,7 +25,6 @@ from disnake.utils import (
     _generated,
     _overload_with_permissions,
     async_all,
-    deprecated,
     iscoroutinefunction,
     maybe_coroutine,
 )
@@ -283,7 +283,7 @@ class InvokableApplicationCommand(ABC):
         self.body._default_contexts = bot._default_contexts
 
     @property
-    @deprecated("Use .contexts instead.")
+    @utils.deprecated("Use `.contexts` instead.")
     def dm_permission(self) -> bool:
         """:class:`bool`: Whether this command can be used in DMs.
 

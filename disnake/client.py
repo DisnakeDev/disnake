@@ -66,7 +66,7 @@ from .template import Template
 from .threads import Thread
 from .ui.view import View
 from .user import ClientUser, User
-from .utils import MISSING, deprecated
+from .utils import MISSING
 from .voice_client import VoiceClient
 from .voice_region import VoiceRegion
 from .webhook import Webhook
@@ -2631,7 +2631,7 @@ class Client:
         data = await self.http.list_sticker_packs()
         return [StickerPack(state=self._connection, data=pack) for pack in data["sticker_packs"]]
 
-    @deprecated("Use `.fetch_sticker_packs()` instead.")
+    @utils.deprecated("Use `.fetch_sticker_packs()` instead.")
     async def fetch_premium_sticker_packs(self) -> list[StickerPack]:
         """An alias of :meth:`fetch_sticker_packs`.
 
