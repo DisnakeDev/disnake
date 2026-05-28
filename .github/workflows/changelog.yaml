@@ -15,6 +15,12 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  # https://docs.astral.sh/uv/reference/environment/
+  UV_LOCKED: 1
+  UV_NO_SYNC: 1
+  UV_PYTHON_DOWNLOADS: never
+
 jobs:
   check-changelog-entry:
     name: Check for changelog entry
