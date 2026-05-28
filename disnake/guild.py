@@ -4133,7 +4133,7 @@ class Guild(Hashable):
         self,
         user: Snowflake,
         *,
-        clean_history_duration: int | datetime.timedelta = 86400,
+        clean_history_duration: int | datetime.timedelta = datetime.timedelta(days=1),
         reason: str | None = None,
     ) -> None: ...
 
@@ -4143,7 +4143,7 @@ class Guild(Hashable):
         self,
         user: Snowflake,
         *,
-        delete_message_days: Literal[0, 1, 2, 3, 4, 5, 6, 7],
+        delete_message_days: Literal[0, 1, 2, 3, 4, 5, 6, 7] = 1,
         reason: str | None = None,
     ) -> None: ...
 
