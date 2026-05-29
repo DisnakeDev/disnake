@@ -830,7 +830,7 @@ class UserCommand(ApplicationCommand):
     def __init__(
         self,
         name: LocalizedRequired,
-        dm_permission: bool | None = None,
+        dm_permission: bool | None,
         default_member_permissions: Permissions | int | None = None,
         nsfw: bool | None = None,
         install_types: ApplicationInstallTypes | None = None,
@@ -981,7 +981,7 @@ class MessageCommand(ApplicationCommand):
     def __init__(
         self,
         name: LocalizedRequired,
-        dm_permission: bool | None = None,
+        dm_permission: bool | None,
         default_member_permissions: Permissions | int | None = None,
         nsfw: bool | None = None,
         install_types: ApplicationInstallTypes | None = None,
@@ -1147,7 +1147,7 @@ class SlashCommand(ApplicationCommand):
         self,
         name: LocalizedRequired,
         description: LocalizedRequired,
-        dm_permission: bool | None = None,
+        dm_permission: bool | None,
         options: list[Option] | None = None,
         default_member_permissions: Permissions | int | None = None,
         nsfw: bool | None = None,

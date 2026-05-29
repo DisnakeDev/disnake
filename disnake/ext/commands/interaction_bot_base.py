@@ -482,6 +482,7 @@ class InteractionBotBase(CommonBotBase):
         *,
         name: LocalizedOptional = None,
         description: LocalizedOptional = None,
+        dm_permission: bool | None = None,  # deprecated
         default_member_permissions: Permissions | int | None = None,
         nsfw: bool | None = None,
         install_types: ApplicationInstallTypes | None = None,
