@@ -15,7 +15,6 @@ class IntegrationApplication(TypedDict):
     name: str
     icon: str | None
     description: str
-    summary: str
     bot: NotRequired[User]
 
 
