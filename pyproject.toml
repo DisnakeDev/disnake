@@ -82,12 +82,12 @@ changelog = [
     "towncrier==25.8.0",
 ]
 docs = [
-    "sphinx==8.2.3",
+    "sphinx==9.1.0",
     "sphinx-autobuild~=2025.8.25",
     "sphinx-hoverxref==1.4.2",
     "sphinx-notfound-page==1.1.0",
     "sphinxcontrib-towncrier==0.5.0a0",
-    "sphinxcontrib-trio~=1.1.2",
+    "sphinxcontrib-trio~=1.2.0",
     "sphinxext-opengraph==0.13.0",
     "versioningit>=3.3.0,<4",
     { include-group = "changelog" },
