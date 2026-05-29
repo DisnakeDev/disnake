@@ -20,10 +20,8 @@ import os
 import re
 import subprocess  # noqa: TID251
 import sys
-import warnings
 from typing import Any
 
-import sphinx.deprecation
 import versioningit
 from sphinx.application import Sphinx
 
@@ -50,7 +48,6 @@ extensions = [
     "sphinx.ext.linkcode",
     "sphinxcontrib_trio",
     "sphinxcontrib.towncrier.ext",
-    "hoverxref.extension",
     "notfound.extension",
     "sphinxext.opengraph",
     "redirects",
@@ -245,30 +242,12 @@ def linkcode_resolve(domain: str, info: dict[str, Any]) -> str | None:
 
 
 # Links used for cross-referencing stuff in other documentation
-# when this is updated hoverxref_intersphinx also needs to be updated IF THE docs are hosted on readthedocs.
 intersphinx_mapping = {
     "py": ("https://docs.python.org/3", None),
     "aio": ("https://docs.aiohttp.org/en/stable/", None),
     "req": ("https://requests.readthedocs.io/en/latest/", None),
 }
 
-
-hoverx_default_type = "tooltip"
-hoverxref_domains = ["py"]
-hoverxref_role_types = dict.fromkeys(
-    ["ref", "class", "func", "meth", "attr", "exc", "data"],
-    "tooltip",
-)
-hoverxref_tooltip_theme = ["tooltipster-custom"]
-hoverxref_tooltip_lazy = True
-
-# these have to match the keys on intersphinx_mapping, and those projects must be hosted on readthedocs.
-hoverxref_intersphinx = list(intersphinx_mapping.keys())
-
-
-# use proxied API endpoint on readthedocs to avoid CORS issues
-if _IS_READTHEDOCS:
-    hoverxref_api_host = "/_"
 
 # when not on readthedocs, assume no prefix for the 404 page.
 # this means that /404.html should properly render on local builds
@@ -520,12 +499,6 @@ def setup(app: Sphinx) -> None:
     import disnake
 
     del disnake.Embed.Empty  # pyright: ignore[reportAttributeAccessIssue]
-
-    warnings.filterwarnings(
-        "ignore",
-        category=sphinx.deprecation.RemovedInSphinx90Warning,
-        module="hoverxref.extension",
-    )
 
     # silence somewhat verbose `Writing evaluated template result to ...` log
     logging.getLogger("sphinx.sphinx.util.fileutil").addFilter(
