@@ -1988,7 +1988,7 @@ class Message(Hashable):
         file: File = ...,
         files: list[File] = ...,
         attachments: list[Attachment] | None = ...,
-        suppress: bool = ...,
+        suppress: bool,
         suppress_embeds: bool = ...,
         flags: MessageFlags = ...,
         allowed_mentions: AllowedMentions | None = ...,
