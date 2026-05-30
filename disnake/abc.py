@@ -1820,6 +1820,112 @@ class Messageable:
             await ret.delete(delay=delete_after)
         return ret
 
+    async def send_v2(
+        self,
+        components: MessageComponents,
+        *,
+        files: File | Sequence[File] = (),
+        nonce: str | int | None = None,
+        flags: MessageFlags = MISSING,
+        allowed_mentions: AllowedMentions = MISSING,
+        reference: Message | MessageReference | PartialMessage = MISSING,
+    ) -> Message:
+        R"""|coro|
+
+        Sends a message to the destination with the given components v2.
+
+        .. note::
+            This method unconditionally sets the :attr:`~MessageFlags.is_components_v2` flag.
+            If you want to use components v1, use :meth:`send` instead.
+
+        Parameters
+        ----------
+        components: |components_type|
+            A list of components to include in the message.
+        files: :class:`File` | :class:`list`\[:class:`File`]
+            A file or a list of files to upload. Must be a maximum of 10.
+        nonce: :class:`str` | :class:`int`
+            The nonce to use for sending this message. If the message was successfully sent,
+            then the message will have a nonce with this value.
+        flags: :class:`.MessageFlags`
+            The flags to set for this message.
+            Only :attr:`~.MessageFlags.suppress_embeds`, :attr:`~.MessageFlags.suppress_notifications`,
+            and :attr:`~.MessageFlags.is_components_v2` are supported.
+        allowed_mentions: :class:`.AllowedMentions`
+            Controls the mentions being processed in this message. If this is
+            passed, then the object is merged with :attr:`.Client.allowed_mentions`.
+            The merging behaviour only overrides attributes that have been explicitly passed
+            to the object, otherwise it uses the attributes set in :attr:`.Client.allowed_mentions`.
+            If no object is passed at all then the defaults given by :attr:`.Client.allowed_mentions`
+            are used instead.
+        reference: :class:`.Message` | :class:`.MessageReference` | :class:`.PartialMessage`
+            A reference to the :class:`.Message` to which you are replying, this can be created using
+            :meth:`.Message.to_reference` or passed directly as a :class:`.Message`. You can control
+            whether this mentions the author of the referenced message using the :attr:`.AllowedMentions.replied_user`
+            attribute of ``allowed_mentions``.
+
+        Returns
+        -------
+        :class:`.Message`
+            The message that was sent.
+        """
+        channel = await self._get_channel()
+        state = self._state
+
+        from .ui.action_row import normalize_components_to_dict
+
+        components_payload, _ = normalize_components_to_dict(components)
+
+        if isinstance(files, File):
+            files_ = [files]
+        elif len(files) > 10:
+            msg = "files cannot exceed maximum of 10 elements"
+            raise ValueError(msg)
+        else:
+            files_ = list(files) if files else None
+
+        if allowed_mentions is MISSING:
+            if state.allowed_mentions is not None:
+                allowed_mentions_payload = state.allowed_mentions.to_dict()
+            else:
+                allowed_mentions_payload = None
+        elif state.allowed_mentions is not None:
+            allowed_mentions_payload = state.allowed_mentions.merge(allowed_mentions).to_dict()
+        else:
+            allowed_mentions_payload = allowed_mentions.to_dict()
+
+        reference_payload = None if reference is MISSING else reference.to_message_reference_dict()
+
+        flags = MessageFlags._from_value(0 if flags is MISSING else flags.value)
+        flags.is_components_v2 = True
+
+        if files_ is not None:
+            try:
+                data = await state.http.send_files(
+                    channel_id=channel.id,
+                    files=files_,
+                    nonce=None if nonce is MISSING else nonce,
+                    allowed_mentions=allowed_mentions_payload,
+                    message_reference=reference_payload,
+                    components=components_payload,
+                    flags=flags.value,
+                )
+            finally:
+                for f in files_:
+                    f.close()
+        else:
+            data = await state.http.send_message(
+                channel_id=channel.id,
+                content=None,
+                nonce=None if nonce is MISSING else nonce,
+                allowed_mentions=allowed_mentions_payload,
+                message_reference=reference_payload,
+                components=components_payload,
+                flags=flags.value,
+            )
+
+        return state.create_message(channel=channel, data=data)
+
     async def trigger_typing(self) -> None:
         """|coro|
 
