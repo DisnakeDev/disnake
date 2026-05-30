@@ -8,10 +8,8 @@ from typing import (
     TYPE_CHECKING,
     Any,
     ClassVar,
-    Literal,
     NamedTuple,
     NoReturn,
-    TypeAlias,
     TypeVar,
 )
 
@@ -1448,9 +1446,6 @@ class StagePrivacyLevel(Enum):
     """The stage instance can only be joined by members of the guild."""
     guild_only = closed
     """An alias for :attr:`.closed`."""
-
-
-_StagePrivacyLevel: TypeAlias = Literal[StagePrivacyLevel.closed]
 
 
 class NSFWLevel(Enum, comparable=True):

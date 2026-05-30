@@ -27,7 +27,6 @@ from .enums import (
     ThreadSortOrder,
     VideoQualityMode,
     VoiceChannelEffectAnimationType,
-    _StagePrivacyLevel,
     try_enum,
     try_enum_to_int,
 )
@@ -2331,23 +2330,23 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         return utils.get(self.guild.stage_instances, channel_id=self.id)
 
     @overload
-    async def create_instance(
-        self,
-        *,
-        topic: str,
-        privacy_level: _StagePrivacyLevel = ...,
-        notify_everyone: bool = False,
-        guild_scheduled_event: Snowflake = ...,
-        reason: str | None = None,
-    ) -> StageInstance: ...
-
-    @overload
     @utils.deprecated("Setting `privacy_level` to `StagePrivacyLevel.public` is deprecated.")
     async def create_instance(
         self,
         *,
         topic: str,
         privacy_level: Literal[StagePrivacyLevel.public],
+        notify_everyone: bool = False,
+        guild_scheduled_event: Snowflake = ...,
+        reason: str | None = None,
+    ) -> StageInstance: ...
+
+    @overload
+    async def create_instance(
+        self,
+        *,
+        topic: str,
+        privacy_level: StagePrivacyLevel = ...,
         notify_everyone: bool = False,
         guild_scheduled_event: Snowflake = ...,
         reason: str | None = None,

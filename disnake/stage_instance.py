@@ -6,7 +6,7 @@ import datetime
 from typing import TYPE_CHECKING, Literal, overload
 
 from . import utils
-from .enums import StagePrivacyLevel, _StagePrivacyLevel, try_enum
+from .enums import StagePrivacyLevel, try_enum
 from .mixins import Hashable
 from .utils import MISSING, _get_as_snowflake, cached_slot_property, snowflake_time
 
@@ -136,15 +136,6 @@ class StageInstance(Hashable):
         return self.guild.get_scheduled_event(self.guild_scheduled_event_id)
 
     @overload
-    async def edit(
-        self,
-        *,
-        topic: str = ...,
-        privacy_level: _StagePrivacyLevel = ...,
-        reason: str | None = None,
-    ) -> None: ...
-
-    @overload
     @utils.deprecated(
         "Setting `privacy_level` to `StagePrivacyLevel.public` is deprecated. "
         "Stages can no longer be public."
@@ -154,6 +145,15 @@ class StageInstance(Hashable):
         *,
         topic: str = ...,
         privacy_level: Literal[StagePrivacyLevel.public],
+        reason: str | None = None,
+    ) -> None: ...
+
+    @overload
+    async def edit(
+        self,
+        *,
+        topic: str = ...,
+        privacy_level: StagePrivacyLevel = ...,
         reason: str | None = None,
     ) -> None: ...
 
