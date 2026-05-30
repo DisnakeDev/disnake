@@ -63,6 +63,10 @@ extensions = [
 
 autodoc_member_order = "bysource"
 autodoc_typehints = "none"
+# for now, go back to pre-9.0 class-based autodoc.
+# patching the new one for enum fixes is a little more tricky
+autodoc_use_legacy_class_based = True
+
 # maybe consider this?
 # napoleon_attr_annotations = False
 
