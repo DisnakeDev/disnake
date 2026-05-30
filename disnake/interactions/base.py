@@ -37,6 +37,7 @@ from ..errors import (
     ModalChainNotSupported,
     NotFound,
 )
+from ..file import File
 from ..flags import InteractionContextTypes, MessageFlags
 from ..guild import Guild
 from ..http import HTTPClient
@@ -67,7 +68,6 @@ if TYPE_CHECKING:
     from ..client import Client
     from ..embeds import Embed
     from ..ext.commands import AutoShardedBot, Bot
-    from ..file import File
     from ..mentions import AllowedMentions
     from ..poll import Poll
     from ..state import ConnectionState
@@ -1188,6 +1188,99 @@ class InteractionResponse:
 
         if delete_after is not MISSING:
             await self._parent.delete_original_response(delay=delete_after)
+
+    async def send_message_v2(
+        self,
+        components: MessageComponents,
+        *,
+        files: File | Sequence[File] = (),
+        allowed_mentions: AllowedMentions = MISSING,
+        ephemeral: bool = MISSING,
+        flags: MessageFlags = MISSING,
+    ) -> None:
+        R"""|coro|
+
+        Responds to this interaction by sending a message with components v2.
+
+        .. note::
+            This method unconditionally sets the :attr:`~MessageFlags.is_components_v2` flag.
+            If you want to use components v1, use :meth:`send_message` instead.
+
+        Parameters
+        ----------
+        components: |components_type|
+            A list of components to send with the message.
+        files: :class:`File` | :class:`list`\[:class:`File`]
+            A file or a list of files to upload. Must be a maximum of 10.
+        allowed_mentions: :class:`AllowedMentions`
+            Controls the mentions being processed in this message.
+        ephemeral: :class:`bool`
+            Whether the message should only be visible to the user who started the interaction.
+        flags: :class:`MessageFlags`
+            The flags to set for this message.
+            Only :attr:`~MessageFlags.suppress_embeds`, :attr:`~MessageFlags.ephemeral`,
+            :attr:`~MessageFlags.suppress_notifications`, and :attr:`~MessageFlags.is_components_v2`
+            are supported.
+
+            If parameter ``ephemeral`` is provided,
+            it will override the corresponding setting of this ``flags`` parameter.
+        """
+        if self._response_type is not None:
+            raise InteractionResponded(self._parent)
+
+        payload: dict[str, Any] = {
+            "components": normalize_components_to_dict(components)[0],
+        }
+
+        if isinstance(files, File):
+            files_ = [files]
+        elif len(files) > 10:
+            msg = "files cannot exceed maximum of 10 elements"
+            raise ValueError(msg)
+        else:
+            files_ = list(files) if files else None
+
+        previous_mentions: AllowedMentions | None = getattr(
+            self._parent._state, "allowed_mentions", None
+        )
+        if allowed_mentions is MISSING:
+            if previous_mentions is not None:
+                payload["allowed_mentions"] = previous_mentions.to_dict()
+        elif previous_mentions is not None:
+            payload["allowed_mentions"] = previous_mentions.merge(allowed_mentions).to_dict()
+        else:
+            payload["allowed_mentions"] = allowed_mentions.to_dict()
+
+        flags = MessageFlags._from_value(0 if flags is MISSING else flags.value)
+        flags.is_components_v2 = True
+
+        if ephemeral is not MISSING:
+            flags.ephemeral = ephemeral
+
+        payload["flags"] = flags.value
+
+        parent = self._parent
+        adapter = async_context.get()
+        response_type = InteractionResponseType.channel_message
+        try:
+            await adapter.create_interaction_response(
+                parent.id,
+                parent.token,
+                session=parent._session,
+                type=response_type.value,
+                data=payload,
+                files=files_,
+            )
+        except NotFound as e:
+            if e.code == 10062:
+                raise InteractionTimedOut(self._parent) from e
+            raise
+        finally:
+            if files_:
+                for f in files_:
+                    f.close()
+
+        self._response_type = response_type
 
     async def edit_message(
         self,
