@@ -1830,7 +1830,7 @@ class Messageable:
         allowed_mentions: AllowedMentions = MISSING,
         reference: Message | MessageReference | PartialMessage = MISSING,
     ) -> Message:
-        R"""|coro|
+        r"""|coro|
 
         Sends a message to the destination with the given components v2.
 
@@ -1842,8 +1842,8 @@ class Messageable:
         ----------
         components: |components_type|
             A list of components to include in the message.
-        files: :class:`File` | :class:`list`\[:class:`File`]
-            A file or a list of files to upload. Must be a maximum of 10.
+        files: :class:`File` | :class:`~collections.abc.Sequence`\[:class:`File`]
+            A file or a sequence of files to upload. Must be a maximum of 10.
         nonce: :class:`str` | :class:`int`
             The nonce to use for sending this message. If the message was successfully sent,
             then the message will have a nonce with this value.

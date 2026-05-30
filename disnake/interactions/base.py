@@ -1198,7 +1198,7 @@ class InteractionResponse:
         ephemeral: bool = MISSING,
         flags: MessageFlags = MISSING,
     ) -> None:
-        R"""|coro|
+        r"""|coro|
 
         Responds to this interaction by sending a message with components v2.
 
@@ -1210,8 +1210,8 @@ class InteractionResponse:
         ----------
         components: |components_type|
             A list of components to send with the message.
-        files: :class:`File` | :class:`list`\[:class:`File`]
-            A file or a list of files to upload. Must be a maximum of 10.
+        files: :class:`File` | :class:`~collections.abc.Sequence`\[:class:`File`]
+            A file or a sequence of files to upload. Must be a maximum of 10.
         allowed_mentions: :class:`AllowedMentions`
             Controls the mentions being processed in this message.
         ephemeral: :class:`bool`
@@ -1240,9 +1240,7 @@ class InteractionResponse:
         else:
             files_ = list(files) if files else None
 
-        previous_mentions: AllowedMentions | None = getattr(
-            self._parent._state, "allowed_mentions", None
-        )
+        previous_mentions = self._parent._state.allowed_mentions
         if allowed_mentions is MISSING:
             if previous_mentions is not None:
                 payload["allowed_mentions"] = previous_mentions.to_dict()
@@ -1504,6 +1502,101 @@ class InteractionResponse:
 
         if delete_after is not None:
             await self._parent.delete_original_response(delay=delete_after)
+
+    async def edit_message_v2(
+        self,
+        components: MessageComponents = MISSING,
+        *,
+        files: File | Sequence[File] = MISSING,
+        attachments: Sequence[Attachment] | None = MISSING,
+        allowed_mentions: AllowedMentions = MISSING,
+    ) -> None:
+        r"""|coro|
+
+        Responds to this interaction by editing the original message of
+        a component interaction or modal interaction (if the modal was sent in
+        response to a component interaction).
+
+        Parameters
+        ----------
+        components: |components_type| | :data:`None`
+            A list of components to update this message with.
+        files: :class:`File` | :class:`~collections.abc.Sequence`\[:class:`File`]
+            A file or a sequence of files to upload. Files will be appended to the message.
+        attachments: :class:`~collections.abc.Sequence`\[:class:`Attachment`] | :data:`None`
+            A list of attachments to keep in the message.
+            If an empty sequence or :data:`None` is passed
+            then all existing attachments are removed.
+            Keeps existing attachments if not provided.
+        allowed_mentions: :class:`AllowedMentions`
+            Controls the mentions being processed in this message.
+        """
+        if self._response_type is not None:
+            raise InteractionResponded(self._parent)
+
+        parent = self._parent
+
+        if parent.type not in (InteractionType.component, InteractionType.modal_submit):
+            raise InteractionNotEditable(parent)
+
+        parent = cast("MessageInteraction | ModalInteraction", parent)
+        message = parent.message
+        # message in modal interactions only exists if modal was sent from component interaction
+        if message is None:
+            raise InteractionNotEditable(parent)
+
+        payload: dict[str, Any] = {}
+
+        if components is not MISSING:
+            if components:
+                payload["components"], _ = normalize_components_to_dict(components)
+            else:
+                payload["components"] = []
+
+        if files is MISSING:
+            files_ = MISSING
+        elif isinstance(files, File):
+            files_ = [files]
+        elif len(files) > 10:
+            msg = "files cannot exceed maximum of 10 elements"
+            raise ValueError(msg)
+        else:
+            files_ = list(files)
+
+        if allowed_mentions is not MISSING:
+            previous_mentions = self._parent._state.allowed_mentions
+
+            if previous_mentions is None:
+                payload["allowed_mentions"] = allowed_mentions.to_dict()
+            else:
+                payload["allowed_mentions"] = previous_mentions.merge(allowed_mentions).to_dict()
+
+        if attachments is None:
+            payload["attachments"] = []
+        elif attachments is not MISSING:
+            payload["attachments"] = [a.to_dict() for a in attachments]
+        # if no attachment list was provided but we're uploading new files,
+        # use current attachments as the base
+        elif files_:
+            payload["attachments"] = [a.to_dict() for a in message.attachments]
+
+        adapter = async_context.get()
+        response_type = InteractionResponseType.message_update
+        try:
+            await adapter.create_interaction_response(
+                parent.id,
+                parent.token,
+                session=parent._session,
+                type=response_type.value,
+                data=payload,
+                files=files_,
+            )
+        finally:
+            if files_:
+                for f in files_:
+                    f.close()
+
+        self._response_type = response_type
 
     async def autocomplete(self, *, choices: Choices) -> None:
         r"""|coro|
