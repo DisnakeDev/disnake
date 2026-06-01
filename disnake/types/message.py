@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from typing import Literal, TypedDict
 
 from typing_extensions import NotRequired
@@ -15,7 +16,7 @@ from .member import Member, UserWithMember
 from .poll import Poll
 from .snowflake import Snowflake, SnowflakeList
 from .sticker import StickerItem
-from .threads import Thread
+from .threads import Thread, ThreadMember
 from .user import User
 
 
@@ -169,3 +170,48 @@ class MessagePin(TypedDict):
 class MessageCall(TypedDict):
     participants: SnowflakeList
     ended_timestamp: NotRequired[str | None]
+
+
+class MessageSearchQuery(TypedDict, total=False):
+    # pagination
+    limit: int
+    offset: int
+    max_id: Snowflake
+    min_id: Snowflake
+    # query
+    slop: int
+    content: str
+    channel_id: Sequence[Snowflake]
+    author_type: Sequence[str]
+    author_id: Sequence[Snowflake]
+    mentions: Sequence[Snowflake]
+    mentions_role: Sequence[Snowflake]
+    mentions_everyone: bool
+    replied_to_user_id: Sequence[Snowflake]
+    replied_to_message_id: Sequence[Snowflake]
+    pinned: bool
+    has: Sequence[str]
+    embed_type: Sequence[str]
+    embed_provider: Sequence[str]
+    link_hostname: Sequence[str]
+    attachment_filename: Sequence[str]
+    attachment_extension: Sequence[str]
+    sort_by: str
+    sort_order: str
+    include_nsfw: bool
+
+
+class MessageSearchResult(TypedDict):
+    doing_deep_historical_index: bool
+    documents_indexed: NotRequired[int]
+    total_results: int
+    messages: list[list[Message]]
+    threads: NotRequired[list[Thread]]
+    members: NotRequired[list[ThreadMember]]
+
+
+class MessageSearchNotIndexedResult(TypedDict):
+    message: str
+    code: int
+    documents_indexed: int
+    retry_after: int
