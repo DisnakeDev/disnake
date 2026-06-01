@@ -7,9 +7,12 @@ from typing import TYPE_CHECKING, TypeAlias
 from .appinfo import PartialAppInfo
 from .asset import Asset
 from .enums import ChannelType, InviteTarget, InviteType, NSFWLevel, VerificationLevel, try_enum
+from .file import File
+from .flags import GuildInviteFlags
 from .guild_scheduled_event import GuildScheduledEvent
 from .mixins import Hashable
 from .object import Object
+from .role import Role
 from .utils import _get_as_snowflake, parse_time, snowflake_time
 from .welcome_screen import WelcomeScreen
 
@@ -33,7 +36,12 @@ if TYPE_CHECKING:
     )
     from .types.gateway import InviteCreateEvent, InviteDeleteEvent
     from .types.guild import GuildFeature
-    from .types.invite import Invite as InvitePayload, InviteGuild as InviteGuildPayload
+    from .types.invite import (
+        Invite as InvitePayload,
+        InviteGuild as InviteGuildPayload,
+        TargetUserJob,
+        TargetUsersJobPayload,
+    )
     from .user import User
 
     GatewayInvitePayload: TypeAlias = InviteCreateEvent | InviteDeleteEvent
@@ -251,7 +259,7 @@ class PartialInviteGuild:
 
 
 class Invite(Hashable):
-    """Represents a Discord :class:`Guild` or :class:`abc.GuildChannel` invite.
+    r"""Represents a Discord :class:`Guild` or :class:`abc.GuildChannel` invite.
 
     Depending on the way this object was created, some of the attributes can
     have a value of :data:`None` (see table below).
@@ -384,6 +392,16 @@ class Invite(Hashable):
         The partial guild's welcome screen, if any.
 
         .. versionadded:: 2.5
+
+    flags: :class:`GuildInviteFlags`
+        The flags of this invite.
+
+        .. versionadded:: |vnext|
+
+    roles: :class:`list`\[:class:`Role`]
+        A list of roles that will be assigned to the users when joining, if any.
+
+        .. versionadded:: |vnext|
     """
 
     __slots__ = (
@@ -405,6 +423,8 @@ class Invite(Hashable):
         "expires_at",
         "guild_scheduled_event",
         "guild_welcome_screen",
+        "flags",
+        "roles",
         "_state",
     )
 
@@ -474,6 +494,16 @@ class Invite(Hashable):
             )
         else:
             self.guild_scheduled_event: GuildScheduledEvent | None = None
+
+        self.flags = GuildInviteFlags._from_value(data.get("flags", 0))
+        self.roles = [
+            Role(
+                guild=self.guild,
+                state=self._state,
+                data=d,
+            )
+            for d in data.get("roles", [])
+        ]
 
     @classmethod
     def from_incomplete(cls, *, state: ConnectionState, data: InvitePayload) -> Self:
@@ -594,3 +624,115 @@ class Invite(Hashable):
             Revoking the invite failed.
         """
         await self._state.http.delete_invite(self.code, reason=reason)
+
+    async def fetch_target_users(self) -> str:
+        """|coro|
+
+        Fetch the csv file with the target users for this invite.
+        You must have the :attr:`~Permissions.manage_guild` or :attr:`~Permissions.view_audit_log`
+        permissions or to be the inviter to do this.
+
+        .. versionadded:: |vnext|
+
+        Raises
+        ------
+        Forbidden
+            You do not have permissions to see the target users.
+        HTTPException
+            Getting the target users failed.
+
+        Returns
+        -------
+        :class:`str`
+            The target users for this invite.
+        """
+        return await self._state.http.get_invite_target_users(self.code)
+
+    async def update_target_users(self, *, file: File) -> None:
+        """|coro|
+
+        Update the target users for this invite.
+        You must have the :attr:`~Permissions.manage_guild` permission or to be the inviter to do this.
+
+        .. versionadded:: |vnext|
+
+        Parameters
+        ----------
+        file: :class:`File`
+            The csv file containing the new user ids to target.
+            This file must only have valid user ids separated by ``\n``.
+            A valid file content would look like this::
+
+                710570210159099984
+                1081815963990761542
+                ... other user ids
+
+        Raises
+        ------
+        Forbidden
+            You do not have permissions to update the target users.
+        HTTPException
+            Updating the target users failed.
+        """
+        return await self._state.http.update_invite_target_users(self.code, file=file)
+
+    async def fetch_target_users_job_status(self) -> TargetUserJob:
+        r"""|coro|
+
+        Get the target users job status.
+        You must have the :attr:`~Permissions.manage_guild` or :attr:`~Permissions.view_audit_log`
+        permissions or be the inviter to do this.
+
+        .. versionadded:: |vnext|
+
+        Raises
+        ------
+        Forbidden
+            You do not have permissions to get the target users job status.
+        HTTPException
+            Getting the target users job status failed.
+
+        Returns
+        -------
+        :class:`dict`\[:class:`str`, :class:`str` | :class:`int` | :class:`datetime.datetime` | :data:`None`]
+            A :class:`dict` containing the job status.
+
+            +-----------------+-------------------------------------------+-------------------------------------------------------------------------+
+            |    Key          |        Type                               |      Description                                                        |
+            +=================+===========================================+=========================================================================+
+            | status          | :class:`int`                              | The status of the job                                                   |
+            +-----------------+-------------------------------------------+-------------------------------------------------------------------------+
+            | total_users     | :class:`int`                              | The total number of targeted users                                      |
+            +-----------------+-------------------------------------------+-------------------------------------------------------------------------+
+            | processed_users | :class:`int`                              | The total number of processed users so far                              |
+            +-----------------+-------------------------------------------+-------------------------------------------------------------------------+
+            | created_at      | :class:`datetime.datetime`                | The date when the job started                                           |
+            +-----------------+-------------------------------------------+-------------------------------------------------------------------------+
+            | completed_at    | :class:`datetime.datetime` | :data:`None` | The date when the job was completed, :data:`None` if it's still running |
+            +-----------------+-------------------------------------------+-------------------------------------------------------------------------+
+            | error_message   | :class:`str` | :data:`None`               | The error message of the job, if any                                    |
+            +-----------------+-------------------------------------------+-------------------------------------------------------------------------+
+
+            +-------------------+---------------------+------------------------------------------------------------------+
+            |    Status Value   |        Name         |      Description                                                 |
+            +===================+=====================+==================================================================+
+            | ``0``             | ``UNSPECIFIED``     | The default value                                                |
+            +-------------------+---------------------+------------------------------------------------------------------+
+            | ``1``             | ``PROCESSING``      | The job is currently being processed                             |
+            +-------------------+---------------------+------------------------------------------------------------------+
+            | ``2``             | ``COMPLETED``       | The job has been completed successfully                          |
+            +-------------------+---------------------+------------------------------------------------------------------+
+            | ``3``             | ``FAILED``          | The job has failed, see ``error_message`` field for more details |
+            +-------------------+---------------------+------------------------------------------------------------------+
+        """
+        data: TargetUsersJobPayload = await self._state.http.get_invite_target_users_job_status(
+            self.code
+        )
+        return {
+            "status": data["status"],
+            "total_users": data["total_users"],
+            "processed_users": data["processed_users"],
+            "created_at": parse_time(data["created_at"]),
+            "completed_at": parse_time(data["completed_at"]),
+            "error_message": data["error_message"],
+        }

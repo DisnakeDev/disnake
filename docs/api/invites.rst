@@ -34,6 +34,14 @@ PartialInviteChannel
 .. autoclass:: PartialInviteChannel()
     :members:
 
+GuildInviteFlags
+~~~~~~~~~~~~~~~~
+
+.. attributetable:: GuildInviteFlags
+
+.. autoclass:: GuildInviteFlags()
+    :members:
+
 Enumerations
 ------------
 
