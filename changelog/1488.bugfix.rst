@@ -1,0 +1,1 @@
+Fix ColourConverter.convert to reject non-Color returns.
