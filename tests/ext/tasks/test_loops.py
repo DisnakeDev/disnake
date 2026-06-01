@@ -71,3 +71,24 @@ class TestLoops:
 
         @loop(lambda lf: Loop(lf))
         async def task() -> None: ...
+
+    def test_get_next_sleep_time_advances_day(self) -> None:
+        """When _last_iteration has the same time as the scheduled time,
+        _get_next_sleep_time should schedule for the next day, not the same day.
+        Regression test for https://github.com/DisnakeDev/disnake/issues/585
+        """
+        target = datetime.time(0, 0, tzinfo=datetime.timezone.utc)
+
+        async def callback() -> None:
+            pass
+
+        lp = Loop(callback, time=target)
+        lp._current_loop = 1
+        lp._time_index = 0
+        lp._last_iteration = datetime.datetime(
+            2026, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc
+        )
+
+        result = lp._get_next_sleep_time()
+        expected = datetime.datetime(2026, 1, 2, 0, 0, 0, tzinfo=datetime.timezone.utc)
+        assert result == expected, f"Expected {expected}, got {result}"
