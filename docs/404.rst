@@ -1,6 +1,7 @@
 .. SPDX-License-Identifier: MIT
 
 :orphan:
+:ogp_disable:
 
 Page Not Found
 --------------

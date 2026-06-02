@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import io
 import os
-from typing import TYPE_CHECKING, Any, Literal, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Literal, TypeAlias, Union
 
 import yarl
 
@@ -20,9 +20,9 @@ if TYPE_CHECKING:
     from .state import ConnectionState
     from .webhook.async_ import BaseWebhook, _WebhookState
 
-    ValidStaticFormatTypes = Literal["webp", "jpeg", "jpg", "png"]
-    ValidAssetFormatTypes = Literal["webp", "jpeg", "jpg", "png", "gif"]
-    AnyState = Union[ConnectionState, _WebhookState[BaseWebhook]]
+    ValidStaticFormatTypes: TypeAlias = Literal["webp", "jpeg", "jpg", "png"]
+    ValidAssetFormatTypes: TypeAlias = Literal["webp", "jpeg", "jpg", "png", "gif"]
+    AnyState: TypeAlias = ConnectionState | _WebhookState[BaseWebhook]
 
 AssetBytes = Union[utils._BytesLike, "AssetMixin"]
 
@@ -35,9 +35,9 @@ MISSING = utils.MISSING
 
 class AssetMixin:
     url: str
-    _state: Optional[AnyState]
+    _state: AnyState | None
 
-    __slots__: Tuple[str, ...] = ("_state",)
+    __slots__: tuple[str, ...] = ("_state",)
 
     async def read(self) -> bytes:
         """|coro|
@@ -59,12 +59,16 @@ class AssetMixin:
             The content of the asset.
         """
         if self._state is None:
-            raise DiscordException("Invalid state (no ConnectionState provided)")
+            msg = "Invalid state (no ConnectionState provided)"
+            raise DiscordException(msg)
 
         return await self._state.http.get_from_cdn(self.url)
 
     async def save(
-        self, fp: Union[str, bytes, os.PathLike, io.BufferedIOBase], *, seek_begin: bool = True
+        self,
+        fp: str | bytes | os.PathLike[str] | os.PathLike[bytes] | io.BufferedIOBase,
+        *,
+        seek_begin: bool = True,
     ) -> int:
         """|coro|
 
@@ -72,7 +76,7 @@ class AssetMixin:
 
         Parameters
         ----------
-        fp: Union[:class:`io.BufferedIOBase`, :class:`os.PathLike`]
+        fp: :class:`io.BufferedIOBase` | :class:`os.PathLike`
             The file-like object to save this asset to or the filename
             to use. If a filename is passed then a file is created with that
             filename and used instead.
@@ -101,15 +105,15 @@ class AssetMixin:
                 fp.seek(0)
             return written
         else:
-            with open(fp, "wb") as f:
+            with open(fp, "wb") as f:  # noqa: ASYNC230
                 return f.write(data)
 
     async def to_file(
         self,
         *,
         spoiler: bool = False,
-        filename: Optional[str] = None,
-        description: Optional[str] = None,
+        filename: str | None = None,
+        description: str | None = None,
     ) -> File:
         """|coro|
 
@@ -125,10 +129,10 @@ class AssetMixin:
         ----------
         spoiler: :class:`bool`
             Whether the file is a spoiler.
-        filename: Optional[:class:`str`]
+        filename: :class:`str` | :data:`None`
             The filename to display when uploading to Discord. If this is not given, it defaults to
             the name of the asset's URL.
-        description: Optional[:class:`str`]
+        description: :class:`str` | :data:`None`
             The file's description.
 
         Raises
@@ -153,7 +157,7 @@ class AssetMixin:
             filename = yarl.URL(self.url).name
             # if the filename doesn't have an extension (e.g. widget member avatars),
             # try to infer it from the data
-            if not os.path.splitext(filename)[1]:
+            if filename and not os.path.splitext(filename)[1]:
                 ext = utils._get_extension_for_data(data)
                 if ext:
                     filename += ext
@@ -187,7 +191,7 @@ class Asset(AssetMixin):
             Returns the hash of the asset.
     """
 
-    __slots__: Tuple[str, ...] = (
+    __slots__: tuple[str, ...] = (
         "_url",
         "_animated",
         "_key",
@@ -340,6 +344,26 @@ class Asset(AssetMixin):
             animated=animated,
         )
 
+    @classmethod
+    def _from_nameplate(cls, state: AnyState, nameplate_asset: str, animated: bool = True) -> Self:
+        suffix = "asset.webm" if animated else "static.png"
+        return cls(
+            state,
+            # nameplate_asset already includes an ending /
+            url=f"{cls.BASE}/assets/collectibles/{nameplate_asset}{suffix}",
+            key=nameplate_asset,
+            animated=animated,
+        )
+
+    @classmethod
+    def _from_guild_tag_badge(cls, state: AnyState, primary_guild_id: int, badge_hash: str) -> Self:
+        return cls(
+            state,
+            url=f"{cls.BASE}/guild-tag-badges/{primary_guild_id}/{badge_hash}.png?size=16",
+            key=badge_hash,
+            animated=False,
+        )
+
     def __str__(self) -> str:
         return self._url
 
@@ -350,7 +374,7 @@ class Asset(AssetMixin):
         shorten = self._url.replace(self.BASE, "")
         return f"<Asset url={shorten!r}>"
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         return isinstance(other, Asset) and self._url == other._url
 
     def __hash__(self) -> int:
@@ -412,20 +436,24 @@ class Asset(AssetMixin):
         if format is not MISSING:
             if self._animated:
                 if format not in VALID_ASSET_FORMATS:
-                    raise ValueError(f"format must be one of {VALID_ASSET_FORMATS}")
+                    msg = f"format must be one of {VALID_ASSET_FORMATS}"
+                    raise ValueError(msg)
             else:
                 if format not in VALID_STATIC_FORMATS:
-                    raise ValueError(f"format must be one of {VALID_STATIC_FORMATS}")
+                    msg = f"format must be one of {VALID_STATIC_FORMATS}"
+                    raise ValueError(msg)
             url = url.with_path(f"{path}.{format}")
 
         if static_format is not MISSING and not self._animated:
             if static_format not in VALID_STATIC_FORMATS:
-                raise ValueError(f"static_format must be one of {VALID_STATIC_FORMATS}")
+                msg = f"static_format must be one of {VALID_STATIC_FORMATS}"
+                raise ValueError(msg)
             url = url.with_path(f"{path}.{static_format}")
 
         if size is not MISSING:
             if not utils.valid_icon_size(size):
-                raise ValueError("size must be a power of 2 between 16 and 4096")
+                msg = "size must be a power of 2 between 16 and 4096"
+                raise ValueError(msg)
             url = url.with_query(size=size)
         else:
             url = url.with_query(url.raw_query_string)
@@ -455,7 +483,8 @@ class Asset(AssetMixin):
             The newly updated asset.
         """
         if not utils.valid_icon_size(size):
-            raise ValueError("size must be a power of 2 between 16 and 4096")
+            msg = "size must be a power of 2 between 16 and 4096"
+            raise ValueError(msg)
 
         url = str(yarl.URL(self._url).with_query(size=size))
         return Asset(state=self._state, url=url, key=self._key, animated=self._animated)
@@ -483,10 +512,12 @@ class Asset(AssetMixin):
         """
         if self._animated:
             if format not in VALID_ASSET_FORMATS:
-                raise ValueError(f"format must be one of {VALID_ASSET_FORMATS}")
+                msg = f"format must be one of {VALID_ASSET_FORMATS}"
+                raise ValueError(msg)
         else:
             if format not in VALID_STATIC_FORMATS:
-                raise ValueError(f"format must be one of {VALID_STATIC_FORMATS}")
+                msg = f"format must be one of {VALID_STATIC_FORMATS}"
+                raise ValueError(msg)
 
         url = yarl.URL(self._url)
         path, _ = os.path.splitext(url.path)

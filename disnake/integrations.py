@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type
+from typing import TYPE_CHECKING, Any
 
 from .enums import ExpireBehaviour, try_enum
 from .user import User
@@ -79,7 +79,7 @@ class PartialIntegration:
         The integration type (i.e. ``twitch``).
     account: :class:`IntegrationAccount`
         The account linked to this integration.
-    application_id: Optional[:class:`int`]
+    application_id: :class:`int` | :data:`None`
         The ID of the application tied to this integration.
     """
 
@@ -104,7 +104,7 @@ class PartialIntegration:
         self.type: IntegrationType = data["type"]
         self.name: str = data["name"]
         self.account: IntegrationAccount = IntegrationAccount(data["account"])
-        self.application_id: Optional[int] = _get_as_snowflake(data, "application_id")
+        self.application_id: int | None = _get_as_snowflake(data, "application_id")
 
     @property
     def created_at(self) -> datetime.datetime:
@@ -135,7 +135,7 @@ class Integration(PartialIntegration):
         Whether the integration is currently enabled.
     account: :class:`IntegrationAccount`
         The account linked to this integration.
-    user: Optional[:class:`User`]
+    user: :class:`User` | :data:`None`
         The user that added this integration.
     """
 
@@ -154,7 +154,7 @@ class Integration(PartialIntegration):
         self.enabled: bool = data["enabled"]
 
     @deprecated("Guild.leave")
-    async def delete(self, *, reason: Optional[str] = None) -> None:
+    async def delete(self, *, reason: str | None = None) -> None:
         """|coro|
 
         .. deprecated:: 2.5
@@ -168,7 +168,7 @@ class Integration(PartialIntegration):
 
         Parameters
         ----------
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason the integration was deleted. Shows up on the audit log.
 
             .. versionadded:: 2.0
@@ -202,7 +202,7 @@ class StreamIntegration(Integration):
         Whether the integration is currently enabled.
     syncing: :class:`bool`
         Whether the integration is currently syncing.
-    enable_emoticons: Optional[:class:`bool`]
+    enable_emoticons: :class:`bool` | :data:`None`
         Whether emoticons should be synced for this integration (currently twitch only).
     expire_behaviour: :class:`ExpireBehaviour`
         The behaviour of expiring subscribers. Aliased to ``expire_behavior`` as well.
@@ -233,7 +233,7 @@ class StreamIntegration(Integration):
         self.expire_behaviour: ExpireBehaviour = try_enum(ExpireBehaviour, data["expire_behavior"])
         self.expire_grace_period: int = data["expire_grace_period"]
         self.synced_at: datetime.datetime = parse_time(data["synced_at"])
-        self._role_id: Optional[int] = _get_as_snowflake(data, "role_id")
+        self._role_id: int | None = _get_as_snowflake(data, "role_id")
         self.syncing: bool = data["syncing"]
         self.enable_emoticons: bool = data["enable_emoticons"]
         self.subscriber_count: int = data["subscriber_count"]
@@ -244,9 +244,9 @@ class StreamIntegration(Integration):
         return self.expire_behaviour
 
     @property
-    def role(self) -> Optional[Role]:
-        """Optional[:class:`Role`] The role which the integration uses for subscribers."""
-        return self.guild.get_role(self._role_id)  # type: ignore
+    def role(self) -> Role | None:
+        """:class:`Role` | :data:`None` The role which the integration uses for subscribers."""
+        return self.guild.get_role(self._role_id)  # pyright: ignore[reportArgumentType]
 
     @deprecated()
     async def edit(
@@ -287,10 +287,11 @@ class StreamIntegration(Integration):
         TypeError
             ``expire_behaviour`` did not receive a :class:`ExpireBehaviour`.
         """
-        payload: Dict[str, Any] = {}
+        payload: dict[str, Any] = {}
         if expire_behaviour is not MISSING:
             if not isinstance(expire_behaviour, ExpireBehaviour):
-                raise TypeError("expire_behaviour field must be of type ExpireBehaviour")
+                msg = "expire_behaviour field must be of type ExpireBehaviour"
+                raise TypeError(msg)
 
             payload["expire_behavior"] = expire_behaviour.value
 
@@ -338,11 +339,11 @@ class IntegrationApplication:
         The application's ID.
     name: :class:`str`
         The application's name.
-    icon: Optional[:class:`str`]
+    icon: :class:`str` | :data:`None`
         The application's icon hash.
     description: :class:`str`
         The application's description. Can be an empty string.
-    user: Optional[:class:`User`]
+    user: :class:`User` | :data:`None`
         The bot user associated with this application.
     """
 
@@ -358,11 +359,11 @@ class IntegrationApplication:
     def __init__(self, *, data: IntegrationApplicationPayload, state) -> None:
         self.id: int = int(data["id"])
         self.name: str = data["name"]
-        self.icon: Optional[str] = data["icon"]
+        self.icon: str | None = data["icon"]
         self.description: str = data["description"]
         self._summary: str = data.get("summary", "")
         user = data.get("bot")
-        self.user: Optional[User] = User(state=state, data=user) if user else None
+        self.user: User | None = User(state=state, data=user) if user else None
 
     @property
     def summary(self) -> str:
@@ -380,7 +381,7 @@ class IntegrationApplication:
 
 
 class BotIntegration(Integration):
-    """Represents a bot integration on Discord.
+    r"""Represents a bot integration on Discord.
 
     .. versionadded:: 2.0
 
@@ -402,7 +403,7 @@ class BotIntegration(Integration):
         The integration account information.
     application: :class:`IntegrationApplication`
         The application tied to this integration.
-    scopes: List[:class:`str`]
+    scopes: :class:`list`\[:class:`str`]
         The OAuth2 scopes the application has been authorized for.
 
         .. versionadded:: 2.6
@@ -415,13 +416,13 @@ class BotIntegration(Integration):
         self.application: IntegrationApplication = IntegrationApplication(
             data=data["application"], state=self._state
         )
-        self.scopes: List[str] = data.get("scopes") or []
+        self.scopes: list[str] = data.get("scopes") or []
 
     def __repr__(self) -> str:
         return f"<{self.__class__.__name__} id={self.id} name={self.name!r} scopes={self.scopes!r}>"
 
 
-def _integration_factory(value: str) -> Tuple[Type[Integration], str]:
+def _integration_factory(value: str) -> tuple[type[Integration], str]:
     if value == "discord":
         return BotIntegration, value
     elif value in ("twitch", "youtube"):

@@ -6,7 +6,6 @@
 # https://docs.disnake.dev/en/stable/ext/commands/commands.html#discord-converters.
 
 import os
-import typing
 
 import disnake
 from disnake.ext import commands
@@ -39,11 +38,12 @@ async def userinfo_error(ctx: commands.Context, error: commands.CommandError):
     # If the conversion above fails for any reason, it will raise `commands.UserNotFound`
     # so we handle this in this error handler:
     if isinstance(error, commands.UserNotFound):
-        return await ctx.send("Couldn't find that user.")
+        await ctx.send("Couldn't find that user.")
+        return
 
 
 @bot.command()
-async def ignore(ctx: commands.Context, target: typing.Union[disnake.Member, disnake.TextChannel]):
+async def ignore(ctx: commands.Context, target: disnake.Member | disnake.TextChannel):
     # This command signature utilises the `typing.Union` typehint.
     # The `commands` framework attempts a conversion of each type in this Union *in order*.
     # So, it will attempt to convert whatever is passed to `target` to a `disnake.Member` instance.
@@ -68,7 +68,8 @@ async def multiply(ctx: commands.Context, number: int, maybe: bool):
     # See: https://docs.disnake.dev/en/stable/ext/commands/commands.html#bool
 
     if maybe is True:
-        return await ctx.send(str(number * 2))
+        await ctx.send(str(number * 2))
+        return
 
     await ctx.send(str(number * 5))
 

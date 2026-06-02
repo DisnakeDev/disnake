@@ -7,7 +7,7 @@
 Checks
 ======
 
-This section documents checks - special decorators intented to simplify working with Discord-specific conditions.
+This section documents checks - special decorators intended to simplify working with Discord-specific conditions.
 
 Classes
 -------
