@@ -84,7 +84,7 @@ EXECUTION_GROUPS: Sequence[ExecutionGroup] = [
     # docs and pyright
     ExecutionGroup(
         sessions=("docs", "pyright"),
-        python="3.11",
+        python="3.12",
         pyright_paths=("docs",),
         groups=("docs",),
     ),

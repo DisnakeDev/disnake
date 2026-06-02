@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import functools
-import inspect
 from typing import TYPE_CHECKING, Any
 
 from docutils import nodes
@@ -11,7 +10,6 @@ from sphinxext.opengraph._description_parser import DescriptionParser
 
 if TYPE_CHECKING:
     from sphinx.application import Sphinx
-    from sphinx.config import Config
     from sphinx.writers.html5 import HTML5Translator
 
     from ._types import SphinxExtensionMeta
@@ -75,23 +73,9 @@ def patch_opengraph(*args: Any) -> None:
     DescriptionParser.dispatch_visit = patched_dispatch_visit
 
 
-def disable_mathjax(app: Sphinx, config: Config) -> None:
-    # prevent installation of mathjax script, which gets installed due to
-    # https://github.com/readthedocs/sphinx-hoverxref/commit/7c4655092c482bd414b1816bdb4f393da117062a
-    #
-    # inspired by https://github.com/readthedocs/sphinx-hoverxref/blob/003b84fee48262f1a969c8143e63c177bd98aa26/hoverxref/extension.py#L151
-
-    for listener in app.events.listeners.get("html-page-context", []):
-        module = inspect.getmodule(listener.handler)
-        module_name = module.__name__ if module else ""
-        if module_name == "sphinx.ext.mathjax":
-            app.disconnect(listener.id)
-
-
 def setup(app: Sphinx) -> SphinxExtensionMeta:
     app.connect("config-inited", patch_genindex)
     app.connect("config-inited", patch_opengraph)
-    app.connect("config-inited", disable_mathjax)
     app.connect("builder-inited", set_translator)
 
     return {

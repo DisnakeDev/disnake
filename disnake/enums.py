@@ -52,7 +52,6 @@ __all__ = (
     "OptionType",
     "ApplicationCommandType",
     "ApplicationCommandPermissionType",
-    "PartyType",
     "GuildScheduledEventEntityType",
     "GuildScheduledEventStatus",
     "GuildScheduledEventPrivacyLevel",
@@ -444,58 +443,6 @@ class MessageType(Enum):
     """
 
 
-class PartyType(Enum):
-    """Represents the type of a voice channel activity/application.
-
-    .. deprecated:: 2.9
-    """
-
-    poker = 755827207812677713
-    """The "Poker Night" activity."""
-    betrayal = 773336526917861400
-    """The "Betrayal.io" activity."""
-    fishing = 814288819477020702
-    """The "Fishington.io" activity."""
-    chess = 832012774040141894
-    """The "Chess In The Park" activity."""
-    letter_tile = 879863686565621790
-    """The "Letter Tile" activity."""
-    word_snack = 879863976006127627
-    """The "Word Snacks" activity."""
-    doodle_crew = 878067389634314250
-    """The "Doodle Crew" activity."""
-    checkers = 832013003968348200
-    """The "Checkers In The Park" activity.
-
-    .. versionadded:: 2.3
-    """
-    spellcast = 852509694341283871
-    """The "SpellCast" activity.
-
-    .. versionadded:: 2.3
-    """
-    watch_together = 880218394199220334
-    """The "Watch Together" activity, a Youtube application.
-
-    .. versionadded:: 2.3
-    """
-    sketch_heads = 902271654783242291
-    """The "Sketch Heads" activity.
-
-    .. versionadded:: 2.4
-    """
-    ocho = 832025144389533716
-    """The "Ocho" activity.
-
-    .. versionadded:: 2.4
-    """
-    gartic_phone = 1007373802981822582
-    """The "Gartic Phone" activity.
-
-    .. versionadded:: 2.9
-    """
-
-
 # undocumented/internal
 class SpeakingState(Enum):
     none = 0
@@ -627,11 +574,17 @@ class StatusDisplayType(Enum):
     """
 
     name = 0  # pyright: ignore[reportAssignmentType]
-    """The name of the activity is displayed, e.g: ``Listening to Spotify``."""
+    """The name of the activity is displayed,
+    e.g: ``Listening to Spotify``.
+    """
     state = 1
-    """The state of the activity is displayed, e.g: ``Listening to Rick Astley``."""
+    """The state of the activity is displayed,
+    e.g: ``Listening to Rick Astley``.
+    """
     details = 2
-    """The details of the activity are displayed, e.g: ``Listening to Never Gonna Give You Up``."""
+    """The details of the activity are displayed,
+    e.g: ``Listening to Never Gonna Give You Up``.
+    """
 
     def __int__(self) -> int:
         return self.value
