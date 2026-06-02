@@ -35,13 +35,29 @@ class EnumMemberDocumenter(AttributeDocumenter):
         return True
 
 
+# show `Enum.name` instead of `(name, value)` in signatures
+# (object_description has a special case for enum.Enum, but obviously not
+# for our custom enum types, which ultimately get displayed as plain tuples)
+def _patch_object_description() -> None:
+    from sphinx.util import inspect
+
+    orig_description = inspect.object_description
+
+    def patched_description(obj: Any, **kwargs: Any) -> Any:
+        if isinstance(obj, disnake.enums._EnumValueBase):
+            # bypass `__str__` defined on some enums
+            return disnake.enums._EnumValueBase.__str__(obj)
+        return orig_description(obj, **kwargs)
+
+    inspect.object_description = patched_description
+
+
 def setup(app: Sphinx) -> SphinxExtensionMeta:
     app.setup_extension("sphinx.ext.autodoc")
 
     app.add_autodocumenter(EnumMemberDocumenter)
 
-    # show `Enum.name` instead of `<Enum.name: 123>` in signatures
-    disnake.enums._EnumValueBase.__repr__ = disnake.enums._EnumValueBase.__str__
+    _patch_object_description()
 
     return {
         "parallel_read_safe": True,

@@ -361,11 +361,7 @@ class Role(Hashable):
         :return type: :class:`bool`
         """
         me = self.guild.me
-        return (
-            not self.is_default()
-            and not self.managed
-            and (me.top_role > self or me.id == self.guild.owner_id)
-        )
+        return not self.is_default() and not self.managed and me.top_role > self
 
     @property
     def permissions(self) -> Permissions:

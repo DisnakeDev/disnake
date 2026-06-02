@@ -3,4 +3,4 @@
 extend = "../pyproject.toml"
 src = ["../"]
 
-target-version = "py311"
+target-version = "py312"
