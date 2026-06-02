@@ -574,11 +574,17 @@ class StatusDisplayType(Enum):
     """
 
     name = 0  # pyright: ignore[reportAssignmentType]
-    """The name of the activity is displayed, e.g: ``Listening to Spotify``."""
+    """The name of the activity is displayed,
+    e.g: ``Listening to Spotify``.
+    """
     state = 1
-    """The state of the activity is displayed, e.g: ``Listening to Rick Astley``."""
+    """The state of the activity is displayed,
+    e.g: ``Listening to Rick Astley``.
+    """
     details = 2
-    """The details of the activity are displayed, e.g: ``Listening to Never Gonna Give You Up``."""
+    """The details of the activity are displayed,
+    e.g: ``Listening to Never Gonna Give You Up``.
+    """
 
     def __int__(self) -> int:
         return self.value

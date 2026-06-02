@@ -21,7 +21,7 @@ from disnake.app_commands import ApplicationCommand, Option
 from disnake.custom_warnings import SyncWarning
 from disnake.enums import ApplicationCommandType
 from disnake.flags import ApplicationInstallTypes, InteractionContextTypes
-from disnake.utils import iscoroutinefunction, warn_deprecated
+from disnake.utils import iscoroutinefunction
 
 from . import errors
 from .base_core import InvokableApplicationCommand
@@ -137,9 +137,6 @@ class InteractionBotBase(CommonBotBase):
         self,
         *,
         command_sync_flags: CommandSyncFlags | None = None,
-        sync_commands: bool = MISSING,
-        sync_commands_debug: bool = MISSING,
-        sync_commands_on_cog_unload: bool = MISSING,
         test_guilds: Sequence[int] | None = None,
         default_install_types: ApplicationInstallTypes | None = None,
         default_contexts: InteractionContextTypes | None = None,
@@ -154,42 +151,11 @@ class InteractionBotBase(CommonBotBase):
         test_guilds = None if test_guilds is None else tuple(test_guilds)
         self._test_guilds: tuple[int, ...] | None = test_guilds
 
-        if command_sync_flags is not None and (
-            sync_commands is not MISSING
-            or sync_commands_debug is not MISSING
-            or sync_commands_on_cog_unload is not MISSING
-        ):
-            msg = "cannot set 'command_sync_flags' and any of 'sync_commands', 'sync_commands_debug', 'sync_commands_on_cog_unload' at the same time."
-            raise TypeError(msg)
-
         if command_sync_flags is not None:
             # this makes a copy so it cannot be changed after setting
             command_sync_flags = CommandSyncFlags._from_value(command_sync_flags.value)
-        if command_sync_flags is None:
+        else:
             command_sync_flags = CommandSyncFlags.default()
-
-            if sync_commands is not MISSING:
-                warn_deprecated(
-                    "sync_commands is deprecated and will be removed in a future version. "
-                    "Use `command_sync_flags` with an `CommandSyncFlags` instance as a replacement.",
-                    stacklevel=3,
-                )
-                command_sync_flags.sync_commands = sync_commands
-            if sync_commands_debug is not MISSING:
-                warn_deprecated(
-                    "sync_commands_debug is deprecated and will be removed in a future version. "
-                    "Use `command_sync_flags` with an `CommandSyncFlags` instance as a replacement.",
-                    stacklevel=3,
-                )
-                command_sync_flags.sync_commands_debug = sync_commands_debug
-
-            if sync_commands_on_cog_unload is not MISSING:
-                warn_deprecated(
-                    "sync_commands_on_cog_unload is deprecated and will be removed in a future version. "
-                    "Use `command_sync_flags` with an `CommandSyncFlags` instance as a replacement.",
-                    stacklevel=3,
-                )
-                command_sync_flags.sync_on_cog_actions = sync_commands_on_cog_unload
 
         self._command_sync_flags = command_sync_flags
         self._sync_queued: asyncio.Lock = asyncio.Lock()
