@@ -12,7 +12,6 @@ from typing import (
     ClassVar,
     Literal,
     NamedTuple,
-    NewType,
     TypeAlias,
     cast,
     overload,
@@ -80,7 +79,6 @@ from .widget import Widget, WidgetSettings
 __all__ = (
     "IncidentsData",
     "Guild",
-    "GuildBuilder",
 )
 
 VocalGuildChannel: TypeAlias = VoiceChannel | StageChannel
@@ -95,14 +93,9 @@ if TYPE_CHECKING:
     from .state import ConnectionState
     from .template import Template
     from .threads import AnyThreadArchiveDuration, ForumTag
-    from .types.channel import (
-        GuildChannel as GuildChannelPayload,
-        PermissionOverwrite as PermissionOverwritePayload,
-    )
+    from .types.channel import GuildChannel as GuildChannelPayload
     from .types.guild import (
         Ban as BanPayload,
-        CreateGuildPlaceholderChannel,
-        CreateGuildPlaceholderRole,
         Guild as GuildPayload,
         GuildFeature,
         IncidentsData as IncidentsDataPayload,
@@ -2091,32 +2084,12 @@ class Guild(Hashable):
 
         Leaves the guild.
 
-        .. note::
-
-            You cannot leave the guild that you own, you must delete it instead
-            via :meth:`delete`.
-
         Raises
         ------
         HTTPException
             Leaving the guild failed.
         """
         await self._state.http.leave_guild(self.id)
-
-    async def delete(self) -> None:
-        """|coro|
-
-        Deletes the guild. You must be the guild owner to delete the
-        guild.
-
-        Raises
-        ------
-        HTTPException
-            Deleting the guild failed.
-        Forbidden
-            You do not have permissions to delete the guild.
-        """
-        await self._state.http.delete_guild(self.id)
 
     async def edit(
         self,
@@ -2134,7 +2107,6 @@ class Guild(Hashable):
         dms_disabled_until: datetime.datetime | datetime.timedelta | None = MISSING,
         raid_alerts_disabled: bool = MISSING,
         afk_channel: VoiceChannel | None = MISSING,
-        owner: Snowflake = MISSING,
         afk_timeout: int = MISSING,
         default_notifications: NotificationLevel = MISSING,
         verification_level: VerificationLevel = MISSING,
@@ -2170,6 +2142,9 @@ class Guild(Hashable):
 
         .. versionchanged:: 2.6
             Raises :exc:`TypeError` or :exc:`ValueError` instead of ``InvalidArgument``.
+
+        .. versionchanged:: |vnext|
+            Removed the ``owner`` parameter, as bots can no longer own guilds.
 
         Parameters
         ----------
@@ -2264,9 +2239,6 @@ class Guild(Hashable):
         afk_timeout: :class:`int`
             The number of seconds until someone is moved to the AFK channel.
             This can be set to ``60``, ``300``, ``900``, ``1800``, and ``3600``.
-        owner: :class:`Member`
-            The new owner of the guild to transfer ownership to. Note that you must
-            be owner of the guild to do this.
         verification_level: :class:`VerificationLevel`
             The new verification level for the guild.
         default_notifications: :class:`NotificationLevel`
@@ -2320,7 +2292,6 @@ class Guild(Hashable):
             ``explicit_content_filter``, or ``system_channel_flags`` was of the incorrect type.
         ValueError
             ``community`` was set without setting both ``rules_channel`` and ``public_updates_channel`` parameters,
-            or if you are not the owner of the guild and request an ownership transfer,
             or the image format passed in to ``icon`` is invalid,
             or both ``community`` and ``invites_disabled` or ``raid_alerts_disabled`` were provided.
 
@@ -2419,13 +2390,6 @@ class Guild(Hashable):
                 fields["safety_alerts_channel_id"] = safety_alerts_channel
             else:
                 fields["safety_alerts_channel_id"] = safety_alerts_channel.id
-
-        if owner is not MISSING:
-            if self.owner_id != self._state.self_id:
-                msg = "To transfer ownership you must be the owner of the guild."
-                raise ValueError(msg)
-
-            fields["owner_id"] = owner.id
 
         if verification_level is not MISSING:
             if not isinstance(verification_level, VerificationLevel):
@@ -4626,40 +4590,6 @@ class Guild(Hashable):
         """
         return self._state.http.widget_image_url(self.id, style=str(style))
 
-    async def edit_mfa_level(self, mfa_level: MFALevel, *, reason: str | None = None) -> None:
-        """|coro|
-
-        Edits the two-factor authentication level of the guild.
-
-        You must be the guild owner to use this.
-
-        .. versionadded:: 2.6
-
-        Parameters
-        ----------
-        mfa_level: :class:`int`
-            The new 2FA level. If set to 0, the guild does not require
-            2FA for their administrative members to take
-            moderation actions. If set to 1, then 2FA is required.
-        reason: :class:`str` | :data:`None`
-            The reason for editing the mfa level. Shows up on the audit log.
-
-        Raises
-        ------
-        HTTPException
-            Editing the 2FA level failed.
-        ValueError
-            You are not the owner of the guild.
-        """
-        if isinstance(mfa_level, bool) or not isinstance(mfa_level, int):
-            msg = f"`mfa_level` must be of type int, got {type(mfa_level).__name__}"
-            raise TypeError(msg)
-        if self.owner_id != self._state.self_id:
-            msg = "To edit the 2FA level, you must be the owner of the guild."
-            raise ValueError(msg)
-        # return value unused
-        await self._state.http.edit_mfa_level(self.id, mfa_level, reason=reason)
-
     async def chunk(self, *, cache: bool = True) -> list[Member] | None:
         r"""|coro|
 
@@ -5412,461 +5342,3 @@ class Guild(Hashable):
         return [
             GuildSoundboardSound(data=d, state=self._state, guild_id=self.id) for d in data["items"]
         ]
-
-
-PlaceholderID = NewType("PlaceholderID", int)
-
-
-class GuildBuilder:
-    """A guild builder object, created by :func:`Client.guild_builder`.
-
-    This allows for easier configuration of more complex guild setups,
-    abstracting away some of the quirks of the guild creation endpoint.
-
-    .. versionadded:: 2.8
-
-    .. note::
-        Many methods of this class return unspecified placeholder IDs
-        (called ``PlaceholderID`` below) that can be used to reference the
-        created object in other objects, for example referencing a category when
-        creating a new text channel, or a role when setting permission overwrites.
-
-    Examples
-    --------
-    Basic usage:
-
-    .. code-block:: python3
-
-        builder = client.guild_builder("Cat Pics")
-        builder.add_text_channel("meow", topic="cat.")
-        guild = await builder.create()
-
-    Adding more channels + roles:
-
-    .. code-block:: python3
-
-        builder = client.guild_builder("More Cat Pics")
-        builder.add_text_channel("welcome")
-
-        # add roles
-        guests = builder.add_role("guests")
-        admins = builder.add_role(
-            "catmins",
-            permissions=Permissions(administrator=True),
-            hoist=True,
-        )
-
-        # add cat-egory and text channel
-        category = builder.add_category("cats!")
-        meow_channel = builder.add_text_channel(
-            "meow",
-            topic="cat.",
-            category=category,
-            overwrites={guests: PermissionOverwrite(send_messages=False)}
-        )
-
-        # set as system channel
-        builder.system_channel = meow_channel
-
-        # add hidden voice channel
-        builder.add_voice_channel(
-            "secret-admin-vc",
-            category=category,
-            overwrites={builder.everyone: PermissionOverwrite(view_channel=False)}
-        )
-
-        # finally, create the guild
-        guild = await builder.create()
-
-    Attributes
-    ----------
-    name: :class:`str`
-        The name of the new guild.
-    icon: |resource_type| | :data:`None`
-        The icon of the new guild.
-    verification_level: :class:`VerificationLevel` | :data:`None`
-        The verification level of the new guild.
-    default_notifications: :class:`NotificationLevel` | :data:`None`
-        The default notification level for the new guild.
-    explicit_content_filter: :class:`ContentFilter` | :data:`None`
-        The explicit content filter for the new guild.
-    afk_channel: ``PlaceholderID`` | :data:`None`
-        The channel that is used as the AFK channel.
-    afk_timeout: :class:`int` | :data:`None`
-        The number of seconds until someone is moved to the AFK channel.
-    system_channel: ``PlaceholderID`` | :data:`None`
-        The channel that is used as the system channel.
-    system_channel_flags: :class:`SystemChannelFlags` | :data:`None`
-        The settings to use with the system channel.
-    """
-
-    def __init__(self, *, state: ConnectionState, name: str) -> None:
-        self._state = state
-        self.name: str = name
-
-        # note: the first role corresponds to @everyone
-        self._roles: list[CreateGuildPlaceholderRole] = []
-        self._channels: list[CreateGuildPlaceholderChannel] = []
-
-        self.icon: AssetBytes | None = None
-        self.verification_level: VerificationLevel | None = None
-        self.default_notifications: NotificationLevel | None = None
-        self.explicit_content_filter: ContentFilter | None = None
-        self.afk_channel: PlaceholderID | None = None
-        self.afk_timeout: int | None = None
-        self.system_channel: PlaceholderID | None = None
-        self.system_channel_flags: SystemChannelFlags | None = None
-
-        self._current_id: int = 1
-
-        self._everyone_id: PlaceholderID = self._next_id()
-
-    def _next_id(self) -> PlaceholderID:
-        self._current_id = (_id := self._current_id) + 1
-        return PlaceholderID(_id)
-
-    def _add_channel(
-        self,
-        *,
-        type: ChannelType,
-        name: str,
-        overwrites: dict[PlaceholderID, PermissionOverwrite] = MISSING,
-        category: PlaceholderID = MISSING,
-        topic: str | None = MISSING,
-        slowmode_delay: int = MISSING,
-        nsfw: bool = MISSING,
-    ) -> tuple[PlaceholderID, CreateGuildPlaceholderChannel]:
-        _id = self._next_id()
-        data: CreateGuildPlaceholderChannel = {
-            "id": _id,
-            "type": try_enum_to_int(type),
-            "name": name,
-        }
-
-        if overwrites is not MISSING:
-            overwrites_data: list[PermissionOverwritePayload] = []
-            for target, perm in overwrites.items():
-                allow, deny = perm.pair()
-                overwrites_data.append(
-                    {
-                        "allow": str(allow.value),
-                        "deny": str(deny.value),
-                        "id": target,
-                        # can only set overrides for roles here
-                        "type": abc._Overwrites.ROLE,
-                    }
-                )
-            data["permission_overwrites"] = overwrites_data
-
-        if category is not MISSING:
-            data["parent_id"] = category
-
-        if topic is not MISSING:
-            data["topic"] = topic
-
-        if slowmode_delay is not MISSING:
-            data["rate_limit_per_user"] = slowmode_delay
-
-        if nsfw is not MISSING:
-            data["nsfw"] = nsfw
-
-        self._channels.append(data)
-        return _id, data
-
-    @property
-    def everyone(self) -> PlaceholderID:
-        """``PlaceholderID``: The placeholder ID used for the ``@everyone`` role."""
-        return self._everyone_id
-
-    async def create(self) -> Guild:
-        """|coro|
-
-        Creates the configured guild.
-
-        Raises
-        ------
-        NotFound
-            The :attr:`.icon` asset couldn't be found.
-        HTTPException
-            Guild creation failed.
-        ValueError
-            Invalid icon image format given. Must be PNG or JPG.
-        TypeError
-            The :attr:`.icon` asset is a lottie sticker (see :func:`Sticker.read <disnake.Sticker.read>`).
-
-        Returns
-        -------
-        :class:`.Guild`
-            The created guild. This is not the same guild that is added to cache.
-
-            .. note::
-                Due to API limitations, this returned guild does
-                not contain any of the configured channels.
-        """
-        if self.icon is not None:
-            icon_base64 = await utils._assetbytes_to_base64_data(self.icon)
-        else:
-            icon_base64 = None
-
-        data = await self._state.http.create_guild(
-            name=self.name,
-            icon=icon_base64,
-            roles=self._roles if self._roles else None,
-            channels=self._channels if self._channels else None,
-            verification_level=try_enum_to_int(self.verification_level),
-            default_message_notifications=try_enum_to_int(self.default_notifications),
-            explicit_content_filter=try_enum_to_int(self.explicit_content_filter),
-            afk_channel=self.afk_channel,
-            afk_timeout=self.afk_timeout,
-            system_channel=self.system_channel,
-            system_channel_flags=try_enum_to_int(self.system_channel_flags),
-        )
-        return Guild(data=data, state=self._state)
-
-    def update_everyone_role(self, *, permissions: Permissions = MISSING) -> PlaceholderID:
-        """Updates attributes of the ``@everyone`` role.
-
-        Parameters
-        ----------
-        permissions: :class:`Permissions`
-            The permissions the role should have.
-
-        Returns
-        -------
-        ``PlaceholderID``
-            The placeholder ID for the ``@everyone`` role.
-            Also available as :attr:`everyone`.
-        """
-        if len(self._roles) == 0:
-            self._roles.append({"id": self._everyone_id})
-        role = self._roles[0]
-
-        if permissions is not MISSING:
-            role["permissions"] = str(permissions.value)
-
-        return self._everyone_id
-
-    def add_role(
-        self,
-        name: str = MISSING,
-        *,
-        permissions: Permissions = MISSING,
-        color: Colour | int = MISSING,
-        colour: Colour | int = MISSING,
-        hoist: bool = MISSING,
-        mentionable: bool = MISSING,
-    ) -> PlaceholderID:
-        """Adds a role to the guild builder.
-
-        The default (``@everyone``) role can be referenced using :attr:`everyone`
-        and configured through :func:`update_everyone_role`.
-
-        Parameters
-        ----------
-        name: :class:`str`
-            The role name. Defaults to 'new role'.
-        permissions: :class:`Permissions`
-            The permissions the role should have. Defaults to no permissions.
-        colour: :class:`Colour` | :class:`int`
-            The colour for the role. Defaults to :meth:`Colour.default`.
-            This is aliased to ``color`` as well.
-        hoist: :class:`bool`
-            Whether the role should be shown separately in the member list.
-            Defaults to ``False``.
-        mentionable: :class:`bool`
-            Whether the role should be mentionable by others.
-            Defaults to ``False``.
-
-        Returns
-        -------
-        ``PlaceholderID``
-            A placeholder ID for the created role.
-        """
-        # always create @everyone role first if not created already
-        if len(self._roles) == 0:
-            self.update_everyone_role()
-
-        _id = self._next_id()
-        data: CreateGuildPlaceholderRole = {"id": _id}
-
-        if name is not MISSING:
-            data["name"] = name
-
-        if permissions is not MISSING:
-            data["permissions"] = str(permissions.value)
-        else:
-            data["permissions"] = "0"
-
-        actual_colour = colour or color or Colour.default()
-        if isinstance(actual_colour, int):
-            data["color"] = actual_colour  # pyright: ignore[reportGeneralTypeIssues]
-        else:
-            data["color"] = actual_colour.value  # pyright: ignore[reportGeneralTypeIssues]
-
-        if hoist is not MISSING:
-            data["hoist"] = hoist
-
-        if mentionable is not MISSING:
-            data["mentionable"] = mentionable
-
-        self._roles.append(data)
-        return _id
-
-    def add_category(
-        self,
-        name: str,
-        *,
-        overwrites: dict[PlaceholderID, PermissionOverwrite] = MISSING,
-    ) -> PlaceholderID:
-        r"""Adds a category channel to the guild builder.
-
-        There is an alias for this named ``add_category_channel``.
-
-        Parameters
-        ----------
-        name: :class:`str`
-            The category's name.
-        overwrites: :class:`dict`\[``PlaceholderID``, :class:`PermissionOverwrite`]
-            A :class:`dict` of roles to :class:`PermissionOverwrite`\s which can be synced to channels.
-
-        Returns
-        -------
-        ``PlaceholderID``
-            A placeholder ID for the created category.
-        """
-        _id, _ = self._add_channel(type=ChannelType.category, name=name, overwrites=overwrites)
-        return _id
-
-    add_category_channel = add_category
-
-    def add_text_channel(
-        self,
-        name: str,
-        *,
-        overwrites: dict[PlaceholderID, PermissionOverwrite] = MISSING,
-        category: PlaceholderID = MISSING,
-        topic: str | None = MISSING,
-        slowmode_delay: int = MISSING,
-        nsfw: bool = MISSING,
-        default_auto_archive_duration: AnyThreadArchiveDuration = MISSING,
-    ) -> PlaceholderID:
-        r"""Adds a text channel to the guild builder.
-
-        Parameters
-        ----------
-        name: :class:`str`
-            The channel's name.
-        overwrites: :class:`dict`\[``PlaceholderID``, :class:`PermissionOverwrite`]
-            A :class:`dict` of roles to :class:`PermissionOverwrite`\s to apply to the channel.
-        category: ``PlaceholderID``
-            The category to place the new channel under.
-
-            .. warning::
-                Unlike :func:`Guild.create_text_channel`, the parent category's
-                permissions will *not* be synced to this new channel by default.
-
-        topic: :class:`str` | :data:`None`
-            The channel's topic.
-        slowmode_delay: :class:`int`
-            Specifies the slowmode rate limit for users in this channel, in seconds.
-            A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
-            If not provided, slowmode is disabled.
-        nsfw: :class:`bool`
-            Whether to mark the channel as NSFW.
-        default_auto_archive_duration: :class:`int` | :class:`ThreadArchiveDuration`
-            The default auto archive duration in minutes for threads created in this channel.
-            Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
-
-        Returns
-        -------
-        ``PlaceholderID``
-            A placeholder ID for the created text channel.
-        """
-        _id, data = self._add_channel(
-            type=ChannelType.text,
-            name=name,
-            overwrites=overwrites,
-            category=category,
-            topic=topic,
-            slowmode_delay=slowmode_delay,
-            nsfw=nsfw,
-        )
-
-        if default_auto_archive_duration is not MISSING:
-            data["default_auto_archive_duration"] = cast(
-                "ThreadArchiveDurationLiteral", try_enum_to_int(default_auto_archive_duration)
-            )
-
-        return _id
-
-    def add_voice_channel(
-        self,
-        name: str,
-        *,
-        overwrites: dict[PlaceholderID, PermissionOverwrite] = MISSING,
-        category: PlaceholderID = MISSING,
-        slowmode_delay: int = MISSING,
-        nsfw: bool = MISSING,
-        bitrate: int = MISSING,
-        user_limit: int = MISSING,
-        rtc_region: str | VoiceRegion | None = MISSING,
-        video_quality_mode: VideoQualityMode = MISSING,
-    ) -> PlaceholderID:
-        r"""Adds a voice channel to the guild builder.
-
-        Parameters
-        ----------
-        name: :class:`str`
-            The channel's name.
-        overwrites: :class:`dict`\[``PlaceholderID``, :class:`PermissionOverwrite`]
-            A :class:`dict` of roles to :class:`PermissionOverwrite`\s to apply to the channel.
-        category: ``PlaceholderID``
-            The category to place the new channel under.
-
-            .. warning::
-                Unlike :func:`Guild.create_voice_channel`, the parent category's
-                permissions will *not* be synced to this new channel by default.
-
-        slowmode_delay: :class:`int`
-            Specifies the slowmode rate limit for users in this channel, in seconds.
-            A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
-            If not provided, slowmode is disabled.
-        nsfw: :class:`bool`
-            Whether to mark the channel as NSFW.
-        bitrate: :class:`int`
-            The channel's preferred audio bitrate in bits per second.
-        user_limit: :class:`int`
-            The channel's limit for number of members that can be in a voice channel.
-        rtc_region: :class:`str` | :class:`VoiceRegion` | :data:`None`
-            The region for the voice channel's voice communication.
-            A value of :data:`None` indicates automatic voice region detection.
-        video_quality_mode: :class:`VideoQualityMode`
-            The camera video quality for the voice channel's participants.
-
-        Returns
-        -------
-        ``PlaceholderID``
-            A placeholder ID for the created voice channel.
-        """
-        _id, data = self._add_channel(
-            type=ChannelType.voice,
-            name=name,
-            overwrites=overwrites,
-            category=category,
-            slowmode_delay=slowmode_delay,
-            nsfw=nsfw,
-        )
-
-        if bitrate is not MISSING:
-            data["bitrate"] = bitrate
-
-        if user_limit is not MISSING:
-            data["user_limit"] = user_limit
-
-        if rtc_region is not MISSING:
-            data["rtc_region"] = None if rtc_region is None else str(rtc_region)
-
-        if video_quality_mode is not MISSING:
-            data["video_quality_mode"] = try_enum_to_int(video_quality_mode)
-
-        return _id
