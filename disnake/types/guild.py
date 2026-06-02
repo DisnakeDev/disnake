@@ -183,7 +183,3 @@ class ChannelPositionUpdate(TypedDict):
 class RolePositionUpdate(TypedDict):
     id: Snowflake
     position: NotRequired[Snowflake | None]
-
-
-class MFALevelUpdate(TypedDict):
-    level: MFALevel

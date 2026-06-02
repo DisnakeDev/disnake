@@ -2107,7 +2107,6 @@ class Guild(Hashable):
         dms_disabled_until: datetime.datetime | datetime.timedelta | None = MISSING,
         raid_alerts_disabled: bool = MISSING,
         afk_channel: VoiceChannel | None = MISSING,
-        owner: Snowflake = MISSING,
         afk_timeout: int = MISSING,
         default_notifications: NotificationLevel = MISSING,
         verification_level: VerificationLevel = MISSING,
@@ -2143,6 +2142,9 @@ class Guild(Hashable):
 
         .. versionchanged:: 2.6
             Raises :exc:`TypeError` or :exc:`ValueError` instead of ``InvalidArgument``.
+
+        .. versionchanged:: |vnext|
+            Removed the ``owner`` parameter, as bots can no longer own guilds.
 
         Parameters
         ----------
@@ -2237,9 +2239,6 @@ class Guild(Hashable):
         afk_timeout: :class:`int`
             The number of seconds until someone is moved to the AFK channel.
             This can be set to ``60``, ``300``, ``900``, ``1800``, and ``3600``.
-        owner: :class:`Member`
-            The new owner of the guild to transfer ownership to. Note that you must
-            be owner of the guild to do this.
         verification_level: :class:`VerificationLevel`
             The new verification level for the guild.
         default_notifications: :class:`NotificationLevel`
@@ -2293,7 +2292,6 @@ class Guild(Hashable):
             ``explicit_content_filter``, or ``system_channel_flags`` was of the incorrect type.
         ValueError
             ``community`` was set without setting both ``rules_channel`` and ``public_updates_channel`` parameters,
-            or if you are not the owner of the guild and request an ownership transfer,
             or the image format passed in to ``icon`` is invalid,
             or both ``community`` and ``invites_disabled` or ``raid_alerts_disabled`` were provided.
 
@@ -2392,13 +2390,6 @@ class Guild(Hashable):
                 fields["safety_alerts_channel_id"] = safety_alerts_channel
             else:
                 fields["safety_alerts_channel_id"] = safety_alerts_channel.id
-
-        if owner is not MISSING:
-            if self.owner_id != self._state.self_id:
-                msg = "To transfer ownership you must be the owner of the guild."
-                raise ValueError(msg)
-
-            fields["owner_id"] = owner.id
 
         if verification_level is not MISSING:
             if not isinstance(verification_level, VerificationLevel):
@@ -4598,40 +4589,6 @@ class Guild(Hashable):
             The widget image URL.
         """
         return self._state.http.widget_image_url(self.id, style=str(style))
-
-    async def edit_mfa_level(self, mfa_level: MFALevel, *, reason: str | None = None) -> None:
-        """|coro|
-
-        Edits the two-factor authentication level of the guild.
-
-        You must be the guild owner to use this.
-
-        .. versionadded:: 2.6
-
-        Parameters
-        ----------
-        mfa_level: :class:`int`
-            The new 2FA level. If set to 0, the guild does not require
-            2FA for their administrative members to take
-            moderation actions. If set to 1, then 2FA is required.
-        reason: :class:`str` | :data:`None`
-            The reason for editing the mfa level. Shows up on the audit log.
-
-        Raises
-        ------
-        HTTPException
-            Editing the 2FA level failed.
-        ValueError
-            You are not the owner of the guild.
-        """
-        if isinstance(mfa_level, bool) or not isinstance(mfa_level, int):
-            msg = f"`mfa_level` must be of type int, got {type(mfa_level).__name__}"
-            raise TypeError(msg)
-        if self.owner_id != self._state.self_id:
-            msg = "To edit the 2FA level, you must be the owner of the guild."
-            raise ValueError(msg)
-        # return value unused
-        await self._state.http.edit_mfa_level(self.id, mfa_level, reason=reason)
 
     async def chunk(self, *, cache: bool = True) -> list[Member] | None:
         r"""|coro|

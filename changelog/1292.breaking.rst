@@ -1,1 +1,3 @@
-Remove the deprecated :meth:`Guild.delete`, :meth:`Client.guild_builder`, :meth:`Client.create_guild`, :meth:`Template.create_guild` and :class:`GuildBuilder` API features. For more information, refer to the :ddocs:`official changelog <change-log#deprecating-guild-creation-by-apps>`.
+Remove the now defunct guild creation/ownership features, as bots can no longer own guilds. For more information, refer to the :ddocs:`official changelog <change-log#deprecating-guild-creation-by-apps>`. This includes:
+- Guild creation: :meth:`Client.create_guild`, :meth:`Template.create_guild`, :meth:`Client.guild_builder`, and :class:`GuildBuilder`.
+- Owner-only actions: :meth:`Guild.delete`, :meth:`Guild.edit_mfa_level`, and the ``owner`` parameter for :meth:`Guild.edit`.

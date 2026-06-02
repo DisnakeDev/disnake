@@ -1425,7 +1425,6 @@ class HTTPClient:
             "name",
             "icon",
             "afk_timeout",
-            "owner_id",
             "afk_channel_id",
             "splash",
             "discovery_splash",
@@ -1529,16 +1528,6 @@ class HTTPClient:
         payload: dict[str, Any] = {"code": code}
         return self.request(
             Route("PATCH", "/guilds/{guild_id}/vanity-url", guild_id=guild_id),
-            json=payload,
-            reason=reason,
-        )
-
-    def edit_mfa_level(
-        self, guild_id: Snowflake, mfa_level: guild.MFALevel, *, reason: str | None = None
-    ) -> Response[guild.MFALevelUpdate]:
-        payload: guild.MFALevelUpdate = {"level": mfa_level}
-        return self.request(
-            Route("POST", "/guilds/{guild_id}/mfa", guild_id=guild_id),
             json=payload,
             reason=reason,
         )
