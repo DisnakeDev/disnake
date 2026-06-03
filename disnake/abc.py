@@ -21,7 +21,6 @@ from . import utils
 from .context_managers import Typing
 from .enums import (
     ChannelType,
-    PartyType,
     ThreadLayout,
     ThreadSortOrder,
     VideoQualityMode,
@@ -1301,7 +1300,7 @@ class GuildChannel(ABC):
         unique: bool = True,
         target_type: InviteTarget | None = None,
         target_user: User | None = None,
-        target_application: Snowflake | PartyType | None = None,
+        target_application: Snowflake | None = None,
         guild_scheduled_event: GuildScheduledEvent | None = None,
     ) -> Invite:
         """|coro|
@@ -1342,9 +1341,6 @@ class GuildChannel(ABC):
 
             .. versionadded:: 2.0
 
-            .. versionchanged:: 2.9
-                ``PartyType`` is deprecated, and :class:`.Snowflake` should be used instead.
-
         guild_scheduled_event: :class:`.GuildScheduledEvent` | :data:`None`
             The guild scheduled event to include with the invite.
 
@@ -1365,12 +1361,6 @@ class GuildChannel(ABC):
         :class:`.Invite`
             The newly created invite.
         """
-        if isinstance(target_application, PartyType):
-            utils.warn_deprecated(
-                "PartyType is deprecated and will be removed in future version",
-                stacklevel=2,
-            )
-            target_application = Object(target_application.value)
         data = await self._state.http.create_invite(
             self.id,
             reason=reason,

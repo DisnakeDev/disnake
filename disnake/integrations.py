@@ -13,7 +13,6 @@ from .utils import (
     deprecated,
     parse_time,
     snowflake_time,
-    warn_deprecated,
 )
 
 __all__ = (
@@ -352,7 +351,6 @@ class IntegrationApplication:
         "name",
         "icon",
         "description",
-        "_summary",
         "user",
     )
 
@@ -361,23 +359,8 @@ class IntegrationApplication:
         self.name: str = data["name"]
         self.icon: str | None = data["icon"]
         self.description: str = data["description"]
-        self._summary: str = data.get("summary", "")
         user = data.get("bot")
         self.user: User | None = User(state=state, data=user) if user else None
-
-    @property
-    def summary(self) -> str:
-        """:class:`str`: The application's summary. Can be an empty string.
-
-        .. deprecated:: 2.5
-
-            This field is deprecated by discord and is now always blank. Consider using :attr:`.description` instead.
-        """
-        warn_deprecated(
-            "summary is deprecated and will be removed in a future version. Consider using description instead.",
-            stacklevel=2,
-        )
-        return self._summary
 
 
 class BotIntegration(Integration):

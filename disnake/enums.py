@@ -52,7 +52,6 @@ __all__ = (
     "OptionType",
     "ApplicationCommandType",
     "ApplicationCommandPermissionType",
-    "PartyType",
     "GuildScheduledEventEntityType",
     "GuildScheduledEventStatus",
     "GuildScheduledEventPrivacyLevel",
@@ -444,58 +443,6 @@ class MessageType(Enum):
     """
 
 
-class PartyType(Enum):
-    """Represents the type of a voice channel activity/application.
-
-    .. deprecated:: 2.9
-    """
-
-    poker = 755827207812677713
-    """The "Poker Night" activity."""
-    betrayal = 773336526917861400
-    """The "Betrayal.io" activity."""
-    fishing = 814288819477020702
-    """The "Fishington.io" activity."""
-    chess = 832012774040141894
-    """The "Chess In The Park" activity."""
-    letter_tile = 879863686565621790
-    """The "Letter Tile" activity."""
-    word_snack = 879863976006127627
-    """The "Word Snacks" activity."""
-    doodle_crew = 878067389634314250
-    """The "Doodle Crew" activity."""
-    checkers = 832013003968348200
-    """The "Checkers In The Park" activity.
-
-    .. versionadded:: 2.3
-    """
-    spellcast = 852509694341283871
-    """The "SpellCast" activity.
-
-    .. versionadded:: 2.3
-    """
-    watch_together = 880218394199220334
-    """The "Watch Together" activity, a Youtube application.
-
-    .. versionadded:: 2.3
-    """
-    sketch_heads = 902271654783242291
-    """The "Sketch Heads" activity.
-
-    .. versionadded:: 2.4
-    """
-    ocho = 832025144389533716
-    """The "Ocho" activity.
-
-    .. versionadded:: 2.4
-    """
-    gartic_phone = 1007373802981822582
-    """The "Gartic Phone" activity.
-
-    .. versionadded:: 2.9
-    """
-
-
 # undocumented/internal
 class SpeakingState(Enum):
     none = 0
@@ -627,11 +574,17 @@ class StatusDisplayType(Enum):
     """
 
     name = 0  # pyright: ignore[reportAssignmentType]
-    """The name of the activity is displayed, e.g: ``Listening to Spotify``."""
+    """The name of the activity is displayed,
+    e.g: ``Listening to Spotify``.
+    """
     state = 1
-    """The state of the activity is displayed, e.g: ``Listening to Rick Astley``."""
+    """The state of the activity is displayed,
+    e.g: ``Listening to Rick Astley``.
+    """
     details = 2
-    """The details of the activity are displayed, e.g: ``Listening to Never Gonna Give You Up``."""
+    """The details of the activity are displayed,
+    e.g: ``Listening to Never Gonna Give You Up``.
+    """
 
     def __int__(self) -> int:
         return self.value
@@ -775,6 +728,11 @@ class AuditLogAction(Enum):
     automod_quarantine_user               = 146
     creator_monetization_request_created  = 150
     creator_monetization_terms_accepted   = 151
+    onboarding_prompt_create              = 163
+    onboarding_prompt_update              = 164
+    onboarding_update                     = 167
+    voice_channel_status_update           = 192
+    voice_channel_status_delete           = 193
     # fmt: on
 
     @property
@@ -841,6 +799,11 @@ class AuditLogAction(Enum):
             AuditLogAction.automod_quarantine_user:               None,
             AuditLogAction.creator_monetization_request_created:  None,
             AuditLogAction.creator_monetization_terms_accepted:   None,
+            AuditLogAction.onboarding_prompt_create:              AuditLogActionCategory.create,
+            AuditLogAction.onboarding_prompt_update:              AuditLogActionCategory.update,
+            AuditLogAction.onboarding_update:                     AuditLogActionCategory.update,
+            AuditLogAction.voice_channel_status_update:           AuditLogActionCategory.update,
+            AuditLogAction.voice_channel_status_delete:           AuditLogActionCategory.delete,
         }
         # fmt: on
         return lookup[self]
@@ -886,8 +849,16 @@ class AuditLogAction(Enum):
             return "automod_rule"
         elif v < 147:
             return "user"
-        elif v < 152:
+        elif v < 163:
             return None
+        elif v < 166:
+            return "onboarding_prompt"
+        elif v < 168:
+            return "onboarding"
+        elif v < 192:
+            return None
+        elif v < 194:
+            return "channel"
         else:
             return None
 
@@ -2119,6 +2090,18 @@ class Event(Enum):
     Represents the :func:`on_raw_voice_channel_effect` event.
 
     .. versionadded:: 2.10
+    """
+    voice_channel_status_update = "voice_channel_status_update"
+    """Called when a voice channel status is updated.
+    Represents the :func:`on_voice_channel_status_update` event.
+
+    .. versionadded:: |vnext|
+    """
+    voice_channel_start_time_update = "voice_channel_start_time_update"
+    """Called when a voice channel start time is updated.
+    Represents the :func:`on_voice_channel_start_time_update` event.
+
+    .. versionadded:: |vnext|
     """
     stage_instance_create = "stage_instance_create"
     """Called when a `StageInstance` is created for a `StageChannel`.

@@ -804,3 +804,17 @@ class GuildSoundboardSoundDelete(TypedDict):
 class GuildSoundboardSoundsUpdate(TypedDict):
     guild_id: Snowflake
     soundboard_sounds: list[GuildSoundboardSound]
+
+
+# https://docs.discord.com/developers/events/gateway-events#voice-channel-status-update
+class VoiceChannelStatusUpdate(TypedDict):
+    id: Snowflake
+    guild_id: Snowflake
+    status: str | None
+
+
+# https://docs.discord.com/developers/events/gateway-events#voice-channel-start-time-update
+class VoiceChannelStartTimeUpdate(TypedDict):
+    id: Snowflake
+    guild_id: Snowflake
+    voice_start_time: NotRequired[int | None]
