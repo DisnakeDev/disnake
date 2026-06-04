@@ -85,15 +85,9 @@ if TYPE_CHECKING:
         cooldown_after_parsing: bool
         parent: GroupMixin[Any] | None
 
-    class _CommandArgsWithName(_CommandArgs, total=False):
-        name: str | None
-
     class _GroupArgs(_CommandArgs, total=False):
         invoke_without_command: bool
         case_insensitive: bool
-
-    class _GroupArgsWithName(_GroupArgs, total=False):
-        name: str | None
 
 
 __all__ = (
@@ -307,13 +301,15 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
     def __init__(
         self,
         func: CommandCallback[CogT, ContextT, P, T],
-        **kwargs: Unpack[_CommandArgsWithName],
+        *,
+        name: str | None = None,
+        **kwargs: Unpack[_CommandArgs],
     ) -> None:
         if not iscoroutinefunction(func):
             msg = "Callback must be a coroutine function."
             raise TypeError(msg)
 
-        name = kwargs.get("name") or func.__name__
+        name = name or func.__name__
         if not isinstance(name, str):
             msg = "Name of a command must be a string."
             raise TypeError(msg)
@@ -1434,9 +1430,9 @@ class Group(GroupMixin[CogT], Command[CogT, P, T]):
         Defaults to ``False``.
     """
 
-    def __init__(self, *args: Any, **attrs: Unpack[_GroupArgsWithName]) -> None:
+    def __init__(self, *args: Any, name: str | None = None, **attrs: Unpack[_GroupArgs]) -> None:
         self.invoke_without_command: bool = attrs.pop("invoke_without_command", False)
-        super().__init__(*args, **attrs)
+        super().__init__(*args, name=name, **attrs)
 
     def copy(self: GroupT) -> GroupT:
         """Creates a copy of this :class:`Group`.

@@ -31,10 +31,13 @@ if TYPE_CHECKING:
     from .bot import AutoShardedBot, Bot
     from .bot_base import BotBase
     from .cog import Cog
-    from .core import _CommandArgsWithName
+    from .core import _CommandArgs
 
     # note: no InteractionBot
     AnyBot: TypeAlias = Bot | AutoShardedBot
+
+    class _CommandArgsWithName(_CommandArgs, total=False):
+        name: str | None
 
     class _HelpCommandArgs(TypedDict, total=False):
         show_hidden: bool
