@@ -71,7 +71,6 @@ class InvokableUserCommand(InvokableApplicationCommand):
         .. versionadded:: 2.5
     """
 
-    # XXX: can we dedupe all these parameters into yet another TypedDict, at least for all the overloads?
     @overload
     def __init__(
         self,

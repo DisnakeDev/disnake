@@ -290,15 +290,15 @@ class SubCommand(InvokableApplicationCommand):
         description: LocalizedOptional = None,
         options: list[Option] | None = None,
         connectors: dict[str, str] | None = None,
-        # FIXME: autocompleters
+        autocompleters: dict[str, Choices | Callable[..., Choices | None]] | None = None,
         **kwargs: Unpack[_AppCommandArgs],
     ) -> None:
         name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
         self.parent: InvokableSlashCommand | SubCommandGroup = parent
         self.connectors: dict[str, str] = connectors or {}
-        self.autocompleters: dict[str, Choices | Callable[..., Choices | None]] = kwargs.get(
-            "autocompleters", {}
+        self.autocompleters: dict[str, Choices | Callable[..., Choices | None]] = (
+            autocompleters or {}
         )
 
         if options is None:
@@ -461,6 +461,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         contexts: InteractionContextTypes | None = None,
         guild_ids: Sequence[int] | None = None,
         connectors: dict[str, str] | None = None,
+        autocompleters: dict[str, Choices | Callable[..., Choices | None]] | None = None,
         auto_sync: bool | None = None,
         **kwargs: Unpack[_AppCommandArgs],
     ) -> None: ...
@@ -481,6 +482,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         contexts: InteractionContextTypes | None = None,
         guild_ids: Sequence[int] | None = None,
         connectors: dict[str, str] | None = None,
+        autocompleters: dict[str, Choices | Callable[..., Choices | None]] | None = None,
         auto_sync: bool | None = None,
         **kwargs: Unpack[_AppCommandArgs],
     ) -> None: ...
@@ -499,8 +501,8 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         contexts: InteractionContextTypes | None = None,
         guild_ids: Sequence[int] | None = None,
         connectors: dict[str, str] | None = None,
+        autocompleters: dict[str, Choices | Callable[..., Choices | None]] | None = None,
         auto_sync: bool | None = None,
-        # FIXME: autocompleters
         **kwargs: Unpack[_AppCommandArgs],
     ) -> None:
         name_loc = Localized._cast(name, False)
@@ -510,8 +512,8 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         self.children: dict[str, SubCommand | SubCommandGroup] = {}
         self.auto_sync: bool = True if auto_sync is None else auto_sync
         self.guild_ids: tuple[int, ...] | None = None if guild_ids is None else tuple(guild_ids)
-        self.autocompleters: dict[str, Choices | Callable[..., Choices | None]] = kwargs.get(
-            "autocompleters", {}
+        self.autocompleters: dict[str, Choices | Callable[..., Choices | None]] = (
+            autocompleters or {}
         )
 
         if options is None:
