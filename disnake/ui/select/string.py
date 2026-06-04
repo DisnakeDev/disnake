@@ -25,7 +25,6 @@ if TYPE_CHECKING:
 
     from ...emoji import Emoji
     from ...partial_emoji import PartialEmoji
-    from ..view import View
 
 
 __all__ = (
@@ -241,7 +240,7 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
 Select = StringSelect  # backwards compatibility
 
 
-S_co = TypeVar("S_co", bound="StringSelect[View]", covariant=True)
+S_co = TypeVar("S_co", bound="StringSelect[Any]", covariant=True)
 
 
 @overload
@@ -256,7 +255,7 @@ def string_select(
     id: int = 0,
     row: int | None = None,
 ) -> Callable[
-    [ItemCallbackType[V_deco, StringSelect[V_deco]]], DecoratedItem[StringSelect[V_deco]]
+    [ItemCallbackType[V_deco, StringSelect[Any]]], DecoratedItem[StringSelect[V_deco]]
 ]: ...
 
 
