@@ -73,7 +73,7 @@ if TYPE_CHECKING:
         brief: str | None
         usage: str | None
         rest_is_raw: bool
-        aliases: list[str] | tuple[str]
+        aliases: list[str] | tuple[str, ...]
         extras: dict[str, Any]
         description: str
         hidden: bool
@@ -225,7 +225,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         The short help text for the command.
     usage: :class:`str` | :data:`None`
         A replacement for arguments in the default help text.
-    aliases: :class:`list`\[:class:`str`] | :class:`tuple`\[:class:`str`]
+    aliases: :class:`list`\[:class:`str`] | :class:`tuple`\[:class:`str`, ...]
         The list of aliases the command can be invoked under.
     enabled: :class:`bool`
         Whether the command is currently enabled.
@@ -331,7 +331,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         self.brief: str | None = kwargs.get("brief")
         self.usage: str | None = kwargs.get("usage")
         self.rest_is_raw: bool = kwargs.get("rest_is_raw", False)
-        self.aliases: list[str] | tuple[str] = kwargs.get("aliases", [])
+        self.aliases: list[str] | tuple[str, ...] = kwargs.get("aliases", [])
         self.extras: dict[str, Any] = kwargs.get("extras", {})
 
         if not isinstance(self.aliases, (list, tuple)):
