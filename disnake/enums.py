@@ -13,7 +13,6 @@ from typing import (
     TypeVar,
 )
 
-# `noop_deprecated` not imported from utils.py to avoid circular imports
 if TYPE_CHECKING:
     from typing_extensions import Self
 
