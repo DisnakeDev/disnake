@@ -17,21 +17,21 @@ from typing import (
 from . import utils
 from .colour import Colour
 from .file import File
-from .utils import MISSING, classproperty, warn_deprecated
+from .utils import MISSING
 
 __all__ = ("Embed",)
 
 
-# backwards compatibility, hidden from type-checkers to have them show errors when accessed
+# backwards compatibility, hidden from type-checkers to have them show errors on access
 if not TYPE_CHECKING:
 
-    def __getattr__(name: str) -> None:
+    def __getattr__(name: str) -> object:
         if name == "EmptyEmbed":
-            warn_deprecated(
+            utils.warn_deprecated(
                 "`EmptyEmbed` is deprecated and will be removed in a future version. Use `None` instead.",
                 stacklevel=2,
             )
-            return None  # noqa: RET501
+            return None
         msg = f"module '{__name__}' has no attribute '{name}'"
         raise AttributeError(msg)
 
@@ -219,16 +219,12 @@ class Embed:
 
         self._files: dict[_FileKey, File] = {}
 
-    # see `EmptyEmbed` above
     if not TYPE_CHECKING:
         # n.b. this is the only use site of classproperty
-        @classproperty
+        @utils.classproperty
+        @utils.deprecated("Embed.Empty is deprecated. Use None instead.", stacklevel=2)
         def Empty(self) -> None:
-            warn_deprecated(
-                "`Embed.Empty` is deprecated and will be removed in a future version. Use `None` instead.",
-                stacklevel=3,
-            )
-            return None  # noqa: RET501
+            return None
 
     @classmethod
     def from_dict(cls, data: EmbedData) -> Self:

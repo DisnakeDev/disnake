@@ -90,20 +90,6 @@ def test_copy_doc() -> None:
     assert inspect.signature(func) == inspect.signature(func2)
 
 
-@mock.patch.object(warnings, "warn")
-@pytest.mark.parametrize(
-    ("instead", "msg"),
-    [(None, "stuff is deprecated."), ("other", "stuff is deprecated, use other instead.")],
-)
-def test_deprecated(mock_warn: mock.Mock, instead, msg) -> None:
-    @utils.deprecated(instead)
-    def stuff(num: int) -> int:
-        return num
-
-    assert stuff(42) == 42
-    mock_warn.assert_called_once_with(msg, stacklevel=3, category=DeprecationWarning)
-
-
 @mock.patch.object(utils, "_root_module_path", os.path.dirname(__file__))
 @pytest.mark.xfail(
     sys.version_info < (3, 12),

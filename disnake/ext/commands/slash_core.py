@@ -9,6 +9,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     TypeVar,
+    overload,
 )
 
 from disnake import utils
@@ -24,6 +25,8 @@ from .errors import CommandError, CommandInvokeError
 from .params import call_param_func, classify_autocompleter, expand_params
 
 if TYPE_CHECKING:
+    from typing_extensions import Never
+
     from disnake.app_commands import Choices
     from disnake.i18n import LocalizedOptional
 
@@ -445,6 +448,45 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         .. versionadded:: 2.6
     """
 
+    @overload
+    def __init__(
+        self,
+        func: CommandCallback,
+        *,
+        name: LocalizedOptional = None,
+        description: LocalizedOptional = None,
+        options: list[Option] | None = None,
+        default_member_permissions: Permissions | int | None = None,
+        nsfw: bool | None = None,
+        install_types: ApplicationInstallTypes | None = None,
+        contexts: InteractionContextTypes | None = None,
+        guild_ids: Sequence[int] | None = None,
+        connectors: dict[str, str] | None = None,
+        auto_sync: bool | None = None,
+        dm_permission: Never = ...,
+        **kwargs: Any,
+    ) -> None: ...
+
+    @overload
+    @utils.deprecated("`dm_permission` is deprecated. Use `contexts` instead.")
+    def __init__(
+        self,
+        func: CommandCallback,
+        *,
+        name: LocalizedOptional = None,
+        description: LocalizedOptional = None,
+        options: list[Option] | None = None,
+        dm_permission: bool | None = None,  # deprecated
+        default_member_permissions: Permissions | int | None = None,
+        nsfw: bool | None = None,
+        install_types: ApplicationInstallTypes | None = None,
+        contexts: InteractionContextTypes | None = None,
+        guild_ids: Sequence[int] | None = None,
+        connectors: dict[str, str] | None = None,
+        auto_sync: bool | None = None,
+        **kwargs: Any,
+    ) -> None: ...
+
     def __init__(
         self,
         func: CommandCallback,
@@ -499,7 +541,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         except AttributeError:
             pass
 
-        self.body: SlashCommand = SlashCommand(
+        self.body: SlashCommand = SlashCommand(  # pyright: ignore[reportDeprecated]
             name=name_loc._upgrade(self.name, key=self.docstring["localization_key_name"]),
             description=desc_loc._upgrade(
                 self.docstring["description"] or "-", key=self.docstring["localization_key_desc"]
@@ -789,6 +831,45 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             await self.call_after_hooks(inter)
 
 
+@overload
+def slash_command(
+    *,
+    name: LocalizedOptional = None,
+    description: LocalizedOptional = None,
+    default_member_permissions: Permissions | int | None = None,
+    nsfw: bool | None = None,
+    install_types: ApplicationInstallTypes | None = None,
+    contexts: InteractionContextTypes | None = None,
+    options: list[Option] | None = None,
+    guild_ids: Sequence[int] | None = None,
+    connectors: dict[str, str] | None = None,
+    auto_sync: bool | None = None,
+    extras: dict[str, Any] | None = None,
+    dm_permission: Never = ...,
+    **kwargs: Any,
+) -> Callable[[CommandCallback], InvokableSlashCommand]: ...
+
+
+@overload
+@utils.deprecated("`dm_permission` is deprecated. Use `contexts` instead.")
+def slash_command(
+    *,
+    name: LocalizedOptional = None,
+    description: LocalizedOptional = None,
+    dm_permission: bool | None = None,  # deprecated
+    default_member_permissions: Permissions | int | None = None,
+    nsfw: bool | None = None,
+    install_types: ApplicationInstallTypes | None = None,
+    contexts: InteractionContextTypes | None = None,
+    options: list[Option] | None = None,
+    guild_ids: Sequence[int] | None = None,
+    connectors: dict[str, str] | None = None,
+    auto_sync: bool | None = None,
+    extras: dict[str, Any] | None = None,
+    **kwargs: Any,
+) -> Callable[[CommandCallback], InvokableSlashCommand]: ...
+
+
 def slash_command(
     *,
     name: LocalizedOptional = None,
@@ -896,7 +977,7 @@ def slash_command(
         if guild_ids and not all(isinstance(guild_id, int) for guild_id in guild_ids):
             msg = "guild_ids must be a sequence of int."
             raise ValueError(msg)
-        return InvokableSlashCommand(
+        return InvokableSlashCommand(  # pyright: ignore[reportDeprecated]
             func,
             name=name,
             description=description,

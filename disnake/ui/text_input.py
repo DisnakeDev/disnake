@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, ClassVar, overload
+
+from disnake import utils
 
 from ..components import TextInput as TextInputComponent
 from ..enums import ComponentType, TextInputStyle
-from ..utils import MISSING, deprecated
+from ..utils import MISSING
 from .item import WrappedComponent
 
 if TYPE_CHECKING:
@@ -68,6 +70,36 @@ class TextInput(WrappedComponent):
     # We have to set this to MISSING in order to overwrite the abstract property from UIComponent
     _underlying: TextInputComponent = MISSING
 
+    @overload
+    def __init__(
+        self,
+        *,
+        custom_id: str = ...,
+        style: TextInputStyle = TextInputStyle.short,
+        placeholder: str | None = None,
+        value: str | None = None,
+        required: bool = True,
+        min_length: int | None = None,
+        max_length: int | None = None,
+        id: int = 0,
+    ) -> None: ...
+
+    @overload
+    @utils.deprecated('`label` is deprecated. Use `ui.Label("<text>", ui.TextInput(...))` instead.')
+    def __init__(
+        self,
+        *,
+        label: str | None = None,
+        custom_id: str = ...,
+        style: TextInputStyle = TextInputStyle.short,
+        placeholder: str | None = None,
+        value: str | None = None,
+        required: bool = True,
+        min_length: int | None = None,
+        max_length: int | None = None,
+        id: int = 0,
+    ) -> None: ...
+
     def __init__(
         self,
         *,
@@ -109,7 +141,7 @@ class TextInput(WrappedComponent):
         self._underlying.style = value
 
     @property
-    @deprecated('ui.Label("<text>", ui.TextInput(...))')
+    @utils.deprecated('Use `ui.Label("<text>", ui.TextInput(...))` instead.')
     def label(self) -> str | None:
         """:class:`str`: The label of the text input.
 
@@ -119,7 +151,7 @@ class TextInput(WrappedComponent):
         return self._underlying.label
 
     @label.setter
-    @deprecated('ui.Label("<text>", ui.TextInput(...))')
+    @utils.deprecated('Use `ui.Label("<text>", ui.TextInput(...))` instead.')
     def label(self, value: str) -> None:
         self._underlying.label = value
 
