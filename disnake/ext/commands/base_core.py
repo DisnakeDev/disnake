@@ -11,6 +11,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     TypeAlias,
+    TypedDict,
     TypeVar,
     cast,
     overload,
@@ -33,7 +34,7 @@ from .cooldowns import BucketType, CooldownMapping, MaxConcurrency
 from .errors import CheckFailure, CommandError, CommandInvokeError, CommandOnCooldown
 
 if TYPE_CHECKING:
-    from typing import Concatenate
+    from typing import Concatenate, Unpack
 
     from typing_extensions import ParamSpec, Self
 
@@ -54,6 +55,13 @@ if TYPE_CHECKING:
         Callable[Concatenate["CogT", ApplicationCommandInteractionT, P], Coro[Any]]
         | Callable[Concatenate[ApplicationCommandInteractionT, P], Coro[Any]]
     )
+
+    class _AppCommandArgs(TypedDict, total=False):
+        guild_only: bool
+        extras: dict[str, Any] | None
+        checks: list[AppCheck]
+        cooldown: CooldownMapping | None
+        max_concurrency: MaxConcurrency | None
 
 
 __all__ = (
@@ -142,7 +150,9 @@ class InvokableApplicationCommand(ABC):
         self.__original_kwargs__ = {k: v for k, v in kwargs.items() if v is not None}
         return self
 
-    def __init__(self, func: CommandCallback, *, name: str | None = None, **kwargs: Any) -> None:
+    def __init__(
+        self, func: CommandCallback, *, name: str | None = None, **kwargs: Unpack[_AppCommandArgs]
+    ) -> None:
         self.__command_flag__ = None
         self._callback: CommandCallback = func
         self.name: str = name or func.__name__
