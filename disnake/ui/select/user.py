@@ -25,8 +25,6 @@ from .base import BaseSelect, SelectDefaultValueInputType, _create_decorator
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from ..view import View
-
 
 __all__ = (
     "UserSelect",
@@ -136,7 +134,7 @@ class UserSelect(BaseSelect[UserSelectMenu, "User | Member", V_co]):
         )
 
 
-S_co = TypeVar("S_co", bound="UserSelect[View]", covariant=True)
+S_co = TypeVar("S_co", bound="UserSelect[Any]", covariant=True)
 
 
 @overload
@@ -150,9 +148,7 @@ def user_select(
     default_values: Sequence[SelectDefaultValueInputType[User | Member]] | None = None,
     id: int = 0,
     row: int | None = None,
-) -> Callable[
-    [ItemCallbackType[V_deco, UserSelect[V_deco]]], DecoratedItem[UserSelect[V_deco]]
-]: ...
+) -> Callable[[ItemCallbackType[V_deco, UserSelect[Any]]], DecoratedItem[UserSelect[V_deco]]]: ...
 
 
 @overload

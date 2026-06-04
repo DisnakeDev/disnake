@@ -25,8 +25,6 @@ from .base import BaseSelect, SelectDefaultValueMultiInputType, _create_decorato
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from ..view import View
-
 
 __all__ = (
     "MentionableSelect",
@@ -140,7 +138,7 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, User | Member | Role, 
         )
 
 
-S_co = TypeVar("S_co", bound="MentionableSelect[View]", covariant=True)
+S_co = TypeVar("S_co", bound="MentionableSelect[Any]", covariant=True)
 
 
 @overload
@@ -155,7 +153,7 @@ def mentionable_select(
     id: int = 0,
     row: int | None = None,
 ) -> Callable[
-    [ItemCallbackType[V_deco, MentionableSelect[V_deco]]], DecoratedItem[MentionableSelect[V_deco]]
+    [ItemCallbackType[V_deco, MentionableSelect[Any]]], DecoratedItem[MentionableSelect[V_deco]]
 ]: ...
 
 

@@ -24,7 +24,6 @@ from .base import BaseSelect, SelectDefaultValueInputType, _create_decorator
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from ..view import View
 
 __all__ = (
     "RoleSelect",
@@ -133,7 +132,7 @@ class RoleSelect(BaseSelect[RoleSelectMenu, "Role", V_co]):
         )
 
 
-S_co = TypeVar("S_co", bound="RoleSelect[View]", covariant=True)
+S_co = TypeVar("S_co", bound="RoleSelect[Any]", covariant=True)
 
 
 @overload
@@ -147,9 +146,7 @@ def role_select(
     default_values: Sequence[SelectDefaultValueInputType[Role]] | None = None,
     id: int = 0,
     row: int | None = None,
-) -> Callable[
-    [ItemCallbackType[V_deco, RoleSelect[V_deco]]], DecoratedItem[RoleSelect[V_deco]]
-]: ...
+) -> Callable[[ItemCallbackType[V_deco, RoleSelect[Any]]], DecoratedItem[RoleSelect[V_deco]]]: ...
 
 
 @overload

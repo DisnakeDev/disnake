@@ -26,7 +26,6 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from ...abc import AnyChannel
-    from ..view import View
 
 
 __all__ = (
@@ -172,7 +171,7 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
         self._underlying.channel_types = value
 
 
-S_co = TypeVar("S_co", bound="ChannelSelect[View]", covariant=True)
+S_co = TypeVar("S_co", bound="ChannelSelect[Any]", covariant=True)
 
 
 @overload
@@ -188,7 +187,7 @@ def channel_select(
     id: int = 0,
     row: int | None = None,
 ) -> Callable[
-    [ItemCallbackType[V_deco, ChannelSelect[V_deco]]], DecoratedItem[ChannelSelect[V_deco]]
+    [ItemCallbackType[V_deco, ChannelSelect[Any]]], DecoratedItem[ChannelSelect[V_deco]]
 ]: ...
 
 

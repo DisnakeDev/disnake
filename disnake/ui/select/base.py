@@ -28,7 +28,6 @@ __all__ = ("BaseSelect",)
 if TYPE_CHECKING:
     from ...abc import Snowflake
     from ...interactions import MessageInteraction
-    from ..view import View
 
 SelectMenuT = TypeVar("SelectMenuT", bound=AnySelectMenu)
 SelectValueT = TypeVar("SelectValueT")
@@ -241,7 +240,7 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
         return result
 
 
-S_co = TypeVar("S_co", bound="BaseSelect[Any, Any, View]", covariant=True)
+S_co = TypeVar("S_co", bound="BaseSelect[Any, Any, Any]", covariant=True)
 
 
 def _create_decorator(

@@ -23,7 +23,6 @@ __all__ = (
 
 if TYPE_CHECKING:
     from ..emoji import Emoji
-    from .view import View
 
 
 class Button(Item[V_co]):
@@ -249,7 +248,7 @@ class Button(Item[V_co]):
         self._underlying = button
 
 
-B_co = TypeVar("B_co", bound="Button[View]", covariant=True)
+B_co = TypeVar("B_co", bound="Button[Any]", covariant=True)
 
 
 @overload
@@ -262,7 +261,7 @@ def button(
     emoji: str | Emoji | PartialEmoji | None = None,
     id: int = 0,
     row: int | None = None,
-) -> Callable[[ItemCallbackType[V_deco, Button[V_deco]]], DecoratedItem[Button[V_deco]]]: ...
+) -> Callable[[ItemCallbackType[V_deco, Button[Any]]], DecoratedItem[Button[V_deco]]]: ...
 
 
 @overload
