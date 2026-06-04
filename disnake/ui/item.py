@@ -10,9 +10,10 @@ from typing import (
     ClassVar,
     Generic,
     Protocol,
-    TypeVar,
     overload,
 )
+
+from typing_extensions import ParamSpec, Self, TypeVar
 
 __all__ = (
     "UIComponent",
@@ -21,11 +22,12 @@ __all__ = (
 )
 
 I = TypeVar("I", bound="Item[Any]")  # noqa: E741
-V_co = TypeVar("V_co", bound="View | None", covariant=True)
+V_co = TypeVar("V_co", bound="View | None", covariant=True, default=None)
+# strict View-bound TypeVar used in decorators
+V_deco = TypeVar("V_deco", bound="View", covariant=True)
+P = ParamSpec("P")
 
 if TYPE_CHECKING:
-    from typing_extensions import Self
-
     from ..client import Client
     from ..components import ActionRowChildComponent, Component
     from ..enums import ComponentType
@@ -33,10 +35,11 @@ if TYPE_CHECKING:
     from ..types.components import ActionRowChildComponent as ActionRowChildComponentPayload
     from .view import View
 
-    ItemCallbackType = Callable[[V_co, I, MessageInteraction], Coroutine[Any, Any, Any]]
 
 ClientT = TypeVar("ClientT", bound="Client")
 UIComponentT = TypeVar("UIComponentT", bound="UIComponent")
+
+ItemCallbackType = Callable[[V_deco, I, "MessageInteraction"], Coroutine[Any, Any, Any]]
 
 
 def ensure_ui_component(obj: UIComponentT, name: str = "component") -> UIComponentT:
@@ -160,12 +163,6 @@ class Item(WrappedComponent, Generic[V_co]):
 
     __repr_attributes__: ClassVar[tuple[str, ...]] = ("row",)
 
-    @overload
-    def __init__(self: Item[None]) -> None: ...
-
-    @overload
-    def __init__(self: Item[V_co]) -> None: ...
-
     def __init__(self) -> None:
         self._view: V_co = None  # pyright: ignore[reportAttributeAccessIssue]
         self._row: int | None = None
@@ -224,15 +221,12 @@ class Item(WrappedComponent, Generic[V_co]):
         pass
 
 
-SelfViewT = TypeVar("SelfViewT", bound="View | None")
-
-
 # While the decorators don't actually return a descriptor that matches this protocol,
 # this protocol ensures that type checkers don't complain about statements like `self.button.disabled = True`,
 # which work as `View.__init__` replaces the handler with the item.
 class DecoratedItem(Protocol[I]):
     @overload
-    def __get__(self, obj: None, objtype: type[SelfViewT]) -> ItemCallbackType[SelfViewT, I]: ...
+    def __get__(self, obj: None, objtype: type[V_deco]) -> ItemCallbackType[V_deco, I]: ...
 
     @overload
     def __get__(self, obj: Any, objtype: Any) -> I: ...
