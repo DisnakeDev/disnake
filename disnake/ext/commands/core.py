@@ -1585,7 +1585,7 @@ def command(
     cls: type[Command[Any, Any, Any]] = MISSING,
     **attrs: Any,
 ) -> Any:
-    """A decorator that transforms a function into a :class:`.Command`
+    r"""A decorator that transforms a function into a :class:`.Command`
     or if called with :func:`.group`, :class:`.Group`.
 
     By default the ``help`` attribute is received automatically from the
@@ -1605,7 +1605,7 @@ def command(
     cls
         The class to construct with. By default this is :class:`.Command`.
         You usually do not change this.
-    attrs
+    \*\*attrs
         Keyword arguments to pass into the construction of the class denoted
         by ``cls``.
 
