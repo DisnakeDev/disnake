@@ -34,9 +34,9 @@ from .cooldowns import BucketType, CooldownMapping, MaxConcurrency
 from .errors import CheckFailure, CommandError, CommandInvokeError, CommandOnCooldown
 
 if TYPE_CHECKING:
-    from typing import Concatenate, Unpack
+    from typing import Concatenate
 
-    from typing_extensions import ParamSpec, Self
+    from typing_extensions import ParamSpec, Self, Unpack
 
     from disnake.interactions import ApplicationCommandInteraction
 
