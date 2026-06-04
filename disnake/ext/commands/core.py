@@ -14,6 +14,7 @@ from typing import (
     Literal,
     Protocol,
     TypeAlias,
+    TypedDict,
     TypeVar,
     Union,
     cast,
@@ -60,11 +61,39 @@ from .errors import (
 if TYPE_CHECKING:
     from typing import Concatenate
 
-    from typing_extensions import ParamSpec, Self
+    from typing_extensions import ParamSpec, Self, Unpack
 
     from disnake.message import Message
 
     from ._types import AppCheck, Check, Coro, CoroFunc, Error, Hook
+
+    class _CommandArgs(TypedDict, total=False):
+        enabled: bool
+        help: str | None
+        brief: str | None
+        usage: str | None
+        rest_is_raw: bool
+        aliases: list[str] | tuple[str]
+        extras: dict[str, Any]
+        description: str
+        hidden: bool
+        checks: list[Check]
+        cooldown: CooldownMapping | None
+        max_concurrency: MaxConcurrency | None
+        require_var_positional: bool
+        ignore_extra: bool
+        cooldown_after_parsing: bool
+        parent: GroupMixin[Any] | None
+
+    class _CommandArgsWithName(_CommandArgs, total=False):
+        name: str | None
+
+    class _GroupArgs(_CommandArgs, total=False):
+        invoke_without_command: bool
+        case_insensitive: bool
+
+    class _GroupArgsWithName(_GroupArgs, total=False):
+        name: str | None
 
 
 __all__ = (
@@ -278,7 +307,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
     def __init__(
         self,
         func: CommandCallback[CogT, ContextT, P, T],
-        **kwargs: Any,
+        **kwargs: Unpack[_CommandArgsWithName],
     ) -> None:
         if not iscoroutinefunction(func):
             msg = "Callback must be a coroutine function."
@@ -352,7 +381,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
 
         # bandaid for the fact that sometimes parent can be the bot instance
         parent = kwargs.get("parent")
-        self.parent: GroupMixin | None = parent if isinstance(parent, _BaseCommand) else None  # pyright: ignore[reportAttributeAccessIssue]
+        self.parent: GroupMixin | None = parent if isinstance(parent, _BaseCommand) else None
 
         self._before_invoke: Hook | None = None
         try:
@@ -434,6 +463,8 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         except ValueError:
             pass
 
+    # n.b. this continues to use `**kwargs: Any` instead of _CommandArgs,
+    # since custom command subclasses may accept additional parameters
     def update(self, **kwargs: Any) -> None:
         """Updates :class:`Command` instance with updated attribute.
 
@@ -1284,6 +1315,13 @@ class GroupMixin(Generic[CogT]):
     @overload
     def command(
         self,
+        name: str = ...,
+        **attrs: Unpack[_CommandArgs],
+    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], Command[CogT, P, T]]: ...
+
+    @overload
+    def command(
+        self,
         name: str,
         cls: type[CommandT],
         *args: Any,
@@ -1298,14 +1336,6 @@ class GroupMixin(Generic[CogT]):
         cls: type[CommandT],
         **kwargs: Any,
     ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], CommandT]: ...
-
-    @overload
-    def command(
-        self,
-        name: str = ...,
-        *args: Any,
-        **kwargs: Any,
-    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], Command[CogT, P, T]]: ...
 
     def command(
         self,
@@ -1334,6 +1364,13 @@ class GroupMixin(Generic[CogT]):
     @overload
     def group(
         self,
+        name: str = ...,
+        **attrs: Unpack[_GroupArgs],
+    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], Group[CogT, P, T]]: ...
+
+    @overload
+    def group(
+        self,
         name: str,
         cls: type[GroupT],
         *args: Any,
@@ -1348,14 +1385,6 @@ class GroupMixin(Generic[CogT]):
         cls: type[GroupT],
         **kwargs: Any,
     ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], GroupT]: ...
-
-    @overload
-    def group(
-        self,
-        name: str = ...,
-        *args: Any,
-        **kwargs: Any,
-    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], Group[CogT, P, T]]: ...
 
     def group(
         self,
@@ -1405,7 +1434,7 @@ class Group(GroupMixin[CogT], Command[CogT, P, T]):
         Defaults to ``False``.
     """
 
-    def __init__(self, *args: Any, **attrs: Any) -> None:
+    def __init__(self, *args: Any, **attrs: Unpack[_GroupArgsWithName]) -> None:
         self.invoke_without_command: bool = attrs.pop("invoke_without_command", False)
         super().__init__(*args, **attrs)
 
@@ -1523,15 +1552,17 @@ if TYPE_CHECKING:
         ) -> Group[CogT, P, T]: ...
 
 
-# Small explanation regarding these overloads:
-# The overloads with the `cls` parameter need to be first,
-# as the other overload would otherwise match first even if `cls` is given.
-# To prevent the overloads with `cls` from matching everything, the parameter
-# cannot have a default value, which in turn means it has to be split into two
-# overloads, one with a positional `cls` parameter and one with a kwarg parameter,
-# as `name` should still be optional.
+@overload
+def command(
+    name: str = ...,
+    **attrs: Unpack[_CommandArgs],
+) -> CommandDecorator: ...
 
 
+# Typing **attrs correctly here is not possible with current ParamSpec/Concatenate features,
+# as it does not support adding kw-only arguments.
+# This overload is split into two, since `cls` cannot have a default without implicitly
+# becoming a fallback when the previous overload didn't match (due to typo'd parameters, etc.)
 @overload
 def command(
     name: str,
@@ -1547,13 +1578,6 @@ def command(
     cls: type[CommandT],
     **attrs: Any,
 ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], CommandT]: ...
-
-
-@overload
-def command(
-    name: str = ...,
-    **attrs: Any,
-) -> CommandDecorator: ...
 
 
 def command(
@@ -1604,6 +1628,13 @@ def command(
 
 @overload
 def group(
+    name: str = ...,
+    **attrs: Unpack[_GroupArgs],
+) -> GroupDecorator: ...
+
+
+@overload
+def group(
     name: str,
     cls: type[GroupT],
     **attrs: Any,
@@ -1617,13 +1648,6 @@ def group(
     cls: type[GroupT],
     **attrs: Any,
 ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], GroupT]: ...
-
-
-@overload
-def group(
-    name: str = ...,
-    **attrs: Any,
-) -> GroupDecorator: ...
 
 
 def group(

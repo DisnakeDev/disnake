@@ -24,12 +24,13 @@ from .core import Command, Group
 from .errors import CommandError
 
 if TYPE_CHECKING:
-    from typing_extensions import Self
+    from typing_extensions import Self, Unpack
 
     from ._types import Check, FuncT, MaybeCoro
     from .bot import AutoShardedBot, Bot
     from .bot_base import BotBase
     from .cog import Cog
+    from .core import _CommandArgs
 
     # note: no InteractionBot
     AnyBot: TypeAlias = Bot | AutoShardedBot
@@ -193,7 +194,7 @@ def _not_overriden(f: FuncT) -> FuncT:
 
 
 class _HelpCommandImpl(Command[CogT | None, Any, None]):
-    def __init__(self, inject: HelpCommand, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, inject: HelpCommand, *args: Any, **kwargs: Unpack[_CommandArgs]) -> None:
         super().__init__(inject.command_callback, *args, **kwargs)
         self._original: HelpCommand = inject
         self._injected: HelpCommand = inject
