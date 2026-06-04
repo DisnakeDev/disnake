@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import datetime
+import inspect
 import itertools
 import sys
 from collections.abc import Callable, Sequence
@@ -182,7 +183,7 @@ def flatten_user(cls: type[Member]) -> type[Member]:
             # probably a member function by now
             def generate_function(x: str) -> Callable[..., Any]:
                 # We want sphinx to properly show coroutine functions as coroutines
-                if utils.iscoroutinefunction(value):  # noqa: B023
+                if inspect.iscoroutinefunction(value):  # noqa: B023
 
                     async def general(self, *args: Any, **kwargs: Any) -> Any:  # pyright: ignore[reportRedeclaration]
                         return await getattr(self._user, x)(*args, **kwargs)

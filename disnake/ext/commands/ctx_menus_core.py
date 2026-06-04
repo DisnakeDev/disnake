@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import inspect
 from collections.abc import Callable, Sequence
 from typing import TYPE_CHECKING, Any, overload
 
@@ -10,7 +11,6 @@ from disnake.app_commands import MessageCommand, UserCommand
 from disnake.flags import ApplicationInstallTypes, InteractionContextTypes
 from disnake.i18n import Localized
 from disnake.permissions import Permissions
-from disnake.utils import iscoroutinefunction
 
 from .base_core import InvokableApplicationCommand, _get_overridden_method
 from .errors import CommandError
@@ -440,7 +440,7 @@ def user_command(
     def decorator(
         func: InteractionCommandCallback[CogT, UserCommandInteraction, P],
     ) -> InvokableUserCommand:
-        if not iscoroutinefunction(func):
+        if not inspect.iscoroutinefunction(func):
             msg = f"<{func.__qualname__}> must be a coroutine function"
             raise TypeError(msg)
         if hasattr(func, "__command_flag__"):
@@ -590,7 +590,7 @@ def message_command(
     def decorator(
         func: InteractionCommandCallback[CogT, MessageCommandInteraction, P],
     ) -> InvokableMessageCommand:
-        if not iscoroutinefunction(func):
+        if not inspect.iscoroutinefunction(func):
             msg = f"<{func.__qualname__}> must be a coroutine function"
             raise TypeError(msg)
         if hasattr(func, "__command_flag__"):
