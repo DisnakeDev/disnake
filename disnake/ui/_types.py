@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 from typing import TYPE_CHECKING, Any, TypeAlias, Union
 
-from typing_extensions import TypeVar
+from typing_extensions import ParamSpec, TypeVar
 
 if TYPE_CHECKING:
     from typing import TypeAlias
@@ -26,7 +26,10 @@ if TYPE_CHECKING:
     from .select import ChannelSelect, MentionableSelect, RoleSelect, StringSelect, UserSelect
     from .view import View
 
-V_co = TypeVar("V_co", bound="View | None", covariant=True)
+V_co = TypeVar("V_co", bound="View | None", covariant=True, default=None)
+# strict View-bound TypeVar used in decorators
+V_deco = TypeVar("V_deco", bound="View", covariant=True)
+P = ParamSpec("P")
 
 AnySelect: TypeAlias = Union[
     "ChannelSelect[V_co]",

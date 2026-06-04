@@ -16,7 +16,8 @@ from ...abc import Snowflake
 from ...components import SelectOption, StringSelectMenu
 from ...enums import ComponentType, SelectDefaultValueType
 from ...utils import MISSING
-from ..item import DecoratedItem, ItemCallbackType, P, V_co, V_deco
+from .._types import P, V_co, V_deco
+from ..item import DecoratedItem, ItemCallbackType
 from .base import BaseSelect, _create_decorator
 
 if TYPE_CHECKING:

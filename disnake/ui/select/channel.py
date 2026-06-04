@@ -18,7 +18,8 @@ from ...enums import ChannelType, ComponentType, SelectDefaultValueType
 from ...object import Object
 from ...threads import Thread
 from ...utils import MISSING
-from ..item import DecoratedItem, ItemCallbackType, P, V_co, V_deco
+from .._types import P, V_co, V_deco
+from ..item import DecoratedItem, ItemCallbackType
 from .base import BaseSelect, SelectDefaultValueInputType, _create_decorator
 
 if TYPE_CHECKING:

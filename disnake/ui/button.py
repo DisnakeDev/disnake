@@ -13,7 +13,8 @@ from ..components import Button as ButtonComponent
 from ..enums import ButtonStyle, ComponentType
 from ..partial_emoji import PartialEmoji, _EmojiTag
 from ..utils import MISSING
-from .item import DecoratedItem, Item, ItemCallbackType, P, V_co, V_deco
+from ._types import P, V_co, V_deco
+from .item import DecoratedItem, Item, ItemCallbackType
 
 __all__ = (
     "Button",

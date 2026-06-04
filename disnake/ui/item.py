@@ -13,7 +13,9 @@ from typing import (
     overload,
 )
 
-from typing_extensions import ParamSpec, Self, TypeVar
+from typing_extensions import Self, TypeVar
+
+from ._types import V_co, V_deco
 
 __all__ = (
     "UIComponent",
@@ -22,10 +24,6 @@ __all__ = (
 )
 
 I = TypeVar("I", bound="Item[Any]")  # noqa: E741
-V_co = TypeVar("V_co", bound="View | None", covariant=True, default=None)
-# strict View-bound TypeVar used in decorators
-V_deco = TypeVar("V_deco", bound="View", covariant=True)
-P = ParamSpec("P")
 
 if TYPE_CHECKING:
     from ..client import Client
@@ -33,7 +31,6 @@ if TYPE_CHECKING:
     from ..enums import ComponentType
     from ..interactions import MessageInteraction
     from ..types.components import ActionRowChildComponent as ActionRowChildComponentPayload
-    from .view import View
 
 
 ClientT = TypeVar("ClientT", bound="Client")
