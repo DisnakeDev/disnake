@@ -19,7 +19,8 @@ from ...components import AnySelectMenu, SelectDefaultValue
 from ...enums import ComponentType, SelectDefaultValueType
 from ...object import Object
 from ...utils import MISSING, humanize_list, iscoroutinefunction
-from ..item import DecoratedItem, Item, ItemCallbackType, P, V_co, V_deco
+from .._types import P, V_co, V_deco
+from ..item import DecoratedItem, Item, ItemCallbackType
 
 __all__ = ("BaseSelect",)
 
