@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import inspect
 import os
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Any, ClassVar, TypeVar, overload
@@ -9,7 +10,7 @@ from typing import TYPE_CHECKING, Any, ClassVar, TypeVar, overload
 from ..components import Button as ButtonComponent
 from ..enums import ButtonStyle, ComponentType
 from ..partial_emoji import PartialEmoji, _EmojiTag
-from ..utils import MISSING, iscoroutinefunction
+from ..utils import MISSING
 from .item import DecoratedItem, Item
 
 __all__ = (
@@ -365,7 +366,7 @@ def button(
         raise TypeError(msg)
 
     def decorator(func: ItemCallbackType[V_co, B_co]) -> DecoratedItem[B_co]:
-        if not iscoroutinefunction(func):
+        if not inspect.iscoroutinefunction(func):
             msg = "button function must be a coroutine function"
             raise TypeError(msg)
 
