@@ -77,7 +77,7 @@ EXECUTION_GROUPS: Sequence[ExecutionGroup] = [
             project=True,
             extras=("speed", "voice"),
             groups=("test", "nox"),
-            dependencies=("pytz", "requests"),  # needed for type checking
+            dependencies=("requests",),  # needed for type checking
         )
         for python in ALL_PYTHONS
     ),

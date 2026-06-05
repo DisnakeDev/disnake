@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import datetime
+import inspect
 import itertools
 import sys
 from collections.abc import Callable, Sequence
@@ -182,7 +183,7 @@ def flatten_user(cls: type[Member]) -> type[Member]:
             # probably a member function by now
             def generate_function(x: str) -> Callable[..., Any]:
                 # We want sphinx to properly show coroutine functions as coroutines
-                if utils.iscoroutinefunction(value):  # noqa: B023
+                if inspect.iscoroutinefunction(value):  # noqa: B023
 
                     async def general(self, *args: Any, **kwargs: Any) -> Any:  # pyright: ignore[reportRedeclaration]
                         return await getattr(self._user, x)(*args, **kwargs)
@@ -442,7 +443,7 @@ class Member(disnake.abc.Messageable, _UserTag):
     def _presence_update(self, data: PresenceData, user: UserPayload) -> tuple[User, User] | None:
         self.activities = tuple(create_activity(a, state=self._state) for a in data["activities"])
         self._client_status = {
-            sys.intern(key): sys.intern(value)  # pyright: ignore[reportArgumentType]
+            sys.intern(key): sys.intern(value)  # pyright: ignore[reportCallIssue, reportArgumentType]
             for key, value in data.get("client_status", {}).items()
         }
         self._client_status[None] = sys.intern(data["status"])

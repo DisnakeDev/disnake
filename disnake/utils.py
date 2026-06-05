@@ -52,7 +52,6 @@ from .enums import Locale
 
 if sys.version_info >= (3, 14):
     import threading
-    from inspect import iscoroutinefunction as iscoroutinefunction
 
     def get_event_loop():
         try:
@@ -66,7 +65,6 @@ if sys.version_info >= (3, 14):
             asyncio.set_event_loop(loop := asyncio.new_event_loop())
             return loop
 else:
-    from asyncio import iscoroutinefunction as iscoroutinefunction
 
     def get_event_loop():
         with warnings.catch_warnings():

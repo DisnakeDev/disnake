@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import datetime
 import functools
+import inspect
 from abc import ABC
 from collections.abc import Callable
 from typing import (
@@ -21,13 +22,7 @@ from disnake.app_commands import ApplicationCommand
 from disnake.enums import ApplicationCommandType
 from disnake.flags import ApplicationInstallTypes, InteractionContextTypes
 from disnake.permissions import Permissions
-from disnake.utils import (
-    _generated,
-    _overload_with_permissions,
-    async_all,
-    iscoroutinefunction,
-    maybe_coroutine,
-)
+from disnake.utils import _generated, _overload_with_permissions, async_all, maybe_coroutine
 
 from .cooldowns import BucketType, CooldownMapping, MaxConcurrency
 from .errors import CheckFailure, CommandError, CommandInvokeError, CommandOnCooldown
@@ -497,7 +492,7 @@ class InvokableApplicationCommand(ABC):
         TypeError
             The argument passed is not actually a coroutine function.
         """
-        if not iscoroutinefunction(coro):
+        if not inspect.iscoroutinefunction(coro):
             msg = "The error handler must be a coroutine function."
             raise TypeError(msg)
 
@@ -614,7 +609,7 @@ class InvokableApplicationCommand(ABC):
         TypeError
             The argument passed is not a coroutine function.
         """
-        if not iscoroutinefunction(coro):
+        if not inspect.iscoroutinefunction(coro):
             msg = "The pre-invoke hook must be a coroutine function."
             raise TypeError(msg)
 
@@ -638,7 +633,7 @@ class InvokableApplicationCommand(ABC):
         TypeError
             The argument passed is not actually a coroutine function.
         """
-        if not iscoroutinefunction(coro):
+        if not inspect.iscoroutinefunction(coro):
             msg = "The post-invoke hook must be a coroutine function."
             raise TypeError(msg)
 
