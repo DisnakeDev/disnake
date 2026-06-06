@@ -7,7 +7,7 @@ import datetime
 import io
 import re
 from base64 import b64decode, b64encode
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from os import PathLike
 from typing import (
     TYPE_CHECKING,
@@ -2172,6 +2172,89 @@ class Message(Hashable):
             view=view,
             components=components,
             delete_after=delete_after,
+        )
+
+    async def edit_v2(
+        self,
+        components: MessageComponents = MISSING,
+        *,
+        files: File | Sequence[File] = MISSING,
+        attachments: Sequence[Attachment] | None = MISSING,
+        allowed_mentions: AllowedMentions = MISSING,
+    ) -> Message:
+        r"""|coro|
+
+        Edits the message.
+
+        .. note::
+
+            This method cannot be used on messages authored by others.
+
+        Parameters
+        ----------
+        components: |components_type|
+            The components to update this message with.
+        files: :class:`File` | :class:`~collections.abc.Sequence`\[:class:`File`]
+            A file or a sequence of files to upload. Files will be appended to the message.
+        attachments: :class:`~collections.abc.Sequence`\[:class:`Attachment`] | :data:`None`
+            A list of attachments to keep in the message.
+            If an empty sequence or :data:`None` is passed
+            then all existing attachments are removed.
+            Keeps existing attachments if not provided.
+        allowed_mentions: :class:`AllowedMentions`
+            Controls the mentions being processed in this message.
+
+        Returns
+        -------
+        :class:`Message`
+            The message that was edited.
+        """
+        # allowed_mentions can only be changed on the bot's own messages
+        if self._state.allowed_mentions is not None and self.author.id == self._state.self_id:
+            previous_allowed_mentions = self._state.allowed_mentions
+        else:
+            previous_allowed_mentions = None
+
+        if files is MISSING:
+            files_ = MISSING
+        elif isinstance(files, File):
+            files_ = [files]
+        elif len(files) > 10:
+            msg = "files cannot exceed maximum of 10 elements"
+            raise ValueError(msg)
+        else:
+            files_ = list(files)
+
+        # if no attachment list was provided but we're uploading new files,
+        # use current attachments as the base
+        attachments_: list[Attachment] | None
+
+        if attachments is None:
+            attachments_ = []
+        elif attachments is not MISSING:
+            attachments_ = list(attachments)
+        elif files_:
+            attachments_ = self.attachments
+        else:
+            attachments_ = MISSING
+
+        return await _edit_handler(
+            self,
+            default_flags=self.flags.value,
+            previous_allowed_mentions=previous_allowed_mentions,
+            content=MISSING,
+            embed=MISSING,
+            embeds=MISSING,
+            file=MISSING,
+            files=files_,
+            attachments=attachments_,
+            suppress=MISSING,
+            suppress_embeds=MISSING,
+            flags=MISSING,
+            allowed_mentions=allowed_mentions,
+            view=MISSING,
+            components=components,
+            delete_after=None,
         )
 
     async def publish(self) -> None:
