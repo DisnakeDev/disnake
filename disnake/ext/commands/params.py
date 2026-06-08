@@ -29,9 +29,11 @@ from typing import (
     Union,
     cast,
     get_origin,
+    overload,
 )
 
 import disnake
+from disnake import utils
 from disnake.app_commands import Option, OptionChoice
 from disnake.channel import _channel_type_factory
 from disnake.enums import ChannelType, OptionType, try_enum_to_int
@@ -1130,6 +1132,7 @@ def expand_params(command: AnySlashCommand) -> list[Option]:
     return [param.to_option() for param in params]
 
 
+@overload
 def Param(
     default: Any | Callable[[ApplicationCommandInteraction[BotT]], Any] = ...,
     *,
@@ -1147,6 +1150,50 @@ def Param(
     large: bool = False,
     min_length: int | None = None,
     max_length: int | None = None,
+) -> Any: ...
+
+
+@overload
+@utils.deprecated(
+    "The `desc`, `conv`, `autocomp`, `min_value`, and `max_value` parameter aliases are deprecated. "
+    "Use `description`, `converter`, `autocomplete`, `ge`, or `le` respectively instead."
+)
+def Param(
+    default: Any | Callable[[ApplicationCommandInteraction[BotT]], Any] = ...,
+    *,
+    name: LocalizedOptional = None,
+    desc: LocalizedOptional = None,
+    choices: Choices | None = None,
+    conv: Callable[[ApplicationCommandInteraction[BotT], Any], Any] | None = None,
+    convert_defaults: bool = False,
+    autocomp: AnyAutocompleter | None = None,
+    channel_types: list[ChannelType] | None = None,
+    min_value: float | None = None,
+    max_value: float | None = None,
+    large: bool = False,
+    min_length: int | None = None,
+    max_length: int | None = None,
+) -> Any: ...
+
+
+def Param(
+    default: Any | Callable[[ApplicationCommandInteraction[BotT]], Any] = ...,
+    *,
+    name: LocalizedOptional = None,
+    description: LocalizedOptional = None,
+    choices: Choices | None = None,
+    converter: Callable[[ApplicationCommandInteraction[BotT], Any], Any] | None = None,
+    convert_defaults: bool = False,
+    autocomplete: AnyAutocompleter | None = None,
+    channel_types: list[ChannelType] | None = None,
+    lt: float | None = None,
+    le: float | None = None,
+    gt: float | None = None,
+    ge: float | None = None,
+    large: bool = False,
+    min_length: int | None = None,
+    max_length: int | None = None,
+    # for deprecated aliases
     **kwargs: Any,
 ) -> Any:
     r"""A special function that creates an instance of :class:`ParamInfo` that contains some information about a
@@ -1229,6 +1276,13 @@ def Param(
             but at runtime this is always a :class:`ParamInfo` instance.
             You can find a more in-depth explanation :ref:`here <why_params_and_injections_return_any>`.
     """
+    if kwargs.keys() & {"desc", "conv", "autocomp", "max_value", "min_value"}:
+        utils.warn_deprecated(
+            "The `desc`, `conv`, `autocomp`, `min_value`, and `max_value` parameter aliases are deprecated. "
+            "Use `description`, `converter`, `autocomplete`, `ge`, or `le` respectively instead.",
+            stacklevel=2,
+        )
+
     description = kwargs.pop("desc", description)
     converter = kwargs.pop("conv", converter)
     autocomplete = kwargs.pop("autocomp", autocomplete)
