@@ -15,8 +15,9 @@ class SomeFlags(FlagConverter):
 def test_flags_annotations(with_future: bool) -> None:
     import __future__
 
+    # this is equivalent to `from __future__ import annotations`
     code_flags = __future__.annotations.compiler_flag if with_future else 0
-    code = compile(flag_def, "", "exec", code_flags)
+    code = compile(flag_def, "<>", "exec", code_flags, dont_inherit=True)
     exec(code, ns := {"FlagConverter": FlagConverter})  # noqa: S102
 
     SomeFlags: type[FlagConverter] = ns["SomeFlags"]
