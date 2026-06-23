@@ -1404,6 +1404,26 @@ def signature_has_self_param(function: Callable[..., Any]) -> bool:
     return not parent.endswith(".<locals>")
 
 
+if sys.version_info >= (3, 14):
+    import annotationlib
+
+    def get_annotations_from_namespace(namespace: dict[str, Any]) -> dict[str, Any]:
+        # classes in 3.14+ don't necessarily have an `__annotations__` dict,
+        # as annotations are lazily evaluated (provided the pre-3.14 future import isn't used)
+        # https://docs.python.org/3.14/library/annotationlib.html#annotationlib-metaclass
+        if annotate := annotationlib.get_annotate_from_class_namespace(namespace):
+            # we usually run these through `resolve_annotation` right after anyway,
+            # so `FORWARDREF` doesn't really provide an advantage over simply using `VALUE`,
+            # but it also doesn't hurt to use it.
+            return annotationlib.call_annotate_function(annotate, annotationlib.Format.FORWARDREF)
+        return namespace.get("__annotations__", {})
+
+else:
+
+    def get_annotations_from_namespace(namespace: dict[str, Any]) -> dict[str, Any]:
+        return namespace.get("__annotations__", {})
+
+
 TimestampStyle = Literal["t", "T", "d", "D", "f", "F", "s", "S", "R"]
 
 

@@ -18,7 +18,12 @@ from typing import (
     get_origin,
 )
 
-from disnake.utils import MISSING, maybe_coroutine, resolve_annotation
+from disnake.utils import (
+    MISSING,
+    get_annotations_from_namespace,
+    maybe_coroutine,
+    resolve_annotation,
+)
 
 from .converter import run_converters
 from .errors import (
@@ -142,7 +147,7 @@ def validate_flag_name(name: str, forbidden: set[str]) -> None:
 def get_flags(
     namespace: dict[str, Any], globals: dict[str, Any], locals: dict[str, Any]
 ) -> dict[str, Flag]:
-    annotations = namespace.get("__annotations__", {})
+    annotations = get_annotations_from_namespace(namespace)
     case_insensitive = namespace["__commands_flag_case_insensitive__"]
     flags: dict[str, Flag] = {}
     cache: dict[str, Any] = {}
