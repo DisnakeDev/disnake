@@ -2433,10 +2433,10 @@ class SubscriptionStatus(Enum):
 
     active = 0
     """Represents an active Subscription which is scheduled to renew."""
-    ending = 1
-    """Represents an active Subscription which will not renew."""
-    inactive = 2
+    inactive = 1
     """Represents an inactive Subscription which is not being charged."""
+    ending = 2
+    """Represents an active Subscription which will not renew."""
 
 
 class PollLayoutType(Enum):
