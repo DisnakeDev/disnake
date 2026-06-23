@@ -1232,6 +1232,11 @@ def Param(
 
         .. versionadded:: |vnext|
 
+        .. warning::
+            Note that only the extension of filenames is checked, the actual contents of files
+            are not inspected and may not actually match the extension.
+            It is up to you to ensure the file is valid, if necessary.
+
     Raises
     ------
     TypeError
