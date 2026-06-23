@@ -209,6 +209,14 @@ class Option:
 
         .. versionadded:: 2.6
 
+    file_types: :class:`list`\[:class:`str`] | :data:`None`
+        The list of file types that can be uploaded with this option, if the type is :class:`OptionType.attachment`.
+        Allowed values are ``image``, ``video``, and ``audio``, as well as
+        any dot-prefixed extension such as ``.pdf`` (up to 10).
+        Defaults to all types (i.e. :data:`None`).
+
+        .. versionadded:: |vnext|
+
     Attributes
     ----------
     name: :class:`str`
@@ -242,6 +250,14 @@ class Option:
         The maximum length for this option if this is a string option.
 
         .. versionadded:: 2.6
+
+    file_types: :class:`list`\[:class:`str`] | :data:`None`
+        The list of file types that can be uploaded with this option, if the type is :class:`OptionType.attachment`.
+        Allowed values are ``image``, ``video``, and ``audio``, as well as
+        any dot-prefixed extension such as ``.pdf`` (up to 10).
+        Defaults to all types (i.e. :data:`None`).
+
+        .. versionadded:: |vnext|
     """
 
     __slots__ = (
@@ -259,6 +275,7 @@ class Option:
         "description_localizations",
         "min_length",
         "max_length",
+        "file_types",
     )
 
     def __init__(
@@ -275,6 +292,7 @@ class Option:
         max_value: float | None = None,
         min_length: int | None = None,
         max_length: int | None = None,
+        file_types: list[str] | None = None,
     ) -> None:
         name_loc = Localized._cast(name, True)
         _validate_name(name_loc.string)
@@ -328,12 +346,18 @@ class Option:
 
         self.autocomplete: bool = autocomplete
 
+        if file_types is not None and not all(isinstance(t, str) for t in file_types):
+            msg = "file_types must be a list of `str`s"
+            raise TypeError(msg)
+        self.file_types: list[str] = file_types or []
+
     def __repr__(self) -> str:
         return (
             f"<Option name={self.name!r} description={self.description!r}"
             f" type={self.type!r} required={self.required!r} choices={self.choices!r}"
             f" options={self.options!r} min_value={self.min_value!r} max_value={self.max_value!r}"
-            f" min_length={self.min_length!r} max_length={self.max_length!r}>"
+            f" min_length={self.min_length!r} max_length={self.max_length!r}"
+            f" file_types={self.file_types!r}>"
         )
 
     def __eq__(self, other: Option) -> bool:
@@ -350,6 +374,7 @@ class Option:
             and self.max_value == other.max_value
             and self.min_length == other.min_length
             and self.max_length == other.max_length
+            and set(self.file_types) == set(other.file_types)
             and self.name_localizations == other.name_localizations
             and self.description_localizations == other.description_localizations
         )
@@ -377,6 +402,7 @@ class Option:
             max_value=data.get("max_value"),
             min_length=data.get("min_length"),
             max_length=data.get("max_length"),
+            file_types=data.get("file_types"),
         )
 
     def add_choice(
@@ -408,6 +434,7 @@ class Option:
         max_value: float | None = None,
         min_length: int | None = None,
         max_length: int | None = None,
+        file_types: list[str] | None = None,
     ) -> None:
         """Adds an option to the current list of options,
         parameters are the same as for :class:`Option`.
@@ -427,6 +454,7 @@ class Option:
                 max_value=max_value,
                 min_length=min_length,
                 max_length=max_length,
+                file_types=file_types,
             )
         )
 
@@ -454,6 +482,8 @@ class Option:
             payload["min_length"] = self.min_length
         if self.max_length is not None:
             payload["max_length"] = self.max_length
+        if self.file_types:
+            payload["file_types"] = self.file_types
         if (loc := self.name_localizations.data) is not None:
             payload["name_localizations"] = loc
         if (loc := self.description_localizations.data) is not None:
@@ -1205,6 +1235,7 @@ class SlashCommand(ApplicationCommand):
         max_value: float | None = None,
         min_length: int | None = None,
         max_length: int | None = None,
+        file_types: list[str] | None = None,
     ) -> None:
         """Adds an option to the current list of options,
         parameters are the same as for :class:`Option`
@@ -1223,6 +1254,7 @@ class SlashCommand(ApplicationCommand):
                 max_value=max_value,
                 min_length=min_length,
                 max_length=max_length,
+                file_types=file_types,
             )
         )
 
