@@ -7,15 +7,7 @@ import pytest
 from typing_extensions import assert_type
 
 import disnake
-from disnake.ui import (
-    ActionRow,
-    Button,
-    Label,
-    Separator,
-    StringSelect,
-    TextInput,
-    WrappedComponent,
-)
+from disnake.ui import ActionRow, Button, Label, Separator, StringSelect, TextInput
 from disnake.ui._types import ActionRowMessageComponent, ActionRowModalComponent
 from disnake.ui.action_row import normalize_components, normalize_components_to_dict
 
@@ -109,7 +101,7 @@ class TestActionRow:
         assert c.custom_id == "asdf"
 
         if TYPE_CHECKING:
-            _ = ActionRow().add_text_input  # pyright: ignore[reportDeprecated]
+            _ = ActionRow[TextInput]().add_text_input  # pyright: ignore[reportDeprecated]
             _ = ActionRow.with_modal_components().add_text_input  # pyright: ignore[reportDeprecated]
             # should not work
             _ = ActionRow.with_message_components().add_text_input  # pyright: ignore[reportAttributeAccessIssue]
@@ -205,7 +197,7 @@ class TestActionRow:
 
     # this method is mainly for pyright to check, the asserts wouldn't do anything at runtime
     def _test_typing_init(self) -> None:  # pragma: no cover
-        assert_type(ActionRow(), ActionRow[WrappedComponent])
+        assert_type(ActionRow(), ActionRow[ActionRowMessageComponent])
 
         assert_type(ActionRow(button1), ActionRow[ActionRowMessageComponent])
         assert_type(ActionRow(select), ActionRow[ActionRowMessageComponent])

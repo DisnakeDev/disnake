@@ -22,7 +22,6 @@ if TYPE_CHECKING:
         TextDisplay,
         TextInput,
     )
-    from .item import WrappedComponent
     from .select import ChannelSelect, MentionableSelect, RoleSelect, StringSelect, UserSelect
     from .view import View
 
@@ -67,7 +66,6 @@ ModalTopLevelComponent: TypeAlias = Union[
 
 ActionRowChildT = TypeVar(
     "ActionRowChildT",
-    "WrappedComponent",
     ActionRowMessageComponent,
     ActionRowModalComponent,
     infer_variance=True,
