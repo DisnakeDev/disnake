@@ -22,7 +22,6 @@ class BaseAppInfo(TypedDict):
     description: str
     terms_of_service_url: NotRequired[str]
     privacy_policy_url: NotRequired[str]
-    summary: str
     verify_key: str
     hook: NotRequired[bool]
     max_participants: NotRequired[int]

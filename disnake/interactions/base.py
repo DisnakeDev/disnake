@@ -1581,7 +1581,7 @@ class InteractionResponse:
         if modal is not None:
             parent._state.store_modal(parent.author.id, modal)
 
-    @utils.deprecated("premium buttons")
+    @utils.deprecated("Use `ui.Button(sku_id=...)` instead.")
     async def require_premium(self) -> None:
         """|coro|
 
@@ -1596,7 +1596,7 @@ class InteractionResponse:
 
         Example
         -------
-        Require an application subscription for a command: ::
+        Require an application subscription for a command::
 
             @bot.slash_command()
             async def cool_command(inter: disnake.ApplicationCommandInteraction):

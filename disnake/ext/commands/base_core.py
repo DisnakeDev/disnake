@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import datetime
 import functools
+import inspect
 from abc import ABC
 from collections.abc import Callable
 from typing import (
@@ -16,17 +17,12 @@ from typing import (
     overload,
 )
 
+from disnake import utils
 from disnake.app_commands import ApplicationCommand
 from disnake.enums import ApplicationCommandType
 from disnake.flags import ApplicationInstallTypes, InteractionContextTypes
 from disnake.permissions import Permissions
-from disnake.utils import (
-    _generated,
-    _overload_with_permissions,
-    async_all,
-    iscoroutinefunction,
-    maybe_coroutine,
-)
+from disnake.utils import _generated, _overload_with_permissions, async_all, maybe_coroutine
 
 from .cooldowns import BucketType, CooldownMapping, MaxConcurrency
 from .errors import CheckFailure, CommandError, CommandInvokeError, CommandOnCooldown
@@ -282,9 +278,15 @@ class InvokableApplicationCommand(ABC):
         self.body._default_contexts = bot._default_contexts
 
     @property
+    @utils.deprecated("Use `.contexts` instead.")
     def dm_permission(self) -> bool:
-        """:class:`bool`: Whether this command can be used in DMs."""
-        return self.body.dm_permission
+        """:class:`bool`: Whether this command can be used in DMs.
+
+        .. deprecated:: 2.10
+            Use :attr:`contexts` instead.
+            This is equivalent to the :attr:`disnake.InteractionContextTypes.bot_dm` flag.
+        """
+        return self.body._dm_permission is not False
 
     @property
     def default_member_permissions(self) -> Permissions | None:
@@ -490,7 +492,7 @@ class InvokableApplicationCommand(ABC):
         TypeError
             The argument passed is not actually a coroutine function.
         """
-        if not iscoroutinefunction(coro):
+        if not inspect.iscoroutinefunction(coro):
             msg = "The error handler must be a coroutine function."
             raise TypeError(msg)
 
@@ -607,7 +609,7 @@ class InvokableApplicationCommand(ABC):
         TypeError
             The argument passed is not a coroutine function.
         """
-        if not iscoroutinefunction(coro):
+        if not inspect.iscoroutinefunction(coro):
             msg = "The pre-invoke hook must be a coroutine function."
             raise TypeError(msg)
 
@@ -631,7 +633,7 @@ class InvokableApplicationCommand(ABC):
         TypeError
             The argument passed is not actually a coroutine function.
         """
-        if not iscoroutinefunction(coro):
+        if not inspect.iscoroutinefunction(coro):
             msg = "The post-invoke hook must be a coroutine function."
             raise TypeError(msg)
 

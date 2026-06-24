@@ -14,6 +14,7 @@ from typing import (
     overload,
 )
 
+from .. import utils
 from ..components import (
     ActionRow as ActionRowComponent,
     ActionRowChildComponent,
@@ -40,7 +41,7 @@ from ..components import (
     UserSelectMenu as UserSelectComponent,
 )
 from ..enums import ButtonStyle, ChannelType, ComponentType, TextInputStyle
-from ..utils import MISSING, SequenceProxy, assert_never, copy_doc, deprecated
+from ..utils import MISSING, SequenceProxy, assert_never, copy_doc
 from ._types import (
     ActionRowChildT,
     ActionRowMessageComponent,
@@ -702,7 +703,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         )
         return self
 
-    @deprecated('Label("<text>", TextInput(...))')
+    @utils.deprecated('Use `Label("<text>", TextInput(...))` instead.')
     def add_text_input(
         self: TextInputCompatibleActionRowT,
         *,
@@ -761,7 +762,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
             The width of the action row exceeds 5.
         """
         self.append_item(
-            TextInput(
+            TextInput(  # pyright: ignore[reportDeprecated]
                 id=id,
                 label=label,
                 custom_id=custom_id,
@@ -862,7 +863,10 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         return iter(self._children)
 
     @classmethod
-    @deprecated()
+    @utils.deprecated(
+        "Use of action rows in modals is deprecated. "
+        "Compatible components can be passed directly to modals."
+    )
     def with_modal_components(cls, *, id: int = 0) -> ActionRow[ActionRowModalComponent]:
         """Create an empty action row meant to store components compatible with
         :class:`disnake.ui.Modal`. Saves the need to import type specifiers to

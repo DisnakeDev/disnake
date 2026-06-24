@@ -142,15 +142,6 @@ WelcomeScreenChannel
 
 .. autoclass:: WelcomeScreenChannel()
 
-GuildBuilder
-~~~~~~~~~~~~~
-
-.. attributetable:: GuildBuilder
-
-.. autoclass:: GuildBuilder()
-    :members:
-    :exclude-members: add_category_channel
-
 Enumerations
 ------------
 

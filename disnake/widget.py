@@ -322,7 +322,7 @@ class Widget:
             connected_channel = _get_as_snowflake(member, "channel_id")
             if connected_channel in channels:
                 connected_channel = channels[connected_channel]
-            elif connected_channel:
+            elif connected_channel is not None:
                 connected_channel = WidgetChannel(id=connected_channel, name="", position=0)
 
             self.members.append(
