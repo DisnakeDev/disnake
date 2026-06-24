@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import inspect
 import logging
 import signal
 import sys
@@ -66,7 +67,7 @@ from .template import Template
 from .threads import Thread
 from .ui.view import View
 from .user import ClientUser, User
-from .utils import MISSING, deprecated
+from .utils import MISSING
 from .voice_client import VoiceClient
 from .voice_region import VoiceRegion
 from .webhook import Webhook
@@ -832,7 +833,7 @@ class Client:
             else (name if isinstance(name, str) else f"on_{name.value}")
         )
 
-        if not utils.iscoroutinefunction(func):
+        if not inspect.iscoroutinefunction(func):
             msg = "Listeners must be coroutines"
             raise TypeError(msg)
 
@@ -1281,8 +1282,8 @@ class Client:
         loop = self.loop
 
         try:
-            loop.add_signal_handler(signal.SIGINT, lambda: loop.stop())
-            loop.add_signal_handler(signal.SIGTERM, lambda: loop.stop())
+            loop.add_signal_handler(signal.SIGINT, loop.stop)
+            loop.add_signal_handler(signal.SIGTERM, loop.stop)
         except NotImplementedError:
             pass
 
@@ -1864,7 +1865,7 @@ class Client:
         TypeError
             The argument passed is not actually a coroutine function.
         """
-        if not utils.iscoroutinefunction(coro):
+        if not inspect.iscoroutinefunction(coro):
             msg = "event registered must be a coroutine function"
             raise TypeError(msg)
 
@@ -2135,6 +2136,28 @@ class Client:
         )
 
     # Invite management
+
+    @overload
+    async def fetch_invite(
+        self,
+        url: Invite | str,
+        *,
+        with_counts: bool = True,
+        guild_scheduled_event_id: int | None = None,
+    ) -> Invite: ...
+
+    @overload
+    @utils.deprecated(
+        "Using `with_expiration` is deprecated, `Invite.expires_at` field is always included now."
+    )
+    async def fetch_invite(
+        self,
+        url: Invite | str,
+        *,
+        with_counts: bool = True,
+        guild_scheduled_event_id: int | None = None,
+        with_expiration: bool = False,
+    ) -> Invite: ...
 
     async def fetch_invite(
         self,
@@ -2609,7 +2632,7 @@ class Client:
         data = await self.http.list_sticker_packs()
         return [StickerPack(state=self._connection, data=pack) for pack in data["sticker_packs"]]
 
-    @deprecated("fetch_sticker_packs")
+    @utils.deprecated("Use `.fetch_sticker_packs()` instead.")
     async def fetch_premium_sticker_packs(self) -> list[StickerPack]:
         """An alias of :meth:`fetch_sticker_packs`.
 

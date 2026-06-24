@@ -25,7 +25,6 @@ from disnake.utils import (
     _generated,
     _overload_with_permissions,
     get_signature_parameters,
-    iscoroutinefunction,
     unwrap_function,
 )
 
@@ -280,7 +279,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         func: CommandCallback[CogT, ContextT, P, T],
         **kwargs: Any,
     ) -> None:
-        if not iscoroutinefunction(func):
+        if not inspect.iscoroutinefunction(func):
             msg = "Callback must be a coroutine function."
             raise TypeError(msg)
 
@@ -904,7 +903,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         TypeError
             The argument passed is not actually a coroutine function.
         """
-        if not iscoroutinefunction(coro):
+        if not inspect.iscoroutinefunction(coro):
             msg = "The error handler must be a coroutine function."
             raise TypeError(msg)
 
@@ -941,7 +940,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         TypeError
             The argument passed is not actually a coroutine function.
         """
-        if not iscoroutinefunction(coro):
+        if not inspect.iscoroutinefunction(coro):
             msg = "The pre-invoke hook must be a coroutine function."
             raise TypeError(msg)
 
@@ -969,7 +968,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         TypeError
             The argument passed is not actually a coroutine function.
         """
-        if not iscoroutinefunction(coro):
+        if not inspect.iscoroutinefunction(coro):
             msg = "The post-invoke hook must be a coroutine function."
             raise TypeError(msg)
 
@@ -1730,7 +1729,7 @@ def check(predicate: Check) -> Callable[[T], T]:
 
         return func
 
-    if iscoroutinefunction(predicate):
+    if inspect.iscoroutinefunction(predicate):
         decorator.predicate = predicate
     else:
 

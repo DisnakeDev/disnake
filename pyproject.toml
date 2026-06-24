@@ -70,7 +70,7 @@ nox = [
     "nox>=2025.5.1",
 ]
 ruff = [
-    "ruff==0.14.5",
+    "ruff==0.15.16",
 ]
 tools = [
     "prek>=0.2.0",
@@ -99,7 +99,7 @@ codemod = [
 ]
 typing = [
     # this is not pyright itself, but the python wrapper
-    "pyright==1.1.405",
+    "pyright==1.1.410",
     # all type-check only dependencies are defined in noxfile.py.
 ]
 test = [

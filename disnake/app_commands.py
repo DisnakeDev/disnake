@@ -6,8 +6,9 @@ import math
 import re
 from abc import ABC
 from collections.abc import Mapping, Sequence
-from typing import TYPE_CHECKING, ClassVar, TypeAlias
+from typing import TYPE_CHECKING, ClassVar, TypeAlias, overload
 
+from . import utils
 from .enums import (
     ApplicationCommandPermissionType,
     ApplicationCommandType,
@@ -21,7 +22,7 @@ from .enums import (
 from .flags import ApplicationInstallTypes, InteractionContextTypes
 from .i18n import Localized
 from .permissions import Permissions
-from .utils import MISSING, _get_as_snowflake, _maybe_cast, deprecated, warn_deprecated
+from .utils import MISSING, _get_as_snowflake, _maybe_cast
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -522,11 +523,35 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
         "contexts",
     )
 
+    @overload
     def __init__(
         self,
         type: ApplicationCommandType,
         name: LocalizedRequired,
-        dm_permission: bool | None = None,  # deprecated
+        default_member_permissions: Permissions | int | None = None,
+        nsfw: bool | None = None,
+        install_types: ApplicationInstallTypes | None = None,
+        contexts: InteractionContextTypes | None = None,
+    ) -> None: ...
+
+    @overload
+    @utils.deprecated("`dm_permission` is deprecated, use `contexts` instead.")
+    def __init__(
+        self,
+        type: ApplicationCommandType,
+        name: LocalizedRequired,
+        dm_permission: bool | None,
+        default_member_permissions: Permissions | int | None = None,
+        nsfw: bool | None = None,
+        install_types: ApplicationInstallTypes | None = None,
+        contexts: InteractionContextTypes | None = None,
+    ) -> None: ...
+
+    def __init__(
+        self,
+        type: ApplicationCommandType,
+        name: LocalizedRequired,
+        dm_permission: bool | None = None,
         default_member_permissions: Permissions | int | None = None,
         nsfw: bool | None = None,
         install_types: ApplicationInstallTypes | None = None,
@@ -569,7 +594,7 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
 
         self._dm_permission: bool | None = dm_permission
         if self._dm_permission is not None:
-            warn_deprecated(
+            utils.warn_deprecated(
                 "dm_permission is deprecated, use contexts instead.",
                 stacklevel=2,
                 # the call stack can have different depths, depending on how the
@@ -603,7 +628,7 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
         return Permissions(self._default_member_permissions)
 
     @property
-    @deprecated("contexts")
+    @utils.deprecated("Use `.contexts` instead.")
     def dm_permission(self) -> bool:
         """
         Whether this command can be used in DMs with the bot.
@@ -618,7 +643,7 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
         return self._dm_permission is not False
 
     @dm_permission.setter
-    @deprecated("contexts")
+    @utils.deprecated("Use `.contexts` instead.")
     def dm_permission(self, value: bool) -> None:
         self._dm_permission = value
 
@@ -790,16 +815,38 @@ class UserCommand(ApplicationCommand):
         n for n in ApplicationCommand.__repr_attributes__ if n != "type"
     )
 
+    @overload
     def __init__(
         self,
         name: LocalizedRequired,
-        dm_permission: bool | None = None,  # deprecated
+        default_member_permissions: Permissions | int | None = None,
+        nsfw: bool | None = None,
+        install_types: ApplicationInstallTypes | None = None,
+        contexts: InteractionContextTypes | None = None,
+    ) -> None: ...
+
+    @overload
+    @utils.deprecated("`dm_permission` is deprecated, use `contexts` instead.")
+    def __init__(
+        self,
+        name: LocalizedRequired,
+        dm_permission: bool | None,
+        default_member_permissions: Permissions | int | None = None,
+        nsfw: bool | None = None,
+        install_types: ApplicationInstallTypes | None = None,
+        contexts: InteractionContextTypes | None = None,
+    ) -> None: ...
+
+    def __init__(
+        self,
+        name: LocalizedRequired,
+        dm_permission: bool | None = None,
         default_member_permissions: Permissions | int | None = None,
         nsfw: bool | None = None,
         install_types: ApplicationInstallTypes | None = None,
         contexts: InteractionContextTypes | None = None,
     ) -> None:
-        super().__init__(
+        super().__init__(  # pyright: ignore[reportDeprecated]
             type=ApplicationCommandType.user,
             name=name,
             dm_permission=dm_permission,
@@ -919,16 +966,38 @@ class MessageCommand(ApplicationCommand):
         n for n in ApplicationCommand.__repr_attributes__ if n != "type"
     )
 
+    @overload
     def __init__(
         self,
         name: LocalizedRequired,
-        dm_permission: bool | None = None,  # deprecated
+        default_member_permissions: Permissions | int | None = None,
+        nsfw: bool | None = None,
+        install_types: ApplicationInstallTypes | None = None,
+        contexts: InteractionContextTypes | None = None,
+    ) -> None: ...
+
+    @overload
+    @utils.deprecated("`dm_permission` is deprecated, use `contexts` instead.")
+    def __init__(
+        self,
+        name: LocalizedRequired,
+        dm_permission: bool | None,
+        default_member_permissions: Permissions | int | None = None,
+        nsfw: bool | None = None,
+        install_types: ApplicationInstallTypes | None = None,
+        contexts: InteractionContextTypes | None = None,
+    ) -> None: ...
+
+    def __init__(
+        self,
+        name: LocalizedRequired,
+        dm_permission: bool | None = None,
         default_member_permissions: Permissions | int | None = None,
         nsfw: bool | None = None,
         install_types: ApplicationInstallTypes | None = None,
         contexts: InteractionContextTypes | None = None,
     ) -> None:
-        super().__init__(
+        super().__init__(  # pyright: ignore[reportDeprecated]
             type=ApplicationCommandType.message,
             name=name,
             dm_permission=dm_permission,
@@ -1060,18 +1129,44 @@ class SlashCommand(ApplicationCommand):
         "options",
     )
 
+    @overload
     def __init__(
         self,
         name: LocalizedRequired,
         description: LocalizedRequired,
         options: list[Option] | None = None,
-        dm_permission: bool | None = None,  # deprecated
+        default_member_permissions: Permissions | int | None = None,
+        nsfw: bool | None = None,
+        install_types: ApplicationInstallTypes | None = None,
+        contexts: InteractionContextTypes | None = None,
+    ) -> None: ...
+
+    @overload
+    @utils.deprecated("`dm_permission` is deprecated, use `contexts` instead.")
+    def __init__(
+        self,
+        name: LocalizedRequired,
+        description: LocalizedRequired,
+        dm_permission: bool | None,
+        options: list[Option] | None = None,
+        default_member_permissions: Permissions | int | None = None,
+        nsfw: bool | None = None,
+        install_types: ApplicationInstallTypes | None = None,
+        contexts: InteractionContextTypes | None = None,
+    ) -> None: ...
+
+    def __init__(
+        self,
+        name: LocalizedRequired,
+        description: LocalizedRequired,
+        options: list[Option] | None = None,
+        dm_permission: bool | None = None,
         default_member_permissions: Permissions | int | None = None,
         nsfw: bool | None = None,
         install_types: ApplicationInstallTypes | None = None,
         contexts: InteractionContextTypes | None = None,
     ) -> None:
-        super().__init__(
+        super().__init__(  # pyright: ignore[reportDeprecated]
             type=ApplicationCommandType.chat_input,
             name=name,
             dm_permission=dm_permission,

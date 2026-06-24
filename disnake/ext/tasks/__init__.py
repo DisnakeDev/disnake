@@ -21,7 +21,7 @@ import aiohttp
 
 import disnake
 from disnake.backoff import ExponentialBackoff
-from disnake.utils import MISSING, iscoroutinefunction, utcnow
+from disnake.utils import MISSING, utcnow
 
 if TYPE_CHECKING:
     from typing import Concatenate
@@ -118,7 +118,7 @@ class Loop(Generic[LF]):
         self._last_iteration: datetime.datetime = MISSING
         self._next_iteration = None
 
-        if not iscoroutinefunction(self.coro):
+        if not inspect.iscoroutinefunction(self.coro):
             msg = f"Expected coroutine function, not {type(self.coro).__name__!r}."
             raise TypeError(msg)
 
@@ -496,7 +496,7 @@ class Loop(Generic[LF]):
         TypeError
             The function was not a coroutine function.
         """
-        if not iscoroutinefunction(coro):
+        if not inspect.iscoroutinefunction(coro):
             msg = f"Expected coroutine function, received {coro.__class__.__name__!r}."
             raise TypeError(msg)
 
@@ -524,7 +524,7 @@ class Loop(Generic[LF]):
         TypeError
             The function was not a coroutine function.
         """
-        if not iscoroutinefunction(coro):
+        if not inspect.iscoroutinefunction(coro):
             msg = f"Expected coroutine function, received {coro.__class__.__name__!r}."
             raise TypeError(msg)
 
@@ -551,7 +551,7 @@ class Loop(Generic[LF]):
         TypeError
             The function was not a coroutine function.
         """
-        if not iscoroutinefunction(coro):
+        if not inspect.iscoroutinefunction(coro):
             msg = f"Expected coroutine function, received {coro.__class__.__name__!r}."
             raise TypeError(msg)
 
@@ -782,7 +782,7 @@ def loop(
         raise TypeError(msg)
 
     def decorator(func: LF) -> L_co:
-        if not iscoroutinefunction(func):
+        if not inspect.iscoroutinefunction(func):
             msg = "The decorated function must be a coroutine function."
             raise TypeError(msg)
 

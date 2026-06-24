@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import inspect
 import os
 from abc import ABC, abstractmethod
 from collections.abc import Callable, Mapping, Sequence
@@ -16,7 +17,7 @@ from typing import (
 from ...components import AnySelectMenu, SelectDefaultValue
 from ...enums import ComponentType, SelectDefaultValueType
 from ...object import Object
-from ...utils import MISSING, humanize_list, iscoroutinefunction
+from ...utils import MISSING, humanize_list
 from ..item import DecoratedItem, Item
 
 __all__ = ("BaseSelect",)
@@ -264,7 +265,7 @@ def _create_decorator(
         raise TypeError(msg)
 
     def decorator(func: ItemCallbackType[V_co, S_co]) -> DecoratedItem[S_co]:
-        if not iscoroutinefunction(func):
+        if not inspect.iscoroutinefunction(func):
             msg = "select function must be a coroutine function"
             raise TypeError(msg)
 

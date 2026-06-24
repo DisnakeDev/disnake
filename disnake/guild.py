@@ -1215,6 +1215,10 @@ class Guild(Hashable):
             return len(self._members)
 
     @property
+    @utils.deprecated(
+        "`VoiceRegion` is no longer set on the guild. "
+        "Use `VoiceChannel.rtc_region` and `StageChannel.rtc_region` instead."
+    )
     def region(self) -> str:
         """:class:`str` | :data:`None`: The region the guild belongs on.
 
@@ -1226,9 +1230,6 @@ class Guild(Hashable):
         .. versionchanged:: 2.5
             No longer a ``VoiceRegion`` instance.
         """
-        utils.warn_deprecated(
-            "Guild.region is deprecated and will be removed in a future version.", stacklevel=2
-        )
         return self._region
 
     @property
@@ -3371,7 +3372,7 @@ class Guild(Hashable):
 
         return Template(state=self._state, data=data)
 
-    @utils.deprecated()
+    @utils.deprecated("Bots cannot use this endpoint anymore.")
     async def create_integration(self, *, type: IntegrationType, id: int) -> None:
         """|coro|
 
@@ -4132,11 +4133,12 @@ class Guild(Hashable):
         self,
         user: Snowflake,
         *,
-        clean_history_duration: int | datetime.timedelta = 86400,
+        clean_history_duration: int | datetime.timedelta = datetime.timedelta(days=1),
         reason: str | None = None,
     ) -> None: ...
 
     @overload
+    @utils.deprecated("`delete_message_days` is deprecated. Use `clean_history_duration` instead.")
     async def ban(
         self,
         user: Snowflake,
