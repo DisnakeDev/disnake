@@ -19,13 +19,16 @@ __all__ = (
 _convertible_colours: dict[str, Callable[[type[Colour]], Colour]] = {}
 
 
+# used to limit callable methods from ColourConverter
+class _converter_target(classmethod):
+    def __set_name__(self, owner: Any, name: str) -> None:
+        _convertible_colours[name] = self.__wrapped__
+
+
 if TYPE_CHECKING:
     converter_target = classmethod["Colour", [], "Colour"]
 else:
-    # used to limit callable methods from ColourConverter
-    class converter_target(classmethod):
-        def __set_name__(self, owner: Any, name: str) -> None:
-            _convertible_colours[name] = self.__wrapped__
+    converter_target = _converter_target
 
 
 class Colour:
