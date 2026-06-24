@@ -14,7 +14,9 @@ if TYPE_CHECKING:
 __all__ = (
     "Colour",
     "Color",
-_convertible_colours: dict[str, Callable[[type["Colour"]], "Colour"]] = {}
+)
+
+_convertible_colours: dict[str, Callable[[type[Colour]], Colour]] = {}
 
 
 if TYPE_CHECKING:
