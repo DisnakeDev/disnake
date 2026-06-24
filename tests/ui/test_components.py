@@ -20,7 +20,7 @@ all_ui_component_objects: list[ui.UIComponent] = [
     ui.RoleSelect(),
     ui.StringSelect(),
     ui.UserSelect(),
-    ui.TextInput(label="", custom_id=""),
+    ui.TextInput(),
     ui.Section(accessory=ui.Button()),
     ui.TextDisplay(""),
     ui.Thumbnail(""),
@@ -28,8 +28,11 @@ all_ui_component_objects: list[ui.UIComponent] = [
     ui.File("attachment://x"),
     ui.Separator(),
     ui.Container(),
-    ui.Label("", ui.TextInput(label="", custom_id="")),
+    ui.Label("", ui.TextInput()),
     ui.FileUpload(),
+    ui.RadioGroup([]),
+    ui.CheckboxGroup([]),
+    ui.Checkbox(),
 ]
 
 _missing = set(all_ui_component_types) ^ set(map(type, all_ui_component_objects))

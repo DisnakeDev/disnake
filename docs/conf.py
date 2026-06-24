@@ -15,12 +15,14 @@
 import importlib.metadata
 import importlib.util
 import inspect
+import logging
 import os
 import re
 import subprocess  # noqa: TID251
 import sys
-from typing import Any, Optional
+from typing import Any
 
+import versioningit
 from sphinx.application import Sphinx
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -46,7 +48,6 @@ extensions = [
     "sphinx.ext.linkcode",
     "sphinxcontrib_trio",
     "sphinxcontrib.towncrier.ext",
-    "hoverxref.extension",
     "notfound.extension",
     "sphinxext.opengraph",
     "redirects",
@@ -62,6 +63,10 @@ extensions = [
 
 autodoc_member_order = "bysource"
 autodoc_typehints = "none"
+# for now, go back to pre-9.0 class-based autodoc.
+# patching the new one for enum fixes is a little more tricky
+autodoc_use_legacy_class_based = True
+
 # maybe consider this?
 # napoleon_attr_annotations = False
 
@@ -71,7 +76,7 @@ dpy_github_repo = "https://github.com/Rapptz/discord.py"
 extlinks = {
     "issue": (f"{github_repo}/issues/%s", "#%s"),
     "issue-dpy": (f"{dpy_github_repo}/issues/%s", "#%s"),
-    "ddocs": ("https://discord.com/developers/docs/%s", None),
+    "ddocs": ("https://docs.discord.com/developers/%s", None),
 }
 
 extlinks_detect_hardcoded_links = True
@@ -91,7 +96,9 @@ rst_prolog = r"""
 templates_path = ["_templates"]
 
 # The suffix of source filenames.
-source_suffix = ".rst"
+source_suffix = {
+    ".rst": "restructuredtext",
+}
 
 # The encoding of source files.
 # source_encoding = 'utf-8-sig'
@@ -109,9 +116,16 @@ copyright = "2015-2021, Rapptz, 2021-present, Disnake Development"
 #
 # The full version, including alpha/beta/rc tags.
 release = importlib.metadata.version("disnake")
-
 # The short X.Y version.
 version = ".".join(release.split(".")[:2])
+# The release for the next release
+next_release = versioningit.get_next_version(os.path.abspath(".."))
+next_version = ".".join((next_release).split(".", 2)[:2])
+
+rst_prolog += f"""
+.. |vnext_full| replace:: {next_release}
+.. |vnext| replace:: {next_version}
+"""
 
 _IS_READTHEDOCS = bool(os.getenv("READTHEDOCS"))
 
@@ -205,7 +219,7 @@ if not (_spec and _spec.origin):
 _disnake_module_path = os.path.dirname(_spec.origin)
 
 
-def linkcode_resolve(domain: str, info: dict[str, Any]) -> Optional[str]:
+def linkcode_resolve(domain: str, info: dict[str, Any]) -> str | None:
     if domain != "py":
         return None
 
@@ -232,30 +246,12 @@ def linkcode_resolve(domain: str, info: dict[str, Any]) -> Optional[str]:
 
 
 # Links used for cross-referencing stuff in other documentation
-# when this is updated hoverxref_intersphinx also needs to be updated IF THE docs are hosted on readthedocs.
 intersphinx_mapping = {
     "py": ("https://docs.python.org/3", None),
     "aio": ("https://docs.aiohttp.org/en/stable/", None),
     "req": ("https://requests.readthedocs.io/en/latest/", None),
 }
 
-
-hoverx_default_type = "tooltip"
-hoverxref_domains = ["py"]
-hoverxref_role_types = dict.fromkeys(
-    ["ref", "class", "func", "meth", "attr", "exc", "data"],
-    "tooltip",
-)
-hoverxref_tooltip_theme = ["tooltipster-custom"]
-hoverxref_tooltip_lazy = True
-
-# these have to match the keys on intersphinx_mapping, and those projects must be hosted on readthedocs.
-hoverxref_intersphinx = list(intersphinx_mapping.keys())
-
-
-# use proxied API endpoint on readthedocs to avoid CORS issues
-if _IS_READTHEDOCS:
-    hoverxref_api_host = "/_"
 
 # when not on readthedocs, assume no prefix for the 404 page.
 # this means that /404.html should properly render on local builds
@@ -507,3 +503,13 @@ def setup(app: Sphinx) -> None:
     import disnake
 
     del disnake.Embed.Empty  # pyright: ignore[reportAttributeAccessIssue]
+
+    # silence somewhat verbose `Writing evaluated template result to ...` log
+    logging.getLogger("sphinx.sphinx.util.fileutil").addFilter(
+        lambda r: getattr(r, "subtype", None) != "template_evaluation"
+    )
+
+    # `document is referenced in multiple toctrees:` is fine and expected
+    logging.getLogger("sphinx.sphinx.environment").addFilter(
+        lambda r: getattr(r, "subtype", None) != "multiple_toc_parents"
+    )

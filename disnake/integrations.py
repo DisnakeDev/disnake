@@ -3,18 +3,12 @@
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
+from . import utils
 from .enums import ExpireBehaviour, try_enum
 from .user import User
-from .utils import (
-    MISSING,
-    _get_as_snowflake,
-    deprecated,
-    parse_time,
-    snowflake_time,
-    warn_deprecated,
-)
+from .utils import MISSING, _get_as_snowflake, parse_time, snowflake_time
 
 __all__ = (
     "IntegrationAccount",
@@ -104,7 +98,7 @@ class PartialIntegration:
         self.type: IntegrationType = data["type"]
         self.name: str = data["name"]
         self.account: IntegrationAccount = IntegrationAccount(data["account"])
-        self.application_id: Optional[int] = _get_as_snowflake(data, "application_id")
+        self.application_id: int | None = _get_as_snowflake(data, "application_id")
 
     @property
     def created_at(self) -> datetime.datetime:
@@ -153,8 +147,8 @@ class Integration(PartialIntegration):
         self.user = User(state=self._state, data=user) if user else None
         self.enabled: bool = data["enabled"]
 
-    @deprecated("Guild.leave")
-    async def delete(self, *, reason: Optional[str] = None) -> None:
+    @utils.deprecated("Use `Guild.leave()` instead.")
+    async def delete(self, *, reason: str | None = None) -> None:
         """|coro|
 
         .. deprecated:: 2.5
@@ -233,7 +227,7 @@ class StreamIntegration(Integration):
         self.expire_behaviour: ExpireBehaviour = try_enum(ExpireBehaviour, data["expire_behavior"])
         self.expire_grace_period: int = data["expire_grace_period"]
         self.synced_at: datetime.datetime = parse_time(data["synced_at"])
-        self._role_id: Optional[int] = _get_as_snowflake(data, "role_id")
+        self._role_id: int | None = _get_as_snowflake(data, "role_id")
         self.syncing: bool = data["syncing"]
         self.enable_emoticons: bool = data["enable_emoticons"]
         self.subscriber_count: int = data["subscriber_count"]
@@ -244,11 +238,11 @@ class StreamIntegration(Integration):
         return self.expire_behaviour
 
     @property
-    def role(self) -> Optional[Role]:
+    def role(self) -> Role | None:
         """:class:`Role` | :data:`None` The role which the integration uses for subscribers."""
         return self.guild.get_role(self._role_id)  # pyright: ignore[reportArgumentType]
 
-    @deprecated()
+    @utils.deprecated("Bots cannot use this endpoint anymore.")
     async def edit(
         self,
         *,
@@ -305,7 +299,7 @@ class StreamIntegration(Integration):
         # Unsure if it returns the data or not as a result
         await self._state.http.edit_integration(self.guild.id, self.id, **payload)
 
-    @deprecated()
+    @utils.deprecated("Bots cannot use this endpoint anymore.")
     async def sync(self) -> None:
         """|coro|
 
@@ -352,36 +346,20 @@ class IntegrationApplication:
         "name",
         "icon",
         "description",
-        "_summary",
         "user",
     )
 
     def __init__(self, *, data: IntegrationApplicationPayload, state) -> None:
         self.id: int = int(data["id"])
         self.name: str = data["name"]
-        self.icon: Optional[str] = data["icon"]
+        self.icon: str | None = data["icon"]
         self.description: str = data["description"]
-        self._summary: str = data.get("summary", "")
         user = data.get("bot")
-        self.user: Optional[User] = User(state=state, data=user) if user else None
-
-    @property
-    def summary(self) -> str:
-        """:class:`str`: The application's summary. Can be an empty string.
-
-        .. deprecated:: 2.5
-
-            This field is deprecated by discord and is now always blank. Consider using :attr:`.description` instead.
-        """
-        warn_deprecated(
-            "summary is deprecated and will be removed in a future version. Consider using description instead.",
-            stacklevel=2,
-        )
-        return self._summary
+        self.user: User | None = User(state=state, data=user) if user else None
 
 
 class BotIntegration(Integration):
-    """Represents a bot integration on Discord.
+    r"""Represents a bot integration on Discord.
 
     .. versionadded:: 2.0
 
@@ -403,7 +381,7 @@ class BotIntegration(Integration):
         The integration account information.
     application: :class:`IntegrationApplication`
         The application tied to this integration.
-    scopes: :class:`list`\\[:class:`str`]
+    scopes: :class:`list`\[:class:`str`]
         The OAuth2 scopes the application has been authorized for.
 
         .. versionadded:: 2.6

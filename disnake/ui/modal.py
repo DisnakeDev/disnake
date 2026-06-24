@@ -6,8 +6,9 @@ import asyncio
 import os
 import sys
 import traceback
+from collections.abc import Callable
 from functools import partial
-from typing import TYPE_CHECKING, Callable, Optional, TypeVar, Union, cast
+from typing import TYPE_CHECKING, TypeAlias, TypeVar, cast
 
 from ..enums import TextInputStyle
 from ..utils import MISSING
@@ -27,7 +28,7 @@ if TYPE_CHECKING:
     from ..ui._types import ModalComponents, ModalTopLevelComponent
 
     # backwards compatibility, `TextInput` internally gets wrapped in an action row (deprecated)
-    ModalTopLevelComponentInput = Union[ModalTopLevelComponent, TextInput]
+    ModalTopLevelComponentInput: TypeAlias = ModalTopLevelComponent | TextInput
 
 
 __all__ = ("Modal",)
@@ -36,7 +37,7 @@ ClientT = TypeVar("ClientT", bound="Client")
 
 
 class Modal:
-    """Represents a UI Modal.
+    r"""Represents a UI Modal.
 
     .. versionadded:: 2.4
 
@@ -49,9 +50,13 @@ class Modal:
 
         Currently supports the following components:
             - :class:`.ui.TextDisplay`
-            - :class:`.ui.TextInput`, in a :class:`.ui.Label`
-            - :class:`.ui.FileUpload`, in a :class:`.ui.Label`
-            - select menus (e.g. :class:`.ui.StringSelect`), in a :class:`.ui.Label`
+            - Inside a :class:`.ui.Label`, respectively:
+                - :class:`.ui.TextInput`
+                - :class:`.ui.FileUpload`
+                - select menus (e.g. :class:`.ui.StringSelect`)
+                - :class:`.ui.RadioGroup`
+                - :class:`.ui.CheckboxGroup`
+                - :class:`.ui.Checkbox`
 
         .. versionchanged:: 2.11
             Using action rows in modals or passing :class:`.ui.TextInput` directly
@@ -63,7 +68,7 @@ class Modal:
         If not given, then a unique one is generated for you.
 
         .. note::
-            :class:`Modal`\\s are identified based on the user ID that triggered the
+            :class:`Modal`\s are identified based on the user ID that triggered the
             modal, and this ``custom_id``.
             This can result in collisions when a user opens a modal with the same ``custom_id`` on
             two separate devices, for example.
@@ -109,9 +114,9 @@ class Modal:
         self.timeout: float = timeout
 
         # function for the modal to remove itself from the store, if any
-        self.__remove_callback: Optional[Callable[[Modal], None]] = None
+        self.__remove_callback: Callable[[Modal], None] | None = None
         # timer handle for the scheduled timeout
-        self.__timeout_handle: Optional[asyncio.TimerHandle] = None
+        self.__timeout_handle: asyncio.TimerHandle | None = None
 
     def __repr__(self) -> str:
         return (
@@ -120,7 +125,7 @@ class Modal:
         )
 
     def append_component(
-        self, component: Union[ModalTopLevelComponentInput, list[ModalTopLevelComponentInput]]
+        self, component: ModalTopLevelComponentInput | list[ModalTopLevelComponentInput]
     ) -> None:
         """Adds one or multiple component(s) to the modal.
 
@@ -166,11 +171,11 @@ class Modal:
         label: str,
         custom_id: str = MISSING,
         style: TextInputStyle = TextInputStyle.short,
-        placeholder: Optional[str] = None,
-        value: Optional[str] = None,
+        placeholder: str | None = None,
+        value: str | None = None,
         required: bool = True,
-        min_length: Optional[int] = None,
-        max_length: Optional[int] = None,
+        min_length: int | None = None,
+        max_length: int | None = None,
     ) -> None:
         """Creates and adds a text input component to the modal.
 
@@ -278,7 +283,7 @@ class Modal:
                 # Otherwise, the modal closed for the user; remove it from the store.
                 self._stop_listening()
 
-    def _start_listening(self, remove_callback: Optional[Callable[[Modal], None]]) -> None:
+    def _start_listening(self, remove_callback: Callable[[Modal], None] | None) -> None:
         self.__remove_callback = remove_callback
 
         loop = asyncio.get_running_loop()

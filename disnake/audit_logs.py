@@ -2,15 +2,12 @@
 
 from __future__ import annotations
 
-from collections.abc import Generator, Mapping
+from collections.abc import Callable, Generator, Mapping
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     ClassVar,
-    Optional,
     TypeVar,
-    Union,
     cast,
 )
 
@@ -22,6 +19,7 @@ from .colour import Colour
 from .invite import Invite
 from .mixins import Hashable
 from .object import Object
+from .onboarding import OnboardingPrompt, OnboardingPromptOption
 from .partial_emoji import PartialEmoji
 from .permissions import PermissionOverwrite, Permissions
 from .threads import ForumTag, Thread
@@ -60,6 +58,10 @@ if TYPE_CHECKING:
         PermissionOverwrite as PermissionOverwritePayload,
     )
     from .types.invite import Invite as InvitePayload
+    from .types.onboarding import (
+        OnboardingPrompt as OnboardingPromptPayload,
+        OnboardingPromptOption as OnboardingPromptOptionPayload,
+    )
     from .types.role import Role as RolePayload
     from .types.snowflake import Snowflake
     from .types.threads import ForumTag as ForumTagPayload
@@ -80,17 +82,15 @@ def _transform_snowflake(entry: AuditLogEntry, data: Snowflake) -> int:
 
 
 def _transform_channel(
-    entry: AuditLogEntry, data: Optional[Snowflake]
-) -> Optional[Union[abc.GuildChannel, Object]]:
+    entry: AuditLogEntry, data: Snowflake | None
+) -> abc.GuildChannel | Object | None:
     if data is None:
         return None
     channel = entry.guild.get_channel(int(data))
     return channel or Object(id=data)
 
 
-def _transform_role(
-    entry: AuditLogEntry, data: Optional[Snowflake]
-) -> Optional[Union[Role, Object]]:
+def _transform_role(entry: AuditLogEntry, data: Snowflake | None) -> Role | Object | None:
     if data is None:
         return None
     role = entry.guild.get_role(int(data))
@@ -98,14 +98,14 @@ def _transform_role(
 
 
 def _transform_member_id(
-    entry: AuditLogEntry, data: Optional[Snowflake]
-) -> Union[Member, User, Object, None]:
+    entry: AuditLogEntry, data: Snowflake | None
+) -> Member | User | Object | None:
     if data is None:
         return None
     return entry._get_member(int(data))
 
 
-def _transform_guild_id(entry: AuditLogEntry, data: Optional[Snowflake]) -> Optional[Guild]:
+def _transform_guild_id(entry: AuditLogEntry, data: Snowflake | None) -> Guild | None:
     if data is None:
         return None
     return entry._state._get_guild(int(data))
@@ -113,8 +113,8 @@ def _transform_guild_id(entry: AuditLogEntry, data: Optional[Snowflake]) -> Opti
 
 def _transform_overwrites(
     entry: AuditLogEntry, data: list[PermissionOverwritePayload]
-) -> list[tuple[Union[Object, Member, Role, User], PermissionOverwrite]]:
-    overwrites: list[tuple[Union[Object, Member, Role, User], PermissionOverwrite]] = []
+) -> list[tuple[Object | Member | Role | User, PermissionOverwrite]]:
+    overwrites: list[tuple[Object | Member | Role | User, PermissionOverwrite]] = []
     for elem in data:
         allow = Permissions(int(elem["allow"]))
         deny = Permissions(int(elem["deny"]))
@@ -136,7 +136,7 @@ def _transform_overwrites(
     return overwrites
 
 
-def _transform_icon(entry: AuditLogEntry, data: Optional[str]) -> Optional[Asset]:
+def _transform_icon(entry: AuditLogEntry, data: str | None) -> Asset | None:
     if data is None:
         return None
     if entry.action.name.startswith("role_"):
@@ -145,15 +145,15 @@ def _transform_icon(entry: AuditLogEntry, data: Optional[str]) -> Optional[Asset
     return Asset._from_guild_icon(entry._state, entry.guild.id, data)
 
 
-def _transform_avatar(entry: AuditLogEntry, data: Optional[str]) -> Optional[Asset]:
+def _transform_avatar(entry: AuditLogEntry, data: str | None) -> Asset | None:
     if data is None:
         return None
     assert entry._target_id is not None
     return Asset._from_avatar(entry._state, entry._target_id, data)
 
 
-def _guild_hash_transformer(path: str) -> Callable[[AuditLogEntry, Optional[str]], Optional[Asset]]:
-    def _transform(entry: AuditLogEntry, data: Optional[str]) -> Optional[Asset]:
+def _guild_hash_transformer(path: str) -> Callable[[AuditLogEntry, str | None], Asset | None]:
+    def _transform(entry: AuditLogEntry, data: str | None) -> Asset | None:
         if data is None:
             return None
         return Asset._from_guild_image(entry._state, entry.guild.id, data, path=path)
@@ -161,22 +161,20 @@ def _guild_hash_transformer(path: str) -> Callable[[AuditLogEntry, Optional[str]
     return _transform
 
 
-def _transform_tag(entry: AuditLogEntry, data: Optional[ForumTagPayload]) -> Optional[ForumTag]:
+def _transform_tag(entry: AuditLogEntry, data: ForumTagPayload | None) -> ForumTag | None:
     if data is None:
         return None
     return ForumTag._from_data(data=data, state=entry._state)
 
 
-def _transform_tag_id(
-    entry: AuditLogEntry, data: Optional[str]
-) -> Optional[Union[ForumTag, Object]]:
+def _transform_tag_id(entry: AuditLogEntry, data: str | None) -> ForumTag | Object | None:
     if data is None:
         return None
 
     # cyclic imports
     from .channel import ThreadOnlyGuildChannel
 
-    tag: Optional[ForumTag] = None
+    tag: ForumTag | None = None
     tag_id = int(data)
     thread = entry.target
     # try thread parent first
@@ -205,8 +203,8 @@ def _enum_transformer(enum: type[EnumT]) -> Callable[[AuditLogEntry, int], EnumT
 
 def _flags_transformer(
     flags_type: type[FlagsT],
-) -> Callable[[AuditLogEntry, Optional[int]], Optional[FlagsT]]:
-    def _transform(entry: AuditLogEntry, data: Optional[int]) -> Optional[FlagsT]:
+) -> Callable[[AuditLogEntry, int | None], FlagsT | None]:
+    def _transform(entry: AuditLogEntry, data: int | None) -> FlagsT | None:
         return flags_type._from_value(data) if data is not None else None
 
     return _transform
@@ -225,7 +223,14 @@ def _list_transformer(
 
 def _transform_type(
     entry: AuditLogEntry, data: Any
-) -> Union[enums.ChannelType, enums.StickerType, enums.WebhookType, str, int]:
+) -> (
+    enums.ChannelType
+    | enums.StickerType
+    | enums.WebhookType
+    | enums.OnboardingPromptType
+    | str
+    | int
+):
     action_name = entry.action.name
     if action_name.startswith("sticker_"):
         return enums.try_enum(enums.StickerType, data)
@@ -234,17 +239,19 @@ def _transform_type(
     elif action_name.startswith(("integration_", "overwrite_")):
         # integration: str, overwrite: int
         return data
+    elif action_name.startswith("onboarding_prompt_"):
+        return enums.try_enum(enums.OnboardingPromptType, data)
     else:
         return enums.try_enum(enums.ChannelType, data)
 
 
-def _transform_datetime(entry: AuditLogEntry, data: Optional[str]) -> Optional[datetime.datetime]:
+def _transform_datetime(entry: AuditLogEntry, data: str | None) -> datetime.datetime | None:
     return utils.parse_time(data)
 
 
 def _transform_privacy_level(
-    entry: AuditLogEntry, data: Optional[int]
-) -> Optional[Union[enums.StagePrivacyLevel, enums.GuildScheduledEventPrivacyLevel]]:
+    entry: AuditLogEntry, data: int | None
+) -> enums.StagePrivacyLevel | enums.GuildScheduledEventPrivacyLevel | None:
     if data is None:
         return None
     if entry.action.target_type == "guild_scheduled_event":
@@ -252,9 +259,7 @@ def _transform_privacy_level(
     return enums.try_enum(enums.StagePrivacyLevel, data)
 
 
-def _transform_guild_scheduled_event_image(
-    entry: AuditLogEntry, data: Optional[str]
-) -> Optional[Asset]:
+def _transform_guild_scheduled_event_image(entry: AuditLogEntry, data: str | None) -> Asset | None:
     if data is None:
         return None
     assert entry._target_id is not None
@@ -262,24 +267,24 @@ def _transform_guild_scheduled_event_image(
 
 
 def _transform_automod_action(
-    entry: AuditLogEntry, data: Optional[AutoModActionPayload]
-) -> Optional[AutoModAction]:
+    entry: AuditLogEntry, data: AutoModActionPayload | None
+) -> AutoModAction | None:
     if data is None:
         return None
     return _automod_action_factory(data)
 
 
 def _transform_automod_trigger_metadata(
-    entry: AuditLogEntry, data: Optional[AutoModTriggerMetadataPayload]
-) -> Optional[AutoModTriggerMetadata]:
+    entry: AuditLogEntry, data: AutoModTriggerMetadataPayload | None
+) -> AutoModTriggerMetadata | None:
     if data is None:
         return None
     return AutoModTriggerMetadata._from_dict(data)
 
 
 def _transform_default_reaction(
-    entry: AuditLogEntry, data: Optional[DefaultReactionPayload]
-) -> Optional[Union[Emoji, PartialEmoji]]:
+    entry: AuditLogEntry, data: DefaultReactionPayload | None
+) -> Emoji | PartialEmoji | None:
     if data is None:
         return None
     return entry._state._get_emoji_from_fields(
@@ -288,11 +293,29 @@ def _transform_default_reaction(
     )
 
 
+def _transform_onboarding_prompt_option(
+    entry: AuditLogEntry, data: OnboardingPromptOptionPayload | None
+) -> OnboardingPromptOption | None:
+    if data is None:
+        return None
+
+    return OnboardingPromptOption(data=data, guild=entry.guild)
+
+
+def _transform_onboarding_prompt(
+    entry: AuditLogEntry, data: OnboardingPromptPayload | None
+) -> OnboardingPrompt | None:
+    if data is None:
+        return None
+
+    return OnboardingPrompt(data=data, guild=entry.guild)
+
+
 class AuditLogDiff:
     def __len__(self) -> int:
         return len(self.__dict__)
 
-    def __iter__(self) -> Generator[tuple[str, Any], None, None]:
+    def __iter__(self) -> Generator[tuple[str, Any]]:
         yield from self.__dict__.items()
 
     def __repr__(self) -> str:
@@ -303,7 +326,7 @@ class AuditLogDiff:
 
         def __getattr__(self, item: str) -> Any: ...
 
-        def __setattr__(self, key: str, value: Any) -> Any: ...
+        def __setattr__(self, key: str, value: object) -> Any: ...
 
 
 Transformer = Callable[["AuditLogEntry", Any], Any]
@@ -311,7 +334,7 @@ Transformer = Callable[["AuditLogEntry", Any], Any]
 
 class AuditLogChanges:
     # fmt: off
-    TRANSFORMERS: ClassVar[dict[str, tuple[Optional[str], Optional[Transformer]]]] = {
+    TRANSFORMERS: ClassVar[dict[str, tuple[str | None, Transformer | None]]] = {
         "verification_level":                 (None, _enum_transformer(enums.VerificationLevel)),
         "explicit_content_filter":            (None, _enum_transformer(enums.ContentFilter)),
         "allow":                              (None, _transform_permissions),
@@ -361,6 +384,9 @@ class AuditLogChanges:
         "available_tags":                     (None, _list_transformer(_transform_tag)),
         "default_reaction_emoji":             ("default_reaction", _transform_default_reaction),
         "default_sort_order":                 (None, _enum_transformer(enums.ThreadSortOrder)),
+        "options":                            (None, _list_transformer(_transform_onboarding_prompt_option)),
+        "prompts":                            (None, _list_transformer(_transform_onboarding_prompt)),
+        "default_channel_ids":                ("default_channels", _list_transformer(_transform_channel)),
         "sound_id":                           ("id", _transform_snowflake),
     }
     # fmt: on
@@ -395,7 +421,7 @@ class AuditLogChanges:
             if attr == "emoji_id" or attr == "emoji_name":
                 has_emoji_fields = True
 
-            transformer: Optional[Transformer]
+            transformer: Transformer | None
 
             try:
                 key, transformer = self.TRANSFORMERS[attr]
@@ -484,8 +510,8 @@ class AuditLogChanges:
 
     def _merge_emoji(self, entry: AuditLogEntry) -> None:
         for diff in (self.before, self.after):
-            emoji_id: Optional[str] = diff.__dict__.pop("emoji_id", None)
-            emoji_name: Optional[str] = diff.__dict__.pop("emoji_name", None)
+            emoji_id: str | None = diff.__dict__.pop("emoji_id", None)
+            emoji_name: str | None = diff.__dict__.pop("emoji_name", None)
 
             diff.emoji = entry._state._get_emoji_from_fields(
                 name=emoji_name,
@@ -499,7 +525,7 @@ class _AuditLogProxyMemberPrune:
 
 
 class _AuditLogProxyMemberMoveOrMessageDelete:
-    channel: Union[abc.GuildChannel, Thread]
+    channel: abc.GuildChannel | Thread
     count: int
 
 
@@ -508,7 +534,7 @@ class _AuditLogProxyMemberDisconnect:
 
 
 class _AuditLogProxyPinAction:
-    channel: Union[abc.GuildChannel, Thread]
+    channel: abc.GuildChannel | Thread
     message_id: int
 
 
@@ -517,17 +543,21 @@ class _AuditLogProxyStageInstanceAction:
 
 
 class _AuditLogProxyAutoModAction:
-    channel: Optional[Union[abc.GuildChannel, Thread]]
+    channel: abc.GuildChannel | Thread | None
     rule_name: str
     rule_trigger_type: enums.AutoModTriggerType
 
 
 class _AuditLogProxyKickOrMemberRoleAction:
-    integration_type: Optional[str]
+    integration_type: str | None
+
+
+class _AuditLogProxyVoiceStatusUpdate:
+    status: str
 
 
 class AuditLogEntry(Hashable):
-    """Represents an Audit Log entry.
+    r"""Represents an Audit Log entry.
 
     You can retrieve these via :meth:`Guild.audit_logs`,
     or via the :func:`on_audit_log_entry_create` event.
@@ -554,7 +584,7 @@ class AuditLogEntry(Hashable):
     action: :class:`AuditLogAction`
         The action that was done.
     user: :class:`Member` | :class:`User` | :class:`Object` | :data:`None`
-        The user who initiated this action. Usually :class:`Member`\\, unless gone
+        The user who initiated this action. Usually :class:`Member`\, unless gone
         then it's a :class:`User`.
 
         .. versionchanged:: 2.8
@@ -688,6 +718,11 @@ class AuditLogEntry(Hashable):
                     "integration_type": extra.get("integration_type"),
                 }
                 self.extra = type("_AuditLogProxy", (), elems)()
+            elif self.action is enums.AuditLogAction.voice_channel_status_update:
+                elems = {
+                    "status": extra.get("status"),
+                }
+                self.extra = type("_AuditLogProxy", (), elems)()
 
         self.extra: Any
         # actually this but there's no reason to annoy users with this:
@@ -699,6 +734,7 @@ class AuditLogEntry(Hashable):
         #     _AuditLogProxyStageInstanceAction,
         #     _AuditLogProxyAutoModAction,
         #     _AuditLogProxyKickOrMemberRoleAction,
+        #     _AuditLogProxyVoiceStatusUpdate,
         #     Member, User, None,
         #     Role,
         # ]
@@ -713,21 +749,19 @@ class AuditLogEntry(Hashable):
         self.user = self._get_member(utils._get_as_snowflake(data, "user_id"))
         self._target_id = utils._get_as_snowflake(data, "target_id")
 
-    def _get_member(self, user_id: Optional[int]) -> Union[Member, User, Object, None]:
+    def _get_member(self, user_id: int | None) -> Member | User | Object | None:
         if not user_id:
             return None
         return self.guild.get_member(user_id) or self._users.get(user_id) or Object(id=user_id)
 
     def _get_channel_or_thread(
-        self, channel_id: Optional[int]
-    ) -> Union[abc.GuildChannel, Thread, Object, None]:
+        self, channel_id: int | None
+    ) -> abc.GuildChannel | Thread | Object | None:
         if not channel_id:
             return None
         return self.guild.get_channel_or_thread(channel_id) or Object(channel_id)
 
-    def _get_integration_by_application_id(
-        self, application_id: int
-    ) -> Optional[PartialIntegration]:
+    def _get_integration_by_application_id(self, application_id: int) -> PartialIntegration | None:
         if not application_id:
             return None
 
@@ -747,25 +781,25 @@ class AuditLogEntry(Hashable):
     @utils.cached_property
     def target(
         self,
-    ) -> Union[
-        Guild,
-        abc.GuildChannel,
-        Member,
-        User,
-        Role,
-        Invite,
-        Webhook,
-        Emoji,
-        PartialIntegration,
-        StageInstance,
-        GuildSticker,
-        Thread,
-        GuildScheduledEvent,
-        APIApplicationCommand,
-        AutoModRule,
-        Object,
-        None,
-    ]:
+    ) -> (
+        Guild
+        | abc.GuildChannel
+        | Member
+        | User
+        | Role
+        | Invite
+        | Webhook
+        | Emoji
+        | PartialIntegration
+        | StageInstance
+        | GuildSticker
+        | Thread
+        | GuildScheduledEvent
+        | APIApplicationCommand
+        | AutoModRule
+        | Object
+        | None
+    ):
         if self.action.target_type is None:
             return Object(id=self._target_id) if self._target_id else None
 
@@ -777,7 +811,7 @@ class AuditLogEntry(Hashable):
             return converter(self._target_id)
 
     @utils.cached_property
-    def category(self) -> Optional[enums.AuditLogActionCategory]:
+    def category(self) -> enums.AuditLogActionCategory | None:
         """:class:`AuditLogActionCategory` | :data:`None`: The category of the action, if applicable."""
         return self.action.category
 
@@ -801,13 +835,13 @@ class AuditLogEntry(Hashable):
     def _convert_target_guild(self, target_id: int) -> Guild:
         return self.guild
 
-    def _convert_target_channel(self, target_id: int) -> Union[abc.GuildChannel, Object]:
+    def _convert_target_channel(self, target_id: int) -> abc.GuildChannel | Object:
         return self.guild.get_channel(target_id) or Object(id=target_id)
 
-    def _convert_target_user(self, target_id: int) -> Union[Member, User, Object, None]:
+    def _convert_target_user(self, target_id: int) -> Member | User | Object | None:
         return self._get_member(target_id)
 
-    def _convert_target_role(self, target_id: int) -> Union[Role, Object]:
+    def _convert_target_role(self, target_id: int) -> Role | Object:
         return self.guild.get_role(target_id) or Object(id=target_id)
 
     def _convert_target_invite(self, target_id: int) -> Invite:
@@ -835,32 +869,30 @@ class AuditLogEntry(Hashable):
             pass
         return obj
 
-    def _convert_target_webhook(self, target_id: int) -> Union[Webhook, Object]:
+    def _convert_target_webhook(self, target_id: int) -> Webhook | Object:
         return self._webhooks.get(target_id) or Object(id=target_id)
 
-    def _convert_target_emoji(self, target_id: int) -> Union[Emoji, Object]:
+    def _convert_target_emoji(self, target_id: int) -> Emoji | Object:
         return self._state.get_emoji(target_id) or Object(id=target_id)
 
-    def _convert_target_message(self, target_id: int) -> Union[Member, User, Object, None]:
+    def _convert_target_message(self, target_id: int) -> Member | User | Object | None:
         return self._get_member(target_id)
 
-    def _convert_target_integration(self, target_id: int) -> Union[PartialIntegration, Object]:
+    def _convert_target_integration(self, target_id: int) -> PartialIntegration | Object:
         return self._integrations.get(target_id) or Object(id=target_id)
 
-    def _convert_target_stage_instance(self, target_id: int) -> Union[StageInstance, Object]:
+    def _convert_target_stage_instance(self, target_id: int) -> StageInstance | Object:
         return self.guild.get_stage_instance(target_id) or Object(id=target_id)
 
-    def _convert_target_sticker(self, target_id: int) -> Union[GuildSticker, Object]:
+    def _convert_target_sticker(self, target_id: int) -> GuildSticker | Object:
         return self._state.get_sticker(target_id) or Object(id=target_id)
 
-    def _convert_target_thread(self, target_id: int) -> Union[Thread, Object]:
+    def _convert_target_thread(self, target_id: int) -> Thread | Object:
         return (
             self.guild.get_thread(target_id) or self._threads.get(target_id) or Object(id=target_id)
         )
 
-    def _convert_target_guild_scheduled_event(
-        self, target_id: int
-    ) -> Union[GuildScheduledEvent, Object]:
+    def _convert_target_guild_scheduled_event(self, target_id: int) -> GuildScheduledEvent | Object:
         return (
             self.guild.get_scheduled_event(target_id)
             or self._guild_scheduled_events.get(target_id)
@@ -869,7 +901,7 @@ class AuditLogEntry(Hashable):
 
     def _convert_target_application_command_or_integration(
         self, target_id: int
-    ) -> Union[APIApplicationCommand, PartialIntegration, Object]:
+    ) -> APIApplicationCommand | PartialIntegration | Object:
         # try application command
         if target := (
             self._state._get_guild_application_command(self.guild.id, target_id)
@@ -886,5 +918,8 @@ class AuditLogEntry(Hashable):
         # fall back to object
         return Object(id=target_id)
 
-    def _convert_target_automod_rule(self, target_id: int) -> Union[AutoModRule, Object]:
+    def _convert_target_automod_rule(self, target_id: int) -> AutoModRule | Object:
         return self._automod_rules.get(target_id) or Object(id=target_id)
+
+    def _convert_target_onboarding_prompt(self, target_id: int) -> Object:
+        return Object(id=target_id)

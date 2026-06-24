@@ -10,7 +10,6 @@ from typing import (
     ClassVar,
     NamedTuple,
     NoReturn,
-    Optional,
     TypeVar,
 )
 
@@ -53,7 +52,6 @@ __all__ = (
     "OptionType",
     "ApplicationCommandType",
     "ApplicationCommandPermissionType",
-    "PartyType",
     "GuildScheduledEventEntityType",
     "GuildScheduledEventStatus",
     "GuildScheduledEventPrivacyLevel",
@@ -131,9 +129,9 @@ class EnumMeta(type):
         *,
         comparable: bool = False,
     ) -> EnumMetaT:
-        value_mapping = {}
-        member_mapping = {}
-        member_names = []
+        value_mapping: dict[object, _EnumValueBase] = {}
+        member_mapping: dict[str, _EnumValueBase] = {}
+        member_names: list[str] = []
 
         value_cls = _create_value_cls(name, comparable)
         for key, value in list(attrs.items()):
@@ -445,58 +443,6 @@ class MessageType(Enum):
     """
 
 
-class PartyType(Enum):
-    """Represents the type of a voice channel activity/application.
-
-    .. deprecated:: 2.9
-    """
-
-    poker = 755827207812677713
-    """The "Poker Night" activity."""
-    betrayal = 773336526917861400
-    """The "Betrayal.io" activity."""
-    fishing = 814288819477020702
-    """The "Fishington.io" activity."""
-    chess = 832012774040141894
-    """The "Chess In The Park" activity."""
-    letter_tile = 879863686565621790
-    """The "Letter Tile" activity."""
-    word_snack = 879863976006127627
-    """The "Word Snacks" activity."""
-    doodle_crew = 878067389634314250
-    """The "Doodle Crew" activity."""
-    checkers = 832013003968348200
-    """The "Checkers In The Park" activity.
-
-    .. versionadded:: 2.3
-    """
-    spellcast = 852509694341283871
-    """The "SpellCast" activity.
-
-    .. versionadded:: 2.3
-    """
-    watch_together = 880218394199220334
-    """The "Watch Together" activity, a Youtube application.
-
-    .. versionadded:: 2.3
-    """
-    sketch_heads = 902271654783242291
-    """The "Sketch Heads" activity.
-
-    .. versionadded:: 2.4
-    """
-    ocho = 832025144389533716
-    """The "Ocho" activity.
-
-    .. versionadded:: 2.4
-    """
-    gartic_phone = 1007373802981822582
-    """The "Gartic Phone" activity.
-
-    .. versionadded:: 2.9
-    """
-
-
 # undocumented/internal
 class SpeakingState(Enum):
     none = 0
@@ -512,7 +458,7 @@ class SpeakingState(Enum):
 
 
 class VerificationLevel(Enum, comparable=True):
-    """Specifies a :class:`Guild`\\'s verification level, which is the criteria in
+    r"""Specifies a :class:`Guild`\'s verification level, which is the criteria in
     which a member must meet before being able to send messages to the guild.
 
     .. collapse:: operations
@@ -557,7 +503,7 @@ class VerificationLevel(Enum, comparable=True):
 
 
 class ContentFilter(Enum, comparable=True):
-    """Specifies a :class:`Guild`\\'s explicit content filter, which is the machine
+    r"""Specifies a :class:`Guild`\'s explicit content filter, which is the machine
     learning algorithms that Discord uses to detect if an image contains NSFW content.
 
     .. collapse:: operations
@@ -594,7 +540,7 @@ class ContentFilter(Enum, comparable=True):
 
 
 class Status(Enum):
-    """Specifies a :class:`Member`\\'s status."""
+    r"""Specifies a :class:`Member`\'s status."""
 
     online = "online"
     """The member is online."""
@@ -604,7 +550,7 @@ class Status(Enum):
     """The member is idle."""
     dnd = "dnd"
     """The member is "Do Not Disturb"."""
-    do_not_disturb = "dnd"
+    do_not_disturb = dnd
     """An alias for :attr:`dnd`."""
     invisible = "invisible"
     """The member is "invisible". In reality, this is only used in sending
@@ -628,11 +574,17 @@ class StatusDisplayType(Enum):
     """
 
     name = 0  # pyright: ignore[reportAssignmentType]
-    """The name of the activity is displayed, e.g: ``Listening to Spotify``."""
+    """The name of the activity is displayed,
+    e.g: ``Listening to Spotify``.
+    """
     state = 1
-    """The state of the activity is displayed, e.g: ``Listening to Rick Astley``."""
+    """The state of the activity is displayed,
+    e.g: ``Listening to Rick Astley``.
+    """
     details = 2
-    """The details of the activity are displayed, e.g: ``Listening to Never Gonna Give You Up``."""
+    """The details of the activity are displayed,
+    e.g: ``Listening to Never Gonna Give You Up``.
+    """
 
     def __int__(self) -> int:
         return self.value
@@ -645,7 +597,7 @@ class DefaultAvatar(Enum):
     """Represents the default avatar with the color blurple. See also :attr:`Colour.blurple`."""
     grey = 1
     """Represents the default avatar with the color grey. See also :attr:`Colour.greyple`."""
-    gray = 1
+    gray = grey
     """An alias for :attr:`grey`."""
     green = 2
     """Represents the default avatar with the color green. See also :attr:`Colour.green`."""
@@ -711,7 +663,7 @@ class AuditLogActionCategory(Enum):
 # NOTE: these fields are only fully documented in audit_logs.rst,
 # as the docstrings alone would be ~1000-1500 additional lines
 class AuditLogAction(Enum):
-    """Represents the type of action being done for a :class:`AuditLogEntry`\\,
+    r"""Represents the type of action being done for a :class:`AuditLogEntry`\,
     which is retrievable via :meth:`Guild.audit_logs` or via the :func:`on_audit_log_entry_create` event.
     """
 
@@ -776,12 +728,17 @@ class AuditLogAction(Enum):
     automod_quarantine_user               = 146
     creator_monetization_request_created  = 150
     creator_monetization_terms_accepted   = 151
+    onboarding_prompt_create              = 163
+    onboarding_prompt_update              = 164
+    onboarding_update                     = 167
+    voice_channel_status_update           = 192
+    voice_channel_status_delete           = 193
     # fmt: on
 
     @property
-    def category(self) -> Optional[AuditLogActionCategory]:
+    def category(self) -> AuditLogActionCategory | None:
         # fmt: off
-        lookup: dict[AuditLogAction, Optional[AuditLogActionCategory]] = {
+        lookup: dict[AuditLogAction, AuditLogActionCategory | None] = {
             AuditLogAction.guild_update:                          AuditLogActionCategory.update,
             AuditLogAction.channel_create:                        AuditLogActionCategory.create,
             AuditLogAction.channel_update:                        AuditLogActionCategory.update,
@@ -842,12 +799,17 @@ class AuditLogAction(Enum):
             AuditLogAction.automod_quarantine_user:               None,
             AuditLogAction.creator_monetization_request_created:  None,
             AuditLogAction.creator_monetization_terms_accepted:   None,
+            AuditLogAction.onboarding_prompt_create:              AuditLogActionCategory.create,
+            AuditLogAction.onboarding_prompt_update:              AuditLogActionCategory.update,
+            AuditLogAction.onboarding_update:                     AuditLogActionCategory.update,
+            AuditLogAction.voice_channel_status_update:           AuditLogActionCategory.update,
+            AuditLogAction.voice_channel_status_delete:           AuditLogActionCategory.delete,
         }
         # fmt: on
         return lookup[self]
 
     @property
-    def target_type(self) -> Optional[str]:
+    def target_type(self) -> str | None:
         v = self.value
         if v == -1:  # pyright: ignore[reportUnnecessaryComparison]
             return "all"
@@ -887,8 +849,16 @@ class AuditLogAction(Enum):
             return "automod_rule"
         elif v < 147:
             return "user"
-        elif v < 152:
+        elif v < 163:
             return None
+        elif v < 166:
+            return "onboarding_prompt"
+        elif v < 168:
+            return "onboarding"
+        elif v < 192:
+            return None
+        elif v < 194:
+            return "channel"
         else:
             return None
 
@@ -1221,7 +1191,7 @@ class ComponentType(Enum):
 
     .. versionadded:: 2.7
     """
-    select = 3  # backwards compatibility
+    select = string_select  # backwards compatibility
     """An alias of :attr:`string_select`."""
     text_input = 4
     """Represents a text input component."""
@@ -1288,7 +1258,22 @@ class ComponentType(Enum):
     file_upload = 19
     """Represents a file upload component.
 
-    .. versionadded:: |vnext|
+    .. versionadded:: 2.12
+    """
+    radio_group = 21
+    """Represents a radio group component.
+
+    .. versionadded:: 2.12
+    """
+    checkbox_group = 22
+    """Represents a checkbox group component.
+
+    .. versionadded:: 2.12
+    """
+    checkbox = 23
+    """Represents a checkbox component.
+
+    .. versionadded:: 2.12
     """
 
     def __int__(self) -> int:
@@ -1318,19 +1303,19 @@ class ButtonStyle(Enum):
     """
 
     # Aliases
-    blurple = 1
+    blurple = primary
     """An alias for :attr:`primary`."""
-    grey = 2
+    grey = secondary
     """An alias for :attr:`secondary`."""
-    gray = 2
+    gray = secondary
     """An alias for :attr:`secondary`."""
-    green = 3
+    green = success
     """An alias for :attr:`success`."""
-    red = 4
+    red = danger
     """An alias for :attr:`danger`."""
-    url = 5
+    url = link
     """An alias for :attr:`link`."""
-    sku = 6
+    sku = premium
     """An alias for :attr:`premium`.
 
     .. versionadded:: 2.11
@@ -1352,11 +1337,11 @@ class TextInputStyle(Enum):
     """Represents a multi-line text input component."""
 
     # Aliases
-    single_line = 1
+    single_line = short
     """An alias for :attr:`short`."""
-    multi_line = 2
+    multi_line = paragraph
     """An alias for :attr:`paragraph`."""
-    long = 2
+    long = paragraph
     """An alias for :attr:`paragraph`."""
 
     def __int__(self) -> int:
@@ -1458,8 +1443,8 @@ class StagePrivacyLevel(Enum):
     """
     closed = 2
     """The stage instance can only be joined by members of the guild."""
-    guild_only = 2
-    """Alias for :attr:`.closed`"""
+    guild_only = closed
+    """An alias for :attr:`.closed`."""
 
 
 class NSFWLevel(Enum, comparable=True):
@@ -1527,7 +1512,7 @@ class GuildScheduledEventStatus(Enum):
     """Represents a completed event."""
     canceled = 4
     """Represents a canceled event."""
-    cancelled = 4
+    cancelled = canceled
     """An alias for :attr:`canceled`.
 
     .. versionadded:: 2.6
@@ -1588,7 +1573,7 @@ class WidgetStyle(Enum):
         return self.value
 
 
-# reference: https://discord.com/developers/docs/reference#locales
+# reference: https://docs.discord.com/developers/reference#locales
 class Locale(Enum):
     """Represents supported locales by Discord.
 
@@ -1673,6 +1658,19 @@ class Locale(Enum):
 class AutoModActionType(Enum):
     """Represents the type of action an auto moderation rule will take upon execution.
 
+    .. _automod_trigger_action_table:
+
+    Based on the trigger type, different action types can be used:
+
+    .. csv-table::
+        :header: "Trigger Type", ``block_message``, ``send_alert_message``, ``timeout``, ``block_member_interaction``
+
+        :attr:`~AutoModTriggerType.keyword`,        ✅, ✅, ✅, ❌
+        :attr:`~AutoModTriggerType.spam`,           ✅, ✅, ❌, ❌
+        :attr:`~AutoModTriggerType.keyword_preset`, ✅, ✅, ❌, ❌
+        :attr:`~AutoModTriggerType.mention_spam`,   ✅, ✅, ✅, ❌
+        :attr:`~AutoModTriggerType.member_profile`, ❌, ✅, ❌, ✅
+
     .. versionadded:: 2.6
     """
 
@@ -1684,24 +1682,48 @@ class AutoModActionType(Enum):
     """The rule will timeout the user that sent the message.
 
     .. note::
-        This action type is only available for rules with trigger type
-        :attr:`~AutoModTriggerType.keyword` or :attr:`~AutoModTriggerType.mention_spam`,
-        and :attr:`~Permissions.moderate_members` permissions are required to use it.
+        Configuring this action type requires :attr:`~Permissions.moderate_members` permissions.
+    """
+    block_member_interaction = 4
+    """The rule will prevent the user from using text, voice, or other interactions.
+
+    .. versionadded:: 2.12
     """
 
 
 class AutoModEventType(Enum):
     """Represents the type of event/context an auto moderation rule will be checked in.
 
+    .. _automod_trigger_event_table:
+
+    Based on the trigger type, different event types are used:
+
+    .. csv-table::
+        :header: "Trigger Type", ``message_send``, ``member_update``
+
+        :attr:`~AutoModTriggerType.keyword`,        ✅, ❌
+        :attr:`~AutoModTriggerType.spam`,           ✅, ❌
+        :attr:`~AutoModTriggerType.keyword_preset`, ✅, ❌
+        :attr:`~AutoModTriggerType.mention_spam`,   ✅, ❌
+        :attr:`~AutoModTriggerType.member_profile`, ❌, ✅
+
     .. versionadded:: 2.6
     """
 
     message_send = 1
     """The rule will apply when a member sends or edits a message in the guild."""
+    member_update = 2
+    """The rule will apply when a member joins or edits their profile.
+
+    .. versionadded:: 2.12
+    """
 
 
 class AutoModTriggerType(Enum):
     """Represents the type of content that can trigger an auto moderation rule.
+
+    Trigger types only work with specific event types,
+    refer to :ref:`this table <automod_trigger_event_table>` for more.
 
     .. versionadded:: 2.6
 
@@ -1730,6 +1752,13 @@ class AutoModTriggerType(Enum):
 
     This trigger type requires additional :class:`metadata <AutoModTriggerMetadata>`.
     """
+    member_profile = 6
+    """The rule will filter member profile names based on a custom keyword list.
+
+    This trigger type requires additional :class:`metadata <AutoModTriggerMetadata>`.
+
+    .. versionadded:: 2.12
+    """
 
 
 class ThreadSortOrder(Enum):
@@ -1745,7 +1774,7 @@ class ThreadSortOrder(Enum):
 
 
 class ThreadLayout(Enum):
-    """Represents the layout of threads in :class:`ForumChannel`\\s.
+    r"""Represents the layout of threads in :class:`ForumChannel`\s.
 
     .. versionadded:: 2.8
     """
@@ -2062,6 +2091,18 @@ class Event(Enum):
 
     .. versionadded:: 2.10
     """
+    voice_channel_status_update = "voice_channel_status_update"
+    """Called when a voice channel status is updated.
+    Represents the :func:`on_voice_channel_status_update` event.
+
+    .. versionadded:: |vnext|
+    """
+    voice_channel_start_time_update = "voice_channel_start_time_update"
+    """Called when a voice channel start time is updated.
+    Represents the :func:`on_voice_channel_start_time_update` event.
+
+    .. versionadded:: |vnext|
+    """
     stage_instance_create = "stage_instance_create"
     """Called when a `StageInstance` is created for a `StageChannel`.
     Represents the :func:`on_stage_instance_create` event.
@@ -2375,10 +2416,10 @@ class SubscriptionStatus(Enum):
 
     active = 0
     """Represents an active Subscription which is scheduled to renew."""
-    ending = 1
-    """Represents an active Subscription which will not renew."""
-    inactive = 2
+    inactive = 1
     """Represents an inactive Subscription which is not being charged."""
+    ending = 2
+    """Represents an active Subscription which will not renew."""
 
 
 class PollLayoutType(Enum):

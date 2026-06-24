@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: MIT
 
-from typing import Union
 from unittest import mock
 
 import pytest
@@ -49,7 +48,7 @@ def test_classmethod_all() -> None:
         (AllowedMentions.none(), {"parse": []}),
     ],
 )
-def test_to_dict(am: AllowedMentions, expected: dict[str, Union[bool, list]]) -> None:
+def test_to_dict(am: AllowedMentions, expected: dict[str, bool | list]) -> None:
     assert expected == am.to_dict()
 
 

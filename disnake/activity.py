@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING, Any, Literal, Optional, Union, overload
+from typing import TYPE_CHECKING, Any, Literal, TypeAlias, overload
 
 from .asset import Asset
 from .colour import Colour
@@ -84,17 +84,17 @@ class _BaseActivity:
     def __init__(
         self,
         *,
-        created_at: Optional[float] = None,
-        timestamps: Optional[ActivityTimestamps] = None,
-        assets: Optional[ActivityAssets] = None,
+        created_at: float | None = None,
+        timestamps: ActivityTimestamps | None = None,
+        assets: ActivityAssets | None = None,
         **kwargs: Any,  # discarded
     ) -> None:
-        self._created_at: Optional[float] = created_at
+        self._created_at: float | None = created_at
         self._timestamps: ActivityTimestamps = timestamps or {}
         self.assets: ActivityAssets = assets or {}
 
     @property
-    def created_at(self) -> Optional[datetime.datetime]:
+    def created_at(self) -> datetime.datetime | None:
         """:class:`datetime.datetime` | :data:`None`: When the user started doing this activity in UTC.
 
         .. versionadded:: 1.3
@@ -106,7 +106,7 @@ class _BaseActivity:
         return None
 
     @property
-    def start(self) -> Optional[datetime.datetime]:
+    def start(self) -> datetime.datetime | None:
         """:class:`datetime.datetime` | :data:`None`: When the user started doing this activity in UTC, if applicable.
 
         .. versionchanged:: 2.6
@@ -118,7 +118,7 @@ class _BaseActivity:
         return datetime.datetime.fromtimestamp(timestamp, tz=datetime.timezone.utc)
 
     @property
-    def end(self) -> Optional[datetime.datetime]:
+    def end(self) -> datetime.datetime | None:
         """:class:`datetime.datetime` | :data:`None`: When the user will stop doing this activity in UTC, if applicable.
 
         .. versionchanged:: 2.6
@@ -132,7 +132,7 @@ class _BaseActivity:
     def to_dict(self) -> ActivityPayload:
         raise NotImplementedError
 
-    def _create_image_url(self, asset: str) -> Optional[str]:
+    def _create_image_url(self, asset: str) -> str | None:
         # `asset` can be a simple ID (see `Activity._create_image_url`),
         # or a string of the format `<prefix>:<id>`
         prefix, _, asset_id = asset.partition(":")
@@ -142,7 +142,7 @@ class _BaseActivity:
         return None
 
     @property
-    def large_image_url(self) -> Optional[str]:
+    def large_image_url(self) -> str | None:
         """:class:`str` | :data:`None`: Returns a URL pointing to the large image asset of this activity, if applicable.
 
         .. versionchanged:: 2.10
@@ -154,7 +154,7 @@ class _BaseActivity:
         return None
 
     @property
-    def small_image_url(self) -> Optional[str]:
+    def small_image_url(self) -> str | None:
         """:class:`str` | :data:`None`: Returns a URL pointing to the small image asset of this activity, if applicable.
 
         .. versionchanged:: 2.10
@@ -166,7 +166,7 @@ class _BaseActivity:
         return None
 
     @property
-    def large_image_text(self) -> Optional[str]:
+    def large_image_text(self) -> str | None:
         """:class:`str` | :data:`None`: Returns the large image asset hover text of this activity, if applicable.
 
         .. versionchanged:: 2.10
@@ -175,7 +175,7 @@ class _BaseActivity:
         return self.assets.get("large_text")
 
     @property
-    def small_image_text(self) -> Optional[str]:
+    def small_image_text(self) -> str | None:
         """:class:`str` | :data:`None`: Returns the small image asset hover text of this activity, if applicable.
 
         .. versionchanged:: 2.10
@@ -184,7 +184,7 @@ class _BaseActivity:
         return self.assets.get("small_text")
 
     @property
-    def large_image_link(self) -> Optional[str]:
+    def large_image_link(self) -> str | None:
         """:class:`str` | :data:`None`: Returns the large image asset URL of this activity, if applicable.
 
         .. versionadded:: 2.11
@@ -192,7 +192,7 @@ class _BaseActivity:
         return self.assets.get("large_url")
 
     @property
-    def small_image_link(self) -> Optional[str]:
+    def small_image_link(self) -> str | None:
         """:class:`str` | :data:`None`: Returns the small image asset URL of this activity, if applicable.
 
         .. versionadded:: 2.11
@@ -234,7 +234,7 @@ _ACTIVITY_URLS = {
 
 
 class Activity(BaseActivity):
-    """Represents an activity in Discord.
+    r"""Represents an activity in Discord.
 
     This could be an activity such as streaming, playing, listening
     or watching.
@@ -283,7 +283,7 @@ class Activity(BaseActivity):
 
         - ``id``: A string representing the party ID.
         - ``size``: A list of two integers denoting (current_size, maximum_size).
-    buttons: :class:`list`\\[:class:`str`]
+    buttons: :class:`list`\[:class:`str`]
         A list of strings representing the labels of custom buttons shown in a rich presence.
 
         .. versionadded:: 2.0
@@ -330,44 +330,44 @@ class Activity(BaseActivity):
     def __init__(
         self,
         *,
-        name: Optional[str] = None,
-        url: Optional[str] = None,
-        type: Optional[Union[ActivityType, int]] = None,
-        state: Optional[str] = None,
-        state_url: Optional[str] = None,
-        details: Optional[str] = None,
-        details_url: Optional[str] = None,
-        party: Optional[ActivityParty] = None,
-        application_id: Optional[Union[str, int]] = None,
-        flags: Optional[int] = None,
-        buttons: Optional[list[str]] = None,
-        emoji: Optional[Union[PartialEmojiPayload, ActivityEmojiPayload]] = None,
-        id: Optional[str] = None,
-        platform: Optional[str] = None,
-        sync_id: Optional[str] = None,
-        session_id: Optional[str] = None,
-        status_display_type: Optional[Union[StatusDisplayType, int]] = None,
+        name: str | None = None,
+        url: str | None = None,
+        type: ActivityType | int | None = None,
+        state: str | None = None,
+        state_url: str | None = None,
+        details: str | None = None,
+        details_url: str | None = None,
+        party: ActivityParty | None = None,
+        application_id: str | int | None = None,
+        flags: int | None = None,
+        buttons: list[str] | None = None,
+        emoji: PartialEmojiPayload | ActivityEmojiPayload | None = None,
+        id: str | None = None,
+        platform: str | None = None,
+        sync_id: str | None = None,
+        session_id: str | None = None,
+        status_display_type: StatusDisplayType | int | None = None,
         **kwargs: Any,
     ) -> None:
         super().__init__(**kwargs)
-        self.state: Optional[str] = state
-        self.state_url: Optional[str] = state_url
-        self.details: Optional[str] = details
-        self.details_url: Optional[str] = details_url
+        self.state: str | None = state
+        self.state_url: str | None = state_url
+        self.details: str | None = details
+        self.details_url: str | None = details_url
         self.party: ActivityParty = party or {}
-        self.application_id: Optional[int] = (
+        self.application_id: int | None = (
             int(application_id) if application_id is not None else None
         )
-        self.name: Optional[str] = name
-        self.url: Optional[str] = url
+        self.name: str | None = name
+        self.url: str | None = url
         self.flags: int = flags or 0
         self.buttons: list[str] = buttons or []
 
         # undocumented fields:
-        self.id: Optional[str] = id
-        self.platform: Optional[str] = platform
-        self.sync_id: Optional[str] = sync_id
-        self.session_id: Optional[str] = session_id
+        self.id: str | None = id
+        self.platform: str | None = platform
+        self.sync_id: str | None = sync_id
+        self.session_id: str | None = session_id
 
         activity_type = type if type is not None else 0
         self.type: ActivityType = (
@@ -376,13 +376,13 @@ class Activity(BaseActivity):
             else try_enum(ActivityType, activity_type)
         )
 
-        self.status_display_type: Optional[StatusDisplayType] = (
+        self.status_display_type: StatusDisplayType | None = (
             try_enum(StatusDisplayType, status_display_type)
             if isinstance(status_display_type, int)
             else status_display_type
         )
 
-        self.emoji: Optional[PartialEmoji] = (
+        self.emoji: PartialEmoji | None = (
             PartialEmoji.from_dict(emoji) if emoji is not None else None
         )
 
@@ -424,7 +424,7 @@ class Activity(BaseActivity):
             ret["timestamps"] = self._timestamps
         return ret
 
-    def _create_image_url(self, asset: str) -> Optional[str]:
+    def _create_image_url(self, asset: str) -> str | None:
         # if parent method already returns valid url, use that
         if url := super()._create_image_url(asset):
             return url
@@ -479,14 +479,14 @@ class Game(BaseActivity):
         self,
         name: str,
         *,
-        platform: Optional[str] = None,
+        platform: str | None = None,
         **kwargs: Any,
     ) -> None:
         super().__init__(**kwargs)
         self.name: str = name
 
         # undocumented
-        self.platform: Optional[str] = platform
+        self.platform: str | None = platform
 
     @property
     def type(self) -> Literal[ActivityType.playing]:
@@ -510,10 +510,10 @@ class Game(BaseActivity):
             "assets": self.assets,
         }
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         return isinstance(other, Game) and other.name == self.name
 
-    def __ne__(self, other: Any) -> bool:
+    def __ne__(self, other: object) -> bool:
         return not self.__eq__(other)
 
     def __hash__(self) -> int:
@@ -570,18 +570,18 @@ class Streaming(BaseActivity):
     def __init__(
         self,
         *,
-        name: Optional[str],
+        name: str | None,
         url: str,
-        details: Optional[str] = None,
-        state: Optional[str] = None,
+        details: str | None = None,
+        state: str | None = None,
         **kwargs: Any,
     ) -> None:
         super().__init__(**kwargs)
-        self.platform: Optional[str] = name
-        self.name: Optional[str] = details or name
-        self.details: Optional[str] = self.name  # compatibility
+        self.platform: str | None = name
+        self.name: str | None = details or name
+        self.details: str | None = self.name  # compatibility
         self.url: str = url
-        self.game: Optional[str] = state
+        self.game: str | None = state
 
     @property
     def type(self) -> Literal[ActivityType.streaming]:
@@ -598,7 +598,7 @@ class Streaming(BaseActivity):
         return f"<Streaming name={self.name!r}>"
 
     @property
-    def twitch_name(self) -> Optional[str]:
+    def twitch_name(self) -> str | None:
         """:class:`str` | :data:`None`: If provided, the twitch name of the user streaming.
 
         This corresponds to the ``large_image`` key of the :attr:`Streaming.assets`
@@ -620,10 +620,10 @@ class Streaming(BaseActivity):
             ret["details"] = self.details
         return ret
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         return isinstance(other, Streaming) and other.name == self.name and other.url == self.url
 
-    def __ne__(self, other: Any) -> bool:
+    def __ne__(self, other: object) -> bool:
         return not self.__eq__(other)
 
     def __hash__(self) -> int:
@@ -663,11 +663,11 @@ class Spotify(_BaseActivity):
     def __init__(
         self,
         *,
-        state: Optional[str] = None,
-        details: Optional[str] = None,
-        party: Optional[ActivityParty] = None,
-        sync_id: Optional[str] = None,
-        session_id: Optional[str] = None,
+        state: str | None = None,
+        details: str | None = None,
+        party: ActivityParty | None = None,
+        sync_id: str | None = None,
+        session_id: str | None = None,
         **kwargs: Any,
     ) -> None:
         super().__init__(**kwargs)
@@ -675,7 +675,7 @@ class Spotify(_BaseActivity):
         self._details: str = details or ""
         self._party: ActivityParty = party or {}
         self._sync_id: str = sync_id or ""
-        self._session_id: Optional[str] = session_id
+        self._session_id: str | None = session_id
 
     @property
     def type(self) -> Literal[ActivityType.listening]:
@@ -719,7 +719,7 @@ class Spotify(_BaseActivity):
         """:class:`str`: The activity's name. This will always return "Spotify"."""
         return "Spotify"
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         return (
             isinstance(other, Spotify)
             and other._session_id == self._session_id
@@ -727,7 +727,7 @@ class Spotify(_BaseActivity):
             and other.start == self.start
         )
 
-    def __ne__(self, other: Any) -> bool:
+    def __ne__(self, other: object) -> bool:
         return not self.__eq__(other)
 
     def __hash__(self) -> int:
@@ -746,7 +746,7 @@ class Spotify(_BaseActivity):
 
     @property
     def artists(self) -> list[str]:
-        """:class:`list`\\[:class:`str`]: The artists of the song being played."""
+        r""":class:`list`\[:class:`str`]: The artists of the song being played."""
         return self._state.split("; ")
 
     @property
@@ -786,7 +786,7 @@ class Spotify(_BaseActivity):
         return f"https://open.spotify.com/track/{self.track_id}"
 
     @property
-    def duration(self) -> Optional[datetime.timedelta]:
+    def duration(self) -> datetime.timedelta | None:
         """:class:`datetime.timedelta` | :data:`None`: The duration of the song being played, if applicable.
 
         .. versionchanged:: 2.6
@@ -840,22 +840,22 @@ class CustomActivity(BaseActivity):
 
     def __init__(
         self,
-        name: Optional[str],
+        name: str | None,
         *,
-        emoji: Optional[Union[ActivityEmojiPayload, str, PartialEmoji]] = None,
-        state: Optional[str] = None,
+        emoji: ActivityEmojiPayload | str | PartialEmoji | None = None,
+        state: str | None = None,
         **kwargs: Any,
     ) -> None:
         super().__init__(**kwargs)
-        self.name: Optional[str] = name
+        self.name: str | None = name
         # Fall back to `name`, since `state` is the relevant field for custom status (`name` is not shown)
-        self.state: Optional[str] = state or name
+        self.state: str | None = state or name
 
         # The official client uses "Custom Status" as the name, the actual name is in `state`
         if self.name == "Custom Status":
             self.name = self.state
 
-        self.emoji: Optional[PartialEmoji]
+        self.emoji: PartialEmoji | None
         if emoji is None:
             self.emoji = emoji
         elif isinstance(emoji, dict):
@@ -894,14 +894,14 @@ class CustomActivity(BaseActivity):
             o["emoji"] = self.emoji.to_dict()  # pyright: ignore[reportGeneralTypeIssues]
         return o
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         return (
             isinstance(other, CustomActivity)
             and other.name == self.name
             and other.emoji == self.emoji
         )
 
-    def __ne__(self, other: Any) -> bool:
+    def __ne__(self, other: object) -> bool:
         return not self.__eq__(other)
 
     def __hash__(self) -> int:
@@ -919,24 +919,24 @@ class CustomActivity(BaseActivity):
         return f"<CustomActivity name={self.name!r} emoji={self.emoji!r}>"
 
 
-ActivityTypes = Union[Activity, Game, CustomActivity, Streaming, Spotify]
+ActivityTypes: TypeAlias = Activity | Game | CustomActivity | Streaming | Spotify
 
 
 @overload
 def create_activity(
-    data: Union[ActivityPayload, WidgetActivityPayload], *, state: Optional[ConnectionState] = None
+    data: ActivityPayload | WidgetActivityPayload, *, state: ConnectionState | None = None
 ) -> ActivityTypes: ...
 
 
 @overload
-def create_activity(data: None, *, state: Optional[ConnectionState] = None) -> None: ...
+def create_activity(data: None, *, state: ConnectionState | None = None) -> None: ...
 
 
 def create_activity(
-    data: Optional[Union[ActivityPayload, WidgetActivityPayload]],
+    data: ActivityPayload | WidgetActivityPayload | None,
     *,
-    state: Optional[ConnectionState] = None,
-) -> Optional[ActivityTypes]:
+    state: ConnectionState | None = None,
+) -> ActivityTypes | None:
     if not data:
         return None
 

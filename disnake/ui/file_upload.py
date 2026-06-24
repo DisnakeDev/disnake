@@ -19,7 +19,7 @@ __all__ = ("FileUpload",)
 class FileUpload(UIComponent):
     """Represents a UI file upload.
 
-    .. versionadded:: |vnext|
+    .. versionadded:: 2.12
 
     Parameters
     ----------
@@ -36,7 +36,8 @@ class FileUpload(UIComponent):
         Whether the file upload is required.
         Defaults to ``True``.
     id: :class:`int`
-        The numeric identifier for the component. Must be unique within the modal.
+        The numeric identifier for the component. Must be unique within a modal.
+        This is always present in components received from the API.
         If set to ``0`` (the default) when sending a component, the API will assign
         sequential identifiers to the components in the modal.
     """
@@ -93,7 +94,7 @@ class FileUpload(UIComponent):
 
     @property
     def required(self) -> bool:
-        """:class:`bool`: Whether the select menu is required."""
+        """:class:`bool`: Whether the file upload is required."""
         return self._underlying.required
 
     @required.setter

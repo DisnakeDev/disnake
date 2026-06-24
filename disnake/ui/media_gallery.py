@@ -28,7 +28,8 @@ class MediaGallery(UIComponent):
     *items: :class:`.MediaGalleryItem`
         The list of images in this gallery (up to 10).
     id: :class:`int`
-        The numeric identifier for the component. Must be unique within the message.
+        The numeric identifier for the component. Must be unique within a message.
+        This is always present in components received from the API.
         If set to ``0`` (the default) when sending a component, the API will assign
         sequential identifiers to the components in the message.
     """
@@ -46,7 +47,7 @@ class MediaGallery(UIComponent):
 
     @property
     def items(self) -> list[MediaGalleryItem]:
-        """:class:`list`\\[:class:`.MediaGalleryItem`]: The images in this gallery."""
+        r""":class:`list`\[:class:`.MediaGalleryItem`]: The images in this gallery."""
         return self._underlying.items
 
     @items.setter

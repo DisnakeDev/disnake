@@ -7,12 +7,13 @@ import inspect
 import os
 import sys
 import warnings
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import timedelta, timezone
 from typing import (
     TYPE_CHECKING,
+    Annotated,
     Any,
-    Callable,
     Literal,
     Optional,
     TypeVar,
@@ -87,20 +88,6 @@ def test_copy_doc() -> None:
 
     assert func2.__doc__ == func.__doc__
     assert inspect.signature(func) == inspect.signature(func2)
-
-
-@mock.patch.object(warnings, "warn")
-@pytest.mark.parametrize(
-    ("instead", "msg"),
-    [(None, "stuff is deprecated."), ("other", "stuff is deprecated, use other instead.")],
-)
-def test_deprecated(mock_warn: mock.Mock, instead, msg) -> None:
-    @utils.deprecated(instead)
-    def stuff(num: int) -> int:
-        return num
-
-    assert stuff(42) == 42
-    mock_warn.assert_called_once_with(msg, stacklevel=3, category=DeprecationWarning)
 
 
 @mock.patch.object(utils, "_root_module_path", os.path.dirname(__file__))
@@ -615,7 +602,7 @@ def test_escape_mentions(text: str, expected) -> None:
         ),
     ],
 )
-def test_parse_docstring_desc(docstring: Optional[str], expected) -> None:
+def test_parse_docstring_desc(docstring: str | None, expected) -> None:
     def f() -> None: ...
 
     f.__doc__ = docstring
@@ -767,14 +754,19 @@ def test_normalise_optional_params(params, expected) -> None:
         (dict[float, "list[yarl.URL]"], dict[float, list[yarl.URL]], True),
         (Literal[1, Literal[False], "hi"], Literal[1, False, "hi"], False),  # noqa: RUF041
         # unions
-        (Union[timezone, float], Union[timezone, float], False),
-        (Optional[int], Optional[int], False),
-        (Union["tuple", None, int], Union[tuple, int, None], True),
+        (Union[timezone, float], Union[timezone, float], False),  # noqa: UP007
+        (timezone | float, timezone | float, False),
+        (Optional[int], Optional[int], False),  # noqa: UP045
+        (int | None, int | None, False),
+        (Union["tuple", None, int], Union[tuple, int, None], True),  # noqa: UP007
         # forward refs
         ("bool", bool, True),
         ("tuple[dict, list[Literal[42, 99]]]", tuple[dict, list[Literal[42, 99]]], True),
+        # Annotated[X, Y] -> Y
+        (Annotated[str, str.casefold], str.casefold, False),
         # 3.10 union syntax
-        ("int | float", Union[int, float], True),
+        ("int | float", Union[int, float], True),  # noqa: UP007
+        ("int | float", int | float, True),
     ],
 )
 def test_resolve_annotation(tp, expected, expected_cache) -> None:
@@ -818,7 +810,7 @@ class TestResolveAnnotationTypeAliasType:
 
     # alias and arg in local scope
     def test_forwardref_local(self) -> None:
-        IntOrStr = Union[int, str]
+        IntOrStr = int | str
 
         annotation = CoolListGeneric["IntOrStr"]
         assert utils.resolve_annotation(annotation, globals(), locals(), {}) == list[IntOrStr]
@@ -828,11 +820,11 @@ class TestResolveAnnotationTypeAliasType:
         resolved = utils.resolve_annotation(
             utils_helper_module.ListWithForwardRefAlias, globals(), locals(), {}
         )
-        assert resolved == list[Union[int, str]]
+        assert resolved == list[int | str]
 
     # combination of the previous two, alias in other module scope and arg in local scope
     def test_forwardref_mixed(self) -> None:
-        LocalIntOrStr = Union[int, str]
+        LocalIntOrStr = int | str
 
         annotation = utils_helper_module.GenericListAlias["LocalIntOrStr"]
         assert utils.resolve_annotation(annotation, globals(), locals(), {}) == list[LocalIntOrStr]

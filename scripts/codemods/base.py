@@ -4,7 +4,7 @@ from abc import ABC
 from collections.abc import Generator
 from contextlib import contextmanager
 from contextvars import ContextVar
-from typing import TYPE_CHECKING, ClassVar, Optional
+from typing import TYPE_CHECKING, ClassVar
 
 import libcst as cst
 import libcst.codemod as codemod
@@ -22,7 +22,7 @@ class NoMetadataWrapperMixin(base_type):
     # deepcopying the entire module on initialization
 
     @contextmanager
-    def _handle_metadata_reference(self, tree: cst.Module) -> Generator[cst.Module, None, None]:
+    def _handle_metadata_reference(self, tree: cst.Module) -> Generator[cst.Module]:
         ctx_unsafe_skip_copy.set(True)
         with super()._handle_metadata_reference(tree) as res:
             ctx_unsafe_skip_copy.set(False)
@@ -41,7 +41,7 @@ cst.MetadataWrapper.__init__ = patched_init
 # similar to `VisitorBasedCodemodCommand`,
 # except without the `MatcherDecoratableTransformer` base for performance reasons
 class BaseCodemodCommand(NoMetadataWrapperMixin, cst.CSTTransformer, codemod.CodemodCommand, ABC):
-    CHECK_MARKER: ClassVar[Optional[str]] = None
+    CHECK_MARKER: ClassVar[str | None] = None
 
     def transform_module(self, tree: cst.Module) -> cst.Module:
         if self.CHECK_MARKER:

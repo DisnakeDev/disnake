@@ -2,13 +2,11 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     ClassVar,
-    Optional,
     TypeVar,
     overload,
 )
@@ -36,7 +34,7 @@ __all__ = (
 
 
 class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
-    """Represents a UI channel select menu.
+    r"""Represents a UI channel select menu.
 
     This is usually represented as a drop down menu.
 
@@ -59,10 +57,10 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select is disabled.
-    channel_types: :class:`list`\\[:class:`.ChannelType`] | :data:`None`
+    channel_types: :class:`list`\[:class:`.ChannelType`] | :data:`None`
         The list of channel types that can be selected in this select menu.
         Defaults to all types (i.e. :data:`None`).
-    default_values: :class:`~collections.abc.Sequence`\\[:class:`.abc.GuildChannel` | :class:`.Thread` | :class:`.abc.PrivateChannel` | :class:`.PartialMessageable` | :class:`.SelectDefaultValue` | :class:`.Object`] | :data:`None`
+    default_values: :class:`~collections.abc.Sequence`\[:class:`.abc.GuildChannel` | :class:`.Thread` | :class:`.abc.PrivateChannel` | :class:`.PartialMessageable` | :class:`.SelectDefaultValue` | :class:`.Object`] | :data:`None`
         The list of values (channels) that are selected by default.
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
@@ -73,9 +71,10 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
 
         .. versionadded:: 2.11
     id: :class:`int`
-        The numeric identifier for the component. Must be unique within the message.
+        The numeric identifier for the component. Must be unique within a message or modal.
+        This is always present in components received from the API.
         If set to ``0`` (the default) when sending a component, the API will assign
-        sequential identifiers to the components in the message.
+        sequential identifiers to the components in the message or modal.
 
         .. versionadded:: 2.11
     row: :class:`int` | :data:`None`
@@ -87,7 +86,7 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
 
     Attributes
     ----------
-    values: :class:`list`\\[:class:`.abc.GuildChannel` | :class:`.Thread` | :class:`.abc.PrivateChannel` | :class:`.PartialMessageable`]
+    values: :class:`list`\[:class:`.abc.GuildChannel` | :class:`.Thread` | :class:`.abc.PrivateChannel` | :class:`.PartialMessageable`]
         A list of channels that have been selected by the user.
     """
 
@@ -114,15 +113,15 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
         self: ChannelSelect[None],
         *,
         custom_id: str = ...,
-        placeholder: Optional[str] = None,
+        placeholder: str | None = None,
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
-        channel_types: Optional[list[ChannelType]] = None,
-        default_values: Optional[Sequence[SelectDefaultValueInputType[AnyChannel]]] = None,
+        channel_types: list[ChannelType] | None = None,
+        default_values: Sequence[SelectDefaultValueInputType[AnyChannel]] | None = None,
         required: bool = True,
         id: int = 0,
-        row: Optional[int] = None,
+        row: int | None = None,
     ) -> None: ...
 
     @overload
@@ -130,30 +129,30 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
         self: ChannelSelect[V_co],
         *,
         custom_id: str = ...,
-        placeholder: Optional[str] = None,
+        placeholder: str | None = None,
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
-        channel_types: Optional[list[ChannelType]] = None,
-        default_values: Optional[Sequence[SelectDefaultValueInputType[AnyChannel]]] = None,
+        channel_types: list[ChannelType] | None = None,
+        default_values: Sequence[SelectDefaultValueInputType[AnyChannel]] | None = None,
         required: bool = True,
         id: int = 0,
-        row: Optional[int] = None,
+        row: int | None = None,
     ) -> None: ...
 
     def __init__(
         self,
         *,
         custom_id: str = MISSING,
-        placeholder: Optional[str] = None,
+        placeholder: str | None = None,
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
-        channel_types: Optional[list[ChannelType]] = None,
-        default_values: Optional[Sequence[SelectDefaultValueInputType[AnyChannel]]] = None,
+        channel_types: list[ChannelType] | None = None,
+        default_values: Sequence[SelectDefaultValueInputType[AnyChannel]] | None = None,
         required: bool = True,
         id: int = 0,
-        row: Optional[int] = None,
+        row: int | None = None,
     ) -> None:
         super().__init__(
             ChannelSelectMenu,
@@ -186,12 +185,12 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
         )
 
     @property
-    def channel_types(self) -> Optional[list[ChannelType]]:
-        """:class:`list`\\[:class:`disnake.ChannelType`] | :data:`None`: A list of channel types that can be selected in this select menu."""
+    def channel_types(self) -> list[ChannelType] | None:
+        r""":class:`list`\[:class:`disnake.ChannelType`] | :data:`None`: A list of channel types that can be selected in this select menu."""
         return self._underlying.channel_types
 
     @channel_types.setter
-    def channel_types(self, value: Optional[list[ChannelType]]) -> None:
+    def channel_types(self, value: list[ChannelType] | None) -> None:
         if value is not None:
             if not isinstance(value, list):
                 msg = "channel_types must be a list of ChannelType"
@@ -209,15 +208,15 @@ S_co = TypeVar("S_co", bound="ChannelSelect", covariant=True)
 @overload
 def channel_select(
     *,
-    placeholder: Optional[str] = None,
+    placeholder: str | None = None,
     custom_id: str = ...,
     min_values: int = 1,
     max_values: int = 1,
     disabled: bool = False,
-    channel_types: Optional[list[ChannelType]] = None,
-    default_values: Optional[Sequence[SelectDefaultValueInputType[AnyChannel]]] = None,
+    channel_types: list[ChannelType] | None = None,
+    default_values: Sequence[SelectDefaultValueInputType[AnyChannel]] | None = None,
     id: int = 0,
-    row: Optional[int] = None,
+    row: int | None = None,
 ) -> Callable[
     [ItemCallbackType[V_co, ChannelSelect[V_co]]], DecoratedItem[ChannelSelect[V_co]]
 ]: ...
@@ -232,9 +231,9 @@ def channel_select(
 def channel_select(
     cls: Callable[..., S_co] = ChannelSelect[Any], **kwargs: Any
 ) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]:
-    """A decorator that attaches a channel select menu to a component.
+    r"""A decorator that attaches a channel select menu to a component.
 
-    The function being decorated should have three parameters, ``self`` representing
+    The function being decorated should have three parameters: ``self`` representing
     the :class:`disnake.ui.View`, the :class:`disnake.ui.ChannelSelect` that was
     interacted with, and the :class:`disnake.MessageInteraction`.
 
@@ -245,10 +244,10 @@ def channel_select(
 
     Parameters
     ----------
-    cls: :class:`~collections.abc.Callable`\\[..., :class:`ChannelSelect`]
-        A callable (may be a :class:`ChannelSelect` subclass) to create a new instance of this component.
+    cls: :class:`~collections.abc.Callable`\[..., :class:`ChannelSelect`]
+        A callable (such as a :class:`ChannelSelect` subclass) returning an instance of a :class:`ChannelSelect`.
         If provided, the other parameters described below do not apply.
-        Instead, this decorator will accept the same keywords as the passed callable/class does.
+        Instead, this decorator will accept the same keyword arguments as the passed callable does.
     placeholder: :class:`str` | :data:`None`
         The placeholder text that is shown if nothing is selected, if any.
     custom_id: :class:`str`
@@ -262,18 +261,18 @@ def channel_select(
         Defaults to 1 and must be between 1 and 25.
     disabled: :class:`bool`
         Whether the select is disabled. Defaults to ``False``.
-    channel_types: :class:`list`\\[:class:`.ChannelType`] | :data:`None`
+    channel_types: :class:`list`\[:class:`.ChannelType`] | :data:`None`
         The list of channel types that can be selected in this select menu.
         Defaults to all types (i.e. :data:`None`).
-    default_values: :class:`~collections.abc.Sequence`\\[:class:`.abc.GuildChannel` | :class:`.Thread` | :class:`.abc.PrivateChannel` | :class:`.PartialMessageable` | :class:`.SelectDefaultValue` | :class:`.Object`] | :data:`None`
+    default_values: :class:`~collections.abc.Sequence`\[:class:`.abc.GuildChannel` | :class:`.Thread` | :class:`.abc.PrivateChannel` | :class:`.PartialMessageable` | :class:`.SelectDefaultValue` | :class:`.Object`] | :data:`None`
         The list of values (channels) that are selected by default.
         If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
         .. versionadded:: 2.10
     id: :class:`int`
-        The numeric identifier for the component. Must be unique within the message.
+        The numeric identifier for the component. Must be unique within a view.
         If set to ``0`` (the default) when sending a component, the API will assign
-        sequential identifiers to the components in the message.
+        sequential identifiers to the components in the view.
 
         .. versionadded:: 2.11
     row: :class:`int` | :data:`None`
@@ -282,5 +281,11 @@ def channel_select(
         like to control the relative positioning of the row then passing an index is advised.
         For example, row=1 will show up before row=2. Defaults to :data:`None`, which is automatic
         ordering. The row number must be between 0 and 4 (i.e. zero indexed).
+
+    Raises
+    ------
+    TypeError
+        The decorated function was not a coroutine function,
+        or the ``cls`` parameter was not a callable or a subclass of :class:`ChannelSelect`.
     """
     return _create_decorator(cls, **kwargs)

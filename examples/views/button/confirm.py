@@ -3,7 +3,6 @@
 """A confirm/cancel button example using views."""
 
 import os
-from typing import Optional
 
 import disnake
 from disnake.ext import commands
@@ -13,7 +12,7 @@ from disnake.ext import commands
 class Confirm(disnake.ui.View):
     def __init__(self):
         super().__init__(timeout=10.0)
-        self.value: Optional[bool] = None
+        self.value: bool | None = None
 
     # When the confirm button is pressed, set the inner value to `True` and
     # stop the View from listening to more input.

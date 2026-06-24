@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Optional, TypedDict
+from typing import TypedDict
 
 from typing_extensions import NotRequired
 
@@ -17,8 +17,8 @@ class PartialSoundboardSound(TypedDict):
 
 class SoundboardSound(PartialSoundboardSound):
     name: str
-    emoji_id: Optional[Snowflake]
-    emoji_name: Optional[str]
+    emoji_id: Snowflake | None
+    emoji_name: str | None
     available: bool
 
 

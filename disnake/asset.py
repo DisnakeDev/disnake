@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import io
 import os
-from typing import TYPE_CHECKING, Any, Literal, Optional, Union
+from typing import TYPE_CHECKING, Literal, TypeAlias, Union
 
 import yarl
 
@@ -20,9 +20,9 @@ if TYPE_CHECKING:
     from .state import ConnectionState
     from .webhook.async_ import BaseWebhook, _WebhookState
 
-    ValidStaticFormatTypes = Literal["webp", "jpeg", "jpg", "png"]
-    ValidAssetFormatTypes = Literal["webp", "jpeg", "jpg", "png", "gif"]
-    AnyState = Union[ConnectionState, _WebhookState[BaseWebhook]]
+    ValidStaticFormatTypes: TypeAlias = Literal["webp", "jpeg", "jpg", "png"]
+    ValidAssetFormatTypes: TypeAlias = Literal["webp", "jpeg", "jpg", "png", "gif"]
+    AnyState: TypeAlias = ConnectionState | _WebhookState[BaseWebhook]
 
 AssetBytes = Union[utils._BytesLike, "AssetMixin"]
 
@@ -35,7 +35,7 @@ MISSING = utils.MISSING
 
 class AssetMixin:
     url: str
-    _state: Optional[AnyState]
+    _state: AnyState | None
 
     __slots__: tuple[str, ...] = ("_state",)
 
@@ -66,7 +66,7 @@ class AssetMixin:
 
     async def save(
         self,
-        fp: Union[str, bytes, os.PathLike[str], os.PathLike[bytes], io.BufferedIOBase],
+        fp: str | bytes | os.PathLike[str] | os.PathLike[bytes] | io.BufferedIOBase,
         *,
         seek_begin: bool = True,
     ) -> int:
@@ -112,8 +112,8 @@ class AssetMixin:
         self,
         *,
         spoiler: bool = False,
-        filename: Optional[str] = None,
-        description: Optional[str] = None,
+        filename: str | None = None,
+        description: str | None = None,
     ) -> File:
         """|coro|
 
@@ -374,7 +374,7 @@ class Asset(AssetMixin):
         shorten = self._url.replace(self.BASE, "")
         return f"<Asset url={shorten!r}>"
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         return isinstance(other, Asset) and self._url == other._url
 
     def __hash__(self) -> int:

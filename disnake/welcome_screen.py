@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING
 
 from . import utils
 from .partial_emoji import PartialEmoji, _EmojiTag
@@ -51,11 +51,11 @@ class WelcomeScreenChannel:
         *,
         id: int,
         description: str,
-        emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
+        emoji: str | Emoji | PartialEmoji | None = None,
     ) -> None:
         self.id: int = id
         self.description: str = description
-        self.emoji: Optional[Union[Emoji, PartialEmoji]] = None
+        self.emoji: Emoji | PartialEmoji | None = None
         if emoji is None:
             self.emoji = None
         elif isinstance(emoji, str):
@@ -98,7 +98,7 @@ class WelcomeScreenChannel:
 
 
 class WelcomeScreen:
-    """Represents a Discord welcome screen for a :class:`Guild`.
+    r"""Represents a Discord welcome screen for a :class:`Guild`.
 
     .. versionadded:: 2.5
 
@@ -106,7 +106,7 @@ class WelcomeScreen:
     ----------
     description: :class:`str` | :data:`None`
         The guild description in the welcome screen.
-    channels: :class:`list`\\[:class:`WelcomeScreenChannel`]
+    channels: :class:`list`\[:class:`WelcomeScreenChannel`]
         The welcome screen's channels.
     """
 
@@ -122,11 +122,11 @@ class WelcomeScreen:
         *,
         data: WelcomeScreenPayload,
         state: ConnectionState,
-        guild: Union[Guild, PartialInviteGuild],
+        guild: Guild | PartialInviteGuild,
     ) -> None:
         self._state = state
         self._guild = guild
-        self.description: Optional[str] = data.get("description")
+        self.description: str | None = data.get("description")
         self.channels: list[WelcomeScreenChannel] = [
             WelcomeScreenChannel._from_data(data=channel, state=state)
             for channel in data["welcome_channels"]
@@ -146,11 +146,11 @@ class WelcomeScreen:
         self,
         *,
         enabled: bool = MISSING,
-        description: Optional[str] = MISSING,
-        channels: Optional[list[WelcomeScreenChannel]] = MISSING,
-        reason: Optional[str] = None,
+        description: str | None = MISSING,
+        channels: list[WelcomeScreenChannel] | None = MISSING,
+        reason: str | None = None,
     ) -> WelcomeScreen:
-        """|coro|
+        r"""|coro|
 
         Edits the welcome screen.
 
@@ -165,7 +165,7 @@ class WelcomeScreen:
             Whether the welcome screen is enabled.
         description: :class:`str` | :data:`None`
             The new guild description in the welcome screen.
-        channels: :class:`list`\\[:class:`WelcomeScreenChannel`] | :data:`None`
+        channels: :class:`list`\[:class:`WelcomeScreenChannel`] | :data:`None`
             The new welcome channels.
         reason: :class:`str` | :data:`None`
             The reason for editing the welcome screen. Shows up on the audit log.

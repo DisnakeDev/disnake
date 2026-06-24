@@ -1,1 +1,0 @@
-Add new ``s`` and ``S`` timestamp styles to :func:`utils.format_dt`.

@@ -17,10 +17,9 @@ class DocstringTransformer(BaseCodemodCommand):
         prefix = simple_string.prefix
 
         new_inner = apply_replacements(current, include_double_backslash=True)
-        # TODO: enable D301 and raw docstrings
-        # if r"\\" in new_inner:
-        #     prefix = "r"
-        #     new_inner = new_inner.replace(r"\\", "\\")
+        if r"\\" in new_inner:
+            prefix = "r"
+            new_inner = new_inner.replace(r"\\", "\\")
         new_value = f"{prefix}{simple_string.quote}{new_inner}{simple_string.quote}"
         return simple_string.with_changes(value=new_value)
 
