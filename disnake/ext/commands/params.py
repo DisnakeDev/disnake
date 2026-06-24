@@ -515,7 +515,7 @@ class ParamInfo:
         large: bool = False,
         min_length: int | None = None,
         max_length: int | None = None,
-        file_types: list[str] | None = None,
+        file_types: list[Literal["image", "video", "audio"] | str] | None = None,
     ) -> None:
         name_loc = Localized._cast(name, False)
         self.name: str = name_loc.string or ""
@@ -1157,7 +1157,7 @@ def Param(
     large: bool = False,
     min_length: int | None = None,
     max_length: int | None = None,
-    file_types: list[str] | None = None,
+    file_types: list[Literal["image", "video", "audio"] | str] | None = None,
     **kwargs: Any,
 ) -> Any:
     r"""A special function that creates an instance of :class:`ParamInfo` that contains some information about a

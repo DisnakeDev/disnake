@@ -6,7 +6,7 @@ import math
 import re
 from abc import ABC
 from collections.abc import Mapping, Sequence
-from typing import TYPE_CHECKING, ClassVar, TypeAlias, overload
+from typing import TYPE_CHECKING, ClassVar, Literal, TypeAlias, overload
 
 from . import utils
 from .enums import (
@@ -292,7 +292,7 @@ class Option:
         max_value: float | None = None,
         min_length: int | None = None,
         max_length: int | None = None,
-        file_types: list[str] | None = None,
+        file_types: list[Literal["image", "video", "audio"] | str] | None = None,
     ) -> None:
         name_loc = Localized._cast(name, True)
         _validate_name(name_loc.string)
@@ -349,7 +349,7 @@ class Option:
         if file_types is not None and not all(isinstance(t, str) for t in file_types):
             msg = "file_types must be a list of `str`s"
             raise TypeError(msg)
-        self.file_types: list[str] = file_types or []
+        self.file_types: list[Literal["image", "video", "audio"] | str] = file_types or []
 
     def __repr__(self) -> str:
         return (
@@ -434,7 +434,7 @@ class Option:
         max_value: float | None = None,
         min_length: int | None = None,
         max_length: int | None = None,
-        file_types: list[str] | None = None,
+        file_types: list[Literal["image", "video", "audio"] | str] | None = None,
     ) -> None:
         """Adds an option to the current list of options,
         parameters are the same as for :class:`Option`.
@@ -1235,7 +1235,7 @@ class SlashCommand(ApplicationCommand):
         max_value: float | None = None,
         min_length: int | None = None,
         max_length: int | None = None,
-        file_types: list[str] | None = None,
+        file_types: list[Literal["image", "video", "audio"] | str] | None = None,
     ) -> None:
         """Adds an option to the current list of options,
         parameters are the same as for :class:`Option`

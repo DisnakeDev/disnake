@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, ClassVar, Literal
 
 from ..components import FileUpload as FileUploadComponent
 from ..enums import ComponentType
@@ -71,7 +71,7 @@ class FileUpload(UIComponent):
         min_values: int = 1,
         max_values: int = 1,
         required: bool = True,
-        file_types: list[str] | None = None,
+        file_types: list[Literal["image", "video", "audio"] | str] | None = None,
         id: int = 0,
     ) -> None:
         custom_id = os.urandom(16).hex() if custom_id is MISSING else custom_id
@@ -122,7 +122,7 @@ class FileUpload(UIComponent):
         self._underlying.required = bool(value)
 
     @property
-    def file_types(self) -> list[str] | None:
+    def file_types(self) -> list[Literal["image", "video", "audio"] | str] | None:
         r""":class:`list`\[:class:`str`] | :data:`None`: A list of file types that can be uploaded with this component.
 
         .. versionadded:: |vnext|
@@ -130,7 +130,7 @@ class FileUpload(UIComponent):
         return self._underlying.file_types
 
     @file_types.setter
-    def file_types(self, value: list[str] | None) -> None:
+    def file_types(self, value: list[Literal["image", "video", "audio"] | str] | None) -> None:
         if value is not None:
             if not isinstance(value, list):
                 msg = "file_types must be a list of str"
