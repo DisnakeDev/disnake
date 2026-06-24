@@ -5,7 +5,7 @@ from __future__ import annotations
 import colorsys
 import random
 from collections.abc import Callable
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -21,7 +21,7 @@ _convertible_colours: dict[str, Callable[[type[Colour]], Colour]] = {}
 
 # used to limit callable methods from ColourConverter
 class _converter_target(classmethod):
-    def __set_name__(self, owner: Any, name: str) -> None:
+    def __set_name__(self, owner: type[object], name: str) -> None:
         _convertible_colours[name] = self.__wrapped__
 
 
