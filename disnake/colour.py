@@ -5,7 +5,7 @@ from __future__ import annotations
 import colorsys
 import random
 from collections.abc import Callable
-from typing import TYPE_CHECKING, TypeVar
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -17,19 +17,16 @@ __all__ = (
 )
 
 ColourFunc = Callable[[type["Colour"]], "Colour"]
-FuncT = TypeVar("FuncT", bound=ColourFunc)
-
 _convertible_colours: dict[str, ColourFunc] = {}
 
 
-# used to limit callable methods from ColourConverter
-def converter_target(*, aliases: tuple[str, ...] = ()) -> Callable[[FuncT], FuncT]:
-    def decorator(f: FuncT) -> FuncT:
-        for name in (f.__name__, *aliases):
-            _convertible_colours[name] = f
-        return f
-
-    return decorator
+if TYPE_CHECKING:
+    converter_target = classmethod["Colour", [], "Colour"]
+else:
+    # used to limit callable methods from ColourConverter
+    class converter_target(classmethod):
+        def __set_name__(self, owner: Any, name: str) -> None:
+            _convertible_colours[name] = self.__wrapped__
 
 
 class Colour:
@@ -126,8 +123,7 @@ class Colour:
         rgb = colorsys.hsv_to_rgb(h, s, v)
         return cls.from_rgb(*(int(x * 255) for x in rgb))
 
-    @classmethod
-    @converter_target()
+    @converter_target
     def default(cls) -> Self:
         """A factory method that returns a :class:`Colour` with a value of ``0``."""
         return cls(0)
@@ -140,8 +136,7 @@ class Colour:
         """
         return cls(int(hex_str.removeprefix("#"), 16))
 
-    @classmethod
-    @converter_target()
+    @converter_target
     def random(cls, *, seed: int | str | float | bytes | bytearray | None = None) -> Self:
         """A factory method that returns a :class:`Colour` with a random hue.
 
@@ -162,20 +157,17 @@ class Colour:
         rand = random if seed is None else random.Random(seed)
         return cls.from_hsv(rand.random(), 1, 1)
 
-    @classmethod
-    @converter_target()
+    @converter_target
     def teal(cls) -> Self:
         """A factory method that returns a :class:`Colour` with a value of ``0x1abc9c``."""
         return cls(0x1ABC9C)
 
-    @classmethod
-    @converter_target()
+    @converter_target
     def dark_teal(cls) -> Self:
         """A factory method that returns a :class:`Colour` with a value of ``0x11806a``."""
         return cls(0x11806A)
 
-    @classmethod
-    @converter_target()
+    @converter_target
     def brand_green(cls) -> Self:
         """A factory method that returns a :class:`Colour` with a value of ``0x57F287``.
 
@@ -183,80 +175,67 @@ class Colour:
         """
         return cls(0x57F287)
 
-    @classmethod
-    @converter_target()
+    @converter_target
     def green(cls) -> Self:
         """A factory method that returns a :class:`Colour` with a value of ``0x2ecc71``."""
         return cls(0x2ECC71)
 
-    @classmethod
-    @converter_target()
+    @converter_target
     def dark_green(cls) -> Self:
         """A factory method that returns a :class:`Colour` with a value of ``0x1f8b4c``."""
         return cls(0x1F8B4C)
 
-    @classmethod
-    @converter_target()
+    @converter_target
     def blue(cls) -> Self:
         """A factory method that returns a :class:`Colour` with a value of ``0x3498db``."""
         return cls(0x3498DB)
 
-    @classmethod
-    @converter_target()
+    @converter_target
     def dark_blue(cls) -> Self:
         """A factory method that returns a :class:`Colour` with a value of ``0x206694``."""
         return cls(0x206694)
 
-    @classmethod
-    @converter_target()
+    @converter_target
     def purple(cls) -> Self:
         """A factory method that returns a :class:`Colour` with a value of ``0x9b59b6``."""
         return cls(0x9B59B6)
 
-    @classmethod
-    @converter_target()
+    @converter_target
     def dark_purple(cls) -> Self:
         """A factory method that returns a :class:`Colour` with a value of ``0x71368a``."""
         return cls(0x71368A)
 
-    @classmethod
-    @converter_target()
+    @converter_target
     def magenta(cls) -> Self:
         """A factory method that returns a :class:`Colour` with a value of ``0xe91e63``."""
         return cls(0xE91E63)
 
-    @classmethod
-    @converter_target()
+    @converter_target
     def dark_magenta(cls) -> Self:
         """A factory method that returns a :class:`Colour` with a value of ``0xad1457``."""
         return cls(0xAD1457)
 
-    @classmethod
-    @converter_target()
+    @converter_target
     def gold(cls) -> Self:
         """A factory method that returns a :class:`Colour` with a value of ``0xf1c40f``."""
         return cls(0xF1C40F)
 
-    @classmethod
-    @converter_target()
+    @converter_target
     def dark_gold(cls) -> Self:
         """A factory method that returns a :class:`Colour` with a value of ``0xc27c0e``."""
         return cls(0xC27C0E)
 
-    @classmethod
-    @converter_target()
+    @converter_target
     def orange(cls) -> Self:
         """A factory method that returns a :class:`Colour` with a value of ``0xe67e22``."""
         return cls(0xE67E22)
 
-    @classmethod
-    @converter_target()
+    @converter_target
     def dark_orange(cls) -> Self:
         """A factory method that returns a :class:`Colour` with a value of ``0xa84300``."""
         return cls(0xA84300)
 
-    @classmethod
-    @converter_target()
+    @converter_target
     def brand_red(cls) -> Self:
         """A factory method that returns a :class:`Colour` with a value of ``0xED4245``.
 
@@ -264,72 +243,62 @@ class Colour:
         """
         return cls(0xED4245)
 
-    @classmethod
-    @converter_target()
+    @converter_target
     def red(cls) -> Self:
         """A factory method that returns a :class:`Colour` with a value of ``0xe74c3c``."""
         return cls(0xE74C3C)
 
-    @classmethod
-    @converter_target()
+    @converter_target
     def dark_red(cls) -> Self:
         """A factory method that returns a :class:`Colour` with a value of ``0x992d22``."""
         return cls(0x992D22)
 
-    @classmethod
-    @converter_target(aliases=("lighter_gray",))
+    @converter_target
     def lighter_grey(cls) -> Self:
         """A factory method that returns a :class:`Colour` with a value of ``0x95a5a6``."""
         return cls(0x95A5A6)
 
     lighter_gray = lighter_grey
 
-    @classmethod
-    @converter_target(aliases=("dark_gray",))
+    @converter_target
     def dark_grey(cls) -> Self:
         """A factory method that returns a :class:`Colour` with a value of ``0x607d8b``."""
         return cls(0x607D8B)
 
     dark_gray = dark_grey
 
-    @classmethod
-    @converter_target(aliases=("light_gray",))
+    @converter_target
     def light_grey(cls) -> Self:
         """A factory method that returns a :class:`Colour` with a value of ``0x979c9f``."""
         return cls(0x979C9F)
 
     light_gray = light_grey
 
-    @classmethod
-    @converter_target(aliases=("darker_gray",))
+    @converter_target
     def darker_grey(cls) -> Self:
         """A factory method that returns a :class:`Colour` with a value of ``0x546e7a``."""
         return cls(0x546E7A)
 
     darker_gray = darker_grey
 
-    @classmethod
-    @converter_target(aliases=("old_blurple",))
+    @converter_target
     def og_blurple(cls) -> Self:
         """A factory method that returns a :class:`Colour` with a value of ``0x7289da``."""
         return cls(0x7289DA)
 
     old_blurple = og_blurple
 
-    @classmethod
-    @converter_target()
+    @converter_target
     def blurple(cls) -> Self:
         """A factory method that returns a :class:`Colour` with a value of ``0x5865F2``."""
         return cls(0x5865F2)
 
-    @classmethod
-    @converter_target()
+    @converter_target
     def greyple(cls) -> Self:
         """A factory method that returns a :class:`Colour` with a value of ``0x99aab5``."""
         return cls(0x99AAB5)
 
-    @classmethod
-    @converter_target()
+    @converter_target
     def dark_theme(cls) -> Self:
         """A factory method that returns a :class:`Colour` with a value of ``0x313338``.
         This will appear transparent on Discord's dark theme.
@@ -338,8 +307,7 @@ class Colour:
         """
         return cls(0x313338)
 
-    @classmethod
-    @converter_target()
+    @converter_target
     def fuchsia(cls) -> Self:
         """A factory method that returns a :class:`Colour` with a value of ``0xEB459E``.
 
@@ -347,8 +315,7 @@ class Colour:
         """
         return cls(0xEB459E)
 
-    @classmethod
-    @converter_target()
+    @converter_target
     def yellow(cls) -> Self:
         """A factory method that returns a :class:`Colour` with a value of ``0xFEE75C``.
 
@@ -356,8 +323,7 @@ class Colour:
         """
         return cls(0xFEE75C)
 
-    @classmethod
-    @converter_target()
+    @converter_target
     def light_embed(cls) -> Self:
         """A factory method that returns a :class:`Colour` with a value of ``0xF2F3F5``.
         This matches the embed background colour on Discord's light theme.
@@ -366,8 +332,7 @@ class Colour:
         """
         return cls(0xF2F3F5)
 
-    @classmethod
-    @converter_target()
+    @converter_target
     def dark_embed(cls) -> Self:
         """A factory method that returns a :class:`Colour` with a value of ``0x2B2D31``.
         This matches the embed background colour on Discord's dark theme.
