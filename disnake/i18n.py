@@ -122,9 +122,7 @@ class Localized(Generic[StringT]):
     def _cast(cls, string: LocalizedRequired, required: Literal[True]) -> Localized[str]: ...
 
     @classmethod
-    def _cast(
-        cls: type[Localized[Any]], string: str | None | Localized[Any], required: bool
-    ) -> Localized[Any]:
+    def _cast(cls, string: StringT | Localized[StringT], required: bool) -> Localized[StringT]:
         if not isinstance(string, Localized):
             string = cls(string, data=None)
 
