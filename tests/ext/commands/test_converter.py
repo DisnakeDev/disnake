@@ -21,7 +21,7 @@ class TestGreedy:
 
 
 class TestColourConverter:
-    @pytest.mark.parametrize("colour_name", ["blurple", "dark_teal"])
+    @pytest.mark.parametrize("colour_name", ["blurple", "lighter_grey", "lighter_gray"])
     @pytest.mark.asyncio
     async def test_name_valid(self, colour_name: str) -> None:
         # should not raise
