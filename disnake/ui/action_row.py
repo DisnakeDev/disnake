@@ -104,6 +104,13 @@ MessageUIComponent: TypeAlias = ActionRowMessageComponent
 ModalUIComponent: TypeAlias = ActionRowModalComponent
 Components: TypeAlias = ComponentInput[ActionRowChildT, NoReturn]
 
+MessageActionRowT = TypeVar(
+    "MessageActionRowT", bound="ActionRow[ActionRowMessageComponent]", infer_variance=True
+)
+ModalActionRowT = TypeVar(
+    "ModalActionRowT", bound="ActionRow[ActionRowModalComponent]", infer_variance=True
+)
+
 # TODO(3.0): deprecate ActionRowModalComponent
 ActionRowChildDefaultT = TypeVar(
     "ActionRowChildDefaultT",
@@ -254,7 +261,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
         return self
 
     def add_button(
-        self: ActionRow[ActionRowMessageComponent],
+        self: MessageActionRowT,
         index: int | None = None,
         *,
         style: ButtonStyle = ButtonStyle.secondary,
@@ -265,7 +272,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
         emoji: str | Emoji | PartialEmoji | None = None,
         sku_id: int | None = None,
         id: int = 0,
-    ) -> ActionRow[ActionRowMessageComponent]:
+    ) -> MessageActionRowT:
         """Add a button to the action row. Can only be used if the action
         row holds message components.
 
@@ -329,7 +336,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
         return self
 
     def add_string_select(
-        self: ActionRow[ActionRowMessageComponent],
+        self: MessageActionRowT,
         *,
         custom_id: str = MISSING,
         placeholder: str | None = None,
@@ -338,7 +345,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
         options: SelectOptionInput = MISSING,
         disabled: bool = False,
         id: int = 0,
-    ) -> ActionRow[ActionRowMessageComponent]:
+    ) -> MessageActionRowT:
         r"""Add a string select menu to the action row. Can only be used if the action
         row holds message components.
 
@@ -397,7 +404,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
     add_select = add_string_select  # backwards compatibility
 
     def add_user_select(
-        self: ActionRow[ActionRowMessageComponent],
+        self: MessageActionRowT,
         *,
         custom_id: str = MISSING,
         placeholder: str | None = None,
@@ -406,7 +413,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
         disabled: bool = False,
         default_values: Sequence[SelectDefaultValueInputType[User | Member]] | None = None,
         id: int = 0,
-    ) -> ActionRow[ActionRowMessageComponent]:
+    ) -> MessageActionRowT:
         r"""Add a user select menu to the action row. Can only be used if the action
         row holds message components.
 
@@ -463,7 +470,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
         return self
 
     def add_role_select(
-        self: ActionRow[ActionRowMessageComponent],
+        self: MessageActionRowT,
         *,
         custom_id: str = MISSING,
         placeholder: str | None = None,
@@ -472,7 +479,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
         disabled: bool = False,
         default_values: Sequence[SelectDefaultValueInputType[Role]] | None = None,
         id: int = 0,
-    ) -> ActionRow[ActionRowMessageComponent]:
+    ) -> MessageActionRowT:
         r"""Add a role select menu to the action row. Can only be used if the action
         row holds message components.
 
@@ -529,7 +536,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
         return self
 
     def add_mentionable_select(
-        self: ActionRow[ActionRowMessageComponent],
+        self: MessageActionRowT,
         *,
         custom_id: str = MISSING,
         placeholder: str | None = None,
@@ -539,7 +546,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
         default_values: Sequence[SelectDefaultValueMultiInputType[User | Member | Role]]
         | None = None,
         id: int = 0,
-    ) -> ActionRow[ActionRowMessageComponent]:
+    ) -> MessageActionRowT:
         r"""Add a mentionable (user/member/role) select menu to the action row. Can only be used if the action
         row holds message components.
 
@@ -598,7 +605,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
         return self
 
     def add_channel_select(
-        self: ActionRow[ActionRowMessageComponent],
+        self: MessageActionRowT,
         *,
         custom_id: str = MISSING,
         placeholder: str | None = None,
@@ -608,7 +615,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
         channel_types: list[ChannelType] | None = None,
         default_values: Sequence[SelectDefaultValueInputType[AnyChannel]] | None = None,
         id: int = 0,
-    ) -> ActionRow[ActionRowMessageComponent]:
+    ) -> MessageActionRowT:
         r"""Add a channel select menu to the action row. Can only be used if the action
         row holds message components.
 
@@ -670,7 +677,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
 
     @utils.deprecated('Use `Label("<text>", TextInput(...))` instead.')
     def add_text_input(
-        self: ActionRow[ActionRowModalComponent],
+        self: ModalActionRowT,  # pyright: ignore[reportGeneralTypeIssues]
         *,
         label: str,
         custom_id: str,
@@ -681,7 +688,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
         min_length: int | None = None,
         max_length: int | None = None,
         id: int = 0,
-    ) -> ActionRow[ActionRowModalComponent]:
+    ) -> ModalActionRowT:
         """Add a text input to the action row. Can only be used if the action
         row holds modal components.
 
