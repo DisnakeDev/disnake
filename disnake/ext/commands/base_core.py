@@ -401,14 +401,14 @@ class InvokableApplicationCommand(ABC):
             raise CheckFailure(msg)
 
         if self._max_concurrency is not None:
-            await self._max_concurrency.acquire(inter)  # pyright: ignore[reportArgumentType]
+            await self._max_concurrency.acquire(inter)
 
         try:
             self._prepare_cooldowns(inter)
             await self.call_before_hooks(inter)
         except Exception:
             if self._max_concurrency is not None:
-                await self._max_concurrency.release(inter)  # pyright: ignore[reportArgumentType]
+                await self._max_concurrency.release(inter)
             raise
 
     def is_on_cooldown(self, inter: ApplicationCommandInteraction) -> bool:
@@ -483,7 +483,7 @@ class InvokableApplicationCommand(ABC):
             raise CommandInvokeError(exc) from exc
         finally:
             if self._max_concurrency is not None:
-                await self._max_concurrency.release(inter)  # pyright: ignore[reportArgumentType]
+                await self._max_concurrency.release(inter)
 
             await self.call_after_hooks(inter)
 

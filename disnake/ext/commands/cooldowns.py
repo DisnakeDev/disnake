@@ -6,8 +6,9 @@ import asyncio
 import time
 from collections import deque
 from collections.abc import Callable
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Protocol
 
+import disnake
 from disnake.enums import Enum
 from disnake.member import Member
 
@@ -25,6 +26,16 @@ __all__ = (
     "DynamicCooldownMapping",
     "MaxConcurrency",
 )
+
+
+# Context, Interaction, or Message
+class ContextType(Protocol):
+    @property
+    def author(self) -> disnake.abc.User: ...
+    @property
+    def guild(self) -> disnake.Guild | None: ...
+    @property
+    def channel(self) -> disnake.abc.MessageableChannel: ...
 
 
 class BucketType(Enum):
@@ -48,7 +59,7 @@ class BucketType(Enum):
     .. versionadded:: 1.3
     """
 
-    def get_key(self, msg: Message) -> Any:
+    def get_key(self, msg: ContextType) -> Any:
         if self is BucketType.user:
             return msg.author.id
         elif self is BucketType.guild:
@@ -69,7 +80,7 @@ class BucketType(Enum):
             ).id
         return None
 
-    def __call__(self, msg: Message) -> Any:
+    def __call__(self, msg: ContextType) -> Any:
         return self.get_key(msg)
 
 
@@ -302,7 +313,7 @@ class _Semaphore:
     def __init__(self, number: int) -> None:
         self.value: int = number
         self.loop: asyncio.AbstractEventLoop = asyncio.get_running_loop()
-        self._waiters: deque[asyncio.Future] = deque()
+        self._waiters: deque[asyncio.Future[None]] = deque()
 
     def __repr__(self) -> str:
         return f"<_Semaphore value={self.value} waiters={len(self._waiters)}>"
@@ -367,10 +378,10 @@ class MaxConcurrency:
     def __repr__(self) -> str:
         return f"<MaxConcurrency per={self.per!r} number={self.number} wait={self.wait}>"
 
-    def get_key(self, message: Message) -> Any:
+    def get_key(self, message: ContextType) -> Any:
         return self.per.get_key(message)
 
-    async def acquire(self, message: Message) -> None:
+    async def acquire(self, message: ContextType) -> None:
         key = self.get_key(message)
 
         try:
@@ -382,7 +393,7 @@ class MaxConcurrency:
         if not acquired:
             raise MaxConcurrencyReached(self.number, self.per)
 
-    async def release(self, message: Message) -> None:
+    async def release(self, message: ContextType) -> None:
         # Technically there's no reason for this function to be async
         # But it might be more useful in the future
         key = self.get_key(message)
