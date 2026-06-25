@@ -1395,7 +1395,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         self.last_message_id: int | None = utils._get_as_snowflake(data, "last_message_id")
         self.status: str | None = data.get("status")
 
-    async def _get_channel(self: Self) -> Self:
+    async def _get_channel(self) -> Self:
         return self
 
     @property
