@@ -77,7 +77,7 @@ class flag_value(Generic[T]):
             raise TypeError(msg)
         return self._parent._from_value(self.flag | other.flag)
 
-    def __invert__(self: flag_value[T]) -> T:
+    def __invert__(self) -> T:
         return ~self._parent._from_value(self.flag)
 
     @overload

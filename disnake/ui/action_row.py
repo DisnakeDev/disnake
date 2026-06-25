@@ -9,10 +9,12 @@ from typing import (
     ClassVar,
     Generic,
     NoReturn,
-    TypeVar,
+    SupportsIndex,
     cast,
     overload,
 )
+
+from typing_extensions import TypeVar
 
 from .. import utils
 from ..components import (
@@ -102,26 +104,24 @@ MessageUIComponent: TypeAlias = ActionRowMessageComponent
 ModalUIComponent: TypeAlias = ActionRowModalComponent
 Components: TypeAlias = ComponentInput[ActionRowChildT, NoReturn]
 
-StrictActionRowChildT = TypeVar(
-    "StrictActionRowChildT", ActionRowMessageComponent, ActionRowModalComponent
+MessageActionRowT = TypeVar(
+    "MessageActionRowT", bound="ActionRow[ActionRowMessageComponent]", infer_variance=True
+)
+ModalActionRowT = TypeVar(
+    "ModalActionRowT", bound="ActionRow[ActionRowModalComponent]", infer_variance=True
 )
 
-# this is cursed
-ButtonCompatibleActionRowT = TypeVar(
-    "ButtonCompatibleActionRowT",
-    bound="ActionRow[ActionRowMessageComponent] | ActionRow[WrappedComponent]",
-)
-SelectCompatibleActionRowT = TypeVar(
-    "SelectCompatibleActionRowT",
-    bound="ActionRow[ActionRowMessageComponent] | ActionRow[WrappedComponent]",
-)
-TextInputCompatibleActionRowT = TypeVar(
-    "TextInputCompatibleActionRowT",
-    bound="ActionRow[ActionRowModalComponent] | ActionRow[WrappedComponent]",
+# TODO(3.0): deprecate ActionRowModalComponent
+ActionRowChildDefaultT = TypeVar(
+    "ActionRowChildDefaultT",
+    ActionRowMessageComponent,
+    ActionRowModalComponent,
+    infer_variance=True,
+    default=ActionRowMessageComponent,
 )
 
 
-class ActionRow(UIComponent, Generic[ActionRowChildT]):
+class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
     """Represents a UI action row. Useful for lower level component manipulation.
 
     .. collapse:: operations
@@ -175,43 +175,15 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
 
     __repr_attributes__: ClassVar[tuple[str, ...]] = ("_children",)
 
-    # When unspecified and called empty, default to an ActionRow that takes any kind of component.
-
-    @overload
-    def __init__(self: ActionRow[WrappedComponent], *, id: int = 0) -> None: ...
-
-    # Explicit definitions are needed to make
-    # "ActionRow(StringSelect(), TextInput())" and
-    # "ActionRow(StringSelect(), Button())"
-    # differentiate themselves properly.
-
-    @overload
-    def __init__(
-        self: ActionRow[ActionRowMessageComponent],
-        *components: ActionRowMessageComponent,
-        id: int = 0,
-    ) -> None: ...
-
-    @overload
-    def __init__(
-        self: ActionRow[ActionRowModalComponent],
-        *components: ActionRowModalComponent,
-        id: int = 0,
-    ) -> None: ...
-
-    @overload
-    def __init__(self, *components: ActionRowChildT, id: int = 0) -> None: ...
-
-    # n.b. this should be `*components: ActionRowChildT`, but pyright does not like it
-    def __init__(self, *components: WrappedComponent, id: int = 0) -> None:
+    def __init__(self, *components: ActionRowChildDefaultT, id: int = 0) -> None:
         self._id: int = id
-        self._children: list[ActionRowChildT] = []
+        self._children: list[ActionRowChildDefaultT] = []
 
         for component in components:
             if not isinstance(component, WrappedComponent):
                 msg = f"components should be of type WrappedComponent, got {type(component).__name__}."
                 raise TypeError(msg)
-            self.append_item(component)  # pyright: ignore[reportArgumentType]
+            self.append_item(component)
 
     def __len__(self) -> int:
         return len(self._children)
@@ -228,7 +200,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         self._id = value
 
     @property
-    def children(self) -> Sequence[ActionRowChildT]:
+    def children(self) -> Sequence[ActionRowChildDefaultT]:
         r""":class:`~collections.abc.Sequence`\[:class:`WrappedComponent`]:
         A read-only proxy of the UI components stored in this action row. To add/remove
         components to/from the action row, use its methods to directly modify it.
@@ -242,7 +214,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
     def width(self) -> int:
         return sum(child.width for child in self._children)
 
-    def append_item(self, item: ActionRowChildT) -> Self:
+    def append_item(self, item: ActionRowChildDefaultT) -> Self:
         """Append a component to the action row. The component's type must match that
         of the action row.
 
@@ -261,7 +233,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         self.insert_item(len(self), item)
         return self
 
-    def insert_item(self, index: int, item: ActionRowChildT) -> Self:
+    def insert_item(self, index: int, item: ActionRowChildDefaultT) -> Self:
         """Insert a component to the action row at a given index. The component's
         type must match that of the action row.
 
@@ -289,7 +261,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         return self
 
     def add_button(
-        self: ButtonCompatibleActionRowT,
+        self: MessageActionRowT,
         index: int | None = None,
         *,
         style: ButtonStyle = ButtonStyle.secondary,
@@ -300,7 +272,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         emoji: str | Emoji | PartialEmoji | None = None,
         sku_id: int | None = None,
         id: int = 0,
-    ) -> ButtonCompatibleActionRowT:
+    ) -> MessageActionRowT:
         """Add a button to the action row. Can only be used if the action
         row holds message components.
 
@@ -364,7 +336,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         return self
 
     def add_string_select(
-        self: SelectCompatibleActionRowT,
+        self: MessageActionRowT,
         *,
         custom_id: str = MISSING,
         placeholder: str | None = None,
@@ -373,7 +345,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         options: SelectOptionInput = MISSING,
         disabled: bool = False,
         id: int = 0,
-    ) -> SelectCompatibleActionRowT:
+    ) -> MessageActionRowT:
         r"""Add a string select menu to the action row. Can only be used if the action
         row holds message components.
 
@@ -432,7 +404,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
     add_select = add_string_select  # backwards compatibility
 
     def add_user_select(
-        self: SelectCompatibleActionRowT,
+        self: MessageActionRowT,
         *,
         custom_id: str = MISSING,
         placeholder: str | None = None,
@@ -441,7 +413,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         disabled: bool = False,
         default_values: Sequence[SelectDefaultValueInputType[User | Member]] | None = None,
         id: int = 0,
-    ) -> SelectCompatibleActionRowT:
+    ) -> MessageActionRowT:
         r"""Add a user select menu to the action row. Can only be used if the action
         row holds message components.
 
@@ -498,7 +470,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         return self
 
     def add_role_select(
-        self: SelectCompatibleActionRowT,
+        self: MessageActionRowT,
         *,
         custom_id: str = MISSING,
         placeholder: str | None = None,
@@ -507,7 +479,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         disabled: bool = False,
         default_values: Sequence[SelectDefaultValueInputType[Role]] | None = None,
         id: int = 0,
-    ) -> SelectCompatibleActionRowT:
+    ) -> MessageActionRowT:
         r"""Add a role select menu to the action row. Can only be used if the action
         row holds message components.
 
@@ -564,7 +536,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         return self
 
     def add_mentionable_select(
-        self: SelectCompatibleActionRowT,
+        self: MessageActionRowT,
         *,
         custom_id: str = MISSING,
         placeholder: str | None = None,
@@ -574,7 +546,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         default_values: Sequence[SelectDefaultValueMultiInputType[User | Member | Role]]
         | None = None,
         id: int = 0,
-    ) -> SelectCompatibleActionRowT:
+    ) -> MessageActionRowT:
         r"""Add a mentionable (user/member/role) select menu to the action row. Can only be used if the action
         row holds message components.
 
@@ -633,7 +605,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         return self
 
     def add_channel_select(
-        self: SelectCompatibleActionRowT,
+        self: MessageActionRowT,
         *,
         custom_id: str = MISSING,
         placeholder: str | None = None,
@@ -643,7 +615,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         channel_types: list[ChannelType] | None = None,
         default_values: Sequence[SelectDefaultValueInputType[AnyChannel]] | None = None,
         id: int = 0,
-    ) -> SelectCompatibleActionRowT:
+    ) -> MessageActionRowT:
         r"""Add a channel select menu to the action row. Can only be used if the action
         row holds message components.
 
@@ -705,7 +677,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
 
     @utils.deprecated('Use `Label("<text>", TextInput(...))` instead.')
     def add_text_input(
-        self: TextInputCompatibleActionRowT,
+        self: ModalActionRowT,  # pyright: ignore[reportGeneralTypeIssues]
         *,
         label: str,
         custom_id: str,
@@ -716,7 +688,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         min_length: int | None = None,
         max_length: int | None = None,
         id: int = 0,
-    ) -> TextInputCompatibleActionRowT:
+    ) -> ModalActionRowT:
         """Add a text input to the action row. Can only be used if the action
         row holds modal components.
 
@@ -787,7 +759,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         self._children.clear()
         return self
 
-    def remove_item(self, item: ActionRowChildT) -> Self:
+    def remove_item(self, item: ActionRowChildDefaultT) -> Self:
         """Remove a component from the action row.
 
         This function returns the class instance to allow for fluent-style chaining.
@@ -807,7 +779,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         self._children.remove(item)
         return self
 
-    def pop(self, index: int) -> ActionRowChildT:
+    def pop(self, index: int) -> ActionRowChildDefaultT:
         """Pop the component at the provided index from the action row.
 
         .. versionadded:: 2.6
@@ -841,25 +813,27 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
     def from_component(cls, action_row: ActionRowComponent) -> Self:
         return cls(
             *cast(
-                "list[ActionRowChildT]",
+                "list[ActionRowChildDefaultT]",
                 [_to_ui_component(c) for c in action_row.children],
             ),
             id=action_row.id,
         )
 
-    def __delitem__(self, index: int | slice) -> None:
+    def __delitem__(self, index: SupportsIndex | slice[SupportsIndex | None]) -> None:
         del self._children[index]
 
     @overload
-    def __getitem__(self, index: int) -> ActionRowChildT: ...
+    def __getitem__(self, index: SupportsIndex) -> ActionRowChildDefaultT: ...
 
     @overload
-    def __getitem__(self, index: slice) -> Sequence[ActionRowChildT]: ...
+    def __getitem__(self, index: slice[SupportsIndex | None]) -> list[ActionRowChildDefaultT]: ...
 
-    def __getitem__(self, index: int | slice) -> ActionRowChildT | Sequence[ActionRowChildT]:
+    def __getitem__(
+        self, index: SupportsIndex | slice[SupportsIndex | None]
+    ) -> ActionRowChildDefaultT | list[ActionRowChildDefaultT]:
         return self._children[index]
 
-    def __iter__(self) -> Iterator[ActionRowChildT]:
+    def __iter__(self) -> Iterator[ActionRowChildDefaultT]:
         return iter(self._children)
 
     @classmethod
