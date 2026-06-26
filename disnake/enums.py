@@ -731,7 +731,7 @@ class AuditLogAction(Enum):
     onboarding_prompt_create              = 163
     onboarding_prompt_update              = 164
     onboarding_update                     = 167
-    voice_channel_status_update           = 192
+    voice_channel_status_create           = 192
     voice_channel_status_delete           = 193
     # fmt: on
 
@@ -802,7 +802,7 @@ class AuditLogAction(Enum):
             AuditLogAction.onboarding_prompt_create:              AuditLogActionCategory.create,
             AuditLogAction.onboarding_prompt_update:              AuditLogActionCategory.update,
             AuditLogAction.onboarding_update:                     AuditLogActionCategory.update,
-            AuditLogAction.voice_channel_status_update:           AuditLogActionCategory.update,
+            AuditLogAction.voice_channel_status_create:           AuditLogActionCategory.create,
             AuditLogAction.voice_channel_status_delete:           AuditLogActionCategory.delete,
         }
         # fmt: on
