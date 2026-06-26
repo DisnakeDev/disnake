@@ -1,0 +1,1 @@
+|commands| Fix :class:`~ext.commands.ColourConverter` incorrectly returning non-:class:`Colour` objects when converting some names (e.g. ``holographic_style``).
