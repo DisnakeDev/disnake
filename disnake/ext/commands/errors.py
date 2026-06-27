@@ -15,6 +15,7 @@ if TYPE_CHECKING:
     from disnake.threads import Thread
     from disnake.types.snowflake import Snowflake, SnowflakeList
 
+    from ._types import Coro
     from .context import AnyContext
     from .cooldowns import BucketType, Cooldown
     from .flag_converter import Flag
@@ -208,10 +209,10 @@ class CheckAnyFailure(CheckFailure):
     """
 
     def __init__(
-        self, checks: list[CheckFailure], errors: list[Callable[[AnyContext], bool]]
+        self, checks: list[Callable[[AnyContext], Coro[bool]]], errors: list[CheckFailure]
     ) -> None:
-        self.checks: list[CheckFailure] = checks
-        self.errors: list[Callable[[AnyContext], bool]] = errors
+        self.checks: list[Callable[[AnyContext], Coro[bool]]] = checks
+        self.errors: list[CheckFailure] = errors
         super().__init__("You do not have permission to run this command.")
 
 

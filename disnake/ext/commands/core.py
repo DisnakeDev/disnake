@@ -1788,7 +1788,7 @@ def check_any(*checks: Check) -> Callable[[T], T]:
         async def only_for_owners(ctx):
             await ctx.send('Hello mister owner!')
     """
-    unwrapped = []
+    unwrapped: list[Callable[[AnyContext], Coro[bool]]] = []
     for wrapped in checks:
         try:
             pred = wrapped.predicate
@@ -1799,7 +1799,7 @@ def check_any(*checks: Check) -> Callable[[T], T]:
             unwrapped.append(pred)
 
     async def predicate(ctx: AnyContext) -> bool:
-        errors = []
+        errors: list[CheckFailure] = []
         for func in unwrapped:
             try:
                 value = await func(ctx)
