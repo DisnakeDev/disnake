@@ -62,6 +62,7 @@ dev = [
     { include-group = "typing" },
     { include-group = "test" },
     { include-group = "build" },
+    # `docs` not included as it requires 3.12+
 ]
 nox = [
     # note: nox should be synced with nox.needs_version in noxfile.py
