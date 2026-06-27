@@ -122,7 +122,7 @@ class Localized(Generic[StringT]):
     def _cast(cls, string: LocalizedRequired, required: Literal[True]) -> Localized[str]: ...
 
     @classmethod
-    def _cast(cls, string: Localized[str | None] | str | None, required: bool) -> Localized[Any]:
+    def _cast(cls, string: LocalizedOptional | LocalizedRequired, required: bool) -> Localized[Any]:
         if not isinstance(string, Localized):
             string = cls(string, data=None)  # pyright: ignore[reportArgumentType]
 
