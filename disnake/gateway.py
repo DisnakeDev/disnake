@@ -102,7 +102,7 @@ _log = logging.getLogger(__name__)
 
 @dataclass(frozen=True)
 class GatewayParams:
-    """Container type for configuring gateway connections.
+    r"""Container type for configuring gateway connections.
 
     .. versionadded:: 2.6
 
@@ -111,10 +111,10 @@ class GatewayParams:
 
     Parameters
     ----------
-    encoding: :class:`str`
+    encoding: :data:`~typing.Literal`\[``"json"``]
         The payload encoding (``json`` is currently the only supported encoding).
         Defaults to ``"json"``.
-    compress: Literal["zlib-stream", "zstd-stream"] | :data:`None`
+    compress: :data:`~typing.Literal`\[``"zlib-stream"``, ``"zstd-stream"``] | :data:`None`
         Which transport compression method to use, if any.
         Defaults to ``"zlib-stream"``.
     """
