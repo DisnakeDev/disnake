@@ -394,8 +394,6 @@ class DiscordWebSocket:
         self.sequence: int | None = None
         # this may or may not include url parameters, we only need the host part of the url anyway
         self.resume_gateway: str | None = None
-        self._zlib: zlib._Decompress = zlib.decompressobj()
-        self._buffer: bytearray = bytearray()
         self._close_code: int | None = None
         self._rate_limiter: GatewayRatelimiter = GatewayRatelimiter()
 
@@ -404,6 +402,7 @@ class DiscordWebSocket:
         self._connection: ConnectionState
         self._discord_parsers: dict[str, Callable[[dict[str, Any]], Any]]
         self.gateway: str
+        self._decompressor: _DecompressionContext
         self.call_hooks: CallHooksFunc
         self._initial_identify: bool
         self.shard_id: int | None
@@ -463,6 +462,8 @@ class DiscordWebSocket:
         ws.session_id = session
         ws.sequence = sequence
         ws._max_heartbeat_timeout = client._connection.heartbeat_timeout
+
+        ws._decompressor = _decompressor_for_params(params)
 
         if client._enable_debug_events:
             ws.send = ws.debug_send
@@ -564,13 +565,9 @@ class DiscordWebSocket:
 
     async def received_message(self, raw_msg: str | bytes, /) -> None:
         if isinstance(raw_msg, bytes):
-            self._buffer.extend(raw_msg)
-
-            if len(raw_msg) < 4 or raw_msg[-4:] != b"\x00\x00\xff\xff":
+            if (decompressed := self._decompressor.decompress(raw_msg)) is None:
                 return
-            raw_msg = self._zlib.decompress(self._buffer)
-            raw_msg = raw_msg.decode("utf-8")
-            self._buffer = bytearray()
+            raw_msg = decompressed.decode("utf-8")
 
         self.log_receive(raw_msg)
         msg: GatewayPayload = utils._from_json(raw_msg)
@@ -1258,3 +1255,45 @@ class DiscordVoiceWebSocket:
 
         self._close_code = code
         await self.ws.close(code=code)
+
+
+class _DecompressionContext(Protocol):
+    def __init__(self) -> None: ...
+    def decompress(self, data: bytes | bytearray) -> bytes | None: ...
+
+
+# In practice, this won't be used. Disabling compression skips the
+# decompressor branch entirely.
+class NullDecompressionContext(_DecompressionContext):
+    def __init__(self) -> None:
+        pass
+
+    def decompress(self, data: bytes | bytearray) -> bytes | None:
+        return bytes(data)
+
+
+class ZlibDecompressionContext(_DecompressionContext):
+    def __init__(self) -> None:
+        self.inflator: zlib._Decompress = zlib.decompressobj()
+        self.buffer: bytearray = bytearray()
+
+    def decompress(self, data: bytes | bytearray) -> bytes | None:
+        # TODO: fast path?
+        self.buffer.extend(data)
+
+        if not data.endswith(b"\x00\x00\xff\xff"):
+            return None
+
+        raw_msg = self.inflator.decompress(self.buffer)
+        self.buffer = bytearray()
+        return raw_msg
+
+
+def _decompressor_for_params(params: GatewayParams) -> _DecompressionContext:
+    tp: type[_DecompressionContext]
+    match params.compress:
+        case "zlib-stream":
+            tp = ZlibDecompressionContext
+        case None:
+            tp = NullDecompressionContext
+    return tp()
