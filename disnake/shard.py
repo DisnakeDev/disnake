@@ -467,8 +467,7 @@ class AutoShardedClient(Client):
 
     async def launch_shards(self, *, ignore_session_start_limit: bool = False) -> None:
         shard_count, gateway, session_start_limit = await self.http.get_bot_gateway(
-            encoding=self.gateway_params.encoding,
-            zlib=self.gateway_params.zlib,
+            self.gateway_params
         )
 
         self.session_start_limit = SessionStartLimit(session_start_limit)

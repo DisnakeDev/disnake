@@ -185,23 +185,27 @@ class SessionStartLimit:
         )
 
 
+# TODO: dataclass?
 class GatewayParams(NamedTuple):
     """Container type for configuring gateway connections.
 
     .. versionadded:: 2.6
+
+    .. versionchanged:: |vnext|
+        Removed ``zlib`` parameter in favour of ``compress``, which now also supports zstd.
 
     Parameters
     ----------
     encoding: :class:`str`
         The payload encoding (``json`` is currently the only supported encoding).
         Defaults to ``"json"``.
-    zlib: :class:`bool`
-        Whether to enable transport compression.
-        Defaults to ``True``.
+    compress: Literal["zlib-stream"] | :data:`None`
+        Which transport compression method to use, if any.
+        Defaults to ``"zlib-stream"``.
     """
 
     encoding: Literal["json"] = "json"
-    zlib: bool = True
+    compress: Literal["zlib-stream"] | None = "zlib-stream"
 
 
 # used for typing the ws parameter dict in the connect() loop
@@ -480,6 +484,7 @@ class Client:
         if self.gateway_params.encoding != "json":
             msg = "Gateway encodings other than `json` are currently not supported."
             raise ValueError(msg)
+        # TODO: move validation and add more
 
         self.extra_events: dict[str, list[CoroFunc]] = {}
 
@@ -1088,8 +1093,7 @@ class Client:
             and this exception will not be raised.
         """
         _, initial_gateway, session_start_limit = await self.http.get_bot_gateway(
-            encoding=self.gateway_params.encoding,
-            zlib=self.gateway_params.zlib,
+            self.gateway_params
         )
         self.session_start_limit = SessionStartLimit(session_start_limit)
 

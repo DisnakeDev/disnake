@@ -408,13 +408,9 @@ class DiscordWebSocket:
         """
         params = client.gateway_params
         if gateway:
-            gateway = client.http._format_gateway_url(
-                gateway,
-                encoding=params.encoding,
-                zlib=params.zlib,
-            )
+            gateway = client.http._format_gateway_url(gateway, params=params)
         else:
-            gateway = await client.http.get_gateway(encoding=params.encoding, zlib=params.zlib)
+            gateway = await client.http.get_gateway(params)
 
         socket = await client.http.ws_connect(gateway)
         ws = cls(socket, loop=client.loop)
