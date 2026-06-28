@@ -182,7 +182,7 @@ def _unbound_range_to_str_len(
 
     elif max_value is not None and max_value < 0:
         # -inf == min_value <= max_value < 0
-        return 1, _int_to_str_len(max_value)
+        return _int_to_str_len(max_value), None
 
     return 1, None
 
@@ -286,7 +286,7 @@ class Injection(Generic[P, T]):
         return decorator
 
 
-NumT = TypeVar("NumT", bound=int | float)
+NumT = TypeVar("NumT", int, int | float)
 
 
 @dataclass(frozen=True)
@@ -299,7 +299,11 @@ class _BaseRange(ABC, Generic[NumT]):
     min_value: NumT | None
     max_value: NumT | None
 
-    def __class_getitem__(cls, params: tuple[Any, ...]) -> Self:
+    def __class_getitem__(
+        cls,
+        params: tuple[NumT | types.EllipsisType | None, NumT | types.EllipsisType | None]
+        | tuple[type[Any], NumT | types.EllipsisType | None, NumT | types.EllipsisType | None],
+    ) -> Self:
         if cls is _BaseRange:
             # needed since made generic
             return super().__class_getitem__(params)  # pyright: ignore[reportAttributeAccessIssue]
@@ -308,8 +312,9 @@ class _BaseRange(ABC, Generic[NumT]):
         if not isinstance(params, tuple):
             params = (params,)
 
-        # the classes are public, but at the same time we don't want the users using them
-        # via the "private" names, since those conflict with type checkers
+        # the classes are defined as private, but have public aliases.
+        # we don't want the users using them via the private names,
+        # since those conflict with type checkers
         name = cls.__name__ = cls.__name__.removeprefix("_")
 
         if len(params) == 2:
