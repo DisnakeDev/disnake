@@ -5,6 +5,8 @@ from __future__ import annotations
 import functools
 import inspect
 import re
+import types
+from collections.abc import Callable, Iterable
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -14,12 +16,15 @@ from typing import (
     TypeVar,
     Union,
     cast,
+    get_args,
+    get_origin,
     runtime_checkable,
 )
 
 import disnake
+from disnake.colour import _convertible_colours
 
-from .context import Context
+from .context import AnyContext, Context
 from .errors import (
     BadArgument,
     BadBoolArgument,
@@ -47,11 +52,7 @@ from .errors import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterable
-
     from disnake.abc import MessageableChannel
-
-    from .context import AnyContext
 
 
 # TODO: USE ACTUAL FUNCTIONS INSTEAD OF USELESS CLASSES
@@ -751,10 +752,9 @@ class ColourConverter(Converter[disnake.Colour]):
             return self.parse_rgb(arg)
 
         arg = arg.replace(" ", "_")
-        method = getattr(disnake.Colour, arg, None)
-        if arg.startswith("from_") or method is None or not inspect.ismethod(method):
-            raise BadColourArgument(arg)
-        return method()
+        if method := _convertible_colours.get(arg):
+            return method(disnake.Colour)
+        raise BadColourArgument(arg)
 
 
 ColorConverter = ColourConverter
@@ -1188,19 +1188,21 @@ class Greedy(list[T]):
             raise TypeError(msg)
         converter = params[0]
 
-        origin = getattr(converter, "__origin__", None)
-        args = getattr(converter, "__args__", ())
+        origin = get_origin(converter)
+        args = get_args(converter)
 
         if not (callable(converter) or isinstance(converter, Converter) or origin is not None):
             msg = "Greedy[...] expects a type or a Converter instance."
             raise TypeError(msg)
 
+        name = getattr(converter, "__name__", repr(converter))
+
         if converter in (str, type(None)) or origin is Greedy:
-            msg = f"Greedy[{converter.__name__}] is invalid."  # pyright: ignore[reportAttributeAccessIssue]
+            msg = f"Greedy[{name}] is invalid."
             raise TypeError(msg)
 
-        if origin is Union and type(None) in args:
-            msg = f"Greedy[{converter!r}] is invalid."
+        if origin in (Union, types.UnionType) and type(None) in args:
+            msg = f"Greedy[{name}] is invalid."
             raise TypeError(msg)
 
         return cls(converter=converter)  # pyright: ignore[reportArgumentType]

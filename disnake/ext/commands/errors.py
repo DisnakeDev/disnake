@@ -2,19 +2,20 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import TYPE_CHECKING, Any
 
 from disnake.errors import ClientException, DiscordException
 from disnake.utils import humanize_list
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
     from inspect import Parameter
 
     from disnake.abc import GuildChannel
     from disnake.threads import Thread
     from disnake.types.snowflake import Snowflake, SnowflakeList
 
+    from ._types import Coro
     from .context import AnyContext
     from .cooldowns import BucketType, Cooldown
     from .flag_converter import Flag
@@ -209,10 +210,10 @@ class CheckAnyFailure(CheckFailure):
     """
 
     def __init__(
-        self, checks: list[CheckFailure], errors: list[Callable[[AnyContext], bool]]
+        self, checks: list[Callable[[AnyContext], Coro[bool]]], errors: list[CheckFailure]
     ) -> None:
-        self.checks: list[CheckFailure] = checks
-        self.errors: list[Callable[[AnyContext], bool]] = errors
+        self.checks: list[Callable[[AnyContext], Coro[bool]]] = checks
+        self.errors: list[CheckFailure] = errors
         super().__init__("You do not have permission to run this command.")
 
 

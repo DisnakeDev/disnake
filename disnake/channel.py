@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import asyncio
+import datetime
 import time
+from collections.abc import Callable, Iterable, Mapping, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -30,13 +32,13 @@ from .enums import (
 )
 from .errors import ClientException
 from .file import File
-from .flags import ChannelFlags
+from .flags import ChannelFlags, MessageFlags
 from .iterators import ArchivedThreadIterator
 from .mixins import Hashable
 from .object import Object
 from .partial_emoji import PartialEmoji
-from .permissions import Permissions
-from .soundboard import GuildSoundboardSound, PartialSoundboardSound
+from .permissions import PermissionOverwrite, Permissions
+from .soundboard import GuildSoundboardSound, PartialSoundboardSound, SoundboardSound
 from .stage_instance import StageInstance
 from .threads import ForumTag, Thread
 from .utils import MISSING
@@ -57,22 +59,16 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
-    import datetime
-    from collections.abc import Callable, Iterable, Mapping, Sequence
-
     from typing_extensions import Never, Self
 
     from .abc import Snowflake, SnowflakeTime
     from .asset import AssetBytes
     from .embeds import Embed
     from .emoji import Emoji
-    from .flags import MessageFlags
     from .guild import Guild, GuildChannel as GuildChannelType
     from .member import Member, VoiceState
     from .message import AllowedMentions, Message, PartialMessage
-    from .permissions import PermissionOverwrite
     from .role import Role
-    from .soundboard import SoundboardSound
     from .state import ConnectionState
     from .sticker import GuildSticker, StandardSticker, StickerItem
     from .threads import AnyThreadArchiveDuration, ThreadType
@@ -208,8 +204,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         in this channel.
 
         A value of `0` denotes that it is disabled.
-        Bots, and users with :attr:`~Permissions.manage_channels` or
-        :attr:`~Permissions.manage_messages` permissions, bypass slowmode.
+        Bots, and users with :attr:`~Permissions.bypass_slowmode` permissions, bypass slowmode.
 
         See also :attr:`default_thread_slowmode_delay`.
 
@@ -218,8 +213,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         in newly created threads in this channel.
 
         A value of ``0`` denotes that it is disabled.
-        Bots, and users with :attr:`~Permissions.manage_channels` or
-        :attr:`~Permissions.manage_messages`, bypass slowmode.
+        Bots, and users with :attr:`~Permissions.bypass_slowmode` permissions, bypass slowmode.
 
         .. versionadded:: 2.8
 
@@ -1350,9 +1344,10 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
 
     slowmode_delay: :class:`int`
         The number of seconds a member must wait between sending messages
-        in this channel. A value of `0` denotes that it is disabled.
-        Bots, and users with :attr:`~Permissions.manage_channels` or
-        :attr:`~Permissions.manage_messages`, bypass slowmode.
+        in this channel.
+
+        A value of `0` denotes that it is disabled.
+        Bots, and users with :attr:`~Permissions.bypass_slowmode` permissions, bypass slowmode.
 
         .. versionadded:: 2.3
 
@@ -1361,12 +1356,20 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         *not* point to an existing or valid message.
 
         .. versionadded:: 2.3
+
+    status: :class:`str` | :data:`None`
+        The channel's status, if any.
+
+        This can be edited using :meth:`set_status`.
+
+        .. versionadded:: |vnext|
     """
 
     __slots__ = (
         "nsfw",
         "slowmode_delay",
         "last_message_id",
+        "status",
     )
 
     def __repr__(self) -> str:
@@ -1390,8 +1393,9 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         self.nsfw: bool = data.get("nsfw", False)
         self.slowmode_delay: int = data.get("rate_limit_per_user", 0)
         self.last_message_id: int | None = utils._get_as_snowflake(data, "last_message_id")
+        self.status: str | None = data.get("status")
 
-    async def _get_channel(self: Self) -> Self:
+    async def _get_channel(self) -> Self:
         return self
 
     @property
@@ -1950,6 +1954,8 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         :attr:`~Permissions.use_external_sounds` permission.
         Additionally, you may not be muted or deafened.
 
+        .. versionadded:: 2.10
+
         Parameters
         ----------
         sound: :class:`SoundboardSound` | :class:`GuildSoundboardSound`
@@ -1970,6 +1976,33 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         await self._state.http.send_soundboard_sound(
             self.id, sound.id, source_guild_id=source_guild_id
         )
+
+    async def set_status(self, status: str | None, /, *, reason: str | None = None) -> None:
+        """|coro|
+
+        Edits the channel's status.
+
+        You must either have :attr:`~Permissions.manage_channels` permission,
+        or be connected to this voice channel and have :attr:`~Permissions.set_voice_channel_status`
+        permission to do this.
+
+        .. versionadded:: |vnext|
+
+        Parameters
+        ----------
+        status: :class:`str` | :data:`None`
+            The new status to set for this channel. Up to 500 characters.
+        reason: :class:`str` | :data:`None`
+            The reason for changing this status. Shows up in the audit logs.
+
+        Raises
+        ------
+        Forbidden
+            You do not have permissions to edit the status.
+        HTTPException
+            Editing the channel status failed.
+        """
+        await self._state.http.set_voice_channel_status(self.id, status=status, reason=reason)
 
 
 class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
@@ -2036,9 +2069,10 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
 
     slowmode_delay: :class:`int`
         The number of seconds a member must wait between sending messages
-        in this channel. A value of `0` denotes that it is disabled.
-        Bots, and users with :attr:`~Permissions.manage_channels` or
-        :attr:`~Permissions.manage_messages`, bypass slowmode.
+        in this channel.
+
+        A value of `0` denotes that it is disabled.
+        Bots, and users with :attr:`~Permissions.bypass_slowmode` permissions, bypass slowmode.
 
         .. versionadded:: 2.9
 
@@ -2294,6 +2328,29 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         if isinstance(self.guild, Object):
             return None
         return utils.get(self.guild.stage_instances, channel_id=self.id)
+
+    @overload
+    @utils.deprecated("Setting `privacy_level` to `StagePrivacyLevel.public` is deprecated.")
+    async def create_instance(
+        self,
+        *,
+        topic: str,
+        privacy_level: Literal[StagePrivacyLevel.public],
+        notify_everyone: bool = False,
+        guild_scheduled_event: Snowflake = ...,
+        reason: str | None = None,
+    ) -> StageInstance: ...
+
+    @overload
+    async def create_instance(
+        self,
+        *,
+        topic: str,
+        privacy_level: StagePrivacyLevel = ...,
+        notify_everyone: bool = False,
+        guild_scheduled_event: Snowflake = ...,
+        reason: str | None = None,
+    ) -> StageInstance: ...
 
     async def create_instance(
         self,
@@ -3981,8 +4038,7 @@ class ForumChannel(ThreadOnlyGuildChannel):
         in this channel.
 
         A value of ``0`` denotes that it is disabled.
-        Bots, and users with :attr:`~Permissions.manage_channels` or
-        :attr:`~Permissions.manage_messages`, bypass slowmode.
+        Bots, and users with :attr:`~Permissions.bypass_slowmode` permissions, bypass slowmode.
 
         See also :attr:`default_thread_slowmode_delay`.
 
@@ -3991,8 +4047,7 @@ class ForumChannel(ThreadOnlyGuildChannel):
         in newly created threads in this channel.
 
         A value of ``0`` denotes that it is disabled.
-        Bots, and users with :attr:`~Permissions.manage_channels` or
-        :attr:`~Permissions.manage_messages`, bypass slowmode.
+        Bots, and users with :attr:`~Permissions.bypass_slowmode` permissions, bypass slowmode.
 
         .. versionadded:: 2.6
 
@@ -4418,8 +4473,7 @@ class MediaChannel(ThreadOnlyGuildChannel):
         in this channel.
 
         A value of ``0`` denotes that it is disabled.
-        Bots, and users with :attr:`~Permissions.manage_channels` or
-        :attr:`~Permissions.manage_messages`, bypass slowmode.
+        Bots, and users with :attr:`~Permissions.bypass_slowmode` permissions, bypass slowmode.
 
         See also :attr:`default_thread_slowmode_delay`.
 
@@ -4428,8 +4482,7 @@ class MediaChannel(ThreadOnlyGuildChannel):
         in newly created threads in this channel.
 
         A value of ``0`` denotes that it is disabled.
-        Bots, and users with :attr:`~Permissions.manage_channels` or
-        :attr:`~Permissions.manage_messages`, bypass slowmode.
+        Bots, and users with :attr:`~Permissions.bypass_slowmode` permissions, bypass slowmode.
 
     default_sort_order: :class:`ThreadSortOrder` | :data:`None`
         The default sort order of threads in this channel.

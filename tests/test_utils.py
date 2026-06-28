@@ -1,5 +1,4 @@
 # SPDX-License-Identifier: MIT
-from __future__ import annotations
 
 import asyncio
 import datetime
@@ -8,6 +7,7 @@ import inspect
 import os
 import sys
 import warnings
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import timedelta, timezone
 from typing import (
@@ -30,8 +30,6 @@ from disnake import utils
 from . import helpers, utils_helper_module
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
-
     from typing_extensions import TypeAliasType
 elif sys.version_info >= (3, 12):
     # non-3.12 tests shouldn't be using this
@@ -90,20 +88,6 @@ def test_copy_doc() -> None:
 
     assert func2.__doc__ == func.__doc__
     assert inspect.signature(func) == inspect.signature(func2)
-
-
-@mock.patch.object(warnings, "warn")
-@pytest.mark.parametrize(
-    ("instead", "msg"),
-    [(None, "stuff is deprecated."), ("other", "stuff is deprecated, use other instead.")],
-)
-def test_deprecated(mock_warn: mock.Mock, instead, msg) -> None:
-    @utils.deprecated(instead)
-    def stuff(num: int) -> int:
-        return num
-
-    assert stuff(42) == 42
-    mock_warn.assert_called_once_with(msg, stacklevel=3, category=DeprecationWarning)
 
 
 @mock.patch.object(utils, "_root_module_path", os.path.dirname(__file__))
@@ -1002,7 +986,7 @@ class _Clazz:
     def decorated(self) -> None: ...
 
     # we cannot stringify this file due to it testing annotation resolving
-    _lambda: Callable[[_Clazz], None] = lambda _: None
+    _lambda: Callable[["_Clazz"], None] = lambda _: None  # noqa: UP037
 
 
 @pytest.mark.parametrize(

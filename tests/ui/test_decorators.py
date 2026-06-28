@@ -2,7 +2,8 @@
 from __future__ import annotations
 
 import contextlib
-from typing import TYPE_CHECKING, Any, TypeVar
+from collections.abc import Generator
+from typing import Any, TypeVar
 
 import pytest
 from typing_extensions import assert_type
@@ -10,17 +11,14 @@ from typing_extensions import assert_type
 from disnake import ui
 from disnake.ui.button import V_co
 
-if TYPE_CHECKING:
-    from collections.abc import Iterator
-
 V = TypeVar("V", bound=ui.View)
-I = TypeVar("I", bound=ui.Item)
+I = TypeVar("I", bound=ui.Item[Any])
 
 
 @contextlib.contextmanager
 def create_callback(
     view_type: type[V], item_type: type[I]
-) -> Iterator[ui.item.ItemCallbackType[V, I]]:
+) -> Generator[ui.item.ItemCallbackType[V, I]]:
     async def callback(self: V, item: I, inter) -> None:
         pytest.fail("callback should not be invoked")
 

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import inspect
 import re
 from typing import TYPE_CHECKING, Any, Generic, TypeAlias, TypeVar
 
@@ -9,16 +10,14 @@ import disnake.abc
 import disnake.utils
 from disnake import ApplicationCommandInteraction
 from disnake.message import Message
+from disnake.permissions import Permissions
 
 if TYPE_CHECKING:
-    import inspect
-
     from typing_extensions import ParamSpec
 
     from disnake.channel import DMChannel, GroupChannel
     from disnake.guild import Guild, GuildMessageable
     from disnake.member import Member
-    from disnake.permissions import Permissions
     from disnake.state import ConnectionState
     from disnake.user import ClientUser, User
     from disnake.voice_client import VoiceProtocol
@@ -290,7 +289,7 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
     def app_permissions(self) -> Permissions:
         """:class:`.Permissions`: Returns the permissions the bot has in the context's channel.
 
-        .. versionadded: |vnext|
+        .. versionadded:: 2.12
         """
         # This probably won't ever error.
         # `permissions_for` exists on all except PartialMessageable, which we shouldn't get here
@@ -301,7 +300,7 @@ class Context(disnake.abc.Messageable, Generic[BotT]):
     def permissions(self) -> Permissions:
         """:class:`.Permissions`: Returns the permissions the author has in the context's channel.
 
-        .. versionadded: |vnext|
+        .. versionadded:: 2.12
         """
         return self.channel.permissions_for(self.author)  # pyright: ignore[reportArgumentType]
 

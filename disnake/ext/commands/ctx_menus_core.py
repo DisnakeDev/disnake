@@ -2,31 +2,31 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+import inspect
+from collections.abc import Callable, Sequence
+from typing import TYPE_CHECKING, Any, overload
 
+from disnake import utils
 from disnake.app_commands import MessageCommand, UserCommand
+from disnake.flags import ApplicationInstallTypes, InteractionContextTypes
 from disnake.i18n import Localized
-from disnake.utils import iscoroutinefunction
+from disnake.permissions import Permissions
 
 from .base_core import InvokableApplicationCommand, _get_overridden_method
+from .errors import CommandError
 from .params import safe_call
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Sequence
+    from typing_extensions import Never, ParamSpec
 
-    from typing_extensions import ParamSpec
-
-    from disnake.flags import ApplicationInstallTypes, InteractionContextTypes
     from disnake.i18n import LocalizedOptional
     from disnake.interactions import (
         ApplicationCommandInteraction,
         MessageCommandInteraction,
         UserCommandInteraction,
     )
-    from disnake.permissions import Permissions
 
     from .base_core import CogT, InteractionCommandCallback
-    from .errors import CommandError
 
     P = ParamSpec("P")
 
@@ -71,6 +71,39 @@ class InvokableUserCommand(InvokableApplicationCommand):
         .. versionadded:: 2.5
     """
 
+    @overload
+    def __init__(
+        self,
+        func: InteractionCommandCallback[CogT, UserCommandInteraction, P],
+        *,
+        name: LocalizedOptional = None,
+        default_member_permissions: Permissions | int | None = None,
+        nsfw: bool | None = None,
+        install_types: ApplicationInstallTypes | None = None,
+        contexts: InteractionContextTypes | None = None,
+        guild_ids: Sequence[int] | None = None,
+        auto_sync: bool | None = None,
+        dm_permission: Never = ...,  # necessary so **kwargs doesn't swallow the argument
+        **kwargs: Any,
+    ) -> None: ...
+
+    @overload
+    @utils.deprecated("`dm_permission` is deprecated. Use `contexts` instead.")
+    def __init__(
+        self,
+        func: InteractionCommandCallback[CogT, UserCommandInteraction, P],
+        *,
+        name: LocalizedOptional = None,
+        dm_permission: bool | None = None,
+        default_member_permissions: Permissions | int | None = None,
+        nsfw: bool | None = None,
+        install_types: ApplicationInstallTypes | None = None,
+        contexts: InteractionContextTypes | None = None,
+        guild_ids: Sequence[int] | None = None,
+        auto_sync: bool | None = None,
+        **kwargs: Any,
+    ) -> None: ...
+
     def __init__(
         self,
         func: InteractionCommandCallback[CogT, UserCommandInteraction, P],
@@ -103,7 +136,7 @@ class InvokableUserCommand(InvokableApplicationCommand):
         except AttributeError:
             pass
 
-        self.body = UserCommand(
+        self.body = UserCommand(  # pyright: ignore[reportDeprecated]
             name=name_loc._upgrade(self.name),
             dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
@@ -182,6 +215,39 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         .. versionadded:: 2.5
     """
 
+    @overload
+    def __init__(
+        self,
+        func: InteractionCommandCallback[CogT, MessageCommandInteraction, P],
+        *,
+        name: LocalizedOptional = None,
+        default_member_permissions: Permissions | int | None = None,
+        nsfw: bool | None = None,
+        install_types: ApplicationInstallTypes | None = None,
+        contexts: InteractionContextTypes | None = None,
+        guild_ids: Sequence[int] | None = None,
+        auto_sync: bool | None = None,
+        dm_permission: Never = ...,
+        **kwargs: Any,
+    ) -> None: ...
+
+    @overload
+    @utils.deprecated("`dm_permission` is deprecated. Use `contexts` instead.")
+    def __init__(
+        self,
+        func: InteractionCommandCallback[CogT, MessageCommandInteraction, P],
+        *,
+        name: LocalizedOptional = None,
+        dm_permission: bool | None = None,  # deprecated
+        default_member_permissions: Permissions | int | None = None,
+        nsfw: bool | None = None,
+        install_types: ApplicationInstallTypes | None = None,
+        contexts: InteractionContextTypes | None = None,
+        guild_ids: Sequence[int] | None = None,
+        auto_sync: bool | None = None,
+        **kwargs: Any,
+    ) -> None: ...
+
     def __init__(
         self,
         func: InteractionCommandCallback[CogT, MessageCommandInteraction, P],
@@ -214,7 +280,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         except AttributeError:
             pass
 
-        self.body = MessageCommand(
+        self.body = MessageCommand(  # pyright: ignore[reportDeprecated]
             name=name_loc._upgrade(self.name),
             dm_permission=dm_permission,
             default_member_permissions=default_member_permissions,
@@ -255,6 +321,43 @@ class InvokableMessageCommand(InvokableApplicationCommand):
             await safe_call(self.callback, interaction, *args, **kwargs)
 
 
+@overload
+def user_command(
+    *,
+    name: LocalizedOptional = None,
+    default_member_permissions: Permissions | int | None = None,
+    nsfw: bool | None = None,
+    install_types: ApplicationInstallTypes | None = None,
+    contexts: InteractionContextTypes | None = None,
+    guild_ids: Sequence[int] | None = None,
+    auto_sync: bool | None = None,
+    extras: dict[str, Any] | None = None,
+    dm_permission: Never = ...,
+    **kwargs: Any,
+) -> Callable[
+    [InteractionCommandCallback[CogT, UserCommandInteraction, P]], InvokableUserCommand
+]: ...
+
+
+@overload
+@utils.deprecated("`dm_permission` is deprecated. Use `contexts` instead.")
+def user_command(
+    *,
+    name: LocalizedOptional = None,
+    dm_permission: bool | None = None,  # deprecated
+    default_member_permissions: Permissions | int | None = None,
+    nsfw: bool | None = None,
+    install_types: ApplicationInstallTypes | None = None,
+    contexts: InteractionContextTypes | None = None,
+    guild_ids: Sequence[int] | None = None,
+    auto_sync: bool | None = None,
+    extras: dict[str, Any] | None = None,
+    **kwargs: Any,
+) -> Callable[
+    [InteractionCommandCallback[CogT, UserCommandInteraction, P]], InvokableUserCommand
+]: ...
+
+
 def user_command(
     *,
     name: LocalizedOptional = None,
@@ -293,7 +396,7 @@ def user_command(
         .. versionadded:: 2.5
 
     nsfw: :class:`bool`
-        Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
+        Whether this command is :ddocs:`age-restricted <interactions/application-commands#age-restricted-commands>`.
         Defaults to ``False``.
 
         .. versionadded:: 2.8
@@ -337,7 +440,7 @@ def user_command(
     def decorator(
         func: InteractionCommandCallback[CogT, UserCommandInteraction, P],
     ) -> InvokableUserCommand:
-        if not iscoroutinefunction(func):
+        if not inspect.iscoroutinefunction(func):
             msg = f"<{func.__qualname__}> must be a coroutine function"
             raise TypeError(msg)
         if hasattr(func, "__command_flag__"):
@@ -346,7 +449,7 @@ def user_command(
         if guild_ids and not all(isinstance(guild_id, int) for guild_id in guild_ids):
             msg = "guild_ids must be a sequence of int."
             raise ValueError(msg)
-        return InvokableUserCommand(
+        return InvokableUserCommand(  # pyright: ignore[reportDeprecated]
             func,
             name=name,
             dm_permission=dm_permission,
@@ -361,6 +464,45 @@ def user_command(
         )
 
     return decorator
+
+
+@overload
+def message_command(
+    *,
+    name: LocalizedOptional = None,
+    default_member_permissions: Permissions | int | None = None,
+    nsfw: bool | None = None,
+    install_types: ApplicationInstallTypes | None = None,
+    contexts: InteractionContextTypes | None = None,
+    guild_ids: Sequence[int] | None = None,
+    auto_sync: bool | None = None,
+    extras: dict[str, Any] | None = None,
+    dm_permission: Never = ...,
+    **kwargs: Any,
+) -> Callable[
+    [InteractionCommandCallback[CogT, MessageCommandInteraction, P]],
+    InvokableMessageCommand,
+]: ...
+
+
+@overload
+@utils.deprecated("`dm_permission` is deprecated. Use `contexts` instead.")
+def message_command(
+    *,
+    name: LocalizedOptional = None,
+    dm_permission: bool | None = None,  # deprecated
+    default_member_permissions: Permissions | int | None = None,
+    nsfw: bool | None = None,
+    install_types: ApplicationInstallTypes | None = None,
+    contexts: InteractionContextTypes | None = None,
+    guild_ids: Sequence[int] | None = None,
+    auto_sync: bool | None = None,
+    extras: dict[str, Any] | None = None,
+    **kwargs: Any,
+) -> Callable[
+    [InteractionCommandCallback[CogT, MessageCommandInteraction, P]],
+    InvokableMessageCommand,
+]: ...
 
 
 def message_command(
@@ -404,7 +546,7 @@ def message_command(
         .. versionadded:: 2.5
 
     nsfw: :class:`bool`
-        Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
+        Whether this command is :ddocs:`age-restricted <interactions/application-commands#age-restricted-commands>`.
         Defaults to ``False``.
 
         .. versionadded:: 2.8
@@ -448,7 +590,7 @@ def message_command(
     def decorator(
         func: InteractionCommandCallback[CogT, MessageCommandInteraction, P],
     ) -> InvokableMessageCommand:
-        if not iscoroutinefunction(func):
+        if not inspect.iscoroutinefunction(func):
             msg = f"<{func.__qualname__}> must be a coroutine function"
             raise TypeError(msg)
         if hasattr(func, "__command_flag__"):
@@ -457,7 +599,7 @@ def message_command(
         if guild_ids and not all(isinstance(guild_id, int) for guild_id in guild_ids):
             msg = "guild_ids must be a sequence of int."
             raise ValueError(msg)
-        return InvokableMessageCommand(
+        return InvokableMessageCommand(  # pyright: ignore[reportDeprecated]
             func,
             name=name,
             dm_permission=dm_permission,

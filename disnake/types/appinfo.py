@@ -2,14 +2,13 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, TypedDict
+from typing import Literal, TypedDict
 
 from typing_extensions import NotRequired
 
-if TYPE_CHECKING:
-    from .snowflake import Snowflake
-    from .team import Team
-    from .user import User
+from .snowflake import Snowflake
+from .team import Team
+from .user import User
 
 # (also called "installation context", which seems more accurate)
 ApplicationIntegrationType = Literal[0, 1]  # GUILD_INSTALL, USER_INSTALL
@@ -23,7 +22,6 @@ class BaseAppInfo(TypedDict):
     description: str
     terms_of_service_url: NotRequired[str]
     privacy_policy_url: NotRequired[str]
-    summary: str
     verify_key: str
     hook: NotRequired[bool]
     max_participants: NotRequired[int]
@@ -71,7 +69,7 @@ class PartialAppInfo(BaseAppInfo, total=False):
     flags: int
 
 
-# see https://discord.com/developers/docs/topics/gateway-events#ready-ready-event-fields
+# see https://docs.discord.com/developers/events/gateway-events#ready-ready-event-fields
 class PartialGatewayAppInfo(TypedDict):
     id: Snowflake
     flags: int

@@ -6,6 +6,7 @@ import asyncio
 import datetime
 import functools
 import inspect
+from collections.abc import Callable, Generator
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -24,13 +25,12 @@ from disnake.utils import (
     _generated,
     _overload_with_permissions,
     get_signature_parameters,
-    iscoroutinefunction,
     unwrap_function,
 )
 
 from ._types import _BaseCommand
 from .cog import Cog
-from .context import Context
+from .context import AnyContext, Context
 from .converter import Greedy, get_converter, run_converters
 from .cooldowns import BucketType, Cooldown, CooldownMapping, DynamicCooldownMapping, MaxConcurrency
 from .errors import (
@@ -57,7 +57,6 @@ from .errors import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Generator
     from typing import Concatenate
 
     from typing_extensions import ParamSpec, Self
@@ -65,7 +64,6 @@ if TYPE_CHECKING:
     from disnake.message import Message
 
     from ._types import AppCheck, Check, Coro, CoroFunc, Error, Hook
-    from .context import AnyContext
 
 
 __all__ = (
@@ -281,7 +279,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         func: CommandCallback[CogT, ContextT, P, T],
         **kwargs: Any,
     ) -> None:
-        if not iscoroutinefunction(func):
+        if not inspect.iscoroutinefunction(func):
             msg = "Callback must be a coroutine function."
             raise TypeError(msg)
 
@@ -905,7 +903,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         TypeError
             The argument passed is not actually a coroutine function.
         """
-        if not iscoroutinefunction(coro):
+        if not inspect.iscoroutinefunction(coro):
             msg = "The error handler must be a coroutine function."
             raise TypeError(msg)
 
@@ -942,7 +940,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         TypeError
             The argument passed is not actually a coroutine function.
         """
-        if not iscoroutinefunction(coro):
+        if not inspect.iscoroutinefunction(coro):
             msg = "The pre-invoke hook must be a coroutine function."
             raise TypeError(msg)
 
@@ -970,7 +968,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         TypeError
             The argument passed is not actually a coroutine function.
         """
-        if not iscoroutinefunction(coro):
+        if not inspect.iscoroutinefunction(coro):
             msg = "The post-invoke hook must be a coroutine function."
             raise TypeError(msg)
 
@@ -1731,7 +1729,7 @@ def check(predicate: Check) -> Callable[[T], T]:
 
         return func
 
-    if iscoroutinefunction(predicate):
+    if inspect.iscoroutinefunction(predicate):
         decorator.predicate = predicate
     else:
 
@@ -1789,7 +1787,7 @@ def check_any(*checks: Check) -> Callable[[T], T]:
         async def only_for_owners(ctx):
             await ctx.send('Hello mister owner!')
     """
-    unwrapped = []
+    unwrapped: list[Callable[[AnyContext], Coro[bool]]] = []
     for wrapped in checks:
         try:
             pred = wrapped.predicate
@@ -1800,7 +1798,7 @@ def check_any(*checks: Check) -> Callable[[T], T]:
             unwrapped.append(pred)
 
     async def predicate(ctx: AnyContext) -> bool:
-        errors = []
+        errors: list[CheckFailure] = []
         for func in unwrapped:
             try:
                 value = await func(ctx)
@@ -2019,6 +2017,7 @@ def has_permissions(
     administrator: bool = ...,
     attach_files: bool = ...,
     ban_members: bool = ...,
+    bypass_slowmode: bool = ...,
     change_nickname: bool = ...,
     connect: bool = ...,
     create_events: bool = ...,
@@ -2058,6 +2057,7 @@ def has_permissions(
     send_polls: bool = ...,
     send_tts_messages: bool = ...,
     send_voice_messages: bool = ...,
+    set_voice_channel_status: bool = ...,
     speak: bool = ...,
     start_embedded_activities: bool = ...,
     stream: bool = ...,
@@ -2146,6 +2146,7 @@ def bot_has_permissions(
     administrator: bool = ...,
     attach_files: bool = ...,
     ban_members: bool = ...,
+    bypass_slowmode: bool = ...,
     change_nickname: bool = ...,
     connect: bool = ...,
     create_events: bool = ...,
@@ -2185,6 +2186,7 @@ def bot_has_permissions(
     send_polls: bool = ...,
     send_tts_messages: bool = ...,
     send_voice_messages: bool = ...,
+    set_voice_channel_status: bool = ...,
     speak: bool = ...,
     start_embedded_activities: bool = ...,
     stream: bool = ...,
@@ -2251,6 +2253,7 @@ def has_guild_permissions(
     administrator: bool = ...,
     attach_files: bool = ...,
     ban_members: bool = ...,
+    bypass_slowmode: bool = ...,
     change_nickname: bool = ...,
     connect: bool = ...,
     create_events: bool = ...,
@@ -2290,6 +2293,7 @@ def has_guild_permissions(
     send_polls: bool = ...,
     send_tts_messages: bool = ...,
     send_voice_messages: bool = ...,
+    set_voice_channel_status: bool = ...,
     speak: bool = ...,
     start_embedded_activities: bool = ...,
     stream: bool = ...,
@@ -2353,6 +2357,7 @@ def bot_has_guild_permissions(
     administrator: bool = ...,
     attach_files: bool = ...,
     ban_members: bool = ...,
+    bypass_slowmode: bool = ...,
     change_nickname: bool = ...,
     connect: bool = ...,
     create_events: bool = ...,
@@ -2392,6 +2397,7 @@ def bot_has_guild_permissions(
     send_polls: bool = ...,
     send_tts_messages: bool = ...,
     send_voice_messages: bool = ...,
+    set_voice_channel_status: bool = ...,
     speak: bool = ...,
     start_embedded_activities: bool = ...,
     stream: bool = ...,

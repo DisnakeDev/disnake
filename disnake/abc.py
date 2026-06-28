@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import copy
 from abc import ABC
+from collections.abc import Callable, Mapping, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -20,7 +21,9 @@ from . import utils
 from .context_managers import Typing
 from .enums import (
     ChannelType,
-    PartyType,
+    ThreadLayout,
+    ThreadSortOrder,
+    VideoQualityMode,
     try_enum_to_int,
 )
 from .errors import ClientException
@@ -32,6 +35,7 @@ from .object import Object
 from .partial_emoji import PartialEmoji
 from .permissions import PermissionOverwrite, Permissions
 from .role import Role
+from .sticker import GuildSticker, StandardSticker, StickerItem
 from .utils import _overload_with_permissions
 from .voice_client import VoiceClient, VoiceProtocol
 
@@ -47,7 +51,6 @@ __all__ = (
 VoiceProtocolT = TypeVar("VoiceProtocolT", bound=VoiceProtocol)
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Mapping, Sequence
     from datetime import datetime
 
     from typing_extensions import Self
@@ -57,12 +60,7 @@ if TYPE_CHECKING:
     from .client import Client
     from .embeds import Embed
     from .emoji import Emoji
-    from .enums import (
-        InviteTarget,
-        ThreadLayout,
-        ThreadSortOrder,
-        VideoQualityMode,
-    )
+    from .enums import InviteTarget
     from .guild import Guild, GuildChannel as AnyGuildChannel, GuildMessageable
     from .guild_scheduled_event import GuildScheduledEvent
     from .iterators import ChannelPinsIterator, HistoryIterator
@@ -70,7 +68,6 @@ if TYPE_CHECKING:
     from .message import Message, MessageReference, PartialMessage
     from .poll import Poll
     from .state import ConnectionState
-    from .sticker import GuildSticker, StandardSticker, StickerItem
     from .threads import AnyThreadArchiveDuration, ForumTag
     from .types.channel import (
         Channel as ChannelPayload,
@@ -865,6 +862,7 @@ class GuildChannel(ABC):
         administrator: bool | None = ...,
         attach_files: bool | None = ...,
         ban_members: bool | None = ...,
+        bypass_slowmode: bool | None = ...,
         change_nickname: bool | None = ...,
         connect: bool | None = ...,
         create_events: bool | None = ...,
@@ -904,6 +902,7 @@ class GuildChannel(ABC):
         send_polls: bool | None = ...,
         send_tts_messages: bool | None = ...,
         send_voice_messages: bool | None = ...,
+        set_voice_channel_status: bool | None = ...,
         speak: bool | None = ...,
         start_embedded_activities: bool | None = ...,
         stream: bool | None = ...,
@@ -1301,7 +1300,7 @@ class GuildChannel(ABC):
         unique: bool = True,
         target_type: InviteTarget | None = None,
         target_user: User | None = None,
-        target_application: Snowflake | PartyType | None = None,
+        target_application: Snowflake | None = None,
         guild_scheduled_event: GuildScheduledEvent | None = None,
     ) -> Invite:
         """|coro|
@@ -1342,9 +1341,6 @@ class GuildChannel(ABC):
 
             .. versionadded:: 2.0
 
-            .. versionchanged:: 2.9
-                ``PartyType`` is deprecated, and :class:`.Snowflake` should be used instead.
-
         guild_scheduled_event: :class:`.GuildScheduledEvent` | :data:`None`
             The guild scheduled event to include with the invite.
 
@@ -1365,12 +1361,6 @@ class GuildChannel(ABC):
         :class:`.Invite`
             The newly created invite.
         """
-        if isinstance(target_application, PartyType):
-            utils.warn_deprecated(
-                "PartyType is deprecated and will be removed in future version",
-                stacklevel=2,
-            )
-            target_application = Object(target_application.value)
         data = await self._state.http.create_invite(
             self.id,
             reason=reason,

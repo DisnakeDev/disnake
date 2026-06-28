@@ -4,10 +4,11 @@ from __future__ import annotations
 
 import asyncio
 import time
+from collections.abc import Callable, Iterable, Sequence
 from typing import TYPE_CHECKING, Literal, TypeAlias
 
 from .abc import GuildChannel, Messageable
-from .enums import ChannelType, try_enum, try_enum_to_int
+from .enums import ChannelType, ThreadArchiveDuration, try_enum, try_enum_to_int
 from .errors import ClientException
 from .flags import ChannelFlags
 from .mixins import Hashable
@@ -24,14 +25,12 @@ __all__ = (
 
 if TYPE_CHECKING:
     import datetime
-    from collections.abc import Callable, Iterable, Sequence
 
     from typing_extensions import Self
 
     from .abc import Snowflake, SnowflakeTime
     from .channel import CategoryChannel, ForumChannel, MediaChannel, TextChannel
     from .emoji import Emoji
-    from .enums import ThreadArchiveDuration
     from .guild import Guild
     from .member import Member
     from .message import Message, PartialMessage
@@ -94,9 +93,10 @@ class Thread(Messageable, Hashable):
         *not* point to an existing or valid message.
     slowmode_delay: :class:`int`
         The number of seconds a member must wait between sending messages
-        in this thread. A value of `0` denotes that it is disabled.
-        Bots, and users with :attr:`~Permissions.manage_channels` or
-        :attr:`~Permissions.manage_messages`, bypass slowmode.
+        in this thread.
+
+        A value of `0` denotes that it is disabled.
+        Bots, and users with :attr:`~Permissions.bypass_slowmode` permissions, bypass slowmode.
     message_count: :class:`int` | :data:`None`
         An approximate number of messages in this thread.
 
@@ -819,7 +819,7 @@ class Thread(Messageable, Hashable):
         You must have :attr:`~.Permissions.send_messages` permission to add a user to a public thread.
         If the thread is private then :attr:`~.Permissions.send_messages` and either :attr:`~.Permissions.create_private_threads`
         or :attr:`~.Permissions.manage_messages` permissions
-        is required to add a user to the thread.
+        are required to add a user to the thread.
 
         Parameters
         ----------

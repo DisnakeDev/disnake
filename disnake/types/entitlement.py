@@ -1,12 +1,10 @@
 # SPDX-License-Identifier: MIT
-from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, TypedDict
+from typing import Literal, TypedDict
 
 from typing_extensions import NotRequired
 
-if TYPE_CHECKING:
-    from .snowflake import Snowflake
+from .snowflake import Snowflake
 
 EntitlementType = Literal[1, 2, 3, 4, 5, 6, 7, 8]
 

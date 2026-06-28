@@ -1,1 +1,0 @@
-|commands| Support :data:`typing.Annotated` for specifying converters in prefix commands in a more type-safe way. See :ref:`Special Converters <ext_commands_converters_annotated>` for details.

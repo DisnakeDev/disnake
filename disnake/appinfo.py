@@ -2,19 +2,17 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from typing import TYPE_CHECKING, cast
 
 from . import utils
-from .asset import Asset
+from .asset import Asset, AssetBytes
 from .enums import ApplicationEventWebhookStatus, try_enum
 from .flags import ApplicationFlags
 from .permissions import Permissions
 from .utils import MISSING
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
-
-    from .asset import AssetBytes
     from .guild import Guild
     from .state import ConnectionState
     from .types.appinfo import (
@@ -42,7 +40,7 @@ class InstallParams:
 
     .. versionadded:: 2.5
 
-    .. versionchanged:: |vnext|
+    .. versionchanged:: 2.12
         This class can now be created by users.
 
     Attributes
@@ -123,7 +121,7 @@ class InstallTypeConfiguration:
 
     .. versionadded:: 2.10
 
-    .. versionchanged:: |vnext|
+    .. versionchanged:: 2.12
 
         This class can now be created by users.
 
@@ -192,7 +190,7 @@ class AppInfo:
         A list of RPC origin URLs, if RPC is enabled.
     verify_key: :class:`str`
         The hex encoded key for verification in interactions and the
-        GameSDK's :ddocs:`GetTicket <game-sdk/applications#getticket>`.
+        GameSDK's `GetTicket <https://github.com/discord/discord-api-docs/blob/legacy-gamesdk/docs/game_sdk/Applications.md#getticket>`_.
 
         .. versionadded:: 1.3
 
@@ -302,7 +300,6 @@ class AppInfo:
         "bot_require_code_grant",
         "owner",
         "_icon",
-        "_summary",
         "verify_key",
         "team",
         "guild_id",
@@ -343,7 +340,6 @@ class AppInfo:
         team: TeamPayload | None = data.get("team")
         self.team: Team | None = Team(state, team) if team else None
 
-        self._summary: str = data.get("summary", "")
         self.verify_key: str = data["verify_key"]
 
         self.guild_id: int | None = utils._get_as_snowflake(data, "guild_id")
@@ -423,23 +419,6 @@ class AppInfo:
         return self._state._get_guild(self.guild_id)
 
     @property
-    def summary(self) -> str:
-        """:class:`str`: If this application is a game sold on Discord,
-        this field will be the summary field for the store page of its primary SKU.
-
-        .. versionadded:: 1.3
-
-        .. deprecated:: 2.5
-
-            This field is deprecated by discord and is now always blank. Consider using :attr:`.description` instead.
-        """
-        utils.warn_deprecated(
-            "summary is deprecated and will be removed in a future version. Consider using description instead.",
-            stacklevel=2,
-        )
-        return self._summary
-
-    @property
     def guild_install_type_config(self) -> InstallTypeConfiguration | None:
         """:class:`InstallTypeConfiguration` | :data:`None`: The guild installation parameters for
         this application. If this application cannot be installed to guilds, returns :data:`None`.
@@ -481,7 +460,7 @@ class AppInfo:
 
         All parameters are optional.
 
-        .. versionadded:: |vnext|
+        .. versionadded:: 2.12
 
         Parameters
         ----------
@@ -540,7 +519,7 @@ class AppInfo:
         event_webhooks_status: :class:`ApplicationEventWebhookStatus`
             The application's event webhooks status.
         event_webhooks_types: :class:`list`\[:class:`str`] | :data:`None`
-            The application's event webhook types. See `webhook event types <https://discord.com/developers/docs/events/webhook-events#event-types>`_
+            The application's event webhook types. See :ddocs:`webhook event types <events/webhook-events#event-types>`
             for a list of valid events.
 
         Raises
@@ -662,7 +641,7 @@ class PartialAppInfo:
         A list of RPC origin URLs, if RPC is enabled.
     verify_key: :class:`str`
         The hex encoded key for verification in interactions and the
-        GameSDK's :ddocs:`GetTicket <game-sdk/applications#getticket>`.
+        GameSDK's `GetTicket <https://github.com/discord/discord-api-docs/blob/legacy-gamesdk/docs/game_sdk/Applications.md#getticket>`_.
     terms_of_service_url: :class:`str` | :data:`None`
         The application's terms of service URL, if set.
     privacy_policy_url: :class:`str` | :data:`None`
@@ -675,7 +654,6 @@ class PartialAppInfo:
         "name",
         "description",
         "rpc_origins",
-        "_summary",
         "verify_key",
         "terms_of_service_url",
         "privacy_policy_url",
@@ -689,7 +667,6 @@ class PartialAppInfo:
         self._icon: str | None = data.get("icon")
         self.description: str = data["description"]
         self.rpc_origins: list[str] | None = data.get("rpc_origins")
-        self._summary: str = data.get("summary", "")
         self.verify_key: str = data["verify_key"]
         self.terms_of_service_url: str | None = data.get("terms_of_service_url")
         self.privacy_policy_url: str | None = data.get("privacy_policy_url")
@@ -703,18 +680,3 @@ class PartialAppInfo:
         if self._icon is None:
             return None
         return Asset._from_icon(self._state, self.id, self._icon, path="app")
-
-    @property
-    def summary(self) -> str:
-        """:class:`str`: If this application is a game sold on Discord,
-        this field will be the summary field for the store page of its primary SKU.
-
-        .. deprecated:: 2.5
-
-            This field is deprecated by discord and is now always blank. Consider using :attr:`.description` instead.
-        """
-        utils.warn_deprecated(
-            "summary is deprecated and will be removed in a future version. Consider using description instead.",
-            stacklevel=2,
-        )
-        return self._summary

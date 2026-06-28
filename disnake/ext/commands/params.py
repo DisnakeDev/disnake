@@ -12,7 +12,7 @@ import itertools
 import math
 import types
 from abc import ABC, abstractmethod
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from typing import (
     TYPE_CHECKING,
@@ -35,7 +35,7 @@ from typing_extensions import ParamSpec, Self
 import disnake
 from disnake.app_commands import Option, OptionChoice
 from disnake.channel import _channel_type_factory
-from disnake.enums import OptionType, try_enum_to_int
+from disnake.enums import ChannelType, OptionType, try_enum_to_int
 from disnake.ext import commands
 from disnake.i18n import Localized
 from disnake.interactions import ApplicationCommandInteraction
@@ -53,10 +53,7 @@ T = TypeVar("T")
 P = ParamSpec("P")
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
-
     from disnake.app_commands import Choices
-    from disnake.enums import ChannelType
     from disnake.i18n import LocalizationValue, LocalizedOptional
     from disnake.types.interactions import ApplicationCommandOptionChoiceValue
 

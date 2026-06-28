@@ -11,6 +11,7 @@ import logging
 import os
 import weakref
 from collections import OrderedDict, deque
+from collections.abc import Callable, Coroutine, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -42,13 +43,14 @@ from .channel import (
 from .components import _SELECT_COMPONENT_TYPES
 from .emoji import Emoji
 from .entitlement import Entitlement
-from .enums import ChannelType, ComponentType, MessageType, Status, try_enum
+from .enums import ApplicationCommandType, ChannelType, ComponentType, MessageType, Status, try_enum
 from .flags import ApplicationFlags, Intents, MemberCacheFlags
 from .guild import Guild
 from .guild_scheduled_event import GuildScheduledEvent
 from .integrations import _integration_factory
 from .interactions import (
     ApplicationCommandInteraction,
+    Interaction,
     MessageInteraction,
     ModalInteraction,
 )
@@ -81,26 +83,21 @@ from .stage_instance import StageInstance
 from .sticker import GuildSticker
 from .subscription import Subscription
 from .threads import Thread, ThreadMember
-from .ui.modal import ModalStore
-from .ui.view import ViewStore
+from .ui.modal import Modal, ModalStore
+from .ui.view import View, ViewStore
 from .user import ClientUser, User
 from .utils import MISSING
 from .webhook import Webhook
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Coroutine, Sequence
     from typing import Concatenate
 
     from .abc import AnyChannel, MessageableChannel, PrivateChannel
     from .app_commands import APIApplicationCommand, ApplicationCommand
     from .client import Client
-    from .enums import ApplicationCommandType
     from .gateway import DiscordWebSocket
     from .guild import GuildChannel, VocalGuildChannel
     from .http import HTTPClient
-    from .interactions import (
-        Interaction,
-    )
     from .types import gateway
     from .types.activity import Activity as ActivityPayload
     from .types.channel import DMChannel as DMChannelPayload
@@ -112,8 +109,6 @@ if TYPE_CHECKING:
     from .types.sticker import GuildSticker as GuildStickerPayload
     from .types.user import User as UserPayload
     from .types.webhook import Webhook as WebhookPayload
-    from .ui.modal import Modal
-    from .ui.view import View
     from .voice_client import VoiceProtocol
 
     Channel: TypeAlias = GuildChannel | VocalGuildChannel | PrivateChannel
@@ -929,7 +924,7 @@ class ConnectionState:
             id=emoji_id,
             animated=emoji.get("animated", False),
             # may be `None` in gateway events if custom emoji data isn't available anymore
-            # https://discord.com/developers/docs/resources/emoji#emoji-object-custom-emoji-examples
+            # https://docs.discord.com/developers/resources/emoji#emoji-object-custom-emoji-examples
             name=emoji["name"],  # pyright: ignore[reportArgumentType]
         )
         raw = RawReactionActionEvent(data, emoji, "REACTION_REMOVE")
@@ -957,7 +952,7 @@ class ConnectionState:
             id=emoji_id,
             animated=emoji.get("animated", False),
             # may be `None` in gateway events if custom emoji data isn't available anymore
-            # https://discord.com/developers/docs/resources/emoji#emoji-object-custom-emoji-examples
+            # https://docs.discord.com/developers/resources/emoji#emoji-object-custom-emoji-examples
             name=emoji["name"],  # pyright: ignore[reportArgumentType]
         )
         raw = RawReactionClearEmojiEvent(data, emoji)
@@ -1885,6 +1880,64 @@ class ConnectionState:
 
         if channel and member:
             self.dispatch("voice_channel_effect", channel, member, effect)
+
+    def parse_voice_channel_status_update(self, data: gateway.VoiceChannelStatusUpdate) -> None:
+        guild_id = int(data["guild_id"])
+        guild = self._get_guild(guild_id)
+
+        if guild is None:
+            _log.debug(
+                "VOICE_CHANNEL_STATUS_UPDATE referencing an unknown guild ID: %s. Discarding",
+                guild_id,
+            )
+            return
+
+        channel_id = int(data["id"])
+        channel = guild.get_channel(channel_id)
+        if channel is None:
+            _log.debug(
+                "VOICE_CHANNEL_STATUS_UPDATE referencing an unknown channel ID: %s. Discarding",
+                channel_id,
+            )
+            return
+
+        if isinstance(channel, VoiceChannel):
+            # in case stage channels ever get statuses too
+            old_status = channel.status
+            channel.status = data.get("status")
+        else:
+            old_status = None
+
+        self.dispatch("voice_channel_status_update", channel, old_status, data.get("status"))
+
+    def parse_voice_channel_start_time_update(
+        self, data: gateway.VoiceChannelStartTimeUpdate
+    ) -> None:
+        guild_id = int(data["guild_id"])
+        guild = self._get_guild(guild_id)
+
+        if guild is None:
+            _log.debug(
+                "VOICE_CHANNEL_START_TIME_UPDATE referencing an unknown guild ID: %s. Discarding",
+                guild_id,
+            )
+            return
+
+        channel_id = int(data["id"])
+        channel = guild.get_channel(channel_id)
+        if channel is None:
+            _log.debug(
+                "VOICE_CHANNEL_START_TIME_UPDATE referencing an unknown channel ID: %s. Discarding",
+                channel_id,
+            )
+            return
+
+        timestamp = (
+            datetime.datetime.fromtimestamp(start_ts, tz=datetime.timezone.utc)
+            if (start_ts := data.get("voice_start_time"))
+            else None
+        )
+        self.dispatch("voice_channel_start_time_update", channel, timestamp)
 
     # FIXME: this should be refactored. The `GroupChannel` path will never be hit,
     # `raw.timestamp` exists so no need to parse it twice, and `.get_user` should be used before falling back

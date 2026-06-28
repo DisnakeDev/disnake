@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable, Mapping, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -10,22 +11,19 @@ from typing import (
     overload,
 )
 
+from ...abc import Snowflake
 from ...components import MentionableSelectMenu
 from ...enums import ComponentType, SelectDefaultValueType
 from ...member import Member
 from ...role import Role
 from ...user import ClientUser, User
 from ...utils import MISSING
-from .base import BaseSelect, V_co, _create_decorator
+from .._types import P, V_co, V_deco
+from ..item import DecoratedItem, ItemCallbackType
+from .base import BaseSelect, SelectDefaultValueMultiInputType, _create_decorator
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Mapping, Sequence
-
     from typing_extensions import Self
-
-    from ...abc import Snowflake
-    from ..item import DecoratedItem, ItemCallbackType
-    from .base import P, SelectDefaultValueMultiInputType
 
 
 __all__ = (
@@ -97,38 +95,6 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, User | Member | Role, 
         SelectDefaultValueType.role: (Role,),
     }
 
-    @overload
-    def __init__(
-        self: MentionableSelect[None],
-        *,
-        custom_id: str = ...,
-        placeholder: str | None = None,
-        min_values: int = 1,
-        max_values: int = 1,
-        disabled: bool = False,
-        default_values: Sequence[SelectDefaultValueMultiInputType[User | Member | Role]]
-        | None = None,
-        required: bool = True,
-        id: int = 0,
-        row: int | None = None,
-    ) -> None: ...
-
-    @overload
-    def __init__(
-        self: MentionableSelect[V_co],
-        *,
-        custom_id: str = ...,
-        placeholder: str | None = None,
-        min_values: int = 1,
-        max_values: int = 1,
-        disabled: bool = False,
-        default_values: Sequence[SelectDefaultValueMultiInputType[User | Member | Role]]
-        | None = None,
-        required: bool = True,
-        id: int = 0,
-        row: int | None = None,
-    ) -> None: ...
-
     def __init__(
         self,
         *,
@@ -172,7 +138,7 @@ class MentionableSelect(BaseSelect[MentionableSelectMenu, User | Member | Role, 
         )
 
 
-S_co = TypeVar("S_co", bound="MentionableSelect", covariant=True)
+S_co = TypeVar("S_co", bound="MentionableSelect[Any]", covariant=True)
 
 
 @overload
@@ -187,19 +153,19 @@ def mentionable_select(
     id: int = 0,
     row: int | None = None,
 ) -> Callable[
-    [ItemCallbackType[V_co, MentionableSelect[V_co]]], DecoratedItem[MentionableSelect[V_co]]
+    [ItemCallbackType[V_deco, MentionableSelect[Any]]], DecoratedItem[MentionableSelect[V_deco]]
 ]: ...
 
 
 @overload
 def mentionable_select(
     cls: Callable[P, S_co], *_: P.args, **kwargs: P.kwargs
-) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]: ...
+) -> Callable[[ItemCallbackType[V_deco, S_co]], DecoratedItem[S_co]]: ...
 
 
 def mentionable_select(
     cls: Callable[..., S_co] = MentionableSelect[Any], **kwargs: Any
-) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]:
+) -> Callable[[ItemCallbackType[V_deco, S_co]], DecoratedItem[S_co]]:
     r"""A decorator that attaches a mentionable (user/member/role) select menu to a component.
 
     The function being decorated should have three parameters: ``self`` representing

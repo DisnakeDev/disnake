@@ -13,6 +13,7 @@ import dataclasses
 import os
 import pathlib
 import shutil
+from collections.abc import Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -20,9 +21,6 @@ from typing import (
 )
 
 import nox
-
-if TYPE_CHECKING:
-    from collections.abc import Sequence
 
 nox.needs_version = ">=2025.5.1"
 
@@ -79,20 +77,21 @@ EXECUTION_GROUPS: Sequence[ExecutionGroup] = [
             project=True,
             extras=("speed", "voice"),
             groups=("test", "nox"),
-            dependencies=("pytz", "requests"),  # needed for type checking
+            dependencies=("requests",),  # needed for type checking
         )
         for python in ALL_PYTHONS
     ),
     # docs and pyright
     ExecutionGroup(
         sessions=("docs", "pyright"),
+        python="3.12",
         pyright_paths=("docs",),
         groups=("docs",),
     ),
     # codemodding and pyright
     ExecutionGroup(
         sessions=("codemod", "autotyping", "pyright"),
-        pyright_paths=("scripts/codemods", "scripts/ci"),
+        pyright_paths=("scripts/codemods",),
         groups=("codemod",),
     ),
     # the other sessions, they don't need pyright, but they need to run
@@ -227,6 +226,8 @@ def docs(session: nox.Session) -> None:
                 "sphinx-autobuild",
                 "--ignore",
                 "_build",
+                "--re-ignore",
+                "__pycache__",
                 "--watch",
                 "../disnake",
                 "--watch",
@@ -476,7 +477,7 @@ def dev(session: nox.Session) -> None:
     """
     session.run("uv", "lock", external=True)
     session.run("uv", "venv", "--clear", external=True)
-    session.run("uv", "sync", "--all-extras", "--all-groups", external=True)
+    session.run("uv", "sync", "--all-extras", external=True)
     session.run("uv", "run", "prek", "install", "--overwrite", external=True)
 
 

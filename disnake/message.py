@@ -3,9 +3,12 @@
 from __future__ import annotations
 
 import asyncio
+import datetime
 import io
 import re
 from base64 import b64decode, b64encode
+from collections.abc import Callable
+from os import PathLike
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -17,7 +20,7 @@ from typing import (
 
 from . import utils
 from .channel import PartialMessageable
-from .components import _message_component_factory
+from .components import MessageTopLevelComponent, _message_component_factory
 from .embeds import Embed
 from .emoji import Emoji
 from .enums import (
@@ -39,18 +42,14 @@ from .poll import Poll
 from .reaction import Reaction
 from .sticker import StickerItem
 from .threads import Thread
-from .utils import MISSING, _get_as_snowflake, assert_never, deprecated, escape_mentions
+from .user import User
+from .utils import MISSING, _get_as_snowflake, assert_never, escape_mentions
 
 if TYPE_CHECKING:
-    import datetime
-    from collections.abc import Callable
-    from os import PathLike
-
     from typing_extensions import Self
 
     from .abc import GuildChannel, MessageableChannel, Snowflake
     from .channel import DMChannel, GroupChannel
-    from .components import MessageTopLevelComponent
     from .guild import GuildMessageable
     from .mentions import AllowedMentions
     from .role import Role
@@ -84,7 +83,6 @@ if TYPE_CHECKING:
     from .types.user import User as UserPayload
     from .ui._types import MessageComponents
     from .ui.view import View
-    from .user import User
 
     EmojiInputType: TypeAlias = Emoji | PartialEmoji | str
 
@@ -743,6 +741,7 @@ class MessageReference:
     to_message_reference_dict = to_dict
 
 
+@utils.noop_deprecated("Use `Message.interaction_metadata` instead.")
 class InteractionReference:
     """Represents an interaction being referenced in a message.
 
@@ -974,7 +973,7 @@ class MessageCall:
     r"""
     Represents a call in a message.
 
-    .. versionadded:: |vnext|
+    .. versionadded:: 2.12
 
     Attributes
     ----------
@@ -1143,7 +1142,7 @@ class Message(Hashable):
         The call contained in this message.
         Only present when :attr:`type` is :attr:`MessageType.call`.
 
-        .. versionadded:: |vnext|
+        .. versionadded:: 2.12
     """
 
     __slots__ = (
@@ -1249,8 +1248,8 @@ class Message(Hashable):
         except AttributeError:
             self.guild = state._get_guild(utils._get_as_snowflake(data, "guild_id"))
 
-        self._interaction: InteractionReference | None = (
-            InteractionReference(state=state, guild=self.guild, data=interaction)
+        self._interaction: InteractionReference | None = (  # pyright: ignore[reportDeprecated]
+            InteractionReference(state=state, guild=self.guild, data=interaction)  # pyright: ignore[reportDeprecated]
             if (interaction := data.get("interaction"))
             else None
         )
@@ -1862,8 +1861,8 @@ class Message(Hashable):
         return None
 
     @property
-    @deprecated("interaction_metadata")
-    def interaction(self) -> InteractionReference | None:
+    @utils.deprecated("Use `.interaction_metadata` instead.")
+    def interaction(self) -> InteractionReference | None:  # pyright: ignore[reportDeprecated]
         """:class:`~disnake.InteractionReference` | :data:`None`: The interaction that this message references.
         This exists only when the message is a response to an interaction without an existing message.
 
@@ -1976,6 +1975,26 @@ class Message(Hashable):
         view: View | None = ...,
         components: MessageComponents | None = ...,
         delete_after: float | None = ...,
+    ) -> Message: ...
+
+    @overload
+    @utils.deprecated("`suppress` is deprecated. Use `suppress_embeds` instead.")
+    async def edit(
+        self,
+        content: str | None = ...,
+        *,
+        embed: Embed | None = ...,
+        embeds: list[Embed] = ...,
+        file: File = ...,
+        files: list[File] = ...,
+        attachments: list[Attachment] | None = ...,
+        suppress: bool,
+        suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
+        allowed_mentions: AllowedMentions | None = ...,
+        view: View | None = ...,
+        components: MessageComponents | None = ...,
+        delete_after: float | None = None,
     ) -> Message: ...
 
     async def edit(
@@ -2748,6 +2767,26 @@ class PartialMessage(Hashable):
         view: View | None = ...,
         components: MessageComponents | None = ...,
         delete_after: float | None = ...,
+    ) -> Message: ...
+
+    @overload
+    @utils.deprecated("`suppress` is deprecated. Use `suppress_embeds` instead.")
+    async def edit(
+        self,
+        content: str | None = ...,
+        *,
+        embed: Embed | None = ...,
+        embeds: list[Embed] = ...,
+        file: File = ...,
+        files: list[File] = ...,
+        attachments: list[Attachment] | None = ...,
+        suppress: bool = ...,
+        suppress_embeds: bool = ...,
+        flags: MessageFlags = ...,
+        allowed_mentions: AllowedMentions | None = ...,
+        view: View | None = ...,
+        components: MessageComponents | None = ...,
+        delete_after: float | None = None,
     ) -> Message: ...
 
     async def edit(

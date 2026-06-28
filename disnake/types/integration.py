@@ -2,13 +2,12 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, TypeAlias, TypedDict
+from typing import Literal, TypeAlias, TypedDict
 
 from typing_extensions import NotRequired
 
-if TYPE_CHECKING:
-    from .snowflake import Snowflake
-    from .user import User
+from .snowflake import Snowflake
+from .user import User
 
 
 class IntegrationApplication(TypedDict):
@@ -16,7 +15,6 @@ class IntegrationApplication(TypedDict):
     name: str
     icon: str | None
     description: str
-    summary: str
     bot: NotRequired[User]
 
 

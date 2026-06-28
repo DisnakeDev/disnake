@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable, Iterator
 from functools import wraps
 from typing import (
     TYPE_CHECKING,
@@ -14,8 +15,6 @@ from .flags import BaseFlags, alias_flag_value, flag_value
 from .utils import _generated, _overload_with_permissions
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterator
-
     from typing_extensions import Self
 
 
@@ -158,6 +157,7 @@ class Permissions(BaseFlags):
         administrator: bool = ...,
         attach_files: bool = ...,
         ban_members: bool = ...,
+        bypass_slowmode: bool = ...,
         change_nickname: bool = ...,
         connect: bool = ...,
         create_events: bool = ...,
@@ -197,6 +197,7 @@ class Permissions(BaseFlags):
         send_polls: bool = ...,
         send_tts_messages: bool = ...,
         send_voice_messages: bool = ...,
+        set_voice_channel_status: bool = ...,
         speak: bool = ...,
         start_embedded_activities: bool = ...,
         stream: bool = ...,
@@ -317,6 +318,9 @@ class Permissions(BaseFlags):
 
         .. versionchanged:: 2.10
             Added :attr:`create_events` permission.
+
+        .. versionchanged:: |vnext|
+            Added :attr:`set_voice_channel_status` permission.
         """
         instance = cls.all()
         instance.update(
@@ -405,9 +409,13 @@ class Permissions(BaseFlags):
 
         .. versionchanged:: 2.10
             Moved :attr:`use_application_commands` permission to :attr:`apps`.
+            Added :attr:`send_polls` permission.
 
         .. versionchanged:: 2.11
             Added :attr:`pin_messages` permission.
+
+        .. versionchanged:: 2.12
+            Added :attr:`bypass_slowmode` permission.
         """
         return cls(
             send_messages=True,
@@ -427,6 +435,7 @@ class Permissions(BaseFlags):
             send_voice_messages=True,
             pin_messages=True,
             send_polls=True,
+            bypass_slowmode=True,
         )
 
     @classmethod
@@ -455,6 +464,7 @@ class Permissions(BaseFlags):
             mute_members=True,
             deafen_members=True,
             move_members=True,
+            set_voice_channel_status=True,
         )
 
     @classmethod
@@ -536,11 +546,12 @@ class Permissions(BaseFlags):
         This is equivalent to :meth:`Permissions.text` with :attr:`~Permissions.view_channel` with the following set to False:
 
         - :attr:`~Permissions.send_tts_messages`: You cannot send TTS messages in a DM.
-        - :attr:`~Permissions.manage_messages`: You cannot delete others messages in a DM.
+        - :attr:`~Permissions.manage_messages`: You cannot delete others' messages in a DM.
         - :attr:`~Permissions.manage_threads`: You cannot manage threads in a DM.
         - :attr:`~Permissions.send_messages_in_threads`: You cannot make threads in a DM.
         - :attr:`~Permissions.create_public_threads`: You cannot make public threads in a DM.
         - :attr:`~Permissions.create_private_threads`: You cannot make private threads in a DM.
+        - :attr:`~Permissions.bypass_slowmode`: You cannot enable slowmode in a DM.
 
         .. versionadded:: 2.4
         """
@@ -552,6 +563,7 @@ class Permissions(BaseFlags):
         base.send_messages_in_threads = False
         base.create_public_threads = False
         base.create_private_threads = False
+        base.bypass_slowmode = False
         return base
 
     @overload
@@ -563,6 +575,7 @@ class Permissions(BaseFlags):
         administrator: bool = ...,
         attach_files: bool = ...,
         ban_members: bool = ...,
+        bypass_slowmode: bool = ...,
         change_nickname: bool = ...,
         connect: bool = ...,
         create_events: bool = ...,
@@ -602,6 +615,7 @@ class Permissions(BaseFlags):
         send_polls: bool = ...,
         send_tts_messages: bool = ...,
         send_voice_messages: bool = ...,
+        set_voice_channel_status: bool = ...,
         speak: bool = ...,
         start_embedded_activities: bool = ...,
         stream: bool = ...,
@@ -1057,6 +1071,16 @@ class Permissions(BaseFlags):
         """
         return 1 << 46
 
+    # 1 << 47 was the use clyde AI permission which never rolled fully out
+
+    @flag_value
+    def set_voice_channel_status(self) -> int:
+        """:class:`bool`: Returns ``True`` if a user can set the voice channel status.
+
+        .. versionadded:: |vnext|
+        """
+        return 1 << 48
+
     @flag_value
     def send_polls(self) -> int:
         """:class:`bool`: Returns ``True`` if a user can send polls.
@@ -1084,6 +1108,16 @@ class Permissions(BaseFlags):
         .. versionadded:: 2.11
         """
         return 1 << 51
+
+    @flag_value
+    def bypass_slowmode(self) -> int:
+        """:class:`bool`: Returns ``True`` if a user can bypass slowmode restrictions.
+
+        Bots are unaffected by slowmode regardless of this permission.
+
+        .. versionadded:: 2.12
+        """
+        return 1 << 52
 
 
 def _augment_from_permissions(cls):
@@ -1155,6 +1189,7 @@ class PermissionOverwrite:
         administrator: bool | None
         attach_files: bool | None
         ban_members: bool | None
+        bypass_slowmode: bool | None
         change_nickname: bool | None
         connect: bool | None
         create_events: bool | None
@@ -1194,6 +1229,7 @@ class PermissionOverwrite:
         send_polls: bool | None
         send_tts_messages: bool | None
         send_voice_messages: bool | None
+        set_voice_channel_status: bool | None
         speak: bool | None
         start_embedded_activities: bool | None
         stream: bool | None
@@ -1224,6 +1260,7 @@ class PermissionOverwrite:
         administrator: bool | None = ...,
         attach_files: bool | None = ...,
         ban_members: bool | None = ...,
+        bypass_slowmode: bool | None = ...,
         change_nickname: bool | None = ...,
         connect: bool | None = ...,
         create_events: bool | None = ...,
@@ -1263,6 +1300,7 @@ class PermissionOverwrite:
         send_polls: bool | None = ...,
         send_tts_messages: bool | None = ...,
         send_voice_messages: bool | None = ...,
+        set_voice_channel_status: bool | None = ...,
         speak: bool | None = ...,
         start_embedded_activities: bool | None = ...,
         stream: bool | None = ...,
@@ -1360,6 +1398,7 @@ class PermissionOverwrite:
         administrator: bool | None = ...,
         attach_files: bool | None = ...,
         ban_members: bool | None = ...,
+        bypass_slowmode: bool | None = ...,
         change_nickname: bool | None = ...,
         connect: bool | None = ...,
         create_events: bool | None = ...,
@@ -1399,6 +1438,7 @@ class PermissionOverwrite:
         send_polls: bool | None = ...,
         send_tts_messages: bool | None = ...,
         send_voice_messages: bool | None = ...,
+        set_voice_channel_status: bool | None = ...,
         speak: bool | None = ...,
         start_embedded_activities: bool | None = ...,
         stream: bool | None = ...,

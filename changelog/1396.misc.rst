@@ -1,1 +1,0 @@
-Update all standard library types to use built-in generics (such as ``list[int]`` instead of ``List[int]``) where applicable.

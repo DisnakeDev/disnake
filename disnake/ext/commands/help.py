@@ -6,6 +6,8 @@ import copy
 import functools
 import itertools
 import re
+from collections.abc import Callable, Generator, Iterable, Mapping, Sequence
+from re import Match
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -17,20 +19,17 @@ from typing import (
 import disnake.abc
 import disnake.utils
 
+from .context import BotT, Context
 from .core import Command, Group
 from .errors import CommandError
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Generator, Iterable, Mapping, Sequence
-    from re import Match
-
     from typing_extensions import Self
 
     from ._types import Check, FuncT, MaybeCoro
     from .bot import AutoShardedBot, Bot
     from .bot_base import BotBase
     from .cog import Cog
-    from .context import BotT, Context
 
     # note: no InteractionBot
     AnyBot: TypeAlias = Bot | AutoShardedBot

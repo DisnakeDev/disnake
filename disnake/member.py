@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import datetime
+import inspect
 import itertools
 import sys
+from collections.abc import Callable, Sequence
 from operator import attrgetter
 from typing import (
     TYPE_CHECKING,
@@ -18,8 +20,8 @@ from typing import (
 import disnake.abc
 
 from . import utils
-from .activity import create_activity
-from .asset import Asset
+from .activity import ActivityTypes, create_activity
+from .asset import Asset, AssetBytes
 from .colour import Colour
 from .enums import Status, try_enum
 from .flags import MemberFlags
@@ -34,13 +36,9 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Sequence
-
     from typing_extensions import Self
 
     from .abc import Snowflake
-    from .activity import ActivityTypes
-    from .asset import AssetBytes
     from .channel import DMChannel, StageChannel, VoiceChannel
     from .flags import PublicUserFlags
     from .guild import Guild
@@ -185,7 +183,7 @@ def flatten_user(cls: type[Member]) -> type[Member]:
             # probably a member function by now
             def generate_function(x: str) -> Callable[..., Any]:
                 # We want sphinx to properly show coroutine functions as coroutines
-                if utils.iscoroutinefunction(value):  # noqa: B023
+                if inspect.iscoroutinefunction(value):  # noqa: B023
 
                     async def general(self, *args: Any, **kwargs: Any) -> Any:  # pyright: ignore[reportRedeclaration]
                         return await getattr(self._user, x)(*args, **kwargs)
@@ -445,7 +443,7 @@ class Member(disnake.abc.Messageable, _UserTag):
     def _presence_update(self, data: PresenceData, user: UserPayload) -> tuple[User, User] | None:
         self.activities = tuple(create_activity(a, state=self._state) for a in data["activities"])
         self._client_status = {
-            sys.intern(key): sys.intern(value)  # pyright: ignore[reportArgumentType]
+            sys.intern(key): sys.intern(value)  # pyright: ignore[reportCallIssue, reportArgumentType]
             for key, value in data.get("client_status", {}).items()
         }
         self._client_status[None] = sys.intern(data["status"])

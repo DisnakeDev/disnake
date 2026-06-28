@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable, Mapping
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -11,22 +12,19 @@ from typing import (
     overload,
 )
 
+from ...abc import Snowflake
 from ...components import SelectOption, StringSelectMenu
-from ...enums import ComponentType
+from ...enums import ComponentType, SelectDefaultValueType
 from ...utils import MISSING
-from .base import BaseSelect, V_co, _create_decorator
+from .._types import P, V_co, V_deco
+from ..item import DecoratedItem, ItemCallbackType
+from .base import BaseSelect, _create_decorator
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Mapping
-
     from typing_extensions import Self
 
-    from ...abc import Snowflake
     from ...emoji import Emoji
-    from ...enums import SelectDefaultValueType
     from ...partial_emoji import PartialEmoji
-    from ..item import DecoratedItem, ItemCallbackType
-    from .base import P
 
 
 __all__ = (
@@ -114,36 +112,6 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
     _default_value_type_map: ClassVar[
         Mapping[SelectDefaultValueType, tuple[type[Snowflake], ...]]
     ] = {}
-
-    @overload
-    def __init__(
-        self: StringSelect[None],
-        *,
-        custom_id: str = ...,
-        placeholder: str | None = None,
-        min_values: int = 1,
-        max_values: int = 1,
-        disabled: bool = False,
-        options: SelectOptionInput = ...,
-        required: bool = True,
-        id: int = 0,
-        row: int | None = None,
-    ) -> None: ...
-
-    @overload
-    def __init__(
-        self: StringSelect[V_co],
-        *,
-        custom_id: str = ...,
-        placeholder: str | None = None,
-        min_values: int = 1,
-        max_values: int = 1,
-        disabled: bool = False,
-        options: SelectOptionInput = ...,
-        required: bool = True,
-        id: int = 0,
-        row: int | None = None,
-    ) -> None: ...
 
     def __init__(
         self,
@@ -272,7 +240,7 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
 Select = StringSelect  # backwards compatibility
 
 
-S_co = TypeVar("S_co", bound="StringSelect", covariant=True)
+S_co = TypeVar("S_co", bound="StringSelect[Any]", covariant=True)
 
 
 @overload
@@ -286,18 +254,20 @@ def string_select(
     disabled: bool = False,
     id: int = 0,
     row: int | None = None,
-) -> Callable[[ItemCallbackType[V_co, StringSelect[V_co]]], DecoratedItem[StringSelect[V_co]]]: ...
+) -> Callable[
+    [ItemCallbackType[V_deco, StringSelect[Any]]], DecoratedItem[StringSelect[V_deco]]
+]: ...
 
 
 @overload
 def string_select(
     cls: Callable[P, S_co], *_: P.args, **kwargs: P.kwargs
-) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]: ...
+) -> Callable[[ItemCallbackType[V_deco, S_co]], DecoratedItem[S_co]]: ...
 
 
 def string_select(
     cls: Callable[..., S_co] = StringSelect[Any], **kwargs: Any
-) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]:
+) -> Callable[[ItemCallbackType[V_deco, S_co]], DecoratedItem[S_co]]:
     r"""A decorator that attaches a string select menu to a component.
 
     The function being decorated should have three parameters: ``self`` representing

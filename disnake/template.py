@@ -4,17 +4,15 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, NoReturn
 
-from .guild import Guild
-from .utils import MISSING, _assetbytes_to_base64_data, parse_time
+from .guild import Guild, Member
+from .utils import MISSING, parse_time
 
 __all__ = ("Template",)
 
 if TYPE_CHECKING:
     import datetime
 
-    from .asset import AssetBytes
     from .flags import MemberCacheFlags
-    from .guild import Member
     from .state import ConnectionState
     from .types.emoji import Emoji as EmojiPayload
     from .types.template import Template as TemplatePayload
@@ -150,53 +148,6 @@ class Template:
             f"<Template code={self.code!r} uses={self.uses} name={self.name!r}"
             f" creator={self.creator!r} source_guild={self.source_guild!r} is_dirty={self.is_dirty}>"
         )
-
-    async def create_guild(self, name: str, icon: AssetBytes | None = None) -> Guild:
-        """|coro|
-
-        Creates a :class:`.Guild` using the template.
-
-        Bot accounts in more than 10 guilds are not allowed to create guilds.
-
-        .. versionchanged:: 2.5
-            Removed the ``region`` parameter.
-
-        .. versionchanged:: 2.6
-            Raises :exc:`ValueError` instead of ``InvalidArgument``.
-
-        Parameters
-        ----------
-        name: :class:`str`
-            The name of the guild.
-        icon: |resource_type| | :data:`None`
-            The icon of the guild.
-            See :meth:`.ClientUser.edit` for more details on what is expected.
-
-            .. versionchanged:: 2.5
-                Now accepts various resource types in addition to :class:`bytes`.
-
-
-        Raises
-        ------
-        NotFound
-            The ``icon`` asset couldn't be found.
-        HTTPException
-            Guild creation failed.
-        TypeError
-            The ``icon`` asset is a lottie sticker (see :func:`Sticker.read`).
-        ValueError
-            Invalid icon image format given. Must be PNG or JPG.
-
-        Returns
-        -------
-        :class:`.Guild`
-            The guild created. This is not the same guild that is
-            added to cache.
-        """
-        icon_data = await _assetbytes_to_base64_data(icon)
-
-        data = await self._state.http.create_from_template(self.code, name, icon_data)
-        return Guild(data=data, state=self._state)
 
     async def sync(self) -> Template:
         """|coro|

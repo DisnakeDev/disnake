@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import datetime
+from collections.abc import Mapping, Sized
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -15,26 +16,22 @@ from typing import (
 
 from . import utils
 from .colour import Colour
-from .utils import MISSING, classproperty, warn_deprecated
-
-if TYPE_CHECKING:
-    from collections.abc import Mapping, Sized
-
-    from .file import File
+from .file import File
+from .utils import MISSING
 
 __all__ = ("Embed",)
 
 
-# backwards compatibility, hidden from type-checkers to have them show errors when accessed
+# backwards compatibility, hidden from type-checkers to have them show errors on access
 if not TYPE_CHECKING:
 
-    def __getattr__(name: str) -> None:
+    def __getattr__(name: str) -> object:
         if name == "EmptyEmbed":
-            warn_deprecated(
+            utils.warn_deprecated(
                 "`EmptyEmbed` is deprecated and will be removed in a future version. Use `None` instead.",
                 stacklevel=2,
             )
-            return None  # noqa: RET501
+            return None
         msg = f"module '{__name__}' has no attribute '{name}'"
         raise AttributeError(msg)
 
@@ -151,7 +148,7 @@ class Embed:
     type: :class:`str` | :data:`None`
         The type of embed. Usually "rich".
         Possible strings for embed types can be found on Discord's
-        :ddocs:`api-docs <resources/channel#embed-object-embed-types>`.
+        :ddocs:`api-docs <resources/message#embed-object-embed-types>`.
     description: :class:`str` | :data:`None`
         The description of the embed.
     url: :class:`str` | :data:`None`
@@ -222,16 +219,12 @@ class Embed:
 
         self._files: dict[_FileKey, File] = {}
 
-    # see `EmptyEmbed` above
     if not TYPE_CHECKING:
         # n.b. this is the only use site of classproperty
-        @classproperty
+        @utils.classproperty
+        @utils.deprecated("Embed.Empty is deprecated. Use None instead.", stacklevel=2)
         def Empty(self) -> None:
-            warn_deprecated(
-                "`Embed.Empty` is deprecated and will be removed in a future version. Use `None` instead.",
-                stacklevel=3,
-            )
-            return None  # noqa: RET501
+            return None
 
     @classmethod
     def from_dict(cls, data: EmbedData) -> Self:
@@ -239,7 +232,7 @@ class Embed:
         format that Discord expects it to be in.
 
         You can find out about this format in the
-        :ddocs:`official Discord documentation <resources/channel#embed-object>`.
+        :ddocs:`official Discord documentation <resources/message#embed-object>`.
 
         Parameters
         ----------

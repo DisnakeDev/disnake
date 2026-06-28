@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import inspect
 import logging
+from collections.abc import Callable, Generator
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -21,8 +22,6 @@ from .ctx_menus_core import InvokableMessageCommand, InvokableUserCommand
 from .slash_core import InvokableSlashCommand
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Generator
-
     from typing_extensions import Self
 
     from disnake.interactions import ApplicationCommandInteraction
@@ -185,7 +184,7 @@ class CogMeta(type):
                     if elem.startswith(("cog_", "bot_")):
                         raise TypeError(no_bot_cog.format(base, elem))
                     app_commands[elem] = value
-                elif disnake.utils.iscoroutinefunction(value):
+                elif inspect.iscoroutinefunction(value):
                     if hasattr(value, "__cog_listener__"):
                         if elem.startswith(("cog_", "bot_")):
                             raise TypeError(no_bot_cog.format(base, elem))
@@ -411,7 +410,7 @@ class Cog(metaclass=CogMeta):
             actual = func
             if isinstance(actual, staticmethod):
                 actual = actual.__func__
-            if not disnake.utils.iscoroutinefunction(actual):
+            if not inspect.iscoroutinefunction(actual):
                 msg = "Listener function must be a coroutine function."
                 raise TypeError(msg)
             actual.__cog_listener__ = True

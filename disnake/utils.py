@@ -19,7 +19,11 @@ from base64 import b64encode
 from bisect import bisect_left
 from collections.abc import (
     AsyncIterator,
+    Awaitable,
+    Callable,
+    Iterable,
     Iterator,
+    Mapping,
     Sequence,
 )
 from inspect import getdoc as _getdoc, isawaitable as _isawaitable, signature as _signature
@@ -32,7 +36,6 @@ from typing import (
     ForwardRef,
     Generic,
     Literal,
-    NoReturn,
     Protocol,
     TypeAlias,
     TypedDict,
@@ -43,21 +46,12 @@ from typing import (
 )
 from urllib.parse import parse_qs, urlencode
 
-if TYPE_CHECKING:
-    from collections.abc import (
-        Awaitable,
-        Callable,
-        Iterable,
-        Mapping,
-    )
-
-    from typing_extensions import Self
+from typing_extensions import Never, ParamSpec, Self, deprecated as deprecated
 
 from .enums import Locale
 
 if sys.version_info >= (3, 14):
     import threading
-    from inspect import iscoroutinefunction as iscoroutinefunction
 
     def get_event_loop():
         try:
@@ -71,7 +65,6 @@ if sys.version_info >= (3, 14):
             asyncio.set_event_loop(loop := asyncio.new_event_loop())
             return loop
 else:
-    from asyncio import iscoroutinefunction as iscoroutinefunction
 
     def get_event_loop():
         with warnings.catch_warnings():
@@ -143,8 +136,6 @@ class _cached_property:
 if TYPE_CHECKING:
     from functools import cached_property as cached_property
 
-    from typing_extensions import Never, ParamSpec, Self
-
     from .abc import Snowflake
     from .asset import AssetBytes
     from .invite import Invite
@@ -155,14 +146,13 @@ if TYPE_CHECKING:
     class _RequestLike(Protocol):
         headers: Mapping[str, Any]
 
-    P = ParamSpec("P")
-
 else:
     cached_property = _cached_property
 
 
 T = TypeVar("T")
 V = TypeVar("V")
+P = ParamSpec("P")
 T_co = TypeVar("T_co", covariant=True)
 _Iter: TypeAlias = Iterator[T] | AsyncIterator[T]
 _BytesLike: TypeAlias = bytes | bytearray | memoryview
@@ -196,12 +186,8 @@ class classproperty(Generic[T_co]):
     def __init__(self, fget: Callable[[Any], T_co]) -> None:
         self.fget = fget
 
-    def __get__(self, instance: object, owner: type[object]) -> T_co:
+    def __get__(self, instance: object | None, owner: type[object]) -> T_co:
         return self.fget(owner)
-
-    def __set__(self, instance: object, value: object) -> NoReturn:
-        msg = "cannot set attribute"
-        raise AttributeError(msg)
 
 
 def cached_slot_property(name: str) -> Callable[[Callable[[T], T_co]], CachedSlotProperty[T, T_co]]:
@@ -281,25 +267,6 @@ def copy_doc(original: Callable[..., Any] | property) -> Callable[[T], T]:
     return decorator
 
 
-def deprecated(
-    instead: str | None = None, *, skip_internal_frames: bool = False
-) -> Callable[[Callable[P, T]], Callable[P, T]]:
-    def actual_decorator(func: Callable[P, T]) -> Callable[P, T]:
-        @functools.wraps(func)
-        def decorated(*args: P.args, **kwargs: P.kwargs) -> T:
-            if instead:
-                msg = f"{func.__name__} is deprecated, use {instead} instead."
-            else:
-                msg = f"{func.__name__} is deprecated."
-
-            warn_deprecated(msg, stacklevel=2, skip_internal_frames=skip_internal_frames)
-            return func(*args, **kwargs)
-
-        return decorated
-
-    return actual_decorator
-
-
 _root_module_path = os.path.join(os.path.dirname(__file__), "")  # add trailing slash
 
 
@@ -319,6 +286,16 @@ def warn_deprecated(
     finally:
         assert isinstance(warnings.filters, list)
         warnings.filters[:] = old_filters
+
+
+# use to mark classes users should no longer use,
+# but the library still needs to create instances of
+if TYPE_CHECKING:
+    noop_deprecated = deprecated
+else:
+
+    def noop_deprecated(*_: object, **__: object) -> Callable[[T], T]:
+        return lambda o: o
 
 
 def oauth_url(
@@ -1405,6 +1382,26 @@ def signature_has_self_param(function: Callable[..., Any]) -> bool:
 
     # (5)
     return not parent.endswith(".<locals>")
+
+
+if sys.version_info >= (3, 14):
+    import annotationlib
+
+    def get_annotations_from_namespace(namespace: dict[str, Any]) -> dict[str, Any]:
+        # classes in 3.14+ don't necessarily have an `__annotations__` dict,
+        # as annotations are lazily evaluated (provided the pre-3.14 future import isn't used)
+        # https://docs.python.org/3.14/library/annotationlib.html#annotationlib-metaclass
+        if annotate := annotationlib.get_annotate_from_class_namespace(namespace):
+            # we usually run these through `resolve_annotation` right after anyway,
+            # so `FORWARDREF` doesn't really provide an advantage over simply using `VALUE`,
+            # but it also doesn't hurt to use it.
+            return annotationlib.call_annotate_function(annotate, annotationlib.Format.FORWARDREF)
+        return namespace.get("__annotations__", {})
+
+else:
+
+    def get_annotations_from_namespace(namespace: dict[str, Any]) -> dict[str, Any]:
+        return namespace.get("__annotations__", {})
 
 
 TimestampStyle = Literal["t", "T", "d", "D", "f", "F", "s", "S", "R"]

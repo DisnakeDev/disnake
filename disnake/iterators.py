@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import datetime
-from collections.abc import AsyncIterator, Awaitable, Callable
+from collections.abc import AsyncIterator, Awaitable, Callable, Generator
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -12,6 +12,8 @@ from typing import (
     Union,
     cast,
 )
+
+from disnake import utils
 
 from .app_commands import application_command_factory
 from .audit_logs import AuditLogEntry
@@ -24,7 +26,7 @@ from .integrations import PartialIntegration
 from .object import Object
 from .subscription import Subscription
 from .threads import Thread
-from .utils import deprecated, maybe_coroutine, parse_time, snowflake_time, time_snowflake
+from .utils import maybe_coroutine, parse_time, snowflake_time, time_snowflake
 
 __all__ = (
     "ReactionIterator",
@@ -40,8 +42,6 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Generator
-
     from .abc import Messageable, Snowflake
     from .app_commands import APIApplicationCommand
     from .client import Client
@@ -1357,7 +1357,9 @@ class ChannelPinsIterator(_AsyncIterator["Message"]):
         self.messages: asyncio.Queue[Message] = asyncio.Queue()
 
     # defined to maintain backward compatibility with the old `pins` method
-    @deprecated("async for msg in channel.pins()")
+    @utils.deprecated(
+        "`await channel.pins()` is deprecated. Use `async for msg in channel.pins()` instead."
+    )
     def __await__(self) -> Generator[None, None, list[Message]]:
         return self.flatten().__await__()
 

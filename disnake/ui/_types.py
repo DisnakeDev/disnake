@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import TYPE_CHECKING, Any, TypeAlias, TypeVar, Union
+from typing import TYPE_CHECKING, Any, TypeAlias, Union
+
+from typing_extensions import ParamSpec, TypeVar
 
 if TYPE_CHECKING:
     from typing import TypeAlias
@@ -20,11 +22,13 @@ if TYPE_CHECKING:
         TextDisplay,
         TextInput,
     )
-    from .item import WrappedComponent
     from .select import ChannelSelect, MentionableSelect, RoleSelect, StringSelect, UserSelect
     from .view import View
 
-V_co = TypeVar("V_co", bound="View | None", covariant=True)
+V_co = TypeVar("V_co", bound="View | None", covariant=True, default=None)
+# strict View-bound TypeVar used in decorators
+V_deco = TypeVar("V_deco", bound="View", covariant=True)
+P = ParamSpec("P")
 
 AnySelect: TypeAlias = Union[
     "ChannelSelect[V_co]",
@@ -60,7 +64,13 @@ ModalTopLevelComponent: TypeAlias = Union[
     "ActionRow[ActionRowModalComponent]",  # deprecated
 ]
 
-ActionRowChildT = TypeVar("ActionRowChildT", bound="WrappedComponent")
+ActionRowChildT = TypeVar(
+    "ActionRowChildT",
+    ActionRowMessageComponent,
+    ActionRowModalComponent,
+    infer_variance=True,
+)
+
 NonActionRowChildT = TypeVar(
     "NonActionRowChildT",
     bound=MessageTopLevelComponentV2 | ModalTopLevelComponent_,

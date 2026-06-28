@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable, Mapping, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -10,22 +11,19 @@ from typing import (
     overload,
 )
 
+from ...abc import Snowflake
 from ...components import UserSelectMenu
 from ...enums import ComponentType, SelectDefaultValueType
 from ...member import Member
 from ...object import Object
 from ...user import ClientUser, User
 from ...utils import MISSING
-from .base import BaseSelect, V_co, _create_decorator
+from .._types import P, V_co, V_deco
+from ..item import DecoratedItem, ItemCallbackType
+from .base import BaseSelect, SelectDefaultValueInputType, _create_decorator
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Mapping, Sequence
-
     from typing_extensions import Self
-
-    from ...abc import Snowflake
-    from ..item import DecoratedItem, ItemCallbackType
-    from .base import P, SelectDefaultValueInputType
 
 
 __all__ = (
@@ -94,36 +92,6 @@ class UserSelect(BaseSelect[UserSelectMenu, "User | Member", V_co]):
         SelectDefaultValueType.user: (Member, User, ClientUser, Object),
     }
 
-    @overload
-    def __init__(
-        self: UserSelect[None],
-        *,
-        custom_id: str = ...,
-        placeholder: str | None = None,
-        min_values: int = 1,
-        max_values: int = 1,
-        disabled: bool = False,
-        default_values: Sequence[SelectDefaultValueInputType[User | Member]] | None = None,
-        required: bool = True,
-        id: int = 0,
-        row: int | None = None,
-    ) -> None: ...
-
-    @overload
-    def __init__(
-        self: UserSelect[V_co],
-        *,
-        custom_id: str = ...,
-        placeholder: str | None = None,
-        min_values: int = 1,
-        max_values: int = 1,
-        disabled: bool = False,
-        default_values: Sequence[SelectDefaultValueInputType[User | Member]] | None = None,
-        required: bool = True,
-        id: int = 0,
-        row: int | None = None,
-    ) -> None: ...
-
     def __init__(
         self,
         *,
@@ -166,7 +134,7 @@ class UserSelect(BaseSelect[UserSelectMenu, "User | Member", V_co]):
         )
 
 
-S_co = TypeVar("S_co", bound="UserSelect", covariant=True)
+S_co = TypeVar("S_co", bound="UserSelect[Any]", covariant=True)
 
 
 @overload
@@ -180,18 +148,18 @@ def user_select(
     default_values: Sequence[SelectDefaultValueInputType[User | Member]] | None = None,
     id: int = 0,
     row: int | None = None,
-) -> Callable[[ItemCallbackType[V_co, UserSelect[V_co]]], DecoratedItem[UserSelect[V_co]]]: ...
+) -> Callable[[ItemCallbackType[V_deco, UserSelect[Any]]], DecoratedItem[UserSelect[V_deco]]]: ...
 
 
 @overload
 def user_select(
     cls: Callable[P, S_co], *_: P.args, **kwargs: P.kwargs
-) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]: ...
+) -> Callable[[ItemCallbackType[V_deco, S_co]], DecoratedItem[S_co]]: ...
 
 
 def user_select(
     cls: Callable[..., S_co] = UserSelect[Any], **kwargs: Any
-) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]:
+) -> Callable[[ItemCallbackType[V_deco, S_co]], DecoratedItem[S_co]]:
     r"""A decorator that attaches a user select menu to a component.
 
     The function being decorated should have three parameters: ``self`` representing

@@ -5,12 +5,12 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from .enums import ApplicationRoleConnectionMetadataType, enum_if_int, try_enum
-from .i18n import Localized
+from .i18n import LocalizationValue, Localized
 
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from .i18n import LocalizationProtocol, LocalizationValue, LocalizedRequired
+    from .i18n import LocalizationProtocol, LocalizedRequired
     from .types.application_role_connection import (
         ApplicationRoleConnectionMetadata as ApplicationRoleConnectionMetadataPayload,
     )

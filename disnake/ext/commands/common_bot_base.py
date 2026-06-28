@@ -11,6 +11,7 @@ import os
 import sys
 import time
 import types
+from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any, Generic, TypeVar
 
 import disnake
@@ -20,8 +21,6 @@ from . import errors
 from .cog import Cog
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
-
     from ._types import CoroFunc
     from .help import HelpCommand
 
