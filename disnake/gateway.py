@@ -1307,7 +1307,7 @@ class ZlibDecompressionContext(_DecompressionContext):
 class ZstdDecompressionContext(_DecompressionContext):
     def __init__(self) -> None:
         if not HAS_ZSTD:
-            msg = "The `backports.zstd` package is required to use zstd transport compression"
+            msg = "Python 3.14 or the `backports.zstd` package is required to use zstd transport compression"
             raise RuntimeError(msg)
 
         self.ctx: zstd.ZstdDecompressor = zstd.ZstdDecompressor()  # pyright: ignore[reportPossiblyUnboundVariable]
