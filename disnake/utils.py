@@ -1156,7 +1156,7 @@ def evaluate_annotation(
     cache: dict[str, Any],
     *,
     implicit_str: bool = True,
-    code: types.CodeType | None = None,
+    source_info: types.CodeType | None = None,
 ) -> Any:
     if isinstance(tp, ForwardRef):
         tp = tp.__forward_arg__
@@ -1167,24 +1167,26 @@ def evaluate_annotation(
         if tp in cache:
             return cache[tp]
 
-        if code is not None:
+        if source_info is not None:
             # compile the annotation to add filename/line no. data for warnings & tracebacks
-            source = compile(tp, code.co_filename, "eval", dont_inherit=True)
-            source = source.replace(co_firstlineno=code.co_firstlineno)
+            source = compile(tp, source_info.co_filename, "eval", dont_inherit=True)
+            source = source.replace(co_firstlineno=source_info.co_firstlineno)
         else:
             source = tp
 
         # this is how annotations are supposed to be unstringifed
         evaluated = eval(source, globals, locals)  # noqa: S307
         # recurse to resolve nested args further
-        evaluated = evaluate_annotation(evaluated, globals, locals, cache, code=code)
+        evaluated = evaluate_annotation(evaluated, globals, locals, cache, source_info=source_info)
 
         cache[tp] = evaluated
         return evaluated
 
     # Annotated[X, Y], where Y is the converter we need
     if get_origin(tp) is Annotated:
-        return evaluate_annotation(tp.__metadata__[0], globals, locals, cache, code=code)
+        return evaluate_annotation(
+            tp.__metadata__[0], globals, locals, cache, source_info=source_info
+        )
 
     # GenericAlias / UnionType
     if hasattr(tp, "__args__"):
@@ -1192,7 +1194,9 @@ def evaluate_annotation(
             # n.b. this became obsolete in Python 3.14+, as `UnionType` and `Union` are the same thing now.
             if tp.__class__ is UnionType:
                 converted = Union[tp.__args__]  # noqa: UP007
-                return evaluate_annotation(converted, globals, locals, cache, code=code)
+                return evaluate_annotation(
+                    converted, globals, locals, cache, source_info=source_info
+                )
 
             return tp
 
@@ -1216,7 +1220,9 @@ def evaluate_annotation(
             is_literal = True
 
         evaluated_args = tuple(
-            evaluate_annotation(arg, globals, locals, cache, implicit_str=implicit_str, code=code)
+            evaluate_annotation(
+                arg, globals, locals, cache, implicit_str=implicit_str, source_info=source_info
+            )
             for arg in args
         )
 
@@ -1323,7 +1329,7 @@ def get_signature_parameters(
             annotation = type(None)
         else:
             annotation = evaluate_annotation(
-                annotation, globalns, globalns, cache, code=function.__code__
+                annotation, globalns, globalns, cache, source_info=function.__code__
             )
 
         params[name] = parameter.replace(annotation=annotation)
