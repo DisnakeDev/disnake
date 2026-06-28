@@ -1,0 +1,1 @@
+Support zstd gateway transport compression (see :class:`GatewayParams`).
