@@ -75,6 +75,17 @@ if TYPE_CHECKING:
         async def __call__(self, *args: Any) -> None: ...
 
 
+try:
+    if sys.version_info >= (3, 14):
+        from compression import zstd
+    else:
+        from backports import zstd
+except ImportError:
+    HAS_ZSTD = False
+else:
+    HAS_ZSTD = True
+
+
 __all__ = (
     "DiscordWebSocket",
     "KeepAliveHandler",
@@ -103,20 +114,20 @@ class GatewayParams:
     encoding: :class:`str`
         The payload encoding (``json`` is currently the only supported encoding).
         Defaults to ``"json"``.
-    compress: Literal["zlib-stream"] | :data:`None`
+    compress: Literal["zlib-stream", "zstd-stream"] | :data:`None`
         Which transport compression method to use, if any.
         Defaults to ``"zlib-stream"``.
     """
 
     encoding: Literal["json"] = "json"
-    compress: Literal["zlib-stream"] | None = "zlib-stream"
+    compress: Literal["zlib-stream", "zstd-stream"] | None = "zlib-stream"
 
     def __post_init__(self) -> None:
         if self.encoding != "json":
             msg = "Gateway encodings other than `json` are currently not supported."
             raise ValueError(msg)
-        if self.compress not in ("zlib-stream", None):
-            msg = "Gateway transport compression modes other than `zlib-stream` or None are currently not supported."
+        if self.compress not in ("zlib-stream", "zstd-stream", None):
+            msg = "Gateway transport compression modes other than `zlib-stream`, `zstd-stream`, or None are currently not supported."
             raise ValueError(msg)
 
 
@@ -1274,7 +1285,7 @@ class NullDecompressionContext(_DecompressionContext):
 
 class ZlibDecompressionContext(_DecompressionContext):
     def __init__(self) -> None:
-        self.inflator: zlib._Decompress = zlib.decompressobj()
+        self.ctx: zlib._Decompress = zlib.decompressobj()
         self.buffer: bytearray = bytearray()
 
     def decompress(self, data: bytes | bytearray) -> bytes | None:
@@ -1284,9 +1295,22 @@ class ZlibDecompressionContext(_DecompressionContext):
         if not data.endswith(b"\x00\x00\xff\xff"):
             return None
 
-        raw_msg = self.inflator.decompress(self.buffer)
+        raw_msg = self.ctx.decompress(self.buffer)
         self.buffer = bytearray()
         return raw_msg
+
+
+class ZstdDecompressionContext(_DecompressionContext):
+    def __init__(self) -> None:
+        if not HAS_ZSTD:
+            msg = "The `backports.zstd` package is required to use zstd transport compression"
+            raise RuntimeError(msg)
+
+        self.ctx: zstd.ZstdDecompressor = zstd.ZstdDecompressor()  # pyright: ignore[reportPossiblyUnboundVariable]
+
+    def decompress(self, data: bytes | bytearray) -> bytes | None:
+        # "each websocket message corresponds to a single gateway message, but does not end a zstd frame"
+        return self.ctx.decompress(data)
 
 
 def _decompressor_for_params(params: GatewayParams) -> _DecompressionContext:
@@ -1294,6 +1318,8 @@ def _decompressor_for_params(params: GatewayParams) -> _DecompressionContext:
     match params.compress:
         case "zlib-stream":
             tp = ZlibDecompressionContext
+        case "zstd-stream":
+            tp = ZstdDecompressionContext
         case None:
             tp = NullDecompressionContext
     return tp()
