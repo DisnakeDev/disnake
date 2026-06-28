@@ -1289,14 +1289,18 @@ class ZlibDecompressionContext(_DecompressionContext):
         self.buffer: bytearray = bytearray()
 
     def decompress(self, data: bytes | bytearray) -> bytes | None:
-        # TODO: fast path?
-        self.buffer.extend(data)
-
         if not data.endswith(b"\x00\x00\xff\xff"):
+            # buffer data to combine with subsequent frames
+            self.buffer.extend(data)
             return None
 
-        raw_msg = self.ctx.decompress(self.buffer)
-        self.buffer = bytearray()
+        if self.buffer:
+            self.buffer.extend(data)
+            raw_msg = self.ctx.decompress(self.buffer)
+            self.buffer = bytearray()
+        else:
+            # fast path, if we have a full message without buffering, decompress directly
+            raw_msg = self.ctx.decompress(data)
         return raw_msg
 
 
