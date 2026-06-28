@@ -166,12 +166,12 @@ LargeInt
 Range
 ~~~~~
 
-.. autoclass:: Range
+.. autoclassalias:: Range
 
 String
 ~~~~~~
 
-.. autoclass:: String
+.. autoclassalias:: String
 
 Functions
 ---------
