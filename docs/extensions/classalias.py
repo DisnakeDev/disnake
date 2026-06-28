@@ -19,7 +19,7 @@ class ClassAliasDocumenter(ClassDocumenter):
 
     objtype = "classalias"
     directivetype = ClassDocumenter.objtype
-    priority = 10 + ClassDocumenter.priority
+    priority = -1
 
     def import_object(self, raiseerror: bool = False) -> bool:
         ret = super().import_object(raiseerror)
