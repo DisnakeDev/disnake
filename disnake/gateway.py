@@ -108,6 +108,7 @@ class GatewayParams:
 
     .. versionchanged:: |vnext|
         Removed ``zlib`` parameter in favour of ``compress``, which now also supports zstd.
+        The default value of ``compress`` is now ``"zstd-stream"``, if available.
 
     Parameters
     ----------
@@ -116,11 +117,14 @@ class GatewayParams:
         Defaults to ``"json"``.
     compress: :data:`~typing.Literal`\[``"zlib-stream"``, ``"zstd-stream"``] | :data:`None`
         Which transport compression method to use, if any.
-        Defaults to ``"zlib-stream"``.
+        Defaults to ``"zstd-stream"`` if zstd is available, or ``"zlib-stream"`` otherwise.
     """
 
     encoding: Literal["json"] = "json"
-    compress: Literal["zlib-stream", "zstd-stream"] | None = "zlib-stream"
+    compress: Literal["zlib-stream", "zstd-stream"] | None = (
+        # prefer zstd if available
+        "zstd-stream" if HAS_ZSTD else "zlib-stream"
+    )
 
     def __post_init__(self) -> None:
         if self.encoding != "json":
