@@ -159,15 +159,15 @@ def _int_to_str_len(number: int) -> int:
 
 
 def _range_to_str_len(min_value: int, max_value: int) -> tuple[int, int]:
-    min_ = _int_to_str_len(min_value)
-    max_ = _int_to_str_len(max_value)
+    min_len = _int_to_str_len(min_value)
+    max_len = _int_to_str_len(max_value)
     opposite_sign = (min_value < 0) ^ (max_value < 0)
     # both bounds positive: len(str(min_value)) <= len(str(max_value))
     # smaller bound negative: the range includes 0, which sets the minimum length to 1
     # both bounds negative: len(str(min_value)) >= len(str(max_value))
     if opposite_sign:
-        return 1, max(min_, max_)
-    return min(min_, max_), max(min_, max_)
+        return 1, max(min_len, max_len)
+    return min(min_len, max_len), max(min_len, max_len)
 
 
 def _unbound_range_to_str_len(
@@ -416,7 +416,7 @@ class _Range(_BaseRange[int | float]):
 
             if self.underlying_type is int and abs(value) >= 2**53 - 1:
                 msg = (
-                    "Discord has upper input limit on integer input type of ±2**53.\n"
+                    "Discord imposes an upper input limit of ±2**53 on integer input types.\n"
                     "For larger values, use Range[commands.LargeInt, ...], which will use"
                     " a string input type with length limited to the minimum and maximum"
                     " string representations of the range bounds, and will automatically"

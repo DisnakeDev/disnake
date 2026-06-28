@@ -70,6 +70,37 @@ class TestParamInfo:
             with pytest.raises(commands.errors.MemberNotFound):
                 await info.verify_type(mock.Mock(), arg_mock)
 
+    @pytest.mark.parametrize(
+        ("bounds", "expected_len"),
+        # ((min_value, max_value), (expected_min_length, expected_max_length))
+        [
+            # positive only
+            ((0, ...), (1, None)),
+            ((1, ...), (1, None)),
+            ((10, ...), (2, None)),
+            ((5000, ...), (4, None)),
+            ((1, 5), (1, 1)),
+            ((1, 10000), (1, 5)),
+            # negative only
+            ((..., -1), (2, None)),
+            ((..., -123), (4, None)),
+            ((-10, -1), (2, 3)),
+            # crossing zero boundary (min length should always be exactly 1)
+            ((-1, ...), (1, None)),
+            ((..., 50), (1, None)),
+            ((-1, 1), (1, 2)),
+            ((-1, 100), (1, 3)),
+            ((-100, 50), (1, 4)),
+        ],
+        ids=repr,
+    )
+    def test_large_range(self, bounds, expected_len) -> None:
+        info = commands.ParamInfo()
+        info.parse_annotation(commands.Range[(commands.LargeInt, *bounds)])
+
+        assert info.large
+        assert (info.min_length, info.max_length) == expected_len
+
 
 # this uses `Range` for testing `_BaseRange`, `String` should work equally
 class TestBaseRange:
