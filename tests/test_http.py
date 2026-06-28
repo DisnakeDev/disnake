@@ -19,6 +19,11 @@ from disnake.http import HTTPClient
             disnake.GatewayParams(encoding="json", compress="zlib-stream"),
             "wss://gateway.discord.com/?v=10&encoding=json&compress=zlib-stream",
         ),
+        (
+            "wss://gateway.discord.com",
+            disnake.GatewayParams(encoding="json", compress="zstd-stream"),
+            "wss://gateway.discord.com/?v=10&encoding=json&compress=zstd-stream",
+        ),
         # should overwrite existing args if needed
         (
             "wss://gateway.discord.com/?v=42&encoding=etf&v=1111",
@@ -31,7 +36,7 @@ from disnake.http import HTTPClient
             disnake.GatewayParams(encoding="json", compress="zlib-stream"),
             "wss://gateway.discord.com/?v=10&stuff=things&a=b&encoding=json&compress=zlib-stream",
         ),
-        # should remove compression if set to false
+        # should remove compression if set to None
         (
             "wss://gateway.discord.com/?v=10&compress=zlib-stream",
             disnake.GatewayParams(encoding="json", compress=None),
