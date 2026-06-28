@@ -10,13 +10,13 @@ import sys
 import traceback
 import types
 from collections.abc import Callable, Coroutine, Generator, Mapping, Sequence
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 from errno import ECONNRESET
 from typing import (
     TYPE_CHECKING,
     Any,
     Literal,
-    NamedTuple,
     TypedDict,
     TypeVar,
     overload,
@@ -185,8 +185,8 @@ class SessionStartLimit:
         )
 
 
-# TODO: dataclass?
-class GatewayParams(NamedTuple):
+@dataclass(frozen=True)
+class GatewayParams:
     """Container type for configuring gateway connections.
 
     .. versionadded:: 2.6
@@ -206,6 +206,14 @@ class GatewayParams(NamedTuple):
 
     encoding: Literal["json"] = "json"
     compress: Literal["zlib-stream"] | None = "zlib-stream"
+
+    def __post_init__(self) -> None:
+        if self.encoding != "json":
+            msg = "Gateway encodings other than `json` are currently not supported."
+            raise ValueError(msg)
+        if self.compress not in ("zlib-stream", None):
+            msg = "Gateway transport compression modes other than `zlib-stream` or None are currently not supported."
+            raise ValueError(msg)
 
 
 # used for typing the ws parameter dict in the connect() loop
@@ -481,10 +489,6 @@ class Client:
         )
 
         self.gateway_params: GatewayParams = gateway_params or GatewayParams()
-        if self.gateway_params.encoding != "json":
-            msg = "Gateway encodings other than `json` are currently not supported."
-            raise ValueError(msg)
-        # TODO: move validation and add more
 
         self.extra_events: dict[str, list[CoroFunc]] = {}
 
