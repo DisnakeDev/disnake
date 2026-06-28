@@ -13,6 +13,7 @@ import traceback
 import zlib
 from collections import deque
 from collections.abc import Callable
+from dataclasses import dataclass
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -80,11 +81,43 @@ __all__ = (
     "VoiceKeepAliveHandler",
     "DiscordVoiceWebSocket",
     "ReconnectWebSocket",
+    "GatewayParams",
 )
 
 _VOICE_VERSION = 8
 
 _log = logging.getLogger(__name__)
+
+
+@dataclass(frozen=True)
+class GatewayParams:
+    """Container type for configuring gateway connections.
+
+    .. versionadded:: 2.6
+
+    .. versionchanged:: |vnext|
+        Removed ``zlib`` parameter in favour of ``compress``, which now also supports zstd.
+
+    Parameters
+    ----------
+    encoding: :class:`str`
+        The payload encoding (``json`` is currently the only supported encoding).
+        Defaults to ``"json"``.
+    compress: Literal["zlib-stream"] | :data:`None`
+        Which transport compression method to use, if any.
+        Defaults to ``"zlib-stream"``.
+    """
+
+    encoding: Literal["json"] = "json"
+    compress: Literal["zlib-stream"] | None = "zlib-stream"
+
+    def __post_init__(self) -> None:
+        if self.encoding != "json":
+            msg = "Gateway encodings other than `json` are currently not supported."
+            raise ValueError(msg)
+        if self.compress not in ("zlib-stream", None):
+            msg = "Gateway transport compression modes other than `zlib-stream` or None are currently not supported."
+            raise ValueError(msg)
 
 
 class ReconnectWebSocket(Exception):

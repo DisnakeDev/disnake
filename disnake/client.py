@@ -10,7 +10,6 @@ import sys
 import traceback
 import types
 from collections.abc import Callable, Coroutine, Generator, Mapping, Sequence
-from dataclasses import dataclass
 from datetime import datetime, timedelta
 from errno import ECONNRESET
 from typing import (
@@ -49,7 +48,7 @@ from .errors import (
     SessionStartLimitReached,
 )
 from .flags import ApplicationFlags, Intents, MemberCacheFlags
-from .gateway import DiscordWebSocket, ReconnectWebSocket
+from .gateway import DiscordWebSocket, GatewayParams, ReconnectWebSocket
 from .guild import Guild
 from .guild_preview import GuildPreview
 from .http import HTTPClient
@@ -92,7 +91,6 @@ if TYPE_CHECKING:
 __all__ = (
     "Client",
     "SessionStartLimit",
-    "GatewayParams",
 )
 
 T = TypeVar("T")
@@ -183,37 +181,6 @@ class SessionStartLimit:
             f"<SessionStartLimit total={self.total!r} remaining={self.remaining!r} "
             f"reset_after={self.reset_after!r} max_concurrency={self.max_concurrency!r} reset_time={self.reset_time!s}>"
         )
-
-
-@dataclass(frozen=True)
-class GatewayParams:
-    """Container type for configuring gateway connections.
-
-    .. versionadded:: 2.6
-
-    .. versionchanged:: |vnext|
-        Removed ``zlib`` parameter in favour of ``compress``, which now also supports zstd.
-
-    Parameters
-    ----------
-    encoding: :class:`str`
-        The payload encoding (``json`` is currently the only supported encoding).
-        Defaults to ``"json"``.
-    compress: Literal["zlib-stream"] | :data:`None`
-        Which transport compression method to use, if any.
-        Defaults to ``"zlib-stream"``.
-    """
-
-    encoding: Literal["json"] = "json"
-    compress: Literal["zlib-stream"] | None = "zlib-stream"
-
-    def __post_init__(self) -> None:
-        if self.encoding != "json":
-            msg = "Gateway encodings other than `json` are currently not supported."
-            raise ValueError(msg)
-        if self.compress not in ("zlib-stream", None):
-            msg = "Gateway transport compression modes other than `zlib-stream` or None are currently not supported."
-            raise ValueError(msg)
 
 
 # used for typing the ws parameter dict in the connect() loop

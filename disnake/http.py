@@ -22,7 +22,7 @@ from urllib.parse import quote as _uriquote
 import aiohttp
 import yarl
 
-from . import __version__, client, utils
+from . import __version__, utils
 from .errors import (
     DiscordServerError,
     Forbidden,
@@ -31,7 +31,7 @@ from .errors import (
     LoginFailure,
     NotFound,
 )
-from .gateway import DiscordClientWebSocketResponse
+from .gateway import DiscordClientWebSocketResponse, GatewayParams
 from .utils import MISSING
 
 _log = logging.getLogger(__name__)
@@ -41,7 +41,6 @@ if TYPE_CHECKING:
 
     from typing_extensions import Self
 
-    from .client import GatewayParams
     from .enums import InteractionResponseType
     from .file import File
     from .message import Attachment
@@ -3060,7 +3059,7 @@ class HTTPClient:
 
     @staticmethod
     def _format_gateway_url(url: str, *, params: GatewayParams | None) -> str:
-        params = params or client.GatewayParams()
+        params = params or GatewayParams()
 
         _url = yarl.URL(url)
         query = _url.query.copy()

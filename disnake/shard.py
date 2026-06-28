@@ -17,7 +17,7 @@ from typing import (
 import aiohttp
 
 from .backoff import ExponentialBackoff
-from .client import Client, GatewayParams, SessionStartLimit
+from .client import Client, SessionStartLimit
 from .enums import Status
 from .errors import (
     ClientException,
@@ -27,7 +27,7 @@ from .errors import (
     PrivilegedIntentsRequired,
     SessionStartLimitReached,
 )
-from .gateway import DiscordWebSocket, ReconnectWebSocket
+from .gateway import DiscordWebSocket, GatewayParams, ReconnectWebSocket
 from .state import AutoShardedConnectionState
 
 if TYPE_CHECKING:
