@@ -1243,7 +1243,9 @@ class Message(Hashable):
         self.poll: Poll | None = None
         if poll_data := data.get("poll"):
             self.poll = Poll.from_dict(message=self, data=poll_data)
-        self.call = MessageCall(data=call_data) if (call_data := data.get("call")) else None
+        self.call: MessageCall | None = (
+            MessageCall(data=call_data) if (call_data := data.get("call")) else None
+        )
         try:
             # if the channel doesn't have a guild attribute, we handle that
             self.guild = channel.guild  # pyright: ignore[reportAttributeAccessIssue]
