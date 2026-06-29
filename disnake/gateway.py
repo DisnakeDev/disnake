@@ -1273,7 +1273,6 @@ class DiscordVoiceWebSocket:
 
 
 class _DecompressionContext(Protocol):
-    def __init__(self) -> None: ...
     def decompress(self, data: bytes | bytearray, /) -> bytes | None: ...
 
 
