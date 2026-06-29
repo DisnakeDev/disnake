@@ -171,7 +171,7 @@ class MessageCall(TypedDict):
     ended_timestamp: NotRequired[str | None]
 
 
-SharedClientThemeBase = Literal[1, 2, 3, 4]
+SharedClientThemeBase = Literal[0, 1, 2, 3, 4]
 
 
 class SharedClientTheme(TypedDict):
