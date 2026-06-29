@@ -1228,6 +1228,7 @@ class Message(Hashable):
         "guild",
         "poll",
         "call",
+        "shared_client_theme",
         "_edited_timestamp",
         "_role_subscription_data",
         "_pinned_at",
@@ -1284,10 +1285,20 @@ class Message(Hashable):
             _message_component_factory(d) for d in data.get("components", [])
         ]
 
-        self.poll: Poll | None = None
-        if poll_data := data.get("poll"):
-            self.poll = Poll.from_dict(message=self, data=poll_data)
-        self.call = MessageCall(data=call_data) if (call_data := data.get("call")) else None
+        self.poll: Poll | None = (
+            Poll.from_dict(message=self, data=poll_data)
+            if (poll_data := data.get("poll"))
+            else None
+        )
+        self.call: MessageCall | None = (
+            MessageCall(data=call_data) if (call_data := data.get("call")) else None
+        )
+        self.shared_client_theme: SharedClientTheme | None = (
+            SharedClientTheme._from_data(theme_data)
+            if (theme_data := data.get("shared_client_theme"))
+            else None
+        )
+
         try:
             # if the channel doesn't have a guild attribute, we handle that
             self.guild = channel.guild  # pyright: ignore[reportAttributeAccessIssue]
