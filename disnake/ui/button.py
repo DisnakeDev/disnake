@@ -2,15 +2,19 @@
 
 from __future__ import annotations
 
+import inspect
 import os
 from collections.abc import Callable
-from typing import TYPE_CHECKING, Any, ClassVar, TypeVar, overload
+from typing import TYPE_CHECKING, Any, ClassVar, overload
+
+from typing_extensions import Self, TypeVar
 
 from ..components import Button as ButtonComponent
 from ..enums import ButtonStyle, ComponentType
 from ..partial_emoji import PartialEmoji, _EmojiTag
-from ..utils import MISSING, iscoroutinefunction
-from .item import DecoratedItem, Item
+from ..utils import MISSING
+from ._types import P, V_co, V_deco
+from .item import DecoratedItem, Item, ItemCallbackType
 
 __all__ = (
     "Button",
@@ -18,19 +22,7 @@ __all__ = (
 )
 
 if TYPE_CHECKING:
-    from typing_extensions import ParamSpec, Self
-
     from ..emoji import Emoji
-    from .item import ItemCallbackType
-    from .view import View
-
-else:
-    ParamSpec = TypeVar
-
-B = TypeVar("B", bound="Button")
-B_co = TypeVar("B_co", bound="Button", covariant=True)
-V_co = TypeVar("V_co", bound="View | None", covariant=True)
-P = ParamSpec("P")
 
 
 class Button(Item[V_co]):
@@ -84,36 +76,6 @@ class Button(Item[V_co]):
     )
     # We have to set this to MISSING in order to overwrite the abstract property from UIComponent
     _underlying: ButtonComponent = MISSING
-
-    @overload
-    def __init__(
-        self: Button[None],
-        *,
-        style: ButtonStyle = ButtonStyle.secondary,
-        label: str | None = None,
-        disabled: bool = False,
-        custom_id: str | None = None,
-        url: str | None = None,
-        emoji: str | Emoji | PartialEmoji | None = None,
-        sku_id: int | None = None,
-        id: int = 0,
-        row: int | None = None,
-    ) -> None: ...
-
-    @overload
-    def __init__(
-        self: Button[V_co],
-        *,
-        style: ButtonStyle = ButtonStyle.secondary,
-        label: str | None = None,
-        disabled: bool = False,
-        custom_id: str | None = None,
-        url: str | None = None,
-        emoji: str | Emoji | PartialEmoji | None = None,
-        sku_id: int | None = None,
-        id: int = 0,
-        row: int | None = None,
-    ) -> None: ...
 
     def __init__(
         self,
@@ -286,6 +248,9 @@ class Button(Item[V_co]):
         self._underlying = button
 
 
+B_co = TypeVar("B_co", bound="Button[Any]", covariant=True)
+
+
 @overload
 def button(
     *,
@@ -296,18 +261,18 @@ def button(
     emoji: str | Emoji | PartialEmoji | None = None,
     id: int = 0,
     row: int | None = None,
-) -> Callable[[ItemCallbackType[V_co, Button[V_co]]], DecoratedItem[Button[V_co]]]: ...
+) -> Callable[[ItemCallbackType[V_deco, Button[Any]]], DecoratedItem[Button[V_deco]]]: ...
 
 
 @overload
 def button(
     cls: Callable[P, B_co], *_: P.args, **kwargs: P.kwargs
-) -> Callable[[ItemCallbackType[V_co, B_co]], DecoratedItem[B_co]]: ...
+) -> Callable[[ItemCallbackType[V_deco, B_co]], DecoratedItem[B_co]]: ...
 
 
 def button(
     cls: Callable[..., B_co] = Button[Any], **kwargs: Any
-) -> Callable[[ItemCallbackType[V_co, B_co]], DecoratedItem[B_co]]:
+) -> Callable[[ItemCallbackType[V_deco, B_co]], DecoratedItem[B_co]]:
     r"""A decorator that attaches a button to a component.
 
     The function being decorated should have three parameters: ``self`` representing
@@ -364,8 +329,8 @@ def button(
         msg = "cls argument must be callable"
         raise TypeError(msg)
 
-    def decorator(func: ItemCallbackType[V_co, B_co]) -> DecoratedItem[B_co]:
-        if not iscoroutinefunction(func):
+    def decorator(func: ItemCallbackType[V_deco, B_co]) -> DecoratedItem[B_co]:
+        if not inspect.iscoroutinefunction(func):
             msg = "button function must be a coroutine function"
             raise TypeError(msg)
 

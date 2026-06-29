@@ -165,10 +165,10 @@ class EnumMeta(type):
         value_cls._actual_enum_cls_ = actual_cls = super().__new__(cls, name, bases, attrs)
         return actual_cls
 
-    def __iter__(cls) -> Iterator[EnumMetaT]:
+    def __iter__(cls) -> Iterator[Any]:
         return (cls._enum_member_map_[name] for name in cls._enum_member_names_)
 
-    def __reversed__(cls) -> Iterator[EnumMetaT]:
+    def __reversed__(cls) -> Iterator[Any]:
         return (cls._enum_member_map_[name] for name in reversed(cls._enum_member_names_))
 
     def __len__(cls) -> int:
@@ -731,7 +731,7 @@ class AuditLogAction(Enum):
     onboarding_prompt_create              = 163
     onboarding_prompt_update              = 164
     onboarding_update                     = 167
-    voice_channel_status_update           = 192
+    voice_channel_status_create           = 192
     voice_channel_status_delete           = 193
     # fmt: on
 
@@ -802,7 +802,7 @@ class AuditLogAction(Enum):
             AuditLogAction.onboarding_prompt_create:              AuditLogActionCategory.create,
             AuditLogAction.onboarding_prompt_update:              AuditLogActionCategory.update,
             AuditLogAction.onboarding_update:                     AuditLogActionCategory.update,
-            AuditLogAction.voice_channel_status_update:           AuditLogActionCategory.update,
+            AuditLogAction.voice_channel_status_create:           AuditLogActionCategory.create,
             AuditLogAction.voice_channel_status_delete:           AuditLogActionCategory.delete,
         }
         # fmt: on
@@ -2416,10 +2416,10 @@ class SubscriptionStatus(Enum):
 
     active = 0
     """Represents an active Subscription which is scheduled to renew."""
-    ending = 1
-    """Represents an active Subscription which will not renew."""
-    inactive = 2
+    inactive = 1
     """Represents an inactive Subscription which is not being charged."""
+    ending = 2
+    """Represents an active Subscription which will not renew."""
 
 
 class PollLayoutType(Enum):

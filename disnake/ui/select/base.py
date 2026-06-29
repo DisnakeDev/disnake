@@ -2,42 +2,35 @@
 
 from __future__ import annotations
 
+import inspect
 import os
 from abc import ABC, abstractmethod
 from collections.abc import Callable, Mapping, Sequence
 from typing import (
     TYPE_CHECKING,
+    Any,
     ClassVar,
     Generic,
     TypeAlias,
-    TypeVar,
 )
+
+from typing_extensions import Self, TypeVar
 
 from ...components import AnySelectMenu, SelectDefaultValue
 from ...enums import ComponentType, SelectDefaultValueType
 from ...object import Object
-from ...utils import MISSING, humanize_list, iscoroutinefunction
-from ..item import DecoratedItem, Item
+from ...utils import MISSING, humanize_list
+from .._types import P, V_co, V_deco
+from ..item import DecoratedItem, Item, ItemCallbackType
 
 __all__ = ("BaseSelect",)
 
 if TYPE_CHECKING:
-    from typing_extensions import ParamSpec, Self
-
     from ...abc import Snowflake
     from ...interactions import MessageInteraction
-    from ..item import ItemCallbackType
-    from ..view import View
 
-else:
-    ParamSpec = TypeVar
-
-
-S_co = TypeVar("S_co", bound="BaseSelect", covariant=True)
-V_co = TypeVar("V_co", bound="View | None", covariant=True)
 SelectMenuT = TypeVar("SelectMenuT", bound=AnySelectMenu)
 SelectValueT = TypeVar("SelectValueT")
-P = ParamSpec("P")
 
 SelectDefaultValueMultiInputType: TypeAlias = SelectValueT | SelectDefaultValue
 # almost the same as above, but with `Object`; used for selects where the type isn't ambiguous (i.e. all except mentionable select)
@@ -247,13 +240,16 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
         return result
 
 
+S_co = TypeVar("S_co", bound="BaseSelect[Any, Any, Any]", covariant=True)
+
+
 def _create_decorator(
     # FIXME(3.0): rename `cls` parameter to more closely represent any callable argument type
     cls: Callable[P, S_co],
     /,
     *args: P.args,
     **kwargs: P.kwargs,
-) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]:
+) -> Callable[[ItemCallbackType[V_deco, S_co]], DecoratedItem[S_co]]:
     if args:
         # the `*args` def above is just to satisfy the typechecker
         msg = "expected no *args"
@@ -263,8 +259,8 @@ def _create_decorator(
         msg = "cls argument must be callable"
         raise TypeError(msg)
 
-    def decorator(func: ItemCallbackType[V_co, S_co]) -> DecoratedItem[S_co]:
-        if not iscoroutinefunction(func):
+    def decorator(func: ItemCallbackType[V_deco, S_co]) -> DecoratedItem[S_co]:
+        if not inspect.iscoroutinefunction(func):
             msg = "select function must be a coroutine function"
             raise TypeError(msg)
 

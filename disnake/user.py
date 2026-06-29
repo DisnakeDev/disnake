@@ -223,9 +223,7 @@ class BaseUser(_UserTag):
 
         .. versionadded:: 2.11
         """
-        return Collectibles(
-            state=self._state, data=(self._collectibles if self._collectibles else {})
-        )
+        return Collectibles(state=self._state, data=self._collectibles or {})
 
     @property
     def accent_colour(self) -> Colour | None:

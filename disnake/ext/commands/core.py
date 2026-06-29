@@ -26,7 +26,6 @@ from disnake.utils import (
     _generated,
     _overload_with_permissions,
     get_signature_parameters,
-    iscoroutinefunction,
     unwrap_function,
 )
 
@@ -305,7 +304,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         name: str | None = None,
         **kwargs: Unpack[_CommandArgs],
     ) -> None:
-        if not iscoroutinefunction(func):
+        if not inspect.iscoroutinefunction(func):
             msg = "Callback must be a coroutine function."
             raise TypeError(msg)
 
@@ -931,7 +930,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         TypeError
             The argument passed is not actually a coroutine function.
         """
-        if not iscoroutinefunction(coro):
+        if not inspect.iscoroutinefunction(coro):
             msg = "The error handler must be a coroutine function."
             raise TypeError(msg)
 
@@ -968,7 +967,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         TypeError
             The argument passed is not actually a coroutine function.
         """
-        if not iscoroutinefunction(coro):
+        if not inspect.iscoroutinefunction(coro):
             msg = "The pre-invoke hook must be a coroutine function."
             raise TypeError(msg)
 
@@ -996,7 +995,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         TypeError
             The argument passed is not actually a coroutine function.
         """
-        if not iscoroutinefunction(coro):
+        if not inspect.iscoroutinefunction(coro):
             msg = "The post-invoke hook must be a coroutine function."
             raise TypeError(msg)
 
@@ -1750,7 +1749,7 @@ def check(predicate: Check) -> Callable[[T], T]:
 
         return func
 
-    if iscoroutinefunction(predicate):
+    if inspect.iscoroutinefunction(predicate):
         decorator.predicate = predicate
     else:
 
@@ -1808,7 +1807,7 @@ def check_any(*checks: Check) -> Callable[[T], T]:
         async def only_for_owners(ctx):
             await ctx.send('Hello mister owner!')
     """
-    unwrapped = []
+    unwrapped: list[Callable[[AnyContext], Coro[bool]]] = []
     for wrapped in checks:
         try:
             pred = wrapped.predicate
@@ -1819,7 +1818,7 @@ def check_any(*checks: Check) -> Callable[[T], T]:
             unwrapped.append(pred)
 
     async def predicate(ctx: AnyContext) -> bool:
-        errors = []
+        errors: list[CheckFailure] = []
         for func in unwrapped:
             try:
                 value = await func(ctx)
