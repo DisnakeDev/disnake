@@ -986,6 +986,8 @@ class MessageCall:
         It is not resolved to the user objects themselves.
     """
 
+    __slots__ = ("ended_timestamp", "participant_ids")
+
     def __init__(self, *, data: MessageCallPayload) -> None:
         self.ended_timestamp: datetime.datetime | None = utils.parse_time(
             data.get("ended_timestamp")
