@@ -30,6 +30,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Internet",
     "Topic :: Software Development :: Libraries",
     "Topic :: Software Development :: Libraries :: Python Modules",
@@ -55,14 +56,14 @@ voice = [
 ]
 
 [dependency-groups]
-dev   = [
+dev = [
     { include-group = "tools" },
     { include-group = "nox" },
     { include-group = "codemod" },
     { include-group = "typing" },
     { include-group = "test" },
     { include-group = "build" },
-    { include-group = "docs" },
+    # `docs` not included as it requires 3.12+
 ]
 nox = [
     # note: nox should be synced with nox.needs_version in noxfile.py

@@ -32,7 +32,7 @@ nox.options.default_venv_backend = "uv|virtualenv"
 PYPROJECT = nox.project.load_toml()
 
 SUPPORTED_PYTHONS: Final[Sequence[str]] = nox.project.python_versions(PYPROJECT)
-EXPERIMENTAL_PYTHON_VERSIONS: Final[Sequence[str]] = ["3.14"]
+EXPERIMENTAL_PYTHON_VERSIONS: Final[Sequence[str]] = []
 ALL_PYTHONS: Final[Sequence[str]] = [*SUPPORTED_PYTHONS, *EXPERIMENTAL_PYTHON_VERSIONS]
 MIN_PYTHON: Final[str] = SUPPORTED_PYTHONS[0]
 CI: Final[bool] = "CI" in os.environ
