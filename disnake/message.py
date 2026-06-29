@@ -1014,6 +1014,7 @@ class SharedClientTheme:
 
     def __init__(
         self,
+        # TODO: colors?
         colours: Sequence[int | Colour],
         *,
         gradient_angle: int,
@@ -1043,8 +1044,7 @@ class SharedClientTheme:
 
     def to_dict(self) -> SharedClientThemePayload:
         return {
-            # FIXME: pad to 6 chars?
-            "colors": [hex(c.value) for c in self.colours],
+            "colors": [f"{c.value:06x}" for c in self.colours],
             "gradient_angle": self.gradient_angle,
             "base_mix": self.intensity,
             "base_theme": self.base.value,
@@ -1307,7 +1307,6 @@ class Message(Hashable):
         self.call: MessageCall | None = (
             MessageCall(data=call_data) if (call_data := data.get("call")) else None
         )
-        # TODO: can these be forwarded as well?
         self.shared_client_theme: SharedClientTheme | None = (
             SharedClientTheme._from_data(theme_data)
             if (theme_data := data.get("shared_client_theme"))

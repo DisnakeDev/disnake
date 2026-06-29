@@ -1443,7 +1443,6 @@ class Messageable:
         view: View = ...,
         components: MessageComponents = ...,
         poll: Poll = ...,
-        # TODO: can this be sent via webhooks, interactions, or forum threads?
         shared_client_theme: SharedClientTheme = ...,
     ) -> Message: ...
 
