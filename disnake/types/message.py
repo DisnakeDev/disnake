@@ -169,3 +169,13 @@ class MessagePin(TypedDict):
 class MessageCall(TypedDict):
     participants: SnowflakeList
     ended_timestamp: NotRequired[str | None]
+
+
+SharedClientThemeBase = Literal[1, 2, 3, 4]
+
+
+class SharedClientTheme(TypedDict):
+    colors: list[str]  # 1-5
+    gradient_angle: int  # max 360
+    base_mix: int  # max 100
+    base_theme: NotRequired[SharedClientThemeBase]

@@ -7,7 +7,7 @@ import datetime
 import io
 import re
 from base64 import b64decode, b64encode
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from os import PathLike
 from typing import (
     TYPE_CHECKING,
@@ -20,6 +20,7 @@ from typing import (
 
 from . import utils
 from .channel import PartialMessageable
+from .colour import Colour
 from .components import MessageTopLevelComponent, _message_component_factory
 from .embeds import Embed
 from .emoji import Emoji
@@ -28,6 +29,7 @@ from .enums import (
     InteractionType,
     MessageReferenceType,
     MessageType,
+    SharedClientThemeBase,
     try_enum,
     try_enum_to_int,
 )
@@ -78,6 +80,7 @@ if TYPE_CHECKING:
         MessageReference as MessageReferencePayload,
         Reaction as ReactionPayload,
         RoleSubscriptionData as RoleSubscriptionDataPayload,
+        SharedClientTheme as SharedClientThemePayload,
     )
     from .types.threads import ThreadArchiveDurationLiteral
     from .types.user import User as UserPayload
@@ -98,6 +101,7 @@ __all__ = (
     "RoleSubscriptionData",
     "ForwardedMessage",
     "MessageCall",
+    "SharedClientTheme",
 )
 
 
@@ -993,6 +997,48 @@ class MessageCall:
         self.participant_ids: list[int] = [
             int(participant) for participant in data.get("participants", [])
         ]
+
+
+class SharedClientTheme:
+    """
+    Represents a custom client-side theme shared via messages.
+
+    .. versionadded:: |vnext|
+
+    Attributes
+    ----------
+    TODO
+    """
+
+    __slots__ = ("colours", "gradient_angle", "intensity", "base")
+
+    def __init__(
+        self,
+        colours: Sequence[int | Colour],
+        *,
+        gradient_angle: int,
+        intensity: int,
+        base: SharedClientThemeBase = SharedClientThemeBase.unset,
+    ) -> None:
+        self.colours: Sequence[Colour] = [
+            (c if isinstance(c, Colour) else Colour(c)) for c in colours
+        ]
+        self.gradient_angle: int = gradient_angle
+        self.intensity: int = intensity
+        self.base: SharedClientThemeBase = base
+
+    @classmethod
+    def _from_data(cls, data: SharedClientThemePayload) -> Self:
+        return cls(
+            colours=[int(c, 16) for c in data["colors"]],
+            gradient_angle=data["gradient_angle"],
+            intensity=data["base_mix"],
+            base=(
+                try_enum(SharedClientThemeBase, base_theme)
+                if (base_theme := data.get("base_theme")) is not None
+                else SharedClientThemeBase.unset
+            ),
+        )
 
 
 @flatten_handlers
