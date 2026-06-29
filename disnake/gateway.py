@@ -1274,7 +1274,7 @@ class DiscordVoiceWebSocket:
 
 class _DecompressionContext(Protocol):
     def __init__(self) -> None: ...
-    def decompress(self, data: bytes | bytearray) -> bytes | None: ...
+    def decompress(self, data: bytes | bytearray, /) -> bytes | None: ...
 
 
 # In practice, this won't be used. Disabling compression skips the
@@ -1283,7 +1283,7 @@ class NullDecompressionContext(_DecompressionContext):
     def __init__(self) -> None:
         pass
 
-    def decompress(self, data: bytes | bytearray) -> bytes | None:
+    def decompress(self, data: bytes | bytearray, /) -> bytes | None:
         return bytes(data)
 
 
@@ -1292,7 +1292,7 @@ class ZlibDecompressionContext(_DecompressionContext):
         self.ctx: zlib._Decompress = zlib.decompressobj()
         self.buffer: bytearray = bytearray()
 
-    def decompress(self, data: bytes | bytearray) -> bytes | None:
+    def decompress(self, data: bytes | bytearray, /) -> bytes | None:
         if not data.endswith(b"\x00\x00\xff\xff"):
             # buffer data to combine with subsequent frames
             self.buffer.extend(data)
@@ -1316,7 +1316,7 @@ class ZstdDecompressionContext(_DecompressionContext):
 
         self.ctx: zstd.ZstdDecompressor = zstd.ZstdDecompressor()  # pyright: ignore[reportPossiblyUnboundVariable]
 
-    def decompress(self, data: bytes | bytearray) -> bytes | None:
+    def decompress(self, data: bytes | bytearray, /) -> bytes | None:
         # "each websocket message corresponds to a single gateway message, but does not end a zstd frame"
         return self.ctx.decompress(data)
 
