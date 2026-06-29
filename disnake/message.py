@@ -1032,7 +1032,7 @@ class SharedClientTheme:
     @classmethod
     def _from_data(cls, data: SharedClientThemePayload) -> Self:
         return cls(
-            colours=[int(c, 16) for c in data["colors"]],
+            colours=[Colour.from_hex(c) for c in data["colors"]],
             gradient_angle=data["gradient_angle"],
             intensity=data["base_mix"],
             base=(
