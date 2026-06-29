@@ -65,7 +65,7 @@ if TYPE_CHECKING:
     from .guild_scheduled_event import GuildScheduledEvent
     from .iterators import ChannelPinsIterator, HistoryIterator
     from .member import Member
-    from .message import Message, MessageReference, PartialMessage
+    from .message import Message, MessageReference, PartialMessage, SharedClientTheme
     from .poll import Poll
     from .state import ConnectionState
     from .threads import AnyThreadArchiveDuration, ForumTag
@@ -1443,6 +1443,8 @@ class Messageable:
         view: View = ...,
         components: MessageComponents = ...,
         poll: Poll = ...,
+        # TODO: can this be sent via webhooks, interactions, or forum threads?
+        shared_client_theme: SharedClientTheme = ...,
     ) -> Message: ...
 
     @overload
@@ -1464,6 +1466,7 @@ class Messageable:
         view: View = ...,
         components: MessageComponents = ...,
         poll: Poll = ...,
+        shared_client_theme: SharedClientTheme = ...,
     ) -> Message: ...
 
     @overload
@@ -1485,6 +1488,7 @@ class Messageable:
         view: View = ...,
         components: MessageComponents = ...,
         poll: Poll = ...,
+        shared_client_theme: SharedClientTheme = ...,
     ) -> Message: ...
 
     @overload
@@ -1506,6 +1510,7 @@ class Messageable:
         view: View = ...,
         components: MessageComponents = ...,
         poll: Poll = ...,
+        shared_client_theme: SharedClientTheme = ...,
     ) -> Message: ...
 
     async def send(
@@ -1528,6 +1533,7 @@ class Messageable:
         view: View | None = None,
         components: MessageComponents | None = None,
         poll: Poll | None = None,
+        shared_client_theme: SharedClientTheme | None = None,
     ):
         r"""|coro|
 
@@ -1536,7 +1542,7 @@ class Messageable:
         The content must be a type that can convert to a string through ``str(content)``.
 
         At least one of ``content``, ``embed``/``embeds``, ``file``/``files``,
-        ``stickers``, ``components``, ``poll`` or ``view`` must be provided.
+        ``stickers``, ``components``, ``poll``, ``shared_client_theme``, or ``view`` must be provided.
 
         To upload a single file, the ``file`` parameter should be used with a
         single :class:`~disnake.File` object. To upload multiple files, the ``files``
@@ -1625,7 +1631,7 @@ class Messageable:
             .. note::
                 Passing v2 components here automatically sets the :attr:`~.MessageFlags.is_components_v2` flag.
                 Setting this flag cannot be reverted. Note that this also disables the
-                ``content``, ``embeds``, ``stickers``, and ``poll`` fields.
+                ``content``, ``embeds``, ``stickers``, ``poll``, and ``shared_client_theme`` fields.
 
         suppress_embeds: :class:`bool`
             Whether to suppress embeds for the message. This hides
@@ -1648,6 +1654,11 @@ class Messageable:
 
             .. versionadded:: 2.10
 
+        shared_client_theme: :class:`.SharedClientTheme`
+            The custom client-side theme to share with the message.
+
+            .. versionadded:: |vnext|
+
         Raises
         ------
         HTTPException
@@ -1662,7 +1673,8 @@ class Messageable:
             :class:`.MessageReference` or :class:`.PartialMessage`.
         ValueError
             The ``files`` or ``embeds`` list is too large, or
-            you tried to send v2 components together with ``content``, ``embeds``, ``stickers``, or ``poll``.
+            you tried to send v2 components together with ``content``,
+            ``embeds``, ``stickers``, ``poll``, or ``shared_client_theme``.
 
         Returns
         -------
@@ -1709,6 +1721,10 @@ class Messageable:
         if poll:
             poll_payload = poll._to_dict()
 
+        theme_payload = None
+        if shared_client_theme:
+            theme_payload = shared_client_theme.to_dict()
+
         allowed_mentions_payload = None
         if allowed_mentions is None:
             allowed_mentions_payload = state.allowed_mentions and state.allowed_mentions.to_dict()
@@ -1750,8 +1766,12 @@ class Messageable:
             flags = MessageFlags._from_value(0 if flags is None else flags.value)
             flags.is_components_v2 = True
         # components v2 cannot be used with other content fields
-        if flags and flags.is_components_v2 and (content or embeds or stickers or poll):
-            msg = "Cannot use v2 components with content, embeds, stickers, or polls"
+        if (
+            flags
+            and flags.is_components_v2
+            and (content or embeds or stickers or poll or shared_client_theme)
+        ):
+            msg = "Cannot use v2 components with content, embeds, stickers, polls, or shared_client_theme"
             raise ValueError(msg)
 
         flags_payload = None
@@ -1782,6 +1802,7 @@ class Messageable:
                     stickers=stickers_payload,
                     components=components_payload,
                     poll=poll_payload,
+                    shared_client_theme=theme_payload,
                     flags=flags_payload,
                 )
             finally:
@@ -1799,6 +1820,7 @@ class Messageable:
                 stickers=stickers_payload,
                 components=components_payload,
                 poll=poll_payload,
+                shared_client_theme=theme_payload,
                 flags=flags_payload,
             )
 

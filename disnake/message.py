@@ -1020,6 +1020,7 @@ class SharedClientTheme:
         intensity: int,
         base: SharedClientThemeBase = SharedClientThemeBase.unset,
     ) -> None:
+        # TODO: add some validation
         self.colours: Sequence[Colour] = [
             (c if isinstance(c, Colour) else Colour(c)) for c in colours
         ]
@@ -1039,6 +1040,15 @@ class SharedClientTheme:
                 else SharedClientThemeBase.unset
             ),
         )
+
+    def to_dict(self) -> SharedClientThemePayload:
+        return {
+            # FIXME: pad to 6 chars?
+            "colors": [hex(c.value) for c in self.colours],
+            "gradient_angle": self.gradient_angle,
+            "base_mix": self.intensity,
+            "base_theme": self.base.value,
+        }
 
 
 @flatten_handlers
@@ -1189,6 +1199,10 @@ class Message(Hashable):
         Only present when :attr:`type` is :attr:`MessageType.call`.
 
         .. versionadded:: 2.12
+    shared_client_theme: :class:`.SharedClientTheme`
+        The custom client-side theme shared via this message.
+
+        .. versionadded:: |vnext||
     """
 
     __slots__ = (
@@ -1293,6 +1307,7 @@ class Message(Hashable):
         self.call: MessageCall | None = (
             MessageCall(data=call_data) if (call_data := data.get("call")) else None
         )
+        # TODO: can these be forwarded as well?
         self.shared_client_theme: SharedClientTheme | None = (
             SharedClientTheme._from_data(theme_data)
             if (theme_data := data.get("shared_client_theme"))
