@@ -79,7 +79,7 @@ from .widget import Widget, WidgetSettings
 
 __all__ = (
     "MessageSearchAuthorType",
-    "MessageSearchHasThing",
+    "MessageSearchHasType",
     "MessageSearchEmbedType",
     "IncidentsData",
     "Guild",
@@ -121,15 +121,16 @@ if TYPE_CHECKING:
     ByCategoryItem: TypeAlias = tuple[CategoryChannel | None, list[GuildChannel]]
 
 
-# XXX: these are here such that they can (in theory) be used at runtime; disnake.types isn't necessarily runtime-importable due to cycles
+# These literals are here such that they can (in theory) be used at runtime;
+# disnake.types isn't necessarily runtime-importable due to cycles
+
 # fmt: off
 MessageSearchAuthorType = Literal[
     "user", "-user",
     "bot", "-bot",
     "webhook", "-webhook"
 ]
-# TODO: name
-MessageSearchHasThing = Literal[
+MessageSearchHasType = Literal[
     "image", "-image",
     "sound", "-sound",
     "video", "-video",
@@ -5393,7 +5394,7 @@ class Guild(Hashable):
         replied_to_user: Sequence[Snowflake] | Snowflake | None = None,
         replied_to_message: Sequence[Snowflake] | Snowflake | None = None,
         pinned: bool | None = None,
-        has: Sequence[MessageSearchHasThing] | MessageSearchHasThing | None = None,
+        has: Sequence[MessageSearchHasType] | MessageSearchHasType | None = None,
         embed_type: Sequence[MessageSearchEmbedType] | MessageSearchEmbedType | None = None,
         embed_provider: Sequence[str] | str | None = None,
         link_hostname: Sequence[str] | str | None = None,
