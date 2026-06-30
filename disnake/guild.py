@@ -3865,28 +3865,34 @@ class Guild(Hashable):
     async def create_role(
         self,
         *,
-        reason: str | None = ...,
         name: str = ...,
         permissions: Permissions = ...,
         colour: Colour | int = ...,
+        primary_colour: Colour | int = ...,
+        secondary_colour: Colour | int | None = ...,
+        tertiary_colour: Colour | int | None = ...,
         hoist: bool = ...,
         icon: AssetBytes = ...,
         emoji: str = ...,
         mentionable: bool = ...,
+        reason: str | None = None,
     ) -> Role: ...
 
     @overload
     async def create_role(
         self,
         *,
-        reason: str | None = ...,
         name: str = ...,
         permissions: Permissions = ...,
         color: Colour | int = ...,
+        primary_color: Colour | int = ...,
+        secondary_color: Colour | int | None = ...,
+        tertiary_color: Colour | int | None = ...,
         hoist: bool = ...,
         icon: AssetBytes = ...,
         emoji: str = ...,
         mentionable: bool = ...,
+        reason: str | None = None,
     ) -> Role: ...
 
     async def create_role(
