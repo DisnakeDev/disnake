@@ -1230,7 +1230,7 @@ class Message(Hashable):
     shared_client_theme: :class:`.SharedClientTheme`
         The custom client-side theme shared via this message.
 
-        .. versionadded:: |vnext||
+        .. versionadded:: |vnext|
     """
 
     __slots__ = (
