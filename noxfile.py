@@ -200,7 +200,7 @@ def install_deps(session: nox.Session, *, execution_group: ExecutionGroup | None
     session.run_install(
         *command,
         env=env,
-        silent=True,
+        silent=not CI,
     )
 
     if execution_group.dependencies:
