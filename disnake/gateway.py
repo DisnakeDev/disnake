@@ -1300,7 +1300,7 @@ class ZlibDecompressionContext(_DecompressionContext):
         if self.buffer:
             self.buffer.extend(data)
             raw_msg = self.ctx.decompress(self.buffer)
-            self.buffer = bytearray()
+            self.buffer.clear()
         else:
             # fast path, if we have a full message without buffering, decompress directly
             raw_msg = self.ctx.decompress(data)
