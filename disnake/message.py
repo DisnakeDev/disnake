@@ -1010,29 +1010,40 @@ class SharedClientTheme:
     TODO
     """
 
-    __slots__ = ("colours", "gradient_angle", "intensity", "base")
+    __slots__ = ("_colours", "gradient_angle", "intensity", "base")
+
+    _colours: Sequence[Colour]
 
     def __init__(
         self,
-        # TODO: colors?
         colours: Sequence[int | Colour],
+        /,
         *,
         gradient_angle: int,
         intensity: int,
         base: SharedClientThemeBase = SharedClientThemeBase.unset,
     ) -> None:
-        # TODO: add some validation
-        self.colours: Sequence[Colour] = [
-            (c if isinstance(c, Colour) else Colour(c)) for c in colours
-        ]
+        # TODO: add some validation?
+        self.colours = colours
         self.gradient_angle: int = gradient_angle
         self.intensity: int = intensity
         self.base: SharedClientThemeBase = base
 
+    @property
+    def colours(self) -> Sequence[Colour]:
+        """TODO"""
+        return self._colours
+
+    @colours.setter
+    def colours(self, colours: Sequence[int | Colour]) -> None:
+        self._colours = [(c if isinstance(c, Colour) else Colour(c)) for c in colours]
+
+    colors = colours
+
     @classmethod
     def _from_data(cls, data: SharedClientThemePayload) -> Self:
         return cls(
-            colours=[Colour.from_hex(c) for c in data["colors"]],
+            [Colour.from_hex(c) for c in data["colors"]],
             gradient_angle=data["gradient_angle"],
             intensity=data["base_mix"],
             base=(
