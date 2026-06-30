@@ -466,6 +466,11 @@ class ParamInfo:
         The maximum length for this option, if it is a string option.
 
         .. versionadded:: 2.6
+
+    file_types: :class:`list`\[:class:`str`] | :data:`None`
+        The list of file types supported by this slash command option.
+
+        .. versionadded:: |vnext|
     """
 
     TYPES: ClassVar[dict[type | UnionType, int]] = {
@@ -507,6 +512,7 @@ class ParamInfo:
         large: bool = False,
         min_length: int | None = None,
         max_length: int | None = None,
+        file_types: list[Literal["image", "video", "audio"] | str] | None = None,
     ) -> None:
         name_loc = Localized._cast(name, False)
         self.name: str = name_loc.string or ""
@@ -528,6 +534,8 @@ class ParamInfo:
         self.choices = choices or []
         self.type = type or str
         self.channel_types = channel_types or []
+        self.file_types = file_types or []
+
         self.max_value = _xt_to_xe(le, lt, -1)
         self.min_value = _xt_to_xe(ge, gt, 1)
         self.min_length = min_length
@@ -555,6 +563,7 @@ class ParamInfo:
         ins.min_value = self.min_value
         ins.min_length = self.min_length
         ins.max_length = self.max_length
+        ins.file_types = self.file_types.copy()
         ins.large = self.large
 
         return ins
@@ -837,6 +846,7 @@ class ParamInfo:
             max_value=self.max_value,
             min_length=self.min_length,
             max_length=self.max_length,
+            file_types=self.file_types,
         )
 
 
@@ -1144,6 +1154,7 @@ def Param(
     large: bool = False,
     min_length: int | None = None,
     max_length: int | None = None,
+    file_types: list[Literal["image", "video", "audio"] | str] | None = None,
     **kwargs: Any,
 ) -> Any:
     r"""A special function that creates an instance of :class:`ParamInfo` that contains some information about a
@@ -1210,6 +1221,19 @@ def Param(
 
         .. versionadded:: 2.6
 
+    file_types: :class:`list`\[:class:`str`] | :data:`None`
+        The list of file types that can be uploaded with this option, if it is an :class:`.Attachment` option.
+        Allowed values are ``image``, ``video``, and ``audio``, as well as
+        any dot-prefixed extension such as ``.pdf`` (up to 10).
+        Defaults to all types (i.e. :data:`None`).
+
+        .. versionadded:: |vnext|
+
+        .. warning::
+            Note that only the extension of filenames is checked, the actual contents of files
+            are not inspected and may not actually match the extension.
+            It is up to you to ensure the file is valid, if necessary.
+
     Raises
     ------
     TypeError
@@ -1253,6 +1277,7 @@ def Param(
         large=large,
         min_length=min_length,
         max_length=max_length,
+        file_types=file_types,
     )
 
 
