@@ -1,0 +1,1 @@
+Add :class:`SharedClientTheme`, :class:`SharedClientThemeBase`, and :attr:`Message.shared_client_theme`, representing custom client-side themes shared via messages.
