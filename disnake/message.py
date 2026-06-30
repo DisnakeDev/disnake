@@ -1013,7 +1013,7 @@ class SharedClientTheme:
         The direction of the theme's colour gradient (0-360).
     intensity: :class:`int`
         The intensity of the theme's colours (0-100).
-    base: :class:`SharedClientThemeBase`
+    base_theme: :class:`SharedClientThemeBase`
         The base colour scheme.
         Defaults to :attr:`SharedClientThemeBase.unset`.
 
@@ -1023,11 +1023,11 @@ class SharedClientTheme:
         The direction of the theme's colour gradient (0-360).
     intensity: :class:`int`
         The intensity of the theme's colours (0-100).
-    base: :class:`SharedClientThemeBase`
+    base_theme: :class:`SharedClientThemeBase`
         The base colour scheme.
     """
 
-    __slots__ = ("_colours", "gradient_angle", "intensity", "base")
+    __slots__ = ("_colours", "gradient_angle", "intensity", "base_theme")
 
     _colours: Sequence[Colour]
 
@@ -1038,13 +1038,13 @@ class SharedClientTheme:
         *,
         gradient_angle: int,
         intensity: int,
-        base: SharedClientThemeBase = SharedClientThemeBase.unset,
+        base_theme: SharedClientThemeBase = SharedClientThemeBase.unset,
     ) -> None:
         # TODO: add some validation?
         self.colours = colours
         self.gradient_angle: int = gradient_angle
         self.intensity: int = intensity
-        self.base: SharedClientThemeBase = base
+        self.base_theme: SharedClientThemeBase = base_theme
 
     @property
     def colours(self) -> Sequence[Colour]:
@@ -1063,7 +1063,7 @@ class SharedClientTheme:
             [Colour.from_hex(c) for c in data["colors"]],
             gradient_angle=data["gradient_angle"],
             intensity=data["base_mix"],
-            base=(
+            base_theme=(
                 try_enum(SharedClientThemeBase, base_theme)
                 if (base_theme := data.get("base_theme")) is not None
                 else SharedClientThemeBase.unset
@@ -1075,7 +1075,7 @@ class SharedClientTheme:
             "colors": [f"{c.value:06x}" for c in self.colours],
             "gradient_angle": self.gradient_angle,
             "base_mix": self.intensity,
-            "base_theme": self.base.value,
+            "base_theme": self.base_theme.value,
         }
 
 
