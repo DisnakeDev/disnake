@@ -1040,7 +1040,6 @@ class SharedClientTheme:
         intensity: int,
         base_theme: SharedClientThemeBase = SharedClientThemeBase.unset,
     ) -> None:
-        # TODO: add some validation?
         self.colours = colours
         self.gradient_angle: int = gradient_angle
         self.intensity: int = intensity
