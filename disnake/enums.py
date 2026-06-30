@@ -2501,7 +2501,7 @@ class NameplatePalette(Enum):
 
 
 class SharedClientThemeBase(Enum):
-    """Specifies the base color scheme used by a :class:`SharedClientTheme`.
+    """Specifies the base colour scheme used by a :class:`SharedClientTheme`.
 
     .. versionadded:: |vnext|
     """

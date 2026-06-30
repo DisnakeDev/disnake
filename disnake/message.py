@@ -1000,14 +1000,31 @@ class MessageCall:
 
 
 class SharedClientTheme:
-    """
+    r"""
     Represents a custom client-side theme shared via messages.
 
     .. versionadded:: |vnext|
 
+    Parameters
+    ----------
+    colours: :class:`~collections.abc.Sequence`\[:class:`Colour` | :class:`int`]
+        The colours of the theme's gradient (up to 5).
+    gradient_angle: :class:`int`
+        The direction of the theme's colour gradient (0-360).
+    intensity: :class:`int`
+        The intensity of the theme's colours (0-100).
+    base: :class:`SharedClientThemeBase`
+        The base colour scheme.
+        Defaults to :attr:`SharedClientThemeBase.unset`.
+
     Attributes
     ----------
-    TODO
+    gradient_angle: :class:`int`
+        The direction of the theme's colour gradient (0-360).
+    intensity: :class:`int`
+        The intensity of the theme's colours (0-100).
+    base: :class:`SharedClientThemeBase`
+        The base colour scheme.
     """
 
     __slots__ = ("_colours", "gradient_angle", "intensity", "base")
@@ -1031,7 +1048,7 @@ class SharedClientTheme:
 
     @property
     def colours(self) -> Sequence[Colour]:
-        """TODO"""
+        r""":class:`~collections.abc.Sequence`\[:class:`Colour`]: The colours of the theme's gradient."""
         return self._colours
 
     @colours.setter
