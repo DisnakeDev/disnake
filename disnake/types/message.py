@@ -144,6 +144,7 @@ class Message(TypedDict):
     position: NotRequired[int]
     role_subscription_data: NotRequired[RoleSubscriptionData]
     poll: NotRequired[Poll]
+    call: NotRequired[MessageCall]
     # contains resolved objects for `default_values` of select menus in this message; we currently don't have a use for this
     resolved: NotRequired[InteractionDataResolved]
 
