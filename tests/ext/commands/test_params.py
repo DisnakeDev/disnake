@@ -1,16 +1,16 @@
 # SPDX-License-Identifier: MIT
 
 import math
-from typing import Any, Optional, Union
+from collections.abc import Callable
+from typing import Any, Optional, Union, cast
 from unittest import mock
 
 import pytest
 
 import disnake
-from disnake import Member, Role, User
+from disnake import Member, OptionType, Role, User
 from disnake.ext import commands
-
-OptionType = disnake.OptionType
+from disnake.ext.commands.params import _BaseRange, _Range, _String
 
 
 class TestParamInfo:
@@ -70,12 +70,50 @@ class TestParamInfo:
             with pytest.raises(commands.errors.MemberNotFound):
                 await info.verify_type(mock.Mock(), arg_mock)
 
+    @pytest.mark.parametrize(
+        ("bounds", "expected_len"),
+        # ((min_value, max_value), (expected_min_length, expected_max_length))
+        [
+            # positive only
+            ((0, ...), (1, None)),
+            ((1, ...), (1, None)),
+            ((10, ...), (2, None)),
+            ((5000, ...), (4, None)),
+            ((1, 5), (1, 1)),
+            ((1, 10000), (1, 5)),
+            # negative only
+            ((..., -1), (2, None)),
+            ((..., -123), (4, None)),
+            ((-10, -1), (2, 3)),
+            # crossing zero boundary (min length should always be exactly 1)
+            ((-1, ...), (1, None)),
+            ((..., 50), (1, None)),
+            ((-1, 1), (1, 2)),
+            ((-1, 100), (1, 3)),
+            ((-100, 50), (1, 4)),
+        ],
+        ids=repr,
+    )
+    def test_large_range__bounds_to_max_len(self, bounds, expected_len) -> None:
+        info = commands.ParamInfo()
+        info.parse_annotation(commands.Range[(commands.LargeInt, *bounds)])
+
+        assert info.large
+        assert (info.min_length, info.max_length) == expected_len
+
+    def test_large_int_attempt(self) -> None:
+        with pytest.raises(ValueError, match=r"Discord imposes an upper input limit"):
+            commands.Range[int, ..., 2**53 - 1]
+
+        # shouldn't fail
+        commands.Range[int, ..., 2**53 - 2]
+
 
 # this uses `Range` for testing `_BaseRange`, `String` should work equally
 class TestBaseRange:
     @pytest.mark.parametrize("args", [int, (int,), (int, 1, 2, 3)])
     def test_param_count(self, args) -> None:
-        with pytest.raises(TypeError, match=r"`Range` expects 3 type arguments"):
+        with pytest.raises(TypeError, match=r"`Range` expects 3 arguments"):
             commands.Range[args]
 
     @pytest.mark.parametrize(
@@ -103,12 +141,12 @@ class TestBaseRange:
 
     @pytest.mark.parametrize("empty", [None, ...])
     def test_ellipsis(self, empty) -> None:
-        x: Any = commands.Range[int, 1, empty]
+        x: _Range = cast("_Range", commands.Range[int, 1, empty])
         assert x.min_value == 1
         assert x.max_value is None
         assert repr(x) == "Range[int, 1, ...]"
 
-        x: Any = commands.Range[float, empty, -10]
+        x = cast("_Range", commands.Range[float, empty, -10])
         assert x.min_value is None
         assert x.max_value == -10
         assert repr(x) == "Range[float, ..., -10]"
@@ -122,7 +160,7 @@ class TestBaseRange:
             (lambda: commands.String[5, 10], (str, 5, 10)),
         ],
     )
-    def test_backwards_compatible(self, create: Any, expected) -> None:
+    def test_backwards_compatible(self, create: Callable[[], _BaseRange[Any]], expected) -> None:
         with pytest.warns(DeprecationWarning, match=r"without an explicit type argument"):
             value = create()
         assert (value.underlying_type, value.min_value, value.max_value) == expected
@@ -140,16 +178,19 @@ class TestRange:
         with pytest.raises(TypeError, match=r"Range.* bounds must be int, not float"):
             commands.Range[int, 1, 10.0]
 
+        with pytest.raises(TypeError, match=r"Range.* bounds must be int, not float"):
+            commands.Range[commands.LargeInt, 1, 10.0]
+
     @pytest.mark.parametrize("value", [math.nan, math.inf, -math.inf])
     def test_nan(self, value) -> None:
         with pytest.raises(ValueError, match=r"min value may not be NaN, inf, or -inf"):
             commands.Range[float, value, 100]
 
     def test_valid(self) -> None:
-        x: Any = commands.Range[int, -1, 2]
+        x: _Range = cast("_Range", commands.Range[int, -1, 2])
         assert x.underlying_type is int
 
-        x: Any = commands.Range[float, ..., 23.45]
+        x = cast("_Range", commands.Range[float, ..., 23.45])
         assert x.underlying_type is float
 
 
@@ -176,7 +217,7 @@ class TestRangeStringParam:
     @pytest.mark.parametrize(
         "annotation", [commands.Range[int, 1, 2], commands.Range[float, ..., 12.3]]
     )
-    def test_range(self, annotation) -> None:
+    def test_range(self, annotation: _Range) -> None:
         info = commands.ParamInfo()
         info.parse_annotation(annotation)
 
@@ -185,7 +226,7 @@ class TestRangeStringParam:
         assert info.type == annotation.underlying_type
 
     def test_string(self) -> None:
-        annotation: Any = commands.String[str, 4, 10]
+        annotation: _String = cast("_String", commands.String[str, 4, 10])
 
         info = commands.ParamInfo()
         info.parse_annotation(annotation)
