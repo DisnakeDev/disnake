@@ -16,7 +16,6 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Literal,
-    NamedTuple,
     TypedDict,
     TypeVar,
     overload,
@@ -49,7 +48,7 @@ from .errors import (
     SessionStartLimitReached,
 )
 from .flags import ApplicationFlags, Intents, MemberCacheFlags
-from .gateway import DiscordWebSocket, ReconnectWebSocket
+from .gateway import DiscordWebSocket, GatewayParams, ReconnectWebSocket
 from .guild import Guild
 from .guild_preview import GuildPreview
 from .http import HTTPClient
@@ -92,7 +91,6 @@ if TYPE_CHECKING:
 __all__ = (
     "Client",
     "SessionStartLimit",
-    "GatewayParams",
 )
 
 T = TypeVar("T")
@@ -183,25 +181,6 @@ class SessionStartLimit:
             f"<SessionStartLimit total={self.total!r} remaining={self.remaining!r} "
             f"reset_after={self.reset_after!r} max_concurrency={self.max_concurrency!r} reset_time={self.reset_time!s}>"
         )
-
-
-class GatewayParams(NamedTuple):
-    """Container type for configuring gateway connections.
-
-    .. versionadded:: 2.6
-
-    Parameters
-    ----------
-    encoding: :class:`str`
-        The payload encoding (``json`` is currently the only supported encoding).
-        Defaults to ``"json"``.
-    zlib: :class:`bool`
-        Whether to enable transport compression.
-        Defaults to ``True``.
-    """
-
-    encoding: Literal["json"] = "json"
-    zlib: bool = True
 
 
 # used for typing the ws parameter dict in the connect() loop
@@ -477,9 +456,6 @@ class Client:
         )
 
         self.gateway_params: GatewayParams = gateway_params or GatewayParams()
-        if self.gateway_params.encoding != "json":
-            msg = "Gateway encodings other than `json` are currently not supported."
-            raise ValueError(msg)
 
         self.extra_events: dict[str, list[CoroFunc]] = {}
 
@@ -1088,8 +1064,7 @@ class Client:
             and this exception will not be raised.
         """
         _, initial_gateway, session_start_limit = await self.http.get_bot_gateway(
-            encoding=self.gateway_params.encoding,
-            zlib=self.gateway_params.zlib,
+            self.gateway_params
         )
         self.session_start_limit = SessionStartLimit(session_start_limit)
 
