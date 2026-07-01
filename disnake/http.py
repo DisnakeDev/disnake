@@ -7,7 +7,7 @@ import logging
 import re
 import sys
 import weakref
-from collections.abc import Coroutine, Iterable, Sequence
+from collections.abc import Coroutine, Iterable, Mapping, Sequence
 from errno import ECONNRESET
 from typing import (
     TYPE_CHECKING,
@@ -907,6 +907,15 @@ class HTTPClient:
         if before is not None:
             params["before"] = before
 
+        return self.request(r, params=params)
+
+    def search_guild_messages(
+        self, guild_id: Snowflake, params: Mapping[str, Any]
+    ) -> Response[message.MessageSearchResult | message.MessageSearchNotIndexedResult]:
+        # turn bools into 0/1
+        params = {k: (int(v) if isinstance(v, bool) else v) for k, v in params.items()}
+
+        r = Route("GET", "/guilds/{guild_id}/messages/search", guild_id=guild_id)
         return self.request(r, params=params)
 
     # Member management
