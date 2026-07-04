@@ -319,9 +319,6 @@ class _BaseRange(ABC, Generic[NumT]):
 
         if len(params) == 2:
             # backwards compatibility for `Range[1, 2]`
-
-            # FIXME: the warning context is incorrect when used with stringified annotations,
-            # and points to the eval frame instead of user code
             disnake.utils.warn_deprecated(
                 f"Using `{name}` without an explicit type argument is deprecated, "
                 "as this form does not work well with modern type-checkers. "
@@ -379,7 +376,7 @@ class _BaseRange(ABC, Generic[NumT]):
     def __repr__(self) -> str:
         a = "..." if self.min_value is None else self.min_value
         b = "..." if self.max_value is None else self.max_value
-        return f"{type(self).__name__}[{self.underlying_type.__name__}, {a}, {b}]"
+        return f"{self.__class__.__name__}[{self.underlying_type.__name__}, {a}, {b}]"
 
     @staticmethod
     @abstractmethod
@@ -682,7 +679,7 @@ class ParamInfo:
 
     def __repr__(self) -> str:
         args = ", ".join(f"{k}={'...' if v is ... else repr(v)}" for k, v in vars(self).items())
-        return f"{type(self).__name__}({args})"
+        return f"{self.__class__.__name__}({args})"
 
     async def get_default(self, inter: ApplicationCommandInteraction) -> Any:
         """Gets the default for an interaction."""
