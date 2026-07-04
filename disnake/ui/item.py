@@ -10,9 +10,12 @@ from typing import (
     ClassVar,
     Generic,
     Protocol,
-    TypeVar,
     overload,
 )
+
+from typing_extensions import Self, TypeVar
+
+from ._types import V_co, V_deco
 
 __all__ = (
     "UIComponent",
@@ -21,27 +24,24 @@ __all__ = (
 )
 
 I = TypeVar("I", bound="Item[Any]")  # noqa: E741
-V_co = TypeVar("V_co", bound="View | None", covariant=True)
 
 if TYPE_CHECKING:
-    from typing_extensions import Self
-
     from ..client import Client
     from ..components import ActionRowChildComponent, Component
     from ..enums import ComponentType
     from ..interactions import MessageInteraction
     from ..types.components import ActionRowChildComponent as ActionRowChildComponentPayload
-    from .view import View
 
-    ItemCallbackType = Callable[[V_co, I, MessageInteraction], Coroutine[Any, Any, Any]]
 
 ClientT = TypeVar("ClientT", bound="Client")
 UIComponentT = TypeVar("UIComponentT", bound="UIComponent")
 
+ItemCallbackType = Callable[[V_deco, I, "MessageInteraction"], Coroutine[Any, Any, Any]]
+
 
 def ensure_ui_component(obj: UIComponentT, name: str = "component") -> UIComponentT:
     if not isinstance(obj, UIComponent):
-        msg = f"{name} should be a valid UI component, got {type(obj).__name__}."
+        msg = f"{name} should be a valid UI component, got {obj.__class__.__name__}."
         raise TypeError(msg)
     return obj
 
@@ -81,7 +81,7 @@ class UIComponent(ABC):
         attrs = " ".join(
             f"{key.lstrip('_')}={getattr(self, key)!r}" for key in self.__repr_attributes__
         )
-        return f"<{type(self).__name__} {attrs}>"
+        return f"<{self.__class__.__name__} {attrs}>"
 
     @property
     def is_v2(self) -> bool:
@@ -160,12 +160,6 @@ class Item(WrappedComponent, Generic[V_co]):
 
     __repr_attributes__: ClassVar[tuple[str, ...]] = ("row",)
 
-    @overload
-    def __init__(self: Item[None]) -> None: ...
-
-    @overload
-    def __init__(self: Item[V_co]) -> None: ...
-
     def __init__(self) -> None:
         self._view: V_co = None  # pyright: ignore[reportAttributeAccessIssue]
         self._row: int | None = None
@@ -224,15 +218,12 @@ class Item(WrappedComponent, Generic[V_co]):
         pass
 
 
-SelfViewT = TypeVar("SelfViewT", bound="View | None")
-
-
 # While the decorators don't actually return a descriptor that matches this protocol,
 # this protocol ensures that type checkers don't complain about statements like `self.button.disabled = True`,
 # which work as `View.__init__` replaces the handler with the item.
 class DecoratedItem(Protocol[I]):
     @overload
-    def __get__(self, obj: None, objtype: type[SelfViewT]) -> ItemCallbackType[SelfViewT, I]: ...
+    def __get__(self, obj: None, objtype: type[V_deco]) -> ItemCallbackType[V_deco, I]: ...
 
     @overload
     def __get__(self, obj: Any, objtype: Any) -> I: ...

@@ -1395,7 +1395,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         self.last_message_id: int | None = utils._get_as_snowflake(data, "last_message_id")
         self.status: str | None = data.get("status")
 
-    async def _get_channel(self: Self) -> Self:
+    async def _get_channel(self) -> Self:
         return self
 
     @property
@@ -3402,7 +3402,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
             ("flags", self.flags),
         )
         joined = " ".join(f"{k!s}={v!r}" for k, v in attrs)
-        return f"<{type(self).__name__} {joined}>"
+        return f"<{self.__class__.__name__} {joined}>"
 
     def _update(self, guild: Guild, data: ForumChannelPayload | MediaChannelPayload) -> None:
         self.guild: Guild = guild

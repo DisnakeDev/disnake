@@ -15,6 +15,7 @@ if TYPE_CHECKING:
     from disnake.threads import Thread
     from disnake.types.snowflake import Snowflake, SnowflakeList
 
+    from ._types import Coro
     from .context import AnyContext
     from .cooldowns import BucketType, Cooldown
     from .flag_converter import Flag
@@ -55,6 +56,7 @@ __all__ = (
     "PartialEmojiConversionFailure",
     "BadBoolArgument",
     "LargeIntConversionFailure",
+    "LargeIntOutOfRange",
     "MissingRole",
     "BotMissingRole",
     "MissingAnyRole",
@@ -208,10 +210,10 @@ class CheckAnyFailure(CheckFailure):
     """
 
     def __init__(
-        self, checks: list[CheckFailure], errors: list[Callable[[AnyContext], bool]]
+        self, checks: list[Callable[[AnyContext], Coro[bool]]], errors: list[CheckFailure]
     ) -> None:
-        self.checks: list[CheckFailure] = checks
-        self.errors: list[Callable[[AnyContext], bool]] = errors
+        self.checks: list[Callable[[AnyContext], Coro[bool]]] = checks
+        self.errors: list[CheckFailure] = errors
         super().__init__("You do not have permission to run this command.")
 
 
@@ -570,7 +572,38 @@ class LargeIntConversionFailure(BadArgument):
 
     def __init__(self, argument: str) -> None:
         self.argument: str = argument
-        super().__init__(f"{argument} is not able to be converted to an integer")
+        super().__init__(f"{argument} is not a valid base 10 integer")
+
+
+class LargeIntOutOfRange(LargeIntConversionFailure):
+    """Exception raised when an argument to a large integer option exceeds given range.
+
+    This inherits from :exc:`LargeIntConversionFailure`
+
+    .. versionadded:: |vnext|
+
+    Attributes
+    ----------
+    argument: :class:`str`
+        The argument that exceeded the defined range.
+    min_value: :class:`int` | :data:`None`
+        The minimum allowed value.
+    max_value: :class:`int` | :data:`None`
+        The maximum allowed value.
+    """
+
+    def __init__(
+        self,
+        argument: str,
+        min_value: int | None,
+        max_value: int | None,
+    ) -> None:
+        self.argument: str = argument
+        self.min_value: int | None = min_value
+        self.max_value: int | None = max_value
+        a = "..." if min_value is None else min_value
+        b = "..." if max_value is None else max_value
+        BadArgument.__init__(self, f"{argument} is not in range [{a}, {b}]")
 
 
 class DisabledCommand(CommandError):
