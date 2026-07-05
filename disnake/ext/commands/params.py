@@ -1293,7 +1293,6 @@ def Param(
 
     description: :class:`str` | :class:`.Localized` | :data:`None`
         The description of the option. You can skip this kwarg and use docstrings. See :ref:`param_syntax`.
-        Kwarg aliases: ``desc``.
 
         .. versionchanged:: 2.5
             Added support for localizations.
@@ -1302,7 +1301,6 @@ def Param(
         The pre-defined choices for this slash command option.
     converter: :class:`~collections.abc.Callable`\[[:class:`.ApplicationCommandInteraction`, :data:`~typing.Any`], :data:`~typing.Any`]
         A function that will convert the original input to a desired format.
-        Kwarg aliases: ``conv``.
     convert_defaults: :class:`bool`
         Whether to also apply the converter to the provided default value.
         Defaults to ``False``.
@@ -1310,18 +1308,18 @@ def Param(
         .. versionadded:: 2.3
     autocomplete: :class:`~collections.abc.Callable`\[[:class:`.ApplicationCommandInteraction`, :class:`str`], :data:`~typing.Any`]
         A function that will suggest possible autocomplete options while typing.
-        See :ref:`param_syntax`. Kwarg aliases: ``autocomp``.
+        See :ref:`param_syntax`.
     channel_types: :class:`~collections.abc.Iterable`\[:class:`.ChannelType`]
         A list of channel types that should be allowed.
         By default these are discerned from the annotation.
     lt: :class:`float`
         The (exclusive) upper bound of values for this option (less-than).
     le: :class:`float`
-        The (inclusive) upper bound of values for this option (less-than-or-equal). Kwarg aliases: ``max_value``.
+        The (inclusive) upper bound of values for this option (less-than-or-equal).
     gt: :class:`float`
         The (exclusive) lower bound of values for this option (greater-than).
     ge: :class:`float`
-        The (inclusive) lower bound of values for this option (greater-than-or-equal). Kwarg aliases: ``min_value``.
+        The (inclusive) lower bound of values for this option (greater-than-or-equal).
     large: :class:`bool`
         For a parameter of type :class:`int`, this controls whether to accept values outside the
         range of ``[-2**53+1, 2**53-1]``, at the cost of reduced Discord-side input validation.
