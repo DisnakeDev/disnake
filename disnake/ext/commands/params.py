@@ -571,10 +571,10 @@ class ParamInfo:
         choices: Choices | None = None,
         type: type | None = None,
         channel_types: list[ChannelType] | None = None,
-        lt: int | float | None = None,
-        le: int | float | None = None,
         gt: int | float | None = None,
         ge: int | float | None = None,
+        lt: int | float | None = None,
+        le: int | float | None = None,
         large: bool = False,
         min_length: int | None = None,
         max_length: int | None = None,
@@ -1221,10 +1221,10 @@ def Param(
     convert_defaults: bool = False,
     autocomplete: AnyAutocompleter | None = None,
     channel_types: list[ChannelType] | None = None,
-    lt: float | None = None,
-    le: float | None = None,
     gt: float | None = None,
     ge: float | None = None,
+    lt: float | None = None,
+    le: float | None = None,
     large: bool = False,
     min_length: int | None = None,
     max_length: int | None = None,
@@ -1264,10 +1264,10 @@ def Param(
     convert_defaults: bool = False,
     autocomplete: AnyAutocompleter | None = None,
     channel_types: list[ChannelType] | None = None,
-    lt: float | None = None,
-    le: float | None = None,
     gt: float | None = None,
     ge: float | None = None,
+    lt: float | None = None,
+    le: float | None = None,
     large: bool = False,
     min_length: int | None = None,
     max_length: int | None = None,
@@ -1312,14 +1312,14 @@ def Param(
     channel_types: :class:`~collections.abc.Iterable`\[:class:`.ChannelType`]
         A list of channel types that should be allowed.
         By default these are discerned from the annotation.
-    lt: :class:`float`
-        The (exclusive) upper bound of values for this option (less-than).
-    le: :class:`float`
-        The (inclusive) upper bound of values for this option (less-than-or-equal).
     gt: :class:`float`
         The (exclusive) lower bound of values for this option (greater-than).
     ge: :class:`float`
         The (inclusive) lower bound of values for this option (greater-than-or-equal).
+    lt: :class:`float`
+        The (exclusive) upper bound of values for this option (less-than).
+    le: :class:`float`
+        The (inclusive) upper bound of values for this option (less-than-or-equal).
     large: :class:`bool`
         For a parameter of type :class:`int`, this controls whether to accept values outside the
         range of ``[-2**53+1, 2**53-1]``, at the cost of reduced Discord-side input validation.
@@ -1364,8 +1364,8 @@ def Param(
     description = kwargs.pop("desc", description)
     converter = kwargs.pop("conv", converter)
     autocomplete = kwargs.pop("autocomp", autocomplete)
-    le = kwargs.pop("max_value", le)
     ge = kwargs.pop("min_value", ge)
+    le = kwargs.pop("max_value", le)
 
     if kwargs:
         a = ", ".join(map(repr, kwargs))
@@ -1381,10 +1381,10 @@ def Param(
         convert_default=convert_defaults,
         autocomplete=autocomplete,
         channel_types=channel_types,
-        lt=lt,
-        le=le,
         gt=gt,
         ge=ge,
+        lt=lt,
+        le=le,
         large=large,
         min_length=min_length,
         max_length=max_length,
