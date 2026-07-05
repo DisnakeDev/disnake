@@ -243,22 +243,22 @@ def get_class_results(
             if inspect.iscoroutinefunction(value) or doc.startswith("|coro|"):
                 key = _("Methods")
                 badge = attributetablebadge("async", "async")
-                badge["badge-type"] = _("coroutine")
+                badge["badge-type"] = "coroutine"
             elif isinstance(value, classmethod):
                 key = _("Methods")
                 label = f"{name}.{attr}"
                 badge = attributetablebadge("cls", "cls")
-                badge["badge-type"] = _("classmethod")
+                badge["badge-type"] = "classmethod"
             elif inspect.isfunction(value):
                 if doc.lstrip().startswith(("A decorator", "A shortcut decorator")):
                     # finicky but surprisingly consistent
                     badge = attributetablebadge("@", "@")
-                    badge["badge-type"] = _("decorator")
+                    badge["badge-type"] = "decorator"
                     key = _("Methods")
                 else:
                     key = _("Methods")
                     badge = attributetablebadge("def", "def")
-                    badge["badge-type"] = _("method")
+                    badge["badge-type"] = "method"
 
         groups[key].append(TableElement(fullname=attrlookup, label=label, badge=badge))
 
