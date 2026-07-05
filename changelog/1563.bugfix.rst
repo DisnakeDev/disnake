@@ -1,1 +1,0 @@
-Fix :class:`RuntimeError` when building translated documentation due to ``badge-type`` values being translated in the ``attributetable.py`` Sphinx extension.
