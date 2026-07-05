@@ -1,1 +1,0 @@
-Add :class:`AttachmentFlags` type and :attr:`Attachment.flags`.

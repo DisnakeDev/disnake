@@ -1,1 +1,0 @@
-Update :meth:`Colour.dark_theme` to match Discord theme change.

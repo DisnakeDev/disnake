@@ -1,1 +1,0 @@
-Adjust type annotations to allow :class:`Object` as ``category`` parameter in :meth:`Guild.create_text_channel` and similar methods.

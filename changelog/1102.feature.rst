@@ -1,1 +1,0 @@
-Add new :class:`Colour`\s: :meth:`~Colour.light_embed` and :meth:`~Colour.dark_embed`.

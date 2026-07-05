@@ -1,1 +1,0 @@
-Add :class:`StandardSticker` to ``stickers`` parameter type annotation of :meth:`Messageable.send` and :meth:`ForumChannel.create_thread`.

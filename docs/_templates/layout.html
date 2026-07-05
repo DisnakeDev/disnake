@@ -1,10 +1,11 @@
 <!-- SPDX-License-Identifier: MIT -->
 
 <!DOCTYPE html>
-<html>
+<html data-content_root="{{ content_root }}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  {{- metatags }}
   <title>{{ title|striptags|e }}{{ titlesuffix }}</title>
   {%- block extrahead %} {% endblock %}
   <link rel="stylesheet" href="{{ pathto('_static/icons.css', 1)|e }}" type="text/css" />
@@ -20,7 +21,6 @@
   <link rel="stylesheet" href="{{ pathto('_static/style.css', 1)|e }}" type="text/css" />
   <link rel="stylesheet" href="{{ pathto('_static/codeblocks.css', 1) }}" type="text/css" />
   {%- block scripts %}
-  <script id="documentation_options" data-url_root="{{ pathto('', 1) }}" src="{{ pathto('_static/documentation_options.js', 1) }}"></script>
   {% if ("/" + pagename).endswith("/api") %}
     <meta name="robots" content="noindex" />
     <script type="text/javascript" src="{{ pathto('_static/api_redirect.js', 1) }}"></script>
@@ -60,6 +60,10 @@
   <link rel="prev" title="{{ prev.title|striptags|e }}" href="{{ prev.link|e }}" />
   {%- endif %}
   {%- endblock %}
+  <!-- Readthedocs Addons does some doctool detection magic based on a couple different selectors,
+    and custom themes are (unfortunately) not detected. We therefore have to trick it into detecting
+    a sphinx theme like this. No `rel=` means this should generally be a noop. -->
+  <link href="_static/alabaster.css" />
 </head>
 <body{% if not display_toc %} class="small-toc"{% endif %}>
 {%- block header %}{% endblock %}
@@ -156,16 +160,6 @@
     </footer>
 {%- endblock %}
   </div>
-  {%- if READTHEDOCS %}
-  <script>
-    if (typeof READTHEDOCS_DATA !== "undefined") {
-        if (!READTHEDOCS_DATA.features) {
-          READTHEDOCS_DATA.features = {};
-        }
-        READTHEDOCS_DATA.features.docsearch_disabled = true;
-      }
-  </script>
-  {%- endif %}
 
   <div id="to-top" onclick="scrollToTop()"{%- if READTHEDOCS %} class="is-rtd"{%- endif %} hidden>
     <span><span class="material-icons">arrow_upward</span> to top</span>

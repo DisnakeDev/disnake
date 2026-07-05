@@ -1,1 +1,0 @@
-Add raw equivalent of :func:`on_presence_update` - :func:`on_raw_presence_update`.

@@ -1,1 +1,0 @@
-Fix :meth:`Thread.permissions_for` not working in some cases due to an incorrect import.

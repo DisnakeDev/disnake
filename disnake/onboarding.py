@@ -29,7 +29,7 @@ __all__ = (
 
 
 class Onboarding:
-    """Represents a guild onboarding object.
+    r"""Represents a guild onboarding object.
 
     .. versionadded:: 2.9
 
@@ -37,11 +37,11 @@ class Onboarding:
     ----------
     guild: :class:`Guild`
         The guild this onboarding is part of.
-    prompts: List[:class:`APIOnboardingPrompt`]
+    prompts: :class:`list`\[:class:`APIOnboardingPrompt`]
         The prompts shown during onboarding and in community customization.
     enabled: :class:`bool`
         Whether onboarding is enabled.
-    default_channel_ids: FrozenSet[:class:`int`]
+    default_channel_ids: :class:`frozenset`\[:class:`int`]
         The IDs of the channels that will be shown to new members by default.
     mode: :class:`OnboardingMode`
         The onboarding mode, defining criteria for enabling onboarding.
@@ -54,11 +54,11 @@ class Onboarding:
         self._from_data(data)
 
     def _from_data(self, data: OnboardingPayload) -> None:
-        self.prompts: List[APIOnboardingPrompt] = [
+        self.prompts: list[APIOnboardingPrompt] = [
             APIOnboardingPrompt(data=prompt, guild=self.guild) for prompt in data["prompts"]
         ]
         self.enabled: bool = data["enabled"]
-        self.default_channel_ids: FrozenSet[int] = (
+        self.default_channel_ids: frozenset[int] = (
             frozenset(map(int, exempt_channels))
             if (exempt_channels := data["default_channel_ids"])
             else frozenset()
@@ -71,13 +71,13 @@ class Onboarding:
         )
 
     @property
-    def default_channels(self) -> List[GuildChannel]:
-        """List[:class:`abc.GuildChannel`]: The list of channels that will be shown to new members by default."""
+    def default_channels(self) -> list[GuildChannel]:
+        r""":class:`list`\[:class:`abc.GuildChannel`]: The list of channels that will be shown to new members by default."""
         return list(filter(None, map(self.guild.get_channel, self.default_channel_ids)))
 
 
 class OnboardingPrompt(Hashable):
-    """Represents an onboarding prompt.
+    r"""Represents an onboarding prompt.
 
     .. versionadded:: 2.9
 
@@ -89,7 +89,7 @@ class OnboardingPrompt(Hashable):
     ----------
     title: :class:`str`
         The onboarding prompt's title.
-    options: List[:class:`OnboardingPromptOption`]
+    options: :class:`list`\[:class:`OnboardingPromptOption`]
         The onboarding prompt's options.
     type: :class:`OnboardingPromptType`
         The onboarding prompt's type.
@@ -98,7 +98,7 @@ class OnboardingPrompt(Hashable):
     required: :class:`bool`
         Whether the prompt is required before a user completes the onboarding flow.
     in_onboarding: :class:`bool`
-        Whether the prompt is present in the onboarding flow.
+        Whether the prompt is present in the initial onboarding flow.
         If ``False``, the prompt will only appear in community customization.
     """
 
@@ -188,7 +188,7 @@ class APIOnboardingPrompt(OnboardingPrompt):
 
 
 class OnboardingPromptOption(Hashable):
-    """Represents an onboarding prompt option.
+    r"""Represents an onboarding prompt option.
 
     .. versionadded:: 2.9
 
@@ -200,7 +200,7 @@ class OnboardingPromptOption(Hashable):
     ----------
     title: :class:`str`
         The prompt option's title.
-    description: Optional[:class:`str`]
+    description: :class:`str` | :data:`None`
         The prompt option's description.
     emoji: Optional[Union[:class:`PartialEmoji`, :class:`Emoji`, :class:`str`]]
         The prompt option's emoji.
@@ -341,11 +341,11 @@ class APIOnboardingPromptOption(OnboardingPromptOption):
         )
 
     @property
-    def roles(self) -> List[Role]:
-        """List[:class:`Role`]: A list of roles that will be added to the user when they select this option."""
+    def roles(self) -> list[Role]:
+        r""":class:`list`\[:class:`Role`]: A list of roles that will be added to the user when they select this option."""
         return list(filter(None, map(self._guild.get_role, self.role_ids)))
 
     @property
-    def channels(self) -> List[GuildChannel]:
-        """List[:class:`abc.GuildChannel`]: A list of channels that the user will see when they select this option."""
+    def channels(self) -> list[GuildChannel]:
+        r""":class:`list`\[:class:`abc.GuildChannel`]: A list of channels that the user will see when they select this option."""
         return list(filter(None, map(self._guild.get_channel, self.channel_ids)))

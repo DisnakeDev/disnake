@@ -1,1 +1,0 @@
-Update the ``python -m disnake newcog`` template to include all missing special methods.

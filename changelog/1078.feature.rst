@@ -1,1 +1,0 @@
-Add ``default_layout`` parameter to :meth:`Guild.create_forum_channel` and :meth:`ForumChannel.clone`.

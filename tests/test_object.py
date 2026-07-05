@@ -11,7 +11,7 @@ snowflake = 881536165478499999  # date/time of first commit
 
 def test_init() -> None:
     with pytest.raises(
-        TypeError, match=r"id parameter must be convertable to int not <class 'str'>"
+        TypeError, match=r"id parameter must be convertible to int not <class 'str'>"
     ):
         Object("hi")
 

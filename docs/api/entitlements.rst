@@ -25,15 +25,8 @@ Enumerations
 EntitlementType
 ~~~~~~~~~~~~~~~
 
-.. class:: EntitlementType
-
-    Represents the type of an entitlement.
-
-    .. versionadded:: 2.10
-
-    .. attribute:: application_subscription
-
-        Represents an entitlement for an application subscription.
+.. autoclass:: EntitlementType()
+    :members:
 
 Events
 ------

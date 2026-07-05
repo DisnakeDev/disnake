@@ -68,23 +68,8 @@ Enumerations
 ExpireBehaviour
 ~~~~~~~~~~~~~~~
 
-.. class:: ExpireBehaviour
-
-    Represents the behaviour the :class:`Integration` should perform
-    when a user's subscription has finished.
-
-    There is an alias for this called ``ExpireBehavior``.
-
-    .. versionadded:: 1.4
-
-    .. attribute:: remove_role
-
-        This will remove the :attr:`StreamIntegration.role` from the user
-        when their subscription is finished.
-
-    .. attribute:: kick
-
-        This will kick the user when their subscription is finished.
+.. autoclass:: ExpireBehaviour()
+    :members:
 
 Events
 ------
