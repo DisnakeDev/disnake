@@ -5260,7 +5260,7 @@ class Guild(Hashable):
 
         All parameters are optional.
 
-        .. versionadded:: 2.10
+        .. versionadded:: |vnext|
 
         Parameters
         ----------

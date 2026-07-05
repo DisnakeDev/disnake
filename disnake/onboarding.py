@@ -82,7 +82,7 @@ class OnboardingPrompt(Hashable):
 
     .. versionadded:: 2.9
 
-    .. versionchanged:: 2.10
+    .. versionchanged:: |vnext|
 
         This is now user-constructible.
 
@@ -148,7 +148,7 @@ class OnboardingPrompt(Hashable):
 class APIOnboardingPrompt(OnboardingPrompt):
     r"""Represents an onboarding prompt returned by the API.
 
-    .. versionadded:: 2.10
+    .. versionadded:: |vnext|
 
     Attributes
     ----------
@@ -193,7 +193,7 @@ class OnboardingPromptOption(Hashable):
 
     .. versionadded:: 2.9
 
-    .. versionchanged:: 2.10
+    .. versionchanged:: |vnext|
 
         This is now user-constructible.
 
@@ -301,7 +301,7 @@ class OnboardingPromptOption(Hashable):
 class APIOnboardingPromptOption(OnboardingPromptOption):
     r"""Represents an onboarding prompt option returned by the API.
 
-    .. versionadded:: 2.10
+    .. versionadded:: |vnext|
 
     Attributes
     ----------

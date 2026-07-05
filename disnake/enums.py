@@ -2373,7 +2373,7 @@ class OnboardingMode(Enum):
     """
     Represents the criteria used to satisfy onboarding constraints that are required for enabling it.
 
-    .. versionadded:: 2.10
+    .. versionadded:: |vnext|
     """
 
     default = 0
