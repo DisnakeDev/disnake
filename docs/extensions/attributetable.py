@@ -59,13 +59,10 @@ def visit_attributetabletitle_node(self: HTMLTranslator, node: nodes.Element) ->
 
 
 def visit_attributetablebadge_node(self: HTMLTranslator, node: nodes.Element) -> None:
-    """Add a class to each badge of the type that it is."""
-    badge_type: str = node["badge-type"]
-    if badge_type not in ("coroutine", "decorator", "method", "classmethod"):
-        msg = f"badge_type {badge_type} is currently unsupported"
-        raise RuntimeError(msg)
     attributes = {
-        "class": f"badge-{badge_type}",
+        "class": "py-attribute-table-badge",
+        # note: in localized documentation builds, this will be an already translated string
+        "title": node["badge-type"],
     }
     self.body.append(self.starttag(node, "span", **attributes))  # pyright: ignore[reportArgumentType]
 
@@ -127,7 +124,7 @@ class PyAttributeTable(SphinxDirective):
                 <span>_('Attributes')</span>
                 <ul>
                     <li>
-                        <a href="...">
+                        <a href="..."></a>
                     </li>
                 </ul>
             </div>
@@ -135,8 +132,8 @@ class PyAttributeTable(SphinxDirective):
                 <span>_('Methods')</span>
                 <ul>
                     <li>
+                        <span class="py-attribute-table-badge" title="decorator">D</span>
                         <a href="..."></a>
-                        <span class="py-attribute-badge" title="decorator">D</span>
                     </li>
                 </ul>
             </div>
