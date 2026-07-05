@@ -2386,7 +2386,7 @@ class HTTPClient:
         self,
         guild_id: Snowflake,
         *,
-        reason: Optional[str] = None,
+        reason: str | None = None,
         **fields: Any,
     ) -> Response[onboarding.Onboarding]:
         valid_keys = ("prompts", "default_channels_ids", "enabled", "mode")

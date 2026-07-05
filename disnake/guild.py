@@ -5245,11 +5245,11 @@ class Guild(Hashable):
     async def edit_onboarding(
         self,
         *,
-        prompts: List[OnboardingPrompt] = MISSING,
+        prompts: list[OnboardingPrompt] = MISSING,
         default_channels: Iterable[Snowflake] = MISSING,
         enabled: bool = MISSING,
         mode: OnboardingMode = MISSING,
-        reason: Optional[str] = None,
+        reason: str | None = None,
     ) -> Onboarding:
         """|coro|
 

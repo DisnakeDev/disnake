@@ -42,7 +42,7 @@ class Onboarding(TypedDict):
 
 
 class EditOnboarding(TypedDict, total=False):
-    prompts: List[OnboardingPrompt]
+    prompts: list[OnboardingPrompt]
     default_channel_ids: SnowflakeList
     enabled: bool
     mode: OnboardingMode

@@ -2,7 +2,8 @@
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING, FrozenSet, Iterable, List, Optional, Union, overload
+from collections.abc import Iterable
+from typing import TYPE_CHECKING, overload
 
 from .emoji import Emoji, PartialEmoji
 from .enums import OnboardingMode, OnboardingPromptType, try_enum
@@ -108,7 +109,7 @@ class OnboardingPrompt(Hashable):
         self,
         *,
         title: str,
-        options: List[OnboardingPromptOption],
+        options: list[OnboardingPromptOption],
         type: OnboardingPromptType,
         single_select: bool = False,
         required: bool = False,
@@ -116,7 +117,7 @@ class OnboardingPrompt(Hashable):
     ) -> None:
         self.id: int = 0
         self.title: str = title
-        self.options: List[OnboardingPromptOption] = options
+        self.options: list[OnboardingPromptOption] = options
         self.type: OnboardingPromptType = type
         self.single_select: bool = single_select
         self.required: bool = required
@@ -171,7 +172,7 @@ class APIOnboardingPrompt(OnboardingPrompt):
     def __init__(self, *, data: OnboardingPromptPayload, guild: Guild) -> None:
         self.id: int = int(data["id"])
         self.title: str = data["title"]
-        self.options: List[APIOnboardingPromptOption] = [
+        self.options: list[APIOnboardingPromptOption] = [
             APIOnboardingPromptOption(data=o, guild=guild) for o in data["options"]
         ]
         self.single_select: bool = data["single_select"]
@@ -228,42 +229,40 @@ class OnboardingPromptOption(Hashable):
         self,
         *,
         title: str,
-        description: Optional[str] = None,
-        emoji: Optional[Union[str, PartialEmoji, Emoji]] = None,
+        description: str | None = None,
+        emoji: str | PartialEmoji | Emoji | None = None,
         roles: Iterable[Snowflake],
-        channels: Optional[Iterable[Snowflake]] = None,
-    ) -> None:
-        ...
+        channels: Iterable[Snowflake] | None = None,
+    ) -> None: ...
 
     @overload
     def __init__(
         self,
         *,
         title: str,
-        description: Optional[str] = None,
-        emoji: Optional[Union[str, PartialEmoji, Emoji]] = None,
-        roles: Optional[Iterable[Snowflake]] = None,
+        description: str | None = None,
+        emoji: str | PartialEmoji | Emoji | None = None,
+        roles: Iterable[Snowflake] | None = None,
         channels: Iterable[Snowflake],
-    ) -> None:
-        ...
+    ) -> None: ...
 
     def __init__(
         self,
         *,
         title: str,
-        description: Optional[str] = None,
-        emoji: Optional[Union[str, PartialEmoji, Emoji]] = None,
-        roles: Optional[Iterable[Snowflake]] = None,
-        channels: Optional[Iterable[Snowflake]] = None,
+        description: str | None = None,
+        emoji: str | PartialEmoji | Emoji | None = None,
+        roles: Iterable[Snowflake] | None = None,
+        channels: Iterable[Snowflake] | None = None,
     ) -> None:
         self.id: int = 0
         self.title: str = title
-        self.description: Optional[str] = description
-        self.role_ids: FrozenSet[int] = frozenset([r.id for r in roles]) if roles else frozenset()
-        self.channel_ids: FrozenSet[int] = (
+        self.description: str | None = description
+        self.role_ids: frozenset[int] = frozenset([r.id for r in roles]) if roles else frozenset()
+        self.channel_ids: frozenset[int] = (
             frozenset([c.id for c in channels]) if channels else frozenset()
         )
-        self.emoji: Optional[Union[Emoji, PartialEmoji, str]] = emoji
+        self.emoji: Emoji | PartialEmoji | str | None = emoji
 
     def __str__(self) -> str:
         return self.title
@@ -282,7 +281,7 @@ class OnboardingPromptOption(Hashable):
             "role_ids": list(self.role_ids),
             "channel_ids": list(self.channel_ids),
         }
-        emoji: EmojiPayload = {}  # type: ignore
+        emoji: EmojiPayload = {}  # pyright: ignore[reportAssignmentType]
 
         if isinstance(self.emoji, (Emoji, PartialEmoji)):
             emoji = self.emoji._to_partial().to_dict()
@@ -323,9 +322,9 @@ class APIOnboardingPromptOption(OnboardingPromptOption):
     def __init__(self, *, data: OnboardingPromptOptionPayload, guild: Guild) -> None:
         self.id: int = int(data["id"])
         self.title: str = data["title"]
-        self.description: Optional[str] = data.get("description")
-        self.role_ids: FrozenSet[int] = frozenset(int(r) for r in data["role_ids"])
-        self.channel_ids: FrozenSet[int] = frozenset(int(c) for c in data["channel_ids"])
+        self.description: str | None = data.get("description")
+        self.role_ids: frozenset[int] = frozenset(int(r) for r in data["role_ids"])
+        self.channel_ids: frozenset[int] = frozenset(int(c) for c in data["channel_ids"])
         self._guild: Guild = guild
 
         if emoji_data := data.get("emoji"):
