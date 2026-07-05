@@ -1220,7 +1220,7 @@ main .py-attribute-table-column > ul {
   text-decoration: none;
 }
 
-.py-attribute-table-list :where(.badge-coroutine, .badge-method, .badge-decorator, .badge-classmethod) {
+.py-attribute-table-badge {
   flex-basis: 3em;
   text-align: right;
   font-size: 0.9em;
