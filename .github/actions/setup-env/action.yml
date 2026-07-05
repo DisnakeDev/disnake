@@ -28,7 +28,7 @@ runs:
   using: composite
   steps:
     - name: Download uv lock
-      uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       if: ${{ inputs.use-cached-uv-lock != 'false' }}
       id: restore-uv-lock
       with:
@@ -41,7 +41,7 @@ runs:
 
     - name: Set up uv with Python ${{ inputs.python-version }}
       id: setup-python
-      uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+      uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
       with:
         version: '0.9.2'
         enable-cache: true

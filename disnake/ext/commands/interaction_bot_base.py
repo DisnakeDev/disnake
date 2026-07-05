@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import inspect
 import logging
 import sys
 import traceback
@@ -23,7 +24,6 @@ from disnake.app_commands import ApplicationCommand, Option
 from disnake.custom_warnings import SyncWarning
 from disnake.enums import ApplicationCommandType
 from disnake.flags import ApplicationInstallTypes, InteractionContextTypes
-from disnake.utils import iscoroutinefunction
 
 from . import errors
 from .base_core import InvokableApplicationCommand
@@ -39,7 +39,7 @@ from .flags import CommandSyncFlags
 from .slash_core import InvokableSlashCommand, SubCommand, SubCommandGroup, slash_command
 
 if TYPE_CHECKING:
-    from typing_extensions import Never, NotRequired, ParamSpec
+    from typing_extensions import NotRequired, ParamSpec, Unpack
 
     from disnake.i18n import LocalizedOptional
     from disnake.interactions import (
@@ -50,7 +50,7 @@ if TYPE_CHECKING:
     from disnake.permissions import Permissions
 
     from ._types import AppCheck, CoroFunc
-    from .base_core import CogT, CommandCallback, InteractionCommandCallback
+    from .base_core import CogT, CommandCallback, InteractionCommandCallback, _AppCommandArgs
 
     P = ParamSpec("P")
 
@@ -127,7 +127,7 @@ def _format_diff(diff: _Diff) -> str:
             continue
         lines.append(label)
         if changes := diff[key]:
-            lines.extend(f"    <{type(cmd).__name__} name={cmd.name!r}>" for cmd in changes)
+            lines.extend(f"    <{cmd.__class__.__name__} name={cmd.name!r}>" for cmd in changes)
         else:
             lines.append("    -")
 
@@ -470,9 +470,7 @@ class InteractionBotBase(CommonBotBase):
         guild_ids: Sequence[int] | None = None,
         connectors: dict[str, str] | None = None,
         auto_sync: bool | None = None,
-        extras: dict[str, Any] | None = None,
-        dm_permission: Never = ...,
-        **kwargs: Any,
+        **kwargs: Unpack[_AppCommandArgs],
     ) -> Callable[[CommandCallback], InvokableSlashCommand]: ...
 
     @overload
@@ -491,8 +489,7 @@ class InteractionBotBase(CommonBotBase):
         guild_ids: Sequence[int] | None = None,
         connectors: dict[str, str] | None = None,
         auto_sync: bool | None = None,
-        extras: dict[str, Any] | None = None,
-        **kwargs: Any,
+        **kwargs: Unpack[_AppCommandArgs],
     ) -> Callable[[CommandCallback], InvokableSlashCommand]: ...
 
     def slash_command(
@@ -509,8 +506,7 @@ class InteractionBotBase(CommonBotBase):
         guild_ids: Sequence[int] | None = None,
         connectors: dict[str, str] | None = None,
         auto_sync: bool | None = None,
-        extras: dict[str, Any] | None = None,
-        **kwargs: Any,
+        **kwargs: Unpack[_AppCommandArgs],
     ) -> Callable[[CommandCallback], InvokableSlashCommand]:
         r"""A shortcut decorator that invokes :func:`~disnake.ext.commands.slash_command` and adds it to
         the internal command list.
@@ -607,7 +603,6 @@ class InteractionBotBase(CommonBotBase):
                 guild_ids=guild_ids,
                 connectors=connectors,
                 auto_sync=auto_sync,
-                extras=extras,
                 **kwargs,
             )(func)
             self.add_slash_command(result)
@@ -626,9 +621,7 @@ class InteractionBotBase(CommonBotBase):
         contexts: InteractionContextTypes | None = None,
         guild_ids: Sequence[int] | None = None,
         auto_sync: bool | None = None,
-        extras: dict[str, Any] | None = None,
-        dm_permission: Never = ...,
-        **kwargs: Any,
+        **kwargs: Unpack[_AppCommandArgs],
     ) -> Callable[
         [InteractionCommandCallback[CogT, UserCommandInteraction, P]], InvokableUserCommand
     ]: ...
@@ -646,8 +639,7 @@ class InteractionBotBase(CommonBotBase):
         contexts: InteractionContextTypes | None = None,
         guild_ids: Sequence[int] | None = None,
         auto_sync: bool | None = None,
-        extras: dict[str, Any] | None = None,
-        **kwargs: Any,
+        **kwargs: Unpack[_AppCommandArgs],
     ) -> Callable[
         [InteractionCommandCallback[CogT, UserCommandInteraction, P]], InvokableUserCommand
     ]: ...
@@ -663,8 +655,7 @@ class InteractionBotBase(CommonBotBase):
         contexts: InteractionContextTypes | None = None,
         guild_ids: Sequence[int] | None = None,
         auto_sync: bool | None = None,
-        extras: dict[str, Any] | None = None,
-        **kwargs: Any,
+        **kwargs: Unpack[_AppCommandArgs],
     ) -> Callable[
         [InteractionCommandCallback[CogT, UserCommandInteraction, P]], InvokableUserCommand
     ]:
@@ -747,7 +738,6 @@ class InteractionBotBase(CommonBotBase):
                 contexts=contexts,
                 guild_ids=guild_ids,
                 auto_sync=auto_sync,
-                extras=extras,
                 **kwargs,
             )(func)
             self.add_user_command(result)
@@ -766,9 +756,7 @@ class InteractionBotBase(CommonBotBase):
         contexts: InteractionContextTypes | None = None,
         guild_ids: Sequence[int] | None = None,
         auto_sync: bool | None = None,
-        extras: dict[str, Any] | None = None,
-        dm_permission: Never = ...,
-        **kwargs: Any,
+        **kwargs: Unpack[_AppCommandArgs],
     ) -> Callable[
         [InteractionCommandCallback[CogT, MessageCommandInteraction, P]], InvokableMessageCommand
     ]: ...
@@ -786,8 +774,7 @@ class InteractionBotBase(CommonBotBase):
         contexts: InteractionContextTypes | None = None,
         guild_ids: Sequence[int] | None = None,
         auto_sync: bool | None = None,
-        extras: dict[str, Any] | None = None,
-        **kwargs: Any,
+        **kwargs: Unpack[_AppCommandArgs],
     ) -> Callable[
         [InteractionCommandCallback[CogT, MessageCommandInteraction, P]], InvokableMessageCommand
     ]: ...
@@ -803,8 +790,7 @@ class InteractionBotBase(CommonBotBase):
         contexts: InteractionContextTypes | None = None,
         guild_ids: Sequence[int] | None = None,
         auto_sync: bool | None = None,
-        extras: dict[str, Any] | None = None,
-        **kwargs: Any,
+        **kwargs: Unpack[_AppCommandArgs],
     ) -> Callable[
         [InteractionCommandCallback[CogT, MessageCommandInteraction, P]], InvokableMessageCommand
     ]:
@@ -887,7 +873,6 @@ class InteractionBotBase(CommonBotBase):
                 contexts=contexts,
                 guild_ids=guild_ids,
                 auto_sync=auto_sync,
-                extras=extras,
                 **kwargs,
             )(func)
             self.add_message_command(result)
@@ -1385,7 +1370,7 @@ class InteractionBotBase(CommonBotBase):
         """Similar to :meth:`Bot.before_invoke` but for slash commands,
         and it takes an :class:`.ApplicationCommandInteraction` as its only parameter.
         """
-        if not iscoroutinefunction(coro):
+        if not inspect.iscoroutinefunction(coro):
             msg = "The pre-invoke hook must be a coroutine function."
             raise TypeError(msg)
 
@@ -1396,7 +1381,7 @@ class InteractionBotBase(CommonBotBase):
         """Similar to :meth:`Bot.after_invoke` but for slash commands,
         and it takes an :class:`.ApplicationCommandInteraction` as its only parameter.
         """
-        if not iscoroutinefunction(coro):
+        if not inspect.iscoroutinefunction(coro):
             msg = "The post-invoke hook must be a coroutine function."
             raise TypeError(msg)
 
@@ -1405,7 +1390,7 @@ class InteractionBotBase(CommonBotBase):
 
     def before_user_command_invoke(self, coro: CFT) -> CFT:
         """Similar to :meth:`Bot.before_slash_command_invoke` but for user commands."""
-        if not iscoroutinefunction(coro):
+        if not inspect.iscoroutinefunction(coro):
             msg = "The pre-invoke hook must be a coroutine function."
             raise TypeError(msg)
 
@@ -1414,7 +1399,7 @@ class InteractionBotBase(CommonBotBase):
 
     def after_user_command_invoke(self, coro: CFT) -> CFT:
         """Similar to :meth:`Bot.after_slash_command_invoke` but for user commands."""
-        if not iscoroutinefunction(coro):
+        if not inspect.iscoroutinefunction(coro):
             msg = "The post-invoke hook must be a coroutine function."
             raise TypeError(msg)
 
@@ -1423,7 +1408,7 @@ class InteractionBotBase(CommonBotBase):
 
     def before_message_command_invoke(self, coro: CFT) -> CFT:
         """Similar to :meth:`Bot.before_slash_command_invoke` but for message commands."""
-        if not iscoroutinefunction(coro):
+        if not inspect.iscoroutinefunction(coro):
             msg = "The pre-invoke hook must be a coroutine function."
             raise TypeError(msg)
 
@@ -1432,7 +1417,7 @@ class InteractionBotBase(CommonBotBase):
 
     def after_message_command_invoke(self, coro: CFT) -> CFT:
         """Similar to :meth:`Bot.after_slash_command_invoke` but for message commands."""
-        if not iscoroutinefunction(coro):
+        if not inspect.iscoroutinefunction(coro):
             msg = "The post-invoke hook must be a coroutine function."
             raise TypeError(msg)
 

@@ -289,9 +289,9 @@ class Option:
         self.required: bool = required
         self.options: list[Option] = options or []
 
-        if min_value and self.type is OptionType.integer:
+        if min_value is not None and self.type is OptionType.integer:
             min_value = math.ceil(min_value)
-        if max_value and self.type is OptionType.integer:
+        if max_value is not None and self.type is OptionType.integer:
             max_value = math.floor(max_value)
 
         self.min_value: float | None = min_value
@@ -528,6 +528,7 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
         self,
         type: ApplicationCommandType,
         name: LocalizedRequired,
+        *,
         default_member_permissions: Permissions | int | None = None,
         nsfw: bool | None = None,
         install_types: ApplicationInstallTypes | None = None,
@@ -649,7 +650,7 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
 
     def __repr__(self) -> str:
         attrs = " ".join(f"{key}={getattr(self, key)!r}" for key in self.__repr_attributes__)
-        return f"<{type(self).__name__} {attrs}>"
+        return f"<{self.__class__.__name__} {attrs}>"
 
     def __str__(self) -> str:
         return self.name
@@ -819,6 +820,7 @@ class UserCommand(ApplicationCommand):
     def __init__(
         self,
         name: LocalizedRequired,
+        *,
         default_member_permissions: Permissions | int | None = None,
         nsfw: bool | None = None,
         install_types: ApplicationInstallTypes | None = None,
@@ -970,6 +972,7 @@ class MessageCommand(ApplicationCommand):
     def __init__(
         self,
         name: LocalizedRequired,
+        *,
         default_member_permissions: Permissions | int | None = None,
         nsfw: bool | None = None,
         install_types: ApplicationInstallTypes | None = None,
@@ -1135,6 +1138,7 @@ class SlashCommand(ApplicationCommand):
         name: LocalizedRequired,
         description: LocalizedRequired,
         options: list[Option] | None = None,
+        *,
         default_member_permissions: Permissions | int | None = None,
         nsfw: bool | None = None,
         install_types: ApplicationInstallTypes | None = None,
@@ -1147,8 +1151,8 @@ class SlashCommand(ApplicationCommand):
         self,
         name: LocalizedRequired,
         description: LocalizedRequired,
-        dm_permission: bool | None,
         options: list[Option] | None = None,
+        dm_permission: bool | None = None,
         default_member_permissions: Permissions | int | None = None,
         nsfw: bool | None = None,
         install_types: ApplicationInstallTypes | None = None,

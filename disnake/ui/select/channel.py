@@ -18,13 +18,14 @@ from ...enums import ChannelType, ComponentType, SelectDefaultValueType
 from ...object import Object
 from ...threads import Thread
 from ...utils import MISSING
-from .base import BaseSelect, P, SelectDefaultValueInputType, V_co, _create_decorator
+from .._types import P, V_co, V_deco
+from ..item import DecoratedItem, ItemCallbackType
+from .base import BaseSelect, SelectDefaultValueInputType, _create_decorator
 
 if TYPE_CHECKING:
     from typing_extensions import Self
 
     from ...abc import AnyChannel
-    from ..item import DecoratedItem, ItemCallbackType
 
 
 __all__ = (
@@ -108,38 +109,6 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
         ),
     }
 
-    @overload
-    def __init__(
-        self: ChannelSelect[None],
-        *,
-        custom_id: str = ...,
-        placeholder: str | None = None,
-        min_values: int = 1,
-        max_values: int = 1,
-        disabled: bool = False,
-        channel_types: list[ChannelType] | None = None,
-        default_values: Sequence[SelectDefaultValueInputType[AnyChannel]] | None = None,
-        required: bool = True,
-        id: int = 0,
-        row: int | None = None,
-    ) -> None: ...
-
-    @overload
-    def __init__(
-        self: ChannelSelect[V_co],
-        *,
-        custom_id: str = ...,
-        placeholder: str | None = None,
-        min_values: int = 1,
-        max_values: int = 1,
-        disabled: bool = False,
-        channel_types: list[ChannelType] | None = None,
-        default_values: Sequence[SelectDefaultValueInputType[AnyChannel]] | None = None,
-        required: bool = True,
-        id: int = 0,
-        row: int | None = None,
-    ) -> None: ...
-
     def __init__(
         self,
         *,
@@ -202,7 +171,7 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
         self._underlying.channel_types = value
 
 
-S_co = TypeVar("S_co", bound="ChannelSelect", covariant=True)
+S_co = TypeVar("S_co", bound="ChannelSelect[Any]", covariant=True)
 
 
 @overload
@@ -218,19 +187,19 @@ def channel_select(
     id: int = 0,
     row: int | None = None,
 ) -> Callable[
-    [ItemCallbackType[V_co, ChannelSelect[V_co]]], DecoratedItem[ChannelSelect[V_co]]
+    [ItemCallbackType[V_deco, ChannelSelect[Any]]], DecoratedItem[ChannelSelect[V_deco]]
 ]: ...
 
 
 @overload
 def channel_select(
     cls: Callable[P, S_co], *_: P.args, **kwargs: P.kwargs
-) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]: ...
+) -> Callable[[ItemCallbackType[V_deco, S_co]], DecoratedItem[S_co]]: ...
 
 
 def channel_select(
     cls: Callable[..., S_co] = ChannelSelect[Any], **kwargs: Any
-) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]:
+) -> Callable[[ItemCallbackType[V_deco, S_co]], DecoratedItem[S_co]]:
     r"""A decorator that attaches a channel select menu to a component.
 
     The function being decorated should have three parameters: ``self`` representing

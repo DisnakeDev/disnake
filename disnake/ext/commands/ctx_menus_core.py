@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import inspect
 from collections.abc import Callable, Sequence
 from typing import TYPE_CHECKING, Any, overload
 
@@ -10,14 +11,13 @@ from disnake.app_commands import MessageCommand, UserCommand
 from disnake.flags import ApplicationInstallTypes, InteractionContextTypes
 from disnake.i18n import Localized
 from disnake.permissions import Permissions
-from disnake.utils import iscoroutinefunction
 
 from .base_core import InvokableApplicationCommand, _get_overridden_method
 from .errors import CommandError
 from .params import safe_call
 
 if TYPE_CHECKING:
-    from typing_extensions import Never, ParamSpec
+    from typing_extensions import ParamSpec, Unpack
 
     from disnake.i18n import LocalizedOptional
     from disnake.interactions import (
@@ -26,7 +26,7 @@ if TYPE_CHECKING:
         UserCommandInteraction,
     )
 
-    from .base_core import CogT, InteractionCommandCallback
+    from .base_core import CogT, InteractionCommandCallback, _AppCommandArgs
 
     P = ParamSpec("P")
 
@@ -83,8 +83,7 @@ class InvokableUserCommand(InvokableApplicationCommand):
         contexts: InteractionContextTypes | None = None,
         guild_ids: Sequence[int] | None = None,
         auto_sync: bool | None = None,
-        dm_permission: Never = ...,  # necessary so **kwargs doesn't swallow the argument
-        **kwargs: Any,
+        **kwargs: Unpack[_AppCommandArgs],
     ) -> None: ...
 
     @overload
@@ -101,7 +100,7 @@ class InvokableUserCommand(InvokableApplicationCommand):
         contexts: InteractionContextTypes | None = None,
         guild_ids: Sequence[int] | None = None,
         auto_sync: bool | None = None,
-        **kwargs: Any,
+        **kwargs: Unpack[_AppCommandArgs],
     ) -> None: ...
 
     def __init__(
@@ -116,7 +115,7 @@ class InvokableUserCommand(InvokableApplicationCommand):
         contexts: InteractionContextTypes | None = None,
         guild_ids: Sequence[int] | None = None,
         auto_sync: bool | None = None,
-        **kwargs: Any,
+        **kwargs: Unpack[_AppCommandArgs],
     ) -> None:
         name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
@@ -227,8 +226,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         contexts: InteractionContextTypes | None = None,
         guild_ids: Sequence[int] | None = None,
         auto_sync: bool | None = None,
-        dm_permission: Never = ...,
-        **kwargs: Any,
+        **kwargs: Unpack[_AppCommandArgs],
     ) -> None: ...
 
     @overload
@@ -245,7 +243,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         contexts: InteractionContextTypes | None = None,
         guild_ids: Sequence[int] | None = None,
         auto_sync: bool | None = None,
-        **kwargs: Any,
+        **kwargs: Unpack[_AppCommandArgs],
     ) -> None: ...
 
     def __init__(
@@ -260,7 +258,7 @@ class InvokableMessageCommand(InvokableApplicationCommand):
         contexts: InteractionContextTypes | None = None,
         guild_ids: Sequence[int] | None = None,
         auto_sync: bool | None = None,
-        **kwargs: Any,
+        **kwargs: Unpack[_AppCommandArgs],
     ) -> None:
         name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
@@ -331,9 +329,7 @@ def user_command(
     contexts: InteractionContextTypes | None = None,
     guild_ids: Sequence[int] | None = None,
     auto_sync: bool | None = None,
-    extras: dict[str, Any] | None = None,
-    dm_permission: Never = ...,
-    **kwargs: Any,
+    **kwargs: Unpack[_AppCommandArgs],
 ) -> Callable[
     [InteractionCommandCallback[CogT, UserCommandInteraction, P]], InvokableUserCommand
 ]: ...
@@ -351,8 +347,7 @@ def user_command(
     contexts: InteractionContextTypes | None = None,
     guild_ids: Sequence[int] | None = None,
     auto_sync: bool | None = None,
-    extras: dict[str, Any] | None = None,
-    **kwargs: Any,
+    **kwargs: Unpack[_AppCommandArgs],
 ) -> Callable[
     [InteractionCommandCallback[CogT, UserCommandInteraction, P]], InvokableUserCommand
 ]: ...
@@ -368,8 +363,7 @@ def user_command(
     contexts: InteractionContextTypes | None = None,
     guild_ids: Sequence[int] | None = None,
     auto_sync: bool | None = None,
-    extras: dict[str, Any] | None = None,
-    **kwargs: Any,
+    **kwargs: Unpack[_AppCommandArgs],
 ) -> Callable[[InteractionCommandCallback[CogT, UserCommandInteraction, P]], InvokableUserCommand]:
     r"""A shortcut decorator that builds a user command.
 
@@ -440,7 +434,7 @@ def user_command(
     def decorator(
         func: InteractionCommandCallback[CogT, UserCommandInteraction, P],
     ) -> InvokableUserCommand:
-        if not iscoroutinefunction(func):
+        if not inspect.iscoroutinefunction(func):
             msg = f"<{func.__qualname__}> must be a coroutine function"
             raise TypeError(msg)
         if hasattr(func, "__command_flag__"):
@@ -459,7 +453,6 @@ def user_command(
             contexts=contexts,
             guild_ids=guild_ids,
             auto_sync=auto_sync,
-            extras=extras,
             **kwargs,
         )
 
@@ -476,9 +469,7 @@ def message_command(
     contexts: InteractionContextTypes | None = None,
     guild_ids: Sequence[int] | None = None,
     auto_sync: bool | None = None,
-    extras: dict[str, Any] | None = None,
-    dm_permission: Never = ...,
-    **kwargs: Any,
+    **kwargs: Unpack[_AppCommandArgs],
 ) -> Callable[
     [InteractionCommandCallback[CogT, MessageCommandInteraction, P]],
     InvokableMessageCommand,
@@ -497,8 +488,7 @@ def message_command(
     contexts: InteractionContextTypes | None = None,
     guild_ids: Sequence[int] | None = None,
     auto_sync: bool | None = None,
-    extras: dict[str, Any] | None = None,
-    **kwargs: Any,
+    **kwargs: Unpack[_AppCommandArgs],
 ) -> Callable[
     [InteractionCommandCallback[CogT, MessageCommandInteraction, P]],
     InvokableMessageCommand,
@@ -515,8 +505,7 @@ def message_command(
     contexts: InteractionContextTypes | None = None,
     guild_ids: Sequence[int] | None = None,
     auto_sync: bool | None = None,
-    extras: dict[str, Any] | None = None,
-    **kwargs: Any,
+    **kwargs: Unpack[_AppCommandArgs],
 ) -> Callable[
     [InteractionCommandCallback[CogT, MessageCommandInteraction, P]],
     InvokableMessageCommand,
@@ -590,7 +579,7 @@ def message_command(
     def decorator(
         func: InteractionCommandCallback[CogT, MessageCommandInteraction, P],
     ) -> InvokableMessageCommand:
-        if not iscoroutinefunction(func):
+        if not inspect.iscoroutinefunction(func):
             msg = f"<{func.__qualname__}> must be a coroutine function"
             raise TypeError(msg)
         if hasattr(func, "__command_flag__"):
@@ -609,7 +598,6 @@ def message_command(
             contexts=contexts,
             guild_ids=guild_ids,
             auto_sync=auto_sync,
-            extras=extras,
             **kwargs,
         )
 

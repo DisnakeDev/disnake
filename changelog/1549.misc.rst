@@ -1,0 +1,1 @@
+Show ``PyNaCl`` and ``dave.py`` versions in the output of ``python -m disnake -v``.

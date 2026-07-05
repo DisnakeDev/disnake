@@ -14,7 +14,6 @@ from typing import TYPE_CHECKING, Any, TypeAlias, TypeVar, overload
 
 import disnake
 from disnake import utils
-from disnake.utils import iscoroutinefunction
 
 from . import errors
 from .common_bot_base import CommonBotBase
@@ -380,7 +379,7 @@ class BotBase(CommonBotBase, GroupMixin):
         TypeError
             The argument passed is not actually a coroutine function.
         """
-        if not iscoroutinefunction(coro):
+        if not inspect.iscoroutinefunction(coro):
             msg = "The pre-invoke hook must be a coroutine function."
             raise TypeError(msg)
 
@@ -416,7 +415,7 @@ class BotBase(CommonBotBase, GroupMixin):
         TypeError
             The argument passed is not actually a coroutine function.
         """
-        if not iscoroutinefunction(coro):
+        if not inspect.iscoroutinefunction(coro):
             msg = "The post-invoke hook must be a coroutine function."
             raise TypeError(msg)
 

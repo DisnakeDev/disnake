@@ -169,6 +169,40 @@ Other types may be converted implicitly, using the builtin :ref:`ext_commands_di
   \*\*\* Corresponds to any mentionable type, currently equivalent to ``User | Member | Role``.
 
 
+.. _large_integers:
+
+Large Integers
+++++++++++++++
+
+Due to a limitation of the Discord API, :class:`int` parameters can only take values between ``-2^53+1`` and ``2^53-1`` (inclusive).
+If you wish to accept values that could fall outside of this range, you can use the ``large`` parameter on :func:`~ext.commands.Param`.
+Setting it to :data:`True` instructs the library to use a string option type on the Discord API side,
+and locally parse user provided content to :class:`int`.
+
+.. code-block:: python3
+
+    @bot.slash_command()
+    async def snowflake(
+        inter: disnake.ApplicationCommandInteraction,
+        snowflake: int = commands.Param(large=True),
+    ):
+        ...
+
+Note that using this is a compromise, as string option type inevitably means that Discord will allow the user to input *any* string,
+which may not necessarily be a valid base 10 integer. When the value received cannot be parsed by :class:`int`,
+:exc:`~ext.commands.LargeIntConversionFailure` is raised.
+
+Instead of using :func:`Param(large=True) <ext.commands.Param>`, you can also use a :class:`~ext.commands.LargeInt` annotation.
+
+.. code-block:: python3
+
+    @bot.slash_command()
+    async def snowflake(
+        inter: disnake.ApplicationCommandInteraction,
+        snowflake: commands.LargeInt,
+    ):
+        ...
+
 .. _param_ranges:
 
 Number Ranges
@@ -197,9 +231,24 @@ The type of the option is specified by the first type argument, which can be eit
     @bot.slash_command()
     async def ranges(
         inter: disnake.ApplicationCommandInteraction,
-        a: commands.Range[int, 0, 10],       # 0 - 10 int
-        b: commands.Range[float, 0, 10.0],     # 0 - 10 float
-        c: commands.Range[int, 1, ...],      # positive int
+        a: commands.Range[int, 0, 10],      # 0 - 10 int
+        b: commands.Range[float, 0, 10.0],  # 0 - 10 float
+        c: commands.Range[int, 1, ...],     # positive int
+    ):
+        ...
+
+Integer ranges can also be combined with :ref:`large_integers`, in which case :ref:`string_lengths` will be set
+based on the *shortest* and *longest* signed base 10 string representations of the possible value ranges,
+and a :exc:`~ext.commands.LargeIntOutOfRange` exception will be raised if the parsed integer value
+falls outside the specified range.
+
+.. code-block:: python3
+
+    @bot.slash_command()
+    async def ranges(
+        inter: disnake.ApplicationCommandInteraction,
+        a: int = commands.Param(ge=0, le=2**64, large=True),  # 0 - 2**64 int
+        b: commands.Range[commands.LargeInt, 0, 2**64],       # 0 - 2**64 int
     ):
         ...
 

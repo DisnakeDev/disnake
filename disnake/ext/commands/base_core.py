@@ -5,12 +5,14 @@ from __future__ import annotations
 import asyncio
 import datetime
 import functools
+import inspect
 from abc import ABC
 from collections.abc import Callable
 from typing import (
     TYPE_CHECKING,
     Any,
     TypeAlias,
+    TypedDict,
     TypeVar,
     cast,
     overload,
@@ -21,13 +23,7 @@ from disnake.app_commands import ApplicationCommand
 from disnake.enums import ApplicationCommandType
 from disnake.flags import ApplicationInstallTypes, InteractionContextTypes
 from disnake.permissions import Permissions
-from disnake.utils import (
-    _generated,
-    _overload_with_permissions,
-    async_all,
-    iscoroutinefunction,
-    maybe_coroutine,
-)
+from disnake.utils import _generated, _overload_with_permissions, async_all, maybe_coroutine
 
 from .cooldowns import BucketType, CooldownMapping, MaxConcurrency
 from .errors import CheckFailure, CommandError, CommandInvokeError, CommandOnCooldown
@@ -35,7 +31,7 @@ from .errors import CheckFailure, CommandError, CommandInvokeError, CommandOnCoo
 if TYPE_CHECKING:
     from typing import Concatenate
 
-    from typing_extensions import ParamSpec, Self
+    from typing_extensions import ParamSpec, Self, Unpack
 
     from disnake.interactions import ApplicationCommandInteraction
 
@@ -54,6 +50,13 @@ if TYPE_CHECKING:
         Callable[Concatenate["CogT", ApplicationCommandInteractionT, P], Coro[Any]]
         | Callable[Concatenate[ApplicationCommandInteractionT, P], Coro[Any]]
     )
+
+    class _AppCommandArgs(TypedDict, total=False):
+        guild_only: bool
+        extras: dict[str, Any] | None
+        checks: list[AppCheck]
+        cooldown: CooldownMapping | None
+        max_concurrency: MaxConcurrency | None
 
 
 __all__ = (
@@ -142,7 +145,9 @@ class InvokableApplicationCommand(ABC):
         self.__original_kwargs__ = {k: v for k, v in kwargs.items() if v is not None}
         return self
 
-    def __init__(self, func: CommandCallback, *, name: str | None = None, **kwargs: Any) -> None:
+    def __init__(
+        self, func: CommandCallback, *, name: str | None = None, **kwargs: Unpack[_AppCommandArgs]
+    ) -> None:
         self.__command_flag__ = None
         self._callback: CommandCallback = func
         self.name: str = name or func.__name__
@@ -497,7 +502,7 @@ class InvokableApplicationCommand(ABC):
         TypeError
             The argument passed is not actually a coroutine function.
         """
-        if not iscoroutinefunction(coro):
+        if not inspect.iscoroutinefunction(coro):
             msg = "The error handler must be a coroutine function."
             raise TypeError(msg)
 
@@ -614,7 +619,7 @@ class InvokableApplicationCommand(ABC):
         TypeError
             The argument passed is not a coroutine function.
         """
-        if not iscoroutinefunction(coro):
+        if not inspect.iscoroutinefunction(coro):
             msg = "The pre-invoke hook must be a coroutine function."
             raise TypeError(msg)
 
@@ -638,7 +643,7 @@ class InvokableApplicationCommand(ABC):
         TypeError
             The argument passed is not actually a coroutine function.
         """
-        if not iscoroutinefunction(coro):
+        if not inspect.iscoroutinefunction(coro):
             msg = "The post-invoke hook must be a coroutine function."
             raise TypeError(msg)
 

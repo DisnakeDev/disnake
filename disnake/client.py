@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import inspect
 import logging
 import signal
 import sys
@@ -832,7 +833,7 @@ class Client:
             else (name if isinstance(name, str) else f"on_{name.value}")
         )
 
-        if not utils.iscoroutinefunction(func):
+        if not inspect.iscoroutinefunction(func):
             msg = "Listeners must be coroutines"
             raise TypeError(msg)
 
@@ -1037,7 +1038,7 @@ class Client:
         """
         _log.info("logging in using static token")
         if not isinstance(token, str):
-            msg = f"token must be of type str, got {type(token).__name__} instead"
+            msg = f"token must be of type str, got {token.__class__.__name__} instead"
             raise TypeError(msg)
 
         data = await self.http.static_login(token.strip())
@@ -1281,8 +1282,8 @@ class Client:
         loop = self.loop
 
         try:
-            loop.add_signal_handler(signal.SIGINT, lambda: loop.stop())
-            loop.add_signal_handler(signal.SIGTERM, lambda: loop.stop())
+            loop.add_signal_handler(signal.SIGINT, loop.stop)
+            loop.add_signal_handler(signal.SIGTERM, loop.stop)
         except NotImplementedError:
             pass
 
@@ -1864,7 +1865,7 @@ class Client:
         TypeError
             The argument passed is not actually a coroutine function.
         """
-        if not utils.iscoroutinefunction(coro):
+        if not inspect.iscoroutinefunction(coro):
             msg = "event registered must be a coroutine function"
             raise TypeError(msg)
 
