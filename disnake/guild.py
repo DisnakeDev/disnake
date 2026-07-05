@@ -5251,7 +5251,7 @@ class Guild(Hashable):
         mode: OnboardingMode = MISSING,
         reason: str | None = None,
     ) -> Onboarding:
-        """|coro|
+        r"""|coro|
 
         Edits the guild onboarding.
 
@@ -5264,16 +5264,16 @@ class Guild(Hashable):
 
         Parameters
         ----------
-        prompts: List[:class:`OnboardingPrompt`]
+        prompts: :class:`list`\[:class:`OnboardingPrompt`]
             The onboarding's new prompts.
-        default_channels: Iterable[:class:`abc.Snowflake`]
+        default_channels: :class:`~collections.abc.Iterable`\[:class:`abc.Snowflake`]
             The onboarding's new default channels.
         enabled: :class:`bool`
             Whether the onboarding is enabled.
         mode: :class:`OnboardingMode`
             The onboarding's new mode. This defines the criteria used to satisfy Onboarding
             constraints that are required for enabling it.
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason for editing the guild onboarding. Shows up on the audit log.
 
         Raises

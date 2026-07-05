@@ -191,19 +191,8 @@ OnboardingPromptType
 OnboardingMode
 ~~~~~~~~~~~~~~
 
-.. class:: OnboardingMode
-
-    Represents the criteria used to satisfy onboarding constraints that are required for enabling it.
-
-    .. versionadded:: 2.10
-
-    .. attribute:: default
-
-        Counts only :attr:`Onboarding.default_channels` towards constraints.
-
-    .. attribute:: advanced
-
-        Counts :attr:`Onboarding.default_channels` and :attr:`~Onboarding.prompts` towards constraints.
+.. autoclass:: OnboardingMode()
+    :members:
 
 Events
 ------

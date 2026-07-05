@@ -2370,8 +2370,16 @@ class OnboardingPromptType(Enum):
 
 
 class OnboardingMode(Enum):
+    """
+    Represents the criteria used to satisfy onboarding constraints that are required for enabling it.
+
+    .. versionadded:: 2.10
+    """
+
     default = 0
+    """Counts only :attr:`Onboarding.default_channels` towards constraints."""
     advanced = 1
+    """Counts :attr:`Onboarding.default_channels` and :attr:`~Onboarding.prompts` towards constraints."""
 
 
 class SKUType(Enum):

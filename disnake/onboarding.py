@@ -146,7 +146,7 @@ class OnboardingPrompt(Hashable):
 
 
 class APIOnboardingPrompt(OnboardingPrompt):
-    """Represents an onboarding prompt returned by the API.
+    r"""Represents an onboarding prompt returned by the API.
 
     .. versionadded:: 2.10
 
@@ -156,7 +156,7 @@ class APIOnboardingPrompt(OnboardingPrompt):
         The onboarding prompt's ID.
     title: :class:`str`
         The onboarding prompt's title.
-    options: List[:class:`APIOnboardingPromptOption`]
+    options: :class:`list`\[:class:`OnboardingPromptOption`]
         The onboarding prompt's options.
     type: :class:`OnboardingPromptType`
         The onboarding prompt's type.
@@ -165,7 +165,7 @@ class APIOnboardingPrompt(OnboardingPrompt):
     required: :class:`bool`
         Whether the prompt is required before a user completes the onboarding flow.
     in_onboarding: :class:`bool`
-        Whether the prompt is present in the onboarding flow.
+        Whether the prompt is present in the initial onboarding flow.
         If ``False``, the prompt will only appear in community customization.
     """
 
@@ -203,12 +203,12 @@ class OnboardingPromptOption(Hashable):
         The prompt option's title.
     description: :class:`str` | :data:`None`
         The prompt option's description.
-    emoji: Optional[Union[:class:`PartialEmoji`, :class:`Emoji`, :class:`str`]]
+    emoji: :class:`PartialEmoji` | :class:`Emoji` | :class:`str` | :data:`None`
         The prompt option's emoji.
-    roles: Iterable[:class:`.abc.Snowflake`]
+    roles: :class:`~collections.abc.Iterable`\[:class:`.abc.Snowflake`]
         The IDs of the roles that will be added to the user when they select this option.
         This must be set if ``channels`` is not set.
-    channels: Iterable[:class:`.abc.Snowflake`]
+    channels: :class:`~collections.abc.Iterable`\[:class:`.abc.Snowflake`]
         The IDs of the channels that the user will see when they select this option.
         This must be set if ``roles`` is not set.
     """
@@ -299,7 +299,7 @@ class OnboardingPromptOption(Hashable):
 
 
 class APIOnboardingPromptOption(OnboardingPromptOption):
-    """Represents an onboarding prompt option returned by the API.
+    r"""Represents an onboarding prompt option returned by the API.
 
     .. versionadded:: 2.10
 
@@ -309,13 +309,13 @@ class APIOnboardingPromptOption(OnboardingPromptOption):
         The onboarding prompt option's ID.
     title: :class:`str`
         The prompt option's title.
-    description: Optional[:class:`str`]
+    description: :class:`str` | :data:`None`
         The prompt option's description.
-    emoji: Optional[Union[:class:`PartialEmoji`, :class:`Emoji`, :class:`str`]]
+    emoji: :class:`PartialEmoji` | :class:`Emoji` | :class:`str` | :data:`None`
         The prompt option's emoji.
-    role_ids: FrozenSet[:class:`int`]
+    role_ids: :class:`frozenset`\[:class:`int`]
         The IDs of the roles that will be added to the user when they select this option.
-    channel_ids: FrozenSet[:class:`int`]
+    channel_ids: :class:`frozenset`\[:class:`int`]
         The IDs of the channels that the user will see when they select this option.
     """
 
