@@ -1279,6 +1279,10 @@ def Param(
 
     See :ref:`param_syntax` for more info.
 
+    .. versionchanged:: |vnext|
+        Deprecated kwarg aliases ``desc``, ``conv``, ``autocomp``, ``min_value``, and ``max_value``.
+        Use ``description``, ``converter``, ``autocomplete``, ``ge``, or ``le`` respectively instead.
+
     Parameters
     ----------
     default: Any | :class:`~collections.abc.Callable`\[[:class:`.ApplicationCommandInteraction`], :data:`~typing.Any`]

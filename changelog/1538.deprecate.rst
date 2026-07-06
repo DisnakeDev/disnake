@@ -1,0 +1,1 @@
+|commands| Deprecate old :func:`~ext.commands.Param` kwarg aliases ``desc``, ``conv``, ``autocomp``, ``min_value``, and ``max_value``. Use ``description``, ``converter``, ``autocomplete``, ``ge``, or ``le`` respectively instead.
