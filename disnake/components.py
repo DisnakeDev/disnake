@@ -1633,6 +1633,9 @@ class FileUpload(Component):
         self.min_values: int = data.get("min_values", 1)
         self.max_values: int = data.get("max_values", 1)
         self.required: bool = data.get("required", True)
+        self.file_types: Sequence[Literal["image", "video", "audio"] | str] | None = data.get(
+            "file_types"
+        )
 
     def to_dict(self) -> FileUploadComponentPayload:
         payload: FileUploadComponentPayload = {
