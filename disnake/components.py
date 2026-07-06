@@ -1600,7 +1600,7 @@ class FileUpload(Component):
     required: :class:`bool`
         Whether the file upload is required.
         Defaults to ``True``.
-    file_types: :class:`list`\[:class:`str`] | :data:`None`
+    file_types: :class:`~collections.abc.Sequence`\[:class:`str`] | :data:`None`
         A list of file types that can be uploaded with this component.
         Allowed values are ``image``, ``video``, and ``audio``, as well as
         any dot-prefixed extension such as ``.pdf`` (up to 10).
@@ -1648,7 +1648,7 @@ class FileUpload(Component):
         }
 
         if self.file_types:
-            payload["file_types"] = self.file_types
+            payload["file_types"] = self.file_types  # pyright: ignore[reportGeneralTypeIssues]
 
         return payload
 

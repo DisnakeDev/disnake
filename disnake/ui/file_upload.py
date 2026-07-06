@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+from collections.abc import Sequence
 from typing import TYPE_CHECKING, ClassVar, Literal
 
 from ..components import FileUpload as FileUploadComponent
@@ -35,7 +36,7 @@ class FileUpload(UIComponent):
     required: :class:`bool`
         Whether the file upload is required.
         Defaults to ``True``.
-    file_types: :class:`list`\[:class:`str`] | :data:`None`
+    file_types: :class:`~collections.abc.Sequence`\[:class:`str`] | :data:`None`
         A list of file types that can be uploaded with this component.
         Allowed values are ``image``, ``video``, and ``audio``, as well as
         any dot-prefixed extension such as ``.pdf`` (up to 10).
@@ -71,7 +72,7 @@ class FileUpload(UIComponent):
         min_values: int = 1,
         max_values: int = 1,
         required: bool = True,
-        file_types: list[Literal["image", "video", "audio"] | str] | None = None,
+        file_types: Sequence[Literal["image", "video", "audio"] | str] | None = None,
         id: int = 0,
     ) -> None:
         custom_id = os.urandom(16).hex() if custom_id is MISSING else custom_id
@@ -122,22 +123,22 @@ class FileUpload(UIComponent):
         self._underlying.required = bool(value)
 
     @property
-    def file_types(self) -> list[Literal["image", "video", "audio"] | str] | None:
-        r""":class:`list`\[:class:`str`] | :data:`None`: A list of file types that can be uploaded with this component.
+    def file_types(self) -> Sequence[Literal["image", "video", "audio"] | str] | None:
+        r""":class:`~collections.abc.Sequence`\[:class:`str`] | :data:`None`: A list of file types that can be uploaded with this component.
 
         .. versionadded:: |vnext|
         """
         return self._underlying.file_types
 
     @file_types.setter
-    def file_types(self, value: list[Literal["image", "video", "audio"] | str] | None) -> None:
-        if value is not None:
-            if not isinstance(value, list):
-                msg = "file_types must be a list of str"
-                raise TypeError(msg)
-            if not all(isinstance(obj, str) for obj in value):
-                msg = "all list items must be str"
-                raise TypeError(msg)
+    def file_types(self, value: Sequence[Literal["image", "video", "audio"] | str] | None) -> None:
+        if value is not None and (
+            not isinstance(value, Sequence)
+            or isinstance(value, str)
+            or not all(isinstance(obj, str) for obj in value)
+        ):
+            msg = "file_types must be a list of `str`s"
+            raise TypeError(msg)
 
         self._underlying.file_types = value
 

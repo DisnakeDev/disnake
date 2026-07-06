@@ -535,7 +535,7 @@ class ParamInfo:
 
         .. versionadded:: 2.6
 
-    file_types: :class:`list`\[:class:`str`] | :data:`None`
+    file_types: :class:`~collections.abc.Sequence`\[:class:`str`] | :data:`None`
         The list of file types supported by this slash command option.
 
         .. versionadded:: |vnext|
@@ -581,7 +581,7 @@ class ParamInfo:
         large: bool = False,
         min_length: int | None = None,
         max_length: int | None = None,
-        file_types: list[Literal["image", "video", "audio"] | str] | None = None,
+        file_types: Sequence[Literal["image", "video", "audio"] | str] | None = None,
     ) -> None:
         name_loc = Localized._cast(name, False)
         self.name: str = name_loc.string or ""
@@ -632,7 +632,7 @@ class ParamInfo:
         ins.min_value = self.min_value
         ins.min_length = self.min_length
         ins.max_length = self.max_length
-        ins.file_types = self.file_types.copy()
+        ins.file_types = copy.copy(self.file_types)
         ins.large = self.large
 
         return ins
@@ -1235,7 +1235,7 @@ def Param(
     large: bool = False,
     min_length: int | None = None,
     max_length: int | None = None,
-    file_types: list[Literal["image", "video", "audio"] | str] | None = None,
+    file_types: Sequence[Literal["image", "video", "audio"] | str] | None = None,
     **kwargs: Any,
 ) -> Any:
     r"""A special function that creates an instance of :class:`ParamInfo` that contains some information about a
@@ -1304,7 +1304,7 @@ def Param(
 
         .. versionadded:: 2.6
 
-    file_types: :class:`list`\[:class:`str`] | :data:`None`
+    file_types: :class:`~collections.abc.Sequence`\[:class:`str`] | :data:`None`
         The list of file types that can be uploaded with this option, if it is an :class:`.Attachment` option.
         Allowed values are ``image``, ``video``, and ``audio``, as well as
         any dot-prefixed extension such as ``.pdf`` (up to 10).

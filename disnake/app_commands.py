@@ -209,7 +209,7 @@ class Option:
 
         .. versionadded:: 2.6
 
-    file_types: :class:`list`\[:class:`str`] | :data:`None`
+    file_types: :class:`~collections.abc.Sequence`\[:class:`str`] | :data:`None`
         The list of file types that can be uploaded with this option, if the type is :class:`OptionType.attachment`.
         Allowed values are ``image``, ``video``, and ``audio``, as well as
         any dot-prefixed extension such as ``.pdf`` (up to 10).
@@ -251,7 +251,7 @@ class Option:
 
         .. versionadded:: 2.6
 
-    file_types: :class:`list`\[:class:`str`] | :data:`None`
+    file_types: :class:`~collections.abc.Sequence`\[:class:`str`] | :data:`None`
         The list of file types that can be uploaded with this option, if the type is :class:`OptionType.attachment`.
         Allowed values are ``image``, ``video``, and ``audio``, as well as
         any dot-prefixed extension such as ``.pdf`` (up to 10).
@@ -292,7 +292,7 @@ class Option:
         max_value: float | None = None,
         min_length: int | None = None,
         max_length: int | None = None,
-        file_types: list[Literal["image", "video", "audio"] | str] | None = None,
+        file_types: Sequence[Literal["image", "video", "audio"] | str] | None = None,
     ) -> None:
         name_loc = Localized._cast(name, True)
         _validate_name(name_loc.string)
@@ -346,10 +346,12 @@ class Option:
 
         self.autocomplete: bool = autocomplete
 
-        if file_types is not None and not all(isinstance(t, str) for t in file_types):
-            msg = "file_types must be a list of `str`s"
+        if file_types is not None and (
+            isinstance(file_types, str) or not all(isinstance(t, str) for t in file_types)
+        ):
+            msg = "file_types must be a list/sequence of `str`s"
             raise TypeError(msg)
-        self.file_types: list[Literal["image", "video", "audio"] | str] = file_types or []
+        self.file_types: Sequence[Literal["image", "video", "audio"] | str] = file_types or []
 
     def __repr__(self) -> str:
         return (
@@ -434,7 +436,7 @@ class Option:
         max_value: float | None = None,
         min_length: int | None = None,
         max_length: int | None = None,
-        file_types: list[Literal["image", "video", "audio"] | str] | None = None,
+        file_types: Sequence[Literal["image", "video", "audio"] | str] | None = None,
     ) -> None:
         """Adds an option to the current list of options,
         parameters are the same as for :class:`Option`.
@@ -483,7 +485,7 @@ class Option:
         if self.max_length is not None:
             payload["max_length"] = self.max_length
         if self.file_types:
-            payload["file_types"] = self.file_types
+            payload["file_types"] = self.file_types  # pyright: ignore[reportGeneralTypeIssues]
         if (loc := self.name_localizations.data) is not None:
             payload["name_localizations"] = loc
         if (loc := self.description_localizations.data) is not None:
@@ -1239,7 +1241,7 @@ class SlashCommand(ApplicationCommand):
         max_value: float | None = None,
         min_length: int | None = None,
         max_length: int | None = None,
-        file_types: list[Literal["image", "video", "audio"] | str] | None = None,
+        file_types: Sequence[Literal["image", "video", "audio"] | str] | None = None,
     ) -> None:
         """Adds an option to the current list of options,
         parameters are the same as for :class:`Option`
