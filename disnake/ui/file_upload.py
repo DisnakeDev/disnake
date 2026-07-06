@@ -137,7 +137,7 @@ class FileUpload(UIComponent):
             or isinstance(value, str)
             or not all(isinstance(obj, str) for obj in value)
         ):
-            msg = "file_types must be a list of `str`s"
+            msg = "file_types must be a list/sequence of `str`s"
             raise TypeError(msg)
 
         self._underlying.file_types = value

@@ -603,6 +603,11 @@ class ParamInfo:
         self.choices = choices or []
         self.type = type or str
         self.channel_types = channel_types or []
+        if file_types is not None and (
+            isinstance(file_types, str) or not all(isinstance(t, str) for t in file_types)
+        ):
+            msg = "file_types must be a list/sequence of `str`s"
+            raise TypeError(msg)
         self.file_types = file_types or []
 
         self.min_value: int | float | None = _xt_to_xe(ge, gt, 1)
