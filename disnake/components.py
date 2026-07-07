@@ -1648,7 +1648,7 @@ class FileUpload(Component):
         }
 
         if self.file_types:
-            payload["file_types"] = self.file_types  # pyright: ignore[reportGeneralTypeIssues]
+            payload["file_types"] = list(self.file_types)
 
         return payload
 

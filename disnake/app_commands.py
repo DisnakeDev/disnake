@@ -485,7 +485,7 @@ class Option:
         if self.max_length is not None:
             payload["max_length"] = self.max_length
         if self.file_types:
-            payload["file_types"] = self.file_types  # pyright: ignore[reportGeneralTypeIssues]
+            payload["file_types"] = list(self.file_types)
         if (loc := self.name_localizations.data) is not None:
             payload["name_localizations"] = loc
         if (loc := self.description_localizations.data) is not None:
