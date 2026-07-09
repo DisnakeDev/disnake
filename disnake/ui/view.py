@@ -32,9 +32,9 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from ..interactions import MessageInteraction
-    from ..message import ForwardedMessage, Message
     from ..state import ConnectionState
     from ..types.components import ActionRow as ActionRowPayload, Component as ComponentPayload
+    from ._types import MessageWithComponents
     from .item import ItemCallbackType
 
 
@@ -195,7 +195,7 @@ class View:
 
     @classmethod
     def from_message(
-        cls, message: Message | ForwardedMessage, /, *, timeout: float | None = 180.0
+        cls, message: MessageWithComponents, /, *, timeout: float | None = 180.0
     ) -> View:
         """Converts a message's components into a :class:`View`.
 

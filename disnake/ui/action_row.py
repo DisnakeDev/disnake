@@ -50,6 +50,7 @@ from ._types import (
     ActionRowModalComponent,
     ComponentInput,
     MessageTopLevelComponent,
+    MessageWithComponents,
     NonActionRowChildT,
 )
 from .button import Button
@@ -77,7 +78,6 @@ if TYPE_CHECKING:
     from ..abc import AnyChannel
     from ..emoji import Emoji
     from ..member import Member
-    from ..message import ForwardedMessage, Message
     from ..partial_emoji import PartialEmoji
     from ..role import Role
     from ..types.components import (
@@ -877,7 +877,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
     @classmethod
     def rows_from_message(
         cls,
-        message: Message | ForwardedMessage,
+        message: MessageWithComponents,
         *,
         strict: bool = True,
     ) -> list[ActionRow[ActionRowMessageComponent]]:
@@ -1096,7 +1096,7 @@ def walk_components(components: Sequence[ComponentT]) -> Iterator[ComponentT]:
         yield from _walk_internal(item, seen)
 
 
-def components_from_message(message: Message | ForwardedMessage) -> list[MessageTopLevelComponent]:
+def components_from_message(message: MessageWithComponents) -> list[MessageTopLevelComponent]:
     r"""Create a list of :class:`UIComponent`\s from the components of an existing message.
 
     This will abide by existing component format on the message, including component
