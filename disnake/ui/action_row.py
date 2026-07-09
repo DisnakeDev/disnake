@@ -77,7 +77,7 @@ if TYPE_CHECKING:
     from ..abc import AnyChannel
     from ..emoji import Emoji
     from ..member import Member
-    from ..message import Message
+    from ..message import ForwardedMessage, Message
     from ..partial_emoji import PartialEmoji
     from ..role import Role
     from ..types.components import (
@@ -877,7 +877,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
     @classmethod
     def rows_from_message(
         cls,
-        message: Message,
+        message: Message | ForwardedMessage,
         *,
         strict: bool = True,
     ) -> list[ActionRow[ActionRowMessageComponent]]:
@@ -895,7 +895,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
 
         Parameters
         ----------
-        message: :class:`disnake.Message`
+        message: :class:`~disnake.Message` | :class:`~disnake.ForwardedMessage`
             The message from which to extract the components.
         strict: :class:`bool`
             Whether or not to raise an exception if an unknown component type is encountered.
@@ -1096,7 +1096,7 @@ def walk_components(components: Sequence[ComponentT]) -> Iterator[ComponentT]:
         yield from _walk_internal(item, seen)
 
 
-def components_from_message(message: Message) -> list[MessageTopLevelComponent]:
+def components_from_message(message: Message | ForwardedMessage) -> list[MessageTopLevelComponent]:
     r"""Create a list of :class:`UIComponent`\s from the components of an existing message.
 
     This will abide by existing component format on the message, including component
@@ -1107,7 +1107,7 @@ def components_from_message(message: Message) -> list[MessageTopLevelComponent]:
 
     Parameters
     ----------
-    message: :class:`disnake.Message`
+    message: :class:`~disnake.Message` | :class:`~disnake.ForwardedMessage`
         The message from which to extract the components.
 
     Raises

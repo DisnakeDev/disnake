@@ -32,7 +32,7 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from ..interactions import MessageInteraction
-    from ..message import Message
+    from ..message import ForwardedMessage, Message
     from ..state import ConnectionState
     from ..types.components import ActionRow as ActionRowPayload, Component as ComponentPayload
     from .item import ItemCallbackType
@@ -194,7 +194,9 @@ class View:
         return components
 
     @classmethod
-    def from_message(cls, message: Message, /, *, timeout: float | None = 180.0) -> View:
+    def from_message(
+        cls, message: Message | ForwardedMessage, /, *, timeout: float | None = 180.0
+    ) -> View:
         """Converts a message's components into a :class:`View`.
 
         The :attr:`.Message.components` of a message are read-only
@@ -204,7 +206,7 @@ class View:
 
         Parameters
         ----------
-        message: :class:`disnake.Message`
+        message: :class:`~disnake.Message` | :class:`~disnake.ForwardedMessage`
             The message with components to convert into a view.
         timeout: :class:`float` | :data:`None`
             The timeout of the converted view.
