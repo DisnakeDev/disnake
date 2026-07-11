@@ -1768,12 +1768,12 @@ class Client:
         self,
         event: Literal[
             Event.connect,
-            "connect",
             Event.disconnect,
-            "disconnect",
             Event.ready,
-            "ready",
             Event.resumed,
+            "connect",
+            "disconnect",
+            "ready",
             "resumed",
         ],
         *,
@@ -1787,12 +1787,12 @@ class Client:
         self,
         event: Literal[
             Event.shard_connect,
-            "shard_connect",
             Event.shard_disconnect,
-            "shard_disconnect",
             Event.shard_ready,
-            "shard_ready",
             Event.shard_resumed,
+            "shard_connect",
+            "shard_disconnect",
+            "shard_ready",
             "shard_resumed",
         ],
         *,
@@ -1806,8 +1806,8 @@ class Client:
         self,
         event: Literal[
             Event.socket_event_type,
-            "socket_event_type",
             Event.socket_raw_receive,
+            "socket_event_type",
             "socket_raw_receive",
         ],
         *,
@@ -1831,10 +1831,10 @@ class Client:
         self,
         event: Literal[
             Event.guild_channel_create,
-            "guild_channel_create",
             Event.guild_channel_delete,
-            "guild_channel_delete",
             Event.webhooks_update,
+            "guild_channel_create",
+            "guild_channel_delete",
             "webhooks_update",
         ],
         *,
@@ -1866,7 +1866,7 @@ class Client:
     @_generated
     def wait_for(
         self,
-        event: Literal[Event.invite_create, "invite_create", Event.invite_delete, "invite_delete"],
+        event: Literal[Event.invite_create, Event.invite_delete, "invite_create", "invite_delete"],
         *,
         check: Callable[[Invite], bool] | None = None,
         timeout: float | None = None,
@@ -1898,14 +1898,14 @@ class Client:
         self,
         event: Literal[
             Event.thread_create,
-            "thread_create",
             Event.thread_delete,
-            "thread_delete",
             Event.thread_join,
-            "thread_join",
             Event.thread_remove,
-            "thread_remove",
             Event.raw_thread_update,
+            "thread_create",
+            "thread_delete",
+            "thread_join",
+            "thread_remove",
             "raw_thread_update",
         ],
         *,
@@ -1929,8 +1929,8 @@ class Client:
         self,
         event: Literal[
             Event.thread_member_join,
-            "thread_member_join",
             Event.thread_member_remove,
+            "thread_member_join",
             "thread_member_remove",
         ],
         *,
@@ -1964,14 +1964,14 @@ class Client:
         self,
         event: Literal[
             Event.guild_join,
-            "guild_join",
             Event.guild_remove,
-            "guild_remove",
             Event.guild_available,
-            "guild_available",
             Event.guild_unavailable,
-            "guild_unavailable",
             Event.guild_integrations_update,
+            "guild_join",
+            "guild_remove",
+            "guild_available",
+            "guild_unavailable",
             "guild_integrations_update",
         ],
         *,
@@ -1995,8 +1995,8 @@ class Client:
         self,
         event: Literal[
             Event.guild_role_create,
-            "guild_role_create",
             Event.guild_role_delete,
+            "guild_role_create",
             "guild_role_delete",
         ],
         *,
@@ -2056,8 +2056,8 @@ class Client:
         self,
         event: Literal[
             Event.guild_scheduled_event_create,
-            "guild_scheduled_event_create",
             Event.guild_scheduled_event_delete,
+            "guild_scheduled_event_create",
             "guild_scheduled_event_delete",
         ],
         *,
@@ -2081,8 +2081,8 @@ class Client:
         self,
         event: Literal[
             Event.guild_scheduled_event_subscribe,
-            "guild_scheduled_event_subscribe",
             Event.guild_scheduled_event_unsubscribe,
+            "guild_scheduled_event_subscribe",
             "guild_scheduled_event_unsubscribe",
         ],
         *,
@@ -2096,8 +2096,8 @@ class Client:
         self,
         event: Literal[
             Event.raw_guild_scheduled_event_subscribe,
-            "raw_guild_scheduled_event_subscribe",
             Event.raw_guild_scheduled_event_unsubscribe,
+            "raw_guild_scheduled_event_subscribe",
             "raw_guild_scheduled_event_unsubscribe",
         ],
         *,
@@ -2133,10 +2133,10 @@ class Client:
         self,
         event: Literal[
             Event.automod_rule_create,
-            "automod_rule_create",
             Event.automod_rule_update,
-            "automod_rule_update",
             Event.automod_rule_delete,
+            "automod_rule_create",
+            "automod_rule_update",
             "automod_rule_delete",
         ],
         *,
@@ -2160,8 +2160,8 @@ class Client:
         self,
         event: Literal[
             Event.integration_create,
-            "integration_create",
             Event.integration_update,
+            "integration_create",
             "integration_update",
         ],
         *,
@@ -2185,10 +2185,10 @@ class Client:
         self,
         event: Literal[
             Event.member_join,
-            "member_join",
             Event.member_remove,
-            "member_remove",
             Event.raw_member_update,
+            "member_join",
+            "member_remove",
             "raw_member_update",
         ],
         *,
@@ -2201,7 +2201,7 @@ class Client:
     def wait_for(
         self,
         event: Literal[
-            Event.member_update, "member_update", Event.presence_update, "presence_update"
+            Event.member_update, Event.presence_update, "member_update", "presence_update"
         ],
         *,
         check: Callable[[Member, Member], bool] | None = None,
@@ -2304,8 +2304,8 @@ class Client:
         self,
         event: Literal[
             Event.stage_instance_create,
-            "stage_instance_create",
             Event.stage_instance_update,
+            "stage_instance_create",
             "stage_instance_update",
         ],
         *,
@@ -2329,8 +2329,8 @@ class Client:
         self,
         event: Literal[
             Event.application_command,
-            "application_command",
             Event.application_command_autocomplete,
+            "application_command",
             "application_command_autocomplete",
         ],
         *,
@@ -2344,10 +2344,10 @@ class Client:
         self,
         event: Literal[
             Event.button_click,
-            "button_click",
             Event.dropdown,
-            "dropdown",
             Event.message_interaction,
+            "button_click",
+            "dropdown",
             "message_interaction",
         ],
         *,
@@ -2379,7 +2379,7 @@ class Client:
     @_generated
     def wait_for(
         self,
-        event: Literal[Event.message, "message", Event.message_delete, "message_delete"],
+        event: Literal[Event.message, Event.message_delete, "message", "message_delete"],
         *,
         check: Callable[[Message], bool] | None = None,
         timeout: float | None = None,
@@ -2410,7 +2410,7 @@ class Client:
     def wait_for(
         self,
         event: Literal[
-            Event.poll_vote_add, "poll_vote_add", Event.poll_vote_remove, "poll_vote_remove"
+            Event.poll_vote_add, Event.poll_vote_remove, "poll_vote_add", "poll_vote_remove"
         ],
         *,
         check: Callable[[Member, PollAnswer], bool] | None = None,
@@ -2453,8 +2453,8 @@ class Client:
         self,
         event: Literal[
             Event.raw_poll_vote_add,
-            "raw_poll_vote_add",
             Event.raw_poll_vote_remove,
+            "raw_poll_vote_add",
             "raw_poll_vote_remove",
         ],
         *,
@@ -2467,7 +2467,7 @@ class Client:
     def wait_for(
         self,
         event: Literal[
-            Event.reaction_add, "reaction_add", Event.reaction_remove, "reaction_remove"
+            Event.reaction_add, Event.reaction_remove, "reaction_add", "reaction_remove"
         ],
         *,
         check: Callable[[Reaction, Member | User], bool] | None = None,
@@ -2510,8 +2510,8 @@ class Client:
         self,
         event: Literal[
             Event.raw_reaction_add,
-            "raw_reaction_add",
             Event.raw_reaction_remove,
+            "raw_reaction_add",
             "raw_reaction_remove",
         ],
         *,
@@ -2565,10 +2565,10 @@ class Client:
         self,
         event: Literal[
             Event.entitlement_create,
-            "entitlement_create",
             Event.entitlement_update,
-            "entitlement_update",
             Event.entitlement_delete,
+            "entitlement_create",
+            "entitlement_update",
             "entitlement_delete",
         ],
         *,
@@ -2582,10 +2582,10 @@ class Client:
         self,
         event: Literal[
             Event.subscription_create,
-            "subscription_create",
             Event.subscription_update,
-            "subscription_update",
             Event.subscription_delete,
+            "subscription_create",
+            "subscription_update",
             "subscription_delete",
         ],
         *,
@@ -2597,7 +2597,7 @@ class Client:
     @_generated
     def wait_for(
         self: AnyPrefixBotT,
-        event: Literal[Event.command, "command", Event.command_completion, "command_completion"],
+        event: Literal[Event.command, Event.command_completion, "command", "command_completion"],
         *,
         check: Callable[[commands.Context[AnyPrefixBotT]], bool] | None = None,
         timeout: float | None = None,
@@ -2620,16 +2620,16 @@ class Client:
         self: AnyBotT,
         event: Literal[
             Event.slash_command,
-            "slash_command",
             Event.slash_command_completion,
-            "slash_command_completion",
             Event.user_command,
-            "user_command",
             Event.user_command_completion,
-            "user_command_completion",
             Event.message_command,
-            "message_command",
             Event.message_command_completion,
+            "slash_command",
+            "slash_command_completion",
+            "user_command",
+            "user_command_completion",
+            "message_command",
             "message_command_completion",
         ],
         *,
@@ -2643,10 +2643,10 @@ class Client:
         self: AnyBotT,
         event: Literal[
             Event.slash_command_error,
-            "slash_command_error",
             Event.user_command_error,
-            "user_command_error",
             Event.message_command_error,
+            "slash_command_error",
+            "user_command_error",
             "message_command_error",
         ],
         *,

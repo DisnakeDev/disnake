@@ -74,7 +74,8 @@ class EventTypings(BaseCodemodCommand):
         )
 
     def create_literal(self, events: list[Event]) -> cst.BaseExpression:
-        event_literals = [f'Event.{event.name}, "{event.value}"' for event in events]
+        event_literals = [f"Event.{event.name}" for event in events]
+        event_literals.extend([f'"{event.value}"' for event in events])
         return cst.parse_expression(
             f"Literal[{', '.join(event_literals)}]",
             config=self.module.config_for_parsing,
