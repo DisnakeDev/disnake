@@ -500,7 +500,7 @@ def test_resolve_template(url, expected) -> None:
         (
             r"## disnake",
             "disnake",
-            r"\#\# disnake",
+            r"\## disnake",
         ),
         (
             r"""Inside is a long list of why markdown is an amazing tool
@@ -510,8 +510,8 @@ def test_resolve_template(url, expected) -> None:
 """,
             r"""Inside is a long list of why markdown is an amazing tool
 markdown supports lists
- honestly its a great tool that markdown supports said lists
-   this is wrong but uh we'll get to that
+honestly its a great tool that markdown supports said lists
+this is wrong but uh we'll get to that
 """,
             r"""Inside is a long list of why markdown is an amazing tool
 \- markdown supports lists
@@ -520,14 +520,18 @@ markdown supports lists
 """,
         ),
         (
+            "* there are also different ways to create a list\n* this is one of them",
+            "there are also different ways to create a list\nthis is one of them",
+            "\\* there are also different ways to create a list\n\\* this is one of them",
+        ),
+        (
             "aaaaa\n> h\n>> abc \n>>> nay*ern_",
             "aaaaa\nh\n>> abc \nnayern",
-            "aaaaa\n\\> h\n>> abc \n\\>\\>\\> nay\\*ern\\_",
+            "aaaaa\n\\> h\n>> abc \n\\>>> nay\\*ern\\_",
         ),
         (
             "*h*\n> [li|nk](~~url~~) xyz **https://google.com/stuff?uwu=owo",
             "h\n xyz https://google.com/stuff?uwu=owo",
-            # NOTE: currently doesn't escape inside `[x](y)`, should that be changed?
             r"\*h\*" + "\n" + r"\> \[li|nk](~~url~~) xyz \*\*https://google.com/stuff?uwu=owo",
         ),
     ],
