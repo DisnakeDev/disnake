@@ -1,1 +1,0 @@
-|commands| Fix usage of :attr:`~ext.commands.BucketType.role`\-type cooldowns in threads, which incorrectly operated on a per-channel basis instead.

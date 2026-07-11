@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
 
 import datetime
-from typing import Any, Tuple
+from typing import Any
 
 import pytest
 
@@ -13,17 +13,15 @@ class TestLoops:
     def test_decorator(self) -> None:
         class Cog(commands.Cog):
             @loop(seconds=30, minutes=0, hours=0)
-            async def task(self) -> None:
-                ...
+            async def task(self) -> None: ...
 
         for c in (Cog, Cog()):
             assert c.task.seconds == 30
 
-        with pytest.raises(TypeError, match="must be a coroutine"):
+        with pytest.raises(TypeError, match="must be a coroutine function"):
 
-            @loop()  # type: ignore
-            def task() -> None:
-                ...
+            @loop()  # pyright: ignore[reportArgumentType]
+            def task() -> None: ...
 
     def test_mixing_time(self) -> None:
         async def callback() -> None:
@@ -35,12 +33,11 @@ class TestLoops:
         with pytest.raises(TypeError):
 
             @loop(seconds=30, time=datetime.time())
-            async def task() -> None:
-                ...
+            async def task() -> None: ...
 
     def test_inheritance(self) -> None:
         class HyperLoop(Loop[LF]):
-            def __init__(self, coro: LF, time_tup: Tuple[float, float, float]) -> None:
+            def __init__(self, coro: LF, time_tup: tuple[float, float, float]) -> None:
                 s, m, h = time_tup
                 super().__init__(coro, seconds=s, minutes=m, hours=h)
 
@@ -56,10 +53,6 @@ class TestLoops:
                 instance._injected = self._injected
                 return instance
 
-        class WhileTrueLoop:
-            def __init__(self, coro: Any) -> None:
-                ...
-
         async def callback() -> None:
             pass
 
@@ -67,14 +60,14 @@ class TestLoops:
 
         class Cog(commands.Cog):
             @loop(cls=HyperLoop[Any], time_tup=(1, 2, 3))
-            async def task(self) -> None:
-                ...
+            async def task(self) -> None: ...
 
         for c in (Cog, Cog()):
             assert (c.task.seconds, c.task.minutes, c.task.hours) == (1, 2, 3)
 
-        with pytest.raises(TypeError, match="subclass of Loop"):
+    def test_factory(self) -> None:
+        with pytest.raises(TypeError, match="must be callable"):
+            loop(cls=...)  # pyright: ignore[reportArgumentType, reportCallIssue]
 
-            @loop(cls=WhileTrueLoop)  # type: ignore
-            async def task() -> None:
-                ...
+        @loop(lambda lf: Loop(lf))  # noqa: PLW0108
+        async def task() -> None: ...

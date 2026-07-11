@@ -1,1 +1,0 @@
-Make :attr:`CustomActivity.state` fall back to the provided :attr:`~CustomActivity.name`, simplifying setting a custom status.

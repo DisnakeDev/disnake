@@ -2,15 +2,15 @@
 
 from __future__ import annotations
 
-from typing import List, Literal, Optional, TypedDict, Union
+from typing import Literal, TypedDict
 
 from typing_extensions import NotRequired
 
 from .channel import ChannelType
-from .components import Component
+from .components import MessageTopLevelComponent
 from .embed import Embed
 from .emoji import PartialEmoji
-from .interactions import InteractionDataResolved, InteractionMessageReference
+from .interactions import InteractionDataResolved, InteractionMessageReference, InteractionMetadata
 from .member import Member, UserWithMember
 from .poll import Poll
 from .snowflake import Snowflake, SnowflakeList
@@ -41,8 +41,8 @@ class Attachment(TypedDict):
     size: int
     url: str
     proxy_url: str
-    height: NotRequired[Optional[int]]
-    width: NotRequired[Optional[int]]
+    height: NotRequired[int | None]
+    width: NotRequired[int | None]
     ephemeral: NotRequired[bool]
     duration_secs: NotRequired[float]
     waveform: NotRequired[str]
@@ -60,16 +60,40 @@ class MessageActivity(TypedDict):
 class MessageApplication(TypedDict):
     id: Snowflake
     description: str
-    icon: Optional[str]
+    icon: str | None
     name: str
     cover_image: NotRequired[str]
 
 
+MessageReferenceType = Literal[0, 1]
+
+
 class MessageReference(TypedDict):
+    type: MessageReferenceType
     message_id: NotRequired[Snowflake]
     channel_id: Snowflake
     guild_id: NotRequired[Snowflake]
     fail_if_not_exists: NotRequired[bool]
+
+
+class ForwardedMessage(TypedDict):
+    type: MessageType
+    content: str
+    embeds: list[Embed]
+    attachments: list[Attachment]
+    timestamp: str
+    edited_timestamp: str | None
+    flags: NotRequired[int]
+    mentions: list[User] | list[UserWithMember]
+    # apparently mention_roles list is not sent if the msg
+    # is not forwarded in the same guild
+    mention_roles: NotRequired[SnowflakeList]
+    sticker_items: NotRequired[list[StickerItem]]
+    components: NotRequired[list[MessageTopLevelComponent]]
+
+
+class MessageSnapshot(TypedDict):
+    message: ForwardedMessage
 
 
 class RoleSubscriptionData(TypedDict):
@@ -90,17 +114,17 @@ class Message(TypedDict):
     author: User
     content: str
     timestamp: str
-    edited_timestamp: Optional[str]
+    edited_timestamp: str | None
     tts: bool
     mention_everyone: bool
     # this only contains (partial) member data in gateway events
-    mentions: Union[List[User], List[UserWithMember]]
+    mentions: list[User] | list[UserWithMember]
     mention_roles: SnowflakeList
-    mention_channels: NotRequired[List[ChannelMention]]
-    attachments: List[Attachment]
-    embeds: List[Embed]
-    reactions: NotRequired[List[Reaction]]
-    nonce: NotRequired[Union[int, str]]
+    mention_channels: NotRequired[list[ChannelMention]]
+    attachments: list[Attachment]
+    embeds: list[Embed]
+    reactions: NotRequired[list[Reaction]]
+    nonce: NotRequired[int | str]
     pinned: bool
     webhook_id: NotRequired[Snowflake]
     type: MessageType
@@ -108,15 +132,18 @@ class Message(TypedDict):
     application: NotRequired[MessageApplication]
     application_id: NotRequired[Snowflake]
     message_reference: NotRequired[MessageReference]
+    message_snapshots: NotRequired[list[MessageSnapshot]]
     flags: NotRequired[int]
-    referenced_message: NotRequired[Optional[Message]]
-    interaction: NotRequired[InteractionMessageReference]
+    referenced_message: NotRequired[Message | None]
+    interaction: NotRequired[InteractionMessageReference]  # deprecated
+    interaction_metadata: NotRequired[InteractionMetadata]
     thread: NotRequired[Thread]
-    components: NotRequired[List[Component]]
-    sticker_items: NotRequired[List[StickerItem]]
+    components: NotRequired[list[MessageTopLevelComponent]]
+    sticker_items: NotRequired[list[StickerItem]]
     position: NotRequired[int]
     role_subscription_data: NotRequired[RoleSubscriptionData]
     poll: NotRequired[Poll]
+    call: NotRequired[MessageCall]
     # contains resolved objects for `default_values` of select menus in this message; we currently don't have a use for this
     resolved: NotRequired[InteractionDataResolved]
 
@@ -129,7 +156,17 @@ AllowedMentionType = Literal["roles", "users", "everyone"]
 
 
 class AllowedMentions(TypedDict):
-    parse: List[AllowedMentionType]
+    parse: list[AllowedMentionType]
     roles: SnowflakeList
     users: SnowflakeList
     replied_user: bool
+
+
+class MessagePin(TypedDict):
+    pinned_at: str
+    message: Message
+
+
+class MessageCall(TypedDict):
+    participants: SnowflakeList
+    ended_timestamp: NotRequired[str | None]

@@ -356,6 +356,8 @@ This can get tedious, so an inline advanced converter is possible through a :fun
         else:
             await ctx.send("Hm you're not so new.")
 
+.. _ext_commands_discord_converters:
+
 Discord Converters
 ++++++++++++++++++
 
@@ -399,6 +401,7 @@ A lot of Discord models work out of the gate as a parameter:
 - :class:`GuildSticker` (since v2.0)
 - :class:`Permissions` (since v2.3)
 - :class:`GuildScheduledEvent` (since v2.5)
+- :class:`GuildSoundboardSound` (since v2.10)
 
 Having any of these set as the converter will intelligently convert the argument to the appropriate target type you
 specify.
@@ -455,6 +458,8 @@ converter is given below:
 +------------------------------+--------------------------------------------------------+
 | :class:`GuildScheduledEvent` | :class:`~ext.commands.GuildScheduledEventConverter`    |
 +------------------------------+--------------------------------------------------------+
+| :class:`GuildSoundboardSound`| :class:`~ext.commands.GuildSoundboardSoundConverter`   |
++------------------------------+--------------------------------------------------------+
 
 By providing the converter it allows us to use them as building blocks for another converter:
 
@@ -482,7 +487,7 @@ commands in an easy to use manner.
 typing.Union
 ^^^^^^^^^^^^
 
-A :data:`typing.Union` is a special type hint that allows for the command to take in any of the specific types instead of
+A :class:`typing.Union` is a special type hint that allows for the command to take in any of the specific types instead of
 a singular type. For example, given the following:
 
 .. code-block:: python3
@@ -499,7 +504,7 @@ The way this works is through a left-to-right order. It first attempts to conver
 :class:`disnake.TextChannel`, and if it fails it tries to convert it to a :class:`disnake.Member`. If all converters fail,
 then a special error is raised, :exc:`~ext.commands.BadUnionArgument`.
 
-Note that any valid converter discussed above can be passed in to the argument list of a :data:`typing.Union`.
+Note that any valid converter discussed above can be passed in to the argument list of a :class:`typing.Union`.
 
 typing.Optional
 ^^^^^^^^^^^^^^^
@@ -548,6 +553,34 @@ The ``buy_sell`` parameter must be either the literal string ``"buy"`` or ``"sel
 :exc:`~.ext.commands.BadLiteralArgument`. Any literal values can be mixed and matched within the same :data:`typing.Literal` converter.
 
 Note that ``typing.Literal[True]`` and ``typing.Literal[False]`` still follow the :class:`bool` converter rules.
+
+.. _ext_commands_converters_annotated:
+
+typing.Annotated
+^^^^^^^^^^^^^^^^
+
+.. versionadded:: 2.12
+
+With :data:`typing.Annotated`, you can use converters in a more type-safe way.
+Taking the example from :ref:`ext_commands_basic_converters` above, ``content`` is annotated
+as ``to_upper`` (i.e. a converter function), while it would naturally be a :class:`str` at runtime;
+this will likely trip up type-checkers such as pyright/mypy.
+
+To avoid this, you can use :data:`typing.Annotated`, such that type-checkers consider the parameter
+a :class:`str` while disnake will use the converter passed as the second argument to :data:`~typing.Annotated` at runtime:
+
+.. code-block:: python3
+
+    from typing import Annotated
+
+    def to_upper(argument: str):
+        return argument.upper()
+
+    @bot.command()
+    async def up(ctx, *, content: Annotated[str, to_upper]):
+        await ctx.send(content)
+
+This works with all types of converters mentioned on this page.
 
 Greedy
 ^^^^^^
@@ -612,7 +645,7 @@ This command can be invoked any of the following ways:
     unintended parsing ambiguities in your code. One technique would be to clamp down the expected syntaxes
     allowed through custom converters or reordering the parameters to minimise clashes.
 
-    To help aid with some parsing ambiguities, :class:`str`, ``None``, :data:`typing.Optional` and
+    To help aid with some parsing ambiguities, :class:`str`, :data:`None`, :data:`typing.Optional` and
     :class:`~ext.commands.Greedy` are forbidden as parameters for the :class:`~ext.commands.Greedy` converter.
 
 .. _ext_commands_flag_converter:
@@ -834,7 +867,7 @@ decorator. For example:
         """A bad example of an eval command"""
         await ctx.send(eval(code))
 
-This would only evaluate the command if the function ``is_owner`` returns ``True``. Sometimes we re-use a check often and
+This would only evaluate the command if the function ``is_owner`` returns ``True``. Sometimes we reuse a check often and
 want to split it into its own decorator. To do that we can just add another level of depth:
 
 .. code-block:: python3

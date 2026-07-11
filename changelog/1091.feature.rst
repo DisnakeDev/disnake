@@ -1,1 +1,0 @@
-Add :attr:`Permissions.create_guild_expressions` and :attr:`Permissions.create_events`.

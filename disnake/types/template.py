@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Optional, TypedDict
+from typing import TypedDict
 
 from .guild import Guild
 from .snowflake import Snowflake
@@ -11,18 +11,18 @@ from .user import User
 
 class CreateTemplate(TypedDict):
     name: str
-    description: Optional[str]
+    description: str | None
 
 
 class Template(TypedDict):
     code: str
     name: str
-    description: Optional[str]
+    description: str | None
     usage_count: int
     creator_id: Snowflake
-    creator: Optional[User]  # unsure when this can be null, but the spec says so
+    creator: User | None  # unsure when this can be null, but the spec says so
     created_at: str
     updated_at: str
     source_guild_id: Snowflake
     serialized_source_guild: Guild
-    is_dirty: Optional[bool]
+    is_dirty: bool | None

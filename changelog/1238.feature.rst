@@ -1,1 +1,0 @@
-Add support for ``BaseFlags`` to allow comparison with ``flag_values`` and vice versa.

@@ -1,1 +1,0 @@
-Make all "Supported Operations" container elements collapsible.

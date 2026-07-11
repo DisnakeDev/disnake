@@ -3,16 +3,9 @@
 from __future__ import annotations
 
 import datetime
+from collections.abc import Iterable, Sequence
 from typing import (
     TYPE_CHECKING,
-    Dict,
-    FrozenSet,
-    Iterable,
-    List,
-    Optional,
-    Sequence,
-    Type,
-    Union,
     overload,
 )
 
@@ -39,6 +32,7 @@ if TYPE_CHECKING:
     from .types.automod import (
         AutoModAction as AutoModActionPayload,
         AutoModActionMetadata,
+        AutoModBlockInteractionActionMetadata,
         AutoModBlockMessageActionMetadata,
         AutoModRule as AutoModRulePayload,
         AutoModSendAlertActionMetadata,
@@ -53,6 +47,7 @@ __all__ = (
     "AutoModBlockMessageAction",
     "AutoModSendAlertAction",
     "AutoModTimeoutAction",
+    "AutoModBlockInteractionAction",
     "AutoModTriggerMetadata",
     "AutoModRule",
     "AutoModActionExecution",
@@ -68,9 +63,13 @@ class AutoModAction:
     - :class:`AutoModBlockMessageAction`
     - :class:`AutoModSendAlertAction`
     - :class:`AutoModTimeoutAction`
+    - :class:`AutoModBlockInteractionAction`
 
     Actions received from the API may be of this type
     (and not one of the subtypes above) if the action type is not implemented yet.
+
+    To see which actions can be used with specific trigger types,
+    refer to :ref:`this table <automod_trigger_action_table>`.
 
     .. versionadded:: 2.6
 
@@ -91,7 +90,7 @@ class AutoModAction:
         self._metadata: AutoModActionMetadata = {}
 
     def __repr__(self) -> str:
-        return f"<{type(self).__name__} type={self.type!r}>"
+        return f"<{self.__class__.__name__} type={self.type!r}>"
 
     @classmethod
     def _from_dict(cls, data: AutoModActionPayload) -> Self:
@@ -112,11 +111,14 @@ class AutoModAction:
 class AutoModBlockMessageAction(AutoModAction):
     """Represents an auto moderation action that blocks content from being sent.
 
+    To see which trigger types this can be used with,
+    refer to :ref:`this table <automod_trigger_action_table>`.
+
     .. versionadded:: 2.6
 
     Parameters
     ----------
-    custom_message: Optional[:class:`str`]
+    custom_message: :class:`str` | :data:`None`
         The custom message to show to the user when the rule is triggered.
         Maximum length is 150 characters.
 
@@ -133,26 +135,29 @@ class AutoModBlockMessageAction(AutoModAction):
 
     _metadata: AutoModBlockMessageActionMetadata
 
-    def __init__(self, custom_message: Optional[str] = None) -> None:
+    def __init__(self, custom_message: str | None = None) -> None:
         super().__init__(type=AutoModActionType.block_message)
 
         if custom_message is not None:
             self._metadata["custom_message"] = custom_message
 
     @property
-    def custom_message(self) -> Optional[str]:
-        """Optional[:class:`str`]: The custom message to show to the user when the rule is triggered.
+    def custom_message(self) -> str | None:
+        """:class:`str` | :data:`None`: The custom message to show to the user when the rule is triggered.
 
         .. versionadded:: 2.9
         """
         return self._metadata.get("custom_message")
 
     def __repr__(self) -> str:
-        return f"<{type(self).__name__} custom_message={self.custom_message!r}>"
+        return f"<{self.__class__.__name__} custom_message={self.custom_message!r}>"
 
 
 class AutoModSendAlertAction(AutoModAction):
     """Represents an auto moderation action that sends an alert to a channel.
+
+    To see which trigger types this can be used with,
+    refer to :ref:`this table <automod_trigger_action_table>`.
 
     .. versionadded:: 2.6
 
@@ -183,17 +188,20 @@ class AutoModSendAlertAction(AutoModAction):
         return int(self._metadata["channel_id"])
 
     def __repr__(self) -> str:
-        return f"<{type(self).__name__} channel_id={self.channel_id!r}>"
+        return f"<{self.__class__.__name__} channel_id={self.channel_id!r}>"
 
 
 class AutoModTimeoutAction(AutoModAction):
     """Represents an auto moderation action that times out the user.
 
+    To see which trigger types this can be used with,
+    refer to :ref:`this table <automod_trigger_action_table>`.
+
     .. versionadded:: 2.6
 
     Parameters
     ----------
-    duration: Union[:class:`int`, :class:`datetime.timedelta`]
+    duration: :class:`int` | :class:`datetime.timedelta`
         The duration (seconds or timedelta) for which to timeout the user when the rule is triggered.
 
     Attributes
@@ -207,7 +215,7 @@ class AutoModTimeoutAction(AutoModAction):
 
     _metadata: AutoModTimeoutActionMetadata
 
-    def __init__(self, duration: Union[int, datetime.timedelta]) -> None:
+    def __init__(self, duration: int | datetime.timedelta) -> None:
         super().__init__(type=AutoModActionType.timeout)
 
         if isinstance(duration, datetime.timedelta):
@@ -222,11 +230,38 @@ class AutoModTimeoutAction(AutoModAction):
         return self._metadata["duration_seconds"]
 
     def __repr__(self) -> str:
-        return f"<{type(self).__name__} duration={self.duration!r}>"
+        return f"<{self.__class__.__name__} duration={self.duration!r}>"
+
+
+class AutoModBlockInteractionAction(AutoModAction):
+    """Represents an auto moderation action that prevents the user
+    from using text, voice, or other interactions.
+
+    To see which trigger types this can be used with,
+    refer to :ref:`this table <automod_trigger_action_table>`.
+
+    .. versionadded:: 2.12
+
+    Attributes
+    ----------
+    type: :class:`AutoModActionType`
+        The action type.
+        Always set to :attr:`~AutoModActionType.block_member_interaction`.
+    """
+
+    __slots__ = ()
+
+    _metadata: AutoModBlockInteractionActionMetadata
+
+    def __init__(self) -> None:
+        super().__init__(type=AutoModActionType.block_member_interaction)
+
+    def __repr__(self) -> str:
+        return f"<{type(self).__name__}>"
 
 
 class AutoModTriggerMetadata:
-    """Metadata for an auto moderation trigger.
+    r"""Metadata for an auto moderation trigger.
 
     Based on the trigger type, different fields can be used with various limits:
 
@@ -237,20 +272,21 @@ class AutoModTriggerMetadata:
         :attr:`~AutoModTriggerType.spam`,           ❌,         ❌,       ❌, ❌,         ❌, ❌
         :attr:`~AutoModTriggerType.keyword_preset`, ❌,         ❌,       ✅, ✅ (x1000), ❌, ❌
         :attr:`~AutoModTriggerType.mention_spam`,   ❌,         ❌,       ❌, ❌,         ✅, ✅
+        :attr:`~AutoModTriggerType.member_profile`, ✅ (x1000), ✅ (x10), ❌, ✅ (x100),  ❌, ❌
 
     .. versionadded:: 2.6
 
     Attributes
     ----------
-    keyword_filter: Optional[Sequence[:class:`str`]]
-        The list of keywords to check for, up to 1000 keywords. Used with :attr:`AutoModTriggerType.keyword`.
+    keyword_filter: :class:`~collections.abc.Sequence`\[:class:`str`] | :data:`None`
+        The list of keywords to check for, up to 1000 keywords.
 
         See :ddocs:`api docs <resources/auto-moderation#auto-moderation-rule-object-keyword-matching-strategies>`
         for details about how keyword matching works.
         Each keyword must be 60 characters or less.
 
-    regex_patterns: Optional[Sequence[:class:`str`]]
-        The list of regular expressions to check for. Used with :attr:`AutoModTriggerType.keyword`.
+    regex_patterns: :class:`~collections.abc.Sequence`\[:class:`str`] | :data:`None`
+        The list of regular expressions to check for.
 
         A maximum of 10 regexes can be added, each with up to 260 characters.
 
@@ -260,20 +296,20 @@ class AutoModTriggerMetadata:
 
         .. versionadded:: 2.7
 
-    presets: Optional[:class:`AutoModKeywordPresets`]
-        The keyword presets. Used with :attr:`AutoModTriggerType.keyword_preset`.
+    presets: :class:`AutoModKeywordPresets` | :data:`None`
+        The keyword presets (pre-defined wordsets defined by Discord).
 
-    allow_list: Optional[Sequence[:class:`str`]]
-        The keywords that should be exempt from a preset.
-        Used with :attr:`AutoModTriggerType.keyword` (up to 100 exemptions) and :attr:`AutoModTriggerType.keyword_preset` (up to 1000 exemptions).
+    allow_list: :class:`~collections.abc.Sequence`\[:class:`str`] | :data:`None`
+        The keywords that should be exempt from a preset,
+        up to 100 or 1000 depending on the used trigger type - see the table above.
 
         Each keyword must be 60 characters or less.
 
-    mention_total_limit: Optional[:class:`int`]
-        The maximum number of mentions (members + roles) allowed, between 1 and 50. Used with :attr:`AutoModTriggerType.mention_spam`.
+    mention_total_limit: :class:`int` | :data:`None`
+        The maximum number of mentions (members + roles) allowed, between 1 and 50.
 
-    mention_raid_protection_enabled: Optional[:class:`bool`]
-        Whether to automatically detect mention raids. Used with :attr:`AutoModTriggerType.mention_spam`.
+    mention_raid_protection_enabled: :class:`bool` | :data:`None`
+        Whether to automatically detect mention raids.
 
         Defaults to ``False``.
 
@@ -293,63 +329,59 @@ class AutoModTriggerMetadata:
     def __init__(
         self,
         *,
-        keyword_filter: Optional[Sequence[str]],
-        regex_patterns: Optional[Sequence[str]] = None,
-        allow_list: Optional[Sequence[str]] = None,
-    ) -> None:
-        ...
+        keyword_filter: Sequence[str] | None,
+        regex_patterns: Sequence[str] | None = None,
+        allow_list: Sequence[str] | None = None,
+    ) -> None: ...
 
     @overload
     def __init__(
         self,
         *,
-        keyword_filter: Optional[Sequence[str]] = None,
-        regex_patterns: Optional[Sequence[str]],
-        allow_list: Optional[Sequence[str]] = None,
-    ) -> None:
-        ...
+        keyword_filter: Sequence[str] | None = None,
+        regex_patterns: Sequence[str] | None,
+        allow_list: Sequence[str] | None = None,
+    ) -> None: ...
 
     @overload
     def __init__(
         self,
         *,
         presets: AutoModKeywordPresets,
-        allow_list: Optional[Sequence[str]] = None,
-    ) -> None:
-        ...
+        allow_list: Sequence[str] | None = None,
+    ) -> None: ...
 
     @overload
     def __init__(
         self, *, mention_total_limit: int, mention_raid_protection_enabled: bool = False
-    ) -> None:
-        ...
+    ) -> None: ...
 
     def __init__(
         self,
         *,
-        keyword_filter: Optional[Sequence[str]] = None,
-        regex_patterns: Optional[Sequence[str]] = None,
-        presets: Optional[AutoModKeywordPresets] = None,
-        allow_list: Optional[Sequence[str]] = None,
-        mention_total_limit: Optional[int] = None,
-        mention_raid_protection_enabled: Optional[bool] = None,
+        keyword_filter: Sequence[str] | None = None,
+        regex_patterns: Sequence[str] | None = None,
+        presets: AutoModKeywordPresets | None = None,
+        allow_list: Sequence[str] | None = None,
+        mention_total_limit: int | None = None,
+        mention_raid_protection_enabled: bool | None = None,
     ) -> None:
-        self.keyword_filter: Optional[Sequence[str]] = keyword_filter
-        self.regex_patterns: Optional[Sequence[str]] = regex_patterns
-        self.presets: Optional[AutoModKeywordPresets] = presets
-        self.allow_list: Optional[Sequence[str]] = allow_list
-        self.mention_total_limit: Optional[int] = mention_total_limit
-        self.mention_raid_protection_enabled: Optional[bool] = mention_raid_protection_enabled
+        self.keyword_filter: Sequence[str] | None = keyword_filter
+        self.regex_patterns: Sequence[str] | None = regex_patterns
+        self.presets: AutoModKeywordPresets | None = presets
+        self.allow_list: Sequence[str] | None = allow_list
+        self.mention_total_limit: int | None = mention_total_limit
+        self.mention_raid_protection_enabled: bool | None = mention_raid_protection_enabled
 
     def with_changes(
         self,
         *,
-        keyword_filter: Optional[Sequence[str]] = MISSING,
-        regex_patterns: Optional[Sequence[str]] = MISSING,
-        presets: Optional[AutoModKeywordPresets] = MISSING,
-        allow_list: Optional[Sequence[str]] = MISSING,
-        mention_total_limit: Optional[int] = MISSING,
-        mention_raid_protection_enabled: Optional[bool] = MISSING,
+        keyword_filter: Sequence[str] | None = MISSING,
+        regex_patterns: Sequence[str] | None = MISSING,
+        presets: AutoModKeywordPresets | None = MISSING,
+        allow_list: Sequence[str] | None = MISSING,
+        mention_total_limit: int | None = MISSING,
+        mention_raid_protection_enabled: bool | None = MISSING,
     ) -> Self:
         """Returns a new instance with the given changes applied.
         All other fields will be kept intact.
@@ -359,7 +391,7 @@ class AutoModTriggerMetadata:
         :class:`AutoModTriggerMetadata`
             The new metadata instance.
         """
-        return self.__class__(  # type: ignore  # call doesn't match any overloads
+        return self.__class__(
             keyword_filter=self.keyword_filter if keyword_filter is MISSING else keyword_filter,
             regex_patterns=self.regex_patterns if regex_patterns is MISSING else regex_patterns,
             presets=self.presets if presets is MISSING else presets,
@@ -372,7 +404,7 @@ class AutoModTriggerMetadata:
                 if mention_raid_protection_enabled is MISSING
                 else mention_raid_protection_enabled
             ),
-        )
+        )  # pyright: ignore[reportCallIssue]  # call doesn't match any overloads
 
     @classmethod
     def _from_dict(cls, data: AutoModTriggerMetadataPayload) -> Self:
@@ -381,14 +413,14 @@ class AutoModTriggerMetadata:
         else:
             presets = None
 
-        return cls(  # type: ignore  # call doesn't match any overloads
+        return cls(
             keyword_filter=data.get("keyword_filter"),
             regex_patterns=data.get("regex_patterns"),
             presets=presets,
             allow_list=data.get("allow_list"),
             mention_total_limit=data.get("mention_total_limit"),
             mention_raid_protection_enabled=data.get("mention_raid_protection_enabled"),
-        )
+        )  # pyright: ignore[reportCallIssue]  # call doesn't match any overloads
 
     def to_dict(self) -> AutoModTriggerMetadataPayload:
         data: AutoModTriggerMetadataPayload = {}
@@ -397,7 +429,7 @@ class AutoModTriggerMetadata:
         if self.regex_patterns is not None:
             data["regex_patterns"] = list(self.regex_patterns)
         if self.presets is not None:
-            data["presets"] = self.presets.values  # type: ignore  # `values` contains ints instead of preset literal values
+            data["presets"] = self.presets.values
         if self.allow_list is not None:
             data["allow_list"] = list(self.allow_list)
         if self.mention_total_limit is not None:
@@ -407,7 +439,7 @@ class AutoModTriggerMetadata:
         return data
 
     def __repr__(self) -> str:
-        s = f"<{type(self).__name__}"
+        s = f"<{self.__class__.__name__}"
         if self.keyword_filter is not None:
             s += f" keyword_filter={self.keyword_filter!r}"
         if self.regex_patterns is not None:
@@ -424,7 +456,7 @@ class AutoModTriggerMetadata:
 
 
 class AutoModRule:
-    """Represents an auto moderation rule.
+    r"""Represents an auto moderation rule.
 
     .. versionadded:: 2.6
 
@@ -446,9 +478,9 @@ class AutoModRule:
         The type of trigger that determines whether this rule's actions should run for a specific event.
     trigger_metadata: :class:`AutoModTriggerMetadata`
         Additional metadata associated with this rule's :attr:`.trigger_type`.
-    exempt_role_ids: FrozenSet[:class:`int`]
+    exempt_role_ids: :class:`frozenset`\[:class:`int`]
         The role IDs that are exempt from this rule.
-    exempt_channel_ids: FrozenSet[:class:`int`]
+    exempt_channel_ids: :class:`frozenset`\[:class:`int`]
         The channel IDs that are exempt from this rule.
     """
 
@@ -475,18 +507,18 @@ class AutoModRule:
         self.creator_id: int = int(data["creator_id"])
         self.event_type: AutoModEventType = try_enum(AutoModEventType, data["event_type"])
         self.trigger_type: AutoModTriggerType = try_enum(AutoModTriggerType, data["trigger_type"])
-        self._actions: List[AutoModAction] = [
+        self._actions: list[AutoModAction] = [
             _automod_action_factory(action) for action in data["actions"]
         ]
         self.trigger_metadata: AutoModTriggerMetadata = AutoModTriggerMetadata._from_dict(
             data.get("trigger_metadata", {})
         )
-        self.exempt_role_ids: FrozenSet[int] = (
+        self.exempt_role_ids: frozenset[int] = (
             frozenset(map(int, exempt_roles))
             if (exempt_roles := data.get("exempt_roles"))
             else frozenset()
         )
-        self.exempt_channel_ids: FrozenSet[int] = (
+        self.exempt_channel_ids: frozenset[int] = (
             frozenset(map(int, exempt_channels))
             if (exempt_channels := data.get("exempt_channels"))
             else frozenset()
@@ -501,27 +533,27 @@ class AutoModRule:
         return snowflake_time(self.id)
 
     @property
-    def actions(self) -> List[AutoModAction]:
-        """List[Union[:class:`AutoModBlockMessageAction`, :class:`AutoModSendAlertAction`, :class:`AutoModTimeoutAction`, :class:`AutoModAction`]]:
+    def actions(self) -> list[AutoModAction]:
+        r""":class:`list`\[:class:`AutoModBlockMessageAction` | :class:`AutoModSendAlertAction` | :class:`AutoModTimeoutAction` | :class:`AutoModBlockInteractionAction` | :class:`AutoModAction`]:
         The list of actions that will execute if a matching event triggered this rule.
         """
         return list(self._actions)  # return a copy
 
     @property
-    def creator(self) -> Optional[Member]:
-        """Optional[:class:`Member`]: The guild member that created this rule.
-        May be ``None`` if the member cannot be found. See also :attr:`.creator_id`.
+    def creator(self) -> Member | None:
+        """:class:`Member` | :data:`None`: The guild member that created this rule.
+        May be :data:`None` if the member cannot be found. See also :attr:`.creator_id`.
         """
         return self.guild.get_member(self.creator_id)
 
     @property
-    def exempt_roles(self) -> List[Role]:
-        """List[:class:`Role`]: The list of roles that are exempt from this rule."""
+    def exempt_roles(self) -> list[Role]:
+        r""":class:`list`\[:class:`Role`]: The list of roles that are exempt from this rule."""
         return list(filter(None, map(self.guild.get_role, self.exempt_role_ids)))
 
     @property
-    def exempt_channels(self) -> List[GuildChannel]:
-        """List[:class:`abc.GuildChannel`]: The list of channels that are exempt from this rule."""
+    def exempt_channels(self) -> list[GuildChannel]:
+        r""":class:`list`\[:class:`abc.GuildChannel`]: The list of channels that are exempt from this rule."""
         return list(filter(None, map(self.guild.get_channel, self.exempt_channel_ids)))
 
     def __repr__(self) -> str:
@@ -540,11 +572,11 @@ class AutoModRule:
         trigger_metadata: AutoModTriggerMetadata = MISSING,
         actions: Sequence[AutoModAction] = MISSING,
         enabled: bool = MISSING,
-        exempt_roles: Optional[Iterable[Snowflake]] = MISSING,
-        exempt_channels: Optional[Iterable[Snowflake]] = MISSING,
-        reason: Optional[str] = None,
+        exempt_roles: Iterable[Snowflake] | None = MISSING,
+        exempt_channels: Iterable[Snowflake] | None = MISSING,
+        reason: str | None = None,
     ) -> AutoModRule:
-        """|coro|
+        r"""|coro|
 
         Edits the auto moderation rule.
 
@@ -588,21 +620,23 @@ class AutoModRule:
             The rule's new name.
         event_type: :class:`AutoModEventType`
             The rule's new event type.
+
+            Refer to :ref:`this table <automod_trigger_event_table>` to see how event types can be used.
         trigger_metadata: :class:`AutoModTriggerMetadata`
             The rule's new associated trigger metadata.
-        actions: Sequence[Union[:class:`AutoModBlockMessageAction`, :class:`AutoModSendAlertAction`, :class:`AutoModTimeoutAction`, :class:`AutoModAction`]]
+        actions: :class:`~collections.abc.Sequence`\[:class:`AutoModBlockMessageAction` | :class:`AutoModSendAlertAction` | :class:`AutoModTimeoutAction` | :class:`AutoModBlockInteractionAction` | :class:`AutoModAction`]
             The rule's new actions.
             If provided, must contain at least one action.
         enabled: :class:`bool`
             Whether to enable the rule.
-        exempt_roles: Optional[Iterable[:class:`abc.Snowflake`]]
+        exempt_roles: :class:`~collections.abc.Iterable`\[:class:`abc.Snowflake`] | :data:`None`
             The rule's new exempt roles, up to 20.
-            If ``[]`` or ``None`` is passed then all role exemptions are removed.
-        exempt_channels: Optional[Iterable[:class:`abc.Snowflake`]]
+            If ``[]`` or :data:`None` is passed then all role exemptions are removed.
+        exempt_channels: :class:`~collections.abc.Iterable`\[:class:`abc.Snowflake`] | :data:`None`
             The rule's new exempt channels, up to 50.
             Can also include categories, in which case all channels inside that category will be exempt.
-            If ``[]`` or ``None`` is passed then all channel exemptions are removed.
-        reason: Optional[:class:`str`]
+            If ``[]`` or :data:`None` is passed then all channel exemptions are removed.
+        reason: :class:`str` | :data:`None`
             The reason for editing the rule. Shows up on the audit log.
 
         Raises
@@ -633,12 +667,12 @@ class AutoModRule:
             payload["trigger_metadata"] = trigger_metadata.to_dict()
         if actions is not MISSING:
             if not actions:
-                raise ValueError("At least one action must be provided.")
+                msg = "At least one action must be provided."
+                raise ValueError(msg)
             for action in actions:
                 if not isinstance(action, AutoModAction):
-                    raise TypeError(
-                        f"actions must be of type `AutoModAction` (or subtype), not {type(action)!r}"
-                    )
+                    msg = f"actions must be of type `AutoModAction` (or subtype), not {type(action)!r}"
+                    raise TypeError(msg)
             payload["actions"] = [a.to_dict() for a in actions]
         if enabled is not MISSING:
             payload["enabled"] = enabled
@@ -656,7 +690,7 @@ class AutoModRule:
         )
         return AutoModRule(data=data, guild=self.guild)
 
-    async def delete(self, *, reason: Optional[str] = None) -> None:
+    async def delete(self, *, reason: str | None = None) -> None:
         """|coro|
 
         Deletes the auto moderation rule.
@@ -665,7 +699,7 @@ class AutoModRule:
 
         Parameters
         ----------
-        reason: Optional[:class:`str`]
+        reason: :class:`str` | :data:`None`
             The reason for deleting this rule. Shows up on the audit log.
 
         Raises
@@ -689,7 +723,7 @@ class AutoModActionExecution:
 
     Attributes
     ----------
-    action: Union[:class:`AutoModBlockMessageAction`, :class:`AutoModSendAlertAction`, :class:`AutoModTimeoutAction`, :class:`AutoModAction`]
+    action: :class:`AutoModBlockMessageAction` | :class:`AutoModSendAlertAction` | :class:`AutoModTimeoutAction` | :class:`AutoModBlockInteractionAction` | :class:`AutoModAction`
         The action that was executed.
     guild: :class:`Guild`
         The guild this action was executed in.
@@ -700,14 +734,14 @@ class AutoModActionExecution:
     user_id: :class:`int`
         The ID of the user that triggered this action.
         See also :attr:`.user`.
-    channel_id: Optional[:class:`int`]
+    channel_id: :class:`int` | :data:`None`
         The channel or thread ID in which the event occurred, if any.
         See also :attr:`.channel`.
-    message_id: Optional[:class:`int`]
-        The ID of the message that matched. ``None`` if the message was blocked,
+    message_id: :class:`int` | :data:`None`
+        The ID of the message that matched. :data:`None` if the message was blocked,
         or if the content was not part of a message.
         See also :attr:`.message`.
-    alert_message_id: Optional[:class:`int`]
+    alert_message_id: :class:`int` | :data:`None`
         The ID of the alert message sent as a result of this action, if any.
         See also :attr:`.alert_message`.
     content: :class:`str`
@@ -716,10 +750,10 @@ class AutoModActionExecution:
         Requires :attr:`Intents.message_content` to be enabled,
         otherwise this field will be empty.
 
-    matched_keyword: Optional[:class:`str`]
+    matched_keyword: :class:`str` | :data:`None`
         The keyword or regex that matched.
 
-    matched_content: Optional[:class:`str`]
+    matched_content: :class:`str` | :data:`None`
         The substring of :attr:`.content` that matched the rule/keyword.
 
         Requires :attr:`Intents.message_content` to be enabled,
@@ -748,16 +782,16 @@ class AutoModActionExecution:
             AutoModTriggerType, data["rule_trigger_type"]
         )
         self.user_id: int = int(data["user_id"])
-        self.channel_id: Optional[int] = _get_as_snowflake(data, "channel_id")
-        self.message_id: Optional[int] = _get_as_snowflake(data, "message_id")
-        self.alert_message_id: Optional[int] = _get_as_snowflake(data, "alert_system_message_id")
+        self.channel_id: int | None = _get_as_snowflake(data, "channel_id")
+        self.message_id: int | None = _get_as_snowflake(data, "message_id")
+        self.alert_message_id: int | None = _get_as_snowflake(data, "alert_system_message_id")
         self.content: str = data.get("content") or ""
-        self.matched_keyword: Optional[str] = data.get("matched_keyword")
-        self.matched_content: Optional[str] = data.get("matched_content")
+        self.matched_keyword: str | None = data.get("matched_keyword")
+        self.matched_content: str | None = data.get("matched_content")
 
     def __repr__(self) -> str:
         return (
-            f"<{type(self).__name__} guild={self.guild!r} action={self.action!r}"
+            f"<{self.__class__.__name__} guild={self.guild!r} action={self.action!r}"
             f" rule_id={self.rule_id!r} rule_trigger_type={self.rule_trigger_type!r}"
             f" channel={self.channel!r} user_id={self.user_id!r} message_id={self.message_id!r}"
             f" alert_message_id={self.alert_message_id!r} content={self.content!r}"
@@ -765,40 +799,41 @@ class AutoModActionExecution:
         )
 
     @property
-    def user(self) -> Optional[Member]:
-        """Optional[:class:`Member`]: The guild member that triggered this action.
-        May be ``None`` if the member cannot be found. See also :attr:`.user_id`.
+    def user(self) -> Member | None:
+        """:class:`Member` | :data:`None`: The guild member that triggered this action.
+        May be :data:`None` if the member cannot be found. See also :attr:`.user_id`.
         """
         return self.guild.get_member(self.user_id)
 
     @property
-    def channel(self) -> Optional[Union[GuildChannel, Thread]]:
-        """Optional[Union[:class:`abc.GuildChannel`, :class:`Thread`]]:
+    def channel(self) -> GuildChannel | Thread | None:
+        """:class:`abc.GuildChannel` | :class:`Thread` | :data:`None`:
         The channel or thread in which the event occurred, if any.
         """
         return self.guild._resolve_channel(self.channel_id)
 
     @property
-    def message(self) -> Optional[Message]:
-        """Optional[:class:`Message`]: The message that matched, if any.
+    def message(self) -> Message | None:
+        """:class:`Message` | :data:`None`: The message that matched, if any.
         Not available if the message was blocked, if the content was not part of a message,
         or if the message was not found in the message cache.
         """
         return self.guild._state._get_message(self.message_id)
 
     @property
-    def alert_message(self) -> Optional[Message]:
-        """Optional[:class:`Message`]: The alert message sent as a result of this action, if any.
+    def alert_message(self) -> Message | None:
+        """:class:`Message` | :data:`None`: The alert message sent as a result of this action, if any.
         Only available if :attr:`action.type <AutoModAction.type>` is :attr:`~AutoModActionType.send_alert_message`
         and the message was found in the message cache.
         """
         return self.guild._state._get_message(self.alert_message_id)
 
 
-_action_map: Dict[int, Type[AutoModAction]] = {
+_action_map: dict[int, type[AutoModAction]] = {
     AutoModActionType.block_message.value: AutoModBlockMessageAction,
     AutoModActionType.send_alert_message.value: AutoModSendAlertAction,
     AutoModActionType.timeout.value: AutoModTimeoutAction,
+    AutoModActionType.block_member_interaction.value: AutoModBlockInteractionAction,
 }
 
 

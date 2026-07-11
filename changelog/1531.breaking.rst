@@ -1,0 +1,1 @@
+Remove deprecated ``AppInfo.summary``, ``PartialAppInfo.summary`` and ``IntegrationApplication.summary`` fields. Use ``.description`` instead.

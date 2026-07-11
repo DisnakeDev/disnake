@@ -1,1 +1,0 @@
-Add :attr:`Permissions.use_external_apps`, and a new :attr:`Permissions.apps` category to match the Discord client UI.

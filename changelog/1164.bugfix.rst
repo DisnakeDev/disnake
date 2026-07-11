@@ -1,1 +1,0 @@
-Avoid ``AttributeError`` in :class:`FFmpegAudio` when cleaning up after failing to spawn ffmpeg process.

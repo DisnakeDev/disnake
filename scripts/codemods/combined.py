@@ -5,7 +5,7 @@ import functools
 import libcst as cst
 from libcst import codemod
 
-from . import overloads_no_missing, typed_events, typed_flags, typed_permissions
+from . import link_doc_types, overloads_no_missing, typed_events, typed_flags, typed_permissions
 from .base import NoMetadataWrapperMixin
 
 CODEMODS = [
@@ -13,6 +13,7 @@ CODEMODS = [
     typed_events.EventTypings,
     typed_flags.FlagTypings,
     typed_permissions.PermissionTypings,
+    link_doc_types.DocstringTransformer,
 ]
 
 

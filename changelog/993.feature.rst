@@ -1,4 +1,0 @@
-Support voice channel effect events.
-- New events: :func:`on_voice_channel_effect`, :func:`on_raw_voice_channel_effect`.
-- New types: :class:`VoiceChannelEffect`, :class:`RawVoiceChannelEffectEvent`.
-- New enum: :class:`VoiceChannelEffectAnimationType`.

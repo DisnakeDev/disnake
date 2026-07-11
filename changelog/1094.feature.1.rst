@@ -1,1 +1,0 @@
-|commands| Update :meth:`Bot.is_owner <ext.commands.Bot.is_owner>` to take team member roles into account.

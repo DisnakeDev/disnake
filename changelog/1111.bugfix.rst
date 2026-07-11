@@ -1,1 +1,0 @@
-Allow ``cls`` argument in select menu decorators (e.g. :func:`ui.string_select`) to be specified by keyword instead of being positional-only.

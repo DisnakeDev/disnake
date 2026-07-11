@@ -1,1 +1,0 @@
-Added ``with_counts`` parameter to :meth:`Client.fetch_guild` and :meth:`Client.fetch_guilds`, used to determine whether to include the guild's member count and presence information.

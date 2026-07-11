@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-from typing import Dict, Literal, Optional
+from typing import Literal
 
 import pytest
 
@@ -24,12 +24,12 @@ class TestPermissions:
         assert Permissions(view_channel=False, read_messages=True).value == 1024
 
     def test_init_invalid_value(self) -> None:
-        with pytest.raises(TypeError, match="Expected int parameter, received str instead."):
-            Permissions("h")  # type: ignore
+        with pytest.raises(TypeError, match=r"Expected int parameter, received str instead."):
+            Permissions("h")  # pyright: ignore[reportArgumentType, reportCallIssue]
 
     def test_init_invalid_perms(self) -> None:
-        with pytest.raises(TypeError, match="'h' is not a valid permission name."):
-            Permissions(h=True)  # type: ignore
+        with pytest.raises(TypeError, match=r"'h' is not a valid permission name."):
+            Permissions(h=True)  # pyright: ignore[reportCallIssue]
 
     @pytest.mark.parametrize(
         ("perms_int", "other_int", "expected"),
@@ -47,7 +47,7 @@ class TestPermissions:
     def test_is_subset_only_permissions(self) -> None:
         perms = Permissions()
         with pytest.raises(TypeError, match="cannot compare Permissions with int"):
-            perms.is_subset(5)  # type: ignore
+            perms.is_subset(5)  # pyright: ignore[reportArgumentType]
 
     @pytest.mark.parametrize(
         ("perms_int", "other_int", "expected"),
@@ -65,7 +65,7 @@ class TestPermissions:
     def test_is_superset_only_permissions(self) -> None:
         perms = Permissions()
         with pytest.raises(TypeError, match="cannot compare Permissions with int"):
-            perms.is_superset(5)  # type: ignore
+            perms.is_superset(5)  # pyright: ignore[reportArgumentType]
 
     @pytest.mark.parametrize(
         ("perms_int", "other_int", "expected"),
@@ -106,9 +106,9 @@ class TestPermissions:
     )
     def test_update(
         self,
-        perms_dict: Dict[str, bool],
-        update: Dict[str, bool],
-        expected: Dict[str, Literal[True]],
+        perms_dict: dict[str, bool],
+        update: dict[str, bool],
+        expected: dict[str, Literal[True]],
     ) -> None:
         perms = Permissions(**perms_dict)
         perms.update(**update)
@@ -126,7 +126,7 @@ class TestPermissions:
             ({"view_channel": False, "read_messages": True}, 8 + 1024),
         ],
     )
-    def test_update_aliases(self, update: Dict[str, bool], expected: int) -> None:
+    def test_update_aliases(self, update: dict[str, bool], expected: int) -> None:
         perms = Permissions(administrator=True)
         perms.update(**update)
         assert perms.value == expected
@@ -142,7 +142,7 @@ class TestPermissions:
             ),
         ],
     )
-    def test_iter(self, parameters: Dict[str, bool], expected: Optional[Dict[str, bool]]) -> None:
+    def test_iter(self, parameters: dict[str, bool], expected: dict[str, bool] | None) -> None:
         perms = Permissions(**parameters)
         if expected is None:
             expected = parameters
@@ -152,7 +152,7 @@ class TestPermissions:
 
     def test_update_ignores(self) -> None:
         perms = Permissions()
-        perms.update(h=True)  # type: ignore
+        perms.update(h=True)  # pyright: ignore[reportCallIssue]
 
     @pytest.mark.parametrize(
         ("initial", "allow", "deny", "expected"),
@@ -208,8 +208,8 @@ class TestPermissionOverwrite:
         assert perms.manage_messages is True
 
     def test_init_invalid_perms(self) -> None:
-        with pytest.raises(ValueError, match="'h' is not a valid permission name."):
-            PermissionOverwrite(h=True)  # type: ignore
+        with pytest.raises(ValueError, match=r"'h' is not a valid permission name."):
+            PermissionOverwrite(h=True)  # pyright: ignore[reportCallIssue]
 
     def test_equality(self) -> None:
         one = PermissionOverwrite()
@@ -235,12 +235,12 @@ class TestPermissionOverwrite:
     def test_set_invalid_type(self) -> None:
         po = PermissionOverwrite()
         with pytest.raises(TypeError, match="Expected bool or NoneType, received str"):
-            po.connect = "h"  # type: ignore
+            po.connect = "h"  # pyright: ignore[reportAttributeAccessIssue]
 
         with pytest.raises(
             AttributeError, match="'PermissionOverwrite' object has no attribute 'oh'"
         ):
-            po.oh = False  # type: ignore
+            po.oh = False  # pyright: ignore[reportAttributeAccessIssue]
 
     @pytest.mark.parametrize(
         ("allow", "deny"),
@@ -252,8 +252,8 @@ class TestPermissionOverwrite:
     )
     def test_from_pair(
         self,
-        allow: Dict[str, bool],
-        deny: Dict[str, bool],
+        allow: dict[str, bool],
+        deny: dict[str, bool],
     ) -> None:
         perm_allow = Permissions(**allow)
         perm_deny = Permissions(**deny)
@@ -317,7 +317,7 @@ class TestPermissionOverwrite:
         assert po.manage_emojis is None
 
         # invalid names are silently ignored
-        po.update(h=True)  # type: ignore
+        po.update(h=True)  # pyright: ignore[reportCallIssue]
         assert not hasattr(po, "h")
 
     @pytest.mark.parametrize(
@@ -331,9 +331,9 @@ class TestPermissionOverwrite:
     )
     def test_iter(
         self,
-        expected: Dict[str, bool],
+        expected: dict[str, bool],
     ) -> None:
         po = PermissionOverwrite(**expected)
 
         for perm, value in po:
-            assert expected.get(perm, None) is value
+            assert expected.get(perm) is value

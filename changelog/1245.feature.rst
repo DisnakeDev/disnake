@@ -1,1 +1,0 @@
-Implement :attr:`~MemberFlags.is_guest`, :attr:`~MemberFlags.started_home_actions`, :attr:`~MemberFlags.completed_home_actions`, :attr:`~MemberFlags.automod_quarantined_username`, :attr:`~MemberFlags.dm_settings_upsell_acknowledged` new member flags.
