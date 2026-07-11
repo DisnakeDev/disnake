@@ -109,7 +109,7 @@ class EventTypings(BaseCodemodCommand):
         elif len(args) == 1:
             new_annotation_str = args[0]
         else:
-            new_annotation_str = f"Tuple[{','.join(args)}]"
+            new_annotation_str = f"tuple[{','.join(args)}]"
         new_annotation = cst.parse_expression(
             f"Coroutine[Any, Any, {new_annotation_str}]",
             config=self.module.config_for_parsing,

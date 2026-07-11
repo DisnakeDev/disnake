@@ -1878,7 +1878,7 @@ class Client:
         *,
         check: Callable[[GuildChannel, GuildChannel], bool] | None = None,
         timeout: float | None = None,
-    ) -> Coroutine[Any, Any, Tuple[GuildChannel, GuildChannel]]: ...
+    ) -> Coroutine[Any, Any, tuple[GuildChannel, GuildChannel]]: ...
     @overload
     @_generated
     def wait_for(
@@ -1896,7 +1896,7 @@ class Client:
         *,
         check: Callable[[GuildChannel | Thread, datetime | None], bool] | None = None,
         timeout: float | None = None,
-    ) -> Coroutine[Any, Any, Tuple[GuildChannel | Thread, datetime | None]]: ...
+    ) -> Coroutine[Any, Any, tuple[GuildChannel | Thread, datetime | None]]: ...
     @overload
     @_generated
     def wait_for(
@@ -1923,7 +1923,7 @@ class Client:
         *,
         check: Callable[[GroupChannel, GroupChannel], bool] | None = None,
         timeout: float | None = None,
-    ) -> Coroutine[Any, Any, Tuple[GroupChannel, GroupChannel]]: ...
+    ) -> Coroutine[Any, Any, tuple[GroupChannel, GroupChannel]]: ...
     @overload
     @_generated
     def wait_for(
@@ -1932,7 +1932,7 @@ class Client:
         *,
         check: Callable[[PrivateChannel, datetime | None], bool] | None = None,
         timeout: float | None = None,
-    ) -> Coroutine[Any, Any, Tuple[PrivateChannel, datetime | None]]: ...
+    ) -> Coroutine[Any, Any, tuple[PrivateChannel, datetime | None]]: ...
     @overload
     @_generated
     def wait_for(
@@ -1959,7 +1959,7 @@ class Client:
         *,
         check: Callable[[Thread, Thread], bool] | None = None,
         timeout: float | None = None,
-    ) -> Coroutine[Any, Any, Tuple[Thread, Thread]]: ...
+    ) -> Coroutine[Any, Any, tuple[Thread, Thread]]: ...
     @overload
     @_generated
     def wait_for(
@@ -2058,7 +2058,7 @@ class Client:
         *,
         check: Callable[[Guild, Guild], bool] | None = None,
         timeout: float | None = None,
-    ) -> Coroutine[Any, Any, Tuple[Guild, Guild]]: ...
+    ) -> Coroutine[Any, Any, tuple[Guild, Guild]]: ...
     @overload
     @_generated
     def wait_for(
@@ -2103,7 +2103,7 @@ class Client:
         *,
         check: Callable[[Role, Role], bool] | None = None,
         timeout: float | None = None,
-    ) -> Coroutine[Any, Any, Tuple[Role, Role]]: ...
+    ) -> Coroutine[Any, Any, tuple[Role, Role]]: ...
     @overload
     @_generated
     def wait_for(
@@ -2112,7 +2112,7 @@ class Client:
         *,
         check: Callable[[Guild, Sequence[Emoji], Sequence[Emoji]], bool] | None = None,
         timeout: float | None = None,
-    ) -> Coroutine[Any, Any, Tuple[Guild, Sequence[Emoji], Sequence[Emoji]]]: ...
+    ) -> Coroutine[Any, Any, tuple[Guild, Sequence[Emoji], Sequence[Emoji]]]: ...
     @overload
     @_generated
     def wait_for(
@@ -2122,7 +2122,7 @@ class Client:
         check: Callable[[Guild, Sequence[GuildSticker], Sequence[GuildSticker]], bool]
         | None = None,
         timeout: float | None = None,
-    ) -> Coroutine[Any, Any, Tuple[Guild, Sequence[GuildSticker], Sequence[GuildSticker]]]: ...
+    ) -> Coroutine[Any, Any, tuple[Guild, Sequence[GuildSticker], Sequence[GuildSticker]]]: ...
     @overload
     @_generated
     def wait_for(
@@ -2135,7 +2135,7 @@ class Client:
         | None = None,
         timeout: float | None = None,
     ) -> Coroutine[
-        Any, Any, Tuple[Guild, Sequence[GuildSoundboardSound], Sequence[GuildSoundboardSound]]
+        Any, Any, tuple[Guild, Sequence[GuildSoundboardSound], Sequence[GuildSoundboardSound]]
     ]: ...
     @overload
     @_generated
@@ -2163,7 +2163,7 @@ class Client:
         *,
         check: Callable[[GuildScheduledEvent, GuildScheduledEvent], bool] | None = None,
         timeout: float | None = None,
-    ) -> Coroutine[Any, Any, Tuple[GuildScheduledEvent, GuildScheduledEvent]]: ...
+    ) -> Coroutine[Any, Any, tuple[GuildScheduledEvent, GuildScheduledEvent]]: ...
     @overload
     @_generated
     def wait_for(
@@ -2181,7 +2181,7 @@ class Client:
         *,
         check: Callable[[GuildScheduledEvent, Member | User], bool] | None = None,
         timeout: float | None = None,
-    ) -> Coroutine[Any, Any, Tuple[GuildScheduledEvent, Member | User]]: ...
+    ) -> Coroutine[Any, Any, tuple[GuildScheduledEvent, Member | User]]: ...
     @overload
     @_generated
     def wait_for(
@@ -2192,7 +2192,7 @@ class Client:
         *,
         check: Callable[[GuildScheduledEvent, Member | User], bool] | None = None,
         timeout: float | None = None,
-    ) -> Coroutine[Any, Any, Tuple[GuildScheduledEvent, Member | User]]: ...
+    ) -> Coroutine[Any, Any, tuple[GuildScheduledEvent, Member | User]]: ...
     @overload
     @_generated
     def wait_for(
@@ -2324,7 +2324,7 @@ class Client:
         *,
         check: Callable[[Member, Member], bool] | None = None,
         timeout: float | None = None,
-    ) -> Coroutine[Any, Any, Tuple[Member, Member]]: ...
+    ) -> Coroutine[Any, Any, tuple[Member, Member]]: ...
     @overload
     @_generated
     def wait_for(
@@ -2351,7 +2351,7 @@ class Client:
         *,
         check: Callable[[Guild, User | Member], bool] | None = None,
         timeout: float | None = None,
-    ) -> Coroutine[Any, Any, Tuple[Guild, User | Member]]: ...
+    ) -> Coroutine[Any, Any, tuple[Guild, User | Member]]: ...
     @overload
     @_generated
     def wait_for(
@@ -2360,7 +2360,7 @@ class Client:
         *,
         check: Callable[[Guild, User], bool] | None = None,
         timeout: float | None = None,
-    ) -> Coroutine[Any, Any, Tuple[Guild, User]]: ...
+    ) -> Coroutine[Any, Any, tuple[Guild, User]]: ...
     @overload
     @_generated
     def wait_for(
@@ -2369,7 +2369,7 @@ class Client:
         *,
         check: Callable[[Member, Member], bool] | None = None,
         timeout: float | None = None,
-    ) -> Coroutine[Any, Any, Tuple[Member, Member]]: ...
+    ) -> Coroutine[Any, Any, tuple[Member, Member]]: ...
     @overload
     @_generated
     def wait_for(
@@ -2378,7 +2378,7 @@ class Client:
         *,
         check: Callable[[User, User], bool] | None = None,
         timeout: float | None = None,
-    ) -> Coroutine[Any, Any, Tuple[User, User]]: ...
+    ) -> Coroutine[Any, Any, tuple[User, User]]: ...
     @overload
     @_generated
     def wait_for(
@@ -2387,7 +2387,7 @@ class Client:
         *,
         check: Callable[[Member, VoiceState, VoiceState], bool] | None = None,
         timeout: float | None = None,
-    ) -> Coroutine[Any, Any, Tuple[Member, VoiceState, VoiceState]]: ...
+    ) -> Coroutine[Any, Any, tuple[Member, VoiceState, VoiceState]]: ...
     @overload
     @_generated
     def wait_for(
@@ -2396,7 +2396,7 @@ class Client:
         *,
         check: Callable[[GuildChannel, Member, VoiceChannelEffect], bool] | None = None,
         timeout: float | None = None,
-    ) -> Coroutine[Any, Any, Tuple[GuildChannel, Member, VoiceChannelEffect]]: ...
+    ) -> Coroutine[Any, Any, tuple[GuildChannel, Member, VoiceChannelEffect]]: ...
     @overload
     @_generated
     def wait_for(
@@ -2414,7 +2414,7 @@ class Client:
         *,
         check: Callable[[GuildChannel, str | None, str | None], bool] | None = None,
         timeout: float | None = None,
-    ) -> Coroutine[Any, Any, Tuple[GuildChannel, str | None, str | None]]: ...
+    ) -> Coroutine[Any, Any, tuple[GuildChannel, str | None, str | None]]: ...
     @overload
     @_generated
     def wait_for(
@@ -2423,7 +2423,7 @@ class Client:
         *,
         check: Callable[[GuildChannel, datetime | None], bool] | None = None,
         timeout: float | None = None,
-    ) -> Coroutine[Any, Any, Tuple[GuildChannel, datetime | None]]: ...
+    ) -> Coroutine[Any, Any, tuple[GuildChannel, datetime | None]]: ...
     @overload
     @_generated
     def wait_for(
@@ -2441,7 +2441,7 @@ class Client:
         *,
         check: Callable[[StageInstance, StageInstance], bool] | None = None,
         timeout: float | None = None,
-    ) -> Coroutine[Any, Any, Tuple[StageInstance, StageInstance]]: ...
+    ) -> Coroutine[Any, Any, tuple[StageInstance, StageInstance]]: ...
     @overload
     @_generated
     def wait_for(
@@ -2531,7 +2531,7 @@ class Client:
         *,
         check: Callable[[Message, Message], bool] | None = None,
         timeout: float | None = None,
-    ) -> Coroutine[Any, Any, Tuple[Message, Message]]: ...
+    ) -> Coroutine[Any, Any, tuple[Message, Message]]: ...
     @overload
     @_generated
     def wait_for(
@@ -2558,7 +2558,7 @@ class Client:
         *,
         check: Callable[[Member, PollAnswer], bool] | None = None,
         timeout: float | None = None,
-    ) -> Coroutine[Any, Any, Tuple[Member, PollAnswer]]: ...
+    ) -> Coroutine[Any, Any, tuple[Member, PollAnswer]]: ...
     @overload
     @_generated
     def wait_for(
@@ -2567,7 +2567,7 @@ class Client:
         *,
         check: Callable[[Member, PollAnswer], bool] | None = None,
         timeout: float | None = None,
-    ) -> Coroutine[Any, Any, Tuple[Member, PollAnswer]]: ...
+    ) -> Coroutine[Any, Any, tuple[Member, PollAnswer]]: ...
     @overload
     @_generated
     def wait_for(
@@ -2621,7 +2621,7 @@ class Client:
         *,
         check: Callable[[Reaction, Member | User], bool] | None = None,
         timeout: float | None = None,
-    ) -> Coroutine[Any, Any, Tuple[Reaction, Member | User]]: ...
+    ) -> Coroutine[Any, Any, tuple[Reaction, Member | User]]: ...
     @overload
     @_generated
     def wait_for(
@@ -2630,7 +2630,7 @@ class Client:
         *,
         check: Callable[[Reaction, Member | User], bool] | None = None,
         timeout: float | None = None,
-    ) -> Coroutine[Any, Any, Tuple[Reaction, Member | User]]: ...
+    ) -> Coroutine[Any, Any, tuple[Reaction, Member | User]]: ...
     @overload
     @_generated
     def wait_for(
@@ -2639,7 +2639,7 @@ class Client:
         *,
         check: Callable[[Message, list[Reaction]], bool] | None = None,
         timeout: float | None = None,
-    ) -> Coroutine[Any, Any, Tuple[Message, list[Reaction]]]: ...
+    ) -> Coroutine[Any, Any, tuple[Message, list[Reaction]]]: ...
     @overload
     @_generated
     def wait_for(
@@ -2702,7 +2702,7 @@ class Client:
         *,
         check: Callable[[Messageable | ForumChannel, User | Member, datetime], bool] | None = None,
         timeout: float | None = None,
-    ) -> Coroutine[Any, Any, Tuple[Messageable | ForumChannel, User | Member, datetime]]: ...
+    ) -> Coroutine[Any, Any, tuple[Messageable | ForumChannel, User | Member, datetime]]: ...
     @overload
     @_generated
     def wait_for(
@@ -2793,7 +2793,7 @@ class Client:
         check: Callable[[commands.Context[AnyPrefixBotT], commands.CommandError], bool]
         | None = None,
         timeout: float | None = None,
-    ) -> Coroutine[Any, Any, Tuple[commands.Context[AnyPrefixBotT], commands.CommandError]]: ...
+    ) -> Coroutine[Any, Any, tuple[commands.Context[AnyPrefixBotT], commands.CommandError]]: ...
     @overload
     @_generated
     def wait_for(
@@ -2822,7 +2822,7 @@ class Client:
         | None = None,
         timeout: float | None = None,
     ) -> Coroutine[
-        Any, Any, Tuple[ApplicationCommandInteraction[AnyBotT], commands.CommandError]
+        Any, Any, tuple[ApplicationCommandInteraction[AnyBotT], commands.CommandError]
     ]: ...
     @overload
     @_generated
@@ -2852,7 +2852,7 @@ class Client:
         | None = None,
         timeout: float | None = None,
     ) -> Coroutine[
-        Any, Any, Tuple[ApplicationCommandInteraction[AnyBotT], commands.CommandError]
+        Any, Any, tuple[ApplicationCommandInteraction[AnyBotT], commands.CommandError]
     ]: ...
     @overload
     @_generated
@@ -2882,7 +2882,7 @@ class Client:
         | None = None,
         timeout: float | None = None,
     ) -> Coroutine[
-        Any, Any, Tuple[ApplicationCommandInteraction[AnyBotT], commands.CommandError]
+        Any, Any, tuple[ApplicationCommandInteraction[AnyBotT], commands.CommandError]
     ]: ...
 
     # fallback for custom events
