@@ -1766,7 +1766,16 @@ class Client:
     @_generated
     def wait_for(
         self,
-        event: Literal[Event.connect, "connect"],
+        event: Literal[
+            Event.connect,
+            "connect",
+            Event.disconnect,
+            "disconnect",
+            Event.ready,
+            "ready",
+            Event.resumed,
+            "resumed",
+        ],
         *,
         check: Callable[[], bool] | None = None,
         timeout: float | None = None,
@@ -1775,34 +1784,16 @@ class Client:
     @_generated
     def wait_for(
         self,
-        event: Literal[Event.disconnect, "disconnect"],
-        *,
-        check: Callable[[], bool] | None = None,
-        timeout: float | None = None,
-    ) -> Coroutine[Any, Any, None]: ...
-    @overload
-    @_generated
-    def wait_for(
-        self,
-        event: Literal[Event.ready, "ready"],
-        *,
-        check: Callable[[], bool] | None = None,
-        timeout: float | None = None,
-    ) -> Coroutine[Any, Any, None]: ...
-    @overload
-    @_generated
-    def wait_for(
-        self,
-        event: Literal[Event.resumed, "resumed"],
-        *,
-        check: Callable[[], bool] | None = None,
-        timeout: float | None = None,
-    ) -> Coroutine[Any, Any, None]: ...
-    @overload
-    @_generated
-    def wait_for(
-        self,
-        event: Literal[Event.shard_connect, "shard_connect"],
+        event: Literal[
+            Event.shard_connect,
+            "shard_connect",
+            Event.shard_disconnect,
+            "shard_disconnect",
+            Event.shard_ready,
+            "shard_ready",
+            Event.shard_resumed,
+            "shard_resumed",
+        ],
         *,
         check: Callable[[int], bool] | None = None,
         timeout: float | None = None,
@@ -1811,43 +1802,12 @@ class Client:
     @_generated
     def wait_for(
         self,
-        event: Literal[Event.shard_disconnect, "shard_disconnect"],
-        *,
-        check: Callable[[int], bool] | None = None,
-        timeout: float | None = None,
-    ) -> Coroutine[Any, Any, int]: ...
-    @overload
-    @_generated
-    def wait_for(
-        self,
-        event: Literal[Event.shard_ready, "shard_ready"],
-        *,
-        check: Callable[[int], bool] | None = None,
-        timeout: float | None = None,
-    ) -> Coroutine[Any, Any, int]: ...
-    @overload
-    @_generated
-    def wait_for(
-        self,
-        event: Literal[Event.shard_resumed, "shard_resumed"],
-        *,
-        check: Callable[[int], bool] | None = None,
-        timeout: float | None = None,
-    ) -> Coroutine[Any, Any, int]: ...
-    @overload
-    @_generated
-    def wait_for(
-        self,
-        event: Literal[Event.socket_event_type, "socket_event_type"],
-        *,
-        check: Callable[[str], bool] | None = None,
-        timeout: float | None = None,
-    ) -> Coroutine[Any, Any, str]: ...
-    @overload
-    @_generated
-    def wait_for(
-        self,
-        event: Literal[Event.socket_raw_receive, "socket_raw_receive"],
+        event: Literal[
+            Event.socket_event_type,
+            "socket_event_type",
+            Event.socket_raw_receive,
+            "socket_raw_receive",
+        ],
         *,
         check: Callable[[str], bool] | None = None,
         timeout: float | None = None,
@@ -1865,7 +1825,14 @@ class Client:
     @_generated
     def wait_for(
         self,
-        event: Literal[Event.guild_channel_create, "guild_channel_create"],
+        event: Literal[
+            Event.guild_channel_create,
+            "guild_channel_create",
+            Event.guild_channel_delete,
+            "guild_channel_delete",
+            Event.webhooks_update,
+            "webhooks_update",
+        ],
         *,
         check: Callable[[GuildChannel], bool] | None = None,
         timeout: float | None = None,
@@ -1883,15 +1850,6 @@ class Client:
     @_generated
     def wait_for(
         self,
-        event: Literal[Event.guild_channel_delete, "guild_channel_delete"],
-        *,
-        check: Callable[[GuildChannel], bool] | None = None,
-        timeout: float | None = None,
-    ) -> Coroutine[Any, Any, GuildChannel]: ...
-    @overload
-    @_generated
-    def wait_for(
-        self,
         event: Literal[Event.guild_channel_pins_update, "guild_channel_pins_update"],
         *,
         check: Callable[[GuildChannel | Thread, datetime | None], bool] | None = None,
@@ -1901,16 +1859,7 @@ class Client:
     @_generated
     def wait_for(
         self,
-        event: Literal[Event.invite_create, "invite_create"],
-        *,
-        check: Callable[[Invite], bool] | None = None,
-        timeout: float | None = None,
-    ) -> Coroutine[Any, Any, Invite]: ...
-    @overload
-    @_generated
-    def wait_for(
-        self,
-        event: Literal[Event.invite_delete, "invite_delete"],
+        event: Literal[Event.invite_create, "invite_create", Event.invite_delete, "invite_delete"],
         *,
         check: Callable[[Invite], bool] | None = None,
         timeout: float | None = None,
@@ -1937,16 +1886,18 @@ class Client:
     @_generated
     def wait_for(
         self,
-        event: Literal[Event.webhooks_update, "webhooks_update"],
-        *,
-        check: Callable[[GuildChannel], bool] | None = None,
-        timeout: float | None = None,
-    ) -> Coroutine[Any, Any, GuildChannel]: ...
-    @overload
-    @_generated
-    def wait_for(
-        self,
-        event: Literal[Event.thread_create, "thread_create"],
+        event: Literal[
+            Event.thread_create,
+            "thread_create",
+            Event.thread_delete,
+            "thread_delete",
+            Event.thread_join,
+            "thread_join",
+            Event.thread_remove,
+            "thread_remove",
+            Event.raw_thread_update,
+            "raw_thread_update",
+        ],
         *,
         check: Callable[[Thread], bool] | None = None,
         timeout: float | None = None,
@@ -1964,43 +1915,12 @@ class Client:
     @_generated
     def wait_for(
         self,
-        event: Literal[Event.thread_delete, "thread_delete"],
-        *,
-        check: Callable[[Thread], bool] | None = None,
-        timeout: float | None = None,
-    ) -> Coroutine[Any, Any, Thread]: ...
-    @overload
-    @_generated
-    def wait_for(
-        self,
-        event: Literal[Event.thread_join, "thread_join"],
-        *,
-        check: Callable[[Thread], bool] | None = None,
-        timeout: float | None = None,
-    ) -> Coroutine[Any, Any, Thread]: ...
-    @overload
-    @_generated
-    def wait_for(
-        self,
-        event: Literal[Event.thread_remove, "thread_remove"],
-        *,
-        check: Callable[[Thread], bool] | None = None,
-        timeout: float | None = None,
-    ) -> Coroutine[Any, Any, Thread]: ...
-    @overload
-    @_generated
-    def wait_for(
-        self,
-        event: Literal[Event.thread_member_join, "thread_member_join"],
-        *,
-        check: Callable[[ThreadMember], bool] | None = None,
-        timeout: float | None = None,
-    ) -> Coroutine[Any, Any, ThreadMember]: ...
-    @overload
-    @_generated
-    def wait_for(
-        self,
-        event: Literal[Event.thread_member_remove, "thread_member_remove"],
+        event: Literal[
+            Event.thread_member_join,
+            "thread_member_join",
+            Event.thread_member_remove,
+            "thread_member_remove",
+        ],
         *,
         check: Callable[[ThreadMember], bool] | None = None,
         timeout: float | None = None,
@@ -2018,15 +1938,6 @@ class Client:
     @_generated
     def wait_for(
         self,
-        event: Literal[Event.raw_thread_update, "raw_thread_update"],
-        *,
-        check: Callable[[Thread], bool] | None = None,
-        timeout: float | None = None,
-    ) -> Coroutine[Any, Any, Thread]: ...
-    @overload
-    @_generated
-    def wait_for(
-        self,
         event: Literal[Event.raw_thread_delete, "raw_thread_delete"],
         *,
         check: Callable[[RawThreadDeleteEvent], bool] | None = None,
@@ -2036,16 +1947,18 @@ class Client:
     @_generated
     def wait_for(
         self,
-        event: Literal[Event.guild_join, "guild_join"],
-        *,
-        check: Callable[[Guild], bool] | None = None,
-        timeout: float | None = None,
-    ) -> Coroutine[Any, Any, Guild]: ...
-    @overload
-    @_generated
-    def wait_for(
-        self,
-        event: Literal[Event.guild_remove, "guild_remove"],
+        event: Literal[
+            Event.guild_join,
+            "guild_join",
+            Event.guild_remove,
+            "guild_remove",
+            Event.guild_available,
+            "guild_available",
+            Event.guild_unavailable,
+            "guild_unavailable",
+            Event.guild_integrations_update,
+            "guild_integrations_update",
+        ],
         *,
         check: Callable[[Guild], bool] | None = None,
         timeout: float | None = None,
@@ -2063,34 +1976,12 @@ class Client:
     @_generated
     def wait_for(
         self,
-        event: Literal[Event.guild_available, "guild_available"],
-        *,
-        check: Callable[[Guild], bool] | None = None,
-        timeout: float | None = None,
-    ) -> Coroutine[Any, Any, Guild]: ...
-    @overload
-    @_generated
-    def wait_for(
-        self,
-        event: Literal[Event.guild_unavailable, "guild_unavailable"],
-        *,
-        check: Callable[[Guild], bool] | None = None,
-        timeout: float | None = None,
-    ) -> Coroutine[Any, Any, Guild]: ...
-    @overload
-    @_generated
-    def wait_for(
-        self,
-        event: Literal[Event.guild_role_create, "guild_role_create"],
-        *,
-        check: Callable[[Role], bool] | None = None,
-        timeout: float | None = None,
-    ) -> Coroutine[Any, Any, Role]: ...
-    @overload
-    @_generated
-    def wait_for(
-        self,
-        event: Literal[Event.guild_role_delete, "guild_role_delete"],
+        event: Literal[
+            Event.guild_role_create,
+            "guild_role_create",
+            Event.guild_role_delete,
+            "guild_role_delete",
+        ],
         *,
         check: Callable[[Role], bool] | None = None,
         timeout: float | None = None,
@@ -2141,16 +2032,12 @@ class Client:
     @_generated
     def wait_for(
         self,
-        event: Literal[Event.guild_integrations_update, "guild_integrations_update"],
-        *,
-        check: Callable[[Guild], bool] | None = None,
-        timeout: float | None = None,
-    ) -> Coroutine[Any, Any, Guild]: ...
-    @overload
-    @_generated
-    def wait_for(
-        self,
-        event: Literal[Event.guild_scheduled_event_create, "guild_scheduled_event_create"],
+        event: Literal[
+            Event.guild_scheduled_event_create,
+            "guild_scheduled_event_create",
+            Event.guild_scheduled_event_delete,
+            "guild_scheduled_event_delete",
+        ],
         *,
         check: Callable[[GuildScheduledEvent], bool] | None = None,
         timeout: float | None = None,
@@ -2168,26 +2055,11 @@ class Client:
     @_generated
     def wait_for(
         self,
-        event: Literal[Event.guild_scheduled_event_delete, "guild_scheduled_event_delete"],
-        *,
-        check: Callable[[GuildScheduledEvent], bool] | None = None,
-        timeout: float | None = None,
-    ) -> Coroutine[Any, Any, GuildScheduledEvent]: ...
-    @overload
-    @_generated
-    def wait_for(
-        self,
-        event: Literal[Event.guild_scheduled_event_subscribe, "guild_scheduled_event_subscribe"],
-        *,
-        check: Callable[[GuildScheduledEvent, Member | User], bool] | None = None,
-        timeout: float | None = None,
-    ) -> Coroutine[Any, Any, tuple[GuildScheduledEvent, Member | User]]: ...
-    @overload
-    @_generated
-    def wait_for(
-        self,
         event: Literal[
-            Event.guild_scheduled_event_unsubscribe, "guild_scheduled_event_unsubscribe"
+            Event.guild_scheduled_event_subscribe,
+            "guild_scheduled_event_subscribe",
+            Event.guild_scheduled_event_unsubscribe,
+            "guild_scheduled_event_unsubscribe",
         ],
         *,
         check: Callable[[GuildScheduledEvent, Member | User], bool] | None = None,
@@ -2198,18 +2070,10 @@ class Client:
     def wait_for(
         self,
         event: Literal[
-            Event.raw_guild_scheduled_event_subscribe, "raw_guild_scheduled_event_subscribe"
-        ],
-        *,
-        check: Callable[[RawGuildScheduledEventUserActionEvent], bool] | None = None,
-        timeout: float | None = None,
-    ) -> Coroutine[Any, Any, RawGuildScheduledEventUserActionEvent]: ...
-    @overload
-    @_generated
-    def wait_for(
-        self,
-        event: Literal[
-            Event.raw_guild_scheduled_event_unsubscribe, "raw_guild_scheduled_event_unsubscribe"
+            Event.raw_guild_scheduled_event_subscribe,
+            "raw_guild_scheduled_event_subscribe",
+            Event.raw_guild_scheduled_event_unsubscribe,
+            "raw_guild_scheduled_event_unsubscribe",
         ],
         *,
         check: Callable[[RawGuildScheduledEventUserActionEvent], bool] | None = None,
@@ -2239,25 +2103,14 @@ class Client:
     @_generated
     def wait_for(
         self,
-        event: Literal[Event.automod_rule_create, "automod_rule_create"],
-        *,
-        check: Callable[[AutoModRule], bool] | None = None,
-        timeout: float | None = None,
-    ) -> Coroutine[Any, Any, AutoModRule]: ...
-    @overload
-    @_generated
-    def wait_for(
-        self,
-        event: Literal[Event.automod_rule_update, "automod_rule_update"],
-        *,
-        check: Callable[[AutoModRule], bool] | None = None,
-        timeout: float | None = None,
-    ) -> Coroutine[Any, Any, AutoModRule]: ...
-    @overload
-    @_generated
-    def wait_for(
-        self,
-        event: Literal[Event.automod_rule_delete, "automod_rule_delete"],
+        event: Literal[
+            Event.automod_rule_create,
+            "automod_rule_create",
+            Event.automod_rule_update,
+            "automod_rule_update",
+            Event.automod_rule_delete,
+            "automod_rule_delete",
+        ],
         *,
         check: Callable[[AutoModRule], bool] | None = None,
         timeout: float | None = None,
@@ -2275,16 +2128,12 @@ class Client:
     @_generated
     def wait_for(
         self,
-        event: Literal[Event.integration_create, "integration_create"],
-        *,
-        check: Callable[[Integration], bool] | None = None,
-        timeout: float | None = None,
-    ) -> Coroutine[Any, Any, Integration]: ...
-    @overload
-    @_generated
-    def wait_for(
-        self,
-        event: Literal[Event.integration_update, "integration_update"],
+        event: Literal[
+            Event.integration_create,
+            "integration_create",
+            Event.integration_update,
+            "integration_update",
+        ],
         *,
         check: Callable[[Integration], bool] | None = None,
         timeout: float | None = None,
@@ -2302,7 +2151,14 @@ class Client:
     @_generated
     def wait_for(
         self,
-        event: Literal[Event.member_join, "member_join"],
+        event: Literal[
+            Event.member_join,
+            "member_join",
+            Event.member_remove,
+            "member_remove",
+            Event.raw_member_update,
+            "raw_member_update",
+        ],
         *,
         check: Callable[[Member], bool] | None = None,
         timeout: float | None = None,
@@ -2311,16 +2167,9 @@ class Client:
     @_generated
     def wait_for(
         self,
-        event: Literal[Event.member_remove, "member_remove"],
-        *,
-        check: Callable[[Member], bool] | None = None,
-        timeout: float | None = None,
-    ) -> Coroutine[Any, Any, Member]: ...
-    @overload
-    @_generated
-    def wait_for(
-        self,
-        event: Literal[Event.member_update, "member_update"],
+        event: Literal[
+            Event.member_update, "member_update", Event.presence_update, "presence_update"
+        ],
         *,
         check: Callable[[Member, Member], bool] | None = None,
         timeout: float | None = None,
@@ -2334,15 +2183,6 @@ class Client:
         check: Callable[[RawGuildMemberRemoveEvent], bool] | None = None,
         timeout: float | None = None,
     ) -> Coroutine[Any, Any, RawGuildMemberRemoveEvent]: ...
-    @overload
-    @_generated
-    def wait_for(
-        self,
-        event: Literal[Event.raw_member_update, "raw_member_update"],
-        *,
-        check: Callable[[Member], bool] | None = None,
-        timeout: float | None = None,
-    ) -> Coroutine[Any, Any, Member]: ...
     @overload
     @_generated
     def wait_for(
@@ -2361,15 +2201,6 @@ class Client:
         check: Callable[[Guild, User], bool] | None = None,
         timeout: float | None = None,
     ) -> Coroutine[Any, Any, tuple[Guild, User]]: ...
-    @overload
-    @_generated
-    def wait_for(
-        self,
-        event: Literal[Event.presence_update, "presence_update"],
-        *,
-        check: Callable[[Member, Member], bool] | None = None,
-        timeout: float | None = None,
-    ) -> Coroutine[Any, Any, tuple[Member, Member]]: ...
     @overload
     @_generated
     def wait_for(
@@ -2428,7 +2259,12 @@ class Client:
     @_generated
     def wait_for(
         self,
-        event: Literal[Event.stage_instance_create, "stage_instance_create"],
+        event: Literal[
+            Event.stage_instance_create,
+            "stage_instance_create",
+            Event.stage_instance_update,
+            "stage_instance_update",
+        ],
         *,
         check: Callable[[StageInstance], bool] | None = None,
         timeout: float | None = None,
@@ -2446,16 +2282,12 @@ class Client:
     @_generated
     def wait_for(
         self,
-        event: Literal[Event.stage_instance_update, "stage_instance_update"],
-        *,
-        check: Callable[[StageInstance], bool] | None = None,
-        timeout: float | None = None,
-    ) -> Coroutine[Any, Any, StageInstance]: ...
-    @overload
-    @_generated
-    def wait_for(
-        self,
-        event: Literal[Event.application_command, "application_command"],
+        event: Literal[
+            Event.application_command,
+            "application_command",
+            Event.application_command_autocomplete,
+            "application_command_autocomplete",
+        ],
         *,
         check: Callable[[ApplicationCommandInteraction[Self]], bool] | None = None,
         timeout: float | None = None,
@@ -2464,25 +2296,14 @@ class Client:
     @_generated
     def wait_for(
         self,
-        event: Literal[Event.application_command_autocomplete, "application_command_autocomplete"],
-        *,
-        check: Callable[[ApplicationCommandInteraction[Self]], bool] | None = None,
-        timeout: float | None = None,
-    ) -> Coroutine[Any, Any, ApplicationCommandInteraction[Self]]: ...
-    @overload
-    @_generated
-    def wait_for(
-        self,
-        event: Literal[Event.button_click, "button_click"],
-        *,
-        check: Callable[[MessageInteraction[Self]], bool] | None = None,
-        timeout: float | None = None,
-    ) -> Coroutine[Any, Any, MessageInteraction[Self]]: ...
-    @overload
-    @_generated
-    def wait_for(
-        self,
-        event: Literal[Event.dropdown, "dropdown"],
+        event: Literal[
+            Event.button_click,
+            "button_click",
+            Event.dropdown,
+            "dropdown",
+            Event.message_interaction,
+            "message_interaction",
+        ],
         *,
         check: Callable[[MessageInteraction[Self]], bool] | None = None,
         timeout: float | None = None,
@@ -2500,15 +2321,6 @@ class Client:
     @_generated
     def wait_for(
         self,
-        event: Literal[Event.message_interaction, "message_interaction"],
-        *,
-        check: Callable[[MessageInteraction[Self]], bool] | None = None,
-        timeout: float | None = None,
-    ) -> Coroutine[Any, Any, MessageInteraction[Self]]: ...
-    @overload
-    @_generated
-    def wait_for(
-        self,
         event: Literal[Event.modal_submit, "modal_submit"],
         *,
         check: Callable[[ModalInteraction[Self]], bool] | None = None,
@@ -2518,7 +2330,7 @@ class Client:
     @_generated
     def wait_for(
         self,
-        event: Literal[Event.message, "message"],
+        event: Literal[Event.message, "message", Event.message_delete, "message_delete"],
         *,
         check: Callable[[Message], bool] | None = None,
         timeout: float | None = None,
@@ -2536,15 +2348,6 @@ class Client:
     @_generated
     def wait_for(
         self,
-        event: Literal[Event.message_delete, "message_delete"],
-        *,
-        check: Callable[[Message], bool] | None = None,
-        timeout: float | None = None,
-    ) -> Coroutine[Any, Any, Message]: ...
-    @overload
-    @_generated
-    def wait_for(
-        self,
         event: Literal[Event.bulk_message_delete, "bulk_message_delete"],
         *,
         check: Callable[[list[Message]], bool] | None = None,
@@ -2554,16 +2357,9 @@ class Client:
     @_generated
     def wait_for(
         self,
-        event: Literal[Event.poll_vote_add, "poll_vote_add"],
-        *,
-        check: Callable[[Member, PollAnswer], bool] | None = None,
-        timeout: float | None = None,
-    ) -> Coroutine[Any, Any, tuple[Member, PollAnswer]]: ...
-    @overload
-    @_generated
-    def wait_for(
-        self,
-        event: Literal[Event.poll_vote_remove, "poll_vote_remove"],
+        event: Literal[
+            Event.poll_vote_add, "poll_vote_add", Event.poll_vote_remove, "poll_vote_remove"
+        ],
         *,
         check: Callable[[Member, PollAnswer], bool] | None = None,
         timeout: float | None = None,
@@ -2599,7 +2395,12 @@ class Client:
     @_generated
     def wait_for(
         self,
-        event: Literal[Event.raw_poll_vote_add, "raw_poll_vote_add"],
+        event: Literal[
+            Event.raw_poll_vote_add,
+            "raw_poll_vote_add",
+            Event.raw_poll_vote_remove,
+            "raw_poll_vote_remove",
+        ],
         *,
         check: Callable[[RawPollVoteActionEvent], bool] | None = None,
         timeout: float | None = None,
@@ -2608,25 +2409,9 @@ class Client:
     @_generated
     def wait_for(
         self,
-        event: Literal[Event.raw_poll_vote_remove, "raw_poll_vote_remove"],
-        *,
-        check: Callable[[RawPollVoteActionEvent], bool] | None = None,
-        timeout: float | None = None,
-    ) -> Coroutine[Any, Any, RawPollVoteActionEvent]: ...
-    @overload
-    @_generated
-    def wait_for(
-        self,
-        event: Literal[Event.reaction_add, "reaction_add"],
-        *,
-        check: Callable[[Reaction, Member | User], bool] | None = None,
-        timeout: float | None = None,
-    ) -> Coroutine[Any, Any, tuple[Reaction, Member | User]]: ...
-    @overload
-    @_generated
-    def wait_for(
-        self,
-        event: Literal[Event.reaction_remove, "reaction_remove"],
+        event: Literal[
+            Event.reaction_add, "reaction_add", Event.reaction_remove, "reaction_remove"
+        ],
         *,
         check: Callable[[Reaction, Member | User], bool] | None = None,
         timeout: float | None = None,
@@ -2662,16 +2447,12 @@ class Client:
     @_generated
     def wait_for(
         self,
-        event: Literal[Event.raw_reaction_add, "raw_reaction_add"],
-        *,
-        check: Callable[[RawReactionActionEvent], bool] | None = None,
-        timeout: float | None = None,
-    ) -> Coroutine[Any, Any, RawReactionActionEvent]: ...
-    @overload
-    @_generated
-    def wait_for(
-        self,
-        event: Literal[Event.raw_reaction_remove, "raw_reaction_remove"],
+        event: Literal[
+            Event.raw_reaction_add,
+            "raw_reaction_add",
+            Event.raw_reaction_remove,
+            "raw_reaction_remove",
+        ],
         *,
         check: Callable[[RawReactionActionEvent], bool] | None = None,
         timeout: float | None = None,
@@ -2716,7 +2497,14 @@ class Client:
     @_generated
     def wait_for(
         self,
-        event: Literal[Event.entitlement_create, "entitlement_create"],
+        event: Literal[
+            Event.entitlement_create,
+            "entitlement_create",
+            Event.entitlement_update,
+            "entitlement_update",
+            Event.entitlement_delete,
+            "entitlement_delete",
+        ],
         *,
         check: Callable[[Entitlement], bool] | None = None,
         timeout: float | None = None,
@@ -2725,43 +2513,14 @@ class Client:
     @_generated
     def wait_for(
         self,
-        event: Literal[Event.entitlement_update, "entitlement_update"],
-        *,
-        check: Callable[[Entitlement], bool] | None = None,
-        timeout: float | None = None,
-    ) -> Coroutine[Any, Any, Entitlement]: ...
-    @overload
-    @_generated
-    def wait_for(
-        self,
-        event: Literal[Event.entitlement_delete, "entitlement_delete"],
-        *,
-        check: Callable[[Entitlement], bool] | None = None,
-        timeout: float | None = None,
-    ) -> Coroutine[Any, Any, Entitlement]: ...
-    @overload
-    @_generated
-    def wait_for(
-        self,
-        event: Literal[Event.subscription_create, "subscription_create"],
-        *,
-        check: Callable[[Subscription], bool] | None = None,
-        timeout: float | None = None,
-    ) -> Coroutine[Any, Any, Subscription]: ...
-    @overload
-    @_generated
-    def wait_for(
-        self,
-        event: Literal[Event.subscription_update, "subscription_update"],
-        *,
-        check: Callable[[Subscription], bool] | None = None,
-        timeout: float | None = None,
-    ) -> Coroutine[Any, Any, Subscription]: ...
-    @overload
-    @_generated
-    def wait_for(
-        self,
-        event: Literal[Event.subscription_delete, "subscription_delete"],
+        event: Literal[
+            Event.subscription_create,
+            "subscription_create",
+            Event.subscription_update,
+            "subscription_update",
+            Event.subscription_delete,
+            "subscription_delete",
+        ],
         *,
         check: Callable[[Subscription], bool] | None = None,
         timeout: float | None = None,
@@ -2770,16 +2529,7 @@ class Client:
     @_generated
     def wait_for(
         self: AnyPrefixBotT,
-        event: Literal[Event.command, "command"],
-        *,
-        check: Callable[[commands.Context[AnyPrefixBotT]], bool] | None = None,
-        timeout: float | None = None,
-    ) -> Coroutine[Any, Any, commands.Context[AnyPrefixBotT]]: ...
-    @overload
-    @_generated
-    def wait_for(
-        self: AnyPrefixBotT,
-        event: Literal[Event.command_completion, "command_completion"],
+        event: Literal[Event.command, "command", Event.command_completion, "command_completion"],
         *,
         check: Callable[[commands.Context[AnyPrefixBotT]], bool] | None = None,
         timeout: float | None = None,
@@ -2798,7 +2548,20 @@ class Client:
     @_generated
     def wait_for(
         self: AnyBotT,
-        event: Literal[Event.slash_command, "slash_command"],
+        event: Literal[
+            Event.slash_command,
+            "slash_command",
+            Event.slash_command_completion,
+            "slash_command_completion",
+            Event.user_command,
+            "user_command",
+            Event.user_command_completion,
+            "user_command_completion",
+            Event.message_command,
+            "message_command",
+            Event.message_command_completion,
+            "message_command_completion",
+        ],
         *,
         check: Callable[[ApplicationCommandInteraction[AnyBotT]], bool] | None = None,
         timeout: float | None = None,
@@ -2807,76 +2570,14 @@ class Client:
     @_generated
     def wait_for(
         self: AnyBotT,
-        event: Literal[Event.slash_command_completion, "slash_command_completion"],
-        *,
-        check: Callable[[ApplicationCommandInteraction[AnyBotT]], bool] | None = None,
-        timeout: float | None = None,
-    ) -> Coroutine[Any, Any, ApplicationCommandInteraction[AnyBotT]]: ...
-    @overload
-    @_generated
-    def wait_for(
-        self: AnyBotT,
-        event: Literal[Event.slash_command_error, "slash_command_error"],
-        *,
-        check: Callable[[ApplicationCommandInteraction[AnyBotT], commands.CommandError], bool]
-        | None = None,
-        timeout: float | None = None,
-    ) -> Coroutine[
-        Any, Any, tuple[ApplicationCommandInteraction[AnyBotT], commands.CommandError]
-    ]: ...
-    @overload
-    @_generated
-    def wait_for(
-        self: AnyBotT,
-        event: Literal[Event.user_command, "user_command"],
-        *,
-        check: Callable[[ApplicationCommandInteraction[AnyBotT]], bool] | None = None,
-        timeout: float | None = None,
-    ) -> Coroutine[Any, Any, ApplicationCommandInteraction[AnyBotT]]: ...
-    @overload
-    @_generated
-    def wait_for(
-        self: AnyBotT,
-        event: Literal[Event.user_command_completion, "user_command_completion"],
-        *,
-        check: Callable[[ApplicationCommandInteraction[AnyBotT]], bool] | None = None,
-        timeout: float | None = None,
-    ) -> Coroutine[Any, Any, ApplicationCommandInteraction[AnyBotT]]: ...
-    @overload
-    @_generated
-    def wait_for(
-        self: AnyBotT,
-        event: Literal[Event.user_command_error, "user_command_error"],
-        *,
-        check: Callable[[ApplicationCommandInteraction[AnyBotT], commands.CommandError], bool]
-        | None = None,
-        timeout: float | None = None,
-    ) -> Coroutine[
-        Any, Any, tuple[ApplicationCommandInteraction[AnyBotT], commands.CommandError]
-    ]: ...
-    @overload
-    @_generated
-    def wait_for(
-        self: AnyBotT,
-        event: Literal[Event.message_command, "message_command"],
-        *,
-        check: Callable[[ApplicationCommandInteraction[AnyBotT]], bool] | None = None,
-        timeout: float | None = None,
-    ) -> Coroutine[Any, Any, ApplicationCommandInteraction[AnyBotT]]: ...
-    @overload
-    @_generated
-    def wait_for(
-        self: AnyBotT,
-        event: Literal[Event.message_command_completion, "message_command_completion"],
-        *,
-        check: Callable[[ApplicationCommandInteraction[AnyBotT]], bool] | None = None,
-        timeout: float | None = None,
-    ) -> Coroutine[Any, Any, ApplicationCommandInteraction[AnyBotT]]: ...
-    @overload
-    @_generated
-    def wait_for(
-        self: AnyBotT,
-        event: Literal[Event.message_command_error, "message_command_error"],
+        event: Literal[
+            Event.slash_command_error,
+            "slash_command_error",
+            Event.user_command_error,
+            "user_command_error",
+            Event.message_command_error,
+            "message_command_error",
+        ],
         *,
         check: Callable[[ApplicationCommandInteraction[AnyBotT], commands.CommandError], bool]
         | None = None,

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections import defaultdict
 from typing import cast
 
 import libcst as cst
@@ -47,14 +48,18 @@ class EventTypings(BaseCodemodCommand):
             raise RuntimeError(msg)
 
         # if we're here, we found a @_overload_with_events decorator
-        new_overloads: list[cst.FunctionDef] = []
+
+        groups: dict[EventData, list[Event]] = defaultdict(list)
         for event in Event:
             if not (event_data := EVENT_DATA.get(event)):
                 msg = f"{event} is missing an EVENT_DATA definition"
                 raise RuntimeError(msg)
-            if event_data.event_only:
-                continue
-            new_overloads.append(generator(node, event, event_data))
+            groups[event_data].append(event)
+
+        new_overloads: list[cst.FunctionDef] = []
+        for event_data, events in groups.items():
+            if overload := generator(node, events, event_data):
+                new_overloads.append(overload)
 
         return cst.FlattenSentinel([*new_overloads, node])
 
@@ -68,9 +73,10 @@ class EventTypings(BaseCodemodCommand):
             leading_lines=(),
         )
 
-    def create_literal(self, event: Event) -> cst.BaseExpression:
+    def create_literal(self, events: list[Event]) -> cst.BaseExpression:
+        event_literals = [f'Event.{event.name}, "{event.value}"' for event in events]
         return cst.parse_expression(
-            f'Literal[Event.{event.name}, "{event.value}"]',
+            f"Literal[{', '.join(event_literals)}]",
             config=self.module.config_for_parsing,
         )
 
@@ -81,8 +87,10 @@ class EventTypings(BaseCodemodCommand):
         )
 
     def generate_wait_for_overload(
-        self, func: cst.FunctionDef, event: Event, event_data: EventData
-    ) -> cst.FunctionDef:
+        self, func: cst.FunctionDef, events: list[Event], event_data: EventData
+    ) -> cst.FunctionDef | None:
+        if event_data.event_only:
+            return None
         args = event_data.arg_types
 
         new_overload = self.create_empty_overload(func)
@@ -90,7 +98,7 @@ class EventTypings(BaseCodemodCommand):
         # set `event` annotation
         new_overload = new_overload.with_deep_changes(
             get_param(new_overload, "event"),
-            annotation=cst.Annotation(self.create_literal(event)),
+            annotation=cst.Annotation(self.create_literal(events)),
         )
 
         # set `check` annotation
