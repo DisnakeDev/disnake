@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Dict, List, Optional, Tuple
-
 from .enums import Event
 
 
@@ -11,21 +9,21 @@ class EventData:
     def __init__(
         self,
         *,
-        arg_types: List[str],
-        self_type: Optional[str] = None,
+        arg_types: list[str],
+        self_type: str | None = None,
         event_only: bool = False,
     ) -> None:
-        self.arg_types: Tuple[str, ...] = tuple(arg_types)
+        self.arg_types: tuple[str, ...] = tuple(arg_types)
         """Type names of event arguments, e.g. `("Guild", "User")`."""
 
-        self.self_type: Optional[str] = self_type
+        self.self_type: str | None = self_type
         """The annotation for the `self` parameter, used for bot-only events."""
 
         self.event_only: bool = event_only
         """Whether the event can only be used through `@event`, and not with listeners."""
 
 
-EVENT_DATA: Dict[Event, EventData] = {
+EVENT_DATA: dict[Event, EventData] = {
     Event.connect: EventData(
         arg_types=[],
     ),

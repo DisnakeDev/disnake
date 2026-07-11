@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-import types
-from typing import List, Optional, cast
+from typing import cast
 
 import libcst as cst
 import libcst.matchers as m
@@ -17,25 +16,22 @@ from .base import BaseCodemodCommand
 def get_param(func: cst.FunctionDef, name: str) -> cst.Param:
     results = m.findall(func.params, m.Param(m.Name(name)))
     assert len(results) == 1
-    return cast(cst.Param, results[0])
+    return cast("cst.Param", results[0])
 
 
 class EventTypings(BaseCodemodCommand):
     DESCRIPTION: str = "Adds overloads for library events."
     CHECK_MARKER: str = "@_overload_with_events"
 
-    flag_classes: List[str]
-    imported_module: types.ModuleType
-
-    def visit_FunctionDef(self, node: cst.FunctionDef) -> Optional[bool]:
+    def visit_FunctionDef(self, node: cst.FunctionDef) -> bool | None:
         # don't recurse into the body of a function
         return False
 
-    def leave_FunctionDef(self, _: cst.FunctionDef, node: cst.FunctionDef):
+    def leave_FunctionDef(
+        self, _: cst.FunctionDef, node: cst.FunctionDef
+    ) -> cst.FlattenSentinel[cst.FunctionDef] | cst.FunctionDef | cst.RemovalSentinel:
         decorators = [
-            deco.decorator.value
-            for deco in node.decorators
-            if not isinstance(deco.decorator, cst.Call)
+            deco.decorator.value for deco in node.decorators if isinstance(deco.decorator, cst.Name)
         ]
         if "_generated" in decorators:
             # remove generated methods
@@ -47,15 +43,15 @@ class EventTypings(BaseCodemodCommand):
         if node.name.value == "wait_for":
             generator = self.generate_wait_for_overload
         else:
-            raise RuntimeError(
-                f"unknown method '{node.name.value}' with @_overload_with_events decorator"
-            )
+            msg = f"unknown method '{node.name.value}' with @_overload_with_events decorator"
+            raise RuntimeError(msg)
 
         # if we're here, we found a @_overload_with_events decorator
-        new_overloads: List[cst.FunctionDef] = []
+        new_overloads: list[cst.FunctionDef] = []
         for event in Event:
             if not (event_data := EVENT_DATA.get(event)):
-                raise RuntimeError(f"{event} is missing an EVENT_DATA definition")
+                msg = f"{event} is missing an EVENT_DATA definition"
+                raise RuntimeError(msg)
             if event_data.event_only:
                 continue
             new_overloads.append(generator(node, event, event_data))
@@ -80,7 +76,7 @@ class EventTypings(BaseCodemodCommand):
 
     def create_args_list(self, event_data: EventData) -> cst.BaseExpression:
         return cst.parse_expression(
-            f'[{",".join(event_data.arg_types)}]',
+            f"[{','.join(event_data.arg_types)}]",
             config=self.module.config_for_parsing,
         )
 
@@ -103,7 +99,7 @@ class EventTypings(BaseCodemodCommand):
         )[0]
         callable_params = m.findall(callable_annotation, m.Ellipsis())[0]
         new_overload = cast(
-            cst.FunctionDef,
+            "cst.FunctionDef",
             new_overload.deep_replace(callable_params, self.create_args_list(event_data)),
         )
 
@@ -113,7 +109,7 @@ class EventTypings(BaseCodemodCommand):
         elif len(args) == 1:
             new_annotation_str = args[0]
         else:
-            new_annotation_str = f'Tuple[{",".join(args)}]'
+            new_annotation_str = f"Tuple[{','.join(args)}]"
         new_annotation = cst.parse_expression(
             f"Coroutine[Any, Any, {new_annotation_str}]",
             config=self.module.config_for_parsing,
