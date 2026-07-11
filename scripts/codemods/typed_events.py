@@ -65,12 +65,12 @@ class EventTypings(BaseCodemodCommand):
 
     def create_empty_overload(self, func: cst.FunctionDef) -> cst.FunctionDef:
         return func.with_changes(
-            body=cst.IndentedBlock([cst.SimpleStatementLine([cst.Expr(cst.Ellipsis())])]),
+            body=cst.SimpleStatementLine([cst.Expr(cst.Ellipsis())]),
             decorators=[
                 cst.Decorator(cst.Name("overload")),
                 cst.Decorator(cst.Name("_generated")),
             ],
-            leading_lines=(),
+            leading_lines=[cst.EmptyLine()],
         )
 
     def create_literal(self, events: list[Event]) -> cst.BaseExpression:
