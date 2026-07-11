@@ -6,7 +6,9 @@ import asyncio
 import time
 from collections import deque
 from collections.abc import Callable
-from typing import TYPE_CHECKING, Any, Protocol
+from typing import TYPE_CHECKING, Any, Generic, Protocol
+
+from typing_extensions import TypeVar
 
 import disnake
 from disnake.enums import Enum
@@ -16,8 +18,6 @@ from .errors import MaxConcurrencyReached
 
 if TYPE_CHECKING:
     from typing_extensions import Self
-
-    from ...message import Message
 
 __all__ = (
     "BucketType",
@@ -36,6 +36,9 @@ class ContextType(Protocol):
     def guild(self) -> disnake.Guild | None: ...
     @property
     def channel(self) -> disnake.abc.MessageableChannel: ...
+
+
+ContextTypeT = TypeVar("ContextTypeT", bound=ContextType, infer_variance=True)
 
 
 class BucketType(Enum):
@@ -97,7 +100,7 @@ class Cooldown:
 
     __slots__ = ("rate", "per", "_window", "_tokens", "_last")
 
-    def __init__(self, rate: float, per: float) -> None:
+    def __init__(self, rate: int, per: float) -> None:
         self.rate: int = int(rate)
         self.per: float = float(per)
         self._window: float = 0.0
@@ -199,11 +202,11 @@ class Cooldown:
         return f"<Cooldown rate: {self.rate} per: {self.per} window: {self._window} tokens: {self._tokens}>"
 
 
-class CooldownMapping:
+class CooldownMapping(Generic[ContextTypeT]):
     def __init__(
         self,
         original: Cooldown | None,
-        type: Callable[[Message], Any],
+        type: Callable[[ContextTypeT], Any],
     ) -> None:
         if not callable(type):
             msg = "Cooldown type must be a BucketType or callable"
@@ -211,7 +214,7 @@ class CooldownMapping:
 
         self._cache: dict[Any, Cooldown] = {}
         self._cooldown: Cooldown | None = original
-        self._type: Callable[[Message], Any] = type
+        self._type: Callable[[ContextTypeT], Any] = type
 
     def copy(self) -> CooldownMapping:
         ret = CooldownMapping(self._cooldown, self._type)
@@ -223,14 +226,14 @@ class CooldownMapping:
         return self._cooldown is not None
 
     @property
-    def type(self) -> Callable[[Message], Any]:
+    def type(self) -> Callable[[ContextTypeT], Any]:
         return self._type
 
     @classmethod
-    def from_cooldown(cls, rate: float, per: float, type) -> Self:
+    def from_cooldown(cls, rate: int, per: float, type) -> Self:
         return cls(Cooldown(rate, per), type)
 
-    def _bucket_key(self, msg: Message) -> Any:
+    def _bucket_key(self, msg: ContextTypeT) -> Any:
         return self._type(msg)
 
     def _verify_cache_integrity(self, current: float | None = None) -> None:
@@ -246,11 +249,11 @@ class CooldownMapping:
         # This method can be overridden in subclasses
         return self._type is BucketType.default
 
-    def create_bucket(self, message: Message) -> Cooldown:
+    def create_bucket(self, message: ContextTypeT) -> Cooldown:
         assert self._cooldown is not None
         return self._cooldown.copy()
 
-    def get_bucket(self, message: Message, current: float | None = None) -> Cooldown:
+    def get_bucket(self, message: ContextTypeT, current: float | None = None) -> Cooldown:
         if self._is_default():
             assert self._cooldown is not None
             return self._cooldown
@@ -266,17 +269,19 @@ class CooldownMapping:
 
         return bucket
 
-    def update_rate_limit(self, message: Message, current: float | None = None) -> float | None:
+    def update_rate_limit(
+        self, message: ContextTypeT, current: float | None = None
+    ) -> float | None:
         bucket = self.get_bucket(message, current)
         return bucket.update_rate_limit(current)
 
 
-class DynamicCooldownMapping(CooldownMapping):
+class DynamicCooldownMapping(CooldownMapping[ContextTypeT]):
     def __init__(
-        self, factory: Callable[[Message], Cooldown], type: Callable[[Message], Any]
+        self, factory: Callable[[ContextTypeT], Cooldown], type: Callable[[ContextTypeT], Any]
     ) -> None:
         super().__init__(None, type)
-        self._factory: Callable[[Message], Cooldown] = factory
+        self._factory: Callable[[ContextTypeT], Cooldown] = factory
 
     def copy(self) -> DynamicCooldownMapping:
         ret = DynamicCooldownMapping(self._factory, self._type)
@@ -291,7 +296,7 @@ class DynamicCooldownMapping(CooldownMapping):
         # In dynamic mappings even default bucket types may have custom behavior
         return False
 
-    def create_bucket(self, message: Message) -> Cooldown:
+    def create_bucket(self, message: ContextTypeT) -> Cooldown:
         return self._factory(message)
 
 

@@ -33,7 +33,14 @@ from ._types import _BaseCommand
 from .cog import Cog
 from .context import AnyContext, Context
 from .converter import Greedy, get_converter, run_converters
-from .cooldowns import BucketType, Cooldown, CooldownMapping, DynamicCooldownMapping, MaxConcurrency
+from .cooldowns import (
+    BucketType,
+    ContextTypeT,
+    Cooldown,
+    CooldownMapping,
+    DynamicCooldownMapping,
+    MaxConcurrency,
+)
 from .errors import (
     ArgumentParsingError,
     BotMissingAnyRole,
@@ -62,7 +69,7 @@ if TYPE_CHECKING:
 
     from typing_extensions import ParamSpec, Self, Unpack
 
-    from disnake.message import Message
+    from disnake import Message
 
     from ._types import AppCheck, Check, Coro, CoroFunc, Error, Hook
 
@@ -77,7 +84,7 @@ if TYPE_CHECKING:
         description: str
         hidden: bool
         checks: list[Check]
-        cooldown: CooldownMapping | None
+        cooldown: CooldownMapping[Message] | None
         max_concurrency: MaxConcurrency | None
         require_var_positional: bool
         ignore_extra: bool
@@ -177,7 +184,7 @@ def hooked_wrapped_callback(
             raise CommandInvokeError(exc) from exc
         finally:
             if command._max_concurrency is not None:
-                await command._max_concurrency.release(ctx)  # pyright: ignore[reportArgumentType]
+                await command._max_concurrency.release(ctx)
 
             await command.call_after_hooks(ctx)
         return ret
@@ -360,7 +367,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         else:
             msg = "Cooldown must be a an instance of CooldownMapping or None."
             raise TypeError(msg)
-        self._buckets: CooldownMapping = buckets
+        self._buckets: CooldownMapping[Message] = buckets
 
         try:
             max_concurrency = func.__commands_max_concurrency__
@@ -801,7 +808,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
             if bucket is not None:  # pyright: ignore[reportUnnecessaryComparison]
                 retry_after = bucket.update_rate_limit(current)
                 if retry_after:
-                    raise CommandOnCooldown(bucket, retry_after, self._buckets.type)  # pyright: ignore[reportArgumentType]
+                    raise CommandOnCooldown(bucket, retry_after, self._buckets.type)
 
     async def prepare(self, ctx: Context) -> None:
         ctx.command = self
@@ -811,8 +818,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
             raise CheckFailure(msg)
 
         if self._max_concurrency is not None:
-            # For this application, context can be duck-typed as a Message
-            await self._max_concurrency.acquire(ctx)  # pyright: ignore[reportArgumentType]
+            await self._max_concurrency.acquire(ctx)
 
         try:
             if self.cooldown_after_parsing:
@@ -825,7 +831,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
             await self.call_before_hooks(ctx)
         except Exception:
             if self._max_concurrency is not None:
-                await self._max_concurrency.release(ctx)  # pyright: ignore[reportArgumentType]
+                await self._max_concurrency.release(ctx)
             raise
 
     def is_on_cooldown(self, ctx: Context) -> bool:
@@ -2564,7 +2570,7 @@ def is_nsfw() -> Callable[[T], T]:
 
 
 def cooldown(
-    rate: int, per: float, type: BucketType | Callable[[Message], Any] = BucketType.default
+    rate: int, per: float, type: BucketType | Callable[[ContextTypeT], Any] = BucketType.default
 ) -> Callable[[T], T]:
     r"""A decorator that adds a cooldown to a :class:`.Command`
 
@@ -2596,7 +2602,8 @@ def cooldown(
         func: Command[CogT, P, T] | CoroFunc,
     ) -> Command[CogT, P, T] | CoroFunc:
         if hasattr(func, "__command_flag__"):
-            func._buckets = CooldownMapping(Cooldown(rate, per), type)
+            # not assignable, because the decorator is typed Command[...]
+            func._buckets = CooldownMapping(Cooldown(rate, per), type)  # pyright: ignore[reportAttributeAccessIssue]
         else:
             func.__commands_cooldown__ = CooldownMapping(Cooldown(rate, per), type)  # pyright: ignore[reportAttributeAccessIssue]
         return func
@@ -2605,7 +2612,7 @@ def cooldown(
 
 
 def dynamic_cooldown(
-    cooldown: BucketType | Callable[[Message], Any], type: BucketType = BucketType.default
+    cooldown: BucketType | Callable[[ContextTypeT], Any], type: BucketType = BucketType.default
 ) -> Callable[[T], T]:
     r"""A decorator that adds a dynamic cooldown to a :class:`.Command`
 
@@ -2643,7 +2650,8 @@ def dynamic_cooldown(
         func: Command[CogT, P, T] | CoroFunc,
     ) -> Command[CogT, P, T] | CoroFunc:
         if hasattr(func, "__command_flag__"):
-            func._buckets = DynamicCooldownMapping(cooldown, type)
+            # not assignable, because the decorator is typed Command[...]
+            func._buckets = DynamicCooldownMapping(cooldown, type)  # pyright: ignore[reportAttributeAccessIssue]
         else:
             func.__commands_cooldown__ = DynamicCooldownMapping(cooldown, type)  # pyright: ignore[reportAttributeAccessIssue]
         return func
