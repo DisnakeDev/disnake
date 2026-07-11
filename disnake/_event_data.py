@@ -64,7 +64,7 @@ EVENT_DATA: dict[Event, EventData] = {
         arg_types=["str"],
     ),
     Event.socket_raw_send: EventData(
-        arg_types=["Union[str, bytes]"],
+        arg_types=["str | bytes"],
     ),
     Event.guild_channel_create: EventData(
         arg_types=["GuildChannel"],
@@ -76,7 +76,7 @@ EVENT_DATA: dict[Event, EventData] = {
         arg_types=["GuildChannel"],
     ),
     Event.guild_channel_pins_update: EventData(
-        arg_types=["Union[GuildChannel, Thread]", "Optional[datetime]"],
+        arg_types=["GuildChannel | Thread", "datetime | None"],
     ),
     Event.invite_create: EventData(
         arg_types=["Invite"],
@@ -88,7 +88,7 @@ EVENT_DATA: dict[Event, EventData] = {
         arg_types=["GroupChannel", "GroupChannel"],
     ),
     Event.private_channel_pins_update: EventData(
-        arg_types=["PrivateChannel", "Optional[datetime]"],
+        arg_types=["PrivateChannel", "datetime | None"],
     ),
     Event.webhooks_update: EventData(
         arg_types=["GuildChannel"],
@@ -153,6 +153,9 @@ EVENT_DATA: dict[Event, EventData] = {
     Event.guild_stickers_update: EventData(
         arg_types=["Guild", "Sequence[GuildSticker]", "Sequence[GuildSticker]"],
     ),
+    Event.guild_soundboard_sounds_update: EventData(
+        arg_types=["Guild", "Sequence[GuildSoundboardSound]", "Sequence[GuildSoundboardSound]"],
+    ),
     Event.guild_integrations_update: EventData(
         arg_types=["Guild"],
     ),
@@ -166,10 +169,10 @@ EVENT_DATA: dict[Event, EventData] = {
         arg_types=["GuildScheduledEvent"],
     ),
     Event.guild_scheduled_event_subscribe: EventData(
-        arg_types=["GuildScheduledEvent", "Union[Member, User]"],
+        arg_types=["GuildScheduledEvent", "Member | User"],
     ),
     Event.guild_scheduled_event_unsubscribe: EventData(
-        arg_types=["GuildScheduledEvent", "Union[Member, User]"],
+        arg_types=["GuildScheduledEvent", "Member | User"],
     ),
     Event.raw_guild_scheduled_event_subscribe: EventData(
         arg_types=["RawGuildScheduledEventUserActionEvent"],
@@ -220,7 +223,7 @@ EVENT_DATA: dict[Event, EventData] = {
         arg_types=["Member"],
     ),
     Event.member_ban: EventData(
-        arg_types=["Guild", "Union[User, Member]"],
+        arg_types=["Guild", "User | Member"],
     ),
     Event.member_unban: EventData(
         arg_types=["Guild", "User"],
@@ -239,6 +242,12 @@ EVENT_DATA: dict[Event, EventData] = {
     ),
     Event.raw_voice_channel_effect: EventData(
         arg_types=["RawVoiceChannelEffectEvent"],
+    ),
+    Event.voice_channel_status_update: EventData(
+        arg_types=["GuildChannel", "str | None", "str | None"],
+    ),
+    Event.voice_channel_start_time_update: EventData(
+        arg_types=["GuildChannel", "datetime | None"],
     ),
     Event.stage_instance_create: EventData(
         arg_types=["StageInstance"],
@@ -280,7 +289,7 @@ EVENT_DATA: dict[Event, EventData] = {
         arg_types=["Message"],
     ),
     Event.bulk_message_delete: EventData(
-        arg_types=["List[Message]"],
+        arg_types=["list[Message]"],
     ),
     Event.poll_vote_add: EventData(
         arg_types=["Member", "PollAnswer"],
@@ -304,13 +313,13 @@ EVENT_DATA: dict[Event, EventData] = {
         arg_types=["RawPollVoteActionEvent"],
     ),
     Event.reaction_add: EventData(
-        arg_types=["Reaction", "Union[Member, User]"],
+        arg_types=["Reaction", "Member | User"],
     ),
     Event.reaction_remove: EventData(
-        arg_types=["Reaction", "Union[Member, User]"],
+        arg_types=["Reaction", "Member | User"],
     ),
     Event.reaction_clear: EventData(
-        arg_types=["Message", "List[Reaction]"],
+        arg_types=["Message", "list[Reaction]"],
     ),
     Event.reaction_clear_emoji: EventData(
         arg_types=["Reaction"],
@@ -331,7 +340,7 @@ EVENT_DATA: dict[Event, EventData] = {
         arg_types=["RawReactionClearEmojiEvent"],
     ),
     Event.typing: EventData(
-        arg_types=["Union[Messageable, ForumChannel]", "Union[User, Member]", "datetime"],
+        arg_types=["Messageable | ForumChannel", "User | Member", "datetime"],
     ),
     Event.raw_typing: EventData(
         arg_types=["RawTypingEvent"],
@@ -344,6 +353,15 @@ EVENT_DATA: dict[Event, EventData] = {
     ),
     Event.entitlement_delete: EventData(
         arg_types=["Entitlement"],
+    ),
+    Event.subscription_create: EventData(
+        arg_types=["Subscription"],
+    ),
+    Event.subscription_update: EventData(
+        arg_types=["Subscription"],
+    ),
+    Event.subscription_delete: EventData(
+        arg_types=["Subscription"],
     ),
     # bot-only:
     Event.command: EventData(
