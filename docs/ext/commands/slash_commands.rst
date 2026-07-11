@@ -21,7 +21,7 @@ This is because each slash command is registered in Discord before people can se
 but you can still manage it.
 
 By default, the registration is global. This means that your slash commands will be visible everywhere, including bot DMs,
-though you can disable them in DMs by setting the appropriate :ref:`permissions <app_command_permissions>`.
+though you can adjust this by setting specific :ref:`contexts <app_command_contexts>`.
 You can also change the registration to be local, so your slash commands will only be visible in several guilds.
 
 This code sample shows how to set the registration to be local:
@@ -138,7 +138,7 @@ Discord itself supports only a few built-in types which are guaranteed to be enf
 - :class:`disnake.Attachment`
 - :class:`disnake.abc.Snowflake`\*\*\*
 
-All the other types may be converted implicitly, similarly to :ref:`ext_commands_basic_converters`
+Other types may be converted implicitly, using the builtin :ref:`ext_commands_discord_converters`:
 
 .. code-block:: python3
 
@@ -155,19 +155,53 @@ All the other types may be converted implicitly, similarly to :ref:`ext_commands
         ...
 
 .. note::
-  \* All channel subclasses and unions (e.g. ``Union[TextChannel, StageChannel]``) are also supported.
+  \* All channel subclasses and unions (e.g. ``TextChannel | StageChannel``) are also supported.
   See :attr:`ParamInfo.channel_types <ext.commands.ParamInfo>` for more fine-grained control.
 
   \*\* Some combinations of types are also allowed, including:
-    - ``Union[User, Member]`` (results in :class:`OptionType.user`)
-    - ``Union[Member, Role]`` (results in :class:`OptionType.mentionable`)
-    - ``Union[User, Role]`` (results in :class:`OptionType.mentionable`)
-    - ``Union[User, Member, Role]`` (results in :class:`OptionType.mentionable`)
+    - ``User | Member`` (results in :class:`OptionType.user`)
+    - ``Member | Role`` (results in :class:`OptionType.mentionable`)
+    - ``User | Role`` (results in :class:`OptionType.mentionable`)
+    - ``User | Member | Role`` (results in :class:`OptionType.mentionable`)
 
   Note that a :class:`~disnake.User` annotation can also result in a :class:`~disnake.Member` being received.
 
-  \*\*\* Corresponds to any mentionable type, currently equivalent to ``Union[User, Member, Role]``.
+  \*\*\* Corresponds to any mentionable type, currently equivalent to ``User | Member | Role``.
 
+
+.. _large_integers:
+
+Large Integers
+++++++++++++++
+
+Due to a limitation of the Discord API, :class:`int` parameters can only take values between ``-2^53+1`` and ``2^53-1`` (inclusive).
+If you wish to accept values that could fall outside of this range, you can use the ``large`` parameter on :func:`~ext.commands.Param`.
+Setting it to :data:`True` instructs the library to use a string option type on the Discord API side,
+and locally parse user provided content to :class:`int`.
+
+.. code-block:: python3
+
+    @bot.slash_command()
+    async def snowflake(
+        inter: disnake.ApplicationCommandInteraction,
+        snowflake: int = commands.Param(large=True),
+    ):
+        ...
+
+Note that using this is a compromise, as string option type inevitably means that Discord will allow the user to input *any* string,
+which may not necessarily be a valid base 10 integer. When the value received cannot be parsed by :class:`int`,
+:exc:`~ext.commands.LargeIntConversionFailure` is raised.
+
+Instead of using :func:`Param(large=True) <ext.commands.Param>`, you can also use a :class:`~ext.commands.LargeInt` annotation.
+
+.. code-block:: python3
+
+    @bot.slash_command()
+    async def snowflake(
+        inter: disnake.ApplicationCommandInteraction,
+        snowflake: commands.LargeInt,
+    ):
+        ...
 
 .. _param_ranges:
 
@@ -188,49 +222,43 @@ For instance, you could restrict an option to only accept positive integers:
         ...
 
 
-Instead of using :func:`Param <ext.commands.Param>`, you can also use a :class:`~ext.commands.Range` annotation.
+Instead of using :func:`~ext.commands.Param`, you can also use a :class:`~ext.commands.Range` annotation.
 The range bounds are both inclusive; using ``...`` as a bound indicates that this end of the range is unbounded.
-The type of the option is determined by the range bounds, with the option being a
-:class:`float` if at least one of the bounds is a :class:`float`, and :class:`int` otherwise.
+The type of the option is specified by the first type argument, which can be either :class:`int` or :class:`float`.
 
 .. code-block:: python3
 
     @bot.slash_command()
     async def ranges(
         inter: disnake.ApplicationCommandInteraction,
-        a: commands.Range[0, 10],       # 0 - 10 int
-        b: commands.Range[0, 10.0],     # 0 - 10 float
-        c: commands.Range[1, ...],      # positive int
+        a: commands.Range[int, 0, 10],      # 0 - 10 int
+        b: commands.Range[float, 0, 10.0],  # 0 - 10 float
+        c: commands.Range[int, 1, ...],     # positive int
     ):
         ...
 
-.. _type_checker_mypy_plugin:
+Integer ranges can also be combined with :ref:`large_integers`, in which case :ref:`string_lengths` will be set
+based on the *shortest* and *longest* signed base 10 string representations of the possible value ranges,
+and a :exc:`~ext.commands.LargeIntOutOfRange` exception will be raised if the parsed integer value
+falls outside the specified range.
 
-.. note::
+.. code-block:: python3
 
-    Type checker support for :class:`~ext.commands.Range` and :class:`~ext.commands.String` (:ref:`see below <string_lengths>`) is limited.
-    Pylance/Pyright seem to handle it correctly; MyPy currently needs a plugin for it to understand :class:`~ext.commands.Range`
-    and :class:`~ext.commands.String` semantics, which can be added in the configuration file (``setup.cfg``, ``mypy.ini``):
-
-    .. code-block:: ini
-
-        [mypy]
-        plugins = disnake.ext.mypy_plugin
-
-    For ``pyproject.toml`` configs, use this instead:
-
-    .. code-block:: toml
-
-        [tool.mypy]
-        plugins = "disnake.ext.mypy_plugin"
+    @bot.slash_command()
+    async def ranges(
+        inter: disnake.ApplicationCommandInteraction,
+        a: int = commands.Param(ge=0, le=2**64, large=True),  # 0 - 2**64 int
+        b: commands.Range[commands.LargeInt, 0, 2**64],       # 0 - 2**64 int
+    ):
+        ...
 
 .. _string_lengths:
 
 String Lengths
 ++++++++++++++
 
-:class:`str` parameters support minimum and maximum allowed value lengths
-using the ``min_length`` and ``max_length`` parameters on :func:`Param <ext.commands.Param>`.
+:class:`str` parameters support minimum and maximum allowed lengths
+using the ``min_length`` and ``max_length`` parameters on :func:`~ext.commands.Param`.
 For instance, you could restrict an option to only accept a single character:
 
 .. code-block:: python3
@@ -253,27 +281,24 @@ Or restrict a tag command to limit tag names to 20 characters:
     ):
         ...
 
-Instead of using :func:`Param <ext.commands.Param>`, you can also use a :class:`~ext.commands.String` annotation.
+Instead of using :func:`~ext.commands.Param`, you can also use a :class:`~ext.commands.String` annotation.
 The length bounds are both inclusive; using ``...`` as a bound indicates that this end of the string length is unbounded.
+The first type argument should always be :class:`str`.
 
 .. code-block:: python3
 
     @bot.slash_command()
     async def strings(
         inter: disnake.ApplicationCommandInteraction,
-        a: commands.String[0, 10],       # a str no longer than 10 characters.
-        b: commands.String[10, 100],     # a str that's at least 10 characters but not longer than 100.
-        c: commands.String[50, ...]      # a str that's at least 50 characters.
+        a: commands.String[str, 0, 10],       # a str no longer than 10 characters.
+        b: commands.String[str, 10, 100],     # a str that's at least 10 characters but not longer than 100.
+        c: commands.String[str, 50, ...],     # a str that's at least 50 characters.
     ):
         ...
 
 .. note::
 
     There is a max length of 6000 characters, which is enforced by Discord.
-
-.. note::
-
-    For mypy type checking support, please see the above note about the :ref:`mypy plugin <type_checker_mypy_plugin>`.
 
 .. _docstrings:
 
@@ -695,13 +720,105 @@ Yet again, with a file like ``locale/de.json`` containing localizations like thi
         "AUTOCOMP_JAPANESE": "Japanisch"
     }
 
+
+.. _app_command_contexts:
+
+Installation/Interaction Contexts
+---------------------------------
+
+The :attr:`~ApplicationCommand.install_types` and :attr:`~ApplicationCommand.contexts` command
+attributes allow you to control how and where your command can be run.
+
+.. note::
+    These fields cannot be configured for a slash subcommand or
+    subcommand group, only in top-level slash commands and user/message commands.
+
+Install Types
++++++++++++++
+
+The :attr:`~ApplicationCommand.install_types` field determines whether your command can be used
+when the bot is installed to a guild, a user, or both.
+
+Bots installed to a **guild** are visible to *all members*, which used to be the only entry point for users
+to run commands. Alternatively, bots can now also support being installed to a **user**, which makes
+the commands available everywhere to the *authorizing user* only.
+
+For instance, to make a command only available in a user-installed context, you can
+use the :func:`~.ext.commands.install_types` decorator:
+
+.. code-block:: python3
+
+    @bot.slash_command()
+    @commands.install_types(user=True)
+    async def command(inter: disnake.ApplicationCommandInteraction):
+        ...
+
+Alternatively, you may pass e.g. ``install_types=disnake.ApplicationInstallTypes(user=True)``
+as an argument directly to the command decorator. To allow all (guild + user) installation types,
+a :meth:`ApplicationInstallTypes.all` shorthand is also available.
+
+By default, commands are set to only be usable in guild-installed contexts.
+You can set bot-wide defaults using the ``default_install_types`` parameter on
+the :class:`~ext.commands.Bot` constructor:
+
+.. code-block:: python3
+
+    bot = commands.Bot(
+        default_install_types=disnake.ApplicationInstallTypes(user=True),
+    )
+
+.. note::
+    To enable installing the bot in user contexts (or disallow guild contexts), you will need to
+    adjust the settings in the **Developer Portal** on the application's **"Installation"** page.
+
+Contexts
+++++++++
+
+While ``install_types`` determines where the bot must be *installed* to run a command,
+:attr:`~ApplicationCommand.contexts` dictates where *in Discord* a command can be used.
+
+Possible surfaces are **guilds**, **DMs with the bot**, and **DMs (and group DMs) between other users**,
+by setting :attr:`~InteractionContextTypes.guild`, :attr:`~InteractionContextTypes.bot_dm`,
+or :attr:`~InteractionContextTypes.private_channel` respectively to ``True``.
+The :attr:`~InteractionContextTypes.private_channel` context is only meaningful for user-installed
+commands.
+
+Similarly to ``install_types``, this can be accomplished using the :func:`~.ext.commands.contexts`
+decorator, to e.g. disallow a command in guilds:
+
+.. code-block:: python3
+
+    @bot.slash_command()
+    @commands.contexts(bot_dm=True, private_channel=True)
+    async def command(inter: disnake.ApplicationCommandInteraction):
+        ...
+
+In the same way, you can use the ``contexts=`` parameter and :class:`InteractionContextTypes` in the command decorator directly.
+
+The default context for commands is :attr:`~InteractionContextTypes.guild` + :attr:`~InteractionContextTypes.bot_dm`.
+This can also be adjusted using the ``default_contexts`` parameter on the :class:`~ext.commands.Bot` constructor.
+
+This attribute supersedes the old ``dm_permission`` field, which can now be considered
+equivalent to the :attr:`~InteractionContextTypes.bot_dm` flag.
+Therefore, to prevent a command from being run in DMs, use ``InteractionContextTypes(guild=True)``.
+
+Interaction Data
+++++++++++++++++
+
+For a given :class:`ApplicationCommandInteraction`, you can determine the context where the interaction
+was triggered from using the :attr:`~ApplicationCommandInteraction.context` field.
+
+To see how the command was installed, use the :attr:`~ApplicationCommandInteraction.authorizing_integration_owners`
+field, which includes installation details relevant to that specific interaction.
+
+
 .. _app_command_permissions:
 
-Permissions
------------
-
 Default Member Permissions
-++++++++++++++++++++++++++
+--------------------------
+
+Using the :attr:`~ApplicationCommand.default_member_permissions` command attribute,
+you can restrict by whom a command can be run in a guild by default.
 
 These commands will not be enabled/visible for members who do not have all the required guild permissions.
 In this example both the ``manage_guild`` and the ``moderate_members`` permissions would be required:
@@ -725,19 +842,5 @@ This can be overridden by moderators on a per-guild basis; ``default_member_perm
 ignored entirely once a permission override — application-wide or for this command in particular — is configured
 in the guild settings, and will be restored if the permissions are re-synced in the settings.
 
-Note that ``default_member_permissions`` and ``dm_permission`` cannot be configured for a slash subcommand or
+Like the previous fields, this cannot be configured for a slash subcommand or
 subcommand group, only in top-level slash commands and user/message commands.
-
-
-DM Permissions
-++++++++++++++
-
-Using this, you can specify if you want a certain slash command to work in DMs or not:
-
-.. code-block:: python3
-
-    @bot.slash_command(dm_permission=False)
-    async def config(inter: disnake.ApplicationCommandInteraction):
-        ...
-
-This will make the ``config`` slash command invisible in DMs, while it will remain visible in guilds.

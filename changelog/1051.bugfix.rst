@@ -1,1 +1,0 @@
-Fix typing issue with :class:`abc.User` protocol requirements, which previously resulted in :class:`User` and :class:`Member` not conforming to the protocol.

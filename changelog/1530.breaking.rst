@@ -1,0 +1,1 @@
+Remove deprecated ``PartyType`` enum, previously used for :meth:`GuildChannel.create_invite(target_application=...) <abc.GuildChannel.create_invite>`. Use :class:`Object` instead.

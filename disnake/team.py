@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Optional
+import datetime
+from typing import TYPE_CHECKING
 
 from . import utils
 from .asset import Asset
-from .enums import TeamMembershipState, try_enum
+from .enums import TeamMemberRole, TeamMembershipState, try_enum
 from .user import BaseUser
 
 if TYPE_CHECKING:
@@ -20,7 +21,8 @@ __all__ = (
 
 
 class Team:
-    """Represents an application team for a bot provided by Discord.
+    r"""Represents an application team.
+    Teams are groups of users who share access to an application's configuration.
 
     Attributes
     ----------
@@ -29,8 +31,8 @@ class Team:
     name: :class:`str`
         The team name.
     owner_id: :class:`int`
-        The team's owner ID.
-    members: List[:class:`TeamMember`]
+        The team owner's ID.
+    members: :class:`list`\[:class:`TeamMember`]
         A list of the members in the team.
 
         .. versionadded:: 1.3
@@ -43,9 +45,9 @@ class Team:
 
         self.id: int = int(data["id"])
         self.name: str = data["name"]
-        self._icon: Optional[str] = data["icon"]
-        self.owner_id: Optional[int] = utils._get_as_snowflake(data, "owner_user_id")
-        self.members: List[TeamMember] = [
+        self._icon: str | None = data.get("icon")
+        self.owner_id: int | None = utils._get_as_snowflake(data, "owner_user_id")
+        self.members: list[TeamMember] = [
             TeamMember(self, self._state, member) for member in data["members"]
         ]
 
@@ -53,22 +55,30 @@ class Team:
         return f"<{self.__class__.__name__} id={self.id} name={self.name}>"
 
     @property
-    def icon(self) -> Optional[Asset]:
-        """Optional[:class:`.Asset`]: Retrieves the team's icon asset, if any."""
+    def created_at(self) -> datetime.datetime:
+        """:class:`datetime.datetime`: Returns the team's creation time in UTC.
+
+        .. versionadded:: 2.10
+        """
+        return utils.snowflake_time(self.id)
+
+    @property
+    def icon(self) -> Asset | None:
+        """:class:`.Asset` | :data:`None`: Retrieves the team's icon asset, if any."""
         if self._icon is None:
             return None
         return Asset._from_icon(self._state, self.id, self._icon, path="team")
 
     @property
-    def owner(self) -> Optional[TeamMember]:
-        """Optional[:class:`TeamMember`]: The team's owner."""
+    def owner(self) -> TeamMember | None:
+        """:class:`TeamMember` | :data:`None`: The team's owner."""
         return utils.get(self.members, id=self.owner_id)
 
 
 class TeamMember(BaseUser):
     """Represents a team member in a team.
 
-    .. container:: operations
+    .. collapse:: operations
 
         .. describe:: x == y
 
@@ -103,30 +113,28 @@ class TeamMember(BaseUser):
             The value of a single zero (``"0"``) indicates that the user has been migrated to the new system.
             See the `help article <https://dis.gd/app-usernames>`__ for details.
 
-    global_name: Optional[:class:`str`]
-        The team members's global display name, if set.
+    global_name: :class:`str` | :data:`None`
+        The team member's global display name, if set.
         This takes precedence over :attr:`.name` when shown.
 
         .. versionadded:: 2.9
 
-    avatar: Optional[:class:`str`]
-        The avatar hash the team member has. Could be None.
-    bot: :class:`bool`
-        Specifies if the user is a bot account.
     team: :class:`Team`
         The team that the member is from.
     membership_state: :class:`TeamMembershipState`
-        The membership state of the member (e.g. invited or accepted)
+        The membership state of the member (e.g. invited or accepted).
+    role: :class:`TeamMemberRole`
+        The role of the team member in the team.
     """
 
-    __slots__ = ("team", "membership_state", "permissions")
+    __slots__ = ("team", "membership_state", "role")
 
     def __init__(self, team: Team, state: ConnectionState, data: TeamMemberPayload) -> None:
         self.team: Team = team
         self.membership_state: TeamMembershipState = try_enum(
             TeamMembershipState, data["membership_state"]
         )
-        self.permissions: List[str] = data["permissions"]
+        self.role: TeamMemberRole = try_enum(TeamMemberRole, data.get("role"))
         super().__init__(state=state, data=data["user"])
 
     def __repr__(self) -> str:

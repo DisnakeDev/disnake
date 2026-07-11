@@ -7,9 +7,10 @@ from docutils import nodes
 from docutils.parsers.rst import Directive
 
 if TYPE_CHECKING:
-    from _types import SphinxExtensionMeta
     from sphinx.application import Sphinx
     from sphinx.writers.html import HTMLTranslator
+
+    from ._types import SphinxExtensionMeta
 
 
 class exception_hierarchy(nodes.General, nodes.Element):
@@ -27,7 +28,7 @@ def depart_exception_hierarchy_node(self: HTMLTranslator, node: nodes.Element) -
 class ExceptionHierarchyDirective(Directive):
     has_content = True
 
-    def run(self):
+    def run(self) -> list[exception_hierarchy]:
         self.assert_has_content()
         node = exception_hierarchy("\n".join(self.content))
         self.state.nested_parse(self.content, self.content_offset, node)

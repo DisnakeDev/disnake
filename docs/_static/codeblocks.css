@@ -110,7 +110,7 @@
 :root[data-theme="dark"] .highlight .nb { color: #29a5b3; } /* Name.Builtin */
 :root[data-theme="dark"] .highlight .nc { color: #6494d8;} /* Name.Class */
 :root[data-theme="dark"] .highlight .no { color: #40ffff; } /* Name.Constant */
-:root[data-theme="dark"] .highlight .nd { color: #ffa500; } /* Name.Decorator */
+:root[data-theme="dark"] .highlight .nd { color: #ffa500; } /* Name.Decorator # */
 :root[data-theme="dark"] .highlight .ni { color: #d0d0d0; } /* Name.Entity */
 :root[data-theme="dark"] .highlight .ne { color: #bbbbbb; } /* Name.Exception */
 :root[data-theme="dark"] .highlight .nf { color: #6494d8; } /* Name.Function */

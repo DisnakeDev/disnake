@@ -1,1 +1,0 @@
-Implement new :attr:`AutoModTriggerMetadata.mention_raid_protection_enabled` parameter.

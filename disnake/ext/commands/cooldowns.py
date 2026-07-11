@@ -5,10 +5,11 @@ from __future__ import annotations
 import asyncio
 import time
 from collections import deque
-from typing import TYPE_CHECKING, Any, Callable, Deque, Dict, Optional
+from collections.abc import Callable
+from typing import TYPE_CHECKING, Any
 
-from disnake.abc import PrivateChannel
 from disnake.enums import Enum
+from disnake.member import Member
 
 from .errors import MaxConcurrencyReached
 
@@ -27,13 +28,25 @@ __all__ = (
 
 
 class BucketType(Enum):
+    """Specifies a type of bucket for, e.g. a cooldown."""
+
     default = 0
+    """The default bucket operates on a global basis."""
     user = 1
+    """The user bucket operates on a per-user basis."""
     guild = 2
+    """The guild bucket operates on a per-guild basis."""
     channel = 3
+    """The channel bucket operates on a per-channel basis."""
     member = 4
+    """The member bucket operates on a per-member basis."""
     category = 5
+    """The category bucket operates on a per-category basis."""
     role = 6
+    """The role bucket operates on a per-role basis.
+
+    .. versionadded:: 1.3
+    """
 
     def get_key(self, msg: Message) -> Any:
         if self is BucketType.user:
@@ -45,13 +58,16 @@ class BucketType(Enum):
         elif self is BucketType.member:
             return ((msg.guild and msg.guild.id), msg.author.id)
         elif self is BucketType.category:
-            return (msg.channel.category or msg.channel).id  # type: ignore
+            return (msg.channel.category or msg.channel).id  # pyright: ignore[reportAttributeAccessIssue]
         elif self is BucketType.role:
-            # we return the channel id of a private-channel as there are only roles in guilds
-            # and that yields the same result as for a guild with only the @everyone role
-            # NOTE: PrivateChannel doesn't actually have an id attribute but we assume we are
-            # recieving a DMChannel or GroupChannel which inherit from PrivateChannel and do
-            return (msg.channel if isinstance(msg.channel, PrivateChannel) else msg.author.top_role).id  # type: ignore
+            # if author is not a Member we are in a private-channel context; returning its id
+            # yields the same result as for a guild with only the @everyone role
+            return (
+                msg.author.top_role
+                if msg.guild is not None and isinstance(msg.author, Member)
+                else msg.channel
+            ).id
+        return None
 
     def __call__(self, msg: Message) -> Any:
         return self.get_key(msg)
@@ -77,12 +93,12 @@ class Cooldown:
         self._tokens: int = self.rate
         self._last: float = 0.0
 
-    def get_tokens(self, current: Optional[float] = None) -> int:
+    def get_tokens(self, current: float | None = None) -> int:
         """Returns the number of available tokens before rate limiting is applied.
 
         Parameters
         ----------
-        current: Optional[:class:`float`]
+        current: :class:`float` | :data:`None`
             The time in seconds since Unix epoch to calculate tokens at.
             If not supplied then :func:`time.time()` is used.
 
@@ -100,12 +116,12 @@ class Cooldown:
             tokens = self.rate
         return tokens
 
-    def get_retry_after(self, current: Optional[float] = None) -> float:
+    def get_retry_after(self, current: float | None = None) -> float:
         """Returns the time in seconds until the cooldown will be reset.
 
         Parameters
         ----------
-        current: Optional[:class:`float`]
+        current: :class:`float` | :data:`None`
             The current time in seconds since Unix epoch.
             If not supplied, then :func:`time.time()` is used.
 
@@ -122,18 +138,18 @@ class Cooldown:
 
         return 0.0
 
-    def update_rate_limit(self, current: Optional[float] = None) -> Optional[float]:
+    def update_rate_limit(self, current: float | None = None) -> float | None:
         """Updates the cooldown rate limit.
 
         Parameters
         ----------
-        current: Optional[:class:`float`]
+        current: :class:`float` | :data:`None`
             The time in seconds since Unix epoch to update the rate limit at.
             If not supplied, then :func:`time.time()` is used.
 
         Returns
         -------
-        Optional[:class:`float`]
+        :class:`float` | :data:`None`
             The retry-after time in seconds if rate limited.
         """
         current = current or time.time()
@@ -151,6 +167,7 @@ class Cooldown:
 
         # we're not so decrement our tokens
         self._tokens -= 1
+        return None
 
     def reset(self) -> None:
         """Reset the cooldown to its initial state."""
@@ -174,14 +191,15 @@ class Cooldown:
 class CooldownMapping:
     def __init__(
         self,
-        original: Optional[Cooldown],
+        original: Cooldown | None,
         type: Callable[[Message], Any],
     ) -> None:
         if not callable(type):
-            raise TypeError("Cooldown type must be a BucketType or callable")
+            msg = "Cooldown type must be a BucketType or callable"
+            raise TypeError(msg)
 
-        self._cache: Dict[Any, Cooldown] = {}
-        self._cooldown: Optional[Cooldown] = original
+        self._cache: dict[Any, Cooldown] = {}
+        self._cooldown: Cooldown | None = original
         self._type: Callable[[Message], Any] = type
 
     def copy(self) -> CooldownMapping:
@@ -204,7 +222,7 @@ class CooldownMapping:
     def _bucket_key(self, msg: Message) -> Any:
         return self._type(msg)
 
-    def _verify_cache_integrity(self, current: Optional[float] = None) -> None:
+    def _verify_cache_integrity(self, current: float | None = None) -> None:
         # we want to delete all cache objects that haven't been used
         # in a cooldown window. e.g. if we have a  command that has a
         # cooldown of 60s and it has not been used in 60s then that key should be deleted
@@ -218,26 +236,26 @@ class CooldownMapping:
         return self._type is BucketType.default
 
     def create_bucket(self, message: Message) -> Cooldown:
-        return self._cooldown.copy()  # type: ignore
+        assert self._cooldown is not None
+        return self._cooldown.copy()
 
-    def get_bucket(self, message: Message, current: Optional[float] = None) -> Cooldown:
+    def get_bucket(self, message: Message, current: float | None = None) -> Cooldown:
         if self._is_default():
-            return self._cooldown  # type: ignore
+            assert self._cooldown is not None
+            return self._cooldown
 
         self._verify_cache_integrity(current)
         key = self._bucket_key(message)
         if key not in self._cache:
             bucket = self.create_bucket(message)
-            if bucket is not None:
+            if bucket is not None:  # pyright: ignore[reportUnnecessaryComparison]
                 self._cache[key] = bucket
         else:
             bucket = self._cache[key]
 
         return bucket
 
-    def update_rate_limit(
-        self, message: Message, current: Optional[float] = None
-    ) -> Optional[float]:
+    def update_rate_limit(self, message: Message, current: float | None = None) -> float | None:
         bucket = self.get_bucket(message, current)
         return bucket.update_rate_limit(current)
 
@@ -284,7 +302,7 @@ class _Semaphore:
     def __init__(self, number: int) -> None:
         self.value: int = number
         self.loop: asyncio.AbstractEventLoop = asyncio.get_running_loop()
-        self._waiters: Deque[asyncio.Future] = deque()
+        self._waiters: deque[asyncio.Future] = deque()
 
     def __repr__(self) -> str:
         return f"<_Semaphore value={self.value} waiters={len(self._waiters)}>"
@@ -330,16 +348,18 @@ class MaxConcurrency:
     __slots__ = ("number", "per", "wait", "_mapping")
 
     def __init__(self, number: int, *, per: BucketType, wait: bool) -> None:
-        self._mapping: Dict[Any, _Semaphore] = {}
+        self._mapping: dict[Any, _Semaphore] = {}
         self.per: BucketType = per
         self.number: int = number
         self.wait: bool = wait
 
         if number <= 0:
-            raise ValueError("max_concurrency 'number' cannot be less than 1")
+            msg = "max_concurrency 'number' cannot be less than 1"
+            raise ValueError(msg)
 
         if not isinstance(per, BucketType):
-            raise TypeError(f"max_concurrency 'per' must be of type BucketType not {type(per)!r}")
+            msg = f"max_concurrency 'per' must be of type BucketType not {type(per)!r}"
+            raise TypeError(msg)
 
     def copy(self) -> Self:
         return self.__class__(self.number, per=self.per, wait=self.wait)

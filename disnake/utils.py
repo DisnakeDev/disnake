@@ -6,38 +6,38 @@ import array
 import asyncio
 import datetime
 import functools
+import inspect
 import json
 import os
 import pkgutil
 import re
 import sys
+import types
 import unicodedata
 import warnings
 from base64 import b64encode
 from bisect import bisect_left
-from inspect import getdoc as _getdoc, isawaitable as _isawaitable, signature as _signature
-from operator import attrgetter
-from typing import (
-    TYPE_CHECKING,
-    Any,
+from collections.abc import (
     AsyncIterator,
     Awaitable,
     Callable,
-    Dict,
-    ForwardRef,
-    Generic,
     Iterable,
     Iterator,
-    List,
-    Literal,
     Mapping,
-    NoReturn,
-    Optional,
-    Protocol,
     Sequence,
-    Set,
-    Tuple,
-    Type,
+)
+from inspect import getdoc as _getdoc, isawaitable as _isawaitable, signature as _signature
+from operator import attrgetter
+from types import UnionType
+from typing import (
+    TYPE_CHECKING,
+    Annotated,
+    Any,
+    ForwardRef,
+    Generic,
+    Literal,
+    Protocol,
+    TypeAlias,
     TypedDict,
     TypeVar,
     Union,
@@ -46,7 +46,32 @@ from typing import (
 )
 from urllib.parse import parse_qs, urlencode
 
+from typing_extensions import Never, ParamSpec, Self, deprecated as deprecated
+
 from .enums import Locale
+
+if sys.version_info >= (3, 14):
+    import threading
+
+    def get_event_loop():
+        try:
+            # If there is no event loop, this will raise a RuntimeError starting with Python 3.14+.
+            # In that case, we create and set a new loop below.
+            # This is more of a bandaid fix, we should really use asyncio.run in the long term.
+            return asyncio.get_event_loop()
+        except RuntimeError:
+            if threading.current_thread() is not threading.main_thread():
+                raise
+            asyncio.set_event_loop(loop := asyncio.new_event_loop())
+            return loop
+else:
+
+    def get_event_loop():
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", DeprecationWarning)
+            # get_event_loop emits deprecation warnings in 3.10-3.13
+            return asyncio.get_event_loop()
+
 
 try:
     import orjson
@@ -77,7 +102,7 @@ DISCORD_EPOCH = 1420070400000
 
 
 class _MissingSentinel:
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         return False
 
     def __hash__(self) -> int:
@@ -96,7 +121,7 @@ MISSING: Any = _MissingSentinel()
 class _cached_property:
     def __init__(self, function) -> None:
         self.function = function
-        self.__doc__: Optional[str] = function.__doc__
+        self.__doc__: str | None = function.__doc__
 
     def __get__(self, instance, owner):
         if instance is None:
@@ -111,18 +136,15 @@ class _cached_property:
 if TYPE_CHECKING:
     from functools import cached_property as cached_property
 
-    from typing_extensions import Never, ParamSpec, Self
-
     from .abc import Snowflake
     from .asset import AssetBytes
     from .invite import Invite
     from .permissions import Permissions
     from .template import Template
+    from .types.appinfo import ApplicationIntegrationType as ApplicationIntegrationTypeLiteral
 
     class _RequestLike(Protocol):
         headers: Mapping[str, Any]
-
-    P = ParamSpec("P")
 
 else:
     cached_property = _cached_property
@@ -130,8 +152,10 @@ else:
 
 T = TypeVar("T")
 V = TypeVar("V")
+P = ParamSpec("P")
 T_co = TypeVar("T_co", covariant=True)
-_Iter = Union[Iterator[T], AsyncIterator[T]]
+_Iter: TypeAlias = Iterator[T] | AsyncIterator[T]
+_BytesLike: TypeAlias = bytes | bytearray | memoryview
 
 
 class CachedSlotProperty(Generic[T, T_co]):
@@ -141,14 +165,12 @@ class CachedSlotProperty(Generic[T, T_co]):
         self.__doc__ = function.__doc__
 
     @overload
-    def __get__(self, instance: None, owner: Type[T]) -> Self:
-        ...
+    def __get__(self, instance: None, owner: type[object]) -> Self: ...
 
     @overload
-    def __get__(self, instance: T, owner: Type[T]) -> T_co:
-        ...
+    def __get__(self, instance: T, owner: type[object]) -> T_co: ...
 
-    def __get__(self, instance: Optional[T], owner: Type[T]) -> Any:
+    def __get__(self, instance: T | None, owner: type[object]) -> Any:
         if instance is None:
             return self
 
@@ -164,11 +186,8 @@ class classproperty(Generic[T_co]):
     def __init__(self, fget: Callable[[Any], T_co]) -> None:
         self.fget = fget
 
-    def __get__(self, instance: Optional[Any], owner: Type[Any]) -> T_co:
+    def __get__(self, instance: object | None, owner: type[object]) -> T_co:
         return self.fget(owner)
-
-    def __set__(self, instance, value) -> NoReturn:
-        raise AttributeError("cannot set attribute")
 
 
 def cached_slot_property(name: str) -> Callable[[Callable[[T], T_co]], CachedSlotProperty[T, T_co]]:
@@ -190,7 +209,7 @@ class SequenceProxy(Sequence[T_co]):
     def __len__(self) -> int:
         return len(self.__proxied)
 
-    def __contains__(self, item: Any) -> bool:
+    def __contains__(self, item: object) -> bool:
         return item in self.__proxied
 
     def __iter__(self) -> Iterator[T_co]:
@@ -207,92 +226,93 @@ class SequenceProxy(Sequence[T_co]):
 
 
 @overload
-def parse_time(timestamp: None) -> None:
-    ...
+def parse_time(timestamp: None) -> None: ...
 
 
 @overload
-def parse_time(timestamp: str) -> datetime.datetime:
-    ...
+def parse_time(timestamp: str) -> datetime.datetime: ...
 
 
 @overload
-def parse_time(timestamp: Optional[str]) -> Optional[datetime.datetime]:
-    ...
+def parse_time(timestamp: str | None) -> datetime.datetime | None: ...
 
 
-def parse_time(timestamp: Optional[str]) -> Optional[datetime.datetime]:
+def parse_time(timestamp: str | None) -> datetime.datetime | None:
     if timestamp:
         return datetime.datetime.fromisoformat(timestamp)
     return None
 
 
 @overload
-def isoformat_utc(dt: datetime.datetime) -> str:
-    ...
+def isoformat_utc(dt: datetime.datetime) -> str: ...
 
 
 @overload
-def isoformat_utc(dt: Optional[datetime.datetime]) -> Optional[str]:
-    ...
+def isoformat_utc(dt: datetime.datetime | None) -> str | None: ...
 
 
-def isoformat_utc(dt: Optional[datetime.datetime]) -> Optional[str]:
+def isoformat_utc(dt: datetime.datetime | None) -> str | None:
     if dt:
         return dt.astimezone(datetime.timezone.utc).isoformat()
     return None
 
 
-def copy_doc(original: Callable) -> Callable[[T], T]:
-    def decorator(overriden: T) -> T:
-        overriden.__doc__ = original.__doc__
-        overriden.__signature__ = _signature(original)  # type: ignore
-        return overriden
+def copy_doc(original: Callable[..., Any] | property) -> Callable[[T], T]:
+    def decorator(overridden: T) -> T:
+        overridden.__doc__ = original.__doc__
+        if callable(original):
+            overridden.__signature__ = _signature(original)  # pyright: ignore[reportAttributeAccessIssue]
+        return overridden
 
     return decorator
 
 
-def deprecated(instead: Optional[str] = None) -> Callable[[Callable[P, T]], Callable[P, T]]:
-    def actual_decorator(func: Callable[P, T]) -> Callable[P, T]:
-        @functools.wraps(func)
-        def decorated(*args: P.args, **kwargs: P.kwargs) -> T:
-            if instead:
-                msg = f"{func.__name__} is deprecated, use {instead} instead."
-            else:
-                msg = f"{func.__name__} is deprecated."
-
-            warn_deprecated(msg, stacklevel=2)
-            return func(*args, **kwargs)
-
-        return decorated
-
-    return actual_decorator
+_root_module_path = os.path.join(os.path.dirname(__file__), "")  # add trailing slash
 
 
-def warn_deprecated(*args: Any, stacklevel: int = 1, **kwargs: Any) -> None:
+def warn_deprecated(
+    *args: Any, stacklevel: int = 1, skip_internal_frames: bool = False, **kwargs: Any
+) -> None:
+    # NOTE: skip_file_prefixes was added in 3.12; in older versions,
+    # we'll just have to live with the warning location possibly being wrong
+    if sys.version_info >= (3, 12) and skip_internal_frames:
+        kwargs["skip_file_prefixes"] = (_root_module_path,)
+        stacklevel = 1  # reset stacklevel, assume we just want the first frame outside library code
+
     old_filters = warnings.filters[:]
     try:
         warnings.simplefilter("always", DeprecationWarning)
         warnings.warn(*args, stacklevel=stacklevel + 1, category=DeprecationWarning, **kwargs)
     finally:
-        warnings.filters[:] = old_filters  # type: ignore
+        assert isinstance(warnings.filters, list)
+        warnings.filters[:] = old_filters
+
+
+# use to mark classes users should no longer use,
+# but the library still needs to create instances of
+if TYPE_CHECKING:
+    noop_deprecated = deprecated
+else:
+
+    def noop_deprecated(*_: object, **__: object) -> Callable[[T], T]:
+        return lambda o: o
 
 
 def oauth_url(
-    client_id: Union[int, str],
+    client_id: int | str,
     *,
     permissions: Permissions = MISSING,
     guild: Snowflake = MISSING,
     redirect_uri: str = MISSING,
     scopes: Iterable[str] = MISSING,
     disable_guild_select: bool = False,
+    integration_type: ApplicationIntegrationTypeLiteral = MISSING,
 ) -> str:
-    """A helper function that returns the OAuth2 URL for inviting the bot
-    into guilds.
+    r"""A helper function that returns the OAuth2 URL for authorizing the application.
 
     Parameters
     ----------
-    client_id: Union[:class:`int`, :class:`str`]
+    client_id: :class:`int` | :class:`str`
         The client ID for your bot.
     permissions: :class:`~disnake.Permissions`
         The permissions you're requesting. If not given then you won't be requesting any
@@ -301,7 +321,7 @@ def oauth_url(
         The guild to pre-select in the authorization screen, if available.
     redirect_uri: :class:`str`
         An optional valid redirect URI.
-    scopes: Iterable[:class:`str`]
+    scopes: :class:`~collections.abc.Iterable`\[:class:`str`]
         An optional valid list of scopes. Defaults to ``('bot',)``.
 
         .. versionadded:: 1.7
@@ -310,6 +330,11 @@ def oauth_url(
         Whether to disallow the user from changing the guild dropdown.
 
         .. versionadded:: 2.0
+
+    integration_type: :class:`int`
+        An optional integration type/installation type to install the application with.
+
+        .. versionadded:: 2.10
 
     Returns
     -------
@@ -326,6 +351,8 @@ def oauth_url(
         url += "&response_type=code&" + urlencode({"redirect_uri": redirect_uri})
     if disable_guild_select:
         url += "&disable_guild_select=true"
+    if integration_type is not MISSING:
+        url += f"&integration_type={integration_type}"
     return url
 
 
@@ -370,14 +397,14 @@ def time_snowflake(dt: datetime.datetime, high: bool = False) -> int:
     return (discord_millis << 22) + (2**22 - 1 if high else 0)
 
 
-def find(predicate: Callable[[T], Any], seq: Iterable[T]) -> Optional[T]:
+def find(predicate: Callable[[T], Any], seq: Iterable[T]) -> T | None:
     """A helper to return the first element found in the sequence
     that meets the predicate. For example: ::
 
         member = disnake.utils.find(lambda m: m.name == 'Mighty', channel.guild.members)
 
     would find the first :class:`~disnake.Member` whose name is 'Mighty' and return it.
-    If an entry is not found, then ``None`` is returned.
+    If an entry is not found, then :data:`None` is returned.
 
     This is different from :func:`py:filter` due to the fact it stops the moment it finds
     a valid entry.
@@ -395,7 +422,7 @@ def find(predicate: Callable[[T], Any], seq: Iterable[T]) -> Optional[T]:
     return None
 
 
-def get(iterable: Iterable[T], **attrs: Any) -> Optional[T]:
+def get(iterable: Iterable[T], **attrs: Any) -> T | None:
     """A helper that returns the first element in the iterable that meets
     all the traits passed in ``attrs``. This is an alternative for
     :func:`~disnake.utils.find`.
@@ -408,7 +435,7 @@ def get(iterable: Iterable[T], **attrs: Any) -> Optional[T]:
     pass in ``x__y`` as the keyword argument.
 
     If nothing is found that matches the attributes passed, then
-    ``None`` is returned.
+    :data:`None` is returned.
 
     Examples
     --------
@@ -458,11 +485,11 @@ def get(iterable: Iterable[T], **attrs: Any) -> Optional[T]:
     return None
 
 
-def _unique(iterable: Iterable[T]) -> List[T]:
+def _unique(iterable: Iterable[T]) -> list[T]:
     return list(dict.fromkeys(iterable))
 
 
-def _get_as_snowflake(data: Any, key: str) -> Optional[int]:
+def _get_as_snowflake(data: Any, key: str) -> int | None:
     try:
         value = data[key]
     except KeyError:
@@ -471,7 +498,7 @@ def _get_as_snowflake(data: Any, key: str) -> Optional[int]:
         return value and int(value)
 
 
-def _maybe_cast(value: V, converter: Callable[[V], T], default: T = None) -> Optional[T]:
+def _maybe_cast(value: V, converter: Callable[[V], T], default: T = None) -> T | None:
     if value is MISSING:
         return default
     return converter(value)
@@ -484,11 +511,13 @@ _mime_type_extensions = {
     "image/jpeg": ".jpg",
     "image/gif": ".gif",
     "image/webp": ".webp",
+    "audio/mpeg": ".mp3",
+    "audio/ogg": ".ogg",
 }
 
 
-def _get_mime_type_for_image(data: bytes) -> str:
-    if data[0:8] == b"\x89\x50\x4E\x47\x0D\x0A\x1A\x0A":
+def _get_mime_type_for_data(data: _BytesLike) -> str:
+    if data[0:8] == b"\x89\x50\x4e\x47\x0d\x0a\x1a\x0a":
         return "image/png"
     elif data[0:3] == b"\xff\xd8\xff" or data[6:10] in (b"JFIF", b"Exif"):
         return "image/jpeg"
@@ -496,36 +525,41 @@ def _get_mime_type_for_image(data: bytes) -> str:
         return "image/gif"
     elif data[0:4] == b"RIFF" and data[8:12] == b"WEBP":
         return "image/webp"
+    elif data[0:3] == b"ID3" or data[0:2] in (b"\xff\xfb", b"\xff\xf3", b"\xff\xf2"):
+        # n.b. this doesn't support the unofficial MPEG-2.5 frame header (which starts with 0xFFEx).
+        # Discord also doesn't accept it.
+        return "audio/mpeg"
+    elif data[0:4] == b"OggS":
+        return "audio/ogg"
     else:
-        raise ValueError("Unsupported image type given")
+        msg = "Unsupported file type provided"
+        raise ValueError(msg)
 
 
-def _bytes_to_base64_data(data: bytes) -> str:
+def _bytes_to_base64_data(data: _BytesLike) -> str:
     fmt = "data:{mime};base64,{data}"
-    mime = _get_mime_type_for_image(data)
+    mime = _get_mime_type_for_data(data)
     b64 = b64encode(data).decode("ascii")
     return fmt.format(mime=mime, data=b64)
 
 
-def _get_extension_for_image(data: bytes) -> Optional[str]:
+def _get_extension_for_data(data: _BytesLike) -> str | None:
     try:
-        mime_type = _get_mime_type_for_image(data)
+        mime_type = _get_mime_type_for_data(data)
     except ValueError:
         return None
     return _mime_type_extensions.get(mime_type)
 
 
 @overload
-async def _assetbytes_to_base64_data(data: None) -> None:
-    ...
+async def _assetbytes_to_base64_data(data: None) -> None: ...
 
 
 @overload
-async def _assetbytes_to_base64_data(data: AssetBytes) -> str:
-    ...
+async def _assetbytes_to_base64_data(data: AssetBytes) -> str: ...
 
 
-async def _assetbytes_to_base64_data(data: Optional[AssetBytes]) -> Optional[str]:
+async def _assetbytes_to_base64_data(data: AssetBytes | None) -> str | None:
     if data is None:
         return None
     if not isinstance(data, (bytes, bytearray, memoryview)):
@@ -536,9 +570,9 @@ async def _assetbytes_to_base64_data(data: Optional[AssetBytes]) -> Optional[str
 if HAS_ORJSON:
 
     def _to_json(obj: Any) -> str:
-        return orjson.dumps(obj).decode("utf-8")
+        return orjson.dumps(obj).decode("utf-8")  # pyright: ignore[reportPossiblyUnboundVariable]
 
-    _from_json = orjson.loads  # type: ignore
+    _from_json = orjson.loads  # pyright: ignore[reportPossiblyUnboundVariable]
 
 else:
 
@@ -549,7 +583,7 @@ else:
 
 
 def _parse_ratelimit_header(request: Any, *, use_clock: bool = False) -> float:
-    reset_after: Optional[str] = request.headers.get("X-Ratelimit-Reset-After")
+    reset_after: str | None = request.headers.get("X-Ratelimit-Reset-After")
     if use_clock or not reset_after:
         utc = datetime.timezone.utc
         now = datetime.datetime.now(utc)
@@ -560,16 +594,17 @@ def _parse_ratelimit_header(request: Any, *, use_clock: bool = False) -> float:
 
 
 async def maybe_coroutine(
-    f: Callable[P, Union[Awaitable[T], T]], /, *args: P.args, **kwargs: P.kwargs
+    f: Callable[P, Awaitable[T] | T], /, *args: P.args, **kwargs: P.kwargs
 ) -> T:
     value = f(*args, **kwargs)
     if _isawaitable(value):
         return await value
     else:
-        return value  # type: ignore  # typeguard doesn't narrow in the negative case
+        return value
 
 
-async def async_all(gen: Iterable[Union[Awaitable[bool], bool]], *, check=_isawaitable) -> bool:
+async def async_all(gen: Iterable[Awaitable[bool] | bool]) -> bool:
+    check = _isawaitable
     for elem in gen:
         if check(elem):
             elem = await elem
@@ -578,7 +613,7 @@ async def async_all(gen: Iterable[Union[Awaitable[bool], bool]], *, check=_isawa
     return True
 
 
-async def sane_wait_for(futures: Iterable[Awaitable[T]], *, timeout: float) -> Set[asyncio.Task[T]]:
+async def sane_wait_for(futures: Iterable[Awaitable[T]], *, timeout: float) -> set[asyncio.Task[T]]:
     ensured = [asyncio.ensure_future(fut) for fut in futures]
     done, pending = await asyncio.wait(ensured, timeout=timeout, return_when=asyncio.ALL_COMPLETED)
 
@@ -588,7 +623,7 @@ async def sane_wait_for(futures: Iterable[Awaitable[T]], *, timeout: float) -> S
     return done
 
 
-def get_slots(cls: Type[Any]) -> Iterator[str]:
+def get_slots(cls: type[object]) -> Iterator[str]:
     for mro in reversed(cls.__mro__):
         slots = getattr(mro, "__slots__", [])
         if isinstance(slots, str):
@@ -604,7 +639,7 @@ def compute_timedelta(dt: datetime.datetime) -> float:
     return max((dt - now).total_seconds(), 0)
 
 
-async def sleep_until(when: datetime.datetime, result: Optional[T] = None) -> Optional[T]:
+async def sleep_until(when: datetime.datetime, result: T | None = None) -> T | None:
     """|coro|
 
     Sleep until a specified time.
@@ -662,17 +697,16 @@ class SnowflakeList(array.array):
 
     if TYPE_CHECKING:
 
-        def __init__(self, data: Iterable[int], *, is_sorted: bool = False) -> None:
-            ...
+        def __init__(self, data: Iterable[int], *, is_sorted: bool = False) -> None: ...
 
-    def __new__(cls, data: Iterable[int], *, is_sorted: bool = False):
-        return array.array.__new__(cls, "Q", data if is_sorted else sorted(data))  # type: ignore
+    def __new__(cls, data: Iterable[int], *, is_sorted: bool = False) -> Self:
+        return array.array.__new__(cls, "Q", data if is_sorted else sorted(data))  # pyright: ignore[reportReturnType]
 
     def add(self, element: int) -> None:
         i = bisect_left(self, element)
         self.insert(i, element)
 
-    def get(self, element: int) -> Optional[int]:
+    def get(self, element: int) -> int | None:
         i = bisect_left(self, element)
         return self[i] if i != len(self) and self[i] == element else None
 
@@ -696,25 +730,23 @@ def _string_width(string: str, *, _IS_ASCII=_IS_ASCII) -> int:
 
 
 @overload
-def resolve_invite(invite: Union[Invite, str], *, with_params: Literal[False] = False) -> str:
-    ...
+def resolve_invite(invite: Invite | str, *, with_params: Literal[False] = False) -> str: ...
 
 
 @overload
 def resolve_invite(
-    invite: Union[Invite, str], *, with_params: Literal[True]
-) -> Tuple[str, Dict[str, str]]:
-    ...
+    invite: Invite | str, *, with_params: Literal[True]
+) -> tuple[str, dict[str, str]]: ...
 
 
 def resolve_invite(
-    invite: Union[Invite, str], *, with_params: bool = False
-) -> Union[str, Tuple[str, Dict[str, str]]]:
-    """Resolves an invite from a :class:`~disnake.Invite`, URL or code.
+    invite: Invite | str, *, with_params: bool = False
+) -> str | tuple[str, dict[str, str]]:
+    r"""Resolves an invite from a :class:`~disnake.Invite`, URL or code.
 
     Parameters
     ----------
-    invite: Union[:class:`~disnake.Invite`, :class:`str`]
+    invite: :class:`~disnake.Invite` | :class:`str`
         The invite to resolve.
     with_params: :class:`bool`
         Whether to also return the query parameters of the invite, if it's a url.
@@ -723,7 +755,7 @@ def resolve_invite(
 
     Returns
     -------
-    Union[:class:`str`, Tuple[:class:`str`, Dict[:class:`str`, :class:`str`]]]
+    :class:`str` | :class:`tuple`\[:class:`str`, :class:`dict`\[:class:`str`, :class:`str`]]
         The invite code if ``with_params`` is ``False``, otherwise a tuple containing the
         invite code and the url's query parameters, if applicable.
     """
@@ -745,14 +777,14 @@ def resolve_invite(
     return (code, params) if with_params else code
 
 
-def resolve_template(code: Union[Template, str]) -> str:
+def resolve_template(code: Template | str) -> str:
     """Resolves a template code from a :class:`~disnake.Template`, URL or code.
 
     .. versionadded:: 1.4
 
     Parameters
     ----------
-    code: Union[:class:`~disnake.Template`, :class:`str`]
+    code: :class:`~disnake.Template` | :class:`str`
         The code.
 
     Returns
@@ -773,7 +805,7 @@ def resolve_template(code: Union[Template, str]) -> str:
 
 
 _MARKDOWN_ESCAPE_SUBREGEX = "|".join(
-    r"\{0}(?=([\s\S]*((?<!\{0})\{0})))".format(c) for c in ("*", "`", "_", "~", "|")
+    rf"\{c}(?=([\s\S]*((?<!\{c})\{c})))" for c in ("*", "`", "_", "~", "|")
 )
 
 _MARKDOWN_ESCAPE_COMMON = r"^>(?:>>)?\s|\[.+\]\(.+\)"
@@ -811,18 +843,18 @@ def remove_markdown(text: str, *, ignore_links: bool = True) -> str:
         The text with the markdown special characters removed.
     """
 
-    def replacement(match):
+    def replacement(match: re.Match) -> str:
         groupdict = match.groupdict()
         return groupdict.get("url", "")
 
     regex = _MARKDOWN_STOCK_REGEX
     if ignore_links:
         regex = f"(?:{_URL_REGEX}|{regex})"
-    return re.sub(regex, replacement, text, 0, re.MULTILINE)
+    return re.sub(regex, replacement, text, flags=re.MULTILINE)
 
 
 def escape_markdown(text: str, *, as_needed: bool = False, ignore_links: bool = True) -> str:
-    """A helper function that escapes Discord's markdown.
+    r"""A helper function that escapes Discord's markdown.
 
     Parameters
     ----------
@@ -831,8 +863,8 @@ def escape_markdown(text: str, *, as_needed: bool = False, ignore_links: bool = 
     as_needed: :class:`bool`
         Whether to escape the markdown characters as needed. This
         means that it does not escape extraneous characters if it's
-        not necessary, e.g. ``**hello**`` is escaped into ``\\*\\*hello**``
-        instead of ``\\*\\*hello\\*\\*``. Note however that this can open
+        not necessary, e.g. ``**hello**`` is escaped into ``\*\*hello**``
+        instead of ``\*\*hello\*\*``. Note however that this can open
         you up to some clever syntax abuse. Defaults to ``False``.
     ignore_links: :class:`bool`
         Whether to leave links alone when escaping markdown. For example,
@@ -847,7 +879,7 @@ def escape_markdown(text: str, *, as_needed: bool = False, ignore_links: bool = 
     """
     if not as_needed:
 
-        def replacement(match):
+        def replacement(match: re.Match) -> str:
             groupdict = match.groupdict()
             is_url = groupdict.get("url")
             if is_url:
@@ -857,7 +889,7 @@ def escape_markdown(text: str, *, as_needed: bool = False, ignore_links: bool = 
         regex = _MARKDOWN_STOCK_REGEX
         if ignore_links:
             regex = f"(?:{_URL_REGEX}|{regex})"
-        return re.sub(regex, replacement, text, 0, re.MULTILINE)
+        return re.sub(regex, replacement, text, flags=re.MULTILINE)
     else:
         text = re.sub(r"\\", r"\\\\", text)
         return _MARKDOWN_ESCAPE_REGEX.sub(r"\\\1", text)
@@ -893,8 +925,8 @@ def escape_mentions(text: str) -> str:
 
 
 class _DocstringLocalizationsMixin(TypedDict):
-    localization_key_name: Optional[str]
-    localization_key_desc: Optional[str]
+    localization_key_name: str | None
+    localization_key_desc: str | None
 
 
 class _DocstringParam(_DocstringLocalizationsMixin):
@@ -905,7 +937,7 @@ class _DocstringParam(_DocstringLocalizationsMixin):
 
 class _ParsedDocstring(_DocstringLocalizationsMixin):
     description: str
-    params: Dict[str, _DocstringParam]
+    params: dict[str, _DocstringParam]
 
 
 def _count_left_spaces(string: str) -> int:
@@ -917,7 +949,7 @@ def _count_left_spaces(string: str) -> int:
     return res
 
 
-def _get_header_line(lines: List[str], header: str, underline: str) -> int:
+def _get_header_line(lines: list[str], header: str, underline: str) -> int:
     underlining = len(header) * underline
     for i, line in enumerate(lines):
         if line.rstrip() == header and i + 1 < len(lines) and lines[i + 1].startswith(underlining):
@@ -925,7 +957,7 @@ def _get_header_line(lines: List[str], header: str, underline: str) -> int:
     return len(lines)
 
 
-def _get_next_header_line(lines: List[str], underline: str, start: int = 0) -> int:
+def _get_next_header_line(lines: list[str], underline: str, start: int = 0) -> int:
     for idx, line in enumerate(lines[start:]):
         i = start + idx
         clean_line = line.rstrip()
@@ -940,12 +972,12 @@ def _get_next_header_line(lines: List[str], underline: str, start: int = 0) -> i
     return len(lines)
 
 
-def _get_description(lines: List[str]) -> str:
+def _get_description(lines: list[str]) -> str:
     end = _get_next_header_line(lines, "-")
     return "\n".join(lines[:end]).strip()
 
 
-def _extract_localization_key(desc: str) -> Tuple[str, Tuple[Optional[str], Optional[str]]]:
+def _extract_localization_key(desc: str) -> tuple[str, tuple[str | None, str | None]]:
     match = re.search(r"\{\{(.*?)\}\}", desc)
     if match:
         desc = desc.replace(match.group(0), "").strip()
@@ -954,18 +986,18 @@ def _extract_localization_key(desc: str) -> Tuple[str, Tuple[Optional[str], Opti
     return desc, (None, None)
 
 
-def _get_option_desc(lines: List[str]) -> Dict[str, _DocstringParam]:
+def _get_option_desc(lines: list[str]) -> dict[str, _DocstringParam]:
     start = _get_header_line(lines, "Parameters", "-") + 2
     end = _get_next_header_line(lines, "-", start)
     if start >= len(lines):
         return {}
     # Read option descriptions
-    options: Dict[str, _DocstringParam] = {}
+    options: dict[str, _DocstringParam] = {}
 
-    def add_param(param: Optional[str], desc_lines: List[str], maybe_type: Optional[str]) -> None:
+    def add_param(param: str | None, desc_lines: list[str], maybe_type: str | None) -> None:
         if param is None:
             return
-        desc: Optional[str] = None
+        desc: str | None = None
         if desc_lines:
             desc = "\n".join(desc_lines)
         elif maybe_type:
@@ -981,9 +1013,9 @@ def _get_option_desc(lines: List[str]) -> Dict[str, _DocstringParam]:
                 "localization_key_desc": loc_key_desc,
             }
 
-    desc_lines: List[str] = []
-    param: Optional[str] = None
-    maybe_type: Optional[str] = None
+    desc_lines: list[str] = []
+    param: str | None = None
+    maybe_type: str | None = None
     for line in lines[start:end]:
         spaces = _count_left_spaces(line)
         if spaces == 0:
@@ -1005,7 +1037,7 @@ def _get_option_desc(lines: List[str]) -> Dict[str, _DocstringParam]:
     return options
 
 
-def parse_docstring(func: Callable) -> _ParsedDocstring:
+def parse_docstring(func: Callable[..., Any]) -> _ParsedDocstring:
     doc = _getdoc(func)
     if doc is None:
         return {
@@ -1027,7 +1059,7 @@ def parse_docstring(func: Callable) -> _ParsedDocstring:
 # Chunkers
 
 
-def _chunk(iterator: Iterator[T], max_size: int) -> Iterator[List[T]]:
+def _chunk(iterator: Iterator[T], max_size: int) -> Iterator[list[T]]:
     ret = []
     n = 0
     for item in iterator:
@@ -1041,7 +1073,7 @@ def _chunk(iterator: Iterator[T], max_size: int) -> Iterator[List[T]]:
         yield ret
 
 
-async def _achunk(iterator: AsyncIterator[T], max_size: int) -> AsyncIterator[List[T]]:
+async def _achunk(iterator: AsyncIterator[T], max_size: int) -> AsyncIterator[list[T]]:
     ret = []
     n = 0
     async for item in iterator:
@@ -1056,23 +1088,21 @@ async def _achunk(iterator: AsyncIterator[T], max_size: int) -> AsyncIterator[Li
 
 
 @overload
-def as_chunks(iterator: Iterator[T], max_size: int) -> Iterator[List[T]]:
-    ...
+def as_chunks(iterator: Iterator[T], max_size: int) -> Iterator[list[T]]: ...
 
 
 @overload
-def as_chunks(iterator: AsyncIterator[T], max_size: int) -> AsyncIterator[List[T]]:
-    ...
+def as_chunks(iterator: AsyncIterator[T], max_size: int) -> AsyncIterator[list[T]]: ...
 
 
-def as_chunks(iterator: _Iter[T], max_size: int) -> _Iter[List[T]]:
+def as_chunks(iterator: _Iter[T], max_size: int) -> _Iter[list[T]]:
     """A helper function that collects an iterator into chunks of a given size.
 
     .. versionadded:: 2.0
 
     Parameters
     ----------
-    iterator: Union[:class:`collections.abc.Iterator`, :class:`collections.abc.AsyncIterator`]
+    iterator: :class:`collections.abc.Iterator` | :class:`collections.abc.AsyncIterator`
         The iterator to chunk, can be sync or async.
     max_size: :class:`int`
         The maximum chunk size.
@@ -1084,48 +1114,50 @@ def as_chunks(iterator: _Iter[T], max_size: int) -> _Iter[List[T]]:
 
     Returns
     -------
-    Union[:class:`Iterator`, :class:`AsyncIterator`]
+    :class:`Iterator` | :class:`AsyncIterator`
         A new iterator which yields chunks of a given size.
     """
     if max_size <= 0:
-        raise ValueError("Chunk sizes must be greater than 0.")
+        msg = "Chunk sizes must be greater than 0."
+        raise ValueError(msg)
 
     if isinstance(iterator, AsyncIterator):
         return _achunk(iterator, max_size)
     return _chunk(iterator, max_size)
 
 
-if sys.version_info >= (3, 10):
-    PY_310 = True
-    from types import UnionType
-else:
-    PY_310 = False
-    UnionType = object()
-
-
-def flatten_literal_params(parameters: Iterable[Any]) -> Tuple[Any, ...]:
-    params = []
-    for p in parameters:
-        if get_origin(p) is Literal:
-            params.extend(_unique(flatten_literal_params(p.__args__)))
-        else:
-            params.append(p)
-    return tuple(params)
-
-
-def normalise_optional_params(parameters: Iterable[Any]) -> Tuple[Any, ...]:
+def normalise_optional_params(parameters: Iterable[Any]) -> tuple[Any, ...]:
     none_cls = type(None)
-    return tuple(p for p in parameters if p is not none_cls) + (none_cls,)
+    return (*tuple(p for p in parameters if p is not none_cls), none_cls)
 
 
+def _resolve_typealiastype(
+    tp: Any, globals: dict[str, Any], locals: dict[str, Any], cache: dict[str, Any]
+) -> Any:
+    # Use __module__ to get the (global) namespace in which the type alias was defined.
+    if mod := sys.modules.get(tp.__module__):
+        mod_globals = mod.__dict__
+        if mod_globals is not globals or mod_globals is not locals:
+            # if the namespace changed (usually when a TypeAliasType was imported from a different module),
+            # drop the cache since names can resolve differently now
+            cache = {}
+        globals = locals = mod_globals
+
+    # Accessing `__value__` automatically evaluates the type alias in the annotation scope.
+    # (recurse to resolve possible forwardrefs, aliases, etc.)
+    return evaluate_annotation(tp.__value__, globals, locals, cache)
+
+
+# FIXME: this should be split up into smaller functions for clarity and easier maintenance
 def evaluate_annotation(
     tp: Any,
-    globals: Dict[str, Any],
-    locals: Dict[str, Any],
-    cache: Dict[str, Any],
+    globals: dict[str, Any],
+    locals: dict[str, Any],
+    cache: dict[str, Any],
     *,
     implicit_str: bool = True,
-):
+    source_info: types.CodeType | None = None,
+) -> Any:
     if isinstance(tp, ForwardRef):
         tp = tp.__forward_arg__
         # ForwardRefs always evaluate their internals
@@ -1134,43 +1166,75 @@ def evaluate_annotation(
     if implicit_str and isinstance(tp, str):
         if tp in cache:
             return cache[tp]
-        evaluated = eval(  # noqa: PGH001 # this is how annotations are supposed to be unstringifed
-            tp, globals, locals
-        )
-        cache[tp] = evaluated
-        return evaluate_annotation(evaluated, globals, locals, cache)
 
+        if source_info is not None:
+            # compile the annotation to add filename/line no. data for warnings & tracebacks
+            source = compile(tp, source_info.co_filename, "eval", dont_inherit=True)
+            source = source.replace(co_firstlineno=source_info.co_firstlineno)
+        else:
+            source = tp
+
+        # this is how annotations are supposed to be unstringifed
+        evaluated = eval(source, globals, locals)  # noqa: S307
+        # recurse to resolve nested args further
+        evaluated = evaluate_annotation(evaluated, globals, locals, cache, source_info=source_info)
+
+        cache[tp] = evaluated
+        return evaluated
+
+    # Annotated[X, Y], where Y is the converter we need
+    if get_origin(tp) is Annotated:
+        return evaluate_annotation(
+            tp.__metadata__[0], globals, locals, cache, source_info=source_info
+        )
+
+    # GenericAlias / UnionType
     if hasattr(tp, "__args__"):
+        if not hasattr(tp, "__origin__"):
+            # n.b. this became obsolete in Python 3.14+, as `UnionType` and `Union` are the same thing now.
+            if tp.__class__ is UnionType:
+                converted = Union[tp.__args__]  # noqa: UP007
+                return evaluate_annotation(
+                    converted, globals, locals, cache, source_info=source_info
+                )
+
+            return tp
+
         implicit_str = True
         is_literal = False
         orig_args = args = tp.__args__
-        if not hasattr(tp, "__origin__"):
-            if tp.__class__ is UnionType:
-                converted = Union[args]  # type: ignore
-                return evaluate_annotation(converted, globals, locals, cache)
+        orig_origin = origin = tp.__origin__
 
-            return tp
-        if tp.__origin__ is Union:
+        # origin can be a TypeAliasType too, resolve it and continue
+        if hasattr(origin, "__value__"):
+            origin = _resolve_typealiastype(origin, globals, locals, cache)
+
+        if origin is Union:
             try:
                 if args.index(type(None)) != len(args) - 1:
                     args = normalise_optional_params(tp.__args__)
             except ValueError:
                 pass
-        if tp.__origin__ is Literal:
-            if not PY_310:
-                args = flatten_literal_params(tp.__args__)
+        if origin is Literal:
             implicit_str = False
             is_literal = True
 
         evaluated_args = tuple(
-            evaluate_annotation(arg, globals, locals, cache, implicit_str=implicit_str)
+            evaluate_annotation(
+                arg, globals, locals, cache, implicit_str=implicit_str, source_info=source_info
+            )
             for arg in args
         )
 
         if is_literal and not all(
             isinstance(x, (str, int, bool, type(None))) for x in evaluated_args
         ):
-            raise TypeError("Literal arguments must be of type str, int, bool, or NoneType.")
+            msg = "Literal arguments must be of type str, int, bool, or NoneType."
+            raise TypeError(msg)
+
+        if origin != orig_origin:
+            # we can't use `copy_with` in this case, so just skip all of the following logic
+            return origin[evaluated_args]
 
         if evaluated_args == orig_args:
             return tp
@@ -1178,16 +1242,20 @@ def evaluate_annotation(
         try:
             return tp.copy_with(evaluated_args)
         except AttributeError:
-            return tp.__origin__[evaluated_args]
+            return origin[evaluated_args]
+
+    # TypeAliasType, 3.12+
+    if hasattr(tp, "__value__"):
+        return _resolve_typealiastype(tp, globals, locals, cache)
 
     return tp
 
 
 def resolve_annotation(
     annotation: Any,
-    globalns: Dict[str, Any],
-    localns: Optional[Dict[str, Any]],
-    cache: Optional[Dict[str, Any]],
+    globalns: dict[str, Any],
+    localns: dict[str, Any] | None,
+    cache: dict[str, Any] | None,
 ) -> Any:
     if annotation is None:
         return type(None)
@@ -1200,31 +1268,187 @@ def resolve_annotation(
     return evaluate_annotation(annotation, globalns, locals, cache)
 
 
-TimestampStyle = Literal["f", "F", "d", "D", "t", "T", "R"]
+def unwrap_function(function: Callable[..., Any]) -> Callable[..., Any]:
+    partial = functools.partial
+    while True:
+        if hasattr(function, "__wrapped__"):
+            function = function.__wrapped__
+        elif isinstance(function, partial):
+            function = function.func
+        else:
+            return function
 
 
-def format_dt(dt: Union[datetime.datetime, float], /, style: TimestampStyle = "f") -> str:
-    """A helper function to format a :class:`datetime.datetime`, :class:`int` or :class:`float` for presentation within Discord.
+def _get_function_globals(function: Callable[..., Any]) -> dict[str, Any]:
+    unwrap = unwrap_function(function)
+    try:
+        return unwrap.__globals__
+    except AttributeError:
+        return {}
+
+
+_inspect_empty = inspect.Parameter.empty
+
+
+def get_signature_parameters(
+    function: Callable[..., Any],
+    globalns: dict[str, Any] | None = None,
+    *,
+    skip_standard_params: bool = False,
+) -> dict[str, inspect.Parameter]:
+    # if no globalns provided, unwrap (where needed) and get global namespace from there
+    if globalns is None:
+        globalns = _get_function_globals(function)
+
+    params: dict[str, inspect.Parameter] = {}
+    cache: dict[str, Any] = {}
+
+    signature = inspect.signature(function)
+    iterator = iter(signature.parameters.items())
+
+    if skip_standard_params:
+        # skip `self` (if present) and `ctx` parameters,
+        # since their annotations are irrelevant
+        skip = 2 if signature_has_self_param(function) else 1
+
+        for _ in range(skip):
+            try:
+                next(iterator)
+            except StopIteration:
+                msg = f"Expected command callback to have at least {skip} parameter(s)"
+                raise ValueError(msg) from None
+
+    # eval all parameter annotations
+    for name, parameter in iterator:
+        annotation = parameter.annotation
+        if annotation is _inspect_empty:
+            params[name] = parameter
+            continue
+
+        if annotation is None:
+            annotation = type(None)
+        else:
+            annotation = evaluate_annotation(
+                annotation, globalns, globalns, cache, source_info=function.__code__
+            )
+
+        params[name] = parameter.replace(annotation=annotation)
+
+    return params
+
+
+def get_signature_return(function: Callable[..., Any]) -> Any:
+    signature = inspect.signature(function)
+
+    # same as parameters above, but for the return annotation
+    ret = signature.return_annotation
+    if ret is not _inspect_empty:
+        if ret is None:
+            ret = type(None)
+        else:
+            globalns = _get_function_globals(function)
+            ret = evaluate_annotation(ret, globalns, globalns, {})
+
+    return ret
+
+
+def signature_has_self_param(function: Callable[..., Any]) -> bool:
+    # If a function was defined in a class and is not bound (i.e. is not types.MethodType),
+    # it should have a `self` parameter.
+    # Bound methods technically also have a `self` parameter, but this is
+    # used in conjunction with `inspect.signature`, which drops that parameter.
+    #
+    # There isn't really any way to reliably detect whether a function
+    # was defined in a class, other than `__qualname__`, thanks to PEP 3155.
+    # As noted in the PEP, this doesn't work with rebinding, but that should be a pretty rare edge case.
+    #
+    #
+    # There are a few possible situations here - for the purposes of this method,
+    # we want to detect the first case only:
+    # (1) The preceding component for *methods in classes* will be the class name, resulting in `Clazz.func`.
+    # (2) For *unbound* functions (not methods), `__qualname__ == __name__`.
+    # (3) Bound methods (i.e. types.MethodType) don't have a `self` parameter in the context of this function (see first paragraph).
+    #     (we currently don't expect to handle bound methods anywhere, except the default help command implementation).
+    # (4) A somewhat special case are lambdas defined in a class namespace (but not inside a method), which use `Clazz.<lambda>` and shouldn't match (1).
+    #     (lambdas at class level are a bit funky; we currently only expect them in the `Param(converter=)` kwarg, which doesn't take a `self` parameter).
+    # (5) Similarly, *nested functions* use `containing_func.<locals>.func` and shouldn't have a `self` parameter.
+    #
+    # Working solely based on this string is certainly not ideal,
+    # but the compiler does a bunch of processing just for that attribute,
+    # and there's really no other way to retrieve this information through other means later.
+    # (3.10: https://github.com/python/cpython/blob/e07086db03d2dc1cd2e2a24f6c9c0ddd422b4cf0/Python/compile.c#L744)
+    #
+    # Not reliable for classmethod/staticmethod.
+
+    qname = function.__qualname__
+    if qname == function.__name__:
+        # (2)
+        return False
+
+    if isinstance(function, types.MethodType):
+        # (3)
+        return False
+
+    # "a.b.c.d" => "a.b.c", "d"
+    parent, basename = qname.rsplit(".", 1)
+
+    if basename == "<lambda>":
+        # (4)
+        return False
+
+    # (5)
+    return not parent.endswith(".<locals>")
+
+
+if sys.version_info >= (3, 14):
+    import annotationlib
+
+    def get_annotations_from_namespace(namespace: dict[str, Any]) -> dict[str, Any]:
+        # classes in 3.14+ don't necessarily have an `__annotations__` dict,
+        # as annotations are lazily evaluated (provided the pre-3.14 future import isn't used)
+        # https://docs.python.org/3.14/library/annotationlib.html#annotationlib-metaclass
+        if annotate := annotationlib.get_annotate_from_class_namespace(namespace):
+            # we usually run these through `resolve_annotation` right after anyway,
+            # so `FORWARDREF` doesn't really provide an advantage over simply using `VALUE`,
+            # but it also doesn't hurt to use it.
+            return annotationlib.call_annotate_function(annotate, annotationlib.Format.FORWARDREF)
+        return namespace.get("__annotations__", {})
+
+else:
+
+    def get_annotations_from_namespace(namespace: dict[str, Any]) -> dict[str, Any]:
+        return namespace.get("__annotations__", {})
+
+
+TimestampStyle = Literal["t", "T", "d", "D", "f", "F", "s", "S", "R"]
+
+
+def format_dt(dt: datetime.datetime | float, /, style: TimestampStyle = "f") -> str:
+    """Format a :class:`datetime.datetime`, :class:`int` or :class:`float` (seconds) for presentation within Discord.
 
     This allows for a locale-independent way of presenting data using Discord specific Markdown.
 
-    +-------------+----------------------------+-----------------+
-    |    Style    |       Example Output       |   Description   |
-    +=============+============================+=================+
-    | t           | 22:57                      | Short Time      |
-    +-------------+----------------------------+-----------------+
-    | T           | 22:57:58                   | Long Time       |
-    +-------------+----------------------------+-----------------+
-    | d           | 17/05/2016                 | Short Date      |
-    +-------------+----------------------------+-----------------+
-    | D           | 17 May 2016                | Long Date       |
-    +-------------+----------------------------+-----------------+
-    | f (default) | 17 May 2016 22:57          | Short Date Time |
-    +-------------+----------------------------+-----------------+
-    | F           | Tuesday, 17 May 2016 22:57 | Long Date Time  |
-    +-------------+----------------------------+-----------------+
-    | R           | 5 years ago                | Relative Time   |
-    +-------------+----------------------------+-----------------+
+    +-------------+-------------------------------+------------------------+
+    |    Style    |        Example Output         |      Description       |
+    +=============+===============================+========================+
+    | t           | 22:57                         | Short Time             |
+    +-------------+-------------------------------+------------------------+
+    | T           | 22:57:58                      | Long Time              |
+    +-------------+-------------------------------+------------------------+
+    | d           | 17/05/2016                    | Short Date             |
+    +-------------+-------------------------------+------------------------+
+    | D           | 17 May 2016                   | Long Date              |
+    +-------------+-------------------------------+------------------------+
+    | f (default) | 17 May 2016 at 22:57          | Long Date, Short Time  |
+    +-------------+-------------------------------+------------------------+
+    | F           | Tuesday, 17 May 2016 at 22:57 | Full Date, Short Time  |
+    +-------------+-------------------------------+------------------------+
+    | s           | 17/05/2016, 22:57             | Short Date, Short Time |
+    +-------------+-------------------------------+------------------------+
+    | S           | 17/05/2016, 22:57:58          | Short Date, Long Time  |
+    +-------------+-------------------------------+------------------------+
+    | R           | 5 years ago                   | Relative Time          |
+    +-------------+-------------------------------+------------------------+
 
     Note that the exact output depends on the user's locale setting in the client. The example output
     presented is using the ``en-GB`` locale.
@@ -1233,7 +1457,7 @@ def format_dt(dt: Union[datetime.datetime, float], /, style: TimestampStyle = "f
 
     Parameters
     ----------
-    dt: Union[:class:`datetime.datetime`, :class:`int`, :class:`float`]
+    dt: :class:`datetime.datetime` | :class:`int` | :class:`float`
         The datetime to format.
         If this is a naive datetime, it is assumed to be local time.
     style: :class:`str`
@@ -1264,13 +1488,16 @@ def search_directory(path: str) -> Iterator[str]:
     """
     relpath = os.path.relpath(path)  # relative and normalized
     if ".." in relpath:
-        raise ValueError("Modules outside the cwd require a package to be specified")
+        msg = "Modules outside the cwd require a package to be specified"
+        raise ValueError(msg)
 
     abspath = os.path.abspath(path)
     if not os.path.exists(relpath):
-        raise ValueError(f"Provided path '{abspath}' does not exist")
+        msg = f"Provided path '{abspath}' does not exist"
+        raise ValueError(msg)
     if not os.path.isdir(relpath):
-        raise ValueError(f"Provided path '{abspath}' is not a directory")
+        msg = f"Provided path '{abspath}' is not a directory"
+        raise ValueError(msg)
 
     prefix = relpath.replace(os.sep, ".")
     if prefix in ("", "."):
@@ -1285,10 +1512,10 @@ def search_directory(path: str) -> Iterator[str]:
             yield prefix + name
 
 
-def as_valid_locale(locale: str) -> Optional[str]:
+def as_valid_locale(locale: str) -> str | None:
     """Converts the provided locale name to a name that is valid for use with the API,
     for example by returning ``en-US`` for ``en_US``.
-    Returns ``None`` for invalid names.
+    Returns :data:`None` for invalid names.
 
     .. versionadded:: 2.5
 
@@ -1316,7 +1543,7 @@ def as_valid_locale(locale: str) -> Optional[str]:
     return None
 
 
-def humanize_list(values: List[str], combine: str) -> str:
+def humanize_list(values: list[str], combine: str) -> str:
     if len(values) > 2:
         return f"{', '.join(values[:-1])}, {combine} {values[-1]}"
     elif len(values) == 0:

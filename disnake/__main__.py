@@ -5,15 +5,21 @@ import importlib.metadata
 import platform
 import sys
 from pathlib import Path
-from typing import Union
 
 import aiohttp
 
 import disnake
 
 
+def _try_get_version(pkg: str) -> str | None:
+    try:
+        return "v" + importlib.metadata.version(pkg)
+    except importlib.metadata.PackageNotFoundError:
+        return None
+
+
 def show_version() -> None:
-    entries = []
+    entries: list[str] = []
 
     sys_ver = sys.version_info
     entries.append(
@@ -23,14 +29,15 @@ def show_version() -> None:
     entries.append(
         f"- disnake v{disnake_ver.major}.{disnake_ver.minor}.{disnake_ver.micro}-{disnake_ver.releaselevel}"
     )
-    try:
-        version = importlib.metadata.version("disnake")
-    except importlib.metadata.PackageNotFoundError:
-        pass
-    else:
-        entries.append(f"    - disnake importlib.metadata: v{version}")
+    if disnake_version := _try_get_version("disnake"):
+        entries.append(f"    - disnake importlib.metadata: {disnake_version}")
 
     entries.append(f"- aiohttp v{aiohttp.__version__}")
+
+    dave_version = _try_get_version("dave.py") or "<not installed>"
+    nacl_version = _try_get_version("PyNaCl") or "<not installed>"
+    entries.append(f"- voice: dave.py {dave_version}, PyNaCl {nacl_version}")
+
     uname = platform.uname()
     entries.append(f"- system info: {uname.system} {uname.release} {uname.version} {uname.machine}")
     print("\n".join(entries))
@@ -120,35 +127,103 @@ def setup(bot):
     bot.add_cog({name}(bot))
 '''
 
+# everything that is a _cog_special_method goes here.
 _cog_extras = """
+    async def cog_load(self):
+        # (async) loading logic goes here
+        pass
+
     def cog_unload(self):
         # clean up logic goes here
         pass
 
+    ### Prefix Commands ###
+
     async def cog_check(self, ctx):
-        # checks that apply to every command in here
+        # checks that apply to every prefix command in here
         return True
 
     async def bot_check(self, ctx):
-        # checks that apply to every command to the bot
+        # checks that apply to every prefix command to the bot
         return True
 
     async def bot_check_once(self, ctx):
-        # check that apply to every command but is guaranteed to be called only once
+        # check that apply to every prefix command but is guaranteed to be called only once
         return True
 
     async def cog_command_error(self, ctx, error):
-        # error handling to every command in here
+        # error handling to every prefix command in here
         pass
 
     async def cog_before_invoke(self, ctx):
-        # called before a command is called here
+        # called before a prefix command is called here
         pass
 
     async def cog_after_invoke(self, ctx):
-        # called after a command is called here
+        # called after a prefix command is called here
         pass
 
+    ### Slash Commands ###
+
+    # These are similar to the ones in the previous section, but for slash commands
+
+    async def cog_slash_command_check(self, inter):
+        return True
+
+    async def bot_slash_command_check(self, inter):
+        return True
+
+    async def bot_slash_command_check_once(self, inter):
+        return True
+
+    async def cog_slash_command_error(self, inter, error):
+        ...
+
+    async def cog_before_slash_command_invoke(self, inter):
+        ...
+
+    async def cog_after_slash_command_invoke(self, inter):
+        ...
+
+    ### Message (Context Menu) Commands ###
+
+    async def cog_message_command_check(self, inter):
+        return True
+
+    async def bot_message_command_check(self, inter):
+        return True
+
+    async def bot_message_command_check_once(self, inter):
+        return True
+
+    async def cog_message_command_error(self, inter, error):
+        ...
+
+    async def cog_before_message_command_invoke(self, inter):
+        ...
+
+    async def cog_after_message_command_invoke(self, inter):
+        ...
+
+    ### User (Context Menu) Commands ###
+
+    async def cog_user_command_check(self, inter):
+        return True
+
+    async def bot_user_command_check(self, inter):
+        return True
+
+    async def bot_user_command_check_once(self, inter):
+        return True
+
+    async def cog_user_command_error(self, inter, error):
+        ...
+
+    async def cog_before_user_command_invoke(self, inter):
+        ...
+
+    async def cog_after_user_command_invoke(self, inter):
+        ...
 """
 
 
@@ -164,7 +239,7 @@ _base_table = {**_ascii_table, **_byte_table}
 _translation_table = str.maketrans(_base_table)
 
 
-def to_path(parser, name: Union[str, Path], *, replace_spaces: bool = False):
+def to_path(parser, name: str | Path, *, replace_spaces: bool = False) -> Path:
     if isinstance(name, Path):
         return name
 
@@ -331,7 +406,7 @@ def add_newcog_args(subparser) -> None:
     parser.add_argument("--full", help="add all special methods as well", action="store_true")
 
 
-def parse_args():
+def parse_args() -> tuple[argparse.ArgumentParser, argparse.Namespace]:
     parser = argparse.ArgumentParser(prog="disnake", description="Tools for helping with disnake")
     parser.add_argument("-v", "--version", action="store_true", help="shows the library version")
     parser.set_defaults(func=core)

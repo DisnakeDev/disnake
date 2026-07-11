@@ -120,6 +120,9 @@ Exceptions
 .. autoexception:: GuildStickerNotFound
     :members:
 
+.. autoexception:: GuildSoundboardSoundNotFound
+    :members:
+
 .. autoexception:: GuildScheduledEventNotFound
     :members:
 
@@ -127,6 +130,9 @@ Exceptions
     :members:
 
 .. autoexception:: LargeIntConversionFailure
+    :members:
+
+.. autoexception:: LargeIntOutOfRange
     :members:
 
 .. autoexception:: MissingPermissions
@@ -213,9 +219,11 @@ Exception Hierarchy
                     - :exc:`EmojiNotFound`
                     - :exc:`PartialEmojiConversionFailure`
                     - :exc:`GuildStickerNotFound`
+                    - :exc:`GuildSoundboardSoundNotFound`
                     - :exc:`GuildScheduledEventNotFound`
                     - :exc:`BadBoolArgument`
                     - :exc:`LargeIntConversionFailure`
+                        - :exc:`LargeIntOutOfRange`
                     - :exc:`FlagError`
                         - :exc:`BadFlagArgument`
                         - :exc:`MissingFlagArgument`

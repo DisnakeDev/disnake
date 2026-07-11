@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Optional, TypedDict
+from typing import TypedDict
 
 from typing_extensions import NotRequired
 
@@ -13,14 +13,16 @@ class Role(TypedDict):
     id: Snowflake
     name: str
     color: int
+    colors: RoleColors
     hoist: bool
-    icon: NotRequired[Optional[str]]
-    unicode_emoji: NotRequired[Optional[str]]
+    icon: NotRequired[str | None]
+    unicode_emoji: NotRequired[str | None]
     position: int
     permissions: str
     managed: bool
     mentionable: bool
     tags: NotRequired[RoleTags]
+    flags: int
 
 
 class RoleTags(TypedDict, total=False):
@@ -32,11 +34,17 @@ class RoleTags(TypedDict, total=False):
     available_for_purchase: None
 
 
+class RoleColors(TypedDict):
+    primary_color: int
+    secondary_color: int | None
+    tertiary_color: int | None
+
+
 class CreateRole(TypedDict, total=False):
     name: str
     permissions: str
-    color: int
+    colors: RoleColors
     hoist: bool
-    icon: Optional[str]
-    unicode_emoji: Optional[str]
+    icon: str | None
+    unicode_emoji: str | None
     mentionable: bool

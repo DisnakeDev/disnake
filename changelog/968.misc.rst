@@ -1,1 +1,0 @@
-Support PyNaCl v1.5.

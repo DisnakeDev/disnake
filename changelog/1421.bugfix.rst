@@ -1,0 +1,1 @@
+|commands| Fix ``Greedy[...]`` to accept union types (e.g. ``Member | Object``) in commands.

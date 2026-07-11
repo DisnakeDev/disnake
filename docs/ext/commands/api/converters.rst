@@ -48,6 +48,9 @@ Classes
 .. autoclass:: ForumChannelConverter
     :members:
 
+.. autoclass:: MediaChannelConverter
+    :members:
+
 .. autoclass:: ThreadConverter
     :members:
 
@@ -73,6 +76,9 @@ Classes
     :members:
 
 .. autoclass:: GuildStickerConverter
+    :members:
+
+.. autoclass:: GuildSoundboardSoundConverter
     :members:
 
 .. autoclass:: PermissionsConverter

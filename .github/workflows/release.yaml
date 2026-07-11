@@ -1,0 +1,149 @@
+# SPDX-License-Identifier: MIT
+
+name: Release
+
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+
+permissions:
+  contents: read
+
+jobs:
+  # Builds sdist and wheel, runs `twine check`, and uploads artifacts.
+  build:
+    name: Build package
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: '0'
+          persist-credentials: false
+
+      - name: Set up environment
+        id: setup
+        uses: ./.github/actions/setup-env
+        with:
+          python-version: '3.10'
+
+      - name: Build package
+        run: |
+          uvx --from=build~=1.3 pyproject-build
+          ls -la dist/
+
+      - name: Twine check
+        run: uvx twine~=6.1 check --strict dist/*
+
+      - name: Show metadata
+        run: |
+          mkdir out/
+          tar -xf dist/*.tar.gz -C out/
+
+          echo -e "<details><summary>Metadata</summary>\n" >> $GITHUB_STEP_SUMMARY
+          cat out/*/PKG-INFO | sed 's/^/    /' | tee -a $GITHUB_STEP_SUMMARY
+          echo -e "\n</details>\n" >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: dist
+          path: dist/
+          if-no-files-found: error
+
+
+  # Ensures that git tag and built version match.
+  validate-tag:
+    name: Validate tag
+    runs-on: ubuntu-latest
+    needs:
+      - build
+    env:
+      GIT_TAG: ${{ github.ref_name }}
+    outputs:
+      bump_dev: ${{ steps.check-dev.outputs.bump_dev }}
+
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: dist
+          path: dist/
+
+      - name: Compare sdist version to git tag
+        run: |
+          mkdir out/
+          tar -xf dist/*.tar.gz -C out/
+
+          SDIST_VERSION="$(grep "^Version:" out/*/PKG-INFO | cut -d' ' -f2-)"
+          echo "git tag: $GIT_TAG"
+          echo "sdist version: $SDIST_VERSION"
+
+          if [ "$GIT_TAG" != "v$SDIST_VERSION" ]; then
+            echo "error: git tag does not match sdist version" >&2
+            exit 1
+          fi
+
+
+  # Creates a draft release on GitHub, and uploads the artifacts there.
+  release-github:
+    name: Create GitHub draft release
+    runs-on: ubuntu-latest
+    needs:
+      - build
+      - validate-tag
+    permissions:
+      contents: write  # required for creating releases
+
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: dist
+          path: dist/
+
+      - name: Calculate versions
+        id: versions
+        env:
+          GIT_TAG: ${{ github.ref_name }}
+        run: |
+          # v1.2.3 -> v1-2-3 (for changelog)
+          echo "docs_version=${GIT_TAG//./-}" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b  # v3.0.1
+        with:
+          files: dist/*
+          draft: true
+          body: |
+            TBD.
+
+            **Changelog**: https://docs.disnake.dev/en/stable/whats_new.html#${{ steps.versions.outputs.docs_version }}
+            **Git history**: https://github.com/${{ github.repository }}/compare/vTODO...${{ github.ref_name }}
+
+
+  # Creates a PyPI release (using an environment which requires separate confirmation).
+  release-pypi:
+    name: Publish package to pypi.org
+    environment:
+      name: release-pypi
+      url: https://pypi.org/project/disnake/
+    runs-on: ubuntu-latest
+    needs:
+      - build
+      - validate-tag
+    permissions:
+      id-token: write  # this permission is mandatory for trusted publishing
+
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: dist
+          path: dist/
+
+      - name: Upload to pypi
+        uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b  # v1.14.0
+        with:
+          print-hash: true

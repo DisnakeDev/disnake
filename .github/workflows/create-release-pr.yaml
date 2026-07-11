@@ -1,0 +1,78 @@
+# SPDX-License-Identifier: MIT
+
+name: Create Release PR
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "The new version number, e.g. `1.2.3`."
+        type: string
+        required: true
+
+permissions: {}
+
+jobs:
+  create-release-pr:
+    name: Create release PR
+    runs-on: ubuntu-latest
+
+    env:
+      VERSION_INPUT: ${{ inputs.version }}
+
+    steps:
+      # https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/making-authenticated-api-requests-with-a-github-app-in-a-github-actions-workflow
+      - name: Generate app token
+        id: generate_token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1  # v3.2.0
+        with:
+          app-id: ${{ secrets.BOT_APP_ID }}
+          private-key: ${{ secrets.BOT_PRIVATE_KEY }}
+
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          token: ${{ steps.generate_token.outputs.token }}
+          persist-credentials: false
+          fetch-depth: '0'
+
+      - name: Set git name/email
+        env:
+          GIT_USER: ${{ vars.GIT_APP_USER_NAME }}
+          GIT_EMAIL: ${{ vars.GIT_APP_USER_EMAIL }}
+        run: |
+          git config user.name "$GIT_USER"
+          git config user.email "$GIT_EMAIL"
+
+      - name: Set up environment
+        uses: ./.github/actions/setup-env
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: uv sync --no-default-groups --group changelog
+
+      - name: Build changelog
+        run: |
+          uv run towncrier build --yes --version "$VERSION_INPUT"
+          git commit -a -m "docs: build changelog"
+
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1  # v8.1.1
+        with:
+          token: ${{ steps.generate_token.outputs.token }}
+          branch: auto/release-v${{ inputs.version }}
+          delete-branch: true
+          title: "chore(release): v${{ inputs.version }}"
+          body: |
+            Automated release PR, triggered by @${{ github.actor }} for ${{ github.sha }}.
+
+            ### Tasks
+            - [ ] Add changelogs from backports, if applicable.
+            - [ ] Update `|vnext|` in documentation.
+            - [ ] Once merged, create + push a tag.
+
+            <sub>https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}</sub>
+          labels: |
+            t: release
+          assignees: |
+            ${{ github.actor }}

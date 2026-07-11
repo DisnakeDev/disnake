@@ -21,7 +21,7 @@ Bot
 .. autoclass:: Bot
     :members:
     :inherited-members:
-    :exclude-members: after_invoke, before_invoke, check, check_once, command, event, group, listen, slash_command, user_command, message_command, after_slash_command_invoke, after_user_command_invoke, after_message_command_invoke, before_slash_command_invoke, before_user_command_invoke, before_message_command_invoke
+    :exclude-members: after_invoke, before_invoke, check, check_once, command, event, listen, group, slash_command, user_command, message_command, after_slash_command_invoke, after_user_command_invoke, after_message_command_invoke, before_slash_command_invoke, before_user_command_invoke, before_message_command_invoke
 
     .. automethod:: Bot.after_invoke()
         :decorator:

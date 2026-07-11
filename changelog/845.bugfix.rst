@@ -1,1 +1,0 @@
-Fix :class:`VoiceClient` not continuing to play audio when moving between channels.

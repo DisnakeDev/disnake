@@ -1,0 +1,1 @@
+|commands| Improve :class:`~ext.commands.FlagConverter` support in Python 3.14+ when ``from __future__ import annotations`` was not used.

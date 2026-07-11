@@ -96,11 +96,11 @@ Documents
     app_info
     audit_logs
     automod
-    ui
     channels
     clients
     components
     emoji
+    entitlements
     events
     exceptions
     guilds
@@ -114,8 +114,12 @@ Documents
     misc
     permissions
     roles
+    skus
+    soundboard
     stage_instances
     stickers
+    subscriptions
+    ui
     users
     utilities
     voice

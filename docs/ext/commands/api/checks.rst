@@ -7,7 +7,7 @@
 Checks
 ======
 
-This section documents checks - special decorators intented to simplify working with Discord-specific conditions.
+This section documents checks - special decorators intended to simplify working with Discord-specific conditions.
 
 Classes
 -------
@@ -26,33 +26,8 @@ Enumerations
 BucketType
 ~~~~~~~~~~
 
-.. class:: BucketType
-
-    Specifies a type of bucket for, e.g. a cooldown.
-
-    .. attribute:: default
-
-        The default bucket operates on a global basis.
-    .. attribute:: user
-
-        The user bucket operates on a per-user basis.
-    .. attribute:: guild
-
-        The guild bucket operates on a per-guild basis.
-    .. attribute:: channel
-
-        The channel bucket operates on a per-channel basis.
-    .. attribute:: member
-
-        The member bucket operates on a per-member basis.
-    .. attribute:: category
-
-        The category bucket operates on a per-category basis.
-    .. attribute:: role
-
-        The role bucket operates on a per-role basis.
-
-        .. versionadded:: 1.3
+.. autoclass:: BucketType()
+    :members:
 
 Functions
 ---------
@@ -61,6 +36,12 @@ Functions
     :decorator:
 
 .. autofunction:: check_any(*checks)
+    :decorator:
+
+.. autofunction:: app_check(predicate)
+    :decorator:
+
+.. autofunction:: app_check_any(*checks)
     :decorator:
 
 .. autofunction:: has_role(item)
@@ -112,7 +93,4 @@ Functions
     :decorator:
 
 .. autofunction:: is_nsfw(,)
-    :decorator:
-
-.. autofunction:: default_member_permissions(value=0, **permissions)
     :decorator:
