@@ -394,7 +394,7 @@ Interaction: TypeAlias = ApplicationCommandInteraction | MessageInteraction | Mo
 BaseInteraction: TypeAlias = Interaction | PingInteraction
 
 
-class InteractionApplicationCommandCallbackData(TypedDict, total=False):
+class InteractionApplicationCommandResponseData(TypedDict, total=False):
     tts: bool
     content: str
     embeds: list[Embed]
@@ -404,20 +404,15 @@ class InteractionApplicationCommandCallbackData(TypedDict, total=False):
     attachments: list[Attachment]
 
 
-class InteractionAutocompleteCallbackData(TypedDict):
+class InteractionAutocompleteResponseData(TypedDict):
     choices: list[ApplicationCommandOptionChoice]
 
 
 InteractionResponseType: TypeAlias = Literal[1, 4, 5, 6, 7, 10]
 
-InteractionCallbackData: TypeAlias = (
-    InteractionApplicationCommandCallbackData | InteractionAutocompleteCallbackData | Modal
+InteractionResponseData: TypeAlias = (
+    InteractionApplicationCommandResponseData | InteractionAutocompleteResponseData | Modal
 )
-
-
-class InteractionResponse(TypedDict):
-    type: InteractionResponseType
-    data: NotRequired[InteractionCallbackData]
 
 
 class InteractionMessageReference(TypedDict):
@@ -456,6 +451,26 @@ InteractionMetadata: TypeAlias = (
     | MessageComponentInteractionMetadata
     | ModalInteractionMetadata
 )
+
+
+class InteractionCallbackMetadata(TypedDict):
+    id: Snowflake
+    type: InteractionType
+    # activity_instance_id: NotRequired[str]  # activity launching not implemented yet
+    response_message_id: NotRequired[Snowflake]
+    response_message_loading: NotRequired[bool]
+    response_message_ephemeral: NotRequired[bool]
+
+
+class InteractionCallbackResource(TypedDict):
+    type: InteractionResponseType
+    # activity_instance: NotRequired[InteractionCallbackActivityInstance]
+    message: NotRequired[Message]
+
+
+class InteractionCallbackResponse(TypedDict):
+    interaction: InteractionCallbackMetadata
+    resource: NotRequired[InteractionCallbackResource]
 
 
 class EditApplicationCommand(TypedDict):
