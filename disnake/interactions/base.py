@@ -48,13 +48,14 @@ from ..permissions import Permissions
 from ..role import Role
 from ..ui.action_row import normalize_components, normalize_components_to_dict
 from ..user import ClientUser, User
-from ..webhook.async_ import Webhook, async_context, handle_message_parameters
+from ..webhook.async_ import Webhook, WebhookMessage, async_context, handle_message_parameters
 
 __all__ = (
     "Interaction",
-    "InteractionMessage",
     "InteractionResponse",
+    "InteractionMessage",
     "InteractionDataResolved",
+    "InteractionCallbackResponse",
 )
 
 if TYPE_CHECKING:
@@ -78,6 +79,7 @@ if TYPE_CHECKING:
     from ..types.interactions import (
         ApplicationCommandOptionChoice as ApplicationCommandOptionChoicePayload,
         Interaction as InteractionPayload,
+        InteractionCallbackResponse as InteractionCallbackResponsePayload,
         InteractionDataResolved as InteractionDataResolvedPayload,
     )
     from ..types.snowflake import Snowflake
@@ -701,7 +703,7 @@ class Interaction(Generic[ClientT]):
         flags: MessageFlags = MISSING,
         delete_after: float = MISSING,
         poll: Poll = MISSING,
-    ) -> None:
+    ) -> WebhookMessage | InteractionCallbackResponse:
         r"""|coro|
 
         Sends a message using either :meth:`response.send_message <InteractionResponse.send_message>`
@@ -799,10 +801,17 @@ class Interaction(Generic[ClientT]):
             you tried to send v2 components together with ``content``, ``embeds``, or ``poll``.
         """
         if self.response._response_type is not None:
-            sender = self.followup.send
+            # workaround for types not correctly representing the fact that `wait` is
+            # always implicitly true for interaction followups
+            if TYPE_CHECKING:
+                from functools import partial
+
+                sender = partial(self.followup.send, wait=True)
+            else:
+                sender = self.followup.send
         else:
             sender = self.response.send_message
-        await sender(
+        return await sender(
             content=content,
             embed=embed,
             embeds=embeds,
@@ -859,7 +868,7 @@ class InteractionResponse:
         *,
         with_message: bool = MISSING,
         ephemeral: bool = MISSING,
-    ) -> None:
+    ) -> InteractionCallbackResponse:  # TODO: document return type everywhere
         """|coro|
 
         Defers the interaction response.
@@ -936,7 +945,7 @@ class InteractionResponse:
                 data["flags"] |= MessageFlags.ephemeral.flag
 
         adapter = async_context.get()
-        await adapter.create_interaction_response(
+        callback_data = await adapter.create_interaction_response(
             parent.id,
             parent.token,
             session=parent._session,
@@ -944,6 +953,8 @@ class InteractionResponse:
             data=data or None,
         )
         self._response_type = defer_type
+
+        return InteractionCallbackResponse(callback_data, parent=self._parent)
 
     async def pong(self) -> None:
         """|coro|
@@ -991,7 +1002,7 @@ class InteractionResponse:
         flags: MessageFlags = MISSING,
         delete_after: float = MISSING,
         poll: Poll = MISSING,
-    ) -> None:
+    ) -> InteractionCallbackResponse:
         r"""|coro|
 
         Responds to this interaction by sending a message.
@@ -1161,7 +1172,7 @@ class InteractionResponse:
         adapter = async_context.get()
         response_type = InteractionResponseType.channel_message
         try:
-            await adapter.create_interaction_response(
+            callback_data = await adapter.create_interaction_response(
                 parent.id,
                 parent.token,
                 session=parent._session,
@@ -1189,6 +1200,8 @@ class InteractionResponse:
         if delete_after is not MISSING:
             await self._parent.delete_original_response(delay=delete_after)
 
+        return InteractionCallbackResponse(callback_data, parent=self._parent)
+
     async def edit_message(
         self,
         content: str | None = MISSING,
@@ -1203,7 +1216,7 @@ class InteractionResponse:
         flags: MessageFlags = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         delete_after: float | None = None,
-    ) -> None:
+    ) -> InteractionCallbackResponse:
         r"""|coro|
 
         Responds to this interaction by editing the original message of
@@ -1391,7 +1404,7 @@ class InteractionResponse:
         adapter = async_context.get()
         response_type = InteractionResponseType.message_update
         try:
-            await adapter.create_interaction_response(
+            callback_data = await adapter.create_interaction_response(
                 parent.id,
                 parent.token,
                 session=parent._session,
@@ -1412,7 +1425,9 @@ class InteractionResponse:
         if delete_after is not None:
             await self._parent.delete_original_response(delay=delete_after)
 
-    async def autocomplete(self, *, choices: Choices) -> None:
+        return InteractionCallbackResponse(callback_data, parent=self._parent)
+
+    async def autocomplete(self, *, choices: Choices) -> InteractionCallbackResponse:
         r"""|coro|
 
         Responds to this interaction by displaying a list of possible autocomplete results.
@@ -1458,7 +1473,7 @@ class InteractionResponse:
         parent = self._parent
         adapter = async_context.get()
         response_type = InteractionResponseType.application_command_autocomplete_result
-        await adapter.create_interaction_response(
+        callback_data = await adapter.create_interaction_response(
             parent.id,
             parent.token,
             session=parent._session,
@@ -1468,8 +1483,10 @@ class InteractionResponse:
 
         self._response_type = response_type
 
+        return InteractionCallbackResponse(callback_data, parent=self._parent)
+
     @overload
-    async def send_modal(self, modal: Modal) -> None: ...
+    async def send_modal(self, modal: Modal) -> InteractionCallbackResponse: ...
 
     @overload
     async def send_modal(
@@ -1478,7 +1495,7 @@ class InteractionResponse:
         title: str,
         custom_id: str,
         components: ModalComponents,
-    ) -> None: ...
+    ) -> InteractionCallbackResponse: ...
 
     async def send_modal(
         self,
@@ -1487,7 +1504,7 @@ class InteractionResponse:
         title: str | None = None,
         custom_id: str | None = None,
         components: ModalComponents | None = None,
-    ) -> None:
+    ) -> InteractionCallbackResponse:
         """|coro|
 
         Responds to this interaction by displaying a modal.
@@ -1569,7 +1586,7 @@ class InteractionResponse:
 
         adapter = async_context.get()
         response_type = InteractionResponseType.modal
-        await adapter.create_interaction_response(
+        callback_data = await adapter.create_interaction_response(
             parent.id,
             parent.token,
             session=parent._session,
@@ -1580,6 +1597,8 @@ class InteractionResponse:
 
         if modal is not None:
             parent._state.store_modal(parent.author.id, modal)
+
+        return InteractionCallbackResponse(callback_data, parent=self._parent)
 
     @utils.deprecated("Use `ui.Button(sku_id=...)` instead.")
     async def require_premium(self) -> None:
@@ -2167,3 +2186,36 @@ class InteractionDataResolved(dict[str, Any]):
             return res
 
         return None
+
+
+# TODO: make generic over resource type?
+class InteractionCallbackResponse:
+    """TODO"""
+
+    __slots__ = (
+        "id",
+        "message_id",
+        "message_deferred",
+        "message_ephemeral",
+        "resource",
+    )
+
+    def __init__(
+        self, data: InteractionCallbackResponsePayload, *, parent: Interaction[Any]
+    ) -> None:
+        interaction_data = data["interaction"]
+        self.id: int = int(interaction_data["id"])
+        # NOTE: these are not only for *created* messages, but are also set when using defer(with_message=False), in which case it refers to the original message
+        self.message_id: int | None = utils._get_as_snowflake(
+            interaction_data, "response_message_id"
+        )
+        self.message_deferred: bool | None = interaction_data.get("response_message_loading")
+        self.message_ephemeral: bool | None = interaction_data.get("response_message_ephemeral")
+
+        # XXX: data also contains interaction type and response type, but those are probably not all that interesting here?
+
+        self.resource: Message | None = None
+        if (resource_data := data.get("resource")) and (
+            message_data := resource_data.get("message")
+        ):
+            self.resource = Message(state=parent._state, channel=parent.channel, data=message_data)
