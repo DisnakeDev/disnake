@@ -10,10 +10,11 @@ from typing import (
     Any,
     Generic,
     TypeAlias,
-    TypeVar,
     cast,
     overload,
 )
+
+from typing_extensions import TypeVar
 
 from .. import utils
 from ..app_commands import OptionChoice
@@ -863,12 +864,13 @@ class InteractionResponse:
         """
         return self._response_type is not None
 
+    # TODO: add overloads depending on with_message?
     async def defer(
         self,
         *,
         with_message: bool = MISSING,
         ephemeral: bool = MISSING,
-    ) -> InteractionCallbackResponse:  # TODO: document return type everywhere
+    ) -> InteractionCallbackResponse[Message | None]:  # TODO: document return type everywhere
         """|coro|
 
         Defers the interaction response.
@@ -1002,7 +1004,7 @@ class InteractionResponse:
         flags: MessageFlags = MISSING,
         delete_after: float = MISSING,
         poll: Poll = MISSING,
-    ) -> InteractionCallbackResponse:
+    ) -> InteractionCallbackResponse[Message]:
         r"""|coro|
 
         Responds to this interaction by sending a message.
@@ -1216,7 +1218,7 @@ class InteractionResponse:
         flags: MessageFlags = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         delete_after: float | None = None,
-    ) -> InteractionCallbackResponse:
+    ) -> InteractionCallbackResponse[Message]:
         r"""|coro|
 
         Responds to this interaction by editing the original message of
@@ -1427,7 +1429,7 @@ class InteractionResponse:
 
         return InteractionCallbackResponse(callback_data, parent=self._parent)
 
-    async def autocomplete(self, *, choices: Choices) -> InteractionCallbackResponse:
+    async def autocomplete(self, *, choices: Choices) -> InteractionCallbackResponse[None]:
         r"""|coro|
 
         Responds to this interaction by displaying a list of possible autocomplete results.
@@ -1486,7 +1488,7 @@ class InteractionResponse:
         return InteractionCallbackResponse(callback_data, parent=self._parent)
 
     @overload
-    async def send_modal(self, modal: Modal) -> InteractionCallbackResponse: ...
+    async def send_modal(self, modal: Modal) -> InteractionCallbackResponse[None]: ...
 
     @overload
     async def send_modal(
@@ -1495,7 +1497,7 @@ class InteractionResponse:
         title: str,
         custom_id: str,
         components: ModalComponents,
-    ) -> InteractionCallbackResponse: ...
+    ) -> InteractionCallbackResponse[None]: ...
 
     async def send_modal(
         self,
@@ -1504,7 +1506,7 @@ class InteractionResponse:
         title: str | None = None,
         custom_id: str | None = None,
         components: ModalComponents | None = None,
-    ) -> InteractionCallbackResponse:
+    ) -> InteractionCallbackResponse[None]:
         """|coro|
 
         Responds to this interaction by displaying a modal.
@@ -2188,8 +2190,10 @@ class InteractionDataResolved(dict[str, Any]):
         return None
 
 
-# TODO: make generic over resource type?
-class InteractionCallbackResponse:
+ResourceT = TypeVar("ResourceT", bound=Message | None, default=Message | None, covariant=True)
+
+
+class InteractionCallbackResponse(Generic[ResourceT]):
     """TODO"""
 
     __slots__ = (
@@ -2214,8 +2218,9 @@ class InteractionCallbackResponse:
 
         # XXX: data also contains interaction type and response type, but those are probably not all that interesting here?
 
-        self.resource: Message | None = None
+        resource: Message | None = None
         if (resource_data := data.get("resource")) and (
             message_data := resource_data.get("message")
         ):
-            self.resource = Message(state=parent._state, channel=parent.channel, data=message_data)
+            resource = Message(state=parent._state, channel=parent.channel, data=message_data)
+        self.resource: ResourceT = resource  # pyright: ignore[reportAttributeAccessIssue]
