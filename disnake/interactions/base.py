@@ -2234,6 +2234,8 @@ class InteractionCallbackResponse(Generic[ResourceT]):
     ----------
     id: :class:`int`
         The ID of the source interaction.
+    type: :class:`InteractionType`
+        The type of the source interaction.
     message_id: :class:`int` | :data:`None`
         The ID of the message that was affected (i.e. created or edited) by the
         interaction response, if any.
@@ -2248,6 +2250,7 @@ class InteractionCallbackResponse(Generic[ResourceT]):
 
     __slots__ = (
         "id",
+        "type",
         "message_id",
         "message_loading",
         "message_ephemeral",
@@ -2259,14 +2262,13 @@ class InteractionCallbackResponse(Generic[ResourceT]):
     ) -> None:
         interaction_data = data["interaction"]
         self.id: int = int(interaction_data["id"])
+        self.type: InteractionType = try_enum(InteractionType, interaction_data["type"])
         # NOTE: these are not only for *created* messages, but are also set when using defer(with_message=False), in which case it refers to the original message
         self.message_id: int | None = utils._get_as_snowflake(
             interaction_data, "response_message_id"
         )
         self.message_loading: bool | None = interaction_data.get("response_message_loading")
         self.message_ephemeral: bool | None = interaction_data.get("response_message_ephemeral")
-
-        # XXX: data also contains interaction type and response type, but those are probably not all that interesting here?
 
         resource: Message | None = None
         if (resource_data := data.get("resource")) and (
