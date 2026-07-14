@@ -704,7 +704,7 @@ class Interaction(Generic[ClientT]):
         flags: MessageFlags = MISSING,
         delete_after: float = MISSING,
         poll: Poll = MISSING,
-    ) -> WebhookMessage | InteractionCallbackResponse:
+    ) -> InteractionCallbackResponse[Message] | WebhookMessage:
         r"""|coro|
 
         Sends a message using either :meth:`response.send_message <InteractionResponse.send_message>`
