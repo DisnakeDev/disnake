@@ -2199,7 +2199,7 @@ class InteractionCallbackResponse(Generic[ResourceT]):
     __slots__ = (
         "id",
         "message_id",
-        "message_deferred",
+        "message_loading",
         "message_ephemeral",
         "resource",
     )
@@ -2213,7 +2213,7 @@ class InteractionCallbackResponse(Generic[ResourceT]):
         self.message_id: int | None = utils._get_as_snowflake(
             interaction_data, "response_message_id"
         )
-        self.message_deferred: bool | None = interaction_data.get("response_message_loading")
+        self.message_loading: bool | None = interaction_data.get("response_message_loading")
         self.message_ephemeral: bool | None = interaction_data.get("response_message_ephemeral")
 
         # XXX: data also contains interaction type and response type, but those are probably not all that interesting here?
