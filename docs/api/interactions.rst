@@ -140,6 +140,14 @@ InteractionDataResolved
 .. autoclass:: InteractionDataResolved()
     :members:
 
+InteractionCallbackResponse
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: InteractionCallbackResponse
+
+.. autoclass:: InteractionCallbackResponse()
+    :members:
+
 ApplicationCommandInteractionData
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

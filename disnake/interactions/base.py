@@ -800,6 +800,12 @@ class Interaction(Generic[ClientT]):
         ValueError
             The length of ``embeds`` was invalid, or
             you tried to send v2 components together with ``content``, ``embeds``, or ``poll``.
+
+        Returns
+        -------
+        :class:`InteractionCallbackResponse` | :class:`WebhookMessage`
+            The callback response data if the interaction hadn't been responded to yet,
+            or the message if this was sent as a followup.
         """
         if self.response._response_type is not None:
             # workaround for types not correctly representing the fact that `wait` is
@@ -870,7 +876,7 @@ class InteractionResponse:
         *,
         with_message: bool = MISSING,
         ephemeral: bool = MISSING,
-    ) -> InteractionCallbackResponse[Message | None]:  # TODO: document return type everywhere
+    ) -> InteractionCallbackResponse[Message | None]:
         """|coro|
 
         Defers the interaction response.
@@ -916,6 +922,11 @@ class InteractionResponse:
             This interaction has already been responded to before.
         TypeError
             This interaction cannot be deferred.
+
+        Returns
+        -------
+        :class:`InteractionCallbackResponse`
+            The callback response data. If ``with_message=True``, this also contains a message resource.
         """
         if self._response_type is not None:
             raise InteractionResponded(self._parent)
@@ -1089,6 +1100,11 @@ class InteractionResponse:
             you tried to send v2 components together with ``content``, ``embeds``, or ``poll``.
         InteractionResponded
             This interaction has already been responded to before.
+
+        Returns
+        -------
+        :class:`InteractionCallbackResponse`
+            The callback response data, with a message resource.
         """
         if self._response_type is not None:
             raise InteractionResponded(self._parent)
@@ -1314,6 +1330,11 @@ class InteractionResponse:
             You tried to send v2 components together with ``content`` or ``embeds``.
         InteractionResponded
             This interaction has already been responded to before.
+
+        Returns
+        -------
+        :class:`InteractionCallbackResponse`
+            The callback response data, with a message resource.
         """
         if self._response_type is not None:
             raise InteractionResponded(self._parent)
@@ -1446,6 +1467,11 @@ class InteractionResponse:
             Autocomplete response has failed.
         InteractionResponded
             This interaction has already been responded to before.
+
+        Returns
+        -------
+        :class:`InteractionCallbackResponse`
+            The callback response data.
         """
         if self._response_type is not None:
             raise InteractionResponded(self._parent)
@@ -1551,6 +1577,11 @@ class InteractionResponse:
             This interaction cannot be responded with a modal.
         InteractionResponded
             This interaction has already been responded to before.
+
+        Returns
+        -------
+        :class:`InteractionCallbackResponse`
+            The callback response data.
         """
         if modal is not None and any((title, components, custom_id)):
             msg = "Cannot mix modal argument and title, custom_id, components arguments"
@@ -2194,7 +2225,26 @@ ResourceT = TypeVar("ResourceT", bound=Message | None, default=Message | None, c
 
 
 class InteractionCallbackResponse(Generic[ResourceT]):
-    """TODO"""
+    """Represents the response data from sending an interaction callback,
+    e.g. using :meth:`InteractionResponse.send_message`.
+
+    .. versionadded:: |vnext|
+
+    Attributes
+    ----------
+    id: :class:`int`
+        The ID of the source interaction.
+    message_id: :class:`int` | :data:`None`
+        The ID of the message that was affected (i.e. created or edited) by the
+        interaction response, if any.
+    message_loading: :class:`bool` | :data:`None`
+        Whether the message is in a :attr:`~MessageFlags.loading` state.
+    message_ephemeral: :class:`bool` | :data:`None`
+        Whether the message is :attr:`~MessageFlags.ephemeral`.
+    resource: :class:`Message` | :data:`None`
+        The resource that was created (or edited) by the interaction response, if any.
+        The type of this attribute depends on the type of interaction callback that was sent.
+    """
 
     __slots__ = (
         "id",
