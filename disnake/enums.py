@@ -52,6 +52,7 @@ __all__ = (
     "OptionType",
     "ApplicationCommandType",
     "ApplicationCommandPermissionType",
+    "ApplicationCommandHandlerType",
     "GuildScheduledEventEntityType",
     "GuildScheduledEventStatus",
     "GuildScheduledEventPrivacyLevel",
@@ -1159,6 +1160,13 @@ class InteractionResponseType(Enum):
     .. deprecated:: 2.11
         Use premium buttons (:class:`ui.Button` with :attr:`~ui.Button.sku_id`) instead.
     """
+    # FIXME: improve documentation somewhat
+    # XXX: can this be sent in response to non-type-4 commands?
+    launch_activity = 12
+    """Responds to the interaction by launching the activity associated with the app.
+
+    .. versionadded:: |vnext|
+    """
 
 
 class VideoQualityMode(Enum):
@@ -1377,6 +1385,14 @@ class ApplicationCommandType(Enum):
     """Represents a user command from the context menu."""
     message = 3
     """Represents a message command from the context menu."""
+    primary_entry_point = 4
+    """Represents a command that invokes an app's embedded activity.
+
+    .. versionadded:: |vnext|
+
+    .. note::
+        Application commands of this type must always be global commands.
+    """
 
 
 class ApplicationCommandPermissionType(Enum):
@@ -1394,6 +1410,22 @@ class ApplicationCommandPermissionType(Enum):
 
     def __int__(self) -> int:
         return self.value
+
+
+class ApplicationCommandHandlerType(Enum):
+    """Represents the type of handler responsible for processing interactions
+    from a :attr:`~ApplicationCommandType.primary_entry_point` application command.
+
+    TODO: ensure this link works
+    More details can be found in the :ddocs:`API documentation <application-commands/entry-point-handlers>`.
+
+    .. versionadded:: |vnext|
+    """
+
+    app_handler = 1
+    """The app handles the interaction by sending an interaction response."""
+    discord_launch_activity = 2
+    """Discord handles the interaction by launching an activity (without coordinating with the app)."""
 
 
 class OptionType(Enum):
