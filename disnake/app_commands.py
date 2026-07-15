@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, ClassVar, Literal, TypeAlias, overload
 
 from . import utils
 from .enums import (
+    ApplicationCommandHandlerType,
     ApplicationCommandPermissionType,
     ApplicationCommandType,
     ChannelType,
@@ -60,6 +61,8 @@ __all__ = (
     "APIUserCommand",
     "MessageCommand",
     "APIMessageCommand",
+    "EntryPointCommand",
+    "APIEntryPointCommand",
     "OptionChoice",
     "Option",
     "ApplicationCommandPermissions",
@@ -75,7 +78,10 @@ def application_command_factory(data: ApplicationCommandPayload) -> APIApplicati
         return APIUserCommand.from_dict(data)
     if cmd_type is ApplicationCommandType.message:
         return APIMessageCommand.from_dict(data)
+    if cmd_type is ApplicationCommandType.primary_entry_point:
+        return APIEntryPointCommand.from_dict(data)
 
+    utils.assert_never(cmd_type)
     msg = f"Application command of type {cmd_type} is not valid"
     raise TypeError(msg)
 
@@ -514,6 +520,7 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
     - :class:`~.SlashCommand`
     - :class:`~.MessageCommand`
     - :class:`~.UserCommand`
+    - :class:`~.EntryPointCommand`
 
     Attributes
     ----------
@@ -1363,6 +1370,133 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
             contexts=(
                 InteractionContextTypes._from_values(contexts)
                 if (contexts := data.get("contexts")) is not None
+                else None
+            ),
+        )
+        self._update_common(data)
+        return self
+
+
+class EntryPointCommand(ApplicationCommand):
+    """A primary entry point command, used for launching an app's associated activity.
+
+    .. versionadded:: |vnext|
+
+    Attributes
+    ----------
+    name: :class:`str`
+        The command's name.
+    name_localizations: :class:`.LocalizationValue`
+        Localizations for ``name``.
+    nsfw: :class:`bool`
+        Whether this command is :ddocs:`age-restricted <interactions/application-commands#age-restricted-commands>`.
+        Defaults to ``False``.
+    install_types: :class:`ApplicationInstallTypes` | :data:`None`
+        The installation types where the command is available.
+        Defaults to :attr:`ApplicationInstallTypes.guild` only.
+        Only available for global commands.
+    contexts: :class:`InteractionContextTypes` | :data:`None`
+        The interaction contexts where the command can be used.
+        Only available for global commands.
+    handler: :class:`ApplicationCommandHandlerType`
+        Whether the interaction triggered by invoking this command should be handled
+        by the app or Discord itself.
+        Defaults to :attr:`ApplicationCommandHandlerType.app_handler`.
+        TODO: does this match the API default?
+    """
+
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (
+        *tuple(n for n in ApplicationCommand.__repr_attributes__ if n != "type"),
+        "handler",
+    )
+
+    def __init__(
+        self,
+        name: LocalizedRequired,
+        default_member_permissions: Permissions | int | None = None,
+        nsfw: bool | None = None,
+        install_types: ApplicationInstallTypes | None = None,
+        contexts: InteractionContextTypes | None = None,
+        handler: ApplicationCommandHandlerType | None = None,
+    ) -> None:
+        super().__init__(
+            type=ApplicationCommandType.primary_entry_point,
+            name=name,
+            default_member_permissions=default_member_permissions,
+            nsfw=nsfw,
+            install_types=install_types,
+            contexts=contexts,
+        )
+
+        self.handler: ApplicationCommandHandlerType = (
+            handler or ApplicationCommandHandlerType.app_handler
+        )
+
+    # TODO: __eq__, to_dict, ...
+
+
+class APIEntryPointCommand(EntryPointCommand, _APIApplicationCommandMixin):
+    """A primary entry point command returned by the API.
+
+    .. versionadded:: |vnext|
+
+    Attributes
+    ----------
+    name: :class:`str`
+        The command's name.
+    name_localizations: :class:`.LocalizationValue`
+        Localizations for ``name``.
+    nsfw: :class:`bool`
+        Whether this command is :ddocs:`age-restricted <interactions/application-commands#age-restricted-commands>`.
+    install_types: :class:`ApplicationInstallTypes` | :data:`None`
+        The installation types where the command is available.
+        Defaults to :attr:`ApplicationInstallTypes.guild` only.
+        Only available for global commands.
+    contexts: :class:`InteractionContextTypes` | :data:`None`
+        The interaction contexts where the command can be used.
+        Only available for global commands.
+    handler: :class:`ApplicationCommandHandlerType`
+        Whether the interaction triggered by invoking this command should be handled
+        by the app or Discord itself.
+    id: :class:`int`
+        The command's ID.
+    application_id: :class:`int`
+        The application ID this command belongs to.
+    guild_id: :class:`int` | :data:`None`
+        The ID of the guild this command is enabled in, or :data:`None` if it's global.
+    version: :class:`int`
+        Autoincrementing version identifier updated during substantial record changes.
+    """
+
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (
+        *EntryPointCommand.__repr_attributes__,
+        *_APIApplicationCommandMixin.__repr_attributes__,
+    )
+
+    @classmethod
+    def from_dict(cls, data: ApplicationCommandPayload) -> Self:
+        cmd_type = data.get("type", 0)
+        if cmd_type != ApplicationCommandType.primary_entry_point.value:
+            msg = f"Invalid payload type for EntryPointCommand: {cmd_type}"
+            raise ValueError(msg)
+
+        self = cls(
+            name=Localized(data["name"], data=data.get("name_localizations")),
+            default_member_permissions=_get_as_snowflake(data, "default_member_permissions"),
+            nsfw=data.get("nsfw"),
+            install_types=(
+                ApplicationInstallTypes._from_values(install_types)
+                if (install_types := data.get("integration_types")) is not None
+                else None
+            ),
+            contexts=(
+                InteractionContextTypes._from_values(contexts)
+                if (contexts := data.get("contexts")) is not None
+                else None
+            ),
+            handler=(
+                try_enum(ApplicationCommandHandlerType, handler)
+                if (handler := data.get("handler")) is not None
                 else None
             ),
         )
