@@ -1414,8 +1414,7 @@ class EntryPointCommand(ApplicationCommand):
     handler: :class:`ApplicationCommandHandlerType`
         Whether the interaction triggered by invoking this command should be handled
         by the app or Discord itself.
-        Defaults to :attr:`ApplicationCommandHandlerType.app_handler`.
-        TODO: does this match the API default?
+        Defaults to :attr:`ApplicationCommandHandlerType.discord_launch_activity`.
     """
 
     __repr_attributes__: ClassVar[tuple[str, ...]] = (
@@ -1442,7 +1441,7 @@ class EntryPointCommand(ApplicationCommand):
         )
 
         self.handler: ApplicationCommandHandlerType = (
-            handler or ApplicationCommandHandlerType.app_handler
+            handler or ApplicationCommandHandlerType.discord_launch_activity
         )
 
     # TODO: __eq__, to_dict, ...
