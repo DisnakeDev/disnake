@@ -1444,7 +1444,15 @@ class EntryPointCommand(ApplicationCommand):
             handler or ApplicationCommandHandlerType.discord_launch_activity
         )
 
-    # TODO: __eq__, to_dict, ...
+    def __eq__(self, other: object) -> bool:
+        return (
+            super().__eq__(other) and self.handler == other.handler  # pyright: ignore[reportAttributeAccessIssue]
+        )
+
+    def to_dict(self) -> EditApplicationCommandPayload:
+        res = super().to_dict()
+        res["handler"] = self.handler.value
+        return res
 
 
 class APIEntryPointCommand(EntryPointCommand, _APIApplicationCommandMixin):
@@ -1463,10 +1471,8 @@ class APIEntryPointCommand(EntryPointCommand, _APIApplicationCommandMixin):
     install_types: :class:`ApplicationInstallTypes` | :data:`None`
         The installation types where the command is available.
         Defaults to :attr:`ApplicationInstallTypes.guild` only.
-        Only available for global commands.
     contexts: :class:`InteractionContextTypes` | :data:`None`
         The interaction contexts where the command can be used.
-        Only available for global commands.
     handler: :class:`ApplicationCommandHandlerType`
         Whether the interaction triggered by invoking this command should be handled
         by the app or Discord itself.
@@ -1474,8 +1480,9 @@ class APIEntryPointCommand(EntryPointCommand, _APIApplicationCommandMixin):
         The command's ID.
     application_id: :class:`int`
         The application ID this command belongs to.
-    guild_id: :class:`int` | :data:`None`
-        The ID of the guild this command is enabled in, or :data:`None` if it's global.
+    guild_id: :data:`None`
+        The ID of the guild this command is enabled in.
+        Always :data:`None` for this type of command.
     version: :class:`int`
         Autoincrementing version identifier updated during substantial record changes.
     """
