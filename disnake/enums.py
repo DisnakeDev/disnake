@@ -1419,9 +1419,9 @@ class ApplicationCommandHandlerType(Enum):
     .. versionadded:: |vnext|
     """
 
-    app_handler = 1
+    app = 1
     """The app handles the interaction by sending an interaction response."""
-    discord_launch_activity = 2
+    discord = 2
     """Discord handles the interaction by launching an activity (without coordinating with the app)."""
 
 
