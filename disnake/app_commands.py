@@ -1393,6 +1393,8 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
 class EntryPointCommand(ApplicationCommand):
     """A primary entry point command, used for launching an app's associated activity.
 
+    More details can be found in the :ddocs:`API documentation <interactions/application-commands#entry-point-commands>`.
+
     .. versionadded:: |vnext|
 
     Attributes

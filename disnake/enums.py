@@ -1414,8 +1414,7 @@ class ApplicationCommandHandlerType(Enum):
     """Represents the type of handler responsible for processing interactions
     from a :attr:`~ApplicationCommandType.primary_entry_point` application command.
 
-    TODO: ensure this link works
-    More details can be found in the :ddocs:`API documentation <application-commands/entry-point-handlers>`.
+    More details can be found in the :ddocs:`API documentation <interactions/application-commands#entry-point-commands>`.
 
     .. versionadded:: |vnext|
     """
