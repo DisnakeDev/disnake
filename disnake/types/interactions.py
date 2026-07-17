@@ -464,7 +464,7 @@ class InteractionCallbackMetadata(TypedDict):
 
 class InteractionCallbackResource(TypedDict):
     type: InteractionResponseType
-    # activity_instance: NotRequired[InteractionCallbackActivityInstance]
+    # activity_instance: NotRequired[InteractionCallbackActivityInstance]  # see above
     message: NotRequired[Message]
 
 

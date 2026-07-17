@@ -2263,7 +2263,8 @@ class InteractionCallbackResponse(Generic[ResourceT]):
         interaction_data = data["interaction"]
         self.id: int = int(interaction_data["id"])
         self.type: InteractionType = try_enum(InteractionType, interaction_data["type"])
-        # NOTE: these are not only for *created* messages, but are also set when using defer(with_message=False), in which case it refers to the original message
+        # NOTE: these are not only for *created* messages, but are also set when using
+        # defer(with_message=False) or edit(), in which case it refers to the original message
         self.message_id: int | None = utils._get_as_snowflake(
             interaction_data, "response_message_id"
         )
