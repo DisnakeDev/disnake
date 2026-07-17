@@ -1407,10 +1407,8 @@ class EntryPointCommand(ApplicationCommand):
     install_types: :class:`ApplicationInstallTypes` | :data:`None`
         The installation types where the command is available.
         Defaults to :attr:`ApplicationInstallTypes.guild` only.
-        Only available for global commands.
     contexts: :class:`InteractionContextTypes` | :data:`None`
         The interaction contexts where the command can be used.
-        Only available for global commands.
     handler: :class:`ApplicationCommandHandlerType`
         Whether the interaction triggered by invoking this command should be handled
         by the app or Discord itself.

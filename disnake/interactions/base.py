@@ -1688,6 +1688,37 @@ class InteractionResponse:
 
         self._response_type = response_type
 
+    async def launch_activity(self) -> None:
+        """|coro|
+
+        Responds to this interaction by launching the activity associated with the app.
+
+        Only available for applications with activities enabled.
+
+        .. versionadded:: |vnext|
+
+        Raises
+        ------
+        HTTPException
+            Sending the response has failed.
+        InteractionResponded
+            This interaction has already been responded to before.
+        """
+        if self._response_type is not None:
+            raise InteractionResponded(self._parent)
+
+        parent = self._parent
+        adapter = async_context.get()
+        response_type = InteractionResponseType.launch_activity
+        await adapter.create_interaction_response(
+            parent.id,
+            parent.token,
+            session=parent._session,
+            type=response_type.value,
+        )
+
+        self._response_type = response_type
+
 
 class _InteractionMessageState:
     __slots__ = ("_parent", "_interaction")
