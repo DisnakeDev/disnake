@@ -1160,8 +1160,6 @@ class InteractionResponseType(Enum):
     .. deprecated:: 2.11
         Use premium buttons (:class:`ui.Button` with :attr:`~ui.Button.sku_id`) instead.
     """
-    # FIXME: improve documentation somewhat
-    # XXX: can this be sent in response to non-type-4 commands?
     launch_activity = 12
     """Responds to the interaction by launching the activity associated with the app.
 
