@@ -2846,6 +2846,7 @@ class Client:
         """
         await self._connection.delete_global_command(command_id)
 
+    # TODO: entry point commands can't be managed (or at least deleted?) through bulk overwrites
     async def bulk_overwrite_global_commands(
         self, application_commands: list[ApplicationCommand]
     ) -> list[APIApplicationCommand]:
