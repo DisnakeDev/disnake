@@ -1441,7 +1441,7 @@ class EntryPointCommand(ApplicationCommand):
         )
 
         self.handler: ApplicationCommandHandlerType = (
-            handler or ApplicationCommandHandlerType.discord_launch_activity
+            handler or ApplicationCommandHandlerType.discord
         )
 
     def __eq__(self, other: object) -> bool:
