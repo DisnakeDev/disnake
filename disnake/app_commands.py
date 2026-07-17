@@ -49,7 +49,8 @@ if TYPE_CHECKING:
         | Sequence[Localized[str]]
     )
 
-    APIApplicationCommand: TypeAlias = "APIUserCommand | APIMessageCommand | APISlashCommand"
+    APIGuildApplicationCommand: TypeAlias = "APIUserCommand | APIMessageCommand | APISlashCommand"
+    APIApplicationCommand: TypeAlias = APIGuildApplicationCommand | "APIEntryPointCommand"
 
 
 __all__ = (
@@ -70,7 +71,19 @@ __all__ = (
 )
 
 
-def application_command_factory(data: ApplicationCommandPayload) -> APIApplicationCommand:
+# `guild_only` is purely a type checking hint, we assume the API only returns the
+# types it's supposed (and documented) to return
+@overload
+def application_command_factory(
+    data: ApplicationCommandPayload, guild_only: Literal[False] = False
+) -> APIApplicationCommand: ...
+@overload
+def application_command_factory(
+    data: ApplicationCommandPayload, guild_only: Literal[True]
+) -> APIGuildApplicationCommand: ...
+def application_command_factory(
+    data: ApplicationCommandPayload, guild_only: bool = False
+) -> APIApplicationCommand:
     cmd_type = try_enum(ApplicationCommandType, data.get("type", 1))
     if cmd_type is ApplicationCommandType.chat_input:
         return APISlashCommand.from_dict(data)

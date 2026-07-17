@@ -86,7 +86,7 @@ MISSING = utils.MISSING
 
 if TYPE_CHECKING:
     from .abc import Snowflake, SnowflakeTime
-    from .app_commands import APIApplicationCommand
+    from .app_commands import APIGuildApplicationCommand
     from .asset import AssetBytes
     from .automod import AutoModTriggerMetadata
     from .permissions import Permissions
@@ -582,7 +582,7 @@ class Guild(Hashable):
 
         return role
 
-    def get_command(self, application_command_id: int, /) -> APIApplicationCommand | None:
+    def get_command(self, application_command_id: int, /) -> APIGuildApplicationCommand | None:
         """Gets a cached application command matching the specified ID.
 
         Parameters
@@ -597,7 +597,7 @@ class Guild(Hashable):
         """
         return self._state._get_guild_application_command(self.id, application_command_id)
 
-    def get_command_named(self, name: str, /) -> APIApplicationCommand | None:
+    def get_command_named(self, name: str, /) -> APIGuildApplicationCommand | None:
         """Gets a cached application command matching the specified name.
 
         Parameters
