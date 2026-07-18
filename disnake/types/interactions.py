@@ -456,15 +456,19 @@ InteractionMetadata: TypeAlias = (
 class InteractionCallbackMetadata(TypedDict):
     id: Snowflake  # interaction ID
     type: InteractionType
-    # activity_instance_id: NotRequired[str]  # activity launching not implemented yet
+    activity_instance_id: NotRequired[str]
     response_message_id: NotRequired[Snowflake]
     response_message_loading: NotRequired[bool]
     response_message_ephemeral: NotRequired[bool]
 
 
+class InteractionCallbackActivityInstance(TypedDict):
+    id: str
+
+
 class InteractionCallbackResource(TypedDict):
     type: InteractionResponseType
-    # activity_instance: NotRequired[InteractionCallbackActivityInstance]  # see above
+    activity_instance: NotRequired[InteractionCallbackActivityInstance]
     message: NotRequired[Message]
 
 

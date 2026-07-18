@@ -56,6 +56,7 @@ __all__ = (
     "InteractionResponse",
     "InteractionMessage",
     "InteractionDataResolved",
+    "InteractionCallbackActivityInstance",
     "InteractionCallbackResponse",
 )
 
@@ -80,6 +81,7 @@ if TYPE_CHECKING:
     from ..types.interactions import (
         ApplicationCommandOptionChoice as ApplicationCommandOptionChoicePayload,
         Interaction as InteractionPayload,
+        InteractionCallbackActivityInstance as InteractionCallbackActivityInstancePayload,
         InteractionCallbackResponse as InteractionCallbackResponsePayload,
         InteractionDataResolved as InteractionDataResolvedPayload,
     )
@@ -2228,10 +2230,27 @@ class InteractionDataResolved(dict[str, Any]):
         return None
 
 
+class InteractionCallbackActivityInstance:
+    """Represents the activity launched by an interaction.
+
+    .. versionadded:: |vnext|
+
+    Attributes
+    ----------
+    id: :class:`str`
+        The instance ID of the launched/joined activity.
+    """
+
+    __slots__ = ("id",)
+
+    def __init__(self, data: InteractionCallbackActivityInstancePayload) -> None:
+        self.id: str = data["id"]
+
+
 ResourceT = TypeVar(
     "ResourceT",
-    bound=InteractionMessage | None,
-    default=InteractionMessage | None,
+    bound=InteractionMessage | InteractionCallbackActivityInstance | None,
+    default=InteractionMessage | InteractionCallbackActivityInstance | None,
     covariant=True,
 )
 
@@ -2248,6 +2267,8 @@ class InteractionCallbackResponse(Generic[ResourceT]):
         The ID of the source interaction.
     type: :class:`InteractionType`
         The type of the source interaction.
+    activity_instance_id: :class:`str` | :data:`None`
+        The instance ID of the launched/joined activity, if any.
     message_id: :class:`int` | :data:`None`
         The ID of the message that was affected (i.e. created or edited) by the
         interaction response, if any.
@@ -2255,14 +2276,15 @@ class InteractionCallbackResponse(Generic[ResourceT]):
         Whether the message is in a :attr:`~MessageFlags.loading` state.
     message_ephemeral: :class:`bool` | :data:`None`
         Whether the message is :attr:`~MessageFlags.ephemeral`.
-    resource: :class:`InteractionMessage` | :data:`None`
-        The resource that was created (or edited) by the interaction response, if any.
+    resource: :class:`InteractionMessage` | :class:`InteractionCallbackActivityInstance` | :data:`None`
+        The resource that was created/affected by the interaction response, if any.
         The type of this attribute depends on the type of interaction callback that was sent.
     """
 
     __slots__ = (
         "id",
         "type",
+        "activity_instance_id",
         "message_id",
         "message_loading",
         "message_ephemeral",
@@ -2275,6 +2297,9 @@ class InteractionCallbackResponse(Generic[ResourceT]):
         interaction_data = data["interaction"]
         self.id: int = int(interaction_data["id"])
         self.type: InteractionType = try_enum(InteractionType, interaction_data["type"])
+
+        self.activity_instance_id: str | None = interaction_data.get("activity_instance_id")
+
         # NOTE: these are not only for *created* messages, but are also set when using
         # defer(with_message=False) or edit(), in which case it refers to the original message
         self.message_id: int | None = utils._get_as_snowflake(
@@ -2283,10 +2308,13 @@ class InteractionCallbackResponse(Generic[ResourceT]):
         self.message_loading: bool | None = interaction_data.get("response_message_loading")
         self.message_ephemeral: bool | None = interaction_data.get("response_message_ephemeral")
 
-        resource: InteractionMessage | None = None
-        if (resource_data := data.get("resource")) and (
-            message_data := resource_data.get("message")
-        ):
-            state = _InteractionMessageState(parent, parent._state)
-            resource = InteractionMessage(state=state, channel=parent.channel, data=message_data)  # pyright: ignore[reportArgumentType]
+        resource: InteractionMessage | InteractionCallbackActivityInstance | None = None
+        if resource_data := data.get("resource"):
+            if message_data := resource_data.get("message"):
+                state = _InteractionMessageState(parent, parent._state)
+                resource = InteractionMessage(
+                    state=cast("ConnectionState", state), channel=parent.channel, data=message_data
+                )
+            elif activity_data := resource_data.get("activity_instance"):
+                resource = InteractionCallbackActivityInstance(activity_data)
         self.resource: ResourceT = resource  # pyright: ignore[reportAttributeAccessIssue]

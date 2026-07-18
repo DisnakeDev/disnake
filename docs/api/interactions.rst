@@ -148,6 +148,14 @@ InteractionCallbackResponse
 .. autoclass:: InteractionCallbackResponse()
     :members:
 
+InteractionCallbackActivityInstance
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: InteractionCallbackActivityInstance
+
+.. autoclass:: InteractionCallbackActivityInstance()
+    :members:
+
 ApplicationCommandInteractionData
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
