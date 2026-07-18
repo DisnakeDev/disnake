@@ -3,13 +3,14 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import TYPE_CHECKING, Any, TypeAlias, Union
+from typing import TYPE_CHECKING, Any, Protocol, TypeAlias, Union
 
 from typing_extensions import ParamSpec, TypeVar
 
 if TYPE_CHECKING:
     from typing import TypeAlias
 
+    from ..components import MessageTopLevelComponent as MessageTopLevelRawComponent
     from . import (
         ActionRow,
         Button,
@@ -97,3 +98,8 @@ ModalComponents = ComponentInput[
     ActionRowModalComponent,  # deprecated
     ModalTopLevelComponent_,
 ]
+
+
+class MessageWithComponents(Protocol):
+    @property
+    def components(self) -> Sequence[MessageTopLevelRawComponent]: ...
