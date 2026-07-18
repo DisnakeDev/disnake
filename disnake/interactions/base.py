@@ -713,11 +713,6 @@ class Interaction(Generic[ClientT]):
         If the interaction hasn't been responded to yet, this method will call :meth:`response.send_message <InteractionResponse.send_message>`.
         Otherwise, it will call :meth:`followup.send <Webhook.send>`.
 
-        .. note::
-            This method does not return a :class:`Message` object. If you need a message object,
-            use :meth:`original_response` to fetch it, or use :meth:`followup.send <Webhook.send>`
-            directly instead of this method if you're sending a followup message.
-
         Parameters
         ----------
         content: :class:`str` | :data:`None`
@@ -806,6 +801,8 @@ class Interaction(Generic[ClientT]):
         :class:`InteractionCallbackResponse` | :class:`WebhookMessage`
             The callback response data if the interaction hadn't been responded to yet,
             or the message if this was sent as a followup.
+
+            .. versionadded:: |vnext|
         """
         if self.response._response_type is not None:
             # workaround for types not correctly representing the fact that `wait` is
@@ -927,6 +924,8 @@ class InteractionResponse:
         -------
         :class:`InteractionCallbackResponse`
             The callback response data. If ``with_message=True``, this also contains a message resource.
+
+            .. versionadded:: |vnext|
         """
         if self._response_type is not None:
             raise InteractionResponded(self._parent)
@@ -1105,6 +1104,8 @@ class InteractionResponse:
         -------
         :class:`InteractionCallbackResponse`
             The callback response data, with a message resource.
+
+            .. versionadded:: |vnext|
         """
         if self._response_type is not None:
             raise InteractionResponded(self._parent)
@@ -1335,6 +1336,8 @@ class InteractionResponse:
         -------
         :class:`InteractionCallbackResponse`
             The callback response data, with a message resource.
+
+            .. versionadded:: |vnext|
         """
         if self._response_type is not None:
             raise InteractionResponded(self._parent)
@@ -1472,6 +1475,8 @@ class InteractionResponse:
         -------
         :class:`InteractionCallbackResponse`
             The callback response data.
+
+            .. versionadded:: |vnext|
         """
         if self._response_type is not None:
             raise InteractionResponded(self._parent)
@@ -1582,6 +1587,8 @@ class InteractionResponse:
         -------
         :class:`InteractionCallbackResponse`
             The callback response data.
+
+            .. versionadded:: |vnext|
         """
         if modal is not None and any((title, components, custom_id)):
             msg = "Cannot mix modal argument and title, custom_id, components arguments"
