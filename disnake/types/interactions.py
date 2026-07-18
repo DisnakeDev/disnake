@@ -66,6 +66,7 @@ class ApplicationCommandOption(TypedDict):
     min_length: NotRequired[int]
     max_length: NotRequired[int]
     autocomplete: NotRequired[bool]
+    file_types: NotRequired[list[str]]
 
 
 ApplicationCommandOptionChoiceValue: TypeAlias = str | int | float

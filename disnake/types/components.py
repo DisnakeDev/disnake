@@ -195,6 +195,7 @@ class FileUploadComponent(_BaseComponent):
     min_values: NotRequired[int]
     max_values: NotRequired[int]
     required: NotRequired[bool]
+    file_types: NotRequired[list[str]]
 
 
 class _GroupOption(TypedDict):

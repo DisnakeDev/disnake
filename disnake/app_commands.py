@@ -6,7 +6,7 @@ import math
 import re
 from abc import ABC
 from collections.abc import Mapping, Sequence
-from typing import TYPE_CHECKING, ClassVar, TypeAlias, overload
+from typing import TYPE_CHECKING, ClassVar, Literal, TypeAlias, overload
 
 from . import utils
 from .enums import (
@@ -209,6 +209,14 @@ class Option:
 
         .. versionadded:: 2.6
 
+    file_types: :class:`~collections.abc.Sequence`\[:class:`str`] | :data:`None`
+        The list of file types that can be uploaded with this option, if the type is :class:`OptionType.attachment`.
+        Allowed values are ``image``, ``video``, and ``audio``, as well as
+        any dot-prefixed extension such as ``.pdf`` (up to 10).
+        Defaults to all types (i.e. :data:`None`).
+
+        .. versionadded:: |vnext|
+
     Attributes
     ----------
     name: :class:`str`
@@ -242,6 +250,14 @@ class Option:
         The maximum length for this option if this is a string option.
 
         .. versionadded:: 2.6
+
+    file_types: :class:`~collections.abc.Sequence`\[:class:`str`] | :data:`None`
+        The list of file types that can be uploaded with this option, if the type is :class:`OptionType.attachment`.
+        Allowed values are ``image``, ``video``, and ``audio``, as well as
+        any dot-prefixed extension such as ``.pdf`` (up to 10).
+        Defaults to all types (i.e. :data:`None`).
+
+        .. versionadded:: |vnext|
     """
 
     __slots__ = (
@@ -259,6 +275,7 @@ class Option:
         "description_localizations",
         "min_length",
         "max_length",
+        "file_types",
     )
 
     def __init__(
@@ -275,6 +292,7 @@ class Option:
         max_value: float | None = None,
         min_length: int | None = None,
         max_length: int | None = None,
+        file_types: Sequence[Literal["image", "video", "audio"] | str] | None = None,
     ) -> None:
         name_loc = Localized._cast(name, True)
         _validate_name(name_loc.string)
@@ -289,9 +307,9 @@ class Option:
         self.required: bool = required
         self.options: list[Option] = options or []
 
-        if min_value and self.type is OptionType.integer:
+        if min_value is not None and self.type is OptionType.integer:
             min_value = math.ceil(min_value)
-        if max_value and self.type is OptionType.integer:
+        if max_value is not None and self.type is OptionType.integer:
             max_value = math.floor(max_value)
 
         self.min_value: float | None = min_value
@@ -328,12 +346,20 @@ class Option:
 
         self.autocomplete: bool = autocomplete
 
+        if file_types is not None and (
+            isinstance(file_types, str) or not all(isinstance(t, str) for t in file_types)
+        ):
+            msg = "file_types must be a list/sequence of `str`s"
+            raise TypeError(msg)
+        self.file_types: Sequence[Literal["image", "video", "audio"] | str] = file_types or []
+
     def __repr__(self) -> str:
         return (
             f"<Option name={self.name!r} description={self.description!r}"
             f" type={self.type!r} required={self.required!r} choices={self.choices!r}"
             f" options={self.options!r} min_value={self.min_value!r} max_value={self.max_value!r}"
-            f" min_length={self.min_length!r} max_length={self.max_length!r}>"
+            f" min_length={self.min_length!r} max_length={self.max_length!r}"
+            f" file_types={self.file_types!r}>"
         )
 
     def __eq__(self, other: Option) -> bool:
@@ -350,6 +376,7 @@ class Option:
             and self.max_value == other.max_value
             and self.min_length == other.min_length
             and self.max_length == other.max_length
+            and set(self.file_types) == set(other.file_types)
             and self.name_localizations == other.name_localizations
             and self.description_localizations == other.description_localizations
         )
@@ -377,6 +404,7 @@ class Option:
             max_value=data.get("max_value"),
             min_length=data.get("min_length"),
             max_length=data.get("max_length"),
+            file_types=data.get("file_types"),
         )
 
     def add_choice(
@@ -408,6 +436,7 @@ class Option:
         max_value: float | None = None,
         min_length: int | None = None,
         max_length: int | None = None,
+        file_types: Sequence[Literal["image", "video", "audio"] | str] | None = None,
     ) -> None:
         """Adds an option to the current list of options,
         parameters are the same as for :class:`Option`.
@@ -427,6 +456,7 @@ class Option:
                 max_value=max_value,
                 min_length=min_length,
                 max_length=max_length,
+                file_types=file_types,
             )
         )
 
@@ -454,6 +484,8 @@ class Option:
             payload["min_length"] = self.min_length
         if self.max_length is not None:
             payload["max_length"] = self.max_length
+        if self.file_types:
+            payload["file_types"] = list(self.file_types)
         if (loc := self.name_localizations.data) is not None:
             payload["name_localizations"] = loc
         if (loc := self.description_localizations.data) is not None:
@@ -528,6 +560,7 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
         self,
         type: ApplicationCommandType,
         name: LocalizedRequired,
+        *,
         default_member_permissions: Permissions | int | None = None,
         nsfw: bool | None = None,
         install_types: ApplicationInstallTypes | None = None,
@@ -649,7 +682,7 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
 
     def __repr__(self) -> str:
         attrs = " ".join(f"{key}={getattr(self, key)!r}" for key in self.__repr_attributes__)
-        return f"<{type(self).__name__} {attrs}>"
+        return f"<{self.__class__.__name__} {attrs}>"
 
     def __str__(self) -> str:
         return self.name
@@ -819,6 +852,7 @@ class UserCommand(ApplicationCommand):
     def __init__(
         self,
         name: LocalizedRequired,
+        *,
         default_member_permissions: Permissions | int | None = None,
         nsfw: bool | None = None,
         install_types: ApplicationInstallTypes | None = None,
@@ -970,6 +1004,7 @@ class MessageCommand(ApplicationCommand):
     def __init__(
         self,
         name: LocalizedRequired,
+        *,
         default_member_permissions: Permissions | int | None = None,
         nsfw: bool | None = None,
         install_types: ApplicationInstallTypes | None = None,
@@ -1135,6 +1170,7 @@ class SlashCommand(ApplicationCommand):
         name: LocalizedRequired,
         description: LocalizedRequired,
         options: list[Option] | None = None,
+        *,
         default_member_permissions: Permissions | int | None = None,
         nsfw: bool | None = None,
         install_types: ApplicationInstallTypes | None = None,
@@ -1147,8 +1183,8 @@ class SlashCommand(ApplicationCommand):
         self,
         name: LocalizedRequired,
         description: LocalizedRequired,
-        dm_permission: bool | None,
         options: list[Option] | None = None,
+        dm_permission: bool | None = None,
         default_member_permissions: Permissions | int | None = None,
         nsfw: bool | None = None,
         install_types: ApplicationInstallTypes | None = None,
@@ -1205,6 +1241,7 @@ class SlashCommand(ApplicationCommand):
         max_value: float | None = None,
         min_length: int | None = None,
         max_length: int | None = None,
+        file_types: Sequence[Literal["image", "video", "audio"] | str] | None = None,
     ) -> None:
         """Adds an option to the current list of options,
         parameters are the same as for :class:`Option`
@@ -1223,6 +1260,7 @@ class SlashCommand(ApplicationCommand):
                 max_value=max_value,
                 min_length=min_length,
                 max_length=max_length,
+                file_types=file_types,
             )
         )
 

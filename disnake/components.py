@@ -1577,7 +1577,7 @@ class Label(Component):
 
 
 class FileUpload(Component):
-    """Represents a file upload component from the Discord Bot UI Kit.
+    r"""Represents a file upload component from the Discord Bot UI Kit.
 
     This allows you to receive files from users, and can only be used in modals.
 
@@ -1600,6 +1600,14 @@ class FileUpload(Component):
     required: :class:`bool`
         Whether the file upload is required.
         Defaults to ``True``.
+    file_types: :class:`~collections.abc.Sequence`\[:class:`str`] | :data:`None`
+        A list of file types that can be uploaded with this component.
+        Allowed values are ``image``, ``video``, and ``audio``, as well as
+        any dot-prefixed extension such as ``.pdf`` (up to 10).
+        If :data:`None`, files of all types may be uploaded.
+
+        .. versionadded:: |vnext|
+
     id: :class:`int`
         The numeric identifier for the component. Must be unique within a modal.
         This is always present in components received from the API.
@@ -1612,6 +1620,7 @@ class FileUpload(Component):
         "min_values",
         "max_values",
         "required",
+        "file_types",
     )
 
     __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
@@ -1624,9 +1633,12 @@ class FileUpload(Component):
         self.min_values: int = data.get("min_values", 1)
         self.max_values: int = data.get("max_values", 1)
         self.required: bool = data.get("required", True)
+        self.file_types: Sequence[Literal["image", "video", "audio"] | str] | None = data.get(
+            "file_types"
+        )
 
     def to_dict(self) -> FileUploadComponentPayload:
-        return {
+        payload: FileUploadComponentPayload = {
             "type": self.type.value,
             "id": self.id,
             "custom_id": self.custom_id,
@@ -1634,6 +1646,11 @@ class FileUpload(Component):
             "max_values": self.max_values,
             "required": self.required,
         }
+
+        if self.file_types:
+            payload["file_types"] = list(self.file_types)
+
+        return payload
 
 
 AnyGroupOptionPayload = Union["RadioGroupOptionPayload", "CheckboxGroupOptionPayload"]
@@ -1917,7 +1934,7 @@ def handle_media_item_input(value: MediaItemInput) -> UnfurledMediaItem:
         return UnfurledMediaItem(value.url)
 
     assert_never(value)
-    msg = f"{type(value).__name__} cannot be converted to UnfurledMediaItem"
+    msg = f"{value.__class__.__name__} cannot be converted to UnfurledMediaItem"
     raise TypeError(msg)
 
 
