@@ -1688,7 +1688,9 @@ class InteractionResponse:
 
         self._response_type = response_type
 
-    async def launch_activity(self) -> None:
+    async def launch_activity(
+        self,
+    ) -> InteractionCallbackResponse[InteractionCallbackActivityInstance]:
         """|coro|
 
         Responds to this interaction by launching the activity associated with the app.
@@ -1703,6 +1705,11 @@ class InteractionResponse:
             Sending the response has failed.
         InteractionResponded
             This interaction has already been responded to before.
+
+        Returns
+        -------
+        :class:`InteractionCallbackResponse`
+            The callback response data, with an :class:`InteractionCallbackActivityInstance` resource.
         """
         if self._response_type is not None:
             raise InteractionResponded(self._parent)
@@ -1710,7 +1717,7 @@ class InteractionResponse:
         parent = self._parent
         adapter = async_context.get()
         response_type = InteractionResponseType.launch_activity
-        await adapter.create_interaction_response(
+        callback_data = await adapter.create_interaction_response(
             parent.id,
             parent.token,
             session=parent._session,
@@ -1718,6 +1725,8 @@ class InteractionResponse:
         )
 
         self._response_type = response_type
+
+        return InteractionCallbackResponse(callback_data, parent=self._parent)
 
 
 class _InteractionMessageState:
