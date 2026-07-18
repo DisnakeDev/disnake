@@ -31,7 +31,7 @@ from .errors import (
     LoginFailure,
     NotFound,
 )
-from .gateway import DiscordClientWebSocketResponse
+from .gateway import DiscordClientWebSocketResponse, GatewayParams
 from .utils import MISSING
 
 _log = logging.getLogger(__name__)
@@ -3035,16 +3035,16 @@ class HTTPClient:
             json=records,
         )
 
-    async def get_gateway(self, *, encoding: str = "json", zlib: bool = True) -> str:
+    async def get_gateway(self, params: GatewayParams | None = None) -> str:
         try:
             data: gateway.Gateway = await self.request(Route("GET", "/gateway"))
         except HTTPException as exc:
             raise GatewayNotFound from exc
 
-        return self._format_gateway_url(data["url"], encoding=encoding, zlib=zlib)
+        return self._format_gateway_url(data["url"], params=params)
 
     async def get_bot_gateway(
-        self, *, encoding: str = "json", zlib: bool = True
+        self, params: GatewayParams | None = None
     ) -> tuple[int, str, gateway.SessionStartLimit]:
         try:
             data: gateway.GatewayBot = await self.request(Route("GET", "/gateway/bot"))
@@ -3053,21 +3053,24 @@ class HTTPClient:
 
         return (
             data["shards"],
-            self._format_gateway_url(data["url"], encoding=encoding, zlib=zlib),
+            self._format_gateway_url(data["url"], params=params),
             data["session_start_limit"],
         )
 
     @staticmethod
-    def _format_gateway_url(url: str, *, encoding: str, zlib: bool) -> str:
+    def _format_gateway_url(url: str, *, params: GatewayParams | None) -> str:
+        params = params or GatewayParams()
+
         _url = yarl.URL(url)
-        params = _url.query.copy()
-        params["v"] = str(_API_VERSION)
-        params["encoding"] = encoding
-        if zlib:
-            params["compress"] = "zlib-stream"
+        query = _url.query.copy()
+        query["v"] = str(_API_VERSION)
+        query["encoding"] = params.encoding
+        if params.compress:
+            query["compress"] = params.compress
         else:
-            params.popall("compress", None)
-        return str(_url.with_query(params))
+            query.popall("compress", None)
+
+        return str(_url.with_query(query))
 
     def get_user(self, user_id: Snowflake) -> Response[user.User]:
         return self.request(Route("GET", "/users/{user_id}", user_id=user_id))
