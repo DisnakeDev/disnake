@@ -704,7 +704,7 @@ class Interaction(Generic[ClientT]):
         flags: MessageFlags = MISSING,
         delete_after: float = MISSING,
         poll: Poll = MISSING,
-    ) -> InteractionCallbackResponse[Message] | WebhookMessage:
+    ) -> InteractionCallbackResponse[InteractionMessage] | WebhookMessage:
         r"""|coro|
 
         Sends a message using either :meth:`response.send_message <InteractionResponse.send_message>`
@@ -873,7 +873,7 @@ class InteractionResponse:
         *,
         with_message: bool = MISSING,
         ephemeral: bool = MISSING,
-    ) -> InteractionCallbackResponse[Message | None]:
+    ) -> InteractionCallbackResponse[InteractionMessage | None]:
         """|coro|
 
         Defers the interaction response.
@@ -1014,7 +1014,7 @@ class InteractionResponse:
         flags: MessageFlags = MISSING,
         delete_after: float = MISSING,
         poll: Poll = MISSING,
-    ) -> InteractionCallbackResponse[Message]:
+    ) -> InteractionCallbackResponse[InteractionMessage]:
         r"""|coro|
 
         Responds to this interaction by sending a message.
@@ -1235,7 +1235,7 @@ class InteractionResponse:
         flags: MessageFlags = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         delete_after: float | None = None,
-    ) -> InteractionCallbackResponse[Message]:
+    ) -> InteractionCallbackResponse[InteractionMessage]:
         r"""|coro|
 
         Responds to this interaction by editing the original message of
@@ -2228,7 +2228,12 @@ class InteractionDataResolved(dict[str, Any]):
         return None
 
 
-ResourceT = TypeVar("ResourceT", bound=Message | None, default=Message | None, covariant=True)
+ResourceT = TypeVar(
+    "ResourceT",
+    bound=InteractionMessage | None,
+    default=InteractionMessage | None,
+    covariant=True,
+)
 
 
 class InteractionCallbackResponse(Generic[ResourceT]):
@@ -2250,7 +2255,7 @@ class InteractionCallbackResponse(Generic[ResourceT]):
         Whether the message is in a :attr:`~MessageFlags.loading` state.
     message_ephemeral: :class:`bool` | :data:`None`
         Whether the message is :attr:`~MessageFlags.ephemeral`.
-    resource: :class:`Message` | :data:`None`
+    resource: :class:`InteractionMessage` | :data:`None`
         The resource that was created (or edited) by the interaction response, if any.
         The type of this attribute depends on the type of interaction callback that was sent.
     """
@@ -2278,9 +2283,10 @@ class InteractionCallbackResponse(Generic[ResourceT]):
         self.message_loading: bool | None = interaction_data.get("response_message_loading")
         self.message_ephemeral: bool | None = interaction_data.get("response_message_ephemeral")
 
-        resource: Message | None = None
+        resource: InteractionMessage | None = None
         if (resource_data := data.get("resource")) and (
             message_data := resource_data.get("message")
         ):
-            resource = Message(state=parent._state, channel=parent.channel, data=message_data)
+            state = _InteractionMessageState(parent, parent._state)
+            resource = InteractionMessage(state=state, channel=parent.channel, data=message_data)  # pyright: ignore[reportArgumentType]
         self.resource: ResourceT = resource  # pyright: ignore[reportAttributeAccessIssue]
