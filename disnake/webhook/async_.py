@@ -27,6 +27,7 @@ from ..asset import Asset
 from ..channel import PartialMessageable
 from ..enums import WebhookType, try_enum
 from ..errors import DiscordServerError, Forbidden, HTTPException, NotFound, WebhookTokenMissing
+from ..file import File
 from ..flags import MessageFlags
 from ..http import Route, set_attachments, to_multipart, to_multipart_with_attachments
 from ..message import Message
@@ -54,7 +55,6 @@ if TYPE_CHECKING:
     from ..asset import AssetBytes
     from ..channel import ForumChannel, MediaChannel, StageChannel, TextChannel, VoiceChannel
     from ..embeds import Embed
-    from ..file import File
     from ..guild import Guild
     from ..http import HTTPClient, Response
     from ..mentions import AllowedMentions
@@ -539,6 +539,9 @@ def handle_message_parameters_dict(
         raise TypeError(msg)
 
     if file is not MISSING:
+        if not isinstance(file, File):
+            msg = "file parameter must be File"
+            raise TypeError(msg)
         files = [file]
 
     payload = {}
@@ -546,13 +549,21 @@ def handle_message_parameters_dict(
         embeds = [embed] if embed else []
     if embeds is not MISSING:
         if len(embeds) > 10:
-            msg = "embeds has a maximum of 10 elements."
+            msg = "embeds parameter must be a list of up to 10 elements"
             raise ValueError(msg)
         payload["embeds"] = [e.to_dict() for e in embeds]
         for embed in embeds:
             if embed._files:
                 files = files or []
                 files.extend(embed._files.values())
+
+    if files:
+        if len(files) > 10:
+            msg = "files parameter must be a list of up to 10 elements"
+            raise ValueError(msg)
+        if not all(isinstance(file, File) for file in files):
+            msg = "files parameter must be a list of File"
+            raise ValueError(msg)
 
     if content is not MISSING:
         payload["content"] = str(content) if content is not None else None
