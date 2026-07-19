@@ -520,11 +520,13 @@ def handle_message_parameters_dict(
     view: View | None = MISSING,
     components: MessageComponents | None = MISSING,
     allowed_mentions: AllowedMentions | None = MISSING,
-    previous_allowed_mentions: AllowedMentions | None = None,
     mention_author: bool | None = None,
     stickers: Sequence[GuildSticker | StandardSticker | StickerItem] = MISSING,
     poll: Poll = MISSING,
     reference: Message | MessageReference | PartialMessage | None = MISSING,
+    # base values for editing messages
+    previous_flags: int = 0,
+    previous_allowed_mentions: AllowedMentions | None = None,
     # webhook only
     username: str = MISSING,
     avatar_url: object = MISSING,
@@ -597,7 +599,7 @@ def handle_message_parameters_dict(
 
     # set cv2 flag automatically
     if is_v2:
-        flags = MessageFlags._from_value(0 if flags is MISSING else flags.value)
+        flags = MessageFlags._from_value(previous_flags if flags is MISSING else flags.value)
         flags.is_components_v2 = True
     # components v2 cannot be used with other content fields
     # (n.b. this doesn't take into account editing messages that *already* have content/embeds,
@@ -609,7 +611,7 @@ def handle_message_parameters_dict(
     # flags
 
     if ephemeral not in (None, MISSING) or suppress_embeds not in (None, MISSING):
-        flags = MessageFlags._from_value(0 if flags is MISSING else flags.value)
+        flags = MessageFlags._from_value(previous_flags if flags is MISSING else flags.value)
         if suppress_embeds not in (None, MISSING):
             flags.suppress_embeds = suppress_embeds
         if ephemeral not in (None, MISSING):
@@ -686,11 +688,13 @@ def handle_message_parameters(
     view: View | None = MISSING,
     components: MessageComponents | None = MISSING,
     allowed_mentions: AllowedMentions | None = MISSING,
-    previous_allowed_mentions: AllowedMentions | None = None,
     mention_author: bool | None = None,
     stickers: Sequence[GuildSticker | StandardSticker | StickerItem] = MISSING,
     poll: Poll = MISSING,
     reference: Message | MessageReference | PartialMessage | None = MISSING,
+    # base values for editing messages
+    previous_flags: int = 0,
+    previous_allowed_mentions: AllowedMentions | None = None,
     # webhook only
     username: str = MISSING,
     avatar_url: object = MISSING,
@@ -713,11 +717,12 @@ def handle_message_parameters(
         view=view,
         components=components,
         allowed_mentions=allowed_mentions,
-        previous_allowed_mentions=previous_allowed_mentions,
         mention_author=mention_author,
         stickers=stickers,
         poll=poll,
         reference=reference,
+        previous_flags=previous_flags,
+        previous_allowed_mentions=previous_allowed_mentions,
         username=username,
         avatar_url=avatar_url,
         thread_name=thread_name,

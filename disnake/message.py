@@ -124,7 +124,7 @@ def convert_emoji_reaction(emoji: EmojiInputType | Reaction) -> str:
 async def _edit_handler(
     msg: Message | PartialMessage,
     *,
-    default_flags: int,
+    previous_flags: int,  # used as the base value, only when params like suppress_embeds are passed
     previous_allowed_mentions: AllowedMentions | None,
     delete_after: float | None,
     # these are the actual edit kwargs,
@@ -142,15 +142,6 @@ async def _edit_handler(
     view: View | None,
     components: MessageComponents | None,
 ) -> Message:
-    if embed is not MISSING and embeds is not MISSING:
-        err = "Cannot mix embed and embeds keyword arguments."
-        raise TypeError(err)
-    if file is not MISSING and files is not MISSING:
-        err = "Cannot mix file and files keyword arguments."
-        raise TypeError(err)
-    if view is not MISSING and components is not MISSING:
-        err = "Cannot mix view and components keyword arguments."
-        raise TypeError(err)
     if suppress is not MISSING:
         suppress_deprecated_msg = "'suppress' is deprecated in favour of 'suppress_embeds'."
         if suppress_embeds is not MISSING:
@@ -161,79 +152,30 @@ async def _edit_handler(
         utils.warn_deprecated(suppress_deprecated_msg, stacklevel=3)
         suppress_embeds = suppress
 
-    payload: dict[str, Any] = {}
-    if content is not MISSING:
-        if content is not None:
-            payload["content"] = str(content)
-        else:
-            payload["content"] = None
+    from .webhook.async_ import handle_message_parameters_dict
 
-    if file is not MISSING:
-        files = [file]
+    with handle_message_parameters_dict(
+        content=content,
+        embed=embed,
+        embeds=embeds,
+        file=file,
+        files=files,
+        attachments=attachments,
+        suppress_embeds=suppress_embeds,
+        flags=flags,
+        view=view,
+        components=components,
+        allowed_mentions=allowed_mentions,
+        previous_flags=previous_flags,
+        previous_allowed_mentions=previous_allowed_mentions,
+    ) as params:
+        if view is not MISSING:
+            msg._state.prevent_view_updates_for(msg.id)
 
-    if embed is not MISSING:
-        embeds = [embed] if embed else []
-    if embeds is not MISSING:
-        payload["embeds"] = [e.to_dict() for e in embeds]
-        for embed in embeds:
-            if embed._files:
-                files = files or []
-                files.extend(embed._files.values())
+        data = await msg._state.http.edit_message(
+            msg.channel.id, msg.id, files=params.files, **params.payload
+        )
 
-    if allowed_mentions is MISSING:
-        if previous_allowed_mentions:
-            payload["allowed_mentions"] = previous_allowed_mentions.to_dict()
-    else:
-        if allowed_mentions:
-            if msg._state.allowed_mentions is not None:
-                payload["allowed_mentions"] = msg._state.allowed_mentions.merge(
-                    allowed_mentions
-                ).to_dict()
-            else:
-                payload["allowed_mentions"] = allowed_mentions.to_dict()
-
-    if attachments is not MISSING:
-        payload["attachments"] = [] if attachments is None else [a.to_dict() for a in attachments]
-
-    if view is not MISSING:
-        msg._state.prevent_view_updates_for(msg.id)
-        if view:
-            payload["components"] = view.to_components()
-        else:
-            payload["components"] = []
-
-    is_v2 = False
-    if components is not MISSING:
-        from .ui.action_row import normalize_components_to_dict
-
-        if components:
-            payload["components"], is_v2 = normalize_components_to_dict(components)
-        else:
-            payload["components"] = []
-
-    # set cv2 flag automatically
-    if is_v2:
-        flags = MessageFlags._from_value(default_flags if flags is MISSING else flags.value)
-        flags.is_components_v2 = True
-    # components v2 cannot be used with other content fields
-    # (n.b. this doesn't take into account editing messages that *already* have content/embeds,
-    # since we can't know that for certain with partial messages anyway)
-    if flags and flags.is_components_v2 and (content or embeds):
-        err = "Cannot use v2 components with content or embeds"
-        raise ValueError(err)
-
-    if suppress_embeds is not MISSING:
-        flags = MessageFlags._from_value(default_flags if flags is MISSING else flags.value)
-        flags.suppress_embeds = suppress_embeds
-    if flags is not MISSING:
-        payload["flags"] = flags.value
-
-    try:
-        data = await msg._state.http.edit_message(msg.channel.id, msg.id, **payload, files=files)
-    finally:
-        if files:
-            for f in files:
-                f.close()
     message = Message(state=msg._state, channel=msg.channel, data=data)
 
     if view and not view.is_finished():
@@ -2161,7 +2103,7 @@ class Message(Hashable):
 
         return await _edit_handler(
             self,
-            default_flags=self.flags.value,
+            previous_flags=self.flags.value,
             previous_allowed_mentions=previous_allowed_mentions,
             content=content,
             embed=embed,
@@ -2950,7 +2892,7 @@ class PartialMessage(Hashable):
 
         return await _edit_handler(
             self,
-            default_flags=0,
+            previous_flags=0,
             previous_allowed_mentions=None,
             content=content,
             embed=embed,

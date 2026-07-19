@@ -727,7 +727,7 @@ class HTTPClient:
         channel_id: Snowflake,
         message_id: Snowflake,
         *,
-        files: list[File] | None = None,
+        files: Sequence[File] | None = None,
         **fields: Any,
     ) -> Response[message.Message]:
         r = Route(
