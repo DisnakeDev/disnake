@@ -505,10 +505,8 @@ class PayloadParameters(Generic[PayloadT]):
 
 
 def handle_message_parameters_dict(
-    content: str | None = MISSING,
     *,
-    username: str = MISSING,
-    avatar_url: object = MISSING,
+    content: str | None = MISSING,
     tts: bool = False,
     nonce: str | int | None = MISSING,
     ephemeral: bool | None = MISSING,
@@ -527,10 +525,16 @@ def handle_message_parameters_dict(
     stickers: Sequence[GuildSticker | StandardSticker | StickerItem] = MISSING,
     poll: Poll = MISSING,
     reference: Message | MessageReference | PartialMessage | None = MISSING,
+    # webhook only
+    username: str = MISSING,
+    avatar_url: object = MISSING,
     # these parameters are exclusive to webhooks in forum/media channels
     thread_name: str = MISSING,
     applied_tags: Sequence[Snowflake] = MISSING,
 ) -> PayloadParameters[dict[str, Any]]:
+
+    # exclusive parameter validation
+
     if files is not MISSING and file is not MISSING:
         msg = "Cannot mix file and files keyword arguments."
         raise TypeError(msg)
@@ -541,13 +545,16 @@ def handle_message_parameters_dict(
         msg = "Cannot mix view and components keyword arguments."
         raise TypeError(msg)
 
+    # files + embeds
+
     if file is not MISSING:
         if not isinstance(file, File):
             msg = "file parameter must be File"
             raise TypeError(msg)
         files = [file]
 
-    payload = {}
+    payload: dict[str, Any] = {}
+
     if embed is not MISSING:
         embeds = [embed] if embed else []
     if embeds is not MISSING:
@@ -568,8 +575,16 @@ def handle_message_parameters_dict(
             msg = "files parameter must be a list of File"
             raise ValueError(msg)
 
+    # simple fields
+
     if content is not MISSING:
         payload["content"] = str(content) if content is not None else None
+    if tts:
+        payload["tts"] = True
+    if nonce:
+        payload["nonce"] = nonce
+
+    # components
 
     is_v2 = False
     if view is not MISSING:
@@ -585,21 +600,13 @@ def handle_message_parameters_dict(
         flags = MessageFlags._from_value(0 if flags is MISSING else flags.value)
         flags.is_components_v2 = True
     # components v2 cannot be used with other content fields
+    # (n.b. this doesn't take into account editing messages that *already* have content/embeds,
+    # since we can't know that for certain with partial messages anyway)
     if flags and flags.is_components_v2 and (content or embeds or stickers or poll):
         msg = "Cannot use v2 components with content, embeds, stickers, or polls"
         raise ValueError(msg)
 
-    if attachments is not MISSING:
-        payload["attachments"] = [] if attachments is None else [a.to_dict() for a in attachments]
-
-    if tts:
-        payload["tts"] = True
-    if nonce:
-        payload["nonce"] = nonce
-    if avatar_url:
-        payload["avatar_url"] = str(avatar_url)
-    if username:
-        payload["username"] = username
+    # flags
 
     if ephemeral not in (None, MISSING) or suppress_embeds not in (None, MISSING):
         flags = MessageFlags._from_value(0 if flags is MISSING else flags.value)
@@ -609,6 +616,8 @@ def handle_message_parameters_dict(
             flags.ephemeral = ephemeral
     if flags is not MISSING:
         payload["flags"] = flags.value
+
+    # allowed mentions
 
     allowed_mentions_data = None
     if allowed_mentions:
@@ -625,6 +634,11 @@ def handle_message_parameters_dict(
 
     payload["allowed_mentions"] = allowed_mentions_data
 
+    # other message fields
+
+    if attachments is not MISSING:
+        payload["attachments"] = [] if attachments is None else [a.to_dict() for a in attachments]
+
     if stickers is not MISSING:
         payload["sticker_ids"] = [s.id for s in stickers]
 
@@ -638,6 +652,15 @@ def handle_message_parameters_dict(
             msg = "reference parameter must be Message, MessageReference, or PartialMessage"
             raise TypeError(msg) from None
 
+    # webhook only
+
+    if avatar_url:
+        payload["avatar_url"] = str(avatar_url)
+    if username:
+        payload["username"] = username
+
+    # webhooks in forum/media channels
+
     if thread_name:
         payload["thread_name"] = thread_name
     if applied_tags:
@@ -647,10 +670,8 @@ def handle_message_parameters_dict(
 
 
 def handle_message_parameters(
-    content: str | None = MISSING,
     *,
-    username: str = MISSING,
-    avatar_url: object = MISSING,
+    content: str | None = MISSING,
     tts: bool = False,
     nonce: str | int | None = MISSING,
     ephemeral: bool | None = MISSING,
@@ -669,14 +690,15 @@ def handle_message_parameters(
     stickers: Sequence[GuildSticker | StandardSticker | StickerItem] = MISSING,
     poll: Poll = MISSING,
     reference: Message | MessageReference | PartialMessage | None = MISSING,
+    # webhook only
+    username: str = MISSING,
+    avatar_url: object = MISSING,
     # these parameters are exclusive to webhooks in forum/media channels
     thread_name: str = MISSING,
     applied_tags: Sequence[Snowflake] = MISSING,
 ) -> PayloadParameters[dict[str, Any] | None]:
     params = handle_message_parameters_dict(
         content=content,
-        username=username,
-        avatar_url=avatar_url,
         tts=tts,
         nonce=nonce,
         ephemeral=ephemeral,
@@ -693,10 +715,12 @@ def handle_message_parameters(
         previous_allowed_mentions=previous_allowed_mentions,
         mention_author=mention_author,
         stickers=stickers,
-        thread_name=thread_name,
-        applied_tags=applied_tags,
         poll=poll,
         reference=reference,
+        username=username,
+        avatar_url=avatar_url,
+        thread_name=thread_name,
+        applied_tags=applied_tags,
     )
 
     if params.files:

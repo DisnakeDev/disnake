@@ -3797,7 +3797,7 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
             channel_data["rate_limit_per_user"] = slowmode_delay
 
         with handle_message_parameters_dict(
-            content,
+            content=content,
             embed=embed,
             embeds=embeds,
             file=file,
