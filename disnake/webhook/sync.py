@@ -12,7 +12,7 @@ import logging
 import re
 import threading
 import time
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from errno import ECONNRESET
 from typing import (
     TYPE_CHECKING,
@@ -91,9 +91,9 @@ class WebhookAdapter:
         route: Route,
         session: Session,
         *,
-        payload: dict[str, Any] | None = None,
-        multipart: list[dict[str, Any]] | None = None,
-        files: list[File] | None = None,
+        payload: Mapping[str, Any] | None = None,
+        multipart: Sequence[dict[str, Any]] | None = None,
+        files: Sequence[File] | None = None,
         reason: str | None = None,
         auth_token: str | None = None,
         params: dict[str, Any] | None = None,
@@ -275,9 +275,9 @@ class WebhookAdapter:
         token: str,
         *,
         session: Session,
-        payload: dict[str, Any] | None = None,
-        multipart: list[dict[str, Any]] | None = None,
-        files: list[File] | None = None,
+        payload: Mapping[str, Any] | None = None,
+        multipart: Sequence[dict[str, Any]] | None = None,
+        files: Sequence[File] | None = None,
         thread_id: int | None = None,
         wait: bool = False,
     ) -> MessagePayload: ...
@@ -289,9 +289,9 @@ class WebhookAdapter:
         token: str,
         *,
         session: Session,
-        payload: dict[str, Any] | None = None,
-        multipart: list[dict[str, Any]] | None = None,
-        files: list[File] | None = None,
+        payload: Mapping[str, Any] | None = None,
+        multipart: Sequence[dict[str, Any]] | None = None,
+        files: Sequence[File] | None = None,
         thread_id: int | None = None,
         wait: bool = False,
     ) -> None: ...
@@ -302,9 +302,9 @@ class WebhookAdapter:
         token: str,
         *,
         session: Session,
-        payload: dict[str, Any] | None = None,
-        multipart: list[dict[str, Any]] | None = None,
-        files: list[File] | None = None,
+        payload: Mapping[str, Any] | None = None,
+        multipart: Sequence[dict[str, Any]] | None = None,
+        files: Sequence[File] | None = None,
         thread_id: int | None = None,
         wait: bool = False,
     ) -> MessagePayload | None:
@@ -351,9 +351,9 @@ class WebhookAdapter:
         message_id: int,
         *,
         session: Session,
-        payload: dict[str, Any] | None = None,
-        multipart: list[dict[str, Any]] | None = None,
-        files: list[File] | None = None,
+        payload: Mapping[str, Any] | None = None,
+        multipart: Sequence[dict[str, Any]] | None = None,
+        files: Sequence[File] | None = None,
         thread_id: int | None = None,
     ) -> MessagePayload:
         params: dict[str, Any] = {}
@@ -1112,7 +1112,8 @@ class SyncWebhook(BaseWebhook):
                 raise TypeError(msg)
             thread_id = thread.id
 
-        params = handle_message_parameters(
+        adapter: WebhookAdapter = _get_webhook_adapter()
+        with handle_message_parameters(
             content=content,
             username=username,
             avatar_url=avatar_url,
@@ -1127,11 +1128,7 @@ class SyncWebhook(BaseWebhook):
             applied_tags=applied_tags,
             allowed_mentions=allowed_mentions,
             previous_allowed_mentions=previous_mentions,
-        )
-
-        adapter: WebhookAdapter = _get_webhook_adapter()
-
-        try:
+        ) as params:
             data = adapter.execute_webhook(
                 self.id,
                 self.token,
@@ -1142,10 +1139,7 @@ class SyncWebhook(BaseWebhook):
                 thread_id=thread_id,
                 wait=wait,
             )
-        finally:
-            if params.files:
-                for f in params.files:
-                    f.close()
+
         if wait:
             return self._create_message(data, thread=thread, thread_name=thread_name)
         return None
@@ -1289,7 +1283,9 @@ class SyncWebhook(BaseWebhook):
             attachments = self.fetch_message(message_id, thread=thread).attachments
 
         previous_mentions: AllowedMentions | None = getattr(self._state, "allowed_mentions", None)
-        params = handle_message_parameters(
+
+        adapter: WebhookAdapter = _get_webhook_adapter()
+        with handle_message_parameters(
             content=content,
             file=file,
             files=files,
@@ -1298,9 +1294,7 @@ class SyncWebhook(BaseWebhook):
             embeds=embeds,
             allowed_mentions=allowed_mentions,
             previous_allowed_mentions=previous_mentions,
-        )
-        adapter: WebhookAdapter = _get_webhook_adapter()
-        try:
+        ) as params:
             data = adapter.edit_webhook_message(
                 self.id,
                 self.token,
@@ -1311,10 +1305,7 @@ class SyncWebhook(BaseWebhook):
                 multipart=params.multipart,
                 files=params.files,
             )
-        finally:
-            if params.files:
-                for f in params.files:
-                    f.close()
+
         return self._create_message(data, thread=thread)
 
     def delete_message(self, message_id: int, /, *, thread: Snowflake | None = None) -> None:

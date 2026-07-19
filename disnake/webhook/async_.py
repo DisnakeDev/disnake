@@ -5,15 +5,15 @@ from __future__ import annotations
 import asyncio
 import logging
 import re
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from contextvars import ContextVar
+from dataclasses import dataclass
 from errno import ECONNRESET
 from typing import (
     TYPE_CHECKING,
     Any,
     Generic,
     Literal,
-    NamedTuple,
     NoReturn,
     TypeVar,
     overload,
@@ -102,9 +102,9 @@ class AsyncWebhookAdapter:
         route: Route,
         session: aiohttp.ClientSession,
         *,
-        payload: dict[str, Any] | None = None,
-        multipart: list[dict[str, Any]] | None = None,
-        files: list[File] | None = None,
+        payload: Mapping[str, Any] | None = None,
+        multipart: Sequence[dict[str, Any]] | None = None,
+        files: Sequence[File] | None = None,
         reason: str | None = None,
         auth_token: str | None = None,
         params: dict[str, Any] | None = None,
@@ -284,9 +284,9 @@ class AsyncWebhookAdapter:
         token: str,
         *,
         session: aiohttp.ClientSession,
-        payload: dict[str, Any] | None = None,
-        multipart: list[dict[str, Any]] | None = None,
-        files: list[File] | None = None,
+        payload: Mapping[str, Any] | None = None,
+        multipart: Sequence[dict[str, Any]] | None = None,
+        files: Sequence[File] | None = None,
         thread_id: int | None = None,
         wait: bool = False,
         with_components: bool = True,
@@ -334,9 +334,9 @@ class AsyncWebhookAdapter:
         message_id: int,
         *,
         session: aiohttp.ClientSession,
-        payload: dict[str, Any] | None = None,
-        multipart: list[dict[str, Any]] | None = None,
-        files: list[File] | None = None,
+        payload: Mapping[str, Any] | None = None,
+        multipart: Sequence[dict[str, Any]] | None = None,
+        files: Sequence[File] | None = None,
         thread_id: int | None = None,
     ) -> Response[MessagePayload]:
         params: dict[str, Any] = {}
@@ -453,9 +453,9 @@ class AsyncWebhookAdapter:
         token: str,
         *,
         session: aiohttp.ClientSession,
-        payload: dict[str, Any] | None = None,
-        multipart: list[dict[str, Any]] | None = None,
-        files: list[File] | None = None,
+        payload: Mapping[str, Any] | None = None,
+        multipart: Sequence[dict[str, Any]] | None = None,
+        files: Sequence[File] | None = None,
     ) -> Response[MessagePayload]:
         r = Route(
             "PATCH",
@@ -481,15 +481,27 @@ class AsyncWebhookAdapter:
         return self.request(r, session=session)
 
 
-class DictPayloadParameters(NamedTuple):
-    payload: dict[str, Any]
-    files: list[File] | None
+PayloadT = TypeVar("PayloadT", bound=dict[str, Any] | None, covariant=True)
 
 
-class PayloadParameters(NamedTuple):
-    payload: dict[str, Any] | None
-    multipart: list[dict[str, Any]] | None
-    files: list[File] | None
+@dataclass(kw_only=True, slots=True)
+class PayloadParameters(Generic[PayloadT]):
+    payload: PayloadT
+    multipart: Sequence[dict[str, Any]] | None
+    files: Sequence[File] | None
+
+    def __enter__(self) -> Self:
+        return self
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: TracebackType | None,
+    ) -> None:
+        if self.files:
+            for f in self.files:
+                f.close()
 
 
 def handle_message_parameters_dict(
@@ -515,7 +527,7 @@ def handle_message_parameters_dict(
     # these parameters are exclusive to webhooks in forum/media channels
     thread_name: str = MISSING,
     applied_tags: Sequence[Snowflake] = MISSING,
-) -> DictPayloadParameters:
+) -> PayloadParameters[dict[str, Any]]:
     if files is not MISSING and file is not MISSING:
         msg = "Cannot mix file and files keyword arguments."
         raise TypeError(msg)
@@ -601,7 +613,7 @@ def handle_message_parameters_dict(
     if poll is not MISSING:
         payload["poll"] = poll._to_dict()
 
-    return DictPayloadParameters(payload=payload, files=files)
+    return PayloadParameters(payload=payload, multipart=None, files=files)
 
 
 def handle_message_parameters(
@@ -627,7 +639,7 @@ def handle_message_parameters(
     # these parameters are exclusive to webhooks in forum/media channels
     thread_name: str = MISSING,
     applied_tags: Sequence[Snowflake] = MISSING,
-) -> PayloadParameters:
+) -> PayloadParameters[dict[str, Any] | None]:
     params = handle_message_parameters_dict(
         content=content,
         username=username,
@@ -654,8 +666,7 @@ def handle_message_parameters(
     if params.files:
         multipart = to_multipart_with_attachments(params.payload, params.files)
         return PayloadParameters(payload=None, multipart=multipart, files=params.files)
-
-    return PayloadParameters(payload=params.payload, multipart=None, files=params.files)
+    return params
 
 
 async_context: ContextVar[AsyncWebhookAdapter] = ContextVar(
@@ -1800,7 +1811,8 @@ class Webhook(BaseWebhook):
                 raise TypeError(msg)
             thread_id = thread.id
 
-        params = handle_message_parameters(
+        adapter = async_context.get()
+        with handle_message_parameters(
             content=content,
             username=username,
             avatar_url=avatar_url,
@@ -1819,11 +1831,7 @@ class Webhook(BaseWebhook):
             allowed_mentions=allowed_mentions,
             previous_allowed_mentions=previous_mentions,
             poll=poll,
-        )
-
-        adapter = async_context.get()
-
-        try:
+        ) as params:
             data = await adapter.execute_webhook(
                 self.id,
                 self.token,
@@ -1834,10 +1842,6 @@ class Webhook(BaseWebhook):
                 thread_id=thread_id,
                 wait=wait,
             )
-        finally:
-            if params.files:
-                for f in params.files:
-                    f.close()
 
         msg = None
         if wait:
@@ -2048,7 +2052,9 @@ class Webhook(BaseWebhook):
             attachments = (await self.fetch_message(message_id, thread=thread)).attachments
 
         previous_mentions: AllowedMentions | None = getattr(self._state, "allowed_mentions", None)
-        params = handle_message_parameters(
+
+        adapter = async_context.get()
+        with handle_message_parameters(
             content=content,
             file=file,
             files=files,
@@ -2060,9 +2066,7 @@ class Webhook(BaseWebhook):
             flags=flags,
             allowed_mentions=allowed_mentions,
             previous_allowed_mentions=previous_mentions,
-        )
-        adapter = async_context.get()
-        try:
+        ) as params:
             data = await adapter.edit_webhook_message(
                 self.id,
                 self.token,
@@ -2073,10 +2077,6 @@ class Webhook(BaseWebhook):
                 multipart=params.multipart,
                 files=params.files,
             )
-        finally:
-            if params.files:
-                for f in params.files:
-                    f.close()
 
         message = self._create_message(data, thread=thread)
         if view and not view.is_finished():

@@ -7,7 +7,7 @@ import logging
 import re
 import sys
 import weakref
-from collections.abc import Coroutine, Iterable, Sequence
+from collections.abc import Coroutine, Iterable, Mapping, Sequence
 from errno import ECONNRESET
 from typing import (
     TYPE_CHECKING,
@@ -132,7 +132,7 @@ def set_attachments(payload: dict[str, Any], files: Sequence[File]) -> None:
         payload["attachments"] = attachments
 
 
-def to_multipart(payload: dict[str, Any], files: Sequence[File]) -> list[dict[str, Any]]:
+def to_multipart(payload: Mapping[str, Any], files: Sequence[File]) -> list[dict[str, Any]]:
     """Converts the payload and list of files to a multipart payload,
     as specified by https://docs.discord.com/developers/reference#uploading-files
     """
@@ -1328,6 +1328,7 @@ class HTTPClient:
             "components",
             "sticker_ids",
             "flags",
+            "attachments",
         )
         payload = {k: v for k, v in fields.items() if k in valid_thread_keys}
         payload["message"] = {k: v for k, v in fields.items() if k in valid_message_keys}

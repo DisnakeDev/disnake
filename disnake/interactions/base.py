@@ -577,7 +577,9 @@ class Interaction(Generic[ClientT]):
             attachments = (await self.original_response()).attachments
 
         previous_mentions: AllowedMentions | None = self._state.allowed_mentions
-        params = handle_message_parameters(
+
+        adapter = async_context.get()
+        with handle_message_parameters(
             content=content,
             file=file,
             files=files,
@@ -591,25 +593,20 @@ class Interaction(Generic[ClientT]):
             flags=flags,
             allowed_mentions=allowed_mentions,
             previous_allowed_mentions=previous_mentions,
-        )
-        adapter = async_context.get()
-        try:
-            data = await adapter.edit_original_interaction_response(
-                self.application_id,
-                self.token,
-                session=self._session,
-                payload=params.payload,
-                multipart=params.multipart,
-                files=params.files,
-            )
-        except NotFound as e:
-            if e.code == 10015:
-                raise InteractionNotResponded(self) from e
-            raise
-        finally:
-            if params.files:
-                for f in params.files:
-                    f.close()
+        ) as params:
+            try:
+                data = await adapter.edit_original_interaction_response(
+                    self.application_id,
+                    self.token,
+                    session=self._session,
+                    payload=params.payload,
+                    multipart=params.multipart,
+                    files=params.files,
+                )
+            except NotFound as e:
+                if e.code == 10015:
+                    raise InteractionNotResponded(self) from e
+                raise
 
         # The message channel types should always match
         state = _InteractionMessageState(self, self._state)
