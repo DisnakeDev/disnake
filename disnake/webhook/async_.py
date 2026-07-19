@@ -632,7 +632,8 @@ def handle_message_parameters_dict(
         allowed_mentions_data = allowed_mentions_data or AllowedMentions().to_dict()
         allowed_mentions_data["replied_user"] = bool(mention_author)
 
-    payload["allowed_mentions"] = allowed_mentions_data
+    if allowed_mentions_data:
+        payload["allowed_mentions"] = allowed_mentions_data
 
     # other message fields
 
