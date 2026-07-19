@@ -409,7 +409,7 @@ class AsyncWebhookAdapter:
         session: aiohttp.ClientSession,
         type: int,
         data: dict[str, Any] | None = None,
-        files: list[File] | None = None,
+        files: Sequence[File] | None = None,
     ) -> Response[None]:
         route = Route(
             "POST",

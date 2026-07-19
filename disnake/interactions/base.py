@@ -48,7 +48,12 @@ from ..permissions import Permissions
 from ..role import Role
 from ..ui.action_row import normalize_components, normalize_components_to_dict
 from ..user import ClientUser, User
-from ..webhook.async_ import Webhook, async_context, handle_message_parameters
+from ..webhook.async_ import (
+    Webhook,
+    async_context,
+    handle_message_parameters,
+    handle_message_parameters_dict,
+)
 
 __all__ = (
     "Interaction",
@@ -1077,105 +1082,44 @@ class InteractionResponse:
         if self._response_type is not None:
             raise InteractionResponded(self._parent)
 
-        payload: dict[str, Any] = {
-            "tts": tts,
-        }
-
-        if embed is not MISSING and embeds is not MISSING:
-            msg = "cannot mix embed and embeds keyword arguments"
-            raise TypeError(msg)
-
-        if file is not MISSING and files is not MISSING:
-            msg = "cannot mix file and files keyword arguments"
-            raise TypeError(msg)
-
-        if view is not MISSING and components is not MISSING:
-            msg = "cannot mix view and components keyword arguments"
-            raise TypeError(msg)
-
-        if file is not MISSING:
-            files = [file]
-
-        if embed is not MISSING:
-            embeds = [embed]
-
-        if embeds:
-            if len(embeds) > 10:
-                msg = "embeds cannot exceed maximum of 10 elements"
-                raise ValueError(msg)
-            payload["embeds"] = [e.to_dict() for e in embeds]
-            for embed in embeds:
-                if embed._files:
-                    files = files or []
-                    files.extend(embed._files.values())
-
-        if files is not MISSING and len(files) > 10:
-            msg = "files cannot exceed maximum of 10 elements"
-            raise ValueError(msg)
-
-        previous_mentions: AllowedMentions | None = getattr(
-            self._parent._state, "allowed_mentions", None
-        )
-        if allowed_mentions:
-            if previous_mentions is not None:
-                payload["allowed_mentions"] = previous_mentions.merge(allowed_mentions).to_dict()
-            else:
-                payload["allowed_mentions"] = allowed_mentions.to_dict()
-        elif previous_mentions is not None:
-            payload["allowed_mentions"] = previous_mentions.to_dict()
-
-        if content is not None:
-            payload["content"] = str(content)
-
-        is_v2 = False
-        if view is not MISSING:
-            payload["components"] = view.to_components()
-        elif components is not MISSING:
-            payload["components"], is_v2 = normalize_components_to_dict(components)
-
-        # set cv2 flag automatically
-        if is_v2:
-            flags = MessageFlags._from_value(0 if flags is MISSING else flags.value)
-            flags.is_components_v2 = True
-        # components v2 cannot be used with other content fields
-        if flags and flags.is_components_v2 and (content or embeds or poll):
-            msg = "Cannot use v2 components with content, embeds, or polls"
-            raise ValueError(msg)
-
-        if poll is not MISSING:
-            payload["poll"] = poll._to_dict()
-
-        if suppress_embeds is not MISSING or ephemeral is not MISSING:
-            flags = MessageFlags._from_value(0 if flags is MISSING else flags.value)
-            if suppress_embeds is not MISSING:
-                flags.suppress_embeds = suppress_embeds
-            if ephemeral is not MISSING:
-                flags.ephemeral = ephemeral
-        if flags is not MISSING:
-            payload["flags"] = flags.value
-
         parent = self._parent
         adapter = async_context.get()
         response_type = InteractionResponseType.channel_message
-        try:
-            await adapter.create_interaction_response(
-                parent.id,
-                parent.token,
-                session=parent._session,
-                type=response_type.value,
-                data=payload,
-                files=files or None,
-            )
-        except NotFound as e:
-            if e.code == 10062:
-                raise InteractionTimedOut(self._parent) from e
-            raise
-        finally:
-            if files:
-                for f in files:
-                    f.close()
 
-        self._response_type = response_type
+        base_allowed_mentions: AllowedMentions | None = getattr(
+            parent._state, "allowed_mentions", None
+        )
+
+        with handle_message_parameters_dict(
+            content=content,
+            tts=tts,
+            file=file,
+            files=files,
+            embed=embed,
+            embeds=embeds,
+            view=view,
+            components=components,
+            ephemeral=ephemeral,
+            suppress_embeds=suppress_embeds,
+            flags=flags,
+            poll=poll,
+            allowed_mentions=allowed_mentions,
+            previous_allowed_mentions=base_allowed_mentions,
+        ) as params:
+            try:
+                await adapter.create_interaction_response(
+                    parent.id,
+                    parent.token,
+                    session=parent._session,
+                    type=response_type.value,
+                    data=params.payload,
+                    files=params.files,
+                )
+                self._response_type = response_type
+            except NotFound as e:
+                if e.code == 10062:
+                    raise InteractionTimedOut(self._parent) from e
+                raise
 
         if view is not MISSING:
             if ephemeral and view.timeout is None:
