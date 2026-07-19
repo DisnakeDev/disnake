@@ -30,6 +30,7 @@ from ..errors import DiscordServerError, Forbidden, HTTPException, NotFound, Web
 from ..file import File
 from ..flags import MessageFlags
 from ..http import Route, set_attachments, to_multipart, to_multipart_with_attachments
+from ..mentions import AllowedMentions
 from ..message import Message
 from ..mixins import Hashable
 from ..object import Object
@@ -57,8 +58,7 @@ if TYPE_CHECKING:
     from ..embeds import Embed
     from ..guild import Guild
     from ..http import HTTPClient, Response
-    from ..mentions import AllowedMentions
-    from ..message import Attachment
+    from ..message import Attachment, MessageReference, PartialMessage
     from ..poll import Poll
     from ..state import ConnectionState
     from ..sticker import GuildSticker, StandardSticker, StickerItem
@@ -510,6 +510,7 @@ def handle_message_parameters_dict(
     username: str = MISSING,
     avatar_url: object = MISSING,
     tts: bool = False,
+    nonce: str | int | None = MISSING,
     ephemeral: bool | None = MISSING,
     suppress_embeds: bool | None = MISSING,
     flags: MessageFlags = MISSING,
@@ -522,8 +523,10 @@ def handle_message_parameters_dict(
     components: MessageComponents | None = MISSING,
     allowed_mentions: AllowedMentions | None = MISSING,
     previous_allowed_mentions: AllowedMentions | None = None,
+    mention_author: bool | None = None,
     stickers: Sequence[GuildSticker | StandardSticker | StickerItem] = MISSING,
     poll: Poll = MISSING,
+    reference: Message | MessageReference | PartialMessage | None = MISSING,
     # these parameters are exclusive to webhooks in forum/media channels
     thread_name: str = MISSING,
     applied_tags: Sequence[Snowflake] = MISSING,
@@ -589,7 +592,10 @@ def handle_message_parameters_dict(
     if attachments is not MISSING:
         payload["attachments"] = [] if attachments is None else [a.to_dict() for a in attachments]
 
-    payload["tts"] = tts
+    if tts:
+        payload["tts"] = True
+    if nonce:
+        payload["nonce"] = nonce
     if avatar_url:
         payload["avatar_url"] = str(avatar_url)
     if username:
@@ -604,25 +610,38 @@ def handle_message_parameters_dict(
     if flags is not MISSING:
         payload["flags"] = flags.value
 
+    allowed_mentions_data = None
     if allowed_mentions:
         if previous_allowed_mentions is not None:
-            payload["allowed_mentions"] = previous_allowed_mentions.merge(
-                allowed_mentions
-            ).to_dict()
+            allowed_mentions_data = previous_allowed_mentions.merge(allowed_mentions).to_dict()
         else:
-            payload["allowed_mentions"] = allowed_mentions.to_dict()
+            allowed_mentions_data = allowed_mentions.to_dict()
     elif previous_allowed_mentions is not None:
-        payload["allowed_mentions"] = previous_allowed_mentions.to_dict()
+        allowed_mentions_data = previous_allowed_mentions.to_dict()
+
+    if mention_author is not None:
+        allowed_mentions_data = allowed_mentions_data or AllowedMentions().to_dict()
+        allowed_mentions_data["replied_user"] = bool(mention_author)
+
+    payload["allowed_mentions"] = allowed_mentions_data
 
     if stickers is not MISSING:
         payload["sticker_ids"] = [s.id for s in stickers]
+
+    if poll is not MISSING:
+        payload["poll"] = poll._to_dict()
+
+    if reference:
+        try:
+            payload["message_reference"] = reference.to_message_reference_dict()
+        except AttributeError:
+            msg = "reference parameter must be Message, MessageReference, or PartialMessage"
+            raise TypeError(msg) from None
 
     if thread_name:
         payload["thread_name"] = thread_name
     if applied_tags:
         payload["applied_tags"] = [t.id for t in applied_tags]
-    if poll is not MISSING:
-        payload["poll"] = poll._to_dict()
 
     return PayloadParameters(payload=payload, multipart=None, files=files)
 
@@ -633,6 +652,7 @@ def handle_message_parameters(
     username: str = MISSING,
     avatar_url: object = MISSING,
     tts: bool = False,
+    nonce: str | int | None = MISSING,
     ephemeral: bool | None = MISSING,
     suppress_embeds: bool | None = MISSING,
     flags: MessageFlags = MISSING,
@@ -645,8 +665,10 @@ def handle_message_parameters(
     components: MessageComponents | None = MISSING,
     allowed_mentions: AllowedMentions | None = MISSING,
     previous_allowed_mentions: AllowedMentions | None = None,
+    mention_author: bool | None = None,
     stickers: Sequence[GuildSticker | StandardSticker | StickerItem] = MISSING,
     poll: Poll = MISSING,
+    reference: Message | MessageReference | PartialMessage | None = MISSING,
     # these parameters are exclusive to webhooks in forum/media channels
     thread_name: str = MISSING,
     applied_tags: Sequence[Snowflake] = MISSING,
@@ -656,6 +678,7 @@ def handle_message_parameters(
         username=username,
         avatar_url=avatar_url,
         tts=tts,
+        nonce=nonce,
         ephemeral=ephemeral,
         suppress_embeds=suppress_embeds,
         flags=flags,
@@ -668,10 +691,12 @@ def handle_message_parameters(
         components=components,
         allowed_mentions=allowed_mentions,
         previous_allowed_mentions=previous_allowed_mentions,
+        mention_author=mention_author,
         stickers=stickers,
         thread_name=thread_name,
         applied_tags=applied_tags,
         poll=poll,
+        reference=reference,
     )
 
     if params.files:

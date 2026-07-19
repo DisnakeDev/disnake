@@ -16,6 +16,7 @@ from typing import (
     Literal,
     TypeVar,
     cast,
+    overload,
 )
 from urllib.parse import quote as _uriquote
 
@@ -524,10 +525,25 @@ class HTTPClient:
 
         return self.request(Route("POST", "/users/@me/channels"), json=payload)
 
+    @overload
+    def send_message(
+        self,
+        channel_id: Snowflake,
+        /,
+        *,
+        files: Sequence[File] | None = None,
+        **fields: Any,
+    ) -> Response[message.Message]: ...
+
+    @overload
+    @utils.deprecated(
+        "The `embed` parameter and passing `content` as a positional argument are deprecated."
+    )
     def send_message(
         self,
         channel_id: Snowflake,
         content: str | None,
+        /,
         *,
         tts: bool = False,
         embed: embed.Embed | None = None,
@@ -539,44 +555,31 @@ class HTTPClient:
         components: Sequence[components.Component] | None = None,
         poll: poll.PollCreatePayload | None = None,
         flags: int | None = None,
+    ) -> Response[message.Message]: ...
+
+    def send_message(
+        self,
+        channel_id: Snowflake,
+        content: str | None = None,
+        /,
+        *,
+        files: Sequence[File] | None = None,
+        **fields: Any,
     ) -> Response[message.Message]:
         r = Route("POST", "/channels/{channel_id}/messages", channel_id=channel_id)
-        payload: dict[str, Any] = {}
 
+        # legacy stuff
         if content:
-            payload["content"] = content
+            fields["content"] = content
+        if embed := fields.pop("embed", None):
+            fields["embeds"] = [embed]
 
-        if tts:
-            payload["tts"] = True
+        fields = {k: v for k, v in fields.items() if v is not None}
 
-        if embed:
-            payload["embeds"] = [embed]
-
-        if embeds:
-            payload["embeds"] = embeds
-
-        if nonce:
-            payload["nonce"] = nonce
-
-        if allowed_mentions:
-            payload["allowed_mentions"] = allowed_mentions
-
-        if message_reference:
-            payload["message_reference"] = message_reference
-
-        if components:
-            payload["components"] = components
-
-        if stickers:
-            payload["sticker_ids"] = stickers
-
-        if flags is not None:
-            payload["flags"] = flags
-
-        if poll is not None:
-            payload["poll"] = poll
-
-        return self.request(r, json=payload)
+        if files:
+            multipart = to_multipart_with_attachments(fields, files)
+            return self.request(r, form=multipart, files=files)
+        return self.request(r, json=fields)
 
     def get_poll_answer_voters(
         self,
@@ -663,6 +666,7 @@ class HTTPClient:
 
         return self.request(route, form=multipart, files=files)
 
+    @utils.noop_deprecated("Use .send_message() instead.")
     def send_files(
         self,
         channel_id: Snowflake,

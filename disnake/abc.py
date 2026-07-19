@@ -1669,137 +1669,34 @@ class Messageable:
         :class:`.Message`
             The message that was sent.
         """
+        from .webhook.async_ import handle_message_parameters_dict
+
         channel = await self._get_channel()
         state = self._state
-        content = str(content) if content is not None else None
 
-        if file is not None and files is not None:
-            msg = "cannot pass both file and files parameter to send()"
-            raise TypeError(msg)
-
-        if file is not None:
-            if not isinstance(file, File):
-                msg = "file parameter must be File"
-                raise TypeError(msg)
-            files = [file]
-
-        if embed is not None and embeds is not None:
-            msg = "cannot pass both embed and embeds parameter to send()"
-            raise TypeError(msg)
-
-        if embed is not None:
-            embeds = [embed]
-
-        embeds_payload = None
-        if embeds is not None:
-            if len(embeds) > 10:
-                msg = "embeds parameter must be a list of up to 10 elements"
-                raise ValueError(msg)
-            for embed in embeds:
-                if embed._files:
-                    files = files or []
-                    files.extend(embed._files.values())
-            embeds_payload = [embed.to_dict() for embed in embeds]
-
-        stickers_payload = None
-        if stickers is not None:
-            stickers_payload = [sticker.id for sticker in stickers]
-
-        poll_payload = None
-        if poll:
-            poll_payload = poll._to_dict()
-
-        allowed_mentions_payload = None
-        if allowed_mentions is None:
-            allowed_mentions_payload = state.allowed_mentions and state.allowed_mentions.to_dict()
-        elif state.allowed_mentions is not None:
-            allowed_mentions_payload = state.allowed_mentions.merge(allowed_mentions).to_dict()
-        else:
-            allowed_mentions_payload = allowed_mentions.to_dict()
-
-        if mention_author is not None:
-            allowed_mentions_payload = allowed_mentions_payload or AllowedMentions().to_dict()
-            allowed_mentions_payload["replied_user"] = bool(mention_author)
-
-        reference_payload = None
-        if reference is not None:
-            try:
-                reference_payload = reference.to_message_reference_dict()
-            except AttributeError:
-                msg = "reference parameter must be Message, MessageReference, or PartialMessage"
-                raise TypeError(msg) from None
-
-        is_v2 = False
-        if view is not None and components is not None:
-            msg = "cannot pass both view and components parameter to send()"
-            raise TypeError(msg)
-        elif view:
-            if not hasattr(view, "__discord_ui_view__"):
-                msg = f"view parameter must be View not {view.__class__!r}"
-                raise TypeError(msg)
-            components_payload = view.to_components()
-        elif components:
-            from .ui.action_row import normalize_components_to_dict
-
-            components_payload, is_v2 = normalize_components_to_dict(components)
-        else:
-            components_payload = None
-
-        # set cv2 flag automatically
-        if is_v2:
-            flags = MessageFlags._from_value(0 if flags is None else flags.value)
-            flags.is_components_v2 = True
-        # components v2 cannot be used with other content fields
-        if flags and flags.is_components_v2 and (content or embeds or stickers or poll):
-            msg = "Cannot use v2 components with content, embeds, stickers, or polls"
-            raise ValueError(msg)
-
-        flags_payload = None
-        if suppress_embeds is not None:
-            flags = MessageFlags._from_value(0 if flags is None else flags.value)
-            flags.suppress_embeds = suppress_embeds
-        if flags is not None:
-            flags_payload = flags.value
-
-        if files is not None:
-            if len(files) > 10:
-                msg = "files parameter must be a list of up to 10 elements"
-                raise ValueError(msg)
-            elif not all(isinstance(file, File) for file in files):
-                msg = "files parameter must be a list of File"
-                raise TypeError(msg)
-
-            try:
-                data = await state.http.send_files(
-                    channel.id,
-                    files=files,
-                    content=content,
-                    tts=tts,
-                    embeds=embeds_payload,
-                    nonce=nonce,
-                    allowed_mentions=allowed_mentions_payload,
-                    message_reference=reference_payload,
-                    stickers=stickers_payload,
-                    components=components_payload,
-                    poll=poll_payload,
-                    flags=flags_payload,
-                )
-            finally:
-                for f in files:
-                    f.close()
-        else:
+        with handle_message_parameters_dict(
+            content=content,
+            tts=tts,
+            nonce=nonce,
+            suppress_embeds=suppress_embeds,
+            flags=flags if flags is not None else MISSING,
+            file=file if file is not None else MISSING,
+            files=files if files is not None else MISSING,
+            embed=embed if embed is not None else MISSING,
+            embeds=embeds if embeds is not None else MISSING,
+            view=view if view is not None else MISSING,
+            components=components if components is not None else MISSING,
+            stickers=stickers if stickers is not None else MISSING,
+            poll=poll if poll is not None else MISSING,
+            reference=reference,
+            allowed_mentions=allowed_mentions,
+            previous_allowed_mentions=self._state.allowed_mentions,
+            mention_author=mention_author,
+        ) as params:
             data = await state.http.send_message(
                 channel.id,
-                content,
-                tts=tts,
-                embeds=embeds_payload,
-                nonce=nonce,
-                allowed_mentions=allowed_mentions_payload,
-                message_reference=reference_payload,
-                stickers=stickers_payload,
-                components=components_payload,
-                poll=poll_payload,
-                flags=flags_payload,
+                files=params.files,
+                **params.payload,
             )
 
         ret = state.create_message(channel=channel, data=data)
