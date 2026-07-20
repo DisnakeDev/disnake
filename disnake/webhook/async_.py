@@ -62,6 +62,7 @@ if TYPE_CHECKING:
     from ..poll import Poll
     from ..state import ConnectionState
     from ..sticker import GuildSticker, StandardSticker, StickerItem
+    from ..types.embed import Embed as EmbedPayload
     from ..types.message import Message as MessagePayload
     from ..types.webhook import Webhook as WebhookPayload
     from ..ui._types import MessageComponents
@@ -563,11 +564,18 @@ def handle_message_parameters_dict(
         if len(embeds) > 10:
             msg = "embeds parameter must be a list of up to 10 elements"
             raise ValueError(msg)
-        payload["embeds"] = [e.to_dict() for e in embeds]
+
+        embed_data: list[EmbedPayload] = []
+        embed_files: list[File] = []
         for embed in embeds:
+            embed_data.append(embed.to_dict())
             if embed._files:
-                files = files or []
-                files.extend(embed._files.values())
+                embed_files.extend(embed._files.values())
+
+        payload["embeds"] = embed_data
+        if embed_files:
+            # create new list, don't (potentially) modify given files list
+            files = files + embed_files
 
     if files:
         if len(files) > 10:
