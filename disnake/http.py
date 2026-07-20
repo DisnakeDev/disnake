@@ -257,7 +257,10 @@ class HTTPClient:
             if hasattr(aiohttp, "ClientWSTimeout")
             else 30.0,
         )
-        ws = await self.__session.ws_connect(
+
+        # in Python 3.10, ws_connect() returns a `Response[bool]` instead of `Response[Literal[True]]`,
+        # so this explicit annotation is required to avoid typing issues
+        ws: aiohttp.ClientWebSocketResponse[Any] = await self.__session.ws_connect(
             url,
             proxy_auth=self.proxy_auth,
             proxy=self.proxy,
@@ -269,9 +272,7 @@ class HTTPClient:
             },
             compress=compress,
         )
-        # basically a glorified type:ignore to avoid a typing issue in Python 3.10,
-        # where ws_connect() returns a `Response[bool]` instead of `Response[Literal[True]]`
-        return cast("Any", ws)
+        return ws
 
     async def request(
         self,
