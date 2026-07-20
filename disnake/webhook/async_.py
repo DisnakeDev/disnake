@@ -1894,9 +1894,9 @@ class Webhook(BaseWebhook):
             components=components,
             thread_name=thread_name,
             applied_tags=applied_tags,
+            poll=poll,
             allowed_mentions=allowed_mentions,
             previous_allowed_mentions=previous_mentions,
-            poll=poll,
         ) as params:
             data = await adapter.execute_webhook(
                 self.id,

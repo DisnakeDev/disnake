@@ -578,6 +578,8 @@ class Interaction(Generic[ClientT]):
         """
         # if no attachment list was provided but we're uploading new files,
         # use current attachments as the base
+        # FIXME: avoid original_response(), use callback data once implemented
+        # FIXME: set previous_flags as well
         if attachments is MISSING and (file or files):
             attachments = (await self.original_response()).attachments
 
@@ -1826,6 +1828,7 @@ class InteractionMessage(Message):
         if attachments is MISSING and (file or files):
             attachments = self.attachments
 
+        # FIXME: suppress_embeds overwrites existing flags, should set previous_flags
         return await self._state._interaction.edit_original_response(
             content=content,
             embed=embed,
