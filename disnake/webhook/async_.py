@@ -511,10 +511,10 @@ def handle_message_parameters_dict(
     embeds: list[Embed] = MISSING,
     view: View | None = MISSING,
     components: MessageComponents | None = MISSING,
-    allowed_mentions: AllowedMentions | None = MISSING,
-    previous_allowed_mentions: AllowedMentions | None = None,
     stickers: Sequence[GuildSticker | StandardSticker | StickerItem] = MISSING,
     poll: Poll = MISSING,
+    allowed_mentions: AllowedMentions | None = MISSING,
+    previous_allowed_mentions: AllowedMentions | None,
     # these parameters are exclusive to webhooks in forum/media channels
     thread_name: str = MISSING,
     applied_tags: Sequence[Snowflake] = MISSING,
@@ -623,10 +623,10 @@ def handle_message_parameters(
     embeds: list[Embed] = MISSING,
     view: View | None = MISSING,
     components: MessageComponents | None = MISSING,
-    allowed_mentions: AllowedMentions | None = MISSING,
-    previous_allowed_mentions: AllowedMentions | None = None,
     stickers: Sequence[GuildSticker | StandardSticker | StickerItem] = MISSING,
     poll: Poll = MISSING,
+    allowed_mentions: AllowedMentions | None = MISSING,
+    previous_allowed_mentions: AllowedMentions | None,
     # these parameters are exclusive to webhooks in forum/media channels
     thread_name: str = MISSING,
     applied_tags: Sequence[Snowflake] = MISSING,
@@ -646,12 +646,12 @@ def handle_message_parameters(
         embeds=embeds,
         view=view,
         components=components,
+        stickers=stickers,
+        poll=poll,
         allowed_mentions=allowed_mentions,
         previous_allowed_mentions=previous_allowed_mentions,
-        stickers=stickers,
         thread_name=thread_name,
         applied_tags=applied_tags,
-        poll=poll,
     )
 
     if params.files:
