@@ -706,7 +706,7 @@ class Interaction(Generic[ClientT]):
         flags: MessageFlags = MISSING,
         delete_after: float = MISSING,
         poll: Poll = MISSING,
-    ) -> InteractionCallbackResponse[InteractionMessage] | WebhookMessage:
+    ) -> InteractionMessage | WebhookMessage:
         r"""|coro|
 
         Sends a message using either :meth:`response.send_message <InteractionResponse.send_message>`
@@ -800,9 +800,9 @@ class Interaction(Generic[ClientT]):
 
         Returns
         -------
-        :class:`InteractionCallbackResponse` | :class:`WebhookMessage`
-            The callback response data if the interaction hadn't been responded to yet,
-            or the message if this was sent as a followup.
+        :class:`InteractionMessage` | :class:`WebhookMessage`
+            The message that was sent. The specific type depends on whether the interaction
+            had already been responded to.
 
             .. versionadded:: |vnext|
         """
@@ -817,7 +817,8 @@ class Interaction(Generic[ClientT]):
                 sender = self.followup.send
         else:
             sender = self.response.send_message
-        return await sender(
+
+        res = await sender(
             content=content,
             embed=embed,
             embeds=embeds,
@@ -833,6 +834,11 @@ class Interaction(Generic[ClientT]):
             delete_after=delete_after,
             poll=poll,
         )
+
+        if isinstance(res, InteractionCallbackResponse):
+            return res.resource
+        else:
+            return res
 
 
 class InteractionResponse:
