@@ -3791,8 +3791,9 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
             flags=flags,
             view=view,
             components=components,
-            allowed_mentions=allowed_mentions,
             stickers=stickers,
+            allowed_mentions=allowed_mentions,
+            previous_allowed_mentions=self._state.allowed_mentions,
         )
 
         if auto_archive_duration not in (MISSING, None):
