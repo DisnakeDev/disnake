@@ -3806,8 +3806,9 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
             flags=flags,
             view=view,
             components=components,
-            allowed_mentions=allowed_mentions,
             stickers=stickers,
+            allowed_mentions=allowed_mentions,
+            previous_allowed_mentions=self._state.allowed_mentions,
         ) as message_params:
             data = await self._state.http.start_thread_in_forum_channel(
                 self.id,
