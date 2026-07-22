@@ -9,8 +9,8 @@ import libcst as cst
 import libcst.matchers as m
 
 from disnake import Event
-from disnake._event_data import EVENT_DATA, EventData
 
+from ._event_data import EVENT_DATA, EventData
 from .base import BaseCodemodCommand
 
 

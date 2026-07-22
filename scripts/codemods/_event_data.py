@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 
-from .enums import Event
+from disnake import Event
 
 
 @dataclass(frozen=True, kw_only=True)
