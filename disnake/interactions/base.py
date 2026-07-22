@@ -806,39 +806,43 @@ class Interaction(Generic[ClientT]):
 
             .. versionadded:: |vnext|
         """
-        if self.response._response_type is not None:
-            # workaround for types not correctly representing the fact that `wait` is
-            # always implicitly true for interaction followups
-            if TYPE_CHECKING:
-                from functools import partial
-
-                sender = partial(self.followup.send, wait=True)
-            else:
-                sender = self.followup.send
+        if self.response._response_type is None:
+            callback_response = await self.response.send_message(
+                content=content,
+                embed=embed,
+                embeds=embeds,
+                file=file,
+                files=files,
+                view=view,
+                components=components,
+                tts=tts,
+                ephemeral=ephemeral,
+                suppress_embeds=suppress_embeds,
+                flags=flags,
+                poll=poll,
+                allowed_mentions=allowed_mentions,
+                delete_after=delete_after,
+            )
+            return callback_response.resource
         else:
-            sender = self.response.send_message
-
-        res = await sender(
-            content=content,
-            embed=embed,
-            embeds=embeds,
-            file=file,
-            files=files,
-            allowed_mentions=allowed_mentions,
-            view=view,
-            components=components,
-            tts=tts,
-            ephemeral=ephemeral,
-            suppress_embeds=suppress_embeds,
-            flags=flags,
-            delete_after=delete_after,
-            poll=poll,
-        )
-
-        if isinstance(res, InteractionCallbackResponse):
-            return res.resource
-        else:
-            return res
+            return await self.followup.send(
+                content=content,
+                embed=embed,
+                embeds=embeds,
+                file=file,
+                files=files,
+                view=view,
+                components=components,
+                tts=tts,
+                ephemeral=ephemeral,
+                suppress_embeds=suppress_embeds,
+                flags=flags,
+                poll=poll,
+                allowed_mentions=allowed_mentions,
+                delete_after=delete_after,
+                # this is already implicitly true for interactions, but specified here for typing purposes
+                wait=True,
+            )
 
 
 class InteractionResponse:
