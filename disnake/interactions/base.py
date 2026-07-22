@@ -1727,7 +1727,10 @@ class InteractionMessage(Message):
     r"""Represents the original interaction response message.
 
     This allows you to edit or delete the message associated with
-    the interaction response. To retrieve this object see :meth:`Interaction.original_response`.
+    the interaction response. You can usually receive this object as the
+    :attr:`~InteractionCallbackResponse.resource` returned by methods such as
+    :meth:`InteractionResponse.send_message`.
+    As an alternative, see :meth:`Interaction.original_response`.
 
     This inherits from :class:`disnake.Message` with changes to
     :meth:`edit` and :meth:`delete` to work.
