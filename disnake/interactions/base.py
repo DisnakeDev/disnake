@@ -10,10 +10,11 @@ from typing import (
     Any,
     Generic,
     TypeAlias,
-    TypeVar,
     cast,
     overload,
 )
+
+from typing_extensions import TypeVar
 
 from .. import utils
 from ..app_commands import OptionChoice
@@ -48,13 +49,15 @@ from ..permissions import Permissions
 from ..role import Role
 from ..ui.action_row import normalize_components, normalize_components_to_dict
 from ..user import ClientUser, User
-from ..webhook.async_ import Webhook, async_context, handle_message_parameters
+from ..webhook.async_ import Webhook, WebhookMessage, async_context, handle_message_parameters
 
 __all__ = (
     "Interaction",
-    "InteractionMessage",
     "InteractionResponse",
+    "InteractionMessage",
     "InteractionDataResolved",
+    "InteractionCallbackActivityInstance",
+    "InteractionCallbackResponse",
 )
 
 if TYPE_CHECKING:
@@ -78,6 +81,8 @@ if TYPE_CHECKING:
     from ..types.interactions import (
         ApplicationCommandOptionChoice as ApplicationCommandOptionChoicePayload,
         Interaction as InteractionPayload,
+        InteractionCallbackActivityInstance as InteractionCallbackActivityInstancePayload,
+        InteractionCallbackResponse as InteractionCallbackResponsePayload,
         InteractionDataResolved as InteractionDataResolvedPayload,
     )
     from ..types.snowflake import Snowflake
@@ -701,7 +706,7 @@ class Interaction(Generic[ClientT]):
         flags: MessageFlags = MISSING,
         delete_after: float = MISSING,
         poll: Poll = MISSING,
-    ) -> None:
+    ) -> InteractionMessage | WebhookMessage:
         r"""|coro|
 
         Sends a message using either :meth:`response.send_message <InteractionResponse.send_message>`
@@ -709,11 +714,6 @@ class Interaction(Generic[ClientT]):
 
         If the interaction hasn't been responded to yet, this method will call :meth:`response.send_message <InteractionResponse.send_message>`.
         Otherwise, it will call :meth:`followup.send <Webhook.send>`.
-
-        .. note::
-            This method does not return a :class:`Message` object. If you need a message object,
-            use :meth:`original_response` to fetch it, or use :meth:`followup.send <Webhook.send>`
-            directly instead of this method if you're sending a followup message.
 
         Parameters
         ----------
@@ -797,27 +797,52 @@ class Interaction(Generic[ClientT]):
         ValueError
             The length of ``embeds`` was invalid, or
             you tried to send v2 components together with ``content``, ``embeds``, or ``poll``.
+
+        Returns
+        -------
+        :class:`InteractionMessage` | :class:`WebhookMessage`
+            The message that was sent. The specific type depends on whether the interaction
+            had already been responded to.
+
+            .. versionadded:: |vnext|
         """
-        if self.response._response_type is not None:
-            sender = self.followup.send
+        if self.response._response_type is None:
+            callback_response = await self.response.send_message(
+                content=content,
+                embed=embed,
+                embeds=embeds,
+                file=file,
+                files=files,
+                view=view,
+                components=components,
+                tts=tts,
+                ephemeral=ephemeral,
+                suppress_embeds=suppress_embeds,
+                flags=flags,
+                poll=poll,
+                allowed_mentions=allowed_mentions,
+                delete_after=delete_after,
+            )
+            return callback_response.resource
         else:
-            sender = self.response.send_message
-        await sender(
-            content=content,
-            embed=embed,
-            embeds=embeds,
-            file=file,
-            files=files,
-            allowed_mentions=allowed_mentions,
-            view=view,
-            components=components,
-            tts=tts,
-            ephemeral=ephemeral,
-            suppress_embeds=suppress_embeds,
-            flags=flags,
-            delete_after=delete_after,
-            poll=poll,
-        )
+            return await self.followup.send(
+                content=content,
+                embed=embed,
+                embeds=embeds,
+                file=file,
+                files=files,
+                view=view,
+                components=components,
+                tts=tts,
+                ephemeral=ephemeral,
+                suppress_embeds=suppress_embeds,
+                flags=flags,
+                poll=poll,
+                allowed_mentions=allowed_mentions,
+                delete_after=delete_after,
+                # this is already implicitly true for interactions, but specified here for typing purposes
+                wait=True,
+            )
 
 
 class InteractionResponse:
@@ -854,12 +879,13 @@ class InteractionResponse:
         """
         return self._response_type is not None
 
+    # TODO: add overloads depending on with_message?
     async def defer(
         self,
         *,
         with_message: bool = MISSING,
         ephemeral: bool = MISSING,
-    ) -> None:
+    ) -> InteractionCallbackResponse[InteractionMessage | None]:
         """|coro|
 
         Defers the interaction response.
@@ -905,6 +931,13 @@ class InteractionResponse:
             This interaction has already been responded to before.
         TypeError
             This interaction cannot be deferred.
+
+        Returns
+        -------
+        :class:`InteractionCallbackResponse`
+            The callback response data. If ``with_message=True``, this also contains a message resource.
+
+            .. versionadded:: |vnext|
         """
         if self._response_type is not None:
             raise InteractionResponded(self._parent)
@@ -936,7 +969,7 @@ class InteractionResponse:
                 data["flags"] |= MessageFlags.ephemeral.flag
 
         adapter = async_context.get()
-        await adapter.create_interaction_response(
+        callback_data = await adapter.create_interaction_response(
             parent.id,
             parent.token,
             session=parent._session,
@@ -944,6 +977,8 @@ class InteractionResponse:
             data=data or None,
         )
         self._response_type = defer_type
+
+        return InteractionCallbackResponse(callback_data, parent=self._parent)
 
     async def pong(self) -> None:
         """|coro|
@@ -991,7 +1026,7 @@ class InteractionResponse:
         flags: MessageFlags = MISSING,
         delete_after: float = MISSING,
         poll: Poll = MISSING,
-    ) -> None:
+    ) -> InteractionCallbackResponse[InteractionMessage]:
         r"""|coro|
 
         Responds to this interaction by sending a message.
@@ -1076,6 +1111,13 @@ class InteractionResponse:
             you tried to send v2 components together with ``content``, ``embeds``, or ``poll``.
         InteractionResponded
             This interaction has already been responded to before.
+
+        Returns
+        -------
+        :class:`InteractionCallbackResponse`
+            The callback response data, with a message resource.
+
+            .. versionadded:: |vnext|
         """
         if self._response_type is not None:
             raise InteractionResponded(self._parent)
@@ -1161,7 +1203,7 @@ class InteractionResponse:
         adapter = async_context.get()
         response_type = InteractionResponseType.channel_message
         try:
-            await adapter.create_interaction_response(
+            callback_data = await adapter.create_interaction_response(
                 parent.id,
                 parent.token,
                 session=parent._session,
@@ -1189,6 +1231,8 @@ class InteractionResponse:
         if delete_after is not MISSING:
             await self._parent.delete_original_response(delay=delete_after)
 
+        return InteractionCallbackResponse(callback_data, parent=self._parent)
+
     async def edit_message(
         self,
         content: str | None = MISSING,
@@ -1203,7 +1247,7 @@ class InteractionResponse:
         flags: MessageFlags = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         delete_after: float | None = None,
-    ) -> None:
+    ) -> InteractionCallbackResponse[InteractionMessage]:
         r"""|coro|
 
         Responds to this interaction by editing the original message of
@@ -1299,6 +1343,13 @@ class InteractionResponse:
             You tried to send v2 components together with ``content`` or ``embeds``.
         InteractionResponded
             This interaction has already been responded to before.
+
+        Returns
+        -------
+        :class:`InteractionCallbackResponse`
+            The callback response data, with a message resource.
+
+            .. versionadded:: |vnext|
         """
         if self._response_type is not None:
             raise InteractionResponded(self._parent)
@@ -1391,7 +1442,7 @@ class InteractionResponse:
         adapter = async_context.get()
         response_type = InteractionResponseType.message_update
         try:
-            await adapter.create_interaction_response(
+            callback_data = await adapter.create_interaction_response(
                 parent.id,
                 parent.token,
                 session=parent._session,
@@ -1412,7 +1463,9 @@ class InteractionResponse:
         if delete_after is not None:
             await self._parent.delete_original_response(delay=delete_after)
 
-    async def autocomplete(self, *, choices: Choices) -> None:
+        return InteractionCallbackResponse(callback_data, parent=self._parent)
+
+    async def autocomplete(self, *, choices: Choices) -> InteractionCallbackResponse[None]:
         r"""|coro|
 
         Responds to this interaction by displaying a list of possible autocomplete results.
@@ -1429,6 +1482,13 @@ class InteractionResponse:
             Autocomplete response has failed.
         InteractionResponded
             This interaction has already been responded to before.
+
+        Returns
+        -------
+        :class:`InteractionCallbackResponse`
+            The callback response data.
+
+            .. versionadded:: |vnext|
         """
         if self._response_type is not None:
             raise InteractionResponded(self._parent)
@@ -1458,7 +1518,7 @@ class InteractionResponse:
         parent = self._parent
         adapter = async_context.get()
         response_type = InteractionResponseType.application_command_autocomplete_result
-        await adapter.create_interaction_response(
+        callback_data = await adapter.create_interaction_response(
             parent.id,
             parent.token,
             session=parent._session,
@@ -1468,8 +1528,10 @@ class InteractionResponse:
 
         self._response_type = response_type
 
+        return InteractionCallbackResponse(callback_data, parent=self._parent)
+
     @overload
-    async def send_modal(self, modal: Modal) -> None: ...
+    async def send_modal(self, modal: Modal) -> InteractionCallbackResponse[None]: ...
 
     @overload
     async def send_modal(
@@ -1478,7 +1540,7 @@ class InteractionResponse:
         title: str,
         custom_id: str,
         components: ModalComponents,
-    ) -> None: ...
+    ) -> InteractionCallbackResponse[None]: ...
 
     async def send_modal(
         self,
@@ -1487,7 +1549,7 @@ class InteractionResponse:
         title: str | None = None,
         custom_id: str | None = None,
         components: ModalComponents | None = None,
-    ) -> None:
+    ) -> InteractionCallbackResponse[None]:
         """|coro|
 
         Responds to this interaction by displaying a modal.
@@ -1532,6 +1594,13 @@ class InteractionResponse:
             This interaction cannot be responded with a modal.
         InteractionResponded
             This interaction has already been responded to before.
+
+        Returns
+        -------
+        :class:`InteractionCallbackResponse`
+            The callback response data.
+
+            .. versionadded:: |vnext|
         """
         if modal is not None and any((title, components, custom_id)):
             msg = "Cannot mix modal argument and title, custom_id, components arguments"
@@ -1569,7 +1638,7 @@ class InteractionResponse:
 
         adapter = async_context.get()
         response_type = InteractionResponseType.modal
-        await adapter.create_interaction_response(
+        callback_data = await adapter.create_interaction_response(
             parent.id,
             parent.token,
             session=parent._session,
@@ -1580,6 +1649,8 @@ class InteractionResponse:
 
         if modal is not None:
             parent._state.store_modal(parent.author.id, modal)
+
+        return InteractionCallbackResponse(callback_data, parent=self._parent)
 
     @utils.deprecated("Use `ui.Button(sku_id=...)` instead.")
     async def require_premium(self) -> None:
@@ -1656,7 +1727,10 @@ class InteractionMessage(Message):
     r"""Represents the original interaction response message.
 
     This allows you to edit or delete the message associated with
-    the interaction response. To retrieve this object see :meth:`Interaction.original_response`.
+    the interaction response. You can usually receive this object as the
+    :attr:`~InteractionCallbackResponse.resource` returned by methods such as
+    :meth:`InteractionResponse.send_message`.
+    As an alternative, see :meth:`Interaction.original_response`.
 
     This inherits from :class:`disnake.Message` with changes to
     :meth:`edit` and :meth:`delete` to work.
@@ -2167,3 +2241,93 @@ class InteractionDataResolved(dict[str, Any]):
             return res
 
         return None
+
+
+class InteractionCallbackActivityInstance:
+    """Represents the activity launched by an interaction.
+
+    .. versionadded:: |vnext|
+
+    Attributes
+    ----------
+    id: :class:`str`
+        The instance ID of the launched/joined activity.
+    """
+
+    __slots__ = ("id",)
+
+    def __init__(self, data: InteractionCallbackActivityInstancePayload) -> None:
+        self.id: str = data["id"]
+
+
+ResourceT = TypeVar(
+    "ResourceT",
+    bound=InteractionMessage | InteractionCallbackActivityInstance | None,
+    default=InteractionMessage | InteractionCallbackActivityInstance | None,
+    covariant=True,
+)
+
+
+class InteractionCallbackResponse(Generic[ResourceT]):
+    """Represents the response data from sending an interaction callback,
+    e.g. using :meth:`InteractionResponse.send_message`.
+
+    .. versionadded:: |vnext|
+
+    Attributes
+    ----------
+    id: :class:`int`
+        The ID of the source interaction.
+    type: :class:`InteractionType`
+        The type of the source interaction.
+    activity_instance_id: :class:`str` | :data:`None`
+        The instance ID of the launched/joined activity, if any.
+    message_id: :class:`int` | :data:`None`
+        The ID of the message that was affected (i.e. created or edited) by the
+        interaction response, if any.
+    message_loading: :class:`bool` | :data:`None`
+        Whether the message is in a :attr:`~MessageFlags.loading` state.
+    message_ephemeral: :class:`bool` | :data:`None`
+        Whether the message is :attr:`~MessageFlags.ephemeral`.
+    resource: :class:`InteractionMessage` | :class:`InteractionCallbackActivityInstance` | :data:`None`
+        The resource that was created/affected by the interaction response, if any.
+        The type of this attribute depends on the type of interaction callback that was sent.
+    """
+
+    __slots__ = (
+        "id",
+        "type",
+        "activity_instance_id",
+        "message_id",
+        "message_loading",
+        "message_ephemeral",
+        "resource",
+    )
+
+    def __init__(
+        self, data: InteractionCallbackResponsePayload, *, parent: Interaction[Any]
+    ) -> None:
+        interaction_data = data["interaction"]
+        self.id: int = int(interaction_data["id"])
+        self.type: InteractionType = try_enum(InteractionType, interaction_data["type"])
+
+        self.activity_instance_id: str | None = interaction_data.get("activity_instance_id")
+
+        # NOTE: these are not only for *created* messages, but are also set when using
+        # defer(with_message=False) or edit(), in which case it refers to the original message
+        self.message_id: int | None = utils._get_as_snowflake(
+            interaction_data, "response_message_id"
+        )
+        self.message_loading: bool | None = interaction_data.get("response_message_loading")
+        self.message_ephemeral: bool | None = interaction_data.get("response_message_ephemeral")
+
+        resource: InteractionMessage | InteractionCallbackActivityInstance | None = None
+        if resource_data := data.get("resource"):
+            if message_data := resource_data.get("message"):
+                state = _InteractionMessageState(parent, parent._state)
+                resource = InteractionMessage(
+                    state=cast("ConnectionState", state), channel=parent.channel, data=message_data
+                )
+            elif activity_data := resource_data.get("activity_instance"):
+                resource = InteractionCallbackActivityInstance(activity_data)
+        self.resource: ResourceT = resource  # pyright: ignore[reportAttributeAccessIssue]

@@ -62,6 +62,9 @@ if TYPE_CHECKING:
     from ..poll import Poll
     from ..state import ConnectionState
     from ..sticker import GuildSticker, StandardSticker, StickerItem
+    from ..types.interactions import (
+        InteractionCallbackResponse as InteractionCallbackResponsePayload,
+    )
     from ..types.message import Message as MessagePayload
     from ..types.webhook import Webhook as WebhookPayload
     from ..ui._types import MessageComponents
@@ -410,10 +413,10 @@ class AsyncWebhookAdapter:
         type: int,
         data: dict[str, Any] | None = None,
         files: list[File] | None = None,
-    ) -> Response[None]:
+    ) -> Response[InteractionCallbackResponsePayload]:
         route = Route(
             "POST",
-            "/interactions/{webhook_id}/{webhook_token}/callback",
+            "/interactions/{webhook_id}/{webhook_token}/callback?with_response=1",
             webhook_id=interaction_id,
             webhook_token=token,
         )
