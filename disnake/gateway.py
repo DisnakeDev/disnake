@@ -13,6 +13,7 @@ import traceback
 import zlib
 from collections import deque
 from collections.abc import Callable
+from dataclasses import dataclass
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -74,17 +75,64 @@ if TYPE_CHECKING:
         async def __call__(self, *args: Any) -> None: ...
 
 
+try:
+    if sys.version_info >= (3, 14):
+        from compression import zstd
+    else:
+        from backports import zstd
+except ImportError:
+    HAS_ZSTD = False
+else:
+    HAS_ZSTD = True
+
+
 __all__ = (
     "DiscordWebSocket",
     "KeepAliveHandler",
     "VoiceKeepAliveHandler",
     "DiscordVoiceWebSocket",
     "ReconnectWebSocket",
+    "GatewayParams",
 )
 
 _VOICE_VERSION = 8
 
 _log = logging.getLogger(__name__)
+
+
+@dataclass(frozen=True)
+class GatewayParams:
+    r"""Container type for configuring gateway connections.
+
+    .. versionadded:: 2.6
+
+    .. versionchanged:: |vnext|
+        Removed ``zlib`` parameter in favour of ``compress``, which now also supports zstd.
+        The default value of ``compress`` is now ``"zstd-stream"``, if available.
+
+    Parameters
+    ----------
+    encoding: :data:`~typing.Literal`\[``"json"``]
+        The payload encoding (``json`` is currently the only supported encoding).
+        Defaults to ``"json"``.
+    compress: :data:`~typing.Literal`\[``"zlib-stream"``, ``"zstd-stream"``] | :data:`None`
+        Which transport compression method to use, if any.
+        Defaults to ``"zstd-stream"`` if zstd is available, or ``"zlib-stream"`` otherwise.
+    """
+
+    encoding: Literal["json"] = "json"
+    compress: Literal["zlib-stream", "zstd-stream"] | None = (
+        # prefer zstd if available
+        "zstd-stream" if HAS_ZSTD else "zlib-stream"
+    )
+
+    def __post_init__(self) -> None:
+        if self.encoding != "json":
+            msg = "Gateway encodings other than `json` are currently not supported."
+            raise ValueError(msg)
+        if self.compress not in ("zlib-stream", "zstd-stream", None):
+            msg = "Gateway transport compression modes other than `zlib-stream`, `zstd-stream`, or None are currently not supported."
+            raise ValueError(msg)
 
 
 class ReconnectWebSocket(Exception):
@@ -361,8 +409,6 @@ class DiscordWebSocket:
         self.sequence: int | None = None
         # this may or may not include url parameters, we only need the host part of the url anyway
         self.resume_gateway: str | None = None
-        self._zlib: zlib._Decompress = zlib.decompressobj()
-        self._buffer: bytearray = bytearray()
         self._close_code: int | None = None
         self._rate_limiter: GatewayRatelimiter = GatewayRatelimiter()
 
@@ -371,6 +417,7 @@ class DiscordWebSocket:
         self._connection: ConnectionState
         self._discord_parsers: dict[str, Callable[[dict[str, Any]], Any]]
         self.gateway: str
+        self._decompressor: _DecompressionContext
         self.call_hooks: CallHooksFunc
         self._initial_identify: bool
         self.shard_id: int | None
@@ -408,13 +455,9 @@ class DiscordWebSocket:
         """
         params = client.gateway_params
         if gateway:
-            gateway = client.http._format_gateway_url(
-                gateway,
-                encoding=params.encoding,
-                zlib=params.zlib,
-            )
+            gateway = client.http._format_gateway_url(gateway, params=params)
         else:
-            gateway = await client.http.get_gateway(encoding=params.encoding, zlib=params.zlib)
+            gateway = await client.http.get_gateway(params)
 
         socket = await client.http.ws_connect(gateway)
         ws = cls(socket, loop=client.loop)
@@ -434,6 +477,8 @@ class DiscordWebSocket:
         ws.session_id = session
         ws.sequence = sequence
         ws._max_heartbeat_timeout = client._connection.heartbeat_timeout
+
+        ws._decompressor = _decompressor_for_params(params)
 
         if client._enable_debug_events:
             ws.send = ws.debug_send
@@ -535,13 +580,9 @@ class DiscordWebSocket:
 
     async def received_message(self, raw_msg: str | bytes, /) -> None:
         if isinstance(raw_msg, bytes):
-            self._buffer.extend(raw_msg)
-
-            if len(raw_msg) < 4 or raw_msg[-4:] != b"\x00\x00\xff\xff":
+            if (decompressed := self._decompressor.decompress(raw_msg)) is None:
                 return
-            raw_msg = self._zlib.decompress(self._buffer)
-            raw_msg = raw_msg.decode("utf-8")
-            self._buffer = bytearray()
+            raw_msg = decompressed.decode("utf-8")
 
         self.log_receive(raw_msg)
         msg: GatewayPayload = utils._from_json(raw_msg)
@@ -1229,3 +1270,63 @@ class DiscordVoiceWebSocket:
 
         self._close_code = code
         await self.ws.close(code=code)
+
+
+class _DecompressionContext(Protocol):
+    def decompress(self, data: bytes | bytearray, /) -> bytes | None: ...
+
+
+# In practice, this won't be used. Disabling compression skips the
+# decompressor branch entirely.
+class NullDecompressionContext(_DecompressionContext):
+    def __init__(self) -> None:
+        pass
+
+    def decompress(self, data: bytes | bytearray, /) -> bytes | None:
+        return bytes(data)
+
+
+class ZlibDecompressionContext(_DecompressionContext):
+    def __init__(self) -> None:
+        self.ctx: zlib._Decompress = zlib.decompressobj()
+        self.buffer: bytearray = bytearray()
+
+    def decompress(self, data: bytes | bytearray, /) -> bytes | None:
+        if not data.endswith(b"\x00\x00\xff\xff"):
+            # buffer data to combine with subsequent frames
+            self.buffer.extend(data)
+            return None
+
+        if self.buffer:
+            self.buffer.extend(data)
+            raw_msg = self.ctx.decompress(self.buffer)
+            self.buffer.clear()
+        else:
+            # fast path, if we have a full message without buffering, decompress directly
+            raw_msg = self.ctx.decompress(data)
+        return raw_msg
+
+
+class ZstdDecompressionContext(_DecompressionContext):
+    def __init__(self) -> None:
+        if not HAS_ZSTD:
+            msg = "Python 3.14+ or the `backports.zstd` package is required to use zstd transport compression"
+            raise RuntimeError(msg)
+
+        self.ctx: zstd.ZstdDecompressor = zstd.ZstdDecompressor()  # pyright: ignore[reportPossiblyUnboundVariable]
+
+    def decompress(self, data: bytes | bytearray, /) -> bytes | None:
+        # "each websocket message corresponds to a single gateway message, but does not end a zstd frame"
+        return self.ctx.decompress(data)
+
+
+def _decompressor_for_params(params: GatewayParams) -> _DecompressionContext:
+    tp: type[_DecompressionContext]
+    match params.compress:
+        case "zlib-stream":
+            tp = ZlibDecompressionContext
+        case "zstd-stream":
+            tp = ZstdDecompressionContext
+        case None:
+            tp = NullDecompressionContext
+    return tp()

@@ -17,7 +17,6 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from disnake.activity import BaseActivity
-    from disnake.client import GatewayParams
     from disnake.enums import Status
     from disnake.flags import (
         ApplicationInstallTypes,
@@ -25,6 +24,7 @@ if TYPE_CHECKING:
         InteractionContextTypes,
         MemberCacheFlags,
     )
+    from disnake.gateway import GatewayParams
     from disnake.i18n import LocalizationProtocol
     from disnake.mentions import AllowedMentions
     from disnake.message import Message
