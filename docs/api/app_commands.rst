@@ -38,6 +38,15 @@ APIMessageCommand
     :members:
     :inherited-members:
 
+APIEntryPointCommand
+~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: APIEntryPointCommand
+
+.. autoclass:: APIEntryPointCommand()
+    :members:
+    :inherited-members:
+
 ApplicationCommandPermissions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -92,6 +101,15 @@ MessageCommand
     :members:
     :inherited-members:
 
+EntryPointCommand
+~~~~~~~~~~~~~~~~~
+
+.. attributetable:: EntryPointCommand
+
+.. autoclass:: EntryPointCommand()
+    :members:
+    :inherited-members:
+
 Option
 ~~~~~~
 
@@ -137,6 +155,12 @@ ApplicationCommandType
 ~~~~~~~~~~~~~~~~~~~~~~
 
 .. autoclass:: ApplicationCommandType()
+    :members:
+
+ApplicationCommandHandlerType
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: ApplicationCommandHandlerType()
     :members:
 
 ApplicationCommandPermissionType
