@@ -22,6 +22,8 @@ in specific versions. Please see :ref:`version_guarantees` for more information.
 v2.12.1
 -------
 
+This is a maintenance release with several bugfixes.
+
 Bug Fixes
 ~~~~~~~~~
 - |commands| Fix ``Greedy[...]`` to accept union types (e.g. ``Member | Object``) in commands. (:issue:`1421`)
