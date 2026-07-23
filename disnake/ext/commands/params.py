@@ -28,11 +28,13 @@ from typing import (
     TypeVar,
     Union,
     get_origin,
+    overload,
 )
 
 from typing_extensions import ParamSpec, Self
 
 import disnake
+from disnake import utils
 from disnake.app_commands import Option, OptionChoice
 from disnake.channel import _channel_type_factory
 from disnake.enums import ChannelType, OptionType, try_enum_to_int
@@ -574,10 +576,10 @@ class ParamInfo:
         choices: Choices | None = None,
         type: type | None = None,
         channel_types: list[ChannelType] | None = None,
-        lt: int | float | None = None,
-        le: int | float | None = None,
         gt: int | float | None = None,
         ge: int | float | None = None,
+        lt: int | float | None = None,
+        le: int | float | None = None,
         large: bool = False,
         min_length: int | None = None,
         max_length: int | None = None,
@@ -1223,6 +1225,7 @@ def expand_params(command: AnySlashCommand) -> list[Option]:
     return [param.to_option() for param in params]
 
 
+@overload
 def Param(
     default: Any | Callable[[ApplicationCommandInteraction[BotT]], Any] = ...,
     *,
@@ -1233,20 +1236,96 @@ def Param(
     convert_defaults: bool = False,
     autocomplete: AnyAutocompleter | None = None,
     channel_types: list[ChannelType] | None = None,
-    lt: float | None = None,
-    le: float | None = None,
     gt: float | None = None,
     ge: float | None = None,
+    lt: float | None = None,
+    le: float | None = None,
     large: bool = False,
     min_length: int | None = None,
     max_length: int | None = None,
     file_types: Sequence[Literal["image", "video", "audio"] | str] | None = None,
+) -> Any: ...
+
+
+@overload
+def Param(
+    default: Any | Callable[[ApplicationCommandInteraction[BotT]], Any] = ...,
+    *,
+    name: LocalizedOptional = None,
+    description: LocalizedOptional = None,
+    choices: Choices | None = None,
+    converter: Callable[[ApplicationCommandInteraction[BotT], Any], Any] | None = None,
+    convert_defaults: bool = False,
+    autocomplete: AnyAutocompleter | None = None,
+    channel_types: list[ChannelType] | None = None,
+    min_value: float | None = None,
+    max_value: float | None = None,
+    large: bool = False,
+    min_length: int | None = None,
+    max_length: int | None = None,
+    file_types: Sequence[Literal["image", "video", "audio"] | str] | None = None,
+) -> Any: ...
+
+
+@overload
+@utils.deprecated(
+    "The `desc`, `conv`, and `autocomp` parameter aliases are deprecated. "
+    "Use `description`, `converter`, or `autocomplete` respectively instead."
+)
+def Param(
+    default: Any | Callable[[ApplicationCommandInteraction[BotT]], Any] = ...,
+    *,
+    name: LocalizedOptional = None,
+    desc: LocalizedOptional = None,
+    choices: Choices | None = None,
+    conv: Callable[[ApplicationCommandInteraction[BotT], Any], Any] | None = None,
+    convert_defaults: bool = False,
+    autocomp: AnyAutocompleter | None = None,
+    channel_types: list[ChannelType] | None = None,
+    min_value: float | None = None,
+    max_value: float | None = None,
+    gt: float | None = None,
+    ge: float | None = None,
+    lt: float | None = None,
+    le: float | None = None,
+    large: bool = False,
+    min_length: int | None = None,
+    max_length: int | None = None,
+    file_types: Sequence[Literal["image", "video", "audio"] | str] | None = None,
+) -> Any: ...
+
+
+def Param(
+    default: Any | Callable[[ApplicationCommandInteraction[BotT]], Any] = ...,
+    *,
+    name: LocalizedOptional = None,
+    description: LocalizedOptional = None,
+    choices: Choices | None = None,
+    converter: Callable[[ApplicationCommandInteraction[BotT], Any], Any] | None = None,
+    convert_defaults: bool = False,
+    autocomplete: AnyAutocompleter | None = None,
+    channel_types: list[ChannelType] | None = None,
+    gt: float | None = None,
+    ge: float | None = None,
+    lt: float | None = None,
+    le: float | None = None,
+    min_value: float | None = None,
+    max_value: float | None = None,
+    large: bool = False,
+    min_length: int | None = None,
+    max_length: int | None = None,
+    file_types: Sequence[Literal["image", "video", "audio"] | str] | None = None,
+    # for deprecated aliases
     **kwargs: Any,
 ) -> Any:
     r"""A special function that creates an instance of :class:`ParamInfo` that contains some information about a
     slash command option. This instance should be assigned to a parameter of a function representing your slash command.
 
     See :ref:`param_syntax` for more info.
+
+    .. versionchanged:: |vnext|
+        Deprecated kwarg aliases ``desc``, ``conv``, and ``autocomp``.
+        Use ``description``, ``converter``, or ``autocomplete`` respectively instead.
 
     Parameters
     ----------
@@ -1262,7 +1341,6 @@ def Param(
 
     description: :class:`str` | :class:`.Localized` | :data:`None`
         The description of the option. You can skip this kwarg and use docstrings. See :ref:`param_syntax`.
-        Kwarg aliases: ``desc``.
 
         .. versionchanged:: 2.5
             Added support for localizations.
@@ -1271,7 +1349,6 @@ def Param(
         The pre-defined choices for this slash command option.
     converter: :class:`~collections.abc.Callable`\[[:class:`.ApplicationCommandInteraction`, :data:`~typing.Any`], :data:`~typing.Any`]
         A function that will convert the original input to a desired format.
-        Kwarg aliases: ``conv``.
     convert_defaults: :class:`bool`
         Whether to also apply the converter to the provided default value.
         Defaults to ``False``.
@@ -1279,18 +1356,20 @@ def Param(
         .. versionadded:: 2.3
     autocomplete: :class:`~collections.abc.Callable`\[[:class:`.ApplicationCommandInteraction`, :class:`str`], :data:`~typing.Any`]
         A function that will suggest possible autocomplete options while typing.
-        See :ref:`param_syntax`. Kwarg aliases: ``autocomp``.
+        See :ref:`param_syntax`.
     channel_types: :class:`~collections.abc.Iterable`\[:class:`.ChannelType`]
         A list of channel types that should be allowed.
         By default these are discerned from the annotation.
-    lt: :class:`float`
-        The (exclusive) upper bound of values for this option (less-than).
-    le: :class:`float`
-        The (inclusive) upper bound of values for this option (less-than-or-equal). Kwarg aliases: ``max_value``.
     gt: :class:`float`
         The (exclusive) lower bound of values for this option (greater-than).
     ge: :class:`float`
-        The (inclusive) lower bound of values for this option (greater-than-or-equal). Kwarg aliases: ``min_value``.
+        The (inclusive) lower bound of values for this option (greater-than-or-equal).
+        Kwarg aliases: ``min_value``.
+    lt: :class:`float`
+        The (exclusive) upper bound of values for this option (less-than).
+    le: :class:`float`
+        The (inclusive) upper bound of values for this option (less-than-or-equal).
+        Kwarg aliases: ``max_value``.
     large: :class:`bool`
         For a parameter of type :class:`int`, this controls whether to accept values outside the
         range of ``[-2**53+1, 2**53-1]``, at the cost of reduced Discord-side input validation.
@@ -1338,11 +1417,16 @@ def Param(
             but at runtime this is always a :class:`ParamInfo` instance.
             You can find a more in-depth explanation :ref:`here <why_params_and_injections_return_any>`.
     """
+    if kwargs.keys() & {"desc", "conv", "autocomp"}:
+        utils.warn_deprecated(
+            "The `desc`, `conv`, and `autocomp` parameter aliases are deprecated. "
+            "Use `description`, `converter`, or `autocomplete` respectively instead.",
+            stacklevel=2,
+        )
+
     description = kwargs.pop("desc", description)
     converter = kwargs.pop("conv", converter)
     autocomplete = kwargs.pop("autocomp", autocomplete)
-    le = kwargs.pop("max_value", le)
-    ge = kwargs.pop("min_value", ge)
 
     if kwargs:
         a = ", ".join(map(repr, kwargs))
@@ -1358,10 +1442,10 @@ def Param(
         convert_default=convert_defaults,
         autocomplete=autocomplete,
         channel_types=channel_types,
-        lt=lt,
-        le=le,
         gt=gt,
-        ge=ge,
+        ge=min_value if min_value is not None else ge,
+        lt=lt,
+        le=max_value if max_value is not None else le,
         large=large,
         min_length=min_length,
         max_length=max_length,
