@@ -399,6 +399,17 @@ class Thread(Messageable, Hashable):
         """
         return self.flags.pinned
 
+    def is_spoiler(self) -> bool:
+        """Whether the thread is marked as a spoiler.
+
+        This is a shortcut to :attr:`self.flags.spoiler_channel <.ChannelFlags.spoiler_channel>`.
+
+        .. versionadded:: |vnext|
+
+        :return type: :class:`bool`
+        """
+        return self.flags.spoiler_channel
+
     @property
     def applied_tags(self) -> list[ForumTag]:
         r""":class:`list`\[:class:`ForumTag`]: The tags currently applied to this thread.
