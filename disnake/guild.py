@@ -1441,7 +1441,7 @@ class Guild(Hashable):
             Whether to mark the channel as NSFW.
         flags: :class:`ChannelFlags`
             The flags to set for this channel.
-            Only :attr:`~ChannelFlags.spoiler_channel` is supported for text channels.
+            Only the :attr:`~ChannelFlags.spoiler_channel` flag is supported for text channels.
 
             .. versionadded:: |vnext|
 
@@ -1571,7 +1571,7 @@ class Guild(Hashable):
 
         flags: :class:`ChannelFlags`
             The flags to set for this channel.
-            Only :attr:`~ChannelFlags.spoiler_channel` is supported for voice channels.
+            Only the :attr:`~ChannelFlags.spoiler_channel` flag is supported for voice channels.
 
             .. versionadded:: |vnext|
 
@@ -1702,7 +1702,7 @@ class Guild(Hashable):
             .. versionadded:: 2.9
         flags: :class:`ChannelFlags`
             The flags to set for this channel.
-            Only :attr:`~ChannelFlags.spoiler_channel` is supported for stage channels.
+            Only the :attr:`~ChannelFlags.spoiler_channel` flag is supported for stage channels.
 
             XXX - api docs claim this is not supported, but it appears to work fine?
 
@@ -1837,8 +1837,8 @@ class Guild(Hashable):
             Whether to mark the channel as NSFW.
         flags: :class:`ChannelFlags`
             The flags to set for this channel.
-            Only :attr:`~ChannelFlags.require_tag` and :attr:`~ChannelFlags.spoiler_channel`
-            are supported for forum channels.
+            Only the :attr:`~ChannelFlags.require_tag` and :attr:`~ChannelFlags.spoiler_channel`
+            flags are supported for forum channels.
 
             .. versionadded:: |vnext|
 
@@ -1991,8 +1991,8 @@ class Guild(Hashable):
             Whether to mark the channel as NSFW.
         flags: :class:`ChannelFlags`
             The flags to set for this channel.
-            Only :attr:`~ChannelFlags.require_tag`, :attr:`~ChannelFlags.hide_media_download_options`,
-            and :attr:`~ChannelFlags.spoiler_channel` are supported for media channels.
+            Only the :attr:`~ChannelFlags.require_tag`, :attr:`~ChannelFlags.hide_media_download_options`,
+            and :attr:`~ChannelFlags.spoiler_channel` flags are supported for media channels.
 
             .. versionadded:: |vnext|
 
