@@ -2205,7 +2205,8 @@ class ChannelFlags(BaseFlags):
     # TODO: just `spoiler`?
     @flag_value
     def spoiler_channel(self) -> int:
-        """:class:`bool`: Returns ``True`` if the channel is a spoiler channel.
+        """:class:`bool`: Returns ``True`` if the channel is a spoiler channel,
+        which requires users to opt-in to view its contents.
 
         This only applies to channel/thread types, except :class:`CategoryChannel`.
 
