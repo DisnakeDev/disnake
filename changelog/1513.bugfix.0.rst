@@ -1,1 +1,0 @@
-Handle voice websocket close codes 4017, 4021, and 4022 properly.

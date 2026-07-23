@@ -1,1 +1,0 @@
-Restore support for localization in ``attributetable`` extension.
