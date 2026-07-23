@@ -2208,6 +2208,8 @@ class ChannelFlags(BaseFlags):
         """:class:`bool`: Returns ``True`` if the channel is a spoiler channel,
         which requires users to opt-in to view its contents.
 
+        Cannot be applied to channels marked as NSFW.
+
         This only applies to channel/thread types, except :class:`CategoryChannel`.
 
         .. versionadded:: |vnext|
