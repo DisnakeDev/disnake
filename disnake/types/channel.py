@@ -6,7 +6,13 @@ from typing_extensions import NotRequired
 
 from .message import MessagePin
 from .snowflake import Snowflake
-from .threads import ForumTag, ThreadArchiveDurationLiteral, ThreadMember, ThreadMetadata
+from .threads import (
+    ForumTag,
+    PartialForumTag,
+    ThreadArchiveDurationLiteral,
+    ThreadMember,
+    ThreadMetadata,
+)
 from .user import PartialUser
 
 OverwriteType = Literal[0, 1]
@@ -184,20 +190,25 @@ class GuildDirectory(_BaseChannel):
     name: str
 
 
-class CreateGuildChannel(TypedDict):
-    name: str
-    type: NotRequired[ChannelType | None]
-    topic: NotRequired[str | None]
-    bitrate: NotRequired[int | None]
-    user_limit: NotRequired[int | None]
-    rate_limit_per_user: NotRequired[int | None]
-    position: NotRequired[int | None]
-    permission_overwrites: NotRequired[list[PermissionOverwrite]]
-    parent_id: NotRequired[Snowflake | None]
-    nsfw: NotRequired[bool | None]
-    rtc_region: NotRequired[str | None]
-    video_quality_mode: NotRequired[VideoQualityMode | None]
-    default_auto_archive_duration: NotRequired[ThreadArchiveDurationLiteral | None]
+class CreateGuildChannel(TypedDict, total=False):
+    # `name` is always required, but not present here for easier typing, as it is passed separately
+    type: ChannelType | None
+    topic: str | None
+    bitrate: int | None
+    user_limit: int | None
+    rate_limit_per_user: int | None
+    position: int | None
+    permission_overwrites: list[PermissionOverwrite] | None
+    parent_id: Snowflake | None
+    nsfw: bool | None
+    rtc_region: str | None
+    video_quality_mode: VideoQualityMode | None
+    default_auto_archive_duration: ThreadArchiveDurationLiteral | None
+    default_reaction_emoji: DefaultReaction | None
+    available_tags: list[PartialForumTag] | None
+    default_sort_order: ThreadSortOrder | None
+    default_forum_layout: ThreadLayout | None
+    default_thread_rate_limit_per_user: int | None
 
 
 class ChannelPins(TypedDict):

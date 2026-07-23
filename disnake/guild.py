@@ -93,7 +93,10 @@ if TYPE_CHECKING:
     from .state import ConnectionState
     from .template import Template
     from .threads import AnyThreadArchiveDuration, ForumTag
-    from .types.channel import GuildChannel as GuildChannelPayload
+    from .types.channel import (
+        CreateGuildChannel as CreateGuildChannelPayload,
+        GuildChannel as GuildChannelPayload,
+    )
     from .types.guild import (
         Ban as BanPayload,
         Guild as GuildPayload,
@@ -1458,7 +1461,7 @@ class Guild(Hashable):
         :class:`TextChannel`
             The channel that was just created.
         """
-        options = {}
+        options: CreateGuildChannelPayload = {}
         if position is not MISSING:
             options["position"] = position
 
@@ -1579,7 +1582,7 @@ class Guild(Hashable):
         :class:`VoiceChannel`
             The channel that was just created.
         """
-        options = {}
+        options: CreateGuildChannelPayload = {}
         if position is not MISSING:
             options["position"] = position
 
@@ -1702,7 +1705,7 @@ class Guild(Hashable):
         :class:`StageChannel`
             The channel that was just created.
         """
-        options: dict[str, Any] = {}
+        options: CreateGuildChannelPayload = {}
 
         if topic is not MISSING:
             options["topic"] = topic
@@ -1841,7 +1844,7 @@ class Guild(Hashable):
         :class:`ForumChannel`
             The channel that was just created.
         """
-        options = {}
+        options: CreateGuildChannelPayload = {}
         if position is not MISSING:
             options["position"] = position
 
@@ -1970,7 +1973,7 @@ class Guild(Hashable):
         :class:`MediaChannel`
             The channel that was just created.
         """
-        options = {}
+        options: CreateGuildChannelPayload = {}
         if position is not MISSING:
             options["position"] = position
 
@@ -2065,7 +2068,7 @@ class Guild(Hashable):
         :class:`CategoryChannel`
             The channel that was just created.
         """
-        options: dict[str, Any] = {}
+        options: CreateGuildChannelPayload = {}
         if position is not MISSING:
             options["position"] = position
 
