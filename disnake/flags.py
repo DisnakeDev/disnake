@@ -2210,7 +2210,7 @@ class ChannelFlags(BaseFlags):
 
         Cannot be applied to channels marked as NSFW.
 
-        This only applies to channel/thread types, except :class:`CategoryChannel`.
+        This applies to all channel/thread types, except :class:`CategoryChannel`.
 
         .. versionadded:: |vnext|
         """
