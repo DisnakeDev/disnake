@@ -1704,8 +1704,6 @@ class Guild(Hashable):
             The flags to set for this channel.
             Only the :attr:`~ChannelFlags.spoiler_channel` flag is supported for stage channels.
 
-            XXX - api docs claim this is not supported, but it appears to work fine?
-
             .. versionadded:: |vnext|
 
         slowmode_delay: :class:`int`
