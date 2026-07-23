@@ -1,0 +1,4 @@
+Support spoiler channels/threads.
+- New :attr:`ChannelFlags.spoiler_channel` flag.
+- New ``flags`` parameter on methods such as :meth:`Guild.create_text_channel` and :meth:`TextChannel.clone`, similarly for other channel types.
+- New :meth:`abc.GuildChannel.is_spoiler`, :meth:`Thread.is_spoiler` methods.
