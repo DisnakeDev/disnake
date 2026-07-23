@@ -1248,9 +1248,29 @@ def Param(
 
 
 @overload
+def Param(
+    default: Any | Callable[[ApplicationCommandInteraction[BotT]], Any] = ...,
+    *,
+    name: LocalizedOptional = None,
+    description: LocalizedOptional = None,
+    choices: Choices | None = None,
+    converter: Callable[[ApplicationCommandInteraction[BotT], Any], Any] | None = None,
+    convert_defaults: bool = False,
+    autocomplete: AnyAutocompleter | None = None,
+    channel_types: list[ChannelType] | None = None,
+    min_value: float | None = None,
+    max_value: float | None = None,
+    large: bool = False,
+    min_length: int | None = None,
+    max_length: int | None = None,
+    file_types: Sequence[Literal["image", "video", "audio"] | str] | None = None,
+) -> Any: ...
+
+
+@overload
 @utils.deprecated(
-    "The `desc`, `conv`, `autocomp`, `min_value`, and `max_value` parameter aliases are deprecated. "
-    "Use `description`, `converter`, `autocomplete`, `ge`, or `le` respectively instead."
+    "The `desc`, `conv`, and `autocomp` parameter aliases are deprecated. "
+    "Use `description`, `converter`, or `autocomplete` respectively instead."
 )
 def Param(
     default: Any | Callable[[ApplicationCommandInteraction[BotT]], Any] = ...,
@@ -1264,6 +1284,10 @@ def Param(
     channel_types: list[ChannelType] | None = None,
     min_value: float | None = None,
     max_value: float | None = None,
+    gt: float | None = None,
+    ge: float | None = None,
+    lt: float | None = None,
+    le: float | None = None,
     large: bool = False,
     min_length: int | None = None,
     max_length: int | None = None,
@@ -1285,6 +1309,8 @@ def Param(
     ge: float | None = None,
     lt: float | None = None,
     le: float | None = None,
+    min_value: float | None = None,
+    max_value: float | None = None,
     large: bool = False,
     min_length: int | None = None,
     max_length: int | None = None,
@@ -1298,8 +1324,8 @@ def Param(
     See :ref:`param_syntax` for more info.
 
     .. versionchanged:: |vnext|
-        Deprecated kwarg aliases ``desc``, ``conv``, ``autocomp``, ``min_value``, and ``max_value``.
-        Use ``description``, ``converter``, ``autocomplete``, ``ge``, or ``le`` respectively instead.
+        Deprecated kwarg aliases ``desc``, ``conv``, and ``autocomp``.
+        Use ``description``, ``converter``, or ``autocomplete`` respectively instead.
 
     Parameters
     ----------
@@ -1338,10 +1364,12 @@ def Param(
         The (exclusive) lower bound of values for this option (greater-than).
     ge: :class:`float`
         The (inclusive) lower bound of values for this option (greater-than-or-equal).
+        Kwarg aliases: ``min_value``.
     lt: :class:`float`
         The (exclusive) upper bound of values for this option (less-than).
     le: :class:`float`
         The (inclusive) upper bound of values for this option (less-than-or-equal).
+        Kwarg aliases: ``max_value``.
     large: :class:`bool`
         For a parameter of type :class:`int`, this controls whether to accept values outside the
         range of ``[-2**53+1, 2**53-1]``, at the cost of reduced Discord-side input validation.
@@ -1389,18 +1417,16 @@ def Param(
             but at runtime this is always a :class:`ParamInfo` instance.
             You can find a more in-depth explanation :ref:`here <why_params_and_injections_return_any>`.
     """
-    if kwargs.keys() & {"desc", "conv", "autocomp", "max_value", "min_value"}:
+    if kwargs.keys() & {"desc", "conv", "autocomp"}:
         utils.warn_deprecated(
-            "The `desc`, `conv`, `autocomp`, `min_value`, and `max_value` parameter aliases are deprecated. "
-            "Use `description`, `converter`, `autocomplete`, `ge`, or `le` respectively instead.",
+            "The `desc`, `conv`, and `autocomp` parameter aliases are deprecated. "
+            "Use `description`, `converter`, or `autocomplete` respectively instead.",
             stacklevel=2,
         )
 
     description = kwargs.pop("desc", description)
     converter = kwargs.pop("conv", converter)
     autocomplete = kwargs.pop("autocomp", autocomplete)
-    ge = kwargs.pop("min_value", ge)
-    le = kwargs.pop("max_value", le)
 
     if kwargs:
         a = ", ".join(map(repr, kwargs))
@@ -1417,9 +1443,9 @@ def Param(
         autocomplete=autocomplete,
         channel_types=channel_types,
         gt=gt,
-        ge=ge,
+        ge=min_value if min_value is not None else ge,
         lt=lt,
-        le=le,
+        le=max_value if max_value is not None else le,
         large=large,
         min_length=min_length,
         max_length=max_length,
