@@ -209,6 +209,7 @@ class CreateGuildChannel(TypedDict, total=False):
     default_sort_order: ThreadSortOrder | None
     default_forum_layout: ThreadLayout | None
     default_thread_rate_limit_per_user: int | None
+    flags: int | None
 
 
 class ChannelPins(TypedDict):
