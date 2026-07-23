@@ -46,9 +46,14 @@ from ..message import Attachment, AuthorizingIntegrationOwners, Message
 from ..object import Object
 from ..permissions import Permissions
 from ..role import Role
-from ..ui.action_row import normalize_components, normalize_components_to_dict
+from ..ui.action_row import normalize_components
 from ..user import ClientUser, User
-from ..webhook.async_ import Webhook, async_context, handle_message_parameters
+from ..webhook.async_ import (
+    Webhook,
+    async_context,
+    handle_message_parameters,
+    handle_message_parameters_dict,
+)
 
 __all__ = (
     "Interaction",
@@ -573,11 +578,15 @@ class Interaction(Generic[ClientT]):
         """
         # if no attachment list was provided but we're uploading new files,
         # use current attachments as the base
+        # FIXME: avoid original_response(), use callback data once implemented
+        # FIXME: set previous_flags as well
         if attachments is MISSING and (file or files):
             attachments = (await self.original_response()).attachments
 
         previous_mentions: AllowedMentions | None = self._state.allowed_mentions
-        params = handle_message_parameters(
+
+        adapter = async_context.get()
+        with handle_message_parameters(
             content=content,
             file=file,
             files=files,
@@ -591,25 +600,20 @@ class Interaction(Generic[ClientT]):
             flags=flags,
             allowed_mentions=allowed_mentions,
             previous_allowed_mentions=previous_mentions,
-        )
-        adapter = async_context.get()
-        try:
-            data = await adapter.edit_original_interaction_response(
-                self.application_id,
-                self.token,
-                session=self._session,
-                payload=params.payload,
-                multipart=params.multipart,
-                files=params.files,
-            )
-        except NotFound as e:
-            if e.code == 10015:
-                raise InteractionNotResponded(self) from e
-            raise
-        finally:
-            if params.files:
-                for f in params.files:
-                    f.close()
+        ) as params:
+            try:
+                data = await adapter.edit_original_interaction_response(
+                    self.application_id,
+                    self.token,
+                    session=self._session,
+                    payload=params.payload,
+                    multipart=params.multipart,
+                    files=params.files,
+                )
+            except NotFound as e:
+                if e.code == 10015:
+                    raise InteractionNotResponded(self) from e
+                raise
 
         # The message channel types should always match
         state = _InteractionMessageState(self, self._state)
@@ -1080,114 +1084,53 @@ class InteractionResponse:
         if self._response_type is not None:
             raise InteractionResponded(self._parent)
 
-        payload: dict[str, Any] = {
-            "tts": tts,
-        }
-
-        if embed is not MISSING and embeds is not MISSING:
-            msg = "cannot mix embed and embeds keyword arguments"
-            raise TypeError(msg)
-
-        if file is not MISSING and files is not MISSING:
-            msg = "cannot mix file and files keyword arguments"
-            raise TypeError(msg)
-
-        if view is not MISSING and components is not MISSING:
-            msg = "cannot mix view and components keyword arguments"
-            raise TypeError(msg)
-
-        if file is not MISSING:
-            files = [file]
-
-        if embed is not MISSING:
-            embeds = [embed]
-
-        if embeds:
-            if len(embeds) > 10:
-                msg = "embeds cannot exceed maximum of 10 elements"
-                raise ValueError(msg)
-            payload["embeds"] = [e.to_dict() for e in embeds]
-            for embed in embeds:
-                if embed._files:
-                    files = files or []
-                    files.extend(embed._files.values())
-
-        if files is not MISSING and len(files) > 10:
-            msg = "files cannot exceed maximum of 10 elements"
-            raise ValueError(msg)
-
-        previous_mentions: AllowedMentions | None = getattr(
-            self._parent._state, "allowed_mentions", None
-        )
-        if allowed_mentions:
-            if previous_mentions is not None:
-                payload["allowed_mentions"] = previous_mentions.merge(allowed_mentions).to_dict()
-            else:
-                payload["allowed_mentions"] = allowed_mentions.to_dict()
-        elif previous_mentions is not None:
-            payload["allowed_mentions"] = previous_mentions.to_dict()
-
-        if content is not None:
-            payload["content"] = str(content)
-
-        is_v2 = False
-        if view is not MISSING:
-            payload["components"] = view.to_components()
-        elif components is not MISSING:
-            payload["components"], is_v2 = normalize_components_to_dict(components)
-
-        # set cv2 flag automatically
-        if is_v2:
-            flags = MessageFlags._from_value(0 if flags is MISSING else flags.value)
-            flags.is_components_v2 = True
-        # components v2 cannot be used with other content fields
-        if flags and flags.is_components_v2 and (content or embeds or poll):
-            msg = "Cannot use v2 components with content, embeds, or polls"
-            raise ValueError(msg)
-
-        if poll is not MISSING:
-            payload["poll"] = poll._to_dict()
-
-        if suppress_embeds is not MISSING or ephemeral is not MISSING:
-            flags = MessageFlags._from_value(0 if flags is MISSING else flags.value)
-            if suppress_embeds is not MISSING:
-                flags.suppress_embeds = suppress_embeds
-            if ephemeral is not MISSING:
-                flags.ephemeral = ephemeral
-        if flags is not MISSING:
-            payload["flags"] = flags.value
-
         parent = self._parent
         adapter = async_context.get()
         response_type = InteractionResponseType.channel_message
-        try:
-            await adapter.create_interaction_response(
-                parent.id,
-                parent.token,
-                session=parent._session,
-                type=response_type.value,
-                data=payload,
-                files=files or None,
-            )
-        except NotFound as e:
-            if e.code == 10062:
-                raise InteractionTimedOut(self._parent) from e
-            raise
-        finally:
-            if files:
-                for f in files:
-                    f.close()
 
-        self._response_type = response_type
+        base_allowed_mentions: AllowedMentions | None = getattr(
+            parent._state, "allowed_mentions", None
+        )
+
+        with handle_message_parameters_dict(
+            content=content,
+            tts=tts,
+            file=file,
+            files=files,
+            embed=embed,
+            embeds=embeds,
+            view=view,
+            components=components,
+            ephemeral=ephemeral,
+            suppress_embeds=suppress_embeds,
+            flags=flags,
+            poll=poll,
+            allowed_mentions=allowed_mentions,
+            previous_allowed_mentions=base_allowed_mentions,
+        ) as params:
+            try:
+                await adapter.create_interaction_response(
+                    parent.id,
+                    parent.token,
+                    session=parent._session,
+                    type=response_type.value,
+                    data=params.payload,
+                    files=params.files,
+                )
+                self._response_type = response_type
+            except NotFound as e:
+                if e.code == 10062:
+                    raise InteractionTimedOut(self._parent) from e
+                raise
 
         if view is not MISSING:
             if ephemeral and view.timeout is None:
                 view.timeout = 15 * 60.0
 
-            self._parent._state.store_view(view)
+            parent._state.store_view(view)
 
         if delete_after is not MISSING:
-            await self._parent.delete_original_response(delay=delete_after)
+            await parent.delete_original_response(delay=delete_after)
 
     async def edit_message(
         self,
@@ -1304,7 +1247,6 @@ class InteractionResponse:
             raise InteractionResponded(self._parent)
 
         parent = self._parent
-        state = parent._state
 
         if parent.type not in (InteractionType.component, InteractionType.modal_submit):
             raise InteractionNotEditable(parent)
@@ -1314,103 +1256,50 @@ class InteractionResponse:
         if not message:
             raise InteractionNotEditable(parent)
 
-        payload = {}
-        if content is not MISSING:
-            payload["content"] = None if content is None else str(content)
+        adapter = async_context.get()
+        response_type = InteractionResponseType.message_update
 
-        if file is not MISSING and files is not MISSING:
-            msg = "cannot mix file and files keyword arguments"
-            raise TypeError(msg)
-
-        if file is not MISSING:
-            files = [file]
-
-        if embed is not MISSING and embeds is not MISSING:
-            msg = "cannot mix both embed and embeds keyword arguments"
-            raise TypeError(msg)
-
-        if embed is not MISSING:
-            embeds = [] if embed is None else [embed]
-        if embeds is not MISSING:
-            payload["embeds"] = [e.to_dict() for e in embeds]
-            for embed in embeds:
-                if embed._files:
-                    files = files or []
-                    files.extend(embed._files.values())
-
-        if files is not MISSING and len(files) > 10:
-            msg = "files cannot exceed maximum of 10 elements"
-            raise ValueError(msg)
-
-        previous_mentions: AllowedMentions | None = getattr(
-            self._parent._state, "allowed_mentions", None
+        base_allowed_mentions: AllowedMentions | None = getattr(
+            parent._state, "allowed_mentions", None
         )
-        if allowed_mentions:
-            if previous_mentions is not None:
-                payload["allowed_mentions"] = previous_mentions.merge(allowed_mentions).to_dict()
-            else:
-                payload["allowed_mentions"] = allowed_mentions.to_dict()
-        elif previous_mentions is not None:
-            payload["allowed_mentions"] = previous_mentions.to_dict()
 
         # if no attachment list was provided but we're uploading new files,
         # use current attachments as the base
         if attachments is MISSING and (file or files):
             attachments = message.attachments
-        if attachments is not MISSING:
-            payload["attachments"] = (
-                [] if attachments is None else [a.to_dict() for a in attachments]
-            )
 
-        if view is not MISSING and components is not MISSING:
-            msg = "cannot mix view and components keyword arguments"
-            raise TypeError(msg)
+        with handle_message_parameters_dict(
+            content=content,
+            file=file,
+            files=files,
+            embed=embed,
+            embeds=embeds,
+            view=view,
+            components=components,
+            flags=flags,
+            allowed_mentions=allowed_mentions,
+            previous_allowed_mentions=base_allowed_mentions,
+            # FIXME: previous_flags ?
+        ) as params:
+            if view is not MISSING:
+                parent._state.prevent_view_updates_for(message.id)
 
-        is_v2 = False
-        if view is not MISSING:
-            state.prevent_view_updates_for(message.id)
-            payload["components"] = [] if view is None else view.to_components()
-        elif components is not MISSING:
-            if components:
-                payload["components"], is_v2 = normalize_components_to_dict(components)
-            else:
-                payload["components"] = []
-
-        # set cv2 flag automatically
-        if is_v2:
-            flags = MessageFlags._from_value(0 if flags is MISSING else flags.value)
-            flags.is_components_v2 = True
-        # components v2 cannot be used with other content fields
-        if flags and flags.is_components_v2 and (content or embeds):
-            msg = "Cannot use v2 components with content or embeds"
-            raise ValueError(msg)
-
-        if flags is not MISSING:
-            payload["flags"] = flags.value
-
-        adapter = async_context.get()
-        response_type = InteractionResponseType.message_update
-        try:
             await adapter.create_interaction_response(
                 parent.id,
                 parent.token,
                 session=parent._session,
                 type=response_type.value,
-                data=payload,
-                files=files,
+                data=params.payload,
+                files=params.files,
             )
-        finally:
-            if files:
-                for f in files:
-                    f.close()
 
         if view and not view.is_finished():
-            state.store_view(view, message.id)
+            parent._state.store_view(view, message.id)
 
         self._response_type = response_type
 
         if delete_after is not None:
-            await self._parent.delete_original_response(delay=delete_after)
+            await parent.delete_original_response(delay=delete_after)
 
     async def autocomplete(self, *, choices: Choices) -> None:
         r"""|coro|
@@ -1939,6 +1828,7 @@ class InteractionMessage(Message):
         if attachments is MISSING and (file or files):
             attachments = self.attachments
 
+        # FIXME: suppress_embeds overwrites existing flags, should set previous_flags
         return await self._state._interaction.edit_original_response(
             content=content,
             embed=embed,

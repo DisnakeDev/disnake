@@ -5,15 +5,15 @@ from __future__ import annotations
 import asyncio
 import logging
 import re
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from contextvars import ContextVar
+from dataclasses import dataclass
 from errno import ECONNRESET
 from typing import (
     TYPE_CHECKING,
     Any,
     Generic,
     Literal,
-    NamedTuple,
     NoReturn,
     TypeVar,
     overload,
@@ -27,8 +27,10 @@ from ..asset import Asset
 from ..channel import PartialMessageable
 from ..enums import WebhookType, try_enum
 from ..errors import DiscordServerError, Forbidden, HTTPException, NotFound, WebhookTokenMissing
+from ..file import File
 from ..flags import MessageFlags
 from ..http import Route, set_attachments, to_multipart, to_multipart_with_attachments
+from ..mentions import AllowedMentions
 from ..message import Message
 from ..mixins import Hashable
 from ..object import Object
@@ -54,14 +56,13 @@ if TYPE_CHECKING:
     from ..asset import AssetBytes
     from ..channel import ForumChannel, MediaChannel, StageChannel, TextChannel, VoiceChannel
     from ..embeds import Embed
-    from ..file import File
     from ..guild import Guild
     from ..http import HTTPClient, Response
-    from ..mentions import AllowedMentions
-    from ..message import Attachment
+    from ..message import Attachment, MessageReference, PartialMessage
     from ..poll import Poll
     from ..state import ConnectionState
     from ..sticker import GuildSticker, StandardSticker, StickerItem
+    from ..types.embed import Embed as EmbedPayload
     from ..types.message import Message as MessagePayload
     from ..types.webhook import Webhook as WebhookPayload
     from ..ui._types import MessageComponents
@@ -102,9 +103,9 @@ class AsyncWebhookAdapter:
         route: Route,
         session: aiohttp.ClientSession,
         *,
-        payload: dict[str, Any] | None = None,
-        multipart: list[dict[str, Any]] | None = None,
-        files: list[File] | None = None,
+        payload: Mapping[str, Any] | None = None,
+        multipart: Sequence[dict[str, Any]] | None = None,
+        files: Sequence[File] | None = None,
         reason: str | None = None,
         auth_token: str | None = None,
         params: dict[str, Any] | None = None,
@@ -284,9 +285,9 @@ class AsyncWebhookAdapter:
         token: str,
         *,
         session: aiohttp.ClientSession,
-        payload: dict[str, Any] | None = None,
-        multipart: list[dict[str, Any]] | None = None,
-        files: list[File] | None = None,
+        payload: Mapping[str, Any] | None = None,
+        multipart: Sequence[dict[str, Any]] | None = None,
+        files: Sequence[File] | None = None,
         thread_id: int | None = None,
         wait: bool = False,
         with_components: bool = True,
@@ -334,9 +335,9 @@ class AsyncWebhookAdapter:
         message_id: int,
         *,
         session: aiohttp.ClientSession,
-        payload: dict[str, Any] | None = None,
-        multipart: list[dict[str, Any]] | None = None,
-        files: list[File] | None = None,
+        payload: Mapping[str, Any] | None = None,
+        multipart: Sequence[dict[str, Any]] | None = None,
+        files: Sequence[File] | None = None,
         thread_id: int | None = None,
     ) -> Response[MessagePayload]:
         params: dict[str, Any] = {}
@@ -409,7 +410,7 @@ class AsyncWebhookAdapter:
         session: aiohttp.ClientSession,
         type: int,
         data: dict[str, Any] | None = None,
-        files: list[File] | None = None,
+        files: Sequence[File] | None = None,
     ) -> Response[None]:
         route = Route(
             "POST",
@@ -453,9 +454,9 @@ class AsyncWebhookAdapter:
         token: str,
         *,
         session: aiohttp.ClientSession,
-        payload: dict[str, Any] | None = None,
-        multipart: list[dict[str, Any]] | None = None,
-        files: list[File] | None = None,
+        payload: Mapping[str, Any] | None = None,
+        multipart: Sequence[dict[str, Any]] | None = None,
+        files: Sequence[File] | None = None,
     ) -> Response[MessagePayload]:
         r = Route(
             "PATCH",
@@ -481,23 +482,34 @@ class AsyncWebhookAdapter:
         return self.request(r, session=session)
 
 
-class DictPayloadParameters(NamedTuple):
-    payload: dict[str, Any]
-    files: list[File] | None
+PayloadT = TypeVar("PayloadT", bound=dict[str, Any] | None, covariant=True)
 
 
-class PayloadParameters(NamedTuple):
-    payload: dict[str, Any] | None
-    multipart: list[dict[str, Any]] | None
-    files: list[File] | None
+@dataclass(kw_only=True, slots=True)
+class PayloadParameters(Generic[PayloadT]):
+    payload: PayloadT
+    multipart: Sequence[dict[str, Any]] | None
+    files: Sequence[File] | None
+
+    def __enter__(self) -> Self:
+        return self
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: TracebackType | None,
+    ) -> None:
+        if self.files:
+            for f in self.files:
+                f.close()
 
 
 def handle_message_parameters_dict(
-    content: str | None = MISSING,
     *,
-    username: str = MISSING,
-    avatar_url: object = MISSING,
+    content: str | None = MISSING,
     tts: bool = False,
+    nonce: str | int | None = MISSING,
     ephemeral: bool | None = MISSING,
     suppress_embeds: bool | None = MISSING,
     flags: MessageFlags = MISSING,
@@ -510,12 +522,22 @@ def handle_message_parameters_dict(
     components: MessageComponents | None = MISSING,
     stickers: Sequence[GuildSticker | StandardSticker | StickerItem] = MISSING,
     poll: Poll = MISSING,
+    reference: Message | MessageReference | PartialMessage | None = MISSING,
     allowed_mentions: AllowedMentions | None = MISSING,
+    mention_author: bool | None = None,
+    # base values for editing messages
+    previous_flags: int = 0,
     previous_allowed_mentions: AllowedMentions | None,
+    # webhook only
+    username: str = MISSING,
+    avatar_url: object = MISSING,
     # these parameters are exclusive to webhooks in forum/media channels
     thread_name: str = MISSING,
     applied_tags: Sequence[Snowflake] = MISSING,
-) -> DictPayloadParameters:
+) -> PayloadParameters[dict[str, Any]]:
+
+    # exclusive parameter validation
+
     if files is not MISSING and file is not MISSING:
         msg = "Cannot mix file and files keyword arguments."
         raise TypeError(msg)
@@ -526,24 +548,53 @@ def handle_message_parameters_dict(
         msg = "Cannot mix view and components keyword arguments."
         raise TypeError(msg)
 
+    # files + embeds
+
     if file is not MISSING:
+        if not isinstance(file, File):
+            msg = "file parameter must be File"
+            raise TypeError(msg)
         files = [file]
 
-    payload = {}
+    payload: dict[str, Any] = {}
+
     if embed is not MISSING:
         embeds = [embed] if embed else []
     if embeds is not MISSING:
         if len(embeds) > 10:
-            msg = "embeds has a maximum of 10 elements."
+            msg = "embeds parameter must be a list of up to 10 elements"
             raise ValueError(msg)
-        payload["embeds"] = [e.to_dict() for e in embeds]
+
+        embed_data: list[EmbedPayload] = []
+        embed_files: list[File] = []
         for embed in embeds:
+            embed_data.append(embed.to_dict())
             if embed._files:
-                files = files or []
-                files.extend(embed._files.values())
+                embed_files.extend(embed._files.values())
+
+        payload["embeds"] = embed_data
+        if embed_files:
+            # create new list, don't (potentially) modify given files list
+            files = files + embed_files
+
+    if files:
+        if len(files) > 10:
+            msg = "files parameter must be a list of up to 10 elements"
+            raise ValueError(msg)
+        if not all(isinstance(file, File) for file in files):
+            msg = "files parameter must be a list of File"
+            raise ValueError(msg)
+
+    # simple fields
 
     if content is not MISSING:
         payload["content"] = str(content) if content is not None else None
+    if tts:
+        payload["tts"] = True
+    if nonce:
+        payload["nonce"] = nonce
+
+    # components
 
     is_v2 = False
     if view is not MISSING:
@@ -556,24 +607,19 @@ def handle_message_parameters_dict(
 
     # set cv2 flag automatically
     if is_v2:
-        flags = MessageFlags._from_value(0 if flags is MISSING else flags.value)
+        flags = MessageFlags._from_value(previous_flags if flags is MISSING else flags.value)
         flags.is_components_v2 = True
     # components v2 cannot be used with other content fields
+    # (n.b. this doesn't take into account editing messages that *already* have content/embeds,
+    # since we can't know that for certain with partial messages anyway)
     if flags and flags.is_components_v2 and (content or embeds or stickers or poll):
         msg = "Cannot use v2 components with content, embeds, stickers, or polls"
         raise ValueError(msg)
 
-    if attachments is not MISSING:
-        payload["attachments"] = [] if attachments is None else [a.to_dict() for a in attachments]
-
-    payload["tts"] = tts
-    if avatar_url:
-        payload["avatar_url"] = str(avatar_url)
-    if username:
-        payload["username"] = username
+    # flags
 
     if ephemeral not in (None, MISSING) or suppress_embeds not in (None, MISSING):
-        flags = MessageFlags._from_value(0 if flags is MISSING else flags.value)
+        flags = MessageFlags._from_value(previous_flags if flags is MISSING else flags.value)
         if suppress_embeds not in (None, MISSING):
             flags.suppress_embeds = suppress_embeds
         if ephemeral not in (None, MISSING):
@@ -581,35 +627,64 @@ def handle_message_parameters_dict(
     if flags is not MISSING:
         payload["flags"] = flags.value
 
+    # allowed mentions
+
+    allowed_mentions_data = None
     if allowed_mentions:
         if previous_allowed_mentions is not None:
-            payload["allowed_mentions"] = previous_allowed_mentions.merge(
-                allowed_mentions
-            ).to_dict()
+            allowed_mentions_data = previous_allowed_mentions.merge(allowed_mentions).to_dict()
         else:
-            payload["allowed_mentions"] = allowed_mentions.to_dict()
+            allowed_mentions_data = allowed_mentions.to_dict()
     elif previous_allowed_mentions is not None:
-        payload["allowed_mentions"] = previous_allowed_mentions.to_dict()
+        allowed_mentions_data = previous_allowed_mentions.to_dict()
+
+    if mention_author is not None:
+        allowed_mentions_data = allowed_mentions_data or AllowedMentions().to_dict()
+        allowed_mentions_data["replied_user"] = bool(mention_author)
+
+    if allowed_mentions_data:
+        payload["allowed_mentions"] = allowed_mentions_data
+
+    # other message fields
+
+    if attachments is not MISSING:
+        payload["attachments"] = [] if attachments is None else [a.to_dict() for a in attachments]
 
     if stickers is not MISSING:
         payload["sticker_ids"] = [s.id for s in stickers]
+
+    if poll is not MISSING:
+        payload["poll"] = poll._to_dict()
+
+    if reference:
+        try:
+            payload["message_reference"] = reference.to_message_reference_dict()
+        except AttributeError:
+            msg = "reference parameter must be Message, MessageReference, or PartialMessage"
+            raise TypeError(msg) from None
+
+    # webhook only
+
+    if avatar_url:
+        payload["avatar_url"] = str(avatar_url)
+    if username:
+        payload["username"] = username
+
+    # webhooks in forum/media channels
 
     if thread_name:
         payload["thread_name"] = thread_name
     if applied_tags:
         payload["applied_tags"] = [t.id for t in applied_tags]
-    if poll is not MISSING:
-        payload["poll"] = poll._to_dict()
 
-    return DictPayloadParameters(payload=payload, files=files)
+    return PayloadParameters(payload=payload, multipart=None, files=files)
 
 
 def handle_message_parameters(
-    content: str | None = MISSING,
     *,
-    username: str = MISSING,
-    avatar_url: object = MISSING,
+    content: str | None = MISSING,
     tts: bool = False,
+    nonce: str | int | None = MISSING,
     ephemeral: bool | None = MISSING,
     suppress_embeds: bool | None = MISSING,
     flags: MessageFlags = MISSING,
@@ -622,17 +697,23 @@ def handle_message_parameters(
     components: MessageComponents | None = MISSING,
     stickers: Sequence[GuildSticker | StandardSticker | StickerItem] = MISSING,
     poll: Poll = MISSING,
+    reference: Message | MessageReference | PartialMessage | None = MISSING,
     allowed_mentions: AllowedMentions | None = MISSING,
+    mention_author: bool | None = None,
+    # base values for editing messages
+    previous_flags: int = 0,
     previous_allowed_mentions: AllowedMentions | None,
+    # webhook only
+    username: str = MISSING,
+    avatar_url: object = MISSING,
     # these parameters are exclusive to webhooks in forum/media channels
     thread_name: str = MISSING,
     applied_tags: Sequence[Snowflake] = MISSING,
-) -> PayloadParameters:
+) -> PayloadParameters[dict[str, Any] | None]:
     params = handle_message_parameters_dict(
         content=content,
-        username=username,
-        avatar_url=avatar_url,
         tts=tts,
+        nonce=nonce,
         ephemeral=ephemeral,
         suppress_embeds=suppress_embeds,
         flags=flags,
@@ -645,8 +726,13 @@ def handle_message_parameters(
         components=components,
         stickers=stickers,
         poll=poll,
+        reference=reference,
         allowed_mentions=allowed_mentions,
+        mention_author=mention_author,
+        previous_flags=previous_flags,
         previous_allowed_mentions=previous_allowed_mentions,
+        username=username,
+        avatar_url=avatar_url,
         thread_name=thread_name,
         applied_tags=applied_tags,
     )
@@ -654,8 +740,7 @@ def handle_message_parameters(
     if params.files:
         multipart = to_multipart_with_attachments(params.payload, params.files)
         return PayloadParameters(payload=None, multipart=multipart, files=params.files)
-
-    return PayloadParameters(payload=params.payload, multipart=None, files=params.files)
+    return params
 
 
 async_context: ContextVar[AsyncWebhookAdapter] = ContextVar(
@@ -1800,7 +1885,8 @@ class Webhook(BaseWebhook):
                 raise TypeError(msg)
             thread_id = thread.id
 
-        params = handle_message_parameters(
+        adapter = async_context.get()
+        with handle_message_parameters(
             content=content,
             username=username,
             avatar_url=avatar_url,
@@ -1816,14 +1902,10 @@ class Webhook(BaseWebhook):
             components=components,
             thread_name=thread_name,
             applied_tags=applied_tags,
+            poll=poll,
             allowed_mentions=allowed_mentions,
             previous_allowed_mentions=previous_mentions,
-            poll=poll,
-        )
-
-        adapter = async_context.get()
-
-        try:
+        ) as params:
             data = await adapter.execute_webhook(
                 self.id,
                 self.token,
@@ -1834,10 +1916,6 @@ class Webhook(BaseWebhook):
                 thread_id=thread_id,
                 wait=wait,
             )
-        finally:
-            if params.files:
-                for f in params.files:
-                    f.close()
 
         msg = None
         if wait:
@@ -2048,7 +2126,9 @@ class Webhook(BaseWebhook):
             attachments = (await self.fetch_message(message_id, thread=thread)).attachments
 
         previous_mentions: AllowedMentions | None = getattr(self._state, "allowed_mentions", None)
-        params = handle_message_parameters(
+
+        adapter = async_context.get()
+        with handle_message_parameters(
             content=content,
             file=file,
             files=files,
@@ -2060,9 +2140,7 @@ class Webhook(BaseWebhook):
             flags=flags,
             allowed_mentions=allowed_mentions,
             previous_allowed_mentions=previous_mentions,
-        )
-        adapter = async_context.get()
-        try:
+        ) as params:
             data = await adapter.edit_webhook_message(
                 self.id,
                 self.token,
@@ -2073,10 +2151,6 @@ class Webhook(BaseWebhook):
                 multipart=params.multipart,
                 files=params.files,
             )
-        finally:
-            if params.files:
-                for f in params.files:
-                    f.close()
 
         message = self._create_message(data, thread=thread)
         if view and not view.is_finished():
