@@ -7,7 +7,7 @@ import datetime
 import io
 import re
 from base64 import b64decode, b64encode
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from os import PathLike
 from typing import (
     TYPE_CHECKING,
@@ -20,6 +20,7 @@ from typing import (
 
 from . import utils
 from .channel import PartialMessageable
+from .colour import Colour
 from .components import MessageTopLevelComponent, _message_component_factory
 from .embeds import Embed
 from .emoji import Emoji
@@ -28,6 +29,7 @@ from .enums import (
     InteractionType,
     MessageReferenceType,
     MessageType,
+    SharedClientThemeBase,
     try_enum,
     try_enum_to_int,
 )
@@ -78,6 +80,7 @@ if TYPE_CHECKING:
         MessageReference as MessageReferencePayload,
         Reaction as ReactionPayload,
         RoleSubscriptionData as RoleSubscriptionDataPayload,
+        SharedClientTheme as SharedClientThemePayload,
     )
     from .types.threads import ThreadArchiveDurationLiteral
     from .types.user import User as UserPayload
@@ -98,6 +101,7 @@ __all__ = (
     "RoleSubscriptionData",
     "ForwardedMessage",
     "MessageCall",
+    "SharedClientTheme",
 )
 
 
@@ -997,6 +1001,85 @@ class MessageCall:
         ]
 
 
+class SharedClientTheme:
+    r"""
+    Represents a custom client-side theme shared via messages.
+
+    .. versionadded:: |vnext|
+
+    Parameters
+    ----------
+    colours: :class:`~collections.abc.Sequence`\[:class:`Colour` | :class:`int`]
+        The colours of the theme's gradient (up to 5).
+    gradient_angle: :class:`int`
+        The direction of the theme's colour gradient (0-360).
+    intensity: :class:`int`
+        The intensity of the theme's colours (0-100).
+    base_theme: :class:`SharedClientThemeBase`
+        The base colour scheme.
+        Defaults to :attr:`SharedClientThemeBase.unset`.
+
+    Attributes
+    ----------
+    gradient_angle: :class:`int`
+        The direction of the theme's colour gradient (0-360).
+    intensity: :class:`int`
+        The intensity of the theme's colours (0-100).
+    base_theme: :class:`SharedClientThemeBase`
+        The base colour scheme.
+    """
+
+    __slots__ = ("_colours", "gradient_angle", "intensity", "base_theme")
+
+    _colours: Sequence[Colour]
+
+    def __init__(
+        self,
+        colours: Sequence[int | Colour],
+        /,
+        *,
+        gradient_angle: int,
+        intensity: int,
+        base_theme: SharedClientThemeBase = SharedClientThemeBase.unset,
+    ) -> None:
+        self.colours = colours
+        self.gradient_angle: int = gradient_angle
+        self.intensity: int = intensity
+        self.base_theme: SharedClientThemeBase = base_theme
+
+    @property
+    def colours(self) -> Sequence[Colour]:
+        r""":class:`~collections.abc.Sequence`\[:class:`Colour`]: The colours of the theme's gradient."""
+        return self._colours
+
+    @colours.setter
+    def colours(self, colours: Sequence[int | Colour]) -> None:
+        self._colours = [(c if isinstance(c, Colour) else Colour(c)) for c in colours]
+
+    colors = colours
+
+    @classmethod
+    def _from_data(cls, data: SharedClientThemePayload) -> Self:
+        return cls(
+            [Colour.from_hex(c) for c in data["colors"]],
+            gradient_angle=data["gradient_angle"],
+            intensity=data["base_mix"],
+            base_theme=(
+                try_enum(SharedClientThemeBase, base_theme)
+                if (base_theme := data.get("base_theme")) is not None
+                else SharedClientThemeBase.unset
+            ),
+        )
+
+    def to_dict(self) -> SharedClientThemePayload:
+        return {
+            "colors": [f"{c.value:06x}" for c in self.colours],
+            "gradient_angle": self.gradient_angle,
+            "base_mix": self.intensity,
+            "base_theme": self.base_theme.value,
+        }
+
+
 @flatten_handlers
 class Message(Hashable):
     r"""Represents a message from Discord.
@@ -1145,6 +1228,10 @@ class Message(Hashable):
         Only present when :attr:`type` is :attr:`MessageType.call`.
 
         .. versionadded:: 2.12
+    shared_client_theme: :class:`.SharedClientTheme`
+        The custom client-side theme shared via this message.
+
+        .. versionadded:: |vnext|
     """
 
     __slots__ = (
@@ -1184,6 +1271,7 @@ class Message(Hashable):
         "guild",
         "poll",
         "call",
+        "shared_client_theme",
         "_edited_timestamp",
         "_role_subscription_data",
         "_pinned_at",
@@ -1240,12 +1328,20 @@ class Message(Hashable):
             _message_component_factory(d) for d in data.get("components", [])
         ]
 
-        self.poll: Poll | None = None
-        if poll_data := data.get("poll"):
-            self.poll = Poll.from_dict(message=self, data=poll_data)
+        self.poll: Poll | None = (
+            Poll.from_dict(message=self, data=poll_data)
+            if (poll_data := data.get("poll"))
+            else None
+        )
         self.call: MessageCall | None = (
             MessageCall(data=call_data) if (call_data := data.get("call")) else None
         )
+        self.shared_client_theme: SharedClientTheme | None = (
+            SharedClientTheme._from_data(theme_data)
+            if (theme_data := data.get("shared_client_theme"))
+            else None
+        )
+
         try:
             # if the channel doesn't have a guild attribute, we handle that
             self.guild = channel.guild  # pyright: ignore[reportAttributeAccessIssue]

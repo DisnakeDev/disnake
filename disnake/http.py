@@ -542,6 +542,7 @@ class HTTPClient:
         stickers: Sequence[Snowflake] | None = None,
         components: Sequence[components.Component] | None = None,
         poll: poll.PollCreatePayload | None = None,
+        shared_client_theme: message.SharedClientTheme | None = None,
         flags: int | None = None,
     ) -> Response[message.Message]:
         r = Route("POST", "/channels/{channel_id}/messages", channel_id=channel_id)
@@ -579,6 +580,9 @@ class HTTPClient:
 
         if poll is not None:
             payload["poll"] = poll
+
+        if shared_client_theme is not None:
+            payload["shared_client_theme"] = shared_client_theme
 
         return self.request(r, json=payload)
 
@@ -639,6 +643,7 @@ class HTTPClient:
         stickers: Sequence[Snowflake] | None = None,
         components: Sequence[components.Component] | None = None,
         poll: poll.PollCreatePayload | None = None,
+        shared_client_theme: message.SharedClientTheme | None = None,
         flags: int | None = None,
     ) -> Response[message.Message]:
         payload: dict[str, Any] = {"tts": tts}
@@ -662,6 +667,8 @@ class HTTPClient:
             payload["flags"] = flags
         if poll:
             payload["poll"] = poll
+        if shared_client_theme:
+            payload["shared_client_theme"] = shared_client_theme
 
         multipart = to_multipart_with_attachments(payload, files)
 
@@ -682,6 +689,7 @@ class HTTPClient:
         stickers: Sequence[Snowflake] | None = None,
         components: Sequence[components.Component] | None = None,
         poll: poll.PollCreatePayload | None = None,
+        shared_client_theme: message.SharedClientTheme | None = None,
         flags: int | None = None,
     ) -> Response[message.Message]:
         r = Route("POST", "/channels/{channel_id}/messages", channel_id=channel_id)
@@ -698,6 +706,7 @@ class HTTPClient:
             stickers=stickers,
             components=components,
             poll=poll,
+            shared_client_theme=shared_client_theme,
             flags=flags,
         )
 
