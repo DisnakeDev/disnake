@@ -1,1 +1,0 @@
-:meth:`ForumChannel.create_thread` now respects the global :attr:`Client.allowed_mentions` value.
