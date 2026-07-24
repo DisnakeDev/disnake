@@ -9,6 +9,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Generic,
+    Literal,
     TypeAlias,
     cast,
     overload,
@@ -879,7 +880,32 @@ class InteractionResponse:
         """
         return self._response_type is not None
 
-    # TODO: add overloads depending on with_message?
+    @overload
+    async def defer(
+        self,
+        *,
+        with_message: Literal[True],
+        ephemeral: bool = ...,
+    ) -> InteractionCallbackResponse[InteractionMessage]: ...
+
+    @overload
+    async def defer(
+        self,
+        *,
+        with_message: Literal[False],
+        ephemeral: bool = ...,
+    ) -> InteractionCallbackResponse[None]: ...
+
+    # if `with_message` is not explicitly given, the exact callback resource type isn't
+    # known, as it depends on the source interaction type
+    @overload
+    async def defer(
+        self,
+        *,
+        with_message: bool = ...,
+        ephemeral: bool = ...,
+    ) -> InteractionCallbackResponse[InteractionMessage | None]: ...
+
     async def defer(
         self,
         *,
