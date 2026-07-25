@@ -311,3 +311,56 @@ class TestIsolateSelf:
         assert cog is None
         assert inter is not None
         assert params.keys() == {"a"}
+
+
+class TestNestedInjectionAutocomplete:
+    def test_nested_injection_autocomplete(self) -> None:
+        @commands.injection()
+        def inner(a: str, b: str) -> str:
+            return a + b
+
+        @inner.autocomplete("a")
+        async def autocomp_a(inter, value) -> list[str]:
+            return [value]
+
+        @commands.injection()
+        def outer(c: str, d: str = inner) -> str:  # type: ignore[assignment]
+            return c + d
+
+        @outer.autocomplete("c")
+        async def autocomp_c(inter, value) -> list[str]:
+            return [value]
+
+        @commands.slash_command()
+        async def cmd(
+            inter: disnake.ApplicationCommandInteraction,
+            arg: str = outer,  # type: ignore[assignment]
+        ) -> None: ...
+
+        assert cmd.autocompleters.keys() == {"a", "c"}
+        assert {o.name: o.autocomplete for o in cmd.body.options} == {
+            "a": True,
+            "b": False,
+            "c": True,
+        }
+
+    def test_nested_injection_unknown_option(self) -> None:
+        @commands.injection()
+        def inner(a: str) -> str:
+            return a
+
+        @inner.autocomplete("nonexistent")
+        async def autocomp(inter, value) -> list[str]:
+            return [value]
+
+        @commands.injection()
+        def outer(b: str, c: str = inner) -> str:  # type: ignore[assignment]
+            return b + c
+
+        with pytest.raises(ValueError, match="Option 'nonexistent' doesn't exist"):
+
+            @commands.slash_command()
+            async def cmd(
+                inter: disnake.ApplicationCommandInteraction,
+                arg: str = outer,  # type: ignore[assignment]
+            ) -> None: ...

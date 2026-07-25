@@ -1,0 +1,1 @@
+|commands| Fix autocompletion not working for options of nested :func:`~ext.commands.injection`\s.

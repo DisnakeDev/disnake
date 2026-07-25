@@ -1103,13 +1103,31 @@ def collect_params(
     )
 
 
+def apply_injection_autocompleters(
+    injection: Injection, params: list[ParamInfo], location: str
+) -> None:
+    """Assign an injection's autocompleters to the matching collected params *in-place*"""
+    if not injection.autocompleters:
+        return
+
+    lookup = {p.name: p for p in params}
+    for name, func in injection.autocompleters.items():
+        param = lookup.get(name)
+        if param is None:
+            msg = f"Option '{name}' doesn't exist in '{location}'"
+            raise ValueError(msg)
+        param.autocomplete = func
+
+
 def collect_nested_params(function: Callable[..., Any]) -> list[ParamInfo]:
     """Collect all options from a function"""
     # TODO: Have these be actually sorted properly and not have injections always at the end
     _, _, paraminfos, injections = collect_params(function)
 
     for injection in injections.values():
-        paraminfos += collect_nested_params(injection.function)
+        nested = collect_nested_params(injection.function)
+        apply_injection_autocompleters(injection, nested, injection.function.__name__)
+        paraminfos += nested
 
     return sorted(paraminfos, key=lambda param: not param.required)
 
@@ -1198,14 +1216,7 @@ def expand_params(command: AnySlashCommand) -> list[Option]:
 
     for injection in injections.values():
         collected = collect_nested_params(injection.function)
-        if injection.autocompleters:
-            lookup = {p.name: p for p in collected}
-            for name, func in injection.autocompleters.items():
-                param = lookup.get(name)
-                if param is None:
-                    msg = f"Option '{name}' doesn't exist in '{command.qualified_name}'"
-                    raise ValueError(msg)
-                param.autocomplete = func
+        apply_injection_autocompleters(injection, collected, command.qualified_name)
         params += collected
 
     params = sorted(params, key=lambda param: not param.required)
