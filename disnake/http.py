@@ -101,7 +101,7 @@ def _workaround_set_api_version(version: Literal[9, 10]) -> None:
     Route.BASE = f"https://discord.com/api/v{_API_VERSION}"
 
 
-USER_AGENT: Final[str] = (
+USER_AGENT: Final[str] = (  # noqa: UP032
     "DiscordBot (https://github.com/DisnakeDev/disnake {0}) Python/{1[0]}.{1[1]} aiohttp/{2}"
 ).format(__version__, sys.version_info, aiohttp.__version__)
 
