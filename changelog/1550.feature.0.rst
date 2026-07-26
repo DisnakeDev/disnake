@@ -1,0 +1,1 @@
+Support restricting allowed file types in :class:`.ui.FileUpload` modal components using :class:`file_types <.ui.FileUpload>`.

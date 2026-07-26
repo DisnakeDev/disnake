@@ -1,0 +1,1 @@
+Add :attr:`VoiceClient.voice_privacy_code` and :meth:`VoiceClient.get_user_verification_code`.

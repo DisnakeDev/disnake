@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, Tuple
+from typing import TYPE_CHECKING, ClassVar
 
 from ..components import Separator as SeparatorComponent
 from ..enums import ComponentType, SeparatorSpacing
@@ -29,12 +29,13 @@ class Separator(UIComponent):
         The size of the separator padding.
         Defaults to :attr:`~.SeparatorSpacing.small`.
     id: :class:`int`
-        The numeric identifier for the component. Must be unique within the message.
+        The numeric identifier for the component. Must be unique within a message.
+        This is always present in components received from the API.
         If set to ``0`` (the default) when sending a component, the API will assign
         sequential identifiers to the components in the message.
     """
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (
         "divider",
         "spacing",
     )

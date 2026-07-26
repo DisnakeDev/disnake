@@ -1,16 +1,17 @@
 # SPDX-License-Identifier: MIT
 
-name: check-pull-labels
+name: Check Pull Labels
 
 on:
   pull_request_target:
     types: [opened, synchronize, labeled, unlabeled, reopened]
 
 permissions:
-  pull-requests: read
+  pull-requests: read # to read pull request labels
 
 jobs:
   check-pull-labels:
+    name: Check pull labels for blocked labels
     runs-on: ubuntu-latest
 
     steps:

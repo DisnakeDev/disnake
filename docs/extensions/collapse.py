@@ -20,7 +20,7 @@ class collapse(nodes.General, nodes.Element):
 
 def visit_collapse_node(self: HTMLTranslator, node: nodes.Element) -> None:
     attrs = {"open": ""} if node["open"] else {}
-    self.body.append(self.starttag(node, "details", **attrs))
+    self.body.append(self.starttag(node, "details", **attrs))  # pyright: ignore[reportArgumentType]
     self.body.append("<summary></summary>")
 
 
@@ -36,7 +36,7 @@ class CollapseDirective(Directive):
 
     option_spec: ClassVar[OptionSpec] = {"open": directives.flag}
 
-    def run(self):
+    def run(self) -> list[collapse]:
         self.assert_has_content()
         node = collapse(
             "\n".join(self.content),

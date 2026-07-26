@@ -1,1 +1,0 @@
-Improve checks for partial :class:`Guild`\s in guild-dependent attributes of channels and threads, which could previously raise errors with user-installed apps, as they don't always receive complete guild data.

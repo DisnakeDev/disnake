@@ -13,7 +13,7 @@ which allows bot developers to create their own component-based UIs right inside
 
 .. warning::
 
-    Classes listed below are not meant to be created by user and are only recieved from the API.
+    Classes listed below are not meant to be created by user and are only received from the API.
     For constructible versions, see :ref:`Bot UI Kit <disnake_api_ui>`.
 
 Discord Models
@@ -203,6 +203,60 @@ Container
 .. autoclass:: Container()
     :members:
     :inherited-members:
+
+Label
+~~~~~
+
+.. attributetable:: Label
+
+.. autoclass:: Label()
+    :members:
+    :inherited-members:
+
+FileUpload
+~~~~~~~~~~
+
+.. attributetable:: FileUpload
+
+.. autoclass:: FileUpload()
+    :members:
+    :inherited-members:
+
+GroupOption
+~~~~~~~~~~~
+
+.. attributetable:: GroupOption
+
+.. autoclass:: GroupOption()
+    :members:
+
+RadioGroup
+~~~~~~~~~~
+
+.. attributetable:: RadioGroup
+
+.. autoclass:: RadioGroup()
+    :members:
+    :inherited-members:
+
+CheckboxGroup
+~~~~~~~~~~~~~
+
+.. attributetable:: CheckboxGroup
+
+.. autoclass:: CheckboxGroup()
+    :members:
+    :inherited-members:
+
+Checkbox
+~~~~~~~~
+
+.. attributetable:: Checkbox
+
+.. autoclass:: Checkbox()
+    :members:
+    :inherited-members:
+
 
 Enumerations
 ------------

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, Tuple
+from typing import TYPE_CHECKING, ClassVar
 
 from ..components import TextDisplay as TextDisplayComponent
 from ..enums import ComponentType
@@ -25,12 +25,13 @@ class TextDisplay(UIComponent):
     content: :class:`str`
         The text displayed by this component.
     id: :class:`int`
-        The numeric identifier for the component. Must be unique within the message.
+        The numeric identifier for the component. Must be unique within a message.
+        This is always present in components received from the API.
         If set to ``0`` (the default) when sending a component, the API will assign
         sequential identifiers to the components in the message.
     """
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = ("content",)
+    __repr_attributes__: ClassVar[tuple[str, ...]] = ("content",)
     # We have to set this to MISSING in order to overwrite the abstract property from UIComponent
     _underlying: TextDisplayComponent = MISSING
 

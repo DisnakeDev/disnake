@@ -5,15 +5,21 @@ import importlib.metadata
 import platform
 import sys
 from pathlib import Path
-from typing import Union
 
 import aiohttp
 
 import disnake
 
 
+def _try_get_version(pkg: str) -> str | None:
+    try:
+        return "v" + importlib.metadata.version(pkg)
+    except importlib.metadata.PackageNotFoundError:
+        return None
+
+
 def show_version() -> None:
-    entries = []
+    entries: list[str] = []
 
     sys_ver = sys.version_info
     entries.append(
@@ -23,14 +29,15 @@ def show_version() -> None:
     entries.append(
         f"- disnake v{disnake_ver.major}.{disnake_ver.minor}.{disnake_ver.micro}-{disnake_ver.releaselevel}"
     )
-    try:
-        version = importlib.metadata.version("disnake")
-    except importlib.metadata.PackageNotFoundError:
-        pass
-    else:
-        entries.append(f"    - disnake importlib.metadata: v{version}")
+    if disnake_version := _try_get_version("disnake"):
+        entries.append(f"    - disnake importlib.metadata: {disnake_version}")
 
     entries.append(f"- aiohttp v{aiohttp.__version__}")
+
+    dave_version = _try_get_version("dave.py") or "<not installed>"
+    nacl_version = _try_get_version("PyNaCl") or "<not installed>"
+    entries.append(f"- voice: dave.py {dave_version}, PyNaCl {nacl_version}")
+
     uname = platform.uname()
     entries.append(f"- system info: {uname.system} {uname.release} {uname.version} {uname.machine}")
     print("\n".join(entries))
@@ -232,7 +239,7 @@ _base_table = {**_ascii_table, **_byte_table}
 _translation_table = str.maketrans(_base_table)
 
 
-def to_path(parser, name: Union[str, Path], *, replace_spaces: bool = False):
+def to_path(parser, name: str | Path, *, replace_spaces: bool = False) -> Path:
     if isinstance(name, Path):
         return name
 
@@ -399,7 +406,7 @@ def add_newcog_args(subparser) -> None:
     parser.add_argument("--full", help="add all special methods as well", action="store_true")
 
 
-def parse_args():
+def parse_args() -> tuple[argparse.ArgumentParser, argparse.Namespace]:
     parser = argparse.ArgumentParser(prog="disnake", description="Tools for helping with disnake")
     parser.add_argument("-v", "--version", action="store_true", help="shows the library version")
     parser.set_defaults(func=core)

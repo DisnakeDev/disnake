@@ -1,1 +1,0 @@
-Add ``flags`` parameter to :meth:`Webhook.edit_message`, :meth:`WebhookMessage.edit`, and :meth:`InteractionResponse.edit_message`.

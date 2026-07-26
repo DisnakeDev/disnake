@@ -178,7 +178,7 @@ This section documents events related to :class:`Client` and its connectivity to
     :type data: :class:`Any`
 
     :param shard_id: The ID of the shard the exception occurred in, if applicable.
-    :type shard_id: Optional[:class:`int`]
+    :type shard_id: :class:`int` | :data:`None`
 
     :param exc: The exception that was raised.
     :type exc: :class:`Exception`
@@ -323,9 +323,9 @@ This section documents events related to Discord channels and threads.
     This requires :attr:`Intents.guilds` to be enabled.
 
     :param channel: The guild channel that had its pins updated.
-    :type channel: Union[:class:`abc.GuildChannel`, :class:`Thread`]
-    :param last_pin: The latest message that was pinned as an aware datetime in UTC. Could be ``None``.
-    :type last_pin: Optional[:class:`datetime.datetime`]
+    :type channel: :class:`abc.GuildChannel` | :class:`Thread`
+    :param last_pin: The latest message that was pinned as an aware datetime in UTC. Could be :data:`None`.
+    :type last_pin: :class:`datetime.datetime` | :data:`None`
 
 .. function:: on_private_channel_update(before, after)
 
@@ -344,8 +344,8 @@ This section documents events related to Discord channels and threads.
 
     :param channel: The private channel that had its pins updated.
     :type channel: :class:`abc.PrivateChannel`
-    :param last_pin: The latest message that was pinned as an aware datetime in UTC. Could be ``None``.
-    :type last_pin: Optional[:class:`datetime.datetime`]
+    :param last_pin: The latest message that was pinned as an aware datetime in UTC. Could be :data:`None`.
+    :type last_pin: :class:`datetime.datetime` | :data:`None`
 
 .. function:: on_thread_create(thread)
 
@@ -502,6 +502,34 @@ This section documents events related to Discord channels and threads.
 
     :param channel: The channel that had its webhooks updated.
     :type channel: :class:`abc.GuildChannel`
+
+.. function:: on_voice_channel_status_update(channel, old, new)
+
+    Called whenever a voice channel status is modified.
+
+    This requires :attr:`Intents.guilds` to be enabled.
+
+    .. versionadded:: |vnext|
+
+    :param channel: The channel that had its status updated.
+    :type channel: :class:`abc.GuildChannel`
+    :param old: The old status.
+    :type old: :class:`str` | :data:`None`
+    :param new: The new status.
+    :type new: :class:`str` | :data:`None`
+
+.. function:: on_voice_channel_start_time_update(channel, start_time)
+
+    Called whenever a voice channel's start time changes.
+
+    This requires :attr:`Intents.guilds` to be enabled.
+
+    .. versionadded:: |vnext|
+
+    :param channel: The channel that had its start time updated.
+    :type channel: :class:`abc.GuildChannel`
+    :param start_time: The new start time.
+    :type start_time: :class:`datetime.datetime` | :data:`None`
 
 Guilds
 ~~~~~~
@@ -675,9 +703,9 @@ Emojis
     :param guild: The guild who got their emojis updated.
     :type guild: :class:`Guild`
     :param before: A list of emojis before the update.
-    :type before: Sequence[:class:`Emoji`]
+    :type before: :class:`~collections.abc.Sequence`\[:class:`Emoji`]
     :param after: A list of emojis after the update.
-    :type after: Sequence[:class:`Emoji`]
+    :type after: :class:`~collections.abc.Sequence`\[:class:`Emoji`]
 
 Integrations
 ++++++++++++
@@ -834,7 +862,7 @@ Members
     :param user: The user that got banned.
                  Can be either :class:`User` or :class:`Member` depending on
                  whether the user was in the guild at the time of removal.
-    :type user: Union[:class:`User`, :class:`Member`]
+    :type user: :class:`User` | :class:`Member`
 
 .. function:: on_member_unban(guild, user)
 
@@ -966,7 +994,7 @@ Scheduled Events
     :param event: The guild scheduled event that the user subscribed to or unsubscribed from.
     :type event: :class:`GuildScheduledEvent`
     :param user: The user who subscribed to or unsubscribed from the event.
-    :type user: Union[:class:`Member`, :class:`User`]
+    :type user: :class:`Member` | :class:`User`
 
 .. function:: on_raw_guild_scheduled_event_subscribe(payload)
               on_raw_guild_scheduled_event_unsubscribe(payload)
@@ -992,9 +1020,9 @@ Soundboard
     :param guild: The guild who got their soundboard sounds updated.
     :type guild: :class:`Guild`
     :param before: A list of soundboard sounds before the update.
-    :type before: Sequence[:class:`GuildSoundboardSound`]
+    :type before: :class:`~collections.abc.Sequence`\[:class:`GuildSoundboardSound`]
     :param after: A list of soundboard sounds after the update.
-    :type after: Sequence[:class:`GuildSoundboardSound`]
+    :type after: :class:`~collections.abc.Sequence`\[:class:`GuildSoundboardSound`]
 
 Stage Instances
 +++++++++++++++
@@ -1039,9 +1067,9 @@ Stickers
     :param guild: The guild who got their stickers updated.
     :type guild: :class:`Guild`
     :param before: A list of stickers before the update.
-    :type before: Sequence[:class:`GuildSticker`]
+    :type before: :class:`~collections.abc.Sequence`\[:class:`GuildSticker`]
     :param after: A list of stickers after the update.
-    :type after: Sequence[:class:`GuildSticker`]
+    :type after: :class:`~collections.abc.Sequence`\[:class:`GuildSticker`]
 
 Voice
 +++++
@@ -1289,7 +1317,7 @@ This section documents events related to Discord chat messages.
     This requires :attr:`Intents.messages` to be enabled.
 
     :param messages: The messages that have been deleted.
-    :type messages: List[:class:`Message`]
+    :type messages: :class:`list`\[:class:`Message`]
 
 .. function:: on_poll_vote_add(member, answer)
 
@@ -1335,7 +1363,7 @@ This section documents events related to Discord chat messages.
     will return a :class:`Message` object that represents the message before the content was modified.
 
     Due to the inherently raw nature of this event, the data parameter coincides with
-    the raw data given by the :ddocs:`gateway <topics/gateway-events#message-update>`.
+    the raw data given by the :ddocs:`gateway <events/gateway-events#message-update>`.
 
     Since the data payload can be partial, care must be taken when accessing stuff in the dictionary.
     One example of a common case of partial data is when the ``'content'`` key is inaccessible. This
@@ -1424,7 +1452,7 @@ This section documents events related to Discord chat messages.
     :param reaction: The current state of the reaction.
     :type reaction: :class:`Reaction`
     :param user: The user who added the reaction.
-    :type user: Union[:class:`Member`, :class:`User`]
+    :type user: :class:`Member` | :class:`User`
 
 .. function:: on_reaction_remove(reaction, user)
 
@@ -1446,7 +1474,7 @@ This section documents events related to Discord chat messages.
     :param reaction: The current state of the reaction.
     :type reaction: :class:`Reaction`
     :param user: The user who added the reaction.
-    :type user: Union[:class:`Member`, :class:`User`]
+    :type user: :class:`Member` | :class:`User`
 
 .. function:: on_reaction_clear(message, reactions)
 
@@ -1459,7 +1487,7 @@ This section documents events related to Discord chat messages.
     :param message: The message that had its reactions cleared.
     :type message: :class:`Message`
     :param reactions: The reactions that were removed.
-    :type reactions: List[:class:`Reaction`]
+    :type reactions: :class:`list`\[:class:`Reaction`]
 
 .. function:: on_reaction_clear_emoji(reaction)
 
@@ -1543,9 +1571,9 @@ This section documents events related to Discord chat messages.
         to enable the members intent.
 
     :param channel: The location where the typing originated from.
-    :type channel: Union[:class:`abc.Messageable`, :class:`ForumChannel`, :class:`MediaChannel`]
+    :type channel: :class:`abc.Messageable` | :class:`ForumChannel` | :class:`MediaChannel`
     :param user: The user that started typing.
-    :type user: Union[:class:`User`, :class:`Member`]
+    :type user: :class:`User` | :class:`Member`
     :param when: When the typing started as an aware datetime in UTC.
     :type when: :class:`datetime.datetime`
 

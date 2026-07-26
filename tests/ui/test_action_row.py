@@ -7,23 +7,22 @@ import pytest
 from typing_extensions import assert_type
 
 import disnake
-from disnake.ui import (
-    ActionRow,
-    Button,
-    Separator,
-    StringSelect,
-    TextInput,
-    WrappedComponent,
-)
+from disnake.ui import ActionRow, Button, Label, Separator, StringSelect, TextInput
 from disnake.ui._types import ActionRowMessageComponent, ActionRowModalComponent
-from disnake.ui.action_row import normalize_components, normalize_components_to_dict
+from disnake.ui.action_row import (
+    ActionRowChildDefaultT,
+    normalize_components,
+    normalize_components_to_dict,
+)
 
 button1 = Button()
 button2 = Button()
 button3 = Button()
 select = StringSelect()
-text_input = TextInput(label="a", custom_id="b")
+text_input = TextInput(label="a", custom_id="b")  # pyright: ignore[reportDeprecated]
 separator = Separator()
+label__text = Label("a", text_input)
+label__select = Label("a", select)
 
 
 class TestActionRow:
@@ -79,7 +78,7 @@ class TestActionRow:
             _ = ActionRow().add_button
             _ = ActionRow.with_message_components().add_button
             # should not work
-            _ = ActionRow.with_modal_components().add_button  # type: ignore
+            _ = ActionRow.with_modal_components().add_button  # pyright: ignore[reportDeprecated, reportAttributeAccessIssue]
 
     def test_add_select(self) -> None:
         r = ActionRow.with_message_components()
@@ -92,22 +91,24 @@ class TestActionRow:
         if TYPE_CHECKING:
             _ = ActionRow().add_string_select
             _ = ActionRow.with_message_components().add_string_select
-            # should not work  # TODO: revert when modal select support is added.
-            _ = ActionRow.with_modal_components().add_select  # type: ignore
+            # should not work
+            _ = ActionRow.with_modal_components().add_select  # pyright: ignore[reportDeprecated, reportAttributeAccessIssue]
 
     def test_add_text_input(self) -> None:
-        r = ActionRow.with_modal_components()
-        r.add_text_input(label="a", custom_id="asdf")
+        with pytest.warns(DeprecationWarning):
+            r = ActionRow.with_modal_components()  # pyright: ignore[reportDeprecated]
+        with pytest.warns(DeprecationWarning):
+            r.add_text_input(label="a", custom_id="asdf")  # pyright: ignore[reportDeprecated]
 
         (c,) = r.children
         assert isinstance(c, TextInput)
         assert c.custom_id == "asdf"
 
         if TYPE_CHECKING:
-            _ = ActionRow().add_text_input
-            _ = ActionRow.with_modal_components().add_text_input
+            _ = ActionRow[TextInput]().add_text_input  # pyright: ignore[reportDeprecated]
+            _ = ActionRow.with_modal_components().add_text_input  # pyright: ignore[reportDeprecated]
             # should not work
-            _ = ActionRow.with_message_components().add_text_input  # type: ignore
+            _ = ActionRow.with_message_components().add_text_input  # pyright: ignore[reportAttributeAccessIssue]
 
     def test_clear_items(self) -> None:
         r = ActionRow(button1, button2)
@@ -132,7 +133,8 @@ class TestActionRow:
         assert list(r.children) == [button2]
 
     def test_with_components(self) -> None:
-        row_modal = ActionRow.with_modal_components()
+        with pytest.warns(DeprecationWarning):
+            row_modal = ActionRow.with_modal_components()  # pyright: ignore[reportDeprecated]
         assert list(row_modal.children) == []
         row_msg = ActionRow.with_message_components()
         assert list(row_msg.children) == []
@@ -154,7 +156,7 @@ class TestActionRow:
 
         assert len(result) == len(rows)
         # compare component types and IDs
-        for actual, expected in zip(result, rows):
+        for actual, expected in zip(result, rows, strict=True):
             assert [(type(c), c.custom_id) for c in actual] == [
                 (type(c), c.custom_id) for c in expected
             ]
@@ -182,7 +184,7 @@ class TestActionRow:
 
         expected = [(row, component) for row in rows for component in row.children]
         for (act_row, act_cmp), (exp_row, exp_cmp) in zip(
-            ActionRow.walk_components(rows), expected
+            ActionRow.walk_components(rows), expected, strict=True
         ):
             # test mutation (rows)
             # (remove row below the one containing select1)
@@ -197,9 +199,9 @@ class TestActionRow:
             assert act_row is exp_row
             assert act_cmp is exp_cmp
 
-    # theis method is mainly for pyright to check, the asserts wouldn't do anything at runtime
+    # this method is mainly for pyright to check, the asserts wouldn't do anything at runtime
     def _test_typing_init(self) -> None:  # pragma: no cover
-        assert_type(ActionRow(), ActionRow[WrappedComponent])
+        assert_type(ActionRow(), ActionRow[ActionRowMessageComponent])
 
         assert_type(ActionRow(button1), ActionRow[ActionRowMessageComponent])
         assert_type(ActionRow(select), ActionRow[ActionRowMessageComponent])
@@ -208,15 +210,24 @@ class TestActionRow:
         assert_type(ActionRow(button1, select), ActionRow[ActionRowMessageComponent])
         assert_type(ActionRow(select, button1), ActionRow[ActionRowMessageComponent])
 
-        # FIXME: no longer works since the overload changed for normalize_components. may revisit this.
-        # # these should fail to type-check - if they pass, there will be an error
-        # # because of the unnecessary ignore comment
-        # ActionRow(button1, text_input)
-        # ActionRow(text_input, button1)
+        # TextInput cannot be mixed with message components
+        ActionRow(button1, text_input)  # pyright: ignore[reportArgumentType]
+        ActionRow(select, text_input)  # pyright: ignore[reportArgumentType]
+        ActionRow(text_input, select)  # pyright: ignore[reportArgumentType]
 
-        # TODO: revert when modal select support is added.
-        assert_type(ActionRow(select, text_input), ActionRow[ActionRowModalComponent])  # type: ignore
-        assert_type(ActionRow(text_input, select), ActionRow[ActionRowModalComponent])  # type: ignore
+        # ActionRow.add_* should support subclasses
+        class MyActionRow(ActionRow[ActionRowChildDefaultT]): ...
+
+        ac = MyActionRow()
+        assert_type(ac, MyActionRow[ActionRowMessageComponent])
+        assert_type(ac.add_button(), MyActionRow[ActionRowMessageComponent])
+
+        ac_ti = MyActionRow[TextInput]()
+        assert_type(ac_ti, MyActionRow[ActionRowModalComponent])
+        assert_type(
+            ac_ti.add_text_input(label="", custom_id=""),  # pyright: ignore[reportDeprecated]
+            MyActionRow[ActionRowModalComponent],
+        )
 
 
 @pytest.mark.parametrize(
@@ -270,13 +281,29 @@ def test_normalize_components__v2(value, expected) -> None:
     assert [(list(c.children) if isinstance(c, ActionRow) else c) for c in result] == expected
 
 
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [
+        ([text_input], [[text_input]]),
+        ([select], [select]),  # should not wrap select in action row
+        (
+            [label__text, text_input, select, label__select, text_input],
+            [label__text, [text_input], select, label__select, [text_input]],
+        ),
+    ],
+)
+def test_normalize_components__modal(value, expected) -> None:
+    result = normalize_components(value, modal=True)
+    assert [(list(c.children) if isinstance(c, ActionRow) else c) for c in result] == expected
+
+
 def test_normalize_components__invalid() -> None:
     for value in (42, [42], [ActionRow(), 42], iter([button1])):
         with pytest.raises(TypeError, match=r"`components` must be a"):
-            normalize_components(value)  # type: ignore
+            normalize_components(value)  # pyright: ignore[reportArgumentType, reportCallIssue]
     for value in ([[[]]], [[[ActionRow()]]]):
         with pytest.raises(TypeError, match=r"components should be of type"):
-            normalize_components(value)  # type: ignore
+            normalize_components(value)  # pyright: ignore[reportArgumentType, reportCallIssue]
 
 
 def test_normalize_components_to_dict() -> None:

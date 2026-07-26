@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import datetime
-from typing import List, Literal, Optional, TypedDict, Union
+from typing import Literal, TypeAlias, TypedDict
 
 from typing_extensions import NotRequired
 
@@ -24,6 +24,7 @@ from .guild import (
 from .guild_scheduled_event import GuildScheduledEvent
 from .integration import IntegrationExpireBehavior, PartialIntegration
 from .interactions import ApplicationCommand, ApplicationCommandPermissions
+from .onboarding import OnboardingPrompt, OnboardingPromptOption
 from .role import Role
 from .snowflake import Snowflake
 from .threads import Thread
@@ -91,6 +92,11 @@ AuditLogEvent = Literal[
     146,
     150,
     151,
+    163,
+    164,
+    167,
+    192,
+    193,
 ]
 
 
@@ -106,6 +112,7 @@ class _AuditLogChange_Str(TypedDict):
         "deny",
         "permissions",
         "tags",
+        "title",
     ]
     new_value: NotRequired[str]
     old_value: NotRequired[str]
@@ -160,6 +167,9 @@ class _AuditLogChange_Bool(TypedDict):
         "locked",
         "premium_progress_bar_enabled",
         "enabled",
+        "single_select",
+        "required",
+        "in_onboarding",
     ]
     new_value: NotRequired[bool]
     old_value: NotRequired[bool]
@@ -184,15 +194,15 @@ class _AuditLogChange_Int(TypedDict):
 
 
 class _AuditLogChange_ListSnowflake(TypedDict):
-    key: Literal["exempt_roles", "exempt_channels"]
-    new_value: NotRequired[List[Snowflake]]
-    old_value: NotRequired[List[Snowflake]]
+    key: Literal["exempt_roles", "exempt_channels", "default_channel_ids"]
+    new_value: NotRequired[list[Snowflake]]
+    old_value: NotRequired[list[Snowflake]]
 
 
 class _AuditLogChange_ListRole(TypedDict):
     key: Literal["$add", "$remove"]
-    new_value: NotRequired[List[Role]]
-    old_value: NotRequired[List[Role]]
+    new_value: NotRequired[list[Role]]
+    old_value: NotRequired[list[Role]]
 
 
 class _AuditLogChange_MFALevel(TypedDict):
@@ -239,8 +249,8 @@ class _AuditLogChange_VideoQualityMode(TypedDict):
 
 class _AuditLogChange_Overwrites(TypedDict):
     key: Literal["permission_overwrites"]
-    new_value: NotRequired[List[PermissionOverwrite]]
-    old_value: NotRequired[List[PermissionOverwrite]]
+    new_value: NotRequired[list[PermissionOverwrite]]
+    old_value: NotRequired[list[PermissionOverwrite]]
 
 
 class _AuditLogChange_Datetime(TypedDict):
@@ -269,8 +279,8 @@ class _AuditLogChange_AutoModEventType(TypedDict):
 
 class _AuditLogChange_AutoModActions(TypedDict):
     key: Literal["actions"]
-    new_value: NotRequired[List[AutoModAction]]
-    old_value: NotRequired[List[AutoModAction]]
+    new_value: NotRequired[list[AutoModAction]]
+    old_value: NotRequired[list[AutoModAction]]
 
 
 class _AuditLogChange_AutoModTriggerMetadata(TypedDict):
@@ -279,29 +289,43 @@ class _AuditLogChange_AutoModTriggerMetadata(TypedDict):
     old_value: NotRequired[AutoModTriggerMetadata]
 
 
-AuditLogChange = Union[
-    _AuditLogChange_Str,
-    _AuditLogChange_AssetHash,
-    _AuditLogChange_Snowflake,
-    _AuditLogChange_Int,
-    _AuditLogChange_Bool,
-    _AuditLogChange_ListSnowflake,
-    _AuditLogChange_ListRole,
-    _AuditLogChange_MFALevel,
-    _AuditLogChange_VerificationLevel,
-    _AuditLogChange_ExplicitContentFilter,
-    _AuditLogChange_DefaultMessageNotificationLevel,
-    _AuditLogChange_ChannelType,
-    _AuditLogChange_IntegrationExpireBehaviour,
-    _AuditLogChange_VideoQualityMode,
-    _AuditLogChange_Overwrites,
-    _AuditLogChange_Datetime,
-    _AuditLogChange_ApplicationCommandPermissions,
-    _AuditLogChange_AutoModTriggerType,
-    _AuditLogChange_AutoModEventType,
-    _AuditLogChange_AutoModActions,
-    _AuditLogChange_AutoModTriggerMetadata,
-]
+class _AuditLogChange_OnboardingPrompts(TypedDict):
+    key: Literal["prompts"]
+    new_value: NotRequired[list[OnboardingPrompt]]
+    old_value: NotRequired[list[OnboardingPrompt]]
+
+
+class _AuditLogChange_OnboardingPromptOptions(TypedDict):
+    key: Literal["options"]
+    new_value: NotRequired[list[OnboardingPromptOption]]
+    old_value: NotRequired[list[OnboardingPromptOption]]
+
+
+AuditLogChange: TypeAlias = (
+    _AuditLogChange_Str
+    | _AuditLogChange_AssetHash
+    | _AuditLogChange_Snowflake
+    | _AuditLogChange_Int
+    | _AuditLogChange_Bool
+    | _AuditLogChange_ListSnowflake
+    | _AuditLogChange_ListRole
+    | _AuditLogChange_MFALevel
+    | _AuditLogChange_VerificationLevel
+    | _AuditLogChange_ExplicitContentFilter
+    | _AuditLogChange_DefaultMessageNotificationLevel
+    | _AuditLogChange_ChannelType
+    | _AuditLogChange_IntegrationExpireBehaviour
+    | _AuditLogChange_VideoQualityMode
+    | _AuditLogChange_Overwrites
+    | _AuditLogChange_Datetime
+    | _AuditLogChange_ApplicationCommandPermissions
+    | _AuditLogChange_AutoModTriggerType
+    | _AuditLogChange_AutoModEventType
+    | _AuditLogChange_AutoModActions
+    | _AuditLogChange_AutoModTriggerMetadata
+    | _AuditLogChange_OnboardingPrompts
+    | _AuditLogChange_OnboardingPromptOptions
+)
 
 
 # All of these are technically only required for matching event types,
@@ -309,7 +333,7 @@ AuditLogChange = Union[
 class AuditEntryInfo(TypedDict):
     delete_member_days: str
     members_removed: str
-    channel_id: Optional[Snowflake]
+    channel_id: Snowflake | None
     message_id: Snowflake
     count: str
     id: Snowflake
@@ -319,12 +343,13 @@ class AuditEntryInfo(TypedDict):
     auto_moderation_rule_name: str
     auto_moderation_rule_trigger_type: str
     integration_type: str
+    status: str
 
 
 class AuditLogEntry(TypedDict):
-    target_id: Optional[str]
-    changes: NotRequired[List[AuditLogChange]]
-    user_id: Optional[Snowflake]
+    target_id: str | None
+    changes: NotRequired[list[AuditLogChange]]
+    user_id: Snowflake | None
     id: Snowflake
     action_type: AuditLogEvent
     options: NotRequired[AuditEntryInfo]
@@ -332,11 +357,11 @@ class AuditLogEntry(TypedDict):
 
 
 class AuditLog(TypedDict):
-    audit_log_entries: List[AuditLogEntry]
-    application_commands: List[ApplicationCommand]
-    auto_moderation_rules: List[AutoModRule]
-    guild_scheduled_events: List[GuildScheduledEvent]
-    integrations: List[PartialIntegration]
-    threads: List[Thread]
-    users: List[User]
-    webhooks: List[Webhook]
+    audit_log_entries: list[AuditLogEntry]
+    application_commands: list[ApplicationCommand]
+    auto_moderation_rules: list[AutoModRule]
+    guild_scheduled_events: list[GuildScheduledEvent]
+    integrations: list[PartialIntegration]
+    threads: list[Thread]
+    users: list[User]
+    webhooks: list[Webhook]

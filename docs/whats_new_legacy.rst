@@ -847,7 +847,7 @@ Bug Fixes
 - Fix issue with :meth:`Client.create_server` that made it stop working.
 - Fix main thread being blocked upon calling ``StreamPlayer.stop``.
 - Handle HEARTBEAT_ACK and resume gracefully when it occurs.
-- Fix race condition when pre-emptively rate limiting that caused releasing an already released lock.
+- Fix race condition when preemptively rate limiting that caused releasing an already released lock.
 - Fix invalid state errors when immediately cancelling a coroutine.
 
 .. _vp0p16p1:

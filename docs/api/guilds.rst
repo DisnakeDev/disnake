@@ -62,7 +62,7 @@ BanEntry
 
         The reason this user was banned.
 
-        :type: Optional[:class:`str`]
+        :type: :class:`str` | :data:`None`
     .. attribute:: user
 
         The :class:`User` that was banned.
@@ -82,12 +82,12 @@ BulkBanResult
 
         The users that were successfully banned.
 
-        :type: Sequence[:class:`Object`]
+        :type: :class:`~collections.abc.Sequence`\[:class:`Object`]
     .. attribute:: failed
 
         The users that were not banned.
 
-        :type: Sequence[:class:`Object`]
+        :type: :class:`~collections.abc.Sequence`\[:class:`Object`]
 
 Onboarding
 ~~~~~~~~~~
@@ -113,6 +113,14 @@ OnboardingPromptOption
 .. autoclass:: OnboardingPromptOption()
     :members:
 
+IncidentsData
+~~~~~~~~~~~~~
+
+.. attributetable:: IncidentsData
+
+.. autoclass:: IncidentsData()
+    :members:
+
 Data Classes
 ------------
 
@@ -130,15 +138,6 @@ WelcomeScreenChannel
 .. attributetable:: WelcomeScreenChannel
 
 .. autoclass:: WelcomeScreenChannel()
-
-GuildBuilder
-~~~~~~~~~~~~~
-
-.. attributetable:: GuildBuilder
-
-.. autoclass:: GuildBuilder()
-    :members:
-    :exclude-members: add_category_channel
 
 Enumerations
 ------------

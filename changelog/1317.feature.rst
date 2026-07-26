@@ -1,1 +1,0 @@
-Add :attr:`AuditLogAction.automod_quarantine_user` action type.

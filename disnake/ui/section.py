@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, ClassVar, List, Tuple, Union, cast
+from typing import TYPE_CHECKING, Any, ClassVar, TypeAlias, cast
 
 from ..components import Section as SectionComponent
 from ..enums import ComponentType
@@ -16,11 +16,13 @@ if TYPE_CHECKING:
     from .button import Button
     from .thumbnail import Thumbnail
 
+    SectionAccessoryUIComponent: TypeAlias = Thumbnail | Button[Any]
+
 __all__ = ("Section",)
 
 
 class Section(UIComponent):
-    """Represents a UI section.
+    r"""Represents a UI section.
 
     This allows displaying an accessory (thumbnail or button) next to a block of text.
 
@@ -28,42 +30,43 @@ class Section(UIComponent):
 
     Parameters
     ----------
-    *components: Union[:class:`str`, :class:`~.ui.TextDisplay`]
+    *components: :class:`str` | :class:`~.ui.TextDisplay`
         The text items in this section (up to 3).
-    accessory: Union[:class:`~.ui.Thumbnail`, :class:`~.ui.Button`]
+    accessory: :class:`~.ui.Thumbnail` | :class:`~.ui.Button`
         The accessory component displayed next to the section text.
     id: :class:`int`
-        The numeric identifier for the component. Must be unique within the message.
+        The numeric identifier for the component. Must be unique within a message.
+        This is always present in components received from the API.
         If set to ``0`` (the default) when sending a component, the API will assign
         sequential identifiers to the components in the message.
 
     Attributes
     ----------
-    children: List[:class:`~.ui.TextDisplay`]
+    children: :class:`list`\[:class:`~.ui.TextDisplay`]
         The list of text items in this section.
-    accessory: Union[:class:`~.ui.Thumbnail`, :class:`~.ui.Button`]
+    accessory: :class:`~.ui.Thumbnail` | :class:`~.ui.Button`
         The accessory component displayed next to the section text.
     """
 
-    __repr_attributes__: ClassVar[Tuple[str, ...]] = (
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (
         "children",
         "accessory",
     )
 
     def __init__(
         self,
-        *components: Union[str, TextDisplay],
-        accessory: Union[Thumbnail, Button[Any]],
+        *components: str | TextDisplay,
+        accessory: SectionAccessoryUIComponent,
         id: int = 0,
     ) -> None:
         self._id: int = id
         # this list can be modified without any runtime checks later on,
         # just assume the user knows what they're doing at that point
-        self.children: List[TextDisplay] = [
+        self.children: list[TextDisplay] = [
             TextDisplay(c) if isinstance(c, str) else ensure_ui_component(c, "components")
             for c in components
         ]
-        self.accessory: Union[Thumbnail, Button[Any]] = ensure_ui_component(accessory, "accessory")
+        self.accessory: SectionAccessoryUIComponent = ensure_ui_component(accessory, "accessory")
 
     # these are reimplemented here to store the value in a separate attribute,
     # since `Section` lazily constructs `_underlying`, unlike most components
@@ -91,9 +94,9 @@ class Section(UIComponent):
 
         return cls(
             *cast(
-                "List[TextDisplay]",
+                "list[TextDisplay]",
                 [_to_ui_component(c) for c in section.children],
             ),
-            accessory=cast("Union[Thumbnail, Button[Any]]", _to_ui_component(section.accessory)),
+            accessory=cast("SectionAccessoryUIComponent", _to_ui_component(section.accessory)),
             id=section.id,
         )

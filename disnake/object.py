@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, SupportsInt, Union
+from typing import TYPE_CHECKING, SupportsInt, TypeAlias
 
 from . import utils
 from .mixins import Hashable
@@ -10,7 +10,7 @@ from .mixins import Hashable
 if TYPE_CHECKING:
     import datetime
 
-    SupportsIntCast = Union[SupportsInt, str, bytes, bytearray]
+    SupportsIntCast: TypeAlias = SupportsInt | str | bytes | bytearray
 
 __all__ = ("Object",)
 
@@ -53,9 +53,8 @@ class Object(Hashable):
         try:
             id = int(id)
         except ValueError:
-            raise TypeError(
-                f"id parameter must be convertable to int not {id.__class__!r}"
-            ) from None
+            msg = f"id parameter must be convertible to int not {id.__class__!r}"
+            raise TypeError(msg) from None
         else:
             self.id = id
 

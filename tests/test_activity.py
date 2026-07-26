@@ -11,27 +11,27 @@ if TYPE_CHECKING:
 
 
 @pytest.fixture
-def activity():
+def activity() -> _activity.Activity:
     return _activity.Activity()
 
 
 @pytest.fixture
-def game():
+def game() -> _activity.Game:
     return _activity.Game(name="Celeste")
 
 
 @pytest.fixture
-def custom_activity():
+def custom_activity() -> _activity.CustomActivity:
     return _activity.CustomActivity(name="custom")
 
 
 @pytest.fixture
-def streaming():
+def streaming() -> _activity.Streaming:
     return _activity.Streaming(name="me", url="https://disnake.dev")
 
 
 @pytest.fixture
-def spotify():
+def spotify() -> _activity.Spotify:
     return _activity.Spotify()
 
 

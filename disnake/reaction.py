@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Optional, Union
+from typing import TYPE_CHECKING
 
 from .iterators import ReactionIterator
 
@@ -20,7 +20,7 @@ class Reaction:
     """Represents a reaction to a message.
 
     Depending on the way this object was created, some of the attributes can
-    have a value of ``None``.
+    have a value of :data:`None`.
 
     .. collapse:: operations
 
@@ -44,7 +44,7 @@ class Reaction:
 
     Attributes
     ----------
-    emoji: Union[:class:`Emoji`, :class:`PartialEmoji`, :class:`str`]
+    emoji: :class:`Emoji` | :class:`PartialEmoji` | :class:`str`
         The reaction emoji. May be a custom emoji, or a unicode emoji.
     count: :class:`int`
         Number of times this reaction was made
@@ -61,13 +61,13 @@ class Reaction:
         *,
         message: Message,
         data: ReactionPayload,
-        emoji: Optional[Union[PartialEmoji, Emoji, str]] = None,
+        emoji: PartialEmoji | Emoji | str | None = None,
     ) -> None:
         self.message: Message = message
         # _get_emoji_from_data won't return None
-        self.emoji: Union[PartialEmoji, Emoji, str] = emoji or message._state._get_emoji_from_data(  # type: ignore
+        self.emoji: PartialEmoji | Emoji | str = emoji or message._state._get_emoji_from_data(
             data["emoji"]
-        )
+        )  # pyright: ignore[reportAttributeAccessIssue]
         self.count: int = data.get("count", 1)
         self.me: bool = data["me"]
 
@@ -79,10 +79,10 @@ class Reaction:
         """
         return not isinstance(self.emoji, str)
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         return isinstance(other, self.__class__) and other.emoji == self.emoji
 
-    def __ne__(self, other: Any) -> bool:
+    def __ne__(self, other: object) -> bool:
         if isinstance(other, self.__class__):
             return other.emoji != self.emoji
         return True
@@ -149,7 +149,7 @@ class Reaction:
         await self.message.clear_reaction(self.emoji)
 
     def users(
-        self, *, limit: Optional[int] = None, after: Optional[Snowflake] = None
+        self, *, limit: int | None = None, after: Snowflake | None = None
     ) -> ReactionIterator:
         """Returns an :class:`AsyncIterator` representing the users that have reacted to the message.
 
@@ -173,11 +173,11 @@ class Reaction:
 
         Parameters
         ----------
-        limit: Optional[:class:`int`]
+        limit: :class:`int` | :data:`None`
             The maximum number of results to return.
             If not provided, returns all the users who
             reacted to the message.
-        after: Optional[:class:`abc.Snowflake`]
+        after: :class:`abc.Snowflake` | :data:`None`
             For pagination, reactions are sorted by member.
 
         Raises
@@ -187,7 +187,7 @@ class Reaction:
 
         Yields
         ------
-        Union[:class:`User`, :class:`Member`]
+        :class:`User` | :class:`Member`
             The member (if retrievable) or the user that has reacted
             to this message. The case where it can be a :class:`Member` is
             in a guild message context. Sometimes it can be a :class:`User`

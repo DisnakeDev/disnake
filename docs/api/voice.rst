@@ -127,12 +127,6 @@ VoiceChannelEffectAnimationType
 .. autoclass:: VoiceChannelEffectAnimationType()
     :members:
 
-PartyType
-~~~~~~~~~
-
-.. autoclass:: PartyType()
-    :members:
-
 Events
 ------
 

@@ -70,6 +70,14 @@ RoleSubscriptionData
 .. autoclass:: RoleSubscriptionData()
     :members:
 
+MessageCall
+~~~~~~~~~~~
+
+.. attributetable:: MessageCall
+
+.. autoclass:: MessageCall()
+    :members:
+
 RawTypingEvent
 ~~~~~~~~~~~~~~
 

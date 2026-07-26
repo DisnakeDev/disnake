@@ -13,9 +13,17 @@ from disnake.state import ConnectionState
 from disnake.utils import MISSING
 
 if TYPE_CHECKING:
-    from disnake.types.interactions import InteractionChannel as InteractionChannelPayload
+    from disnake.types.interactions import (
+        InteractionCallbackResponse as InteractionCallbackResponsePayload,
+        InteractionChannel as InteractionChannelPayload,
+    )
     from disnake.types.member import Member as MemberPayload
     from disnake.types.user import User as UserPayload
+
+
+interaction_callback_response: InteractionCallbackResponsePayload = {
+    "interaction": {"id": 0, "type": 4}
+}
 
 
 @pytest.mark.asyncio
@@ -26,8 +34,11 @@ class TestInteractionResponse:
         return disnake.InteractionResponse(inter)
 
     @pytest.fixture
-    def adapter(self):
+    def adapter(self) -> mock.AsyncMock:
         adapter = mock.AsyncMock()
+        adapter.create_interaction_response = mock.AsyncMock(
+            return_value=interaction_callback_response
+        )
         disnake.interactions.base.async_context.set(adapter)
         return adapter
 
@@ -132,14 +143,14 @@ class TestInteractionResponse:
 class TestInteractionDataResolved:
     # TODO: use proper mock models once we have state/guild mocks
     @pytest.fixture
-    def state(self):
+    def state(self) -> mock.Mock:
         s = mock.Mock(spec=ConnectionState)
         s._get_guild.return_value = None
         s.user = mock.Mock()
         return s
 
     @pytest.fixture
-    def interaction(self, state):
+    def interaction(self, state) -> mock.Mock:
         i = mock.Mock(spec_set=Interaction)
         i._state = state
         i.guild_id = 1234
