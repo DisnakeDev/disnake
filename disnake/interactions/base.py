@@ -230,6 +230,7 @@ class Interaction(Generic[ClientT]):
         "_state",
         "_session",
         "_original_response",
+        "_current_response",
         "_cs_response",
         "_cs_followup",
         "_cs_me",
@@ -242,7 +243,12 @@ class Interaction(Generic[ClientT]):
         # TODO: Maybe use a unique session
         self._session: ClientSession = state.http._HTTPClient__session  # pyright: ignore[reportAttributeAccessIssue]
         self.client: ClientT = cast("ClientT", state._get_client())
+
+        # TODO(3.0): merge these fields
+        # cached return value for .original_response()
         self._original_response: InteractionMessage | None = None
+        # (presumably) current message state taking into account all edits etc.
+        self._current_response: InteractionMessage | None = None
 
         self.id: int = int(data["id"])
         self.type: InteractionType = try_enum(InteractionType, data["type"])
@@ -410,6 +416,14 @@ class Interaction(Generic[ClientT]):
         :return type: :class:`bool`
         """
         return self.expires_at <= utils.utcnow()
+
+    def _update_current_response(
+        self, response: InteractionMessage | InteractionCallbackResponse[InteractionMessage | None]
+    ) -> None:
+        if isinstance(response, InteractionMessage):
+            self._current_response = response
+        elif isinstance(response.resource, InteractionMessage):
+            self._current_response = response.resource
 
     async def original_response(self) -> InteractionMessage:
         """|coro|
@@ -625,6 +639,7 @@ class Interaction(Generic[ClientT]):
         # The message channel types should always match
         state = _InteractionMessageState(self, self._state)
         message = InteractionMessage(state=state, channel=self.channel, data=data)  # pyright: ignore[reportArgumentType]
+        self._update_current_response(message)
 
         if view and not view.is_finished():
             self._state.store_view(view, message.id)
@@ -1009,7 +1024,11 @@ class InteractionResponse:
         )
         self._response_type = defer_type
 
-        return InteractionCallbackResponse(callback_data, parent=self._parent)
+        response = InteractionCallbackResponse[InteractionMessage | None](
+            callback_data, parent=self._parent
+        )
+        self._parent._update_current_response(response)
+        return response
 
     async def pong(self) -> None:
         """|coro|
@@ -1186,11 +1205,16 @@ class InteractionResponse:
                     data=params.payload,
                     files=params.files,
                 )
-                self._response_type = response_type
             except NotFound as e:
                 if e.code == 10062:
                     raise InteractionTimedOut(self._parent) from e
                 raise
+
+        self._response_type = response_type
+        response = InteractionCallbackResponse[InteractionMessage](
+            callback_data, parent=self._parent
+        )
+        self._parent._update_current_response(response)
 
         if view is not MISSING:
             if ephemeral and view.timeout is None:
@@ -1201,7 +1225,7 @@ class InteractionResponse:
         if delete_after is not MISSING:
             await parent.delete_original_response(delay=delete_after)
 
-        return InteractionCallbackResponse(callback_data, parent=self._parent)
+        return response
 
     async def edit_message(
         self,
@@ -1371,15 +1395,19 @@ class InteractionResponse:
                 files=params.files,
             )
 
+        self._response_type = response_type
+        response = InteractionCallbackResponse[InteractionMessage](
+            callback_data, parent=self._parent
+        )
+        self._parent._update_current_response(response)
+
         if view and not view.is_finished():
             parent._state.store_view(view, message.id)
-
-        self._response_type = response_type
 
         if delete_after is not None:
             await parent.delete_original_response(delay=delete_after)
 
-        return InteractionCallbackResponse(callback_data, parent=self._parent)
+        return response
 
     async def autocomplete(self, *, choices: Choices) -> InteractionCallbackResponse[None]:
         r"""|coro|
