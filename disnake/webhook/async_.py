@@ -29,7 +29,7 @@ from ..enums import WebhookType, try_enum
 from ..errors import DiscordServerError, Forbidden, HTTPException, NotFound, WebhookTokenMissing
 from ..file import File
 from ..flags import MessageFlags
-from ..http import Route, set_attachments, to_multipart, to_multipart_with_attachments
+from ..http import USER_AGENT, Route, set_attachments, to_multipart, to_multipart_with_attachments
 from ..mentions import AllowedMentions
 from ..message import Message
 from ..mixins import Hashable
@@ -63,6 +63,9 @@ if TYPE_CHECKING:
     from ..state import ConnectionState
     from ..sticker import GuildSticker, StandardSticker, StickerItem
     from ..types.embed import Embed as EmbedPayload
+    from ..types.interactions import (
+        InteractionCallbackResponse as InteractionCallbackResponsePayload,
+    )
     from ..types.message import Message as MessagePayload
     from ..types.webhook import Webhook as WebhookPayload
     from ..ui._types import MessageComponents
@@ -119,6 +122,9 @@ class AsyncWebhookAdapter:
             lock = self._locks[bucket]
         except KeyError:
             self._locks[bucket] = lock = asyncio.Lock()
+
+        if "User-Agent" not in session.headers:
+            headers["User-Agent"] = USER_AGENT
 
         if payload is not None:
             headers["Content-Type"] = "application/json"
@@ -411,10 +417,10 @@ class AsyncWebhookAdapter:
         type: int,
         data: dict[str, Any] | None = None,
         files: Sequence[File] | None = None,
-    ) -> Response[None]:
+    ) -> Response[InteractionCallbackResponsePayload]:
         route = Route(
             "POST",
-            "/interactions/{webhook_id}/{webhook_token}/callback",
+            "/interactions/{webhook_id}/{webhook_token}/callback?with_response=1",
             webhook_id=interaction_id,
             webhook_token=token,
         )

@@ -808,15 +808,15 @@ _MARKDOWN_ESCAPE_SUBREGEX = "|".join(
     rf"\{c}(?=([\s\S]*((?<!\{c})\{c})))" for c in ("*", "`", "_", "~", "|")
 )
 
-_MARKDOWN_ESCAPE_COMMON = r"^>(?:>>)?\s|\[.+\]\(.+\)"
+_MARKDOWN_ESCAPE_COMMON = r"^>(?:>>)?\s|\[.+\]\(.+\)|^(?P<prefix>\s*)[-*]\s|^#{1,3}\s"
 
 _MARKDOWN_ESCAPE_REGEX = re.compile(
-    rf"(?P<markdown>{_MARKDOWN_ESCAPE_SUBREGEX}|{_MARKDOWN_ESCAPE_COMMON})", re.MULTILINE
+    rf"(?P<markdown>{_MARKDOWN_ESCAPE_COMMON}|{_MARKDOWN_ESCAPE_SUBREGEX})", re.MULTILINE
 )
 
 _URL_REGEX = r"(?P<url><[^: >]+:\/[^ >]+>|(?:https?|steam):\/\/[^\s<]+[^<.,:;\"\'\]\s])"
 
-_MARKDOWN_STOCK_REGEX = rf"(?P<markdown>[_\\~|\*`]|{_MARKDOWN_ESCAPE_COMMON})"
+_MARKDOWN_STOCK_REGEX = rf"(?P<markdown>{_MARKDOWN_ESCAPE_COMMON}|[_\\~|\*`])"
 
 
 def remove_markdown(text: str, *, ignore_links: bool = True) -> str:
@@ -843,7 +843,7 @@ def remove_markdown(text: str, *, ignore_links: bool = True) -> str:
         The text with the markdown special characters removed.
     """
 
-    def replacement(match: re.Match) -> str:
+    def replacement(match: re.Match[str]) -> str:
         groupdict = match.groupdict()
         return groupdict.get("url", "")
 
@@ -879,12 +879,13 @@ def escape_markdown(text: str, *, as_needed: bool = False, ignore_links: bool = 
     """
     if not as_needed:
 
-        def replacement(match: re.Match) -> str:
+        def replacement(match: re.Match[str]) -> str:
             groupdict = match.groupdict()
             is_url = groupdict.get("url")
             if is_url:
                 return is_url
-            return "\\" + groupdict["markdown"]
+            prefix = groupdict.get("prefix") or ""
+            return prefix + "\\" + groupdict["markdown"].removeprefix(prefix)
 
         regex = _MARKDOWN_STOCK_REGEX
         if ignore_links:
