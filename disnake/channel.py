@@ -3781,8 +3781,23 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
         from .message import Message
         from .webhook.async_ import handle_message_parameters_dict
 
-        params = handle_message_parameters_dict(
-            content,
+        if auto_archive_duration not in (MISSING, None):
+            auto_archive_duration = cast(
+                "ThreadArchiveDurationLiteral", try_enum_to_int(auto_archive_duration)
+            )
+
+        tag_ids = [t.id for t in applied_tags] if applied_tags else []
+
+        channel_data = {
+            "name": name,
+            "auto_archive_duration": auto_archive_duration or self.default_auto_archive_duration,
+            "applied_tags": tag_ids,
+        }
+        if slowmode_delay not in (MISSING, None):
+            channel_data["rate_limit_per_user"] = slowmode_delay
+
+        with handle_message_parameters_dict(
+            content=content,
             embed=embed,
             embeds=embeds,
             file=file,
@@ -3794,43 +3809,14 @@ class ThreadOnlyGuildChannel(disnake.abc.GuildChannel, Hashable):
             stickers=stickers,
             allowed_mentions=allowed_mentions,
             previous_allowed_mentions=self._state.allowed_mentions,
-        )
-
-        if auto_archive_duration not in (MISSING, None):
-            auto_archive_duration = cast(
-                "ThreadArchiveDurationLiteral", try_enum_to_int(auto_archive_duration)
-            )
-
-        tag_ids = [t.id for t in applied_tags] if applied_tags else []
-
-        if params.files and len(params.files) > 10:
-            msg = "files parameter must be a list of up to 10 elements"
-            raise ValueError(msg)
-        elif params.files and not all(isinstance(file, File) for file in params.files):
-            msg = "files parameter must be a list of File"
-            raise TypeError(msg)
-
-        channel_data = {
-            "name": name,
-            "auto_archive_duration": auto_archive_duration or self.default_auto_archive_duration,
-            "applied_tags": tag_ids,
-        }
-
-        if slowmode_delay not in (MISSING, None):
-            channel_data["rate_limit_per_user"] = slowmode_delay
-
-        try:
+        ) as message_params:
             data = await self._state.http.start_thread_in_forum_channel(
                 self.id,
                 **channel_data,
-                files=params.files,
+                files=message_params.files,
                 reason=reason,
-                **params.payload,
+                **message_params.payload,
             )
-        finally:
-            if params.files:
-                for f in params.files:
-                    f.close()
 
         thread = Thread(guild=self.guild, data=data, state=self._state)
         message = Message(channel=thread, data=data["message"], state=self._state)
