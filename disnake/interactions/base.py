@@ -247,7 +247,7 @@ class Interaction(Generic[ClientT]):
         # TODO(3.0): merge these fields
         # cached return value for .original_response()
         self._original_response: InteractionMessage | None = None
-        # (presumably) current message state taking into account all edits etc.
+        # current message state taking into account all edits etc.
         self._current_response: InteractionMessage | None = None
 
         self.id: int = int(data["id"])
