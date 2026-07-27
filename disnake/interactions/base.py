@@ -597,12 +597,14 @@ class Interaction(Generic[ClientT]):
         :class:`InteractionMessage`
             The newly edited message.
         """
-        # if no attachment list was provided but we're uploading new files,
-        # use current attachments as the base
-        # FIXME: avoid original_response(), use callback data once implemented
-        # FIXME: set previous_flags as well
-        if attachments is MISSING and (file or files):
-            attachments = (await self.original_response()).attachments
+        previous_flags: int = 0
+        if self._current_response:
+            previous_flags = self._current_response.flags.value
+
+            # if no attachment list was provided but we're uploading new files,
+            # use current attachments as the base
+            if attachments is MISSING and (file or files):
+                attachments = self._current_response.attachments
 
         previous_mentions: AllowedMentions | None = self._state.allowed_mentions
 
@@ -621,6 +623,7 @@ class Interaction(Generic[ClientT]):
             flags=flags,
             allowed_mentions=allowed_mentions,
             previous_allowed_mentions=previous_mentions,
+            previous_flags=previous_flags,
         ) as params:
             try:
                 data = await adapter.edit_original_interaction_response(
@@ -1381,7 +1384,7 @@ class InteractionResponse:
             flags=flags,
             allowed_mentions=allowed_mentions,
             previous_allowed_mentions=base_allowed_mentions,
-            # FIXME: previous_flags ?
+            previous_flags=message.flags.value,
         ) as params:
             if view is not MISSING:
                 parent._state.prevent_view_updates_for(message.id)
@@ -1951,13 +1954,6 @@ class InteractionMessage(Message):
                 **params,
             )
 
-        # if no attachment list was provided but we're uploading new files,
-        # use current attachments as the base
-        # this isn't necessary when using the superclass, as the implementation there takes care of attachments
-        if attachments is MISSING and (file or files):
-            attachments = self.attachments
-
-        # FIXME: suppress_embeds overwrites existing flags, should set previous_flags
         return await self._state._interaction.edit_original_response(
             content=content,
             embed=embed,
