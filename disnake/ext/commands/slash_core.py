@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import inspect
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -25,12 +25,12 @@ from .errors import CommandError, CommandInvokeError
 from .params import call_param_func, classify_autocompleter, expand_params
 
 if TYPE_CHECKING:
-    from typing_extensions import Never
+    from typing_extensions import Unpack
 
     from disnake.app_commands import Choices
     from disnake.i18n import LocalizedOptional
 
-    from .base_core import CommandCallback
+    from .base_core import CommandCallback, _AppCommandArgs
 
 MISSING = utils.MISSING
 
@@ -103,7 +103,7 @@ _INVALID_SUB_KWARGS = frozenset(
 
 # this is just a helpful message for users trying to set specific
 # top-level-only fields on subcommands or groups
-def _check_invalid_sub_kwargs(func: CommandCallback, kwargs: dict[str, Any]) -> None:
+def _check_invalid_sub_kwargs(func: CommandCallback, kwargs: Mapping[str, Any]) -> None:
     invalid_keys = kwargs.keys() & _INVALID_SUB_KWARGS
 
     for decorator_key in [
@@ -164,7 +164,7 @@ class SubCommandGroup(InvokableApplicationCommand):
         parent: InvokableSlashCommand,
         *,
         name: LocalizedOptional = None,
-        **kwargs: Any,
+        **kwargs: Unpack[_AppCommandArgs],
     ) -> None:
         name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
@@ -212,8 +212,7 @@ class SubCommandGroup(InvokableApplicationCommand):
         description: LocalizedOptional = None,
         options: list[Option] | None = None,
         connectors: dict[str, str] | None = None,
-        extras: dict[str, Any] | None = None,
-        **kwargs: Any,
+        **kwargs: Unpack[_AppCommandArgs],
     ) -> Callable[[CommandCallback], SubCommand]:
         r"""A decorator that creates a subcommand in the subcommand group.
         Parameters are the same as in :class:`InvokableSlashCommand.sub_command`
@@ -232,7 +231,6 @@ class SubCommandGroup(InvokableApplicationCommand):
                 description=description,
                 options=options,
                 connectors=connectors,
-                extras=extras,
                 **kwargs,
             )
             self.children[new_func.name] = new_func
@@ -292,14 +290,15 @@ class SubCommand(InvokableApplicationCommand):
         description: LocalizedOptional = None,
         options: list[Option] | None = None,
         connectors: dict[str, str] | None = None,
-        **kwargs: Any,
+        autocompleters: dict[str, Choices | Callable[..., Choices | None]] | None = None,
+        **kwargs: Unpack[_AppCommandArgs],
     ) -> None:
         name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
         self.parent: InvokableSlashCommand | SubCommandGroup = parent
         self.connectors: dict[str, str] = connectors or {}
-        self.autocompleters: dict[str, Choices | Callable[..., Choices | None]] = kwargs.get(
-            "autocompleters", {}
+        self.autocompleters: dict[str, Choices | Callable[..., Choices | None]] = (
+            autocompleters or {}
         )
 
         if options is None:
@@ -462,9 +461,9 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         contexts: InteractionContextTypes | None = None,
         guild_ids: Sequence[int] | None = None,
         connectors: dict[str, str] | None = None,
+        autocompleters: dict[str, Choices | Callable[..., Choices | None]] | None = None,
         auto_sync: bool | None = None,
-        dm_permission: Never = ...,
-        **kwargs: Any,
+        **kwargs: Unpack[_AppCommandArgs],
     ) -> None: ...
 
     @overload
@@ -483,8 +482,9 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         contexts: InteractionContextTypes | None = None,
         guild_ids: Sequence[int] | None = None,
         connectors: dict[str, str] | None = None,
+        autocompleters: dict[str, Choices | Callable[..., Choices | None]] | None = None,
         auto_sync: bool | None = None,
-        **kwargs: Any,
+        **kwargs: Unpack[_AppCommandArgs],
     ) -> None: ...
 
     def __init__(
@@ -501,8 +501,9 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         contexts: InteractionContextTypes | None = None,
         guild_ids: Sequence[int] | None = None,
         connectors: dict[str, str] | None = None,
+        autocompleters: dict[str, Choices | Callable[..., Choices | None]] | None = None,
         auto_sync: bool | None = None,
-        **kwargs: Any,
+        **kwargs: Unpack[_AppCommandArgs],
     ) -> None:
         name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
@@ -511,8 +512,8 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         self.children: dict[str, SubCommand | SubCommandGroup] = {}
         self.auto_sync: bool = True if auto_sync is None else auto_sync
         self.guild_ids: tuple[int, ...] | None = None if guild_ids is None else tuple(guild_ids)
-        self.autocompleters: dict[str, Choices | Callable[..., Choices | None]] = kwargs.get(
-            "autocompleters", {}
+        self.autocompleters: dict[str, Choices | Callable[..., Choices | None]] = (
+            autocompleters or {}
         )
 
         if options is None:
@@ -606,8 +607,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         description: LocalizedOptional = None,
         options: list[Option] | None = None,
         connectors: dict[str, str] | None = None,
-        extras: dict[str, Any] | None = None,
-        **kwargs: Any,
+        **kwargs: Unpack[_AppCommandArgs],
     ) -> Callable[[CommandCallback], SubCommand]:
         r"""A decorator that creates a subcommand under the base command.
 
@@ -656,7 +656,6 @@ class InvokableSlashCommand(InvokableApplicationCommand):
                 description=description,
                 options=options,
                 connectors=connectors,
-                extras=extras,
                 **kwargs,
             )
             self.children[new_func.name] = new_func
@@ -668,8 +667,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
     def sub_command_group(
         self,
         name: LocalizedOptional = None,
-        extras: dict[str, Any] | None = None,
-        **kwargs: Any,
+        **kwargs: Unpack[_AppCommandArgs],
     ) -> Callable[[CommandCallback], SubCommandGroup]:
         r"""A decorator that creates a subcommand group under the base command.
 
@@ -701,7 +699,6 @@ class InvokableSlashCommand(InvokableApplicationCommand):
                 func,
                 self,
                 name=name,
-                extras=extras,
                 **kwargs,
             )
             self.children[new_func.name] = new_func
@@ -844,9 +841,7 @@ def slash_command(
     guild_ids: Sequence[int] | None = None,
     connectors: dict[str, str] | None = None,
     auto_sync: bool | None = None,
-    extras: dict[str, Any] | None = None,
-    dm_permission: Never = ...,
-    **kwargs: Any,
+    **kwargs: Unpack[_AppCommandArgs],
 ) -> Callable[[CommandCallback], InvokableSlashCommand]: ...
 
 
@@ -865,8 +860,7 @@ def slash_command(
     guild_ids: Sequence[int] | None = None,
     connectors: dict[str, str] | None = None,
     auto_sync: bool | None = None,
-    extras: dict[str, Any] | None = None,
-    **kwargs: Any,
+    **kwargs: Unpack[_AppCommandArgs],
 ) -> Callable[[CommandCallback], InvokableSlashCommand]: ...
 
 
@@ -883,8 +877,7 @@ def slash_command(
     guild_ids: Sequence[int] | None = None,
     connectors: dict[str, str] | None = None,
     auto_sync: bool | None = None,
-    extras: dict[str, Any] | None = None,
-    **kwargs: Any,
+    **kwargs: Unpack[_AppCommandArgs],
 ) -> Callable[[CommandCallback], InvokableSlashCommand]:
     r"""A decorator that builds a slash command.
 
@@ -990,7 +983,6 @@ def slash_command(
             guild_ids=guild_ids,
             connectors=connectors,
             auto_sync=auto_sync,
-            extras=extras,
             **kwargs,
         )
 
