@@ -1186,22 +1186,26 @@ class InteractionResponse:
                     data=params.payload,
                     files=params.files,
                 )
-                self._response_type = response_type
             except NotFound as e:
                 if e.code == 10062:
                     raise InteractionTimedOut(self._parent) from e
                 raise
 
+        self._response_type = response_type
+        response: InteractionCallbackResponse[InteractionMessage] = InteractionCallbackResponse(
+            callback_data, parent=self._parent
+        )
+
         if view is not MISSING:
             if ephemeral and view.timeout is None:
                 view.timeout = 15 * 60.0
 
-            parent._state.store_view(view)
+            parent._state.store_view(view, response.message_id)
 
         if delete_after is not MISSING:
             await parent.delete_original_response(delay=delete_after)
 
-        return InteractionCallbackResponse(callback_data, parent=self._parent)
+        return response
 
     async def edit_message(
         self,
