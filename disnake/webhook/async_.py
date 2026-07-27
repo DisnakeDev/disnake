@@ -683,7 +683,7 @@ def handle_message_parameters_dict(
     if applied_tags:
         payload["applied_tags"] = [t.id for t in applied_tags]
 
-    return PayloadParameters(payload=payload, multipart=None, files=files)
+    return PayloadParameters(payload=payload, multipart=None, files=files or ())
 
 
 def handle_message_parameters(
