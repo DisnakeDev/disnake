@@ -1247,6 +1247,7 @@ def Param(
 ) -> Any: ...
 
 
+# same as above, but with min_value/max_value instead of gt/ge/lt/le
 @overload
 def Param(
     default: Any | Callable[[ApplicationCommandInteraction[BotT]], Any] = ...,
