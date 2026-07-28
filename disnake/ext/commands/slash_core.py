@@ -801,11 +801,11 @@ class InvokableSlashCommand(InvokableApplicationCommand):
 
     async def invoke(self, inter: ApplicationCommandInteraction) -> None:
         await self.prepare(inter)
+        has_children = len(self.children) > 0
 
         try:
-            if len(self.children) > 0:
+            if has_children:
                 await self(inter)
-                await self.invoke_children(inter)
             else:
                 kwargs = inter.filled_options
                 for k, v in self.connectors.items():
@@ -826,6 +826,9 @@ class InvokableSlashCommand(InvokableApplicationCommand):
                 await self._max_concurrency.release(inter)  # pyright: ignore[reportArgumentType]
 
             await self.call_after_hooks(inter)
+
+        if has_children:
+            await self.invoke_children(inter)
 
 
 @overload
