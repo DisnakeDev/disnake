@@ -9,11 +9,13 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Generic,
+    Literal,
     TypeAlias,
-    TypeVar,
     cast,
     overload,
 )
+
+from typing_extensions import TypeVar
 
 from .. import utils
 from ..app_commands import OptionChoice
@@ -46,15 +48,23 @@ from ..message import Attachment, AuthorizingIntegrationOwners, Message
 from ..object import Object
 from ..permissions import Permissions
 from ..role import Role
-from ..ui.action_row import normalize_components, normalize_components_to_dict
+from ..ui.action_row import normalize_components
 from ..user import ClientUser, User
-from ..webhook.async_ import Webhook, async_context, handle_message_parameters
+from ..webhook.async_ import (
+    Webhook,
+    WebhookMessage,
+    async_context,
+    handle_message_parameters,
+    handle_message_parameters_dict,
+)
 
 __all__ = (
     "Interaction",
-    "InteractionMessage",
     "InteractionResponse",
+    "InteractionMessage",
     "InteractionDataResolved",
+    "InteractionCallbackActivityInstance",
+    "InteractionCallbackResponse",
 )
 
 if TYPE_CHECKING:
@@ -78,6 +88,8 @@ if TYPE_CHECKING:
     from ..types.interactions import (
         ApplicationCommandOptionChoice as ApplicationCommandOptionChoicePayload,
         Interaction as InteractionPayload,
+        InteractionCallbackActivityInstance as InteractionCallbackActivityInstancePayload,
+        InteractionCallbackResponse as InteractionCallbackResponsePayload,
         InteractionDataResolved as InteractionDataResolvedPayload,
     )
     from ..types.snowflake import Snowflake
@@ -573,11 +585,15 @@ class Interaction(Generic[ClientT]):
         """
         # if no attachment list was provided but we're uploading new files,
         # use current attachments as the base
+        # FIXME: avoid original_response(), use callback data once implemented
+        # FIXME: set previous_flags as well
         if attachments is MISSING and (file or files):
             attachments = (await self.original_response()).attachments
 
         previous_mentions: AllowedMentions | None = self._state.allowed_mentions
-        params = handle_message_parameters(
+
+        adapter = async_context.get()
+        with handle_message_parameters(
             content=content,
             file=file,
             files=files,
@@ -591,25 +607,20 @@ class Interaction(Generic[ClientT]):
             flags=flags,
             allowed_mentions=allowed_mentions,
             previous_allowed_mentions=previous_mentions,
-        )
-        adapter = async_context.get()
-        try:
-            data = await adapter.edit_original_interaction_response(
-                self.application_id,
-                self.token,
-                session=self._session,
-                payload=params.payload,
-                multipart=params.multipart,
-                files=params.files,
-            )
-        except NotFound as e:
-            if e.code == 10015:
-                raise InteractionNotResponded(self) from e
-            raise
-        finally:
-            if params.files:
-                for f in params.files:
-                    f.close()
+        ) as params:
+            try:
+                data = await adapter.edit_original_interaction_response(
+                    self.application_id,
+                    self.token,
+                    session=self._session,
+                    payload=params.payload,
+                    multipart=params.multipart,
+                    files=params.files,
+                )
+            except NotFound as e:
+                if e.code == 10015:
+                    raise InteractionNotResponded(self) from e
+                raise
 
         # The message channel types should always match
         state = _InteractionMessageState(self, self._state)
@@ -701,7 +712,7 @@ class Interaction(Generic[ClientT]):
         flags: MessageFlags = MISSING,
         delete_after: float = MISSING,
         poll: Poll = MISSING,
-    ) -> None:
+    ) -> InteractionMessage | WebhookMessage:
         r"""|coro|
 
         Sends a message using either :meth:`response.send_message <InteractionResponse.send_message>`
@@ -709,11 +720,6 @@ class Interaction(Generic[ClientT]):
 
         If the interaction hasn't been responded to yet, this method will call :meth:`response.send_message <InteractionResponse.send_message>`.
         Otherwise, it will call :meth:`followup.send <Webhook.send>`.
-
-        .. note::
-            This method does not return a :class:`Message` object. If you need a message object,
-            use :meth:`original_response` to fetch it, or use :meth:`followup.send <Webhook.send>`
-            directly instead of this method if you're sending a followup message.
 
         Parameters
         ----------
@@ -797,27 +803,52 @@ class Interaction(Generic[ClientT]):
         ValueError
             The length of ``embeds`` was invalid, or
             you tried to send v2 components together with ``content``, ``embeds``, or ``poll``.
+
+        Returns
+        -------
+        :class:`InteractionMessage` | :class:`WebhookMessage`
+            The message that was sent. The specific type depends on whether the interaction
+            had already been responded to.
+
+            .. versionadded:: |vnext|
         """
-        if self.response._response_type is not None:
-            sender = self.followup.send
+        if self.response._response_type is None:
+            callback_response = await self.response.send_message(
+                content=content,
+                embed=embed,
+                embeds=embeds,
+                file=file,
+                files=files,
+                view=view,
+                components=components,
+                tts=tts,
+                ephemeral=ephemeral,
+                suppress_embeds=suppress_embeds,
+                flags=flags,
+                poll=poll,
+                allowed_mentions=allowed_mentions,
+                delete_after=delete_after,
+            )
+            return callback_response.resource
         else:
-            sender = self.response.send_message
-        await sender(
-            content=content,
-            embed=embed,
-            embeds=embeds,
-            file=file,
-            files=files,
-            allowed_mentions=allowed_mentions,
-            view=view,
-            components=components,
-            tts=tts,
-            ephemeral=ephemeral,
-            suppress_embeds=suppress_embeds,
-            flags=flags,
-            delete_after=delete_after,
-            poll=poll,
-        )
+            return await self.followup.send(
+                content=content,
+                embed=embed,
+                embeds=embeds,
+                file=file,
+                files=files,
+                view=view,
+                components=components,
+                tts=tts,
+                ephemeral=ephemeral,
+                suppress_embeds=suppress_embeds,
+                flags=flags,
+                poll=poll,
+                allowed_mentions=allowed_mentions,
+                delete_after=delete_after,
+                # this is already implicitly true for interactions, but specified here for typing purposes
+                wait=True,
+            )
 
 
 class InteractionResponse:
@@ -854,12 +885,38 @@ class InteractionResponse:
         """
         return self._response_type is not None
 
+    @overload
+    async def defer(
+        self,
+        *,
+        with_message: Literal[True],
+        ephemeral: bool = ...,
+    ) -> InteractionCallbackResponse[InteractionMessage]: ...
+
+    @overload
+    async def defer(
+        self,
+        *,
+        with_message: Literal[False],
+        ephemeral: bool = ...,
+    ) -> InteractionCallbackResponse[None]: ...
+
+    # if `with_message` is not explicitly given, the exact callback resource type isn't
+    # known, as it depends on the source interaction type
+    @overload
+    async def defer(
+        self,
+        *,
+        with_message: bool = ...,
+        ephemeral: bool = ...,
+    ) -> InteractionCallbackResponse[InteractionMessage | None]: ...
+
     async def defer(
         self,
         *,
         with_message: bool = MISSING,
         ephemeral: bool = MISSING,
-    ) -> None:
+    ) -> InteractionCallbackResponse[InteractionMessage | None]:
         """|coro|
 
         Defers the interaction response.
@@ -905,6 +962,13 @@ class InteractionResponse:
             This interaction has already been responded to before.
         TypeError
             This interaction cannot be deferred.
+
+        Returns
+        -------
+        :class:`InteractionCallbackResponse`
+            The callback response data. If ``with_message=True``, this also contains a message resource.
+
+            .. versionadded:: |vnext|
         """
         if self._response_type is not None:
             raise InteractionResponded(self._parent)
@@ -936,7 +1000,7 @@ class InteractionResponse:
                 data["flags"] |= MessageFlags.ephemeral.flag
 
         adapter = async_context.get()
-        await adapter.create_interaction_response(
+        callback_data = await adapter.create_interaction_response(
             parent.id,
             parent.token,
             session=parent._session,
@@ -944,6 +1008,8 @@ class InteractionResponse:
             data=data or None,
         )
         self._response_type = defer_type
+
+        return InteractionCallbackResponse(callback_data, parent=self._parent)
 
     async def pong(self) -> None:
         """|coro|
@@ -991,7 +1057,7 @@ class InteractionResponse:
         flags: MessageFlags = MISSING,
         delete_after: float = MISSING,
         poll: Poll = MISSING,
-    ) -> None:
+    ) -> InteractionCallbackResponse[InteractionMessage]:
         r"""|coro|
 
         Responds to this interaction by sending a message.
@@ -1076,118 +1142,70 @@ class InteractionResponse:
             you tried to send v2 components together with ``content``, ``embeds``, or ``poll``.
         InteractionResponded
             This interaction has already been responded to before.
+
+        Returns
+        -------
+        :class:`InteractionCallbackResponse`
+            The callback response data, with a message resource.
+
+            .. versionadded:: |vnext|
         """
         if self._response_type is not None:
             raise InteractionResponded(self._parent)
 
-        payload: dict[str, Any] = {
-            "tts": tts,
-        }
-
-        if embed is not MISSING and embeds is not MISSING:
-            msg = "cannot mix embed and embeds keyword arguments"
-            raise TypeError(msg)
-
-        if file is not MISSING and files is not MISSING:
-            msg = "cannot mix file and files keyword arguments"
-            raise TypeError(msg)
-
-        if view is not MISSING and components is not MISSING:
-            msg = "cannot mix view and components keyword arguments"
-            raise TypeError(msg)
-
-        if file is not MISSING:
-            files = [file]
-
-        if embed is not MISSING:
-            embeds = [embed]
-
-        if embeds:
-            if len(embeds) > 10:
-                msg = "embeds cannot exceed maximum of 10 elements"
-                raise ValueError(msg)
-            payload["embeds"] = [e.to_dict() for e in embeds]
-            for embed in embeds:
-                if embed._files:
-                    files = files or []
-                    files.extend(embed._files.values())
-
-        if files is not MISSING and len(files) > 10:
-            msg = "files cannot exceed maximum of 10 elements"
-            raise ValueError(msg)
-
-        previous_mentions: AllowedMentions | None = getattr(
-            self._parent._state, "allowed_mentions", None
-        )
-        if allowed_mentions:
-            if previous_mentions is not None:
-                payload["allowed_mentions"] = previous_mentions.merge(allowed_mentions).to_dict()
-            else:
-                payload["allowed_mentions"] = allowed_mentions.to_dict()
-        elif previous_mentions is not None:
-            payload["allowed_mentions"] = previous_mentions.to_dict()
-
-        if content is not None:
-            payload["content"] = str(content)
-
-        is_v2 = False
-        if view is not MISSING:
-            payload["components"] = view.to_components()
-        elif components is not MISSING:
-            payload["components"], is_v2 = normalize_components_to_dict(components)
-
-        # set cv2 flag automatically
-        if is_v2:
-            flags = MessageFlags._from_value(0 if flags is MISSING else flags.value)
-            flags.is_components_v2 = True
-        # components v2 cannot be used with other content fields
-        if flags and flags.is_components_v2 and (content or embeds or poll):
-            msg = "Cannot use v2 components with content, embeds, or polls"
-            raise ValueError(msg)
-
-        if poll is not MISSING:
-            payload["poll"] = poll._to_dict()
-
-        if suppress_embeds is not MISSING or ephemeral is not MISSING:
-            flags = MessageFlags._from_value(0 if flags is MISSING else flags.value)
-            if suppress_embeds is not MISSING:
-                flags.suppress_embeds = suppress_embeds
-            if ephemeral is not MISSING:
-                flags.ephemeral = ephemeral
-        if flags is not MISSING:
-            payload["flags"] = flags.value
-
         parent = self._parent
         adapter = async_context.get()
         response_type = InteractionResponseType.channel_message
-        try:
-            await adapter.create_interaction_response(
-                parent.id,
-                parent.token,
-                session=parent._session,
-                type=response_type.value,
-                data=payload,
-                files=files or None,
-            )
-        except NotFound as e:
-            if e.code == 10062:
-                raise InteractionTimedOut(self._parent) from e
-            raise
-        finally:
-            if files:
-                for f in files:
-                    f.close()
+
+        base_allowed_mentions: AllowedMentions | None = getattr(
+            parent._state, "allowed_mentions", None
+        )
+
+        with handle_message_parameters_dict(
+            content=content,
+            tts=tts,
+            file=file,
+            files=files,
+            embed=embed,
+            embeds=embeds,
+            view=view,
+            components=components,
+            ephemeral=ephemeral,
+            suppress_embeds=suppress_embeds,
+            flags=flags,
+            poll=poll,
+            allowed_mentions=allowed_mentions,
+            previous_allowed_mentions=base_allowed_mentions,
+        ) as params:
+            try:
+                callback_data = await adapter.create_interaction_response(
+                    parent.id,
+                    parent.token,
+                    session=parent._session,
+                    type=response_type.value,
+                    data=params.payload,
+                    files=params.files,
+                )
+            except NotFound as e:
+                if e.code == 10062:
+                    raise InteractionTimedOut(self._parent) from e
+                raise
 
         self._response_type = response_type
+        response: InteractionCallbackResponse[InteractionMessage] = InteractionCallbackResponse(
+            callback_data, parent=self._parent
+        )
 
         if view is not MISSING:
             if ephemeral and view.timeout is None:
                 view.timeout = 15 * 60.0
 
-            self._parent._state.store_view(view)
+            parent._state.store_view(view, response.message_id)
 
         if delete_after is not MISSING:
-            await self._parent.delete_original_response(delay=delete_after)
+            await parent.delete_original_response(delay=delete_after)
+
+        return response
 
     async def edit_message(
         self,
@@ -1203,7 +1221,7 @@ class InteractionResponse:
         flags: MessageFlags = MISSING,
         allowed_mentions: AllowedMentions = MISSING,
         delete_after: float | None = None,
-    ) -> None:
+    ) -> InteractionCallbackResponse[InteractionMessage]:
         r"""|coro|
 
         Responds to this interaction by editing the original message of
@@ -1299,12 +1317,18 @@ class InteractionResponse:
             You tried to send v2 components together with ``content`` or ``embeds``.
         InteractionResponded
             This interaction has already been responded to before.
+
+        Returns
+        -------
+        :class:`InteractionCallbackResponse`
+            The callback response data, with a message resource.
+
+            .. versionadded:: |vnext|
         """
         if self._response_type is not None:
             raise InteractionResponded(self._parent)
 
         parent = self._parent
-        state = parent._state
 
         if parent.type not in (InteractionType.component, InteractionType.modal_submit):
             raise InteractionNotEditable(parent)
@@ -1314,105 +1338,54 @@ class InteractionResponse:
         if not message:
             raise InteractionNotEditable(parent)
 
-        payload = {}
-        if content is not MISSING:
-            payload["content"] = None if content is None else str(content)
+        adapter = async_context.get()
+        response_type = InteractionResponseType.message_update
 
-        if file is not MISSING and files is not MISSING:
-            msg = "cannot mix file and files keyword arguments"
-            raise TypeError(msg)
-
-        if file is not MISSING:
-            files = [file]
-
-        if embed is not MISSING and embeds is not MISSING:
-            msg = "cannot mix both embed and embeds keyword arguments"
-            raise TypeError(msg)
-
-        if embed is not MISSING:
-            embeds = [] if embed is None else [embed]
-        if embeds is not MISSING:
-            payload["embeds"] = [e.to_dict() for e in embeds]
-            for embed in embeds:
-                if embed._files:
-                    files = files or []
-                    files.extend(embed._files.values())
-
-        if files is not MISSING and len(files) > 10:
-            msg = "files cannot exceed maximum of 10 elements"
-            raise ValueError(msg)
-
-        previous_mentions: AllowedMentions | None = getattr(
-            self._parent._state, "allowed_mentions", None
+        base_allowed_mentions: AllowedMentions | None = getattr(
+            parent._state, "allowed_mentions", None
         )
-        if allowed_mentions:
-            if previous_mentions is not None:
-                payload["allowed_mentions"] = previous_mentions.merge(allowed_mentions).to_dict()
-            else:
-                payload["allowed_mentions"] = allowed_mentions.to_dict()
-        elif previous_mentions is not None:
-            payload["allowed_mentions"] = previous_mentions.to_dict()
 
         # if no attachment list was provided but we're uploading new files,
         # use current attachments as the base
         if attachments is MISSING and (file or files):
             attachments = message.attachments
-        if attachments is not MISSING:
-            payload["attachments"] = (
-                [] if attachments is None else [a.to_dict() for a in attachments]
-            )
 
-        if view is not MISSING and components is not MISSING:
-            msg = "cannot mix view and components keyword arguments"
-            raise TypeError(msg)
+        with handle_message_parameters_dict(
+            content=content,
+            file=file,
+            files=files,
+            embed=embed,
+            embeds=embeds,
+            view=view,
+            components=components,
+            flags=flags,
+            allowed_mentions=allowed_mentions,
+            previous_allowed_mentions=base_allowed_mentions,
+            # FIXME: previous_flags ?
+        ) as params:
+            if view is not MISSING:
+                parent._state.prevent_view_updates_for(message.id)
 
-        is_v2 = False
-        if view is not MISSING:
-            state.prevent_view_updates_for(message.id)
-            payload["components"] = [] if view is None else view.to_components()
-        elif components is not MISSING:
-            if components:
-                payload["components"], is_v2 = normalize_components_to_dict(components)
-            else:
-                payload["components"] = []
-
-        # set cv2 flag automatically
-        if is_v2:
-            flags = MessageFlags._from_value(0 if flags is MISSING else flags.value)
-            flags.is_components_v2 = True
-        # components v2 cannot be used with other content fields
-        if flags and flags.is_components_v2 and (content or embeds):
-            msg = "Cannot use v2 components with content or embeds"
-            raise ValueError(msg)
-
-        if flags is not MISSING:
-            payload["flags"] = flags.value
-
-        adapter = async_context.get()
-        response_type = InteractionResponseType.message_update
-        try:
-            await adapter.create_interaction_response(
+            callback_data = await adapter.create_interaction_response(
                 parent.id,
                 parent.token,
                 session=parent._session,
                 type=response_type.value,
-                data=payload,
-                files=files,
+                data=params.payload,
+                files=params.files,
             )
-        finally:
-            if files:
-                for f in files:
-                    f.close()
 
         if view and not view.is_finished():
-            state.store_view(view, message.id)
+            parent._state.store_view(view, message.id)
 
         self._response_type = response_type
 
         if delete_after is not None:
-            await self._parent.delete_original_response(delay=delete_after)
+            await parent.delete_original_response(delay=delete_after)
 
-    async def autocomplete(self, *, choices: Choices) -> None:
+        return InteractionCallbackResponse(callback_data, parent=self._parent)
+
+    async def autocomplete(self, *, choices: Choices) -> InteractionCallbackResponse[None]:
         r"""|coro|
 
         Responds to this interaction by displaying a list of possible autocomplete results.
@@ -1429,6 +1402,13 @@ class InteractionResponse:
             Autocomplete response has failed.
         InteractionResponded
             This interaction has already been responded to before.
+
+        Returns
+        -------
+        :class:`InteractionCallbackResponse`
+            The callback response data.
+
+            .. versionadded:: |vnext|
         """
         if self._response_type is not None:
             raise InteractionResponded(self._parent)
@@ -1458,7 +1438,7 @@ class InteractionResponse:
         parent = self._parent
         adapter = async_context.get()
         response_type = InteractionResponseType.application_command_autocomplete_result
-        await adapter.create_interaction_response(
+        callback_data = await adapter.create_interaction_response(
             parent.id,
             parent.token,
             session=parent._session,
@@ -1468,8 +1448,10 @@ class InteractionResponse:
 
         self._response_type = response_type
 
+        return InteractionCallbackResponse(callback_data, parent=self._parent)
+
     @overload
-    async def send_modal(self, modal: Modal) -> None: ...
+    async def send_modal(self, modal: Modal) -> InteractionCallbackResponse[None]: ...
 
     @overload
     async def send_modal(
@@ -1478,7 +1460,7 @@ class InteractionResponse:
         title: str,
         custom_id: str,
         components: ModalComponents,
-    ) -> None: ...
+    ) -> InteractionCallbackResponse[None]: ...
 
     async def send_modal(
         self,
@@ -1487,7 +1469,7 @@ class InteractionResponse:
         title: str | None = None,
         custom_id: str | None = None,
         components: ModalComponents | None = None,
-    ) -> None:
+    ) -> InteractionCallbackResponse[None]:
         """|coro|
 
         Responds to this interaction by displaying a modal.
@@ -1532,6 +1514,13 @@ class InteractionResponse:
             This interaction cannot be responded with a modal.
         InteractionResponded
             This interaction has already been responded to before.
+
+        Returns
+        -------
+        :class:`InteractionCallbackResponse`
+            The callback response data.
+
+            .. versionadded:: |vnext|
         """
         if modal is not None and any((title, components, custom_id)):
             msg = "Cannot mix modal argument and title, custom_id, components arguments"
@@ -1569,7 +1558,7 @@ class InteractionResponse:
 
         adapter = async_context.get()
         response_type = InteractionResponseType.modal
-        await adapter.create_interaction_response(
+        callback_data = await adapter.create_interaction_response(
             parent.id,
             parent.token,
             session=parent._session,
@@ -1580,6 +1569,8 @@ class InteractionResponse:
 
         if modal is not None:
             parent._state.store_modal(parent.author.id, modal)
+
+        return InteractionCallbackResponse(callback_data, parent=self._parent)
 
     @utils.deprecated("Use `ui.Button(sku_id=...)` instead.")
     async def require_premium(self) -> None:
@@ -1656,7 +1647,10 @@ class InteractionMessage(Message):
     r"""Represents the original interaction response message.
 
     This allows you to edit or delete the message associated with
-    the interaction response. To retrieve this object see :meth:`Interaction.original_response`.
+    the interaction response. You can usually receive this object as the
+    :attr:`~InteractionCallbackResponse.resource` returned by methods such as
+    :meth:`InteractionResponse.send_message`.
+    As an alternative, see :meth:`Interaction.original_response`.
 
     This inherits from :class:`disnake.Message` with changes to
     :meth:`edit` and :meth:`delete` to work.
@@ -1939,6 +1933,7 @@ class InteractionMessage(Message):
         if attachments is MISSING and (file or files):
             attachments = self.attachments
 
+        # FIXME: suppress_embeds overwrites existing flags, should set previous_flags
         return await self._state._interaction.edit_original_response(
             content=content,
             embed=embed,
@@ -2167,3 +2162,93 @@ class InteractionDataResolved(dict[str, Any]):
             return res
 
         return None
+
+
+class InteractionCallbackActivityInstance:
+    """Represents the activity launched by an interaction.
+
+    .. versionadded:: |vnext|
+
+    Attributes
+    ----------
+    id: :class:`str`
+        The instance ID of the launched/joined activity.
+    """
+
+    __slots__ = ("id",)
+
+    def __init__(self, data: InteractionCallbackActivityInstancePayload) -> None:
+        self.id: str = data["id"]
+
+
+ResourceT = TypeVar(
+    "ResourceT",
+    bound=InteractionMessage | InteractionCallbackActivityInstance | None,
+    default=InteractionMessage | InteractionCallbackActivityInstance | None,
+    covariant=True,
+)
+
+
+class InteractionCallbackResponse(Generic[ResourceT]):
+    """Represents the response data from sending an interaction callback,
+    e.g. using :meth:`InteractionResponse.send_message`.
+
+    .. versionadded:: |vnext|
+
+    Attributes
+    ----------
+    id: :class:`int`
+        The ID of the source interaction.
+    type: :class:`InteractionType`
+        The type of the source interaction.
+    activity_instance_id: :class:`str` | :data:`None`
+        The instance ID of the launched/joined activity, if any.
+    message_id: :class:`int` | :data:`None`
+        The ID of the message that was affected (i.e. created or edited) by the
+        interaction response, if any.
+    message_loading: :class:`bool` | :data:`None`
+        Whether the message is in a :attr:`~MessageFlags.loading` state.
+    message_ephemeral: :class:`bool` | :data:`None`
+        Whether the message is :attr:`~MessageFlags.ephemeral`.
+    resource: :class:`InteractionMessage` | :class:`InteractionCallbackActivityInstance` | :data:`None`
+        The resource that was created/affected by the interaction response, if any.
+        The type of this attribute depends on the type of interaction callback that was sent.
+    """
+
+    __slots__ = (
+        "id",
+        "type",
+        "activity_instance_id",
+        "message_id",
+        "message_loading",
+        "message_ephemeral",
+        "resource",
+    )
+
+    def __init__(
+        self, data: InteractionCallbackResponsePayload, *, parent: Interaction[Any]
+    ) -> None:
+        interaction_data = data["interaction"]
+        self.id: int = int(interaction_data["id"])
+        self.type: InteractionType = try_enum(InteractionType, interaction_data["type"])
+
+        self.activity_instance_id: str | None = interaction_data.get("activity_instance_id")
+
+        # NOTE: these are not only for *created* messages, but are also set when using
+        # defer(with_message=False) or edit(), in which case it refers to the original message
+        self.message_id: int | None = utils._get_as_snowflake(
+            interaction_data, "response_message_id"
+        )
+        self.message_loading: bool | None = interaction_data.get("response_message_loading")
+        self.message_ephemeral: bool | None = interaction_data.get("response_message_ephemeral")
+
+        resource: InteractionMessage | InteractionCallbackActivityInstance | None = None
+        if resource_data := data.get("resource"):
+            if message_data := resource_data.get("message"):
+                state = _InteractionMessageState(parent, parent._state)
+                resource = InteractionMessage(
+                    state=cast("ConnectionState", state), channel=parent.channel, data=message_data
+                )
+            elif activity_data := resource_data.get("activity_instance"):
+                resource = InteractionCallbackActivityInstance(activity_data)
+        self.resource: ResourceT = resource  # pyright: ignore[reportAttributeAccessIssue]
