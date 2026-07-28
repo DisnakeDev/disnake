@@ -230,7 +230,7 @@ class Interaction(Generic[ClientT]):
         "_state",
         "_session",
         "_original_response",
-        "_current_response",
+        "_last_response",
         "_cs_response",
         "_cs_followup",
         "_cs_me",
@@ -248,7 +248,7 @@ class Interaction(Generic[ClientT]):
         # cached return value for .original_response()
         self._original_response: InteractionMessage | None = None
         # current message state taking into account all edits etc.
-        self._current_response: InteractionMessage | None = None
+        self._last_response: InteractionMessage | None = None
 
         self.id: int = int(data["id"])
         self.type: InteractionType = try_enum(InteractionType, data["type"])
@@ -417,13 +417,13 @@ class Interaction(Generic[ClientT]):
         """
         return self.expires_at <= utils.utcnow()
 
-    def _update_current_response(
+    def _update_last_response(
         self, response: InteractionMessage | InteractionCallbackResponse[InteractionMessage | None]
     ) -> None:
         if isinstance(response, InteractionMessage):
-            self._current_response = response
+            self._last_response = response
         elif isinstance(response.resource, InteractionMessage):
-            self._current_response = response.resource
+            self._last_response = response.resource
 
     async def original_response(self) -> InteractionMessage:
         """|coro|
@@ -598,13 +598,13 @@ class Interaction(Generic[ClientT]):
             The newly edited message.
         """
         previous_flags: int = 0
-        if self._current_response:
-            previous_flags = self._current_response.flags.value
+        if self._last_response:
+            previous_flags = self._last_response.flags.value
 
             # if no attachment list was provided but we're uploading new files,
             # use current attachments as the base
             if attachments is MISSING and (file or files):
-                attachments = self._current_response.attachments
+                attachments = self._last_response.attachments
 
         previous_mentions: AllowedMentions | None = self._state.allowed_mentions
 
@@ -642,7 +642,7 @@ class Interaction(Generic[ClientT]):
         # The message channel types should always match
         state = _InteractionMessageState(self, self._state)
         message = InteractionMessage(state=state, channel=self.channel, data=data)  # pyright: ignore[reportArgumentType]
-        self._update_current_response(message)
+        self._update_last_response(message)
 
         if view and not view.is_finished():
             self._state.store_view(view, message.id)
@@ -1030,7 +1030,7 @@ class InteractionResponse:
         response = InteractionCallbackResponse[InteractionMessage | None](
             callback_data, parent=self._parent
         )
-        self._parent._update_current_response(response)
+        self._parent._update_last_response(response)
         return response
 
     async def pong(self) -> None:
@@ -1217,7 +1217,7 @@ class InteractionResponse:
         response = InteractionCallbackResponse[InteractionMessage](
             callback_data, parent=self._parent
         )
-        self._parent._update_current_response(response)
+        self._parent._update_last_response(response)
 
         if view is not MISSING:
             if ephemeral and view.timeout is None:
@@ -1402,7 +1402,7 @@ class InteractionResponse:
         response = InteractionCallbackResponse[InteractionMessage](
             callback_data, parent=self._parent
         )
-        self._parent._update_current_response(response)
+        self._parent._update_last_response(response)
 
         if view and not view.is_finished():
             parent._state.store_view(view, message.id)
