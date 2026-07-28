@@ -1223,7 +1223,7 @@ class InteractionResponse:
             if ephemeral and view.timeout is None:
                 view.timeout = 15 * 60.0
 
-            parent._state.store_view(view)
+            parent._state.store_view(view, response.message_id)
 
         if delete_after is not MISSING:
             await parent.delete_original_response(delay=delete_after)
