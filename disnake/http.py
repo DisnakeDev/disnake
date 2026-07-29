@@ -409,14 +409,19 @@ class HTTPClient:
                                 )
                                 self._global_over.clear()
 
-                            await asyncio.sleep(retry_after)
-                            _log.debug("Done sleeping for the rate limit. Retrying...")
-
-                            # release the global lock now that the
-                            # global rate limit has passed
-                            if is_global:
-                                self._global_over.set()
-                                _log.debug("Global rate limit is now over.")
+                            try:
+                                await asyncio.sleep(retry_after)
+                                _log.debug("Done sleeping for the rate limit. Retrying...")
+                            finally:
+                                # release the global lock now that the
+                                # global rate limit has passed.
+                                # this has to happen in a finally, otherwise a
+                                # request cancelled while sleeping would leave
+                                # the event cleared forever, and every later
+                                # request would block on it indefinitely
+                                if is_global:
+                                    self._global_over.set()
+                                    _log.debug("Global rate limit is now over.")
 
                             continue
 
