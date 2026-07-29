@@ -37,6 +37,21 @@ Generally speaking, questions are better suited in our resources below.
 
 ---
 
+## Generative AI Policy
+
+The use of large language models (LLMs) for contributions to this project is **expressly forbidden**.  
+This includes tools like ChatGPT, Copilot, Claude, DeepSeek, and others.
+
+This policy **applies to all parts of the project**, including, but not limited to, code contributions, documentation contributions, and conversations in issues/pull requests.  
+An **exception** applies specifically for translating texts to interact with issues, pull requests, or discussions in the repository.
+
+Not only is AI-generated content typically a detriment to the overall quality of the issue tracker and codebase, resulting in additional work for maintainers and often wasting valuable time, it also raises concerns about copyright and ownership of intellectual property, as LLMs have been shown to potentially reproduce copyrighted material verbatim.  
+AI tools, by their own nature, cannot assess the accuracy or correctness of their own responses/outputs, which makes them unsuitable for environments such as this project, where the responsibility of verifying and correcting potentially entirely fabricated changes is then pushed onto the reviewers.
+
+**As such, if you encounter a bug or would like to see a new feature but don't feel equipped to make those changes yourself, please consider opening a bug report/feature request instead.**
+
+AI tools *can* be used to find information or answer questions, but caution should be exercised nevertheless; responses can potentially be misleading, outdated, or plainly incorrect.
+
 ## Good Bug Reports
 
 To report bugs (or to suggest new features), visit our [issue tracker](https://github.com/DisnakeDev/disnake/issues).
