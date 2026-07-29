@@ -50,7 +50,7 @@ AI tools, by their own nature, cannot assess the accuracy or correctness of thei
 
 **As such, if you encounter a bug or would like to see a new feature but don't feel equipped to make those changes yourself, please consider opening a bug report/feature request instead.**
 
-AI tools *can* be used to find information or answer questions, but caution should be exercised nevertheless; responses can potentially be misleading, outdated, or plainly incorrect.
+AI tools *can* be used to find information, answer questions, or gain understanding of a particular topic (e.g. existing code in a project), but caution should be exercised nevertheless; responses can potentially be misleading, outdated, or plainly incorrect.
 
 ## Good Bug Reports
 
