@@ -48,9 +48,9 @@ An **exception** applies specifically for translating texts to interact with iss
 AI-generated content is typically a detriment to the overall quality of the issue tracker and codebase, resulting in additional work for maintainers and often wasting valuable time; additionally, it raises concerns about copyright and ownership of intellectual property, and it remains unclear whether the output of LLMs is copyrightable in the first place.  
 Generative AI tools, by their own nature, cannot assess the accuracy or correctness of their own responses/outputs, which makes them unsuitable for environments such as this project, where the responsibility of verifying and correcting potentially entirely fabricated changes is then pushed onto the reviewers.
 
-**As such, if you encounter a bug or would like to see a new feature but don't feel equipped to make these changes yourself, please consider opening a bug report/feature request instead.**
+**As such, if you encounter a bug or would like to see a new feature added, but don't feel equipped to make these changes yourself, please consider opening a bug report/feature request instead.**
 
-AI tools *can* be useful to find information, answer questions, or gain further understanding of a particular topic (e.g. existing code in a project), but caution should be exercised nevertheless; responses can possibly be misleading, outdated, or plainly incorrect.
+AI tools *can* be useful to find information, answer questions, or gain further understanding of a particular topic (e.g. existing code in a project), but caution should be exercised nevertheless; their responses can possibly be misleading, outdated, or plainly incorrect.
 
 ## Good Bug Reports
 
