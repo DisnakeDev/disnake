@@ -1,0 +1,1 @@
+Fix a deadlock where cancelling a request while it was waiting out a global rate limit would leave every subsequent request waiting forever.
