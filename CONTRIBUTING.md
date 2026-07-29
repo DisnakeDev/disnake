@@ -11,6 +11,7 @@ The following is a set of guidelines for contributing to the repository. These a
 - [Contributing to disnake](#contributing-to-disnake)
   - [Table of Contents](#table-of-contents)
   - [This is too much to read! I want to ask a question!](#this-is-too-much-to-read-i-want-to-ask-a-question)
+  - [Generative AI Policy](#generative-ai-policy)
   - [Good Bug Reports](#good-bug-reports)
   - [Creating a Pull Request](#creating-a-pull-request)
     - [Overview](#overview)
