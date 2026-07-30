@@ -277,7 +277,7 @@ class InteractionBotBase(CommonBotBase):
             if isinstance(cmd, InvokableMessageCommand)
         }
 
-    def add_app_command(self, app_command: InvokableApplicationCommand) -> None:
+    def add_app_command(self, app_command: InvokableApplicationCommand, /) -> None:
         """Adds an :class:`InvokableApplicationCommand` into the internal list of app commands.
 
         This is usually not called, instead shortcut decorators are used, such as
