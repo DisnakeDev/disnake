@@ -438,29 +438,28 @@ class InteractionBotBase(CommonBotBase):
         :class:`InvokableApplicationCommand` | :data:`None`
             The app command that was removed. If no matching command was found, then :data:`None` is returned instead.
         """
-        if guild_id is not None or self._test_guilds is None:
-            cmd_index = AppCmdIndex(type=cmd_type, name=name, guild_id=guild_id)
-            return self._all_app_commands.pop(cmd_index, None)
+        return self._remove_app_commands(
+            cmd_type, name, guild_ids=[guild_id] if guild_id is not None else None
+        )
 
-        result = None
-        for guild_id in self._test_guilds:
+    def _remove_app_commands(
+        self, cmd_type: ApplicationCommandType, name: str, *, guild_ids: Sequence[int] | None
+    ) -> InvokableApplicationCommand | None:
+        # this is consistent with the behavior of command synchronisation
+        if guild_ids:
+            final_guild_ids = guild_ids
+        else:
+            # use default guilds
+            final_guild_ids = (None,) if self._test_guilds is None else self._test_guilds
+
+        result: InvokableApplicationCommand | None = None
+        for guild_id in final_guild_ids:
             cmd_index = AppCmdIndex(type=cmd_type, name=name, guild_id=guild_id)
             cmd = self._all_app_commands.pop(cmd_index, None)
             if result is None:
                 result = cmd
 
         return result
-
-    def _remove_app_commands(
-        self, cmd_type: ApplicationCommandType, name: str, *, guild_ids: Sequence[int] | None
-    ) -> None:
-        test_guilds = (None,) if self._test_guilds is None else self._test_guilds
-        # this is consistent with the behavior of command synchronisation
-        final_guild_ids = guild_ids or test_guilds
-
-        for guild_id in final_guild_ids:
-            cmd_index = AppCmdIndex(type=cmd_type, name=name, guild_id=guild_id)
-            self._all_app_commands.pop(cmd_index, None)
 
     def _emulate_old_app_command_remove(self, cmd_type: ApplicationCommandType, name: str) -> Any:
         bad_keys: list[AppCmdIndex] = []
