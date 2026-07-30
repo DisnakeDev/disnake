@@ -1089,7 +1089,7 @@ class ApplicationCommandRegistrationError(CommandRegistrationError):
 
     This inherits from :exc:`CommandRegistrationError`
 
-    .. versionadded:: 2.12
+    .. versionadded:: |vnext|
 
     Attributes
     ----------

@@ -292,7 +292,7 @@ class InteractionBotBase(CommonBotBase):
         parameter ``test_guilds`` is specified in the bot constructor, in which case
         this command is registered to those guilds.
 
-        .. versionadded:: 2.12
+        .. versionadded:: |vnext|
 
         .. note::
             Any change to the ``app_command``'s ``name`` and ``guild_ids`` attributes
@@ -412,7 +412,7 @@ class InteractionBotBase(CommonBotBase):
     ) -> InvokableApplicationCommand | None:
         """Removes an :class:`InvokableApplicationCommand` from the internal list of app commands.
 
-        .. versionadded:: 2.10
+        .. versionadded:: |vnext|
 
         Parameters
         ----------

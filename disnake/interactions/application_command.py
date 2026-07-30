@@ -234,7 +234,7 @@ class ApplicationCommandInteractionData(dict[str, Any]):
     guild_id: :class:`int` | :data:`None`
         ID of the guild the command is registered to.
 
-        .. versionadded:: 2.12
+        .. versionadded:: |vnext|
     target_id: :class:`int`
         ID of the user or message targeted by a user or message command.
     target: :class:`User` | :class:`Member` | :class:`Message`
