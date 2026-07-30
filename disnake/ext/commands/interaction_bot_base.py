@@ -136,7 +136,7 @@ def _format_diff(diff: _Diff) -> str:
 
 
 def _match_subcommand_chain(
-    command: InvokableSlashCommand, chain: list[str]
+    command: InvokableSlashCommand, chain: Sequence[str]
 ) -> InvokableSlashCommand | SubCommand | SubCommandGroup | None:
     """An internal function that returns a subcommand with a route matching the chain.
     If there's no match then :data:`None` is returned.
@@ -540,6 +540,36 @@ class InteractionBotBase(CommonBotBase):
         """
         return self._emulate_old_app_command_remove(ApplicationCommandType.message, name)
 
+    def _get_app_command(
+        self, cmd_type: ApplicationCommandType, name: str, *, guild_id: int | None = MISSING
+    ) -> InvokableApplicationCommand | None:
+        if not isinstance(name, str):
+            msg = f"Expected name to be str, not {name.__class__}"
+            raise TypeError(msg)
+
+        if guild_id is not MISSING:
+            cmd_index = AppCmdIndex(type=cmd_type, name=name, guild_id=guild_id)
+            return self._all_app_commands.get(cmd_index)
+
+        # this is mostly for backwards compatibility, as previously the guild_id arg didn't exist
+        result: InvokableApplicationCommand | None = None
+        for command in self._all_app_commands.values():
+            if command.body.type != cmd_type or command.name != name:
+                continue
+
+            if result is None:
+                result = command
+            # we should check whether there's an ambiguity in command search
+            elif command is not result:
+                type_ = "slash" if cmd_type is ApplicationCommandType.chat_input else cmd_type.name
+                msg = (
+                    f"The `guild_id` argument must be provided if there are different {type_} commands "
+                    "with the same name but different guilds or one of them is global."
+                )
+                raise ValueError(msg)
+
+        return result
+
     def get_slash_command(
         self, name: str, *, guild_id: int | None = MISSING
     ) -> InvokableSlashCommand | SubCommandGroup | SubCommand | None:
@@ -547,7 +577,7 @@ class InteractionBotBase(CommonBotBase):
 
         If the name contains spaces, then it will assume that you are looking for a :class:`SubCommand` or
         a :class:`SubCommandGroup`.
-        e.g: ``'foo bar'`` will get the sub command group, or the sub command ``bar`` of the top-level slash command
+        e.g: ``'foo bar'`` will get the sub command or group named ``bar`` of the top-level slash command
         ``foo`` if found, otherwise :data:`None`.
 
         Parameters
@@ -571,39 +601,11 @@ class InteractionBotBase(CommonBotBase):
         :class:`InvokableSlashCommand` | :class:`SubCommandGroup` | :class:`SubCommand` | :data:`None`
             The slash command that was requested. If not found, returns :data:`None`.
         """
-        if not isinstance(name, str):
-            msg = f"Expected name to be str, not {name.__class__}"
-            raise TypeError(msg)
-
         chain = name.split()
-        if guild_id is not MISSING:
-            cmd_index = AppCmdIndex(
-                type=ApplicationCommandType.chat_input, name=chain[0], guild_id=guild_id
-            )
-            command = self._all_app_commands.get(cmd_index)
-            if command is None:
-                return None
-            return _match_subcommand_chain(command, chain)  # pyright: ignore[reportArgumentType]
-
-        # this is mostly for backwards compatibility, as previously the guild_id arg didn't exist
-        result = None
-        for command in self._all_app_commands.values():
-            if not isinstance(command, InvokableSlashCommand):
-                continue
-            chain_match = _match_subcommand_chain(command, chain)
-            if chain_match is None:
-                continue
-            if result is None:
-                result = chain_match
-            # we should check whether there's an ambiguity in command search
-            elif chain_match is not result:
-                msg = (
-                    "The `guild_id` argument must be provided if there are different slash commands "
-                    "with the same name but different guilds or one of them is global."
-                )
-                raise ValueError(msg)
-
-        return result
+        cmd = self._get_app_command(ApplicationCommandType.chat_input, chain[0], guild_id=guild_id)
+        if cmd is None:
+            return None
+        return _match_subcommand_chain(cast("InvokableSlashCommand", cmd), chain)
 
     def get_user_command(
         self, name: str, *, guild_id: int | None = MISSING
@@ -630,29 +632,7 @@ class InteractionBotBase(CommonBotBase):
         :class:`InvokableUserCommand` | :data:`None`
             The user command that was requested. If not found, returns :data:`None`.
         """
-        if guild_id is not MISSING:
-            cmd_index = AppCmdIndex(type=ApplicationCommandType.user, name=name, guild_id=guild_id)
-            command = self._all_app_commands.get(cmd_index)
-            if command is None:
-                return None
-            return command  # pyright: ignore[reportReturnType]
-
-        # this is mostly for backwards compatibility, as previously the guild_id arg didn't exist
-        result = None
-        for command in self._all_app_commands.values():
-            if not isinstance(command, InvokableUserCommand) or command.name != name:
-                continue
-            if result is None:
-                result = command
-            # we should check whether there's an ambiguity in command search
-            elif command is not result:
-                msg = (
-                    "The `guild_id` argument must be provided if there are different user commands "
-                    "with the same name but different guilds or one of them is global."
-                )
-                raise ValueError(msg)
-
-        return result
+        return self._get_app_command(ApplicationCommandType.user, name, guild_id=guild_id)  # pyright: ignore[reportReturnType]
 
     def get_message_command(
         self, name: str, *, guild_id: int | None = MISSING
@@ -679,31 +659,7 @@ class InteractionBotBase(CommonBotBase):
         :class:`InvokableMessageCommand` | :data:`None`
             The message command that was requested. If not found, returns :data:`None`.
         """
-        if guild_id is not MISSING:
-            cmd_index = AppCmdIndex(
-                type=ApplicationCommandType.message, name=name, guild_id=guild_id
-            )
-            command = self._all_app_commands.get(cmd_index)
-            if command is None:
-                return None
-            return command  # pyright: ignore[reportReturnType]
-
-        # this is mostly for backwards compatibility, as previously the guild_id arg didn't exist
-        result = None
-        for command in self._all_app_commands.values():
-            if not isinstance(command, InvokableMessageCommand) or command.name != name:
-                continue
-            if result is None:
-                result = command
-            # we should check whether there's an ambiguity in command search
-            elif command is not result:
-                msg = (
-                    "The `guild_id` argument must be provided if there are different message commands "
-                    "with the same name but different guilds or one of them is global."
-                )
-                raise ValueError(msg)
-
-        return result
+        return self._get_app_command(ApplicationCommandType.message, name, guild_id=guild_id)  # pyright: ignore[reportReturnType]
 
     @overload
     def slash_command(
