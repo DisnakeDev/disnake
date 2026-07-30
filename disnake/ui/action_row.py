@@ -9,19 +9,22 @@ from typing import (
     ClassVar,
     Generic,
     NoReturn,
-    Optional,
-    TypeVar,
-    Union,
+    SupportsIndex,
     cast,
     overload,
 )
 
+from typing_extensions import TypeVar
+
+from .. import utils
 from ..components import (
     ActionRow as ActionRowComponent,
     ActionRowChildComponent,
     ActionRowMessageComponent as ActionRowMessageComponentRaw,
     Button as ButtonComponent,
     ChannelSelectMenu as ChannelSelectComponent,
+    Checkbox as CheckboxComponent,
+    CheckboxGroup as CheckboxGroupComponent,
     Component,
     Container as ContainerComponent,
     FileComponent as FileComponent,
@@ -29,6 +32,7 @@ from ..components import (
     Label as LabelComponent,
     MediaGallery as MediaGalleryComponent,
     MentionableSelectMenu as MentionableSelectComponent,
+    RadioGroup as RadioGroupComponent,
     RoleSelectMenu as RoleSelectComponent,
     Section as SectionComponent,
     Separator as SeparatorComponent,
@@ -39,22 +43,26 @@ from ..components import (
     UserSelectMenu as UserSelectComponent,
 )
 from ..enums import ButtonStyle, ChannelType, ComponentType, TextInputStyle
-from ..utils import MISSING, SequenceProxy, assert_never, copy_doc, deprecated
+from ..utils import MISSING, SequenceProxy, assert_never, copy_doc
 from ._types import (
     ActionRowChildT,
     ActionRowMessageComponent,
     ActionRowModalComponent,
     ComponentInput,
     MessageTopLevelComponent,
+    MessageWithComponents,
     NonActionRowChildT,
 )
 from .button import Button
+from .checkbox import Checkbox
+from .checkbox_group import CheckboxGroup
 from .container import Container
 from .file import File
 from .file_upload import FileUpload
 from .item import UIComponent, WrappedComponent
 from .label import Label
 from .media_gallery import MediaGallery
+from .radio_group import RadioGroup
 from .section import Section
 from .select import ChannelSelect, MentionableSelect, RoleSelect, StringSelect, UserSelect
 from .separator import Separator
@@ -63,12 +71,13 @@ from .text_input import TextInput
 from .thumbnail import Thumbnail
 
 if TYPE_CHECKING:
-    from typing_extensions import Self, TypeAlias
+    from typing import TypeAlias
+
+    from typing_extensions import Self
 
     from ..abc import AnyChannel
     from ..emoji import Emoji
     from ..member import Member
-    from ..message import Message
     from ..partial_emoji import PartialEmoji
     from ..role import Role
     from ..types.components import (
@@ -95,26 +104,24 @@ MessageUIComponent: TypeAlias = ActionRowMessageComponent
 ModalUIComponent: TypeAlias = ActionRowModalComponent
 Components: TypeAlias = ComponentInput[ActionRowChildT, NoReturn]
 
-StrictActionRowChildT = TypeVar(
-    "StrictActionRowChildT", ActionRowMessageComponent, ActionRowModalComponent
+MessageActionRowT = TypeVar(
+    "MessageActionRowT", bound="ActionRow[ActionRowMessageComponent]", infer_variance=True
+)
+ModalActionRowT = TypeVar(
+    "ModalActionRowT", bound="ActionRow[ActionRowModalComponent]", infer_variance=True
 )
 
-# this is cursed
-ButtonCompatibleActionRowT = TypeVar(
-    "ButtonCompatibleActionRowT",
-    bound="Union[ActionRow[ActionRowMessageComponent], ActionRow[WrappedComponent]]",
-)
-SelectCompatibleActionRowT = TypeVar(
-    "SelectCompatibleActionRowT",
-    bound="Union[ActionRow[ActionRowMessageComponent], ActionRow[WrappedComponent]]",
-)
-TextInputCompatibleActionRowT = TypeVar(
-    "TextInputCompatibleActionRowT",
-    bound="Union[ActionRow[ActionRowModalComponent], ActionRow[WrappedComponent]]",
+# TODO(3.0): deprecate ActionRowModalComponent
+ActionRowChildDefaultT = TypeVar(
+    "ActionRowChildDefaultT",
+    ActionRowMessageComponent,
+    ActionRowModalComponent,
+    infer_variance=True,
+    default=ActionRowMessageComponent,
 )
 
 
-class ActionRow(UIComponent, Generic[ActionRowChildT]):
+class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
     """Represents a UI action row. Useful for lower level component manipulation.
 
     .. collapse:: operations
@@ -158,7 +165,8 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
             Components can now be either valid in the context of a message, or in the
             context of a modal. Combining components from both contexts is not supported.
     id: :class:`int`
-        The numeric identifier for the component. Must be unique within the message.
+        The numeric identifier for the component. Must be unique within a message.
+        This is always present in components received from the API.
         If set to ``0`` (the default) when sending a component, the API will assign
         sequential identifiers to the components in the message.
 
@@ -167,43 +175,15 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
 
     __repr_attributes__: ClassVar[tuple[str, ...]] = ("_children",)
 
-    # When unspecified and called empty, default to an ActionRow that takes any kind of component.
-
-    @overload
-    def __init__(self: ActionRow[WrappedComponent], *, id: int = 0) -> None: ...
-
-    # Explicit definitions are needed to make
-    # "ActionRow(StringSelect(), TextInput())" and
-    # "ActionRow(StringSelect(), Button())"
-    # differentiate themselves properly.
-
-    @overload
-    def __init__(
-        self: ActionRow[ActionRowMessageComponent],
-        *components: ActionRowMessageComponent,
-        id: int = 0,
-    ) -> None: ...
-
-    @overload
-    def __init__(
-        self: ActionRow[ActionRowModalComponent],
-        *components: ActionRowModalComponent,
-        id: int = 0,
-    ) -> None: ...
-
-    @overload
-    def __init__(self, *components: ActionRowChildT, id: int = 0) -> None: ...
-
-    # n.b. this should be `*components: ActionRowChildT`, but pyright does not like it
-    def __init__(self, *components: WrappedComponent, id: int = 0) -> None:
+    def __init__(self, *components: ActionRowChildDefaultT, id: int = 0) -> None:
         self._id: int = id
-        self._children: list[ActionRowChildT] = []
+        self._children: list[ActionRowChildDefaultT] = []
 
         for component in components:
             if not isinstance(component, WrappedComponent):
-                msg = f"components should be of type WrappedComponent, got {type(component).__name__}."
+                msg = f"components should be of type WrappedComponent, got {component.__class__.__name__}."
                 raise TypeError(msg)
-            self.append_item(component)  # pyright: ignore[reportArgumentType]
+            self.append_item(component)
 
     def __len__(self) -> int:
         return len(self._children)
@@ -220,8 +200,8 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         self._id = value
 
     @property
-    def children(self) -> Sequence[ActionRowChildT]:
-        """:class:`~collections.abc.Sequence`\\[:class:`WrappedComponent`]:
+    def children(self) -> Sequence[ActionRowChildDefaultT]:
+        r""":class:`~collections.abc.Sequence`\[:class:`WrappedComponent`]:
         A read-only proxy of the UI components stored in this action row. To add/remove
         components to/from the action row, use its methods to directly modify it.
 
@@ -234,7 +214,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
     def width(self) -> int:
         return sum(child.width for child in self._children)
 
-    def append_item(self, item: ActionRowChildT) -> Self:
+    def append_item(self, item: ActionRowChildDefaultT) -> Self:
         """Append a component to the action row. The component's type must match that
         of the action row.
 
@@ -253,7 +233,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         self.insert_item(len(self), item)
         return self
 
-    def insert_item(self, index: int, item: ActionRowChildT) -> Self:
+    def insert_item(self, index: int, item: ActionRowChildDefaultT) -> Self:
         """Insert a component to the action row at a given index. The component's
         type must match that of the action row.
 
@@ -281,18 +261,18 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         return self
 
     def add_button(
-        self: ButtonCompatibleActionRowT,
-        index: Optional[int] = None,
+        self: MessageActionRowT,
+        index: int | None = None,
         *,
         style: ButtonStyle = ButtonStyle.secondary,
-        label: Optional[str] = None,
+        label: str | None = None,
         disabled: bool = False,
-        custom_id: Optional[str] = None,
-        url: Optional[str] = None,
-        emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
-        sku_id: Optional[int] = None,
+        custom_id: str | None = None,
+        url: str | None = None,
+        emoji: str | Emoji | PartialEmoji | None = None,
+        sku_id: int | None = None,
         id: int = 0,
-    ) -> ButtonCompatibleActionRowT:
+    ) -> MessageActionRowT:
         """Add a button to the action row. Can only be used if the action
         row holds message components.
 
@@ -329,7 +309,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
 
             .. versionadded:: 2.11
         id: :class:`int`
-            The numeric identifier for the component.
+            The numeric identifier for the component. Must be unique within a message.
             If set to ``0`` (the default) when sending a component, the API will assign
             sequential identifiers to the components in the message.
 
@@ -356,17 +336,17 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         return self
 
     def add_string_select(
-        self: SelectCompatibleActionRowT,
+        self: MessageActionRowT,
         *,
         custom_id: str = MISSING,
-        placeholder: Optional[str] = None,
+        placeholder: str | None = None,
         min_values: int = 1,
         max_values: int = 1,
         options: SelectOptionInput = MISSING,
         disabled: bool = False,
         id: int = 0,
-    ) -> SelectCompatibleActionRowT:
-        """Add a string select menu to the action row. Can only be used if the action
+    ) -> MessageActionRowT:
+        r"""Add a string select menu to the action row. Can only be used if the action
         row holds message components.
 
         To append a pre-existing :class:`~disnake.ui.StringSelect` use the
@@ -390,14 +370,14 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         max_values: :class:`int`
             The maximum number of items that must be chosen for this select menu.
             Defaults to 1 and must be between 1 and 25.
-        options: :class:`list`\\[:class:`disnake.SelectOption`] | :class:`list`\\[:class:`str`] | :class:`dict`\\[:class:`str`, :class:`str`]
-            A list of options that can be selected in this menu. Use explicit :class:`.SelectOption`\\s
+        options: :class:`list`\[:class:`disnake.SelectOption`] | :class:`list`\[:class:`str`] | :class:`dict`\[:class:`str`, :class:`str`]
+            A list of options that can be selected in this menu. Use explicit :class:`.SelectOption`\s
             for fine-grained control over the options. Alternatively, a list of strings will be treated
             as a list of labels, and a dict will be treated as a mapping of labels to values.
         disabled: :class:`bool`
             Whether the select is disabled or not.
         id: :class:`int`
-            The numeric identifier for the component.
+            The numeric identifier for the component. Must be unique within a message.
             If set to ``0`` (the default) when sending a component, the API will assign
             sequential identifiers to the components in the message.
 
@@ -424,17 +404,17 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
     add_select = add_string_select  # backwards compatibility
 
     def add_user_select(
-        self: SelectCompatibleActionRowT,
+        self: MessageActionRowT,
         *,
         custom_id: str = MISSING,
-        placeholder: Optional[str] = None,
+        placeholder: str | None = None,
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
-        default_values: Optional[Sequence[SelectDefaultValueInputType[Union[User, Member]]]] = None,
+        default_values: Sequence[SelectDefaultValueInputType[User | Member]] | None = None,
         id: int = 0,
-    ) -> SelectCompatibleActionRowT:
-        """Add a user select menu to the action row. Can only be used if the action
+    ) -> MessageActionRowT:
+        r"""Add a user select menu to the action row. Can only be used if the action
         row holds message components.
 
         To append a pre-existing :class:`~disnake.ui.UserSelect` use the
@@ -459,13 +439,13 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
             Defaults to 1 and must be between 1 and 25.
         disabled: :class:`bool`
             Whether the select is disabled. Defaults to ``False``.
-        default_values: :class:`~collections.abc.Sequence`\\[:class:`~disnake.User` | :class:`.Member` | :class:`.SelectDefaultValue` | :class:`.Object`] | :data:`None`
+        default_values: :class:`~collections.abc.Sequence`\[:class:`~disnake.User` | :class:`.Member` | :class:`.SelectDefaultValue` | :class:`.Object`] | :data:`None`
             The list of values (users/members) that are selected by default.
             If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
             .. versionadded:: 2.10
         id: :class:`int`
-            The numeric identifier for the component.
+            The numeric identifier for the component. Must be unique within a message.
             If set to ``0`` (the default) when sending a component, the API will assign
             sequential identifiers to the components in the message.
 
@@ -490,17 +470,17 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         return self
 
     def add_role_select(
-        self: SelectCompatibleActionRowT,
+        self: MessageActionRowT,
         *,
         custom_id: str = MISSING,
-        placeholder: Optional[str] = None,
+        placeholder: str | None = None,
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
-        default_values: Optional[Sequence[SelectDefaultValueInputType[Role]]] = None,
+        default_values: Sequence[SelectDefaultValueInputType[Role]] | None = None,
         id: int = 0,
-    ) -> SelectCompatibleActionRowT:
-        """Add a role select menu to the action row. Can only be used if the action
+    ) -> MessageActionRowT:
+        r"""Add a role select menu to the action row. Can only be used if the action
         row holds message components.
 
         To append a pre-existing :class:`~disnake.ui.RoleSelect` use the
@@ -525,13 +505,13 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
             Defaults to 1 and must be between 1 and 25.
         disabled: :class:`bool`
             Whether the select is disabled. Defaults to ``False``.
-        default_values: :class:`~collections.abc.Sequence`\\[:class:`.Role` | :class:`.SelectDefaultValue` | :class:`.Object`] | :data:`None`
+        default_values: :class:`~collections.abc.Sequence`\[:class:`.Role` | :class:`.SelectDefaultValue` | :class:`.Object`] | :data:`None`
             The list of values (roles) that are selected by default.
             If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
             .. versionadded:: 2.10
         id: :class:`int`
-            The numeric identifier for the component.
+            The numeric identifier for the component. Must be unique within a message.
             If set to ``0`` (the default) when sending a component, the API will assign
             sequential identifiers to the components in the message.
 
@@ -556,19 +536,18 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         return self
 
     def add_mentionable_select(
-        self: SelectCompatibleActionRowT,
+        self: MessageActionRowT,
         *,
         custom_id: str = MISSING,
-        placeholder: Optional[str] = None,
+        placeholder: str | None = None,
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
-        default_values: Optional[
-            Sequence[SelectDefaultValueMultiInputType[Union[User, Member, Role]]]
-        ] = None,
+        default_values: Sequence[SelectDefaultValueMultiInputType[User | Member | Role]]
+        | None = None,
         id: int = 0,
-    ) -> SelectCompatibleActionRowT:
-        """Add a mentionable (user/member/role) select menu to the action row. Can only be used if the action
+    ) -> MessageActionRowT:
+        r"""Add a mentionable (user/member/role) select menu to the action row. Can only be used if the action
         row holds message components.
 
         To append a pre-existing :class:`~disnake.ui.MentionableSelect` use the
@@ -593,15 +572,15 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
             Defaults to 1 and must be between 1 and 25.
         disabled: :class:`bool`
             Whether the select is disabled. Defaults to ``False``.
-        default_values: :class:`~collections.abc.Sequence`\\[:class:`~disnake.User` | :class:`.Member` | :class:`.Role` | :class:`.SelectDefaultValue`] | :data:`None`
+        default_values: :class:`~collections.abc.Sequence`\[:class:`~disnake.User` | :class:`.Member` | :class:`.Role` | :class:`.SelectDefaultValue`] | :data:`None`
             The list of values (users/roles) that are selected by default.
             If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
-            Note that unlike other select menu types, this does not support :class:`.Object`\\s due to ambiguities.
+            Note that unlike other select menu types, this does not support :class:`.Object`\s due to ambiguities.
 
             .. versionadded:: 2.10
         id: :class:`int`
-            The numeric identifier for the component.
+            The numeric identifier for the component. Must be unique within a message.
             If set to ``0`` (the default) when sending a component, the API will assign
             sequential identifiers to the components in the message.
 
@@ -626,18 +605,18 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         return self
 
     def add_channel_select(
-        self: SelectCompatibleActionRowT,
+        self: MessageActionRowT,
         *,
         custom_id: str = MISSING,
-        placeholder: Optional[str] = None,
+        placeholder: str | None = None,
         min_values: int = 1,
         max_values: int = 1,
         disabled: bool = False,
-        channel_types: Optional[list[ChannelType]] = None,
-        default_values: Optional[Sequence[SelectDefaultValueInputType[AnyChannel]]] = None,
+        channel_types: list[ChannelType] | None = None,
+        default_values: Sequence[SelectDefaultValueInputType[AnyChannel]] | None = None,
         id: int = 0,
-    ) -> SelectCompatibleActionRowT:
-        """Add a channel select menu to the action row. Can only be used if the action
+    ) -> MessageActionRowT:
+        r"""Add a channel select menu to the action row. Can only be used if the action
         row holds message components.
 
         To append a pre-existing :class:`~disnake.ui.ChannelSelect` use the
@@ -662,16 +641,16 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
             Defaults to 1 and must be between 1 and 25.
         disabled: :class:`bool`
             Whether the select is disabled. Defaults to ``False``.
-        channel_types: :class:`list`\\[:class:`.ChannelType`] | :data:`None`
+        channel_types: :class:`list`\[:class:`.ChannelType`] | :data:`None`
             The list of channel types that can be selected in this select menu.
             Defaults to all types (i.e. :data:`None`).
-        default_values: :class:`~collections.abc.Sequence`\\[:class:`.abc.GuildChannel` | :class:`.Thread` | :class:`.abc.PrivateChannel` | :class:`.PartialMessageable` | :class:`.SelectDefaultValue` | :class:`.Object`] | :data:`None`
+        default_values: :class:`~collections.abc.Sequence`\[:class:`.abc.GuildChannel` | :class:`.Thread` | :class:`.abc.PrivateChannel` | :class:`.PartialMessageable` | :class:`.SelectDefaultValue` | :class:`.Object`] | :data:`None`
             The list of values (channels) that are selected by default.
             If set, the number of items must be within the bounds set by ``min_values`` and ``max_values``.
 
             .. versionadded:: 2.10
         id: :class:`int`
-            The numeric identifier for the component.
+            The numeric identifier for the component. Must be unique within a message.
             If set to ``0`` (the default) when sending a component, the API will assign
             sequential identifiers to the components in the message.
 
@@ -696,20 +675,20 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         )
         return self
 
-    @deprecated('Label("<text>", TextInput(...))')
+    @utils.deprecated('Use `Label("<text>", TextInput(...))` instead.')
     def add_text_input(
-        self: TextInputCompatibleActionRowT,
+        self: ModalActionRowT,  # pyright: ignore[reportGeneralTypeIssues]
         *,
         label: str,
         custom_id: str,
         style: TextInputStyle = TextInputStyle.short,
-        placeholder: Optional[str] = None,
-        value: Optional[str] = None,
+        placeholder: str | None = None,
+        value: str | None = None,
         required: bool = True,
-        min_length: Optional[int] = None,
-        max_length: Optional[int] = None,
+        min_length: int | None = None,
+        max_length: int | None = None,
         id: int = 0,
-    ) -> TextInputCompatibleActionRowT:
+    ) -> ModalActionRowT:
         """Add a text input to the action row. Can only be used if the action
         row holds modal components.
 
@@ -743,9 +722,9 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         max_length: :class:`int` | :data:`None`
             The maximum length of the text input.
         id: :class:`int`
-            The numeric identifier for the component.
+            The numeric identifier for the component. Must be unique within a modal.
             If set to ``0`` (the default) when sending a component, the API will assign
-            sequential identifiers to the components in the message.
+            sequential identifiers to the components in the modal.
 
             .. versionadded:: 2.11
 
@@ -755,7 +734,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
             The width of the action row exceeds 5.
         """
         self.append_item(
-            TextInput(
+            TextInput(  # pyright: ignore[reportDeprecated]
                 id=id,
                 label=label,
                 custom_id=custom_id,
@@ -780,7 +759,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         self._children.clear()
         return self
 
-    def remove_item(self, item: ActionRowChildT) -> Self:
+    def remove_item(self, item: ActionRowChildDefaultT) -> Self:
         """Remove a component from the action row.
 
         This function returns the class instance to allow for fluent-style chaining.
@@ -800,7 +779,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
         self._children.remove(item)
         return self
 
-    def pop(self, index: int) -> ActionRowChildT:
+    def pop(self, index: int) -> ActionRowChildDefaultT:
         """Pop the component at the provided index from the action row.
 
         .. versionadded:: 2.6
@@ -834,31 +813,34 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
     def from_component(cls, action_row: ActionRowComponent) -> Self:
         return cls(
             *cast(
-                "list[ActionRowChildT]",
+                "list[ActionRowChildDefaultT]",
                 [_to_ui_component(c) for c in action_row.children],
             ),
             id=action_row.id,
         )
 
-    def __delitem__(self, index: Union[int, slice]) -> None:
+    def __delitem__(self, index: SupportsIndex | slice[SupportsIndex | None]) -> None:
         del self._children[index]
 
     @overload
-    def __getitem__(self, index: int) -> ActionRowChildT: ...
+    def __getitem__(self, index: SupportsIndex) -> ActionRowChildDefaultT: ...
 
     @overload
-    def __getitem__(self, index: slice) -> Sequence[ActionRowChildT]: ...
+    def __getitem__(self, index: slice[SupportsIndex | None]) -> list[ActionRowChildDefaultT]: ...
 
     def __getitem__(
-        self, index: Union[int, slice]
-    ) -> Union[ActionRowChildT, Sequence[ActionRowChildT]]:
+        self, index: SupportsIndex | slice[SupportsIndex | None]
+    ) -> ActionRowChildDefaultT | list[ActionRowChildDefaultT]:
         return self._children[index]
 
-    def __iter__(self) -> Iterator[ActionRowChildT]:
+    def __iter__(self) -> Iterator[ActionRowChildDefaultT]:
         return iter(self._children)
 
     @classmethod
-    @deprecated()
+    @utils.deprecated(
+        "Use of action rows in modals is deprecated. "
+        "Compatible components can be passed directly to modals."
+    )
     def with_modal_components(cls, *, id: int = 0) -> ActionRow[ActionRowModalComponent]:
         """Create an empty action row meant to store components compatible with
         :class:`disnake.ui.Modal`. Saves the need to import type specifiers to
@@ -895,25 +877,25 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
     @classmethod
     def rows_from_message(
         cls,
-        message: Message,
+        message: MessageWithComponents,
         *,
         strict: bool = True,
     ) -> list[ActionRow[ActionRowMessageComponent]]:
-        """Create a list of up to 5 action rows from the components on an existing message.
+        r"""Create a list of up to 5 action rows from the components on an existing message.
 
         This will abide by existing component format on the message, including component
         ordering and rows. Components will be transformed to UI kit components, such that
         they can be easily modified and re-sent as action rows.
 
         .. note::
-            This only supports :class:`ActionRow`\\s and associated components, i.e. no v2 components.
+            This only supports :class:`ActionRow`\s and associated components, i.e. no v2 components.
             See :func:`.ui.components_from_message` for a function that supports all component types.
 
         .. versionadded:: 2.6
 
         Parameters
         ----------
-        message: :class:`disnake.Message`
+        message: :class:`~disnake.Message` | :class:`~disnake.ForwardedMessage`
             The message from which to extract the components.
         strict: :class:`bool`
             Whether or not to raise an exception if an unknown component type is encountered.
@@ -926,7 +908,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
 
         Returns
         -------
-        :class:`list`\\[:class:`ActionRow`]:
+        :class:`list`\[:class:`ActionRow`]:
             The action rows parsed from the components on the message.
         """
         rows: list[ActionRow[ActionRowMessageComponent]] = []
@@ -951,24 +933,24 @@ class ActionRow(UIComponent, Generic[ActionRowChildT]):
     @staticmethod
     def walk_components(
         action_rows: Sequence[ActionRow[ActionRowChildT]],
-    ) -> Generator[tuple[ActionRow[ActionRowChildT], ActionRowChildT], None, None]:
-        """Iterate over the components in a sequence of action rows, yielding each
+    ) -> Generator[tuple[ActionRow[ActionRowChildT], ActionRowChildT]]:
+        r"""Iterate over the components in a sequence of action rows, yielding each
         individual component together with the action row of which it is a child.
 
         .. note::
-            This only supports :class:`ActionRow`\\s, i.e. no v2 components.
+            This only supports :class:`ActionRow`\s, i.e. no v2 components.
             See :func:`.ui.walk_components` for a function that supports all component types.
 
         .. versionadded:: 2.6
 
         Parameters
         ----------
-        action_rows: :class:`~collections.abc.Sequence`\\[:class:`ActionRow`]
+        action_rows: :class:`~collections.abc.Sequence`\[:class:`ActionRow`]
             The sequence of action rows over which to iterate.
 
         Yields
         ------
-        :class:`tuple`\\[:class:`ActionRow`, :class:`WrappedComponent`]
+        :class:`tuple`\[:class:`ActionRow`, :class:`WrappedComponent`]
             A tuple containing an action row and a component of that action row.
         """
         for row in tuple(action_rows):
@@ -992,12 +974,12 @@ def normalize_components(
 @overload
 def normalize_components(
     components: ComponentInput[ActionRowChildT, NonActionRowChildT], /, modal: bool = False
-) -> Sequence[Union[ActionRow[ActionRowChildT], NonActionRowChildT]]: ...
+) -> Sequence[ActionRow[ActionRowChildT] | NonActionRowChildT]: ...
 
 
 def normalize_components(
     components: ComponentInput[ActionRowChildT, NonActionRowChildT], /, modal: bool = False
-) -> Sequence[Union[ActionRow[ActionRowChildT], NonActionRowChildT]]:
+) -> Sequence[ActionRow[ActionRowChildT] | NonActionRowChildT]:
     """Wraps consecutive actionrow-compatible components or lists in `ActionRow`s,
     while respecting the width limit. Other components are returned as-is.
 
@@ -1007,7 +989,7 @@ def normalize_components(
     if not isinstance(components, Sequence):
         components = [components]
 
-    result: list[Union[ActionRow[ActionRowChildT], NonActionRowChildT]] = []
+    result: list[ActionRow[ActionRowChildT] | NonActionRowChildT] = []
     auto_row: ActionRow[ActionRowChildT] = ActionRow[ActionRowChildT]()
 
     wrap_types = TextInput if modal else WrappedComponent
@@ -1093,14 +1075,14 @@ def _walk_internal(component: ComponentT, seen: set[ComponentT]) -> Iterator[Com
 
 
 def walk_components(components: Sequence[ComponentT]) -> Iterator[ComponentT]:
-    """Iterate over given components, yielding each individual component,
+    r"""Iterate over given components, yielding each individual component,
     including child components where applicable (e.g. for :class:`ActionRow` and :class:`Container`).
 
     .. versionadded:: 2.11
 
     Parameters
     ----------
-    components: :class:`~collections.abc.Sequence`\\[:class:`~disnake.Component`] | :class:`~collections.abc.Sequence`\\[:class:`UIComponent`]
+    components: :class:`~collections.abc.Sequence`\[:class:`~disnake.Component`] | :class:`~collections.abc.Sequence`\[:class:`UIComponent`]
         The sequence of components to iterate over. This supports both :class:`disnake.Component`
         objects and :class:`.ui.UIComponent` objects.
 
@@ -1114,8 +1096,8 @@ def walk_components(components: Sequence[ComponentT]) -> Iterator[ComponentT]:
         yield from _walk_internal(item, seen)
 
 
-def components_from_message(message: Message) -> list[MessageTopLevelComponent]:
-    """Create a list of :class:`UIComponent`\\s from the components of an existing message.
+def components_from_message(message: MessageWithComponents) -> list[MessageTopLevelComponent]:
+    r"""Create a list of :class:`UIComponent`\s from the components of an existing message.
 
     This will abide by existing component format on the message, including component
     ordering. Components will be transformed to UI kit components, such that
@@ -1125,7 +1107,7 @@ def components_from_message(message: Message) -> list[MessageTopLevelComponent]:
 
     Parameters
     ----------
-    message: :class:`disnake.Message`
+    message: :class:`~disnake.Message` | :class:`~disnake.ForwardedMessage`
         The message from which to extract the components.
 
     Raises
@@ -1135,7 +1117,7 @@ def components_from_message(message: Message) -> list[MessageTopLevelComponent]:
 
     Returns
     -------
-    :class:`list`\\[:class:`UIComponent`]:
+    :class:`list`\[:class:`UIComponent`]:
         The ui components parsed from the components on the message.
     """
     components: list[UIComponent] = [_to_ui_component(c) for c in message.components]
@@ -1160,6 +1142,9 @@ UI_COMPONENT_LOOKUP: Mapping[type[Component], type[UIComponent]] = {
     ContainerComponent: Container,
     LabelComponent: Label,
     FileUploadComponent: FileUpload,
+    RadioGroupComponent: RadioGroup,
+    CheckboxGroupComponent: CheckboxGroup,
+    CheckboxComponent: Checkbox,
 }
 
 
@@ -1176,7 +1161,7 @@ def _to_ui_component(component: Component) -> UIComponent:
 
 def _message_component_to_item(
     component: ActionRowMessageComponentRaw,
-) -> Optional[ActionRowMessageComponent]:
+) -> ActionRowMessageComponent | None:
     if isinstance(
         component,
         (

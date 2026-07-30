@@ -5,7 +5,7 @@ import importlib
 import inspect
 import re
 from collections import defaultdict
-from typing import TYPE_CHECKING, ClassVar, NamedTuple, Optional
+from typing import TYPE_CHECKING, ClassVar, NamedTuple
 
 from docutils import nodes
 from sphinx import addnodes
@@ -59,13 +59,10 @@ def visit_attributetabletitle_node(self: HTMLTranslator, node: nodes.Element) ->
 
 
 def visit_attributetablebadge_node(self: HTMLTranslator, node: nodes.Element) -> None:
-    """Add a class to each badge of the type that it is."""
-    badge_type: str = node["badge-type"]
-    if badge_type not in ("coroutine", "decorator", "method", "classmethod"):
-        msg = f"badge_type {badge_type} is currently unsupported"
-        raise RuntimeError(msg)
     attributes = {
-        "class": f"badge-{badge_type}",
+        "class": "py-attribute-table-badge",
+        # note: in localized documentation builds, this will be an already translated string
+        "title": node["badge-type"],
     }
     self.body.append(self.starttag(node, "span", **attributes))  # pyright: ignore[reportArgumentType]
 
@@ -104,7 +101,7 @@ class PyAttributeTable(SphinxDirective):
     final_argument_whitespace = False
     option_spec: ClassVar[OptionSpec] = {}
 
-    def parse_name(self, content: str) -> tuple[str, Optional[str]]:
+    def parse_name(self, content: str) -> tuple[str, str | None]:
         match = _name_parser_regex.match(content)
         path, name = match.groups() if match else (None, None)
         if path:
@@ -127,7 +124,7 @@ class PyAttributeTable(SphinxDirective):
                 <span>_('Attributes')</span>
                 <ul>
                     <li>
-                        <a href="...">
+                        <a href="..."></a>
                     </li>
                 </ul>
             </div>
@@ -135,8 +132,8 @@ class PyAttributeTable(SphinxDirective):
                 <span>_('Methods')</span>
                 <ul>
                     <li>
+                        <span class="py-attribute-table-badge" title="decorator">D</span>
                         <a href="..."></a>
-                        <span class="py-attribute-badge" title="decorator">D</span>
                     </li>
                 </ul>
             </div>
@@ -182,7 +179,7 @@ def build_lookup_table(env: BuildEnvironment) -> dict[str, list[str]]:
 class TableElement(NamedTuple):
     fullname: str
     label: str
-    badge: Optional[attributetablebadge]
+    badge: attributetablebadge | None
 
 
 def process_attributetable(app: Sphinx, doctree: nodes.document, docname: str) -> None:

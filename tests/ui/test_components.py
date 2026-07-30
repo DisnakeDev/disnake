@@ -20,7 +20,7 @@ all_ui_component_objects: list[ui.UIComponent] = [
     ui.RoleSelect(),
     ui.StringSelect(),
     ui.UserSelect(),
-    ui.TextInput(label="", custom_id=""),
+    ui.TextInput(),
     ui.Section(accessory=ui.Button()),
     ui.TextDisplay(""),
     ui.Thumbnail(""),
@@ -28,8 +28,11 @@ all_ui_component_objects: list[ui.UIComponent] = [
     ui.File("attachment://x"),
     ui.Separator(),
     ui.Container(),
-    ui.Label("", ui.TextInput(label="", custom_id="")),
+    ui.Label("", ui.TextInput()),
     ui.FileUpload(),
+    ui.RadioGroup([]),
+    ui.CheckboxGroup([]),
+    ui.Checkbox(),
 ]
 
 _missing = set(all_ui_component_types) ^ set(map(type, all_ui_component_objects))
@@ -39,7 +42,7 @@ assert not _missing, f"missing component objects: {_missing}"
 @pytest.mark.parametrize(
     "obj",
     all_ui_component_objects,
-    ids=[type(o).__name__ for o in all_ui_component_objects],
+    ids=[o.__class__.__name__ for o in all_ui_component_objects],
 )
 def test_id_property(obj: ui.UIComponent) -> None:
     assert obj.id == 0

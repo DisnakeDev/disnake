@@ -7,23 +7,19 @@ import pytest
 from typing_extensions import assert_type
 
 import disnake
-from disnake.ui import (
-    ActionRow,
-    Button,
-    Label,
-    Separator,
-    StringSelect,
-    TextInput,
-    WrappedComponent,
-)
+from disnake.ui import ActionRow, Button, Label, Separator, StringSelect, TextInput
 from disnake.ui._types import ActionRowMessageComponent, ActionRowModalComponent
-from disnake.ui.action_row import normalize_components, normalize_components_to_dict
+from disnake.ui.action_row import (
+    ActionRowChildDefaultT,
+    normalize_components,
+    normalize_components_to_dict,
+)
 
 button1 = Button()
 button2 = Button()
 button3 = Button()
 select = StringSelect()
-text_input = TextInput(label="a", custom_id="b")
+text_input = TextInput(label="a", custom_id="b")  # pyright: ignore[reportDeprecated]
 separator = Separator()
 label__text = Label("a", text_input)
 label__select = Label("a", select)
@@ -82,7 +78,7 @@ class TestActionRow:
             _ = ActionRow().add_button
             _ = ActionRow.with_message_components().add_button
             # should not work
-            _ = ActionRow.with_modal_components().add_button  # pyright: ignore[reportAttributeAccessIssue]
+            _ = ActionRow.with_modal_components().add_button  # pyright: ignore[reportDeprecated, reportAttributeAccessIssue]
 
     def test_add_select(self) -> None:
         r = ActionRow.with_message_components()
@@ -96,21 +92,21 @@ class TestActionRow:
             _ = ActionRow().add_string_select
             _ = ActionRow.with_message_components().add_string_select
             # should not work
-            _ = ActionRow.with_modal_components().add_select  # pyright: ignore[reportAttributeAccessIssue]
+            _ = ActionRow.with_modal_components().add_select  # pyright: ignore[reportDeprecated, reportAttributeAccessIssue]
 
     def test_add_text_input(self) -> None:
         with pytest.warns(DeprecationWarning):
-            r = ActionRow.with_modal_components()
+            r = ActionRow.with_modal_components()  # pyright: ignore[reportDeprecated]
         with pytest.warns(DeprecationWarning):
-            r.add_text_input(label="a", custom_id="asdf")
+            r.add_text_input(label="a", custom_id="asdf")  # pyright: ignore[reportDeprecated]
 
         (c,) = r.children
         assert isinstance(c, TextInput)
         assert c.custom_id == "asdf"
 
         if TYPE_CHECKING:
-            _ = ActionRow().add_text_input
-            _ = ActionRow.with_modal_components().add_text_input
+            _ = ActionRow[TextInput]().add_text_input  # pyright: ignore[reportDeprecated]
+            _ = ActionRow.with_modal_components().add_text_input  # pyright: ignore[reportDeprecated]
             # should not work
             _ = ActionRow.with_message_components().add_text_input  # pyright: ignore[reportAttributeAccessIssue]
 
@@ -138,7 +134,7 @@ class TestActionRow:
 
     def test_with_components(self) -> None:
         with pytest.warns(DeprecationWarning):
-            row_modal = ActionRow.with_modal_components()
+            row_modal = ActionRow.with_modal_components()  # pyright: ignore[reportDeprecated]
         assert list(row_modal.children) == []
         row_msg = ActionRow.with_message_components()
         assert list(row_msg.children) == []
@@ -205,7 +201,7 @@ class TestActionRow:
 
     # this method is mainly for pyright to check, the asserts wouldn't do anything at runtime
     def _test_typing_init(self) -> None:  # pragma: no cover
-        assert_type(ActionRow(), ActionRow[WrappedComponent])
+        assert_type(ActionRow(), ActionRow[ActionRowMessageComponent])
 
         assert_type(ActionRow(button1), ActionRow[ActionRowMessageComponent])
         assert_type(ActionRow(select), ActionRow[ActionRowMessageComponent])
@@ -213,6 +209,25 @@ class TestActionRow:
 
         assert_type(ActionRow(button1, select), ActionRow[ActionRowMessageComponent])
         assert_type(ActionRow(select, button1), ActionRow[ActionRowMessageComponent])
+
+        # TextInput cannot be mixed with message components
+        ActionRow(button1, text_input)  # pyright: ignore[reportArgumentType]
+        ActionRow(select, text_input)  # pyright: ignore[reportArgumentType]
+        ActionRow(text_input, select)  # pyright: ignore[reportArgumentType]
+
+        # ActionRow.add_* should support subclasses
+        class MyActionRow(ActionRow[ActionRowChildDefaultT]): ...
+
+        ac = MyActionRow()
+        assert_type(ac, MyActionRow[ActionRowMessageComponent])
+        assert_type(ac.add_button(), MyActionRow[ActionRowMessageComponent])
+
+        ac_ti = MyActionRow[TextInput]()
+        assert_type(ac_ti, MyActionRow[ActionRowModalComponent])
+        assert_type(
+            ac_ti.add_text_input(label="", custom_id=""),  # pyright: ignore[reportDeprecated]
+            MyActionRow[ActionRowModalComponent],
+        )
 
 
 @pytest.mark.parametrize(

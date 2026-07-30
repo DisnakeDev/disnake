@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, ClassVar, Union, cast
+from typing import TYPE_CHECKING, Any, ClassVar, TypeAlias, cast
 
 from ..components import Section as SectionComponent
 from ..enums import ComponentType
@@ -16,13 +16,13 @@ if TYPE_CHECKING:
     from .button import Button
     from .thumbnail import Thumbnail
 
-    SectionAccessoryUIComponent = Union[Thumbnail, Button[Any]]
+    SectionAccessoryUIComponent: TypeAlias = Thumbnail | Button[Any]
 
 __all__ = ("Section",)
 
 
 class Section(UIComponent):
-    """Represents a UI section.
+    r"""Represents a UI section.
 
     This allows displaying an accessory (thumbnail or button) next to a block of text.
 
@@ -35,13 +35,14 @@ class Section(UIComponent):
     accessory: :class:`~.ui.Thumbnail` | :class:`~.ui.Button`
         The accessory component displayed next to the section text.
     id: :class:`int`
-        The numeric identifier for the component. Must be unique within the message.
+        The numeric identifier for the component. Must be unique within a message.
+        This is always present in components received from the API.
         If set to ``0`` (the default) when sending a component, the API will assign
         sequential identifiers to the components in the message.
 
     Attributes
     ----------
-    children: :class:`list`\\[:class:`~.ui.TextDisplay`]
+    children: :class:`list`\[:class:`~.ui.TextDisplay`]
         The list of text items in this section.
     accessory: :class:`~.ui.Thumbnail` | :class:`~.ui.Button`
         The accessory component displayed next to the section text.
@@ -54,7 +55,7 @@ class Section(UIComponent):
 
     def __init__(
         self,
-        *components: Union[str, TextDisplay],
+        *components: str | TextDisplay,
         accessory: SectionAccessoryUIComponent,
         id: int = 0,
     ) -> None:

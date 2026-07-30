@@ -9,11 +9,11 @@ import logging
 import sys
 import traceback
 import warnings
-from collections.abc import Iterable
-from typing import TYPE_CHECKING, Any, Callable, Optional, TypeVar, Union
+from collections.abc import Callable, Iterable
+from typing import TYPE_CHECKING, Any, TypeAlias, TypeVar, overload
 
 import disnake
-from disnake.utils import iscoroutinefunction
+from disnake import utils
 
 from . import errors
 from .common_bot_base import CommonBotBase
@@ -42,7 +42,7 @@ T = TypeVar("T")
 CFT = TypeVar("CFT", bound="CoroFunc")
 CXT = TypeVar("CXT", bound="Context")
 
-PrefixType = Union[str, Iterable[str]]
+PrefixType: TypeAlias = str | Iterable[str]
 
 _log = logging.getLogger(__name__)
 
@@ -105,13 +105,36 @@ _default: Any = _DefaultRepr()
 
 
 class BotBase(CommonBotBase, GroupMixin):
+    @overload
     def __init__(
         self,
-        command_prefix: Optional[
-            Union[PrefixType, Callable[[Self, Message], MaybeCoro[PrefixType]]]
-        ] = None,
-        help_command: Optional[HelpCommand] = _default,
-        description: Optional[str] = None,
+        command_prefix: PrefixType | Callable[[Self, Message], MaybeCoro[PrefixType]],
+        help_command: HelpCommand | None = ...,
+        description: str | None = None,
+        *,
+        strip_after_prefix: bool = False,
+        **options: Any,
+    ) -> None: ...
+
+    @overload
+    @utils.deprecated(
+        "Using `command_prefix=None` is deprecated. Use `(AutoSharded)InteractionBot` instead."
+    )
+    def __init__(
+        self,
+        command_prefix: None = None,
+        help_command: HelpCommand | None = ...,
+        description: str | None = None,
+        *,
+        strip_after_prefix: bool = False,
+        **options: Any,
+    ) -> None: ...
+
+    def __init__(
+        self,
+        command_prefix: PrefixType | Callable[[Self, Message], MaybeCoro[PrefixType]] | None = None,
+        help_command: HelpCommand | None = _default,
+        description: str | None = None,
         *,
         strip_after_prefix: bool = False,
         **options: Any,
@@ -128,7 +151,7 @@ class BotBase(CommonBotBase, GroupMixin):
             else "InteractionBot"
         )
         if command_prefix is None:
-            disnake.utils.warn_deprecated(
+            utils.warn_deprecated(
                 "Using `command_prefix=None` is deprecated and will result in "
                 "an error in future versions. "
                 f"If you don't need any prefix functionality, consider using {alternative}.",
@@ -154,10 +177,10 @@ class BotBase(CommonBotBase, GroupMixin):
         self._checks: list[Check] = []
         self._check_once: list[Check] = []
 
-        self._before_invoke: Optional[CoroFunc] = None
-        self._after_invoke: Optional[CoroFunc] = None
+        self._before_invoke: CoroFunc | None = None
+        self._after_invoke: CoroFunc | None = None
 
-        self._help_command: Optional[HelpCommand] = None
+        self._help_command: HelpCommand | None = None
         self.description: str = inspect.cleandoc(description) if description else ""
         self.strip_after_prefix: bool = strip_after_prefix
 
@@ -251,7 +274,7 @@ class BotBase(CommonBotBase, GroupMixin):
             pass
 
     def check(self, func: T) -> T:
-        """A decorator that adds a global check to the bot.
+        r"""A decorator that adds a global check to the bot.
 
         This is for text commands only, and doesn't apply to application commands.
 
@@ -263,7 +286,7 @@ class BotBase(CommonBotBase, GroupMixin):
 
             This function can either be a regular function or a coroutine function.
 
-        Similar to a command :func:`.check`\\, this takes a single parameter
+        Similar to a command :func:`.check`\, this takes a single parameter
         of type :class:`.Context` and can only raise exceptions inherited from
         :exc:`.CommandError`.
 
@@ -281,7 +304,7 @@ class BotBase(CommonBotBase, GroupMixin):
         return func
 
     def check_once(self, func: CFT) -> CFT:
-        """A decorator that adds a "call once" global check to the bot.
+        r"""A decorator that adds a "call once" global check to the bot.
 
         This is for text commands only, and doesn't apply to application commands.
 
@@ -303,7 +326,7 @@ class BotBase(CommonBotBase, GroupMixin):
 
             This function can either be a regular function or a coroutine function.
 
-        Similar to a command :func:`.check`\\, this takes a single parameter
+        Similar to a command :func:`.check`\, this takes a single parameter
         of type :class:`.Context` and can only raise exceptions inherited from
         :exc:`.CommandError`.
 
@@ -356,7 +379,7 @@ class BotBase(CommonBotBase, GroupMixin):
         TypeError
             The argument passed is not actually a coroutine function.
         """
-        if not iscoroutinefunction(coro):
+        if not inspect.iscoroutinefunction(coro):
             msg = "The pre-invoke hook must be a coroutine function."
             raise TypeError(msg)
 
@@ -364,7 +387,7 @@ class BotBase(CommonBotBase, GroupMixin):
         return coro
 
     def after_invoke(self, coro: CFT) -> CFT:
-        """A decorator that registers a coroutine function as a post-invoke hook.
+        r"""A decorator that registers a coroutine function as a post-invoke hook.
 
         This is for text commands only, and doesn't apply to application commands.
 
@@ -376,10 +399,10 @@ class BotBase(CommonBotBase, GroupMixin):
 
         .. note::
 
-            Similar to :meth:`~.Bot.before_invoke`\\, this is not called unless
+            Similar to :meth:`~.Bot.before_invoke`\, this is not called unless
             checks and argument parsing procedures succeed. This hook is,
             however, **always** called regardless of the internal command
-            callback raising an error (i.e. :exc:`.CommandInvokeError`\\).
+            callback raising an error (i.e. :exc:`.CommandInvokeError`\).
             This makes it ideal for clean-up scenarios.
 
         Parameters
@@ -392,7 +415,7 @@ class BotBase(CommonBotBase, GroupMixin):
         TypeError
             The argument passed is not actually a coroutine function.
         """
-        if not iscoroutinefunction(coro):
+        if not inspect.iscoroutinefunction(coro):
             msg = "The post-invoke hook must be a coroutine function."
             raise TypeError(msg)
 
@@ -413,11 +436,11 @@ class BotBase(CommonBotBase, GroupMixin):
     # help command stuff
 
     @property
-    def help_command(self) -> Optional[HelpCommand]:
+    def help_command(self) -> HelpCommand | None:
         return self._help_command
 
     @help_command.setter
-    def help_command(self, value: Optional[HelpCommand]) -> None:
+    def help_command(self, value: HelpCommand | None) -> None:
         if value is not None and not isinstance(value, HelpCommand):
             msg = "help_command must be a subclass of HelpCommand or None"
             raise TypeError(msg)
@@ -432,8 +455,8 @@ class BotBase(CommonBotBase, GroupMixin):
 
     # command processing
 
-    async def get_prefix(self, message: Message) -> Optional[Union[list[str], str]]:
-        """|coro|
+    async def get_prefix(self, message: Message) -> list[str] | str | None:
+        r"""|coro|
 
         Retrieves the prefix the bot is listening to
         with the message as a context.
@@ -445,7 +468,7 @@ class BotBase(CommonBotBase, GroupMixin):
 
         Returns
         -------
-        :class:`list`\\[:class:`str`] | :class:`str` | :data:`None`
+        :class:`list`\[:class:`str`] | :class:`str` | :data:`None`
             A list of prefixes or a single prefix that the bot is
             listening for. None if the bot isn't listening for prefixes.
         """
@@ -478,7 +501,7 @@ class BotBase(CommonBotBase, GroupMixin):
         return ret
 
     async def get_context(self, message: Message, *, cls: type[CXT] = Context) -> CXT:
-        """|coro|
+        r"""|coro|
 
         Returns the invocation context from the message.
 

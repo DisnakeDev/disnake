@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING, ClassVar
+from collections.abc import Sequence
+from typing import TYPE_CHECKING, ClassVar, Literal
 
 from ..components import FileUpload as FileUploadComponent
 from ..enums import ComponentType
@@ -17,9 +18,9 @@ __all__ = ("FileUpload",)
 
 
 class FileUpload(UIComponent):
-    """Represents a UI file upload.
+    r"""Represents a UI file upload.
 
-    .. versionadded:: |vnext|
+    .. versionadded:: 2.12
 
     Parameters
     ----------
@@ -35,13 +36,32 @@ class FileUpload(UIComponent):
     required: :class:`bool`
         Whether the file upload is required.
         Defaults to ``True``.
+    file_types: :class:`~collections.abc.Sequence`\[:class:`str`] | :data:`None`
+        A list of file types that can be uploaded with this component.
+        Allowed values are ``image``, ``video``, and ``audio``, as well as
+        any dot-prefixed extension such as ``.pdf`` (up to 10).
+        Defaults to all types (i.e. :data:`None`).
+
+        .. versionadded:: |vnext|
+
+        .. warning::
+            Note that only the extension of filenames is checked, the actual contents of files
+            are not inspected and may not actually match the extension.
+            It is up to you to ensure the file is valid, if necessary.
+
     id: :class:`int`
-        The numeric identifier for the component. Must be unique within the modal.
+        The numeric identifier for the component. Must be unique within a modal.
+        This is always present in components received from the API.
         If set to ``0`` (the default) when sending a component, the API will assign
         sequential identifiers to the components in the modal.
     """
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = ("min_values", "max_values", "required")
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (
+        "min_values",
+        "max_values",
+        "required",
+        "file_types",
+    )
     # We have to set this to MISSING in order to overwrite the abstract property from UIComponent
     _underlying: FileUploadComponent = MISSING
 
@@ -52,6 +72,7 @@ class FileUpload(UIComponent):
         min_values: int = 1,
         max_values: int = 1,
         required: bool = True,
+        file_types: Sequence[Literal["image", "video", "audio"] | str] | None = None,
         id: int = 0,
     ) -> None:
         custom_id = os.urandom(16).hex() if custom_id is MISSING else custom_id
@@ -62,6 +83,7 @@ class FileUpload(UIComponent):
             min_values=min_values,
             max_values=max_values,
             required=required,
+            file_types=file_types,
         )
 
     @property
@@ -93,12 +115,32 @@ class FileUpload(UIComponent):
 
     @property
     def required(self) -> bool:
-        """:class:`bool`: Whether the select menu is required."""
+        """:class:`bool`: Whether the file upload is required."""
         return self._underlying.required
 
     @required.setter
     def required(self, value: bool) -> None:
         self._underlying.required = bool(value)
+
+    @property
+    def file_types(self) -> Sequence[Literal["image", "video", "audio"] | str] | None:
+        r""":class:`~collections.abc.Sequence`\[:class:`str`] | :data:`None`: A list of file types that can be uploaded with this component.
+
+        .. versionadded:: |vnext|
+        """
+        return self._underlying.file_types
+
+    @file_types.setter
+    def file_types(self, value: Sequence[Literal["image", "video", "audio"] | str] | None) -> None:
+        if value is not None and (
+            not isinstance(value, Sequence)
+            or isinstance(value, str)
+            or not all(isinstance(obj, str) for obj in value)
+        ):
+            msg = "file_types must be a list/sequence of `str`s"
+            raise TypeError(msg)
+
+        self._underlying.file_types = value
 
     @classmethod
     def from_component(cls, file_upload: FileUploadComponent) -> Self:
@@ -107,5 +149,6 @@ class FileUpload(UIComponent):
             min_values=file_upload.min_values,
             max_values=file_upload.max_values,
             required=file_upload.required,
+            file_types=file_upload.file_types,
             id=file_upload.id,
         )

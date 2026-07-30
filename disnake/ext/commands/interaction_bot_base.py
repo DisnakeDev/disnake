@@ -3,29 +3,29 @@
 from __future__ import annotations
 
 import asyncio
+import inspect
 import logging
 import sys
 import traceback
 import warnings
-from collections.abc import Iterable, Sequence
+from collections.abc import Callable, Iterable, Sequence
 from types import MappingProxyType
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
-    Optional,
     TypedDict,
     TypeVar,
-    Union,
     cast,
+    overload,
 )
 
 import disnake
+from disnake import utils
 from disnake.app_commands import ApplicationCommand, Option
 from disnake.custom_warnings import SyncWarning
 from disnake.enums import ApplicationCommandType
 from disnake.flags import ApplicationInstallTypes, InteractionContextTypes
-from disnake.utils import deprecated, iscoroutinefunction, warn_deprecated
+from disnake.utils import deprecated, warn_deprecated
 
 from . import errors
 from .base_core import AppCmdIndex, InvokableApplicationCommand
@@ -41,7 +41,7 @@ from .flags import CommandSyncFlags
 from .slash_core import InvokableSlashCommand, SubCommand, SubCommandGroup, slash_command
 
 if TYPE_CHECKING:
-    from typing_extensions import NotRequired, ParamSpec
+    from typing_extensions import NotRequired, ParamSpec, Unpack
 
     from disnake.i18n import LocalizedOptional
     from disnake.interactions import (
@@ -52,7 +52,7 @@ if TYPE_CHECKING:
     from disnake.permissions import Permissions
 
     from ._types import AppCheck, CoroFunc
-    from .base_core import CogT, CommandCallback, InteractionCommandCallback
+    from .base_core import CogT, CommandCallback, InteractionCommandCallback, _AppCommandArgs
 
     P = ParamSpec("P")
 
@@ -129,7 +129,7 @@ def _format_diff(diff: _Diff) -> str:
             continue
         lines.append(label)
         if changes := diff[key]:
-            lines.extend(f"    <{type(cmd).__name__} name={cmd.name!r}>" for cmd in changes)
+            lines.extend(f"    <{cmd.__class__.__name__} name={cmd.name!r}>" for cmd in changes)
         else:
             lines.append("    -")
 
@@ -138,7 +138,7 @@ def _format_diff(diff: _Diff) -> str:
 
 def _match_subcommand_chain(
     command: InvokableSlashCommand, chain: list[str]
-) -> Union[InvokableSlashCommand, SubCommand, SubCommandGroup, None]:
+) -> InvokableSlashCommand | SubCommand | SubCommandGroup | None:
     """An internal function that returns a subcommand with a route matching the chain.
     If there's no match then :data:`None` is returned.
     """
@@ -159,13 +159,10 @@ class InteractionBotBase(CommonBotBase):
     def __init__(
         self,
         *,
-        command_sync_flags: Optional[CommandSyncFlags] = None,
-        sync_commands: bool = MISSING,
-        sync_commands_debug: bool = MISSING,
-        sync_commands_on_cog_unload: bool = MISSING,
-        test_guilds: Optional[Sequence[int]] = None,
-        default_install_types: Optional[ApplicationInstallTypes] = None,
-        default_contexts: Optional[InteractionContextTypes] = None,
+        command_sync_flags: CommandSyncFlags | None = None,
+        test_guilds: Sequence[int] | None = None,
+        default_install_types: ApplicationInstallTypes | None = None,
+        default_contexts: InteractionContextTypes | None = None,
         **options: Any,
     ) -> None:
         if test_guilds and not all(isinstance(guild_id, int) for guild_id in test_guilds):
@@ -175,44 +172,13 @@ class InteractionBotBase(CommonBotBase):
         super().__init__(**options)
 
         test_guilds = None if test_guilds is None else tuple(test_guilds)
-        self._test_guilds: Optional[tuple[int, ...]] = test_guilds
-
-        if command_sync_flags is not None and (
-            sync_commands is not MISSING
-            or sync_commands_debug is not MISSING
-            or sync_commands_on_cog_unload is not MISSING
-        ):
-            msg = "cannot set 'command_sync_flags' and any of 'sync_commands', 'sync_commands_debug', 'sync_commands_on_cog_unload' at the same time."
-            raise TypeError(msg)
+        self._test_guilds: tuple[int, ...] | None = test_guilds
 
         if command_sync_flags is not None:
             # this makes a copy so it cannot be changed after setting
             command_sync_flags = CommandSyncFlags._from_value(command_sync_flags.value)
-        if command_sync_flags is None:
+        else:
             command_sync_flags = CommandSyncFlags.default()
-
-            if sync_commands is not MISSING:
-                warn_deprecated(
-                    "sync_commands is deprecated and will be removed in a future version. "
-                    "Use `command_sync_flags` with an `CommandSyncFlags` instance as a replacement.",
-                    stacklevel=3,
-                )
-                command_sync_flags.sync_commands = sync_commands
-            if sync_commands_debug is not MISSING:
-                warn_deprecated(
-                    "sync_commands_debug is deprecated and will be removed in a future version. "
-                    "Use `command_sync_flags` with an `CommandSyncFlags` instance as a replacement.",
-                    stacklevel=3,
-                )
-                command_sync_flags.sync_commands_debug = sync_commands_debug
-
-            if sync_commands_on_cog_unload is not MISSING:
-                warn_deprecated(
-                    "sync_commands_on_cog_unload is deprecated and will be removed in a future version. "
-                    "Use `command_sync_flags` with an `CommandSyncFlags` instance as a replacement.",
-                    stacklevel=3,
-                )
-                command_sync_flags.sync_on_cog_actions = sync_commands_on_cog_unload
 
         self._command_sync_flags = command_sync_flags
         self._sync_queued: asyncio.Lock = asyncio.Lock()
@@ -252,33 +218,33 @@ class InteractionBotBase(CommonBotBase):
 
     @property
     def all_app_commands(self) -> MappingProxyType[AppCmdIndex, InvokableApplicationCommand]:
-        """:class:`~collections.abc.Mapping`\\[:class:`AppCmdIndex`, :class:`InvokableApplicationCommand`]:
+        r""":class:`~collections.abc.Mapping`\[:class:`AppCmdIndex`, :class:`InvokableApplicationCommand`]:
         A read-only mapping with all application commands the bot has.
         """
         return MappingProxyType(self._all_app_commands)
 
     @property
     def application_commands(self) -> set[InvokableApplicationCommand]:
-        """:class:`set`\\[:class:`InvokableApplicationCommand`]: A set of all application commands the bot has."""
+        r""":class:`set`\[:class:`InvokableApplicationCommand`]: A set of all application commands the bot has."""
         return set(self._all_app_commands.values())
 
     @property
     def slash_commands(self) -> set[InvokableSlashCommand]:
-        """:class:`set`\\[:class:`InvokableSlashCommand`]: A set of all slash commands the bot has."""
+        r""":class:`set`\[:class:`InvokableSlashCommand`]: A set of all slash commands the bot has."""
         return {
             cmd for cmd in self._all_app_commands.values() if isinstance(cmd, InvokableSlashCommand)
         }
 
     @property
     def user_commands(self) -> set[InvokableUserCommand]:
-        """:class:`set`\\[:class:`InvokableUserCommand`]: A set of all user commands the bot has."""
+        r""":class:`set`\[:class:`InvokableUserCommand`]: A set of all user commands the bot has."""
         return {
             cmd for cmd in self._all_app_commands.values() if isinstance(cmd, InvokableUserCommand)
         }
 
     @property
     def message_commands(self) -> set[InvokableMessageCommand]:
-        """:class:`set`\\[:class:`InvokableMessageCommand`]: A set of all message commands the bot has."""
+        r""":class:`set`\[:class:`InvokableMessageCommand`]: A set of all message commands the bot has."""
         return {
             cmd
             for cmd in self._all_app_commands.values()
@@ -442,8 +408,8 @@ class InteractionBotBase(CommonBotBase):
         self.add_app_command(message_command)
 
     def remove_app_command(
-        self, cmd_type: ApplicationCommandType, name: str, *, guild_id: Optional[int]
-    ) -> Optional[InvokableApplicationCommand]:
+        self, cmd_type: ApplicationCommandType, name: str, *, guild_id: int | None
+    ) -> InvokableApplicationCommand | None:
         """Removes an :class:`InvokableApplicationCommand` from the internal list of app commands.
 
         .. versionadded:: 2.10
@@ -478,7 +444,7 @@ class InteractionBotBase(CommonBotBase):
         return result
 
     def _remove_app_commands(
-        self, cmd_type: ApplicationCommandType, name: str, *, guild_ids: Optional[Sequence[int]]
+        self, cmd_type: ApplicationCommandType, name: str, *, guild_ids: Sequence[int] | None
     ) -> None:
         test_guilds = (None,) if self._test_guilds is None else self._test_guilds
         # this is consistent with the behavior of command synchronisation
@@ -500,7 +466,7 @@ class InteractionBotBase(CommonBotBase):
             if key.type is cmd_type and key.name == name:
                 bad_keys.append(key)
 
-        result: Optional[InvokableApplicationCommand] = None
+        result: InvokableApplicationCommand | None = None
         for key in bad_keys:
             cmd = self._all_app_commands.pop(key, None)
             if result is None:
@@ -508,7 +474,7 @@ class InteractionBotBase(CommonBotBase):
 
         return result
 
-    def remove_slash_command(self, name: str) -> Optional[InvokableSlashCommand]:
+    def remove_slash_command(self, name: str) -> InvokableSlashCommand | None:
         """Removes an :class:`InvokableSlashCommand` from the internal list
         of slash commands.
 
@@ -524,7 +490,7 @@ class InteractionBotBase(CommonBotBase):
         """
         return self._emulate_old_app_command_remove(ApplicationCommandType.chat_input, name)
 
-    def remove_user_command(self, name: str) -> Optional[InvokableUserCommand]:
+    def remove_user_command(self, name: str) -> InvokableUserCommand | None:
         """Removes an :class:`InvokableUserCommand` from the internal list
         of user commands.
 
@@ -540,7 +506,7 @@ class InteractionBotBase(CommonBotBase):
         """
         return self._emulate_old_app_command_remove(ApplicationCommandType.user, name)
 
-    def remove_message_command(self, name: str) -> Optional[InvokableMessageCommand]:
+    def remove_message_command(self, name: str) -> InvokableMessageCommand | None:
         """Removes an :class:`InvokableMessageCommand` from the internal list
         of message commands.
 
@@ -557,8 +523,8 @@ class InteractionBotBase(CommonBotBase):
         return self._emulate_old_app_command_remove(ApplicationCommandType.message, name)
 
     def get_slash_command(
-        self, name: str, *, guild_id: Optional[int] = MISSING
-    ) -> Optional[Union[InvokableSlashCommand, SubCommandGroup, SubCommand]]:
+        self, name: str, *, guild_id: int | None = MISSING
+    ) -> InvokableSlashCommand | SubCommandGroup | SubCommand | None:
         """Works like ``Bot.get_command``, but for slash commands.
 
         If the name contains spaces, then it will assume that you are looking for a :class:`SubCommand` or
@@ -622,8 +588,8 @@ class InteractionBotBase(CommonBotBase):
         return result
 
     def get_user_command(
-        self, name: str, *, guild_id: Optional[int] = MISSING
-    ) -> Optional[InvokableUserCommand]:
+        self, name: str, *, guild_id: int | None = MISSING
+    ) -> InvokableUserCommand | None:
         """Gets an :class:`InvokableUserCommand` from the internal list
         of user commands.
 
@@ -670,8 +636,8 @@ class InteractionBotBase(CommonBotBase):
         return result
 
     def get_message_command(
-        self, name: str, *, guild_id: Optional[int] = MISSING
-    ) -> Optional[InvokableMessageCommand]:
+        self, name: str, *, guild_id: int | None = MISSING
+    ) -> InvokableMessageCommand | None:
         """Gets an :class:`InvokableMessageCommand` from the internal list
         of message commands.
 
@@ -719,24 +685,59 @@ class InteractionBotBase(CommonBotBase):
 
         return result
 
+    @overload
     def slash_command(
         self,
         *,
         name: LocalizedOptional = None,
         description: LocalizedOptional = None,
-        dm_permission: Optional[bool] = None,  # deprecated
-        default_member_permissions: Optional[Union[Permissions, int]] = None,
-        nsfw: Optional[bool] = None,
-        install_types: Optional[ApplicationInstallTypes] = None,
-        contexts: Optional[InteractionContextTypes] = None,
-        options: Optional[list[Option]] = None,
-        guild_ids: Optional[Sequence[int]] = None,
-        connectors: Optional[dict[str, str]] = None,
-        auto_sync: Optional[bool] = None,
-        extras: Optional[dict[str, Any]] = None,
-        **kwargs: Any,
+        default_member_permissions: Permissions | int | None = None,
+        nsfw: bool | None = None,
+        install_types: ApplicationInstallTypes | None = None,
+        contexts: InteractionContextTypes | None = None,
+        options: list[Option] | None = None,
+        guild_ids: Sequence[int] | None = None,
+        connectors: dict[str, str] | None = None,
+        auto_sync: bool | None = None,
+        **kwargs: Unpack[_AppCommandArgs],
+    ) -> Callable[[CommandCallback], InvokableSlashCommand]: ...
+
+    @overload
+    @utils.deprecated("`dm_permission` is deprecated. Use `contexts` instead.")
+    def slash_command(
+        self,
+        *,
+        name: LocalizedOptional = None,
+        description: LocalizedOptional = None,
+        dm_permission: bool | None = None,  # deprecated
+        default_member_permissions: Permissions | int | None = None,
+        nsfw: bool | None = None,
+        install_types: ApplicationInstallTypes | None = None,
+        contexts: InteractionContextTypes | None = None,
+        options: list[Option] | None = None,
+        guild_ids: Sequence[int] | None = None,
+        connectors: dict[str, str] | None = None,
+        auto_sync: bool | None = None,
+        **kwargs: Unpack[_AppCommandArgs],
+    ) -> Callable[[CommandCallback], InvokableSlashCommand]: ...
+
+    def slash_command(
+        self,
+        *,
+        name: LocalizedOptional = None,
+        description: LocalizedOptional = None,
+        dm_permission: bool | None = None,  # deprecated
+        default_member_permissions: Permissions | int | None = None,
+        nsfw: bool | None = None,
+        install_types: ApplicationInstallTypes | None = None,
+        contexts: InteractionContextTypes | None = None,
+        options: list[Option] | None = None,
+        guild_ids: Sequence[int] | None = None,
+        connectors: dict[str, str] | None = None,
+        auto_sync: bool | None = None,
+        **kwargs: Unpack[_AppCommandArgs],
     ) -> Callable[[CommandCallback], InvokableSlashCommand]:
-        """A shortcut decorator that invokes :func:`~disnake.ext.commands.slash_command` and adds it to
+        r"""A shortcut decorator that invokes :func:`~disnake.ext.commands.slash_command` and adds it to
         the internal command list.
 
         Parameters
@@ -753,7 +754,7 @@ class InteractionBotBase(CommonBotBase):
             .. versionchanged:: 2.5
                 Added support for localizations.
 
-        options: :class:`list`\\[:class:`.Option`]
+        options: :class:`list`\[:class:`.Option`]
             The list of slash command options. The options will be visible in Discord.
             This is the old way of specifying options. Consider using :ref:`param_syntax` instead.
         dm_permission: :class:`bool`
@@ -771,7 +772,7 @@ class InteractionBotBase(CommonBotBase):
             .. versionadded:: 2.5
 
         nsfw: :class:`bool`
-            Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
+            Whether this command is :ddocs:`age-restricted <interactions/application-commands#age-restricted-commands>`.
             Defaults to ``False``.
 
             .. versionadded:: 2.8
@@ -795,18 +796,18 @@ class InteractionBotBase(CommonBotBase):
 
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``
-        guild_ids: :class:`~collections.abc.Sequence`\\[:class:`int`] | :data:`None`
+        guild_ids: :class:`~collections.abc.Sequence`\[:class:`int`] | :data:`None`
             If specified, the client will register the command to these guilds.
             Otherwise the command will be registered globally, unless
             parameter ``test_guilds`` is specified in the bot constructor, in which case
             this command will be registered to those guilds.
-        connectors: :class:`dict`\\[:class:`str`, :class:`str`]
+        connectors: :class:`dict`\[:class:`str`, :class:`str`]
             Binds function names to option names. If the name
             of an option already matches the corresponding function param,
             you don't have to specify the connectors. Connectors template:
             ``{"option-name": "param_name", ...}``.
             If you're using :ref:`param_syntax`, you don't need to specify this.
-        extras: :class:`dict`\\[:class:`str`, :data:`~typing.Any`]
+        extras: :class:`dict`\[:class:`str`, :data:`~typing.Any`]
             A dict of user provided extras to attach to the command.
 
             .. note::
@@ -816,12 +817,12 @@ class InteractionBotBase(CommonBotBase):
 
         Returns
         -------
-        :class:`~collections.abc.Callable`\\[..., :class:`InvokableSlashCommand`]
+        :class:`~collections.abc.Callable`\[..., :class:`InvokableSlashCommand`]
             A decorator that converts the provided method into an InvokableSlashCommand, adds it to the bot, then returns it.
         """
 
         def decorator(func: CommandCallback) -> InvokableSlashCommand:
-            result = slash_command(
+            result = slash_command(  # pyright: ignore[reportDeprecated]
                 name=name,
                 description=description,
                 options=options,
@@ -833,7 +834,6 @@ class InteractionBotBase(CommonBotBase):
                 guild_ids=guild_ids,
                 connectors=connectors,
                 auto_sync=auto_sync,
-                extras=extras,
                 **kwargs,
             )(func)
             self.add_app_command(result)
@@ -841,23 +841,56 @@ class InteractionBotBase(CommonBotBase):
 
         return decorator
 
+    @overload
     def user_command(
         self,
         *,
         name: LocalizedOptional = None,
-        dm_permission: Optional[bool] = None,  # deprecated
-        default_member_permissions: Optional[Union[Permissions, int]] = None,
-        nsfw: Optional[bool] = None,
-        install_types: Optional[ApplicationInstallTypes] = None,
-        contexts: Optional[InteractionContextTypes] = None,
-        guild_ids: Optional[Sequence[int]] = None,
-        auto_sync: Optional[bool] = None,
-        extras: Optional[dict[str, Any]] = None,
-        **kwargs: Any,
+        default_member_permissions: Permissions | int | None = None,
+        nsfw: bool | None = None,
+        install_types: ApplicationInstallTypes | None = None,
+        contexts: InteractionContextTypes | None = None,
+        guild_ids: Sequence[int] | None = None,
+        auto_sync: bool | None = None,
+        **kwargs: Unpack[_AppCommandArgs],
+    ) -> Callable[
+        [InteractionCommandCallback[CogT, UserCommandInteraction, P]], InvokableUserCommand
+    ]: ...
+
+    @overload
+    @utils.deprecated("`dm_permission` is deprecated. Use `contexts` instead.")
+    def user_command(
+        self,
+        *,
+        name: LocalizedOptional = None,
+        dm_permission: bool | None = None,  # deprecated
+        default_member_permissions: Permissions | int | None = None,
+        nsfw: bool | None = None,
+        install_types: ApplicationInstallTypes | None = None,
+        contexts: InteractionContextTypes | None = None,
+        guild_ids: Sequence[int] | None = None,
+        auto_sync: bool | None = None,
+        **kwargs: Unpack[_AppCommandArgs],
+    ) -> Callable[
+        [InteractionCommandCallback[CogT, UserCommandInteraction, P]], InvokableUserCommand
+    ]: ...
+
+    def user_command(
+        self,
+        *,
+        name: LocalizedOptional = None,
+        dm_permission: bool | None = None,  # deprecated
+        default_member_permissions: Permissions | int | None = None,
+        nsfw: bool | None = None,
+        install_types: ApplicationInstallTypes | None = None,
+        contexts: InteractionContextTypes | None = None,
+        guild_ids: Sequence[int] | None = None,
+        auto_sync: bool | None = None,
+        **kwargs: Unpack[_AppCommandArgs],
     ) -> Callable[
         [InteractionCommandCallback[CogT, UserCommandInteraction, P]], InvokableUserCommand
     ]:
-        """A shortcut decorator that invokes :func:`~disnake.ext.commands.user_command` and adds it to
+        r"""A shortcut decorator that invokes :func:`~disnake.ext.commands.user_command` and adds it to
         the internal command list.
 
         Parameters
@@ -883,7 +916,7 @@ class InteractionBotBase(CommonBotBase):
             .. versionadded:: 2.5
 
         nsfw: :class:`bool`
-            Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
+            Whether this command is :ddocs:`age-restricted <interactions/application-commands#age-restricted-commands>`.
             Defaults to ``False``.
 
             .. versionadded:: 2.8
@@ -907,12 +940,12 @@ class InteractionBotBase(CommonBotBase):
 
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``.
-        guild_ids: :class:`~collections.abc.Sequence`\\[:class:`int`] | :data:`None`
+        guild_ids: :class:`~collections.abc.Sequence`\[:class:`int`] | :data:`None`
             If specified, the client will register the command to these guilds.
             Otherwise the command will be registered globally, unless
             parameter ``test_guilds`` is specified in the bot constructor, in which case
             this command will be registered to those guilds.
-        extras: :class:`dict`\\[:class:`str`, :data:`~typing.Any`]
+        extras: :class:`dict`\[:class:`str`, :data:`~typing.Any`]
             A dict of user provided extras to attach to the command.
 
             .. note::
@@ -922,14 +955,14 @@ class InteractionBotBase(CommonBotBase):
 
         Returns
         -------
-        :class:`~collections.abc.Callable`\\[..., :class:`InvokableUserCommand`]
+        :class:`~collections.abc.Callable`\[..., :class:`InvokableUserCommand`]
             A decorator that converts the provided method into an InvokableUserCommand, adds it to the bot, then returns it.
         """
 
         def decorator(
             func: InteractionCommandCallback[CogT, UserCommandInteraction, P],
         ) -> InvokableUserCommand:
-            result = user_command(
+            result = user_command(  # pyright: ignore[reportDeprecated]
                 name=name,
                 dm_permission=dm_permission,
                 default_member_permissions=default_member_permissions,
@@ -938,7 +971,6 @@ class InteractionBotBase(CommonBotBase):
                 contexts=contexts,
                 guild_ids=guild_ids,
                 auto_sync=auto_sync,
-                extras=extras,
                 **kwargs,
             )(func)
             self.add_app_command(result)
@@ -946,23 +978,56 @@ class InteractionBotBase(CommonBotBase):
 
         return decorator
 
+    @overload
     def message_command(
         self,
         *,
         name: LocalizedOptional = None,
-        dm_permission: Optional[bool] = None,  # deprecated
-        default_member_permissions: Optional[Union[Permissions, int]] = None,
-        nsfw: Optional[bool] = None,
-        install_types: Optional[ApplicationInstallTypes] = None,
-        contexts: Optional[InteractionContextTypes] = None,
-        guild_ids: Optional[Sequence[int]] = None,
-        auto_sync: Optional[bool] = None,
-        extras: Optional[dict[str, Any]] = None,
-        **kwargs: Any,
+        default_member_permissions: Permissions | int | None = None,
+        nsfw: bool | None = None,
+        install_types: ApplicationInstallTypes | None = None,
+        contexts: InteractionContextTypes | None = None,
+        guild_ids: Sequence[int] | None = None,
+        auto_sync: bool | None = None,
+        **kwargs: Unpack[_AppCommandArgs],
+    ) -> Callable[
+        [InteractionCommandCallback[CogT, MessageCommandInteraction, P]], InvokableMessageCommand
+    ]: ...
+
+    @overload
+    @utils.deprecated("`dm_permission` is deprecated. Use `contexts` instead.")
+    def message_command(
+        self,
+        *,
+        name: LocalizedOptional = None,
+        dm_permission: bool | None = None,  # deprecated
+        default_member_permissions: Permissions | int | None = None,
+        nsfw: bool | None = None,
+        install_types: ApplicationInstallTypes | None = None,
+        contexts: InteractionContextTypes | None = None,
+        guild_ids: Sequence[int] | None = None,
+        auto_sync: bool | None = None,
+        **kwargs: Unpack[_AppCommandArgs],
+    ) -> Callable[
+        [InteractionCommandCallback[CogT, MessageCommandInteraction, P]], InvokableMessageCommand
+    ]: ...
+
+    def message_command(
+        self,
+        *,
+        name: LocalizedOptional = None,
+        dm_permission: bool | None = None,  # deprecated
+        default_member_permissions: Permissions | int | None = None,
+        nsfw: bool | None = None,
+        install_types: ApplicationInstallTypes | None = None,
+        contexts: InteractionContextTypes | None = None,
+        guild_ids: Sequence[int] | None = None,
+        auto_sync: bool | None = None,
+        **kwargs: Unpack[_AppCommandArgs],
     ) -> Callable[
         [InteractionCommandCallback[CogT, MessageCommandInteraction, P]], InvokableMessageCommand
     ]:
-        """A shortcut decorator that invokes :func:`~disnake.ext.commands.message_command` and adds it to
+        r"""A shortcut decorator that invokes :func:`~disnake.ext.commands.message_command` and adds it to
         the internal command list.
 
         Parameters
@@ -988,7 +1053,7 @@ class InteractionBotBase(CommonBotBase):
             .. versionadded:: 2.5
 
         nsfw: :class:`bool`
-            Whether this command is :ddocs:`age-restricted <interactions/application-commands#agerestricted-commands>`.
+            Whether this command is :ddocs:`age-restricted <interactions/application-commands#age-restricted-commands>`.
             Defaults to ``False``.
 
             .. versionadded:: 2.8
@@ -1012,12 +1077,12 @@ class InteractionBotBase(CommonBotBase):
 
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``
-        guild_ids: :class:`~collections.abc.Sequence`\\[:class:`int`] | :data:`None`
+        guild_ids: :class:`~collections.abc.Sequence`\[:class:`int`] | :data:`None`
             If specified, the client will register the command to these guilds.
             Otherwise the command will be registered globally, unless
             parameter ``test_guilds`` is specified in the bot constructor, in which case
             this command will be registered to those guilds.
-        extras: :class:`dict`\\[:class:`str`, :data:`~typing.Any`]
+        extras: :class:`dict`\[:class:`str`, :data:`~typing.Any`]
             A dict of user provided extras to attach to the command.
 
             .. note::
@@ -1027,14 +1092,14 @@ class InteractionBotBase(CommonBotBase):
 
         Returns
         -------
-        :class:`~collections.abc.Callable`\\[..., :class:`InvokableMessageCommand`]
+        :class:`~collections.abc.Callable`\[..., :class:`InvokableMessageCommand`]
             A decorator that converts the provided method into an InvokableMessageCommand, adds it to the bot, then returns it.
         """
 
         def decorator(
             func: InteractionCommandCallback[CogT, MessageCommandInteraction, P],
         ) -> InvokableMessageCommand:
-            result = message_command(
+            result = message_command(  # pyright: ignore[reportDeprecated]
                 name=name,
                 dm_permission=dm_permission,
                 default_member_permissions=default_member_permissions,
@@ -1043,7 +1108,6 @@ class InteractionBotBase(CommonBotBase):
                 contexts=contexts,
                 guild_ids=guild_ids,
                 auto_sync=auto_sync,
-                extras=extras,
                 **kwargs,
             )(func)
             self.add_app_command(result)
@@ -1460,7 +1524,7 @@ class InteractionBotBase(CommonBotBase):
         [Callable[[ApplicationCommandInteraction], Any]],
         Callable[[ApplicationCommandInteraction], Any],
     ]:
-        """A decorator that adds a global application command check to the bot.
+        r"""A decorator that adds a global application command check to the bot.
 
         A global check is similar to a :func:`check` that is applied
         on a per command basis except it is run before any application command checks
@@ -1470,7 +1534,7 @@ class InteractionBotBase(CommonBotBase):
 
             This function can either be a regular function or a coroutine.
 
-        Similar to a command :func:`check`\\, this takes a single parameter
+        Similar to a command :func:`check`\, this takes a single parameter
         of type :class:`.ApplicationCommandInteraction` and can only raise exceptions inherited from
         :exc:`CommandError`.
 
@@ -1538,7 +1602,7 @@ class InteractionBotBase(CommonBotBase):
         """Similar to :meth:`Bot.before_invoke` but for slash commands,
         and it takes an :class:`.ApplicationCommandInteraction` as its only parameter.
         """
-        if not iscoroutinefunction(coro):
+        if not inspect.iscoroutinefunction(coro):
             msg = "The pre-invoke hook must be a coroutine function."
             raise TypeError(msg)
 
@@ -1549,7 +1613,7 @@ class InteractionBotBase(CommonBotBase):
         """Similar to :meth:`Bot.after_invoke` but for slash commands,
         and it takes an :class:`.ApplicationCommandInteraction` as its only parameter.
         """
-        if not iscoroutinefunction(coro):
+        if not inspect.iscoroutinefunction(coro):
             msg = "The post-invoke hook must be a coroutine function."
             raise TypeError(msg)
 
@@ -1558,7 +1622,7 @@ class InteractionBotBase(CommonBotBase):
 
     def before_user_command_invoke(self, coro: CFT) -> CFT:
         """Similar to :meth:`Bot.before_slash_command_invoke` but for user commands."""
-        if not iscoroutinefunction(coro):
+        if not inspect.iscoroutinefunction(coro):
             msg = "The pre-invoke hook must be a coroutine function."
             raise TypeError(msg)
 
@@ -1567,7 +1631,7 @@ class InteractionBotBase(CommonBotBase):
 
     def after_user_command_invoke(self, coro: CFT) -> CFT:
         """Similar to :meth:`Bot.after_slash_command_invoke` but for user commands."""
-        if not iscoroutinefunction(coro):
+        if not inspect.iscoroutinefunction(coro):
             msg = "The post-invoke hook must be a coroutine function."
             raise TypeError(msg)
 
@@ -1576,7 +1640,7 @@ class InteractionBotBase(CommonBotBase):
 
     def before_message_command_invoke(self, coro: CFT) -> CFT:
         """Similar to :meth:`Bot.before_slash_command_invoke` but for message commands."""
-        if not iscoroutinefunction(coro):
+        if not inspect.iscoroutinefunction(coro):
             msg = "The pre-invoke hook must be a coroutine function."
             raise TypeError(msg)
 
@@ -1585,7 +1649,7 @@ class InteractionBotBase(CommonBotBase):
 
     def after_message_command_invoke(self, coro: CFT) -> CFT:
         """Similar to :meth:`Bot.after_slash_command_invoke` but for message commands."""
-        if not iscoroutinefunction(coro):
+        if not inspect.iscoroutinefunction(coro):
             msg = "The post-invoke hook must be a coroutine function."
             raise TypeError(msg)
 

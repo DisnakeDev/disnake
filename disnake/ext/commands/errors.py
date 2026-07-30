@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable, Optional, Union
+from collections.abc import Callable
+from typing import TYPE_CHECKING, Any
 
 from disnake.enums import ApplicationCommandType
 from disnake.errors import ClientException, DiscordException
@@ -15,6 +16,7 @@ if TYPE_CHECKING:
     from disnake.threads import Thread
     from disnake.types.snowflake import Snowflake, SnowflakeList
 
+    from ._types import Coro
     from .context import AnyContext
     from .cooldowns import BucketType, Cooldown
     from .flag_converter import Flag
@@ -55,6 +57,7 @@ __all__ = (
     "PartialEmojiConversionFailure",
     "BadBoolArgument",
     "LargeIntConversionFailure",
+    "LargeIntOutOfRange",
     "MissingRole",
     "BotMissingRole",
     "MissingAnyRole",
@@ -86,16 +89,16 @@ __all__ = (
 
 
 class CommandError(DiscordException):
-    """The base exception type for all command related errors.
+    r"""The base exception type for all command related errors.
 
     This inherits from :exc:`disnake.DiscordException`.
 
     This exception and exceptions inherited from it are handled
     in a special way as they are caught and passed into a special event
-    from :class:`.Bot`\\, :func:`.on_command_error`.
+    from :class:`.Bot`\, :func:`.on_command_error`.
     """
 
-    def __init__(self, message: Optional[str] = None, *args: Any) -> None:
+    def __init__(self, message: str | None = None, *args: Any) -> None:
         if message is not None:
             # clean-up @everyone and @here mentions
             m = message.replace("@everyone", "@\u200beveryone").replace("@here", "@\u200bhere")
@@ -194,7 +197,7 @@ class CheckFailure(CommandError):
 
 
 class CheckAnyFailure(CheckFailure):
-    """Exception raised when all predicates in :func:`check_any` or :func:`app_check_any` fail.
+    r"""Exception raised when all predicates in :func:`check_any` or :func:`app_check_any` fail.
 
     This inherits from :exc:`CheckFailure`.
 
@@ -202,17 +205,17 @@ class CheckAnyFailure(CheckFailure):
 
     Attributes
     ----------
-    errors: :class:`list`\\[:class:`CheckFailure`]
+    errors: :class:`list`\[:class:`CheckFailure`]
         A list of errors that were caught during execution.
-    checks: :class:`list`\\[:class:`~collections.abc.Callable`\\[[:class:`Context` | :class:`disnake.ApplicationCommandInteraction`], :class:`bool`]]
+    checks: :class:`list`\[:class:`~collections.abc.Callable`\[[:class:`Context` | :class:`disnake.ApplicationCommandInteraction`], :class:`bool`]]
         A list of check predicates that failed.
     """
 
     def __init__(
-        self, checks: list[CheckFailure], errors: list[Callable[[AnyContext], bool]]
+        self, checks: list[Callable[[AnyContext], Coro[bool]]], errors: list[CheckFailure]
     ) -> None:
-        self.checks: list[CheckFailure] = checks
-        self.errors: list[Callable[[AnyContext], bool]] = errors
+        self.checks: list[Callable[[AnyContext], Coro[bool]]] = checks
+        self.errors: list[CheckFailure] = errors
         super().__init__("You do not have permission to run this command.")
 
 
@@ -223,7 +226,7 @@ class PrivateMessageOnly(CheckFailure):
     This inherits from :exc:`CheckFailure`
     """
 
-    def __init__(self, message: Optional[str] = None) -> None:
+    def __init__(self, message: str | None = None) -> None:
         super().__init__(message or "This command can only be used in private messages.")
 
 
@@ -234,7 +237,7 @@ class NoPrivateMessage(CheckFailure):
     This inherits from :exc:`CheckFailure`
     """
 
-    def __init__(self, message: Optional[str] = None) -> None:
+    def __init__(self, message: str | None = None) -> None:
         super().__init__(message or "This command cannot be used in private messages.")
 
 
@@ -354,8 +357,8 @@ class ChannelNotReadable(BadArgument):
         The channel supplied by the caller that was not readable
     """
 
-    def __init__(self, argument: Union[GuildChannel, Thread]) -> None:
-        self.argument: Union[GuildChannel, Thread] = argument
+    def __init__(self, argument: GuildChannel | Thread) -> None:
+        self.argument: GuildChannel | Thread = argument
         super().__init__(f"Can't read messages in {argument.mention}.")
 
 
@@ -571,7 +574,38 @@ class LargeIntConversionFailure(BadArgument):
 
     def __init__(self, argument: str) -> None:
         self.argument: str = argument
-        super().__init__(f"{argument} is not able to be converted to an integer")
+        super().__init__(f"{argument} is not a valid base 10 integer")
+
+
+class LargeIntOutOfRange(LargeIntConversionFailure):
+    """Exception raised when an argument to a large integer option exceeds given range.
+
+    This inherits from :exc:`LargeIntConversionFailure`
+
+    .. versionadded:: |vnext|
+
+    Attributes
+    ----------
+    argument: :class:`str`
+        The argument that exceeded the defined range.
+    min_value: :class:`int` | :data:`None`
+        The minimum allowed value.
+    max_value: :class:`int` | :data:`None`
+        The maximum allowed value.
+    """
+
+    def __init__(
+        self,
+        argument: str,
+        min_value: int | None,
+        max_value: int | None,
+    ) -> None:
+        self.argument: str = argument
+        self.min_value: int | None = min_value
+        self.max_value: int | None = max_value
+        a = "..." if min_value is None else min_value
+        b = "..." if max_value is None else max_value
+        BadArgument.__init__(self, f"{argument} is not in range [{a}, {b}]")
 
 
 class DisabledCommand(CommandError):
@@ -688,7 +722,7 @@ class BotMissingRole(CheckFailure):
 
 
 class MissingAnyRole(CheckFailure):
-    """Exception raised when the command invoker lacks any of
+    r"""Exception raised when the command invoker lacks any of
     the roles specified to run a command.
 
     This inherits from :exc:`CheckFailure`
@@ -697,7 +731,7 @@ class MissingAnyRole(CheckFailure):
 
     Attributes
     ----------
-    missing_roles: :class:`list`\\[:class:`str` | :class:`int`]
+    missing_roles: :class:`list`\[:class:`str` | :class:`int`]
         The roles that the invoker is missing.
         These are the parameters passed to :func:`~.commands.has_any_role`.
     """
@@ -713,7 +747,7 @@ class MissingAnyRole(CheckFailure):
 
 
 class BotMissingAnyRole(CheckFailure):
-    """Exception raised when the bot's member lacks any of
+    r"""Exception raised when the bot's member lacks any of
     the roles specified to run a command.
 
     This inherits from :exc:`CheckFailure`
@@ -722,7 +756,7 @@ class BotMissingAnyRole(CheckFailure):
 
     Attributes
     ----------
-    missing_roles: :class:`list`\\[:class:`str` | :class:`int`]
+    missing_roles: :class:`list`\[:class:`str` | :class:`int`]
         The roles that the bot's member is missing.
         These are the parameters passed to :func:`~.commands.has_any_role`.
 
@@ -751,20 +785,20 @@ class NSFWChannelRequired(CheckFailure):
         The channel that does not have NSFW enabled.
     """
 
-    def __init__(self, channel: Union[GuildChannel, Thread]) -> None:
-        self.channel: Union[GuildChannel, Thread] = channel
+    def __init__(self, channel: GuildChannel | Thread) -> None:
+        self.channel: GuildChannel | Thread = channel
         super().__init__(f"Channel '{channel}' needs to be NSFW for this command to work.")
 
 
 class MissingPermissions(CheckFailure):
-    """Exception raised when the command invoker lacks permissions to run a
+    r"""Exception raised when the command invoker lacks permissions to run a
     command.
 
     This inherits from :exc:`CheckFailure`
 
     Attributes
     ----------
-    missing_permissions: :class:`list`\\[:class:`str`]
+    missing_permissions: :class:`list`\[:class:`str`]
         The required permissions that are missing.
     """
 
@@ -782,14 +816,14 @@ class MissingPermissions(CheckFailure):
 
 
 class BotMissingPermissions(CheckFailure):
-    """Exception raised when the bot's member lacks permissions to run a
+    r"""Exception raised when the bot's member lacks permissions to run a
     command.
 
     This inherits from :exc:`CheckFailure`
 
     Attributes
     ----------
-    missing_permissions: :class:`list`\\[:class:`str`]
+    missing_permissions: :class:`list`\[:class:`str`]
         The required permissions that are missing.
     """
 
@@ -807,7 +841,7 @@ class BotMissingPermissions(CheckFailure):
 
 
 class BadUnionArgument(UserInputError):
-    """Exception raised when a :class:`typing.Union` converter fails for all
+    r"""Exception raised when a :class:`typing.Union` converter fails for all
     its associated types.
 
     This inherits from :exc:`UserInputError`
@@ -816,9 +850,9 @@ class BadUnionArgument(UserInputError):
     ----------
     param: :class:`inspect.Parameter`
         The parameter that failed being converted.
-    converters: :class:`tuple`\\[:class:`type`, ``...``]
+    converters: :class:`tuple`\[:class:`type`, ``...``]
         A tuple of converters attempted in conversion, in order of failure.
-    errors: :class:`list`\\[:class:`CommandError`]
+    errors: :class:`list`\[:class:`CommandError`]
         A list of errors that were caught from failing the conversion.
     """
 
@@ -844,7 +878,7 @@ class BadUnionArgument(UserInputError):
 
 
 class BadLiteralArgument(UserInputError):
-    """Exception raised when a :data:`typing.Literal` converter fails for all
+    r"""Exception raised when a :data:`typing.Literal` converter fails for all
     its associated values.
 
     This inherits from :exc:`UserInputError`
@@ -855,9 +889,9 @@ class BadLiteralArgument(UserInputError):
     ----------
     param: :class:`inspect.Parameter`
         The parameter that failed being converted.
-    literals: :class:`tuple`\\[:data:`~typing.Any`, ``...``]
+    literals: :class:`tuple`\[:data:`~typing.Any`, ``...``]
         A tuple of values compared against in conversion, in order of failure.
-    errors: :class:`list`\\[:class:`CommandError`]
+    errors: :class:`list`\[:class:`CommandError`]
         A list of errors that were caught from failing the conversion.
     """
 
@@ -946,7 +980,7 @@ class ExtensionError(DiscordException):
         The extension that had an error.
     """
 
-    def __init__(self, message: Optional[str] = None, *args: Any, name: str) -> None:
+    def __init__(self, message: str | None = None, *args: Any, name: str) -> None:
         self.name: str = name
         message = message or f"Extension {name!r} had an error."
         # clean-up @everyone and @here mentions
@@ -1068,12 +1102,10 @@ class ApplicationCommandRegistrationError(CommandRegistrationError):
         or :data:`None` if it was a global command.
     """
 
-    def __init__(
-        self, cmd_type: ApplicationCommandType, name: str, guild_id: Optional[int]
-    ) -> None:
+    def __init__(self, cmd_type: ApplicationCommandType, name: str, guild_id: int | None) -> None:
         self.cmd_type: ApplicationCommandType = cmd_type
         self.name: str = name
-        self.guild_id: Optional[int] = guild_id
+        self.guild_id: int | None = guild_id
         # backwards compatibility
         self.alias_conflict: bool = False
         # fixed API naming here because no one calls slash commands "chat input"
@@ -1098,7 +1130,7 @@ class FlagError(BadArgument):
 
 
 class TooManyFlags(FlagError):
-    """An exception raised when a flag has received too many values.
+    r"""An exception raised when a flag has received too many values.
 
     This inherits from :exc:`FlagError`.
 
@@ -1108,7 +1140,7 @@ class TooManyFlags(FlagError):
     ----------
     flag: :class:`.Flag`
         The flag that received too many values.
-    values: :class:`list`\\[:class:`str`]
+    values: :class:`list`\[:class:`str`]
         The values that were passed.
     """
 

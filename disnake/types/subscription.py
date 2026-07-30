@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-from typing import Literal, Optional, TypedDict
+from typing import Literal, TypedDict
 
 from typing_extensions import NotRequired
 
@@ -14,10 +14,10 @@ class Subscription(TypedDict):
     user_id: Snowflake
     sku_ids: list[Snowflake]
     entitlement_ids: list[Snowflake]
-    renewal_sku_ids: Optional[list[Snowflake]]
+    renewal_sku_ids: list[Snowflake] | None
     current_period_start: str
     current_period_end: str
     status: SubscriptionStatus
-    canceled_at: Optional[str]
+    canceled_at: str | None
     # this is always missing unless queried with a private OAuth scope.
     country: NotRequired[str]

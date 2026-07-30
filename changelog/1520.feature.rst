@@ -1,0 +1,4 @@
+Support voice channel statuses.
+- New field: :attr:`VoiceChannel.status`, changeable using :meth:`VoiceChannel.set_status`.
+- New events: :func:`on_voice_channel_status_update` + :func:`on_voice_channel_start_time_update`.
+- New audit log types: :attr:`AuditLogAction.voice_channel_status_create`, :attr:`~AuditLogAction.voice_channel_status_delete`.

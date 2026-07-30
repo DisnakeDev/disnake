@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: MIT
 
 from collections.abc import Sequence
-from typing import Optional
 
 import libcst as cst
 import libcst.matchers as m
@@ -14,7 +13,7 @@ EllipsisType = type(Ellipsis)
 class EllipsisOverloads(BaseCodemodCommand):
     DESCRIPTION = "Ensure that `MISSING` is not used in any overloads as a default."
 
-    def visit_FunctionDef(self, node: cst.FunctionDef) -> Optional[bool]:
+    def visit_FunctionDef(self, node: cst.FunctionDef) -> bool | None:
         return False
 
     def leave_FunctionDef(

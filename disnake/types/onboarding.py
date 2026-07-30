@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: MIT
 
-from typing import Literal, Optional, TypedDict
+from typing import Literal, TypedDict
 
 from .emoji import Emoji
 from .snowflake import Snowflake, SnowflakeList
@@ -11,7 +11,7 @@ OnboardingPromptType = Literal[0, 1]
 class OnboardingPromptOption(TypedDict):
     id: Snowflake
     title: str
-    description: Optional[str]
+    description: str | None
     emoji: Emoji
     role_ids: SnowflakeList
     channel_ids: SnowflakeList

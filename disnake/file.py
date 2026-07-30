@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import io
 import os
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING
 
 __all__ = ("File",)
 
@@ -48,17 +48,17 @@ class File:
 
     if TYPE_CHECKING:
         fp: io.BufferedIOBase
-        filename: Optional[str]
+        filename: str | None
         spoiler: bool
-        description: Optional[str]
+        description: str | None
 
     def __init__(
         self,
-        fp: Union[str, bytes, os.PathLike[str], os.PathLike[bytes], io.BufferedIOBase],
-        filename: Optional[str] = None,
+        fp: str | bytes | os.PathLike[str] | os.PathLike[bytes] | io.BufferedIOBase,
+        filename: str | None = None,
         *,
         spoiler: bool = False,
-        description: Optional[str] = None,
+        description: str | None = None,
     ) -> None:
         if isinstance(fp, io.IOBase):
             if not (fp.seekable() and fp.readable()):
@@ -95,7 +95,7 @@ class File:
         )
         self.description = description
 
-    def reset(self, *, seek: Union[int, bool] = True) -> None:
+    def reset(self, *, seek: int | bool = True) -> None:
         # The `seek` parameter is needed because
         # the retry-loop is iterated over multiple times
         # starting from 0, as an implementation quirk

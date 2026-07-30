@@ -132,6 +132,9 @@ Exceptions
 .. autoexception:: LargeIntConversionFailure
     :members:
 
+.. autoexception:: LargeIntOutOfRange
+    :members:
+
 .. autoexception:: MissingPermissions
     :members:
 
@@ -223,6 +226,7 @@ Exception Hierarchy
                     - :exc:`GuildScheduledEventNotFound`
                     - :exc:`BadBoolArgument`
                     - :exc:`LargeIntConversionFailure`
+                        - :exc:`LargeIntOutOfRange`
                     - :exc:`FlagError`
                         - :exc:`BadFlagArgument`
                         - :exc:`MissingFlagArgument`

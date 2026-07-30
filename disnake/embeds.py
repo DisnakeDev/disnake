@@ -9,9 +9,7 @@ from typing import (
     Any,
     ClassVar,
     Literal,
-    Optional,
     Protocol,
-    Union,
     cast,
     overload,
 )
@@ -19,27 +17,27 @@ from typing import (
 from . import utils
 from .colour import Colour
 from .file import File
-from .utils import MISSING, classproperty, warn_deprecated
+from .utils import MISSING
 
 __all__ = ("Embed",)
 
 
-# backwards compatibility, hidden from type-checkers to have them show errors when accessed
+# backwards compatibility, hidden from type-checkers to have them show errors on access
 if not TYPE_CHECKING:
 
-    def __getattr__(name: str) -> None:
+    def __getattr__(name: str) -> object:
         if name == "EmptyEmbed":
-            warn_deprecated(
+            utils.warn_deprecated(
                 "`EmptyEmbed` is deprecated and will be removed in a future version. Use `None` instead.",
                 stacklevel=2,
             )
-            return None  # noqa: RET501
+            return None
         msg = f"module '{__name__}' has no attribute '{name}'"
         raise AttributeError(msg)
 
 
 class EmbedProxy:
-    def __init__(self, layer: Optional[Mapping[str, Any]]) -> None:
+    def __init__(self, layer: Mapping[str, Any] | None) -> None:
         if layer is not None:
             self.__dict__.update(layer)
 
@@ -53,7 +51,7 @@ class EmbedProxy:
     def __getattr__(self, attr: str) -> None:
         return None
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         return isinstance(other, EmbedProxy) and self.__dict__ == other.__dict__
 
 
@@ -73,36 +71,36 @@ if TYPE_CHECKING:
     )
 
     class _EmbedFooterProxy(Sized, Protocol):
-        text: Optional[str]
-        icon_url: Optional[str]
-        proxy_icon_url: Optional[str]
+        text: str | None
+        icon_url: str | None
+        proxy_icon_url: str | None
 
     class _EmbedFieldProxy(Sized, Protocol):
-        name: Optional[str]
-        value: Optional[str]
-        inline: Optional[bool]
+        name: str | None
+        value: str | None
+        inline: bool | None
 
     class _EmbedMediaProxy(Sized, Protocol):
-        url: Optional[str]
-        proxy_url: Optional[str]
-        height: Optional[int]
-        width: Optional[int]
+        url: str | None
+        proxy_url: str | None
+        height: int | None
+        width: int | None
 
     class _EmbedVideoProxy(Sized, Protocol):
-        url: Optional[str]
-        proxy_url: Optional[str]
-        height: Optional[int]
-        width: Optional[int]
+        url: str | None
+        proxy_url: str | None
+        height: int | None
+        width: int | None
 
     class _EmbedProviderProxy(Sized, Protocol):
-        name: Optional[str]
-        url: Optional[str]
+        name: str | None
+        url: str | None
 
     class _EmbedAuthorProxy(Sized, Protocol):
-        name: Optional[str]
-        url: Optional[str]
-        icon_url: Optional[str]
-        proxy_icon_url: Optional[str]
+        name: str | None
+        url: str | None
+        icon_url: str | None
+        proxy_icon_url: str | None
 
     _FileKey = Literal["image", "thumbnail", "footer", "author"]
 
@@ -150,7 +148,7 @@ class Embed:
     type: :class:`str` | :data:`None`
         The type of embed. Usually "rich".
         Possible strings for embed types can be found on Discord's
-        :ddocs:`api-docs <resources/channel#embed-object-embed-types>`.
+        :ddocs:`api-docs <resources/message#embed-object-embed-types>`.
     description: :class:`str` | :data:`None`
         The description of the embed.
     url: :class:`str` | :data:`None`
@@ -182,24 +180,24 @@ class Embed:
         "_files",
     )
 
-    _default_colour: ClassVar[Optional[Colour]] = None
-    _colour: Optional[Colour]
+    _default_colour: ClassVar[Colour | None] = None
+    _colour: Colour | None
 
     def __init__(
         self,
         *,
-        title: Optional[Any] = None,
-        type: Optional[EmbedType] = "rich",
-        description: Optional[Any] = None,
-        url: Optional[Any] = None,
-        timestamp: Optional[datetime.datetime] = None,
-        colour: Optional[Union[int, Colour]] = MISSING,
-        color: Optional[Union[int, Colour]] = MISSING,
+        title: object | None = None,
+        type: EmbedType | None = "rich",
+        description: object | None = None,
+        url: object | None = None,
+        timestamp: datetime.datetime | None = None,
+        colour: int | Colour | None = MISSING,
+        color: int | Colour | None = MISSING,
     ) -> None:
-        self.title: Optional[str] = str(title) if title is not None else None
-        self.type: Optional[EmbedType] = type
-        self.description: Optional[str] = str(description) if description is not None else None
-        self.url: Optional[str] = str(url) if url is not None else None
+        self.title: str | None = str(title) if title is not None else None
+        self.type: EmbedType | None = type
+        self.description: str | None = str(description) if description is not None else None
+        self.url: str | None = str(url) if url is not None else None
 
         self.timestamp = timestamp
 
@@ -211,26 +209,22 @@ class Embed:
             color = colour
         self.colour = color
 
-        self._thumbnail: Optional[EmbedThumbnailPayload] = None
-        self._video: Optional[EmbedVideoPayload] = None
-        self._provider: Optional[EmbedProviderPayload] = None
-        self._author: Optional[EmbedAuthorPayload] = None
-        self._image: Optional[EmbedImagePayload] = None
-        self._footer: Optional[EmbedFooterPayload] = None
-        self._fields: Optional[list[EmbedFieldPayload]] = None
+        self._thumbnail: EmbedThumbnailPayload | None = None
+        self._video: EmbedVideoPayload | None = None
+        self._provider: EmbedProviderPayload | None = None
+        self._author: EmbedAuthorPayload | None = None
+        self._image: EmbedImagePayload | None = None
+        self._footer: EmbedFooterPayload | None = None
+        self._fields: list[EmbedFieldPayload] | None = None
 
         self._files: dict[_FileKey, File] = {}
 
-    # see `EmptyEmbed` above
     if not TYPE_CHECKING:
-
-        @classproperty
+        # n.b. this is the only use site of classproperty
+        @utils.classproperty
+        @utils.deprecated("Embed.Empty is deprecated. Use None instead.", stacklevel=2)
         def Empty(self) -> None:
-            warn_deprecated(
-                "`Embed.Empty` is deprecated and will be removed in a future version. Use `None` instead.",
-                stacklevel=3,
-            )
-            return None  # noqa: RET501
+            return None
 
     @classmethod
     def from_dict(cls, data: EmbedData) -> Self:
@@ -238,7 +232,7 @@ class Embed:
         format that Discord expects it to be in.
 
         You can find out about this format in the
-        :ddocs:`official Discord documentation <resources/channel#embed-object>`.
+        :ddocs:`official Discord documentation <resources/message#embed-object>`.
 
         Parameters
         ----------
@@ -320,7 +314,7 @@ class Embed:
             )
         )
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         if not isinstance(other, Embed):
             return False
         for slot in self.__slots__:
@@ -331,18 +325,18 @@ class Embed:
         return True
 
     @property
-    def colour(self) -> Optional[Colour]:
+    def colour(self) -> Colour | None:
         col = self._colour
         return col if col is not MISSING else type(self)._default_colour
 
     @colour.setter
-    def colour(self, value: Optional[Union[int, Colour]]) -> None:
+    def colour(self, value: int | Colour | None) -> None:
         if isinstance(value, int):
             self._colour = Colour(value=value)
         elif value is MISSING or value is None or isinstance(value, Colour):
             self._colour = value
         else:
-            msg = f"Expected disnake.Colour, int, or None but received {type(value).__name__} instead."
+            msg = f"Expected disnake.Colour, int, or None, received {value.__class__.__name__} instead."
             raise TypeError(msg)
 
     @colour.deleter
@@ -352,11 +346,11 @@ class Embed:
     color = colour
 
     @property
-    def timestamp(self) -> Optional[datetime.datetime]:
+    def timestamp(self) -> datetime.datetime | None:
         return self._timestamp
 
     @timestamp.setter
-    def timestamp(self, value: Optional[datetime.datetime]) -> None:
+    def timestamp(self, value: datetime.datetime | None) -> None:
         if isinstance(value, datetime.datetime):
             if value.tzinfo is None:
                 value = value.astimezone()
@@ -364,7 +358,9 @@ class Embed:
         elif value is None:
             self._timestamp = value
         else:
-            msg = f"Expected datetime.datetime or None received {type(value).__name__} instead"
+            msg = (
+                f"Expected datetime.datetime or None, received {value.__class__.__name__} instead."
+            )
             raise TypeError(msg)
 
     @property
@@ -382,13 +378,13 @@ class Embed:
         return cast("_EmbedFooterProxy", EmbedProxy(self._footer))
 
     @overload
-    def set_footer(self, *, text: Any, icon_url: Optional[Any] = ...) -> Self: ...
+    def set_footer(self, *, text: object, icon_url: object | None = ...) -> Self: ...
 
     @overload
-    def set_footer(self, *, text: Any, icon_file: File = ...) -> Self: ...
+    def set_footer(self, *, text: object, icon_file: File = ...) -> Self: ...
 
     def set_footer(
-        self, *, text: Any, icon_url: Optional[Any] = MISSING, icon_file: File = MISSING
+        self, *, text: object, icon_url: object | None = MISSING, icon_file: File = MISSING
     ) -> Self:
         """Sets the footer for the embed content.
 
@@ -457,12 +453,12 @@ class Embed:
         return cast("_EmbedMediaProxy", EmbedProxy(self._image))
 
     @overload
-    def set_image(self, url: Optional[Any]) -> Self: ...
+    def set_image(self, url: object | None) -> Self: ...
 
     @overload
     def set_image(self, *, file: File) -> Self: ...
 
-    def set_image(self, url: Optional[Any] = MISSING, *, file: File = MISSING) -> Self:
+    def set_image(self, url: object | None = MISSING, *, file: File = MISSING) -> Self:
         """Sets the image for the embed content.
 
         This function returns the class instance to allow for fluent-style
@@ -510,12 +506,12 @@ class Embed:
         return cast("_EmbedMediaProxy", EmbedProxy(self._thumbnail))
 
     @overload
-    def set_thumbnail(self, url: Optional[Any]) -> Self: ...
+    def set_thumbnail(self, url: object | None) -> Self: ...
 
     @overload
     def set_thumbnail(self, *, file: File) -> Self: ...
 
-    def set_thumbnail(self, url: Optional[Any] = MISSING, *, file: File = MISSING) -> Self:
+    def set_thumbnail(self, url: object | None = MISSING, *, file: File = MISSING) -> Self:
         """Sets the thumbnail for the embed content.
 
         This function returns the class instance to allow for fluent-style
@@ -584,18 +580,20 @@ class Embed:
 
     @overload
     def set_author(
-        self, *, name: Any, url: Optional[Any] = ..., icon_url: Optional[Any] = ...
+        self, *, name: object, url: object | None = ..., icon_url: object | None = ...
     ) -> Self: ...
 
     @overload
-    def set_author(self, *, name: Any, url: Optional[Any] = ..., icon_file: File = ...) -> Self: ...
+    def set_author(
+        self, *, name: object, url: object | None = ..., icon_file: File = ...
+    ) -> Self: ...
 
     def set_author(
         self,
         *,
-        name: Any,
-        url: Optional[Any] = None,
-        icon_url: Optional[Any] = MISSING,
+        name: object,
+        url: object | None = None,
+        icon_url: object | None = MISSING,
         icon_file: File = MISSING,
     ) -> Self:
         """Sets the author for the embed content.
@@ -652,7 +650,7 @@ class Embed:
 
     @property
     def fields(self) -> list[_EmbedFieldProxy]:
-        """:class:`list`\\[``EmbedProxy``]: Returns a :class:`list` of ``EmbedProxy`` denoting the field contents.
+        r""":class:`list`\[``EmbedProxy``]: Returns a :class:`list` of ``EmbedProxy`` denoting the field contents.
 
         See :meth:`add_field` for possible values you can access.
 
@@ -660,7 +658,7 @@ class Embed:
         """
         return cast("list[_EmbedFieldProxy]", [EmbedProxy(d) for d in (self._fields or [])])
 
-    def add_field(self, name: Any, value: Any, *, inline: bool = True) -> Self:
+    def add_field(self, name: object, value: object, *, inline: bool = True) -> Self:
         """Adds a field to the embed object.
 
         This function returns the class instance to allow for fluent-style
@@ -689,7 +687,9 @@ class Embed:
 
         return self
 
-    def insert_field_at(self, index: int, name: Any, value: Any, *, inline: bool = True) -> Self:
+    def insert_field_at(
+        self, index: int, name: object, value: object, *, inline: bool = True
+    ) -> Self:
         """Inserts a field before a specified index to the embed.
 
         This function returns the class instance to allow for fluent-style
@@ -748,7 +748,7 @@ class Embed:
             except IndexError:
                 pass
 
-    def set_field_at(self, index: int, name: Any, value: Any, *, inline: bool = True) -> Self:
+    def set_field_at(self, index: int, name: object, value: object, *, inline: bool = True) -> Self:
         """Modifies a field to the embed object.
 
         The index must point to a valid pre-existing field.
@@ -832,7 +832,7 @@ class Embed:
         return result
 
     @classmethod
-    def set_default_colour(cls, value: Optional[Union[int, Colour]]) -> Optional[Colour]:
+    def set_default_colour(cls, value: int | Colour | None) -> Colour | None:
         """Set the default colour of all new embeds.
 
         .. versionadded:: 2.4
@@ -847,14 +847,14 @@ class Embed:
         elif isinstance(value, int):
             cls._default_colour = Colour(value=value)
         else:
-            msg = f"Expected disnake.Colour, int, or None but received {type(value).__name__} instead."
+            msg = f"Expected disnake.Colour, int, or None, received {value.__class__.__name__} instead."
             raise TypeError(msg)
         return cls._default_colour
 
     set_default_color = set_default_colour
 
     @classmethod
-    def get_default_colour(cls) -> Optional[Colour]:
+    def get_default_colour(cls) -> Colour | None:
         """Get the default colour of all new embeds.
 
         .. versionadded:: 2.4
@@ -870,8 +870,8 @@ class Embed:
     get_default_color = get_default_colour
 
     def _handle_resource(
-        self, url: Optional[Any], file: Optional[File], *, key: _FileKey, required: bool = True
-    ) -> Optional[str]:
+        self, url: object | None, file: File | None, *, key: _FileKey, required: bool = True
+    ) -> str | None:
         if required:
             if not (url is MISSING) ^ (file is MISSING):
                 msg = "Exactly one of url or file must be provided"

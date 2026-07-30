@@ -2,48 +2,39 @@
 
 from __future__ import annotations
 
+import inspect
 import os
 from abc import ABC, abstractmethod
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from typing import (
     TYPE_CHECKING,
-    Callable,
+    Any,
     ClassVar,
     Generic,
-    Optional,
-    TypeVar,
-    Union,
+    TypeAlias,
 )
+
+from typing_extensions import Self, TypeVar
 
 from ...components import AnySelectMenu, SelectDefaultValue
 from ...enums import ComponentType, SelectDefaultValueType
 from ...object import Object
-from ...utils import MISSING, humanize_list, iscoroutinefunction
-from ..item import DecoratedItem, Item
+from ...utils import MISSING, humanize_list
+from .._types import P, V_co, V_deco
+from ..item import DecoratedItem, Item, ItemCallbackType
 
 __all__ = ("BaseSelect",)
 
 if TYPE_CHECKING:
-    from typing_extensions import ParamSpec, Self
-
     from ...abc import Snowflake
     from ...interactions import MessageInteraction
-    from ..item import ItemCallbackType
-    from ..view import View
 
-else:
-    ParamSpec = TypeVar
-
-
-S_co = TypeVar("S_co", bound="BaseSelect", covariant=True)
-V_co = TypeVar("V_co", bound="Optional[View]", covariant=True)
 SelectMenuT = TypeVar("SelectMenuT", bound=AnySelectMenu)
 SelectValueT = TypeVar("SelectValueT")
-P = ParamSpec("P")
 
-SelectDefaultValueMultiInputType = Union[SelectValueT, SelectDefaultValue]
+SelectDefaultValueMultiInputType: TypeAlias = SelectValueT | SelectDefaultValue
 # almost the same as above, but with `Object`; used for selects where the type isn't ambiguous (i.e. all except mentionable select)
-SelectDefaultValueInputType = Union[SelectDefaultValueMultiInputType[SelectValueT], Object]
+SelectDefaultValueInputType: TypeAlias = SelectDefaultValueMultiInputType[SelectValueT] | Object
 
 
 class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
@@ -81,14 +72,14 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
         component_type: ComponentType,
         *,
         custom_id: str,
-        placeholder: Optional[str],
+        placeholder: str | None,
         min_values: int,
         max_values: int,
         disabled: bool,
-        default_values: Optional[Sequence[SelectDefaultValueInputType[SelectValueT]]],
+        default_values: Sequence[SelectDefaultValueInputType[SelectValueT]] | None,
         required: bool,
         id: int,
-        row: Optional[int],
+        row: int | None,
     ) -> None:
         super().__init__()
         self._selected_values: list[SelectValueT] = []
@@ -121,12 +112,12 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
         self._underlying.custom_id = value
 
     @property
-    def placeholder(self) -> Optional[str]:
+    def placeholder(self) -> str | None:
         """:class:`str` | :data:`None`: The placeholder text that is shown if nothing is selected, if any."""
         return self._underlying.placeholder
 
     @placeholder.setter
-    def placeholder(self, value: Optional[str]) -> None:
+    def placeholder(self, value: str | None) -> None:
         if value is not None and not isinstance(value, str):
             msg = "placeholder must be None or str"
             raise TypeError(msg)
@@ -162,14 +153,14 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
 
     @property
     def default_values(self) -> list[SelectDefaultValue]:
-        """:class:`list`\\[:class:`.SelectDefaultValue`]: The list of values that are selected by default.
+        r""":class:`list`\[:class:`.SelectDefaultValue`]: The list of values that are selected by default.
         Only available for auto-populated select menus.
         """
         return self._underlying.default_values
 
     @default_values.setter
     def default_values(
-        self, value: Optional[Sequence[SelectDefaultValueInputType[SelectValueT]]]
+        self, value: Sequence[SelectDefaultValueInputType[SelectValueT]] | None
     ) -> None:
         self._underlying.default_values = self._transform_default_values(value) if value else []
 
@@ -249,13 +240,16 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
         return result
 
 
+S_co = TypeVar("S_co", bound="BaseSelect[Any, Any, Any]", covariant=True)
+
+
 def _create_decorator(
     # FIXME(3.0): rename `cls` parameter to more closely represent any callable argument type
     cls: Callable[P, S_co],
     /,
     *args: P.args,
     **kwargs: P.kwargs,
-) -> Callable[[ItemCallbackType[V_co, S_co]], DecoratedItem[S_co]]:
+) -> Callable[[ItemCallbackType[V_deco, S_co]], DecoratedItem[S_co]]:
     if args:
         # the `*args` def above is just to satisfy the typechecker
         msg = "expected no *args"
@@ -265,8 +259,8 @@ def _create_decorator(
         msg = "cls argument must be callable"
         raise TypeError(msg)
 
-    def decorator(func: ItemCallbackType[V_co, S_co]) -> DecoratedItem[S_co]:
-        if not iscoroutinefunction(func):
+    def decorator(func: ItemCallbackType[V_deco, S_co]) -> DecoratedItem[S_co]:
+        if not inspect.iscoroutinefunction(func):
             msg = "select function must be a coroutine function"
             raise TypeError(msg)
 

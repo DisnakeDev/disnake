@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING, Any, Optional, Union
+from typing import TYPE_CHECKING, Any
 
 from . import utils
 from .asset import Asset, AssetMixin
@@ -75,18 +75,16 @@ class PartialEmoji(_EmojiTag, AssetMixin):
     )
 
     if TYPE_CHECKING:
-        id: Optional[int]
+        id: int | None
 
-    def __init__(self, *, name: str, animated: bool = False, id: Optional[int] = None) -> None:
+    def __init__(self, *, name: str, animated: bool = False, id: int | None = None) -> None:
         self.animated = animated
         self.name = name
         self.id = id
         self._state = None
 
     @classmethod
-    def from_dict(
-        cls, data: Union[PartialEmojiPayload, ActivityEmojiPayload, dict[str, Any]]
-    ) -> Self:
+    def from_dict(cls, data: PartialEmojiPayload | ActivityEmojiPayload | dict[str, Any]) -> Self:
         return cls(
             animated=data.get("animated", False),
             id=utils._get_as_snowflake(data, "id"),
@@ -147,7 +145,7 @@ class PartialEmoji(_EmojiTag, AssetMixin):
         *,
         name: str,
         animated: bool = False,
-        id: Optional[int] = None,
+        id: int | None = None,
     ) -> Self:
         self = cls(name=name, animated=animated, id=id)
         self._state = state
@@ -165,7 +163,7 @@ class PartialEmoji(_EmojiTag, AssetMixin):
             f"<{self.__class__.__name__} animated={self.animated} name={self.name!r} id={self.id}>"
         )
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         if self.is_unicode_emoji():
             return isinstance(other, PartialEmoji) and self.name == other.name
 
@@ -173,7 +171,7 @@ class PartialEmoji(_EmojiTag, AssetMixin):
             return self.id == other.id
         return False
 
-    def __ne__(self, other: Any) -> bool:
+    def __ne__(self, other: object) -> bool:
         return not self.__eq__(other)
 
     def __hash__(self) -> int:
@@ -199,7 +197,7 @@ class PartialEmoji(_EmojiTag, AssetMixin):
         return f"{self.name}:{self.id}"
 
     @property
-    def created_at(self) -> Optional[datetime]:
+    def created_at(self) -> datetime | None:
         """:class:`datetime.datetime` | :data:`None`: Returns the emoji's creation time in UTC, or None if it's a Unicode emoji.
 
         .. versionadded:: 1.6
@@ -255,8 +253,8 @@ class PartialEmoji(_EmojiTag, AssetMixin):
     # (e.g. default reaction, tag emoji)
     @staticmethod
     def _emoji_to_name_id(
-        emoji: Optional[Union[str, Emoji, PartialEmoji]],
-    ) -> tuple[Optional[str], Optional[int]]:
+        emoji: str | Emoji | PartialEmoji | None,
+    ) -> tuple[str | None, int | None]:
         if emoji is None:
             return None, None
 

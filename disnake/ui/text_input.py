@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING, ClassVar, Optional
+from typing import TYPE_CHECKING, ClassVar, overload
+
+from disnake import utils
 
 from ..components import TextInput as TextInputComponent
 from ..enums import ComponentType, TextInputStyle
-from ..utils import MISSING, deprecated
+from ..utils import MISSING
 from .item import WrappedComponent
 
 if TYPE_CHECKING:
@@ -48,9 +50,10 @@ class TextInput(WrappedComponent):
     max_length: :class:`int` | :data:`None`
         The maximum length of the text input.
     id: :class:`int`
-        The numeric identifier for the component. Must be unique within the message.
+        The numeric identifier for the component. Must be unique within a modal.
+        This is always present in components received from the API.
         If set to ``0`` (the default) when sending a component, the API will assign
-        sequential identifiers to the components in the message.
+        sequential identifiers to the components in the modal.
 
         .. versionadded:: 2.11
     """
@@ -67,17 +70,47 @@ class TextInput(WrappedComponent):
     # We have to set this to MISSING in order to overwrite the abstract property from UIComponent
     _underlying: TextInputComponent = MISSING
 
+    @overload
     def __init__(
         self,
         *,
-        label: Optional[str] = None,
+        custom_id: str = ...,
+        style: TextInputStyle = TextInputStyle.short,
+        placeholder: str | None = None,
+        value: str | None = None,
+        required: bool = True,
+        min_length: int | None = None,
+        max_length: int | None = None,
+        id: int = 0,
+    ) -> None: ...
+
+    @overload
+    @utils.deprecated('`label` is deprecated. Use `ui.Label("<text>", ui.TextInput(...))` instead.')
+    def __init__(
+        self,
+        *,
+        label: str | None = None,
+        custom_id: str = ...,
+        style: TextInputStyle = TextInputStyle.short,
+        placeholder: str | None = None,
+        value: str | None = None,
+        required: bool = True,
+        min_length: int | None = None,
+        max_length: int | None = None,
+        id: int = 0,
+    ) -> None: ...
+
+    def __init__(
+        self,
+        *,
+        label: str | None = None,
         custom_id: str = MISSING,
         style: TextInputStyle = TextInputStyle.short,
-        placeholder: Optional[str] = None,
-        value: Optional[str] = None,
+        placeholder: str | None = None,
+        value: str | None = None,
         required: bool = True,
-        min_length: Optional[int] = None,
-        max_length: Optional[int] = None,
+        min_length: int | None = None,
+        max_length: int | None = None,
         id: int = 0,
     ) -> None:
         custom_id = os.urandom(16).hex() if custom_id is MISSING else custom_id
@@ -108,8 +141,8 @@ class TextInput(WrappedComponent):
         self._underlying.style = value
 
     @property
-    @deprecated('ui.Label("<text>", ui.TextInput(...))')
-    def label(self) -> Optional[str]:
+    @utils.deprecated('Use `ui.Label("<text>", ui.TextInput(...))` instead.')
+    def label(self) -> str | None:
         """:class:`str`: The label of the text input.
 
         .. deprecated:: 2.11
@@ -118,7 +151,7 @@ class TextInput(WrappedComponent):
         return self._underlying.label
 
     @label.setter
-    @deprecated('ui.Label("<text>", ui.TextInput(...))')
+    @utils.deprecated('Use `ui.Label("<text>", ui.TextInput(...))` instead.')
     def label(self, value: str) -> None:
         self._underlying.label = value
 
@@ -132,21 +165,21 @@ class TextInput(WrappedComponent):
         self._underlying.custom_id = value
 
     @property
-    def placeholder(self) -> Optional[str]:
+    def placeholder(self) -> str | None:
         """:class:`str` | :data:`None`: The placeholder text that is shown if nothing is entered."""
         return self._underlying.placeholder
 
     @placeholder.setter
-    def placeholder(self, value: Optional[str]) -> None:
+    def placeholder(self, value: str | None) -> None:
         self._underlying.placeholder = value
 
     @property
-    def value(self) -> Optional[str]:
+    def value(self) -> str | None:
         """:class:`str` | :data:`None`: The pre-filled text of the text input."""
         return self._underlying.value
 
     @value.setter
-    def value(self, value: Optional[str]) -> None:
+    def value(self, value: str | None) -> None:
         self._underlying.value = value
 
     @property
@@ -159,21 +192,21 @@ class TextInput(WrappedComponent):
         self._underlying.required = value
 
     @property
-    def min_length(self) -> Optional[int]:
+    def min_length(self) -> int | None:
         """:class:`int` | :data:`None`: The minimum length of the text input."""
         return self._underlying.min_length
 
     @min_length.setter
-    def min_length(self, value: Optional[int]) -> None:
+    def min_length(self, value: int | None) -> None:
         self._underlying.min_length = value
 
     @property
-    def max_length(self) -> Optional[int]:
+    def max_length(self) -> int | None:
         """:class:`int` | :data:`None`: The maximum length of the text input."""
         return self._underlying.max_length
 
     @max_length.setter
-    def max_length(self, value: Optional[int]) -> None:
+    def max_length(self, value: int | None) -> None:
         self._underlying.max_length = value
 
     @classmethod
