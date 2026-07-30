@@ -328,16 +328,21 @@ class InteractionBotBase(CommonBotBase):
         app_command._apply_defaults(self)
         app_command.body.localize(self.i18n)
 
+        # note: this is done in two separate steps/loops, so that any
+        # errors from duplicate commands/indices don't result in an only
+        # partially updated command cache
+        indices: list[AppCmdIndex] = []
         for guild_id in guild_ids:
             cmd_index = AppCmdIndex(
                 type=app_command.body.type, name=app_command.name, guild_id=guild_id
             )
             if cmd_index in self._all_app_commands:
-                # FIXME: if this fails, the command might have been added to some but not others
                 raise ApplicationCommandRegistrationError(
                     cmd_index.type, cmd_index.name, cmd_index.guild_id
                 )
+            indices.append(cmd_index)
 
+        for cmd_index in indices:
             # note that we're adding the same command object for each guild_id;
             # this ensures that any changes that happen to the command after add_app_command
             # (such as hook attachments or permission modifications) apply properly
