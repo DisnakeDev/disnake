@@ -328,11 +328,15 @@ class InteractionBotBase(CommonBotBase):
         test_guilds = (None,) if self._test_guilds is None else self._test_guilds
         guild_ids = app_command.guild_ids or test_guilds
 
+        app_command._apply_defaults(self)
+        app_command.body.localize(self.i18n)
+
         for guild_id in guild_ids:
             cmd_index = AppCmdIndex(
                 type=app_command.body.type, name=app_command.name, guild_id=guild_id
             )
             if cmd_index in self._all_app_commands:
+                # FIXME: if this fails, the command might have been added to some but not others
                 raise ApplicationCommandRegistrationError(
                     cmd_index.type, cmd_index.name, cmd_index.guild_id
                 )
@@ -341,7 +345,6 @@ class InteractionBotBase(CommonBotBase):
             # this ensures that any changes that happen to app_command after add_app_command
             # (such as hook attachments or permission modifications) apply properly
             self._all_app_commands[cmd_index] = app_command
-        app_command.body.localize(self.i18n)
 
     @utils.deprecated("Use `.add_app_command` instead.")
     def add_slash_command(self, slash_command: InvokableSlashCommand) -> None:
