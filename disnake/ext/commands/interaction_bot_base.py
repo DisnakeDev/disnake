@@ -25,7 +25,6 @@ from disnake.app_commands import ApplicationCommand, Option
 from disnake.custom_warnings import SyncWarning
 from disnake.enums import ApplicationCommandType
 from disnake.flags import ApplicationInstallTypes, InteractionContextTypes
-from disnake.utils import deprecated, warn_deprecated
 
 from . import errors
 from .base_core import AppCmdIndex, InvokableApplicationCommand
@@ -252,7 +251,7 @@ class InteractionBotBase(CommonBotBase):
         }
 
     @property
-    @deprecated("slash_commands")
+    @utils.deprecated("Use `.slash_commands` instead.")
     def all_slash_commands(self) -> dict[str, InvokableSlashCommand]:
         # no docstring because it was an attribute and now it's deprecated
         return {
@@ -262,7 +261,7 @@ class InteractionBotBase(CommonBotBase):
         }
 
     @property
-    @deprecated("user_commands")
+    @utils.deprecated("Use `.user_commands` instead.")
     def all_user_commands(self) -> dict[str, InvokableUserCommand]:
         # no docstring because it was an attribute and now it's deprecated
         return {
@@ -272,7 +271,7 @@ class InteractionBotBase(CommonBotBase):
         }
 
     @property
-    @deprecated("message_commands")
+    @utils.deprecated("Use `.message_commands` instead.")
     def all_message_commands(self) -> dict[str, InvokableMessageCommand]:
         # no docstring because it was an attribute and now it's deprecated
         return {
@@ -344,7 +343,7 @@ class InteractionBotBase(CommonBotBase):
             self._all_app_commands[cmd_index] = app_command
         app_command.body.localize(self.i18n)
 
-    @deprecated("add_app_command")
+    @utils.deprecated("Use `.add_app_command` instead.")
     def add_slash_command(self, slash_command: InvokableSlashCommand) -> None:
         """Adds an :class:`InvokableSlashCommand` into the internal list of slash commands.
 
@@ -365,7 +364,7 @@ class InteractionBotBase(CommonBotBase):
         """
         self.add_app_command(slash_command)
 
-    @deprecated("add_app_command")
+    @utils.deprecated("Use `.add_app_command` instead.")
     def add_user_command(self, user_command: InvokableUserCommand) -> None:
         """Adds an :class:`InvokableUserCommand` into the internal list of user commands.
 
@@ -386,7 +385,7 @@ class InteractionBotBase(CommonBotBase):
         """
         self.add_app_command(user_command)
 
-    @deprecated("add_app_command")
+    @utils.deprecated("Use `.add_app_command` instead.")
     def add_message_command(self, message_command: InvokableMessageCommand) -> None:
         """Adds an :class:`InvokableMessageCommand` into the internal list of message commands.
 
@@ -456,7 +455,7 @@ class InteractionBotBase(CommonBotBase):
 
     def _emulate_old_app_command_remove(self, cmd_type: ApplicationCommandType, name: str) -> Any:
         type_info = "slash" if cmd_type is ApplicationCommandType.chat_input else cmd_type.name
-        warn_deprecated(
+        utils.warn_deprecated(
             f"remove_{type_info}_command is deprecated and will be removed in a future version. "
             "Use remove_app_command instead.",
             stacklevel=3,
