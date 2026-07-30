@@ -231,7 +231,7 @@ class ApplicationCommandInteractionData(dict[str, Any]):
         All resolved objects related to this interaction.
     options: :class:`list`\\[:class:`ApplicationCommandInteractionDataOption`]
         A list of options from the API.
-    guild_id: Optional[:class:`int`]
+    guild_id: :class:`int` | :data:`None`
         ID of the guild the command is registered to.
 
         .. versionadded:: 2.12

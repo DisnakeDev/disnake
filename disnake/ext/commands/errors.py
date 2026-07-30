@@ -1063,9 +1063,9 @@ class ApplicationCommandRegistrationError(CommandRegistrationError):
         The command type.
     name: :class:`str`
         The command name.
-    guild_id: Optional[:class:`int`]
+    guild_id: :class:`int` | :data:`None`
         The ID of the guild where the command was supposed to be registered
-        or ``None`` if it was a global command.
+        or :data:`None` if it was a global command.
     """
 
     def __init__(

@@ -140,7 +140,7 @@ def _match_subcommand_chain(
     command: InvokableSlashCommand, chain: list[str]
 ) -> Union[InvokableSlashCommand, SubCommand, SubCommandGroup, None]:
     """An internal function that returns a subcommand with a route matching the chain.
-    If there's no match then ``None`` is returned.
+    If there's no match then :data:`None` is returned.
     """
     if command.name != chain[0]:
         return None
@@ -252,7 +252,7 @@ class InteractionBotBase(CommonBotBase):
 
     @property
     def all_app_commands(self) -> MappingProxyType[AppCmdIndex, InvokableApplicationCommand]:
-        """Mapping[:class:`AppCmdIndex`, :class:`InvokableApplicationCommand`]:
+        """:class:`~collections.abc.Mapping`\\[:class:`AppCmdIndex`, :class:`InvokableApplicationCommand`]:
         A read-only mapping with all application commands the bot has.
         """
         return MappingProxyType(self._all_app_commands)
@@ -322,7 +322,7 @@ class InteractionBotBase(CommonBotBase):
         :meth:`.slash_command`, :meth:`.user_command` or :meth:`.message_command`.
 
         The app command is registered to guilds specified in the ``guild_ids`` attribute.
-        If this attribute is ``None`` then the command is registered globally, unless
+        If this attribute is :data:`None` then the command is registered globally, unless
         parameter ``test_guilds`` is specified in the bot constructor, in which case
         this command is registered to those guilds.
 
@@ -454,15 +454,15 @@ class InteractionBotBase(CommonBotBase):
             The type of the app command to remove.
         name: :class:`str`
             The name of the app command to remove.
-        guild_id: Optional[:class:`int`]
+        guild_id: :class:`int` | :data:`None`
             The ID of the guild from which this command should be removed,
-            or ``None`` if it's global. If ``test_guilds`` is specified in the bot constructor,
-            passing ``None`` here will remove the command from those guilds instead.
+            or :data:`None` if it's global. If ``test_guilds`` is specified in the bot constructor,
+            passing :data:`None` here will remove the command from those guilds instead.
 
         Returns
         -------
-        Optional[:class:`InvokableApplicationCommand`]
-            The app command that was removed. If no matching command was found, then ``None`` is returned instead.
+        :class:`InvokableApplicationCommand` | :data:`None`
+            The app command that was removed. If no matching command was found, then :data:`None` is returned instead.
         """
         if guild_id is not None or self._test_guilds is None:
             cmd_index = AppCmdIndex(type=cmd_type, name=name, guild_id=guild_id)
@@ -570,8 +570,8 @@ class InteractionBotBase(CommonBotBase):
         ----------
         name: :class:`str`
             The name of the slash command to get.
-        guild_id: Optional[:class:`int`]
-            The guild ID corresponding to the slash command or ``None`` if it's a global command.
+        guild_id: :class:`int` | :data:`None`
+            The guild ID corresponding to the slash command or :data:`None` if it's a global command.
             If this is not specified then the first match is returned instead.
 
         Raises
@@ -631,8 +631,8 @@ class InteractionBotBase(CommonBotBase):
         ----------
         name: :class:`str`
             The name of the user command to get.
-        guild_id: Optional[:class:`int`]
-            The guild ID corresponding to the user command or ``None`` if it's a global command.
+        guild_id: :class:`int` | :data:`None`
+            The guild ID corresponding to the user command or :data:`None` if it's a global command.
             If this is not specified then the first match is returned instead.
 
         Raises
@@ -679,8 +679,8 @@ class InteractionBotBase(CommonBotBase):
         ----------
         name: :class:`str`
             The name of the message command to get.
-        guild_id: Optional[:class:`int`]
-            The guild ID corresponding to the message command or ``None`` if it's a global command.
+        guild_id: :class:`int` | :data:`None`
+            The guild ID corresponding to the message command or :data:`None` if it's a global command.
             If this is not specified then the first match is returned instead.
 
         Raises
@@ -795,7 +795,7 @@ class InteractionBotBase(CommonBotBase):
 
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``
-        guild_ids: Optional[Sequence[:class:`int`]]
+        guild_ids: :class:`~collections.abc.Sequence`\\[:class:`int`] | :data:`None`
             If specified, the client will register the command to these guilds.
             Otherwise the command will be registered globally, unless
             parameter ``test_guilds`` is specified in the bot constructor, in which case
@@ -907,7 +907,7 @@ class InteractionBotBase(CommonBotBase):
 
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``.
-        guild_ids: Optional[Sequence[:class:`int`]]
+        guild_ids: :class:`~collections.abc.Sequence`\\[:class:`int`] | :data:`None`
             If specified, the client will register the command to these guilds.
             Otherwise the command will be registered globally, unless
             parameter ``test_guilds`` is specified in the bot constructor, in which case
@@ -1012,7 +1012,7 @@ class InteractionBotBase(CommonBotBase):
 
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``
-        guild_ids: Optional[Sequence[:class:`int`]]
+        guild_ids: :class:`~collections.abc.Sequence`\\[:class:`int`] | :data:`None`
             If specified, the client will register the command to these guilds.
             Otherwise the command will be registered globally, unless
             parameter ``test_guilds`` is specified in the bot constructor, in which case

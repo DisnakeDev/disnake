@@ -103,9 +103,9 @@ class AppCmdIndex(NamedTuple):
         The type of the application command being stored.
     name: :class:`str`
         The name of the application command being stored.
-    guild_id: Optional[:class:`int`]
+    guild_id: :class:`int` | :data:`None`
         One of the guild IDs this command should be registered to,
-        or ``None`` if it's a global command.
+        or :data:`None` if it's a global command.
     """
 
     type: ApplicationCommandType

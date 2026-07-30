@@ -316,7 +316,7 @@ def user_command(
 
     auto_sync: :class:`bool`
         Whether to automatically register the command. Defaults to ``True``.
-    guild_ids: Optional[Sequence[:class:`int`]]
+    guild_ids: :class:`~collections.abc.Sequence`\\[:class:`int`] | :data:`None`
         If specified, the client will register the command to these guilds.
         Otherwise the command will be registered globally, unless
         parameter ``test_guilds`` is specified in the bot constructor, in which case
@@ -429,7 +429,7 @@ def message_command(
 
     auto_sync: :class:`bool`
         Whether to automatically register the command. Defaults to ``True``.
-    guild_ids: Optional[Sequence[:class:`int`]]
+    guild_ids: :class:`~collections.abc.Sequence`\\[:class:`int`] | :data:`None`
         If specified, the client will register the command to these guilds.
         Otherwise the command will be registered globally, unless
         parameter ``test_guilds`` is specified in the bot constructor, in which case
