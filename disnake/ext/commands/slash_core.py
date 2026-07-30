@@ -937,7 +937,7 @@ def slash_command(
 
         .. versionadded:: 2.5
 
-    guild_ids: :class:`list`\[:class:`int`]
+    guild_ids: :class:`~collections.abc.Sequence`\[:class:`int`] | :data:`None`
         If specified, the client will register the command in these guilds.
         Otherwise, this command will be registered globally, unless
         parameter ``test_guilds`` is specified in the bot constructor, in which case
