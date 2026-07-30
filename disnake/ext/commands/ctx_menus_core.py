@@ -417,7 +417,7 @@ def user_command(
     guild_ids: :class:`~collections.abc.Sequence`\[:class:`int`] | :data:`None`
         If specified, the client will register the command to these guilds.
         Otherwise the command will be registered globally, unless
-        parameter ``test_guilds`` is specified in the bot constructor, in which case
+        the ``test_guilds`` parameter is specified in the bot constructor, in which case
         this command will be registered to those guilds.
     extras: :class:`dict`\[:class:`str`, :data:`~typing.Any`]
         A dict of user provided extras to attach to the command.
@@ -564,7 +564,7 @@ def message_command(
     guild_ids: :class:`~collections.abc.Sequence`\[:class:`int`] | :data:`None`
         If specified, the client will register the command to these guilds.
         Otherwise the command will be registered globally, unless
-        parameter ``test_guilds`` is specified in the bot constructor, in which case
+        the ``test_guilds`` parameter is specified in the bot constructor, in which case
         this command will be registered to those guilds.
     extras: :class:`dict`\[:class:`str`, :data:`~typing.Any`]
         A dict of user provided extras to attach to the command.

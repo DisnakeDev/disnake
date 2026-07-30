@@ -253,7 +253,6 @@ class InteractionBotBase(CommonBotBase):
     @property
     @utils.deprecated("Use `.slash_commands` instead.")
     def all_slash_commands(self) -> dict[str, InvokableSlashCommand]:
-        # no docstring because it was an attribute and now it's deprecated
         return {
             cmd.name: cmd
             for cmd in self._all_app_commands.values()
@@ -263,7 +262,6 @@ class InteractionBotBase(CommonBotBase):
     @property
     @utils.deprecated("Use `.user_commands` instead.")
     def all_user_commands(self) -> dict[str, InvokableUserCommand]:
-        # no docstring because it was an attribute and now it's deprecated
         return {
             cmd.name: cmd
             for cmd in self._all_app_commands.values()
@@ -273,7 +271,6 @@ class InteractionBotBase(CommonBotBase):
     @property
     @utils.deprecated("Use `.message_commands` instead.")
     def all_message_commands(self) -> dict[str, InvokableMessageCommand]:
-        # no docstring because it was an attribute and now it's deprecated
         return {
             cmd.name: cmd
             for cmd in self._all_app_commands.values()
@@ -288,13 +285,13 @@ class InteractionBotBase(CommonBotBase):
 
         The app command is registered to guilds specified in the ``guild_ids`` attribute.
         If this attribute is :data:`None` then the command is registered globally, unless
-        parameter ``test_guilds`` is specified in the bot constructor, in which case
+        the ``test_guilds`` parameter is specified in the bot constructor, in which case
         this command is registered to those guilds.
 
         .. versionadded:: |vnext|
 
         .. note::
-            Any change to the ``app_command``'s ``name`` and ``guild_ids`` attributes
+            Any change to the command's ``name`` and ``guild_ids`` attributes
             after the command was added to the client are not supported and may
             result in undefined behaviour.
 
@@ -341,8 +338,8 @@ class InteractionBotBase(CommonBotBase):
                     cmd_index.type, cmd_index.name, cmd_index.guild_id
                 )
 
-            # note that we're adding the same command object for each guild_id
-            # this ensures that any changes that happen to app_command after add_app_command
+            # note that we're adding the same command object for each guild_id;
+            # this ensures that any changes that happen to the command after add_app_command
             # (such as hook attachments or permission modifications) apply properly
             self._all_app_commands[cmd_index] = app_command
 
@@ -540,14 +537,14 @@ class InteractionBotBase(CommonBotBase):
             The name of the slash command to get.
         guild_id: :class:`int` | :data:`None`
             The guild ID corresponding to the slash command or :data:`None` if it's a global command.
-            If this is not specified then the first match is returned instead.
+            If this is not specified but multiple commands with this name exist, and error will be raised.
 
         Raises
         ------
         TypeError
             The name is not a string.
         ValueError
-            Parameter ``guild_id`` was not provided in a case where different slash commands
+            The ``guild_id`` parameter was not provided in a case where different slash commands
             have the same name but different guild_ids.
 
         Returns
@@ -569,7 +566,7 @@ class InteractionBotBase(CommonBotBase):
                 return None
             return _match_subcommand_chain(command, chain)  # pyright: ignore[reportArgumentType]
 
-        # this is mostly for backwards compatibility, as previously guild_id arg didn't exist
+        # this is mostly for backwards compatibility, as previously the guild_id arg didn't exist
         result = None
         for command in self._all_app_commands.values():
             if not isinstance(command, InvokableSlashCommand):
@@ -582,7 +579,7 @@ class InteractionBotBase(CommonBotBase):
             # we should check whether there's an ambiguity in command search
             elif chain_match is not result:
                 msg = (
-                    "Argument guild_id must be provided if there're different slash commands "
+                    "The `guild_id` argument must be provided if there are different slash commands "
                     "with the same name but different guilds or one of them is global."
                 )
                 raise ValueError(msg)
@@ -601,12 +598,12 @@ class InteractionBotBase(CommonBotBase):
             The name of the user command to get.
         guild_id: :class:`int` | :data:`None`
             The guild ID corresponding to the user command or :data:`None` if it's a global command.
-            If this is not specified then the first match is returned instead.
+            If this is not specified but multiple commands with this name exist, and error will be raised.
 
         Raises
         ------
         ValueError
-            Parameter ``guild_id`` was not provided in a case where different user commands
+            The ``guild_id`` parameter was not provided in a case where different user commands
             have the same name but different guild_ids.
 
         Returns
@@ -620,7 +617,8 @@ class InteractionBotBase(CommonBotBase):
             if command is None:
                 return None
             return command  # pyright: ignore[reportReturnType]
-        # this is mostly for backwards compatibility, as previously guild_id arg didn't exist
+
+        # this is mostly for backwards compatibility, as previously the guild_id arg didn't exist
         result = None
         for command in self._all_app_commands.values():
             if not isinstance(command, InvokableUserCommand) or command.name != name:
@@ -630,7 +628,7 @@ class InteractionBotBase(CommonBotBase):
             # we should check whether there's an ambiguity in command search
             elif command is not result:
                 msg = (
-                    "Argument guild_id must be provided if there're different user commands "
+                    "The `guild_id` argument must be provided if there are different user commands "
                     "with the same name but different guilds or one of them is global."
                 )
                 raise ValueError(msg)
@@ -649,12 +647,12 @@ class InteractionBotBase(CommonBotBase):
             The name of the message command to get.
         guild_id: :class:`int` | :data:`None`
             The guild ID corresponding to the message command or :data:`None` if it's a global command.
-            If this is not specified then the first match is returned instead.
+            If this is not specified but multiple commands with this name exist, and error will be raised.
 
         Raises
         ------
         ValueError
-            Parameter ``guild_id`` was not provided in a case where different message commands
+            The ``guild_id`` parameter was not provided in a case where different message commands
             have the same name but different guild_ids.
 
         Returns
@@ -670,7 +668,8 @@ class InteractionBotBase(CommonBotBase):
             if command is None:
                 return None
             return command  # pyright: ignore[reportReturnType]
-        # this is mostly for backwards compatibility, as previously guild_id arg didn't exist
+
+        # this is mostly for backwards compatibility, as previously the guild_id arg didn't exist
         result = None
         for command in self._all_app_commands.values():
             if not isinstance(command, InvokableMessageCommand) or command.name != name:
@@ -680,7 +679,7 @@ class InteractionBotBase(CommonBotBase):
             # we should check whether there's an ambiguity in command search
             elif command is not result:
                 msg = (
-                    "Argument guild_id must be provided if there're different message commands "
+                    "The `guild_id` argument must be provided if there are different message commands "
                     "with the same name but different guilds or one of them is global."
                 )
                 raise ValueError(msg)
@@ -801,7 +800,7 @@ class InteractionBotBase(CommonBotBase):
         guild_ids: :class:`~collections.abc.Sequence`\[:class:`int`] | :data:`None`
             If specified, the client will register the command to these guilds.
             Otherwise the command will be registered globally, unless
-            parameter ``test_guilds`` is specified in the bot constructor, in which case
+            the ``test_guilds`` parameter is specified in the bot constructor, in which case
             this command will be registered to those guilds.
         connectors: :class:`dict`\[:class:`str`, :class:`str`]
             Binds function names to option names. If the name
@@ -945,7 +944,7 @@ class InteractionBotBase(CommonBotBase):
         guild_ids: :class:`~collections.abc.Sequence`\[:class:`int`] | :data:`None`
             If specified, the client will register the command to these guilds.
             Otherwise the command will be registered globally, unless
-            parameter ``test_guilds`` is specified in the bot constructor, in which case
+            the ``test_guilds`` parameter is specified in the bot constructor, in which case
             this command will be registered to those guilds.
         extras: :class:`dict`\[:class:`str`, :data:`~typing.Any`]
             A dict of user provided extras to attach to the command.
@@ -1082,7 +1081,7 @@ class InteractionBotBase(CommonBotBase):
         guild_ids: :class:`~collections.abc.Sequence`\[:class:`int`] | :data:`None`
             If specified, the client will register the command to these guilds.
             Otherwise the command will be registered globally, unless
-            parameter ``test_guilds`` is specified in the bot constructor, in which case
+            the ``test_guilds`` parameter is specified in the bot constructor, in which case
             this command will be registered to those guilds.
         extras: :class:`dict`\[:class:`str`, :data:`~typing.Any`]
             A dict of user provided extras to attach to the command.

@@ -256,9 +256,7 @@ class ApplicationCommandInteractionData(dict[str, Any]):
         self,
         *,
         data: ApplicationCommandInteractionDataPayload,
-        parent: ApplicationCommandInteraction[
-            ClientT
-        ],  # the ID of the guild where this command has been invoked
+        parent: ApplicationCommandInteraction[ClientT],
     ) -> None:
         super().__init__(data)
         self.id: int = int(data["id"])

@@ -97,8 +97,8 @@ def wrap_callback(coro):
 
 
 class AppCmdIndex(NamedTuple):
-    """A named tuple used for indexation of :class:`InvokableApplicationCommand`
-    objects stored in bot's cache.
+    """A named tuple used for indexing :class:`InvokableApplicationCommand`
+    objects handled by the bot.
 
     .. versionadded:: |vnext|
 
@@ -109,7 +109,7 @@ class AppCmdIndex(NamedTuple):
     name: :class:`str`
         The name of the application command being stored.
     guild_id: :class:`int` | :data:`None`
-        One of the guild IDs this command should be registered to,
+        One of the guild IDs this command is registered to,
         or :data:`None` if it's a global command.
     """
 
