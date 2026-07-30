@@ -350,6 +350,9 @@ class InteractionBotBase(CommonBotBase):
         This is usually not called, instead the :meth:`.slash_command` or
         shortcut decorators are used.
 
+        .. deprecated:: |vnext|
+            Use :meth:`add_app_command` instead.
+
         Parameters
         ----------
         slash_command: :class:`InvokableSlashCommand`
@@ -371,6 +374,9 @@ class InteractionBotBase(CommonBotBase):
         This is usually not called, instead the :meth:`.user_command` or
         shortcut decorators are used.
 
+        .. deprecated:: |vnext|
+            Use :meth:`add_app_command` instead.
+
         Parameters
         ----------
         user_command: :class:`InvokableUserCommand`
@@ -391,6 +397,9 @@ class InteractionBotBase(CommonBotBase):
 
         This is usually not called, instead the :meth:`.message_command` or
         shortcut decorators are used.
+
+        .. deprecated:: |vnext|
+            Use :meth:`add_app_command` instead.
 
         Parameters
         ----------
@@ -454,12 +463,6 @@ class InteractionBotBase(CommonBotBase):
             self._all_app_commands.pop(cmd_index, None)
 
     def _emulate_old_app_command_remove(self, cmd_type: ApplicationCommandType, name: str) -> Any:
-        type_info = "slash" if cmd_type is ApplicationCommandType.chat_input else cmd_type.name
-        utils.warn_deprecated(
-            f"remove_{type_info}_command is deprecated and will be removed in a future version. "
-            "Use remove_app_command instead.",
-            stacklevel=3,
-        )
         bad_keys: list[AppCmdIndex] = []
         for key in self._all_app_commands:
             if key.type is cmd_type and key.name == name:
@@ -473,9 +476,13 @@ class InteractionBotBase(CommonBotBase):
 
         return result
 
+    @utils.deprecated("Use `.remove_app_command` instead.")
     def remove_slash_command(self, name: str) -> InvokableSlashCommand | None:
         """Removes an :class:`InvokableSlashCommand` from the internal list
         of slash commands.
+
+        .. deprecated:: |vnext|
+            Use :meth:`remove_app_command` instead.
 
         Parameters
         ----------
@@ -489,9 +496,13 @@ class InteractionBotBase(CommonBotBase):
         """
         return self._emulate_old_app_command_remove(ApplicationCommandType.chat_input, name)
 
+    @utils.deprecated("Use `.remove_app_command` instead.")
     def remove_user_command(self, name: str) -> InvokableUserCommand | None:
         """Removes an :class:`InvokableUserCommand` from the internal list
         of user commands.
+
+        .. deprecated:: |vnext|
+            Use :meth:`remove_app_command` instead.
 
         Parameters
         ----------
@@ -505,9 +516,13 @@ class InteractionBotBase(CommonBotBase):
         """
         return self._emulate_old_app_command_remove(ApplicationCommandType.user, name)
 
+    @utils.deprecated("Use `.remove_app_command` instead.")
     def remove_message_command(self, name: str) -> InvokableMessageCommand | None:
         """Removes an :class:`InvokableMessageCommand` from the internal list
         of message commands.
+
+        .. deprecated:: |vnext|
+            Use :meth:`remove_app_command` instead.
 
         Parameters
         ----------
