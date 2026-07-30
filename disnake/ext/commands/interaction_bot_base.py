@@ -561,10 +561,9 @@ class InteractionBotBase(CommonBotBase):
                 result = command
             # we should check whether there's an ambiguity in command search
             elif command is not result:
-                type_ = "slash" if cmd_type is ApplicationCommandType.chat_input else cmd_type.name
                 msg = (
-                    f"The `guild_id` argument must be provided if there are different {type_} commands "
-                    "with the same name but different guilds or one of them is global."
+                    f"The `guild_id` argument must be provided if there are different {cmd_type._command_name}"
+                    " commands with the same name but different guilds or one of them is global."
                 )
                 raise ValueError(msg)
 
@@ -1559,13 +1558,10 @@ class InteractionBotBase(CommonBotBase):
     ) -> bool:
         if inter.data.type is ApplicationCommandType.chat_input:
             checks = self._slash_command_check_once if call_once else self._slash_command_checks
-
         elif inter.data.type is ApplicationCommandType.user:
             checks = self._user_command_check_once if call_once else self._user_command_checks
-
         elif inter.data.type is ApplicationCommandType.message:
             checks = self._message_command_check_once if call_once else self._message_command_checks
-
         else:
             return True
 
@@ -1730,25 +1726,19 @@ class InteractionBotBase(CommonBotBase):
             return
 
         command_type = interaction.data.type
-        event_name = None
         # `inter.data.guild_id` is the guild ID the command is registered to,
         # so this is correct even when a global command is called from a guild
         cmd_index = AppCmdIndex(
             type=command_type, name=interaction.data.name, guild_id=interaction.data.guild_id
         )
+
         app_command = self._all_app_commands.get(cmd_index)
-
-        if command_type is ApplicationCommandType.chat_input:
-            event_name = "slash_command"
-        elif command_type is ApplicationCommandType.user:
-            event_name = "user_command"
-        elif command_type is ApplicationCommandType.message:
-            event_name = "message_command"
-
-        if event_name is None or app_command is None:
+        type_name = command_type._command_name
+        if app_command is None or type_name is None:
             # If we are here, the command being invoked is either unknown or has an unknown type.
             # This usually happens if the auto sync is disabled, so let's just ignore this.
             return
+        event_name = f"{type_name}_command"
 
         self.dispatch(event_name, interaction)
         try:

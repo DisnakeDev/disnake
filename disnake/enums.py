@@ -8,6 +8,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     ClassVar,
+    Literal,
     NamedTuple,
     NoReturn,
     TypeVar,
@@ -1377,6 +1378,18 @@ class ApplicationCommandType(Enum):
     """Represents a user command from the context menu."""
     message = 3
     """Represents a message command from the context menu."""
+
+    @property
+    def _command_name(self):
+        # n.b. this currently won't return `None`, but it will once non-invocable command types are added
+        return _COMMAND_NAME_LOOKUP.get(self)
+
+
+_COMMAND_NAME_LOOKUP: dict[ApplicationCommandType, Literal["slash", "user", "message"]] = {
+    ApplicationCommandType.chat_input: "slash",
+    ApplicationCommandType.user: "user",
+    ApplicationCommandType.message: "message",
+}
 
 
 class ApplicationCommandPermissionType(Enum):

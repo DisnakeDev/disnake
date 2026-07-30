@@ -575,14 +575,9 @@ class InvokableApplicationCommand(ABC):
             else:
                 await self._before_invoke(inter)  # pyright: ignore[reportArgumentType, reportCallIssue]
 
-        if inter.data.type is ApplicationCommandType.chat_input:
-            partial_attr_name = "slash_command"
-        elif inter.data.type is ApplicationCommandType.user:
-            partial_attr_name = "user_command"
-        elif inter.data.type is ApplicationCommandType.message:
-            partial_attr_name = "message_command"
-        else:
+        if not (type_name := inter.data.type._command_name):
             return
+        partial_attr_name = f"{type_name}_command"
 
         # call the cog local hook if applicable:
         if cog is not None:
@@ -605,14 +600,9 @@ class InvokableApplicationCommand(ABC):
             else:
                 await self._after_invoke(inter)  # pyright: ignore[reportArgumentType, reportCallIssue]
 
-        if inter.data.type is ApplicationCommandType.chat_input:
-            partial_attr_name = "slash_command"
-        elif inter.data.type is ApplicationCommandType.user:
-            partial_attr_name = "user_command"
-        elif inter.data.type is ApplicationCommandType.message:
-            partial_attr_name = "message_command"
-        else:
+        if not (type_name := inter.data.type._command_name):
             return
+        partial_attr_name = f"{type_name}_command"
 
         # call the cog local hook if applicable:
         if cog is not None:
@@ -704,14 +694,9 @@ class InvokableApplicationCommand(ABC):
         original = inter.application_command
         inter.application_command = self
 
-        if inter.data.type is ApplicationCommandType.chat_input:
-            partial_attr_name = "slash_command"
-        elif inter.data.type is ApplicationCommandType.user:
-            partial_attr_name = "user_command"
-        elif inter.data.type is ApplicationCommandType.message:
-            partial_attr_name = "message_command"
-        else:
+        if not (type_name := inter.data.type._command_name):
             return True
+        partial_attr_name = f"{type_name}_command"
 
         try:
             if inter.bot and not await inter.bot.application_command_can_run(inter):

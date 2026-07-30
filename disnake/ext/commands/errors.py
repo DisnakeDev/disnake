@@ -1108,12 +1108,13 @@ class ApplicationCommandRegistrationError(CommandRegistrationError):
         self.guild_id: int | None = guild_id
         # backwards compatibility
         self.alias_conflict: bool = False
-        # fixed API naming here because no one calls slash commands "chat input"
-        type_ = "slash" if cmd_type is ApplicationCommandType.chat_input else cmd_type.name
         if guild_id is None:
-            msg = f"Global {type_} command {name} was specified earlier in your code."
+            msg = f"Global {cmd_type._command_name} command {name} was specified earlier in your code."
         else:
-            msg = f"Local {type_} command {name} with guild ID {guild_id} was specified earlier in your code."
+            msg = (
+                f"Local {cmd_type._command_name} command {name} with"
+                f" guild ID {guild_id} was specified earlier in your code."
+            )
         # this bypasses CommandRegistrationError.__init__
         super(CommandRegistrationError, self).__init__(msg)
 
