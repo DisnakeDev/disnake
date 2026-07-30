@@ -565,7 +565,7 @@ class InteractionBotBase(CommonBotBase):
             command = self._all_app_commands.get(cmd_index)
             if command is None:
                 return None
-            return _match_subcommand_chain(command, chain)  # type: ignore[reportArgumentType]
+            return _match_subcommand_chain(command, chain)  # pyright: ignore[reportArgumentType]
 
         # this is mostly for backwards compatibility, as previously guild_id arg didn't exist
         result = None
@@ -617,7 +617,7 @@ class InteractionBotBase(CommonBotBase):
             command = self._all_app_commands.get(cmd_index)
             if command is None:
                 return None
-            return command  # type: ignore[reportReturnType]
+            return command  # pyright: ignore[reportReturnType]
         # this is mostly for backwards compatibility, as previously guild_id arg didn't exist
         result = None
         for command in self._all_app_commands.values():
@@ -667,7 +667,7 @@ class InteractionBotBase(CommonBotBase):
             command = self._all_app_commands.get(cmd_index)
             if command is None:
                 return None
-            return command  # type: ignore[reportReturnType]
+            return command  # pyright: ignore[reportReturnType]
         # this is mostly for backwards compatibility, as previously guild_id arg didn't exist
         result = None
         for command in self._all_app_commands.values():
