@@ -1658,13 +1658,12 @@ class InteractionBotBase(CommonBotBase):
         cmd_index = AppCmdIndex(
             type=inter.data.type, name=inter.data.name, guild_id=inter.data.guild_id
         )
-        # this happens to always be a slash command
+
+        # this happens to always be a slash command, the instance check is
+        # for `None` and to appease the type-checker
         slash_command = self._all_app_commands.get(cmd_index)
-
-        if slash_command is None:
+        if not isinstance(slash_command, InvokableSlashCommand):
             return
-
-        slash_command = cast("InvokableSlashCommand", slash_command)
 
         inter.application_command = slash_command
         if slash_command.guild_ids is None or inter.guild_id in slash_command.guild_ids:
@@ -1738,11 +1737,12 @@ class InteractionBotBase(CommonBotBase):
             type=command_type, name=interaction.data.name, guild_id=interaction.data.guild_id
         )
 
-        app_command = self._all_app_commands.get(cmd_index)
-        type_name = command_type._command_name
-        if app_command is None or type_name is None:
+        if (app_command := self._all_app_commands.get(cmd_index)) is None:
             # If we are here, the command being invoked is either unknown or has an unknown type.
-            # This usually happens if the auto sync is disabled, so let's just ignore this.
+            # This usually happens if auto sync is disabled, so let's just ignore this.
+            return
+        if (type_name := command_type._command_name) is None:
+            # see above
             return
         event_name = f"{type_name}_command"
 
