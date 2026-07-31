@@ -1470,23 +1470,28 @@ class InteractionBotBase(CommonBotBase):
         interaction: :class:`disnake.ApplicationCommandInteraction`
             The interaction to process commands for.
         """
+        if not isinstance(self, disnake.Client):
+            msg = "This method is only usable in disnake.Client subclasses"
+            raise NotImplementedError(msg)
+
         # This usually comes from the blind spots of the sync algorithm.
         # Since not all guild commands are cached, it is possible to experience such issues.
         # In this case, the blind spot is the interaction guild, let's fix it:
         if (
             # if we're not currently syncing,
             not self._sync_queued.locked()
-            # and we're instructed to sync guild commands
+            # and we're instructed to sync guild commands,
             and self._command_sync_flags.sync_guild_commands
-            # and the current command was registered to a guild
+            # and we're in a guild and the current command was registered to a guild,
+            and interaction.guild_id
             and interaction.data.get("guild_id")
             # and we don't know the command
-            and not self.get_guild_command(interaction.guild_id, interaction.data.id)  # pyright: ignore[reportAttributeAccessIssue]
+            and not self.get_guild_command(interaction.guild_id, interaction.data.id)
         ):
             # don't do anything if we aren't allowed to disable them
             if self._command_sync_flags.allow_command_deletion:
                 try:
-                    await self.bulk_overwrite_guild_commands(interaction.guild_id, [])  # pyright: ignore[reportAttributeAccessIssue]
+                    await self.bulk_overwrite_guild_commands(interaction.guild_id, [])
                 except disnake.HTTPException:
                     # for some reason we were unable to sync the command
                     # either malformed API request, or some other error
