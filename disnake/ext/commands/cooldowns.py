@@ -216,7 +216,7 @@ class CooldownMapping(Generic[ContextTypeT]):
         self._cooldown: Cooldown | None = original
         self._type: Callable[[ContextTypeT], Any] = type
 
-    def copy(self) -> CooldownMapping:
+    def copy(self) -> CooldownMapping[ContextTypeT]:
         ret = CooldownMapping(self._cooldown, self._type)
         ret._cache = self._cache.copy()
         return ret
@@ -283,7 +283,7 @@ class DynamicCooldownMapping(CooldownMapping[ContextTypeT]):
         super().__init__(None, type)
         self._factory: Callable[[ContextTypeT], Cooldown] = factory
 
-    def copy(self) -> DynamicCooldownMapping:
+    def copy(self) -> DynamicCooldownMapping[ContextTypeT]:
         ret = DynamicCooldownMapping(self._factory, self._type)
         ret._cache = self._cache.copy()
         return ret
