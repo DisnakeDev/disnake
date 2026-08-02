@@ -989,6 +989,12 @@ class SharedClientTheme:
         self.intensity: int = intensity
         self.base_theme: SharedClientThemeBase = base_theme
 
+    def __repr__(self) -> str:
+        return (
+            f"<{self.__class__.__name__} colours={self.colours!r} gradient_angle={self.gradient_angle}"
+            f" intensity={self.intensity} base_theme={self.base_theme!r}>"
+        )
+
     @property
     def colours(self) -> Sequence[Colour]:
         r""":class:`~collections.abc.Sequence`\[:class:`Colour`]: The colours of the theme's gradient."""
