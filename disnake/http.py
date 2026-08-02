@@ -572,6 +572,7 @@ class HTTPClient:
         stickers: Sequence[Snowflake] | None = None,
         components: Sequence[components.Component] | None = None,
         poll: poll.PollCreatePayload | None = None,
+        shared_client_theme: message.SharedClientTheme | None = None,
         flags: int | None = None,
     ) -> Response[message.Message]: ...
 
