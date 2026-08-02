@@ -138,7 +138,7 @@ class _cached_property:
 
 
 if TYPE_CHECKING:
-    from functools import cached_property as cached_property
+    cached_property: TypeAlias = property
 
     from typing_extensions import Never, ParamSpec, Self
 
