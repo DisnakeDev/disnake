@@ -55,7 +55,7 @@ from .enums import (
 )
 from .errors import ClientException, HTTPException, InvalidData
 from .file import File
-from .flags import SystemChannelFlags
+from .flags import ChannelFlags, SystemChannelFlags
 from .guild_scheduled_event import GuildScheduledEvent, GuildScheduledEventMetadata
 from .integrations import Integration, _integration_factory
 from .invite import Invite
@@ -93,7 +93,10 @@ if TYPE_CHECKING:
     from .state import ConnectionState
     from .template import Template
     from .threads import AnyThreadArchiveDuration, ForumTag
-    from .types.channel import GuildChannel as GuildChannelPayload
+    from .types.channel import (
+        CreateGuildChannel as CreateGuildChannelPayload,
+        GuildChannel as GuildChannelPayload,
+    )
     from .types.guild import (
         Ban as BanPayload,
         Guild as GuildPayload,
@@ -1355,6 +1358,7 @@ class Guild(Hashable):
         default_thread_slowmode_delay: int = MISSING,
         default_auto_archive_duration: AnyThreadArchiveDuration = MISSING,
         nsfw: bool = MISSING,
+        flags: ChannelFlags = MISSING,
         news: bool = MISSING,
         overwrites: dict[Role | Member, PermissionOverwrite] = MISSING,
     ) -> TextChannel:
@@ -1435,6 +1439,12 @@ class Guild(Hashable):
 
         nsfw: :class:`bool`
             Whether to mark the channel as NSFW.
+        flags: :class:`ChannelFlags`
+            The flags to set for this channel.
+            Only the :attr:`~ChannelFlags.spoiler_channel` flag is supported for text channels.
+
+            .. versionadded:: |vnext|
+
         news: :class:`bool`
             Whether to make a news channel. News channels are text channels that can be followed.
             This is only available to guilds that contain ``NEWS`` in :attr:`Guild.features`.
@@ -1458,7 +1468,7 @@ class Guild(Hashable):
         :class:`TextChannel`
             The channel that was just created.
         """
-        options = {}
+        options: CreateGuildChannelPayload = {}
         if position is not MISSING:
             options["position"] = position
 
@@ -1473,6 +1483,9 @@ class Guild(Hashable):
 
         if nsfw is not MISSING:
             options["nsfw"] = nsfw
+
+        if flags is not MISSING:
+            options["flags"] = flags.value
 
         if default_auto_archive_duration is not MISSING:
             options["default_auto_archive_duration"] = cast(
@@ -1509,6 +1522,7 @@ class Guild(Hashable):
         rtc_region: str | VoiceRegion | None = MISSING,
         video_quality_mode: VideoQualityMode = MISSING,
         nsfw: bool = MISSING,
+        flags: ChannelFlags = MISSING,
         slowmode_delay: int = MISSING,
         overwrites: dict[Role | Member, PermissionOverwrite] = MISSING,
         reason: str | None = None,
@@ -1555,6 +1569,12 @@ class Guild(Hashable):
 
             .. versionadded:: 2.5
 
+        flags: :class:`ChannelFlags`
+            The flags to set for this channel.
+            Only the :attr:`~ChannelFlags.spoiler_channel` flag is supported for voice channels.
+
+            .. versionadded:: |vnext|
+
         slowmode_delay: :class:`int`
             Specifies the slowmode rate limit for users in this channel, in seconds.
             A value of ``0`` disables slowmode. The maximum value possible is ``21600``.
@@ -1579,7 +1599,7 @@ class Guild(Hashable):
         :class:`VoiceChannel`
             The channel that was just created.
         """
-        options = {}
+        options: CreateGuildChannelPayload = {}
         if position is not MISSING:
             options["position"] = position
 
@@ -1597,6 +1617,9 @@ class Guild(Hashable):
 
         if nsfw is not MISSING:
             options["nsfw"] = nsfw
+
+        if flags is not MISSING:
+            options["flags"] = flags.value
 
         if slowmode_delay is not MISSING:
             options["rate_limit_per_user"] = slowmode_delay
@@ -1628,6 +1651,7 @@ class Guild(Hashable):
         overwrites: dict[Role | Member, PermissionOverwrite] = MISSING,
         category: Snowflake | None = None,
         nsfw: bool = MISSING,
+        flags: ChannelFlags = MISSING,
         slowmode_delay: int = MISSING,
         reason: str | None = None,
     ) -> StageChannel:
@@ -1676,6 +1700,11 @@ class Guild(Hashable):
             Whether to mark the channel as NSFW.
 
             .. versionadded:: 2.9
+        flags: :class:`ChannelFlags`
+            The flags to set for this channel.
+            Only the :attr:`~ChannelFlags.spoiler_channel` flag is supported for stage channels.
+
+            .. versionadded:: |vnext|
 
         slowmode_delay: :class:`int`
             Specifies the slowmode rate limit for users in this channel, in seconds.
@@ -1702,7 +1731,7 @@ class Guild(Hashable):
         :class:`StageChannel`
             The channel that was just created.
         """
-        options: dict[str, Any] = {}
+        options: CreateGuildChannelPayload = {}
 
         if topic is not MISSING:
             options["topic"] = topic
@@ -1724,6 +1753,9 @@ class Guild(Hashable):
 
         if nsfw is not MISSING:
             options["nsfw"] = nsfw
+
+        if flags is not MISSING:
+            options["flags"] = flags.value
 
         if slowmode_delay is not MISSING:
             options["rate_limit_per_user"] = slowmode_delay
@@ -1753,6 +1785,7 @@ class Guild(Hashable):
         default_thread_slowmode_delay: int = MISSING,
         default_auto_archive_duration: AnyThreadArchiveDuration | None = None,
         nsfw: bool = MISSING,
+        flags: ChannelFlags = MISSING,
         overwrites: dict[Role | Member, PermissionOverwrite] = MISSING,
         available_tags: Sequence[ForumTag] | None = None,
         default_reaction: str | Emoji | PartialEmoji | None = None,
@@ -1800,6 +1833,13 @@ class Guild(Hashable):
             Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
         nsfw: :class:`bool`
             Whether to mark the channel as NSFW.
+        flags: :class:`ChannelFlags`
+            The flags to set for this channel.
+            Only the :attr:`~ChannelFlags.require_tag` and :attr:`~ChannelFlags.spoiler_channel`
+            flags are supported for forum channels.
+
+            .. versionadded:: |vnext|
+
         overwrites: :class:`dict`\[:class:`Role` | :class:`Member`, :class:`PermissionOverwrite`]
             A :class:`dict` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply upon creation of a channel.
@@ -1841,7 +1881,7 @@ class Guild(Hashable):
         :class:`ForumChannel`
             The channel that was just created.
         """
-        options = {}
+        options: CreateGuildChannelPayload = {}
         if position is not MISSING:
             options["position"] = position
 
@@ -1856,6 +1896,9 @@ class Guild(Hashable):
 
         if nsfw is not MISSING:
             options["nsfw"] = nsfw
+
+        if flags is not MISSING:
+            options["flags"] = flags.value
 
         if default_auto_archive_duration is not None:
             options["default_auto_archive_duration"] = cast(
@@ -1903,6 +1946,7 @@ class Guild(Hashable):
         default_thread_slowmode_delay: int = MISSING,
         default_auto_archive_duration: AnyThreadArchiveDuration | None = None,
         nsfw: bool = MISSING,
+        flags: ChannelFlags = MISSING,
         overwrites: dict[Role | Member, PermissionOverwrite] = MISSING,
         available_tags: Sequence[ForumTag] | None = None,
         default_reaction: str | Emoji | PartialEmoji | None = None,
@@ -1943,6 +1987,13 @@ class Guild(Hashable):
             Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
         nsfw: :class:`bool`
             Whether to mark the channel as NSFW.
+        flags: :class:`ChannelFlags`
+            The flags to set for this channel.
+            Only the :attr:`~ChannelFlags.require_tag`, :attr:`~ChannelFlags.hide_media_download_options`,
+            and :attr:`~ChannelFlags.spoiler_channel` flags are supported for media channels.
+
+            .. versionadded:: |vnext|
+
         overwrites: :class:`dict`\[:class:`Role` | :class:`Member`, :class:`PermissionOverwrite`]
             A :class:`dict` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply upon creation of a channel.
@@ -1970,7 +2021,7 @@ class Guild(Hashable):
         :class:`MediaChannel`
             The channel that was just created.
         """
-        options = {}
+        options: CreateGuildChannelPayload = {}
         if position is not MISSING:
             options["position"] = position
 
@@ -1985,6 +2036,9 @@ class Guild(Hashable):
 
         if nsfw is not MISSING:
             options["nsfw"] = nsfw
+
+        if flags is not MISSING:
+            options["flags"] = flags.value
 
         if default_auto_archive_duration is not None:
             options["default_auto_archive_duration"] = cast(
@@ -2065,7 +2119,7 @@ class Guild(Hashable):
         :class:`CategoryChannel`
             The channel that was just created.
         """
-        options: dict[str, Any] = {}
+        options: CreateGuildChannelPayload = {}
         if position is not MISSING:
             options["position"] = position
 

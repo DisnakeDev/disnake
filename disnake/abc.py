@@ -624,6 +624,17 @@ class GuildChannel(ABC):
         """
         return ChannelFlags._from_value(self._flags)
 
+    def is_spoiler(self) -> bool:
+        """Whether the channel is marked as a spoiler.
+
+        This is a shortcut to :attr:`self.flags.spoiler_channel <.ChannelFlags.spoiler_channel>`.
+
+        .. versionadded:: |vnext|
+
+        :return type: :class:`bool`
+        """
+        return self.flags.spoiler_channel
+
     @property
     def jump_url(self) -> str:
         """A URL that can be used to jump to this channel.
