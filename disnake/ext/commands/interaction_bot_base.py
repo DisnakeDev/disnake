@@ -9,12 +9,13 @@ import sys
 import traceback
 import warnings
 from collections.abc import Callable, Iterable, Sequence
-from itertools import chain
+from types import MappingProxyType
 from typing import (
     TYPE_CHECKING,
     Any,
     TypedDict,
     TypeVar,
+    cast,
     overload,
 )
 
@@ -26,7 +27,7 @@ from disnake.enums import ApplicationCommandType
 from disnake.flags import ApplicationInstallTypes, InteractionContextTypes
 
 from . import errors
-from .base_core import InvokableApplicationCommand
+from .base_core import AppCmdIndex, InvokableApplicationCommand
 from .common_bot_base import CommonBotBase
 from .ctx_menus_core import (
     InvokableMessageCommand,
@@ -34,7 +35,7 @@ from .ctx_menus_core import (
     message_command,
     user_command,
 )
-from .errors import CommandRegistrationError
+from .errors import ApplicationCommandRegistrationError
 from .flags import CommandSyncFlags
 from .slash_core import InvokableSlashCommand, SubCommand, SubCommandGroup, slash_command
 
@@ -134,6 +135,25 @@ def _format_diff(diff: _Diff) -> str:
     return "\n".join(f"| {line}" for line in lines)
 
 
+def _match_subcommand_chain(
+    command: InvokableSlashCommand, chain: Sequence[str]
+) -> InvokableSlashCommand | SubCommand | SubCommandGroup | None:
+    """An internal function that returns a subcommand with a route matching the chain.
+    If there's no match then :data:`None` is returned.
+    """
+    if command.name != chain[0]:
+        return None
+    if len(chain) == 1:
+        return command
+    if len(chain) == 2:
+        return command.children.get(chain[1])
+    if len(chain) == 3:
+        group = command.children.get(chain[1])
+        if isinstance(group, SubCommandGroup):
+            return group.children.get(chain[2])
+    return None
+
+
 class InteractionBotBase(CommonBotBase):
     def __init__(
         self,
@@ -179,9 +199,7 @@ class InteractionBotBase(CommonBotBase):
         self._before_message_command_invoke = None
         self._after_message_command_invoke = None
 
-        self.all_slash_commands: dict[str, InvokableSlashCommand] = {}
-        self.all_user_commands: dict[str, InvokableUserCommand] = {}
-        self.all_message_commands: dict[str, InvokableMessageCommand] = {}
+        self._all_app_commands: dict[AppCmdIndex, InvokableApplicationCommand] = {}
 
     @disnake.utils.copy_doc(disnake.Client.login)
     async def login(self, token: str) -> None:
@@ -197,38 +215,148 @@ class InteractionBotBase(CommonBotBase):
         """
         return CommandSyncFlags._from_value(self._command_sync_flags.value)
 
-    def application_commands_iterator(self) -> Iterable[InvokableApplicationCommand]:
-        return chain(
-            self.all_slash_commands.values(),
-            self.all_user_commands.values(),
-            self.all_message_commands.values(),
-        )
+    @property
+    def all_app_commands(self) -> MappingProxyType[AppCmdIndex, InvokableApplicationCommand]:
+        r""":class:`~collections.abc.Mapping`\[:class:`AppCmdIndex`, :class:`InvokableApplicationCommand`]:
+        A read-only mapping with all application commands the bot has.
+        """
+        return MappingProxyType(self._all_app_commands)
 
     @property
     def application_commands(self) -> set[InvokableApplicationCommand]:
         r""":class:`set`\[:class:`InvokableApplicationCommand`]: A set of all application commands the bot has."""
-        return set(self.application_commands_iterator())
+        return set(self._all_app_commands.values())
 
     @property
     def slash_commands(self) -> set[InvokableSlashCommand]:
         r""":class:`set`\[:class:`InvokableSlashCommand`]: A set of all slash commands the bot has."""
-        return set(self.all_slash_commands.values())
+        return {
+            cmd for cmd in self._all_app_commands.values() if isinstance(cmd, InvokableSlashCommand)
+        }
 
     @property
     def user_commands(self) -> set[InvokableUserCommand]:
         r""":class:`set`\[:class:`InvokableUserCommand`]: A set of all user commands the bot has."""
-        return set(self.all_user_commands.values())
+        return {
+            cmd for cmd in self._all_app_commands.values() if isinstance(cmd, InvokableUserCommand)
+        }
 
     @property
     def message_commands(self) -> set[InvokableMessageCommand]:
         r""":class:`set`\[:class:`InvokableMessageCommand`]: A set of all message commands the bot has."""
-        return set(self.all_message_commands.values())
+        return {
+            cmd
+            for cmd in self._all_app_commands.values()
+            if isinstance(cmd, InvokableMessageCommand)
+        }
 
+    @property
+    @utils.deprecated("Use `.slash_commands` instead.")
+    def all_slash_commands(self) -> dict[str, InvokableSlashCommand]:
+        return {
+            cmd.name: cmd
+            for cmd in self._all_app_commands.values()
+            if isinstance(cmd, InvokableSlashCommand)
+        }
+
+    @property
+    @utils.deprecated("Use `.user_commands` instead.")
+    def all_user_commands(self) -> dict[str, InvokableUserCommand]:
+        return {
+            cmd.name: cmd
+            for cmd in self._all_app_commands.values()
+            if isinstance(cmd, InvokableUserCommand)
+        }
+
+    @property
+    @utils.deprecated("Use `.message_commands` instead.")
+    def all_message_commands(self) -> dict[str, InvokableMessageCommand]:
+        return {
+            cmd.name: cmd
+            for cmd in self._all_app_commands.values()
+            if isinstance(cmd, InvokableMessageCommand)
+        }
+
+    def add_app_command(self, app_command: InvokableApplicationCommand, /) -> None:
+        """Adds an :class:`InvokableApplicationCommand` into the internal list of app commands.
+
+        This is usually not called, instead shortcut decorators are used, such as
+        :meth:`.slash_command`, :meth:`.user_command` or :meth:`.message_command`.
+
+        The app command is registered to guilds specified in the ``guild_ids`` attribute.
+        If this attribute is :data:`None` then the command is registered globally, unless
+        the ``test_guilds`` parameter is specified in the bot constructor, in which case
+        this command is registered to those guilds.
+
+        .. versionadded:: |vnext|
+
+        .. note::
+            Any change to the command's ``name`` and ``guild_ids`` attributes
+            after the command was added to the client are not supported and may
+            result in undefined behaviour.
+
+
+        Parameters
+        ----------
+        app_command: :class:`InvokableApplicationCommand`
+            The app command to add.
+
+        Raises
+        ------
+        ApplicationCommandRegistrationError
+            The app command is already registered.
+        TypeError
+            The app command passed is not an instance of :class:`InvokableApplicationCommand`.
+        """
+        if not isinstance(self, disnake.Client):
+            msg = "This method is only usable in disnake.Client subclasses"
+            raise NotImplementedError(msg)
+
+        if not isinstance(app_command, InvokableApplicationCommand):
+            msg = "The app_command passed must be an instance of InvokableApplicationCommand"
+            raise TypeError(msg)
+        if isinstance(app_command, (SubCommand, SubCommandGroup)):
+            msg = (
+                "The app_command passed must be a top level command, "
+                "not an instance of SubCommand or SubCommandGroup"
+            )
+            raise TypeError(msg)
+
+        test_guilds = (None,) if self._test_guilds is None else self._test_guilds
+        guild_ids = app_command.guild_ids or test_guilds
+
+        app_command._apply_defaults(self)
+        app_command.body.localize(self.i18n)
+
+        # note: this is done in two separate steps/loops, so that any
+        # errors from duplicate commands/indices don't result in an only
+        # partially updated command cache
+        indices: list[AppCmdIndex] = []
+        for guild_id in guild_ids:
+            cmd_index = AppCmdIndex(
+                type=app_command.body.type, name=app_command.name, guild_id=guild_id
+            )
+            if cmd_index in self._all_app_commands:
+                raise ApplicationCommandRegistrationError(
+                    cmd_index.type, cmd_index.name, cmd_index.guild_id
+                )
+            indices.append(cmd_index)
+
+        for cmd_index in indices:
+            # note that we're adding the same command object for each guild_id;
+            # this ensures that any changes that happen to the command after add_app_command
+            # (such as hook attachments or permission modifications) apply properly
+            self._all_app_commands[cmd_index] = app_command
+
+    @utils.deprecated("Use `.add_app_command` instead.")
     def add_slash_command(self, slash_command: InvokableSlashCommand) -> None:
         """Adds an :class:`InvokableSlashCommand` into the internal list of slash commands.
 
         This is usually not called, instead the :meth:`.slash_command` or
         shortcut decorators are used.
+
+        .. deprecated:: |vnext|
+            Use :meth:`add_app_command` instead.
 
         Parameters
         ----------
@@ -242,26 +370,17 @@ class InteractionBotBase(CommonBotBase):
         TypeError
             The slash command passed is not an instance of :class:`InvokableSlashCommand`.
         """
-        if not isinstance(self, disnake.Client):
-            msg = "This method is only usable in disnake.Client subclasses"
-            raise NotImplementedError(msg)
+        self.add_app_command(slash_command)
 
-        if not isinstance(slash_command, InvokableSlashCommand):
-            msg = "The slash_command passed must be an instance of InvokableSlashCommand"
-            raise TypeError(msg)
-
-        if slash_command.name in self.all_slash_commands:
-            raise CommandRegistrationError(slash_command.name)
-
-        slash_command._apply_defaults(self)
-        slash_command.body.localize(self.i18n)
-        self.all_slash_commands[slash_command.name] = slash_command
-
+    @utils.deprecated("Use `.add_app_command` instead.")
     def add_user_command(self, user_command: InvokableUserCommand) -> None:
         """Adds an :class:`InvokableUserCommand` into the internal list of user commands.
 
         This is usually not called, instead the :meth:`.user_command` or
         shortcut decorators are used.
+
+        .. deprecated:: |vnext|
+            Use :meth:`add_app_command` instead.
 
         Parameters
         ----------
@@ -275,26 +394,17 @@ class InteractionBotBase(CommonBotBase):
         TypeError
             The user command passed is not an instance of :class:`InvokableUserCommand`.
         """
-        if not isinstance(self, disnake.Client):
-            msg = "This method is only usable in disnake.Client subclasses"
-            raise NotImplementedError(msg)
+        self.add_app_command(user_command)
 
-        if not isinstance(user_command, InvokableUserCommand):
-            msg = "The user_command passed must be an instance of InvokableUserCommand"
-            raise TypeError(msg)
-
-        if user_command.name in self.all_user_commands:
-            raise CommandRegistrationError(user_command.name)
-
-        user_command._apply_defaults(self)
-        user_command.body.localize(self.i18n)
-        self.all_user_commands[user_command.name] = user_command
-
+    @utils.deprecated("Use `.add_app_command` instead.")
     def add_message_command(self, message_command: InvokableMessageCommand) -> None:
         """Adds an :class:`InvokableMessageCommand` into the internal list of message commands.
 
         This is usually not called, instead the :meth:`.message_command` or
         shortcut decorators are used.
+
+        .. deprecated:: |vnext|
+            Use :meth:`add_app_command` instead.
 
         Parameters
         ----------
@@ -308,24 +418,75 @@ class InteractionBotBase(CommonBotBase):
         TypeError
             The message command passed is not an instance of :class:`InvokableMessageCommand`.
         """
-        if not isinstance(self, disnake.Client):
-            msg = "This method is only usable in disnake.Client subclasses"
-            raise NotImplementedError(msg)
+        self.add_app_command(message_command)
 
-        if not isinstance(message_command, InvokableMessageCommand):
-            msg = "The message_command passed must be an instance of InvokableMessageCommand"
-            raise TypeError(msg)
+    def remove_app_command(
+        self, cmd_type: ApplicationCommandType, name: str, *, guild_id: int | None
+    ) -> InvokableApplicationCommand | None:
+        """Removes an :class:`InvokableApplicationCommand` from the internal list of app commands.
 
-        if message_command.name in self.all_message_commands:
-            raise CommandRegistrationError(message_command.name)
+        .. versionadded:: |vnext|
 
-        message_command._apply_defaults(self)
-        message_command.body.localize(self.i18n)
-        self.all_message_commands[message_command.name] = message_command
+        Parameters
+        ----------
+        cmd_type: :class:`disnake.ApplicationCommandType`
+            The type of the app command to remove.
+        name: :class:`str`
+            The name of the app command to remove.
+        guild_id: :class:`int` | :data:`None`
+            The ID of the guild from which this command should be removed,
+            or :data:`None` if it's global. If ``test_guilds`` is specified in the bot constructor,
+            passing :data:`None` here will remove the command from those guilds instead.
 
+        Returns
+        -------
+        :class:`InvokableApplicationCommand` | :data:`None`
+            The app command that was removed. If no matching command was found, then :data:`None` is returned instead.
+        """
+        return self._remove_app_commands(
+            cmd_type, name, guild_ids=[guild_id] if guild_id is not None else None
+        )
+
+    def _remove_app_commands(
+        self, cmd_type: ApplicationCommandType, name: str, *, guild_ids: Sequence[int] | None
+    ) -> InvokableApplicationCommand | None:
+        # this is consistent with the behavior of command synchronisation
+        if guild_ids:
+            final_guild_ids = guild_ids
+        else:
+            # use default guilds
+            final_guild_ids = (None,) if self._test_guilds is None else self._test_guilds
+
+        result: InvokableApplicationCommand | None = None
+        for guild_id in final_guild_ids:
+            cmd_index = AppCmdIndex(type=cmd_type, name=name, guild_id=guild_id)
+            cmd = self._all_app_commands.pop(cmd_index, None)
+            if result is None:
+                result = cmd
+
+        return result
+
+    def _emulate_old_app_command_remove(self, cmd_type: ApplicationCommandType, name: str) -> Any:
+        bad_keys: list[AppCmdIndex] = []
+        for key in self._all_app_commands:
+            if key.type is cmd_type and key.name == name:
+                bad_keys.append(key)
+
+        result: InvokableApplicationCommand | None = None
+        for key in bad_keys:
+            cmd = self._all_app_commands.pop(key, None)
+            if result is None:
+                result = cmd
+
+        return result
+
+    @utils.deprecated("Use `.remove_app_command` instead.")
     def remove_slash_command(self, name: str) -> InvokableSlashCommand | None:
         """Removes an :class:`InvokableSlashCommand` from the internal list
         of slash commands.
+
+        .. deprecated:: |vnext|
+            Use :meth:`remove_app_command` instead.
 
         Parameters
         ----------
@@ -337,14 +498,15 @@ class InteractionBotBase(CommonBotBase):
         :class:`InvokableSlashCommand` | :data:`None`
             The slash command that was removed. If the name is not valid then :data:`None` is returned instead.
         """
-        command = self.all_slash_commands.pop(name, None)
-        if command is None:
-            return None
-        return command
+        return self._emulate_old_app_command_remove(ApplicationCommandType.chat_input, name)
 
+    @utils.deprecated("Use `.remove_app_command` instead.")
     def remove_user_command(self, name: str) -> InvokableUserCommand | None:
         """Removes an :class:`InvokableUserCommand` from the internal list
         of user commands.
+
+        .. deprecated:: |vnext|
+            Use :meth:`remove_app_command` instead.
 
         Parameters
         ----------
@@ -356,14 +518,15 @@ class InteractionBotBase(CommonBotBase):
         :class:`InvokableUserCommand` | :data:`None`
             The user command that was removed. If the name is not valid then :data:`None` is returned instead.
         """
-        command = self.all_user_commands.pop(name, None)
-        if command is None:
-            return None
-        return command
+        return self._emulate_old_app_command_remove(ApplicationCommandType.user, name)
 
+    @utils.deprecated("Use `.remove_app_command` instead.")
     def remove_message_command(self, name: str) -> InvokableMessageCommand | None:
         """Removes an :class:`InvokableMessageCommand` from the internal list
         of message commands.
+
+        .. deprecated:: |vnext|
+            Use :meth:`remove_app_command` instead.
 
         Parameters
         ----------
@@ -375,56 +538,79 @@ class InteractionBotBase(CommonBotBase):
         :class:`InvokableMessageCommand` | :data:`None`
             The message command that was removed. If the name is not valid then :data:`None` is returned instead.
         """
-        command = self.all_message_commands.pop(name, None)
-        if command is None:
-            return None
-        return command
+        return self._emulate_old_app_command_remove(ApplicationCommandType.message, name)
+
+    def _get_app_command(
+        self, cmd_type: ApplicationCommandType, name: str, *, guild_id: int | None = MISSING
+    ) -> InvokableApplicationCommand | None:
+        if not isinstance(name, str):
+            msg = f"Expected name to be str, not {name.__class__}"
+            raise TypeError(msg)
+
+        if guild_id is not MISSING:
+            cmd_index = AppCmdIndex(type=cmd_type, name=name, guild_id=guild_id)
+            return self._all_app_commands.get(cmd_index)
+
+        # this is mostly for backwards compatibility, as previously the guild_id arg didn't exist
+        result: InvokableApplicationCommand | None = None
+        for command in self._all_app_commands.values():
+            if command.body.type != cmd_type or command.name != name:
+                continue
+
+            if result is None:
+                result = command
+            # we should check whether there's an ambiguity in command search
+            elif command is not result:
+                msg = (
+                    f"The `guild_id` argument must be provided if there are different {cmd_type._command_name}"
+                    " commands with the same name but different guilds or one of them is global."
+                )
+                raise ValueError(msg)
+
+        return result
 
     def get_slash_command(
-        self, name: str
+        self, name: str, *, guild_id: int | None = MISSING
     ) -> InvokableSlashCommand | SubCommandGroup | SubCommand | None:
         """Works like ``Bot.get_command``, but for slash commands.
 
         If the name contains spaces, then it will assume that you are looking for a :class:`SubCommand` or
         a :class:`SubCommandGroup`.
-        e.g: ``'foo bar'`` will get the sub command group, or the sub command ``bar`` of the top-level slash command
+        e.g: ``'foo bar'`` will get the sub command or group named ``bar`` of the top-level slash command
         ``foo`` if found, otherwise :data:`None`.
 
         Parameters
         ----------
         name: :class:`str`
             The name of the slash command to get.
+        guild_id: :class:`int` | :data:`None`
+            The guild ID corresponding to the slash command or :data:`None` if it's a global command.
+            If this is not specified but multiple commands with this name exist, and error will be raised.
+
+            .. versionadded:: |vnext|
 
         Raises
         ------
         TypeError
             The name is not a string.
+        ValueError
+            The ``guild_id`` parameter was not provided in a case where different slash commands
+            have the same name but different guild_ids.
 
         Returns
         -------
         :class:`InvokableSlashCommand` | :class:`SubCommandGroup` | :class:`SubCommand` | :data:`None`
             The slash command that was requested. If not found, returns :data:`None`.
         """
-        if not isinstance(name, str):
-            msg = f"Expected name to be str, not {name.__class__}"
-            raise TypeError(msg)
-
         chain = name.split()
-        slash = self.all_slash_commands.get(chain[0])
-        if slash is None:
+        cmd = self._get_app_command(ApplicationCommandType.chat_input, chain[0], guild_id=guild_id)
+        if cmd is None:
             return None
+        return _match_subcommand_chain(cast("InvokableSlashCommand", cmd), chain)
 
-        if len(chain) == 1:
-            return slash
-        elif len(chain) == 2:
-            return slash.children.get(chain[1])
-        elif len(chain) == 3:
-            group = slash.children.get(chain[1])
-            if isinstance(group, SubCommandGroup):
-                return group.children.get(chain[2])
-        return None
-
-    def get_user_command(self, name: str) -> InvokableUserCommand | None:
+    def get_user_command(
+        self, name: str, *, guild_id: int | None = MISSING
+    ) -> InvokableUserCommand | None:
         """Gets an :class:`InvokableUserCommand` from the internal list
         of user commands.
 
@@ -432,15 +618,28 @@ class InteractionBotBase(CommonBotBase):
         ----------
         name: :class:`str`
             The name of the user command to get.
+        guild_id: :class:`int` | :data:`None`
+            The guild ID corresponding to the user command or :data:`None` if it's a global command.
+            If this is not specified but multiple commands with this name exist, and error will be raised.
+
+            .. versionadded:: |vnext|
+
+        Raises
+        ------
+        ValueError
+            The ``guild_id`` parameter was not provided in a case where different user commands
+            have the same name but different guild_ids.
 
         Returns
         -------
         :class:`InvokableUserCommand` | :data:`None`
             The user command that was requested. If not found, returns :data:`None`.
         """
-        return self.all_user_commands.get(name)
+        return self._get_app_command(ApplicationCommandType.user, name, guild_id=guild_id)  # pyright: ignore[reportReturnType]
 
-    def get_message_command(self, name: str) -> InvokableMessageCommand | None:
+    def get_message_command(
+        self, name: str, *, guild_id: int | None = MISSING
+    ) -> InvokableMessageCommand | None:
         """Gets an :class:`InvokableMessageCommand` from the internal list
         of message commands.
 
@@ -448,13 +647,24 @@ class InteractionBotBase(CommonBotBase):
         ----------
         name: :class:`str`
             The name of the message command to get.
+        guild_id: :class:`int` | :data:`None`
+            The guild ID corresponding to the message command or :data:`None` if it's a global command.
+            If this is not specified but multiple commands with this name exist, and error will be raised.
+
+            .. versionadded:: |vnext|
+
+        Raises
+        ------
+        ValueError
+            The ``guild_id`` parameter was not provided in a case where different message commands
+            have the same name but different guild_ids.
 
         Returns
         -------
         :class:`InvokableMessageCommand` | :data:`None`
             The message command that was requested. If not found, returns :data:`None`.
         """
-        return self.all_message_commands.get(name)
+        return self._get_app_command(ApplicationCommandType.message, name, guild_id=guild_id)  # pyright: ignore[reportReturnType]
 
     @overload
     def slash_command(
@@ -567,9 +777,11 @@ class InteractionBotBase(CommonBotBase):
 
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``
-        guild_ids: :class:`~collections.abc.Sequence`\[:class:`int`]
-            If specified, the client will register the command in these guilds.
-            Otherwise, this command will be registered globally.
+        guild_ids: :class:`~collections.abc.Sequence`\[:class:`int`] | :data:`None`
+            If specified, the client will register the command to these guilds.
+            Otherwise the command will be registered globally, unless
+            the ``test_guilds`` parameter is specified in the bot constructor, in which case
+            this command will be registered to those guilds.
         connectors: :class:`dict`\[:class:`str`, :class:`str`]
             Binds function names to option names. If the name
             of an option already matches the corresponding function param,
@@ -605,7 +817,7 @@ class InteractionBotBase(CommonBotBase):
                 auto_sync=auto_sync,
                 **kwargs,
             )(func)
-            self.add_slash_command(result)
+            self.add_app_command(result)
             return result
 
         return decorator
@@ -709,9 +921,11 @@ class InteractionBotBase(CommonBotBase):
 
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``.
-        guild_ids: :class:`~collections.abc.Sequence`\[:class:`int`]
-            If specified, the client will register the command in these guilds.
-            Otherwise, this command will be registered globally.
+        guild_ids: :class:`~collections.abc.Sequence`\[:class:`int`] | :data:`None`
+            If specified, the client will register the command to these guilds.
+            Otherwise the command will be registered globally, unless
+            the ``test_guilds`` parameter is specified in the bot constructor, in which case
+            this command will be registered to those guilds.
         extras: :class:`dict`\[:class:`str`, :data:`~typing.Any`]
             A dict of user provided extras to attach to the command.
 
@@ -740,7 +954,7 @@ class InteractionBotBase(CommonBotBase):
                 auto_sync=auto_sync,
                 **kwargs,
             )(func)
-            self.add_user_command(result)
+            self.add_app_command(result)
             return result
 
         return decorator
@@ -844,9 +1058,11 @@ class InteractionBotBase(CommonBotBase):
 
         auto_sync: :class:`bool`
             Whether to automatically register the command. Defaults to ``True``
-        guild_ids: :class:`~collections.abc.Sequence`\[:class:`int`]
-            If specified, the client will register the command in these guilds.
-            Otherwise, this command will be registered globally.
+        guild_ids: :class:`~collections.abc.Sequence`\[:class:`int`] | :data:`None`
+            If specified, the client will register the command to these guilds.
+            Otherwise the command will be registered globally, unless
+            the ``test_guilds`` parameter is specified in the bot constructor, in which case
+            this command will be registered to those guilds.
         extras: :class:`dict`\[:class:`str`, :data:`~typing.Any`]
             A dict of user provided extras to attach to the command.
 
@@ -875,7 +1091,7 @@ class InteractionBotBase(CommonBotBase):
                 auto_sync=auto_sync,
                 **kwargs,
             )(func)
-            self.add_message_command(result)
+            self.add_app_command(result)
             return result
 
         return decorator
@@ -883,26 +1099,23 @@ class InteractionBotBase(CommonBotBase):
     # command synchronisation
 
     def _ordered_unsynced_commands(
-        self, test_guilds: Sequence[int] | None = None
+        self,
     ) -> tuple[list[ApplicationCommand], dict[int, list[ApplicationCommand]]]:
         global_cmds: list[ApplicationCommand] = []
         guilds: dict[int, list[ApplicationCommand]] = {}
 
-        for cmd in self.application_commands_iterator():
+        for key, cmd in self._all_app_commands.items():
             if not cmd.auto_sync:
                 cmd.body._always_synced = True
 
-            guild_ids = cmd.guild_ids or test_guilds
+            guild_id = key.guild_id
 
-            if guild_ids is None:
+            if guild_id is None:
                 global_cmds.append(cmd.body)
-                continue
-
-            for guild_id in guild_ids:
-                if guild_id not in guilds:
-                    guilds[guild_id] = [cmd.body]
-                else:
-                    guilds[guild_id].append(cmd.body)
+            elif guild_id not in guilds:
+                guilds[guild_id] = [cmd.body]
+            else:
+                guilds[guild_id].append(cmd.body)
 
         return global_cmds, guilds
 
@@ -911,7 +1124,7 @@ class InteractionBotBase(CommonBotBase):
             msg = "This method is only usable in disnake.Client subclasses"
             raise NotImplementedError(msg)
 
-        _, guilds = self._ordered_unsynced_commands(self._test_guilds)
+        _, guilds = self._ordered_unsynced_commands()
 
         # Here we only cache global commands and commands from guilds that are specified in the code.
         # They're collected from the "test_guilds" kwarg of commands.InteractionBotBase
@@ -947,8 +1160,8 @@ class InteractionBotBase(CommonBotBase):
             return
 
         # We assume that all commands are already cached.
-        # Sort all invocable commands between guild IDs:
-        global_cmds, guild_cmds = self._ordered_unsynced_commands(self._test_guilds)
+        # Group all invocable commands by guild IDs:
+        global_cmds, guild_cmds = self._ordered_unsynced_commands()
 
         if self._command_sync_flags.sync_global_commands:
             # Update global commands first
@@ -1351,13 +1564,10 @@ class InteractionBotBase(CommonBotBase):
     ) -> bool:
         if inter.data.type is ApplicationCommandType.chat_input:
             checks = self._slash_command_check_once if call_once else self._slash_command_checks
-
         elif inter.data.type is ApplicationCommandType.user:
             checks = self._user_command_check_once if call_once else self._user_command_checks
-
         elif inter.data.type is ApplicationCommandType.message:
             checks = self._message_command_check_once if call_once else self._message_command_checks
-
         else:
             return True
 
@@ -1443,9 +1653,16 @@ class InteractionBotBase(CommonBotBase):
         inter: :class:`disnake.ApplicationCommandInteraction`
             The interaction to process.
         """
-        slash_command = self.all_slash_commands.get(inter.data.name)
+        # `inter.data.guild_id` is the guild ID the command is registered to,
+        # so this is correct even when a global command is called from a guild
+        cmd_index = AppCmdIndex(
+            type=inter.data.type, name=inter.data.name, guild_id=inter.data.guild_id
+        )
 
-        if slash_command is None:
+        # this happens to always be a slash command, the instance check is
+        # for `None` and to appease the type-checker
+        slash_command = self._all_app_commands.get(cmd_index)
+        if not isinstance(slash_command, InvokableSlashCommand):
             return
 
         inter.application_command = slash_command
@@ -1479,7 +1696,7 @@ class InteractionBotBase(CommonBotBase):
             # and we're instructed to sync guild commands
             and self._command_sync_flags.sync_guild_commands
             # and the current command was registered to a guild
-            and interaction.data.get("guild_id")
+            and interaction.data.guild_id
             # and we don't know the command
             and not self.get_guild_command(interaction.guild_id, interaction.data.id)  # pyright: ignore[reportAttributeAccessIssue]
         ):
@@ -1514,26 +1731,20 @@ class InteractionBotBase(CommonBotBase):
             return
 
         command_type = interaction.data.type
-        command_name = interaction.data.name
-        app_command = None
-        event_name = None
+        # `inter.data.guild_id` is the guild ID the command is registered to,
+        # so this is correct even when a global command is called from a guild
+        cmd_index = AppCmdIndex(
+            type=command_type, name=interaction.data.name, guild_id=interaction.data.guild_id
+        )
 
-        if command_type is ApplicationCommandType.chat_input:
-            app_command = self.all_slash_commands.get(command_name)
-            event_name = "slash_command"
-
-        elif command_type is ApplicationCommandType.user:
-            app_command = self.all_user_commands.get(command_name)
-            event_name = "user_command"
-
-        elif command_type is ApplicationCommandType.message:
-            app_command = self.all_message_commands.get(command_name)
-            event_name = "message_command"
-
-        if event_name is None or app_command is None:
+        if (app_command := self._all_app_commands.get(cmd_index)) is None:
             # If we are here, the command being invoked is either unknown or has an unknown type.
-            # This usually happens if the auto sync is disabled, so let's just ignore this.
+            # This usually happens if auto sync is disabled, so let's just ignore this.
             return
+        if (type_name := command_type._command_name) is None:
+            # see above
+            return
+        event_name = f"{type_name}_command"
 
         self.dispatch(event_name, interaction)
         try:

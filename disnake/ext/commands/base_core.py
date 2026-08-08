@@ -8,7 +8,7 @@ import functools
 import inspect
 from abc import ABC
 from collections.abc import Callable
-from typing import TYPE_CHECKING, Any, TypeAlias, TypedDict, TypeVar, overload
+from typing import TYPE_CHECKING, Any, NamedTuple, TypeAlias, TypedDict, TypeVar, overload
 
 from disnake import utils
 from disnake.app_commands import ApplicationCommand
@@ -52,6 +52,7 @@ if TYPE_CHECKING:
 
 
 __all__ = (
+    "AppCmdIndex",
     "InvokableApplicationCommand",
     "default_member_permissions",
     "install_types",
@@ -84,6 +85,28 @@ def wrap_callback(coro):
         return ret
 
     return wrapped
+
+
+class AppCmdIndex(NamedTuple):
+    """A named tuple used for indexing :class:`InvokableApplicationCommand`
+    objects handled by the bot.
+
+    .. versionadded:: |vnext|
+
+    Attributes
+    ----------
+    type: :class:`disnake.ApplicationCommandType`
+        The type of the application command being stored.
+    name: :class:`str`
+        The name of the application command being stored.
+    guild_id: :class:`int` | :data:`None`
+        One of the guild IDs this command is registered to,
+        or :data:`None` if it's a global command.
+    """
+
+    type: ApplicationCommandType
+    name: str
+    guild_id: int | None
 
 
 class InvokableApplicationCommand(ABC):
@@ -544,14 +567,9 @@ class InvokableApplicationCommand(ABC):
             else:
                 await self._before_invoke(inter)  # pyright: ignore[reportArgumentType, reportCallIssue]
 
-        if inter.data.type is ApplicationCommandType.chat_input:
-            partial_attr_name = "slash_command"
-        elif inter.data.type is ApplicationCommandType.user:
-            partial_attr_name = "user_command"
-        elif inter.data.type is ApplicationCommandType.message:
-            partial_attr_name = "message_command"
-        else:
+        if not (type_name := inter.data.type._command_name):
             return
+        partial_attr_name = f"{type_name}_command"
 
         # call the cog local hook if applicable:
         if cog is not None:
@@ -574,14 +592,9 @@ class InvokableApplicationCommand(ABC):
             else:
                 await self._after_invoke(inter)  # pyright: ignore[reportArgumentType, reportCallIssue]
 
-        if inter.data.type is ApplicationCommandType.chat_input:
-            partial_attr_name = "slash_command"
-        elif inter.data.type is ApplicationCommandType.user:
-            partial_attr_name = "user_command"
-        elif inter.data.type is ApplicationCommandType.message:
-            partial_attr_name = "message_command"
-        else:
+        if not (type_name := inter.data.type._command_name):
             return
+        partial_attr_name = f"{type_name}_command"
 
         # call the cog local hook if applicable:
         if cog is not None:
@@ -673,14 +686,9 @@ class InvokableApplicationCommand(ABC):
         original = inter.application_command
         inter.application_command = self
 
-        if inter.data.type is ApplicationCommandType.chat_input:
-            partial_attr_name = "slash_command"
-        elif inter.data.type is ApplicationCommandType.user:
-            partial_attr_name = "user_command"
-        elif inter.data.type is ApplicationCommandType.message:
-            partial_attr_name = "message_command"
-        else:
+        if not (type_name := inter.data.type._command_name):
             return True
+        partial_attr_name = f"{type_name}_command"
 
         try:
             if inter.bot and not await inter.bot.application_command_can_run(inter):
