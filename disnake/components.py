@@ -1726,11 +1726,11 @@ class GroupOption:
         )
 
 
-GroupOptionInput: TypeAlias = Sequence[GroupOption | str] | dict[str, str]
+GroupOptionInput: TypeAlias = Sequence[GroupOption | str] | Mapping[str, str]
 
 
 def _parse_group_options(options: GroupOptionInput) -> list[GroupOption]:
-    if isinstance(options, dict):
+    if isinstance(options, Mapping):
         return [GroupOption(label=key, value=val) for key, val in options.items()]
 
     return [opt if isinstance(opt, GroupOption) else GroupOption(label=opt) for opt in options]

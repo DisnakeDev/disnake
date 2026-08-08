@@ -7,6 +7,7 @@ import os
 import warnings
 from abc import ABC, abstractmethod
 from collections import defaultdict
+from collections.abc import Mapping
 from pathlib import Path
 from typing import (
     TYPE_CHECKING,
@@ -42,7 +43,7 @@ MISSING = utils.MISSING
 _log = logging.getLogger(__name__)
 
 
-LocalizationsDict: TypeAlias = dict[Locale, str] | dict[str, str]
+LocalizationsDict: TypeAlias = Mapping[Locale, str] | Mapping[str, str]
 Localizations: TypeAlias = str | LocalizationsDict
 
 StringT = TypeVar("StringT", str, str | None, covariant=True, default=str | None)
@@ -174,7 +175,7 @@ class LocalizationValue:
             # got localization key
             self._key = localizations
             self._data = MISSING  # not localized yet
-        elif isinstance(localizations, dict):
+        elif isinstance(localizations, Mapping):
             # got localization data
             self._key = None
             self._data = {str(k): v for k, v in localizations.items()}

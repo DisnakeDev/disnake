@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Mapping, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -35,11 +35,12 @@ __all__ = (
 )
 
 
-SelectOptionInput: TypeAlias = list[SelectOption] | list[str] | dict[str, str]
+# n.b. list + tuple instead of simply Sequence[str], as it would otherwise match plain strs as well
+SelectOptionInput: TypeAlias = Sequence[SelectOption] | list[str] | tuple[str] | Mapping[str, str]
 
 
 def _parse_select_options(options: SelectOptionInput) -> list[SelectOption]:
-    if isinstance(options, dict):
+    if isinstance(options, Mapping):
         return [SelectOption(label=key, value=val) for key, val in options.items()]
 
     return [opt if isinstance(opt, SelectOption) else SelectOption(label=opt) for opt in options]
