@@ -370,10 +370,10 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
         max_values: :class:`int`
             The maximum number of items that must be chosen for this select menu.
             Defaults to 1 and must be between 1 and 25.
-        options: :class:`list`\[:class:`disnake.SelectOption`] | :class:`list`\[:class:`str`] | :class:`dict`\[:class:`str`, :class:`str`]
+        options: :class:`list`\[:class:`disnake.SelectOption`] | :class:`list`\[:class:`str`] | :class:`~collections.abc.Mapping`\[:class:`str`, :class:`str`]
             A list of options that can be selected in this menu. Use explicit :class:`.SelectOption`\s
             for fine-grained control over the options. Alternatively, a list of strings will be treated
-            as a list of labels, and a dict will be treated as a mapping of labels to values.
+            as a list of labels, and a mapping/dict will be treated as a mapping of labels to values.
         disabled: :class:`bool`
             Whether the select is disabled or not.
         id: :class:`int`

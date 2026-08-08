@@ -75,7 +75,7 @@ class Localized(Generic[StringT]):
     key: :class:`str`
         A localization key used for lookups.
         Incompatible with ``data``.
-    data: :class:`dict`\[:class:`.Locale`, :class:`str`] | :class:`dict`\[:class:`str`, :class:`str`]
+    data: :class:`~collections.abc.Mapping`\[:class:`.Locale`, :class:`str`] | :class:`~collections.abc.Mapping`\[:class:`str`, :class:`str`]
         A mapping of locales to localized values.
         Incompatible with ``key``.
     """
