@@ -340,17 +340,7 @@ jobs:
           TZ: "America/New_York"
         run: |
           echo "$GITHUB_STEP_SUMMARY_HEADER" | sed "s/#name#/Test Summary/" >> $GITHUB_STEP_SUMMARY
-          nox --no-install -- --color=no --cov-report= | tee -a $GITHUB_STEP_SUMMARY
-          echo "$GITHUB_STEP_SUMMARY_FOOTER" >> $GITHUB_STEP_SUMMARY
-
-      - name: Print coverage output
-        if: always() && (steps.run_tests.outcome == 'success' || steps.run_tests.outcome == 'failure')
-        env:
-          UV_NO_SYNC: 0
-          NOXSESSION: coverage
-        run: |
-          echo "$GITHUB_STEP_SUMMARY_HEADER" | sed "s/#name#/Coverage Summary/" >> $GITHUB_STEP_SUMMARY
-          nox -- report | tee -a $GITHUB_STEP_SUMMARY
+          nox --no-install -- --color=no | tee -a $GITHUB_STEP_SUMMARY
           echo "$GITHUB_STEP_SUMMARY_FOOTER" >> $GITHUB_STEP_SUMMARY
 
   # thanks to aiohttp for this part of the workflow
