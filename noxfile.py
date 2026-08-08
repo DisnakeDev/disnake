@@ -418,17 +418,19 @@ def test(session: nox.Session, execution_group: ExecutionGroup) -> None:
     """Run tests."""
     install_deps(session, execution_group=execution_group)
 
-    pytest_args = ["--cov", "--cov-context=test"]
+    pytest_args: list[str] = []
     if execution_group.experimental:
         # don't turn warnings into errors
         # (this will override what we set in pyproject, but not be overridden by the cli)
         pytest_args.append("-Wdefault")
+
     global reset_coverage  # noqa: PLW0603
     if reset_coverage:
         # don't use `--cov-append` for first run
         reset_coverage = False
     else:
         # use `--cov-append` in all subsequent runs
+        # (n.b. while --cov isn't enabled by default, this is still useful when --cov is passed)
         pytest_args.append("--cov-append")
 
     # TODO: only run tests that depend on the different dependencies
