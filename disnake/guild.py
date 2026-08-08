@@ -45,6 +45,7 @@ from .enums import (
     Locale,
     NotificationLevel,
     NSFWLevel,
+    OnboardingMode,
     ThreadLayout,
     ThreadSortOrder,
     VerificationLevel,
@@ -89,6 +90,7 @@ if TYPE_CHECKING:
     from .app_commands import APIApplicationCommand
     from .asset import AssetBytes
     from .automod import AutoModTriggerMetadata
+    from .onboarding import OnboardingPrompt
     from .permissions import Permissions
     from .state import ConnectionState
     from .template import Template
@@ -102,6 +104,7 @@ if TYPE_CHECKING:
         MFALevel,
     )
     from .types.integration import Integration as IntegrationPayload, IntegrationType
+    from .types.onboarding import EditOnboarding as EditOnboardingPayload
     from .types.role import CreateRole as CreateRolePayload
     from .types.sticker import CreateGuildSticker as CreateStickerPayload
     from .types.threads import Thread as ThreadPayload, ThreadArchiveDurationLiteral
@@ -3918,7 +3921,7 @@ class Guild(Hashable):
 
         Creates a :class:`Role` for the guild.
 
-        All fields are optional.
+        All parameters are optional.
 
         You must have :attr:`~Permissions.manage_roles` permission to
         do this.
@@ -5237,6 +5240,71 @@ class Guild(Hashable):
             The guild onboarding data.
         """
         data = await self._state.http.get_guild_onboarding(self.id)
+        return Onboarding(data=data, guild=self)
+
+    async def edit_onboarding(
+        self,
+        *,
+        prompts: list[OnboardingPrompt] = MISSING,
+        default_channels: Iterable[Snowflake] = MISSING,
+        enabled: bool = MISSING,
+        mode: OnboardingMode = MISSING,
+        reason: str | None = None,
+    ) -> Onboarding:
+        r"""|coro|
+
+        Edits the guild onboarding.
+
+        You must have :attr:`.Permissions.manage_guild` and :attr:`.Permissions.manage_roles`
+        permissions to do this.
+
+        All parameters are optional.
+
+        .. versionadded:: |vnext|
+
+        Parameters
+        ----------
+        prompts: :class:`list`\[:class:`OnboardingPrompt`]
+            The onboarding's new prompts.
+        default_channels: :class:`~collections.abc.Iterable`\[:class:`abc.Snowflake`]
+            The onboarding's new default channels.
+        enabled: :class:`bool`
+            Whether the onboarding is enabled.
+        mode: :class:`OnboardingMode`
+            The onboarding's new mode. This defines the criteria used to satisfy Onboarding
+            constraints that are required for enabling it.
+        reason: :class:`str` | :data:`None`
+            The reason for editing the guild onboarding. Shows up on the audit log.
+
+        Raises
+        ------
+        HTTPException
+            Editing the guild onboarding failed.
+
+        Returns
+        -------
+        :class:`Onboarding`
+            The newly edited guild onboarding.
+        """
+        edit_payload: EditOnboardingPayload = {}
+
+        if prompts is not MISSING:
+            edit_payload["prompts"] = [p.to_dict() for p in prompts]
+
+        if default_channels is not MISSING:
+            edit_payload["default_channel_ids"] = [c.id for c in default_channels]
+
+        if enabled is not MISSING:
+            edit_payload["enabled"] = enabled
+
+        if mode is not MISSING:
+            edit_payload["mode"] = mode.value
+
+        data = await self._state.http.edit_guild_onboarding(
+            self.id,
+            **edit_payload,
+            reason=reason,
+        )
         return Onboarding(data=data, guild=self)
 
     async def create_soundboard_sound(
