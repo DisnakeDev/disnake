@@ -11,6 +11,7 @@ from disnake.utils import humanize_list
 if TYPE_CHECKING:
     from inspect import Parameter
 
+    from disnake import ApplicationCommandInteraction, Message
     from disnake.abc import GuildChannel
     from disnake.threads import Thread
     from disnake.types.snowflake import Snowflake, SnowflakeList
@@ -648,10 +649,19 @@ class CommandOnCooldown(CommandError):
         The amount of seconds to wait before you can retry again.
     """
 
-    def __init__(self, cooldown: Cooldown, retry_after: float, type: BucketType) -> None:
+    def __init__(
+        self,
+        cooldown: Cooldown,
+        retry_after: float,
+        type: BucketType
+        | Callable[[Message], Any]
+        | Callable[[ApplicationCommandInteraction], Any],
+    ) -> None:
         self.cooldown: Cooldown = cooldown
         self.retry_after: float = retry_after
-        self.type: BucketType = type
+        self.type: (
+            BucketType | Callable[[Message], Any] | Callable[[ApplicationCommandInteraction], Any]
+        ) = type
         super().__init__(f"You are on cooldown. Try again in {retry_after:.2f}s")
 
 
