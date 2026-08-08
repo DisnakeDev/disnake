@@ -1,0 +1,1 @@
+Loosen version requirement for ``dave.py``, allowing any version up to v1.0.0.
