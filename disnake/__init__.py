@@ -45,6 +45,9 @@ from .enums import *
 from .errors import *
 from .file import *
 from .flags import *
+from .gateway import (
+    GatewayParams as GatewayParams,  # don't want to export everything from this module
+)
 from .guild import *
 from .guild_preview import *
 from .guild_scheduled_event import *

@@ -32,7 +32,7 @@ nox.options.default_venv_backend = "uv|virtualenv"
 PYPROJECT = nox.project.load_toml()
 
 SUPPORTED_PYTHONS: Final[Sequence[str]] = nox.project.python_versions(PYPROJECT)
-EXPERIMENTAL_PYTHON_VERSIONS: Final[Sequence[str]] = ["3.14"]
+EXPERIMENTAL_PYTHON_VERSIONS: Final[Sequence[str]] = []
 ALL_PYTHONS: Final[Sequence[str]] = [*SUPPORTED_PYTHONS, *EXPERIMENTAL_PYTHON_VERSIONS]
 MIN_PYTHON: Final[str] = SUPPORTED_PYTHONS[0]
 CI: Final[bool] = "CI" in os.environ
@@ -200,7 +200,7 @@ def install_deps(session: nox.Session, *, execution_group: ExecutionGroup | None
     session.run_install(
         *command,
         env=env,
-        silent=True,
+        silent=not CI,
     )
 
     if execution_group.dependencies:
@@ -418,17 +418,19 @@ def test(session: nox.Session, execution_group: ExecutionGroup) -> None:
     """Run tests."""
     install_deps(session, execution_group=execution_group)
 
-    pytest_args = ["--cov", "--cov-context=test"]
+    pytest_args: list[str] = []
     if execution_group.experimental:
         # don't turn warnings into errors
         # (this will override what we set in pyproject, but not be overridden by the cli)
         pytest_args.append("-Wdefault")
+
     global reset_coverage  # noqa: PLW0603
     if reset_coverage:
         # don't use `--cov-append` for first run
         reset_coverage = False
     else:
         # use `--cov-append` in all subsequent runs
+        # (n.b. while --cov isn't enabled by default, this is still useful when --cov is passed)
         pytest_args.append("--cov-append")
 
     # TODO: only run tests that depend on the different dependencies

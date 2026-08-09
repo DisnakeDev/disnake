@@ -1858,9 +1858,9 @@ AuditLogAction
 
         .. versionadded:: |vnext|
 
-    .. attribute:: voice_channel_status_update
+    .. attribute:: voice_channel_status_create
 
-        A voice channel status was updated.
+        A voice channel status was set by a user.
 
         When this is the action, the type of :attr:`~AuditLogEntry.extra` is
         set to an unspecified proxy object with one attribute:

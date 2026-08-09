@@ -1,1 +1,0 @@
-Fix :class:`SubscriptionStatus`'s :attr:`~SubscriptionStatus.ending` and :attr:`~SubscriptionStatus.inactive` members to map to the correct value. These were previously swapped due to a mistake in the API documentation.

@@ -718,7 +718,7 @@ class AuditLogEntry(Hashable):
                     "integration_type": extra.get("integration_type"),
                 }
                 self.extra = type("_AuditLogProxy", (), elems)()
-            elif self.action is enums.AuditLogAction.voice_channel_status_update:
+            elif self.action is enums.AuditLogAction.voice_channel_status_create:
                 elems = {
                     "status": extra.get("status"),
                 }

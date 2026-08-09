@@ -7,15 +7,17 @@ import logging
 import re
 import sys
 import weakref
-from collections.abc import Coroutine, Iterable, Sequence
+from collections.abc import Coroutine, Iterable, Mapping, Sequence
 from errno import ECONNRESET
 from typing import (
     TYPE_CHECKING,
     Any,
     ClassVar,
+    Final,
     Literal,
     TypeVar,
     cast,
+    overload,
 )
 from urllib.parse import quote as _uriquote
 
@@ -31,7 +33,7 @@ from .errors import (
     LoginFailure,
     NotFound,
 )
-from .gateway import DiscordClientWebSocketResponse
+from .gateway import DiscordClientWebSocketResponse, GatewayParams
 from .utils import MISSING
 
 _log = logging.getLogger(__name__)
@@ -100,6 +102,11 @@ def _workaround_set_api_version(version: Literal[9, 10]) -> None:
     Route.BASE = f"https://discord.com/api/v{_API_VERSION}"
 
 
+USER_AGENT: Final[str] = (  # noqa: UP032
+    "DiscordBot (https://github.com/DisnakeDev/disnake {0}) Python/{1[0]}.{1[1]} aiohttp/{2}"
+).format(__version__, sys.version_info, aiohttp.__version__)
+
+
 async def json_or_text(response: aiohttp.ClientResponse) -> dict[str, Any] | str:
     text = await response.text(encoding="utf-8")
     try:
@@ -132,7 +139,7 @@ def set_attachments(payload: dict[str, Any], files: Sequence[File]) -> None:
         payload["attachments"] = attachments
 
 
-def to_multipart(payload: dict[str, Any], files: Sequence[File]) -> list[dict[str, Any]]:
+def to_multipart(payload: Mapping[str, Any], files: Sequence[File]) -> list[dict[str, Any]]:
     """Converts the payload and list of files to a multipart payload,
     as specified by https://docs.discord.com/developers/reference#uploading-files
     """
@@ -241,13 +248,18 @@ class HTTPClient:
         self.proxy_auth: aiohttp.BasicAuth | None = proxy_auth
         self.use_clock: bool = not unsync_clock
 
-        user_agent = "DiscordBot (https://github.com/DisnakeDev/disnake {0}) Python/{1[0]}.{1[1]} aiohttp/{2}"
-        self.user_agent: str = user_agent.format(__version__, sys.version_info, aiohttp.__version__)
+        # n.b. if this is changed after the ClientSession is created,
+        # the new user agent will not be used until the session is recreated
+        self.user_agent: str = USER_AGENT
 
     def recreate(self) -> None:
         if self.__session.closed:
             self.__session = aiohttp.ClientSession(
-                connector=self.connector, ws_response_class=DiscordClientWebSocketResponse
+                connector=self.connector,
+                ws_response_class=DiscordClientWebSocketResponse,
+                headers={
+                    "User-Agent": self.user_agent,
+                },
             )
 
     async def ws_connect(self, url: str, *, compress: int = 0) -> aiohttp.ClientWebSocketResponse:
@@ -257,7 +269,10 @@ class HTTPClient:
             if hasattr(aiohttp, "ClientWSTimeout")
             else 30.0,
         )
-        return await self.__session.ws_connect(
+
+        # in Python 3.10, ws_connect() returns a `Response[bool]` instead of `Response[Literal[True]]`,
+        # so this explicit annotation is required to avoid typing issues
+        ws: aiohttp.ClientWebSocketResponse[Any] = await self.__session.ws_connect(
             url,
             proxy_auth=self.proxy_auth,
             proxy=self.proxy,
@@ -269,6 +284,7 @@ class HTTPClient:
             },
             compress=compress,
         )
+        return ws
 
     async def request(
         self,
@@ -287,9 +303,8 @@ class HTTPClient:
             self._locks[bucket] = lock = asyncio.Lock()
 
         # header creation
-        headers: dict[str, str] = {
-            "User-Agent": self.user_agent,
-        }
+        # User-Agent is set on the session itself
+        headers: dict[str, str] = {}
 
         if self.token is not None:
             headers["Authorization"] = "Bot " + self.token
@@ -460,7 +475,11 @@ class HTTPClient:
     async def static_login(self, token: str) -> user.User:
         # Necessary to get aiohttp to stop complaining about session creation
         self.__session = aiohttp.ClientSession(
-            connector=self.connector, ws_response_class=DiscordClientWebSocketResponse
+            connector=self.connector,
+            ws_response_class=DiscordClientWebSocketResponse,
+            headers={
+                "User-Agent": self.user_agent,
+            },
         )
         old_token = self.token
         self.token = token
@@ -524,10 +543,25 @@ class HTTPClient:
 
         return self.request(Route("POST", "/users/@me/channels"), json=payload)
 
+    @overload
+    def send_message(
+        self,
+        channel_id: Snowflake,
+        /,
+        *,
+        files: Sequence[File] | None = None,
+        **fields: Any,
+    ) -> Response[message.Message]: ...
+
+    @overload
+    @utils.deprecated(
+        "The `embed` parameter and passing `content` as a positional argument are deprecated."
+    )
     def send_message(
         self,
         channel_id: Snowflake,
         content: str | None,
+        /,
         *,
         tts: bool = False,
         embed: embed.Embed | None = None,
@@ -538,45 +572,33 @@ class HTTPClient:
         stickers: Sequence[Snowflake] | None = None,
         components: Sequence[components.Component] | None = None,
         poll: poll.PollCreatePayload | None = None,
+        shared_client_theme: message.SharedClientTheme | None = None,
         flags: int | None = None,
+    ) -> Response[message.Message]: ...
+
+    def send_message(
+        self,
+        channel_id: Snowflake,
+        content: str | None = None,
+        /,
+        *,
+        files: Sequence[File] | None = None,
+        **fields: Any,
     ) -> Response[message.Message]:
         r = Route("POST", "/channels/{channel_id}/messages", channel_id=channel_id)
-        payload: dict[str, Any] = {}
 
+        # legacy stuff
         if content:
-            payload["content"] = content
+            fields["content"] = content
+        if embed := fields.pop("embed", None):
+            fields["embeds"] = [embed]
 
-        if tts:
-            payload["tts"] = True
+        fields = {k: v for k, v in fields.items() if v is not None}
 
-        if embed:
-            payload["embeds"] = [embed]
-
-        if embeds:
-            payload["embeds"] = embeds
-
-        if nonce:
-            payload["nonce"] = nonce
-
-        if allowed_mentions:
-            payload["allowed_mentions"] = allowed_mentions
-
-        if message_reference:
-            payload["message_reference"] = message_reference
-
-        if components:
-            payload["components"] = components
-
-        if stickers:
-            payload["sticker_ids"] = stickers
-
-        if flags is not None:
-            payload["flags"] = flags
-
-        if poll is not None:
-            payload["poll"] = poll
-
-        return self.request(r, json=payload)
+        if files:
+            multipart = to_multipart_with_attachments(fields, files)
+            return self.request(r, form=multipart, files=files)
+        return self.request(r, json=fields)
 
     def get_poll_answer_voters(
         self,
@@ -663,6 +685,7 @@ class HTTPClient:
 
         return self.request(route, form=multipart, files=files)
 
+    @utils.noop_deprecated("Use .send_message() instead.")
     def send_files(
         self,
         channel_id: Snowflake,
@@ -723,7 +746,7 @@ class HTTPClient:
         channel_id: Snowflake,
         message_id: Snowflake,
         *,
-        files: list[File] | None = None,
+        files: Sequence[File] | None = None,
         **fields: Any,
     ) -> Response[message.Message]:
         r = Route(
@@ -1328,6 +1351,7 @@ class HTTPClient:
             "components",
             "sticker_ids",
             "flags",
+            "attachments",
         )
         payload = {k: v for k, v in fields.items() if k in valid_thread_keys}
         payload["message"] = {k: v for k, v in fields.items() if k in valid_message_keys}
@@ -2721,7 +2745,7 @@ class HTTPClient:
         token: str,
         *,
         type: InteractionResponseType,
-        data: interactions.InteractionCallbackData | None = None,
+        data: interactions.InteractionResponseData | None = None,
     ) -> Response[None]:
         r = Route(
             "POST",
@@ -3035,16 +3059,16 @@ class HTTPClient:
             json=records,
         )
 
-    async def get_gateway(self, *, encoding: str = "json", zlib: bool = True) -> str:
+    async def get_gateway(self, params: GatewayParams | None = None) -> str:
         try:
             data: gateway.Gateway = await self.request(Route("GET", "/gateway"))
         except HTTPException as exc:
             raise GatewayNotFound from exc
 
-        return self._format_gateway_url(data["url"], encoding=encoding, zlib=zlib)
+        return self._format_gateway_url(data["url"], params=params)
 
     async def get_bot_gateway(
-        self, *, encoding: str = "json", zlib: bool = True
+        self, params: GatewayParams | None = None
     ) -> tuple[int, str, gateway.SessionStartLimit]:
         try:
             data: gateway.GatewayBot = await self.request(Route("GET", "/gateway/bot"))
@@ -3053,21 +3077,24 @@ class HTTPClient:
 
         return (
             data["shards"],
-            self._format_gateway_url(data["url"], encoding=encoding, zlib=zlib),
+            self._format_gateway_url(data["url"], params=params),
             data["session_start_limit"],
         )
 
     @staticmethod
-    def _format_gateway_url(url: str, *, encoding: str, zlib: bool) -> str:
+    def _format_gateway_url(url: str, *, params: GatewayParams | None) -> str:
+        params = params or GatewayParams()
+
         _url = yarl.URL(url)
-        params = _url.query.copy()
-        params["v"] = str(_API_VERSION)
-        params["encoding"] = encoding
-        if zlib:
-            params["compress"] = "zlib-stream"
+        query = _url.query.copy()
+        query["v"] = str(_API_VERSION)
+        query["encoding"] = params.encoding
+        if params.compress:
+            query["compress"] = params.compress
         else:
-            params.popall("compress", None)
-        return str(_url.with_query(params))
+            query.popall("compress", None)
+
+        return str(_url.with_query(query))
 
     def get_user(self, user_id: Snowflake) -> Response[user.User]:
         return self.request(Route("GET", "/users/{user_id}", user_id=user_id))

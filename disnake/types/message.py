@@ -147,6 +147,7 @@ class Message(TypedDict):
     position: NotRequired[int]
     role_subscription_data: NotRequired[RoleSubscriptionData]
     poll: NotRequired[Poll]
+    call: NotRequired[MessageCall]
     # contains resolved objects for `default_values` of select menus in this message; we currently don't have a use for this
     resolved: NotRequired[InteractionDataResolved]
 
@@ -173,3 +174,13 @@ class MessagePin(TypedDict):
 class MessageCall(TypedDict):
     participants: SnowflakeList
     ended_timestamp: NotRequired[str | None]
+
+
+SharedClientThemeBase = Literal[0, 1, 2, 3, 4]
+
+
+class SharedClientTheme(TypedDict):
+    colors: list[str]  # 1-5
+    gradient_angle: int  # max 360
+    base_mix: int  # max 100
+    base_theme: NotRequired[SharedClientThemeBase]

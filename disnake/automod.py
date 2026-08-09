@@ -90,7 +90,7 @@ class AutoModAction:
         self._metadata: AutoModActionMetadata = {}
 
     def __repr__(self) -> str:
-        return f"<{type(self).__name__} type={self.type!r}>"
+        return f"<{self.__class__.__name__} type={self.type!r}>"
 
     @classmethod
     def _from_dict(cls, data: AutoModActionPayload) -> Self:
@@ -150,7 +150,7 @@ class AutoModBlockMessageAction(AutoModAction):
         return self._metadata.get("custom_message")
 
     def __repr__(self) -> str:
-        return f"<{type(self).__name__} custom_message={self.custom_message!r}>"
+        return f"<{self.__class__.__name__} custom_message={self.custom_message!r}>"
 
 
 class AutoModSendAlertAction(AutoModAction):
@@ -188,7 +188,7 @@ class AutoModSendAlertAction(AutoModAction):
         return int(self._metadata["channel_id"])
 
     def __repr__(self) -> str:
-        return f"<{type(self).__name__} channel_id={self.channel_id!r}>"
+        return f"<{self.__class__.__name__} channel_id={self.channel_id!r}>"
 
 
 class AutoModTimeoutAction(AutoModAction):
@@ -230,7 +230,7 @@ class AutoModTimeoutAction(AutoModAction):
         return self._metadata["duration_seconds"]
 
     def __repr__(self) -> str:
-        return f"<{type(self).__name__} duration={self.duration!r}>"
+        return f"<{self.__class__.__name__} duration={self.duration!r}>"
 
 
 class AutoModBlockInteractionAction(AutoModAction):
@@ -439,7 +439,7 @@ class AutoModTriggerMetadata:
         return data
 
     def __repr__(self) -> str:
-        s = f"<{type(self).__name__}"
+        s = f"<{self.__class__.__name__}"
         if self.keyword_filter is not None:
             s += f" keyword_filter={self.keyword_filter!r}"
         if self.regex_patterns is not None:
@@ -791,7 +791,7 @@ class AutoModActionExecution:
 
     def __repr__(self) -> str:
         return (
-            f"<{type(self).__name__} guild={self.guild!r} action={self.action!r}"
+            f"<{self.__class__.__name__} guild={self.guild!r} action={self.action!r}"
             f" rule_id={self.rule_id!r} rule_trigger_type={self.rule_trigger_type!r}"
             f" channel={self.channel!r} user_id={self.user_id!r} message_id={self.message_id!r}"
             f" alert_message_id={self.alert_message_id!r} content={self.content!r}"

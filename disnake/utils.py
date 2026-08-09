@@ -134,7 +134,7 @@ class _cached_property:
 
 
 if TYPE_CHECKING:
-    from functools import cached_property as cached_property
+    cached_property: TypeAlias = property
 
     from .abc import Snowflake
     from .asset import AssetBytes
@@ -808,15 +808,15 @@ _MARKDOWN_ESCAPE_SUBREGEX = "|".join(
     rf"\{c}(?=([\s\S]*((?<!\{c})\{c})))" for c in ("*", "`", "_", "~", "|")
 )
 
-_MARKDOWN_ESCAPE_COMMON = r"^>(?:>>)?\s|\[.+\]\(.+\)"
+_MARKDOWN_ESCAPE_COMMON = r"^>(?:>>)?\s|\[.+\]\(.+\)|^(?P<prefix>\s*)[-*]\s|^#{1,3}\s"
 
 _MARKDOWN_ESCAPE_REGEX = re.compile(
-    rf"(?P<markdown>{_MARKDOWN_ESCAPE_SUBREGEX}|{_MARKDOWN_ESCAPE_COMMON})", re.MULTILINE
+    rf"(?P<markdown>{_MARKDOWN_ESCAPE_COMMON}|{_MARKDOWN_ESCAPE_SUBREGEX})", re.MULTILINE
 )
 
 _URL_REGEX = r"(?P<url><[^: >]+:\/[^ >]+>|(?:https?|steam):\/\/[^\s<]+[^<.,:;\"\'\]\s])"
 
-_MARKDOWN_STOCK_REGEX = rf"(?P<markdown>[_\\~|\*`]|{_MARKDOWN_ESCAPE_COMMON})"
+_MARKDOWN_STOCK_REGEX = rf"(?P<markdown>{_MARKDOWN_ESCAPE_COMMON}|[_\\~|\*`])"
 
 
 def remove_markdown(text: str, *, ignore_links: bool = True) -> str:
@@ -843,7 +843,7 @@ def remove_markdown(text: str, *, ignore_links: bool = True) -> str:
         The text with the markdown special characters removed.
     """
 
-    def replacement(match: re.Match) -> str:
+    def replacement(match: re.Match[str]) -> str:
         groupdict = match.groupdict()
         return groupdict.get("url", "")
 
@@ -879,12 +879,13 @@ def escape_markdown(text: str, *, as_needed: bool = False, ignore_links: bool = 
     """
     if not as_needed:
 
-        def replacement(match: re.Match) -> str:
+        def replacement(match: re.Match[str]) -> str:
             groupdict = match.groupdict()
             is_url = groupdict.get("url")
             if is_url:
                 return is_url
-            return "\\" + groupdict["markdown"]
+            prefix = groupdict.get("prefix") or ""
+            return prefix + "\\" + groupdict["markdown"].removeprefix(prefix)
 
         regex = _MARKDOWN_STOCK_REGEX
         if ignore_links:
@@ -1156,6 +1157,7 @@ def evaluate_annotation(
     cache: dict[str, Any],
     *,
     implicit_str: bool = True,
+    source_info: types.CodeType | None = None,
 ) -> Any:
     if isinstance(tp, ForwardRef):
         tp = tp.__forward_arg__
@@ -1166,17 +1168,26 @@ def evaluate_annotation(
         if tp in cache:
             return cache[tp]
 
+        if source_info is not None:
+            # compile the annotation to add filename/line no. data for warnings & tracebacks
+            source = compile(tp, source_info.co_filename, "eval", dont_inherit=True)
+            source = source.replace(co_firstlineno=source_info.co_firstlineno)
+        else:
+            source = tp
+
         # this is how annotations are supposed to be unstringifed
-        evaluated = eval(tp, globals, locals)  # noqa: S307
+        evaluated = eval(source, globals, locals)  # noqa: S307
         # recurse to resolve nested args further
-        evaluated = evaluate_annotation(evaluated, globals, locals, cache)
+        evaluated = evaluate_annotation(evaluated, globals, locals, cache, source_info=source_info)
 
         cache[tp] = evaluated
         return evaluated
 
     # Annotated[X, Y], where Y is the converter we need
     if get_origin(tp) is Annotated:
-        return evaluate_annotation(tp.__metadata__[0], globals, locals, cache)
+        return evaluate_annotation(
+            tp.__metadata__[0], globals, locals, cache, source_info=source_info
+        )
 
     # GenericAlias / UnionType
     if hasattr(tp, "__args__"):
@@ -1184,7 +1195,9 @@ def evaluate_annotation(
             # n.b. this became obsolete in Python 3.14+, as `UnionType` and `Union` are the same thing now.
             if tp.__class__ is UnionType:
                 converted = Union[tp.__args__]  # noqa: UP007
-                return evaluate_annotation(converted, globals, locals, cache)
+                return evaluate_annotation(
+                    converted, globals, locals, cache, source_info=source_info
+                )
 
             return tp
 
@@ -1208,7 +1221,9 @@ def evaluate_annotation(
             is_literal = True
 
         evaluated_args = tuple(
-            evaluate_annotation(arg, globals, locals, cache, implicit_str=implicit_str)
+            evaluate_annotation(
+                arg, globals, locals, cache, implicit_str=implicit_str, source_info=source_info
+            )
             for arg in args
         )
 
@@ -1314,7 +1329,9 @@ def get_signature_parameters(
         if annotation is None:
             annotation = type(None)
         else:
-            annotation = evaluate_annotation(annotation, globalns, globalns, cache)
+            annotation = evaluate_annotation(
+                annotation, globalns, globalns, cache, source_info=function.__code__
+            )
 
         params[name] = parameter.replace(annotation=annotation)
 

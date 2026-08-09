@@ -7,7 +7,7 @@ import datetime
 import io
 import re
 from base64 import b64decode, b64encode
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from os import PathLike
 from typing import (
     TYPE_CHECKING,
@@ -20,6 +20,7 @@ from typing import (
 
 from . import utils
 from .channel import PartialMessageable
+from .colour import Colour
 from .components import MessageTopLevelComponent, _message_component_factory
 from .embeds import Embed
 from .emoji import Emoji
@@ -28,6 +29,7 @@ from .enums import (
     InteractionType,
     MessageReferenceType,
     MessageType,
+    SharedClientThemeBase,
     try_enum,
     try_enum_to_int,
 )
@@ -78,6 +80,7 @@ if TYPE_CHECKING:
         MessageReference as MessageReferencePayload,
         Reaction as ReactionPayload,
         RoleSubscriptionData as RoleSubscriptionDataPayload,
+        SharedClientTheme as SharedClientThemePayload,
     )
     from .types.threads import ThreadArchiveDurationLiteral
     from .types.user import User as UserPayload
@@ -98,6 +101,7 @@ __all__ = (
     "RoleSubscriptionData",
     "ForwardedMessage",
     "MessageCall",
+    "SharedClientTheme",
 )
 
 
@@ -124,7 +128,7 @@ def convert_emoji_reaction(emoji: EmojiInputType | Reaction) -> str:
 async def _edit_handler(
     msg: Message | PartialMessage,
     *,
-    default_flags: int,
+    previous_flags: int,  # used as the base value, only when params like suppress_embeds are passed
     previous_allowed_mentions: AllowedMentions | None,
     delete_after: float | None,
     # these are the actual edit kwargs,
@@ -142,15 +146,6 @@ async def _edit_handler(
     view: View | None,
     components: MessageComponents | None,
 ) -> Message:
-    if embed is not MISSING and embeds is not MISSING:
-        err = "Cannot mix embed and embeds keyword arguments."
-        raise TypeError(err)
-    if file is not MISSING and files is not MISSING:
-        err = "Cannot mix file and files keyword arguments."
-        raise TypeError(err)
-    if view is not MISSING and components is not MISSING:
-        err = "Cannot mix view and components keyword arguments."
-        raise TypeError(err)
     if suppress is not MISSING:
         suppress_deprecated_msg = "'suppress' is deprecated in favour of 'suppress_embeds'."
         if suppress_embeds is not MISSING:
@@ -161,79 +156,30 @@ async def _edit_handler(
         utils.warn_deprecated(suppress_deprecated_msg, stacklevel=3)
         suppress_embeds = suppress
 
-    payload: dict[str, Any] = {}
-    if content is not MISSING:
-        if content is not None:
-            payload["content"] = str(content)
-        else:
-            payload["content"] = None
+    from .webhook.async_ import handle_message_parameters_dict
 
-    if file is not MISSING:
-        files = [file]
+    with handle_message_parameters_dict(
+        content=content,
+        embed=embed,
+        embeds=embeds,
+        file=file,
+        files=files,
+        attachments=attachments,
+        suppress_embeds=suppress_embeds,
+        flags=flags,
+        view=view,
+        components=components,
+        allowed_mentions=allowed_mentions,
+        previous_flags=previous_flags,
+        previous_allowed_mentions=previous_allowed_mentions,
+    ) as params:
+        if view is not MISSING:
+            msg._state.prevent_view_updates_for(msg.id)
 
-    if embed is not MISSING:
-        embeds = [embed] if embed else []
-    if embeds is not MISSING:
-        payload["embeds"] = [e.to_dict() for e in embeds]
-        for embed in embeds:
-            if embed._files:
-                files = files or []
-                files.extend(embed._files.values())
+        data = await msg._state.http.edit_message(
+            msg.channel.id, msg.id, files=params.files, **params.payload
+        )
 
-    if allowed_mentions is MISSING:
-        if previous_allowed_mentions:
-            payload["allowed_mentions"] = previous_allowed_mentions.to_dict()
-    else:
-        if allowed_mentions:
-            if msg._state.allowed_mentions is not None:
-                payload["allowed_mentions"] = msg._state.allowed_mentions.merge(
-                    allowed_mentions
-                ).to_dict()
-            else:
-                payload["allowed_mentions"] = allowed_mentions.to_dict()
-
-    if attachments is not MISSING:
-        payload["attachments"] = [] if attachments is None else [a.to_dict() for a in attachments]
-
-    if view is not MISSING:
-        msg._state.prevent_view_updates_for(msg.id)
-        if view:
-            payload["components"] = view.to_components()
-        else:
-            payload["components"] = []
-
-    is_v2 = False
-    if components is not MISSING:
-        from .ui.action_row import normalize_components_to_dict
-
-        if components:
-            payload["components"], is_v2 = normalize_components_to_dict(components)
-        else:
-            payload["components"] = []
-
-    # set cv2 flag automatically
-    if is_v2:
-        flags = MessageFlags._from_value(default_flags if flags is MISSING else flags.value)
-        flags.is_components_v2 = True
-    # components v2 cannot be used with other content fields
-    # (n.b. this doesn't take into account editing messages that *already* have content/embeds,
-    # since we can't know that for certain with partial messages anyway)
-    if flags and flags.is_components_v2 and (content or embeds):
-        err = "Cannot use v2 components with content or embeds"
-        raise ValueError(err)
-
-    if suppress_embeds is not MISSING:
-        flags = MessageFlags._from_value(default_flags if flags is MISSING else flags.value)
-        flags.suppress_embeds = suppress_embeds
-    if flags is not MISSING:
-        payload["flags"] = flags.value
-
-    try:
-        data = await msg._state.http.edit_message(msg.channel.id, msg.id, **payload, files=files)
-    finally:
-        if files:
-            for f in files:
-                f.close()
     message = Message(state=msg._state, channel=msg.channel, data=data)
 
     if view and not view.is_finished():
@@ -1008,6 +954,8 @@ class MessageCall:
         It is not resolved to the user objects themselves.
     """
 
+    __slots__ = ("ended_timestamp", "participant_ids")
+
     def __init__(self, *, data: MessageCallPayload) -> None:
         self.ended_timestamp: datetime.datetime | None = utils.parse_time(
             data.get("ended_timestamp")
@@ -1015,6 +963,91 @@ class MessageCall:
         self.participant_ids: list[int] = [
             int(participant) for participant in data.get("participants", [])
         ]
+
+
+class SharedClientTheme:
+    r"""
+    Represents a custom client-side theme shared via messages.
+
+    .. versionadded:: |vnext|
+
+    Parameters
+    ----------
+    colours: :class:`~collections.abc.Sequence`\[:class:`Colour` | :class:`int`]
+        The colours of the theme's gradient (up to 5).
+    gradient_angle: :class:`int`
+        The direction of the theme's colour gradient (0-360).
+    intensity: :class:`int`
+        The intensity of the theme's colours (0-100).
+    base_theme: :class:`SharedClientThemeBase`
+        The base colour scheme.
+        Defaults to :attr:`SharedClientThemeBase.unset`.
+
+    Attributes
+    ----------
+    gradient_angle: :class:`int`
+        The direction of the theme's colour gradient (0-360).
+    intensity: :class:`int`
+        The intensity of the theme's colours (0-100).
+    base_theme: :class:`SharedClientThemeBase`
+        The base colour scheme.
+    """
+
+    __slots__ = ("_colours", "gradient_angle", "intensity", "base_theme")
+
+    _colours: Sequence[Colour]
+
+    def __init__(
+        self,
+        colours: Sequence[int | Colour],
+        /,
+        *,
+        gradient_angle: int,
+        intensity: int,
+        base_theme: SharedClientThemeBase = SharedClientThemeBase.unset,
+    ) -> None:
+        self.colours = colours
+        self.gradient_angle: int = gradient_angle
+        self.intensity: int = intensity
+        self.base_theme: SharedClientThemeBase = base_theme
+
+    def __repr__(self) -> str:
+        return (
+            f"<{self.__class__.__name__} colours={self.colours!r} gradient_angle={self.gradient_angle}"
+            f" intensity={self.intensity} base_theme={self.base_theme!r}>"
+        )
+
+    @property
+    def colours(self) -> Sequence[Colour]:
+        r""":class:`~collections.abc.Sequence`\[:class:`Colour`]: The colours of the theme's gradient."""
+        return self._colours
+
+    @colours.setter
+    def colours(self, colours: Sequence[int | Colour]) -> None:
+        self._colours = [(c if isinstance(c, Colour) else Colour(c)) for c in colours]
+
+    colors = colours
+
+    @classmethod
+    def _from_data(cls, data: SharedClientThemePayload) -> Self:
+        return cls(
+            [Colour.from_hex(c) for c in data["colors"]],
+            gradient_angle=data["gradient_angle"],
+            intensity=data["base_mix"],
+            base_theme=(
+                try_enum(SharedClientThemeBase, base_theme)
+                if (base_theme := data.get("base_theme")) is not None
+                else SharedClientThemeBase.unset
+            ),
+        )
+
+    def to_dict(self) -> SharedClientThemePayload:
+        return {
+            "colors": [f"{c.value:06x}" for c in self.colours],
+            "gradient_angle": self.gradient_angle,
+            "base_mix": self.intensity,
+            "base_theme": self.base_theme.value,
+        }
 
 
 @flatten_handlers
@@ -1165,6 +1198,10 @@ class Message(Hashable):
         Only present when :attr:`type` is :attr:`MessageType.call`.
 
         .. versionadded:: 2.12
+    shared_client_theme: :class:`.SharedClientTheme`
+        The custom client-side theme shared via this message.
+
+        .. versionadded:: |vnext|
     """
 
     __slots__ = (
@@ -1204,6 +1241,7 @@ class Message(Hashable):
         "guild",
         "poll",
         "call",
+        "shared_client_theme",
         "_edited_timestamp",
         "_role_subscription_data",
         "_pinned_at",
@@ -1260,10 +1298,20 @@ class Message(Hashable):
             _message_component_factory(d) for d in data.get("components", [])
         ]
 
-        self.poll: Poll | None = None
-        if poll_data := data.get("poll"):
-            self.poll = Poll.from_dict(message=self, data=poll_data)
-        self.call = MessageCall(data=call_data) if (call_data := data.get("call")) else None
+        self.poll: Poll | None = (
+            Poll.from_dict(message=self, data=poll_data)
+            if (poll_data := data.get("poll"))
+            else None
+        )
+        self.call: MessageCall | None = (
+            MessageCall(data=call_data) if (call_data := data.get("call")) else None
+        )
+        self.shared_client_theme: SharedClientTheme | None = (
+            SharedClientTheme._from_data(theme_data)
+            if (theme_data := data.get("shared_client_theme"))
+            else None
+        )
+
         try:
             # if the channel doesn't have a guild attribute, we handle that
             self.guild = channel.guild  # pyright: ignore[reportAttributeAccessIssue]
@@ -2179,7 +2227,7 @@ class Message(Hashable):
 
         return await _edit_handler(
             self,
-            default_flags=self.flags.value,
+            previous_flags=self.flags.value,
             previous_allowed_mentions=previous_allowed_mentions,
             content=content,
             embed=embed,
@@ -2968,7 +3016,7 @@ class PartialMessage(Hashable):
 
         return await _edit_handler(
             self,
-            default_flags=0,
+            previous_flags=0,
             previous_allowed_mentions=None,
             content=content,
             embed=embed,

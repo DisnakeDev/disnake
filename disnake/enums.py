@@ -75,6 +75,7 @@ __all__ = (
     "MessageReferenceType",
     "SeparatorSpacing",
     "NameplatePalette",
+    "SharedClientThemeBase",
 )
 
 EnumMetaT = TypeVar("EnumMetaT", bound="EnumMeta")
@@ -165,10 +166,10 @@ class EnumMeta(type):
         value_cls._actual_enum_cls_ = actual_cls = super().__new__(cls, name, bases, attrs)
         return actual_cls
 
-    def __iter__(cls) -> Iterator[EnumMetaT]:
+    def __iter__(cls) -> Iterator[Any]:
         return (cls._enum_member_map_[name] for name in cls._enum_member_names_)
 
-    def __reversed__(cls) -> Iterator[EnumMetaT]:
+    def __reversed__(cls) -> Iterator[Any]:
         return (cls._enum_member_map_[name] for name in reversed(cls._enum_member_names_))
 
     def __len__(cls) -> int:
@@ -731,7 +732,7 @@ class AuditLogAction(Enum):
     onboarding_prompt_create              = 163
     onboarding_prompt_update              = 164
     onboarding_update                     = 167
-    voice_channel_status_update           = 192
+    voice_channel_status_create           = 192
     voice_channel_status_delete           = 193
     # fmt: on
 
@@ -802,7 +803,7 @@ class AuditLogAction(Enum):
             AuditLogAction.onboarding_prompt_create:              AuditLogActionCategory.create,
             AuditLogAction.onboarding_prompt_update:              AuditLogActionCategory.update,
             AuditLogAction.onboarding_update:                     AuditLogActionCategory.update,
-            AuditLogAction.voice_channel_status_update:           AuditLogActionCategory.update,
+            AuditLogAction.voice_channel_status_create:           AuditLogActionCategory.create,
             AuditLogAction.voice_channel_status_delete:           AuditLogActionCategory.delete,
         }
         # fmt: on
@@ -2497,6 +2498,24 @@ class NameplatePalette(Enum):
     """Lemon color palette."""
     white = "white"
     """White color palette."""
+
+
+class SharedClientThemeBase(Enum):
+    """Specifies the base colour scheme used by a :class:`SharedClientTheme`.
+
+    .. versionadded:: |vnext|
+    """
+
+    unset = 0
+    """No base theme. Equivalent to :attr:`dark`."""
+    dark = 1
+    """Dark base theme."""
+    light = 2
+    """Light base theme."""
+    darker = 3
+    """Darker base theme."""
+    midnight = 4
+    """Midnight base theme."""
 
 
 T = TypeVar("T", bound="Enum")

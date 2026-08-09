@@ -22,6 +22,7 @@ from typing import (
 )
 
 import disnake
+from disnake.colour import _convertible_colours
 
 from .context import AnyContext, Context
 from .errors import (
@@ -751,10 +752,9 @@ class ColourConverter(Converter[disnake.Colour]):
             return self.parse_rgb(arg)
 
         arg = arg.replace(" ", "_")
-        method = getattr(disnake.Colour, arg, None)
-        if arg.startswith("from_") or method is None or not inspect.ismethod(method):
-            raise BadColourArgument(arg)
-        return method()
+        if method := _convertible_colours.get(arg):
+            return method(disnake.Colour)
+        raise BadColourArgument(arg)
 
 
 ColorConverter = ColourConverter

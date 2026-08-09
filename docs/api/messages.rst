@@ -78,6 +78,14 @@ MessageCall
 .. autoclass:: MessageCall()
     :members:
 
+SharedClientTheme
+~~~~~~~~~~~~~~~~~
+
+.. attributetable:: SharedClientTheme
+
+.. autoclass:: SharedClientTheme
+    :members:
+
 RawTypingEvent
 ~~~~~~~~~~~~~~
 
@@ -268,6 +276,12 @@ MessageReferenceType
 ~~~~~~~~~~~~~~~~~~~~
 
 .. autoclass:: MessageReferenceType()
+    :members:
+
+SharedClientThemeBase
+~~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: SharedClientThemeBase()
     :members:
 
 Events
