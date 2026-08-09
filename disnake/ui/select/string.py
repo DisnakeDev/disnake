@@ -36,7 +36,7 @@ __all__ = (
 
 
 # n.b. list + tuple instead of simply Sequence[str], as it would otherwise match plain strs as well
-SelectOptionInput: TypeAlias = Sequence[SelectOption] | list[str] | tuple[str] | Mapping[str, str]
+SelectOptionInput: TypeAlias = Sequence[SelectOption] | list[str] | tuple[str, ...] | Mapping[str, str]
 
 
 def _parse_select_options(options: SelectOptionInput) -> list[SelectOption]:
