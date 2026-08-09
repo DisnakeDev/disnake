@@ -95,7 +95,7 @@ class AppCmdIndex(NamedTuple):
 
     Attributes
     ----------
-    type: :class:`disnake.ApplicationCommandType`
+    type: :class:`.ApplicationCommandType`
         The type of the application command being stored.
     name: :class:`str`
         The name of the application command being stored.
