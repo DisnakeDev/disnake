@@ -53,14 +53,15 @@ GuildFeature = Literal[
     "DEVELOPER_SUPPORT_SERVER",
     "DISCOVERABLE",
     "ENABLED_DISCOVERABLE_BEFORE",
+    "ENHANCED_ROLE_COLORS",
     "FEATURABLE",
-    "GUILD_HOME_TEST",  # not yet documented/finalised
+    "GUESTS_ENABLED",
+    "GUILD_TAGS",
     "HAS_DIRECTORY_ENTRY",
     "HUB",
     "INVITE_SPLASH",
     "INVITES_DISABLED",
     "LINKED_TO_HUB",
-    "MEMBER_PROFILES",  # not sure what this does, if anything
     "MEMBER_VERIFICATION_GATE_ENABLED",
     "MORE_EMOJI",
     "MORE_SOUNDBOARD",
@@ -70,6 +71,7 @@ GuildFeature = Literal[
     "PARTNERED",
     "PREVIEW_ENABLED",
     "PRIVATE_THREADS",  # deprecated
+    "PRUNE_REQUIRES_ADMIN",
     "RAID_ALERTS_DISABLED",
     "RELAY_ENABLED",
     "ROLE_ICONS",

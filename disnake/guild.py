@@ -312,7 +312,10 @@ class Guild(Hashable):
         - ``DEVELOPER_SUPPORT_SERVER``: Guild is set as a support server in the app directory.
         - ``DISCOVERABLE``: Guild shows up in Server Discovery.
         - ``ENABLED_DISCOVERABLE_BEFORE``: Guild had Server Discovery enabled at least once.
+        - ``ENHANCED_ROLE_COLORS``: Guild can use gradient role colours.
         - ``FEATURABLE``: Guild is able to be featured in Server Discovery.
+        - ``GUESTS_ENABLED``: Guild has access to guest invites.
+        - ``GUILD_TAGS``: Guild can set guild tags.
         - ``HAS_DIRECTORY_ENTRY``: Guild is listed in a student hub.
         - ``HUB``: Guild is a student hub.
         - ``INVITE_SPLASH``: Guild's invite page can have a special splash.
@@ -327,6 +330,7 @@ class Guild(Hashable):
         - ``PARTNERED``: Guild is a partnered server.
         - ``PREVIEW_ENABLED``: Guild can be viewed before being accepted via Membership Screening.
         - ``PRIVATE_THREADS``: Guild has access to create private threads (no longer has any effect).
+        - ``PRUNE_REQUIRES_ADMIN``: Guild requires administrator permissions to prune members.
         - ``RAID_ALERTS_DISABLED``: Guild has disabled alerts for join raids in the configured safety alerts channel.
         - ``ROLE_ICONS``: Guild has access to role icons.
         - ``ROLE_SUBSCRIPTIONS_AVAILABLE_FOR_PURCHASE``: Guild has role subscriptions that can be purchased.
