@@ -3155,7 +3155,7 @@ class Guild(Hashable):
 
         You must have the :attr:`~Permissions.manage_guild` and
         :attr:`~Permissions.kick_members` permissions to use this;
-        if the guild has the ``PRUNE_REQUIRES_ADMIN`` :attr:`feature`,
+        if :attr:`Guild.features` contains ``PRUNE_REQUIRES_ADMIN``,
         you must have :attr:`~Permissions.administrator` permissions instead.
 
         To check how many members you would prune without actually pruning,
@@ -3270,7 +3270,7 @@ class Guild(Hashable):
 
         You must have the :attr:`~Permissions.manage_guild` and
         :attr:`~Permissions.kick_members` permissions to use this;
-        if the guild has the ``PRUNE_REQUIRES_ADMIN`` :attr:`feature`,
+        if :attr:`Guild.features` contains ``PRUNE_REQUIRES_ADMIN``,
         you must have :attr:`~Permissions.administrator` permissions instead.
 
         .. versionchanged:: 2.6
