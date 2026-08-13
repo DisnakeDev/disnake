@@ -399,6 +399,16 @@ class Thread(Messageable, Hashable):
         """
         return self.flags.pinned
 
+    def is_obfuscated(self) -> Literal[False]:
+        """This only exists for compatibility with :meth:`abc.GuildChannel.is_obfuscated`,
+        and will always be ``False``.
+
+        .. versionadded:: |vnext|
+
+        :return type: :class:`bool`
+        """  # noqa: D404
+        return False
+
     @property
     def applied_tags(self) -> list[ForumTag]:
         r""":class:`list`\[:class:`ForumTag`]: The tags currently applied to this thread.
