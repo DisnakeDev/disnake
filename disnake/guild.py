@@ -3154,7 +3154,9 @@ class Guild(Hashable):
         ``days`` number of days and they have no roles.
 
         You must have the :attr:`~Permissions.manage_guild` and
-        :attr:`~Permissions.kick_members` permissions to use this.
+        :attr:`~Permissions.kick_members` permissions to use this;
+        if the guild has the ``PRUNE_REQUIRES_ADMIN`` :attr:`feature`,
+        you must have :attr:`~Permissions.administrator` permissions instead.
 
         To check how many members you would prune without actually pruning,
         see the :meth:`estimate_pruned_members` function.
@@ -3265,6 +3267,11 @@ class Guild(Hashable):
         Similar to :meth:`prune_members` except instead of actually
         pruning members, it returns how many members it would prune
         from the guild had it been called.
+
+        You must have the :attr:`~Permissions.manage_guild` and
+        :attr:`~Permissions.kick_members` permissions to use this;
+        if the guild has the ``PRUNE_REQUIRES_ADMIN`` :attr:`feature`,
+        you must have :attr:`~Permissions.administrator` permissions instead.
 
         .. versionchanged:: 2.6
             Raises :exc:`TypeError` instead of ``InvalidArgument``.
