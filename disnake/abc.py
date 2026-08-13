@@ -696,6 +696,11 @@ class GuildChannel(ABC):
             due to an API limitation.
             Consider using :attr:`.Interaction.permissions` or :attr:`~.Interaction.app_permissions` instead.
 
+        .. note::
+            If the channel is :attr:`obfuscated <.is_obfuscated>`, this method is not reliable
+            and will return ``PermissionOverwrite(view_channel=False)`` for all
+            non-admin users and roles.
+
         .. versionchanged:: 2.0
             The object passed in can now be a role object.
 

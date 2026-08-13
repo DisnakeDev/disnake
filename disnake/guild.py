@@ -2482,6 +2482,11 @@ class Guild(Hashable):
         Retrieves all :class:`abc.GuildChannel` that the guild has.
 
         .. note::
+            Starting November 16th 2026, this method will only return channels the bot
+            has permission to view. :class:`CategoryChannel`\s will be included if at least
+            one child channel is viewable. Non-viewable channels will be omitted entirely.
+
+        .. note::
 
             This method is an API call. For general usage, consider :attr:`channels` instead.
 
@@ -3030,6 +3035,8 @@ class Guild(Hashable):
         """|coro|
 
         Retrieves a :class:`.abc.GuildChannel` or :class:`.Thread` with the given ID.
+
+        TODO: how does this work with obfuscation?
 
         .. note::
 
