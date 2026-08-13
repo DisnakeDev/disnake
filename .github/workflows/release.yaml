@@ -34,7 +34,7 @@ jobs:
           ls -la dist/
 
       - name: Twine check
-        run: uvx twine~=6.1 check --strict dist/*
+        run: uvx twine~=7.0 check --strict dist/*
 
       - name: Show metadata
         run: |
