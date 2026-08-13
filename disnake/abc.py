@@ -1057,11 +1057,16 @@ class GuildChannel(ABC):
         self,
         base_attrs: dict[str, Any],
         *,
+        base_flags: ChannelFlags,
         name: str | None = None,
         category: Snowflake | None = MISSING,
         overwrites: Mapping[Role | Member, PermissionOverwrite] = MISSING,
         reason: str | None = None,
     ) -> Self:
+        if base_flags.obfuscated:
+            msg = "Cannot clone an obfuscated channel"
+            raise RuntimeError(msg)
+
         # if the overwrites are MISSING, defaults to the
         # original permissions of the channel
         overwrites_payload: list[PermissionOverwritePayload]
