@@ -263,7 +263,7 @@ jobs:
 
       - name: Check README.md renders properly on PyPI
         run: |
-          uvx twine~=6.1 check --strict dist/*
+          uvx twine~=7.0 check --strict dist/*
 
   codemod:
     name: LibCST codemods
