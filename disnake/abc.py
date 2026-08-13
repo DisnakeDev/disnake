@@ -624,6 +624,17 @@ class GuildChannel(ABC):
         """
         return ChannelFlags._from_value(self._flags)
 
+    def is_obfuscated(self) -> bool:
+        """Whether the channel's metadata is obfuscated.
+
+        This is a shortcut to :attr:`self.flags.obfuscated <.ChannelFlags.obfuscated>`.
+
+        .. versionadded:: |vnext|
+
+        :return type: :class:`bool`
+        """
+        return self.flags.obfuscated
+
     @property
     def jump_url(self) -> str:
         """A URL that can be used to jump to this channel.
