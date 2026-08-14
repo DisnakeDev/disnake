@@ -602,6 +602,7 @@ aside h3 {
   font-size: 1.5em!important;
   left: -1.166em;
   top: 0.25em;
+  margin-right: -20px;
   user-select: none;
   position: relative;
   line-height: 0.5em;
@@ -612,11 +613,6 @@ aside h3 {
 .expanded {
   transition: transform 0.4s;
   transform: rotate(0deg);
-}
-
-.ref-internal-padding {
-  position: relative;
-  left: -20px;
 }
 
 aside .material-icons {
@@ -1007,10 +1003,6 @@ main img {
 }
 
 /* weird margins */
-li > p {
-  margin: 2px;
-}
-
 li > blockquote {
   margin: 10px;
 }
