@@ -340,9 +340,9 @@ As of version 2.8, there's now an event for it, called :func:`on_audit_log_entry
 Why are some channels simply named ``___hidden___`` and have placeholder fields?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Starting November 16, 2026, channels your bot cannot view (i.e. lacking
-:attr:`~Permissions.view_channel` permission) will generally be obfuscated, with many fields being
-reduced or receiving placeholder values.
+Starting November 16, 2026, channels your bot cannot view (i.e. missing
+:attr:`~Permissions.view_channel` permission) will generally be obfuscated, with many fields
+being reduced or receiving placeholder values.
 
 **Via the gateway**, which includes the channel cache (:attr:`Guild.channels`), as well as events such as
 :attr:`~Event.guild_channel_create` and :attr:`~Event.guild_channel_update`, only a very **limited
