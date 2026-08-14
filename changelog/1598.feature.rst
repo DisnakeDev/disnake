@@ -1,2 +1,3 @@
-Improve support for channel obfuscation using :meth:`abc.GuildChannel.is_obfuscated` and :attr:`ChannelFlags.obfuscated`.
+Improve support for channel obfuscation.
 - Channels that the bot cannot view will generally be obfuscated and only have a limited subset of accurate fields, with the rest being reduced/redacted. See :ref:`this FAQ entry <channel_obfuscation>` for more details.
+- The state of a channel can be determined using :meth:`abc.GuildChannel.is_obfuscated` and :attr:`ChannelFlags.obfuscated`.
