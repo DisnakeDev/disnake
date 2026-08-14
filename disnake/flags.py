@@ -2207,10 +2207,9 @@ class ChannelFlags(BaseFlags):
         """:class:`bool`: Returns ``True`` if the channel's metadata is obfuscated (because
         the bot does not have permission to view it).
 
-        More details about channel obfuscation can be found in the
+        More details about channel obfuscation can be found in the FAQ entry
+        :ref:`channel_obfuscation`, as well as the
         :ddocs:`API documentation <resources/channel#channel-object-obfuscated-channels>`.
-
-        TODO: add documentation section about channel obfuscation?
 
         .. versionadded:: |vnext|
         """

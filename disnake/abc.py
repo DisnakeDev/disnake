@@ -240,6 +240,12 @@ class GuildChannel(ABC):
     ----------
     name: :class:`str`
         The channel name.
+    id: :class:`int`
+        The channel's ID.
+    type: :class:`.ChannelType`
+        The channel's Discord type.
+    category_id: :class:`int` | :data:`None`
+        The category channel ID this channel belongs to, if applicable.
     guild: :class:`.Guild`
         The guild the channel belongs to.
     position: :class:`int`

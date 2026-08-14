@@ -335,6 +335,53 @@ Is there an event for audit log entries being created?
 
 As of version 2.8, there's now an event for it, called :func:`on_audit_log_entry_create`.
 
+.. _channel_obfuscation:
+
+Why are some channels simply named ``___hidden___`` and have placeholder fields?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Starting November 16, 2026, channels your bot cannot view (i.e. lacking
+:attr:`~Permissions.view_channel` permission) will generally be obfuscated, with many fields being
+reduced or receiving placeholder values.
+
+**Via the gateway**, which includes the channel cache (:attr:`Guild.channels`), as well as events such as
+:attr:`~Event.guild_channel_create` and :attr:`~Event.guild_channel_update`, only a very **limited
+subset of fields** will be accessible/accurate in these channels:
+
+- :attr:`abc.GuildChannel.id`
+- :attr:`abc.GuildChannel.type`
+    - (This also means channel objects will always be the correct subclass, e.g.
+      :class:`TextChannel`/:class:`VoiceChannel`/etc., despite being obfuscated)
+- :attr:`abc.GuildChannel.position`
+- :attr:`abc.GuildChannel.category`
+
+You can determine whether a channel is obfuscated using :meth:`abc.GuildChannel.is_obfuscated`
+(which is based on :attr:`ChannelFlags.obfuscated`).
+
+Channels received via **interactions** are **exempt** from obfuscation, i.e. attributes like
+:attr:`Interaction.channel` will always be non-obfuscated.
+
+**Via the REST API**, which includes methods such as :meth:`Guild.fetch_channels`, inaccessible channels
+will be **omitted entirely**.
+
+Changes to obfuscated channels
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+When an obfuscated channel is updated through any means (e.g. name/topic change, permission
+overwrites, ...), it will receive a :attr:`~Event.guild_channel_update` event like before, although
+with obfuscated data (see above).
+
+When the bot (re-)gains access to a previously obfuscated channel, it will receive a
+:attr:`~Event.guild_channel_update` event containing the full channel data.
+The same applies to that channel's parent category, if the bot previously had access to none of
+the channels in the category.
+
+If the bot loses access to a channel, it will *not necessarily* receive a
+:attr:`~Event.guild_channel_update` event obfuscating the channel data; this largely depends on the
+way in which the bot lost access, which can be due to a permission overwrite, a role permission
+change, or similar.
+
+
 Commands Extension
 -------------------
 
