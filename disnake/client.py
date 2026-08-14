@@ -2449,8 +2449,6 @@ class Client:
 
         Retrieves a :class:`.abc.GuildChannel`, :class:`.abc.PrivateChannel`, or :class:`.Thread` with the specified ID.
 
-        TODO: how does this work with obfuscation?
-
         .. note::
 
             This method is an API call. For general usage, consider :meth:`get_channel` instead.

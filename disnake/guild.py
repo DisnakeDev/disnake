@@ -3036,8 +3036,6 @@ class Guild(Hashable):
 
         Retrieves a :class:`.abc.GuildChannel` or :class:`.Thread` with the given ID.
 
-        TODO: how does this work with obfuscation?
-
         .. note::
 
             This method is an API call. For general usage, consider :meth:`get_channel_or_thread` instead.
