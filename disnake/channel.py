@@ -4985,7 +4985,6 @@ class DMChannel(disnake.abc.Messageable, Hashable):
 
         return PartialMessage(channel=self, id=message_id)
 
-    # TODO: unsure if this is really all that useful (same goes for GroupChannel and Thread)
     def is_obfuscated(self) -> Literal[False]:
         """This only exists for compatibility with :meth:`abc.GuildChannel.is_obfuscated`,
         and will always be ``False``.
