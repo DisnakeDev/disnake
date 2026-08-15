@@ -1450,6 +1450,7 @@ class Intents(BaseFlags):
         - :attr:`~disnake.Message.embeds`
         - :attr:`~disnake.Message.attachments`
         - :attr:`~disnake.Message.components`
+        - :attr:`~disnake.Message.poll`
 
         The following cases will always have the above fields:
 
