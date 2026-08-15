@@ -80,7 +80,9 @@ A privileged intent is one that requires you to go to the developer portal and m
 
 .. warning::
 
-    Enabling privileged intents when your bot has more than 10000 users requires going through `bot verification <https://support.discord.com/hc/en-us/articles/360040720412>`_. If your bot is already verified and you would like to enable a privileged intent you must go through `Discord support <https://dis.gd/contact>`_ and talk to them about it.
+    Enabling privileged intents when your bot has more than 10000 users requires
+    applying for `review <https://support-dev.discord.com/hc/en-us/articles/6207308062871>`_.
+    For continued access, you must reapply annually.
 
 .. note::
 
