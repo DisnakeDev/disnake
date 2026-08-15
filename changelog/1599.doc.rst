@@ -1,0 +1,1 @@
+Add callout to :class:`Message` fields affected by the :attr:`~Intents.message_content` intent.
