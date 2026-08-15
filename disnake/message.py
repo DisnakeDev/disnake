@@ -1061,7 +1061,7 @@ class Message(Hashable):
     content: :class:`str`
         The actual contents of the message.
 
-        This may be empty if the message content intent is not enabled,
+        This may be empty if the message content intent is not enabled;
         see :attr:`Intents.message_content` for details.
     nonce: :class:`str` | :class:`int` | :data:`None`
         The value used by the Discord guild and the client to verify that the message is successfully sent.
@@ -1069,7 +1069,7 @@ class Message(Hashable):
     embeds: :class:`list`\[:class:`Embed`]
         A list of embeds the message has.
 
-        This may be empty if the message content intent is not enabled,
+        This may be empty if the message content intent is not enabled;
         see :attr:`Intents.message_content` for details.
     channel: :class:`TextChannel` | :class:`VoiceChannel` | :class:`StageChannel` | :class:`Thread` | :class:`DMChannel` | :class:`GroupChannel` | :class:`PartialMessageable`
         The channel that the message was sent from.
@@ -1128,7 +1128,7 @@ class Message(Hashable):
     attachments: :class:`list`\[:class:`Attachment`]
         A list of attachments given to a message.
 
-        This may be empty if the message content intent is not enabled,
+        This may be empty if the message content intent is not enabled;
         see :attr:`Intents.message_content` for details.
     pinned: :class:`bool`
         Specifies if the message is currently pinned.
@@ -1165,7 +1165,7 @@ class Message(Hashable):
     components: :class:`list`\[:class:`Component`]
         A list of components in the message.
 
-        This may be empty if the message content intent is not enabled,
+        This may be empty if the message content intent is not enabled;
         see :attr:`Intents.message_content` for details.
 
         .. versionadded:: 2.0
@@ -1180,6 +1180,9 @@ class Message(Hashable):
 
     poll: :class:`Poll` | :data:`None`
         The poll contained in this message.
+
+        This may be empty if the message content intent is not enabled;
+        see :attr:`Intents.message_content` for details.
 
         .. versionadded:: 2.10
 
