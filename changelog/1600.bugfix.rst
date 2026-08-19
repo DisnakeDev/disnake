@@ -1,0 +1,1 @@
+|tasks| Retain original ``**kwargs`` of a :class:`~ext.tasks.Loop` for copying the loop, which helps avoid having to re-implement :meth:`Loop.clone <ext.tasks.Loop.clone>` in custom subclasses.
