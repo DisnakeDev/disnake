@@ -72,6 +72,16 @@ class Loop(Generic[LF]):
     The main interface to create this is through :func:`loop`.
     """
 
+    # used for cloning the loop later
+    __original_kwargs__: dict[str, Any]
+
+    def __new__(cls, *args: Any, **kwargs: Any) -> Self:
+        self = super().__new__(cls)
+        # These are captured in __new__ (rather than __init__), such that we run
+        # before any subclass __init__'s and snapshot the original set of arguments
+        self.__original_kwargs__ = kwargs
+        return self
+
     def __init__(
         self,
         coro: LF,
@@ -200,20 +210,13 @@ class Loop(Generic[LF]):
         return clone
 
     def clone(self) -> Self:
-        instance = type(self)(
-            self.coro,
-            seconds=self._seconds,
-            hours=self._hours,
-            minutes=self._minutes,
-            time=self._time,
-            count=self.count,
-            reconnect=self.reconnect,
-            loop=self.loop,
-        )
+        instance = type(self)(self.coro, **self.__original_kwargs__)
+
         instance._before_loop = self._before_loop
         instance._after_loop = self._after_loop
         instance._error = self._error
         instance._injected = self._injected
+
         return instance
 
     @property
