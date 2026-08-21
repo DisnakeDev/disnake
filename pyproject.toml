@@ -52,7 +52,7 @@ speed = [
 ]
 voice = [
     "PyNaCl>=1.5.0,<1.7",
-    "dave.py~=0.1.1",
+    "dave.py>=0.1.2,<1.0",
     'audioop-lts>=0.2.1; python_version >= "3.13"',
 ]
 
@@ -112,8 +112,8 @@ test = [
     "coverage[toml]~=7.14",
 ]
 build = [
-    "build>=1.2.2.post1",
-    "twine>=6.1.0",
+    "build~=1.3",
+    "twine~=7.0",
     "versioningit>=3.3.0,<4",
 ]
 

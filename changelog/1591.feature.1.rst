@@ -1,0 +1,1 @@
+|commands| Support restricting allowed file types in :class:`Attachment` slash command parameters using ``Param(file_types=[...])`` (see :attr:`Option.file_types`).
