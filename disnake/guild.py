@@ -3156,7 +3156,7 @@ class Guild(Hashable):
         You must have the :attr:`~Permissions.manage_guild` and
         :attr:`~Permissions.kick_members` permissions to use this;
         if :attr:`Guild.features` contains ``PRUNE_REQUIRES_ADMIN``,
-        you must have :attr:`~Permissions.administrator` permissions instead.
+        you must have :attr:`~Permissions.administrator` permission instead.
 
         To check how many members you would prune without actually pruning,
         see the :meth:`estimate_pruned_members` function.
@@ -3271,7 +3271,7 @@ class Guild(Hashable):
         You must have the :attr:`~Permissions.manage_guild` and
         :attr:`~Permissions.kick_members` permissions to use this;
         if :attr:`Guild.features` contains ``PRUNE_REQUIRES_ADMIN``,
-        you must have :attr:`~Permissions.administrator` permissions instead.
+        you must have :attr:`~Permissions.administrator` permission instead.
 
         .. versionchanged:: 2.6
             Raises :exc:`TypeError` instead of ``InvalidArgument``.
