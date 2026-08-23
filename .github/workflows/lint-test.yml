@@ -39,8 +39,7 @@ jobs:
     # The only purpose of this is to create a lockfile, which will be cached
     # to be used with subsequent jobs.
     # This provides somewhat of a middle ground and avoids having each job lock dependencies on its own,
-    # while still not needing to commit a lockfile to the repo, which is discouraged for libraries as per
-    # https://pdm-project.org/en/latest/usage/lockfile/
+    # while still not needing to commit a lockfile to the repo, which is discouraged for libraries
     runs-on: ubuntu-latest
     env:
       UV_RESOLUTION: highest
@@ -199,10 +198,6 @@ jobs:
           echo python="$(uv python find)" >> $GITHUB_OUTPUT
 
       - name: Install dependencies
-        # `--no-venv` to install in the main pdm venv instead of nox's pyright-specific one
-        # because nox uses pdm internally to install, this means that the venv that is used is
-        # the one that pdm would create in project: `.venv`
-        # python is NOT forced here because the session name is explicit
         env:
           NOXSESSION: ${{ matrix.session.name }}
           NOX_DEFAULT_VENV_BACKEND: "none"
