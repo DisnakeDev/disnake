@@ -652,7 +652,7 @@ class Invite(Hashable):
         """|coro|
 
         Update the target users for this invite.
-        You must have the :attr:`~Permissions.manage_guild` permission or to be the inviter to do this.
+        You must have the :attr:`~Permissions.manage_guild` permission or be the inviter to do this.
 
         .. versionadded:: |vnext|
 
