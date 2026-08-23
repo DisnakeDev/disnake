@@ -17,7 +17,6 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from disnake.activity import BaseActivity
-    from disnake.client import GatewayParams
     from disnake.enums import Status
     from disnake.flags import (
         ApplicationInstallTypes,
@@ -25,6 +24,7 @@ if TYPE_CHECKING:
         InteractionContextTypes,
         MemberCacheFlags,
     )
+    from disnake.gateway import GatewayParams
     from disnake.i18n import LocalizationProtocol
     from disnake.mentions import AllowedMentions
     from disnake.message import Message
@@ -73,39 +73,6 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
         If not given, defaults to :func:`CommandSyncFlags.default`.
 
         .. versionadded:: 2.7
-
-    sync_commands: :class:`bool`
-        Whether to enable automatic synchronization of application commands in your code.
-        Defaults to ``True``, which means that commands in API are automatically synced
-        with the commands in your code.
-
-        .. versionadded:: 2.1
-
-        .. deprecated:: 2.7
-            Replaced with ``command_sync_flags``.
-
-    sync_commands_on_cog_unload: :class:`bool`
-        Whether to sync the application commands on cog unload / reload. Defaults to ``True``.
-
-        .. versionadded:: 2.1
-
-        .. deprecated:: 2.7
-            Replaced with ``command_sync_flags``.
-
-    sync_commands_debug: :class:`bool`
-        Whether to always show sync debug logs (uses ``INFO`` log level if it's enabled, prints otherwise).
-        If disabled, uses the default ``DEBUG`` log level which isn't shown unless the log level is changed manually.
-        Useful for tracking the commands being registered in the API.
-        Defaults to ``False``.
-
-        .. versionadded:: 2.1
-
-        .. versionchanged:: 2.4
-            Changes the log level of corresponding messages from ``DEBUG`` to ``INFO`` or ``print``\s them,
-            instead of controlling whether they are enabled at all.
-
-        .. deprecated:: 2.7
-            Replaced with ``command_sync_flags``.
 
     localization_provider: :class:`.LocalizationProtocol`
         An implementation of :class:`.LocalizationProtocol` to use for localization of
@@ -261,9 +228,6 @@ class Bot(BotBase, InteractionBotBase, disnake.Client):
             reload: bool = False,
             case_insensitive: bool = False,
             command_sync_flags: CommandSyncFlags = ...,
-            sync_commands: bool = ...,
-            sync_commands_debug: bool = ...,
-            sync_commands_on_cog_unload: bool = ...,
             test_guilds: Sequence[int] | None = None,
             default_install_types: ApplicationInstallTypes | None = None,
             default_contexts: InteractionContextTypes | None = None,
@@ -314,9 +278,6 @@ class AutoShardedBot(BotBase, InteractionBotBase, disnake.AutoShardedClient):
             reload: bool = False,
             case_insensitive: bool = False,
             command_sync_flags: CommandSyncFlags = ...,
-            sync_commands: bool = ...,
-            sync_commands_debug: bool = ...,
-            sync_commands_on_cog_unload: bool = ...,
             test_guilds: Sequence[int] | None = None,
             default_install_types: ApplicationInstallTypes | None = None,
             default_contexts: InteractionContextTypes | None = None,
@@ -371,39 +332,6 @@ class InteractionBot(InteractionBotBase, disnake.Client):
         If not given, defaults to :func:`CommandSyncFlags.default`.
 
         .. versionadded:: 2.7
-
-    sync_commands: :class:`bool`
-        Whether to enable automatic synchronization of application commands in your code.
-        Defaults to ``True``, which means that commands in API are automatically synced
-        with the commands in your code.
-
-        .. versionadded:: 2.1
-
-        .. deprecated:: 2.7
-            Replaced with ``command_sync_flags``.
-
-    sync_commands_on_cog_unload: :class:`bool`
-        Whether to sync the application commands on cog unload / reload. Defaults to ``True``.
-
-        .. versionadded:: 2.1
-
-        .. deprecated:: 2.7
-            Replaced with ``command_sync_flags``.
-
-    sync_commands_debug: :class:`bool`
-        Whether to always show sync debug logs (uses ``INFO`` log level if it's enabled, prints otherwise).
-        If disabled, uses the default ``DEBUG`` log level which isn't shown unless the log level is changed manually.
-        Useful for tracking the commands being registered in the API.
-        Defaults to ``False``.
-
-        .. versionadded:: 2.1
-
-        .. versionchanged:: 2.4
-            Changes the log level of corresponding messages from ``DEBUG`` to ``INFO`` or ``print``\s them,
-            instead of controlling whether they are enabled at all.
-
-        .. deprecated:: 2.7
-            Replaced with ``command_sync_flags``.
 
     localization_provider: :class:`.LocalizationProtocol`
         An implementation of :class:`.LocalizationProtocol` to use for localization of
@@ -486,9 +414,6 @@ class InteractionBot(InteractionBotBase, disnake.Client):
             owner_ids: set[int] | None = None,
             reload: bool = False,
             command_sync_flags: CommandSyncFlags = ...,
-            sync_commands: bool = ...,
-            sync_commands_debug: bool = ...,
-            sync_commands_on_cog_unload: bool = ...,
             test_guilds: Sequence[int] | None = None,
             default_install_types: ApplicationInstallTypes | None = None,
             default_contexts: InteractionContextTypes | None = None,
@@ -532,9 +457,6 @@ class AutoShardedInteractionBot(InteractionBotBase, disnake.AutoShardedClient):
             owner_ids: set[int] | None = None,
             reload: bool = False,
             command_sync_flags: CommandSyncFlags = ...,
-            sync_commands: bool = ...,
-            sync_commands_debug: bool = ...,
-            sync_commands_on_cog_unload: bool = ...,
             test_guilds: Sequence[int] | None = None,
             default_install_types: ApplicationInstallTypes | None = None,
             default_contexts: InteractionContextTypes | None = None,

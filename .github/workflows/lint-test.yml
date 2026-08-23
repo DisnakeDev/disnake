@@ -45,7 +45,7 @@ jobs:
     env:
       UV_RESOLUTION: highest
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
@@ -56,7 +56,7 @@ jobs:
           use-cached-uv-lock: 'false' # we don't need the lock here, we will automatically download it below
 
       - name: Restore uv lock
-        uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: cache-uv-lock
         with:
           key: uv-lock-resolved-${{ env.UV_RESOLUTION }}
@@ -79,7 +79,7 @@ jobs:
           UV_LOCKED: 0
         run: uv lock --refresh
 
-      - uses: actions/cache/save@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+      - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: steps.lock-uv-deps.outcome == 'success'
         name: upload-uv-lock
         with:
@@ -100,7 +100,7 @@ jobs:
       pyright-sessions: ${{ steps.set-matrix.outputs.pyright-sessions }}
       test-sessions: ${{ steps.set-matrix.outputs.test-sessions }}
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - name: Set up environment
@@ -126,12 +126,12 @@ jobs:
       RUFF_OUTPUT_FORMAT: github
     steps:
 
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
       - name: Cache pip cache
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           key: ${{ runner.os }}-prek-pip-${{ hashFiles('**/pyproject.toml') }}
           path: ~/.cache/pip
@@ -139,7 +139,7 @@ jobs:
 
       - name: Run prek
         id: prek
-        uses: j178/prek-action@0bb87d7f00b0c99306c8bcb8b8beba1eb581c037 # v1.1.1
+        uses: j178/prek-action@4e14d07f9231acabce116ccfca13b13dd9755ece # v3.0.0
         # given the interoperability and the nature of prek, we stay unpinned for now
         # note that this action by default uses the latest version of prek
         # this is exactly how the pre-commit action worked, and we never had any issues
@@ -154,7 +154,7 @@ jobs:
       - lock-dependencies
       - lint
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: '0'
           persist-credentials: false
@@ -181,7 +181,7 @@ jobs:
       fail-fast: false
     continue-on-error: ${{ matrix.session.experimental }}
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
@@ -242,7 +242,7 @@ jobs:
       - lock-dependencies
       - lint
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: '0'
           persist-credentials: false
@@ -263,7 +263,7 @@ jobs:
 
       - name: Check README.md renders properly on PyPI
         run: |
-          uvx twine~=6.1 check --strict dist/*
+          uvx twine~=7.0 check --strict dist/*
 
   codemod:
     name: LibCST codemods
@@ -273,7 +273,7 @@ jobs:
       - lock-dependencies
       - lint
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
@@ -319,7 +319,7 @@ jobs:
     env:
       NOXSESSION: ${{ matrix.session.name }}
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
@@ -340,17 +340,7 @@ jobs:
           TZ: "America/New_York"
         run: |
           echo "$GITHUB_STEP_SUMMARY_HEADER" | sed "s/#name#/Test Summary/" >> $GITHUB_STEP_SUMMARY
-          nox --no-install -- --color=no --cov-report= | tee -a $GITHUB_STEP_SUMMARY
-          echo "$GITHUB_STEP_SUMMARY_FOOTER" >> $GITHUB_STEP_SUMMARY
-
-      - name: Print coverage output
-        if: always() && (steps.run_tests.outcome == 'success' || steps.run_tests.outcome == 'failure')
-        env:
-          UV_NO_SYNC: 0
-          NOXSESSION: coverage
-        run: |
-          echo "$GITHUB_STEP_SUMMARY_HEADER" | sed "s/#name#/Coverage Summary/" >> $GITHUB_STEP_SUMMARY
-          nox -- report | tee -a $GITHUB_STEP_SUMMARY
+          nox --no-install -- --color=no | tee -a $GITHUB_STEP_SUMMARY
           echo "$GITHUB_STEP_SUMMARY_FOOTER" >> $GITHUB_STEP_SUMMARY
 
   # thanks to aiohttp for this part of the workflow

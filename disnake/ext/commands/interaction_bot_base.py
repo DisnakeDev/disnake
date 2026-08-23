@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import inspect
 import logging
 import sys
 import traceback
@@ -14,14 +15,15 @@ from typing import (
     Any,
     TypedDict,
     TypeVar,
+    overload,
 )
 
 import disnake
+from disnake import utils
 from disnake.app_commands import ApplicationCommand, Option
 from disnake.custom_warnings import SyncWarning
 from disnake.enums import ApplicationCommandType
 from disnake.flags import ApplicationInstallTypes, InteractionContextTypes
-from disnake.utils import iscoroutinefunction, warn_deprecated
 
 from . import errors
 from .base_core import InvokableApplicationCommand
@@ -37,7 +39,7 @@ from .flags import CommandSyncFlags
 from .slash_core import InvokableSlashCommand, SubCommand, SubCommandGroup, slash_command
 
 if TYPE_CHECKING:
-    from typing_extensions import NotRequired, ParamSpec
+    from typing_extensions import NotRequired, ParamSpec, Unpack
 
     from disnake.i18n import LocalizedOptional
     from disnake.interactions import (
@@ -48,7 +50,7 @@ if TYPE_CHECKING:
     from disnake.permissions import Permissions
 
     from ._types import AppCheck, CoroFunc
-    from .base_core import CogT, CommandCallback, InteractionCommandCallback
+    from .base_core import CogT, CommandCallback, InteractionCommandCallback, _AppCommandArgs
 
     P = ParamSpec("P")
 
@@ -125,7 +127,7 @@ def _format_diff(diff: _Diff) -> str:
             continue
         lines.append(label)
         if changes := diff[key]:
-            lines.extend(f"    <{type(cmd).__name__} name={cmd.name!r}>" for cmd in changes)
+            lines.extend(f"    <{cmd.__class__.__name__} name={cmd.name!r}>" for cmd in changes)
         else:
             lines.append("    -")
 
@@ -137,9 +139,6 @@ class InteractionBotBase(CommonBotBase):
         self,
         *,
         command_sync_flags: CommandSyncFlags | None = None,
-        sync_commands: bool = MISSING,
-        sync_commands_debug: bool = MISSING,
-        sync_commands_on_cog_unload: bool = MISSING,
         test_guilds: Sequence[int] | None = None,
         default_install_types: ApplicationInstallTypes | None = None,
         default_contexts: InteractionContextTypes | None = None,
@@ -154,42 +153,11 @@ class InteractionBotBase(CommonBotBase):
         test_guilds = None if test_guilds is None else tuple(test_guilds)
         self._test_guilds: tuple[int, ...] | None = test_guilds
 
-        if command_sync_flags is not None and (
-            sync_commands is not MISSING
-            or sync_commands_debug is not MISSING
-            or sync_commands_on_cog_unload is not MISSING
-        ):
-            msg = "cannot set 'command_sync_flags' and any of 'sync_commands', 'sync_commands_debug', 'sync_commands_on_cog_unload' at the same time."
-            raise TypeError(msg)
-
         if command_sync_flags is not None:
             # this makes a copy so it cannot be changed after setting
             command_sync_flags = CommandSyncFlags._from_value(command_sync_flags.value)
-        if command_sync_flags is None:
+        else:
             command_sync_flags = CommandSyncFlags.default()
-
-            if sync_commands is not MISSING:
-                warn_deprecated(
-                    "sync_commands is deprecated and will be removed in a future version. "
-                    "Use `command_sync_flags` with an `CommandSyncFlags` instance as a replacement.",
-                    stacklevel=3,
-                )
-                command_sync_flags.sync_commands = sync_commands
-            if sync_commands_debug is not MISSING:
-                warn_deprecated(
-                    "sync_commands_debug is deprecated and will be removed in a future version. "
-                    "Use `command_sync_flags` with an `CommandSyncFlags` instance as a replacement.",
-                    stacklevel=3,
-                )
-                command_sync_flags.sync_commands_debug = sync_commands_debug
-
-            if sync_commands_on_cog_unload is not MISSING:
-                warn_deprecated(
-                    "sync_commands_on_cog_unload is deprecated and will be removed in a future version. "
-                    "Use `command_sync_flags` with an `CommandSyncFlags` instance as a replacement.",
-                    stacklevel=3,
-                )
-                command_sync_flags.sync_on_cog_actions = sync_commands_on_cog_unload
 
         self._command_sync_flags = command_sync_flags
         self._sync_queued: asyncio.Lock = asyncio.Lock()
@@ -488,6 +456,25 @@ class InteractionBotBase(CommonBotBase):
         """
         return self.all_message_commands.get(name)
 
+    @overload
+    def slash_command(
+        self,
+        *,
+        name: LocalizedOptional = None,
+        description: LocalizedOptional = None,
+        default_member_permissions: Permissions | int | None = None,
+        nsfw: bool | None = None,
+        install_types: ApplicationInstallTypes | None = None,
+        contexts: InteractionContextTypes | None = None,
+        options: list[Option] | None = None,
+        guild_ids: Sequence[int] | None = None,
+        connectors: dict[str, str] | None = None,
+        auto_sync: bool | None = None,
+        **kwargs: Unpack[_AppCommandArgs],
+    ) -> Callable[[CommandCallback], InvokableSlashCommand]: ...
+
+    @overload
+    @utils.deprecated("`dm_permission` is deprecated. Use `contexts` instead.")
     def slash_command(
         self,
         *,
@@ -502,8 +489,24 @@ class InteractionBotBase(CommonBotBase):
         guild_ids: Sequence[int] | None = None,
         connectors: dict[str, str] | None = None,
         auto_sync: bool | None = None,
-        extras: dict[str, Any] | None = None,
-        **kwargs: Any,
+        **kwargs: Unpack[_AppCommandArgs],
+    ) -> Callable[[CommandCallback], InvokableSlashCommand]: ...
+
+    def slash_command(
+        self,
+        *,
+        name: LocalizedOptional = None,
+        description: LocalizedOptional = None,
+        dm_permission: bool | None = None,  # deprecated
+        default_member_permissions: Permissions | int | None = None,
+        nsfw: bool | None = None,
+        install_types: ApplicationInstallTypes | None = None,
+        contexts: InteractionContextTypes | None = None,
+        options: list[Option] | None = None,
+        guild_ids: Sequence[int] | None = None,
+        connectors: dict[str, str] | None = None,
+        auto_sync: bool | None = None,
+        **kwargs: Unpack[_AppCommandArgs],
     ) -> Callable[[CommandCallback], InvokableSlashCommand]:
         r"""A shortcut decorator that invokes :func:`~disnake.ext.commands.slash_command` and adds it to
         the internal command list.
@@ -588,7 +591,7 @@ class InteractionBotBase(CommonBotBase):
         """
 
         def decorator(func: CommandCallback) -> InvokableSlashCommand:
-            result = slash_command(
+            result = slash_command(  # pyright: ignore[reportDeprecated]
                 name=name,
                 description=description,
                 options=options,
@@ -600,13 +603,46 @@ class InteractionBotBase(CommonBotBase):
                 guild_ids=guild_ids,
                 connectors=connectors,
                 auto_sync=auto_sync,
-                extras=extras,
                 **kwargs,
             )(func)
             self.add_slash_command(result)
             return result
 
         return decorator
+
+    @overload
+    def user_command(
+        self,
+        *,
+        name: LocalizedOptional = None,
+        default_member_permissions: Permissions | int | None = None,
+        nsfw: bool | None = None,
+        install_types: ApplicationInstallTypes | None = None,
+        contexts: InteractionContextTypes | None = None,
+        guild_ids: Sequence[int] | None = None,
+        auto_sync: bool | None = None,
+        **kwargs: Unpack[_AppCommandArgs],
+    ) -> Callable[
+        [InteractionCommandCallback[CogT, UserCommandInteraction, P]], InvokableUserCommand
+    ]: ...
+
+    @overload
+    @utils.deprecated("`dm_permission` is deprecated. Use `contexts` instead.")
+    def user_command(
+        self,
+        *,
+        name: LocalizedOptional = None,
+        dm_permission: bool | None = None,  # deprecated
+        default_member_permissions: Permissions | int | None = None,
+        nsfw: bool | None = None,
+        install_types: ApplicationInstallTypes | None = None,
+        contexts: InteractionContextTypes | None = None,
+        guild_ids: Sequence[int] | None = None,
+        auto_sync: bool | None = None,
+        **kwargs: Unpack[_AppCommandArgs],
+    ) -> Callable[
+        [InteractionCommandCallback[CogT, UserCommandInteraction, P]], InvokableUserCommand
+    ]: ...
 
     def user_command(
         self,
@@ -619,8 +655,7 @@ class InteractionBotBase(CommonBotBase):
         contexts: InteractionContextTypes | None = None,
         guild_ids: Sequence[int] | None = None,
         auto_sync: bool | None = None,
-        extras: dict[str, Any] | None = None,
-        **kwargs: Any,
+        **kwargs: Unpack[_AppCommandArgs],
     ) -> Callable[
         [InteractionCommandCallback[CogT, UserCommandInteraction, P]], InvokableUserCommand
     ]:
@@ -694,7 +729,7 @@ class InteractionBotBase(CommonBotBase):
         def decorator(
             func: InteractionCommandCallback[CogT, UserCommandInteraction, P],
         ) -> InvokableUserCommand:
-            result = user_command(
+            result = user_command(  # pyright: ignore[reportDeprecated]
                 name=name,
                 dm_permission=dm_permission,
                 default_member_permissions=default_member_permissions,
@@ -703,13 +738,46 @@ class InteractionBotBase(CommonBotBase):
                 contexts=contexts,
                 guild_ids=guild_ids,
                 auto_sync=auto_sync,
-                extras=extras,
                 **kwargs,
             )(func)
             self.add_user_command(result)
             return result
 
         return decorator
+
+    @overload
+    def message_command(
+        self,
+        *,
+        name: LocalizedOptional = None,
+        default_member_permissions: Permissions | int | None = None,
+        nsfw: bool | None = None,
+        install_types: ApplicationInstallTypes | None = None,
+        contexts: InteractionContextTypes | None = None,
+        guild_ids: Sequence[int] | None = None,
+        auto_sync: bool | None = None,
+        **kwargs: Unpack[_AppCommandArgs],
+    ) -> Callable[
+        [InteractionCommandCallback[CogT, MessageCommandInteraction, P]], InvokableMessageCommand
+    ]: ...
+
+    @overload
+    @utils.deprecated("`dm_permission` is deprecated. Use `contexts` instead.")
+    def message_command(
+        self,
+        *,
+        name: LocalizedOptional = None,
+        dm_permission: bool | None = None,  # deprecated
+        default_member_permissions: Permissions | int | None = None,
+        nsfw: bool | None = None,
+        install_types: ApplicationInstallTypes | None = None,
+        contexts: InteractionContextTypes | None = None,
+        guild_ids: Sequence[int] | None = None,
+        auto_sync: bool | None = None,
+        **kwargs: Unpack[_AppCommandArgs],
+    ) -> Callable[
+        [InteractionCommandCallback[CogT, MessageCommandInteraction, P]], InvokableMessageCommand
+    ]: ...
 
     def message_command(
         self,
@@ -722,8 +790,7 @@ class InteractionBotBase(CommonBotBase):
         contexts: InteractionContextTypes | None = None,
         guild_ids: Sequence[int] | None = None,
         auto_sync: bool | None = None,
-        extras: dict[str, Any] | None = None,
-        **kwargs: Any,
+        **kwargs: Unpack[_AppCommandArgs],
     ) -> Callable[
         [InteractionCommandCallback[CogT, MessageCommandInteraction, P]], InvokableMessageCommand
     ]:
@@ -797,7 +864,7 @@ class InteractionBotBase(CommonBotBase):
         def decorator(
             func: InteractionCommandCallback[CogT, MessageCommandInteraction, P],
         ) -> InvokableMessageCommand:
-            result = message_command(
+            result = message_command(  # pyright: ignore[reportDeprecated]
                 name=name,
                 dm_permission=dm_permission,
                 default_member_permissions=default_member_permissions,
@@ -806,7 +873,6 @@ class InteractionBotBase(CommonBotBase):
                 contexts=contexts,
                 guild_ids=guild_ids,
                 auto_sync=auto_sync,
-                extras=extras,
                 **kwargs,
             )(func)
             self.add_message_command(result)
@@ -1304,7 +1370,7 @@ class InteractionBotBase(CommonBotBase):
         """Similar to :meth:`Bot.before_invoke` but for slash commands,
         and it takes an :class:`.ApplicationCommandInteraction` as its only parameter.
         """
-        if not iscoroutinefunction(coro):
+        if not inspect.iscoroutinefunction(coro):
             msg = "The pre-invoke hook must be a coroutine function."
             raise TypeError(msg)
 
@@ -1315,7 +1381,7 @@ class InteractionBotBase(CommonBotBase):
         """Similar to :meth:`Bot.after_invoke` but for slash commands,
         and it takes an :class:`.ApplicationCommandInteraction` as its only parameter.
         """
-        if not iscoroutinefunction(coro):
+        if not inspect.iscoroutinefunction(coro):
             msg = "The post-invoke hook must be a coroutine function."
             raise TypeError(msg)
 
@@ -1324,7 +1390,7 @@ class InteractionBotBase(CommonBotBase):
 
     def before_user_command_invoke(self, coro: CFT) -> CFT:
         """Similar to :meth:`Bot.before_slash_command_invoke` but for user commands."""
-        if not iscoroutinefunction(coro):
+        if not inspect.iscoroutinefunction(coro):
             msg = "The pre-invoke hook must be a coroutine function."
             raise TypeError(msg)
 
@@ -1333,7 +1399,7 @@ class InteractionBotBase(CommonBotBase):
 
     def after_user_command_invoke(self, coro: CFT) -> CFT:
         """Similar to :meth:`Bot.after_slash_command_invoke` but for user commands."""
-        if not iscoroutinefunction(coro):
+        if not inspect.iscoroutinefunction(coro):
             msg = "The post-invoke hook must be a coroutine function."
             raise TypeError(msg)
 
@@ -1342,7 +1408,7 @@ class InteractionBotBase(CommonBotBase):
 
     def before_message_command_invoke(self, coro: CFT) -> CFT:
         """Similar to :meth:`Bot.before_slash_command_invoke` but for message commands."""
-        if not iscoroutinefunction(coro):
+        if not inspect.iscoroutinefunction(coro):
             msg = "The pre-invoke hook must be a coroutine function."
             raise TypeError(msg)
 
@@ -1351,7 +1417,7 @@ class InteractionBotBase(CommonBotBase):
 
     def after_message_command_invoke(self, coro: CFT) -> CFT:
         """Similar to :meth:`Bot.after_slash_command_invoke` but for message commands."""
-        if not iscoroutinefunction(coro):
+        if not inspect.iscoroutinefunction(coro):
             msg = "The post-invoke hook must be a coroutine function."
             raise TypeError(msg)
 

@@ -14,6 +14,7 @@ from typing import (
     Literal,
     Protocol,
     TypeAlias,
+    TypedDict,
     TypeVar,
     Union,
     cast,
@@ -25,7 +26,6 @@ from disnake.utils import (
     _generated,
     _overload_with_permissions,
     get_signature_parameters,
-    iscoroutinefunction,
     unwrap_function,
 )
 
@@ -33,7 +33,14 @@ from ._types import _BaseCommand
 from .cog import Cog
 from .context import AnyContext, Context
 from .converter import Greedy, get_converter, run_converters
-from .cooldowns import BucketType, Cooldown, CooldownMapping, DynamicCooldownMapping, MaxConcurrency
+from .cooldowns import (
+    BucketType,
+    ContextTypeT,
+    Cooldown,
+    CooldownMapping,
+    DynamicCooldownMapping,
+    MaxConcurrency,
+)
 from .errors import (
     ArgumentParsingError,
     BotMissingAnyRole,
@@ -60,11 +67,33 @@ from .errors import (
 if TYPE_CHECKING:
     from typing import Concatenate
 
-    from typing_extensions import ParamSpec, Self
+    from typing_extensions import ParamSpec, Self, Unpack
 
-    from disnake.message import Message
+    from disnake import Message
 
     from ._types import AppCheck, Check, Coro, CoroFunc, Error, Hook
+
+    class _CommandArgs(TypedDict, total=False):
+        enabled: bool
+        help: str | None
+        brief: str | None
+        usage: str | None
+        rest_is_raw: bool
+        aliases: list[str] | tuple[str, ...]
+        extras: dict[str, Any]
+        description: str
+        hidden: bool
+        checks: list[Check]
+        cooldown: CooldownMapping[Message] | None
+        max_concurrency: MaxConcurrency | None
+        require_var_positional: bool
+        ignore_extra: bool
+        cooldown_after_parsing: bool
+        parent: GroupMixin[Any] | None
+
+    class _GroupArgs(_CommandArgs, total=False):
+        invoke_without_command: bool
+        case_insensitive: bool
 
 
 __all__ = (
@@ -155,7 +184,7 @@ def hooked_wrapped_callback(
             raise CommandInvokeError(exc) from exc
         finally:
             if command._max_concurrency is not None:
-                await command._max_concurrency.release(ctx)  # pyright: ignore[reportArgumentType]
+                await command._max_concurrency.release(ctx)
 
             await command.call_after_hooks(ctx)
         return ret
@@ -202,7 +231,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         The short help text for the command.
     usage: :class:`str` | :data:`None`
         A replacement for arguments in the default help text.
-    aliases: :class:`list`\[:class:`str`] | :class:`tuple`\[:class:`str`]
+    aliases: :class:`list`\[:class:`str`] | :class:`tuple`\[:class:`str`, ...]
         The list of aliases the command can be invoked under.
     enabled: :class:`bool`
         Whether the command is currently enabled.
@@ -278,13 +307,15 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
     def __init__(
         self,
         func: CommandCallback[CogT, ContextT, P, T],
-        **kwargs: Any,
+        *,
+        name: str | None = None,
+        **kwargs: Unpack[_CommandArgs],
     ) -> None:
-        if not iscoroutinefunction(func):
+        if not inspect.iscoroutinefunction(func):
             msg = "Callback must be a coroutine function."
             raise TypeError(msg)
 
-        name = kwargs.get("name") or func.__name__
+        name = name or func.__name__
         if not isinstance(name, str):
             msg = "Name of a command must be a string."
             raise TypeError(msg)
@@ -306,7 +337,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         self.brief: str | None = kwargs.get("brief")
         self.usage: str | None = kwargs.get("usage")
         self.rest_is_raw: bool = kwargs.get("rest_is_raw", False)
-        self.aliases: list[str] | tuple[str] = kwargs.get("aliases", [])
+        self.aliases: list[str] | tuple[str, ...] = kwargs.get("aliases", [])
         self.extras: dict[str, Any] = kwargs.get("extras", {})
 
         if not isinstance(self.aliases, (list, tuple)):
@@ -336,7 +367,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         else:
             msg = "Cooldown must be a an instance of CooldownMapping or None."
             raise TypeError(msg)
-        self._buckets: CooldownMapping = buckets
+        self._buckets: CooldownMapping[Message] = buckets
 
         try:
             max_concurrency = func.__commands_max_concurrency__
@@ -352,7 +383,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
 
         # bandaid for the fact that sometimes parent can be the bot instance
         parent = kwargs.get("parent")
-        self.parent: GroupMixin | None = parent if isinstance(parent, _BaseCommand) else None  # pyright: ignore[reportAttributeAccessIssue]
+        self.parent: GroupMixin | None = parent if isinstance(parent, _BaseCommand) else None
 
         self._before_invoke: Hook | None = None
         try:
@@ -434,6 +465,8 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         except ValueError:
             pass
 
+    # n.b. this continues to use `**kwargs: Any` instead of _CommandArgs,
+    # since custom command subclasses may accept additional parameters
     def update(self, **kwargs: Any) -> None:
         """Updates :class:`Command` instance with updated attribute.
 
@@ -775,7 +808,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
             if bucket is not None:  # pyright: ignore[reportUnnecessaryComparison]
                 retry_after = bucket.update_rate_limit(current)
                 if retry_after:
-                    raise CommandOnCooldown(bucket, retry_after, self._buckets.type)  # pyright: ignore[reportArgumentType]
+                    raise CommandOnCooldown(bucket, retry_after, self._buckets.type)
 
     async def prepare(self, ctx: Context) -> None:
         ctx.command = self
@@ -785,8 +818,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
             raise CheckFailure(msg)
 
         if self._max_concurrency is not None:
-            # For this application, context can be duck-typed as a Message
-            await self._max_concurrency.acquire(ctx)  # pyright: ignore[reportArgumentType]
+            await self._max_concurrency.acquire(ctx)
 
         try:
             if self.cooldown_after_parsing:
@@ -799,7 +831,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
             await self.call_before_hooks(ctx)
         except Exception:
             if self._max_concurrency is not None:
-                await self._max_concurrency.release(ctx)  # pyright: ignore[reportArgumentType]
+                await self._max_concurrency.release(ctx)
             raise
 
     def is_on_cooldown(self, ctx: Context) -> bool:
@@ -904,7 +936,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         TypeError
             The argument passed is not actually a coroutine function.
         """
-        if not iscoroutinefunction(coro):
+        if not inspect.iscoroutinefunction(coro):
             msg = "The error handler must be a coroutine function."
             raise TypeError(msg)
 
@@ -941,7 +973,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         TypeError
             The argument passed is not actually a coroutine function.
         """
-        if not iscoroutinefunction(coro):
+        if not inspect.iscoroutinefunction(coro):
             msg = "The pre-invoke hook must be a coroutine function."
             raise TypeError(msg)
 
@@ -969,7 +1001,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         TypeError
             The argument passed is not actually a coroutine function.
         """
-        if not iscoroutinefunction(coro):
+        if not inspect.iscoroutinefunction(coro):
             msg = "The post-invoke hook must be a coroutine function."
             raise TypeError(msg)
 
@@ -1284,6 +1316,13 @@ class GroupMixin(Generic[CogT]):
     @overload
     def command(
         self,
+        name: str = ...,
+        **attrs: Unpack[_CommandArgs],
+    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], Command[CogT, P, T]]: ...
+
+    @overload
+    def command(
+        self,
         name: str,
         cls: type[CommandT],
         *args: Any,
@@ -1298,14 +1337,6 @@ class GroupMixin(Generic[CogT]):
         cls: type[CommandT],
         **kwargs: Any,
     ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], CommandT]: ...
-
-    @overload
-    def command(
-        self,
-        name: str = ...,
-        *args: Any,
-        **kwargs: Any,
-    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], Command[CogT, P, T]]: ...
 
     def command(
         self,
@@ -1334,6 +1365,13 @@ class GroupMixin(Generic[CogT]):
     @overload
     def group(
         self,
+        name: str = ...,
+        **attrs: Unpack[_GroupArgs],
+    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], Group[CogT, P, T]]: ...
+
+    @overload
+    def group(
+        self,
         name: str,
         cls: type[GroupT],
         *args: Any,
@@ -1348,14 +1386,6 @@ class GroupMixin(Generic[CogT]):
         cls: type[GroupT],
         **kwargs: Any,
     ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], GroupT]: ...
-
-    @overload
-    def group(
-        self,
-        name: str = ...,
-        *args: Any,
-        **kwargs: Any,
-    ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], Group[CogT, P, T]]: ...
 
     def group(
         self,
@@ -1405,9 +1435,9 @@ class Group(GroupMixin[CogT], Command[CogT, P, T]):
         Defaults to ``False``.
     """
 
-    def __init__(self, *args: Any, **attrs: Any) -> None:
+    def __init__(self, *args: Any, name: str | None = None, **attrs: Unpack[_GroupArgs]) -> None:
         self.invoke_without_command: bool = attrs.pop("invoke_without_command", False)
-        super().__init__(*args, **attrs)
+        super().__init__(*args, name=name, **attrs)
 
     def copy(self: GroupT) -> GroupT:
         """Creates a copy of this :class:`Group`.
@@ -1523,15 +1553,17 @@ if TYPE_CHECKING:
         ) -> Group[CogT, P, T]: ...
 
 
-# Small explanation regarding these overloads:
-# The overloads with the `cls` parameter need to be first,
-# as the other overload would otherwise match first even if `cls` is given.
-# To prevent the overloads with `cls` from matching everything, the parameter
-# cannot have a default value, which in turn means it has to be split into two
-# overloads, one with a positional `cls` parameter and one with a kwarg parameter,
-# as `name` should still be optional.
+@overload
+def command(
+    name: str = ...,
+    **attrs: Unpack[_CommandArgs],
+) -> CommandDecorator: ...
 
 
+# Typing **attrs correctly here is not possible with current ParamSpec/Concatenate features,
+# as it does not support adding kw-only arguments.
+# This overload is split into two, since `cls` cannot have a default without implicitly
+# becoming a fallback when the previous overload didn't match (due to typo'd parameters, etc.)
 @overload
 def command(
     name: str,
@@ -1549,19 +1581,12 @@ def command(
 ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], CommandT]: ...
 
 
-@overload
-def command(
-    name: str = ...,
-    **attrs: Any,
-) -> CommandDecorator: ...
-
-
 def command(
     name: str = MISSING,
     cls: type[Command[Any, Any, Any]] = MISSING,
     **attrs: Any,
 ) -> Any:
-    """A decorator that transforms a function into a :class:`.Command`
+    r"""A decorator that transforms a function into a :class:`.Command`
     or if called with :func:`.group`, :class:`.Group`.
 
     By default the ``help`` attribute is received automatically from the
@@ -1581,7 +1606,7 @@ def command(
     cls
         The class to construct with. By default this is :class:`.Command`.
         You usually do not change this.
-    attrs
+    \*\*attrs
         Keyword arguments to pass into the construction of the class denoted
         by ``cls``.
 
@@ -1604,6 +1629,13 @@ def command(
 
 @overload
 def group(
+    name: str = ...,
+    **attrs: Unpack[_GroupArgs],
+) -> GroupDecorator: ...
+
+
+@overload
+def group(
     name: str,
     cls: type[GroupT],
     **attrs: Any,
@@ -1617,13 +1649,6 @@ def group(
     cls: type[GroupT],
     **attrs: Any,
 ) -> Callable[[CommandCallback[CogT, ContextT, P, T]], GroupT]: ...
-
-
-@overload
-def group(
-    name: str = ...,
-    **attrs: Any,
-) -> GroupDecorator: ...
 
 
 def group(
@@ -1730,7 +1755,7 @@ def check(predicate: Check) -> Callable[[T], T]:
 
         return func
 
-    if iscoroutinefunction(predicate):
+    if inspect.iscoroutinefunction(predicate):
         decorator.predicate = predicate
     else:
 
@@ -1788,7 +1813,7 @@ def check_any(*checks: Check) -> Callable[[T], T]:
         async def only_for_owners(ctx):
             await ctx.send('Hello mister owner!')
     """
-    unwrapped = []
+    unwrapped: list[Callable[[AnyContext], Coro[bool]]] = []
     for wrapped in checks:
         try:
             pred = wrapped.predicate
@@ -1799,7 +1824,7 @@ def check_any(*checks: Check) -> Callable[[T], T]:
             unwrapped.append(pred)
 
     async def predicate(ctx: AnyContext) -> bool:
-        errors = []
+        errors: list[CheckFailure] = []
         for func in unwrapped:
             try:
                 value = await func(ctx)
@@ -2058,6 +2083,7 @@ def has_permissions(
     send_polls: bool = ...,
     send_tts_messages: bool = ...,
     send_voice_messages: bool = ...,
+    set_voice_channel_status: bool = ...,
     speak: bool = ...,
     start_embedded_activities: bool = ...,
     stream: bool = ...,
@@ -2186,6 +2212,7 @@ def bot_has_permissions(
     send_polls: bool = ...,
     send_tts_messages: bool = ...,
     send_voice_messages: bool = ...,
+    set_voice_channel_status: bool = ...,
     speak: bool = ...,
     start_embedded_activities: bool = ...,
     stream: bool = ...,
@@ -2292,6 +2319,7 @@ def has_guild_permissions(
     send_polls: bool = ...,
     send_tts_messages: bool = ...,
     send_voice_messages: bool = ...,
+    set_voice_channel_status: bool = ...,
     speak: bool = ...,
     start_embedded_activities: bool = ...,
     stream: bool = ...,
@@ -2395,6 +2423,7 @@ def bot_has_guild_permissions(
     send_polls: bool = ...,
     send_tts_messages: bool = ...,
     send_voice_messages: bool = ...,
+    set_voice_channel_status: bool = ...,
     speak: bool = ...,
     start_embedded_activities: bool = ...,
     stream: bool = ...,
@@ -2541,7 +2570,7 @@ def is_nsfw() -> Callable[[T], T]:
 
 
 def cooldown(
-    rate: int, per: float, type: BucketType | Callable[[Message], Any] = BucketType.default
+    rate: int, per: float, type: BucketType | Callable[[ContextTypeT], Any] = BucketType.default
 ) -> Callable[[T], T]:
     r"""A decorator that adds a cooldown to a :class:`.Command`
 
@@ -2562,7 +2591,7 @@ def cooldown(
         The number of times a command can be used before triggering a cooldown.
     per: :class:`float`
         The amount of seconds to wait for a cooldown when it's been triggered.
-    type: :class:`.BucketType` | :class:`~collections.abc.Callable`\[[:class:`.Message`], :data:`~typing.Any`]
+    type: :class:`.BucketType` | :class:`~collections.abc.Callable`\[[:class:`.Message`], :data:`~typing.Any`] | :class:`~collections.abc.Callable`\[[:class:`.ApplicationCommandInteraction`], :data:`~typing.Any`]
         The type of cooldown to have. If callable, should return a key for the mapping.
 
         .. versionchanged:: 1.7
@@ -2573,7 +2602,8 @@ def cooldown(
         func: Command[CogT, P, T] | CoroFunc,
     ) -> Command[CogT, P, T] | CoroFunc:
         if hasattr(func, "__command_flag__"):
-            func._buckets = CooldownMapping(Cooldown(rate, per), type)
+            # not assignable, because the decorator is typed Command[...]
+            func._buckets = CooldownMapping(Cooldown(rate, per), type)  # pyright: ignore[reportAttributeAccessIssue]
         else:
             func.__commands_cooldown__ = CooldownMapping(Cooldown(rate, per), type)  # pyright: ignore[reportAttributeAccessIssue]
         return func
@@ -2582,7 +2612,7 @@ def cooldown(
 
 
 def dynamic_cooldown(
-    cooldown: BucketType | Callable[[Message], Any], type: BucketType = BucketType.default
+    cooldown: BucketType | Callable[[ContextTypeT], Any], type: BucketType = BucketType.default
 ) -> Callable[[T], T]:
     r"""A decorator that adds a dynamic cooldown to a :class:`.Command`
 
@@ -2620,7 +2650,8 @@ def dynamic_cooldown(
         func: Command[CogT, P, T] | CoroFunc,
     ) -> Command[CogT, P, T] | CoroFunc:
         if hasattr(func, "__command_flag__"):
-            func._buckets = DynamicCooldownMapping(cooldown, type)
+            # not assignable, because the decorator is typed Command[...]
+            func._buckets = DynamicCooldownMapping(cooldown, type)  # pyright: ignore[reportAttributeAccessIssue]
         else:
             func.__commands_cooldown__ = DynamicCooldownMapping(cooldown, type)  # pyright: ignore[reportAttributeAccessIssue]
         return func

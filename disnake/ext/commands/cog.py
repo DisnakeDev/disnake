@@ -184,7 +184,7 @@ class CogMeta(type):
                     if elem.startswith(("cog_", "bot_")):
                         raise TypeError(no_bot_cog.format(base, elem))
                     app_commands[elem] = value
-                elif disnake.utils.iscoroutinefunction(value):
+                elif inspect.iscoroutinefunction(value):
                     if hasattr(value, "__cog_listener__"):
                         if elem.startswith(("cog_", "bot_")):
                             raise TypeError(no_bot_cog.format(base, elem))
@@ -410,7 +410,7 @@ class Cog(metaclass=CogMeta):
             actual = func
             if isinstance(actual, staticmethod):
                 actual = actual.__func__
-            if not disnake.utils.iscoroutinefunction(actual):
+            if not inspect.iscoroutinefunction(actual):
                 msg = "Listener function must be a coroutine function."
                 raise TypeError(msg)
             actual.__cog_listener__ = True

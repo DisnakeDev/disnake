@@ -4,11 +4,12 @@ from __future__ import annotations
 
 import asyncio
 import inspect
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
     TypeVar,
+    overload,
 )
 
 from disnake import utils
@@ -24,10 +25,12 @@ from .errors import CommandError, CommandInvokeError
 from .params import call_param_func, classify_autocompleter, expand_params
 
 if TYPE_CHECKING:
+    from typing_extensions import Unpack
+
     from disnake.app_commands import Choices
     from disnake.i18n import LocalizedOptional
 
-    from .base_core import CommandCallback
+    from .base_core import CommandCallback, _AppCommandArgs
 
 MISSING = utils.MISSING
 
@@ -100,7 +103,7 @@ _INVALID_SUB_KWARGS = frozenset(
 
 # this is just a helpful message for users trying to set specific
 # top-level-only fields on subcommands or groups
-def _check_invalid_sub_kwargs(func: CommandCallback, kwargs: dict[str, Any]) -> None:
+def _check_invalid_sub_kwargs(func: CommandCallback, kwargs: Mapping[str, Any]) -> None:
     invalid_keys = kwargs.keys() & _INVALID_SUB_KWARGS
 
     for decorator_key in [
@@ -161,7 +164,7 @@ class SubCommandGroup(InvokableApplicationCommand):
         parent: InvokableSlashCommand,
         *,
         name: LocalizedOptional = None,
-        **kwargs: Any,
+        **kwargs: Unpack[_AppCommandArgs],
     ) -> None:
         name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
@@ -209,8 +212,7 @@ class SubCommandGroup(InvokableApplicationCommand):
         description: LocalizedOptional = None,
         options: list[Option] | None = None,
         connectors: dict[str, str] | None = None,
-        extras: dict[str, Any] | None = None,
-        **kwargs: Any,
+        **kwargs: Unpack[_AppCommandArgs],
     ) -> Callable[[CommandCallback], SubCommand]:
         r"""A decorator that creates a subcommand in the subcommand group.
         Parameters are the same as in :class:`InvokableSlashCommand.sub_command`
@@ -229,7 +231,6 @@ class SubCommandGroup(InvokableApplicationCommand):
                 description=description,
                 options=options,
                 connectors=connectors,
-                extras=extras,
                 **kwargs,
             )
             self.children[new_func.name] = new_func
@@ -289,14 +290,15 @@ class SubCommand(InvokableApplicationCommand):
         description: LocalizedOptional = None,
         options: list[Option] | None = None,
         connectors: dict[str, str] | None = None,
-        **kwargs: Any,
+        autocompleters: dict[str, Choices | Callable[..., Choices | None]] | None = None,
+        **kwargs: Unpack[_AppCommandArgs],
     ) -> None:
         name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
         self.parent: InvokableSlashCommand | SubCommandGroup = parent
         self.connectors: dict[str, str] = connectors or {}
-        self.autocompleters: dict[str, Choices | Callable[..., Choices | None]] = kwargs.get(
-            "autocompleters", {}
+        self.autocompleters: dict[str, Choices | Callable[..., Choices | None]] = (
+            autocompleters or {}
         )
 
         if options is None:
@@ -384,7 +386,7 @@ class SubCommand(InvokableApplicationCommand):
             raise CommandInvokeError(exc) from exc
         finally:
             if self._max_concurrency is not None:
-                await self._max_concurrency.release(inter)  # pyright: ignore[reportArgumentType]
+                await self._max_concurrency.release(inter)
 
             await self.call_after_hooks(inter)
 
@@ -445,6 +447,27 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         .. versionadded:: 2.6
     """
 
+    @overload
+    def __init__(
+        self,
+        func: CommandCallback,
+        *,
+        name: LocalizedOptional = None,
+        description: LocalizedOptional = None,
+        options: list[Option] | None = None,
+        default_member_permissions: Permissions | int | None = None,
+        nsfw: bool | None = None,
+        install_types: ApplicationInstallTypes | None = None,
+        contexts: InteractionContextTypes | None = None,
+        guild_ids: Sequence[int] | None = None,
+        connectors: dict[str, str] | None = None,
+        autocompleters: dict[str, Choices | Callable[..., Choices | None]] | None = None,
+        auto_sync: bool | None = None,
+        **kwargs: Unpack[_AppCommandArgs],
+    ) -> None: ...
+
+    @overload
+    @utils.deprecated("`dm_permission` is deprecated. Use `contexts` instead.")
     def __init__(
         self,
         func: CommandCallback,
@@ -459,8 +482,28 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         contexts: InteractionContextTypes | None = None,
         guild_ids: Sequence[int] | None = None,
         connectors: dict[str, str] | None = None,
+        autocompleters: dict[str, Choices | Callable[..., Choices | None]] | None = None,
         auto_sync: bool | None = None,
-        **kwargs: Any,
+        **kwargs: Unpack[_AppCommandArgs],
+    ) -> None: ...
+
+    def __init__(
+        self,
+        func: CommandCallback,
+        *,
+        name: LocalizedOptional = None,
+        description: LocalizedOptional = None,
+        options: list[Option] | None = None,
+        dm_permission: bool | None = None,  # deprecated
+        default_member_permissions: Permissions | int | None = None,
+        nsfw: bool | None = None,
+        install_types: ApplicationInstallTypes | None = None,
+        contexts: InteractionContextTypes | None = None,
+        guild_ids: Sequence[int] | None = None,
+        connectors: dict[str, str] | None = None,
+        autocompleters: dict[str, Choices | Callable[..., Choices | None]] | None = None,
+        auto_sync: bool | None = None,
+        **kwargs: Unpack[_AppCommandArgs],
     ) -> None:
         name_loc = Localized._cast(name, False)
         super().__init__(func, name=name_loc.string, **kwargs)
@@ -469,8 +512,8 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         self.children: dict[str, SubCommand | SubCommandGroup] = {}
         self.auto_sync: bool = True if auto_sync is None else auto_sync
         self.guild_ids: tuple[int, ...] | None = None if guild_ids is None else tuple(guild_ids)
-        self.autocompleters: dict[str, Choices | Callable[..., Choices | None]] = kwargs.get(
-            "autocompleters", {}
+        self.autocompleters: dict[str, Choices | Callable[..., Choices | None]] = (
+            autocompleters or {}
         )
 
         if options is None:
@@ -499,7 +542,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         except AttributeError:
             pass
 
-        self.body: SlashCommand = SlashCommand(
+        self.body: SlashCommand = SlashCommand(  # pyright: ignore[reportDeprecated]
             name=name_loc._upgrade(self.name, key=self.docstring["localization_key_name"]),
             description=desc_loc._upgrade(
                 self.docstring["description"] or "-", key=self.docstring["localization_key_desc"]
@@ -564,8 +607,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
         description: LocalizedOptional = None,
         options: list[Option] | None = None,
         connectors: dict[str, str] | None = None,
-        extras: dict[str, Any] | None = None,
-        **kwargs: Any,
+        **kwargs: Unpack[_AppCommandArgs],
     ) -> Callable[[CommandCallback], SubCommand]:
         r"""A decorator that creates a subcommand under the base command.
 
@@ -614,7 +656,6 @@ class InvokableSlashCommand(InvokableApplicationCommand):
                 description=description,
                 options=options,
                 connectors=connectors,
-                extras=extras,
                 **kwargs,
             )
             self.children[new_func.name] = new_func
@@ -626,8 +667,7 @@ class InvokableSlashCommand(InvokableApplicationCommand):
     def sub_command_group(
         self,
         name: LocalizedOptional = None,
-        extras: dict[str, Any] | None = None,
-        **kwargs: Any,
+        **kwargs: Unpack[_AppCommandArgs],
     ) -> Callable[[CommandCallback], SubCommandGroup]:
         r"""A decorator that creates a subcommand group under the base command.
 
@@ -659,7 +699,6 @@ class InvokableSlashCommand(InvokableApplicationCommand):
                 func,
                 self,
                 name=name,
-                extras=extras,
                 **kwargs,
             )
             self.children[new_func.name] = new_func
@@ -784,9 +823,45 @@ class InvokableSlashCommand(InvokableApplicationCommand):
             raise CommandInvokeError(exc) from exc
         finally:
             if self._max_concurrency is not None:
-                await self._max_concurrency.release(inter)  # pyright: ignore[reportArgumentType]
+                await self._max_concurrency.release(inter)
 
             await self.call_after_hooks(inter)
+
+
+@overload
+def slash_command(
+    *,
+    name: LocalizedOptional = None,
+    description: LocalizedOptional = None,
+    default_member_permissions: Permissions | int | None = None,
+    nsfw: bool | None = None,
+    install_types: ApplicationInstallTypes | None = None,
+    contexts: InteractionContextTypes | None = None,
+    options: list[Option] | None = None,
+    guild_ids: Sequence[int] | None = None,
+    connectors: dict[str, str] | None = None,
+    auto_sync: bool | None = None,
+    **kwargs: Unpack[_AppCommandArgs],
+) -> Callable[[CommandCallback], InvokableSlashCommand]: ...
+
+
+@overload
+@utils.deprecated("`dm_permission` is deprecated. Use `contexts` instead.")
+def slash_command(
+    *,
+    name: LocalizedOptional = None,
+    description: LocalizedOptional = None,
+    dm_permission: bool | None = None,  # deprecated
+    default_member_permissions: Permissions | int | None = None,
+    nsfw: bool | None = None,
+    install_types: ApplicationInstallTypes | None = None,
+    contexts: InteractionContextTypes | None = None,
+    options: list[Option] | None = None,
+    guild_ids: Sequence[int] | None = None,
+    connectors: dict[str, str] | None = None,
+    auto_sync: bool | None = None,
+    **kwargs: Unpack[_AppCommandArgs],
+) -> Callable[[CommandCallback], InvokableSlashCommand]: ...
 
 
 def slash_command(
@@ -802,8 +877,7 @@ def slash_command(
     guild_ids: Sequence[int] | None = None,
     connectors: dict[str, str] | None = None,
     auto_sync: bool | None = None,
-    extras: dict[str, Any] | None = None,
-    **kwargs: Any,
+    **kwargs: Unpack[_AppCommandArgs],
 ) -> Callable[[CommandCallback], InvokableSlashCommand]:
     r"""A decorator that builds a slash command.
 
@@ -887,7 +961,7 @@ def slash_command(
     """
 
     def decorator(func: CommandCallback) -> InvokableSlashCommand:
-        if not utils.iscoroutinefunction(func):
+        if not inspect.iscoroutinefunction(func):
             msg = f"<{func.__qualname__}> must be a coroutine function"
             raise TypeError(msg)
         if hasattr(func, "__command_flag__"):
@@ -896,7 +970,7 @@ def slash_command(
         if guild_ids and not all(isinstance(guild_id, int) for guild_id in guild_ids):
             msg = "guild_ids must be a sequence of int."
             raise ValueError(msg)
-        return InvokableSlashCommand(
+        return InvokableSlashCommand(  # pyright: ignore[reportDeprecated]
             func,
             name=name,
             description=description,
@@ -909,7 +983,6 @@ def slash_command(
             guild_ids=guild_ids,
             connectors=connectors,
             auto_sync=auto_sync,
-            extras=extras,
             **kwargs,
         )
 

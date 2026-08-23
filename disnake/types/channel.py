@@ -82,6 +82,7 @@ class VoiceChannel(_BaseVocalGuildChannel):
     last_message_id: NotRequired[Snowflake | None]
     rate_limit_per_user: NotRequired[int]
     video_quality_mode: NotRequired[VideoQualityMode]
+    status: NotRequired[str | None]  # somewhat undocumented, only received via gw
 
 
 class CategoryChannel(_BaseGuildChannel):

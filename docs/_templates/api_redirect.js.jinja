@@ -9,8 +9,8 @@ const redirects_map = {{ redirect_data }};
 
     if (!url.pathname.endsWith("/api.html")) return;
 
-    // URL_ROOT is relative to `url`, and points to e.g. `<host>/en/latest/`
-    const root = new URL(DOCUMENTATION_OPTIONS.URL_ROOT, url);
+    // content_root is relative to `url`, and points to e.g. `<host>/en/latest/`
+    const root = new URL(document.documentElement.dataset.content_root, url);
     if (!root.pathname.endsWith("/")) root.pathname += "/";
 
     const targetPath = redirects_map[url.hash.slice(1)];

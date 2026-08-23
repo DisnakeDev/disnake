@@ -5,9 +5,6 @@ from dataclasses import dataclass
 from typing import Any, Literal
 
 import disnake
-
-# this file uses pytz in one of its examples but it is completely optional
-import pytz
 from disnake.ext import commands
 
 bot = commands.Bot(command_prefix=commands.when_mentioned)
@@ -15,19 +12,21 @@ bot = commands.Bot(command_prefix=commands.when_mentioned)
 # Instead of repeating boiler-plate code you may use injections.
 # Here we give each command a config with a few default options.
 
+Theme = Literal["light", "dark", "amoled"]
+
 
 @dataclass
 class Config:
     locale: str
-    timezone: pytz.BaseTzInfo
-    theme: str
+    theme: Theme
+    notifications: bool
 
 
 async def get_config(
     inter: disnake.CommandInteraction,
     locale: str | None = None,
-    timezone: str = "UTC",
-    theme: Literal["light", "dark", "amoled"] = "dark",
+    theme: Theme = "dark",
+    notifications: bool = True,
 ) -> Config:
     """Let the user enter a config
 
@@ -37,18 +36,15 @@ async def get_config(
 
     Parameters
     ----------
-    locale: The preferred locale, defaults to the server's locale
-    timezone: Your current timezone, must be in the format of "US/Eastern" or "Europe/London"
+    locale: Your preferred locale, defaults to the server's locale
     theme: Your preferred theme, defaults to the dark theme
+    notifications: Whether you'd like to receive notifications
     """
     # if a locale is not provided use the guild's locale
     if locale is None:
         locale = str(inter.guild_locale or "en-US")
 
-    # parse a timezone from a string using pytz (maybe even use the locale if you feel like it)
-    tzinfo = pytz.timezone(timezone)
-
-    return Config(locale, tzinfo, theme)
+    return Config(locale, theme, notifications)
 
 
 # Note that the following command will have 4 options:

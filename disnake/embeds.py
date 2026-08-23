@@ -17,21 +17,21 @@ from typing import (
 from . import utils
 from .colour import Colour
 from .file import File
-from .utils import MISSING, classproperty, warn_deprecated
+from .utils import MISSING
 
 __all__ = ("Embed",)
 
 
-# backwards compatibility, hidden from type-checkers to have them show errors when accessed
+# backwards compatibility, hidden from type-checkers to have them show errors on access
 if not TYPE_CHECKING:
 
-    def __getattr__(name: str) -> None:
+    def __getattr__(name: str) -> object:
         if name == "EmptyEmbed":
-            warn_deprecated(
+            utils.warn_deprecated(
                 "`EmptyEmbed` is deprecated and will be removed in a future version. Use `None` instead.",
                 stacklevel=2,
             )
-            return None  # noqa: RET501
+            return None
         msg = f"module '{__name__}' has no attribute '{name}'"
         raise AttributeError(msg)
 
@@ -219,16 +219,12 @@ class Embed:
 
         self._files: dict[_FileKey, File] = {}
 
-    # see `EmptyEmbed` above
     if not TYPE_CHECKING:
         # n.b. this is the only use site of classproperty
-        @classproperty
+        @utils.classproperty
+        @utils.deprecated("Embed.Empty is deprecated. Use None instead.", stacklevel=2)
         def Empty(self) -> None:
-            warn_deprecated(
-                "`Embed.Empty` is deprecated and will be removed in a future version. Use `None` instead.",
-                stacklevel=3,
-            )
-            return None  # noqa: RET501
+            return None
 
     @classmethod
     def from_dict(cls, data: EmbedData) -> Self:
@@ -340,7 +336,7 @@ class Embed:
         elif value is MISSING or value is None or isinstance(value, Colour):
             self._colour = value
         else:
-            msg = f"Expected disnake.Colour, int, or None but received {type(value).__name__} instead."
+            msg = f"Expected disnake.Colour, int, or None, received {value.__class__.__name__} instead."
             raise TypeError(msg)
 
     @colour.deleter
@@ -362,7 +358,9 @@ class Embed:
         elif value is None:
             self._timestamp = value
         else:
-            msg = f"Expected datetime.datetime or None received {type(value).__name__} instead"
+            msg = (
+                f"Expected datetime.datetime or None, received {value.__class__.__name__} instead."
+            )
             raise TypeError(msg)
 
     @property
@@ -849,7 +847,7 @@ class Embed:
         elif isinstance(value, int):
             cls._default_colour = Colour(value=value)
         else:
-            msg = f"Expected disnake.Colour, int, or None but received {type(value).__name__} instead."
+            msg = f"Expected disnake.Colour, int, or None, received {value.__class__.__name__} instead."
             raise TypeError(msg)
         return cls._default_colour
 

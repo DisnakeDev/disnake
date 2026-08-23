@@ -5,11 +5,11 @@ from typing import Literal, TypedDict
 from typing_extensions import NotRequired
 
 from .activity import PartialPresenceUpdate
-from .channel import CreateGuildChannel, GuildChannel, StageInstance
+from .channel import GuildChannel, StageInstance
 from .emoji import Emoji
 from .guild_scheduled_event import GuildScheduledEvent
 from .member import Member
-from .role import CreateRole, Role
+from .role import Role
 from .snowflake import Snowflake
 from .soundboard import GuildSoundboardSound
 from .sticker import GuildSticker
@@ -43,6 +43,7 @@ PremiumTier = Literal[0, 1, 2, 3]
 GuildFeature = Literal[
     "ANIMATED_BANNER",
     "ANIMATED_ICON",
+    "APPLICATION_COMMAND_PERMISSIONS_V2",
     "AUTO_MODERATION",
     "BANNER",
     "COMMUNITY",
@@ -52,14 +53,15 @@ GuildFeature = Literal[
     "DEVELOPER_SUPPORT_SERVER",
     "DISCOVERABLE",
     "ENABLED_DISCOVERABLE_BEFORE",
+    "ENHANCED_ROLE_COLORS",
     "FEATURABLE",
-    "GUILD_HOME_TEST",  # not yet documented/finalised
+    "GUESTS_ENABLED",
+    "GUILD_TAGS",
     "HAS_DIRECTORY_ENTRY",
     "HUB",
     "INVITE_SPLASH",
     "INVITES_DISABLED",
     "LINKED_TO_HUB",
-    "MEMBER_PROFILES",  # not sure what this does, if anything
     "MEMBER_VERIFICATION_GATE_ENABLED",
     "MORE_EMOJI",
     "MORE_SOUNDBOARD",
@@ -69,6 +71,7 @@ GuildFeature = Literal[
     "PARTNERED",
     "PREVIEW_ENABLED",
     "PRIVATE_THREADS",  # deprecated
+    "PRUNE_REQUIRES_ADMIN",
     "RAID_ALERTS_DISABLED",
     "RELAY_ENABLED",
     "ROLE_ICONS",
@@ -84,6 +87,9 @@ GuildFeature = Literal[
     "VERIFIED",
     "VIP_REGIONS",
     "WELCOME_SCREEN_ENABLED",
+    "GUESTS_ENABLED",
+    "GUILD_TAGS",
+    "ENHANCED_ROLE_COLORS",
 ]
 
 
@@ -179,29 +185,3 @@ class ChannelPositionUpdate(TypedDict):
 class RolePositionUpdate(TypedDict):
     id: Snowflake
     position: NotRequired[Snowflake | None]
-
-
-class MFALevelUpdate(TypedDict):
-    level: MFALevel
-
-
-class CreateGuildPlaceholderRole(CreateRole):
-    id: Snowflake
-
-
-class CreateGuildPlaceholderChannel(CreateGuildChannel):
-    id: NotRequired[Snowflake]
-
-
-class CreateGuild(TypedDict):
-    name: str
-    icon: NotRequired[str]
-    verification_level: NotRequired[VerificationLevel]
-    default_message_notifications: NotRequired[DefaultMessageNotificationLevel]
-    explicit_content_filter: NotRequired[ExplicitContentFilterLevel]
-    roles: NotRequired[list[CreateGuildPlaceholderRole]]
-    channels: NotRequired[list[CreateGuildPlaceholderChannel]]
-    afk_channel_id: NotRequired[Snowflake]
-    afk_timeout: NotRequired[int]
-    system_channel_id: NotRequired[Snowflake]
-    system_channel_flags: NotRequired[int]

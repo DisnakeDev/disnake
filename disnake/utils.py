@@ -36,7 +36,6 @@ from typing import (
     ForwardRef,
     Generic,
     Literal,
-    NoReturn,
     Protocol,
     TypeAlias,
     TypedDict,
@@ -47,14 +46,12 @@ from typing import (
 )
 from urllib.parse import parse_qs, urlencode
 
-if TYPE_CHECKING:
-    from typing_extensions import Self
+from typing_extensions import Never, ParamSpec, Self, deprecated as deprecated
 
 from .enums import Locale
 
 if sys.version_info >= (3, 14):
     import threading
-    from inspect import iscoroutinefunction as iscoroutinefunction
 
     def get_event_loop():
         try:
@@ -68,7 +65,6 @@ if sys.version_info >= (3, 14):
             asyncio.set_event_loop(loop := asyncio.new_event_loop())
             return loop
 else:
-    from asyncio import iscoroutinefunction as iscoroutinefunction
 
     def get_event_loop():
         with warnings.catch_warnings():
@@ -138,9 +134,7 @@ class _cached_property:
 
 
 if TYPE_CHECKING:
-    from functools import cached_property as cached_property
-
-    from typing_extensions import Never, ParamSpec, Self
+    cached_property: TypeAlias = property
 
     from .abc import Snowflake
     from .asset import AssetBytes
@@ -152,14 +146,13 @@ if TYPE_CHECKING:
     class _RequestLike(Protocol):
         headers: Mapping[str, Any]
 
-    P = ParamSpec("P")
-
 else:
     cached_property = _cached_property
 
 
 T = TypeVar("T")
 V = TypeVar("V")
+P = ParamSpec("P")
 T_co = TypeVar("T_co", covariant=True)
 _Iter: TypeAlias = Iterator[T] | AsyncIterator[T]
 _BytesLike: TypeAlias = bytes | bytearray | memoryview
@@ -193,12 +186,8 @@ class classproperty(Generic[T_co]):
     def __init__(self, fget: Callable[[Any], T_co]) -> None:
         self.fget = fget
 
-    def __get__(self, instance: object, owner: type[object]) -> T_co:
+    def __get__(self, instance: object | None, owner: type[object]) -> T_co:
         return self.fget(owner)
-
-    def __set__(self, instance: object, value: object) -> NoReturn:
-        msg = "cannot set attribute"
-        raise AttributeError(msg)
 
 
 def cached_slot_property(name: str) -> Callable[[Callable[[T], T_co]], CachedSlotProperty[T, T_co]]:
@@ -278,25 +267,6 @@ def copy_doc(original: Callable[..., Any] | property) -> Callable[[T], T]:
     return decorator
 
 
-def deprecated(
-    instead: str | None = None, *, skip_internal_frames: bool = False
-) -> Callable[[Callable[P, T]], Callable[P, T]]:
-    def actual_decorator(func: Callable[P, T]) -> Callable[P, T]:
-        @functools.wraps(func)
-        def decorated(*args: P.args, **kwargs: P.kwargs) -> T:
-            if instead:
-                msg = f"{func.__name__} is deprecated, use {instead} instead."
-            else:
-                msg = f"{func.__name__} is deprecated."
-
-            warn_deprecated(msg, stacklevel=2, skip_internal_frames=skip_internal_frames)
-            return func(*args, **kwargs)
-
-        return decorated
-
-    return actual_decorator
-
-
 _root_module_path = os.path.join(os.path.dirname(__file__), "")  # add trailing slash
 
 
@@ -316,6 +286,16 @@ def warn_deprecated(
     finally:
         assert isinstance(warnings.filters, list)
         warnings.filters[:] = old_filters
+
+
+# use to mark classes users should no longer use,
+# but the library still needs to create instances of
+if TYPE_CHECKING:
+    noop_deprecated = deprecated
+else:
+
+    def noop_deprecated(*_: object, **__: object) -> Callable[[T], T]:
+        return lambda o: o
 
 
 def oauth_url(
@@ -828,15 +808,15 @@ _MARKDOWN_ESCAPE_SUBREGEX = "|".join(
     rf"\{c}(?=([\s\S]*((?<!\{c})\{c})))" for c in ("*", "`", "_", "~", "|")
 )
 
-_MARKDOWN_ESCAPE_COMMON = r"^>(?:>>)?\s|\[.+\]\(.+\)"
+_MARKDOWN_ESCAPE_COMMON = r"^>(?:>>)?\s|\[.+\]\(.+\)|^(?P<prefix>\s*)[-*]\s|^#{1,3}\s"
 
 _MARKDOWN_ESCAPE_REGEX = re.compile(
-    rf"(?P<markdown>{_MARKDOWN_ESCAPE_SUBREGEX}|{_MARKDOWN_ESCAPE_COMMON})", re.MULTILINE
+    rf"(?P<markdown>{_MARKDOWN_ESCAPE_COMMON}|{_MARKDOWN_ESCAPE_SUBREGEX})", re.MULTILINE
 )
 
 _URL_REGEX = r"(?P<url><[^: >]+:\/[^ >]+>|(?:https?|steam):\/\/[^\s<]+[^<.,:;\"\'\]\s])"
 
-_MARKDOWN_STOCK_REGEX = rf"(?P<markdown>[_\\~|\*`]|{_MARKDOWN_ESCAPE_COMMON})"
+_MARKDOWN_STOCK_REGEX = rf"(?P<markdown>{_MARKDOWN_ESCAPE_COMMON}|[_\\~|\*`])"
 
 
 def remove_markdown(text: str, *, ignore_links: bool = True) -> str:
@@ -863,7 +843,7 @@ def remove_markdown(text: str, *, ignore_links: bool = True) -> str:
         The text with the markdown special characters removed.
     """
 
-    def replacement(match: re.Match) -> str:
+    def replacement(match: re.Match[str]) -> str:
         groupdict = match.groupdict()
         return groupdict.get("url", "")
 
@@ -899,12 +879,13 @@ def escape_markdown(text: str, *, as_needed: bool = False, ignore_links: bool = 
     """
     if not as_needed:
 
-        def replacement(match: re.Match) -> str:
+        def replacement(match: re.Match[str]) -> str:
             groupdict = match.groupdict()
             is_url = groupdict.get("url")
             if is_url:
                 return is_url
-            return "\\" + groupdict["markdown"]
+            prefix = groupdict.get("prefix") or ""
+            return prefix + "\\" + groupdict["markdown"].removeprefix(prefix)
 
         regex = _MARKDOWN_STOCK_REGEX
         if ignore_links:
@@ -1176,6 +1157,7 @@ def evaluate_annotation(
     cache: dict[str, Any],
     *,
     implicit_str: bool = True,
+    source_info: types.CodeType | None = None,
 ) -> Any:
     if isinstance(tp, ForwardRef):
         tp = tp.__forward_arg__
@@ -1186,17 +1168,26 @@ def evaluate_annotation(
         if tp in cache:
             return cache[tp]
 
+        if source_info is not None:
+            # compile the annotation to add filename/line no. data for warnings & tracebacks
+            source = compile(tp, source_info.co_filename, "eval", dont_inherit=True)
+            source = source.replace(co_firstlineno=source_info.co_firstlineno)
+        else:
+            source = tp
+
         # this is how annotations are supposed to be unstringifed
-        evaluated = eval(tp, globals, locals)  # noqa: S307
+        evaluated = eval(source, globals, locals)  # noqa: S307
         # recurse to resolve nested args further
-        evaluated = evaluate_annotation(evaluated, globals, locals, cache)
+        evaluated = evaluate_annotation(evaluated, globals, locals, cache, source_info=source_info)
 
         cache[tp] = evaluated
         return evaluated
 
     # Annotated[X, Y], where Y is the converter we need
     if get_origin(tp) is Annotated:
-        return evaluate_annotation(tp.__metadata__[0], globals, locals, cache)
+        return evaluate_annotation(
+            tp.__metadata__[0], globals, locals, cache, source_info=source_info
+        )
 
     # GenericAlias / UnionType
     if hasattr(tp, "__args__"):
@@ -1204,7 +1195,9 @@ def evaluate_annotation(
             # n.b. this became obsolete in Python 3.14+, as `UnionType` and `Union` are the same thing now.
             if tp.__class__ is UnionType:
                 converted = Union[tp.__args__]  # noqa: UP007
-                return evaluate_annotation(converted, globals, locals, cache)
+                return evaluate_annotation(
+                    converted, globals, locals, cache, source_info=source_info
+                )
 
             return tp
 
@@ -1228,7 +1221,9 @@ def evaluate_annotation(
             is_literal = True
 
         evaluated_args = tuple(
-            evaluate_annotation(arg, globals, locals, cache, implicit_str=implicit_str)
+            evaluate_annotation(
+                arg, globals, locals, cache, implicit_str=implicit_str, source_info=source_info
+            )
             for arg in args
         )
 
@@ -1334,7 +1329,9 @@ def get_signature_parameters(
         if annotation is None:
             annotation = type(None)
         else:
-            annotation = evaluate_annotation(annotation, globalns, globalns, cache)
+            annotation = evaluate_annotation(
+                annotation, globalns, globalns, cache, source_info=function.__code__
+            )
 
         params[name] = parameter.replace(annotation=annotation)
 
@@ -1402,6 +1399,26 @@ def signature_has_self_param(function: Callable[..., Any]) -> bool:
 
     # (5)
     return not parent.endswith(".<locals>")
+
+
+if sys.version_info >= (3, 14):
+    import annotationlib
+
+    def get_annotations_from_namespace(namespace: dict[str, Any]) -> dict[str, Any]:
+        # classes in 3.14+ don't necessarily have an `__annotations__` dict,
+        # as annotations are lazily evaluated (provided the pre-3.14 future import isn't used)
+        # https://docs.python.org/3.14/library/annotationlib.html#annotationlib-metaclass
+        if annotate := annotationlib.get_annotate_from_class_namespace(namespace):
+            # we usually run these through `resolve_annotation` right after anyway,
+            # so `FORWARDREF` doesn't really provide an advantage over simply using `VALUE`,
+            # but it also doesn't hurt to use it.
+            return annotationlib.call_annotate_function(annotate, annotationlib.Format.FORWARDREF)
+        return namespace.get("__annotations__", {})
+
+else:
+
+    def get_annotations_from_namespace(namespace: dict[str, Any]) -> dict[str, Any]:
+        return namespace.get("__annotations__", {})
 
 
 TimestampStyle = Literal["t", "T", "d", "D", "f", "F", "s", "S", "R"]

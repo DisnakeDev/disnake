@@ -140,7 +140,7 @@ class TestDefaultContexts:
     def test_dm_permission(self, bot: commands.InteractionBot) -> None:
         with warnings.catch_warnings(record=True):
 
-            @bot.slash_command(dm_permission=False)
+            @bot.slash_command(dm_permission=False)  # pyright: ignore[reportDeprecated]
             async def c(inter) -> None: ...
 
         # if dm_permission was set, the `contexts` default shouldn't apply

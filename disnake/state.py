@@ -1881,6 +1881,64 @@ class ConnectionState:
         if channel and member:
             self.dispatch("voice_channel_effect", channel, member, effect)
 
+    def parse_voice_channel_status_update(self, data: gateway.VoiceChannelStatusUpdate) -> None:
+        guild_id = int(data["guild_id"])
+        guild = self._get_guild(guild_id)
+
+        if guild is None:
+            _log.debug(
+                "VOICE_CHANNEL_STATUS_UPDATE referencing an unknown guild ID: %s. Discarding",
+                guild_id,
+            )
+            return
+
+        channel_id = int(data["id"])
+        channel = guild.get_channel(channel_id)
+        if channel is None:
+            _log.debug(
+                "VOICE_CHANNEL_STATUS_UPDATE referencing an unknown channel ID: %s. Discarding",
+                channel_id,
+            )
+            return
+
+        if isinstance(channel, VoiceChannel):
+            # in case stage channels ever get statuses too
+            old_status = channel.status
+            channel.status = data.get("status")
+        else:
+            old_status = None
+
+        self.dispatch("voice_channel_status_update", channel, old_status, data.get("status"))
+
+    def parse_voice_channel_start_time_update(
+        self, data: gateway.VoiceChannelStartTimeUpdate
+    ) -> None:
+        guild_id = int(data["guild_id"])
+        guild = self._get_guild(guild_id)
+
+        if guild is None:
+            _log.debug(
+                "VOICE_CHANNEL_START_TIME_UPDATE referencing an unknown guild ID: %s. Discarding",
+                guild_id,
+            )
+            return
+
+        channel_id = int(data["id"])
+        channel = guild.get_channel(channel_id)
+        if channel is None:
+            _log.debug(
+                "VOICE_CHANNEL_START_TIME_UPDATE referencing an unknown channel ID: %s. Discarding",
+                channel_id,
+            )
+            return
+
+        timestamp = (
+            datetime.datetime.fromtimestamp(start_ts, tz=datetime.timezone.utc)
+            if (start_ts := data.get("voice_start_time"))
+            else None
+        )
+        self.dispatch("voice_channel_start_time_update", channel, timestamp)
+
     # FIXME: this should be refactored. The `GroupChannel` path will never be hit,
     # `raw.timestamp` exists so no need to parse it twice, and `.get_user` should be used before falling back
     def parse_typing_start(self, data: gateway.TypingStartEvent) -> None:

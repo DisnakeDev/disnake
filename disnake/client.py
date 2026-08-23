@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import inspect
 import logging
 import signal
 import sys
@@ -15,7 +16,6 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Literal,
-    NamedTuple,
     TypedDict,
     TypeVar,
     overload,
@@ -48,8 +48,8 @@ from .errors import (
     SessionStartLimitReached,
 )
 from .flags import ApplicationFlags, Intents, MemberCacheFlags
-from .gateway import DiscordWebSocket, ReconnectWebSocket
-from .guild import Guild, GuildBuilder
+from .gateway import DiscordWebSocket, GatewayParams, ReconnectWebSocket
+from .guild import Guild
 from .guild_preview import GuildPreview
 from .http import HTTPClient
 from .i18n import LocalizationProtocol, LocalizationStore
@@ -66,7 +66,7 @@ from .template import Template
 from .threads import Thread
 from .ui.view import View
 from .user import ClientUser, User
-from .utils import MISSING, deprecated
+from .utils import MISSING
 from .voice_client import VoiceClient
 from .voice_region import VoiceRegion
 from .webhook import Webhook
@@ -91,7 +91,6 @@ if TYPE_CHECKING:
 __all__ = (
     "Client",
     "SessionStartLimit",
-    "GatewayParams",
 )
 
 T = TypeVar("T")
@@ -182,25 +181,6 @@ class SessionStartLimit:
             f"<SessionStartLimit total={self.total!r} remaining={self.remaining!r} "
             f"reset_after={self.reset_after!r} max_concurrency={self.max_concurrency!r} reset_time={self.reset_time!s}>"
         )
-
-
-class GatewayParams(NamedTuple):
-    """Container type for configuring gateway connections.
-
-    .. versionadded:: 2.6
-
-    Parameters
-    ----------
-    encoding: :class:`str`
-        The payload encoding (``json`` is currently the only supported encoding).
-        Defaults to ``"json"``.
-    zlib: :class:`bool`
-        Whether to enable transport compression.
-        Defaults to ``True``.
-    """
-
-    encoding: Literal["json"] = "json"
-    zlib: bool = True
 
 
 # used for typing the ws parameter dict in the connect() loop
@@ -446,9 +426,20 @@ class Client:
         self._connection._get_websocket = self._get_websocket
         self._connection._get_client = lambda: self
 
-        if VoiceClient.warn_nacl:
-            VoiceClient.warn_nacl = False
-            _log.warning("PyNaCl is not installed, voice will NOT be supported")
+        if VoiceClient.warn_nacl or VoiceClient.warn_dave:
+            missing: list[str] = []
+            if VoiceClient.warn_nacl:
+                missing.append("PyNaCl")
+            if VoiceClient.warn_dave:
+                missing.append("dave.py")
+
+            _log.warning(
+                "%s %s not installed, voice will NOT be supported",
+                " and ".join(missing),
+                "are" if len(missing) > 1 else "is",
+            )
+
+            VoiceClient.warn_nacl = VoiceClient.warn_dave = False
 
         if strict_localization and localization_provider is not None:
             msg = (
@@ -465,9 +456,6 @@ class Client:
         )
 
         self.gateway_params: GatewayParams = gateway_params or GatewayParams()
-        if self.gateway_params.encoding != "json":
-            msg = "Gateway encodings other than `json` are currently not supported."
-            raise ValueError(msg)
 
         self.extra_events: dict[str, list[CoroFunc]] = {}
 
@@ -821,7 +809,7 @@ class Client:
             else (name if isinstance(name, str) else f"on_{name.value}")
         )
 
-        if not utils.iscoroutinefunction(func):
+        if not inspect.iscoroutinefunction(func):
             msg = "Listeners must be coroutines"
             raise TypeError(msg)
 
@@ -1026,7 +1014,7 @@ class Client:
         """
         _log.info("logging in using static token")
         if not isinstance(token, str):
-            msg = f"token must be of type str, got {type(token).__name__} instead"
+            msg = f"token must be of type str, got {token.__class__.__name__} instead"
             raise TypeError(msg)
 
         data = await self.http.static_login(token.strip())
@@ -1076,8 +1064,7 @@ class Client:
             and this exception will not be raised.
         """
         _, initial_gateway, session_start_limit = await self.http.get_bot_gateway(
-            encoding=self.gateway_params.encoding,
-            zlib=self.gateway_params.zlib,
+            self.gateway_params
         )
         self.session_start_limit = SessionStartLimit(session_start_limit)
 
@@ -1270,8 +1257,8 @@ class Client:
         loop = self.loop
 
         try:
-            loop.add_signal_handler(signal.SIGINT, lambda: loop.stop())
-            loop.add_signal_handler(signal.SIGTERM, lambda: loop.stop())
+            loop.add_signal_handler(signal.SIGINT, loop.stop)
+            loop.add_signal_handler(signal.SIGTERM, loop.stop)
         except NotImplementedError:
             pass
 
@@ -1853,7 +1840,7 @@ class Client:
         TypeError
             The argument passed is not actually a coroutine function.
         """
-        if not utils.iscoroutinefunction(coro):
+        if not inspect.iscoroutinefunction(coro):
             msg = "event registered must be a coroutine function"
             raise TypeError(msg)
 
@@ -2087,102 +2074,6 @@ class Client:
         data = await self.http.get_guild_preview(guild_id)
         return GuildPreview(data=data, state=self._connection)
 
-    async def create_guild(
-        self,
-        *,
-        name: str,
-        icon: AssetBytes = MISSING,
-        code: str = MISSING,
-    ) -> Guild:
-        """|coro|
-
-        Creates a :class:`.Guild`.
-
-        See :func:`guild_builder` for a more comprehensive alternative.
-
-        Bot accounts in 10 or more guilds are not allowed to create guilds.
-
-        .. note::
-
-            Using this, you will **not** receive :attr:`.Guild.channels`, :attr:`.Guild.members`,
-            :attr:`.Member.activity` and :attr:`.Member.voice` per :class:`.Member`.
-
-        .. versionchanged:: 2.5
-            Removed the ``region`` parameter.
-
-        .. versionchanged:: 2.6
-            Raises :exc:`ValueError` instead of ``InvalidArgument``.
-
-        Parameters
-        ----------
-        name: :class:`str`
-            The name of the guild.
-        icon: |resource_type|
-            The icon of the guild.
-            See :meth:`.ClientUser.edit` for more details on what is expected.
-
-            .. versionchanged:: 2.5
-                Now accepts various resource types in addition to :class:`bytes`.
-
-        code: :class:`str`
-            The code for a template to create the guild with.
-
-            .. versionadded:: 1.4
-
-        Raises
-        ------
-        NotFound
-            The ``icon`` asset couldn't be found.
-        HTTPException
-            Guild creation failed.
-        ValueError
-            Invalid icon image format given. Must be PNG or JPG.
-        TypeError
-            The ``icon`` asset is a lottie sticker (see :func:`Sticker.read <disnake.Sticker.read>`).
-
-        Returns
-        -------
-        :class:`.Guild`
-            The created guild. This is not the same guild that is added to cache.
-        """
-        if icon is not MISSING:
-            icon_base64 = await utils._assetbytes_to_base64_data(icon)
-        else:
-            icon_base64 = None
-
-        if code:
-            data = await self.http.create_from_template(code, name, icon_base64)
-        else:
-            data = await self.http.create_guild(name, icon_base64)
-        return Guild(data=data, state=self._connection)
-
-    def guild_builder(self, name: str) -> GuildBuilder:
-        """Creates a builder object that can be used to create more complex guilds.
-
-        This is a more comprehensive alternative to :func:`create_guild`.
-        See :class:`.GuildBuilder` for details and examples.
-
-        Bot accounts in 10 or more guilds are not allowed to create guilds.
-
-        .. note::
-
-            Using this, you will **not** receive :attr:`.Guild.channels`, :attr:`.Guild.members`,
-            :attr:`.Member.activity` and :attr:`.Member.voice` per :class:`.Member`.
-
-        .. versionadded:: 2.8
-
-        Parameters
-        ----------
-        name: :class:`str`
-            The name of the guild.
-
-        Returns
-        -------
-        :class:`.GuildBuilder`
-            The guild builder object for configuring and creating a new guild.
-        """
-        return GuildBuilder(name=name, state=self._connection)
-
     async def fetch_stage_instance(self, channel_id: int, /) -> StageInstance:
         """|coro|
 
@@ -2220,6 +2111,28 @@ class Client:
         )
 
     # Invite management
+
+    @overload
+    async def fetch_invite(
+        self,
+        url: Invite | str,
+        *,
+        with_counts: bool = True,
+        guild_scheduled_event_id: int | None = None,
+    ) -> Invite: ...
+
+    @overload
+    @utils.deprecated(
+        "Using `with_expiration` is deprecated, `Invite.expires_at` field is always included now."
+    )
+    async def fetch_invite(
+        self,
+        url: Invite | str,
+        *,
+        with_counts: bool = True,
+        guild_scheduled_event_id: int | None = None,
+        with_expiration: bool = False,
+    ) -> Invite: ...
 
     async def fetch_invite(
         self,
@@ -2694,7 +2607,7 @@ class Client:
         data = await self.http.list_sticker_packs()
         return [StickerPack(state=self._connection, data=pack) for pack in data["sticker_packs"]]
 
-    @deprecated("fetch_sticker_packs")
+    @utils.deprecated("Use `.fetch_sticker_packs()` instead.")
     async def fetch_premium_sticker_packs(self) -> list[StickerPack]:
         """An alias of :meth:`fetch_sticker_packs`.
 

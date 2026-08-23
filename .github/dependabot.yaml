@@ -9,6 +9,8 @@ updates:
       - "/.github/actions/*"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
     open-pull-requests-limit: 1
     labels:
       - "t: dependencies"

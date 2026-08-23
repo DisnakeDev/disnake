@@ -10,10 +10,10 @@ import sys
 import traceback
 import warnings
 from collections.abc import Callable, Iterable
-from typing import TYPE_CHECKING, Any, TypeAlias, TypeVar
+from typing import TYPE_CHECKING, Any, TypeAlias, TypeVar, overload
 
 import disnake
-from disnake.utils import iscoroutinefunction
+from disnake import utils
 
 from . import errors
 from .common_bot_base import CommonBotBase
@@ -105,6 +105,31 @@ _default: Any = _DefaultRepr()
 
 
 class BotBase(CommonBotBase, GroupMixin):
+    @overload
+    def __init__(
+        self,
+        command_prefix: PrefixType | Callable[[Self, Message], MaybeCoro[PrefixType]],
+        help_command: HelpCommand | None = ...,
+        description: str | None = None,
+        *,
+        strip_after_prefix: bool = False,
+        **options: Any,
+    ) -> None: ...
+
+    @overload
+    @utils.deprecated(
+        "Using `command_prefix=None` is deprecated. Use `(AutoSharded)InteractionBot` instead."
+    )
+    def __init__(
+        self,
+        command_prefix: None = None,
+        help_command: HelpCommand | None = ...,
+        description: str | None = None,
+        *,
+        strip_after_prefix: bool = False,
+        **options: Any,
+    ) -> None: ...
+
     def __init__(
         self,
         command_prefix: PrefixType | Callable[[Self, Message], MaybeCoro[PrefixType]] | None = None,
@@ -126,7 +151,7 @@ class BotBase(CommonBotBase, GroupMixin):
             else "InteractionBot"
         )
         if command_prefix is None:
-            disnake.utils.warn_deprecated(
+            utils.warn_deprecated(
                 "Using `command_prefix=None` is deprecated and will result in "
                 "an error in future versions. "
                 f"If you don't need any prefix functionality, consider using {alternative}.",
@@ -354,7 +379,7 @@ class BotBase(CommonBotBase, GroupMixin):
         TypeError
             The argument passed is not actually a coroutine function.
         """
-        if not iscoroutinefunction(coro):
+        if not inspect.iscoroutinefunction(coro):
             msg = "The pre-invoke hook must be a coroutine function."
             raise TypeError(msg)
 
@@ -390,7 +415,7 @@ class BotBase(CommonBotBase, GroupMixin):
         TypeError
             The argument passed is not actually a coroutine function.
         """
-        if not iscoroutinefunction(coro):
+        if not inspect.iscoroutinefunction(coro):
             msg = "The post-invoke hook must be a coroutine function."
             raise TypeError(msg)
 

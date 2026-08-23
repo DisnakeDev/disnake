@@ -90,20 +90,6 @@ def test_copy_doc() -> None:
     assert inspect.signature(func) == inspect.signature(func2)
 
 
-@mock.patch.object(warnings, "warn")
-@pytest.mark.parametrize(
-    ("instead", "msg"),
-    [(None, "stuff is deprecated."), ("other", "stuff is deprecated, use other instead.")],
-)
-def test_deprecated(mock_warn: mock.Mock, instead, msg) -> None:
-    @utils.deprecated(instead)
-    def stuff(num: int) -> int:
-        return num
-
-    assert stuff(42) == 42
-    mock_warn.assert_called_once_with(msg, stacklevel=3, category=DeprecationWarning)
-
-
 @mock.patch.object(utils, "_root_module_path", os.path.dirname(__file__))
 @pytest.mark.xfail(
     sys.version_info < (3, 12),
@@ -512,6 +498,33 @@ def test_resolve_template(url, expected) -> None:
             r"\*hi\* \~\~a\~ \|aaa\~\*\\\`\`" + "\n" + r"\`py x\`\`\` \_\_uwu\_\_ y",
         ),
         (
+            r"## disnake",
+            "disnake",
+            r"\## disnake",
+        ),
+        (
+            r"""Inside is a long list of why markdown is an amazing tool
+- markdown supports lists
+ - honestly its a great tool that markdown supports said lists
+   - this is wrong but uh we'll get to that
+""",
+            r"""Inside is a long list of why markdown is an amazing tool
+markdown supports lists
+honestly its a great tool that markdown supports said lists
+this is wrong but uh we'll get to that
+""",
+            r"""Inside is a long list of why markdown is an amazing tool
+\- markdown supports lists
+ \- honestly its a great tool that markdown supports said lists
+   \- this is wrong but uh we'll get to that
+""",
+        ),
+        (
+            "* there are also different ways to create a list\n* this is one of them",
+            "there are also different ways to create a list\nthis is one of them",
+            "\\* there are also different ways to create a list\n\\* this is one of them",
+        ),
+        (
             "aaaaa\n> h\n>> abc \n>>> nay*ern_",
             "aaaaa\nh\n>> abc \nnayern",
             "aaaaa\n\\> h\n>> abc \n\\>>> nay\\*ern\\_",
@@ -519,7 +532,6 @@ def test_resolve_template(url, expected) -> None:
         (
             "*h*\n> [li|nk](~~url~~) xyz **https://google.com/stuff?uwu=owo",
             "h\n xyz https://google.com/stuff?uwu=owo",
-            # NOTE: currently doesn't escape inside `[x](y)`, should that be changed?
             r"\*h\*" + "\n" + r"\> \[li|nk](~~url~~) xyz \*\*https://google.com/stuff?uwu=owo",
         ),
     ],

@@ -1,0 +1,1 @@
+|commands| Remove deprecated ``sync_commands``, ``sync_commands_debug``, and ``sync_commands_on_cog_unload`` parameters from :class:`~ext.commands.Bot`. Use :attr:`Bot.command_sync_flags <ext.commands.Bot.command_sync_flags>` instead.

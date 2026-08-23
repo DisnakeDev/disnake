@@ -21,7 +21,6 @@ from . import utils
 from .context_managers import Typing
 from .enums import (
     ChannelType,
-    PartyType,
     ThreadLayout,
     ThreadSortOrder,
     VideoQualityMode,
@@ -66,7 +65,7 @@ if TYPE_CHECKING:
     from .guild_scheduled_event import GuildScheduledEvent
     from .iterators import ChannelPinsIterator, HistoryIterator
     from .member import Member
-    from .message import Message, MessageReference, PartialMessage
+    from .message import Message, MessageReference, PartialMessage, SharedClientTheme
     from .poll import Poll
     from .state import ConnectionState
     from .threads import AnyThreadArchiveDuration, ForumTag
@@ -903,6 +902,7 @@ class GuildChannel(ABC):
         send_polls: bool | None = ...,
         send_tts_messages: bool | None = ...,
         send_voice_messages: bool | None = ...,
+        set_voice_channel_status: bool | None = ...,
         speak: bool | None = ...,
         start_embedded_activities: bool | None = ...,
         stream: bool | None = ...,
@@ -1301,7 +1301,7 @@ class GuildChannel(ABC):
         target_type: InviteTarget | None = None,
         target_user: User | None = None,
         target_users_file: File | None = None,
-        target_application: Snowflake | PartyType | None = None,
+        target_application: Snowflake | None = None,
         guild_scheduled_event: GuildScheduledEvent | None = None,
         roles: Collection[Role] | None = None,
     ) -> Invite:
@@ -1354,9 +1354,6 @@ class GuildChannel(ABC):
 
             .. versionadded:: 2.0
 
-            .. versionchanged:: 2.9
-                ``PartyType`` is deprecated, and :class:`.Snowflake` should be used instead.
-
         guild_scheduled_event: :class:`.GuildScheduledEvent` | :data:`None`
             The guild scheduled event to include with the invite.
 
@@ -1384,12 +1381,6 @@ class GuildChannel(ABC):
         :class:`.Invite`
             The newly created invite.
         """
-        if isinstance(target_application, PartyType):
-            utils.warn_deprecated(
-                "PartyType is deprecated and will be removed in future version",
-                stacklevel=2,
-            )
-            target_application = Object(target_application.value)
         data = await self._state.http.create_invite(
             self.id,
             reason=reason,
@@ -1474,6 +1465,7 @@ class Messageable:
         view: View = ...,
         components: MessageComponents = ...,
         poll: Poll = ...,
+        shared_client_theme: SharedClientTheme = ...,
     ) -> Message: ...
 
     @overload
@@ -1495,6 +1487,7 @@ class Messageable:
         view: View = ...,
         components: MessageComponents = ...,
         poll: Poll = ...,
+        shared_client_theme: SharedClientTheme = ...,
     ) -> Message: ...
 
     @overload
@@ -1516,6 +1509,7 @@ class Messageable:
         view: View = ...,
         components: MessageComponents = ...,
         poll: Poll = ...,
+        shared_client_theme: SharedClientTheme = ...,
     ) -> Message: ...
 
     @overload
@@ -1537,6 +1531,7 @@ class Messageable:
         view: View = ...,
         components: MessageComponents = ...,
         poll: Poll = ...,
+        shared_client_theme: SharedClientTheme = ...,
     ) -> Message: ...
 
     async def send(
@@ -1559,6 +1554,7 @@ class Messageable:
         view: View | None = None,
         components: MessageComponents | None = None,
         poll: Poll | None = None,
+        shared_client_theme: SharedClientTheme | None = None,
     ):
         r"""|coro|
 
@@ -1567,7 +1563,7 @@ class Messageable:
         The content must be a type that can convert to a string through ``str(content)``.
 
         At least one of ``content``, ``embed``/``embeds``, ``file``/``files``,
-        ``stickers``, ``components``, ``poll`` or ``view`` must be provided.
+        ``stickers``, ``components``, ``poll``, ``shared_client_theme``, or ``view`` must be provided.
 
         To upload a single file, the ``file`` parameter should be used with a
         single :class:`~disnake.File` object. To upload multiple files, the ``files``
@@ -1656,7 +1652,7 @@ class Messageable:
             .. note::
                 Passing v2 components here automatically sets the :attr:`~.MessageFlags.is_components_v2` flag.
                 Setting this flag cannot be reverted. Note that this also disables the
-                ``content``, ``embeds``, ``stickers``, and ``poll`` fields.
+                ``content``, ``embeds``, ``stickers``, ``poll``, and ``shared_client_theme`` fields.
 
         suppress_embeds: :class:`bool`
             Whether to suppress embeds for the message. This hides
@@ -1679,6 +1675,11 @@ class Messageable:
 
             .. versionadded:: 2.10
 
+        shared_client_theme: :class:`.SharedClientTheme`
+            The custom client-side theme to share with the message.
+
+            .. versionadded:: |vnext|
+
         Raises
         ------
         HTTPException
@@ -1693,144 +1694,43 @@ class Messageable:
             :class:`.MessageReference` or :class:`.PartialMessage`.
         ValueError
             The ``files`` or ``embeds`` list is too large, or
-            you tried to send v2 components together with ``content``, ``embeds``, ``stickers``, or ``poll``.
+            you tried to send v2 components together with ``content``,
+            ``embeds``, ``stickers``, ``poll``, or ``shared_client_theme``.
 
         Returns
         -------
         :class:`.Message`
             The message that was sent.
         """
+        from .webhook.async_ import handle_message_parameters_dict
+
         channel = await self._get_channel()
         state = self._state
-        content = str(content) if content is not None else None
 
-        if file is not None and files is not None:
-            msg = "cannot pass both file and files parameter to send()"
-            raise TypeError(msg)
-
-        if file is not None:
-            if not isinstance(file, File):
-                msg = "file parameter must be File"
-                raise TypeError(msg)
-            files = [file]
-
-        if embed is not None and embeds is not None:
-            msg = "cannot pass both embed and embeds parameter to send()"
-            raise TypeError(msg)
-
-        if embed is not None:
-            embeds = [embed]
-
-        embeds_payload = None
-        if embeds is not None:
-            if len(embeds) > 10:
-                msg = "embeds parameter must be a list of up to 10 elements"
-                raise ValueError(msg)
-            for embed in embeds:
-                if embed._files:
-                    files = files or []
-                    files.extend(embed._files.values())
-            embeds_payload = [embed.to_dict() for embed in embeds]
-
-        stickers_payload = None
-        if stickers is not None:
-            stickers_payload = [sticker.id for sticker in stickers]
-
-        poll_payload = None
-        if poll:
-            poll_payload = poll._to_dict()
-
-        allowed_mentions_payload = None
-        if allowed_mentions is None:
-            allowed_mentions_payload = state.allowed_mentions and state.allowed_mentions.to_dict()
-        elif state.allowed_mentions is not None:
-            allowed_mentions_payload = state.allowed_mentions.merge(allowed_mentions).to_dict()
-        else:
-            allowed_mentions_payload = allowed_mentions.to_dict()
-
-        if mention_author is not None:
-            allowed_mentions_payload = allowed_mentions_payload or AllowedMentions().to_dict()
-            allowed_mentions_payload["replied_user"] = bool(mention_author)
-
-        reference_payload = None
-        if reference is not None:
-            try:
-                reference_payload = reference.to_message_reference_dict()
-            except AttributeError:
-                msg = "reference parameter must be Message, MessageReference, or PartialMessage"
-                raise TypeError(msg) from None
-
-        is_v2 = False
-        if view is not None and components is not None:
-            msg = "cannot pass both view and components parameter to send()"
-            raise TypeError(msg)
-        elif view:
-            if not hasattr(view, "__discord_ui_view__"):
-                msg = f"view parameter must be View not {view.__class__!r}"
-                raise TypeError(msg)
-            components_payload = view.to_components()
-        elif components:
-            from .ui.action_row import normalize_components_to_dict
-
-            components_payload, is_v2 = normalize_components_to_dict(components)
-        else:
-            components_payload = None
-
-        # set cv2 flag automatically
-        if is_v2:
-            flags = MessageFlags._from_value(0 if flags is None else flags.value)
-            flags.is_components_v2 = True
-        # components v2 cannot be used with other content fields
-        if flags and flags.is_components_v2 and (content or embeds or stickers or poll):
-            msg = "Cannot use v2 components with content, embeds, stickers, or polls"
-            raise ValueError(msg)
-
-        flags_payload = None
-        if suppress_embeds is not None:
-            flags = MessageFlags._from_value(0 if flags is None else flags.value)
-            flags.suppress_embeds = suppress_embeds
-        if flags is not None:
-            flags_payload = flags.value
-
-        if files is not None:
-            if len(files) > 10:
-                msg = "files parameter must be a list of up to 10 elements"
-                raise ValueError(msg)
-            elif not all(isinstance(file, File) for file in files):
-                msg = "files parameter must be a list of File"
-                raise TypeError(msg)
-
-            try:
-                data = await state.http.send_files(
-                    channel.id,
-                    files=files,
-                    content=content,
-                    tts=tts,
-                    embeds=embeds_payload,
-                    nonce=nonce,
-                    allowed_mentions=allowed_mentions_payload,
-                    message_reference=reference_payload,
-                    stickers=stickers_payload,
-                    components=components_payload,
-                    poll=poll_payload,
-                    flags=flags_payload,
-                )
-            finally:
-                for f in files:
-                    f.close()
-        else:
+        with handle_message_parameters_dict(
+            content=content,
+            tts=tts,
+            nonce=nonce,
+            suppress_embeds=suppress_embeds,
+            flags=flags if flags is not None else MISSING,
+            file=file if file is not None else MISSING,
+            files=files if files is not None else MISSING,
+            embed=embed if embed is not None else MISSING,
+            embeds=embeds if embeds is not None else MISSING,
+            view=view if view is not None else MISSING,
+            components=components if components is not None else MISSING,
+            stickers=stickers if stickers is not None else MISSING,
+            poll=poll if poll is not None else MISSING,
+            shared_client_theme=shared_client_theme if shared_client_theme is not None else MISSING,
+            reference=reference,
+            allowed_mentions=allowed_mentions,
+            previous_allowed_mentions=self._state.allowed_mentions,
+            mention_author=mention_author,
+        ) as params:
             data = await state.http.send_message(
                 channel.id,
-                content,
-                tts=tts,
-                embeds=embeds_payload,
-                nonce=nonce,
-                allowed_mentions=allowed_mentions_payload,
-                message_reference=reference_payload,
-                stickers=stickers_payload,
-                components=components_payload,
-                poll=poll_payload,
-                flags=flags_payload,
+                files=params.files,
+                **params.payload,
             )
 
         ret = state.create_message(channel=channel, data=data)

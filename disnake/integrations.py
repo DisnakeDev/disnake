@@ -5,16 +5,10 @@ from __future__ import annotations
 import datetime
 from typing import TYPE_CHECKING, Any
 
+from . import utils
 from .enums import ExpireBehaviour, try_enum
 from .user import User
-from .utils import (
-    MISSING,
-    _get_as_snowflake,
-    deprecated,
-    parse_time,
-    snowflake_time,
-    warn_deprecated,
-)
+from .utils import MISSING, _get_as_snowflake, parse_time, snowflake_time
 
 __all__ = (
     "IntegrationAccount",
@@ -153,7 +147,7 @@ class Integration(PartialIntegration):
         self.user = User(state=self._state, data=user) if user else None
         self.enabled: bool = data["enabled"]
 
-    @deprecated("Guild.leave")
+    @utils.deprecated("Use `Guild.leave()` instead.")
     async def delete(self, *, reason: str | None = None) -> None:
         """|coro|
 
@@ -248,7 +242,7 @@ class StreamIntegration(Integration):
         """:class:`Role` | :data:`None` The role which the integration uses for subscribers."""
         return self.guild.get_role(self._role_id)  # pyright: ignore[reportArgumentType]
 
-    @deprecated()
+    @utils.deprecated("Bots cannot use this endpoint anymore.")
     async def edit(
         self,
         *,
@@ -305,7 +299,7 @@ class StreamIntegration(Integration):
         # Unsure if it returns the data or not as a result
         await self._state.http.edit_integration(self.guild.id, self.id, **payload)
 
-    @deprecated()
+    @utils.deprecated("Bots cannot use this endpoint anymore.")
     async def sync(self) -> None:
         """|coro|
 
@@ -352,7 +346,6 @@ class IntegrationApplication:
         "name",
         "icon",
         "description",
-        "_summary",
         "user",
     )
 
@@ -361,23 +354,8 @@ class IntegrationApplication:
         self.name: str = data["name"]
         self.icon: str | None = data["icon"]
         self.description: str = data["description"]
-        self._summary: str = data.get("summary", "")
         user = data.get("bot")
         self.user: User | None = User(state=state, data=user) if user else None
-
-    @property
-    def summary(self) -> str:
-        """:class:`str`: The application's summary. Can be an empty string.
-
-        .. deprecated:: 2.5
-
-            This field is deprecated by discord and is now always blank. Consider using :attr:`.description` instead.
-        """
-        warn_deprecated(
-            "summary is deprecated and will be removed in a future version. Consider using description instead.",
-            stacklevel=2,
-        )
-        return self._summary
 
 
 class BotIntegration(Integration):

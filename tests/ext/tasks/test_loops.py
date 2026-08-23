@@ -69,5 +69,5 @@ class TestLoops:
         with pytest.raises(TypeError, match="must be callable"):
             loop(cls=...)  # pyright: ignore[reportArgumentType, reportCallIssue]
 
-        @loop(lambda lf: Loop(lf))
+        @loop(lambda lf: Loop(lf))  # noqa: PLW0108
         async def task() -> None: ...
