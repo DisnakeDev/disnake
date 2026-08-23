@@ -630,7 +630,7 @@ class Invite(Hashable):
 
         Fetch the csv file with the target users for this invite.
         You must have the :attr:`~Permissions.manage_guild` or :attr:`~Permissions.view_audit_log`
-        permissions or to be the inviter to do this.
+        permissions or be the inviter to do this.
 
         .. versionadded:: |vnext|
 
