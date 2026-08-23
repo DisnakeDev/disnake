@@ -469,7 +469,7 @@ def coverage(session: nox.Session) -> None:
 
 @nox.session(default=False, python=False)
 def dev(session: nox.Session) -> None:
-    """Set up a development environment using pdm.
+    """Set up a development environment using uv.
 
     This will:
     - lock all dependencies with uv
