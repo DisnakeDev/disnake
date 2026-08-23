@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, TypeAlias, NamedTuple, Literal
+from typing import TYPE_CHECKING, Literal, NamedTuple, TypeAlias
 
 from .appinfo import PartialAppInfo
 from .asset import Asset
@@ -55,7 +55,6 @@ class TargetUserJob(NamedTuple):
     error_message: str | None
     created_at: datetime.datetime
     completed_at: datetime.datetime | None
-
 
 
 class PartialInviteChannel:
@@ -658,7 +657,7 @@ class Invite(Hashable):
         return await self._state.http.get_invite_target_users(self.code)
 
     async def update_target_users(self, *, file: File) -> None:
-        """|coro|
+        r"""|coro|
 
         Update the target users for this invite.
         You must have the :attr:`~Permissions.manage_guild` permission or be the inviter to do this.

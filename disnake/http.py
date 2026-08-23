@@ -139,7 +139,9 @@ def set_attachments(payload: dict[str, Any], files: Sequence[File]) -> None:
         payload["attachments"] = attachments
 
 
-def to_multipart(payload: Mapping[str, Any], files: Sequence[File], *, is_csv: bool = False) -> list[dict[str, Any]]:
+def to_multipart(
+    payload: Mapping[str, Any], files: Sequence[File], *, is_csv: bool = False
+) -> list[dict[str, Any]]:
     """Converts the payload and list of files to a multipart payload,
     as specified by https://docs.discord.com/developers/reference#uploading-files
     """

@@ -65,17 +65,17 @@ TargetUserJob
     .. attribute:: processed_users
 
         The total number of processed users so far
-        
+
         :type: :class:`int`
     .. attribute:: created_at
 
         The date when the job started
-        
+
         :type: :class:`~datetime.datetime`
     .. attribute:: completed_at
 
         The date when the job was completed, :data:`None` if it's still running
-        
+
         :type: :class:`~datetime.datetime` | :data:`None`
     .. attribute:: error_message
 

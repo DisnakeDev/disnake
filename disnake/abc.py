@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 import copy
 from abc import ABC
-from collections.abc import Callable, Mapping, Sequence, Collection
+from collections.abc import Callable, Collection, Mapping, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
