@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, TypeAlias
+from typing import TYPE_CHECKING, TypeAlias, NamedTuple, Literal
 
 from .appinfo import PartialAppInfo
 from .asset import Asset
@@ -39,7 +39,6 @@ if TYPE_CHECKING:
     from .types.invite import (
         Invite as InvitePayload,
         InviteGuild as InviteGuildPayload,
-        TargetUserJob,
         TargetUsersJobPayload,
     )
     from .user import User
@@ -47,6 +46,16 @@ if TYPE_CHECKING:
     GatewayInvitePayload: TypeAlias = InviteCreateEvent | InviteDeleteEvent
     InviteGuildType: TypeAlias = "Guild | PartialInviteGuild | Object"
     InviteChannelType: TypeAlias = "GuildChannel | PartialInviteChannel | Object"
+
+
+class TargetUserJob(NamedTuple):
+    status: Literal[0, 1, 2, 3]
+    total_users: int
+    processed_users: int
+    error_message: str | None
+    created_at: datetime.datetime
+    completed_at: datetime.datetime | None
+
 
 
 class PartialInviteChannel:
@@ -398,7 +407,7 @@ class Invite(Hashable):
 
         .. versionadded:: |vnext|
 
-    roles: :class:`list`\[:class:`Role`]
+    roles: :class:`tuple`\[:class:`Role`]
         A list of roles that will be assigned to the users when joining, if any.
 
         .. versionadded:: |vnext|
@@ -496,14 +505,14 @@ class Invite(Hashable):
             self.guild_scheduled_event: GuildScheduledEvent | None = None
 
         self.flags = GuildInviteFlags._from_value(data.get("flags", 0))
-        self.roles = [
+        self.roles = tuple(
             Role(
                 guild=self.guild,
                 state=self._state,
                 data=d,
             )
             for d in data.get("roles", [])
-        ]
+        )
 
     @classmethod
     def from_incomplete(cls, *, state: ConnectionState, data: InvitePayload) -> Self:
@@ -694,45 +703,17 @@ class Invite(Hashable):
 
         Returns
         -------
-        :class:`dict`\[:class:`str`, :class:`str` | :class:`int` | :class:`datetime.datetime` | :data:`None`]
-            A :class:`dict` containing the job status.
-
-            +-----------------+-------------------------------------------+-------------------------------------------------------------------------+
-            |    Key          |        Type                               |      Description                                                        |
-            +=================+===========================================+=========================================================================+
-            | status          | :class:`int`                              | The status of the job                                                   |
-            +-----------------+-------------------------------------------+-------------------------------------------------------------------------+
-            | total_users     | :class:`int`                              | The total number of targeted users                                      |
-            +-----------------+-------------------------------------------+-------------------------------------------------------------------------+
-            | processed_users | :class:`int`                              | The total number of processed users so far                              |
-            +-----------------+-------------------------------------------+-------------------------------------------------------------------------+
-            | created_at      | :class:`datetime.datetime`                | The date when the job started                                           |
-            +-----------------+-------------------------------------------+-------------------------------------------------------------------------+
-            | completed_at    | :class:`datetime.datetime` | :data:`None` | The date when the job was completed, :data:`None` if it's still running |
-            +-----------------+-------------------------------------------+-------------------------------------------------------------------------+
-            | error_message   | :class:`str` | :data:`None`               | The error message of the job, if any                                    |
-            +-----------------+-------------------------------------------+-------------------------------------------------------------------------+
-
-            +-------------------+---------------------+------------------------------------------------------------------+
-            |    Status Value   |        Name         |      Description                                                 |
-            +===================+=====================+==================================================================+
-            | ``0``             | ``UNSPECIFIED``     | The default value                                                |
-            +-------------------+---------------------+------------------------------------------------------------------+
-            | ``1``             | ``PROCESSING``      | The job is currently being processed                             |
-            +-------------------+---------------------+------------------------------------------------------------------+
-            | ``2``             | ``COMPLETED``       | The job has been completed successfully                          |
-            +-------------------+---------------------+------------------------------------------------------------------+
-            | ``3``             | ``FAILED``          | The job has failed, see ``error_message`` field for more details |
-            +-------------------+---------------------+------------------------------------------------------------------+
+        :class:`TargetUserJob`
+            A :class:`~typing.NamedTuple` containing the job status.
         """
         data: TargetUsersJobPayload = await self._state.http.get_invite_target_users_job_status(
             self.code
         )
-        return {
-            "status": data["status"],
-            "total_users": data["total_users"],
-            "processed_users": data["processed_users"],
-            "created_at": parse_time(data["created_at"]),
-            "completed_at": parse_time(data["completed_at"]),
-            "error_message": data["error_message"],
-        }
+        return TargetUserJob(
+            data["status"],
+            data["total_users"],
+            data["processed_users"],
+            data["error_message"],
+            parse_time(data["created_at"]),
+            parse_time(data["completed_at"]),
+        )

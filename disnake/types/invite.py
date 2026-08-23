@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, TypedDict
+from typing import Literal, TypedDict
 
 from typing_extensions import NotRequired
 
@@ -12,9 +12,6 @@ from .guild import InviteGuild
 from .guild_scheduled_event import GuildScheduledEvent
 from .role import PartialRole
 from .user import PartialUser
-
-if TYPE_CHECKING:
-    from datetime import datetime
 
 InviteType = Literal[0, 1, 2]
 InviteTargetType = Literal[1, 2]
@@ -60,8 +57,3 @@ class TargetUsersJobBase(TypedDict):
 class TargetUsersJobPayload(TargetUsersJobBase):
     created_at: str
     completed_at: str | None
-
-
-class TargetUserJob(TargetUsersJobBase):
-    created_at: datetime
-    completed_at: datetime | None
