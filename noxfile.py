@@ -472,11 +472,15 @@ def dev(session: nox.Session) -> None:
     """Set up a development environment using pdm.
 
     This will:
-    - lock all dependencies with pdm
-    - create a .venv/ directory, overwriting the existing one,
-    - install all dependencies needed for development.
+    - lock all dependencies with uv
+    - create a .venv/ directory, overwriting the existing one
+    - install all dependencies needed for development
     - install the pre-commit hook (prek)
     """
+    # clear venv-specific variables, otherwise this session will inherit and
+    # use the implicit nox script mode venv, rather than the outer .venv
+    session.env.update({"UV_PROJECT_ENVIRONMENT": None, "VIRTUAL_ENV": None})
+
     session.run("uv", "lock", external=True)
     session.run("uv", "venv", "--clear", external=True)
     session.run("uv", "sync", "--all-extras", external=True)
