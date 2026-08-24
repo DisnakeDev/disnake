@@ -591,8 +591,6 @@ class InteractionBotBase(CommonBotBase):
 
         Raises
         ------
-        TypeError
-            The name is not a string.
         ValueError
             The ``guild_id`` parameter was not provided in a case where different slash commands
             have the same name but different guild_ids.
