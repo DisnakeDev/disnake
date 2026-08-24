@@ -282,6 +282,10 @@ class FlagsMeta(type):
                     local_ns = frame.f_locals
                 else:
                     local_ns = frame.f_back.f_locals
+
+                # f_locals can be a proxy type in 3.15+
+                # (technically not in this case, since we're coming from a class scope, but still)
+                local_ns = dict(local_ns)
         finally:
             del frame
 
