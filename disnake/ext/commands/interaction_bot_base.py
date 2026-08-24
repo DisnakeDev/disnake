@@ -585,7 +585,7 @@ class InteractionBotBase(CommonBotBase):
             The name of the slash command to get.
         guild_id: :class:`int` | :data:`None`
             The guild ID corresponding to the slash command or :data:`None` if it's a global command.
-            If this is not specified but multiple commands with this name exist, and error will be raised.
+            If this is not specified but multiple commands with this name exist, an error will be raised.
 
             .. versionadded:: |vnext|
 
@@ -618,7 +618,7 @@ class InteractionBotBase(CommonBotBase):
             The name of the user command to get.
         guild_id: :class:`int` | :data:`None`
             The guild ID corresponding to the user command or :data:`None` if it's a global command.
-            If this is not specified but multiple commands with this name exist, and error will be raised.
+            If this is not specified but multiple commands with this name exist, an error will be raised.
 
             .. versionadded:: |vnext|
 
@@ -647,7 +647,7 @@ class InteractionBotBase(CommonBotBase):
             The name of the message command to get.
         guild_id: :class:`int` | :data:`None`
             The guild ID corresponding to the message command or :data:`None` if it's a global command.
-            If this is not specified but multiple commands with this name exist, and error will be raised.
+            If this is not specified but multiple commands with this name exist, an error will be raised.
 
             .. versionadded:: |vnext|
 
