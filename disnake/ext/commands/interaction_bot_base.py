@@ -342,9 +342,7 @@ class InteractionBotBase(CommonBotBase):
                 type=app_command.body.type, name=app_command.name, guild_id=guild_id
             )
             if cmd_index in self._all_app_commands:
-                raise ApplicationCommandRegistrationError(
-                    cmd_index.type, cmd_index.name, cmd_index.guild_id
-                )
+                raise ApplicationCommandRegistrationError(cmd_index)
             indices.append(cmd_index)
 
         for cmd_index in indices:

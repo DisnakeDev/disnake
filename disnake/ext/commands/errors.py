@@ -18,6 +18,7 @@ if TYPE_CHECKING:
     from disnake.types.snowflake import Snowflake, SnowflakeList
 
     from ._types import Coro
+    from .base_core import AppCmdIndex
     from .context import AnyContext
     from .cooldowns import BucketType, Cooldown
     from .flag_converter import Flag
@@ -1112,19 +1113,23 @@ class ApplicationCommandRegistrationError(CommandRegistrationError):
         or :data:`None` if it was a global command.
     """
 
-    def __init__(self, cmd_type: ApplicationCommandType, name: str, guild_id: int | None) -> None:
-        self.cmd_type: ApplicationCommandType = cmd_type
-        self.name: str = name
-        self.guild_id: int | None = guild_id
-        # backwards compatibility
-        self.alias_conflict: bool = False
-        if guild_id is None:
-            msg = f"Global {cmd_type._command_name} command {name} was specified earlier in your code."
+    def __init__(self, index: AppCmdIndex) -> None:
+        self.cmd_type: ApplicationCommandType = index.type
+        self.name: str = index.name
+        self.guild_id: int | None = index.guild_id
+        if self.guild_id is None:
+            msg = (
+                f"Global {self.cmd_type._command_name} command {self.name}"
+                " was specified earlier in your code."
+            )
         else:
             msg = (
-                f"Local {cmd_type._command_name} command {name} with"
-                f" guild ID {guild_id} was specified earlier in your code."
+                f"Local {self.cmd_type._command_name} command {self.name} with"
+                f" guild ID {self.guild_id} was specified earlier in your code."
             )
+
+        # backwards compatibility
+        self.alias_conflict: bool = False
         # this bypasses CommandRegistrationError.__init__
         super(CommandRegistrationError, self).__init__(msg)
 
