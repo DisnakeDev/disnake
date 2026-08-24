@@ -143,15 +143,20 @@ def _match_subcommand_chain(
     """
     if command.name != chain[0]:
         return None
-    if len(chain) == 1:
-        return command
-    if len(chain) == 2:
-        return command.children.get(chain[1])
-    if len(chain) == 3:
-        group = command.children.get(chain[1])
-        if isinstance(group, SubCommandGroup):
-            return group.children.get(chain[2])
-    return None
+
+    match len(chain):
+        case 1:
+            return command
+        case 2:
+            return command.children.get(chain[1])
+        case 3:
+            group = command.children.get(chain[1])
+            if isinstance(group, SubCommandGroup):
+                return group.children.get(chain[2])
+            return None
+        case _:
+            msg = "Expected at most 3 command name parts"
+            raise ValueError(msg)
 
 
 class InteractionBotBase(CommonBotBase):
@@ -593,7 +598,8 @@ class InteractionBotBase(CommonBotBase):
         ------
         ValueError
             The ``guild_id`` parameter was not provided in a case where different slash commands
-            have the same name but different guild_ids.
+            have the same name but different guild_ids, or the ``name`` parameter contained
+            more than 3 space-separated parts.
 
         Returns
         -------
