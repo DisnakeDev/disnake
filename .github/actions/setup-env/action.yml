@@ -54,6 +54,11 @@ runs:
         UV_PYTHON_DOWNLOADS: automatic
         PYTHON_VERSION: ${{ inputs.python-version }}
       run: |
+        # uv installs to ~/.local/bin, which is not in $PATH on Windows by default, and nox can't discover uv's python executables on its own
+        if [ "${{ runner.os }}" = "Windows" ]; then
+          echo "$USERPROFILE/.local/bin" >> $GITHUB_PATH
+        fi
+
         uv python install ${PYTHON_VERSION}
 
     - name: Install nox
