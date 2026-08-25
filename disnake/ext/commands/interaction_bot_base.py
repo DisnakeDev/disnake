@@ -604,6 +604,7 @@ class InteractionBotBase(CommonBotBase):
         :class:`InvokableSlashCommand` | :class:`SubCommandGroup` | :class:`SubCommand` | :data:`None`
             The slash command that was requested. If not found, returns :data:`None`.
         """
+        name = name.removeprefix("/")  # tiny QOL fixup
         chain = name.split()
         cmd = self._get_app_command(ApplicationCommandType.chat_input, chain[0], guild_id=guild_id)
         if cmd is None:
