@@ -192,11 +192,8 @@ jobs:
           python-version: ${{ matrix.session.python }}
 
       - name: Add .venv/bin to PATH
-        id: venv-bin
         run: |
-          uv venv .venv
           dirname "$(uv python find)" >> $GITHUB_PATH
-          echo python="$(uv python find)" >> $GITHUB_OUTPUT
 
       - name: Install dependencies
         # `--no-venv` to install in the main pdm venv instead of nox's pyright-specific one
@@ -206,9 +203,6 @@ jobs:
         env:
           NOXSESSION: ${{ matrix.session.name }}
           NOX_DEFAULT_VENV_BACKEND: "none"
-          ## needed to install specific dependencies
-          ## used internally when nox calls pip to install a dependency in the venv
-          PIP_PYTHON: ${{ steps.venv-bin.outputs.python }}
         run: |
           nox --install-only
 
