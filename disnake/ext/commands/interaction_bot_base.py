@@ -606,6 +606,9 @@ class InteractionBotBase(CommonBotBase):
         """
         name = name.removeprefix("/")  # tiny QOL fixup
         chain = name.split()
+        if not chain:
+            return None
+
         cmd = self._get_app_command(ApplicationCommandType.chat_input, chain[0], guild_id=guild_id)
         if cmd is None:
             return None
