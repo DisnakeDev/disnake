@@ -144,15 +144,15 @@ def _match_subcommand_chain(
     if command.name != chain[0]:
         return None
 
-    match len(chain):
-        case 1:
+    match chain:
+        case [_]:
             return command
-        case 2:
-            return command.children.get(chain[1])
-        case 3:
-            group = command.children.get(chain[1])
+        case [_, subcommand_name]:
+            return command.children.get(subcommand_name)
+        case [_, group_name, subcommand_name]:
+            group = command.children.get(group_name)
             if isinstance(group, SubCommandGroup):
-                return group.children.get(chain[2])
+                return group.children.get(subcommand_name)
             return None
         case _:
             msg = "Expected at most 3 command name parts"
