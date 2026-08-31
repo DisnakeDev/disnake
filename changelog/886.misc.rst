@@ -1,0 +1,1 @@
+Emit a :class:`SyncWarning` instead of sending an ephemeral interaction response when an unknown guild application command is invoked.
