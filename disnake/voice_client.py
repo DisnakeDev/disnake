@@ -853,7 +853,8 @@ class DaveState:
         if not self._session.has_established_group():
             return None
 
-        authenticator = self._session.get_last_epoch_authenticator()
+        if not (authenticator := self._session.get_last_epoch_authenticator()):
+            return None
         return dave.generate_displayable_code(authenticator, 30, 5)
 
     async def get_user_verification_code(self, user_id: int) -> str | None:
@@ -861,8 +862,9 @@ class DaveState:
             return None
 
         # version is currently always 0
-        d = await self._session.get_pairwise_fingerprint(0, str(user_id))
-        return dave.generate_displayable_code(d, 45, 5)
+        if not (fp := await self._session.get_pairwise_fingerprint(0, str(user_id))):
+            return None
+        return dave.generate_displayable_code(fp, 45, 5)
 
     def can_encrypt(self) -> bool:
         return self._encryptor is not None and self._encryptor.has_key_ratchet()
@@ -942,6 +944,9 @@ class DaveState:
             #  - The voice gateway sends a select_protocol_ack opcode (4) that includes a non-zero protocol version [in which case we call `prepare_epoch(1)`]
             #  - The voice gateway announces that a group is being created or re-created via the dave_protocol_prepare_epoch opcode (24) with epoch_id = 1"
             key_package = self._session.get_marshalled_key_package()
+            if not key_package:
+                msg = "Failed to create new MLS key package"
+                raise RuntimeError(msg)
             await self.vc.ws.send_dave_mls_key_package(key_package)
 
             _log.debug("finished re-initializing MLS session")
