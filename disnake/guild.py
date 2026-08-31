@@ -5,7 +5,7 @@ from __future__ import annotations
 import copy
 import datetime
 import unicodedata
-from collections.abc import Iterable, Sequence
+from collections.abc import Iterable, Mapping, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -1311,14 +1311,14 @@ class Guild(Hashable):
         self,
         name: str,
         channel_type: ChannelType,
-        overwrites: dict[Role | Member, PermissionOverwrite] = MISSING,
+        overwrites: Mapping[Role | Member, PermissionOverwrite] = MISSING,
         category: Snowflake | None = None,
         **options: Any,
     ) -> Any:
         if overwrites is MISSING:
             overwrites = {}
-        elif not isinstance(overwrites, dict):
-            msg = "overwrites parameter expects a dict."
+        elif not isinstance(overwrites, Mapping):
+            msg = "overwrites parameter expects a mapping/dict."
             raise TypeError(msg)
 
         perms = []
@@ -1360,7 +1360,7 @@ class Guild(Hashable):
         default_auto_archive_duration: AnyThreadArchiveDuration = MISSING,
         nsfw: bool = MISSING,
         news: bool = MISSING,
-        overwrites: dict[Role | Member, PermissionOverwrite] = MISSING,
+        overwrites: Mapping[Role | Member, PermissionOverwrite] = MISSING,
     ) -> TextChannel:
         r"""|coro|
 
@@ -1406,8 +1406,8 @@ class Guild(Hashable):
         ----------
         name: :class:`str`
             The channel's name.
-        overwrites: :class:`dict`\[:class:`Role` | :class:`Member`, :class:`PermissionOverwrite`]
-            A :class:`dict` of target (either a role or a member) to
+        overwrites: :class:`~collections.abc.Mapping`\[:class:`Role` | :class:`Member`, :class:`PermissionOverwrite`]
+            A :class:`~collections.abc.Mapping` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply upon creation of a channel.
             Useful for creating secret channels.
         category: :class:`abc.Snowflake` | :data:`None`
@@ -1514,7 +1514,7 @@ class Guild(Hashable):
         video_quality_mode: VideoQualityMode = MISSING,
         nsfw: bool = MISSING,
         slowmode_delay: int = MISSING,
-        overwrites: dict[Role | Member, PermissionOverwrite] = MISSING,
+        overwrites: Mapping[Role | Member, PermissionOverwrite] = MISSING,
         reason: str | None = None,
     ) -> VoiceChannel:
         r"""|coro|
@@ -1527,9 +1527,8 @@ class Guild(Hashable):
         Parameters
         ----------
         name: :class:`str`
-            The channel's name.
-        overwrites: :class:`dict`\[:class:`Role` | :class:`Member`, :class:`PermissionOverwrite`]
-            A :class:`dict` of target (either a role or a member) to
+        overwrites: :class:`~collections.abc.Mapping`\[:class:`Role` | :class:`Member`, :class:`PermissionOverwrite`]
+            A :class:`~collections.abc.Mapping` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply upon creation of a channel.
             Useful for creating secret channels.
         category: :class:`abc.Snowflake` | :data:`None`
@@ -1629,7 +1628,7 @@ class Guild(Hashable):
         user_limit: int = MISSING,
         rtc_region: str | VoiceRegion | None = MISSING,
         video_quality_mode: VideoQualityMode = MISSING,
-        overwrites: dict[Role | Member, PermissionOverwrite] = MISSING,
+        overwrites: Mapping[Role | Member, PermissionOverwrite] = MISSING,
         category: Snowflake | None = None,
         nsfw: bool = MISSING,
         slowmode_delay: int = MISSING,
@@ -1654,8 +1653,8 @@ class Guild(Hashable):
             .. versionchanged:: 2.5
                 This is no longer required to be provided.
 
-        overwrites: :class:`dict`\[:class:`Role` | :class:`Member`, :class:`PermissionOverwrite`]
-            A :class:`dict` of target (either a role or a member) to
+        overwrites: :class:`~collections.abc.Mapping`\[:class:`Role` | :class:`Member`, :class:`PermissionOverwrite`]
+            A :class:`~collections.abc.Mapping` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply upon creation of a channel.
             Useful for creating secret channels.
         category: :class:`abc.Snowflake` | :data:`None`
@@ -1757,7 +1756,7 @@ class Guild(Hashable):
         default_thread_slowmode_delay: int = MISSING,
         default_auto_archive_duration: AnyThreadArchiveDuration | None = None,
         nsfw: bool = MISSING,
-        overwrites: dict[Role | Member, PermissionOverwrite] = MISSING,
+        overwrites: Mapping[Role | Member, PermissionOverwrite] = MISSING,
         available_tags: Sequence[ForumTag] | None = None,
         default_reaction: str | Emoji | PartialEmoji | None = None,
         default_sort_order: ThreadSortOrder | None = None,
@@ -1804,8 +1803,8 @@ class Guild(Hashable):
             Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
         nsfw: :class:`bool`
             Whether to mark the channel as NSFW.
-        overwrites: :class:`dict`\[:class:`Role` | :class:`Member`, :class:`PermissionOverwrite`]
-            A :class:`dict` of target (either a role or a member) to
+        overwrites: :class:`~collections.abc.Mapping`\[:class:`Role` | :class:`Member`, :class:`PermissionOverwrite`]
+            A :class:`~collections.abc.Mapping` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply upon creation of a channel.
             Useful for creating secret channels.
         available_tags: :class:`~collections.abc.Sequence`\[:class:`ForumTag`] | :data:`None`
@@ -1907,7 +1906,7 @@ class Guild(Hashable):
         default_thread_slowmode_delay: int = MISSING,
         default_auto_archive_duration: AnyThreadArchiveDuration | None = None,
         nsfw: bool = MISSING,
-        overwrites: dict[Role | Member, PermissionOverwrite] = MISSING,
+        overwrites: Mapping[Role | Member, PermissionOverwrite] = MISSING,
         available_tags: Sequence[ForumTag] | None = None,
         default_reaction: str | Emoji | PartialEmoji | None = None,
         default_sort_order: ThreadSortOrder | None = None,
@@ -1947,8 +1946,8 @@ class Guild(Hashable):
             Must be one of ``60``, ``1440``, ``4320``, or ``10080``.
         nsfw: :class:`bool`
             Whether to mark the channel as NSFW.
-        overwrites: :class:`dict`\[:class:`Role` | :class:`Member`, :class:`PermissionOverwrite`]
-            A :class:`dict` of target (either a role or a member) to
+        overwrites: :class:`~collections.abc.Mapping`\[:class:`Role` | :class:`Member`, :class:`PermissionOverwrite`]
+            A :class:`~collections.abc.Mapping` of target (either a role or a member) to
             :class:`PermissionOverwrite` to apply upon creation of a channel.
             Useful for creating secret channels.
         available_tags: :class:`~collections.abc.Sequence`\[:class:`ForumTag`] | :data:`None`
@@ -2026,7 +2025,7 @@ class Guild(Hashable):
         self,
         name: str,
         *,
-        overwrites: dict[Role | Member, PermissionOverwrite] = MISSING,
+        overwrites: Mapping[Role | Member, PermissionOverwrite] = MISSING,
         reason: str | None = None,
         position: int = MISSING,
     ) -> CategoryChannel:
@@ -2046,8 +2045,8 @@ class Guild(Hashable):
         ----------
         name: :class:`str`
             The category's name.
-        overwrites: :class:`dict`\[:class:`Role` | :class:`Member`, :class:`PermissionOverwrite`]
-            A :class:`dict` of target (either a role or a member) to
+        overwrites: :class:`~collections.abc.Mapping`\[:class:`Role` | :class:`Member`, :class:`PermissionOverwrite`]
+            A :class:`~collections.abc.Mapping` of target (either a role or a member) to
             :class:`PermissionOverwrite` which can be synced to channels.
         position: :class:`int`
             The position in the channel list. This is a number that starts
@@ -4052,7 +4051,7 @@ class Guild(Hashable):
         return Role(guild=self, data=data, state=self._state)
 
     async def edit_role_positions(
-        self, positions: dict[Snowflake, int], *, reason: str | None = None
+        self, positions: Mapping[Snowflake, int], *, reason: str | None = None
     ) -> list[Role]:
         r"""|coro|
 
@@ -4080,9 +4079,9 @@ class Guild(Hashable):
 
         Parameters
         ----------
-        positions
-            A :class:`dict` of :class:`Role` to :class:`int` to change the positions
-            of each given role.
+        positions: :class:`~collections.abc.Mapping`\[:class:`abc.Snowflake`, :class:`int`]
+            A :class:`~collections.abc.Mapping` of :class:`Role` to :class:`int` to
+            change the positions of each given role.
         reason: :class:`str` | :data:`None`
             The reason for editing the role positions. Shows up on the audit log.
 
@@ -4100,8 +4099,8 @@ class Guild(Hashable):
         :class:`list`\[:class:`Role`]
             A list of all the roles in the guild.
         """
-        if not isinstance(positions, dict):
-            msg = "positions parameter expects a dict."
+        if not isinstance(positions, Mapping):
+            msg = "positions parameter expects a mapping/dict."
             raise TypeError(msg)
 
         role_positions: list[Any] = []
