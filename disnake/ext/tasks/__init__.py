@@ -97,9 +97,6 @@ class Loop(Generic[LF]):
         reconnect: bool = True,
         loop: asyncio.AbstractEventLoop = MISSING,
     ) -> None:
-        """.. note:
-        If you overwrite ``__init__`` arguments, make sure to redefine .clone too.
-        """
         if not inspect.iscoroutinefunction(coro):
             msg = f"Expected a coroutine function, got {coro.__class__.__name__!r} instead."
             raise TypeError(msg)
