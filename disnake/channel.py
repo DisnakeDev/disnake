@@ -4986,13 +4986,16 @@ class DMChannel(disnake.abc.Messageable, Hashable):
         return PartialMessage(channel=self, id=message_id)
 
     def is_obfuscated(self) -> Literal[False]:
-        """This only exists for compatibility with :meth:`abc.GuildChannel.is_obfuscated`,
-        and will always be ``False``.
+        """Whether the channel's metadata is obfuscated.
+
+        .. note::
+            This only exists for compatibility with :meth:`abc.GuildChannel.is_obfuscated`,
+            and will always be ``False``.
 
         .. versionadded:: |vnext|
 
         :return type: :class:`bool`
-        """  # noqa: D404
+        """
         return False
 
 
@@ -5172,13 +5175,16 @@ class GroupChannel(disnake.abc.Messageable, Hashable):
         await self._state.http.leave_group(self.id)
 
     def is_obfuscated(self) -> Literal[False]:
-        """This only exists for compatibility with :meth:`abc.GuildChannel.is_obfuscated`,
-        and will always be ``False``.
+        """Whether the channel's metadata is obfuscated.
+
+        .. note::
+            This only exists for compatibility with :meth:`abc.GuildChannel.is_obfuscated`,
+            and will always be ``False``.
 
         .. versionadded:: |vnext|
 
         :return type: :class:`bool`
-        """  # noqa: D404
+        """
         return False
 
 
