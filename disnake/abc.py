@@ -1050,8 +1050,8 @@ class GuildChannel(ABC):
         # original permissions of the channel
         overwrites_payload: list[PermissionOverwritePayload]
         if overwrites is not MISSING:
-            if not isinstance(overwrites, dict):
-                msg = "overwrites parameter expects a dict."
+            if not isinstance(overwrites, Mapping):
+                msg = "overwrites parameter expects a mapping/dict."
                 raise TypeError(msg)
 
             overwrites_payload = []
