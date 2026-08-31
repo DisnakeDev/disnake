@@ -6,6 +6,7 @@ from typing import Literal, TypedDict
 
 from typing_extensions import NotRequired
 
+from .appinfo import AppInfo
 from .channel import ChannelType
 from .components import MessageTopLevelComponent
 from .embed import Embed
@@ -47,6 +48,9 @@ class Attachment(TypedDict):
     duration_secs: NotRequired[float]
     waveform: NotRequired[str]
     flags: NotRequired[int]
+    clip_participants: NotRequired[list[User]]
+    clip_created_at: NotRequired[str]
+    application: NotRequired[AppInfo | None]
 
 
 MessageActivityType = Literal[1, 2, 3, 5]
