@@ -2,14 +2,17 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, TypeAlias
+from typing import TYPE_CHECKING, Literal, NamedTuple, TypeAlias
 
 from .appinfo import PartialAppInfo
 from .asset import Asset
 from .enums import ChannelType, InviteTarget, InviteType, NSFWLevel, VerificationLevel, try_enum
+from .file import File
+from .flags import GuildInviteFlags
 from .guild_scheduled_event import GuildScheduledEvent
 from .mixins import Hashable
 from .object import Object
+from .role import Role
 from .utils import _get_as_snowflake, parse_time, snowflake_time
 from .welcome_screen import WelcomeScreen
 
@@ -33,12 +36,25 @@ if TYPE_CHECKING:
     )
     from .types.gateway import InviteCreateEvent, InviteDeleteEvent
     from .types.guild import GuildFeature
-    from .types.invite import Invite as InvitePayload, InviteGuild as InviteGuildPayload
+    from .types.invite import (
+        Invite as InvitePayload,
+        InviteGuild as InviteGuildPayload,
+        TargetUsersJobPayload,
+    )
     from .user import User
 
     GatewayInvitePayload: TypeAlias = InviteCreateEvent | InviteDeleteEvent
     InviteGuildType: TypeAlias = "Guild | PartialInviteGuild | Object"
     InviteChannelType: TypeAlias = "GuildChannel | PartialInviteChannel | Object"
+
+
+class TargetUserJob(NamedTuple):
+    status: Literal[0, 1, 2, 3]
+    total_users: int
+    processed_users: int
+    error_message: str | None
+    created_at: datetime.datetime
+    completed_at: datetime.datetime | None
 
 
 class PartialInviteChannel:
@@ -251,7 +267,7 @@ class PartialInviteGuild:
 
 
 class Invite(Hashable):
-    """Represents a Discord :class:`Guild` or :class:`abc.GuildChannel` invite.
+    r"""Represents a Discord :class:`Guild` or :class:`abc.GuildChannel` invite.
 
     Depending on the way this object was created, some of the attributes can
     have a value of :data:`None` (see table below).
@@ -384,6 +400,16 @@ class Invite(Hashable):
         The partial guild's welcome screen, if any.
 
         .. versionadded:: 2.5
+
+    flags: :class:`GuildInviteFlags`
+        The flags of this invite.
+
+        .. versionadded:: |vnext|
+
+    roles: :class:`tuple`\[:class:`Role`]
+        A list of roles that will be assigned to the users when joining, if any.
+
+        .. versionadded:: |vnext|
     """
 
     __slots__ = (
@@ -405,6 +431,8 @@ class Invite(Hashable):
         "expires_at",
         "guild_scheduled_event",
         "guild_welcome_screen",
+        "flags",
+        "roles",
         "_state",
     )
 
@@ -474,6 +502,16 @@ class Invite(Hashable):
             )
         else:
             self.guild_scheduled_event: GuildScheduledEvent | None = None
+
+        self.flags = GuildInviteFlags._from_value(data.get("flags", 0))
+        self.roles = tuple(
+            Role(
+                guild=self.guild,
+                state=self._state,
+                data=d,
+            )
+            for d in data.get("roles", [])
+        )
 
     @classmethod
     def from_incomplete(cls, *, state: ConnectionState, data: InvitePayload) -> Self:
@@ -594,3 +632,87 @@ class Invite(Hashable):
             Revoking the invite failed.
         """
         await self._state.http.delete_invite(self.code, reason=reason)
+
+    async def fetch_target_users(self) -> str:
+        """|coro|
+
+        Fetch the csv file with the target users for this invite.
+        You must have the :attr:`~Permissions.manage_guild` or :attr:`~Permissions.view_audit_log`
+        permissions or be the inviter to do this.
+
+        .. versionadded:: |vnext|
+
+        Raises
+        ------
+        Forbidden
+            You do not have permissions to see the target users.
+        HTTPException
+            Getting the target users failed.
+
+        Returns
+        -------
+        :class:`str`
+            The target users for this invite.
+        """
+        return await self._state.http.get_invite_target_users(self.code)
+
+    async def update_target_users(self, *, file: File) -> None:
+        r"""|coro|
+
+        Update the target users for this invite.
+        You must have the :attr:`~Permissions.manage_guild` permission or be the inviter to do this.
+
+        .. versionadded:: |vnext|
+
+        Parameters
+        ----------
+        file: :class:`File`
+            The csv file containing the new user ids to target.
+            This file must only have valid user ids separated by ``\n``.
+            A valid file content would look like this::
+
+                710570210159099984
+                1081815963990761542
+                ... other user ids
+
+        Raises
+        ------
+        Forbidden
+            You do not have permissions to update the target users.
+        HTTPException
+            Updating the target users failed.
+        """
+        return await self._state.http.update_invite_target_users(self.code, file=file)
+
+    async def fetch_target_users_job_status(self) -> TargetUserJob:
+        r"""|coro|
+
+        Get the target users job status.
+        You must have the :attr:`~Permissions.manage_guild` or :attr:`~Permissions.view_audit_log`
+        permissions or be the inviter to do this.
+
+        .. versionadded:: |vnext|
+
+        Raises
+        ------
+        Forbidden
+            You do not have permissions to get the target users job status.
+        HTTPException
+            Getting the target users job status failed.
+
+        Returns
+        -------
+        :class:`TargetUserJob`
+            A :class:`~typing.NamedTuple` containing the job status.
+        """
+        data: TargetUsersJobPayload = await self._state.http.get_invite_target_users_job_status(
+            self.code
+        )
+        return TargetUserJob(
+            data["status"],
+            data["total_users"],
+            data["processed_users"],
+            data["error_message"],
+            parse_time(data["created_at"]),
+            parse_time(data["completed_at"]),
+        )

@@ -10,6 +10,7 @@ from .appinfo import PartialAppInfo
 from .channel import InviteChannel
 from .guild import InviteGuild
 from .guild_scheduled_event import GuildScheduledEvent
+from .role import PartialRole
 from .user import PartialUser
 
 InviteType = Literal[0, 1, 2]
@@ -42,3 +43,17 @@ class Invite(_InviteMetadata):
     approximate_member_count: NotRequired[int]
     expires_at: str | None
     guild_scheduled_event: NotRequired[GuildScheduledEvent]
+    flags: NotRequired[int]
+    roles: NotRequired[list[PartialRole]]
+
+
+class TargetUsersJobBase(TypedDict):
+    status: Literal[0, 1, 2, 3]
+    total_users: int
+    processed_users: int
+    error_message: str | None
+
+
+class TargetUsersJobPayload(TargetUsersJobBase):
+    created_at: str
+    completed_at: str | None
