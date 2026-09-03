@@ -1405,6 +1405,10 @@ class EntryPointCommand(ApplicationCommand):
         The command's name.
     name_localizations: :class:`.LocalizationValue`
         Localizations for ``name``.
+    description: :class:`str`
+        The command's description.
+    description_localizations: :class:`.LocalizationValue`
+        Localizations for ``description``.
     nsfw: :class:`bool`
         Whether this command is :ddocs:`age-restricted <interactions/application-commands#age-restricted-commands>`.
         Defaults to ``False``.
@@ -1421,12 +1425,15 @@ class EntryPointCommand(ApplicationCommand):
 
     __repr_attributes__: ClassVar[tuple[str, ...]] = (
         *tuple(n for n in ApplicationCommand.__repr_attributes__ if n != "type"),
+        "description",
         "handler",
     )
 
     def __init__(
         self,
         name: LocalizedRequired,
+        # TODO: is this required?
+        description: LocalizedRequired,
         default_member_permissions: Permissions | int | None = None,
         nsfw: bool | None = None,
         install_types: ApplicationInstallTypes | None = None,
@@ -1444,18 +1451,28 @@ class EntryPointCommand(ApplicationCommand):
         # TODO: do the chat_input name restrictions also apply here?
         _validate_name(self.name)
 
+        desc_loc = Localized._cast(description, True)
+        self.description: str = desc_loc.string
+        self.description_localizations: LocalizationValue = desc_loc.localizations
+
         self.handler: ApplicationCommandHandlerType = (
             handler or ApplicationCommandHandlerType.discord
         )
 
     def __eq__(self, other: object) -> bool:
         return (
-            super().__eq__(other) and self.handler == other.handler  # pyright: ignore[reportAttributeAccessIssue]
+            super().__eq__(other)
+            and self.description == other.description  # pyright: ignore[reportAttributeAccessIssue]
+            and self.description_localizations == other.description_localizations  # pyright: ignore[reportAttributeAccessIssue]
+            and self.handler == other.handler  # pyright: ignore[reportAttributeAccessIssue]
         )
 
     def to_dict(self) -> EditApplicationCommandPayload:
         res = super().to_dict()
         res["handler"] = self.handler.value
+        res["description"] = self.description
+        if (loc := self.description_localizations.data) is not None:
+            res["description_localizations"] = loc
         return res
 
     def localize(self, store: LocalizationProtocol) -> None:
@@ -1464,6 +1481,8 @@ class EntryPointCommand(ApplicationCommand):
             for value in name_loc.values():
                 # TODO: see above
                 _validate_name(value)
+
+        self.description_localizations._link(store)
 
 
 class APIEntryPointCommand(EntryPointCommand, _APIApplicationCommandMixin):
@@ -1477,6 +1496,10 @@ class APIEntryPointCommand(EntryPointCommand, _APIApplicationCommandMixin):
         The command's name.
     name_localizations: :class:`.LocalizationValue`
         Localizations for ``name``.
+    description: :class:`str`
+        The command's description.
+    description_localizations: :class:`.LocalizationValue`
+        Localizations for ``description``.
     nsfw: :class:`bool`
         Whether this command is :ddocs:`age-restricted <interactions/application-commands#age-restricted-commands>`.
     install_types: :class:`ApplicationInstallTypes` | :data:`None`
@@ -1512,6 +1535,7 @@ class APIEntryPointCommand(EntryPointCommand, _APIApplicationCommandMixin):
 
         self = cls(
             name=Localized(data["name"], data=data.get("name_localizations")),
+            description=Localized(data["description"], data=data.get("description_localizations")),
             default_member_permissions=_get_as_snowflake(data, "default_member_permissions"),
             nsfw=data.get("nsfw"),
             install_types=(
