@@ -588,7 +588,7 @@ class Loop(Generic[LF]):
                 )
 
         next_date = self._last_iteration
-        if next_time < next_date.timetz():
+        if next_time <= next_date.timetz():
             next_date += datetime.timedelta(days=1)
 
         self._time_index += 1
