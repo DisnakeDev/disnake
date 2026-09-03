@@ -1,0 +1,1 @@
+|commands| Run the parent slash command's ``after_invoke`` hook before invoking subcommands, instead of the other way around. This now matches the behaviour of prefix commands as well.
