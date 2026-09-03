@@ -1441,6 +1441,8 @@ class EntryPointCommand(ApplicationCommand):
             install_types=install_types,
             contexts=contexts,
         )
+        # TODO: do the chat_input name restrictions also apply here?
+        _validate_name(self.name)
 
         self.handler: ApplicationCommandHandlerType = (
             handler or ApplicationCommandHandlerType.discord
@@ -1455,6 +1457,13 @@ class EntryPointCommand(ApplicationCommand):
         res = super().to_dict()
         res["handler"] = self.handler.value
         return res
+
+    def localize(self, store: LocalizationProtocol) -> None:
+        super().localize(store)
+        if (name_loc := self.name_localizations.data) is not None:
+            for value in name_loc.values():
+                # TODO: see above
+                _validate_name(value)
 
 
 class APIEntryPointCommand(EntryPointCommand, _APIApplicationCommandMixin):
