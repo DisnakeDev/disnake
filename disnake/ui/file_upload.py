@@ -38,7 +38,8 @@ class FileUpload(UIComponent):
         Defaults to ``True``.
     file_types: :class:`~collections.abc.Sequence`\[:class:`str`] | :data:`None`
         A list of file types that can be uploaded with this component.
-        Allowed values are ``image``, ``video``, and ``audio``, as well as
+        Allowed values are ``image``, ``video``, and ``audio`` (see
+        :ddocs:`API Reference <reference#file-type-filtering>`), as well as
         any dot-prefixed extension such as ``.pdf`` (up to 10).
         Defaults to all types (i.e. :data:`None`).
 

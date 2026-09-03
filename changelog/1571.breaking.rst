@@ -1,1 +1,1 @@
-Applicable :class:`InteractionResponse` methods (e.g. :meth:`~InteractionResponse.send_message`), as well as :meth:`Interaction.send`, now return an :class:`InteractionCallbackResponse` object instead of :data:`None`.
+Applicable :class:`InteractionResponse` methods (e.g. :meth:`~InteractionResponse.send_message`) now return an :class:`InteractionCallbackResponse` object instead of :data:`None`. Similarly, :meth:`Interaction.send` now returns the message that was sent instead of :data:`None`.
