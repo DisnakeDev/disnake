@@ -378,10 +378,10 @@ ApplicationCommandInteractionDataResolved = InteractionDataResolved
 
 
 # People asked about shorter aliases, let's see which one catches on the most
-CommandInteraction = ApplicationCommandInteraction[ClientT]
-CmdInteraction = ApplicationCommandInteraction[ClientT]
-CommandInter = ApplicationCommandInteraction[ClientT]
-CmdInter = ApplicationCommandInteraction[ClientT]
-AppCommandInteraction = ApplicationCommandInteraction[ClientT]
-AppCommandInter = ApplicationCommandInteraction[ClientT]
-AppCmdInter = ApplicationCommandInteraction[ClientT]
+CommandInteraction = ApplicationCommandInteraction
+CmdInteraction = ApplicationCommandInteraction
+CommandInter = ApplicationCommandInteraction
+CmdInter = ApplicationCommandInteraction
+AppCommandInteraction = ApplicationCommandInteraction
+AppCommandInter = ApplicationCommandInteraction
+AppCmdInter = ApplicationCommandInteraction
