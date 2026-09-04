@@ -1133,7 +1133,12 @@ def normalise_optional_params(parameters: Iterable[Any]) -> tuple[Any, ...]:
 
 
 def _resolve_typealiastype(
-    tp: Any, globals: dict[str, Any], locals: dict[str, Any], cache: dict[str, Any]
+    tp: Any,
+    globals: dict[str, Any],
+    locals: dict[str, Any],
+    cache: dict[str, Any],
+    *,
+    return_annotated: bool,
 ) -> Any:
     # Use __module__ to get the (global) namespace in which the type alias was defined.
     if mod := sys.modules.get(tp.__module__):
@@ -1146,10 +1151,11 @@ def _resolve_typealiastype(
 
     # Accessing `__value__` automatically evaluates the type alias in the annotation scope.
     # (recurse to resolve possible forwardrefs, aliases, etc.)
-    return evaluate_annotation(tp.__value__, globals, locals, cache)
+    return evaluate_annotation(
+        tp.__value__, globals, locals, cache, return_annotated=return_annotated
+    )
 
 
-# FIXME: this should be split up into smaller functions for clarity and easier maintenance
 def evaluate_annotation(
     tp: Any,
     globals: dict[str, Any],
@@ -1158,6 +1164,11 @@ def evaluate_annotation(
     *,
     implicit_str: bool = True,
     source_info: types.CodeType | None = None,
+    # whether Annotated[X, Y] should be turned into <resolved Y> or Annotated[<resolved X>, <resolved Y>]
+    # (for simplicity, this is forwarded into recursive calls only when they are not operating on
+    # a subsection of the annotation, i.e. mainly implicit forwardrefs and typealiastypes;
+    # we don't care about any inner Annotated[] types, only the outer one, if any)
+    return_annotated: bool = False,
 ) -> Any:
     if isinstance(tp, ForwardRef):
         tp = tp.__forward_arg__
@@ -1165,8 +1176,10 @@ def evaluate_annotation(
         implicit_str = True
 
     if implicit_str and isinstance(tp, str):
-        if tp in cache:
-            return cache[tp]
+        # separate cache entries for true/false, as the evaluate_annotation return type changes
+        cache_key = f"{tp}--annotated" if return_annotated else tp
+        if cache_key in cache:
+            return cache[cache_key]
 
         if source_info is not None:
             # compile the annotation to add filename/line no. data for warnings & tracebacks
@@ -1178,16 +1191,32 @@ def evaluate_annotation(
         # this is how annotations are supposed to be unstringifed
         evaluated = eval(source, globals, locals)  # noqa: S307
         # recurse to resolve nested args further
-        evaluated = evaluate_annotation(evaluated, globals, locals, cache, source_info=source_info)
+        evaluated = evaluate_annotation(
+            evaluated,
+            globals,
+            locals,
+            cache,
+            source_info=source_info,
+            return_annotated=return_annotated,
+        )
 
-        cache[tp] = evaluated
+        cache[cache_key] = evaluated
         return evaluated
 
     # Annotated[X, Y], where Y is the converter we need
+    # (n.b. this must go before any `__args__` logic, as Annotated would match that as well)
     if get_origin(tp) is Annotated:
-        return evaluate_annotation(
+        meta_resolved = evaluate_annotation(
             tp.__metadata__[0], globals, locals, cache, source_info=source_info
         )
+        if not return_annotated:
+            return meta_resolved
+
+        # __origin__ in this case is not `Annotated`, but rather `X` (as above)
+        type_resolved = evaluate_annotation(
+            tp.__origin__, globals, locals, cache, source_info=source_info
+        )
+        return Annotated[type_resolved, meta_resolved]
 
     # GenericAlias / UnionType
     if hasattr(tp, "__args__"):
@@ -1208,7 +1237,7 @@ def evaluate_annotation(
 
         # origin can be a TypeAliasType too, resolve it and continue
         if hasattr(origin, "__value__"):
-            origin = _resolve_typealiastype(origin, globals, locals, cache)
+            origin = _resolve_typealiastype(origin, globals, locals, cache, return_annotated=False)
 
         if origin is Union:
             try:
@@ -1247,7 +1276,7 @@ def evaluate_annotation(
 
     # TypeAliasType, 3.12+
     if hasattr(tp, "__value__"):
-        return _resolve_typealiastype(tp, globals, locals, cache)
+        return _resolve_typealiastype(tp, globals, locals, cache, return_annotated=return_annotated)
 
     return tp
 
@@ -1257,6 +1286,8 @@ def resolve_annotation(
     globalns: dict[str, Any],
     localns: dict[str, Any] | None,
     cache: dict[str, Any] | None,
+    *,
+    return_annotated: bool = False,  # see evaluate_annotation
 ) -> Any:
     if annotation is None:
         return type(None)
@@ -1266,7 +1297,9 @@ def resolve_annotation(
     locals = globalns if localns is None else localns
     if cache is None:
         cache = {}
-    return evaluate_annotation(annotation, globalns, locals, cache)
+    return evaluate_annotation(
+        annotation, globalns, locals, cache, return_annotated=return_annotated
+    )
 
 
 def unwrap_function(function: Callable[..., Any]) -> Callable[..., Any]:
