@@ -667,12 +667,9 @@ class ParamInfo:
     def from_param(
         cls,
         param: inspect.Parameter,
-        type_hints: dict[str, Any],
         parsed_docstring: dict[str, disnake.utils._DocstringParam] | None = None,
     ) -> Self:
         # hopefully repeated parsing won't cause any problems
-        parsed_docstring = parsed_docstring or {}
-
         if isinstance(param.default, cls):
             # we copy this ParamInfo instance because it can be used in multiple signatures
             self = param.default.copy()
@@ -681,10 +678,9 @@ class ParamInfo:
             self = cls(default)
 
         self.parse_parameter(param)
-        doc = parsed_docstring.get(param.name)
-        if doc:
+        if parsed_docstring and (doc := parsed_docstring.get(param.name)):
             self.parse_doc(doc)
-        self.parse_annotation(type_hints.get(param.name, param.annotation))
+        self.parse_annotation(param.annotation)
 
         return self
 
@@ -1094,7 +1090,7 @@ def collect_params(
                 msg = f"Found two candidates for the cog parameter in {function!r}: {cog_param.name} and {parameter.name}"
                 raise TypeError(msg)
         else:
-            paraminfo = ParamInfo.from_param(parameter, {}, doc)
+            paraminfo = ParamInfo.from_param(parameter, doc)
             paraminfos.append(paraminfo)
 
     return (
