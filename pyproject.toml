@@ -52,7 +52,7 @@ speed = [
 ]
 voice = [
     "PyNaCl>=1.5.0,<1.7",
-    "dave.py>=0.1.2,<1.0",
+    "dave.py~=1.0",
     'audioop-lts>=0.2.1; python_version >= "3.13"',
 ]
 
@@ -95,7 +95,7 @@ docs = [
 ]
 codemod = [
     # run codemods on the repository (mostly automated typing)
-    "libcst==1.8.5",
+    "libcst==1.9.0",
     "autotyping==24.9.0",
     { include-group = "ruff" },
 ]
