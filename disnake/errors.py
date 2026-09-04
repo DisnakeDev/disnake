@@ -10,6 +10,7 @@ if TYPE_CHECKING:
     from requests import Response
 
     from .client import SessionStartLimit
+    from .guild import Guild
     from .interactions import Interaction, ModalInteraction
 
     _ResponseType: TypeAlias = ClientResponse | Response
@@ -36,6 +37,7 @@ __all__ = (
     "ModalChainNotSupported",
     "InteractionNotEditable",
     "LocalizationKeyError",
+    "MessageSearchIndexUnavailableError",
 )
 
 
@@ -433,3 +435,20 @@ class LocalizationKeyError(DiscordException):
     def __init__(self, key: str) -> None:
         self.key: str = key
         super().__init__(f"No localizations were found for the key '{key}'.")
+
+
+class MessageSearchIndexUnavailableError(DiscordException):
+    """Exception that's raised when the message search target is not yet
+    indexed, and all retries (if configured) have been exhausted.
+
+    .. versionadded:: |vnext|
+
+    Attributes
+    ----------
+    guild: :class:`Guild`
+        The guild whose messages are not yet indexed.
+    """
+
+    def __init__(self, guild: Guild) -> None:
+        self.guild: Guild = guild
+        super().__init__(f"Message search indexing for guild ID {guild.id} is still in progress.")
