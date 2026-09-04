@@ -13,6 +13,7 @@ from typing import (
     Any,
     ClassVar,
     TypeAlias,
+    TypedDict,
     TypeVar,
 )
 
@@ -24,15 +25,41 @@ from .core import Command, Group
 from .errors import CommandError
 
 if TYPE_CHECKING:
-    from typing_extensions import Self
+    from typing_extensions import Self, Unpack
 
     from ._types import Check, FuncT, MaybeCoro
     from .bot import AutoShardedBot, Bot
     from .bot_base import BotBase
     from .cog import Cog
+    from .core import _CommandArgs
 
     # note: no InteractionBot
     AnyBot: TypeAlias = Bot | AutoShardedBot
+
+    class _CommandArgsWithName(_CommandArgs, total=False):
+        name: str | None
+
+    class _HelpCommandArgs(TypedDict, total=False):
+        show_hidden: bool
+        verify_checks: bool
+        command_attrs: _CommandArgsWithName
+
+    # supported by both {Default,Minimal}HelpCommand
+    class _CommonHelpCommandArgs(TypedDict, total=False):
+        sort_commands: bool
+        commands_heading: str
+        dm_help: bool | None
+        dm_help_threshold: int
+        no_category: str
+        paginator: Paginator
+
+    class _DefaultHelpCommandArgs(_CommonHelpCommandArgs, _HelpCommandArgs, total=False):
+        width: int
+        indent: int
+
+    class _MinimalHelpCommandArgs(_CommonHelpCommandArgs, _HelpCommandArgs, total=False):
+        aliases_heading: str
+
 
 CogT = TypeVar("CogT", bound="Cog")
 
@@ -193,7 +220,9 @@ def _not_overriden(f: FuncT) -> FuncT:
 
 
 class _HelpCommandImpl(Command[CogT | None, Any, None]):
-    def __init__(self, inject: HelpCommand, *args: Any, **kwargs: Any) -> None:
+    def __init__(
+        self, inject: HelpCommand, *args: Any, **kwargs: Unpack[_CommandArgsWithName]
+    ) -> None:
         super().__init__(inject.command_callback, *args, **kwargs)
         self._original: HelpCommand = inject
         self._injected: HelpCommand = inject
@@ -323,14 +352,14 @@ class HelpCommand:
         self.__original_args__ = deepcopy(args)  # pyright: ignore[reportAttributeAccessIssue]
         return self
 
-    def __init__(self, **options: Any) -> None:
+    def __init__(self, **options: Unpack[_HelpCommandArgs]) -> None:
         self.show_hidden: bool = options.pop("show_hidden", False)
         self.verify_checks: bool | None = options.pop("verify_checks", True)
 
         attrs = options.pop("command_attrs", {})
         attrs.setdefault("name", "help")
         attrs.setdefault("help", "Shows this message")
-        self.command_attrs: dict[str, Any] = attrs
+        self.command_attrs: _CommandArgsWithName = attrs
 
         self.context: Context[AnyBot] = disnake.utils.MISSING
         self._command_impl: _HelpCommandImpl = _HelpCommandImpl(self, **self.command_attrs)
@@ -926,7 +955,7 @@ class DefaultHelpCommand(HelpCommand):
         The paginator used to paginate the help command output.
     """
 
-    def __init__(self, **options: Any) -> None:
+    def __init__(self, **options: Unpack[_DefaultHelpCommandArgs]) -> None:
         self.width: int = options.pop("width", 80)
         self.indent: int = options.pop("indent", 2)
         self.sort_commands: bool = options.pop("sort_commands", True)
@@ -1140,7 +1169,7 @@ class MinimalHelpCommand(HelpCommand):
         The paginator used to paginate the help command output.
     """
 
-    def __init__(self, **options: Any) -> None:
+    def __init__(self, **options: Unpack[_MinimalHelpCommandArgs]) -> None:
         self.sort_commands: bool = options.pop("sort_commands", True)
         self.commands_heading: str = options.pop("commands_heading", "Commands")
         self.dm_help: bool | None = options.pop("dm_help", False)

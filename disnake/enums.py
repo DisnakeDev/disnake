@@ -75,6 +75,7 @@ __all__ = (
     "MessageReferenceType",
     "SeparatorSpacing",
     "NameplatePalette",
+    "SharedClientThemeBase",
     "MessageSearchSortMode",
 )
 
@@ -2498,6 +2499,24 @@ class NameplatePalette(Enum):
     """Lemon color palette."""
     white = "white"
     """White color palette."""
+
+
+class SharedClientThemeBase(Enum):
+    """Specifies the base colour scheme used by a :class:`SharedClientTheme`.
+
+    .. versionadded:: |vnext|
+    """
+
+    unset = 0
+    """No base theme. Equivalent to :attr:`dark`."""
+    dark = 1
+    """Dark base theme."""
+    light = 2
+    """Light base theme."""
+    darker = 3
+    """Darker base theme."""
+    midnight = 4
+    """Midnight base theme."""
 
 
 class MessageSearchSortMode(Enum):

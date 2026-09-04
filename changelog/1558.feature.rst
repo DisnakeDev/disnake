@@ -1,0 +1,1 @@
+Support zstd gateway transport compression (see :class:`GatewayParams`). This is now the default compression mode, if available (requires Python 3.14+, or ``backports.zstd``).

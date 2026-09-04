@@ -30,10 +30,10 @@ class CheckboxGroup(UIComponent):
     custom_id: :class:`str`
         The ID of the checkbox group that gets received during an interaction.
         If not given then one is generated for you.
-    options: :class:`~collections.abc.Sequence`\[:class:`.GroupOption` | :class:`str`] | :class:`dict`\[:class:`str`, :class:`str`]
+    options: :class:`~collections.abc.Sequence`\[:class:`.GroupOption` | :class:`str`] | :class:`~collections.abc.Mapping`\[:class:`str`, :class:`str`]
         A list of options that can be selected in this group (1-10). Use explicit :class:`.GroupOption`\s
         for fine-grained control over the options. Alternatively, a list of strings will be treated
-        as a list of labels, and a dict will be treated as a mapping of labels to values.
+        as a list of labels, and a mapping/dict will be treated as a mapping of labels to values.
     min_values: :class:`int`
         The minimum number of options that must be selected in this group.
         Defaults to 1 and must be between 0 and 10.

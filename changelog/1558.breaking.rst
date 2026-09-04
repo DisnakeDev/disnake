@@ -1,0 +1,1 @@
+The ``zlib`` parameter of :class:`GatewayParams` has been renamed to ``compress``, with ``zlib=True`` corresponding to ``compress="zlib-stream"`` and ``zlib=False`` to ``compress=None``.

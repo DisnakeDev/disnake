@@ -163,17 +163,15 @@ LargeInt
 
 .. autoclass:: LargeInt
 
-    This is a class which inherits from :class:`int` to allow large numbers in slash commands, meant to be used only for annotations.
-
 Range
 ~~~~~
 
-.. autoclass:: Range
+.. autoclassalias:: Range
 
 String
 ~~~~~~
 
-.. autoclass:: String
+.. autoclassalias:: String
 
 Functions
 ---------

@@ -2,46 +2,47 @@
 
 import pytest
 
+import disnake
 from disnake.http import HTTPClient
 
 
 @pytest.mark.parametrize(
-    ("url", "encoding", "zlib", "expected"),
+    ("url", "params", "expected"),
     [
         (
             "wss://gateway.discord.com",
-            "json",
-            False,
+            disnake.GatewayParams(encoding="json", compress=None),
             "wss://gateway.discord.com/?v=10&encoding=json",
         ),
         (
             "wss://gateway.discord.com",
-            "json",
-            True,
+            disnake.GatewayParams(encoding="json", compress="zlib-stream"),
             "wss://gateway.discord.com/?v=10&encoding=json&compress=zlib-stream",
+        ),
+        (
+            "wss://gateway.discord.com",
+            disnake.GatewayParams(encoding="json", compress="zstd-stream"),
+            "wss://gateway.discord.com/?v=10&encoding=json&compress=zstd-stream",
         ),
         # should overwrite existing args if needed
         (
             "wss://gateway.discord.com/?v=42&encoding=etf&v=1111",
-            "json",
-            True,
+            disnake.GatewayParams(encoding="json", compress="zlib-stream"),
             "wss://gateway.discord.com/?v=10&encoding=json&compress=zlib-stream",
         ),
         # should keep other args intact
         (
             "wss://gateway.discord.com/?v=42&stuff=things&a=b",
-            "json",
-            True,
+            disnake.GatewayParams(encoding="json", compress="zlib-stream"),
             "wss://gateway.discord.com/?v=10&stuff=things&a=b&encoding=json&compress=zlib-stream",
         ),
-        # should remove compression if set to false
+        # should remove compression if set to None
         (
             "wss://gateway.discord.com/?v=10&compress=zlib-stream",
-            "json",
-            False,
+            disnake.GatewayParams(encoding="json", compress=None),
             "wss://gateway.discord.com/?v=10&encoding=json",
         ),
     ],
 )
-def test_format_gateway_url(url: str, encoding: str, zlib: bool, expected: str) -> None:
-    assert HTTPClient._format_gateway_url(url, encoding=encoding, zlib=zlib) == expected
+def test_format_gateway_url(url: str, params: disnake.GatewayParams, expected: str) -> None:
+    assert HTTPClient._format_gateway_url(url, params=params) == expected

@@ -57,6 +57,7 @@ extensions = [
     "resourcelinks",
     "collapse",
     "enumattrs",
+    "classalias",
     "nitpick_file_ignorer",
     "versionchange",
 ]

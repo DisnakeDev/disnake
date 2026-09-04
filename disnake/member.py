@@ -529,6 +529,14 @@ class Member(disnake.abc.Messageable, _UserTag):
         """:class:`Status`: The member's status on the web client, if applicable."""
         return try_enum(Status, self._client_status.get("web", "offline"))
 
+    @property
+    def vr_status(self) -> Status:
+        """:class:`Status`: The member's status on a virtual reality device, if applicable.
+
+        .. versionadded:: |vnext|
+        """
+        return try_enum(Status, self._client_status.get("vr", "offline"))
+
     def is_on_mobile(self) -> bool:
         """Whether the member is active on a mobile device.
 

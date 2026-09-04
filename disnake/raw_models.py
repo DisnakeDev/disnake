@@ -59,7 +59,7 @@ class _RawReprMixin:
 
     def __repr__(self) -> str:
         value = " ".join(f"{attr}={getattr(self, attr)!r}" for attr in get_slots(type(self)))
-        return f"<{type(self).__name__} {value}>"
+        return f"<{self.__class__.__name__} {value}>"
 
 
 class RawMessageDeleteEvent(_RawReprMixin):

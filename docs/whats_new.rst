@@ -17,6 +17,31 @@ in specific versions. Please see :ref:`version_guarantees` for more information.
 
 .. towncrier release notes start
 
+.. _vp2p12p1:
+
+v2.12.1
+-------
+
+This is a maintenance release with several bugfixes.
+
+Bug Fixes
+~~~~~~~~~
+- |commands| Fix ``Greedy[...]`` to accept union types (e.g. ``Member | Object``) in commands. (:issue:`1421`)
+- Handle voice websocket close codes 4017, 4021, and 4022 properly. (:issue:`1513`)
+- Raise early error if required dependencies for voice connections are not installed. (:issue:`1513`)
+- Fix :class:`SubscriptionStatus`'s :attr:`~SubscriptionStatus.ending` and :attr:`~SubscriptionStatus.inactive` members to map to the correct value. These were previously swapped due to a mistake in the API documentation. (:issue:`1544`)
+- |commands| Improve :class:`~ext.commands.FlagConverter` support in Python 3.14+ when ``from __future__ import annotations`` was not used. (:issue:`1545`)
+- :meth:`ForumChannel.create_thread` now respects the global :attr:`Client.allowed_mentions` value. (:issue:`1573`)
+
+Documentation
+~~~~~~~~~~~~~
+- Restore support for localization in ``attributetable`` extension. (:issue:`1565`)
+
+Miscellaneous
+~~~~~~~~~~~~~
+- Show ``PyNaCl`` and ``dave.py`` versions in the output of ``python -m disnake -v``. (:issue:`1549`)
+
+
 .. _vp2p12p0:
 
 v2.12.0

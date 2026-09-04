@@ -50,6 +50,7 @@ from ._types import (
     ActionRowModalComponent,
     ComponentInput,
     MessageTopLevelComponent,
+    MessageWithComponents,
     NonActionRowChildT,
 )
 from .button import Button
@@ -77,7 +78,6 @@ if TYPE_CHECKING:
     from ..abc import AnyChannel
     from ..emoji import Emoji
     from ..member import Member
-    from ..message import Message
     from ..partial_emoji import PartialEmoji
     from ..role import Role
     from ..types.components import (
@@ -181,7 +181,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
 
         for component in components:
             if not isinstance(component, WrappedComponent):
-                msg = f"components should be of type WrappedComponent, got {type(component).__name__}."
+                msg = f"components should be of type WrappedComponent, got {component.__class__.__name__}."
                 raise TypeError(msg)
             self.append_item(component)
 
@@ -370,10 +370,10 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
         max_values: :class:`int`
             The maximum number of items that must be chosen for this select menu.
             Defaults to 1 and must be between 1 and 25.
-        options: :class:`list`\[:class:`disnake.SelectOption`] | :class:`list`\[:class:`str`] | :class:`dict`\[:class:`str`, :class:`str`]
+        options: :class:`~collections.abc.Sequence`\[:class:`disnake.SelectOption` | :class:`str`] | :class:`~collections.abc.Mapping`\[:class:`str`, :class:`str`]
             A list of options that can be selected in this menu. Use explicit :class:`.SelectOption`\s
             for fine-grained control over the options. Alternatively, a list of strings will be treated
-            as a list of labels, and a dict will be treated as a mapping of labels to values.
+            as a list of labels, and a mapping/dict will be treated as a mapping of labels to values.
         disabled: :class:`bool`
             Whether the select is disabled or not.
         id: :class:`int`
@@ -877,7 +877,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
     @classmethod
     def rows_from_message(
         cls,
-        message: Message,
+        message: MessageWithComponents,
         *,
         strict: bool = True,
     ) -> list[ActionRow[ActionRowMessageComponent]]:
@@ -895,7 +895,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
 
         Parameters
         ----------
-        message: :class:`disnake.Message`
+        message: :class:`~disnake.Message` | :class:`~disnake.ForwardedMessage`
             The message from which to extract the components.
         strict: :class:`bool`
             Whether or not to raise an exception if an unknown component type is encountered.
@@ -1096,7 +1096,7 @@ def walk_components(components: Sequence[ComponentT]) -> Iterator[ComponentT]:
         yield from _walk_internal(item, seen)
 
 
-def components_from_message(message: Message) -> list[MessageTopLevelComponent]:
+def components_from_message(message: MessageWithComponents) -> list[MessageTopLevelComponent]:
     r"""Create a list of :class:`UIComponent`\s from the components of an existing message.
 
     This will abide by existing component format on the message, including component
@@ -1107,7 +1107,7 @@ def components_from_message(message: Message) -> list[MessageTopLevelComponent]:
 
     Parameters
     ----------
-    message: :class:`disnake.Message`
+    message: :class:`~disnake.Message` | :class:`~disnake.ForwardedMessage`
         The message from which to extract the components.
 
     Raises

@@ -39,7 +39,7 @@ from .flags import CommandSyncFlags
 from .slash_core import InvokableSlashCommand, SubCommand, SubCommandGroup, slash_command
 
 if TYPE_CHECKING:
-    from typing_extensions import Never, NotRequired, ParamSpec
+    from typing_extensions import NotRequired, ParamSpec, Unpack
 
     from disnake.i18n import LocalizedOptional
     from disnake.interactions import (
@@ -50,7 +50,7 @@ if TYPE_CHECKING:
     from disnake.permissions import Permissions
 
     from ._types import AppCheck, CoroFunc
-    from .base_core import CogT, CommandCallback, InteractionCommandCallback
+    from .base_core import CogT, CommandCallback, InteractionCommandCallback, _AppCommandArgs
 
     P = ParamSpec("P")
 
@@ -127,7 +127,7 @@ def _format_diff(diff: _Diff) -> str:
             continue
         lines.append(label)
         if changes := diff[key]:
-            lines.extend(f"    <{type(cmd).__name__} name={cmd.name!r}>" for cmd in changes)
+            lines.extend(f"    <{cmd.__class__.__name__} name={cmd.name!r}>" for cmd in changes)
         else:
             lines.append("    -")
 
@@ -470,9 +470,7 @@ class InteractionBotBase(CommonBotBase):
         guild_ids: Sequence[int] | None = None,
         connectors: dict[str, str] | None = None,
         auto_sync: bool | None = None,
-        extras: dict[str, Any] | None = None,
-        dm_permission: Never = ...,
-        **kwargs: Any,
+        **kwargs: Unpack[_AppCommandArgs],
     ) -> Callable[[CommandCallback], InvokableSlashCommand]: ...
 
     @overload
@@ -491,8 +489,7 @@ class InteractionBotBase(CommonBotBase):
         guild_ids: Sequence[int] | None = None,
         connectors: dict[str, str] | None = None,
         auto_sync: bool | None = None,
-        extras: dict[str, Any] | None = None,
-        **kwargs: Any,
+        **kwargs: Unpack[_AppCommandArgs],
     ) -> Callable[[CommandCallback], InvokableSlashCommand]: ...
 
     def slash_command(
@@ -509,8 +506,7 @@ class InteractionBotBase(CommonBotBase):
         guild_ids: Sequence[int] | None = None,
         connectors: dict[str, str] | None = None,
         auto_sync: bool | None = None,
-        extras: dict[str, Any] | None = None,
-        **kwargs: Any,
+        **kwargs: Unpack[_AppCommandArgs],
     ) -> Callable[[CommandCallback], InvokableSlashCommand]:
         r"""A shortcut decorator that invokes :func:`~disnake.ext.commands.slash_command` and adds it to
         the internal command list.
@@ -607,7 +603,6 @@ class InteractionBotBase(CommonBotBase):
                 guild_ids=guild_ids,
                 connectors=connectors,
                 auto_sync=auto_sync,
-                extras=extras,
                 **kwargs,
             )(func)
             self.add_slash_command(result)
@@ -626,9 +621,7 @@ class InteractionBotBase(CommonBotBase):
         contexts: InteractionContextTypes | None = None,
         guild_ids: Sequence[int] | None = None,
         auto_sync: bool | None = None,
-        extras: dict[str, Any] | None = None,
-        dm_permission: Never = ...,
-        **kwargs: Any,
+        **kwargs: Unpack[_AppCommandArgs],
     ) -> Callable[
         [InteractionCommandCallback[CogT, UserCommandInteraction, P]], InvokableUserCommand
     ]: ...
@@ -646,8 +639,7 @@ class InteractionBotBase(CommonBotBase):
         contexts: InteractionContextTypes | None = None,
         guild_ids: Sequence[int] | None = None,
         auto_sync: bool | None = None,
-        extras: dict[str, Any] | None = None,
-        **kwargs: Any,
+        **kwargs: Unpack[_AppCommandArgs],
     ) -> Callable[
         [InteractionCommandCallback[CogT, UserCommandInteraction, P]], InvokableUserCommand
     ]: ...
@@ -663,8 +655,7 @@ class InteractionBotBase(CommonBotBase):
         contexts: InteractionContextTypes | None = None,
         guild_ids: Sequence[int] | None = None,
         auto_sync: bool | None = None,
-        extras: dict[str, Any] | None = None,
-        **kwargs: Any,
+        **kwargs: Unpack[_AppCommandArgs],
     ) -> Callable[
         [InteractionCommandCallback[CogT, UserCommandInteraction, P]], InvokableUserCommand
     ]:
@@ -747,7 +738,6 @@ class InteractionBotBase(CommonBotBase):
                 contexts=contexts,
                 guild_ids=guild_ids,
                 auto_sync=auto_sync,
-                extras=extras,
                 **kwargs,
             )(func)
             self.add_user_command(result)
@@ -766,9 +756,7 @@ class InteractionBotBase(CommonBotBase):
         contexts: InteractionContextTypes | None = None,
         guild_ids: Sequence[int] | None = None,
         auto_sync: bool | None = None,
-        extras: dict[str, Any] | None = None,
-        dm_permission: Never = ...,
-        **kwargs: Any,
+        **kwargs: Unpack[_AppCommandArgs],
     ) -> Callable[
         [InteractionCommandCallback[CogT, MessageCommandInteraction, P]], InvokableMessageCommand
     ]: ...
@@ -786,8 +774,7 @@ class InteractionBotBase(CommonBotBase):
         contexts: InteractionContextTypes | None = None,
         guild_ids: Sequence[int] | None = None,
         auto_sync: bool | None = None,
-        extras: dict[str, Any] | None = None,
-        **kwargs: Any,
+        **kwargs: Unpack[_AppCommandArgs],
     ) -> Callable[
         [InteractionCommandCallback[CogT, MessageCommandInteraction, P]], InvokableMessageCommand
     ]: ...
@@ -803,8 +790,7 @@ class InteractionBotBase(CommonBotBase):
         contexts: InteractionContextTypes | None = None,
         guild_ids: Sequence[int] | None = None,
         auto_sync: bool | None = None,
-        extras: dict[str, Any] | None = None,
-        **kwargs: Any,
+        **kwargs: Unpack[_AppCommandArgs],
     ) -> Callable[
         [InteractionCommandCallback[CogT, MessageCommandInteraction, P]], InvokableMessageCommand
     ]:
@@ -887,7 +873,6 @@ class InteractionBotBase(CommonBotBase):
                 contexts=contexts,
                 guild_ids=guild_ids,
                 auto_sync=auto_sync,
-                extras=extras,
                 **kwargs,
             )(func)
             self.add_message_command(result)
@@ -1485,47 +1470,34 @@ class InteractionBotBase(CommonBotBase):
         interaction: :class:`disnake.ApplicationCommandInteraction`
             The interaction to process commands for.
         """
+        if not isinstance(self, disnake.Client):
+            msg = "This method is only usable in disnake.Client subclasses"
+            raise NotImplementedError(msg)
+
         # This usually comes from the blind spots of the sync algorithm.
-        # Since not all guild commands are cached, it is possible to experience such issues.
-        # In this case, the blind spot is the interaction guild, let's fix it:
+        # Since not all guild commands are cached, it is possible to experience such issues
+        # when a guild *used to* have synced app commands, but they have been removed from the
+        # bot/cache, in which case the commands remain registered with the API.
         if (
             # if we're not currently syncing,
             not self._sync_queued.locked()
-            # and we're instructed to sync guild commands
+            # and we're instructed to sync guild commands,
             and self._command_sync_flags.sync_guild_commands
-            # and the current command was registered to a guild
+            # and we're in a guild and the current command was registered to a guild,
+            and interaction.guild_id
             and interaction.data.get("guild_id")
             # and we don't know the command
-            and not self.get_guild_command(interaction.guild_id, interaction.data.id)  # pyright: ignore[reportAttributeAccessIssue]
+            and not self.get_guild_command(interaction.guild_id, interaction.data.id)
         ):
-            # don't do anything if we aren't allowed to disable them
-            if self._command_sync_flags.allow_command_deletion:
-                try:
-                    await self.bulk_overwrite_guild_commands(interaction.guild_id, [])  # pyright: ignore[reportAttributeAccessIssue]
-                except disnake.HTTPException:
-                    # for some reason we were unable to sync the command
-                    # either malformed API request, or some other error
-                    # in theory this will never error: if a command exists the bot has authorisation
-                    # in practice this is not the case, the API could change valid requests at any time
-                    message = "This command could not be processed. Additionally, an error occurred when trying to sync commands."
-                else:
-                    message = "This command has just been synced."
-            else:
-                # this block is responsible for responding to guild commands that we don't delete
-                # this could be changed to not respond but that behavior is undecided
-                message = "This command could not be processed."
-            try:
-                # This part is in a separate try-except because we still should respond to the interaction
-                message += (
-                    " More information about this: "
-                    "https://docs.disnake.dev/page/ext/commands/additional_info.html#unknown-commands."
-                )
-                await interaction.response.send_message(
-                    message,
-                    ephemeral=True,
-                )
-            except (disnake.HTTPException, disnake.InteractionTimedOut):
-                pass
+            warnings.warn(
+                f"This command is not present in the bot's command cache for guild ID {interaction.guild_id}."
+                " This can usually happen after removing the guild from the `guild_ids` of a command,"
+                " or from the `test_guilds` of the bot."
+                " To resolve this, consider clearing the guild command using"
+                f" `await bot.bulk_overwrite_guild_commands({interaction.guild_id}, [])`.",
+                SyncWarning,
+                stacklevel=2,
+            )
             return
 
         command_type = interaction.data.type

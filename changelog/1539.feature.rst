@@ -1,0 +1,1 @@
+|commands| Improve typing of :func:`@command <ext.commands.command>`, :func:`@slash_command <ext.commands.command>`, and similar command decorators, making type-checkers warn about unknown/misspelled parameters.

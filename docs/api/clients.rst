@@ -76,8 +76,6 @@ GatewayParams
 .. attributetable:: GatewayParams
 
 .. autoclass:: GatewayParams()
-    :members:
-    :exclude-members: encoding, zlib
 
 Intents
 ~~~~~~~
