@@ -1,0 +1,1 @@
+Restore ``isinstance`` functionality of :class:`ApplicationCommandInteraction` aliases (such as ``CommandInteraction``).
