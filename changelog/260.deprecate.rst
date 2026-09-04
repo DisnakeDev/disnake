@@ -1,0 +1,3 @@
+|commands| Deprecate several command-type-specific methods:
+- :meth:`Bot.add_slash_command <.ext.commands.Bot.add_slash_command>`, :meth:`Bot.add_user_command <.ext.commands.Bot.add_user_command>`, and :meth:`Bot.add_message_command <.ext.commands.Bot.add_message_command>` are deprecated in favour of :meth:`Bot.add_app_command <.ext.commands.Bot.add_app_command>`.
+- :meth:`Bot.remove_slash_command <.ext.commands.Bot.remove_slash_command>`, :meth:`Bot.remove_user_command <.ext.commands.Bot.remove_user_command>`, and :meth:`Bot.remove_message_command <.ext.commands.Bot.remove_message_command>` are deprecated in favour of :meth:`Bot.remove_app_command <.ext.commands.Bot.remove_app_command>`.

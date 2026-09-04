@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Any
 
+from disnake.enums import ApplicationCommandType
 from disnake.errors import ClientException, DiscordException
 from disnake.utils import humanize_list
 
@@ -17,6 +18,7 @@ if TYPE_CHECKING:
     from disnake.types.snowflake import Snowflake, SnowflakeList
 
     from ._types import Coro
+    from .base_core import AppCmdIndex
     from .context import AnyContext
     from .cooldowns import BucketType, Cooldown
     from .flag_converter import Flag
@@ -79,6 +81,7 @@ __all__ = (
     "ExtensionFailed",
     "ExtensionNotFound",
     "CommandRegistrationError",
+    "ApplicationCommandRegistrationError",
     "FlagError",
     "BadFlagArgument",
     "MissingFlagArgument",
@@ -1086,6 +1089,49 @@ class CommandRegistrationError(ClientException):
         self.alias_conflict: bool = alias_conflict
         type_ = "alias" if alias_conflict else "command"
         super().__init__(f"The {type_} {name} is already an existing command or alias.")
+
+
+# we inherit CommandRegistrationError for backwards compatibility,
+# because this error replaced CommandRegistrationError in several places
+class ApplicationCommandRegistrationError(CommandRegistrationError):
+    """An exception raised when the app command can't be added
+    because a command with the same key already exists.
+    A key is determined by command type, name, and guild_id.
+
+    This inherits from :exc:`CommandRegistrationError`
+
+    .. versionadded:: |vnext|
+
+    Attributes
+    ----------
+    cmd_type: :class:`disnake.ApplicationCommandType`
+        The command type.
+    name: :class:`str`
+        The command name.
+    guild_id: :class:`int` | :data:`None`
+        The ID of the guild where the command was supposed to be registered
+        or :data:`None` if it was a global command.
+    """
+
+    def __init__(self, index: AppCmdIndex) -> None:
+        self.cmd_type: ApplicationCommandType = index.type
+        self.name: str = index.name
+        self.guild_id: int | None = index.guild_id
+        if self.guild_id is None:
+            msg = (
+                f"Global {self.cmd_type._command_name} command {self.name}"
+                " was specified earlier in your code."
+            )
+        else:
+            msg = (
+                f"Local {self.cmd_type._command_name} command {self.name} with"
+                f" guild ID {self.guild_id} was specified earlier in your code."
+            )
+
+        # backwards compatibility
+        self.alias_conflict: bool = False
+        # this bypasses CommandRegistrationError.__init__
+        super(CommandRegistrationError, self).__init__(msg)
 
 
 class FlagError(BadArgument):
