@@ -874,13 +874,13 @@ class ParamInfo:
             # (we need `__call__` here to get the correct global namespace later, since
             # classes do not have `__globals__`)
             converter_func = converter.__call__
-        _, parameters = isolate_self(converter_func)
+        _, signature = isolate_self(converter_func)
 
-        if len(parameters) != 1:
+        if len(signature.params) != 1:
             msg = "Converters must take precisely two arguments: the interaction and the argument"
             raise TypeError(msg)
 
-        _, parameter = parameters.popitem()
+        _, parameter = signature.params.popitem()
         annotation = parameter.annotation
 
         if parameter.default is not inspect.Parameter.empty and self.required:
@@ -937,7 +937,7 @@ class ParamInfo:
 def safe_call(function: Callable[..., T], /, *possible_args: Any, **possible_kwargs: Any) -> T:
     """Calls a function without providing any extra unexpected arguments"""
     MISSING: Any = object()
-    parameters = get_signature_parameters(function)
+    parameters, _ = get_signature_parameters(function)
 
     kinds = {p.kind for p in parameters.values()}
     arb = {inspect.Parameter.VAR_POSITIONAL, inspect.Parameter.VAR_KEYWORD}
@@ -984,20 +984,20 @@ def safe_call(function: Callable[..., T], /, *possible_args: Any, **possible_kwa
 
 def isolate_self(
     function: Callable[..., Any],
-    parameters: dict[str, inspect.Parameter] | None = None,
-) -> tuple[tuple[inspect.Parameter | None, ...], dict[str, inspect.Parameter]]:
+    signature: utils._SignatureData | None = None,
+) -> tuple[tuple[inspect.Parameter | None, ...], utils._SignatureData]:
     """Create parameters without self and the first interaction.
 
-    Optionally accepts a `{str: inspect.Parameter}` dict as an optimization,
+    Optionally accepts already processed signature data as an optimization,
     calls `get_signature_parameters(function)` if not provided.
     """
-    if parameters is None:
-        parameters = get_signature_parameters(function)
-    if not parameters:
-        return (None, None), {}
+    if signature is None:
+        signature = get_signature_parameters(function)
+    if not signature.params:
+        return (None, None), signature
 
-    parameters = dict(parameters)  # shallow copy
-    parametersl = list(parameters.values())
+    parameters = dict(signature.params)  # shallow copy
+    parametersl = list(signature.params.values())
 
     cog_param: inspect.Parameter | None = None
     inter_param: inspect.Parameter | None = None
@@ -1010,7 +1010,7 @@ def isolate_self(
         if issubclass_(annot, ApplicationCommandInteraction) or annot is inspect.Parameter.empty:
             inter_param = parameters.pop(parametersl[0].name)
 
-    return (cog_param, inter_param), parameters
+    return (cog_param, inter_param), utils._SignatureData(parameters, signature.metadata)
 
 
 def classify_autocompleter(autocompleter: AnyAutocompleter) -> None:
@@ -1050,22 +1050,23 @@ def classify_autocompleter(autocompleter: AnyAutocompleter) -> None:
 
 def collect_params(
     function: Callable[..., Any],
-    parameters: dict[str, inspect.Parameter] | None = None,
+    signature: utils._SignatureData | None = None,
 ) -> tuple[str | None, str | None, list[ParamInfo], dict[str, Injection]]:
     """Collect all parameters in a function.
 
-    Optionally accepts a `{str: inspect.Parameter}` dict as an optimization.
+    Optionally accepts already processed signature data as an optimization.
 
     Returns: (`cog parameter`, `interaction parameter`, `param infos`, `injections`)
     """
-    (cog_param, inter_param), parameters = isolate_self(function, parameters)
+    (cog_param, inter_param), signature = isolate_self(function, signature)
 
     doc = disnake.utils.parse_docstring(function)["params"]
 
     paraminfos: list[ParamInfo] = []
     injections: dict[str, Injection] = {}
 
-    for parameter in parameters.values():
+    # TODO: make use of signature.metadata?
+    for parameter in signature.params.values():
         if parameter.kind in [parameter.VAR_POSITIONAL, parameter.VAR_KEYWORD]:
             continue
         if parameter.kind is parameter.POSITIONAL_ONLY:
@@ -1185,10 +1186,10 @@ def expand_params(command: AnySlashCommand) -> list[Option]:
 
     Returns the created options
     """
-    parameters = get_signature_parameters(command.callback)
-    # pass `parameters` down to avoid having to call `get_signature_parameters(func)` another time,
+    signature = get_signature_parameters(command.callback)
+    # pass `signature` down to avoid having to call `get_signature_parameters(func)` another time,
     # which may cause side effects with deferred annotations and warnings
-    _, inter_param, params, injections = collect_params(command.callback, parameters)
+    _, inter_param, params, injections = collect_params(command.callback, signature)
 
     if inter_param is None:
         msg = f"Couldn't find an interaction parameter in {command.callback}"
@@ -1215,7 +1216,7 @@ def expand_params(command: AnySlashCommand) -> list[Option]:
         if param.autocomplete:
             command.autocompleters[param.name] = param.autocomplete
 
-    if issubclass_(parameters[inter_param].annotation, disnake.GuildCommandInteraction):
+    if issubclass_(signature.params[inter_param].annotation, disnake.GuildCommandInteraction):
         command._guild_only = True
 
     return [param.to_option() for param in params]

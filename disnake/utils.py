@@ -36,6 +36,7 @@ from typing import (
     ForwardRef,
     Generic,
     Literal,
+    NamedTuple,
     Protocol,
     TypeAlias,
     TypedDict,
@@ -1324,17 +1325,23 @@ def _get_function_globals(function: Callable[..., Any]) -> dict[str, Any]:
 _inspect_empty = inspect.Parameter.empty
 
 
+class _SignatureData(NamedTuple):
+    params: dict[str, inspect.Parameter]  # {param_name: param}
+    metadata: dict[str, Sequence[Any]]  # {param_name: (annotated_args...)}
+
+
 def get_signature_parameters(
     function: Callable[..., Any],
     globalns: dict[str, Any] | None = None,
     *,
     skip_standard_params: bool = False,
-) -> dict[str, inspect.Parameter]:
+) -> _SignatureData:
     # if no globalns provided, unwrap (where needed) and get global namespace from there
     if globalns is None:
         globalns = _get_function_globals(function)
 
     params: dict[str, inspect.Parameter] = {}
+    metadata: dict[str, Sequence[Any]] = {}
     cache: dict[str, Any] = {}
 
     signature = inspect.signature(function)
@@ -1363,12 +1370,22 @@ def get_signature_parameters(
             annotation = type(None)
         else:
             annotation = evaluate_annotation(
-                annotation, globalns, globalns, cache, source_info=function.__code__
+                annotation,
+                globalns,
+                globalns,
+                cache,
+                source_info=function.__code__,
+                return_annotated=True,
             )
+
+            if get_origin(annotation) is Annotated:
+                # separate real type and (potential) ParamInfo or similar
+                annotation, meta = annotation.__origin__, annotation.__metadata__
+                metadata[name] = meta
 
         params[name] = parameter.replace(annotation=annotation)
 
-    return params
+    return _SignatureData(params, metadata)
 
 
 def get_signature_return(function: Callable[..., Any]) -> Any:

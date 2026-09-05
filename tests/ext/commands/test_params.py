@@ -261,45 +261,45 @@ class TestIsolateSelf:
     def test_function_simple(self) -> None:
         def func(a: int) -> None: ...
 
-        (cog, inter), params = commands.params.isolate_self(func)
+        (cog, inter), sig = commands.params.isolate_self(func)
         assert cog is None
         assert inter is None
-        assert params.keys() == {"a"}
+        assert sig.params.keys() == {"a"}
 
     def test_function_inter(self) -> None:
         def func(inter: disnake.ApplicationCommandInteraction, a: int) -> None: ...
 
-        (cog, inter), params = commands.params.isolate_self(func)
+        (cog, inter), sig = commands.params.isolate_self(func)
         assert cog is None  # should not be set
         assert inter is not None
-        assert params.keys() == {"a"}
+        assert sig.params.keys() == {"a"}
 
     def test_unbound_method(self) -> None:
         class Cog(commands.Cog):
             def func(self, inter: disnake.ApplicationCommandInteraction, a: int) -> None: ...
 
-        (cog, inter), params = commands.params.isolate_self(Cog.func)
+        (cog, inter), sig = commands.params.isolate_self(Cog.func)
         assert cog is not None  # *should* be set here
         assert inter is not None
-        assert params.keys() == {"a"}
+        assert sig.params.keys() == {"a"}
 
     # I don't think the param parsing logic ever handles bound methods, but testing for regressions anyway
     def test_bound_method(self) -> None:
         class Cog(commands.Cog):
             def func(self, inter: disnake.ApplicationCommandInteraction, a: int) -> None: ...
 
-        (cog, inter), params = commands.params.isolate_self(Cog().func)
+        (cog, inter), sig = commands.params.isolate_self(Cog().func)
         assert cog is None  # should not be set here, since method is already bound
         assert inter is not None
-        assert params.keys() == {"a"}
+        assert sig.params.keys() == {"a"}
 
     def test_generic(self) -> None:
         def func(inter: disnake.ApplicationCommandInteraction[commands.Bot], a: int) -> None: ...
 
-        (cog, inter), params = commands.params.isolate_self(func)
+        (cog, inter), sig = commands.params.isolate_self(func)
         assert cog is None
         assert inter is not None
-        assert params.keys() == {"a"}
+        assert sig.params.keys() == {"a"}
 
     def test_inter_union(self) -> None:
         def func(
@@ -307,7 +307,7 @@ class TestIsolateSelf:
             a: int,
         ) -> None: ...
 
-        (cog, inter), params = commands.params.isolate_self(func)
+        (cog, inter), sig = commands.params.isolate_self(func)
         assert cog is None
         assert inter is not None
-        assert params.keys() == {"a"}
+        assert sig.params.keys() == {"a"}
