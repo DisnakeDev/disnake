@@ -667,12 +667,12 @@ class ParamInfo:
     def from_param(
         cls,
         param: inspect.Parameter,
+        base_param_info: Self | None = None,
         parsed_docstring: dict[str, disnake.utils._DocstringParam] | None = None,
     ) -> Self:
-        # hopefully repeated parsing won't cause any problems
-        if isinstance(param.default, cls):
+        if base_param_info:
             # we copy this ParamInfo instance because it can be used in multiple signatures
-            self = param.default.copy()
+            self = base_param_info.copy()
         else:
             default = param.default if param.default is not inspect.Parameter.empty else ...
             self = cls(default)
@@ -1048,6 +1048,33 @@ def classify_autocompleter(autocompleter: AnyAutocompleter) -> None:
     autocompleter.__has_cog_param__ = positional_param_count == 3
 
 
+AnyMetadata = ParamInfo | Injection
+_AnyMetadata_tp: tuple[type[AnyMetadata], ...] = AnyMetadata.__args__
+
+
+def find_meta_object(param: inspect.Parameter, metadata: Sequence[Any]) -> AnyMetadata | None:
+    """Find any `ParamInfo` or `Injection` in a parameter's default value or Annotated metadata.
+
+    Raises if >1 object was found, e.g. when `arg: Annotated[str, Param(...)] = Param(...)`.
+    """
+    candidates = list(metadata)
+    if isinstance(param.default, _AnyMetadata_tp):
+        candidates.append(param.default)
+
+    if len(candidates) == 0:
+        return None
+
+    for obj in candidates:
+        if not isinstance(obj, _AnyMetadata_tp):
+            msg = f'Expected `Param` or `Injection` object for "{param.name}" parameter, not {type(obj)!r}'
+            raise TypeError(msg)
+
+    if len(candidates) > 1:
+        msg = f'Found more than one `Param` or `Injection` object for "{param.name}" parameter'
+        raise TypeError(msg)
+    return candidates[0]
+
+
 def collect_params(
     function: Callable[..., Any],
     signature: utils._SignatureData | None = None,
@@ -1065,7 +1092,6 @@ def collect_params(
     paraminfos: list[ParamInfo] = []
     injections: dict[str, Injection] = {}
 
-    # TODO: make use of signature.metadata?
     for parameter in signature.params.values():
         if parameter.kind in [parameter.VAR_POSITIONAL, parameter.VAR_KEYWORD]:
             continue
@@ -1073,9 +1099,9 @@ def collect_params(
             msg = "Positional-only parameters cannot be used in commands"
             raise TypeError(msg)
 
-        default = parameter.default
-        if isinstance(default, Injection):
-            injections[parameter.name] = default
+        meta = find_meta_object(parameter, signature.metadata.get(parameter.name, ()))
+        if isinstance(meta, Injection):
+            injections[parameter.name] = meta
         elif parameter.annotation in Injection._registered:
             injections[parameter.name] = Injection._registered[parameter.annotation]
         elif issubclass_(parameter.annotation, ApplicationCommandInteraction):
@@ -1091,7 +1117,7 @@ def collect_params(
                 msg = f"Found two candidates for the cog parameter in {function!r}: {cog_param.name} and {parameter.name}"
                 raise TypeError(msg)
         else:
-            paraminfo = ParamInfo.from_param(parameter, doc)
+            paraminfo = ParamInfo.from_param(parameter, meta, doc)
             paraminfos.append(paraminfo)
 
     return (
