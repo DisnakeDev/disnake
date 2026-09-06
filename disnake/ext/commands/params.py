@@ -485,6 +485,7 @@ class LargeInt(int):
 _VERIFY_TYPES: Final[frozenset[OptionType]] = frozenset((OptionType.user, OptionType.mentionable))
 
 
+# TODO(3.0): drop Param() and inject() functions, rename ParamInfo to Param
 class ParamInfo:
     r"""A class that basically connects function params with slash command options.
     The instances of this class are not created manually, but via the functional interface instead.
@@ -670,11 +671,18 @@ class ParamInfo:
         base_param_info: Self | None = None,
         parsed_docstring: dict[str, disnake.utils._DocstringParam] | None = None,
     ) -> Self:
+        default = param.default if param.default is not inspect.Parameter.empty else ...
+
         if base_param_info:
             # we copy this ParamInfo instance because it can be used in multiple signatures
             self = base_param_info.copy()
+
+            # base_param_info can be either from `= Param()` or `: Annotated[T, Param()]`;
+            # to support `arg: Annotated[str, Param(...)] = xyz`, capture the default value in
+            # the latter case
+            if default is not ... and not isinstance(default, cls):
+                self.default = default
         else:
-            default = param.default if param.default is not inspect.Parameter.empty else ...
             self = cls(default)
 
         self.parse_parameter(param)

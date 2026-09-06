@@ -345,3 +345,12 @@ class TestExpandParams:
                 "num", "does stuff", OptionType.integer, required=default_value is ..., min_value=7
             )
         ]
+
+    def test_param_as_annotated_with_default(self) -> None:
+        def func(
+            num: Annotated[int, Param(ge=7)] = 67,
+        ) -> None: ...
+
+        opts, _, params = self._expand_params(func)
+        assert opts == [Option("num", "-", OptionType.integer, required=False, min_value=7)]
+        assert params[0].default == 67
