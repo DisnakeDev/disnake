@@ -3,7 +3,7 @@
 """An example on how to set up localized application commands."""
 
 import os
-from typing import Any
+from typing import Annotated, Any
 
 import disnake
 from disnake import Localized, OptionChoice
@@ -46,13 +46,16 @@ async def highscore(
     inter: disnake.CommandInteraction,
     user: disnake.User,
     game: str,
-    interval: str = commands.Param(
-        choices=[
-            OptionChoice(Localized("Last Day", key="CHOICE_DAY"), "day"),
-            OptionChoice(Localized("Last Week", key="CHOICE_WEEK"), "week"),
-            OptionChoice(Localized("Last Month", key="CHOICE_MONTH"), "month"),
-        ]
-    ),
+    interval: Annotated[
+        str,
+        commands.Param(
+            choices=[
+                OptionChoice(Localized("Last Day", key="CHOICE_DAY"), "day"),
+                OptionChoice(Localized("Last Week", key="CHOICE_WEEK"), "week"),
+                OptionChoice(Localized("Last Month", key="CHOICE_MONTH"), "month"),
+            ]
+        ),
+    ],
 ):
     """Shows the highscore of the selected user within the specified interval.
     {{ HIGHSCORE_COMMAND }}

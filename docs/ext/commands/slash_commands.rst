@@ -214,7 +214,7 @@ and locally parse user provided content to :class:`int`.
     @bot.slash_command()
     async def snowflake(
         inter: disnake.ApplicationCommandInteraction,
-        snowflake: int = commands.Param(large=True),
+        snowflake: Annotated[int, commands.Param(large=True)],
     ):
         ...
 
@@ -247,7 +247,7 @@ For instance, you could restrict an option to only accept positive integers:
     @bot.slash_command()
     async def command(
         inter: disnake.ApplicationCommandInteraction,
-        amount: int = commands.Param(gt=0),
+        amount: Annotated[int, commands.Param(gt=0)],
     ):
         ...
 
@@ -277,8 +277,8 @@ falls outside the specified range.
     @bot.slash_command()
     async def ranges(
         inter: disnake.ApplicationCommandInteraction,
-        a: int = commands.Param(ge=0, le=2**64, large=True),  # 0 - 2**64 int
-        b: commands.Range[commands.LargeInt, 0, 2**64],       # 0 - 2**64 int
+        a: Annotated[int, commands.Param(ge=0, le=2**64, large=True)],  # 0 - 2**64 int
+        b: commands.Range[commands.LargeInt, 0, 2**64],                 # 0 - 2**64 int
     ):
         ...
 
@@ -296,7 +296,7 @@ For instance, you could restrict an option to only accept a single character:
     @bot.slash_command()
     async def charinfo(
         inter: disnake.ApplicationCommandInteraction,
-        character: str = commands.Param(max_length=1),
+        character: Annotated[str, commands.Param(max_length=1)],
     ):
         ...
 
@@ -307,7 +307,7 @@ Or restrict a tag command to limit tag names to 20 characters:
     @bot.slash_command()
     async def tags(
         inter: disnake.ApplicationCommandInteraction,
-        tag: str = commands.Param(max_length=20)
+        tag: Annotated[str, commands.Param(max_length=20)],
     ):
         ...
 
@@ -437,7 +437,7 @@ Or you can simply list the choices in ``commands.Param``:
     @bot.slash_command()
     async def blep(
         inter: disnake.ApplicationCommandInteraction,
-        animal: str = commands.Param(choices={"Dog": "dog", "Cat": "cat", "Penguin": "penguin"})
+        animal: Annotated[str, commands.Param(choices={"Dog": "dog", "Cat": "cat", "Penguin": "penguin"})],
     ):
         await inter.response.send_message(animal)
 
@@ -446,7 +446,7 @@ Or you can simply list the choices in ``commands.Param``:
     @bot.slash_command()
     async def blep(
         inter: disnake.ApplicationCommandInteraction,
-        animal: str = commands.Param(choices=["Dog", "Cat", "Penguin"])
+        animal: Annotated[str, commands.Param(choices=["Dog", "Cat", "Penguin"])],
     ):
         await inter.response.send_message(animal)
 
@@ -474,7 +474,7 @@ For example:
     @bot.slash_command()
     async def example(
         inter: disnake.ApplicationCommandInteraction,
-        language: str = commands.Param(autocomplete=autocomp_langs)
+        language: Annotated[str, commands.Param(autocomplete=autocomp_langs)],
     ):
         ...
 
@@ -638,10 +638,10 @@ This would create the same command as the code above, though you're free to chan
     @bot.slash_command(name=Localized("add_5", key="ADD_NUM_NAME"), description=Localized(key="ADD_NUM_DESCRIPTION"))
     async def _add_5_slash(
         inter: disnake.ApplicationCommandInteraction,
-        num: int = commands.Param(
+        num: Annotated[int, commands.Param(
             name=Localized(key="COOL_NUMBER_NAME"),
             description=Localized(key="COOL_NUMBER_DESCRIPTION")
-        ),
+        )],
     ):
         """
         Adds 5 to a number.
@@ -662,10 +662,10 @@ While not recommended, it is also possible to avoid using ``.json`` files at all
     )
     async def add_5(
         inter: disnake.ApplicationCommandInteraction,
-        num: int = commands.Param(
+        num: Annotated[int, commands.Param(
             name=Localized(data={Locale.de: "zahl"}),
             description=Localized(data={Locale.de: "Eine Zahl"}),
-        ),
+        )],
     ):
         ...
 
@@ -680,13 +680,13 @@ Choices/Autocomplete
     @bot.slash_command()
     async def example(
         inter: disnake.ApplicationCommandInteraction,
-        animal: str = commands.Param(choices=[
+        animal: Annotated[str, commands.Param(choices=[
             # alternatively:
             # OptionChoice(Localized("Cat", key="OPTION_CAT"), "Cat")
             Localized("Cat", key="OPTION_CAT"),
             Localized("Dolphin", key="OPTION_DOLPHIN"),
-        ]),
-        language: str = commands.Param(autocomplete=autocomp_langs),
+        ])],
+        language: Annotated[str, commands.Param(autocomplete=autocomp_langs)],
     ):
         ...
 
