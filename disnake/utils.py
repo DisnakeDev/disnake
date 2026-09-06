@@ -1204,7 +1204,8 @@ def evaluate_annotation(
         cache[cache_key] = evaluated
         return evaluated
 
-    # Annotated[X, Y], where Y is the converter we need
+    # Annotated[X, Y]
+    # (resolve and return only Y if `return_annotated` is false)
     # (n.b. this must go before any `__args__` logic, as Annotated would match that as well)
     if get_origin(tp) is Annotated:
         meta_resolved = evaluate_annotation(
