@@ -1063,7 +1063,7 @@ _AnyMetadata_tp: tuple[type[AnyMetadata], ...] = AnyMetadata.__args__
 def find_meta_object(param: inspect.Parameter, metadata: Sequence[Any]) -> AnyMetadata | None:
     """Find any `ParamInfo` or `Injection` in a parameter's default value or Annotated metadata.
 
-    Raises if >1 object was found, e.g. when `arg: Annotated[str, Param(...)] = Param(...)`.
+    Raises if >1 object was found, e.g. when `arg: Annotated[T, Param(...)] = Param(...)`.
     """
     candidates = list(metadata)
     if isinstance(param.default, _AnyMetadata_tp):
