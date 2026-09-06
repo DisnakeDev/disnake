@@ -2,15 +2,15 @@
 
 import math
 from collections.abc import Callable
-from typing import Any, Optional, Union, cast
+from typing import Annotated, Any, Optional, Union, cast
 from unittest import mock
 
 import pytest
 
 import disnake
-from disnake import Member, OptionType, Role, User
+from disnake import Member, Option, OptionType, Role, User
 from disnake.ext import commands
-from disnake.ext.commands.params import _BaseRange, _Range, _String
+from disnake.ext.commands.params import Param, _BaseRange, _Range, _String
 
 
 class TestParamInfo:
@@ -311,3 +311,37 @@ class TestIsolateSelf:
         assert cog is None
         assert inter is not None
         assert sig.params.keys() == {"a"}
+
+
+class TestExpandParams:
+    def _expand_params(
+        self, func: Callable[..., Any]
+    ) -> tuple[list[Option], dict[str, commands.Injection], list[commands.ParamInfo]]:
+        _, _, params, injections = commands.params.collect_params(func)
+        return [p.to_option() for p in params], injections, params
+
+    @pytest.mark.parametrize("default_value", [..., 67])
+    def test_param_as_default(self, default_value: Any) -> None:
+        def func(
+            num: int = Param(default_value, description="does stuff", ge=7),
+        ) -> None: ...
+
+        opts, _, _ = self._expand_params(func)
+        assert opts == [
+            Option(
+                "num", "does stuff", OptionType.integer, required=default_value is ..., min_value=7
+            )
+        ]
+
+    @pytest.mark.parametrize("default_value", [..., 67])
+    def test_param_as_annotated(self, default_value: Any) -> None:
+        def func(
+            num: Annotated[int, Param(default_value, description="does stuff", ge=7)],
+        ) -> None: ...
+
+        opts, _, _ = self._expand_params(func)
+        assert opts == [
+            Option(
+                "num", "does stuff", OptionType.integer, required=default_value is ..., min_value=7
+            )
+        ]
