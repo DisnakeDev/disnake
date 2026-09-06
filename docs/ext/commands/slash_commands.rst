@@ -125,7 +125,7 @@ You may have as many options as you want but the order matters, an optional opti
 Option Types
 ++++++++++++
 
-You might already be familiar with discord.py's converters, slash commands have a very similar equivalent in the form of option types.
+You might already be familiar with converters; slash commands have a very similar equivalent in the form of option types.
 Discord itself supports only a few built-in types which are guaranteed to be enforced:
 
 - :class:`str`
@@ -167,6 +167,36 @@ Other types may be converted implicitly, using the builtin :ref:`ext_commands_di
   Note that a :class:`~disnake.User` annotation can also result in a :class:`~disnake.Member` being received.
 
   \*\*\* Corresponds to any mentionable type, currently equivalent to ``User | Member | Role``.
+
+
+Parameter Descriptors
++++++++++++++++++++++
+
+A slash command's parameter can have additional configuration/metadata, depending on the type. For instance,
+you may e.g. rename a parameter, pass the input through a converter function, or restrict a :class:`str` parameter's
+minimum and/or maximum length (which will be enforced by the Discord API).
+
+To facilitate this, :func:`~ext.commands.Param` can be used with :data:`typing.Annotated` to add all sorts of metadata to a parameter, like this:
+
+.. code-block:: python
+    :emphasize-lines: 4
+
+    @bot.slash_command()
+    async def echo(
+        inter: disnake.ApplicationCommandInteraction,
+        text: Annotated[str, commands.Param(max_length=10)],
+        suffix: Annotated[str, commands.Param(name="emoji", choices=["😊", "😔"])]
+    ) -> None:
+        await inter.response.send_message(text + " " + suffix)
+
+This way, the parameters in this snippet remain :class:`str` options, while e.g. additionally restricting the length to 10 characters using ``Param(max_length=10)``, all while keeping your editor/type-checker happy.
+
+Other features include minimum/maximum values for numbers, restricting parameters to a fixed set of choices, restricting an :class:`Attachment` option to certain file types, and more. See below for more detailed information.
+
+.. note::
+    Prior to v2.13, :func:`~ext.commands.Param` was used by assigning it as a parameter's "default value" (similar to fastapi's syntax),
+    rather than using it in conjunction with :data:`typing.Annotated`, as seen in :ref:`why_params_and_injections_return_any`.
+    While this **remains supported** for the time being, we encourage users to migrate to the ``Annotated[T, Param(...)]`` syntax, as it is more flexible and pythonic.
 
 
 .. _large_integers:
@@ -353,42 +383,6 @@ If you prefer the real RST format, you can still use it:
         """
         ...
 
-
-Parameter Descriptors
-+++++++++++++++++++++
-
-Python has no truly *clean* way to provide metadata for parameters, so disnake uses the same approach as fastapi using
-parameter defaults. At the current time there's only :class:`~disnake.ext.commands.Param`.
-
-With this you may set the name, description, custom converters, :ref:`autocompleters`, and more.
-
-.. code-block:: python3
-
-    @bot.slash_command()
-    async def math(
-        interaction: disnake.ApplicationCommandInteraction,
-        a: int = commands.Param(le=10),
-        b: int = commands.Param(le=10),
-        op: str = commands.Param(name="operator", choices=["+", "-", "/", "*"])
-    ):
-        """
-        Perform an operation on two numbers as long as both of them are less than or equal to 10
-        """
-        ...
-
-.. code-block:: python3
-
-    @bot.slash_command()
-    async def multiply(
-        interaction: disnake.ApplicationCommandInteraction,
-        clean: str = commands.Param(converter=lambda inter, arg: arg.replace("@", "\\@")
-    ):
-        ...
-
-
-.. note ::
-    The converter parameter only ever takes in a **function**, not a Converter class.
-    Converter classes are completely unusable in disnake due to their inconsistent typing.
 
 .. _option_choices:
 
