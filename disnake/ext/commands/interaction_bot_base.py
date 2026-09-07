@@ -20,7 +20,7 @@ from typing import (
 
 import disnake
 from disnake import utils
-from disnake.app_commands import ApplicationCommand, Option
+from disnake.app_commands import ApplicationCommand, EntryPointCommand, Option
 from disnake.custom_warnings import SyncWarning
 from disnake.enums import ApplicationCommandType
 from disnake.flags import ApplicationInstallTypes, InteractionContextTypes
@@ -105,7 +105,12 @@ def _app_commands_diff(
             diff["no_changes"].append(new_cmd)
 
     for name_and_type, old_cmd in old_cmds.items():
-        if name_and_type not in new_cmds:
+        if isinstance(old_cmd, EntryPointCommand):
+            # NOTE: entry point commands bypass the traditional sync mechanism, largely because they
+            # cannot be removed via the bulk update endpoint and are not necessarily handled by
+            # the bot in the first place
+            diff["no_changes"].append(old_cmd)
+        elif name_and_type not in new_cmds:
             diff["delete"].append(old_cmd)
 
     return diff

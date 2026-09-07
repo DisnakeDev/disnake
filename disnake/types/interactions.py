@@ -24,7 +24,8 @@ if TYPE_CHECKING:
     from .message import AllowedMentions, Attachment, Message
 
 
-ApplicationCommandType = Literal[1, 2, 3]
+ApplicationCommandType = Literal[1, 2, 3, 4]
+ApplicationCommandHandlerType = Literal[1, 2]
 
 InteractionContextType = Literal[1, 2, 3]  # GUILD, BOT_DM, PRIVATE_CHANNEL
 
@@ -46,6 +47,7 @@ class ApplicationCommand(TypedDict):
     integration_types: NotRequired[list[ApplicationIntegrationType]]
     contexts: NotRequired[list[InteractionContextType] | None]
     version: Snowflake
+    handler: NotRequired[ApplicationCommandHandlerType]
 
 
 ApplicationCommandOptionType = Literal[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
@@ -408,7 +410,7 @@ class InteractionAutocompleteResponseData(TypedDict):
     choices: list[ApplicationCommandOptionChoice]
 
 
-InteractionResponseType: TypeAlias = Literal[1, 4, 5, 6, 7, 10]
+InteractionResponseType: TypeAlias = Literal[1, 4, 5, 6, 7, 8, 9, 10, 12]
 
 InteractionResponseData: TypeAlias = (
     InteractionApplicationCommandResponseData | InteractionAutocompleteResponseData | Modal
@@ -478,6 +480,9 @@ class InteractionCallbackResponse(TypedDict):
 
 
 class EditApplicationCommand(TypedDict):
+    # n.b. this cannot be changed
+    type: NotRequired[ApplicationCommandType]
+
     name: str
     name_localizations: NotRequired[LocalizationDict | None]
     description: NotRequired[str]
@@ -489,5 +494,4 @@ class EditApplicationCommand(TypedDict):
     nsfw: NotRequired[bool]
     integration_types: NotRequired[list[ApplicationIntegrationType] | None]
     contexts: NotRequired[list[InteractionContextType] | None]
-    # n.b. this cannot be changed
-    type: NotRequired[ApplicationCommandType]
+    handler: NotRequired[ApplicationCommandHandlerType]
