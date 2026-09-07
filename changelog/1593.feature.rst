@@ -1,0 +1,1 @@
+Support :class:`~collections.abc.Mapping` instead of only :class:`dict` in all ``overwrites`` parameters (used in channel creation/cloning), the ``options`` parameters of :class:`ui.StringSelect`, :class:`ui.CheckboxGroup`, and :class:`ui.RadioGroup`, as well as the ``data`` parameter of :class:`Localized`.

@@ -1391,7 +1391,8 @@ def Param(
 
     file_types: :class:`~collections.abc.Sequence`\[:class:`str`] | :data:`None`
         The list of file types that can be uploaded with this option, if it is an :class:`.Attachment` option.
-        Allowed values are ``image``, ``video``, and ``audio``, as well as
+        Allowed values are ``image``, ``video``, and ``audio`` (see
+        :ddocs:`API Reference <reference#file-type-filtering>`), as well as
         any dot-prefixed extension such as ``.pdf`` (up to 10).
         Defaults to all types (i.e. :data:`None`).
 

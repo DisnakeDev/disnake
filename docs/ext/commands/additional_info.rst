@@ -16,29 +16,28 @@ App command sync
 
 If you're using :ref:`disnake_ext_commands` for application commands (slash commands, context menus) you should
 understand how your commands show up in Discord. By default, the library registers / updates all commands automatically.
-Based on the application commands defined in your code the library automatically determines
-which commands should be registered, edited or deleted, but there're some edge cases you should keep in mind.
+Based on the application commands defined in your code, the library automatically determines
+which commands should be registered, edited or deleted, but there are some edge cases you should keep in mind.
 
 Unknown Commands
-+++++++++++++++++
+++++++++++++++++
 
 Unlike global commands, per-guild application commands are synced in a lazy fashion. This is due to Discord ratelimits,
-as checking all guilds for application commands is infeasible past two or three guilds.
-This can lead to situations where a command no longer exists in the code but still exists in a server.
+as checking all guilds for application commands is infeasible beyond only a handful of guilds.
+This can lead to situations where a command no longer exists in the code but still exists in the Discord API.
 
-To rectify this, just run the command. It will automatically be deleted.
+When an interaction for a previously removed guild command is received, a :class:`SyncWarning` will be emitted.
+To rectify this, consider using :meth:`await bot.bulk_overwrite_guild_commands(\<guild_id\>, []) <ext.commands.Bot.bulk_overwrite_guild_commands>`.
 
-.. _changing-test-guilds:
-
-This will also occur when IDs are removed from the ``test_guilds`` kwarg of :class:`Bot <ext.commands.Bot>` (or a similar class) or from the ``guild_ids`` kwarg of
-:func:`slash_command <ext.commands.slash_command>`, :func:`user_command <ext.commands.user_command>`, or :func:`message_command <ext.commands.message_command>`.
+This will also occur when IDs are removed from the ``test_guilds`` kwarg of :class:`~ext.commands.Bot` or from the ``guild_ids`` kwarg of
+:func:`~ext.commands.slash_command`, :func:`~ext.commands.user_command`, or :func:`~ext.commands.message_command`.
 
 Command Sync with Multiple Clusters
-++++++++++++++++++++++++++++++++++++
++++++++++++++++++++++++++++++++++++
 
 If your bot requires shard distribution across several clusters, you should disable command sync on all clusters except one.
-This will prevent conflicts and race conditions. Discord API doesn't provide users with events related to application command updates,
-so it's impossible to keep the cache of multiple machines synced. Having only 1 cluster with ``sync_commands`` set to ``True`` is enough
+This will prevent conflicts and race conditions. The Discord API doesn't provide users with events related to application command updates,
+so it's impossible to keep the cache of multiple machines synced. Having only 1 cluster with :attr:`CommandSyncFlags.sync_commands <ext.commands.CommandSyncFlags.sync_commands>` set to ``True`` is enough
 because global registration of application commands doesn't depend on sharding.
 
 .. _why_params_and_injections_return_any:

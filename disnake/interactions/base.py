@@ -230,6 +230,7 @@ class Interaction(Generic[ClientT]):
         "_state",
         "_session",
         "_original_response",
+        "_last_response",
         "_cs_response",
         "_cs_followup",
         "_cs_me",
@@ -242,7 +243,12 @@ class Interaction(Generic[ClientT]):
         # TODO: Maybe use a unique session
         self._session: ClientSession = state.http._HTTPClient__session  # pyright: ignore[reportAttributeAccessIssue]
         self.client: ClientT = cast("ClientT", state._get_client())
+
+        # TODO(3.0): merge these fields
+        # cached return value for .original_response()
         self._original_response: InteractionMessage | None = None
+        # current message state taking into account all edits etc.
+        self._last_response: InteractionMessage | None = None
 
         self.id: int = int(data["id"])
         self.type: InteractionType = try_enum(InteractionType, data["type"])
@@ -410,6 +416,14 @@ class Interaction(Generic[ClientT]):
         :return type: :class:`bool`
         """
         return self.expires_at <= utils.utcnow()
+
+    def _update_last_response(
+        self, response: InteractionMessage | InteractionCallbackResponse[InteractionMessage | None]
+    ) -> None:
+        if isinstance(response, InteractionMessage):
+            self._last_response = response
+        elif isinstance(response.resource, InteractionMessage):
+            self._last_response = response.resource
 
     async def original_response(self) -> InteractionMessage:
         """|coro|
@@ -583,12 +597,14 @@ class Interaction(Generic[ClientT]):
         :class:`InteractionMessage`
             The newly edited message.
         """
-        # if no attachment list was provided but we're uploading new files,
-        # use current attachments as the base
-        # FIXME: avoid original_response(), use callback data once implemented
-        # FIXME: set previous_flags as well
-        if attachments is MISSING and (file or files):
-            attachments = (await self.original_response()).attachments
+        previous_flags: int = 0
+        if self._last_response:
+            previous_flags = self._last_response.flags.value
+
+            # if no attachment list was provided but we're uploading new files,
+            # use current attachments as the base
+            if attachments is MISSING and (file or files):
+                attachments = self._last_response.attachments
 
         previous_mentions: AllowedMentions | None = self._state.allowed_mentions
 
@@ -607,6 +623,7 @@ class Interaction(Generic[ClientT]):
             flags=flags,
             allowed_mentions=allowed_mentions,
             previous_allowed_mentions=previous_mentions,
+            previous_flags=previous_flags,
         ) as params:
             try:
                 data = await adapter.edit_original_interaction_response(
@@ -625,6 +642,7 @@ class Interaction(Generic[ClientT]):
         # The message channel types should always match
         state = _InteractionMessageState(self, self._state)
         message = InteractionMessage(state=state, channel=self.channel, data=data)  # pyright: ignore[reportArgumentType]
+        self._update_last_response(message)
 
         if view and not view.is_finished():
             self._state.store_view(view, message.id)
@@ -1009,7 +1027,11 @@ class InteractionResponse:
         )
         self._response_type = defer_type
 
-        return InteractionCallbackResponse(callback_data, parent=self._parent)
+        response = InteractionCallbackResponse[InteractionMessage | None](
+            callback_data, parent=self._parent
+        )
+        self._parent._update_last_response(response)
+        return response
 
     async def pong(self) -> None:
         """|coro|
@@ -1192,9 +1214,10 @@ class InteractionResponse:
                 raise
 
         self._response_type = response_type
-        response: InteractionCallbackResponse[InteractionMessage] = InteractionCallbackResponse(
+        response = InteractionCallbackResponse[InteractionMessage](
             callback_data, parent=self._parent
         )
+        self._parent._update_last_response(response)
 
         if view is not MISSING:
             if ephemeral and view.timeout is None:
@@ -1361,7 +1384,7 @@ class InteractionResponse:
             flags=flags,
             allowed_mentions=allowed_mentions,
             previous_allowed_mentions=base_allowed_mentions,
-            # FIXME: previous_flags ?
+            previous_flags=message.flags.value,
         ) as params:
             if view is not MISSING:
                 parent._state.prevent_view_updates_for(message.id)
@@ -1375,15 +1398,19 @@ class InteractionResponse:
                 files=params.files,
             )
 
+        self._response_type = response_type
+        response = InteractionCallbackResponse[InteractionMessage](
+            callback_data, parent=self._parent
+        )
+        self._parent._update_last_response(response)
+
         if view and not view.is_finished():
             parent._state.store_view(view, message.id)
-
-        self._response_type = response_type
 
         if delete_after is not None:
             await parent.delete_original_response(delay=delete_after)
 
-        return InteractionCallbackResponse(callback_data, parent=self._parent)
+        return response
 
     async def autocomplete(self, *, choices: Choices) -> InteractionCallbackResponse[None]:
         r"""|coro|
@@ -1927,13 +1954,6 @@ class InteractionMessage(Message):
                 **params,
             )
 
-        # if no attachment list was provided but we're uploading new files,
-        # use current attachments as the base
-        # this isn't necessary when using the superclass, as the implementation there takes care of attachments
-        if attachments is MISSING and (file or files):
-            attachments = self.attachments
-
-        # FIXME: suppress_embeds overwrites existing flags, should set previous_flags
         return await self._state._interaction.edit_original_response(
             content=content,
             embed=embed,

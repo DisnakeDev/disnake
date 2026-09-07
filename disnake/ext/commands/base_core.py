@@ -8,15 +8,7 @@ import functools
 import inspect
 from abc import ABC
 from collections.abc import Callable
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    TypeAlias,
-    TypedDict,
-    TypeVar,
-    cast,
-    overload,
-)
+from typing import TYPE_CHECKING, Any, TypeAlias, TypedDict, TypeVar, overload
 
 from disnake import utils
 from disnake.app_commands import ApplicationCommand
@@ -55,7 +47,7 @@ if TYPE_CHECKING:
         guild_only: bool
         extras: dict[str, Any] | None
         checks: list[AppCheck]
-        cooldown: CooldownMapping | None
+        cooldown: CooldownMapping[ApplicationCommandInteraction] | None
         max_concurrency: MaxConcurrency | None
 
 
@@ -197,7 +189,7 @@ class InvokableApplicationCommand(ABC):
         else:
             msg = "Cooldown must be a an instance of CooldownMapping or None."
             raise TypeError(msg)
-        self._buckets: CooldownMapping = buckets
+        self._buckets: CooldownMapping[ApplicationCommandInteraction] = buckets
 
         try:
             max_concurrency = func.__commands_max_concurrency__
@@ -222,7 +214,8 @@ class InvokableApplicationCommand(ABC):
             other._buckets = self._buckets.copy()
         if self._max_concurrency != other._max_concurrency:
             # _max_concurrency won't be None at this point
-            other._max_concurrency = cast("MaxConcurrency", self._max_concurrency).copy()
+            assert self._max_concurrency is not None
+            other._max_concurrency = self._max_concurrency.copy()
 
         if (
             # see https://github.com/DisnakeDev/disnake/pull/678#discussion_r938113624:
@@ -387,11 +380,11 @@ class InvokableApplicationCommand(ABC):
         if self._buckets.valid:
             dt = inter.created_at
             current = dt.replace(tzinfo=datetime.timezone.utc).timestamp()
-            bucket = self._buckets.get_bucket(inter, current)  # pyright: ignore[reportArgumentType]
+            bucket = self._buckets.get_bucket(inter, current)
             if bucket is not None:  # pyright: ignore[reportUnnecessaryComparison]
                 retry_after = bucket.update_rate_limit(current)
                 if retry_after:
-                    raise CommandOnCooldown(bucket, retry_after, self._buckets.type)  # pyright: ignore[reportArgumentType]
+                    raise CommandOnCooldown(bucket, retry_after, self._buckets.type)
 
     async def prepare(self, inter: ApplicationCommandInteraction) -> None:
         inter.application_command = self
@@ -401,14 +394,14 @@ class InvokableApplicationCommand(ABC):
             raise CheckFailure(msg)
 
         if self._max_concurrency is not None:
-            await self._max_concurrency.acquire(inter)  # pyright: ignore[reportArgumentType]
+            await self._max_concurrency.acquire(inter)
 
         try:
             self._prepare_cooldowns(inter)
             await self.call_before_hooks(inter)
         except Exception:
             if self._max_concurrency is not None:
-                await self._max_concurrency.release(inter)  # pyright: ignore[reportArgumentType]
+                await self._max_concurrency.release(inter)
             raise
 
     def is_on_cooldown(self, inter: ApplicationCommandInteraction) -> bool:
@@ -427,7 +420,7 @@ class InvokableApplicationCommand(ABC):
         if not self._buckets.valid:
             return False
 
-        bucket = self._buckets.get_bucket(inter)  # pyright: ignore[reportArgumentType]
+        bucket = self._buckets.get_bucket(inter)
         dt = inter.created_at
         current = dt.replace(tzinfo=datetime.timezone.utc).timestamp()
         return bucket.get_tokens(current) == 0
@@ -441,7 +434,7 @@ class InvokableApplicationCommand(ABC):
             The interaction with this application command
         """
         if self._buckets.valid:
-            bucket = self._buckets.get_bucket(inter)  # pyright: ignore[reportArgumentType]
+            bucket = self._buckets.get_bucket(inter)
             bucket.reset()
 
     def get_cooldown_retry_after(self, inter: ApplicationCommandInteraction) -> float:
@@ -459,7 +452,7 @@ class InvokableApplicationCommand(ABC):
             If this is ``0.0`` then the command isn't on cooldown.
         """
         if self._buckets.valid:
-            bucket = self._buckets.get_bucket(inter)  # pyright: ignore[reportArgumentType]
+            bucket = self._buckets.get_bucket(inter)
             dt = inter.created_at
             current = dt.replace(tzinfo=datetime.timezone.utc).timestamp()
             return bucket.get_retry_after(current)
@@ -483,7 +476,7 @@ class InvokableApplicationCommand(ABC):
             raise CommandInvokeError(exc) from exc
         finally:
             if self._max_concurrency is not None:
-                await self._max_concurrency.release(inter)  # pyright: ignore[reportArgumentType]
+                await self._max_concurrency.release(inter)
 
             await self.call_after_hooks(inter)
 

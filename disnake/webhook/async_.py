@@ -58,7 +58,7 @@ if TYPE_CHECKING:
     from ..embeds import Embed
     from ..guild import Guild
     from ..http import HTTPClient, Response
-    from ..message import Attachment, MessageReference, PartialMessage
+    from ..message import Attachment, MessageReference, PartialMessage, SharedClientTheme
     from ..poll import Poll
     from ..state import ConnectionState
     from ..sticker import GuildSticker, StandardSticker, StickerItem
@@ -528,6 +528,7 @@ def handle_message_parameters_dict(
     components: MessageComponents | None = MISSING,
     stickers: Sequence[GuildSticker | StandardSticker | StickerItem] = MISSING,
     poll: Poll = MISSING,
+    shared_client_theme: SharedClientTheme = MISSING,
     reference: Message | MessageReference | PartialMessage | None = MISSING,
     allowed_mentions: AllowedMentions | None = MISSING,
     mention_author: bool | None = None,
@@ -618,8 +619,14 @@ def handle_message_parameters_dict(
     # components v2 cannot be used with other content fields
     # (n.b. this doesn't take into account editing messages that *already* have content/embeds,
     # since we can't know that for certain with partial messages anyway)
-    if flags and flags.is_components_v2 and (content or embeds or stickers or poll):
-        msg = "Cannot use v2 components with content, embeds, stickers, or polls"
+    if (
+        flags
+        and flags.is_components_v2
+        and (content or embeds or stickers or poll or shared_client_theme)
+    ):
+        msg = (
+            "Cannot use v2 components with content, embeds, stickers, poll, or shared_client_theme"
+        )
         raise ValueError(msg)
 
     # flags
@@ -662,6 +669,9 @@ def handle_message_parameters_dict(
     if poll is not MISSING:
         payload["poll"] = poll._to_dict()
 
+    if shared_client_theme is not MISSING:
+        payload["shared_client_theme"] = shared_client_theme.to_dict()
+
     if reference:
         try:
             payload["message_reference"] = reference.to_message_reference_dict()
@@ -703,6 +713,7 @@ def handle_message_parameters(
     components: MessageComponents | None = MISSING,
     stickers: Sequence[GuildSticker | StandardSticker | StickerItem] = MISSING,
     poll: Poll = MISSING,
+    shared_client_theme: SharedClientTheme = MISSING,
     reference: Message | MessageReference | PartialMessage | None = MISSING,
     allowed_mentions: AllowedMentions | None = MISSING,
     mention_author: bool | None = None,
@@ -732,6 +743,7 @@ def handle_message_parameters(
         components=components,
         stickers=stickers,
         poll=poll,
+        shared_client_theme=shared_client_theme,
         reference=reference,
         allowed_mentions=allowed_mentions,
         mention_author=mention_author,
