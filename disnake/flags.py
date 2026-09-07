@@ -2170,6 +2170,7 @@ class ChannelFlags(BaseFlags):
             self,
             *,
             hide_media_download_options: bool = ...,
+            obfuscated: bool = ...,
             pinned: bool = ...,
             require_tag: bool = ...,
         ) -> None: ...
@@ -2201,6 +2202,19 @@ class ChannelFlags(BaseFlags):
         .. versionadded:: 2.10
         """
         return 1 << 15
+
+    @flag_value
+    def obfuscated(self) -> int:
+        """:class:`bool`: Returns ``True`` if the channel's metadata is obfuscated (because
+        the bot does not have permission to view it).
+
+        More details about channel obfuscation can be found in the FAQ entry
+        :ref:`channel_obfuscation`, as well as the
+        :ddocs:`API documentation <resources/channel#channel-object-obfuscated-channels>`.
+
+        .. versionadded:: |vnext|
+        """
+        return 1 << 17
 
 
 class AutoModKeywordPresets(ListBaseFlags):

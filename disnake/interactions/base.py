@@ -143,8 +143,7 @@ class Interaction(Generic[ClientT]):
     channel: :class:`abc.GuildChannel` | :class:`Thread` | :class:`abc.PrivateChannel` | :class:`PartialMessageable`
         The channel the interaction was sent from.
 
-        Note that due to a Discord limitation, DM channels
-        may not contain recipient information.
+        Note that due to a Discord limitation, DM channels may not contain recipient information.
         Unknown channel types will be :class:`PartialMessageable`.
 
         .. versionchanged:: 2.10
@@ -156,6 +155,10 @@ class Interaction(Generic[ClientT]):
         .. note::
             If you want to compute the interaction author's or bot's permissions in the channel,
             consider using :attr:`permissions` or :attr:`app_permissions`.
+
+        .. note::
+            This is always a full channel object, even if the bot cannot normally view the channel
+            (i.e. it will not be :meth:`obfuscated <abc.GuildChannel.is_obfuscated>`).
 
     author: :class:`User` | :class:`Member`
         The user or member that sent the interaction.
