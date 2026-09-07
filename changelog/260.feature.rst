@@ -1,0 +1,4 @@
+|commands| Support creating multiple per-guild application commands with the same name in different guilds.
+- Add :meth:`Bot.add_app_command <.ext.commands.Bot.add_app_command>` and :meth:`Bot.remove_app_command <.ext.commands.Bot.remove_app_command>` (superseding ``.add_(slash|user|message)_command`` and ``.remove_(slash|user|message)_command``).
+- Add :class:`~.ext.commands.ApplicationCommandRegistrationError`, which is raised when an identical command already exists.
+- Add ``guild_id`` parameter to :meth:`Bot.get_slash_command <.ext.commands.Bot.get_slash_command>`, :meth:`Bot.get_user_command <.ext.commands.Bot.get_user_command>`, and :meth:`Bot.get_message_command <.ext.commands.Bot.get_message_command>`.
