@@ -2172,7 +2172,7 @@ class ChannelFlags(BaseFlags):
             hide_media_download_options: bool = ...,
             pinned: bool = ...,
             require_tag: bool = ...,
-            spoiler_channel: bool = ...,
+            spoiler: bool = ...,
         ) -> None: ...
 
     @flag_value
@@ -2203,9 +2203,8 @@ class ChannelFlags(BaseFlags):
         """
         return 1 << 15
 
-    # TODO: just `spoiler`?
     @flag_value
-    def spoiler_channel(self) -> int:
+    def spoiler(self) -> int:
         """:class:`bool`: Returns ``True`` if the channel is a spoiler channel,
         which requires users to opt-in to view its contents.
 

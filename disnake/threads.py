@@ -402,13 +402,13 @@ class Thread(Messageable, Hashable):
     def is_spoiler(self) -> bool:
         """Whether the thread is marked as a spoiler.
 
-        This is a shortcut to :attr:`self.flags.spoiler_channel <.ChannelFlags.spoiler_channel>`.
+        This is a shortcut to :attr:`self.flags.spoiler <.ChannelFlags.spoiler>`.
 
         .. versionadded:: |vnext|
 
         :return type: :class:`bool`
         """
-        return self.flags.spoiler_channel
+        return self.flags.spoiler
 
     @property
     def applied_tags(self) -> list[ForumTag]:
@@ -728,7 +728,7 @@ class Thread(Messageable, Hashable):
         flags: :class:`ChannelFlags`
             The new channel flags to set for this thread. This will overwrite any existing flags set on this channel.
 
-            Only the :attr:`~ChannelFlags.pinned` and :attr:`~ChannelFlags.spoiler_channel`
+            Only the :attr:`~ChannelFlags.pinned` and :attr:`~ChannelFlags.spoiler`
             flags are supported for threads.
 
             If parameter ``pinned`` is provided, that will override the setting of :attr:`ChannelFlags.pinned`.

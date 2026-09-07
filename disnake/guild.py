@@ -1445,7 +1445,7 @@ class Guild(Hashable):
             Whether to mark the channel as NSFW.
         flags: :class:`ChannelFlags`
             The flags to set for this channel.
-            Only the :attr:`~ChannelFlags.spoiler_channel` flag is supported for text channels.
+            Only the :attr:`~ChannelFlags.spoiler` flag is supported for text channels.
 
             .. versionadded:: |vnext|
 
@@ -1574,7 +1574,7 @@ class Guild(Hashable):
 
         flags: :class:`ChannelFlags`
             The flags to set for this channel.
-            Only the :attr:`~ChannelFlags.spoiler_channel` flag is supported for voice channels.
+            Only the :attr:`~ChannelFlags.spoiler` flag is supported for voice channels.
 
             .. versionadded:: |vnext|
 
@@ -1705,7 +1705,7 @@ class Guild(Hashable):
             .. versionadded:: 2.9
         flags: :class:`ChannelFlags`
             The flags to set for this channel.
-            Only the :attr:`~ChannelFlags.spoiler_channel` flag is supported for stage channels.
+            Only the :attr:`~ChannelFlags.spoiler` flag is supported for stage channels.
 
             .. versionadded:: |vnext|
 
@@ -1838,7 +1838,7 @@ class Guild(Hashable):
             Whether to mark the channel as NSFW.
         flags: :class:`ChannelFlags`
             The flags to set for this channel.
-            Only the :attr:`~ChannelFlags.require_tag` and :attr:`~ChannelFlags.spoiler_channel`
+            Only the :attr:`~ChannelFlags.require_tag` and :attr:`~ChannelFlags.spoiler`
             flags are supported for forum channels.
 
             .. versionadded:: |vnext|
@@ -1993,7 +1993,7 @@ class Guild(Hashable):
         flags: :class:`ChannelFlags`
             The flags to set for this channel.
             Only the :attr:`~ChannelFlags.require_tag`, :attr:`~ChannelFlags.hide_media_download_options`,
-            and :attr:`~ChannelFlags.spoiler_channel` flags are supported for media channels.
+            and :attr:`~ChannelFlags.spoiler` flags are supported for media channels.
 
             .. versionadded:: |vnext|
 
