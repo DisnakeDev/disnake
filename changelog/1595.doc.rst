@@ -1,0 +1,1 @@
+Update list of guild :attr:`~Guild.features`, and add administrator permission requirement to :meth:`Guild.prune_members` if the guild has the ``PRUNE_REQUIRES_ADMIN`` feature.

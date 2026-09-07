@@ -1,0 +1,1 @@
+Fix dispatching components in views with the same ``custom_id`` when sent via :meth:`InteractionResponse.send_message`. Previously, sending a view would override already tracked components of views with the same ``custom_id`` from prior interaction responses.

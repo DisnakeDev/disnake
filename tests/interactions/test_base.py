@@ -13,9 +13,17 @@ from disnake.state import ConnectionState
 from disnake.utils import MISSING
 
 if TYPE_CHECKING:
-    from disnake.types.interactions import InteractionChannel as InteractionChannelPayload
+    from disnake.types.interactions import (
+        InteractionCallbackResponse as InteractionCallbackResponsePayload,
+        InteractionChannel as InteractionChannelPayload,
+    )
     from disnake.types.member import Member as MemberPayload
     from disnake.types.user import User as UserPayload
+
+
+interaction_callback_response: InteractionCallbackResponsePayload = {
+    "interaction": {"id": 0, "type": 4}
+}
 
 
 @pytest.mark.asyncio
@@ -28,6 +36,9 @@ class TestInteractionResponse:
     @pytest.fixture
     def adapter(self) -> mock.AsyncMock:
         adapter = mock.AsyncMock()
+        adapter.create_interaction_response = mock.AsyncMock(
+            return_value=interaction_callback_response
+        )
         disnake.interactions.base.async_context.set(adapter)
         return adapter
 

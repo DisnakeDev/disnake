@@ -72,6 +72,19 @@ class Loop(Generic[LF]):
     The main interface to create this is through :func:`loop`.
     """
 
+    # (args, kwargs), used for cloning the loop later
+    __original_args__: tuple[tuple[Any, ...], dict[str, Any]]
+
+    def __new__(cls, *args: Any, **kwargs: Any) -> Self:
+        self = super().__new__(cls)
+        # These are captured in __new__ (rather than __init__), such that we run
+        # before any subclass __init__'s and snapshot the original set of arguments.
+        # (n.b. while custom *args aren't supported in `Loop`, we capture *args here
+        # nonetheless, in case a subclass __init__ wraps the callback; using self.coro
+        # instead of the original arg for cloning would wrap it a second time)
+        self.__original_args__ = (args, kwargs)
+        return self
+
     def __init__(
         self,
         coro: LF,
@@ -84,9 +97,6 @@ class Loop(Generic[LF]):
         reconnect: bool = True,
         loop: asyncio.AbstractEventLoop = MISSING,
     ) -> None:
-        """.. note:
-        If you overwrite ``__init__`` arguments, make sure to redefine .clone too.
-        """
         if not inspect.iscoroutinefunction(coro):
             msg = f"Expected a coroutine function, got {coro.__class__.__name__!r} instead."
             raise TypeError(msg)
@@ -200,20 +210,14 @@ class Loop(Generic[LF]):
         return clone
 
     def clone(self) -> Self:
-        instance = type(self)(
-            self.coro,
-            seconds=self._seconds,
-            hours=self._hours,
-            minutes=self._minutes,
-            time=self._time,
-            count=self.count,
-            reconnect=self.reconnect,
-            loop=self.loop,
-        )
+        args, kwargs = self.__original_args__
+        instance = type(self)(*args, **kwargs)
+
         instance._before_loop = self._before_loop
         instance._after_loop = self._after_loop
         instance._error = self._error
         instance._injected = self._injected
+
         return instance
 
     @property
