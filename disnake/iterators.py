@@ -1430,9 +1430,9 @@ class MessageSearchIterator(_AsyncIterator["Message"]):
         self.limit = limit
         self.offset: int = 0
 
-        self.query = query
-        # since the given `query` dict should always be ephemeral and only created by the lib,
-        # we can just mutate it directly
+        # copy the query data so that we can directly modify it for pagination
+        self.query: MessageSearchQuery = query.copy()
+
         if before is not None:
             self.query["max_id"] = before.id
         if after is not None:
