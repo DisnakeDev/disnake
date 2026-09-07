@@ -1446,7 +1446,7 @@ class MessageSearchIterator(_AsyncIterator["Message"]):
         # note: unlike other endpoints, this one can return empty pages,
         # especially with higher offsets. therefore, continue iterating empty pages
         # until we either get some results or reach the definitive end
-        while self.messages.empty() and self.limit != 0:
+        while self.messages.empty() and self.limit and self.limit > 0:
             await self.fill_messages()
 
         try:
