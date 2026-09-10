@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING, Literal, NamedTuple, TypeAlias
 from disnake.colour import Colour
 from disnake.partial_emoji import PartialEmoji
 
-from .abc import Snowflake
 from .appinfo import PartialAppInfo
 from .asset import Asset
 from .enums import ChannelType, InviteTarget, InviteType, NSFWLevel, VerificationLevel, try_enum
@@ -32,7 +31,7 @@ if TYPE_CHECKING:
 
     from typing_extensions import Self
 
-    from .abc import GuildChannel
+    from .abc import GuildChannel, Snowflake
     from .guild import Guild
     from .state import ConnectionState
     from .types.channel import (
