@@ -661,13 +661,13 @@ class Invite(Hashable):
         else:
             self.guild_scheduled_event: GuildScheduledEvent | None = None
 
-        self.roles = tuple(
+        self.roles: set[PartialInviteRole] = {
             PartialInviteRole(
                 state=self._state,
                 data=d,
             )
             for d in data.get("roles", [])
-        )
+        }
 
     @classmethod
     def from_incomplete(cls, *, state: ConnectionState, data: InvitePayload) -> Self:
