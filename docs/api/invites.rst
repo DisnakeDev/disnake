@@ -42,14 +42,6 @@ PartialInviteRole
 .. autoclass:: PartialInviteRole()
     :members:
 
-GuildInviteFlags
-~~~~~~~~~~~~~~~~
-
-.. attributetable:: GuildInviteFlags
-
-.. autoclass:: GuildInviteFlags()
-    :members:
-
 Data Classes
 ------------
 

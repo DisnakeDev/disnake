@@ -557,12 +557,6 @@ class Invite(Hashable):
         The partial guild's welcome screen, if any.
 
         .. versionadded:: 2.5
-
-    flags: :class:`GuildInviteFlags`
-        The flags of this invite.
-
-        .. versionadded:: |vnext|
-
     roles: :class:`~collections.abc.Collection`\[:class:`Role`, ...]
         A list of roles that will be assigned to the users when joining, if any.
 
@@ -588,7 +582,6 @@ class Invite(Hashable):
         "expires_at",
         "guild_scheduled_event",
         "guild_welcome_screen",
-        "flags",
         "roles",
         "_state",
     )
