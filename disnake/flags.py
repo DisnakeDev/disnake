@@ -2638,7 +2638,7 @@ class AttachmentFlags(BaseFlags):
         ) -> None: ...
 
     @flag_value
-    def is_clip(self):
+    def is_clip(self) -> int:
         """:class:`bool`: Returns ``True`` if the attachment is a clip from a stream.
 
         .. versionadded:: |vnext|
@@ -2646,7 +2646,7 @@ class AttachmentFlags(BaseFlags):
         return 1 << 0
 
     @flag_value
-    def is_thumbnail(self):
+    def is_thumbnail(self) -> int:
         """:class:`bool`: Returns ``True`` if the attachment is the thumbnail of a thread in a media channel.
 
         .. versionadded:: |vnext|
@@ -2659,7 +2659,7 @@ class AttachmentFlags(BaseFlags):
         return 1 << 2
 
     @flag_value
-    def is_spoiler(self):
+    def is_spoiler(self) -> int:
         """:class:`bool`: Returns ``True`` if the attachment was marked as a spoiler.
 
         .. versionadded:: |vnext|
@@ -2667,7 +2667,7 @@ class AttachmentFlags(BaseFlags):
         return 1 << 3
 
     @flag_value
-    def contains_explicit_media(self):
+    def contains_explicit_media(self) -> int:
         """:class:`bool`: Returns ``True`` if the attachment was flagged as sensitive content.
 
         .. versionadded:: |vnext|
@@ -2675,7 +2675,7 @@ class AttachmentFlags(BaseFlags):
         return 1 << 4
 
     @flag_value
-    def is_animated(self):
+    def is_animated(self) -> int:
         """:class:`bool`: Returns ``True`` if the attachment is an animated image.
 
         .. versionadded:: |vnext|
@@ -3126,7 +3126,7 @@ class EmbedMediaFlags(BaseFlags):
         def __init__(self, *, is_animated: bool = ...) -> None: ...
 
     @flag_value
-    def is_animated(self) -> int:
+    def is_animated(self):
         """:class:`bool`: Returns ``True`` if the embed image is animated."""
         return 1 << 5
 
@@ -3203,6 +3203,6 @@ class UnfurledMediaItemFlags(BaseFlags):
         def __init__(self, *, is_animated: bool = ...) -> None: ...
 
     @flag_value
-    def is_animated(self) -> int:
+    def is_animated(self):
         """:class:`bool`: Returns ``True`` if the unfurled media item is animated."""
         return 1 << 0

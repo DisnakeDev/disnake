@@ -39,14 +39,14 @@ if not TYPE_CHECKING:
 
 # TODO: rework these proxy classes into dataclasses
 class EmbedProxy:
+    __slots__ = ("__dict__",)
+
     def __init__(self, layer: Mapping[str, Any] | None) -> None:
         if layer is not None:
             self.__dict__.update(layer)
 
-        self._flags: int = self.__dict__.pop("flags", 0)
-
     def __len__(self) -> int:
-        return len([k for k in self.__dict__ if not k.startswith("_")])
+        return len(self.__dict__)
 
     def __repr__(self) -> str:
         inner = ", ".join((f"{k}={v!r}" for k, v in self.__dict__.items() if not k.startswith("_")))
@@ -58,8 +58,17 @@ class EmbedProxy:
     def __eq__(self, other: object) -> bool:
         return isinstance(other, EmbedProxy) and self.__dict__ == other.__dict__
 
+
+class EmbedMediaProxy(EmbedProxy):
+    __slots__ = ("_flags",)
+
+    def __init__(self, layer: Mapping[str, Any] | None) -> None:
+        super().__init__(layer)
+
+        self._flags: int = self.__dict__.pop("flags", 0)
+
     @property
-    def flags(self):
+    def flags(self) -> EmbedMediaFlags:
         """:class:`EmbedMediaFlags`: the flags for this embed media object.
 
         .. versionadded:: |vnext|
@@ -478,7 +487,7 @@ class Embed:
 
             Added the ``flags`` attribute.
         """
-        return cast("_EmbedMediaProxy", EmbedProxy(self._image))
+        return cast("_EmbedMediaProxy", EmbedMediaProxy(self._image))
 
     @overload
     def set_image(self, url: object | None) -> Self: ...
@@ -536,7 +545,7 @@ class Embed:
 
             Added the ``flags`` attribute.
         """
-        return cast("_EmbedMediaProxy", EmbedProxy(self._thumbnail))
+        return cast("_EmbedMediaProxy", EmbedMediaProxy(self._thumbnail))
 
     @overload
     def set_thumbnail(self, url: object | None) -> Self: ...
@@ -589,7 +598,7 @@ class Embed:
 
         If an attribute is not set, it will be :data:`None`.
         """
-        return cast("_EmbedMediaProxy", EmbedProxy(self._video))
+        return cast("_EmbedMediaProxy", EmbedMediaProxy(self._video))
 
     @property
     def provider(self) -> _EmbedProviderProxy:
