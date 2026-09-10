@@ -45,13 +45,12 @@ PartialInviteRole
 Data Classes
 ------------
 
-TargetUserJob
-~~~~~~~~~~~~~
+InviteTargetUsersJob
+~~~~~~~~~~~~~~~~~~~~
 
 .. attributetable:: InviteTargetUsersJob
 
 .. autoclass:: InviteTargetUsersJob()
-    :members:
 
 
 Enumerations
