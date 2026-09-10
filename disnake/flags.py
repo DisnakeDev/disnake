@@ -3126,7 +3126,7 @@ class EmbedMediaFlags(BaseFlags):
         def __init__(self, *, is_animated: bool = ...) -> None: ...
 
     @flag_value
-    def is_animated(self):
+    def is_animated(self) -> int:
         """:class:`bool`: Returns ``True`` if the embed image is animated."""
         return 1 << 5
 
