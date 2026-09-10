@@ -9,7 +9,6 @@ import sys
 import weakref
 from collections.abc import Coroutine, Iterable, Mapping, Sequence
 from errno import ECONNRESET
-from io import StringIO
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -1959,10 +1958,7 @@ class HTTPClient:
                     }
                 ]
             else:
-                fp = StringIO()
-                for snowflake in target_users_file:
-                    fp.write(str(snowflake) + "\n")
-                fp.seek(0)
+                fp = "\n".join(map(str, target_users_file))
 
                 form: list[dict[str, Any]] = [
                     {"name": "target_users_file", "value": fp, "content_type": "text/csv"}
@@ -2000,10 +1996,7 @@ class HTTPClient:
                 {"name": "target_users_file", "value": file.fp, "content_type": "text/csv"}
             ]
         else:
-            fp = StringIO()
-            for snowflake in file:
-                fp.write(str(snowflake) + "\n")
-            fp.seek(0)
+            fp = "\n".join(map(str, file))
 
             form: list[dict[str, Any]] = [
                 {"name": "target_users_file", "value": fp, "content_type": "text/csv"}
