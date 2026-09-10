@@ -1338,7 +1338,7 @@ class GuildChannel(ABC):
 
             .. versionadded:: 2.0
 
-        target_users_file: :class:`~collections.abc.Sequence`\[:class:`Snowflake`] | :class:`~disnake.File` | :data:`None`
+        target_users_file: :class:`~collections.abc.Sequence`\[:class:`~disnake.abc.Snowflake`] | :class:`~disnake.File` | :data:`None`
             A sequence or a file with a list of users able to accept the invite.
             This file must have one user ID per line, separated by ``\n``.
             A valid file would look like this::

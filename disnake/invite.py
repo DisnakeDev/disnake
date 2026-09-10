@@ -54,7 +54,7 @@ if TYPE_CHECKING:
 
 
 class InviteTargetUsersJob(NamedTuple):
-    """A :class:`~typing.NamedTuple` which represents an invite user job from :meth:`Invite.fetch_target_users_job_status`.
+    """A :class:`~typing.NamedTuple` which represents an invite user job from :meth:`Invite.target_users_job_status`.
 
     .. versionadded:: |vnext|
 
@@ -818,7 +818,7 @@ class Invite(Hashable):
 
         Parameters
         ----------
-        file: :class:`~collections.abc.Sequence`\[:class:`Snowflake`] | :class:`File`
+        file: :class:`~collections.abc.Sequence`\[:class:`~disnake.abc.Snowflake`] | :class:`File`
             A list or the file with a new list of users able to accept the invite.
             This file must have one user ID per line, separated by ``\n``.
             A valid file would look like this::
@@ -856,7 +856,7 @@ class Invite(Hashable):
 
         Returns
         -------
-        :class:`TargetUserJob`
+        :class:`InviteTargetUsersJob`
             A :class:`~typing.NamedTuple` containing the job status.
         """
         data: TargetUsersJobPayload = await self._state.http.get_invite_target_users_job_status(
