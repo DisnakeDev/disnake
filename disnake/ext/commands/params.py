@@ -1072,15 +1072,15 @@ def find_meta_object(param: inspect.Parameter, metadata: Sequence[Any]) -> AnyMe
     if len(candidates) == 0:
         return None
 
-    for obj in candidates:
-        if not isinstance(obj, _AnyMetadata_tp):
-            msg = f'Expected `Param` or `Injection` object for "{param.name}" parameter, not {type(obj)!r}'
-            raise TypeError(msg)
-
     if len(candidates) > 1:
-        msg = f'Found more than one `Param` or `Injection` object for "{param.name}" parameter'
+        msg = f'Found more than one potential `Param` or `Injection` object for "{param.name}" parameter'
         raise TypeError(msg)
-    return candidates[0]
+
+    if not isinstance(candidate := candidates[0], _AnyMetadata_tp):
+        msg = f'Expected `Param` or `Injection` object for "{param.name}" parameter, not {type(candidate)!r}'
+        raise TypeError(msg)
+
+    return candidate
 
 
 def collect_params(
