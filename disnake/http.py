@@ -144,8 +144,7 @@ def to_multipart(payload: Mapping[str, Any], files: Sequence[File]) -> list[dict
     """Converts the payload and list of files to a multipart payload,
     as specified by https://docs.discord.com/developers/reference#uploading-files
     """
-    multipart: list[dict[str, Any]]
-    multipart = [
+    multipart: list[dict[str, Any]] = [
         {
             "name": f"files[{index}]",
             "value": file.fp,
