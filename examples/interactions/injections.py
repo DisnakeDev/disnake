@@ -54,7 +54,7 @@ async def get_config(
 async def injected1(
     inter: disnake.CommandInteraction,
     number: int,
-    config: Annotated[Config, commands.inject(get_config)],
+    config: Annotated[Config, commands.Injection(get_config)],
 ):
     """A command which takes in a number and some config parameters
 
@@ -68,7 +68,7 @@ async def injected1(
 async def injected2(
     inter: disnake.CommandInteraction,
     string: str,
-    config: Annotated[Config, commands.inject(get_config)],
+    config: Annotated[Config, commands.Injection(get_config)],
 ):
     """A command which takes in a string and some config parameters
 
