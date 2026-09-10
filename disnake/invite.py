@@ -811,8 +811,10 @@ class Invite(Hashable):
             The target users for this invite.
         """
         data = await self._state.http.get_invite_target_users(self.code)
+        it = iter(data.split("\n"))
         # strip csv header
-        return [int(u) for u in data.split("\n")[1:]]
+        next(it, None)
+        return [int(u) for u in it]
 
     async def update_target_users(self, *, file: Sequence[Snowflake] | File) -> None:
         r"""|coro|
