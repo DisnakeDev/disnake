@@ -1968,11 +1968,7 @@ class HTTPClient:
                     {"name": "target_users_file", "value": fp, "content_type": "text/csv"}
                 ]
 
-            return self.request(
-                r,
-                reason=reason,
-                form=form,
-            )
+            return self.request(r, reason=reason, form=form)
 
         return self.request(r, reason=reason, json=payload)
 
