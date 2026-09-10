@@ -67,7 +67,7 @@ class InviteTargetUsersJob(NamedTuple):
         The total number of targeted users.
     processed_users: :class:`int`
         The total number of processed users so far.
-    created_at: :class:`~datetime.datetime`
+    created_at: :class:`~datetime.datetime` | :data:`None`
         The date when the job started.
     completed_at: :class:`~datetime.datetime` | :data:`None`
         The date when the job was completed, :data:`None` if it's still running.
@@ -138,7 +138,7 @@ class PartialInviteRole:
         self._secondary_color: int | None = colors["secondary_color"]
         self._tertiary_color: int | None = colors["tertiary_color"]
         self._icon: str | None = data.get("icon")
-        self._emoji = data.get("unicode_emoji")
+        self._emoji: str | None = data.get("unicode_emoji")
 
     def __str__(self) -> str:
         return self.name
@@ -564,7 +564,7 @@ class Invite(Hashable):
 
         .. versionadded:: |vnext|
 
-    roles: :class:`tuple`\[:class:`Role`, ...]
+    roles: :class:`~collections.abc.Collection`\[:class:`Role`, ...]
         A list of roles that will be assigned to the users when joining, if any.
 
         .. versionadded:: |vnext|
