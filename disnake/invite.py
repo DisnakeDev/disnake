@@ -2,14 +2,22 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, NamedTuple, TypeAlias
+from typing import TYPE_CHECKING, NamedTuple, TypeAlias
 
 from disnake.colour import Colour
 from disnake.partial_emoji import PartialEmoji
 
 from .appinfo import PartialAppInfo
 from .asset import Asset
-from .enums import ChannelType, InviteTarget, InviteType, NSFWLevel, VerificationLevel, try_enum
+from .enums import (
+    ChannelType,
+    InviteTarget,
+    InviteTargetUsersJobStatus,
+    InviteType,
+    NSFWLevel,
+    VerificationLevel,
+    try_enum,
+)
 from .file import File
 from .guild_scheduled_event import GuildScheduledEvent
 from .mixins import Hashable
@@ -74,7 +82,7 @@ class InviteTargetUsersJob(NamedTuple):
         The error message of the job, if any.
     """
 
-    status: Literal[0, 1, 2, 3]
+    status: InviteTargetUsersJobStatus
     total_users: int
     processed_users: int
     error_message: str | None
@@ -863,7 +871,7 @@ class Invite(Hashable):
             self.code
         )
         return InviteTargetUsersJob(
-            data["status"],
+            try_enum(InviteTargetUsersJobStatus, data["status"]),
             data["total_users"],
             data["processed_users"],
             data["error_message"],
