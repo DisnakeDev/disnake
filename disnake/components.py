@@ -1188,7 +1188,7 @@ class UnfurledMediaItem:
         return self
 
     @property
-    def flags(self):
+    def flags(self) -> UnfurledMediaItemFlags:
         """:class:`UnfurledMediaItemFlags`: The flags for this media item.
 
         .. versionadded:: |vnext|
