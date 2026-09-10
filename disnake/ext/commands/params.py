@@ -673,7 +673,7 @@ class ParamInfo:
     ) -> Self:
         default = param.default if param.default is not inspect.Parameter.empty else ...
 
-        if base_param_info:
+        if base_param_info is not None:
             # we copy this ParamInfo instance because it can be used in multiple signatures
             self = base_param_info.copy()
 
