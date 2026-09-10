@@ -3203,6 +3203,6 @@ class UnfurledMediaItemFlags(BaseFlags):
         def __init__(self, *, is_animated: bool = ...) -> None: ...
 
     @flag_value
-    def is_animated(self):
+    def is_animated(self) -> int:
         """:class:`bool`: Returns ``True`` if the unfurled media item is animated."""
         return 1 << 0
