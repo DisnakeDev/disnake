@@ -1135,11 +1135,11 @@ class UnfurledMediaItem:
     width: :class:`int` | :data:`None`
         The width of this media item, if applicable.
     placeholder: :class:`str` | :data:`None`
-        `Thumbhash <https://evanw.github.io/thumbhash/>`_ placeholder (if image or video) of this media item.
+        The `Thumbhash <https://evanw.github.io/thumbhash/>`_ placeholder (if image or video) of this media item.
 
         .. versionadded:: |vnext|
     placeholder_version: :class:`int` | :data:`None`
-        Version of the placeholder (if image or video) of this media item.
+        The version of the placeholder (if image or video) of this media item.
 
         .. versionadded:: |vnext|
     content_type: :class:`str` | :data:`None`
