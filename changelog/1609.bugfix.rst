@@ -1,1 +1,0 @@
-|commands| Support :class:`ForumChannel` and :class:`MediaChannel` in :func:`~ext.commands.is_nsfw` check.
