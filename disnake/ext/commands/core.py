@@ -2557,8 +2557,10 @@ def is_nsfw() -> Callable[[T], T]:
                 (
                     disnake.TextChannel,
                     disnake.VoiceChannel,
-                    disnake.Thread,
                     disnake.StageChannel,
+                    disnake.Thread,
+                    disnake.ForumChannel,
+                    disnake.MediaChannel,
                 ),
             )
             and ch.is_nsfw()
