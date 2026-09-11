@@ -481,6 +481,9 @@ class Embed:
         - ``proxy_url``
         - ``width``
         - ``height``
+        - ``placeholder``
+        - ``placeholder_version``
+        - ``description``
         - ``flags``
 
         If an attribute is not set, it will be :data:`None`.
