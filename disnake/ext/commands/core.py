@@ -61,6 +61,7 @@ from .errors import (
     NotOwner,
     NSFWChannelRequired,
     PrivateMessageOnly,
+    SpoilerChannelRequired,
     TooManyArguments,
 )
 
@@ -121,6 +122,7 @@ __all__ = (
     "guild_only",
     "is_owner",
     "is_nsfw",
+    "is_spoiler",
     "has_guild_permissions",
     "bot_has_guild_permissions",
 )
@@ -2565,6 +2567,29 @@ def is_nsfw() -> Callable[[T], T]:
         ):
             return True
         raise NSFWChannelRequired(ch)  # pyright: ignore[reportArgumentType]
+
+    return check(pred)
+
+
+def is_spoiler() -> Callable[[T], T]:
+    """A :func:`.check` that checks if the channel is a spoiler channel,
+    i.e. that it has the :attr:`.ChannelFlags.spoiler` flag.
+
+    This check raises a special exception, :exc:`.SpoilerChannelRequired`
+    that is derived from :exc:`.CheckFailure`.
+
+    DM channels always successfully pass this check.
+
+    .. versionadded:: |vnext|
+    """
+
+    def pred(ctx: AnyContext) -> bool:
+        ch = ctx.channel
+        if ctx.guild is None or (
+            isinstance(ch, (disnake.abc.GuildChannel, disnake.Thread)) and ch.is_spoiler()
+        ):
+            return True
+        raise SpoilerChannelRequired(ch)  # pyright: ignore[reportArgumentType]
 
     return check(pred)
 

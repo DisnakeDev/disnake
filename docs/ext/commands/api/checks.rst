@@ -94,3 +94,6 @@ Functions
 
 .. autofunction:: is_nsfw(,)
     :decorator:
+
+.. autofunction:: is_spoiler(,)
+    :decorator:

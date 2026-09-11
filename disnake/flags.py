@@ -2172,6 +2172,7 @@ class ChannelFlags(BaseFlags):
             hide_media_download_options: bool = ...,
             pinned: bool = ...,
             require_tag: bool = ...,
+            spoiler: bool = ...,
         ) -> None: ...
 
     @flag_value
@@ -2201,6 +2202,19 @@ class ChannelFlags(BaseFlags):
         .. versionadded:: 2.10
         """
         return 1 << 15
+
+    @flag_value
+    def spoiler(self) -> int:
+        """:class:`bool`: Returns ``True`` if the channel is a spoiler channel,
+        which requires users to opt-in to view its contents.
+
+        Cannot be applied to channels marked as NSFW.
+
+        This applies to all channel/thread types, except :class:`CategoryChannel`.
+
+        .. versionadded:: |vnext|
+        """
+        return 1 << 21
 
 
 class AutoModKeywordPresets(ListBaseFlags):
