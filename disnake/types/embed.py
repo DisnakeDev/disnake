@@ -28,6 +28,7 @@ class EmbedMedia(TypedDict, total=False):
     description: str
     flags: int
 
+
 EmbedThumbnail = EmbedImage = EmbedVideo = EmbedMedia
 
 
