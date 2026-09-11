@@ -2667,14 +2667,6 @@ class AttachmentFlags(BaseFlags):
         return 1 << 3
 
     @flag_value
-    def contains_explicit_media(self) -> int:
-        """:class:`bool`: Returns ``True`` if the attachment was flagged as sensitive content.
-
-        .. versionadded:: |vnext|
-        """
-        return 1 << 4
-
-    @flag_value
     def is_animated(self) -> int:
         """:class:`bool`: Returns ``True`` if the attachment is an animated image.
 
