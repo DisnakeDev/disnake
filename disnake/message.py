@@ -277,11 +277,11 @@ class Attachment(Hashable):
 
         .. versionadded:: |vnext|
     placeholder: :class:`str` | :data:`None`
-        `Thumbhash <https://evanw.github.io/thumbhash/>`_ placeholder (if image or video) of this attachment.
+        The `Thumbhash <https://evanw.github.io/thumbhash/>`_ placeholder (if image or video) of this attachment.
 
         .. versionadded:: |vnext|
     placeholder_version: :class:`int` | :data:`None`
-        Version of the placeholder (if image or video) of this attachment.
+        The version of the placeholder (if image or video) of this attachment.
 
         .. versionadded:: |vnext|
     """
