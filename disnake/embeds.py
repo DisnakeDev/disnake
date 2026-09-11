@@ -39,6 +39,8 @@ if not TYPE_CHECKING:
 
 # TODO: rework these proxy classes into dataclasses
 class EmbedProxy:
+    # n.b. specifying slots for this class allows subclasses to add additional
+    # attributes (such as `EmbedMediaProxy._flags`) without polluting `__dict__`
     __slots__ = ("__dict__",)
 
     def __init__(self, layer: Mapping[str, Any] | None) -> None:
