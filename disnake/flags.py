@@ -2629,7 +2629,6 @@ class AttachmentFlags(BaseFlags):
         def __init__(
             self,
             *,
-            contains_explicit_media: bool = ...,
             is_animated: bool = ...,
             is_clip: bool = ...,
             is_remix: bool = ...,
