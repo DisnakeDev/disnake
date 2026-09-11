@@ -2629,7 +2629,6 @@ class AttachmentFlags(BaseFlags):
         def __init__(
             self,
             *,
-            contains_explicit_media: bool = ...,
             is_animated: bool = ...,
             is_clip: bool = ...,
             is_remix: bool = ...,
@@ -2665,14 +2664,6 @@ class AttachmentFlags(BaseFlags):
         .. versionadded:: |vnext|
         """
         return 1 << 3
-
-    @flag_value
-    def contains_explicit_media(self) -> int:
-        """:class:`bool`: Returns ``True`` if the attachment was flagged as sensitive content.
-
-        .. versionadded:: |vnext|
-        """
-        return 1 << 4
 
     @flag_value
     def is_animated(self) -> int:

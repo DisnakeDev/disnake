@@ -277,11 +277,11 @@ class Attachment(Hashable):
 
         .. versionadded:: |vnext|
     placeholder: :class:`str` | :data:`None`
-        `Thumbhash <https://evanw.github.io/thumbhash/>`_ placeholder (if image or video) of this attachment.
+        The `Thumbhash <https://evanw.github.io/thumbhash/>`_ placeholder (if image or video) of this attachment.
 
         .. versionadded:: |vnext|
     placeholder_version: :class:`int` | :data:`None`
-        Version of the placeholder (if image or video) of this attachment.
+        The version of the placeholder (if image or video) of this attachment.
 
         .. versionadded:: |vnext|
     """
@@ -327,7 +327,7 @@ class Attachment(Hashable):
         )
         self._flags: int = data.get("flags", 0)
         self.clip_participants: list[User] = [
-            User(state=state, data=d) for d in data.get("clip_participants", [])
+            state.store_user(d) for d in data.get("clip_participants", [])
         ]
         self.clip_created_at: datetime.datetime | None = utils.parse_time(
             data.get("clip_created_at")
@@ -344,7 +344,7 @@ class Attachment(Hashable):
 
             Now considers the attachment flags as well as the filename.
         """
-        return self.flags.is_spoiler
+        return self.filename.startswith("SPOILER_") or self.flags.is_spoiler
 
     def __repr__(self) -> str:
         return f"<Attachment id={self.id} filename={self.filename!r} url={self.url!r} ephemeral={self.ephemeral!r}>"

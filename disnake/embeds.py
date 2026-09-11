@@ -39,6 +39,8 @@ if not TYPE_CHECKING:
 
 # TODO: rework these proxy classes into dataclasses
 class EmbedProxy:
+    # n.b. specifying slots for this class allows subclasses to add additional
+    # attributes (such as `EmbedMediaProxy._flags`) without polluting `__dict__`
     __slots__ = ("__dict__",)
 
     def __init__(self, layer: Mapping[str, Any] | None) -> None:
@@ -109,6 +111,8 @@ if TYPE_CHECKING:
         placeholder_version: int | None
         description: str | None
         flags: int | None
+
+_EmbedVideoProxy = _EmbedMediaProxy
 
     class _EmbedProviderProxy(Sized, Protocol):
         name: str | None
@@ -479,6 +483,9 @@ class Embed:
         - ``proxy_url``
         - ``width``
         - ``height``
+        - ``placeholder``
+        - ``placeholder_version``
+        - ``description``
         - ``flags``
 
         If an attribute is not set, it will be :data:`None`.
@@ -537,6 +544,9 @@ class Embed:
         - ``proxy_url``
         - ``width``
         - ``height``
+        - ``placeholder``
+        - ``placeholder_version``
+        - ``description``
         - ``flags``
 
         If an attribute is not set, it will be :data:`None`.
@@ -595,6 +605,10 @@ class Embed:
         - ``proxy_url`` for the proxied video URL.
         - ``height`` for the video height.
         - ``width`` for the video width.
+        - ``placeholder`` for the video's placeholder Thumbhash
+        - ``placeholder_version`` for the placeholder version
+        - ``description`` for the video's description (alt text)
+        - ``flags`` for the video's media flags
 
         If an attribute is not set, it will be :data:`None`.
         """
