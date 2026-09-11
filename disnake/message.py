@@ -327,7 +327,7 @@ class Attachment(Hashable):
         )
         self._flags: int = data.get("flags", 0)
         self.clip_participants: list[User] = [
-            User(state=state, data=d) for d in data.get("clip_participants", [])
+            state.store_user(d) for d in data.get("clip_participants", [])
         ]
         self.clip_created_at: datetime.datetime | None = utils.parse_time(
             data.get("clip_created_at")
