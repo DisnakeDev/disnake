@@ -112,7 +112,7 @@ if TYPE_CHECKING:
         description: str | None
         flags: int | None
 
-_EmbedVideoProxy = _EmbedMediaProxy
+    _EmbedVideoProxy = _EmbedMediaProxy
 
     class _EmbedProviderProxy(Sized, Protocol):
         name: str | None
