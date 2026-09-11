@@ -603,6 +603,10 @@ class Embed:
         - ``proxy_url`` for the proxied video URL.
         - ``height`` for the video height.
         - ``width`` for the video width.
+        - ``placeholder`` for the video's placeholder Thumbhash
+        - ``placeholder_version`` for the placeholder version
+        - ``description`` for the video's description (alt text)
+        - ``flags`` for the video's media flags
 
         If an attribute is not set, it will be :data:`None`.
         """
