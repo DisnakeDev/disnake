@@ -835,7 +835,7 @@ class Embed:
     def to_dict(self) -> EmbedData:
         """Converts this embed object into a dict."""
         # add in the raw data into the dict
-        result: EmbedData = {}
+        result: EmbedData = {"flags": self._flags}
         if self._footer is not None:
             result["footer"] = self._footer
         if self._image is not None:
