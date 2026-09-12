@@ -27,6 +27,7 @@ from .enums import (
     TextInputStyle,
     try_enum,
 )
+from .flags import UnfurledMediaItemFlags
 from .partial_emoji import PartialEmoji, _EmojiTag
 from .utils import MISSING, _get_as_snowflake, assert_never, get_slots
 
@@ -1133,6 +1134,14 @@ class UnfurledMediaItem:
         The height of this media item, if applicable.
     width: :class:`int` | :data:`None`
         The width of this media item, if applicable.
+    placeholder: :class:`str` | :data:`None`
+        The `Thumbhash <https://evanw.github.io/thumbhash/>`_ placeholder (if image or video) of this media item.
+
+        .. versionadded:: |vnext|
+    placeholder_version: :class:`int` | :data:`None`
+        The version of the placeholder (if image or video) of this media item.
+
+        .. versionadded:: |vnext|
     content_type: :class:`str` | :data:`None`
         The `media type <https://en.wikipedia.org/wiki/Media_type>`_ of this media item.
     attachment_id: :class:`int` | :data:`None`
@@ -1145,6 +1154,9 @@ class UnfurledMediaItem:
         "proxy_url",
         "height",
         "width",
+        "placeholder",
+        "placeholder_version",
+        "_flags",
         "content_type",
         "attachment_id",
     )
@@ -1156,6 +1168,9 @@ class UnfurledMediaItem:
         self.proxy_url: str | None = None
         self.height: int | None = None
         self.width: int | None = None
+        self.placeholder: str | None = None
+        self.placeholder_version: int | None = None
+        self._flags: int = 0
         self.content_type: str | None = None
         self.attachment_id: int | None = None
 
@@ -1165,9 +1180,20 @@ class UnfurledMediaItem:
         self.proxy_url = data.get("proxy_url")
         self.height = _get_as_snowflake(data, "height")
         self.width = _get_as_snowflake(data, "width")
+        self.placeholder = data.get("placeholder")
+        self.placeholder_version = data.get("placeholder_version")
+        self._flags = data.get("flags", 0)
         self.content_type = data.get("content_type")
         self.attachment_id = _get_as_snowflake(data, "attachment_id")
         return self
+
+    @property
+    def flags(self) -> UnfurledMediaItemFlags:
+        """:class:`UnfurledMediaItemFlags`: The flags for this media item.
+
+        .. versionadded:: |vnext|
+        """
+        return UnfurledMediaItemFlags._from_value(self._flags)
 
     def to_dict(self) -> UnfurledMediaItemPayload:
         # for sending, only `url` is required, and other fields are ignored regardless

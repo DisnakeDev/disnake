@@ -17,6 +17,7 @@ from typing import (
 from . import utils
 from .colour import Colour
 from .file import File
+from .flags import EmbedFlags, EmbedMediaFlags
 from .utils import MISSING
 
 __all__ = ("Embed",)
@@ -36,7 +37,12 @@ if not TYPE_CHECKING:
         raise AttributeError(msg)
 
 
+# TODO: rework these proxy classes into dataclasses
 class EmbedProxy:
+    # n.b. specifying slots for this class allows subclasses to add additional
+    # attributes (such as `EmbedMediaProxy._flags`) without polluting `__dict__`
+    __slots__ = ("__dict__",)
+
     def __init__(self, layer: Mapping[str, Any] | None) -> None:
         if layer is not None:
             self.__dict__.update(layer)
@@ -55,6 +61,23 @@ class EmbedProxy:
         return isinstance(other, EmbedProxy) and self.__dict__ == other.__dict__
 
 
+class EmbedMediaProxy(EmbedProxy):
+    __slots__ = ("_flags",)
+
+    def __init__(self, layer: Mapping[str, Any] | None) -> None:
+        super().__init__(layer)
+
+        self._flags: int = self.__dict__.pop("flags", 0)
+
+    @property
+    def flags(self) -> EmbedMediaFlags:
+        """:class:`EmbedMediaFlags`: the flags for this embed media object.
+
+        .. versionadded:: |vnext|
+        """
+        return EmbedMediaFlags._from_value(self._flags)
+
+
 if TYPE_CHECKING:
     from typing_extensions import Self
 
@@ -63,11 +86,9 @@ if TYPE_CHECKING:
         EmbedAuthor as EmbedAuthorPayload,
         EmbedField as EmbedFieldPayload,
         EmbedFooter as EmbedFooterPayload,
-        EmbedImage as EmbedImagePayload,
+        EmbedMedia as EmbedMediaPayload,
         EmbedProvider as EmbedProviderPayload,
-        EmbedThumbnail as EmbedThumbnailPayload,
         EmbedType,
-        EmbedVideo as EmbedVideoPayload,
     )
 
     class _EmbedFooterProxy(Sized, Protocol):
@@ -85,12 +106,13 @@ if TYPE_CHECKING:
         proxy_url: str | None
         height: int | None
         width: int | None
+        content_type: str | None
+        placeholder: str | None
+        placeholder_version: int | None
+        description: str | None
+        flags: int | None
 
-    class _EmbedVideoProxy(Sized, Protocol):
-        url: str | None
-        proxy_url: str | None
-        height: int | None
-        width: int | None
+    _EmbedVideoProxy = _EmbedMediaProxy
 
     class _EmbedProviderProxy(Sized, Protocol):
         name: str | None
@@ -178,6 +200,7 @@ class Embed:
         "_fields",
         "description",
         "_files",
+        "_flags",
     )
 
     _default_colour: ClassVar[Colour | None] = None
@@ -209,13 +232,14 @@ class Embed:
             color = colour
         self.colour = color
 
-        self._thumbnail: EmbedThumbnailPayload | None = None
-        self._video: EmbedVideoPayload | None = None
+        self._thumbnail: EmbedMediaPayload | None = None
+        self._video: EmbedMediaPayload | None = None
         self._provider: EmbedProviderPayload | None = None
         self._author: EmbedAuthorPayload | None = None
-        self._image: EmbedImagePayload | None = None
+        self._image: EmbedMediaPayload | None = None
         self._footer: EmbedFooterPayload | None = None
         self._fields: list[EmbedFieldPayload] | None = None
+        self._flags: int = 0
 
         self._files: dict[_FileKey, File] = {}
 
@@ -259,12 +283,16 @@ class Embed:
         self.timestamp = utils.parse_time(data.get("timestamp"))
 
         self._thumbnail = data.get("thumbnail")
+
         self._video = data.get("video")
         self._provider = data.get("provider")
         self._author = data.get("author")
+
         self._image = data.get("image")
+
         self._footer = data.get("footer")
         self._fields = data.get("fields")
+        self._flags = data.get("flags", 0)
 
         return self
 
@@ -364,6 +392,14 @@ class Embed:
             raise TypeError(msg)
 
     @property
+    def flags(self) -> EmbedFlags:
+        """:class:`EmbedFlags`: Returns the embed's flags.
+
+        .. versionadded:: |vnext|
+        """
+        return EmbedFlags._from_value(self._flags)
+
+    @property
     def footer(self) -> _EmbedFooterProxy:
         """Returns an ``EmbedProxy`` denoting the footer contents.
 
@@ -447,10 +483,18 @@ class Embed:
         - ``proxy_url``
         - ``width``
         - ``height``
+        - ``placeholder``
+        - ``placeholder_version``
+        - ``description``
+        - ``flags``
 
         If an attribute is not set, it will be :data:`None`.
+
+        .. versionchanged:: |vnext|
+
+            Added the ``flags`` attribute.
         """
-        return cast("_EmbedMediaProxy", EmbedProxy(self._image))
+        return cast("_EmbedMediaProxy", EmbedMediaProxy(self._image))
 
     @overload
     def set_image(self, url: object | None) -> Self: ...
@@ -500,10 +544,18 @@ class Embed:
         - ``proxy_url``
         - ``width``
         - ``height``
+        - ``placeholder``
+        - ``placeholder_version``
+        - ``description``
+        - ``flags``
 
         If an attribute is not set, it will be :data:`None`.
+
+        .. versionchanged:: |vnext|
+
+            Added the ``flags`` attribute.
         """
-        return cast("_EmbedMediaProxy", EmbedProxy(self._thumbnail))
+        return cast("_EmbedMediaProxy", EmbedMediaProxy(self._thumbnail))
 
     @overload
     def set_thumbnail(self, url: object | None) -> Self: ...
@@ -544,7 +596,7 @@ class Embed:
         return self
 
     @property
-    def video(self) -> _EmbedVideoProxy:
+    def video(self) -> _EmbedMediaProxy:
         """Returns an ``EmbedProxy`` denoting the video contents.
 
         Possible attributes include:
@@ -553,10 +605,14 @@ class Embed:
         - ``proxy_url`` for the proxied video URL.
         - ``height`` for the video height.
         - ``width`` for the video width.
+        - ``placeholder`` for the video's placeholder Thumbhash
+        - ``placeholder_version`` for the placeholder version
+        - ``description`` for the video's description (alt text)
+        - ``flags`` for the video's media flags
 
         If an attribute is not set, it will be :data:`None`.
         """
-        return cast("_EmbedVideoProxy", EmbedProxy(self._video))
+        return cast("_EmbedMediaProxy", EmbedMediaProxy(self._video))
 
     @property
     def provider(self) -> _EmbedProviderProxy:
@@ -828,6 +884,9 @@ class Embed:
 
         if self.title:
             result["title"] = self.title
+
+        if self._flags:
+            result["flags"] = self._flags
 
         return result
 
