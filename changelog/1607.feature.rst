@@ -1,0 +1,3 @@
+|commands| Add new ``arg: Annotated[T, Param(...)]`` syntax for :func:`~ext.commands.Param`. (See :ref:`param_syntax` for more.)
+- The original syntax of ``arg: T = Param(...)`` remains supported.
+- The same applies to injections now, which support ``arg: Annotated[T, Injection(func)]`` in addition to ``arg: T = inject(func)``.

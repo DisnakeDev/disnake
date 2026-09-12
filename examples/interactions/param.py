@@ -3,6 +3,7 @@
 """Some examples showing how to customize slash command options."""
 
 import os
+from typing import Annotated
 
 import disnake
 from disnake.ext import commands
@@ -61,8 +62,9 @@ async def description(
 @bot.slash_command()
 async def defaults(
     inter: disnake.CommandInteraction[commands.Bot],
+    *,
     string: str = "this is a default value",
-    user: disnake.User = commands.Param(lambda inter: inter.author),
+    user: Annotated[disnake.User, commands.Param(lambda inter: inter.author)],
 ): ...
 
 

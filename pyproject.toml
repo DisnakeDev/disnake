@@ -297,8 +297,6 @@ ignore-fully-untyped = true
 
 [tool.ruff.lint.flake8-bugbear]
 extend-immutable-calls = [
-    "disnake.ext.commands.inject",
-    "disnake.ext.commands.Param",
     "disnake.webhook.async_.AsyncWebhookAdapter",
 ]
 
