@@ -1,0 +1,1 @@
+Add :meth:`Guild.search_messages`, which allows searching for messages in a guild or channels using several different query parameters.
