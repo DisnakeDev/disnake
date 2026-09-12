@@ -2,11 +2,23 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, TypeAlias
+from typing import TYPE_CHECKING, NamedTuple, TypeAlias
+
+from disnake.colour import Colour
+from disnake.partial_emoji import PartialEmoji
 
 from .appinfo import PartialAppInfo
 from .asset import Asset
-from .enums import ChannelType, InviteTarget, InviteType, NSFWLevel, VerificationLevel, try_enum
+from .enums import (
+    ChannelType,
+    InviteTarget,
+    InviteTargetUsersJobStatus,
+    InviteType,
+    NSFWLevel,
+    VerificationLevel,
+    try_enum,
+)
+from .file import File
 from .guild_scheduled_event import GuildScheduledEvent
 from .mixins import Hashable
 from .object import Object
@@ -17,14 +29,17 @@ __all__ = (
     "PartialInviteChannel",
     "PartialInviteGuild",
     "Invite",
+    "InviteTargetUsersJob",
+    "PartialInviteRole",
 )
 
 if TYPE_CHECKING:
     import datetime
+    from collections.abc import Sequence
 
     from typing_extensions import Self
 
-    from .abc import GuildChannel
+    from .abc import GuildChannel, Snowflake
     from .guild import Guild
     from .state import ConnectionState
     from .types.channel import (
@@ -33,12 +48,178 @@ if TYPE_CHECKING:
     )
     from .types.gateway import InviteCreateEvent, InviteDeleteEvent
     from .types.guild import GuildFeature
-    from .types.invite import Invite as InvitePayload, InviteGuild as InviteGuildPayload
+    from .types.invite import (
+        Invite as InvitePayload,
+        InviteGuild as InviteGuildPayload,
+        TargetUsersJob as TargetUsersJobPayload,
+    )
+    from .types.role import PartialRole as InvitePartialRolePayload
     from .user import User
 
     GatewayInvitePayload: TypeAlias = InviteCreateEvent | InviteDeleteEvent
     InviteGuildType: TypeAlias = "Guild | PartialInviteGuild | Object"
     InviteChannelType: TypeAlias = "GuildChannel | PartialInviteChannel | Object"
+
+
+class InviteTargetUsersJob(NamedTuple):
+    """A :class:`~typing.NamedTuple` which represents an invite user job from :meth:`Invite.target_users_job_status`.
+
+    .. versionadded:: |vnext|
+
+    Attributes
+    ----------
+    status: :class:`InviteTargetUsersJobStatus`
+        The status of the job.
+    total_users: :class:`int`
+        The total number of targeted users.
+    processed_users: :class:`int`
+        The total number of processed users so far.
+    created_at: :class:`~datetime.datetime` | :data:`None`
+        The date when the job started.
+    completed_at: :class:`~datetime.datetime` | :data:`None`
+        The date when the job was completed, :data:`None` if it's still running.
+    error_message: :class:`str` | :data:`None`
+        The error message of the job, if any.
+    """
+
+    status: InviteTargetUsersJobStatus
+    total_users: int
+    processed_users: int
+    error_message: str | None
+    created_at: datetime.datetime | None
+    completed_at: datetime.datetime | None
+
+
+class PartialInviteRole:
+    """Represents a "partial" invite role.
+
+    .. versionadded:: |vnext|
+
+    .. collapse:: operations
+
+        .. describe:: x == y
+
+            Checks if two partial roles are the same.
+
+        .. describe:: x != y
+
+            Checks if two partial roles are not the same.
+
+        .. describe:: hash(x)
+
+            Return the partial roles's hash.
+
+        .. describe:: str(x)
+
+            Returns the partial roles's name.
+
+    Attributes
+    ----------
+    name: :class:`str`
+        The partial role's name.
+    id: :class:`int`
+        The partial role's ID.
+    position: :class:`int`
+        The partial role's position.
+    """
+
+    __slots__ = (
+        "id",
+        "name",
+        "position",
+        "_icon",
+        "_state",
+        "_emoji",
+        "_primary_color",
+        "_secondary_color",
+        "_tertiary_color",
+    )
+
+    def __init__(self, *, state: ConnectionState, data: InvitePartialRolePayload) -> None:
+        self._state = state
+        self.id: int = int(data["id"])
+        self.name: str = data["name"]
+        self.position: int = data["position"]
+        colors = data["colors"]
+        self._primary_color: int = colors["primary_color"]
+        self._secondary_color: int | None = colors["secondary_color"]
+        self._tertiary_color: int | None = colors["tertiary_color"]
+        self._icon: str | None = data.get("icon")
+        self._emoji: str | None = data.get("unicode_emoji")
+
+    def __str__(self) -> str:
+        return self.name
+
+    def __repr__(self) -> str:
+        return f"<PartialInviteRole id={self.id} name={self.name!r}>"
+
+    @property
+    def colour(self) -> Colour:
+        """:class:`Colour`: Returns the role colour. An alias exists under ``color``.
+
+        .. note::
+
+            This is equivalent to :meth:`primary_colour`.
+        """
+        return self.primary_colour
+
+    @property
+    def color(self) -> Colour:
+        """:class:`Colour`: Returns the role color. An alias exists under ``colour``.
+
+        .. note::
+
+            This is equivalent to :meth:`primary_color`.
+        """
+        return self.primary_colour
+
+    @property
+    def primary_colour(self) -> Colour:
+        """:class:`Colour`: Returns the primary colour for the role. An alias exists under ``primary_color``."""
+        return Colour(self._primary_color)
+
+    @property
+    def primary_color(self) -> Colour:
+        """:class:`Colour`: Returns the primary color for the role. An alias exists under ``primary_colour``."""
+        return self.primary_colour
+
+    @property
+    def secondary_colour(self) -> Colour | None:
+        """:class:`Colour` | :data:`None`: Returns the secondary colour for the role, if any. An alias exists under ``secondary_color``."""
+        if self._secondary_color:
+            return Colour(self._secondary_color)
+        return None
+
+    @property
+    def secondary_color(self) -> Colour | None:
+        """:class:`Colour` | :data:`None`: Returns the secondary color for the role, if any. An alias exists under ``secondary_colour``."""
+        return self.secondary_colour
+
+    @property
+    def tertiary_colour(self) -> Colour | None:
+        """:class:`Colour` | :data:`None`: Returns the tertiary colour for the role, if any. An alias exists under ``tertiary_color``."""
+        if self._tertiary_color:
+            return Colour(self._tertiary_color)
+        return None
+
+    @property
+    def tertiary_color(self) -> Colour | None:
+        """:class:`Colour` | :data:`None`: Returns the tertiary color for the role, if any. An alias exists under ``tertiary_colour``."""
+        return self.tertiary_colour
+
+    @property
+    def icon(self) -> Asset | None:
+        """:class:`Asset` | :data:`None`: Returns the role's icon asset, if available."""
+        if self._icon is None:
+            return None
+        return Asset._from_role_icon(self._state, self.id, self._icon)
+
+    @property
+    def emoji(self) -> PartialEmoji | None:
+        """:class:`PartialEmoji` | :data:`None`: Returns the role's emoji, if available."""
+        if self._emoji is None:
+            return None
+        return PartialEmoji(name=self._emoji)
 
 
 class PartialInviteChannel:
@@ -251,7 +432,7 @@ class PartialInviteGuild:
 
 
 class Invite(Hashable):
-    """Represents a Discord :class:`Guild` or :class:`abc.GuildChannel` invite.
+    r"""Represents a Discord :class:`Guild` or :class:`abc.GuildChannel` invite.
 
     Depending on the way this object was created, some of the attributes can
     have a value of :data:`None` (see table below).
@@ -384,6 +565,10 @@ class Invite(Hashable):
         The partial guild's welcome screen, if any.
 
         .. versionadded:: 2.5
+    roles: :class:`~collections.abc.Collection`\[:class:`Role`, ...]
+        A list of roles that will be assigned to the users when joining, if any.
+
+        .. versionadded:: |vnext|
     """
 
     __slots__ = (
@@ -405,6 +590,7 @@ class Invite(Hashable):
         "expires_at",
         "guild_scheduled_event",
         "guild_welcome_screen",
+        "roles",
         "_state",
     )
 
@@ -474,6 +660,14 @@ class Invite(Hashable):
             )
         else:
             self.guild_scheduled_event: GuildScheduledEvent | None = None
+
+        self.roles: set[PartialInviteRole] = {
+            PartialInviteRole(
+                state=self._state,
+                data=d,
+            )
+            for d in data.get("roles", [])
+        }
 
     @classmethod
     def from_incomplete(cls, *, state: ConnectionState, data: InvitePayload) -> Self:
@@ -594,3 +788,93 @@ class Invite(Hashable):
             Revoking the invite failed.
         """
         await self._state.http.delete_invite(self.code, reason=reason)
+
+    async def target_users(self) -> list[int]:
+        r"""|coro|
+
+        Fetch the csv file with the target users for this invite.
+        You must have the :attr:`~Permissions.manage_guild` or :attr:`~Permissions.view_audit_log`
+        permissions or be the inviter to do this.
+
+        .. versionadded:: |vnext|
+
+        Raises
+        ------
+        Forbidden
+            You do not have permissions to see the target users.
+        HTTPException
+            Getting the target users failed.
+
+        Returns
+        -------
+        :class:`list`\[:class:`int`]
+            The target users for this invite.
+        """
+        data = await self._state.http.get_invite_target_users(self.code)
+        it = iter(data.split("\n"))
+        # strip csv header
+        next(it, None)
+        return [int(u) for u in it]
+
+    async def update_target_users(self, *, file: Sequence[Snowflake] | File) -> None:
+        r"""|coro|
+
+        Update the target users for this invite.
+        You must have the :attr:`~Permissions.manage_guild` permission or be the inviter to do this.
+
+        .. versionadded:: |vnext|
+
+        Parameters
+        ----------
+        file: :class:`~collections.abc.Sequence`\[:class:`~disnake.abc.Snowflake`] | :class:`File`
+            A list or the file with a new list of users able to accept the invite.
+            This file must have one user ID per line, separated by ``\n``.
+            A valid file would look like this::
+
+                710570210159099984
+                1081815963990761542
+                ... other user ids
+
+        Raises
+        ------
+        Forbidden
+            You do not have permissions to update the target users.
+        HTTPException
+            Updating the target users failed.
+        """
+        await self._state.http.update_invite_target_users(
+            self.code, file=(file if isinstance(file, File) else [o.id for o in file])
+        )
+
+    async def target_users_job_status(self) -> InviteTargetUsersJob:
+        r"""|coro|
+
+        Get the target users job status.
+        You must have the :attr:`~Permissions.manage_guild` or :attr:`~Permissions.view_audit_log`
+        permissions or be the inviter to do this.
+
+        .. versionadded:: |vnext|
+
+        Raises
+        ------
+        Forbidden
+            You do not have permissions to get the target users job status.
+        HTTPException
+            Getting the target users job status failed.
+
+        Returns
+        -------
+        :class:`InviteTargetUsersJob`
+            A :class:`~typing.NamedTuple` containing the job status.
+        """
+        data: TargetUsersJobPayload = await self._state.http.get_invite_target_users_job_status(
+            self.code
+        )
+        return InviteTargetUsersJob(
+            try_enum(InviteTargetUsersJobStatus, data["status"]),
+            data["total_users"],
+            data["processed_users"],
+            data["error_message"],
+            parse_time(data["created_at"]),
+            parse_time(data["completed_at"]),
+        )
