@@ -1,0 +1,1 @@
+Support :class:`ApplicationFlags` beyond bit 30 by using ``flags_new``.
