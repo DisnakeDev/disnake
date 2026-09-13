@@ -156,6 +156,9 @@ Exceptions
 .. autoexception:: NSFWChannelRequired
     :members:
 
+.. autoexception:: SpoilerChannelRequired
+    :members:
+
 .. autoexception:: FlagError
     :members:
 
@@ -248,6 +251,7 @@ Exception Hierarchy
                 - :exc:`MissingAnyRole`
                 - :exc:`BotMissingAnyRole`
                 - :exc:`NSFWChannelRequired`
+                - :exc:`SpoilerChannelRequired`
             - :exc:`DisabledCommand`
             - :exc:`CommandInvokeError`
             - :exc:`CommandOnCooldown`

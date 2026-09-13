@@ -65,6 +65,7 @@ __all__ = (
     "MissingPermissions",
     "BotMissingPermissions",
     "NSFWChannelRequired",
+    "SpoilerChannelRequired",
     "ConversionError",
     "BadUnionArgument",
     "BadLiteralArgument",
@@ -787,7 +788,7 @@ class NSFWChannelRequired(CheckFailure):
 
     .. versionadded:: 1.1
 
-    Parameters
+    Attributes
     ----------
     channel: :class:`.abc.GuildChannel` | :class:`.Thread`
         The channel that does not have NSFW enabled.
@@ -796,6 +797,26 @@ class NSFWChannelRequired(CheckFailure):
     def __init__(self, channel: GuildChannel | Thread) -> None:
         self.channel: GuildChannel | Thread = channel
         super().__init__(f"Channel '{channel}' needs to be NSFW for this command to work.")
+
+
+class SpoilerChannelRequired(CheckFailure):
+    """Exception raised when a channel does not have the required spoiler setting.
+
+    This inherits from :exc:`CheckFailure`.
+
+    .. versionadded:: |vnext|
+
+    Attributes
+    ----------
+    channel: :class:`.abc.GuildChannel` | :class:`.Thread`
+        The channel that is not marked as a spoiler channel.
+    """
+
+    def __init__(self, channel: GuildChannel | Thread) -> None:
+        self.channel: GuildChannel | Thread = channel
+        super().__init__(
+            f"Channel '{channel}' needs to be marked as a spoiler channel for this command to work."
+        )
 
 
 class MissingPermissions(CheckFailure):
