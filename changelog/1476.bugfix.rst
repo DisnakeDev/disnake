@@ -1,0 +1,1 @@
+Fix ``utils.warn_deprecated`` to respect :mod:`warnings` filters defined by user.
