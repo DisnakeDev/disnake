@@ -76,6 +76,7 @@ __all__ = (
     "SeparatorSpacing",
     "NameplatePalette",
     "SharedClientThemeBase",
+    "MessageSearchSortMode",
 )
 
 EnumMetaT = TypeVar("EnumMetaT", bound="EnumMeta")
@@ -2516,6 +2517,40 @@ class SharedClientThemeBase(Enum):
     """Darker base theme."""
     midnight = 4
     """Midnight base theme."""
+
+
+class MessageSearchSortMode(Enum):
+    """Represents the sorting algorithm/direction used for :meth:`Guild.search_messages`.
+
+    .. versionadded:: |vnext|
+    """
+
+    timestamp_desc = "timestamp_desc"
+    """Sort by message creation time, descending."""
+    timestamp_asc = "timestamp_asc"
+    """Sort by message creation time, ascending."""
+    relevance = "relevance"
+    """Sort by relevance of the message to the search query."""
+
+    @property
+    def sort_key(self) -> str:
+        match self:
+            case MessageSearchSortMode.timestamp_desc:
+                return "timestamp"
+            case MessageSearchSortMode.timestamp_asc:
+                return "timestamp"
+            case MessageSearchSortMode.relevance:
+                return "relevance"
+
+    @property
+    def sort_order(self) -> str | None:
+        match self:
+            case MessageSearchSortMode.timestamp_desc:
+                return "desc"
+            case MessageSearchSortMode.timestamp_asc:
+                return "asc"
+            case MessageSearchSortMode.relevance:
+                return None
 
 
 T = TypeVar("T", bound="Enum")
