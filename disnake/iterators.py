@@ -1467,11 +1467,11 @@ class MessageSearchIterator(_AsyncIterator["Message"]):
                 params=self.query,
             )
 
-            if (code := data.get("code")) is None:
+            if "messages" in data:
                 # success
                 return data
 
-            if code != 110000:
+            if (code := data["code"]) != 110000:
                 msg = f"Received unexpected error code {code}"
                 raise RuntimeError(msg)
 
