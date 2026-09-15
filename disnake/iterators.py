@@ -1439,7 +1439,6 @@ class MessageSearchIterator(_AsyncIterator["Message"]):
             self.query["min_id"] = after.id
 
         self.max_retries = retries
-        self.getter = self._state.http.search_guild_messages
         self.messages: asyncio.Queue[Message] = asyncio.Queue()
 
     async def next(self) -> Message:
@@ -1463,7 +1462,7 @@ class MessageSearchIterator(_AsyncIterator["Message"]):
     async def _try_fetch(self) -> MessageSearchResult:
         retries = 0
         while True:
-            data = await self.getter(
+            data = await self._state.http.search_guild_messages(
                 guild_id=self.guild.id,
                 params=self.query,
             )
