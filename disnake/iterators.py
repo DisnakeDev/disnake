@@ -1467,12 +1467,12 @@ class MessageSearchIterator(_AsyncIterator["Message"]):
                 params=self.query,
             )
 
-            if "code" not in data:
+            if (code := data.get("code")) is None:
                 # success
                 return data
 
-            if data["code"] != 110000:
-                msg = f"Received unexpected error code {data['code']}"
+            if code != 110000:
+                msg = f"Received unexpected error code {code}"
                 raise RuntimeError(msg)
 
             # if we have `"code": 110000`, this was a 202 response and message indexing is likely still in progress
