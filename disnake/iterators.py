@@ -1501,7 +1501,7 @@ class MessageSearchIterator(_AsyncIterator["Message"]):
 
         threads = {
             int(t["id"]): Thread(guild=self.guild, state=self._state, data=t)
-            for t in data.get("threads") or []
+            for t in data.get("threads") or ()
         }
         message_data = [m for ms in data["messages"] for m in ms]
 
