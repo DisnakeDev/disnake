@@ -1517,7 +1517,7 @@ class MessageSearchIterator(_AsyncIterator["Message"]):
             if message := self.create_message(element, threads):
                 await self.messages.put(message)
 
-    def create_message(self, data: MessagePayload, threads: dict[int, Thread]) -> Message | None:
+    def create_message(self, data: MessagePayload, threads: Mapping[int, Thread]) -> Message | None:
         from .abc import Messageable
 
         channel_id = int(data["channel_id"])
