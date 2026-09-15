@@ -1503,19 +1503,19 @@ class MessageSearchIterator(_AsyncIterator["Message"]):
             int(t["id"]): Thread(guild=self.guild, state=self._state, data=t)
             for t in data.get("threads") or ()
         }
-        message_data = [m for ms in data["messages"] for m in ms]
 
-        if self.limit is not None:
-            self.limit -= len(message_data)
         self.offset += self.retrieve
 
-        # if the next offset would exceed the total number of results or maximum allowed offset, stop
         if self.offset >= data["total_results"] or self.offset > 9975:
-            self.limit = 0  # terminate loop
+            # if the next offset would exceed the total number of results or maximum allowed offset, stop
+            self.limit = 0
+        elif self.limit is not None:
+            self.limit -= sum(len(ms) for ms in data["messages"])
 
-        for element in message_data:
-            if message := self.create_message(element, threads):
-                await self.messages.put(message)
+        for elements in data["messages"]:
+            for element in elements:
+                if message := self.create_message(element, threads):
+                    await self.messages.put(message)
 
     def create_message(self, data: MessagePayload, threads: Mapping[int, Thread]) -> Message | None:
         from .abc import Messageable
