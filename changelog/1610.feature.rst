@@ -1,0 +1,1 @@
+Setting :attr:`File.spoiler` now makes use of attachment flags directly, instead of adding the now-legacy ``SPOILER_`` prefix to the filename.
