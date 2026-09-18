@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from typing import Literal, Required, TypedDict
+from typing import Literal, TypedDict
 
-from typing_extensions import NotRequired
+from typing_extensions import NotRequired, Required
 
 from .appinfo import AppInfo
 from .channel import ChannelType
