@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Literal, TypedDict
+from typing import Literal, Required, TypedDict
 
 from typing_extensions import NotRequired
 
@@ -53,6 +53,17 @@ class Attachment(TypedDict):
     placeholder: NotRequired[str]
     placeholder_version: NotRequired[int]
     application: NotRequired[AppInfo | None]
+
+
+# https://docs.discord.com/developers/resources/message#attachment-object-attachment-request-structure
+class AttachmentRequestData(TypedDict, total=False):
+    id: Required[Snowflake | int]
+    filename: str
+    # title: str
+    description: str | None
+    # duration_secs: float
+    # waveform: str
+    is_spoiler: bool
 
 
 MessageActivityType = Literal[1, 2, 3, 5]
