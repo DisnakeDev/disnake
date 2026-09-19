@@ -57,7 +57,7 @@ class Attachment(TypedDict):
 
 # https://docs.discord.com/developers/resources/message#attachment-object-attachment-request-structure
 class AttachmentRequestData(TypedDict, total=False):
-    id: Required[Snowflake | int]
+    id: Required[Snowflake]
     filename: str
     # title: str
     description: str | None
