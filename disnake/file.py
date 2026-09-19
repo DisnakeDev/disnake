@@ -83,13 +83,12 @@ class File:
         self._closer = self.fp.close
         self.fp.close = lambda: None
 
-        if filename is None:
-            if isinstance(fp, str):
-                _, self.filename = os.path.split(fp)
-            else:
-                self.filename = getattr(fp, "name", None)
-        else:
+        if filename is not None:
             self.filename = filename
+        elif isinstance(fp, str):
+            _, self.filename = os.path.split(fp)
+        else:
+            self.filename = getattr(fp, "name", None)
 
         if self.filename is not None and self.filename.startswith("SPOILER_"):
             # legacy behavior; the API still takes the `SPOILER_` prefix into account,
