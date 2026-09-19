@@ -124,12 +124,13 @@ def set_attachments(payload: dict[str, Any], files: Sequence[File]) -> None:
 
     note: this method modifies the provided ``payload`` and ``payload["attachments"]`` collections
     """
-    attachments = payload.get("attachments", [])
+    attachments: list[message.AttachmentRequestData] = payload.get("attachments", [])
     for index, file in enumerate(files):
         attachments.append(
             {
                 "id": index,
                 "description": file.description,
+                "is_spoiler": file.spoiler,
             }
         )
 
