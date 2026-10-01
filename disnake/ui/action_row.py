@@ -43,7 +43,7 @@ from ..components import (
     UserSelectMenu as UserSelectComponent,
 )
 from ..enums import ButtonStyle, ChannelType, ComponentType, TextInputStyle
-from ..utils import MISSING, SequenceProxy, assert_never, copy_doc
+from ..utils import MISSING, assert_never, copy_doc
 from ._types import (
     ActionRowChildT,
     ActionRowMessageComponent,
@@ -173,11 +173,11 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
         .. versionadded:: 2.11
     """
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = ("_children",)
+    __repr_attributes__: ClassVar[tuple[str, ...]] = ("children",)
 
     def __init__(self, *components: ActionRowChildDefaultT, id: int = 0) -> None:
         self._id: int = id
-        self._children: list[ActionRowChildDefaultT] = []
+        self.children: list[ActionRowChildDefaultT] = []
 
         for component in components:
             if not isinstance(component, WrappedComponent):
@@ -186,7 +186,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
             self.append_item(component)
 
     def __len__(self) -> int:
-        return len(self._children)
+        return len(self.children)
 
     # these are reimplemented here to store the value in a separate attribute,
     # since `ActionRow` lazily constructs `_underlying`, unlike most components
@@ -200,19 +200,8 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
         self._id = value
 
     @property
-    def children(self) -> Sequence[ActionRowChildDefaultT]:
-        r""":class:`~collections.abc.Sequence`\[:class:`WrappedComponent`]:
-        A read-only proxy of the UI components stored in this action row. To add/remove
-        components to/from the action row, use its methods to directly modify it.
-
-        .. versionchanged:: 2.6
-            Returns an immutable sequence instead of a list.
-        """
-        return SequenceProxy(self._children)
-
-    @property
     def width(self) -> int:
-        return sum(child.width for child in self._children)
+        return sum(child.width for child in self.children)
 
     def append_item(self, item: ActionRowChildDefaultT) -> Self:
         """Append a component to the action row. The component's type must match that
@@ -257,7 +246,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
             msg = "Too many components in this row, can not append a new one."
             raise ValueError(msg)
 
-        self._children.insert(index, item)
+        self.children.insert(index, item)
         return self
 
     def add_button(
@@ -756,7 +745,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
 
         .. versionadded:: 2.6
         """
-        self._children.clear()
+        self.children.clear()
         return self
 
     def remove_item(self, item: ActionRowChildDefaultT) -> Self:
@@ -776,7 +765,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
         ValueError
             The component could not be found on the action row.
         """
-        self._children.remove(item)
+        self.children.remove(item)
         return self
 
     def pop(self, index: int) -> ActionRowChildDefaultT:
@@ -802,7 +791,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
         return ActionRowComponent._raw_construct(
             type=ComponentType.action_row,
             id=self._id,
-            children=[comp._underlying for comp in self._children],
+            children=[comp._underlying for comp in self.children],
         )
 
     # already provided by base type, reimplemented here for more precise return types
@@ -820,7 +809,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
         )
 
     def __delitem__(self, index: SupportsIndex | slice[SupportsIndex | None]) -> None:
-        del self._children[index]
+        del self.children[index]
 
     @overload
     def __getitem__(self, index: SupportsIndex) -> ActionRowChildDefaultT: ...
@@ -831,10 +820,10 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
     def __getitem__(
         self, index: SupportsIndex | slice[SupportsIndex | None]
     ) -> ActionRowChildDefaultT | list[ActionRowChildDefaultT]:
-        return self._children[index]
+        return self.children[index]
 
     def __iter__(self) -> Iterator[ActionRowChildDefaultT]:
-        return iter(self._children)
+        return iter(self.children)
 
     @classmethod
     @utils.deprecated(
@@ -954,7 +943,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
             A tuple containing an action row and a component of that action row.
         """
         for row in tuple(action_rows):
-            for component in tuple(row._children):
+            for component in tuple(row.children):
                 yield row, component
 
 
