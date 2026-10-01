@@ -269,7 +269,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
 
         Parameters
         ----------
-        index: :class:`int`
+        index: :class:`~typing.SupportsIndex`
             The index at which to insert the button into the action row. If not provided,
             this method defaults to appending the button to the action row.
         style: :class:`.ButtonStyle`
