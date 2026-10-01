@@ -222,7 +222,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
         self.insert_item(len(self), item)
         return self
 
-    def insert_item(self, index: int, item: ActionRowChildDefaultT) -> Self:
+    def insert_item(self, index: SupportsIndex, item: ActionRowChildDefaultT) -> Self:
         """Insert a component to the action row at a given index. The component's
         type must match that of the action row.
 
@@ -232,7 +232,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
 
         Parameters
         ----------
-        index: :class:`int`
+        index: :class:`~typing.SupportsIndex`
             The index at which to insert the component into the action row.
         item: :class:`WrappedComponent`
             The component to insert into the action row.
@@ -251,7 +251,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
 
     def add_button(
         self: MessageActionRowT,
-        index: int | None = None,
+        index: SupportsIndex | None = None,
         *,
         style: ButtonStyle = ButtonStyle.secondary,
         label: str | None = None,
@@ -768,14 +768,14 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
         self.children.remove(item)
         return self
 
-    def pop(self, index: int) -> ActionRowChildDefaultT:
+    def pop(self, index: SupportsIndex) -> ActionRowChildDefaultT:
         """Pop the component at the provided index from the action row.
 
         .. versionadded:: 2.6
 
         Parameters
         ----------
-        index: :class:`int`
+        index: :class:`~typing.SupportsIndex`
             The index at which to pop the component.
 
         Raises
