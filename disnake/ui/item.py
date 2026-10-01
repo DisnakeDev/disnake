@@ -130,7 +130,7 @@ class WrappedComponent(UIComponent):
     .. versionadded:: 2.4
     """
 
-    # the purpose of these two is just more precise typechecking compared to the base type
+    # narrower return types compared to the base type
     if TYPE_CHECKING:
 
         @property

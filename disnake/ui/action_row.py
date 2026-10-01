@@ -43,7 +43,7 @@ from ..components import (
     UserSelectMenu as UserSelectComponent,
 )
 from ..enums import ButtonStyle, ChannelType, ComponentType, TextInputStyle
-from ..utils import MISSING, assert_never, copy_doc
+from ..utils import MISSING, assert_never
 from ._types import (
     ActionRowChildT,
     ActionRowMessageComponent,
@@ -176,7 +176,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
     __repr_attributes__: ClassVar[tuple[str, ...]] = ("children",)
 
     def __init__(self, *components: ActionRowChildDefaultT, id: int = 0) -> None:
-        self._id: int = id
+        self.id: int = id
         self.children: list[ActionRowChildDefaultT] = []
 
         for component in components:
@@ -188,16 +188,9 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
     def __len__(self) -> int:
         return len(self.children)
 
-    # these are reimplemented here to store the value in a separate attribute,
+    # override id property of the base type; store the value in a separate attribute,
     # since `ActionRow` lazily constructs `_underlying`, unlike most components
-    @property
-    @copy_doc(UIComponent.id)
-    def id(self) -> int:
-        return self._id
-
-    @id.setter
-    def id(self, value: int) -> None:
-        self._id = value
+    id = None  # pyright: ignore[reportAssignmentType]
 
     @property
     def width(self) -> int:
@@ -789,13 +782,13 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
     def _underlying(self) -> ActionRowComponent[ActionRowChildComponent]:
         return ActionRowComponent._raw_construct(
             type=ComponentType.action_row,
-            id=self._id,
+            id=self.id,
             children=[comp._underlying for comp in self.children],
         )
 
-    # already provided by base type, reimplemented here for more precise return types
-    def to_component_dict(self) -> ActionRowPayload:
-        return self._underlying.to_dict()
+    # narrower return type compared to the base type
+    if TYPE_CHECKING:
+        def to_component_dict(self) -> ActionRowPayload: ...
 
     @classmethod
     def from_component(cls, action_row: ActionRowComponent) -> Self:
