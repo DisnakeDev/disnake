@@ -788,6 +788,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
 
     # narrower return type compared to the base type
     if TYPE_CHECKING:
+
         def to_component_dict(self) -> ActionRowPayload: ...
 
     @classmethod
