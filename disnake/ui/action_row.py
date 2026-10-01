@@ -783,8 +783,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
         IndexError
             There is no component at the provided index.
         """
-        self.remove_item(component := self[index])
-        return component
+        return self.children.pop(index)
 
     @property
     def _underlying(self) -> ActionRowComponent[ActionRowChildComponent]:
