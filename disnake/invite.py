@@ -827,8 +827,8 @@ class Invite(Hashable):
         Parameters
         ----------
         file: :class:`~collections.abc.Sequence`\[:class:`~disnake.abc.Snowflake`] | :class:`File`
-            A list or the file with a new list of users able to accept the invite.
-            This file must have one user ID per line, separated by ``\n``.
+            A list or a file with a new list of users able to accept the invite.
+            The file must have one user ID per line, separated by ``\n``.
             A valid file would look like this::
 
                 710570210159099984
