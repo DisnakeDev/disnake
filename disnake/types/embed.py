@@ -2,7 +2,7 @@
 
 from typing import Literal, TypedDict
 
-from typing_extensions import NotRequired
+from typing_extensions import NotRequired, Required
 
 
 class EmbedFooter(TypedDict):
@@ -17,25 +17,19 @@ class EmbedField(TypedDict):
     inline: NotRequired[bool]
 
 
-class EmbedThumbnail(TypedDict):
-    url: str
-    proxy_url: NotRequired[str]
-    height: NotRequired[int]
-    width: NotRequired[int]
-
-
-class EmbedVideo(TypedDict, total=False):
-    url: str
+class EmbedMedia(TypedDict, total=False):
+    url: Required[str]
     proxy_url: str
     height: int
     width: int
+    content_type: str
+    placeholder: str
+    placeholder_version: int
+    description: str
+    flags: int
 
 
-class EmbedImage(TypedDict):
-    url: str
-    proxy_url: NotRequired[str]
-    height: NotRequired[int]
-    width: NotRequired[int]
+EmbedThumbnail = EmbedImage = EmbedVideo = EmbedMedia
 
 
 class EmbedProvider(TypedDict, total=False):
@@ -61,9 +55,10 @@ class Embed(TypedDict, total=False):
     timestamp: str
     color: int
     footer: EmbedFooter
-    image: EmbedImage
-    thumbnail: EmbedThumbnail
-    video: EmbedVideo
+    image: EmbedMedia
+    thumbnail: EmbedMedia
+    video: EmbedMedia
     provider: EmbedProvider
     author: EmbedAuthor
     fields: list[EmbedField]
+    flags: int
