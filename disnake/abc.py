@@ -1300,7 +1300,8 @@ class GuildChannel(ABC):
         unique: bool = True,
         target_type: InviteTarget | None = None,
         target_user: User | None = None,
-        target_users_file: Sequence[Snowflake] | File | None = None,
+        target_users_file: File | None = None,
+        target_user_ids: Sequence[Snowflake] | None = None,
         target_application: Snowflake | None = None,
         guild_scheduled_event: GuildScheduledEvent | None = None,
         roles: Collection[Role] | None = None,
@@ -1338,14 +1339,19 @@ class GuildChannel(ABC):
 
             .. versionadded:: 2.0
 
-        target_users_file: :class:`~collections.abc.Sequence`\[:class:`~disnake.abc.Snowflake`] | :class:`~disnake.File` | :data:`None`
-            A sequence or a file with a list of users able to accept the invite.
+        target_users_file: :class:`~disnake.File` | :data:`None`
+            A file with a list of users able to accept the invite.
             This file must have one user ID per line, separated by ``\n``.
             A valid file would look like this::
 
                 710570210159099984
                 1081815963990761542
                 ... other user ids
+
+            .. versionadded:: |vnext|
+
+        target_user_ids: :class:`~collections.abc.Sequence`\[:class:`.Snowflake`] | :data:`None`
+            A sequence of user IDs able to accept the invite.
 
             .. versionadded:: |vnext|
 
@@ -1375,12 +1381,28 @@ class GuildChannel(ABC):
             Invite creation failed.
         NotFound
             The channel that was passed is a category or an invalid channel.
+        ValueError
+            Both ``target_users_file`` and ``target_user_ids`` were provided.
+
+            .. versionadded:: |vnext|
+        TypeError
+            ``target_users_file`` is not a :class:`~disnake.File`.
+
+            .. versionadded:: |vnext|
 
         Returns
         -------
         :class:`.Invite`
             The newly created invite.
         """
+        if target_users_file and target_user_ids:
+            msg = "target_users_file and target_user_ids cannot be used together"
+            raise ValueError(msg)
+
+        if target_users_file and not isinstance(target_users_file, File):
+            msg = f"target_users_file must be a File, not {target_users_file.__class__.__name__}"
+            raise TypeError(msg)
+
         data = await self._state.http.create_invite(
             self.id,
             reason=reason,
@@ -1390,11 +1412,8 @@ class GuildChannel(ABC):
             unique=unique,
             target_type=try_enum_to_int(target_type),
             target_user_id=target_user.id if target_user else None,
-            target_users_file=(
-                target_users_file
-                if isinstance(target_users_file, File)
-                else [o.id for o in (target_users_file or [])]
-            ),
+            target_users_file=target_users_file,
+            target_user_ids=[u.id for u in target_user_ids] if target_user_ids else None,
             target_application_id=target_application.id if target_application else None,
             role_ids=[r.id for r in roles] if roles else None,
         )

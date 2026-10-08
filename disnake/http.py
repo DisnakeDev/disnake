@@ -1924,7 +1924,8 @@ class HTTPClient:
         unique: bool = True,
         target_type: invite.InviteTargetType | None = None,
         target_user_id: Snowflake | None = None,
-        target_users_file: Sequence[Snowflake] | File | None = None,
+        target_users_file: File | None = None,
+        target_user_ids: Sequence[Snowflake] | None = None,
         target_application_id: Snowflake | None = None,
         role_ids: list[Snowflake] | None = None,
     ) -> Response[invite.Invite]:
@@ -1948,24 +1949,20 @@ class HTTPClient:
         if role_ids:
             payload["role_ids"] = role_ids
 
+        if target_user_ids:
+            payload["target_user_ids"] = target_user_ids
+
         if target_users_file:
-            if isinstance(target_users_file, File):
-                form: list[dict[str, Any]] = [
-                    {
-                        "name": "target_users_file",
-                        "value": target_users_file.fp,
-                        "content_type": "text/csv",
-                    }
-                ]
+            form: list[dict[str, Any]] = [
+                {
+                    "name": "target_users_file",
+                    "value": target_users_file.fp,
+                    "content_type": "text/csv",
+                }
+            ]
 
-                for param, value in payload.items():
-                    form.append({"name": param, "value": value})
-            else:
-                fp = "\n".join(map(str, target_users_file))
-
-                form: list[dict[str, Any]] = [
-                    {"name": "target_users_file", "value": fp, "content_type": "text/csv"}
-                ]
+            for param, value in payload.items():
+                form.append({"name": param, "value": value})
 
             return self.request(r, reason=reason, form=form)
 
