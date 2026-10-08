@@ -750,6 +750,8 @@ class Cog(metaclass=CogMeta):
             except Exception:
                 # undo our additions
                 for to_undo in self.__cog_app_commands__[:index]:
+                    if isinstance(to_undo, (SubCommand, SubCommandGroup)):
+                        continue
                     bot._remove_app_commands(
                         to_undo.body.type, to_undo.name, guild_ids=to_undo.guild_ids
                     )
@@ -827,6 +829,8 @@ class Cog(metaclass=CogMeta):
                     bot.remove_command(command.name)  # pyright: ignore[reportAttributeAccessIssue]
 
             for app_command in self.__cog_app_commands__:
+                if isinstance(app_command, (SubCommand, SubCommandGroup)):
+                    continue
                 bot._remove_app_commands(
                     app_command.body.type, app_command.name, guild_ids=app_command.guild_ids
                 )
