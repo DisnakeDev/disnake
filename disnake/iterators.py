@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import asyncio
 import datetime
-from collections.abc import AsyncIterator, Awaitable, Callable, Generator
+import logging
+from collections.abc import AsyncIterator, Awaitable, Callable, Generator, Mapping
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -20,7 +21,7 @@ from .audit_logs import AuditLogEntry
 from .automod import AutoModRule
 from .bans import BanEntry
 from .entitlement import Entitlement
-from .errors import NoMoreItems
+from .errors import MessageSearchIndexUnavailableError, NoMoreItems
 from .guild_scheduled_event import GuildScheduledEvent
 from .integrations import PartialIntegration
 from .object import Object
@@ -39,6 +40,7 @@ __all__ = (
     "EntitlementIterator",
     "SubscriptionIterator",
     "PollAnswerIterator",
+    "MessageSearchIterator",
 )
 
 if TYPE_CHECKING:
@@ -60,7 +62,7 @@ if TYPE_CHECKING:
         GuildScheduledEventUser as GuildScheduledEventUserPayload,
     )
     from .types.member import MemberWithUser as MemberWithUserPayload
-    from .types.message import Message as MessagePayload
+    from .types.message import Message as MessagePayload, MessageSearchQuery, MessageSearchResult
     from .types.subscription import Subscription as SubscriptionPayload
     from .types.threads import Thread as ThreadPayload
     from .types.user import PartialUser as PartialUserPayload
@@ -71,6 +73,8 @@ OT = TypeVar("OT")
 _Func = Callable[[T], OT | Awaitable[OT]]
 
 OLDEST_OBJECT = Object(id=0)
+
+_log = logging.getLogger(__name__)
 
 
 class _AsyncIterator(AsyncIterator[T]):
@@ -1402,3 +1406,125 @@ class ChannelPinsIterator(_AsyncIterator["Message"]):
                 message = self._state.create_message(channel=self.channel, data=element["message"])
                 message._pinned_at = parse_time(element["pinned_at"])
                 await self.messages.put(message)
+
+
+class MessageSearchIterator(_AsyncIterator["Message"]):
+    def __init__(
+        self,
+        guild: Guild,
+        query: MessageSearchQuery,
+        *,
+        retries: int,
+        limit: int | None,
+        before: Snowflake | datetime.datetime | None = None,
+        after: Snowflake | datetime.datetime | None = None,
+    ) -> None:
+        if isinstance(before, datetime.datetime):
+            before = Object(id=time_snowflake(before, high=False))
+        if isinstance(after, datetime.datetime):
+            after = Object(id=time_snowflake(after, high=True))
+
+        self.guild = guild
+        self._state = guild._state
+
+        self.limit = limit
+        self.offset: int = 0
+
+        # copy the query data so that we can directly modify it for pagination
+        self.query: MessageSearchQuery = query.copy()
+
+        if before is not None:
+            self.query["max_id"] = before.id
+        if after is not None:
+            self.query["min_id"] = after.id
+
+        self.max_retries = retries
+        self.messages: asyncio.Queue[Message] = asyncio.Queue()
+
+    async def next(self) -> Message:
+        # note: unlike other endpoints, this one can return empty pages,
+        # especially with higher offsets. therefore, continue iterating empty pages
+        # until we either get some results or reach the definitive end
+        while self.messages.empty() and (self.limit is None or self.limit > 0):
+            await self.fill_messages()
+
+        try:
+            return self.messages.get_nowait()
+        except asyncio.QueueEmpty:
+            raise NoMoreItems from None
+
+    def _get_retrieve(self) -> bool:
+        self.retrieve = min(self.limit, 25) if self.limit is not None else 25
+        return self.retrieve > 0
+
+    # this endpoint is somewhat special in that the guild/channel may still be in the
+    # process of being indexed, in which case we receive a `202 Accepted` with a `retry_after` field.
+    async def _try_fetch(self) -> MessageSearchResult:
+        retries = 0
+        while True:
+            data = await self._state.http.search_guild_messages(
+                guild_id=self.guild.id,
+                params=self.query,
+            )
+
+            if "messages" in data:
+                # success
+                return data
+
+            if (code := data["code"]) != 110000:
+                msg = f"Received unexpected error code {code}"
+                raise RuntimeError(msg)
+
+            # if we have `"code": 110000`, this was a 202 response and message indexing is likely still in progress
+            if retries >= self.max_retries:
+                raise MessageSearchIndexUnavailableError(self.guild)
+
+            retry_after = data["retry_after"]
+            # "If the retry_after field is 0, you should retry the request after a short delay."
+            retry_after = max(retry_after, 1)
+            _log.info(
+                "Message search index for guild ID %d is not yet available. Retrying in %.2fs.",
+                self.guild.id,
+                retry_after,
+            )
+
+            await asyncio.sleep(retry_after)
+            retries += 1
+
+    async def fill_messages(self) -> None:
+        if not self._get_retrieve():
+            return
+
+        self.query["limit"] = self.retrieve
+        self.query["offset"] = self.offset
+        data = await self._try_fetch()
+
+        threads = {
+            int(t["id"]): Thread(guild=self.guild, state=self._state, data=t)
+            for t in data.get("threads") or ()
+        }
+
+        self.offset += self.retrieve
+
+        if self.offset >= data["total_results"] or self.offset > 9975:
+            # if the next offset would exceed the total number of results or maximum allowed offset, stop
+            self.limit = 0
+        elif self.limit is not None:
+            self.limit -= sum(len(ms) for ms in data["messages"])
+
+        for elements in data["messages"]:
+            for element in elements:
+                if message := self.create_message(element, threads):
+                    await self.messages.put(message)
+
+    def create_message(self, data: MessagePayload, threads: Mapping[int, Thread]) -> Message | None:
+        from .abc import Messageable
+
+        channel_id = int(data["channel_id"])
+        channel = self.guild.get_channel_or_thread(channel_id) or threads.get(channel_id)
+        if not isinstance(channel, Messageable):
+            # this should never happen. we're here either because the channel resolved to a
+            # non-messageable guild channel, or because we can't find the channel/thread
+            return None
+
+        return self._state.create_message(channel=channel, data=data)
