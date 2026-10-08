@@ -1957,6 +1957,9 @@ class HTTPClient:
                         "content_type": "text/csv",
                     }
                 ]
+
+                for param, value in payload.items():
+                    form.append({"name": param, "value": value})
             else:
                 fp = "\n".join(map(str, target_users_file))
 
