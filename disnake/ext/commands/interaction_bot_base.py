@@ -1665,8 +1665,8 @@ class InteractionBotBase(CommonBotBase):
             type=inter.data.type, name=inter.data.name, guild_id=inter.data.guild_id
         )
 
-        # this happens to always be a slash command, the instance check is
-        # for `None` and to appease the type-checker
+        # this is generally expected to be a slash command, but check
+        # nonetheless for `None` and in case a new autocompletable type is added
         slash_command = self._all_app_commands.get(cmd_index)
         if not isinstance(slash_command, InvokableSlashCommand):
             return
