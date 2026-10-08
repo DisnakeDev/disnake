@@ -666,7 +666,7 @@ class Invite(Hashable):
                 state=self._state,
                 data=d,
             )
-            for d in data.get("roles", [])
+            for d in data.get("roles", ())
         }
 
     @classmethod
