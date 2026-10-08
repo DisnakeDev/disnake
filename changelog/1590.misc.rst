@@ -1,1 +1,0 @@
-Update ``dave.py`` version requirement to ``~=v1.0``.
