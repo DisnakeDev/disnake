@@ -843,7 +843,7 @@ class Invite(Hashable):
             Updating the target users failed.
         """
         await self._state.http.update_invite_target_users(
-            self.code, file=(file if isinstance(file, File) else [o.id for o in file])
+            self.code, file=file if isinstance(file, File) else [o.id for o in file]
         )
 
     async def target_users_job_status(self) -> InviteTargetUsersJob:
