@@ -801,11 +801,11 @@ class InvokableSlashCommand(InvokableApplicationCommand):
 
     async def invoke(self, inter: ApplicationCommandInteraction) -> None:
         await self.prepare(inter)
+        has_children = len(self.children) > 0
 
         try:
-            if len(self.children) > 0:
+            if has_children:
                 await self(inter)
-                await self.invoke_children(inter)
             else:
                 kwargs = inter.filled_options
                 for k, v in self.connectors.items():
@@ -826,6 +826,9 @@ class InvokableSlashCommand(InvokableApplicationCommand):
                 await self._max_concurrency.release(inter)
 
             await self.call_after_hooks(inter)
+
+        if has_children:
+            await self.invoke_children(inter)
 
 
 @overload
@@ -937,9 +940,11 @@ def slash_command(
 
         .. versionadded:: 2.5
 
-    guild_ids: :class:`list`\[:class:`int`]
+    guild_ids: :class:`~collections.abc.Sequence`\[:class:`int`] | :data:`None`
         If specified, the client will register the command in these guilds.
-        Otherwise, this command will be registered globally.
+        Otherwise, this command will be registered globally, unless
+        the ``test_guilds`` parameter is specified in the bot constructor, in which case
+        this command will be registered to those guilds.
     connectors: :class:`dict`\[:class:`str`, :class:`str`]
         Binds function names to option names. If the name
         of an option already matches the corresponding function param,

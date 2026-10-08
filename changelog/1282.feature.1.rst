@@ -1,0 +1,1 @@
+Add new :class:`AttachmentFlags`: :attr:`~AttachmentFlags.is_clip`, :attr:`~AttachmentFlags.is_thumbnail`, :attr:`~AttachmentFlags.is_spoiler`, and :attr:`~AttachmentFlags.is_animated`.
