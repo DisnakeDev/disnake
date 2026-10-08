@@ -1988,6 +1988,29 @@ class HTTPClient:
     def get_invite_target_users(self, invite_id: str) -> Response[str]:
         return self.request(Route("GET", "/invites/{invite_id}/target-users", invite_id=invite_id))
 
+    def add_invite_target_users(self, invite_id: str, user_id: Snowflake) -> Response[None]:
+        return self.request(
+            Route(
+                "PUT",
+                "/invites/{invite_id}/target-users/{user_id}",
+                invite_id=invite_id,
+                user_id=user_id,
+            )
+        )
+
+    def bulk_add_invite_target_users(
+        self, invite_id: str, user_ids: Sequence[Snowflake]
+    ) -> Response[None]:
+        payload: dict[str, Any] = {"user_ids": user_ids}
+        return self.request(
+            Route(
+                "POST",
+                "/invites/{invite_id}/target-users/bulk-add",
+                invite_id=invite_id,
+                json=payload,
+            )
+        )
+
     def update_invite_target_users(
         self, invite_id: str, *, file: Sequence[Snowflake] | File
     ) -> Response[None]:
@@ -2005,6 +2028,29 @@ class HTTPClient:
         return self.request(
             Route("PUT", "/invites/{invite_id}/target-users", invite_id=invite_id),
             form=form,
+        )
+
+    def remove_invite_target_users(self, invite_id: str, user_id: Snowflake) -> Response[None]:
+        return self.request(
+            Route(
+                "DELETE",
+                "/invites/{invite_id}/target-users/{user_id}",
+                invite_id=invite_id,
+                user_id=user_id,
+            )
+        )
+
+    def bulk_delete_invite_target_users(
+        self, invite_id: str, user_ids: Sequence[Snowflake]
+    ) -> Response[None]:
+        payload: dict[str, Any] = {"user_ids": user_ids}
+        return self.request(
+            Route(
+                "POST",
+                "/invites/{invite_id}/target-users/bulk-delete",
+                invite_id=invite_id,
+                json=payload,
+            )
         )
 
     def get_invite_target_users_job_status(self, invite_id: str) -> Response[invite.TargetUsersJob]:

@@ -816,6 +816,50 @@ class Invite(Hashable):
         next(it, None)
         return [int(u) for u in it]
 
+    async def add_target_user(self, *, user: Snowflake) -> None:
+        r"""|coro|
+
+        Add a target user for this invite.
+        You must have the :attr:`~Permissions.manage_guild` permission or be the inviter to do this.
+
+        .. versionadded:: |vnext|
+
+        Parameters
+        ----------
+        user: :class:`~disnake.abc.Snowflake`
+            The user to add as a target user.
+
+        Raises
+        ------
+        Forbidden
+            You do not have permissions to add a target user.
+        HTTPException
+            Adding the target user failed.
+        """
+        await self._state.http.add_invite_target_users(self.code, user.id)
+
+    async def add_bulk_target_users(self, *, users: Sequence[Snowflake]) -> None:
+        r"""|coro|
+
+        Add multiple target users for this invite.
+        You must have the :attr:`~Permissions.manage_guild` permission or be the inviter to do this.
+
+        .. versionadded:: |vnext|
+
+        Parameters
+        ----------
+        users: :class:`~collections.abc.Sequence`\[:class:`~disnake.abc.Snowflake`]
+            The users to add as target users.
+
+        Raises
+        ------
+        Forbidden
+            You do not have permissions to add target users.
+        HTTPException
+            Adding the target users failed.
+        """
+        await self._state.http.bulk_add_invite_target_users(self.code, [o.id for o in users])
+
     async def update_target_users(self, *, file: Sequence[Snowflake] | File) -> None:
         r"""|coro|
 
@@ -845,6 +889,50 @@ class Invite(Hashable):
         await self._state.http.update_invite_target_users(
             self.code, file=file if isinstance(file, File) else [o.id for o in file]
         )
+
+    async def remove_target_user(self, *, user: Snowflake) -> None:
+        r"""|coro|
+
+        Remove a target user for this invite.
+        You must have the :attr:`~Permissions.manage_guild` permission or be the inviter to do this.
+
+        .. versionadded:: |vnext|
+
+        Parameters
+        ----------
+        user: :class:`~disnake.abc.Snowflake`
+            The user to remove as a target user.
+
+        Raises
+        ------
+        Forbidden
+            You do not have permissions to remove the target user.
+        HTTPException
+            Removing the target user failed.
+        """
+        await self._state.http.remove_invite_target_users(self.code, user.id)
+
+    async def bulk_remove_target_users(self, *, users: Sequence[Snowflake]) -> None:
+        r"""|coro|
+
+        Remove multiple target users for this invite.
+        You must have the :attr:`~Permissions.manage_guild` permission or be the inviter to do this.
+
+        .. versionadded:: |vnext|
+
+        Parameters
+        ----------
+        users: :class:`~collections.abc.Sequence`\[:class:`~disnake.abc.Snowflake`]
+            The users to remove as target users.
+
+        Raises
+        ------
+        Forbidden
+            You do not have permissions to remove target users.
+        HTTPException
+            Removing the target users failed.
+        """
+        await self._state.http.bulk_delete_invite_target_users(self.code, [o.id for o in users])
 
     async def target_users_job_status(self) -> InviteTargetUsersJob:
         r"""|coro|
