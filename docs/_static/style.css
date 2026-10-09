@@ -185,6 +185,7 @@ img[src$="/snake_dark.svg"]  {
 }
 
 // hint selected theme to browser for automatically styling form controls/scrollbars
+// see https://web.dev/articles/baseline-in-action-color-theme#give_users_control_with_built-in_theme_switcher
 html {
   // signal that both are supported
   color-scheme: light dark;
