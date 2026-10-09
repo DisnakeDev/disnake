@@ -97,8 +97,8 @@ Historically however, thanks to:
   --table-border: var(--grey-4);
   --mobile-active-toc: var(--grey-7);
   --active-toc: var(--grey-3);
-  --scrollbar: rgba(0,0,0,0.2);
-  --scrollbar-hover: rgba(0,0,0,0.4);
+  --scrollbar: rgba(0, 0, 0, 0.3);
+  --scrollbar-hover: rgba(0, 0, 0, 0.5);
   --rtd-ad-border: var(--grey-3);
   --rtd-ad-background: var(--grey-2);
   --rtd-ad-main-text: var(--grey-6);
@@ -162,8 +162,8 @@ img[src$="/snake_dark.svg"]  {
     --table-text: var(--grey-1);
     --table-border: var(--grey-4);
     --active-toc: var(--grey-6);
-    --scrollbar: rgba(0, 0, 0, 0.5);
-    --scrollbar-hover: rgba(0, 0, 0, 0.7);
+    --scrollbar: rgba(255, 255, 255, 0.5);
+    --scrollbar-hover: rgba(255, 255, 255, 0.7);
     --rtd-ad-border: var(--grey-6);
     --rtd-ad-background: var(--grey-5);
     --rtd-ad-main-text: var(--grey-2);
