@@ -816,7 +816,7 @@ class Invite(Hashable):
         next(it, None)
         return [int(u) for u in it]
 
-    async def add_target_user(self, *, user: Snowflake) -> None:
+    async def add_target_user(self, user: Snowflake) -> None:
         r"""|coro|
 
         Add a target user for this invite.
@@ -838,7 +838,7 @@ class Invite(Hashable):
         """
         await self._state.http.add_invite_target_users(self.code, user.id)
 
-    async def add_bulk_target_users(self, *, users: Sequence[Snowflake]) -> None:
+    async def bulk_add_target_users(self, users: Sequence[Snowflake]) -> None:
         r"""|coro|
 
         Add multiple target users for this invite.
@@ -890,7 +890,7 @@ class Invite(Hashable):
             self.code, file=file if isinstance(file, File) else [o.id for o in file]
         )
 
-    async def remove_target_user(self, *, user: Snowflake) -> None:
+    async def remove_target_user(self, user: Snowflake) -> None:
         r"""|coro|
 
         Remove a target user for this invite.
@@ -912,7 +912,7 @@ class Invite(Hashable):
         """
         await self._state.http.remove_invite_target_users(self.code, user.id)
 
-    async def bulk_remove_target_users(self, *, users: Sequence[Snowflake]) -> None:
+    async def bulk_remove_target_users(self, users: Sequence[Snowflake]) -> None:
         r"""|coro|
 
         Remove multiple target users for this invite.
