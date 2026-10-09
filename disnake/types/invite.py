@@ -10,10 +10,12 @@ from .appinfo import PartialAppInfo
 from .channel import InviteChannel
 from .guild import InviteGuild
 from .guild_scheduled_event import GuildScheduledEvent
+from .role import PartialRole
 from .user import PartialUser
 
 InviteType = Literal[0, 1, 2]
 InviteTargetType = Literal[1, 2]
+TargetUsersJobStatus = Literal[0, 1, 2, 3]
 
 
 class VanityInvite(TypedDict):
@@ -42,3 +44,14 @@ class Invite(_InviteMetadata):
     approximate_member_count: NotRequired[int]
     expires_at: str | None
     guild_scheduled_event: NotRequired[GuildScheduledEvent]
+    flags: NotRequired[int]
+    roles: NotRequired[list[PartialRole]]
+
+
+class TargetUsersJob(TypedDict):
+    status: TargetUsersJobStatus
+    total_users: int
+    processed_users: int
+    error_message: str | None
+    created_at: str | None
+    completed_at: str | None
