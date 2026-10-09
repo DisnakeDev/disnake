@@ -93,7 +93,7 @@ if TYPE_CHECKING:
     from typing import Concatenate
 
     from .abc import AnyChannel, MessageableChannel, PrivateChannel
-    from .app_commands import APIApplicationCommand, ApplicationCommand
+    from .app_commands import APIApplicationCommand, APIGuildApplicationCommand, ApplicationCommand
     from .client import Client
     from .gateway import DiscordWebSocket
     from .guild import GuildChannel, VocalGuildChannel
@@ -309,7 +309,7 @@ class ConnectionState:
 
         if application_commands:
             self._global_application_commands: dict[int, APIApplicationCommand] = {}
-            self._guild_application_commands: dict[int, dict[int, APIApplicationCommand]] = {}
+            self._guild_application_commands: dict[int, dict[int, APIGuildApplicationCommand]] = {}
 
         if views:
             self._view_store: ViewStore = ViewStore(self)
@@ -488,14 +488,14 @@ class ConnectionState:
 
     def _get_guild_application_command(
         self, guild_id: int, application_command_id: int
-    ) -> APIApplicationCommand | None:
+    ) -> APIGuildApplicationCommand | None:
         granula = self._guild_application_commands.get(guild_id)
         if granula is not None:
             return granula.get(application_command_id)
         return None
 
     def _add_guild_application_command(
-        self, guild_id: int, application_command: APIApplicationCommand
+        self, guild_id: int, application_command: APIGuildApplicationCommand
     ) -> None:
         if not application_command.id:
             msg = "The provided application command does not have an ID"
@@ -528,7 +528,7 @@ class ConnectionState:
 
     def _get_guild_command_named(
         self, guild_id: int, name: str, cmd_type: ApplicationCommandType | None = None
-    ) -> APIApplicationCommand | None:
+    ) -> APIGuildApplicationCommand | None:
         granula = self._guild_application_commands.get(guild_id, {})
         for cmd in granula.values():
             if cmd.name == name and (cmd_type is None or cmd.type is cmd_type):
@@ -2394,37 +2394,39 @@ class ConnectionState:
         guild_id: int,
         *,
         with_localizations: bool = True,
-    ) -> list[APIApplicationCommand]:
+    ) -> list[APIGuildApplicationCommand]:
         assert self.application_id is not None
         results = await self.http.get_guild_commands(
             self.application_id, guild_id, with_localizations=with_localizations
         )
-        return [application_command_factory(data) for data in results]
+        return [application_command_factory(data, guild_only=True) for data in results]
 
-    async def fetch_guild_command(self, guild_id: int, command_id: int) -> APIApplicationCommand:
+    async def fetch_guild_command(
+        self, guild_id: int, command_id: int
+    ) -> APIGuildApplicationCommand:
         assert self.application_id is not None
         result = await self.http.get_guild_command(self.application_id, guild_id, command_id)
-        return application_command_factory(result)
+        return application_command_factory(result, guild_only=True)
 
     async def create_guild_command(
         self, guild_id: int, application_command: ApplicationCommand
-    ) -> APIApplicationCommand:
+    ) -> APIGuildApplicationCommand:
         assert self.application_id is not None
         result = await self.http.upsert_guild_command(
             self.application_id, guild_id, application_command.to_dict()
         )
-        cmd = application_command_factory(result)
+        cmd = application_command_factory(result, guild_only=True)
         self._add_guild_application_command(guild_id, cmd)
         return cmd
 
     async def edit_guild_command(
         self, guild_id: int, command_id: int, new_command: ApplicationCommand
-    ) -> APIApplicationCommand:
+    ) -> APIGuildApplicationCommand:
         assert self.application_id is not None
         result = await self.http.edit_guild_command(
             self.application_id, guild_id, command_id, new_command.to_dict()
         )
-        cmd = application_command_factory(result)
+        cmd = application_command_factory(result, guild_only=True)
         self._add_guild_application_command(guild_id, cmd)
         return cmd
 
@@ -2435,11 +2437,11 @@ class ConnectionState:
 
     async def bulk_overwrite_guild_commands(
         self, guild_id: int, application_commands: list[ApplicationCommand]
-    ) -> list[APIApplicationCommand]:
+    ) -> list[APIGuildApplicationCommand]:
         assert self.application_id is not None
         payload = [cmd.to_dict() for cmd in application_commands]
         results = await self.http.bulk_upsert_guild_commands(self.application_id, guild_id, payload)
-        commands = [application_command_factory(data) for data in results]
+        commands = [application_command_factory(data, guild_only=True) for data in results]
         self._guild_application_commands[guild_id] = {cmd.id: cmd for cmd in commands}
         return commands
 
