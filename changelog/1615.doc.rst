@@ -1,0 +1,1 @@
+Fix color scheme of scrollbar in the table-of-contents sidebar for some browsers.
