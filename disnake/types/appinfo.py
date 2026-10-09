@@ -44,6 +44,7 @@ class AppInfo(BaseAppInfo):
     owner: User
     team: NotRequired[Team]
     flags: NotRequired[int]
+    flags_new: NotRequired[str]  # like `flags`, but also contains flags beyond bit 30
     guild_id: NotRequired[Snowflake]
     primary_sku_id: NotRequired[Snowflake]
     slug: NotRequired[str]
@@ -67,12 +68,14 @@ class PartialAppInfo(BaseAppInfo, total=False):
     rpc_origins: list[str]
     cover_image: str
     flags: int
+    flags_new: str  # like `flags`, but also contains flags beyond bit 30
 
 
 # see https://docs.discord.com/developers/events/gateway-events#ready-ready-event-fields
 class PartialGatewayAppInfo(TypedDict):
     id: Snowflake
     flags: int
+    flags_new: str  # like `flags`, but also contains flags beyond bit 30
 
 
 class EditAppInfo(TypedDict, total=False):
