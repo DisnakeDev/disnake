@@ -565,7 +565,7 @@ class Invite(Hashable):
         The partial guild's welcome screen, if any.
 
         .. versionadded:: 2.5
-    roles: :class:`~collections.abc.Collection`\[:class:`Role`, ...]
+    roles: :class:`~collections.abc.Collection`\[:class:`Role`]
         A list of roles that will be assigned to the users when joining, if any.
 
         .. versionadded:: |vnext|
