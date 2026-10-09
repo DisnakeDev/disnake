@@ -338,13 +338,14 @@ class Attachment(Hashable):
     def is_spoiler(self) -> bool:
         """Whether this attachment contains a spoiler.
 
+        .. versionchanged:: |vnext|
+
+            Now considers the :attr:`~AttachmentFlags.is_spoiler` attachment
+            flag instead of the filename.
+
         :return type: :class:`bool`
-
-        .. versionchanged: |vnext|
-
-            Now considers the attachment flags as well as the filename.
         """
-        return self.filename.startswith("SPOILER_") or self.flags.is_spoiler
+        return self.flags.is_spoiler
 
     def __repr__(self) -> str:
         return f"<Attachment id={self.id} filename={self.filename!r} url={self.url!r} ephemeral={self.ephemeral!r}>"
