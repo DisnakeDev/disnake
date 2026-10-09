@@ -3,6 +3,7 @@
 """An example showcasing the two ways of adding autocompletion to slash command options."""
 
 import os
+from typing import Annotated
 
 import disnake
 from disnake.ext import commands
@@ -29,7 +30,7 @@ async def autocomplete_langs(inter, string: str) -> list[str]:
 @bot.slash_command()
 async def languages_1(
     inter: disnake.CommandInteraction,
-    language: str = commands.Param(autocomplete=autocomplete_langs),
+    language: Annotated[str, commands.Param(autocomplete=autocomplete_langs)],
 ): ...
 
 

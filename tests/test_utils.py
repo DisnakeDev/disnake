@@ -814,6 +814,26 @@ def test_resolve_annotation_literal() -> None:
         utils.resolve_annotation(Literal[timezone.utc, 3], globals(), locals(), {})
 
 
+@pytest.mark.parametrize(
+    ("tp", "return_annotated", "expected"),
+    [
+        (Annotated["str", str.casefold], False, str.casefold),
+        (Annotated["str", str.casefold], True, Annotated[str, str.casefold]),
+        # Annotated should be handled correctly as a forwardref
+        ('Annotated["str", str.casefold]', False, str.casefold),
+        ('Annotated["str", str.casefold]', True, Annotated[str, str.casefold]),
+        # any inner Annotated[] should fall back to the default behavior, i.e. returning its metadata
+        (int | Annotated[str, "bool"], False, int | bool),
+        (int | Annotated[str, "bool"], True, int | bool),
+    ],
+)
+def test_resolve_annotation_annotated(tp, return_annotated, expected) -> None:
+    assert (
+        utils.resolve_annotation(tp, globals(), locals(), None, return_annotated=return_annotated)
+        == expected
+    )
+
+
 # declared here as `TypeAliasType` is only valid in class/module scopes
 if TYPE_CHECKING or sys.version_info >= (3, 12):
     # this is equivalent to `type CoolList = List[int]`
