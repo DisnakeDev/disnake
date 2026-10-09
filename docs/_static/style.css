@@ -97,8 +97,6 @@ Historically however, thanks to:
   --table-border: var(--grey-4);
   --mobile-active-toc: var(--grey-7);
   --active-toc: var(--grey-3);
-  --scrollbar: rgba(0,0,0,0.2);
-  --scrollbar-hover: rgba(0,0,0,0.4);
   --rtd-ad-border: var(--grey-3);
   --rtd-ad-background: var(--grey-2);
   --rtd-ad-main-text: var(--grey-6);
@@ -162,8 +160,6 @@ img[src$="/snake_dark.svg"]  {
     --table-text: var(--grey-1);
     --table-border: var(--grey-4);
     --active-toc: var(--grey-6);
-    --scrollbar: rgba(0, 0, 0, 0.5);
-    --scrollbar-hover: rgba(0, 0, 0, 0.7);
     --rtd-ad-border: var(--grey-6);
     --rtd-ad-background: var(--grey-5);
     --rtd-ad-main-text: var(--grey-2);
@@ -186,6 +182,20 @@ img[src$="/snake_dark.svg"]  {
   img[src$="/snake_dark.svg"] {
     display: inherit;
   }
+}
+
+// hint selected theme to browser for automatically styling form controls/scrollbars
+// see https://web.dev/articles/baseline-in-action-color-theme#give_users_control_with_built-in_theme_switcher
+html {
+  // signal that both are supported
+  color-scheme: light dark;
+}
+
+html[data-theme="light"] {
+  color-scheme: light;
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
 }
 
 
@@ -705,12 +715,7 @@ aside::-webkit-scrollbar {
 }
 
 aside::-webkit-scrollbar-thumb {
-  background-color: var(--scrollbar);
   border-radius: 0.25em;
-}
-
-aside::-webkit-scrollbar-thumb:hover {
-  background-color: var(--scrollbar-hover);
 }
 
 /* search button stuff */
