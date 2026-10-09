@@ -1927,7 +1927,7 @@ class HTTPClient:
         target_users_file: File | None = None,
         target_user_ids: Sequence[Snowflake] | None = None,
         target_application_id: Snowflake | None = None,
-        role_ids: list[Snowflake] | None = None,
+        role_ids: Sequence[Snowflake] | None = None,
     ) -> Response[invite.Invite]:
         r = Route("POST", "/channels/{channel_id}/invites", channel_id=channel_id)
         payload: dict[str, Any] = {
