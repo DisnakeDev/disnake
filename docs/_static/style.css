@@ -319,6 +319,7 @@ aside {
   width: 350px;
   overscroll-behavior: contain;
   scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar) var(--main-background);
 }
 
 header .header-breakpoint {
