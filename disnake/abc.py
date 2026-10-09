@@ -1338,7 +1338,7 @@ class GuildChannel(ABC):
 
             .. versionadded:: 2.0
 
-        target_users: :class:`~collections.abc.Collection`\[:class:`Snowflake`] | :class:`~disnake.File` | :data:`None`
+        target_users: :class:`~collections.abc.Collection`\[:class:`~disnake.abc.Snowflake`] | :class:`~disnake.File` | :data:`None`
             A collection of users able to accept the invite, or a file with a list of user IDs.
             If a file is provided, it must have one user ID per line, separated by ``\n``.
             A valid file would look like this::
