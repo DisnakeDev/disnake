@@ -43,7 +43,7 @@ from ..components import (
     UserSelectMenu as UserSelectComponent,
 )
 from ..enums import ButtonStyle, ChannelType, ComponentType, TextInputStyle
-from ..utils import MISSING, assert_never
+from ..utils import MISSING, assert_never, copy_doc
 from ._types import (
     ActionRowChildT,
     ActionRowMessageComponent,
@@ -196,7 +196,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
     __repr_attributes__: ClassVar[tuple[str, ...]] = ("children",)
 
     def __init__(self, *components: ActionRowChildDefaultT, id: int = 0) -> None:
-        self.id: int = id
+        self._id: int = id
         self.children: list[ActionRowChildDefaultT] = []
 
         for component in components:
@@ -210,7 +210,14 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
 
     # override id property of the base type; store the value in a separate attribute,
     # since `ActionRow` lazily constructs `_underlying`, unlike most components
-    id = None  # pyright: ignore[reportAssignmentType]
+    @property
+    @copy_doc(UIComponent.id)
+    def id(self) -> int:
+        return self._id
+
+    @id.setter
+    def id(self, value: int) -> None:
+        self._id = value
 
     @property
     def width(self) -> int:
@@ -802,7 +809,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
     def _underlying(self) -> ActionRowComponent[ActionRowChildComponent]:
         return ActionRowComponent._raw_construct(
             type=ComponentType.action_row,
-            id=self.id,
+            id=self._id,
             children=[comp._underlying for comp in self.children],
         )
 
