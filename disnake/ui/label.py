@@ -70,6 +70,7 @@ class Label(UIComponent):
         "text",
         "description",
         "component",
+        "_id"
     )
 
     def __init__(

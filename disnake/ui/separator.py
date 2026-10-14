@@ -38,6 +38,7 @@ class Separator(UIComponent):
     __repr_attributes__: ClassVar[tuple[str, ...]] = (
         "divider",
         "spacing",
+        "id",
     )
     # We have to set this to MISSING in order to overwrite the abstract property from UIComponent
     _underlying: SeparatorComponent = MISSING
