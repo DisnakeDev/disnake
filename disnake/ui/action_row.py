@@ -122,7 +122,7 @@ ActionRowChildDefaultT = TypeVar(
 
 
 class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
-    """Represents a UI action row. Useful for lower level component manipulation.
+    r"""Represents a UI action row. Useful for lower level component manipulation.
 
     .. collapse:: operations
 
@@ -145,6 +145,10 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
 
             .. versionadded:: 2.6
 
+    To add/remove components to/from an action row,
+    either use the action row's methods like :meth:`append_item` (which perform some validation),
+    or access the :attr:`.children` list and use its methods directly.
+
     To handle interactions created by components sent in action rows or entirely independently,
     event listeners must be used. For buttons and selects, the related events are
     :func:`disnake.on_button_click` and :func:`disnake.on_dropdown`, respectively. Alternatively,
@@ -158,7 +162,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
 
     Parameters
     ----------
-    *components: :class:`WrappedComponent`
+    *components: :class:`~ui.Button` | :class:`~ui.StringSelect` | :class:`~ui.UserSelect` | :class:`~ui.RoleSelect` | :class:`~ui.MentionableSelect` | :class:`~ui.ChannelSelect`
         The components of this action row.
 
         .. versionchanged:: 2.6
@@ -171,6 +175,22 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
         sequential identifiers to the components in the message.
 
         .. versionadded:: 2.11
+
+    Attributes
+    ----------
+    children: :class:`list`\[:class:`~ui.Button` | :class:`~ui.StringSelect` | :class:`~ui.UserSelect` | :class:`~ui.RoleSelect` | :class:`~ui.MentionableSelect` | :class:`~ui.ChannelSelect`]
+        A list of UI components stored in this action row.
+
+        .. versionchanged:: 2.6
+            Returns an immutable sequence instead of a list.
+
+        .. versionchanged:: |vnext|
+            This is now a public attribute that holds a list.
+    id: :class:`int`
+        The numeric identifier for the component. Must be unique within a message.
+        This is always present in components received from the API.
+        If set to ``0`` (the default) when sending a component, the API will assign
+        sequential identifiers to the components in the message.
     """
 
     __repr_attributes__: ClassVar[tuple[str, ...]] = ("children",)
