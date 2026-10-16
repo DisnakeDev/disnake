@@ -608,7 +608,6 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
                     raise
         view.previous = previous
 
-        # type-checker fails to narrow argument
         assert argument is not None
         return await run_converters(ctx, converter, argument, param)
 
