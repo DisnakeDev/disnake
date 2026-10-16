@@ -43,7 +43,7 @@ runs:
       id: setup-python
       uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
       with:
-        version: '0.12.5'
+        version: '0.13.1'
         enable-cache: 'auto'
         # this doesn't install python but pins the uv version; its the same as providing UV_PYTHON
         python-version: ${{ inputs.python-version }}
