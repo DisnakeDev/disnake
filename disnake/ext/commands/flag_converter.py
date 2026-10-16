@@ -285,7 +285,8 @@ class FlagsMeta(type):
 
                 # f_locals can be a proxy type in 3.15+
                 # (technically not in this case, since we're coming from a class scope, but still)
-                local_ns = dict(local_ns)
+                if not isinstance(local_ns, dict):
+                    local_ns = dict(local_ns)
         finally:
             del frame
 
