@@ -138,7 +138,7 @@ jobs:
 
       - name: Run prek
         id: prek
-        uses: j178/prek-action@4e14d07f9231acabce116ccfca13b13dd9755ece # v3.0.0
+        uses: j178/prek-action@1382ad72dea72f9d53832f2bcb65b3e87a947204 # v3.0.1
         # given the interoperability and the nature of prek, we stay unpinned for now
         # note that this action by default uses the latest version of prek
         # this is exactly how the pre-commit action worked, and we never had any issues
