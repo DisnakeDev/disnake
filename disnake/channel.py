@@ -608,6 +608,11 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             You do not have the proper permissions to create this channel.
         HTTPException
             Creating the channel failed.
+        TypeError
+            The ``overwrites`` parameter has an invalid type.
+        RuntimeError
+            Cannot clone an :meth:`obfuscated <.is_obfuscated>` channel, as most
+            of its data is missing.
 
         Returns
         -------
@@ -641,6 +646,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
                     else self.default_auto_archive_duration
                 ),
             },
+            base_flags=self.flags,
             name=name,
             category=category,
             reason=reason,
@@ -1470,6 +1476,11 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
             You do not have the proper permissions to create this channel.
         HTTPException
             Creating the channel failed.
+        TypeError
+            The ``overwrites`` parameter has an invalid type.
+        RuntimeError
+            Cannot clone an :meth:`obfuscated <.is_obfuscated>` channel, as most
+            of its data is missing.
 
         Returns
         -------
@@ -1492,6 +1503,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
                     slowmode_delay if slowmode_delay is not MISSING else self.slowmode_delay
                 ),
             },
+            base_flags=self.flags,
             name=name,
             category=category,
             reason=reason,
@@ -2235,6 +2247,11 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
             You do not have the proper permissions to create this channel.
         HTTPException
             Creating the channel failed.
+        TypeError
+            The ``overwrites`` parameter has an invalid type.
+        RuntimeError
+            Cannot clone an :meth:`obfuscated <.is_obfuscated>` channel, as most
+            of its data is missing.
 
         Returns
         -------
@@ -2259,6 +2276,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
                 ),
                 "nsfw": nsfw if nsfw is not MISSING else self.nsfw,
             },
+            base_flags=self.flags,
             name=name,
             category=category,
             reason=reason,
@@ -3003,6 +3021,11 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
             You do not have the proper permissions to create this channel.
         HTTPException
             Creating the channel failed.
+        TypeError
+            The ``overwrites`` parameter has an invalid type.
+        RuntimeError
+            Cannot clone an :meth:`obfuscated <.is_obfuscated>` channel, as most
+            of its data is missing.
 
         Returns
         -------
@@ -3013,6 +3036,7 @@ class CategoryChannel(disnake.abc.GuildChannel, Hashable):
             {
                 "position": position if position is not MISSING else self.position,
             },
+            base_flags=self.flags,
             name=name,
             reason=reason,
             overwrites=overwrites,
@@ -4342,6 +4366,11 @@ class ForumChannel(ThreadOnlyGuildChannel):
             You do not have the proper permissions to create this channel.
         HTTPException
             Creating the channel failed.
+        TypeError
+            The ``overwrites`` parameter has an invalid type.
+        RuntimeError
+            Cannot clone an :meth:`obfuscated <.is_obfuscated>` channel, as most
+            of its data is missing.
 
         Returns
         -------
@@ -4396,6 +4425,7 @@ class ForumChannel(ThreadOnlyGuildChannel):
                     else try_enum_to_int(self.default_layout)
                 ),
             },
+            base_flags=self.flags,
             name=name,
             category=category,
             reason=reason,
@@ -4727,6 +4757,11 @@ class MediaChannel(ThreadOnlyGuildChannel):
             You do not have the proper permissions to create this channel.
         HTTPException
             Creating the channel failed.
+        TypeError
+            The ``overwrites`` parameter has an invalid type.
+        RuntimeError
+            Cannot clone an :meth:`obfuscated <.is_obfuscated>` channel, as most
+            of its data is missing.
 
         Returns
         -------
@@ -4777,6 +4812,7 @@ class MediaChannel(ThreadOnlyGuildChannel):
                     try_enum_to_int(default_sort_order) if default_sort_order is not None else None
                 ),
             },
+            base_flags=self.flags,
             name=name,
             category=category,
             reason=reason,
@@ -4948,6 +4984,19 @@ class DMChannel(disnake.abc.Messageable, Hashable):
         from .message import PartialMessage
 
         return PartialMessage(channel=self, id=message_id)
+
+    def is_obfuscated(self) -> Literal[False]:
+        """Whether the channel's metadata is obfuscated.
+
+        .. note::
+            This only exists for compatibility with :meth:`abc.GuildChannel.is_obfuscated`,
+            and will always be ``False``.
+
+        .. versionadded:: |vnext|
+
+        :return type: :class:`bool`
+        """
+        return False
 
 
 class GroupChannel(disnake.abc.Messageable, Hashable):
@@ -5124,6 +5173,19 @@ class GroupChannel(disnake.abc.Messageable, Hashable):
             Leaving the group failed.
         """
         await self._state.http.leave_group(self.id)
+
+    def is_obfuscated(self) -> Literal[False]:
+        """Whether the channel's metadata is obfuscated.
+
+        .. note::
+            This only exists for compatibility with :meth:`abc.GuildChannel.is_obfuscated`,
+            and will always be ``False``.
+
+        .. versionadded:: |vnext|
+
+        :return type: :class:`bool`
+        """
+        return False
 
 
 class PartialMessageable(disnake.abc.Messageable, Hashable):
