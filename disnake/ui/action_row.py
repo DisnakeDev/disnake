@@ -162,7 +162,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
 
     Parameters
     ----------
-    *components: :class:`~ui.Button` | :class:`~ui.StringSelect` | :class:`~ui.UserSelect` | :class:`~ui.RoleSelect` | :class:`~ui.MentionableSelect` | :class:`~ui.ChannelSelect`
+    *components: :class:`~.ui.Button` | :class:`~.ui.StringSelect` | :class:`~.ui.UserSelect` | :class:`~.ui.RoleSelect` | :class:`~.ui.MentionableSelect` | :class:`~.ui.ChannelSelect`
         The components of this action row.
 
         .. versionchanged:: 2.6
@@ -178,7 +178,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
 
     Attributes
     ----------
-    children: :class:`list`\[:class:`~ui.Button` | :class:`~ui.StringSelect` | :class:`~ui.UserSelect` | :class:`~ui.RoleSelect` | :class:`~ui.MentionableSelect` | :class:`~ui.ChannelSelect`]
+    children: :class:`list`\[:class:`~.ui.Button` | :class:`~.ui.StringSelect` | :class:`~.ui.UserSelect` | :class:`~.ui.RoleSelect` | :class:`~.ui.MentionableSelect` | :class:`~.ui.ChannelSelect`]
         A list of UI components stored in this action row.
 
         .. versionchanged:: 2.6
