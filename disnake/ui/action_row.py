@@ -206,6 +206,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
             self.append_item(component)
 
     if not TYPE_CHECKING:
+
         @property
         @utils.deprecated("Use `.children` instead.")
         def _children(self) -> list[ActionRowChildDefaultT]:
