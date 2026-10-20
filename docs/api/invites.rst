@@ -34,6 +34,25 @@ PartialInviteChannel
 .. autoclass:: PartialInviteChannel()
     :members:
 
+PartialInviteRole
+~~~~~~~~~~~~~~~~~
+
+.. attributetable:: PartialInviteRole
+
+.. autoclass:: PartialInviteRole()
+    :members:
+
+Data Classes
+------------
+
+InviteTargetUsersJob
+~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: InviteTargetUsersJob
+
+.. autoclass:: InviteTargetUsersJob()
+
+
 Enumerations
 ------------
 
@@ -47,6 +66,12 @@ InviteTarget
 ~~~~~~~~~~~~
 
 .. autoclass:: InviteTarget()
+    :members:
+
+InviteTargetUsersJobStatus
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: InviteTargetUsersJobStatus()
     :members:
 
 Events

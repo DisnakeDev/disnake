@@ -9,15 +9,18 @@ from typing_extensions import NotRequired
 from .snowflake import Snowflake
 
 
-class Role(TypedDict):
+class PartialRole(TypedDict):
     id: Snowflake
     name: str
+    position: int
     color: int
     colors: RoleColors
-    hoist: bool
     icon: NotRequired[str | None]
     unicode_emoji: NotRequired[str | None]
-    position: int
+
+
+class Role(PartialRole):
+    hoist: bool
     permissions: str
     managed: bool
     mentionable: bool
