@@ -1,0 +1,1 @@
+|commands| Restore support for :func:`~ext.commands.has_permissions` and :func:`~ext.commands.bot_has_permissions` command decorators within DMs.
