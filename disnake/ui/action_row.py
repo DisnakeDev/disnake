@@ -205,6 +205,12 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
                 raise TypeError(msg)
             self.append_item(component)
 
+    if not TYPE_CHECKING:
+        @property
+        @utils.deprecated("Use `.children` instead.")
+        def _children(self) -> list[ActionRowChildDefaultT]:
+            return self.children
+
     def __len__(self) -> int:
         return len(self.children)
 
