@@ -185,7 +185,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
             Returns an immutable sequence instead of a list.
 
         .. versionchanged:: |vnext|
-            This is now a public attribute that holds a list.
+            This is now a public attribute that holds a (mutable) list.
     id: :class:`int`
         The numeric identifier for the component. Must be unique within a message.
         This is always present in components received from the API.
