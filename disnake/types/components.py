@@ -239,6 +239,9 @@ class UnfurledMediaItem(TypedDict, total=False):
     proxy_url: str
     height: int | None
     width: int | None
+    placeholder: str
+    placeholder_version: int
+    flags: int
     content_type: str
     attachment_id: Snowflake
 

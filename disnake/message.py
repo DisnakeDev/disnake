@@ -192,7 +192,7 @@ async def _edit_handler(
 
 
 class Attachment(Hashable):
-    """Represents an attachment from Discord.
+    r"""Represents an attachment from Discord.
 
     .. collapse:: operations
 
@@ -266,6 +266,24 @@ class Attachment(Hashable):
         (see :attr:`MessageFlags.is_voice_message`).
 
         .. versionadded:: 2.9
+
+    clip_participants: :class:`list`\[:class:`User`]
+        The list of users who were in the stream, if this attachment is a clip.
+
+        .. versionadded:: |vnext|
+
+    clip_created_at: :class:`datetime.datetime` | :data:`None`
+        The creation timestamp, if this attachment is a clip.
+
+        .. versionadded:: |vnext|
+    placeholder: :class:`str` | :data:`None`
+        The `Thumbhash <https://evanw.github.io/thumbhash/>`_ placeholder (if image or video) of this attachment.
+
+        .. versionadded:: |vnext|
+    placeholder_version: :class:`int` | :data:`None`
+        The version of the placeholder (if image or video) of this attachment.
+
+        .. versionadded:: |vnext|
     """
 
     __slots__ = (
@@ -284,6 +302,10 @@ class Attachment(Hashable):
         "duration",
         "waveform",
         "_flags",
+        "placeholder",
+        "placeholder_version",
+        "clip_participants",
+        "clip_created_at",
     )
 
     def __init__(self, *, data: AttachmentPayload, state: ConnectionState) -> None:
@@ -304,13 +326,25 @@ class Attachment(Hashable):
             b64decode(waveform_data) if (waveform_data := data.get("waveform")) else None
         )
         self._flags: int = data.get("flags", 0)
+        self.clip_participants: list[User] = [
+            state.store_user(d) for d in data.get("clip_participants", [])
+        ]
+        self.clip_created_at: datetime.datetime | None = utils.parse_time(
+            data.get("clip_created_at")
+        )
+        self.placeholder: str | None = data.get("placeholder")
+        self.placeholder_version: int | None = data.get("placeholder_version")
 
     def is_spoiler(self) -> bool:
         """Whether this attachment contains a spoiler.
 
         :return type: :class:`bool`
+
+        .. versionchanged: |vnext|
+
+            Now considers the attachment flags as well as the filename.
         """
-        return self.filename.startswith("SPOILER_")
+        return self.filename.startswith("SPOILER_") or self.flags.is_spoiler
 
     def __repr__(self) -> str:
         return f"<Attachment id={self.id} filename={self.filename!r} url={self.url!r} ephemeral={self.ephemeral!r}>"

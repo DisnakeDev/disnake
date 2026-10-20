@@ -17,6 +17,20 @@ in specific versions. Please see :ref:`version_guarantees` for more information.
 
 .. towncrier release notes start
 
+.. _vp2p12p2:
+
+v2.12.2
+-------
+
+Bug Fixes
+~~~~~~~~~
+- Restore ``isinstance`` functionality of :class:`ApplicationCommandInteraction` aliases (such as ``CommandInteraction``). (:issue:`1606`)
+
+Miscellaneous
+~~~~~~~~~~~~~
+- Update ``dave.py`` version requirement to ``~=v1.0``. (:issue:`1590`, :issue:`1597`)
+
+
 .. _vp2p12p1:
 
 v2.12.1
