@@ -3004,8 +3004,8 @@ class Guild(Hashable):
 
         Retrieves the :class:`BanEntry` for a user.
 
-        You must have :attr:`~Permissions.ban_members` permission
-        to use this.
+        You must have :attr:`~Permissions.ban_members` or
+        :attr:`~Permissions.view_audit_log` permission to use this.
 
         Parameters
         ----------
@@ -3090,7 +3090,8 @@ class Guild(Hashable):
     ) -> BanIterator:
         """Returns an :class:`~disnake.AsyncIterator` that enables receiving the destination's bans.
 
-        You must have the :attr:`~Permissions.ban_members` permission to get this information.
+        You must have :attr:`~Permissions.ban_members` or
+        :attr:`~Permissions.view_audit_log` permission to use this.
 
         .. versionchanged:: 2.5
             Due to a breaking change in Discord's API, this now returns an :class:`~disnake.AsyncIterator` instead of a :class:`list`.
