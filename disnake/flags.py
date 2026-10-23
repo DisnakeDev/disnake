@@ -106,7 +106,7 @@ class flag_value(Generic[T]):
 
 
 class alias_flag_value(flag_value[T]):
-    pass
+    __slots__ = ("__doc__",)  # __doc__ is not inherited by subclasses
 
 
 # TODO: it's now unused, but it's not _ prefixed, so someone could be using it
