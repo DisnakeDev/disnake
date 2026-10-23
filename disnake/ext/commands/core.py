@@ -608,7 +608,6 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
                     raise
         view.previous = previous
 
-        # type-checker fails to narrow argument
         assert argument is not None
         return await run_converters(ctx, converter, argument, param)
 
@@ -2151,8 +2150,11 @@ def has_permissions(**perms: bool) -> Callable[[T], T]:
             permissions = ctx.permissions
         else:
             ch = ctx.channel
-            assert isinstance(ctx.author, disnake.Member)
-            permissions = ch.permissions_for(ctx.author, ignore_timeout=False)
+            # ctx.author type will always match required type for channel method
+            permissions = ch.permissions_for(
+                ctx.author,  # pyright: ignore[reportArgumentType]
+                ignore_timeout=False,
+            )
 
         missing = [perm for perm, value in perms.items() if getattr(permissions, perm) != value]
 
@@ -2258,8 +2260,11 @@ def bot_has_permissions(**perms: bool) -> Callable[[T], T]:
             permissions = ctx.app_permissions
         else:
             ch = ctx.channel
-            assert isinstance(ctx.me, disnake.Member)
-            permissions = ch.permissions_for(ctx.me, ignore_timeout=False)
+            # ctx.me type will always match required type for channel method
+            permissions = ch.permissions_for(
+                ctx.me,  # pyright: ignore[reportArgumentType]
+                ignore_timeout=False,
+            )
 
         missing = [perm for perm, value in perms.items() if getattr(permissions, perm) != value]
 
@@ -2552,16 +2557,7 @@ def is_nsfw() -> Callable[[T], T]:
     def pred(ctx: AnyContext) -> bool:
         ch = ctx.channel
         if ctx.guild is None or (
-            isinstance(
-                ch,
-                (
-                    disnake.TextChannel,
-                    disnake.VoiceChannel,
-                    disnake.Thread,
-                    disnake.StageChannel,
-                ),
-            )
-            and ch.is_nsfw()
+            isinstance(ch, (disnake.abc.GuildChannel, disnake.Thread)) and ch.is_nsfw()
         ):
             return True
         raise NSFWChannelRequired(ch)  # pyright: ignore[reportArgumentType]
