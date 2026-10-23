@@ -281,10 +281,8 @@ class BaseFlags:
 
     def __iter__(self) -> Iterator[tuple[str, bool]]:
         for name, value in self.__class__.__dict__.items():
-            if isinstance(value, alias_flag_value):
-                continue
-
-            if isinstance(value, flag_value):
+            # using `is` excludes `alias_flag_value`
+            if type(value) is flag_value:
                 yield (name, self._has_flag(value.flag))
 
     def _has_flag(self, o: int) -> bool:
