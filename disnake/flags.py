@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import functools
 import operator
-from collections.abc import Callable, Iterator, Mapping, Sequence
+from collections.abc import Callable, Iterable, Iterator, Mapping
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -12,6 +12,7 @@ from typing import (
     Generic,
     NoReturn,
     TypeVar,
+    cast,
     overload,
 )
 
@@ -21,9 +22,9 @@ from .utils import MISSING, _generated
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from disnake.types.appinfo import ApplicationIntegrationType
-    from disnake.types.automod import AutoModPresetType
-    from disnake.types.interactions import InteractionContextType
+    from disnake.types.appinfo import ApplicationIntegrationType  # noqa: F401
+    from disnake.types.automod import AutoModPresetType  # noqa: F401
+    from disnake.types.interactions import InteractionContextType  # noqa: F401
 
 
 __all__ = (
@@ -48,6 +49,7 @@ __all__ = (
 
 BF = TypeVar("BF", bound="BaseFlags")
 T = TypeVar("T", bound="BaseFlags")
+FlagListVT = TypeVar("FlagListVT", bound=int)
 
 
 class flag_value(Generic[T]):
@@ -298,7 +300,7 @@ class BaseFlags:
             raise TypeError(msg)
 
 
-class ListBaseFlags(BaseFlags, no_fill_flags=True):
+class ListBaseFlags(BaseFlags, Generic[FlagListVT], no_fill_flags=True):
     """A base class for flags that aren't powers of 2.
     Instead, values are used as exponents to map to powers of 2 to avoid collisions,
     and only the combined value is stored, which allows all bitwise operations to work as expected.
@@ -307,7 +309,7 @@ class ListBaseFlags(BaseFlags, no_fill_flags=True):
     __slots__ = ()
 
     @classmethod
-    def _from_values(cls, values: Sequence[int]) -> Self:
+    def _from_values(cls, values: Iterable[FlagListVT], /) -> Self:
         self = cls.__new__(cls)
         value = 0
         for n in values:
@@ -321,13 +323,17 @@ class ListBaseFlags(BaseFlags, no_fill_flags=True):
         return self
 
     @property
-    def values(self) -> list[int]:
+    def values(self) -> list[FlagListVT]:
         # This essentially converts an int like `0b100110` into `[1, 2, 5]`,
         # i.e. the exponents of set bits in `self.value`.
         # This may look weird but interestingly it's by far the
         # fastest out of all benchmarked snippets, see https://stackoverflow.com/a/49592515/5080607
         # (this code is a derivative of one of them)
-        return [i for i, c in enumerate(bin(self.value)[:1:-1]) if c == "1"]
+        return [
+            i
+            for i, c in cast("Iterable[tuple[FlagListVT, str]]", enumerate(bin(self.value)[:1:-1]))
+            if c == "1"
+        ]
 
     def __repr__(self) -> str:
         return f"<{self.__class__.__name__} values={self.values}>"
@@ -2208,7 +2214,7 @@ class ChannelFlags(BaseFlags):
         return 1 << 15
 
 
-class AutoModKeywordPresets(ListBaseFlags):
+class AutoModKeywordPresets(ListBaseFlags["AutoModPresetType"]):
     """Wraps up the pre-defined auto moderation keyword lists, provided by Discord.
 
     .. collapse:: operations
@@ -2283,9 +2289,6 @@ class AutoModKeywordPresets(ListBaseFlags):
         def __init__(
             self, *, profanity: bool = ..., sexual_content: bool = ..., slurs: bool = ...
         ) -> None: ...
-
-        @property
-        def values(self) -> list[AutoModPresetType]: ...
 
     @classmethod
     def all(cls) -> Self:
@@ -2771,7 +2774,7 @@ class SKUFlags(BaseFlags):
         return 1 << 8
 
 
-class ApplicationInstallTypes(ListBaseFlags):
+class ApplicationInstallTypes(ListBaseFlags["ApplicationIntegrationType"]):
     """Represents the location(s) in which an application or application command can be installed.
 
     See the :ddocs:`official documentation <resources/application#installation-context>` for more info.
@@ -2846,9 +2849,6 @@ class ApplicationInstallTypes(ListBaseFlags):
         @_generated
         def __init__(self, *, guild: bool = ..., user: bool = ...) -> None: ...
 
-        @property
-        def values(self) -> list[ApplicationIntegrationType]: ...
-
     @classmethod
     def all(cls) -> Self:
         """A factory method that creates an :class:`ApplicationInstallTypes` instance with everything enabled."""
@@ -2867,7 +2867,7 @@ class ApplicationInstallTypes(ListBaseFlags):
         return 1 << 1
 
 
-class InteractionContextTypes(ListBaseFlags):
+class InteractionContextTypes(ListBaseFlags["InteractionContextType"]):
     """Represents the context(s) in which an application command can be used.
 
     See the :ddocs:`official documentation <interactions/application-commands#interaction-contexts>` for more info.
@@ -2943,9 +2943,6 @@ class InteractionContextTypes(ListBaseFlags):
         def __init__(
             self, *, bot_dm: bool = ..., guild: bool = ..., private_channel: bool = ...
         ) -> None: ...
-
-        @property
-        def values(self) -> list[InteractionContextType]: ...
 
     @classmethod
     def all(cls) -> Self:
