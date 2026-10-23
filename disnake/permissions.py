@@ -226,27 +226,25 @@ class Permissions(BaseFlags):
 
     def is_subset(self, other: Permissions) -> bool:
         """Returns ``True`` if self has the same or fewer permissions as other."""
-        if isinstance(other, Permissions):
-            return (self.value & other.value) == self.value
-        else:
+        if not isinstance(other, __class__):
             msg = f"cannot compare {self.__class__.__name__} with {other.__class__.__name__}"
             raise TypeError(msg)
+        return (self.value & other.value) == self.value
 
     def is_superset(self, other: Permissions) -> bool:
         """Returns ``True`` if self has the same or more permissions as other."""
-        if isinstance(other, Permissions):
-            return (self.value | other.value) == self.value
-        else:
+        if not isinstance(other, __class__):
             msg = f"cannot compare {self.__class__.__name__} with {other.__class__.__name__}"
             raise TypeError(msg)
+        return (self.value | other.value) == self.value
 
     def is_strict_subset(self, other: Permissions) -> bool:
         """Returns ``True`` if the permissions on self are a strict subset of those on other."""
-        return self.is_subset(other) and self != other
+        return self.is_subset(other) and self.value != other.value
 
     def is_strict_superset(self, other: Permissions) -> bool:
         """Returns ``True`` if the permissions on self are a strict superset of those on other."""
-        return self.is_superset(other) and self != other
+        return self.is_superset(other) and self.value != other.value
 
     # the parent uses `Self` for the `other` typehint but we use `Permissions` here for backwards compat.
     __le__ = is_subset
