@@ -1131,16 +1131,12 @@ class Intents(BaseFlags):
     @classmethod
     def all(cls) -> Self:
         """A factory method that creates an :class:`Intents` instance with everything enabled."""
-        self = cls.__new__(cls)
-        self.value = cls.ALL_FLAGS_VALUE
-        return self
+        return cls._from_value(cls.ALL_FLAGS_VALUE)
 
     @classmethod
     def none(cls) -> Self:
         """A factory method that creates an :class:`Intents` instance with everything disabled."""
-        self = cls.__new__(cls)
-        self.value = 0
-        return self
+        return cls._from_value(0)
 
     @classmethod
     def default(cls) -> Self:
@@ -1840,16 +1836,12 @@ class MemberCacheFlags(BaseFlags, default_all_set=True):
     @classmethod
     def all(cls) -> Self:
         """A factory method that creates a :class:`MemberCacheFlags` instance with everything enabled."""
-        self = cls.__new__(cls)
-        self.value = cls.ALL_FLAGS_VALUE
-        return self
+        return cls._from_value(cls.ALL_FLAGS_VALUE)
 
     @classmethod
     def none(cls) -> Self:
         """A factory method that creates a :class:`MemberCacheFlags` instance with everything disabled."""
-        self = cls.__new__(cls)
-        self.value = 0
-        return self
+        return cls._from_value(0)
 
     @property
     def _empty(self) -> bool:
@@ -2294,16 +2286,12 @@ class AutoModKeywordPresets(ListBaseFlags["AutoModPresetType"]):
     @classmethod
     def all(cls) -> Self:
         """A factory method that creates an :class:`AutoModKeywordPresets` instance with everything enabled."""
-        self = cls.__new__(cls)
-        self.value = cls.ALL_FLAGS_VALUE
-        return self
+        return cls._from_value(cls.ALL_FLAGS_VALUE)
 
     @classmethod
     def none(cls) -> Self:
         """A factory method that creates an :class:`AutoModKeywordPresets` instance with everything disabled."""
-        self = cls.__new__(cls)
-        self.value = 0
-        return self
+        return cls._from_value(0)
 
     @flag_value
     def profanity(self) -> int:
@@ -2853,9 +2841,7 @@ class ApplicationInstallTypes(ListBaseFlags["ApplicationIntegrationType"]):
     @classmethod
     def all(cls) -> Self:
         """A factory method that creates an :class:`ApplicationInstallTypes` instance with everything enabled."""
-        self = cls.__new__(cls)
-        self.value = cls.ALL_FLAGS_VALUE
-        return self
+        return cls._from_value(cls.ALL_FLAGS_VALUE)
 
     @flag_value
     def guild(self) -> int:
@@ -2948,9 +2934,7 @@ class InteractionContextTypes(ListBaseFlags["InteractionContextType"]):
     @classmethod
     def all(cls) -> Self:
         """A factory method that creates an :class:`InteractionContextTypes` instance with everything enabled."""
-        self = cls.__new__(cls)
-        self.value = cls.ALL_FLAGS_VALUE
-        return self
+        return cls._from_value(cls.ALL_FLAGS_VALUE)
 
     @flag_value
     def guild(self) -> int:

@@ -253,22 +253,18 @@ class Permissions(BaseFlags):
     __gt__ = is_strict_superset
 
     @classmethod
-    def none(cls) -> Self:
-        """A factory method that creates a :class:`Permissions` with all
-        permissions set to ``False``.
-        """
-        self = cls.__new__(cls)
-        self.value = 0
-        return self
-
-    @classmethod
     def all(cls) -> Self:
         """A factory method that creates a :class:`Permissions` with all
         permissions set to ``True``.
         """
-        self = cls.__new__(cls)
-        self.value = cls.ALL_FLAGS_VALUE
-        return self
+        return cls._from_value(cls.ALL_FLAGS_VALUE)
+
+    @classmethod
+    def none(cls) -> Self:
+        """A factory method that creates a :class:`Permissions` with all
+        permissions set to ``False``.
+        """
+        return cls._from_value(0)
 
     @classmethod
     @cached_creation
