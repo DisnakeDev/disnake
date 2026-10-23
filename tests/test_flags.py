@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from typing import Literal
 
 import pytest
 
@@ -446,7 +447,7 @@ class TestBaseFlags:
         assert ins.value == 0b00
 
 
-class _ListFlags(flags.ListBaseFlags):
+class _ListFlags(flags.ListBaseFlags[Literal[0, 1, 2]]):
     @flags.flag_value
     def flag1(self) -> int:
         return 1 << 0
@@ -479,20 +480,20 @@ class TestListBaseFlags:
         assert _ListFlags.VALID_FLAGS == {"flag1": 1, "flag2": 2, "flag3": 4}
 
     def test_from_values(self) -> None:
-        flags = _ListFlags._from_values([0, 2, 3, 4, 5, 10])
-        assert flags.value == 1085
+        flags = _ListFlags._from_values([0, 2, 3, 4, 5, 10])  # pyright: ignore[reportArgumentType]
+        assert flags.value == 0b10000111101
         assert flags.values == [0, 2, 3, 4, 5, 10]
 
     @pytest.mark.parametrize("value", [-10, -1, 100])
     def test_from_values__invalid(self, value) -> None:
         with pytest.raises(ValueError, match=re.escape("Flag values must be within [0, 64)")):
-            _ListFlags._from_values([0, 2, value, 3])
+            _ListFlags._from_values([0, 2, value])
 
     def test_update(self) -> None:
         flags = _ListFlags(flag2=True)
         flags.flag2 = False
         flags.flag3 = True
-        assert flags.value == 4
+        assert flags.value == 0b100
         assert flags.values == [2]
 
     def test_operators(self) -> None:
