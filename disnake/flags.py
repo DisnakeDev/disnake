@@ -155,7 +155,6 @@ class BaseFlags:
         cls.ALL_FLAGS_VALUE = all_flags_value
         cls.DEFAULT_VALUE = cls.ALL_FLAGS_VALUE if default_all_set else 0
 
-
     def _init_from_mapping(self, mapping: Mapping[str, bool], /) -> None:
         try:
             for key, value in mapping.items():
