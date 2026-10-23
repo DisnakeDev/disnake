@@ -26,21 +26,6 @@ __all__ = (
 PT = TypeVar("PT", bound="Permissions")
 
 
-# A permission alias works like a regular flag but is marked
-# So the PermissionOverwrite knows to work with it
-class permission_alias(alias_flag_value[PT]):
-    alias: str
-
-
-def make_permission_alias(alias: str) -> Callable[[Callable[[PT], int]], permission_alias[PT]]:
-    def decorator(func: Callable[[PT], int]) -> permission_alias[PT]:
-        ret = permission_alias(func)
-        ret.alias = alias
-        return ret
-
-    return decorator
-
-
 def cached_creation(func: Callable[[type[PT]], PT]) -> Callable[[type[PT]], PT]:
     @wraps(func)
     def wrapped(cls: type[PT]) -> PT:
@@ -746,7 +731,7 @@ class Permissions(BaseFlags):
         """
         return 1 << 10
 
-    @make_permission_alias("view_channel")
+    @alias_flag_value
     def read_messages(self) -> int:
         """:class:`bool`: An alias for :attr:`view_channel`."""
         return 1 << 10
@@ -758,7 +743,7 @@ class Permissions(BaseFlags):
         """
         return 1 << 11
 
-    @make_permission_alias("send_messages")
+    @alias_flag_value
     def create_forum_threads(self) -> int:
         """:class:`bool`: An alias for :attr:`send_messages`.
 
@@ -806,7 +791,7 @@ class Permissions(BaseFlags):
         """:class:`bool`: Returns ``True`` if a user can use emojis from other guilds."""
         return 1 << 18
 
-    @make_permission_alias("external_emojis")
+    @alias_flag_value
     def use_external_emojis(self) -> int:
         """:class:`bool`: An alias for :attr:`external_emojis`.
 
@@ -870,7 +855,7 @@ class Permissions(BaseFlags):
         """
         return 1 << 28
 
-    @make_permission_alias("manage_roles")
+    @alias_flag_value
     def manage_permissions(self) -> int:
         """:class:`bool`: An alias for :attr:`manage_roles`.
 
@@ -894,12 +879,12 @@ class Permissions(BaseFlags):
         """
         return 1 << 30
 
-    @make_permission_alias("manage_guild_expressions")
+    @alias_flag_value
     def manage_emojis(self) -> int:
         """:class:`bool`: An alias for :attr:`manage_guild_expressions`."""
         return 1 << 30
 
-    @make_permission_alias("manage_guild_expressions")
+    @alias_flag_value
     def manage_emojis_and_stickers(self) -> int:
         """:class:`bool`: An alias for :attr:`manage_guild_expressions`.
 
@@ -915,7 +900,7 @@ class Permissions(BaseFlags):
         """
         return 1 << 31
 
-    @make_permission_alias("use_application_commands")
+    @alias_flag_value
     def use_slash_commands(self) -> int:
         """:class:`bool`: An alias for :attr:`use_application_commands`.
 
@@ -977,7 +962,7 @@ class Permissions(BaseFlags):
         """
         return 1 << 37
 
-    @make_permission_alias("external_stickers")
+    @alias_flag_value
     def use_external_stickers(self) -> int:
         """:class:`bool`: An alias for :attr:`external_stickers`.
 
@@ -1002,7 +987,7 @@ class Permissions(BaseFlags):
         """
         return 1 << 39
 
-    @make_permission_alias("use_embedded_activities")
+    @alias_flag_value
     def start_embedded_activities(self) -> int:
         """:class:`bool`: An alias for :attr:`use_embedded_activities`.
 
@@ -1133,20 +1118,17 @@ def _augment_from_permissions(cls: type[POT]) -> type[POT]:
 
     # make descriptors for all the valid names and aliases
     for name, value in Permissions.__dict__.items():
-        if isinstance(value, permission_alias):
-            key = value.alias
-            aliases.add(name)
-        elif isinstance(value, flag_value):
-            key = name
-        else:
+        if not isinstance(value, flag_value):
             continue
+        if isinstance(value, alias_flag_value):
+            aliases.add(name)
 
         # god bless Python
-        def getter(self: POT, x: str = key) -> bool | None:
-            return self._get_by_key(x)
+        def getter(self: POT, x: int = value.flag) -> bool | None:
+            return self._get_by_flag(x)
 
-        def setter(self: POT, value: bool | None, x: str = key) -> None:
-            self._set_by_key(x, value)
+        def setter(self: POT, value: bool | None, x: int = value.flag) -> None:
+            self._set_by_flag(x, value)
 
         prop = property(getter, setter)
         setattr(cls, name, prop)
