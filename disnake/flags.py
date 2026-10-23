@@ -115,12 +115,12 @@ def all_flags_value(flags: Mapping[str, int]) -> int:
 
 
 class BaseFlags:
+    # mapping of all flag names (including aliases) to their flag values
     VALID_FLAGS: ClassVar[Mapping[str, int]] = {}
-    """A mapping of all valid flag names (including aliases) to their values."""
+    # value of flags when creating an instance without arguments
     DEFAULT_VALUE: ClassVar[int] = 0
-    """The value of flags when creating an instance without arguments."""
+    # combined value of all flags
     ALL_FLAGS_VALUE: ClassVar[int] = 0
-    """The combined value of all flags."""
 
     value: int
 
