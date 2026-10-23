@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Iterator
+from collections.abc import Callable, Iterator, Set
 from functools import wraps
 from typing import (
     TYPE_CHECKING,
-    Any,
     ClassVar,
+    TypeVar,
     overload,
 )
 
@@ -23,15 +23,17 @@ __all__ = (
     "PermissionOverwrite",
 )
 
+PT = TypeVar("PT", bound="Permissions")
+
 
 # A permission alias works like a regular flag but is marked
 # So the PermissionOverwrite knows to work with it
-class permission_alias(alias_flag_value):
+class permission_alias(alias_flag_value[PT]):
     alias: str
 
 
-def make_permission_alias(alias: str) -> Callable[[Callable[[Any], int]], permission_alias]:
-    def decorator(func: Callable[[Any], int]) -> permission_alias:
+def make_permission_alias(alias: str) -> Callable[[Callable[[PT], int]], permission_alias[PT]]:
+    def decorator(func: Callable[[PT], int]) -> permission_alias[PT]:
         ret = permission_alias(func)
         ret.alias = alias
         return ret
@@ -39,15 +41,17 @@ def make_permission_alias(alias: str) -> Callable[[Callable[[Any], int]], permis
     return decorator
 
 
-def cached_creation(func):
+def cached_creation(func: Callable[[type[PT]], PT]) -> Callable[[type[PT]], PT]:
     @wraps(func)
-    def wrapped(cls):
+    def wrapped(cls: type[PT]) -> PT:
         try:
             value = func.__stored_value__
         except AttributeError:
-            value = func(cls).value
-            func.__stored_value__ = value
-        return cls(value)
+            instance = func(cls)
+            func.__stored_value__ = instance.value
+            return instance
+        else:
+            return cls(value)
 
     return wrapped
 
@@ -230,11 +234,7 @@ class Permissions(BaseFlags):
             raise TypeError(msg)
 
         self.value = permissions
-        for key, value in kwargs.items():
-            if key not in self.VALID_FLAGS:
-                msg = f"{key!r} is not a valid permission name."
-                raise TypeError(msg)
-            setattr(self, key, value)
+        self._init_from_mapping(kwargs)
 
     def is_subset(self, other: Permissions) -> bool:
         """Returns ``True`` if self has the same or fewer permissions as other."""
@@ -267,20 +267,22 @@ class Permissions(BaseFlags):
     __gt__ = is_strict_superset
 
     @classmethod
-    @cached_creation
     def none(cls) -> Self:
         """A factory method that creates a :class:`Permissions` with all
         permissions set to ``False``.
         """
-        return cls(0)
+        self = cls.__new__(cls)
+        self.value = 0
+        return self
 
     @classmethod
-    @cached_creation
     def all(cls) -> Self:
         """A factory method that creates a :class:`Permissions` with all
         permissions set to ``True``.
         """
-        return cls(**dict.fromkeys(cls.VALID_FLAGS.keys(), True))
+        self = cls.__new__(cls)
+        self.value = cls.ALL_FLAGS_VALUE
+        return self
 
     @classmethod
     @cached_creation
@@ -656,8 +658,8 @@ class Permissions(BaseFlags):
             A list of key/value pairs to bulk update permissions with.
         """
         for key, value in kwargs.items():
-            if key in self.VALID_FLAGS:
-                setattr(self, key, value)
+            if (o := self.VALID_FLAGS.get(key)) is not None:
+                self._set_flag(o, value)
 
     def handle_overwrite(self, allow: int, deny: int) -> None:
         # Basically this is what's happening here.
@@ -1120,9 +1122,12 @@ class Permissions(BaseFlags):
         return 1 << 52
 
 
-def _augment_from_permissions(cls):
+POT = TypeVar("POT", bound="PermissionOverwrite")
+
+
+def _augment_from_permissions(cls: type[POT]) -> type[POT]:
     cls.VALID_NAMES = set(Permissions.VALID_FLAGS)
-    aliases = set()
+    aliases: set[str] = set()
 
     # make descriptors for all the valid names and aliases
     for name, value in Permissions.__dict__.items():
@@ -1135,10 +1140,10 @@ def _augment_from_permissions(cls):
             continue
 
         # god bless Python
-        def getter(self, x: str = key) -> bool | None:
+        def getter(self: POT, x: str = key) -> bool | None:
             return self._values.get(x)
 
-        def setter(self, value: bool | None, x: str = key) -> None:
+        def setter(self: POT, value: bool | None, x: str = key) -> None:
             self._set(x, value)
 
         prop = property(getter, setter)
@@ -1248,8 +1253,8 @@ class PermissionOverwrite:
         view_guild_insights: bool | None
 
     if TYPE_CHECKING:
-        VALID_NAMES: ClassVar[set[str]]
-        PURE_FLAGS: ClassVar[set[str]]
+        VALID_NAMES: ClassVar[Set[str]]
+        PURE_FLAGS: ClassVar[Set[str]]
 
     @overload
     @_generated
@@ -1337,7 +1342,7 @@ class PermissionOverwrite:
             setattr(self, key, value)
 
     def __eq__(self, other: object) -> bool:
-        return isinstance(other, PermissionOverwrite) and self._values == other._values
+        return isinstance(other, __class__) and self._values == other._values
 
     def _set(self, key: str, value: bool | None) -> None:
         if value not in (True, None, False):

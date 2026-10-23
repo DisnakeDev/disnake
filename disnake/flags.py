@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import functools
 import operator
-from collections.abc import Callable, Iterator, Sequence
+from collections.abc import Callable, Iterator, Mapping, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -51,6 +51,8 @@ T = TypeVar("T", bound="BaseFlags")
 
 
 class flag_value(Generic[T]):
+    __slots__ = ("flag", "__doc__", "_parent")
+
     def __init__(self, func: Callable[[Any], int]) -> None:
         self.flag = func(None)
         self.__doc__ = func.__doc__
@@ -105,13 +107,18 @@ class alias_flag_value(flag_value[T]):
     pass
 
 
-def all_flags_value(flags: dict[str, int]) -> int:
+# TODO: it's now unused, but it's not _ prefixed, so someone could be using it
+def all_flags_value(flags: Mapping[str, int]) -> int:
     return functools.reduce(operator.or_, flags.values())
 
 
 class BaseFlags:
-    VALID_FLAGS: ClassVar[dict[str, int]]
-    DEFAULT_VALUE: ClassVar[int]
+    VALID_FLAGS: ClassVar[Mapping[str, int]] = {}
+    """A mapping of all valid flag names (including aliases) to their values."""
+    DEFAULT_VALUE: ClassVar[int] = 0
+    """The value of flags when creating an instance without arguments."""
+    ALL_FLAGS_VALUE: ClassVar[int] = 0
+    """The combined value of all flags."""
 
     value: int
 
@@ -119,36 +126,45 @@ class BaseFlags:
 
     def __init__(self, **kwargs: bool) -> None:
         self.value = self.DEFAULT_VALUE
-        for key, value in kwargs.items():
-            if key not in self.VALID_FLAGS:
-                msg = f"{key!r} is not a valid flag name."
-                raise TypeError(msg)
-            setattr(self, key, value)
+        self._init_from_mapping(kwargs)
 
     @classmethod
-    def __init_subclass__(cls, inverted: bool = False, no_fill_flags: bool = False) -> type[Self]:
+    def __init_subclass__(cls, default_all_set: bool = False, no_fill_flags: bool = False) -> None:
+        super().__init_subclass__()
         # add a way to bypass filling flags, eg for ListBaseFlags.
         if no_fill_flags:
-            return cls
+            return
 
-        # use the parent's current flags as a base if they exist
-        cls.VALID_FLAGS = getattr(cls, "VALID_FLAGS", {}).copy()
+        # use the parent's current flags as a base
+        flags = dict(cls.VALID_FLAGS)
+        all_flags_value = 0
 
         for name, value in cls.__dict__.items():
             if isinstance(value, flag_value):
                 value._parent = cls
-                cls.VALID_FLAGS[name] = value.flag
+                flags[name] = value.flag
+                all_flags_value |= value.flag
 
-        if not cls.VALID_FLAGS:
+        if not flags:
             msg = "At least one flag must be defined in a BaseFlags subclass, or 'no_fill_flags' must be set to True"
             raise RuntimeError(msg)
 
-        cls.DEFAULT_VALUE = all_flags_value(cls.VALID_FLAGS) if inverted else 0
+        cls.VALID_FLAGS = flags
+        cls.ALL_FLAGS_VALUE = all_flags_value
+        cls.DEFAULT_VALUE = cls.ALL_FLAGS_VALUE if default_all_set else 0
 
-        return cls
+
+    def _init_from_mapping(self, mapping: Mapping[str, bool], /) -> None:
+        try:
+            for key, value in mapping.items():
+                self._set_flag(self.VALID_FLAGS[key], value)
+
+        except KeyError as err:
+            msg = f"{err.args[0]!r} is not a valid flag name."
+            raise TypeError(msg) from None
 
     @classmethod
-    def _from_value(cls, value: int) -> Self:
+    def _from_value(cls, value: int, /) -> Self:
         self = cls.__new__(cls)
         self.value = value
         return self
@@ -252,7 +268,7 @@ class BaseFlags:
         # invert the bit but make sure all truthy values are valid flags
         # this code means that if a flag class doesn't define 1 << 2 that
         # value won't suddenly be set to True
-        bitmask = all_flags_value(self.VALID_FLAGS)
+        bitmask = self.ALL_FLAGS_VALUE
         return self._from_value((self.value ^ bitmask) & bitmask)
 
     def __hash__(self) -> int:
@@ -317,7 +333,7 @@ class ListBaseFlags(BaseFlags, no_fill_flags=True):
         return f"<{self.__class__.__name__} values={self.values}>"
 
 
-class SystemChannelFlags(BaseFlags, inverted=True):
+class SystemChannelFlags(BaseFlags, default_all_set=True):
     r"""Wraps up a Discord system channel flag value.
 
     Similar to :class:`Permissions`\, the properties provided are two way.
@@ -1102,24 +1118,21 @@ class Intents(BaseFlags):
             self.value = value
         else:
             self.value = self.DEFAULT_VALUE
-        for key, value in kwargs.items():
-            if key not in self.VALID_FLAGS:
-                msg = f"{key!r} is not a valid flag name."
-                raise TypeError(msg)
-            setattr(self, key, value)
+
+        self._init_from_mapping(kwargs)
 
     @classmethod
     def all(cls) -> Self:
         """A factory method that creates an :class:`Intents` instance with everything enabled."""
         self = cls.__new__(cls)
-        self.value = all_flags_value(cls.VALID_FLAGS)
+        self.value = cls.ALL_FLAGS_VALUE
         return self
 
     @classmethod
     def none(cls) -> Self:
         """A factory method that creates an :class:`Intents` instance with everything disabled."""
         self = cls.__new__(cls)
-        self.value = self.DEFAULT_VALUE
+        self.value = 0
         return self
 
     @classmethod
@@ -1710,7 +1723,7 @@ class Intents(BaseFlags):
         return 1 << 25
 
 
-class MemberCacheFlags(BaseFlags):
+class MemberCacheFlags(BaseFlags, default_all_set=True):
     """Controls the library's cache policy when it comes to members.
 
     This allows for finer grained control over what members are cached.
@@ -1812,39 +1825,28 @@ class MemberCacheFlags(BaseFlags):
 
     __slots__ = ()
 
-    @overload
-    @_generated
-    def __init__(self, *, joined: bool = ..., voice: bool = ...) -> None: ...
+    if TYPE_CHECKING:
 
-    @overload
-    @_generated
-    def __init__(self: NoReturn) -> None: ...
-
-    def __init__(self, **kwargs: bool) -> None:
-        self.value = all_flags_value(self.VALID_FLAGS)
-        for key, value in kwargs.items():
-            if key not in self.VALID_FLAGS:
-                msg = f"{key!r} is not a valid flag name."
-                raise TypeError(msg)
-            setattr(self, key, value)
+        @_generated
+        def __init__(self, *, joined: bool = ..., voice: bool = ...) -> None: ...
 
     @classmethod
     def all(cls) -> Self:
         """A factory method that creates a :class:`MemberCacheFlags` instance with everything enabled."""
         self = cls.__new__(cls)
-        self.value = all_flags_value(cls.VALID_FLAGS)
+        self.value = cls.ALL_FLAGS_VALUE
         return self
 
     @classmethod
     def none(cls) -> Self:
         """A factory method that creates a :class:`MemberCacheFlags` instance with everything disabled."""
         self = cls.__new__(cls)
-        self.value = self.DEFAULT_VALUE
+        self.value = 0
         return self
 
     @property
     def _empty(self) -> bool:
-        return self.value == self.DEFAULT_VALUE
+        return self.value == 0
 
     @flag_value
     def voice(self) -> int:
@@ -2289,14 +2291,14 @@ class AutoModKeywordPresets(ListBaseFlags):
     def all(cls) -> Self:
         """A factory method that creates an :class:`AutoModKeywordPresets` instance with everything enabled."""
         self = cls.__new__(cls)
-        self.value = all_flags_value(cls.VALID_FLAGS)
+        self.value = cls.ALL_FLAGS_VALUE
         return self
 
     @classmethod
     def none(cls) -> Self:
         """A factory method that creates an :class:`AutoModKeywordPresets` instance with everything disabled."""
         self = cls.__new__(cls)
-        self.value = self.DEFAULT_VALUE
+        self.value = 0
         return self
 
     @flag_value
@@ -2851,7 +2853,7 @@ class ApplicationInstallTypes(ListBaseFlags):
     def all(cls) -> Self:
         """A factory method that creates an :class:`ApplicationInstallTypes` instance with everything enabled."""
         self = cls.__new__(cls)
-        self.value = all_flags_value(cls.VALID_FLAGS)
+        self.value = cls.ALL_FLAGS_VALUE
         return self
 
     @flag_value
@@ -2949,7 +2951,7 @@ class InteractionContextTypes(ListBaseFlags):
     def all(cls) -> Self:
         """A factory method that creates an :class:`InteractionContextTypes` instance with everything enabled."""
         self = cls.__new__(cls)
-        self.value = all_flags_value(cls.VALID_FLAGS)
+        self.value = cls.ALL_FLAGS_VALUE
         return self
 
     @flag_value
@@ -3040,7 +3042,7 @@ class EmbedFlags(BaseFlags):
         def __init__(self, *, is_content_inventory_entry: bool = ...) -> None: ...
 
     @flag_value
-    def is_content_inventory_entry(self):
+    def is_content_inventory_entry(self) -> int:
         """:class:`bool`: Returns ``True`` if the embed is a reply to an activity card."""
         return 1 << 5
 
@@ -3117,7 +3119,7 @@ class EmbedMediaFlags(BaseFlags):
         def __init__(self, *, is_animated: bool = ...) -> None: ...
 
     @flag_value
-    def is_animated(self):
+    def is_animated(self) -> int:
         """:class:`bool`: Returns ``True`` if the embed image is animated."""
         return 1 << 5
 
@@ -3194,6 +3196,6 @@ class UnfurledMediaItemFlags(BaseFlags):
         def __init__(self, *, is_animated: bool = ...) -> None: ...
 
     @flag_value
-    def is_animated(self):
+    def is_animated(self) -> int:
         """:class:`bool`: Returns ``True`` if the unfurled media item is animated."""
         return 1 << 0
