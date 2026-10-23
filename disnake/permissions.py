@@ -1365,7 +1365,7 @@ class PermissionOverwrite:
     def from_pair(cls, allow: Permissions, deny: Permissions) -> Self:
         """Creates an overwrite from an allow/deny pair of :class:`Permissions`."""
         self = cls()
-        # denied permissions take precendence over allowed ones
+        # denied permissions take precedence over allowed ones
         self._allowed_value = allow.value & ~deny.value
         self._denied_value = deny.value
         return self
