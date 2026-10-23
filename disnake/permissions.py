@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Iterator
+from collections.abc import Callable, Iterator, Set
 from functools import wraps
 from typing import (
     TYPE_CHECKING,
-    Any,
     ClassVar,
+    TypeVar,
     overload,
 )
 
@@ -23,31 +23,20 @@ __all__ = (
     "PermissionOverwrite",
 )
 
-
-# A permission alias works like a regular flag but is marked
-# So the PermissionOverwrite knows to work with it
-class permission_alias(alias_flag_value):
-    alias: str
+PT = TypeVar("PT", bound="Permissions")
 
 
-def make_permission_alias(alias: str) -> Callable[[Callable[[Any], int]], permission_alias]:
-    def decorator(func: Callable[[Any], int]) -> permission_alias:
-        ret = permission_alias(func)
-        ret.alias = alias
-        return ret
-
-    return decorator
-
-
-def cached_creation(func):
+def cached_creation(func: Callable[[type[PT]], PT]) -> Callable[[type[PT]], PT]:
     @wraps(func)
-    def wrapped(cls):
+    def wrapped(cls: type[PT]) -> PT:
         try:
             value = func.__stored_value__
         except AttributeError:
-            value = func(cls).value
-            func.__stored_value__ = value
-        return cls(value)
+            instance = func(cls)
+            func.__stored_value__ = instance.value
+            return instance
+        else:
+            return cls(value)
 
     return wrapped
 
@@ -228,37 +217,34 @@ class Permissions(BaseFlags):
         if not isinstance(permissions, int):
             msg = f"Expected int parameter, received {permissions.__class__.__name__} instead."
             raise TypeError(msg)
+        if permissions & ~self.ALL_FLAGS_VALUE:
+            msg = "'permissions' has unknown permissions set."
+            raise ValueError(msg)
 
         self.value = permissions
-        for key, value in kwargs.items():
-            if key not in self.VALID_FLAGS:
-                msg = f"{key!r} is not a valid permission name."
-                raise TypeError(msg)
-            setattr(self, key, value)
+        self._init_from_mapping(kwargs)
 
     def is_subset(self, other: Permissions) -> bool:
         """Returns ``True`` if self has the same or fewer permissions as other."""
-        if isinstance(other, Permissions):
-            return (self.value & other.value) == self.value
-        else:
+        if not isinstance(other, __class__):
             msg = f"cannot compare {self.__class__.__name__} with {other.__class__.__name__}"
             raise TypeError(msg)
+        return (self.value & other.value) == self.value
 
     def is_superset(self, other: Permissions) -> bool:
         """Returns ``True`` if self has the same or more permissions as other."""
-        if isinstance(other, Permissions):
-            return (self.value | other.value) == self.value
-        else:
+        if not isinstance(other, __class__):
             msg = f"cannot compare {self.__class__.__name__} with {other.__class__.__name__}"
             raise TypeError(msg)
+        return (self.value | other.value) == self.value
 
     def is_strict_subset(self, other: Permissions) -> bool:
         """Returns ``True`` if the permissions on self are a strict subset of those on other."""
-        return self.is_subset(other) and self != other
+        return self.is_subset(other) and self.value != other.value
 
     def is_strict_superset(self, other: Permissions) -> bool:
         """Returns ``True`` if the permissions on self are a strict superset of those on other."""
-        return self.is_superset(other) and self != other
+        return self.is_superset(other) and self.value != other.value
 
     # the parent uses `Self` for the `other` typehint but we use `Permissions` here for backwards compat.
     __le__ = is_subset
@@ -267,20 +253,18 @@ class Permissions(BaseFlags):
     __gt__ = is_strict_superset
 
     @classmethod
-    @cached_creation
-    def none(cls) -> Self:
-        """A factory method that creates a :class:`Permissions` with all
-        permissions set to ``False``.
-        """
-        return cls(0)
-
-    @classmethod
-    @cached_creation
     def all(cls) -> Self:
         """A factory method that creates a :class:`Permissions` with all
         permissions set to ``True``.
         """
-        return cls(**dict.fromkeys(cls.VALID_FLAGS.keys(), True))
+        return cls._from_value(cls.ALL_FLAGS_VALUE)
+
+    @classmethod
+    def none(cls) -> Self:
+        """A factory method that creates a :class:`Permissions` with all
+        permissions set to ``False``.
+        """
+        return cls._from_value(0)
 
     @classmethod
     @cached_creation
@@ -656,8 +640,8 @@ class Permissions(BaseFlags):
             A list of key/value pairs to bulk update permissions with.
         """
         for key, value in kwargs.items():
-            if key in self.VALID_FLAGS:
-                setattr(self, key, value)
+            if (o := self.VALID_FLAGS.get(key)) is not None:
+                self._set_flag(o, value)
 
     def handle_overwrite(self, allow: int, deny: int) -> None:
         # Basically this is what's happening here.
@@ -741,7 +725,7 @@ class Permissions(BaseFlags):
         """
         return 1 << 10
 
-    @make_permission_alias("view_channel")
+    @alias_flag_value
     def read_messages(self) -> int:
         """:class:`bool`: An alias for :attr:`view_channel`."""
         return 1 << 10
@@ -753,7 +737,7 @@ class Permissions(BaseFlags):
         """
         return 1 << 11
 
-    @make_permission_alias("send_messages")
+    @alias_flag_value
     def create_forum_threads(self) -> int:
         """:class:`bool`: An alias for :attr:`send_messages`.
 
@@ -801,7 +785,7 @@ class Permissions(BaseFlags):
         """:class:`bool`: Returns ``True`` if a user can use emojis from other guilds."""
         return 1 << 18
 
-    @make_permission_alias("external_emojis")
+    @alias_flag_value
     def use_external_emojis(self) -> int:
         """:class:`bool`: An alias for :attr:`external_emojis`.
 
@@ -865,7 +849,7 @@ class Permissions(BaseFlags):
         """
         return 1 << 28
 
-    @make_permission_alias("manage_roles")
+    @alias_flag_value
     def manage_permissions(self) -> int:
         """:class:`bool`: An alias for :attr:`manage_roles`.
 
@@ -889,12 +873,12 @@ class Permissions(BaseFlags):
         """
         return 1 << 30
 
-    @make_permission_alias("manage_guild_expressions")
+    @alias_flag_value
     def manage_emojis(self) -> int:
         """:class:`bool`: An alias for :attr:`manage_guild_expressions`."""
         return 1 << 30
 
-    @make_permission_alias("manage_guild_expressions")
+    @alias_flag_value
     def manage_emojis_and_stickers(self) -> int:
         """:class:`bool`: An alias for :attr:`manage_guild_expressions`.
 
@@ -910,7 +894,7 @@ class Permissions(BaseFlags):
         """
         return 1 << 31
 
-    @make_permission_alias("use_application_commands")
+    @alias_flag_value
     def use_slash_commands(self) -> int:
         """:class:`bool`: An alias for :attr:`use_application_commands`.
 
@@ -972,7 +956,7 @@ class Permissions(BaseFlags):
         """
         return 1 << 37
 
-    @make_permission_alias("external_stickers")
+    @alias_flag_value
     def use_external_stickers(self) -> int:
         """:class:`bool`: An alias for :attr:`external_stickers`.
 
@@ -997,7 +981,7 @@ class Permissions(BaseFlags):
         """
         return 1 << 39
 
-    @make_permission_alias("use_embedded_activities")
+    @alias_flag_value
     def start_embedded_activities(self) -> int:
         """:class:`bool`: An alias for :attr:`use_embedded_activities`.
 
@@ -1120,31 +1104,30 @@ class Permissions(BaseFlags):
         return 1 << 52
 
 
-def _augment_from_permissions(cls):
-    cls.VALID_NAMES = set(Permissions.VALID_FLAGS)
-    aliases = set()
+POT = TypeVar("POT", bound="PermissionOverwrite")
+
+
+def _augment_from_permissions(cls: type[POT]) -> type[POT]:
+    aliases: set[str] = set()
 
     # make descriptors for all the valid names and aliases
     for name, value in Permissions.__dict__.items():
-        if isinstance(value, permission_alias):
-            key = value.alias
-            aliases.add(name)
-        elif isinstance(value, flag_value):
-            key = name
-        else:
+        if not isinstance(value, flag_value):
             continue
+        if isinstance(value, alias_flag_value):
+            aliases.add(name)
 
         # god bless Python
-        def getter(self, x: str = key) -> bool | None:
-            return self._values.get(x)
+        def getter(self: POT, x: int = value.flag) -> bool | None:
+            return self._get_by_flag(x)
 
-        def setter(self, value: bool | None, x: str = key) -> None:
-            self._set(x, value)
+        def setter(self: POT, value: bool | None, x: int = value.flag) -> None:
+            self._set_by_flag(x, value)
 
         prop = property(getter, setter)
         setattr(cls, name, prop)
 
-    cls.PURE_FLAGS = cls.VALID_NAMES - aliases
+    cls.PURE_FLAGS = Permissions.VALID_FLAGS.keys() - aliases
     return cls
 
 
@@ -1181,7 +1164,7 @@ class PermissionOverwrite:
         Set the value of permissions by their name.
     """
 
-    __slots__ = ("_values",)
+    __slots__ = ("_allowed_value", "_denied_value")
 
     # n. b. this typechecking block must be first and separate from the secondary one, due to codemodding
     if TYPE_CHECKING:
@@ -1248,8 +1231,7 @@ class PermissionOverwrite:
         view_guild_insights: bool | None
 
     if TYPE_CHECKING:
-        VALID_NAMES: ClassVar[set[str]]
-        PURE_FLAGS: ClassVar[set[str]]
+        PURE_FLAGS: ClassVar[Set[str]]
 
     @overload
     @_generated
@@ -1327,54 +1309,66 @@ class PermissionOverwrite:
 
     @_overload_with_permissions
     def __init__(self, **kwargs: bool | None) -> None:
-        self._values: dict[str, bool | None] = {}
+        self._allowed_value: int = 0
+        self._denied_value: int = 0
 
-        for key, value in kwargs.items():
-            if key not in self.VALID_NAMES:
-                msg = f"{key!r} is not a valid permission name."
-                raise ValueError(msg)
+        try:
+            for key, value in kwargs.items():
+                self._set_by_key(key, value)
 
-            setattr(self, key, value)
+        except KeyError as err:
+            msg = f"{err.args[0]!r} is not a valid permission name."
+            raise ValueError(msg) from None
 
     def __eq__(self, other: object) -> bool:
-        return isinstance(other, PermissionOverwrite) and self._values == other._values
+        return (
+            isinstance(other, __class__)
+            and self._allowed_value == other._allowed_value
+            and self._denied_value == other._denied_value
+        )
 
-    def _set(self, key: str, value: bool | None) -> None:
-        if value not in (True, None, False):
+    def _get_by_key(self, key: str, /) -> bool | None:
+        return self._get_by_flag(Permissions.VALID_FLAGS[key])
+
+    def _get_by_flag(self, flag: int, /) -> bool | None:
+        if self._denied_value & flag:
+            return False
+        if self._allowed_value & flag:
+            return True
+        return None
+
+    def _set_by_key(self, key: str, value: bool | None, /) -> None:
+        self._set_by_flag(Permissions.VALID_FLAGS[key], value)
+
+    def _set_by_flag(self, flag: int, value: bool | None, /) -> None:
+        if value is True:
+            self._allowed_value |= flag
+            self._denied_value &= ~flag
+        elif value is False:
+            self._allowed_value &= ~flag
+            self._denied_value |= flag
+        elif value is None:
+            self._allowed_value &= ~flag
+            self._denied_value &= ~flag
+        else:
             msg = f"Expected bool or NoneType, received {value.__class__.__name__}"
             raise TypeError(msg)
 
-        if value is None:
-            self._values.pop(key, None)
-        else:
-            self._values[key] = value
-
     def pair(self) -> tuple[Permissions, Permissions]:
         r""":class:`tuple`\[:class:`Permissions`, :class:`Permissions`]: Returns the (allow, deny) pair from this overwrite."""
-        allow = Permissions.none()
-        deny = Permissions.none()
-
-        for key, value in self._values.items():
-            if value is True:
-                setattr(allow, key, True)
-            elif value is False:
-                setattr(deny, key, True)
-
-        return allow, deny
+        return (
+            Permissions._from_value(self._allowed_value),
+            Permissions._from_value(self._denied_value),
+        )
 
     @classmethod
     def from_pair(cls, allow: Permissions, deny: Permissions) -> Self:
         """Creates an overwrite from an allow/deny pair of :class:`Permissions`."""
-        ret = cls()
-        for key, value in allow:
-            if value is True:
-                setattr(ret, key, True)
-
-        for key, value in deny:
-            if value is True:
-                setattr(ret, key, False)
-
-        return ret
+        self = cls()
+        # denied permissions take precedence over allowed ones
+        self._allowed_value = allow.value & ~deny.value
+        self._denied_value = deny.value
+        return self
 
     def is_empty(self) -> bool:
         """Checks if the permission overwrite is currently empty.
@@ -1387,7 +1381,7 @@ class PermissionOverwrite:
         :class:`bool`
             Indicates if the overwrite is empty.
         """
-        return len(self._values) == 0
+        return self._allowed_value == self._denied_value == 0
 
     @overload
     @_generated
@@ -1477,11 +1471,10 @@ class PermissionOverwrite:
             A list of key/value pairs to bulk update with.
         """
         for key, value in kwargs.items():
-            if key not in self.VALID_NAMES:
-                continue
-
-            setattr(self, key, value)
+            if (flag := Permissions.VALID_FLAGS.get(key)) is not None:
+                self._set_by_flag(flag, value)
 
     def __iter__(self) -> Iterator[tuple[str, bool | None]]:
+        # NOTE: this iterates over a set, so order is non-deterministic
         for key in self.PURE_FLAGS:
-            yield key, self._values.get(key)
+            yield key, self._get_by_key(key)
