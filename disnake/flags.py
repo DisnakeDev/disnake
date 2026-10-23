@@ -162,7 +162,7 @@ class BaseFlags:
                 self._set_flag(self.VALID_FLAGS[key], value)
 
         except KeyError as err:
-            msg = f"{err.args[0]!r} is not a valid flag name."
+            msg = f"{err.args[0]!r} is not a valid {self.__class__.__name__} name."
             raise TypeError(msg) from None
 
     @classmethod
