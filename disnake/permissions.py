@@ -1129,7 +1129,6 @@ POT = TypeVar("POT", bound="PermissionOverwrite")
 
 
 def _augment_from_permissions(cls: type[POT]) -> type[POT]:
-    cls.VALID_NAMES = Permissions.VALID_FLAGS.keys()
     aliases: set[str] = set()
 
     # make descriptors for all the valid names and aliases
@@ -1144,15 +1143,15 @@ def _augment_from_permissions(cls: type[POT]) -> type[POT]:
 
         # god bless Python
         def getter(self: POT, x: str = key) -> bool | None:
-            return self._values.get(x)
+            return self._get_by_key(x)
 
         def setter(self: POT, value: bool | None, x: str = key) -> None:
-            self._set(x, value)
+            self._set_by_key(x, value)
 
         prop = property(getter, setter)
         setattr(cls, name, prop)
 
-    cls.PURE_FLAGS = cls.VALID_NAMES - aliases
+    cls.PURE_FLAGS = Permissions.VALID_FLAGS.keys() - aliases
     return cls
 
 
@@ -1189,7 +1188,7 @@ class PermissionOverwrite:
         Set the value of permissions by their name.
     """
 
-    __slots__ = ("_values",)
+    __slots__ = ("_allowed_value", "_denied_value")
 
     # n. b. this typechecking block must be first and separate from the secondary one, due to codemodding
     if TYPE_CHECKING:
@@ -1256,7 +1255,6 @@ class PermissionOverwrite:
         view_guild_insights: bool | None
 
     if TYPE_CHECKING:
-        VALID_NAMES: ClassVar[Set[str]]
         PURE_FLAGS: ClassVar[Set[str]]
 
     @overload
@@ -1335,54 +1333,66 @@ class PermissionOverwrite:
 
     @_overload_with_permissions
     def __init__(self, **kwargs: bool | None) -> None:
-        self._values: dict[str, bool | None] = {}
+        self._allowed_value: int = 0
+        self._denied_value: int = 0
 
-        for key, value in kwargs.items():
-            if key not in self.VALID_NAMES:
-                msg = f"{key!r} is not a valid permission name."
-                raise ValueError(msg)
+        try:
+            for key, value in kwargs.items():
+                self._set_by_key(key, value)
 
-            setattr(self, key, value)
+        except KeyError as err:
+            msg = f"{err.args[0]!r} is not a valid permission name."
+            raise ValueError(msg) from None
 
     def __eq__(self, other: object) -> bool:
-        return isinstance(other, __class__) and self._values == other._values
+        return (
+            isinstance(other, __class__)
+            and self._allowed_value == other._allowed_value
+            and self._denied_value == other._denied_value
+        )
 
-    def _set(self, key: str, value: bool | None) -> None:
-        if value not in (True, None, False):
+    def _get_by_key(self, key: str, /) -> bool | None:
+        return self._get_by_flag(Permissions.VALID_FLAGS[key])
+
+    def _get_by_flag(self, flag: int, /) -> bool | None:
+        if self._denied_value & flag:
+            return False
+        if self._allowed_value & flag:
+            return True
+        return None
+
+    def _set_by_key(self, key: str, value: bool | None, /) -> None:
+        self._set_by_flag(Permissions.VALID_FLAGS[key], value)
+
+    def _set_by_flag(self, flag: int, value: bool | None, /) -> None:
+        if value is True:
+            self._allowed_value |= flag
+            self._denied_value &= ~flag
+        elif value is False:
+            self._allowed_value &= ~flag
+            self._denied_value |= flag
+        elif value is None:
+            self._allowed_value &= ~flag
+            self._denied_value &= ~flag
+        else:
             msg = f"Expected bool or NoneType, received {value.__class__.__name__}"
             raise TypeError(msg)
 
-        if value is None:
-            self._values.pop(key, None)
-        else:
-            self._values[key] = value
-
     def pair(self) -> tuple[Permissions, Permissions]:
         r""":class:`tuple`\[:class:`Permissions`, :class:`Permissions`]: Returns the (allow, deny) pair from this overwrite."""
-        allow = Permissions.none()
-        deny = Permissions.none()
-
-        for key, value in self._values.items():
-            if value is True:
-                setattr(allow, key, True)
-            elif value is False:
-                setattr(deny, key, True)
-
-        return allow, deny
+        return (
+            Permissions._from_value(self._allowed_value),
+            Permissions._from_value(self._denied_value),
+        )
 
     @classmethod
     def from_pair(cls, allow: Permissions, deny: Permissions) -> Self:
         """Creates an overwrite from an allow/deny pair of :class:`Permissions`."""
-        ret = cls()
-        for key, value in allow:
-            if value is True:
-                setattr(ret, key, True)
-
-        for key, value in deny:
-            if value is True:
-                setattr(ret, key, False)
-
-        return ret
+        self = cls()
+        # denied permissions take precendence over allowed ones
+        self._allowed_value = allow.value & ~deny.value
+        self._denied_value = deny.value
+        return self
 
     def is_empty(self) -> bool:
         """Checks if the permission overwrite is currently empty.
@@ -1395,7 +1405,7 @@ class PermissionOverwrite:
         :class:`bool`
             Indicates if the overwrite is empty.
         """
-        return len(self._values) == 0
+        return self._allowed_value == self._denied_value == 0
 
     @overload
     @_generated
@@ -1485,11 +1495,10 @@ class PermissionOverwrite:
             A list of key/value pairs to bulk update with.
         """
         for key, value in kwargs.items():
-            if key not in self.VALID_NAMES:
-                continue
-
-            setattr(self, key, value)
+            if (flag := Permissions.VALID_FLAGS.get(key)) is not None:
+                self._set_by_flag(flag, value)
 
     def __iter__(self) -> Iterator[tuple[str, bool | None]]:
+        # NOTE: this iterates over a set, so order is non-deterministic
         for key in self.PURE_FLAGS:
-            yield key, self._values.get(key)
+            yield key, self._get_by_key(key)
