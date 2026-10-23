@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, ClassVar, Literal, TypeAlias, overload
 
 from . import utils
 from .enums import (
+    ApplicationCommandHandlerType,
     ApplicationCommandPermissionType,
     ApplicationCommandType,
     ChannelType,
@@ -48,7 +49,8 @@ if TYPE_CHECKING:
         | Sequence[Localized[str]]
     )
 
-    APIApplicationCommand: TypeAlias = "APIUserCommand | APIMessageCommand | APISlashCommand"
+    APIGuildApplicationCommand: TypeAlias = "APIUserCommand | APIMessageCommand | APISlashCommand"
+    APIApplicationCommand: TypeAlias = APIGuildApplicationCommand | "APIEntryPointCommand"
 
 
 __all__ = (
@@ -60,6 +62,8 @@ __all__ = (
     "APIUserCommand",
     "MessageCommand",
     "APIMessageCommand",
+    "EntryPointCommand",
+    "APIEntryPointCommand",
     "OptionChoice",
     "Option",
     "ApplicationCommandPermissions",
@@ -67,7 +71,19 @@ __all__ = (
 )
 
 
-def application_command_factory(data: ApplicationCommandPayload) -> APIApplicationCommand:
+# `guild_only` is purely a type checking hint, we assume the API only returns the
+# types it's supposed (and documented) to return
+@overload
+def application_command_factory(
+    data: ApplicationCommandPayload, guild_only: Literal[False] = False
+) -> APIApplicationCommand: ...
+@overload
+def application_command_factory(
+    data: ApplicationCommandPayload, guild_only: Literal[True]
+) -> APIGuildApplicationCommand: ...
+def application_command_factory(
+    data: ApplicationCommandPayload, guild_only: bool = False
+) -> APIApplicationCommand:
     cmd_type = try_enum(ApplicationCommandType, data.get("type", 1))
     if cmd_type is ApplicationCommandType.chat_input:
         return APISlashCommand.from_dict(data)
@@ -75,7 +91,10 @@ def application_command_factory(data: ApplicationCommandPayload) -> APIApplicati
         return APIUserCommand.from_dict(data)
     if cmd_type is ApplicationCommandType.message:
         return APIMessageCommand.from_dict(data)
+    if cmd_type is ApplicationCommandType.primary_entry_point:
+        return APIEntryPointCommand.from_dict(data)
 
+    utils.assert_never(cmd_type)
     msg = f"Application command of type {cmd_type} is not valid"
     raise TypeError(msg)
 
@@ -516,6 +535,7 @@ class ApplicationCommand(ABC):  # noqa: B024  # this will get refactored eventua
     - :class:`~.SlashCommand`
     - :class:`~.MessageCommand`
     - :class:`~.UserCommand`
+    - :class:`~.EntryPointCommand`
 
     Attributes
     ----------
@@ -1365,6 +1385,172 @@ class APISlashCommand(SlashCommand, _APIApplicationCommandMixin):
             contexts=(
                 InteractionContextTypes._from_values(contexts)
                 if (contexts := data.get("contexts")) is not None
+                else None
+            ),
+        )
+        self._update_common(data)
+        return self
+
+
+class EntryPointCommand(ApplicationCommand):
+    """A primary entry point command, used for launching an app's associated activity.
+
+    More details can be found in the :ddocs:`API documentation <interactions/application-commands#entry-point-commands>`.
+
+    .. versionadded:: |vnext|
+
+    Attributes
+    ----------
+    name: :class:`str`
+        The command's name.
+    name_localizations: :class:`.LocalizationValue`
+        Localizations for ``name``.
+    description: :class:`str`
+        The command's description.
+    description_localizations: :class:`.LocalizationValue`
+        Localizations for ``description``.
+    nsfw: :class:`bool`
+        Whether this command is :ddocs:`age-restricted <interactions/application-commands#age-restricted-commands>`.
+        Defaults to ``False``.
+    install_types: :class:`ApplicationInstallTypes` | :data:`None`
+        The installation types where the command is available.
+        Defaults to :attr:`ApplicationInstallTypes.guild` only.
+    contexts: :class:`InteractionContextTypes` | :data:`None`
+        The interaction contexts where the command can be used.
+    handler: :class:`ApplicationCommandHandlerType`
+        Whether the interaction triggered by invoking this command should be handled
+        by the app or Discord itself.
+        Defaults to :attr:`ApplicationCommandHandlerType.discord`.
+    """
+
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (
+        *tuple(n for n in ApplicationCommand.__repr_attributes__ if n != "type"),
+        "description",
+        "handler",
+    )
+
+    def __init__(
+        self,
+        name: LocalizedRequired,
+        # TODO: is this required?
+        description: LocalizedRequired,
+        default_member_permissions: Permissions | int | None = None,
+        nsfw: bool | None = None,
+        install_types: ApplicationInstallTypes | None = None,
+        contexts: InteractionContextTypes | None = None,
+        handler: ApplicationCommandHandlerType | None = None,
+    ) -> None:
+        super().__init__(
+            type=ApplicationCommandType.primary_entry_point,
+            name=name,
+            default_member_permissions=default_member_permissions,
+            nsfw=nsfw,
+            install_types=install_types,
+            contexts=contexts,
+        )
+        # TODO: do the chat_input name restrictions also apply here?
+        _validate_name(self.name)
+
+        desc_loc = Localized._cast(description, True)
+        self.description: str = desc_loc.string
+        self.description_localizations: LocalizationValue = desc_loc.localizations
+
+        self.handler: ApplicationCommandHandlerType = (
+            handler or ApplicationCommandHandlerType.discord
+        )
+
+    def __eq__(self, other: object) -> bool:
+        return (
+            super().__eq__(other)
+            and self.description == other.description  # pyright: ignore[reportAttributeAccessIssue]
+            and self.description_localizations == other.description_localizations  # pyright: ignore[reportAttributeAccessIssue]
+            and self.handler == other.handler  # pyright: ignore[reportAttributeAccessIssue]
+        )
+
+    def to_dict(self) -> EditApplicationCommandPayload:
+        res = super().to_dict()
+        res["handler"] = self.handler.value
+        res["description"] = self.description
+        if (loc := self.description_localizations.data) is not None:
+            res["description_localizations"] = loc
+        return res
+
+    def localize(self, store: LocalizationProtocol) -> None:
+        super().localize(store)
+        if (name_loc := self.name_localizations.data) is not None:
+            for value in name_loc.values():
+                # TODO: see above
+                _validate_name(value)
+
+        self.description_localizations._link(store)
+
+
+class APIEntryPointCommand(EntryPointCommand, _APIApplicationCommandMixin):
+    """A primary entry point command returned by the API.
+
+    .. versionadded:: |vnext|
+
+    Attributes
+    ----------
+    name: :class:`str`
+        The command's name.
+    name_localizations: :class:`.LocalizationValue`
+        Localizations for ``name``.
+    description: :class:`str`
+        The command's description.
+    description_localizations: :class:`.LocalizationValue`
+        Localizations for ``description``.
+    nsfw: :class:`bool`
+        Whether this command is :ddocs:`age-restricted <interactions/application-commands#age-restricted-commands>`.
+    install_types: :class:`ApplicationInstallTypes` | :data:`None`
+        The installation types where the command is available.
+        Defaults to :attr:`ApplicationInstallTypes.guild` only.
+    contexts: :class:`InteractionContextTypes` | :data:`None`
+        The interaction contexts where the command can be used.
+    handler: :class:`ApplicationCommandHandlerType`
+        Whether the interaction triggered by invoking this command should be handled
+        by the app or Discord itself.
+    id: :class:`int`
+        The command's ID.
+    application_id: :class:`int`
+        The application ID this command belongs to.
+    guild_id: :data:`None`
+        The ID of the guild this command is enabled in.
+        Always :data:`None` for this type of command.
+    version: :class:`int`
+        Autoincrementing version identifier updated during substantial record changes.
+    """
+
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (
+        *EntryPointCommand.__repr_attributes__,
+        *_APIApplicationCommandMixin.__repr_attributes__,
+    )
+
+    @classmethod
+    def from_dict(cls, data: ApplicationCommandPayload) -> Self:
+        cmd_type = data.get("type", 0)
+        if cmd_type != ApplicationCommandType.primary_entry_point.value:
+            msg = f"Invalid payload type for EntryPointCommand: {cmd_type}"
+            raise ValueError(msg)
+
+        self = cls(
+            name=Localized(data["name"], data=data.get("name_localizations")),
+            description=Localized(data["description"], data=data.get("description_localizations")),
+            default_member_permissions=_get_as_snowflake(data, "default_member_permissions"),
+            nsfw=data.get("nsfw"),
+            install_types=(
+                ApplicationInstallTypes._from_values(install_types)
+                if (install_types := data.get("integration_types")) is not None
+                else None
+            ),
+            contexts=(
+                InteractionContextTypes._from_values(contexts)
+                if (contexts := data.get("contexts")) is not None
+                else None
+            ),
+            handler=(
+                try_enum(ApplicationCommandHandlerType, handler)
+                if (handler := data.get("handler")) is not None
                 else None
             ),
         )
