@@ -232,6 +232,9 @@ class Permissions(BaseFlags):
         if not isinstance(permissions, int):
             msg = f"Expected int parameter, received {permissions.__class__.__name__} instead."
             raise TypeError(msg)
+        if permissions & ~self.ALL_FLAGS_VALUE:
+            msg = "'permissions' has unknown permissions set."
+            raise ValueError(msg)
 
         self.value = permissions
         self._init_from_mapping(kwargs)
