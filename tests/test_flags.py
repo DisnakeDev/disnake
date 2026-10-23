@@ -60,7 +60,7 @@ def test_flag_creation() -> None:
 
 
 def test_flag_creation_inverted() -> None:
-    class InvertedFlags(flags.BaseFlags, inverted=True):
+    class InvertedFlags(flags.BaseFlags, default_all_set=True):
         @flags.flag_value
         def one(self) -> int:
             return 1 << 0
