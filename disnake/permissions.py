@@ -1129,7 +1129,7 @@ POT = TypeVar("POT", bound="PermissionOverwrite")
 
 
 def _augment_from_permissions(cls: type[POT]) -> type[POT]:
-    cls.VALID_NAMES = set(Permissions.VALID_FLAGS)
+    cls.VALID_NAMES = Permissions.VALID_FLAGS.keys()
     aliases: set[str] = set()
 
     # make descriptors for all the valid names and aliases
