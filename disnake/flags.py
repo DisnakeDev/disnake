@@ -1121,6 +1121,9 @@ class Intents(BaseFlags):
             if value < 0:
                 msg = "Expected a non-negative value."
                 raise ValueError(msg)
+            if value & ~self.ALL_FLAGS_VALUE:
+                msg = "'value' has unknown flags set."
+                raise ValueError(msg)
             self.value = value
         else:
             self.value = self.DEFAULT_VALUE
