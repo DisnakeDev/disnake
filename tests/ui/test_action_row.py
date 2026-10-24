@@ -46,7 +46,7 @@ class TestActionRow:
         with pytest.raises(ValueError, match=r"Too many components in this row"):
             r.append_item(select)
 
-        assert list(r.children) == [button1, button2]
+        assert r.children == [button1, button2]
 
     def test_insert_item(self) -> None:
         r = ActionRow()
@@ -54,10 +54,10 @@ class TestActionRow:
         r.insert_item(0, button2)
         r.insert_item(1, button3)
 
-        assert list(r.children) == [button2, button3, button1]
+        assert r.children == [button2, button3, button1]
 
         r.insert_item(-2, button1)
-        assert list(r.children) == [button2, button1, button3, button1]
+        assert r.children == [button2, button1, button3, button1]
 
     @pytest.mark.parametrize("index", [None, 1])
     def test_add_button(self, index) -> None:
@@ -70,9 +70,9 @@ class TestActionRow:
         new_button = disnake.utils.get(r.children, custom_id="asdf")
         assert isinstance(new_button, Button)
         if index is None:
-            assert list(r.children) == [button1, button2, new_button]
+            assert r.children == [button1, button2, new_button]
         else:
-            assert list(r.children) == [button1, new_button, button2]
+            assert r.children == [button1, new_button, button2]
 
         if TYPE_CHECKING:
             _ = ActionRow().add_button
@@ -113,31 +113,31 @@ class TestActionRow:
     def test_clear_items(self) -> None:
         r = ActionRow(button1, button2)
         r.clear_items()
-        assert list(r.children) == []
+        assert r.children == []
 
     def test_remove_item(self) -> None:
         r = ActionRow(button1, button2)
         r.remove_item(button1)
-        assert list(r.children) == [button2]
+        assert r.children == [button2]
 
     def test_pop(self) -> None:
         r = ActionRow(button1, button2)
         assert r.pop(0) is button1
-        assert list(r.children) == [button2]
+        assert r.children == [button2]
 
     def test_dunder(self) -> None:
         r = ActionRow(button1, button2)
         assert r[1] is button2
 
         del r[0]
-        assert list(r.children) == [button2]
+        assert r.children == [button2]
 
     def test_with_components(self) -> None:
         with pytest.warns(DeprecationWarning):
             row_modal = ActionRow.with_modal_components()  # pyright: ignore[reportDeprecated]
-        assert list(row_modal.children) == []
+        assert row_modal.children == []
         row_msg = ActionRow.with_message_components()
-        assert list(row_msg.children) == []
+        assert row_msg.children == []
 
         assert_type(row_modal, ActionRow[ActionRowModalComponent])
         assert_type(row_msg, ActionRow[ActionRowMessageComponent])
@@ -256,7 +256,7 @@ class TestActionRow:
 def test_normalize_components__actionrow(value, expected) -> None:
     rows = normalize_components(value)
     assert all(isinstance(row, ActionRow) for row in rows)
-    assert [list(row.children) for row in rows] == expected
+    assert [row.children for row in rows] == expected
 
 
 @pytest.mark.parametrize(
@@ -278,7 +278,7 @@ def test_normalize_components__actionrow(value, expected) -> None:
 )
 def test_normalize_components__v2(value, expected) -> None:
     result = normalize_components(value)
-    assert [(list(c.children) if isinstance(c, ActionRow) else c) for c in result] == expected
+    assert [(c.children if isinstance(c, ActionRow) else c) for c in result] == expected
 
 
 @pytest.mark.parametrize(
@@ -294,7 +294,7 @@ def test_normalize_components__v2(value, expected) -> None:
 )
 def test_normalize_components__modal(value, expected) -> None:
     result = normalize_components(value, modal=True)
-    assert [(list(c.children) if isinstance(c, ActionRow) else c) for c in result] == expected
+    assert [(c.children if isinstance(c, ActionRow) else c) for c in result] == expected
 
 
 def test_normalize_components__invalid() -> None:
