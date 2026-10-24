@@ -174,12 +174,13 @@ version_info: VersionInfo = VersionInfo{version_tuple}
 """
 
 
-[tool.ruff]
-line-length = 100
-
 [tool.codespell]
 skip = ['docs/_static/**', '*.po']
 ignore-words-list = ['GroupT', "OT",]
+
+
+[tool.ruff]
+line-length = 100
 
 [tool.ruff.lint]
 future-annotations = true
@@ -332,6 +333,9 @@ convention = "numpy"
 
 [tool.ruff.lint.pyupgrade]
 keep-runtime-typing = true
+
+[tool.ruff.lint.pyflakes]
+extend-generics = ["disnake.flags.ListBaseFlags"]
 
 [tool.towncrier]
 template = "changelog/_template.rst.jinja"

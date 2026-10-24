@@ -20,9 +20,9 @@ from .utils import MISSING, _generated
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-    from disnake.types.appinfo import ApplicationIntegrationType  # noqa: F401
-    from disnake.types.automod import AutoModPresetType  # noqa: F401
-    from disnake.types.interactions import InteractionContextType  # noqa: F401
+    from disnake.types.appinfo import ApplicationIntegrationType
+    from disnake.types.automod import AutoModPresetType
+    from disnake.types.interactions import InteractionContextType
 
 
 __all__ = (
