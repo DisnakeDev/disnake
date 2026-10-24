@@ -139,7 +139,7 @@ class BaseFlags:
 
         # use the parent's current flags as a base
         flags = dict(cls.VALID_FLAGS)
-        all_flags_value = 0
+        all_flags_value = cls.ALL_FLAGS_VALUE
 
         for name, value in cls.__dict__.items():
             if isinstance(value, flag_value):
