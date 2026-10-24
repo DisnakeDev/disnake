@@ -1313,8 +1313,8 @@ class PermissionOverwrite:
         self._denied_value: int = 0
 
         try:
-            for key, value in kwargs.items():
-                self._set_by_key(key, value)
+            for name, value in kwargs.items():
+                self._set_by_name(name, value)
 
         except KeyError as err:
             msg = f"{err.args[0]!r} is not a valid permission name."
@@ -1327,8 +1327,8 @@ class PermissionOverwrite:
             and self._denied_value == other._denied_value
         )
 
-    def _get_by_key(self, key: str, /) -> bool | None:
-        return self._get_by_flag(Permissions.VALID_FLAGS[key])
+    def _get_by_name(self, name: str, /) -> bool | None:
+        return self._get_by_flag(Permissions.VALID_FLAGS[name])
 
     def _get_by_flag(self, flag: int, /) -> bool | None:
         if self._denied_value & flag:
@@ -1337,8 +1337,8 @@ class PermissionOverwrite:
             return True
         return None
 
-    def _set_by_key(self, key: str, value: bool | None, /) -> None:
-        self._set_by_flag(Permissions.VALID_FLAGS[key], value)
+    def _set_by_name(self, name: str, value: bool | None, /) -> None:
+        self._set_by_flag(Permissions.VALID_FLAGS[name], value)
 
     def _set_by_flag(self, flag: int, value: bool | None, /) -> None:
         if value is True:
@@ -1476,5 +1476,5 @@ class PermissionOverwrite:
 
     def __iter__(self) -> Iterator[tuple[str, bool | None]]:
         # NOTE: this iterates over a set, so order is non-deterministic
-        for key in self.PURE_FLAGS:
-            yield key, self._get_by_key(key)
+        for name in self.PURE_FLAGS:
+            yield name, self._get_by_name(name)
