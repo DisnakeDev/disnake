@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import functools
-import operator
 from collections.abc import Callable, Iterable, Iterator, Mapping
 from typing import (
     TYPE_CHECKING,
@@ -107,11 +105,6 @@ class flag_value(Generic[T]):
 
 class alias_flag_value(flag_value[T]):
     __slots__ = ("__doc__",)  # __doc__ is not inherited by subclasses
-
-
-# TODO: it's now unused, but it's not _ prefixed, so someone could be using it
-def all_flags_value(flags: Mapping[str, int]) -> int:
-    return functools.reduce(operator.or_, flags.values())
 
 
 class BaseFlags:
