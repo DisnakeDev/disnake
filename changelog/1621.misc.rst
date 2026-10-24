@@ -1,0 +1,1 @@
+Refactored internals of :mod:`~disnake.flags`, :class:`Permissions` and :class:`PermissionOverwrite`.
