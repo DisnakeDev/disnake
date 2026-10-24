@@ -51,8 +51,6 @@ FlagListVT = TypeVar("FlagListVT", bound=int)
 
 
 class flag_value(Generic[T]):
-    __slots__ = ("flag", "__doc__", "_parent")
-
     def __init__(self, func: Callable[[Any], int]) -> None:
         self.flag = func(None)
         self.__doc__ = func.__doc__
@@ -104,7 +102,7 @@ class flag_value(Generic[T]):
 
 
 class alias_flag_value(flag_value[T]):
-    __slots__ = ("__doc__",)  # __doc__ is not inherited by subclasses
+    pass
 
 
 class BaseFlags:
