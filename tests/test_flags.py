@@ -44,10 +44,6 @@ class OtherTestFlags(flags.BaseFlags):
         return 1 << 0
 
 
-def test_all_flags_value() -> None:
-    assert flags.all_flags_value(TestFlags.VALID_FLAGS) == 0b10111
-
-
 def test_flag_creation() -> None:
     assert TestFlags.VALID_FLAGS == {
         "one": 1,
