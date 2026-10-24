@@ -110,7 +110,7 @@ class alias_flag_value(flag_value[T]):
 class BaseFlags:
     # mapping of all flag names (including aliases) to their flag values
     VALID_FLAGS: ClassVar[Mapping[str, int]] = {}
-    # value of flags when creating an instance without arguments
+    # initial value of flags when creating an instance
     DEFAULT_VALUE: ClassVar[int] = 0
     # combined value of all flags
     ALL_FLAGS_VALUE: ClassVar[int] = 0
