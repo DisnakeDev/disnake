@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import re
+from typing import Literal
 
 import pytest
+from typing_extensions import assert_type
 
 from disnake import flags
 
@@ -43,10 +45,6 @@ class OtherTestFlags(flags.BaseFlags):
         return 1 << 0
 
 
-def test_all_flags_value() -> None:
-    assert flags.all_flags_value(TestFlags.VALID_FLAGS) == 0b10111
-
-
 def test_flag_creation() -> None:
     assert TestFlags.VALID_FLAGS == {
         "one": 1,
@@ -60,7 +58,7 @@ def test_flag_creation() -> None:
 
 
 def test_flag_creation_inverted() -> None:
-    class InvertedFlags(flags.BaseFlags, inverted=True):
+    class InvertedFlags(flags.BaseFlags, default_all_set=True):
         @flags.flag_value
         def one(self) -> int:
             return 1 << 0
@@ -95,7 +93,7 @@ def test_flag_creation_inverted() -> None:
 def test_flag_creation_empty() -> None:
     with pytest.raises(RuntimeError, match="At least one flag must be defined"):
 
-        class InvertedFlags(flags.BaseFlags):
+        class EmptyFlags(flags.BaseFlags):
             not_a_flag = 2
 
 
@@ -148,6 +146,13 @@ class TestFlagValue:
 
         assert (ins ^ TestFlags.four).value == 6
 
+    def _test_typing_flag_value(self, test_flags: TestFlags) -> None:
+        # static typing only
+        assert_type(TestFlags.one, flags.flag_value[TestFlags])
+        assert_type(TestFlags.three, flags.alias_flag_value[TestFlags])
+        assert_type(test_flags.one, bool)
+        assert_type(TestFlags.one | TestFlags.two, TestFlags)
+
 
 class TestBaseFlags:
     def test__init__default_value(self) -> None:
@@ -160,7 +165,7 @@ class TestBaseFlags:
         assert ins.two is False
 
     def test__init__invalid_kwargs(self) -> None:
-        with pytest.raises(TypeError, match=r"'h' is not a valid flag name."):
+        with pytest.raises(TypeError, match=r"'h' is not a valid TestFlags name."):
             TestFlags(h=True)
 
     def test_set_require_bool(self) -> None:
@@ -446,7 +451,7 @@ class TestBaseFlags:
         assert ins.value == 0b00
 
 
-class _ListFlags(flags.ListBaseFlags):
+class _ListFlags(flags.ListBaseFlags[Literal[0, 1, 2]]):
     @flags.flag_value
     def flag1(self) -> int:
         return 1 << 0
@@ -479,20 +484,20 @@ class TestListBaseFlags:
         assert _ListFlags.VALID_FLAGS == {"flag1": 1, "flag2": 2, "flag3": 4}
 
     def test_from_values(self) -> None:
-        flags = _ListFlags._from_values([0, 2, 3, 4, 5, 10])
-        assert flags.value == 1085
+        flags = _ListFlags._from_values([0, 2, 3, 4, 5, 10])  # pyright: ignore[reportArgumentType]
+        assert flags.value == 0b10000111101
         assert flags.values == [0, 2, 3, 4, 5, 10]
 
     @pytest.mark.parametrize("value", [-10, -1, 100])
     def test_from_values__invalid(self, value) -> None:
         with pytest.raises(ValueError, match=re.escape("Flag values must be within [0, 64)")):
-            _ListFlags._from_values([0, 2, value, 3])
+            _ListFlags._from_values([0, 2, value])
 
     def test_update(self) -> None:
         flags = _ListFlags(flag2=True)
         flags.flag2 = False
         flags.flag3 = True
-        assert flags.value == 4
+        assert flags.value == 0b100
         assert flags.values == [2]
 
     def test_operators(self) -> None:
