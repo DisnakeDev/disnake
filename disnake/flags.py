@@ -58,26 +58,20 @@ class flag_value(Generic[BF]):
     def __eq__(self, other: object) -> bool:
         if isinstance(other, flag_value):
             return self.flag == other.flag
-        if isinstance(other, BaseFlags):
-            return self._parent is other.__class__ and self.flag == other.value
+        if type(other) is self._parent:
+            return self.flag == other.value
         return False
 
-    def __ne__(self, other: object) -> bool:
-        return not self.__eq__(other)
-
     def __or__(self, other: flag_value[BF] | BF) -> BF:
-        if isinstance(other, BaseFlags):
-            if self._parent is not other.__class__:
-                msg = f"unsupported operand type(s) for |: flags of '{self._parent.__name__}' and flags of '{other.__class__.__name__}'"
+        if isinstance(other, flag_value):
+            if self._parent is not other._parent:
+                msg = f"unsupported operand type(s) for |: flags of '{self._parent.__name__}' and flags of '{other._parent.__name__}'"
                 raise TypeError(msg)
-            return other._from_value(self.flag | other.value)
-        if not isinstance(other, flag_value):
-            msg = f"unsupported operand type(s) for |: flags of '{self._parent.__name__}' and {other.__class__}"
+            return self._parent._from_value(self.flag | other.flag)
+        if type(other) is not self._parent:
+            msg = f"unsupported operand type(s) for |: flags of '{self._parent.__name__}' and '{other.__class__.__name__}'"
             raise TypeError(msg)
-        if self._parent is not other._parent:
-            msg = f"unsupported operand type(s) for |: flags of '{self._parent.__name__}' and flags of '{other._parent.__name__}'"
-            raise TypeError(msg)
-        return self._parent._from_value(self.flag | other.flag)
+        return other._from_value(self.flag | other.value)
 
     def __invert__(self) -> BF:
         return ~self._parent._from_value(self.flag)
