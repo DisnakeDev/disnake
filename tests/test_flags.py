@@ -6,6 +6,7 @@ import re
 from typing import Literal
 
 import pytest
+from typing_extensions import assert_type
 
 from disnake import flags
 
@@ -92,7 +93,7 @@ def test_flag_creation_inverted() -> None:
 def test_flag_creation_empty() -> None:
     with pytest.raises(RuntimeError, match="At least one flag must be defined"):
 
-        class InvertedFlags(flags.BaseFlags):
+        class EmptyFlags(flags.BaseFlags):
             not_a_flag = 2
 
 
@@ -144,6 +145,13 @@ class TestFlagValue:
         assert ins.value == 2
 
         assert (ins ^ TestFlags.four).value == 6
+
+    def _test_typing_flag_value(self, test_flags: TestFlags) -> None:
+        # static typing only
+        assert_type(TestFlags.one, flags.flag_value[TestFlags])
+        assert_type(TestFlags.three, flags.alias_flag_value[TestFlags])
+        assert_type(test_flags.one, bool)
+        assert_type(TestFlags.one | TestFlags.two, TestFlags)
 
 
 class TestBaseFlags:
