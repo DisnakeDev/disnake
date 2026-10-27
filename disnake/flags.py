@@ -5,7 +5,6 @@ from __future__ import annotations
 from collections.abc import Callable, Iterable, Iterator, Mapping
 from typing import (
     TYPE_CHECKING,
-    Any,
     ClassVar,
     Generic,
     NoReturn,
@@ -51,7 +50,7 @@ FlagListVT = TypeVar("FlagListVT", bound=int)
 
 class flag_value(Generic[BF]):
     def __init__(self, func: Callable[[BF], int]) -> None:
-        self.flag: int = func(cast("Any", None))
+        self.flag: int = func(cast("BF", None))
         self.__doc__ = func.__doc__
         self._parent: type[BF] = MISSING
 
