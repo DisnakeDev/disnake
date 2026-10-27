@@ -46,15 +46,14 @@ __all__ = (
 )
 
 BF = TypeVar("BF", bound="BaseFlags")
-T = TypeVar("T", bound="BaseFlags")
 FlagListVT = TypeVar("FlagListVT", bound=int)
 
 
-class flag_value(Generic[T]):
-    def __init__(self, func: Callable[[Any], int]) -> None:
-        self.flag = func(None)
+class flag_value(Generic[BF]):
+    def __init__(self, func: Callable[[BF], int]) -> None:
+        self.flag: int = func(cast("Any", None))
         self.__doc__ = func.__doc__
-        self._parent: type[T] = MISSING
+        self._parent: type[BF] = MISSING
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, flag_value):
@@ -66,7 +65,7 @@ class flag_value(Generic[T]):
     def __ne__(self, other: object) -> bool:
         return not self.__eq__(other)
 
-    def __or__(self, other: flag_value[T] | T) -> T:
+    def __or__(self, other: flag_value[BF] | BF) -> BF:
         if isinstance(other, BaseFlags):
             if self._parent is not other.__class__:
                 msg = f"unsupported operand type(s) for |: flags of '{self._parent.__name__}' and flags of '{other.__class__.__name__}'"
@@ -80,16 +79,16 @@ class flag_value(Generic[T]):
             raise TypeError(msg)
         return self._parent._from_value(self.flag | other.flag)
 
-    def __invert__(self) -> T:
+    def __invert__(self) -> BF:
         return ~self._parent._from_value(self.flag)
 
     @overload
-    def __get__(self, instance: None, owner: type[BF]) -> flag_value[BF]: ...
+    def __get__(self, instance: None, owner: type[BF]) -> Self: ...
 
     @overload
     def __get__(self, instance: BF, owner: type[BF]) -> bool: ...
 
-    def __get__(self, instance: BF | None, owner: type[BF]) -> Any:
+    def __get__(self, instance: BF | None, owner: type[BF]) -> Self | bool:
         if instance is None:
             return self
         return instance._has_flag(self.flag)
@@ -101,7 +100,7 @@ class flag_value(Generic[T]):
         return f"<flag_value flag={self.flag!r}>"
 
 
-class alias_flag_value(flag_value[T]):
+class alias_flag_value(flag_value[BF]):
     pass
 
 
