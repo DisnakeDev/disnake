@@ -233,7 +233,7 @@ class Component:
 
     __slots__: tuple[str, ...] = ("type", "id")
 
-    __repr_attributes__: ClassVar[tuple[str, ...]]
+    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
 
     # subclasses are expected to overwrite this if they're only usable with `MessageFlags.is_components_v2`
     is_v2: ClassVar[bool] = False
@@ -285,7 +285,7 @@ class ActionRow(Component, Generic[ActionRowChildComponentT]):
 
     __slots__: tuple[str, ...] = ("children",)
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (*Component.__repr_attributes__, *__slots__)
 
     def __init__(self, data: ActionRowPayload) -> None:
         self.type: Literal[ComponentType.action_row] = ComponentType.action_row
@@ -353,7 +353,7 @@ class Button(Component):
         "sku_id",
     )
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (*Component.__repr_attributes__, *__slots__)
 
     def __init__(self, data: ButtonComponentPayload) -> None:
         self.type: Literal[ComponentType.button] = ComponentType.button
@@ -459,8 +459,9 @@ class BaseSelectMenu(Component):
     )
 
     # FIXME: this isn't pretty; we should decouple __repr__ from slots
-    __repr_attributes__: ClassVar[tuple[str, ...]] = tuple(
-        s for s in __slots__ if s != "default_values"
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (
+        *Component.__repr_attributes__,
+        *(s for s in __slots__ if s != "default_values"),
     )
 
     # n.b: ideally this would be `BaseSelectMenuPayload`,
@@ -982,7 +983,7 @@ class TextInput(Component):
         "min_length",
     )
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (*Component.__repr_attributes__, *__slots__)
 
     def __init__(self, data: TextInputPayload) -> None:
         self.type: Literal[ComponentType.text_input] = ComponentType.text_input
@@ -1052,7 +1053,7 @@ class Section(Component):
 
     __slots__: tuple[str, ...] = ("children", "accessory")
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (*Component.__repr_attributes__, *__slots__)
 
     is_v2 = True
 
@@ -1100,7 +1101,7 @@ class TextDisplay(Component):
 
     __slots__: tuple[str, ...] = ("content",)
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (*Component.__repr_attributes__, *__slots__)
 
     is_v2 = True
 
@@ -1238,7 +1239,7 @@ class Thumbnail(Component):
         "spoiler",
     )
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (*Component.__repr_attributes__, *__slots__)
 
     is_v2 = True
 
@@ -1290,7 +1291,7 @@ class MediaGallery(Component):
 
     __slots__: tuple[str, ...] = ("items",)
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (*Component.__repr_attributes__, *__slots__)
 
     is_v2 = True
 
@@ -1361,7 +1362,7 @@ class MediaGalleryItem:
         return payload
 
     def __repr__(self) -> str:
-        return f"<MediaGalleryItem media={self.media!r} description={self.description!r}>"
+        return f"<MediaGalleryItem media={self.media!r} description={self.description!r} spoiler={self.spoiler}>"
 
 
 class FileComponent(Component):
@@ -1399,7 +1400,7 @@ class FileComponent(Component):
 
     __slots__: tuple[str, ...] = ("file", "spoiler", "name", "size")
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (*Component.__repr_attributes__, *__slots__)
 
     is_v2 = True
 
@@ -1451,7 +1452,7 @@ class Separator(Component):
 
     __slots__: tuple[str, ...] = ("divider", "spacing")
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (*Component.__repr_attributes__, *__slots__)
 
     is_v2 = True
 
@@ -1505,7 +1506,7 @@ class Container(Component):
         "spoiler",
     )
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (*Component.__repr_attributes__, *__slots__)
 
     is_v2 = True
 
@@ -1576,7 +1577,7 @@ class Label(Component):
         "component",
     )
 
-    __repr_info__: ClassVar[tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (*Component.__repr_attributes__, *__slots__)
 
     def __init__(self, data: LabelComponentPayload) -> None:
         self.type: Literal[ComponentType.label] = ComponentType.label
@@ -1650,7 +1651,7 @@ class FileUpload(Component):
         "file_types",
     )
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (*Component.__repr_attributes__, *__slots__)
 
     def __init__(self, data: FileUploadComponentPayload) -> None:
         self.type: Literal[ComponentType.file_upload] = ComponentType.file_upload
@@ -1795,7 +1796,7 @@ class RadioGroup(Component):
         "required",
     )
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (*Component.__repr_attributes__, *__slots__)
 
     def __init__(self, data: RadioGroupComponentPayload) -> None:
         self.type: Literal[ComponentType.radio_group] = ComponentType.radio_group
@@ -1860,7 +1861,7 @@ class CheckboxGroup(Component):
         "required",
     )
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (*Component.__repr_attributes__, *__slots__)
 
     def __init__(self, data: CheckboxGroupComponentPayload) -> None:
         self.type: Literal[ComponentType.checkbox_group] = ComponentType.checkbox_group
@@ -1918,7 +1919,7 @@ class Checkbox(Component):
 
     __slots__: tuple[str, ...] = ("custom_id", "default")
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (*Component.__repr_attributes__, *__slots__)
 
     def __init__(self, data: CheckboxComponentPayload) -> None:
         self.type: Literal[ComponentType.checkbox] = ComponentType.checkbox

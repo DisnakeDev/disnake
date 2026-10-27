@@ -38,7 +38,11 @@ class Checkbox(UIComponent):
         sequential identifiers to the components in the modal.
     """
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = ("default",)
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (
+        "custom_id",
+        "default",
+        "id",
+    )
     # We have to set this to MISSING in order to overwrite the abstract property from UIComponent
     _underlying: CheckboxComponent = MISSING
 

@@ -40,6 +40,7 @@ class File(UIComponent):
     __repr_attributes__: ClassVar[tuple[str, ...]] = (
         "file",
         "spoiler",
+        "id",
     )
     # We have to set this to MISSING in order to overwrite the abstract property from UIComponent
     _underlying: FileComponent = MISSING

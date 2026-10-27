@@ -44,6 +44,7 @@ class Thumbnail(UIComponent):
         "media",
         "description",
         "spoiler",
+        "id",
     )
     # We have to set this to MISSING in order to overwrite the abstract property from UIComponent
     _underlying: ThumbnailComponent = MISSING

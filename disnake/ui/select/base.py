@@ -54,11 +54,14 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
     """
 
     __repr_attributes__: ClassVar[tuple[str, ...]] = (
+        "custom_id",
         "placeholder",
         "min_values",
         "max_values",
         "disabled",
         "required",
+        "id",
+        "row",
     )
     # We have to set this to MISSING in order to overwrite the abstract property from UIComponent
     _underlying: SelectMenuT = MISSING

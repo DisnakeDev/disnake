@@ -68,6 +68,7 @@ class Container(UIComponent):
         "children",
         "accent_colour",
         "spoiler",
+        "_id",
     )
 
     def __init__(
