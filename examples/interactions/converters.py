@@ -3,6 +3,7 @@
 """An example using converters with slash commands."""
 
 import os
+from typing import Annotated
 
 import disnake
 from disnake.ext import commands
@@ -15,7 +16,7 @@ bot = commands.Bot(command_prefix=commands.when_mentioned)
 @bot.slash_command()
 async def clean_command(
     inter: disnake.CommandInteraction[commands.Bot],
-    text: str = commands.Param(converter=lambda inter, text: text.replace("@", "\\@")),
+    text: Annotated[str, commands.Param(converter=lambda inter, text: text.replace("@", "\\@"))],
 ): ...
 
 
@@ -29,7 +30,7 @@ def avatar_converter(inter: disnake.CommandInteraction, user: disnake.User) -> s
 @bot.slash_command()
 async def command_with_avatar(
     inter: disnake.CommandInteraction,
-    avatar: str = commands.Param(converter=avatar_converter),
+    avatar: Annotated[str, commands.Param(converter=avatar_converter)],
 ): ...
 
 
@@ -47,7 +48,7 @@ class SomeCustomClass:
 @bot.slash_command()
 async def command_with_clsmethod(
     inter: disnake.CommandInteraction,
-    some: SomeCustomClass = commands.Param(converter=SomeCustomClass.from_option),
+    some: Annotated[SomeCustomClass, commands.Param(converter=SomeCustomClass.from_option)],
 ): ...
 
 

@@ -419,7 +419,7 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
             globalns = {}
 
         try:
-            params = get_signature_parameters(function, globalns, skip_standard_params=True)
+            params, _ = get_signature_parameters(function, globalns, skip_standard_params=True)
         except NameError as e:
             msg = (
                 str(e)

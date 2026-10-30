@@ -45,11 +45,11 @@ because global registration of application commands doesn't depend on sharding.
 Why do ``Param`` and ``Injection``-related functions return ``Any``?
 --------------------------------------------------------------------
 
-If your editor of choice supports type-checking, you may have noticed that :func:`~ext.commands.Param`, :func:`~ext.commands.inject`,
-and :func:`~ext.commands.injection` do not have a specific return type, but at runtime these return :class:`~ext.commands.ParamInfo` and
-:class:`~ext.commands.Injection` respectively.
+The original (but still supported) pre-v2.13 syntax for :func:`~ext.commands.Param` and :func:`~ext.commands.inject`
+required assigning them as the "default value" of a slash command parameter, like this:
 
-A typical example of a slash command might look like this: ::
+.. code-block:: python
+    :emphasize-lines: 4
 
     @bot.slash_command(description="Replies with the given text!")
     async def echo(
@@ -58,10 +58,11 @@ A typical example of a slash command might look like this: ::
     ) -> None:
         await inter.response.send_message(text)
 
-Here, you have two parameters in your command's function: ``inter``, an instance of :class:`disnake.ApplicationCommandInteraction`, and
-``text``, which is somewhat unusual: you annotate ``text`` as ``str``, but at the same time, assign a :class:`~ext.commands.ParamInfo` instance to it.
-That's the thing. When your editor type-checks your (any library's) code, it would normally complain if you tried to do the above, because
-you're trying to assign a ``ParamInfo`` to a ``str`` - however, since the library declares ``Param``'s return type as ``Any``, the type-checker accepts
-your code, because ``str`` (and any type) is a subtype of ``Any``.
+If your editor of choice supports type-checking, you may have noticed that :func:`~ext.commands.Param`, :func:`~ext.commands.inject`,
+and :func:`~ext.commands.injection` do not have a specific return type, but at runtime they return :class:`~ext.commands.ParamInfo` and
+:class:`~ext.commands.Injection` respectively.
 
-The same thing applies to :func:`~ext.commands.inject` and :func:`~ext.commands.injection`.
+A type-checker would normally complain if you tried to do the above, because you're trying to assign a ``ParamInfo`` to a ``str`` - however,
+since the library declares ``Param``'s return type as ``Any``, the type-checker accepts your code, because ``str`` (and any type) is a subtype of ``Any``.
+
+The newer ``text: Annotated[str, commands.Param(...)]`` syntax no longer has any shortcomings like this, but it remains supported for backwards compatibility.

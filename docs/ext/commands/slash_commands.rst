@@ -125,7 +125,7 @@ You may have as many options as you want but the order matters, an optional opti
 Option Types
 ++++++++++++
 
-You might already be familiar with discord.py's converters, slash commands have a very similar equivalent in the form of option types.
+You might already be familiar with converters; slash commands have a very similar equivalent in the form of option types.
 Discord itself supports only a few built-in types which are guaranteed to be enforced:
 
 - :class:`str`
@@ -169,6 +169,36 @@ Other types may be converted implicitly, using the builtin :ref:`ext_commands_di
   \*\*\* Corresponds to any mentionable type, currently equivalent to ``User | Member | Role``.
 
 
+Parameter Descriptors
++++++++++++++++++++++
+
+A slash command's parameter can have additional configuration/metadata, depending on the type. For instance,
+you may e.g. rename a parameter, pass the input through a converter function, or restrict a :class:`str` parameter's
+minimum and/or maximum length (which will be enforced by the Discord API).
+
+To facilitate this, :func:`~ext.commands.Param` can be used with :data:`typing.Annotated` to add all sorts of metadata to a parameter, like this:
+
+.. code-block:: python
+    :emphasize-lines: 4
+
+    @bot.slash_command()
+    async def echo(
+        inter: disnake.ApplicationCommandInteraction,
+        text: Annotated[str, commands.Param(max_length=10)],
+        suffix: Annotated[str, commands.Param(name="emoji", choices=["😊", "😔"])]
+    ) -> None:
+        await inter.response.send_message(text + " " + suffix)
+
+This way, the parameters in this snippet remain :class:`str` options, while e.g. additionally restricting the length to 10 characters using ``Param(max_length=10)``, all while keeping your editor/type-checker happy.
+
+Other features include minimum/maximum values for numbers, restricting parameters to a fixed set of choices, restricting an :class:`Attachment` option to certain file types, and more. See below for more detailed information.
+
+.. note::
+    Prior to v2.13, :func:`~ext.commands.Param` was used by assigning it as a parameter's "default value" (similar to fastapi's syntax),
+    rather than using it in conjunction with :data:`typing.Annotated`, as seen in :ref:`why_params_and_injections_return_any`.
+    While this **remains supported** for the time being, we encourage users to migrate to the ``Annotated[T, Param(...)]`` syntax, as it is more flexible and pythonic.
+
+
 .. _large_integers:
 
 Large Integers
@@ -184,7 +214,7 @@ and locally parse user provided content to :class:`int`.
     @bot.slash_command()
     async def snowflake(
         inter: disnake.ApplicationCommandInteraction,
-        snowflake: int = commands.Param(large=True),
+        snowflake: Annotated[int, commands.Param(large=True)],
     ):
         ...
 
@@ -217,7 +247,7 @@ For instance, you could restrict an option to only accept positive integers:
     @bot.slash_command()
     async def command(
         inter: disnake.ApplicationCommandInteraction,
-        amount: int = commands.Param(gt=0),
+        amount: Annotated[int, commands.Param(gt=0)],
     ):
         ...
 
@@ -247,8 +277,8 @@ falls outside the specified range.
     @bot.slash_command()
     async def ranges(
         inter: disnake.ApplicationCommandInteraction,
-        a: int = commands.Param(ge=0, le=2**64, large=True),  # 0 - 2**64 int
-        b: commands.Range[commands.LargeInt, 0, 2**64],       # 0 - 2**64 int
+        a: Annotated[int, commands.Param(ge=0, le=2**64, large=True)],  # 0 - 2**64 int
+        b: commands.Range[commands.LargeInt, 0, 2**64],                 # 0 - 2**64 int
     ):
         ...
 
@@ -266,7 +296,7 @@ For instance, you could restrict an option to only accept a single character:
     @bot.slash_command()
     async def charinfo(
         inter: disnake.ApplicationCommandInteraction,
-        character: str = commands.Param(max_length=1),
+        character: Annotated[str, commands.Param(max_length=1)],
     ):
         ...
 
@@ -277,7 +307,7 @@ Or restrict a tag command to limit tag names to 20 characters:
     @bot.slash_command()
     async def tags(
         inter: disnake.ApplicationCommandInteraction,
-        tag: str = commands.Param(max_length=20)
+        tag: Annotated[str, commands.Param(max_length=20)],
     ):
         ...
 
@@ -354,42 +384,6 @@ If you prefer the real RST format, you can still use it:
         ...
 
 
-Parameter Descriptors
-+++++++++++++++++++++
-
-Python has no truly *clean* way to provide metadata for parameters, so disnake uses the same approach as fastapi using
-parameter defaults. At the current time there's only :class:`~disnake.ext.commands.Param`.
-
-With this you may set the name, description, custom converters, :ref:`autocompleters`, and more.
-
-.. code-block:: python3
-
-    @bot.slash_command()
-    async def math(
-        interaction: disnake.ApplicationCommandInteraction,
-        a: int = commands.Param(le=10),
-        b: int = commands.Param(le=10),
-        op: str = commands.Param(name="operator", choices=["+", "-", "/", "*"])
-    ):
-        """
-        Perform an operation on two numbers as long as both of them are less than or equal to 10
-        """
-        ...
-
-.. code-block:: python3
-
-    @bot.slash_command()
-    async def multiply(
-        interaction: disnake.ApplicationCommandInteraction,
-        clean: str = commands.Param(converter=lambda inter, arg: arg.replace("@", "\\@")
-    ):
-        ...
-
-
-.. note ::
-    The converter parameter only ever takes in a **function**, not a Converter class.
-    Converter classes are completely unusable in disnake due to their inconsistent typing.
-
 .. _option_choices:
 
 Choices
@@ -443,7 +437,7 @@ Or you can simply list the choices in ``commands.Param``:
     @bot.slash_command()
     async def blep(
         inter: disnake.ApplicationCommandInteraction,
-        animal: str = commands.Param(choices={"Dog": "dog", "Cat": "cat", "Penguin": "penguin"})
+        animal: Annotated[str, commands.Param(choices={"Dog": "dog", "Cat": "cat", "Penguin": "penguin"})],
     ):
         await inter.response.send_message(animal)
 
@@ -452,7 +446,7 @@ Or you can simply list the choices in ``commands.Param``:
     @bot.slash_command()
     async def blep(
         inter: disnake.ApplicationCommandInteraction,
-        animal: str = commands.Param(choices=["Dog", "Cat", "Penguin"])
+        animal: Annotated[str, commands.Param(choices=["Dog", "Cat", "Penguin"])],
     ):
         await inter.response.send_message(animal)
 
@@ -480,7 +474,7 @@ For example:
     @bot.slash_command()
     async def example(
         inter: disnake.ApplicationCommandInteraction,
-        language: str = commands.Param(autocomplete=autocomp_langs)
+        language: Annotated[str, commands.Param(autocomplete=autocomp_langs)],
     ):
         ...
 
@@ -644,10 +638,10 @@ This would create the same command as the code above, though you're free to chan
     @bot.slash_command(name=Localized("add_5", key="ADD_NUM_NAME"), description=Localized(key="ADD_NUM_DESCRIPTION"))
     async def _add_5_slash(
         inter: disnake.ApplicationCommandInteraction,
-        num: int = commands.Param(
+        num: Annotated[int, commands.Param(
             name=Localized(key="COOL_NUMBER_NAME"),
             description=Localized(key="COOL_NUMBER_DESCRIPTION")
-        ),
+        )],
     ):
         """
         Adds 5 to a number.
@@ -668,10 +662,10 @@ While not recommended, it is also possible to avoid using ``.json`` files at all
     )
     async def add_5(
         inter: disnake.ApplicationCommandInteraction,
-        num: int = commands.Param(
+        num: Annotated[int, commands.Param(
             name=Localized(data={Locale.de: "zahl"}),
             description=Localized(data={Locale.de: "Eine Zahl"}),
-        ),
+        )],
     ):
         ...
 
@@ -686,13 +680,13 @@ Choices/Autocomplete
     @bot.slash_command()
     async def example(
         inter: disnake.ApplicationCommandInteraction,
-        animal: str = commands.Param(choices=[
+        animal: Annotated[str, commands.Param(choices=[
             # alternatively:
             # OptionChoice(Localized("Cat", key="OPTION_CAT"), "Cat")
             Localized("Cat", key="OPTION_CAT"),
             Localized("Dolphin", key="OPTION_DOLPHIN"),
-        ]),
-        language: str = commands.Param(autocomplete=autocomp_langs),
+        ])],
+        language: Annotated[str, commands.Param(autocomplete=autocomp_langs)],
     ):
         ...
 

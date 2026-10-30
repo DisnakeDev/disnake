@@ -2,7 +2,7 @@
 
 import os
 from dataclasses import dataclass
-from typing import Any, Literal
+from typing import Annotated, Any, Literal
 
 import disnake
 from disnake.ext import commands
@@ -48,13 +48,13 @@ async def get_config(
 
 
 # Note that the following command will have 4 options:
-# `number`, `locale`, `timezone` and `theme`.
+# `number`, `locale`, `theme` and `notifications`.
 # `config` will be whatever `get_config()` returns.
 @bot.slash_command()
 async def injected1(
     inter: disnake.CommandInteraction,
     number: int,
-    config: Config = commands.inject(get_config),
+    config: Annotated[Config, commands.Injection(get_config)],
 ):
     """A command which takes in a number and some config parameters
 
@@ -68,7 +68,7 @@ async def injected1(
 async def injected2(
     inter: disnake.CommandInteraction,
     string: str,
-    config: Config = commands.inject(get_config),
+    config: Annotated[Config, commands.Injection(get_config)],
 ):
     """A command which takes in a string and some config parameters
 
