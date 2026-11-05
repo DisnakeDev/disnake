@@ -3006,11 +3006,11 @@ class Guild(Hashable):
     async def fetch_member_permissions(self, member_id: int, /) -> Permissions:
         """|coro|
 
-        Retrieves a :class:`Permissions` with the given member ID.
+        Retrieves a :class:`~disnake.Permissions` with the given member ID.
 
         .. note::
 
-            This method is an API call. If you have :attr:`Intents.members` and member cache enabled, consider :meth:`get_member_permissions` instead.
+            This method is an API call. If you have :attr:`Intents.members` and member cache enabled, consider :attr:`.Member.guild_permissions` instead.
 
         .. versionadded:: |vnext|
 
@@ -3030,7 +3030,7 @@ class Guild(Hashable):
 
         Returns
         -------
-        :class:`Permissions`
+        :class:`~disnake.Permissions`
             The permissions of the member.
         """
         data = await self._state.http.get_guild_member_permissions(self.id, member_id)
@@ -3809,11 +3809,11 @@ class Guild(Hashable):
     async def fetch_role_permissions(self, role_id: int, /) -> Permissions:
         """|coro|
 
-        Retrieve a :class:`Permissions` for a role.
+        Retrieve a :class:`~disnake.Permissions` for a role.
 
         .. note::
 
-            This method is an API call. For general usage, consider :meth:`get_role_permissions` or :attr:`roles` instead.
+            This method is an API call. For general usage, consider :attr:`.Role.permissions` instead.
 
         .. versionadded:: |vnext|
 
@@ -3833,7 +3833,7 @@ class Guild(Hashable):
 
         Returns
         -------
-        :class:`Permissions`
+        :class:`~disnake.Permissions`
             The permissions of the role.
         """
         data = await self._state.http.get_guild_role_permissions(self.id, role_id=role_id)

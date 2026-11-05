@@ -1432,11 +1432,11 @@ class GuildChannel(ABC):
     ) -> Permissions:
         """|coro|
 
-        Retrieve a :class:`Permissions` for a member.
+        Retrieve a :class:`~disnake.Permissions` for a member.
 
         .. note::
 
-            This method is an API call. For general usage, consider :meth:`get_member_permissions` or :attr:`members` instead.
+            This method is an API call. For general usage, consider :attr:`.Member.guild_permissions` instead.
 
         .. versionadded:: |vnext|
 
@@ -1456,7 +1456,7 @@ class GuildChannel(ABC):
 
         Returns
         -------
-        :class:`Permissions`
+        :class:`~disnake.Permissions`
             The permissions of the member.
         """
         data = await self._state.http.get_channel_member_permissions(
@@ -1467,11 +1467,11 @@ class GuildChannel(ABC):
     async def fetch_role_permissions(self, role_id: int, *, implicit: bool = True) -> Permissions:
         """|coro|
 
-        Retrieve a :class:`Permissions` for a role.
+        Retrieve a :class:`~disnake.Permissions` for a role.
 
         .. note::
 
-            This method is an API call. For general usage, consider :meth:`get_role_permissions` or :attr:`roles` instead.
+            This method is an API call. For general usage, consider :attr:`.Role.permissions` instead.
 
         .. versionadded:: |vnext|
 
@@ -1493,7 +1493,7 @@ class GuildChannel(ABC):
 
         Returns
         -------
-        :class:`Permissions`
+        :class:`~disnake.Permissions`
             The permissions of the role.
         """
         data = await self._state.http.get_channel_role_permissions(
