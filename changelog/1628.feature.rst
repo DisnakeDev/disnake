@@ -1,0 +1,1 @@
+Add :meth:`~disnake.AttachmentFlags.contains_explicit_content`, :meth:`~disnake.AttachmentFlags.contains_gore_content`, :meth:`~disnake.AttachmentFlags.contains_self_harm_content`, :class:`~disnake.UnfurledScanMetadataFlags`, :attr:`.UnfurledMediaItem.content_scan_metadata` and :class:`.UnfurledScanMetadata`.
