@@ -66,11 +66,7 @@ class Label(UIComponent):
         The description text for the label.
     """
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = (
-        "text",
-        "description",
-        "component",
-    )
+    __repr_attributes__: ClassVar[tuple[str, ...]] = ("text", "description", "component", "_id")
 
     def __init__(
         self,

@@ -42,7 +42,12 @@ class RadioGroup(UIComponent):
         sequential identifiers to the components in the modal.
     """
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = ("options", "required")
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (
+        "custom_id",
+        "options",
+        "required",
+        "id",
+    )
     # We have to set this to MISSING in order to overwrite the abstract property from UIComponent
     _underlying: RadioGroupComponent = MISSING
 
