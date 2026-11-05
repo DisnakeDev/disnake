@@ -65,7 +65,7 @@ from .mixins import Hashable
 from .object import Object
 from .onboarding import Onboarding
 from .partial_emoji import PartialEmoji
-from .permissions import PermissionOverwrite
+from .permissions import PermissionOverwrite, Permissions
 from .role import Role
 from .soundboard import GuildSoundboardSound
 from .stage_instance import StageInstance
@@ -89,7 +89,6 @@ if TYPE_CHECKING:
     from .app_commands import APIApplicationCommand
     from .asset import AssetBytes
     from .automod import AutoModTriggerMetadata
-    from .permissions import Permissions
     from .state import ConnectionState
     from .template import Template
     from .threads import AnyThreadArchiveDuration, ForumTag
@@ -3004,6 +3003,39 @@ class Guild(Hashable):
         data = await self._state.http.get_member(self.id, member_id)
         return Member(data=data, state=self._state, guild=self)
 
+    async def fetch_member_permissions(self, member_id: int, /) -> Permissions:
+        """|coro|
+
+        Retrieves a :class:`Permissions` with the given member ID.
+
+        .. note::
+
+            This method is an API call. If you have :attr:`Intents.members` and member cache enabled, consider :meth:`get_member_permissions` instead.
+
+        .. versionadded:: |vnext|
+
+        Parameters
+        ----------
+        member_id: :class:`int`
+            The member's ID to fetch permissions from.
+
+        Raises
+        ------
+        NotFound
+            A member with this ID does not exist in the guild.
+        Forbidden
+            You do not have access to the guild.
+        HTTPException
+            Retrieving the member failed.
+
+        Returns
+        -------
+        :class:`Permissions`
+            The permissions of the member.
+        """
+        data = await self._state.http.get_guild_member_permissions(self.id, member_id)
+        return Permissions(int(data["permissions"]))
+
     async def fetch_ban(self, user: Snowflake) -> BanEntry:
         """|coro|
 
@@ -3773,6 +3805,39 @@ class Guild(Hashable):
         """
         data = await self._state.http.get_role(self.id, role_id=role_id)
         return Role(guild=self, state=self._state, data=data)
+
+    async def fetch_role_permissions(self, role_id: int, /) -> Permissions:
+        """|coro|
+
+        Retrieve a :class:`Permissions` for a role.
+
+        .. note::
+
+            This method is an API call. For general usage, consider :meth:`get_role_permissions` or :attr:`roles` instead.
+
+        .. versionadded:: |vnext|
+
+        Parameters
+        ----------
+        role_id: :class:`int`
+            The ID of the role to retrieve permissions for.
+
+        Raises
+        ------
+        NotFound
+            The role requested could not be found.
+        Forbidden
+            You do not have access to the guild.
+        HTTPException
+            Retrieving the role permissions failed.
+
+        Returns
+        -------
+        :class:`Permissions`
+            The permissions of the role.
+        """
+        data = await self._state.http.get_guild_role_permissions(self.id, role_id=role_id)
+        return Permissions(int(data["permissions"]))
 
     async def fetch_roles(self) -> list[Role]:
         r"""|coro|
