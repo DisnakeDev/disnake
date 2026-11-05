@@ -44,6 +44,7 @@ __all__ = (
     "EmbedFlags",
     "EmbedMediaFlags",
     "UnfurledMediaItemFlags",
+    "UnfurledScanMetadataFlags",
 )
 
 BF = TypeVar("BF", bound="BaseFlags")
@@ -2643,6 +2644,9 @@ class AttachmentFlags(BaseFlags):
         def __init__(
             self,
             *,
+            contains_explicit_content: bool = ...,
+            contains_gore_content: bool = ...,
+            contains_self_harm_content: bool = ...,
             is_animated: bool = ...,
             is_clip: bool = ...,
             is_remix: bool = ...,
@@ -2680,12 +2684,36 @@ class AttachmentFlags(BaseFlags):
         return 1 << 3
 
     @flag_value
+    def contains_explicit_content(self) -> int:
+        """:class:`bool`: Returns ``True`` if the attachment was marked as explicit content.
+
+        .. versionadded:: |vnext|
+        """
+        return 1 << 4
+
+    @flag_value
     def is_animated(self) -> int:
         """:class:`bool`: Returns ``True`` if the attachment is an animated image.
 
         .. versionadded:: |vnext|
         """
         return 1 << 5
+
+    @flag_value
+    def contains_gore_content(self) -> int:
+        """:class:`bool`: Returns ``True`` if the attachment was marked as gore content.
+
+        .. versionadded:: |vnext|
+        """
+        return 1 << 6
+
+    @flag_value
+    def contains_self_harm_content(self) -> int:
+        """:class:`bool`: Returns ``True`` if the attachment was marked as self-harm content.
+
+        .. versionadded:: |vnext|
+        """
+        return 1 << 7
 
 
 class SKUFlags(BaseFlags):
@@ -3051,12 +3079,43 @@ class EmbedFlags(BaseFlags):
     if TYPE_CHECKING:
 
         @_generated
-        def __init__(self, *, is_content_inventory_entry: bool = ...) -> None: ...
+        def __init__(
+            self,
+            *,
+            contains_explicit_content: bool = ...,
+            contains_gore_content: bool = ...,
+            contains_self_harm_content: bool = ...,
+            is_content_inventory_entry: bool = ...,
+        ) -> None: ...
+
+    @flag_value
+    def contains_explicit_content(self):
+        """:class:`bool`: Returns ``True`` if the embed contains explicit content.
+
+        .. versionadded:: |vnext|
+        """
+        return 1 << 4
 
     @flag_value
     def is_content_inventory_entry(self):
         """:class:`bool`: Returns ``True`` if the embed is a reply to an activity card."""
         return 1 << 5
+
+    @flag_value
+    def contains_gore_content(self):
+        """:class:`bool`: Returns ``True`` if the embed contains gore content.
+
+        .. versionadded:: |vnext|
+        """
+        return 1 << 6
+
+    @flag_value
+    def contains_self_harm_content(self):
+        """:class:`bool`: Returns ``True`` if the embed contains self-harm content.
+
+        .. versionadded:: |vnext|
+        """
+        return 1 << 7
 
 
 class EmbedMediaFlags(BaseFlags):
@@ -3211,3 +3270,90 @@ class UnfurledMediaItemFlags(BaseFlags):
     def is_animated(self):
         """:class:`bool`: Returns ``True`` if the unfurled media item is animated."""
         return 1 << 0
+
+
+class UnfurledScanMetadataFlags(BaseFlags):
+    """Wraps up Discord unfurled scan metadata flags.
+
+    .. collapse:: operations
+
+        .. describe:: x == y
+
+            Checks if two UnfurledScanMetadataFlags instances are equal.
+        .. describe:: x != y
+
+            Checks if two UnfurledScanMetadataFlags instances are not equal.
+        .. describe:: x <= y
+
+            Checks if an UnfurledScanMetadataFlags instance is a subset of another UnfurledScanMetadataFlags instance.
+        .. describe:: x >= y
+
+            Checks if an UnfurledScanMetadataFlags instance is a superset of another UnfurledScanMetadataFlags instance.
+        .. describe:: x < y
+
+            Checks if an UnfurledScanMetadataFlags instance is a strict subset of another UnfurledScanMetadataFlags instance.
+        .. describe:: x > y
+
+            Checks if an UnfurledScanMetadataFlags instance is a strict superset of another UnfurledScanMetadataFlags instance.
+        .. describe:: x | y, x |= y
+
+            Returns a new UnfurledScanMetadataFlags instance with all enabled flags from both x and y.
+            (Using ``|=`` will update in place).
+        .. describe:: x & y, x &= y
+
+            Returns a new UnfurledScanMetadataFlags instance with only flags enabled on both x and y.
+            (Using ``&=`` will update in place).
+        .. describe:: x ^ y, x ^= y
+
+            Returns a new UnfurledScanMetadataFlags instance with only flags enabled on one of x or y, but not both.
+            (Using ``^=`` will update in place).
+        .. describe:: ~x
+
+            Returns a new UnfurledScanMetadataFlags instance with all flags from x inverted.
+        .. describe:: hash(x)
+
+            Returns the flag's hash.
+        .. describe:: iter(x)
+
+            Returns an iterator of ``(name, value)`` pairs. This allows it
+            to be, for example, constructed as a dict or a list of pairs.
+            Note that aliases are not shown.
+
+        Additionally supported are a few operations on class attributes.
+
+        .. describe:: UnfurledScanMetadataFlags.y | UnfurledScanMetadataFlags.z, UnfurledScanMetadataFlags(y=True) | UnfurledScanMetadataFlags.z
+
+            Returns an UnfurledScanMetadataFlags instance with all provided flags enabled.
+
+        .. describe:: ~UnfurledScanMetadataFlags.x
+
+            Returns an UnfurledScanMetadataFlags instance with all flags except ``x`` inverted from their default value.
+
+    .. versionadded:: |vnext|
+    """
+
+    if TYPE_CHECKING:
+
+        @_generated
+        def __init__(
+            self,
+            *,
+            is_explicit_content: bool = ...,
+            is_gore_content: bool = ...,
+            is_self_harm_content: bool = ...,
+        ) -> None: ...
+
+    @flag_value
+    def is_explicit_content(self):
+        """:class:`bool`: Returns ``True`` if the unfurled scan metadata is marked as explicit content."""
+        return 1 << 0
+
+    @flag_value
+    def is_gore_content(self):
+        """:class:`bool`: Returns ``True`` if the unfurled scan metadata is marked as gore content."""
+        return 1 << 1
+
+    @flag_value
+    def is_self_harm_content(self):
+        """:class:`bool`: Returns ``True`` if the unfurled scan metadata is marked as self-harm content."""
+        return 1 << 2
