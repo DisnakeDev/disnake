@@ -28,7 +28,7 @@ class TestPermissions:
             Permissions("h")  # pyright: ignore[reportArgumentType, reportCallIssue]
 
     def test_init_invalid_perms(self) -> None:
-        with pytest.raises(TypeError, match=r"'h' is not a valid permission name."):
+        with pytest.raises(TypeError, match=r"'h' is not a valid Permissions name."):
             Permissions(h=True)  # pyright: ignore[reportCallIssue]
 
     @pytest.mark.parametrize(
