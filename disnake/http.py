@@ -857,6 +857,30 @@ class HTTPClient:
         r = Route("GET", "/channels/{channel_id}", channel_id=channel_id)
         return self.request(r)
 
+    def get_channel_member_permissions(
+        self, channel_id: Snowflake, member_id: Snowflake, implicit: bool
+    ) -> Response[guild.Permissions]:
+        r = Route(
+            "GET",
+            "/channels/{channel_id}/permissions/member/{member_id}",
+            channel_id=channel_id,
+            member_id=member_id,
+            params={"implicit": implicit},
+        )
+        return self.request(r)
+
+    def get_channel_role_permissions(
+        self, channel_id: Snowflake, role_id: Snowflake, implicit: bool
+    ) -> Response[guild.Permissions]:
+        r = Route(
+            "GET",
+            "/channels/{channel_id}/permissions/role/{role_id}",
+            channel_id=channel_id,
+            role_id=role_id,
+            params={"implicit": implicit},
+        )
+        return self.request(r)
+
     def logs_from(
         self,
         channel_id: Snowflake,
@@ -1583,6 +1607,18 @@ class HTTPClient:
             )
         )
 
+    def get_guild_member_permissions(
+        self, guild_id: Snowflake, member_id: Snowflake
+    ) -> Response[guild.Permissions]:
+        return self.request(
+            Route(
+                "GET",
+                "/guilds/{guild_id}/permissions/member/{member_id}",
+                guild_id=guild_id,
+                member_id=member_id,
+            )
+        )
+
     def prune_members(
         self,
         guild_id: Snowflake,
@@ -1979,6 +2015,18 @@ class HTTPClient:
     def get_role(self, guild_id: Snowflake, role_id: Snowflake) -> Response[role.Role]:
         return self.request(
             Route("GET", "/guilds/{guild_id}/roles/{role_id}", guild_id=guild_id, role_id=role_id)
+        )
+
+    def get_guild_role_permissions(
+        self, guild_id: Snowflake, role_id: Snowflake
+    ) -> Response[guild.Permissions]:
+        return self.request(
+            Route(
+                "GET",
+                "/guilds/{guild_id}/permissions/role/{role_id}",
+                guild_id=guild_id,
+                role_id=role_id,
+            )
         )
 
     def get_roles(self, guild_id: Snowflake) -> Response[list[role.Role]]:
