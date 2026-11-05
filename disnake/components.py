@@ -90,6 +90,7 @@ __all__ = (
     "Section",
     "TextDisplay",
     "UnfurledMediaItem",
+    "UnfurledScanMetadata",
     "Thumbnail",
     "MediaGallery",
     "MediaGalleryItem",
