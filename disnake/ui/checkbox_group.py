@@ -76,7 +76,7 @@ class CheckboxGroup(UIComponent):
             custom_id=custom_id,
             options=_parse_group_options(options),
             min_values=min_values,
-            max_values=max_values if max_values is not MISSING else len(options),
+            max_values=max_values,
             required=required,
         )
 
