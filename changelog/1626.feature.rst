@@ -1,0 +1,1 @@
+Add :meth:`Guild.fetch_member_permissions` and :meth:`Guild.fetch_role_permissions`, :meth:`abc.GuildChannel.fetch_member_permissions` and :meth:`abc.GuildChannel.fetch_role_permissions` to fetch permissions for a member or role in a guild or channel.
