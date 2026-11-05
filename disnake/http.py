@@ -33,6 +33,7 @@ from .errors import (
     LoginFailure,
     NotFound,
 )
+from .file import File
 from .gateway import DiscordClientWebSocketResponse, GatewayParams
 from .utils import MISSING
 
@@ -44,7 +45,6 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from .enums import InteractionResponseType
-    from .file import File
     from .message import Attachment
     from .types import (
         appinfo,
@@ -143,16 +143,15 @@ def to_multipart(payload: Mapping[str, Any], files: Sequence[File]) -> list[dict
     """Converts the payload and list of files to a multipart payload,
     as specified by https://docs.discord.com/developers/reference#uploading-files
     """
-    multipart: list[dict[str, Any]] = []
-    for index, file in enumerate(files):
-        multipart.append(
-            {
-                "name": f"files[{index}]",
-                "value": file.fp,
-                "filename": file.filename,
-                "content_type": "application/octet-stream",
-            }
-        )
+    multipart: list[dict[str, Any]] = [
+        {
+            "name": f"files[{index}]",
+            "value": file.fp,
+            "filename": file.filename,
+            "content_type": "application/octet-stream",
+        }
+        for index, file in enumerate(files)
+    ]
 
     multipart.append({"name": "payload_json", "value": utils._to_json(payload)})
     return multipart
@@ -1925,7 +1924,10 @@ class HTTPClient:
         unique: bool = True,
         target_type: invite.InviteTargetType | None = None,
         target_user_id: Snowflake | None = None,
+        target_users_file: File | None = None,
+        target_user_ids: Sequence[Snowflake] | None = None,
         target_application_id: Snowflake | None = None,
+        role_ids: Sequence[Snowflake] | None = None,
     ) -> Response[invite.Invite]:
         r = Route("POST", "/channels/{channel_id}/invites", channel_id=channel_id)
         payload: dict[str, Any] = {
@@ -1944,6 +1946,26 @@ class HTTPClient:
         if target_application_id:
             payload["target_application_id"] = str(target_application_id)
 
+        if role_ids:
+            payload["role_ids"] = role_ids
+
+        if target_user_ids:
+            payload["target_user_ids"] = target_user_ids
+
+        if target_users_file:
+            form: list[dict[str, Any]] = [
+                {
+                    "name": "target_users_file",
+                    "value": target_users_file.fp,
+                    "content_type": "text/csv",
+                }
+            ]
+
+            for param, value in payload.items():
+                form.append({"name": param, "value": value})
+
+            return self.request(r, reason=reason, form=form)
+
         return self.request(r, reason=reason, json=payload)
 
     def get_invite(
@@ -1961,6 +1983,79 @@ class HTTPClient:
 
         return self.request(
             Route("GET", "/invites/{invite_id}", invite_id=invite_id), params=params
+        )
+
+    def get_invite_target_users(self, invite_id: str) -> Response[str]:
+        return self.request(Route("GET", "/invites/{invite_id}/target-users", invite_id=invite_id))
+
+    def add_invite_target_users(self, invite_id: str, user_id: Snowflake) -> Response[None]:
+        return self.request(
+            Route(
+                "PUT",
+                "/invites/{invite_id}/target-users/{user_id}",
+                invite_id=invite_id,
+                user_id=user_id,
+            )
+        )
+
+    def bulk_add_invite_target_users(
+        self, invite_id: str, user_ids: Sequence[Snowflake]
+    ) -> Response[None]:
+        payload: dict[str, Any] = {"user_ids": user_ids}
+        return self.request(
+            Route(
+                "POST",
+                "/invites/{invite_id}/target-users/bulk-add",
+                invite_id=invite_id,
+                json=payload,
+            )
+        )
+
+    def update_invite_target_users(
+        self, invite_id: str, *, file: Sequence[Snowflake] | File
+    ) -> Response[None]:
+        if isinstance(file, File):
+            form: list[dict[str, Any]] = [
+                {"name": "target_users_file", "value": file.fp, "content_type": "text/csv"}
+            ]
+        else:
+            fp = "\n".join(map(str, file))
+
+            form: list[dict[str, Any]] = [
+                {"name": "target_users_file", "value": fp, "content_type": "text/csv"}
+            ]
+
+        return self.request(
+            Route("PUT", "/invites/{invite_id}/target-users", invite_id=invite_id),
+            form=form,
+        )
+
+    def remove_invite_target_users(self, invite_id: str, user_id: Snowflake) -> Response[None]:
+        return self.request(
+            Route(
+                "DELETE",
+                "/invites/{invite_id}/target-users/{user_id}",
+                invite_id=invite_id,
+                user_id=user_id,
+            )
+        )
+
+    def bulk_delete_invite_target_users(
+        self, invite_id: str, user_ids: Sequence[Snowflake]
+    ) -> Response[None]:
+        payload: dict[str, Any] = {"user_ids": user_ids}
+        return self.request(
+            Route(
+                "POST",
+                "/invites/{invite_id}/target-users/bulk-delete",
+                invite_id=invite_id,
+                json=payload,
+            )
+        )
+
+    def get_invite_target_users_job_status(self, invite_id: str) -> Response[invite.TargetUsersJob]:
+        return self.request(
+            Route("GET", "/invites/{invite_id}/target-users/job-status", invite_id=invite_id)
         )
 
     def invites_from(self, guild_id: Snowflake) -> Response[list[invite.Invite]]:
