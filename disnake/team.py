@@ -45,8 +45,8 @@ class Team:
 
         self.id: int = int(data["id"])
         self.name: str = data["name"]
-        self._icon: str | None = data.get("icon")
-        self.owner_id: int | None = utils._get_as_snowflake(data, "owner_user_id")
+        self._icon: str | None = data["icon"]
+        self.owner_id: int = int(data["owner_user_id"])
         self.members: list[TeamMember] = [
             TeamMember(self, self._state, member) for member in data["members"]
         ]
