@@ -2299,7 +2299,12 @@ class ConnectionState:
 
         # the factory can't be a DMChannel or GroupChannel here
         data.setdefault("position", 0)  # pyright: ignore[reportArgumentType, reportCallIssue]
-        return (isinstance(guild, Guild) and guild.get_channel_or_thread(channel_id)) or factory(
+        if isinstance(guild, Guild):
+            channel = guild.get_channel_or_thread(channel_id)
+            # if the cached channel is obfuscated, prefer the (always non-obfuscated) interaction channel data
+            if channel and not channel.flags.obfuscated:
+                return channel
+        return factory(
             guild=guild,  # pyright: ignore[reportArgumentType, reportCallIssue]  # FIXME: create proper fallback guild instead of passing Object
             state=self,
             data=data,  # pyright: ignore[reportArgumentType]  # generic payload type

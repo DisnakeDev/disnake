@@ -51,7 +51,6 @@ class Sidebar {
           }
         })
 
-        ref.classList.add('ref-internal-padding')
         ref.parentNode.insertBefore(icon, ref);
 
         // collapse all top-level toc entries, except the current page's

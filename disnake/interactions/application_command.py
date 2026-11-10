@@ -231,16 +231,21 @@ class ApplicationCommandInteractionData(dict[str, Any]):
         All resolved objects related to this interaction.
     options: :class:`list`\[:class:`ApplicationCommandInteractionDataOption`]
         A list of options from the API.
+    guild_id: :class:`int` | :data:`None`
+        ID of the guild the command is registered to.
+
+        .. versionadded:: |vnext|
     target_id: :class:`int`
-        ID of the user or message targeted by a user or message command
+        ID of the user or message targeted by a user or message command.
     target: :class:`User` | :class:`Member` | :class:`Message`
-        The user or message targeted by a user or message command
+        The user or message targeted by a user or message command.
     """
 
     __slots__ = (
         "id",
         "name",
         "type",
+        "guild_id",
         "target_id",
         "target",
         "resolved",
@@ -259,6 +264,7 @@ class ApplicationCommandInteractionData(dict[str, Any]):
         self.type: ApplicationCommandType = try_enum(ApplicationCommandType, data["type"])
 
         self.resolved = InteractionDataResolved(data=data.get("resolved", {}), parent=parent)
+        self.guild_id: int | None = utils._get_as_snowflake(data, "guild_id")
         self.target_id: int | None = utils._get_as_snowflake(data, "target_id")
         target = self.resolved.get_by_id(self.target_id)
         self.target: User | Member | Message | None = target  # pyright: ignore[reportAttributeAccessIssue]
@@ -378,10 +384,10 @@ ApplicationCommandInteractionDataResolved = InteractionDataResolved
 
 
 # People asked about shorter aliases, let's see which one catches on the most
-CommandInteraction = ApplicationCommandInteraction[ClientT]
-CmdInteraction = ApplicationCommandInteraction[ClientT]
-CommandInter = ApplicationCommandInteraction[ClientT]
-CmdInter = ApplicationCommandInteraction[ClientT]
-AppCommandInteraction = ApplicationCommandInteraction[ClientT]
-AppCommandInter = ApplicationCommandInteraction[ClientT]
-AppCmdInter = ApplicationCommandInteraction[ClientT]
+CommandInteraction = ApplicationCommandInteraction
+CmdInteraction = ApplicationCommandInteraction
+CommandInter = ApplicationCommandInteraction
+CmdInter = ApplicationCommandInteraction
+AppCommandInteraction = ApplicationCommandInteraction
+AppCommandInter = ApplicationCommandInteraction
+AppCmdInter = ApplicationCommandInteraction
