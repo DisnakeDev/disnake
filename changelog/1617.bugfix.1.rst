@@ -1,0 +1,1 @@
+Allow :data:`None` bitrates returned from custom probe functions in :meth:`FFmpegOpusAudio.from_probe`.
