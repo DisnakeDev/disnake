@@ -15,6 +15,7 @@ from typing import (
     ClassVar,
     Final,
     Literal,
+    TypeAlias,
     TypeVar,
     cast,
     overload,
@@ -203,12 +204,18 @@ class RouteParameters(TypedDict, total=False, closed=True):
     sound_id: Snowflake
 
 
+# https://docs.python.org/3/library/http.html#http-methods
+HTTPMethod: TypeAlias = Literal["GET", "POST", "PUT", "DELETE", "PATCH"]
+
+
 class Route:
     BASE: ClassVar[str] = "https://discord.com/api/v10"
 
-    def __init__(self, method: str, path: str, **parameters: Unpack[RouteParameters]) -> None:
+    def __init__(
+        self, method: HTTPMethod, path: str, **parameters: Unpack[RouteParameters]
+    ) -> None:
+        self.method: HTTPMethod = method
         self.path: str = path
-        self.method: str = method
         url = self.BASE + self.path
         if parameters:
             url = url.format_map(
