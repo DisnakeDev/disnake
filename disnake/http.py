@@ -332,8 +332,11 @@ class HTTPClient:
         route: Route,
         *,
         files: Sequence[File] | None = None,
-        form: Iterable[dict[str, Any]] | None = None,
-        **kwargs: Any,
+        form: Iterable[Mapping[str, Any]] | None = None,
+        reason: str | None = None,
+        # note: _RequestOptions requires aiohttp>=3.10, but its absence on <3.10 shouldn't cause
+        # issues thanks to __future__, besides resulting in **kwargs: Unknown
+        **kwargs: Unpack[aiohttp.client._RequestOptions],
     ) -> Any:
         bucket = route.bucket
         method = route.method
@@ -353,14 +356,8 @@ class HTTPClient:
         if "json" in kwargs:
             headers["Content-Type"] = "application/json"
             kwargs["data"] = utils._to_json(kwargs.pop("json"))
-
-        try:
-            reason = kwargs.pop("reason")
-        except KeyError:
-            pass
-        else:
-            if reason:
-                headers["X-Audit-Log-Reason"] = _uriquote(reason, safe="/ ")
+        if reason:
+            headers["X-Audit-Log-Reason"] = _uriquote(reason, safe="/ ")
 
         kwargs["headers"] = headers
 
