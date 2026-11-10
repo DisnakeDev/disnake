@@ -233,7 +233,7 @@ class Component:
 
     __slots__: tuple[str, ...] = ("type", "id")
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[tuple[str, ...]] = ("id",)
 
     # subclasses are expected to overwrite this if they're only usable with `MessageFlags.is_components_v2`
     is_v2: ClassVar[bool] = False
