@@ -1201,7 +1201,7 @@ class UnfurledMediaItem:
         return {"url": self.url}
 
     def __repr__(self) -> str:
-        return f"<UnfurledMediaItem url={self.url} content_type={self.content_type}>"
+        return f"<UnfurledMediaItem url={self.url!r} content_type={self.content_type!r}>"
 
 
 class Thumbnail(Component):
