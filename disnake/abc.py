@@ -1444,6 +1444,8 @@ class GuildChannel(ABC):
         ----------
         member_id: :class:`int`
             The ID of the member to retrieve permissions for.
+        implicit: :class:`bool`
+            Whether to include implicit permissions in the result. Defaults to ``True``.
 
         Raises
         ------
