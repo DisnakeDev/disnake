@@ -243,7 +243,12 @@ class UnfurledMediaItem(TypedDict, total=False):
     placeholder_version: int
     flags: int
     content_type: str
+    content_scan_metadata: UnfurledScanMetadata
     attachment_id: Snowflake
+
+
+class UnfurledScanMetadata(TypedDict):
+    flags: int
 
 
 # NOTE: these are type definitions for *sending*, while *receiving* likely has fewer optional fields

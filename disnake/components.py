@@ -27,7 +27,7 @@ from .enums import (
     TextInputStyle,
     try_enum,
 )
-from .flags import UnfurledMediaItemFlags
+from .flags import UnfurledMediaItemFlags, UnfurledScanMetadataFlags
 from .partial_emoji import PartialEmoji, _EmojiTag
 from .utils import MISSING, _get_as_snowflake, assert_never, get_slots
 
@@ -69,6 +69,7 @@ if TYPE_CHECKING:
         TextInput as TextInputPayload,
         ThumbnailComponent as ThumbnailComponentPayload,
         UnfurledMediaItem as UnfurledMediaItemPayload,
+        UnfurledScanMetadata as UnfurledScanMetadataPayload,
         UserSelectMenu as UserSelectMenuPayload,
     )
 
@@ -89,6 +90,7 @@ __all__ = (
     "Section",
     "TextDisplay",
     "UnfurledMediaItem",
+    "UnfurledScanMetadata",
     "Thumbnail",
     "MediaGallery",
     "MediaGalleryItem",
@@ -1145,6 +1147,10 @@ class UnfurledMediaItem:
         .. versionadded:: |vnext|
     content_type: :class:`str` | :data:`None`
         The `media type <https://en.wikipedia.org/wiki/Media_type>`_ of this media item.
+    content_scan_metadata: :class:`UnfurledScanMetadata` | :data:`None`
+        The content scan metadata for this media item, if any.
+
+        .. versionadded:: |vnext|
     attachment_id: :class:`int` | :data:`None`
         The ID of the uploaded attachment. Only present if the media item was
         uploaded as an attachment.
@@ -1160,6 +1166,7 @@ class UnfurledMediaItem:
         "_flags",
         "content_type",
         "attachment_id",
+        "content_scan_metadata",
     )
 
     # generally, users should also be able to pass a plain url where applicable instead of
@@ -1173,6 +1180,7 @@ class UnfurledMediaItem:
         self.placeholder_version: int | None = None
         self._flags: int = 0
         self.content_type: str | None = None
+        self.content_scan_metadata: UnfurledScanMetadata | None = None
         self.attachment_id: int | None = None
 
     @classmethod
@@ -1185,6 +1193,11 @@ class UnfurledMediaItem:
         self.placeholder_version = data.get("placeholder_version")
         self._flags = data.get("flags", 0)
         self.content_type = data.get("content_type")
+        self.content_scan_metadata = (
+            UnfurledScanMetadata(metadata)
+            if (metadata := data.get("content_scan_metadata"))
+            else None
+        )
         self.attachment_id = _get_as_snowflake(data, "attachment_id")
         return self
 
@@ -1202,6 +1215,23 @@ class UnfurledMediaItem:
 
     def __repr__(self) -> str:
         return f"<UnfurledMediaItem url={self.url!r} content_type={self.content_type!r}>"
+
+
+class UnfurledScanMetadata:
+    """Represents the content scan metadata for an unfurled media item.
+
+    .. versionadded:: |vnext|
+    """
+
+    __slots__: tuple[str, ...] = ("_flags",)
+
+    def __init__(self, data: UnfurledScanMetadataPayload) -> None:
+        self._flags: int = data.get("flags", 0)
+
+    @property
+    def flags(self) -> UnfurledScanMetadataFlags:
+        """:class:`UnfurledScanMetadataFlags`: The flags for this content scan metadata."""
+        return UnfurledScanMetadataFlags._from_value(self._flags)
 
 
 class Thumbnail(Component):
