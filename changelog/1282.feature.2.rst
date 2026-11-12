@@ -1,0 +1,1 @@
+Add ``placeholder`` and ``placeholder_version`` attributes to :class:`Attachment`, :class:`UnfurledMediaItem`, ``Embed.image``, ``Embed.thumbnail``, and ``Embed.video``.

@@ -399,6 +399,19 @@ class Thread(Messageable, Hashable):
         """
         return self.flags.pinned
 
+    def is_obfuscated(self) -> Literal[False]:
+        """Whether the thread's metadata is obfuscated.
+
+        .. note::
+            This only exists for compatibility with :meth:`abc.GuildChannel.is_obfuscated`,
+            and will always be ``False``.
+
+        .. versionadded:: |vnext|
+
+        :return type: :class:`bool`
+        """
+        return False
+
     def is_spoiler(self) -> bool:
         """Whether the thread is marked as a spoiler.
 

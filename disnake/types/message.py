@@ -4,8 +4,9 @@ from __future__ import annotations
 
 from typing import Literal, TypedDict
 
-from typing_extensions import NotRequired
+from typing_extensions import NotRequired, Required
 
+from .appinfo import AppInfo
 from .channel import ChannelType
 from .components import MessageTopLevelComponent
 from .embed import Embed
@@ -47,6 +48,22 @@ class Attachment(TypedDict):
     duration_secs: NotRequired[float]
     waveform: NotRequired[str]
     flags: NotRequired[int]
+    clip_participants: NotRequired[list[User]]
+    clip_created_at: NotRequired[str]
+    placeholder: NotRequired[str]
+    placeholder_version: NotRequired[int]
+    application: NotRequired[AppInfo | None]
+
+
+# https://docs.discord.com/developers/resources/message#attachment-object-attachment-request-structure
+class AttachmentRequestData(TypedDict, total=False):
+    id: Required[Snowflake]
+    filename: str
+    # title: str
+    description: str | None
+    # duration_secs: float
+    # waveform: str
+    is_spoiler: bool
 
 
 MessageActivityType = Literal[1, 2, 3, 5]

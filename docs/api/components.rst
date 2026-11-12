@@ -290,3 +290,15 @@ SeparatorSpacing
 
 .. autoclass:: SeparatorSpacing()
     :members:
+
+
+Data Classes
+------------
+
+UnfurledMediaItemFlags
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: UnfurledMediaItemFlags
+
+.. autoclass:: UnfurledMediaItemFlags()
+    :members:

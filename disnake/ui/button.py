@@ -66,12 +66,14 @@ class Button(Item[V_co]):
     """
 
     __repr_attributes__: ClassVar[tuple[str, ...]] = (
+        "custom_id",
         "style",
         "url",
         "disabled",
         "label",
         "emoji",
         "sku_id",
+        "id",
         "row",
     )
     # We have to set this to MISSING in order to overwrite the abstract property from UIComponent

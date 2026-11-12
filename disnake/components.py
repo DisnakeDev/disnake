@@ -27,6 +27,7 @@ from .enums import (
     TextInputStyle,
     try_enum,
 )
+from .flags import UnfurledMediaItemFlags
 from .partial_emoji import PartialEmoji, _EmojiTag
 from .utils import MISSING, _get_as_snowflake, assert_never, get_slots
 
@@ -232,7 +233,7 @@ class Component:
 
     __slots__: tuple[str, ...] = ("type", "id")
 
-    __repr_attributes__: ClassVar[tuple[str, ...]]
+    __repr_attributes__: ClassVar[tuple[str, ...]] = ("id",)
 
     # subclasses are expected to overwrite this if they're only usable with `MessageFlags.is_components_v2`
     is_v2: ClassVar[bool] = False
@@ -284,7 +285,7 @@ class ActionRow(Component, Generic[ActionRowChildComponentT]):
 
     __slots__: tuple[str, ...] = ("children",)
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (*Component.__repr_attributes__, *__slots__)
 
     def __init__(self, data: ActionRowPayload) -> None:
         self.type: Literal[ComponentType.action_row] = ComponentType.action_row
@@ -352,7 +353,7 @@ class Button(Component):
         "sku_id",
     )
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (*Component.__repr_attributes__, *__slots__)
 
     def __init__(self, data: ButtonComponentPayload) -> None:
         self.type: Literal[ComponentType.button] = ComponentType.button
@@ -458,8 +459,9 @@ class BaseSelectMenu(Component):
     )
 
     # FIXME: this isn't pretty; we should decouple __repr__ from slots
-    __repr_attributes__: ClassVar[tuple[str, ...]] = tuple(
-        s for s in __slots__ if s != "default_values"
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (
+        *Component.__repr_attributes__,
+        *(s for s in __slots__ if s != "default_values"),
     )
 
     # n.b: ideally this would be `BaseSelectMenuPayload`,
@@ -981,7 +983,7 @@ class TextInput(Component):
         "min_length",
     )
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (*Component.__repr_attributes__, *__slots__)
 
     def __init__(self, data: TextInputPayload) -> None:
         self.type: Literal[ComponentType.text_input] = ComponentType.text_input
@@ -1051,7 +1053,7 @@ class Section(Component):
 
     __slots__: tuple[str, ...] = ("children", "accessory")
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (*Component.__repr_attributes__, *__slots__)
 
     is_v2 = True
 
@@ -1099,7 +1101,7 @@ class TextDisplay(Component):
 
     __slots__: tuple[str, ...] = ("content",)
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (*Component.__repr_attributes__, *__slots__)
 
     is_v2 = True
 
@@ -1133,6 +1135,14 @@ class UnfurledMediaItem:
         The height of this media item, if applicable.
     width: :class:`int` | :data:`None`
         The width of this media item, if applicable.
+    placeholder: :class:`str` | :data:`None`
+        The `Thumbhash <https://evanw.github.io/thumbhash/>`_ placeholder (if image or video) of this media item.
+
+        .. versionadded:: |vnext|
+    placeholder_version: :class:`int` | :data:`None`
+        The version of the placeholder (if image or video) of this media item.
+
+        .. versionadded:: |vnext|
     content_type: :class:`str` | :data:`None`
         The `media type <https://en.wikipedia.org/wiki/Media_type>`_ of this media item.
     attachment_id: :class:`int` | :data:`None`
@@ -1145,6 +1155,9 @@ class UnfurledMediaItem:
         "proxy_url",
         "height",
         "width",
+        "placeholder",
+        "placeholder_version",
+        "_flags",
         "content_type",
         "attachment_id",
     )
@@ -1156,6 +1169,9 @@ class UnfurledMediaItem:
         self.proxy_url: str | None = None
         self.height: int | None = None
         self.width: int | None = None
+        self.placeholder: str | None = None
+        self.placeholder_version: int | None = None
+        self._flags: int = 0
         self.content_type: str | None = None
         self.attachment_id: int | None = None
 
@@ -1165,16 +1181,27 @@ class UnfurledMediaItem:
         self.proxy_url = data.get("proxy_url")
         self.height = _get_as_snowflake(data, "height")
         self.width = _get_as_snowflake(data, "width")
+        self.placeholder = data.get("placeholder")
+        self.placeholder_version = data.get("placeholder_version")
+        self._flags = data.get("flags", 0)
         self.content_type = data.get("content_type")
         self.attachment_id = _get_as_snowflake(data, "attachment_id")
         return self
+
+    @property
+    def flags(self) -> UnfurledMediaItemFlags:
+        """:class:`UnfurledMediaItemFlags`: The flags for this media item.
+
+        .. versionadded:: |vnext|
+        """
+        return UnfurledMediaItemFlags._from_value(self._flags)
 
     def to_dict(self) -> UnfurledMediaItemPayload:
         # for sending, only `url` is required, and other fields are ignored regardless
         return {"url": self.url}
 
     def __repr__(self) -> str:
-        return f"<UnfurledMediaItem url={self.url} content_type={self.content_type}>"
+        return f"<UnfurledMediaItem url={self.url!r} content_type={self.content_type!r}>"
 
 
 class Thumbnail(Component):
@@ -1212,7 +1239,7 @@ class Thumbnail(Component):
         "spoiler",
     )
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (*Component.__repr_attributes__, *__slots__)
 
     is_v2 = True
 
@@ -1264,7 +1291,7 @@ class MediaGallery(Component):
 
     __slots__: tuple[str, ...] = ("items",)
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (*Component.__repr_attributes__, *__slots__)
 
     is_v2 = True
 
@@ -1335,7 +1362,7 @@ class MediaGalleryItem:
         return payload
 
     def __repr__(self) -> str:
-        return f"<MediaGalleryItem media={self.media!r} description={self.description!r}>"
+        return f"<MediaGalleryItem media={self.media!r} description={self.description!r} spoiler={self.spoiler}>"
 
 
 class FileComponent(Component):
@@ -1373,7 +1400,7 @@ class FileComponent(Component):
 
     __slots__: tuple[str, ...] = ("file", "spoiler", "name", "size")
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (*Component.__repr_attributes__, *__slots__)
 
     is_v2 = True
 
@@ -1425,7 +1452,7 @@ class Separator(Component):
 
     __slots__: tuple[str, ...] = ("divider", "spacing")
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (*Component.__repr_attributes__, *__slots__)
 
     is_v2 = True
 
@@ -1479,7 +1506,7 @@ class Container(Component):
         "spoiler",
     )
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (*Component.__repr_attributes__, *__slots__)
 
     is_v2 = True
 
@@ -1550,7 +1577,7 @@ class Label(Component):
         "component",
     )
 
-    __repr_info__: ClassVar[tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (*Component.__repr_attributes__, *__slots__)
 
     def __init__(self, data: LabelComponentPayload) -> None:
         self.type: Literal[ComponentType.label] = ComponentType.label
@@ -1624,7 +1651,7 @@ class FileUpload(Component):
         "file_types",
     )
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (*Component.__repr_attributes__, *__slots__)
 
     def __init__(self, data: FileUploadComponentPayload) -> None:
         self.type: Literal[ComponentType.file_upload] = ComponentType.file_upload
@@ -1769,7 +1796,7 @@ class RadioGroup(Component):
         "required",
     )
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (*Component.__repr_attributes__, *__slots__)
 
     def __init__(self, data: RadioGroupComponentPayload) -> None:
         self.type: Literal[ComponentType.radio_group] = ComponentType.radio_group
@@ -1834,7 +1861,7 @@ class CheckboxGroup(Component):
         "required",
     )
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (*Component.__repr_attributes__, *__slots__)
 
     def __init__(self, data: CheckboxGroupComponentPayload) -> None:
         self.type: Literal[ComponentType.checkbox_group] = ComponentType.checkbox_group
@@ -1892,7 +1919,7 @@ class Checkbox(Component):
 
     __slots__: tuple[str, ...] = ("custom_id", "default")
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = __slots__
+    __repr_attributes__: ClassVar[tuple[str, ...]] = (*Component.__repr_attributes__, *__slots__)
 
     def __init__(self, data: CheckboxComponentPayload) -> None:
         self.type: Literal[ComponentType.checkbox] = ComponentType.checkbox
