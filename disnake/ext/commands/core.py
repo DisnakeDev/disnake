@@ -2580,10 +2580,12 @@ def is_spoiler() -> Callable[[T], T]:
     """
 
     def pred(ctx: AnyContext) -> bool:
+        if (ctx.guild if isinstance(ctx, Context) else ctx.guild_id) is None:
+            # dm/group channel
+            return True
+
         ch = ctx.channel
-        if ctx.guild is None or (
-            isinstance(ch, (disnake.abc.GuildChannel, disnake.Thread)) and ch.is_spoiler()
-        ):
+        if isinstance(ch, (disnake.abc.GuildChannel, disnake.Thread)) and ch.is_spoiler():
             return True
         raise SpoilerChannelRequired(ch)  # pyright: ignore[reportArgumentType]
 
