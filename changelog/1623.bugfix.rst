@@ -1,0 +1,1 @@
+Fix :class:`components.Label`\ 's ``__repr__`` failing at runtime.
