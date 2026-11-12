@@ -173,7 +173,7 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
         .. versionadded:: 2.11
     """
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = ("_children",)
+    __repr_attributes__: ClassVar[tuple[str, ...]] = ("_children", "_id")
 
     def __init__(self, *components: ActionRowChildDefaultT, id: int = 0) -> None:
         self._id: int = id

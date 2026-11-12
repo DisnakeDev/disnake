@@ -66,6 +66,7 @@ class TextInput(WrappedComponent):
         "required",
         "min_length",
         "max_length",
+        "id",
     )
     # We have to set this to MISSING in order to overwrite the abstract property from UIComponent
     _underlying: TextInputComponent = MISSING

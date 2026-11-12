@@ -34,7 +34,7 @@ class MediaGallery(UIComponent):
         sequential identifiers to the components in the message.
     """
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = ("items",)
+    __repr_attributes__: ClassVar[tuple[str, ...]] = ("items", "id")
     # We have to set this to MISSING in order to overwrite the abstract property from UIComponent
     _underlying: MediaGalleryComponent = MISSING
 

@@ -38,6 +38,10 @@ class File:
         a string then the ``filename`` will default to the string given.
     spoiler: :class:`bool`
         Whether the attachment is a spoiler.
+
+        .. versionchanged:: |vnext|
+            Marking an attachment as a spoiler now sets the :meth:`~AttachmentFlags.is_spoiler`
+            flag directly, rather than adding the legacy ``SPOILER_`` prefix to the filename.
     description: :class:`str` | :data:`None`
         The file's description.
 
@@ -79,20 +83,20 @@ class File:
         self._closer = self.fp.close
         self.fp.close = lambda: None
 
-        if filename is None:
-            if isinstance(fp, str):
-                _, self.filename = os.path.split(fp)
-            else:
-                self.filename = getattr(fp, "name", None)
-        else:
+        if filename is not None:
             self.filename = filename
+        elif isinstance(fp, str):
+            _, self.filename = os.path.split(fp)
+        else:
+            self.filename = getattr(fp, "name", None)
 
-        if spoiler and self.filename is not None and not self.filename.startswith("SPOILER_"):
-            self.filename = "SPOILER_" + self.filename
+        if self.filename is not None and self.filename.startswith("SPOILER_"):
+            # legacy behavior; the API still takes the `SPOILER_` prefix into account,
+            # so setting spoiler=True here is really only for having the `self.spoiler`
+            # attr reflect that like before
+            spoiler = True
 
-        self.spoiler = spoiler or (
-            self.filename is not None and self.filename.startswith("SPOILER_")
-        )
+        self.spoiler = spoiler
         self.description = description
 
     def reset(self, *, seek: int | bool = True) -> None:
