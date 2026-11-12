@@ -546,6 +546,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
         topic: str | None = MISSING,
         position: int = MISSING,
         nsfw: bool = MISSING,
+        flags: ChannelFlags = MISSING,
         category: Snowflake | None = MISSING,
         slowmode_delay: int = MISSING,
         default_thread_slowmode_delay: int | None = MISSING,
@@ -567,10 +568,6 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             ``default_thread_slowmode_delay``, ``default_auto_archive_duration``, ``news``
             and ``overwrites`` keyword-only parameters.
 
-        .. note::
-            The current :attr:`TextChannel.flags` value won't be cloned.
-            This is a Discord limitation.
-
         Parameters
         ----------
         name: :class:`str` | :data:`None`
@@ -581,6 +578,11 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
             The position of the new channel. If not provided, defaults to this channel's position.
         nsfw: :class:`bool`
             Whether the new channel should be marked as NSFW. If not provided, defaults to this channel's NSFW value.
+        flags: :class:`ChannelFlags`
+            The new flags of this channel. If not provided, defaults to this channel's flags.
+
+            .. versionadded:: |vnext|
+
         category: :class:`abc.Snowflake` | :data:`None`
             The category where the new channel should be grouped. If not provided, defaults to this channel's category.
         slowmode_delay: :class:`int`
@@ -631,6 +633,7 @@ class TextChannel(disnake.abc.Messageable, disnake.abc.GuildChannel, Hashable):
                 "topic": topic if topic is not MISSING else self.topic,
                 "position": position if position is not MISSING else self.position,
                 "nsfw": nsfw if nsfw is not MISSING else self.nsfw,
+                "flags": flags.value if flags is not MISSING else self.flags.value,
                 "type": channel_type.value,
                 "rate_limit_per_user": (
                     slowmode_delay if slowmode_delay is not MISSING else self.slowmode_delay
@@ -1423,6 +1426,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
         rtc_region: str | VoiceRegion | None = MISSING,
         video_quality_mode: VideoQualityMode = MISSING,
         nsfw: bool = MISSING,
+        flags: ChannelFlags = MISSING,
         overwrites: Mapping[Role | Member, PermissionOverwrite] = MISSING,
         slowmode_delay: int | None = MISSING,
         reason: str | None = None,
@@ -1439,10 +1443,6 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
             Added ``bitrate``, ``user_limit``, ``position``, ``category``,
             ``rtc_region``, ``video_quality_mode``, ``nsfw``, ``slowmode_delay``
             and ``overwrites`` keyword-only parameters.
-
-        .. note::
-            The current :attr:`VoiceChannel.flags` value won't be cloned.
-            This is a Discord limitation.
 
         Parameters
         ----------
@@ -1462,6 +1462,11 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
             The video quality mode of the new channel. If not provided, defaults to this channel's video quality mode.
         nsfw: :class:`bool`
             Whether the new channel should be nsfw or not. If not provided, defaults to this channel's NSFW value.
+        flags: :class:`ChannelFlags`
+            The new flags of this channel. If not provided, defaults to this channel's flags.
+
+            .. versionadded:: |vnext|
+
         overwrites: :class:`~collections.abc.Mapping`\[:class:`~.Member` | :class:`~.Role`, :class:`PermissionOverwrite`]
             A :class:`Mapping` of target (either a role or a member) to :class:`PermissionOverwrite` to apply
             to the channel. If not provided, defaults to this channel's overwrites.
@@ -1499,6 +1504,7 @@ class VoiceChannel(disnake.abc.Messageable, VocalGuildChannel):
                     else int(self.video_quality_mode)
                 ),
                 "nsfw": nsfw if nsfw is not MISSING else self.nsfw,
+                "flags": flags.value if flags is not MISSING else self.flags.value,
                 "rate_limit_per_user": (
                     slowmode_delay if slowmode_delay is not MISSING else self.slowmode_delay
                 ),
@@ -2193,6 +2199,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         rtc_region: str | VoiceRegion | None = MISSING,
         video_quality_mode: VideoQualityMode = MISSING,
         nsfw: bool = MISSING,
+        flags: ChannelFlags = MISSING,
         overwrites: Mapping[Role | Member, PermissionOverwrite] = MISSING,
         reason: str | None = None,
     ) -> StageChannel:
@@ -2207,10 +2214,6 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         .. versionchanged:: 2.9
             Added ``position``, ``category``, ``rtc_region``,
             ``video_quality_mode``, ``bitrate``, ``nsfw``, ``slowmode_delay`` and ``overwrites`` keyword-only parameters.
-
-        .. note::
-            The current :attr:`StageChannel.flags` value won't be cloned.
-            This is a Discord limitation.
 
         .. warning::
             Currently the ``user_limit`` attribute is not cloned due to a Discord limitation.
@@ -2235,6 +2238,11 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
             The video quality mode of the new channel. If not provided, defaults to this channel's video quality mode.
         nsfw: :class:`bool`
             Whether the new channel should be nsfw or not. If not provided, defaults to this channel's NSFW value.
+        flags: :class:`ChannelFlags`
+            The new flags of this channel. If not provided, defaults to this channel's flags.
+
+            .. versionadded:: |vnext|
+
         overwrites: :class:`~collections.abc.Mapping`\[:class:`~.Member` | :class:`~.Role`, :class:`PermissionOverwrite`]
             A :class:`Mapping` of target (either a role or a member) to :class:`PermissionOverwrite`
             to apply to the channel. If not provided, defaults to this channel's overwrites.
@@ -2258,8 +2266,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
         :class:`StageChannel`
             The channel that was created.
         """
-        # TODO
-        # - check if discord-api-docs#5962 is solved and clone the user_limit attribute
+        # TODO: check if discord-api-docs#5962 is solved and clone the user_limit attribute
         return await self._clone_impl(
             {
                 "rate_limit_per_user": (
@@ -2275,6 +2282,7 @@ class StageChannel(disnake.abc.Messageable, VocalGuildChannel):
                     else int(self.video_quality_mode)
                 ),
                 "nsfw": nsfw if nsfw is not MISSING else self.nsfw,
+                "flags": flags.value if flags is not MISSING else self.flags.value,
             },
             base_flags=self.flags,
             name=name,
@@ -4296,6 +4304,7 @@ class ForumChannel(ThreadOnlyGuildChannel):
         topic: str | None = MISSING,
         position: int = MISSING,
         nsfw: bool = MISSING,
+        flags: ChannelFlags = MISSING,
         category: Snowflake | None = MISSING,
         slowmode_delay: int | None = MISSING,
         default_thread_slowmode_delay: int | None = MISSING,
@@ -4324,10 +4333,6 @@ class ForumChannel(ThreadOnlyGuildChannel):
         .. versionchanged:: 2.10
             Added ``default_layout`` parameter.
 
-        .. note::
-            The current :attr:`ForumChannel.flags` value won't be cloned.
-            This is a Discord limitation.
-
         Parameters
         ----------
         name: :class:`str` | :data:`None`
@@ -4338,6 +4343,11 @@ class ForumChannel(ThreadOnlyGuildChannel):
             The position of the new channel. If not provided, defaults to this channel's position.
         nsfw: :class:`bool`
             Whether the new channel should be nsfw or not. If not provided, defaults to this channel's NSFW value.
+        flags: :class:`ChannelFlags`
+            The new flags of this channel. If not provided, defaults to this channel's flags.
+
+            .. versionadded:: |vnext|
+
         category: :class:`abc.Snowflake` | :data:`None`
             The category where the new channel should be grouped. If not provided, defaults to this channel's category.
         slowmode_delay: :class:`int` | :data:`None`
@@ -4395,6 +4405,7 @@ class ForumChannel(ThreadOnlyGuildChannel):
                 "topic": topic if topic is not MISSING else self.topic,
                 "position": position if position is not MISSING else self.position,
                 "nsfw": nsfw if nsfw is not MISSING else self.nsfw,
+                "flags": flags.value if flags is not MISSING else self.flags.value,
                 "rate_limit_per_user": (
                     slowmode_delay if slowmode_delay is not MISSING else self.slowmode_delay
                 ),
@@ -4699,6 +4710,7 @@ class MediaChannel(ThreadOnlyGuildChannel):
         topic: str | None = MISSING,
         position: int = MISSING,
         nsfw: bool = MISSING,
+        flags: ChannelFlags = MISSING,
         category: Snowflake | None = MISSING,
         slowmode_delay: int | None = MISSING,
         default_thread_slowmode_delay: int | None = MISSING,
@@ -4717,10 +4729,6 @@ class MediaChannel(ThreadOnlyGuildChannel):
         You must have :attr:`.Permissions.manage_channels` permission to
         do this.
 
-        .. note::
-            The current :attr:`MediaChannel.flags` value won't be cloned.
-            This is a Discord limitation.
-
         Parameters
         ----------
         name: :class:`str` | :data:`None`
@@ -4731,6 +4739,11 @@ class MediaChannel(ThreadOnlyGuildChannel):
             The position of the new channel. If not provided, defaults to this channel's position.
         nsfw: :class:`bool`
             Whether the new channel should be nsfw or not. If not provided, defaults to this channel's NSFW value.
+        flags: :class:`ChannelFlags`
+            The new flags of this channel. If not provided, defaults to this channel's flags.
+
+            .. versionadded:: |vnext|
+
         category: :class:`abc.Snowflake` | :data:`None`
             The category where the new channel should be grouped. If not provided, defaults to this channel's category.
         slowmode_delay: :class:`int` | :data:`None`
@@ -4789,6 +4802,7 @@ class MediaChannel(ThreadOnlyGuildChannel):
                 "topic": topic if topic is not MISSING else self.topic,
                 "position": position if position is not MISSING else self.position,
                 "nsfw": nsfw if nsfw is not MISSING else self.nsfw,
+                "flags": flags.value if flags is not MISSING else self.flags.value,
                 "rate_limit_per_user": (
                     slowmode_delay if slowmode_delay is not MISSING else self.slowmode_delay
                 ),

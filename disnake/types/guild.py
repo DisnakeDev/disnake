@@ -180,6 +180,7 @@ class ChannelPositionUpdate(TypedDict):
     position: int | None
     lock_permissions: NotRequired[bool | None]
     parent_id: NotRequired[Snowflake | None]
+    flags: NotRequired[int | None]  # currently not implemented
 
 
 class RolePositionUpdate(TypedDict):
