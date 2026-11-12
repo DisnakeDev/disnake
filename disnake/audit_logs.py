@@ -19,7 +19,7 @@ from .colour import Colour
 from .invite import Invite
 from .mixins import Hashable
 from .object import Object
-from .onboarding import OnboardingPrompt, OnboardingPromptOption
+from .onboarding import APIOnboardingPrompt, APIOnboardingPromptOption
 from .partial_emoji import PartialEmoji
 from .permissions import PermissionOverwrite, Permissions
 from .threads import ForumTag, Thread
@@ -295,20 +295,20 @@ def _transform_default_reaction(
 
 def _transform_onboarding_prompt_option(
     entry: AuditLogEntry, data: OnboardingPromptOptionPayload | None
-) -> OnboardingPromptOption | None:
+) -> APIOnboardingPromptOption | None:
     if data is None:
         return None
 
-    return OnboardingPromptOption(data=data, guild=entry.guild)
+    return APIOnboardingPromptOption(data=data, guild=entry.guild)
 
 
 def _transform_onboarding_prompt(
     entry: AuditLogEntry, data: OnboardingPromptPayload | None
-) -> OnboardingPrompt | None:
+) -> APIOnboardingPrompt | None:
     if data is None:
         return None
 
-    return OnboardingPrompt(data=data, guild=entry.guild)
+    return APIOnboardingPrompt(data=data, guild=entry.guild)
 
 
 class AuditLogDiff:

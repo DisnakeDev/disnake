@@ -68,6 +68,7 @@ __all__ = (
     "ApplicationRoleConnectionMetadataType",
     "ApplicationEventWebhookStatus",
     "OnboardingPromptType",
+    "OnboardingMode",
     "SKUType",
     "EntitlementType",
     "SubscriptionStatus",
@@ -2380,6 +2381,19 @@ class OnboardingPromptType(Enum):
     """The prompt is a multiple choice prompt."""
     dropdown = 1
     """The prompt is a dropdown prompt."""
+
+
+class OnboardingMode(Enum):
+    """
+    Represents the criteria used to satisfy onboarding constraints that are required for enabling it.
+
+    .. versionadded:: |vnext|
+    """
+
+    default = 0
+    """Counts only :attr:`Onboarding.default_channels` towards constraints."""
+    advanced = 1
+    """Counts :attr:`Onboarding.default_channels` and :attr:`~Onboarding.prompts` towards constraints."""
 
 
 class SKUType(Enum):
