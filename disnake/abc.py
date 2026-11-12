@@ -1427,6 +1427,82 @@ class GuildChannel(ABC):
         guild = self.guild
         return [Invite(state=state, data=invite, channel=self, guild=guild) for invite in data]
 
+    async def fetch_member_permissions(
+        self, member_id: int, *, implicit: bool = True
+    ) -> Permissions:
+        """|coro|
+
+        Retrieve a :class:`~disnake.Permissions` for a member.
+
+        .. note::
+
+            This method is an API call. For general usage, consider :attr:`.Member.guild_permissions` instead.
+
+        .. versionadded:: |vnext|
+
+        Parameters
+        ----------
+        member_id: :class:`int`
+            The ID of the member to retrieve permissions for.
+        implicit: :class:`bool`
+            Whether to include implicit permissions in the result. Defaults to ``True``.
+
+        Raises
+        ------
+        NotFound
+            The member requested could not be found.
+        Forbidden
+            You do not have proper permissions to get the information.
+        HTTPException
+            Retrieving the member permissions failed.
+
+        Returns
+        -------
+        :class:`~disnake.Permissions`
+            The permissions of the member.
+        """
+        data = await self._state.http.get_channel_member_permissions(
+            self.id, member_id=member_id, implicit=implicit
+        )
+        return Permissions(int(data["permissions"]))
+
+    async def fetch_role_permissions(self, role_id: int, *, implicit: bool = True) -> Permissions:
+        """|coro|
+
+        Retrieve a :class:`~disnake.Permissions` for a role.
+
+        .. note::
+
+            This method is an API call. For general usage, consider :attr:`.Role.permissions` instead.
+
+        .. versionadded:: |vnext|
+
+        Parameters
+        ----------
+        role_id: :class:`int`
+            The ID of the role to retrieve permissions for.
+        implicit: :class:`bool`
+            Whether to include implicit permissions in the result. Defaults to ``True``.
+
+        Raises
+        ------
+        NotFound
+            The role requested could not be found.
+        Forbidden
+            You do not have proper permissions to get the information.
+        HTTPException
+            Retrieving the role permissions failed.
+
+        Returns
+        -------
+        :class:`~disnake.Permissions`
+            The permissions of the role.
+        """
+        data = await self._state.http.get_channel_role_permissions(
+            self.id, role_id=role_id, implicit=implicit
+        )
+        return Permissions(int(data["permissions"]))
+
 
 class Messageable:
     """An ABC that details the common operations on a model that can send messages.
