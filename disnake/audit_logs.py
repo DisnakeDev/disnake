@@ -655,7 +655,11 @@ class AuditLogEntry(Hashable):
                     ),
                 }
                 self.extra = type("_AuditLogProxy", (), elems)()
-            elif self.action is enums.AuditLogAction.member_disconnect:
+            elif self.action in (
+                enums.AuditLogAction.member_disconnect,
+                enums.AuditLogAction.channel_position_update,
+                enums.AuditLogAction.role_position_update,
+            ):
                 elems = {
                     "count": int(extra["count"]),
                 }
