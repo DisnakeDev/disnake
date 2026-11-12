@@ -865,9 +865,8 @@ class HTTPClient:
             "/channels/{channel_id}/permissions/member/{member_id}",
             channel_id=channel_id,
             member_id=member_id,
-            params={"implicit": implicit},
         )
-        return self.request(r)
+        return self.request(r, params={"implicit": str(implicit).lower()})
 
     def get_channel_role_permissions(
         self, channel_id: Snowflake, role_id: Snowflake, implicit: bool
@@ -877,9 +876,8 @@ class HTTPClient:
             "/channels/{channel_id}/permissions/role/{role_id}",
             channel_id=channel_id,
             role_id=role_id,
-            params={"implicit": implicit},
         )
-        return self.request(r)
+        return self.request(r, params={"implicit": str(implicit).lower()})
 
     def logs_from(
         self,
