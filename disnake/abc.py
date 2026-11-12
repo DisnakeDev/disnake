@@ -240,6 +240,12 @@ class GuildChannel(ABC):
     ----------
     name: :class:`str`
         The channel name.
+    id: :class:`int`
+        The channel's ID.
+    type: :class:`.ChannelType`
+        The channel's Discord type.
+    category_id: :class:`int` | :data:`None`
+        The category channel ID this channel belongs to, if applicable.
     guild: :class:`.Guild`
         The guild the channel belongs to.
     position: :class:`int`
@@ -624,6 +630,17 @@ class GuildChannel(ABC):
         """
         return ChannelFlags._from_value(self._flags)
 
+    def is_obfuscated(self) -> bool:
+        """Whether the channel's metadata is obfuscated.
+
+        This is a shortcut to :attr:`self.flags.obfuscated <.ChannelFlags.obfuscated>`.
+
+        .. versionadded:: |vnext|
+
+        :return type: :class:`bool`
+        """
+        return self.flags.obfuscated
+
     @property
     def jump_url(self) -> str:
         """A URL that can be used to jump to this channel.
@@ -684,6 +701,11 @@ class GuildChannel(ABC):
             user-installed applications in guilds, this method will not work
             due to an API limitation.
             Consider using :attr:`.Interaction.permissions` or :attr:`~.Interaction.app_permissions` instead.
+
+        .. note::
+            If the channel is :attr:`obfuscated <.is_obfuscated>`, this method is not reliable
+            and will return ``PermissionOverwrite(view_channel=False)`` for all
+            non-admin users and roles.
 
         .. versionchanged:: 2.0
             The object passed in can now be a role object.
@@ -1041,11 +1063,16 @@ class GuildChannel(ABC):
         self,
         base_attrs: dict[str, Any],
         *,
+        base_flags: ChannelFlags,
         name: str | None = None,
         category: Snowflake | None = MISSING,
         overwrites: Mapping[Role | Member, PermissionOverwrite] = MISSING,
         reason: str | None = None,
     ) -> Self:
+        if base_flags.obfuscated:
+            msg = "Cannot clone an obfuscated channel"
+            raise RuntimeError(msg)
+
         # if the overwrites are MISSING, defaults to the
         # original permissions of the channel
         overwrites_payload: list[PermissionOverwritePayload]

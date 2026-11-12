@@ -41,9 +41,9 @@ runs:
 
     - name: Set up uv with Python ${{ inputs.python-version }}
       id: setup-python
-      uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+      uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
       with:
-        version: '0.12.5'
+        version: '0.13.6'
         enable-cache: 'auto'
         # this doesn't install python but pins the uv version; its the same as providing UV_PYTHON
         python-version: ${{ inputs.python-version }}
@@ -54,6 +54,11 @@ runs:
         UV_PYTHON_DOWNLOADS: automatic
         PYTHON_VERSION: ${{ inputs.python-version }}
       run: |
+        # uv installs to ~/.local/bin, which is not in $PATH on Windows by default, and nox can't discover uv's python executables on its own
+        if [ "${{ runner.os }}" = "Windows" ]; then
+          echo "$USERPROFILE/.local/bin" >> $GITHUB_PATH
+        fi
+
         uv python install ${PYTHON_VERSION}
 
     - name: Install nox
