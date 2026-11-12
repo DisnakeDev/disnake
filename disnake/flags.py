@@ -3090,10 +3090,7 @@ class EmbedFlags(BaseFlags):
 
     @flag_value
     def contains_explicit_content(self):
-        """:class:`bool`: Returns ``True`` if the embed contains explicit content.
-
-        .. versionadded:: |vnext|
-        """
+        """:class:`bool`: Returns ``True`` if the embed contains explicit content."""
         return 1 << 4
 
     @flag_value
