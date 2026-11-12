@@ -1,1 +1,4 @@
-Add :meth:`~disnake.AttachmentFlags.contains_explicit_content`, :meth:`~disnake.AttachmentFlags.contains_gore_content`, :meth:`~disnake.AttachmentFlags.contains_self_harm_content`, :class:`~disnake.UnfurledScanMetadataFlags`, :attr:`.UnfurledMediaItem.content_scan_metadata` and :class:`.UnfurledScanMetadata`.
+Add content-scanning flags to media.
+- :class:`AttachmentFlags`: :attr:`~AttachmentFlags.contains_explicit_content`, :attr:`~AttachmentFlags.contains_gore_content`, :attr:`~AttachmentFlags.contains_self_harm_content`
+- :class:`EmbedFlags`: same as above
+- :class:`UnfurledScanMetadata`, :class:`UnfurledScanMetadataFlags`, and :attr:`.UnfurledMediaItem.content_scan_metadata`.
