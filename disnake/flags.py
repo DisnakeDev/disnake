@@ -3100,18 +3100,12 @@ class EmbedFlags(BaseFlags):
 
     @flag_value
     def contains_gore_content(self):
-        """:class:`bool`: Returns ``True`` if the embed contains gore content.
-
-        .. versionadded:: |vnext|
-        """
+        """:class:`bool`: Returns ``True`` if the embed contains gore content."""
         return 1 << 6
 
     @flag_value
     def contains_self_harm_content(self):
-        """:class:`bool`: Returns ``True`` if the embed contains self-harm content.
-
-        .. versionadded:: |vnext|
-        """
+        """:class:`bool`: Returns ``True`` if the embed contains self-harm content."""
         return 1 << 7
 
 
@@ -3327,6 +3321,12 @@ class UnfurledScanMetadataFlags(BaseFlags):
             Returns an UnfurledScanMetadataFlags instance with all flags except ``x`` inverted from their default value.
 
     .. versionadded:: |vnext|
+
+    Attributes
+    ----------
+    value: :class:`int`
+        The raw value. You should query flags via the properties
+        rather than using this raw value.
     """
 
     if TYPE_CHECKING:
