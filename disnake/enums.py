@@ -77,6 +77,7 @@ __all__ = (
     "SeparatorSpacing",
     "NameplatePalette",
     "SharedClientThemeBase",
+    "InviteTargetUsersJobStatus",
 )
 
 EnumMetaT = TypeVar("EnumMetaT", bound="EnumMeta")
@@ -2529,6 +2530,22 @@ class SharedClientThemeBase(Enum):
     """Darker base theme."""
     midnight = 4
     """Midnight base theme."""
+
+
+class InviteTargetUsersJobStatus(Enum):
+    """Specifies the job status for an :class:`InviteTargetUsersJob`.
+
+    .. versionadded:: |vnext|
+    """
+
+    unspecified = 0
+    """The default value."""
+    processing = 1
+    """The job is currently being processed."""
+    completed = 2
+    """The job has been completed successfully."""
+    failed = 3
+    """The job has failed, see ``error_message`` attribute for more details."""
 
 
 T = TypeVar("T", bound="Enum")
