@@ -821,11 +821,6 @@ class AuditLogAction(Enum):
             return "all"
         elif v < 10:
             return "guild"
-        elif v < 20:
-            return "channel"
-        elif v < 30:
-            return "user"
-        elif v < 40:
         elif v < 16:
             return "channel"
         elif v < 20:
