@@ -967,8 +967,10 @@ AuditLogAction
 
         A channel's position was updated.
 
-        When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`abc.GuildChannel` or :class:`Object` with an ID.
+        When this is the action, the type of :attr:`~AuditLogEntry.extra` is
+        set to an unspecified proxy object with one attribute:
+
+        - ``count``: An integer specifying how many channels were reordered.
 
         .. versionadded:: |vnext|
 
@@ -1154,8 +1156,10 @@ AuditLogAction
 
         A role's position was updated.
 
-        When this is the action, the type of :attr:`~AuditLogEntry.target` is
-        the :class:`Role` or a :class:`Object` with the ID.
+        When this is the action, the type of :attr:`~AuditLogEntry.extra` is
+        set to an unspecified proxy object with one attribute:
+
+        - ``count``: An integer specifying how many roles were reordered.
 
         .. versionadded:: |vnext|
 
