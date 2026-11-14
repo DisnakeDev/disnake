@@ -172,7 +172,7 @@ def to_multipart_with_attachments(
     return to_multipart(payload, files)
 
 
-class RouteParameters(TypedDict, total=False, closed=True):
+class RouteParameters(TypedDict, total=False):
     # major parameters
     channel_id: Snowflake
     guild_id: Snowflake
