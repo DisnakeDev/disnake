@@ -104,6 +104,8 @@ class BaseFlags:
     DEFAULT_VALUE: ClassVar[int] = 0
     # combined value of all flags
     ALL_FLAGS_VALUE: ClassVar[int] = 0
+    # used in error messages
+    _FRIENDLY_FLAG_NAME: ClassVar[str] = "flag"
 
     value: int
 
@@ -144,7 +146,7 @@ class BaseFlags:
                 self._set_flag(self.VALID_FLAGS[key], value)
 
         except KeyError as err:
-            msg = f"{err.args[0]!r} is not a valid {self.__class__.__name__} name."
+            msg = f"{err.args[0]!r} is not a valid {self._FRIENDLY_FLAG_NAME} name."
             raise TypeError(msg) from None
 
     @classmethod

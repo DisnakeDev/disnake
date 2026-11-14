@@ -136,6 +136,8 @@ class Permissions(BaseFlags):
 
     __slots__ = ()
 
+    _FRIENDLY_FLAG_NAME: ClassVar[str] = "permission"
+
     @overload
     @_generated
     def __init__(

@@ -165,7 +165,7 @@ class TestBaseFlags:
         assert ins.two is False
 
     def test__init__invalid_kwargs(self) -> None:
-        with pytest.raises(TypeError, match=r"'h' is not a valid TestFlags name."):
+        with pytest.raises(TypeError, match=r"'h' is not a valid flag name."):
             TestFlags(h=True)
 
     def test_set_require_bool(self) -> None:
