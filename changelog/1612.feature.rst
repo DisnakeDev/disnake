@@ -1,0 +1,1 @@
+Change :attr:`.ui.ActionRow.children` to be a plain mutable list, allowing you to use list methods like :meth:`row.children.append() <list.append>` in addition to the existing API of :meth:`ui.ActionRow.append_item` and similar.
