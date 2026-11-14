@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 import copy
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING
 
 from ..components import FileComponent, UnfurledMediaItem, handle_media_item_input
 from ..enums import ComponentType
-from ..utils import MISSING
+from ..utils import MISSING, make_repr
 from .item import UIComponent
 
 if TYPE_CHECKING:
@@ -18,6 +18,11 @@ if TYPE_CHECKING:
 __all__ = ("File",)
 
 
+@make_repr(
+    "file",
+    spoiler=...,
+    id=...,
+)
 class File(UIComponent):
     """Represents a UI file component.
 
@@ -37,11 +42,6 @@ class File(UIComponent):
         sequential identifiers to the components in the message.
     """
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = (
-        "file",
-        "spoiler",
-        "id",
-    )
     # We have to set this to MISSING in order to overwrite the abstract property from UIComponent
     _underlying: FileComponent = MISSING
 

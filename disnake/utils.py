@@ -29,7 +29,7 @@ from collections.abc import (
 )
 from inspect import getdoc as _getdoc, isawaitable as _isawaitable, signature as _signature
 from operator import attrgetter
-from types import UnionType
+from types import EllipsisType, UnionType
 from typing import (
     TYPE_CHECKING,
     Annotated,
@@ -1552,6 +1552,56 @@ def humanize_list(values: list[str], combine: str) -> str:
         return "<none>"
     else:
         return f" {combine} ".join(values)
+
+
+def make_repr(
+    *positional: str, _unpack_: str = "", **kw_params: EllipsisType
+) -> Callable[[type[T]], type[T]]:
+    r"""Decorator that synthesizes a `__repr__` for a class.
+
+    Parameters
+    ----------
+    *positional:
+        Attributes whose values should appear as passed positionally.
+    \_unpack\_:
+        A name of a single attribute that holds an iterable, whose elements should be unpacked:
+        ```
+        @make_repr(_unpack_="seq")
+        class Foo:
+            seq: Sequence[int]
+
+            def __init__(*seq: int) -> None:
+                self.seq = list(seq)
+        repr(Foo(1, 2, 3))  # Foo(1, 2, 3)
+        ```
+    **kw_params:
+        Attributes which should appear as `name=value` pairs. Leading `_` are stripped from `name`.
+    """
+    args_parts: list[str] = []
+
+    if _unpack_:
+        args_parts.append(f'{{", ".join(map(repr, self.{_unpack_}))}}')
+        if positional or kw_params:
+            args_parts.append(f'{{", " if self.{_unpack_} else ""}}')
+    if positional:
+        args_parts.append(", ".join(f"{{self.{pos}!r}}" for pos in positional))
+        if kw_params:
+            args_parts.append(", ")
+    if kw_params:
+        args_parts.append(", ".join(f"{kw.lstrip('_')}={{self.{kw}!r}}" for kw in kw_params))
+
+    source = (
+        "def __repr__(self) -> str:\n"
+        f"    return f'{{self.__class__.__name__}}({''.join(args_parts)})'"
+    )
+    ns: dict[str, Any] = {}
+    exec(source, None, ns)  # noqa: S102
+
+    def inner(cls: type[T], /) -> type[T]:
+        cls.__repr__ = ns["__repr__"]
+        return cls
+
+    return inner
 
 
 # Similar to typing.assert_never, but returns instead of raising (i.e. has no runtime effect).

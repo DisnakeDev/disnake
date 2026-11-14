@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING
 
 from ..components import Checkbox as CheckboxComponent
 from ..enums import ComponentType
-from ..utils import MISSING
+from ..utils import MISSING, make_repr
 from .item import UIComponent
 
 if TYPE_CHECKING:
@@ -16,6 +16,11 @@ if TYPE_CHECKING:
 __all__ = ("Checkbox",)
 
 
+@make_repr(
+    custom_id=...,
+    default=...,
+    id=...,
+)
 class Checkbox(UIComponent):
     r"""Represents a UI checkbox.
 
@@ -38,11 +43,6 @@ class Checkbox(UIComponent):
         sequential identifiers to the components in the modal.
     """
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = (
-        "custom_id",
-        "default",
-        "id",
-    )
     # We have to set this to MISSING in order to overwrite the abstract property from UIComponent
     _underlying: CheckboxComponent = MISSING
 

@@ -15,7 +15,7 @@ from typing import (
 from ...abc import Snowflake
 from ...components import SelectOption, StringSelectMenu
 from ...enums import ComponentType, SelectDefaultValueType
-from ...utils import MISSING
+from ...utils import MISSING, make_repr
 from .._types import P, V_co, V_deco
 from ..item import DecoratedItem, ItemCallbackType
 from .base import BaseSelect, _create_decorator
@@ -48,6 +48,17 @@ def _parse_select_options(options: SelectOptionInput) -> list[SelectOption]:
     return [opt if isinstance(opt, SelectOption) else SelectOption(label=opt) for opt in options]
 
 
+@make_repr(
+    custom_id=...,
+    placeholder=...,
+    min_values=...,
+    max_values=...,
+    disabled=...,
+    options=...,
+    required=...,
+    id=...,
+    row=...,
+)
 class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
     r"""Represents a UI string select menu.
 
@@ -108,8 +119,6 @@ class StringSelect(BaseSelect[StringSelectMenu, str, V_co]):
     values: :class:`list`\[:class:`str`]
         A list of values that have been selected by the user.
     """
-
-    __repr_attributes__: ClassVar[tuple[str, ...]] = (*BaseSelect.__repr_attributes__, "options")
 
     # In practice this should never be used by anything, might as well have it anyway though.
     _default_value_type_map: ClassVar[

@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING
 
 from ..components import Separator as SeparatorComponent
 from ..enums import ComponentType, SeparatorSpacing
-from ..utils import MISSING
+from ..utils import MISSING, make_repr
 from .item import UIComponent
 
 if TYPE_CHECKING:
@@ -15,6 +15,11 @@ if TYPE_CHECKING:
 __all__ = ("Separator",)
 
 
+@make_repr(
+    divider=...,
+    spacing=...,
+    id=...,
+)
 class Separator(UIComponent):
     """Represents a UI separator.
 
@@ -35,11 +40,6 @@ class Separator(UIComponent):
         sequential identifiers to the components in the message.
     """
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = (
-        "divider",
-        "spacing",
-        "id",
-    )
     # We have to set this to MISSING in order to overwrite the abstract property from UIComponent
     _underlying: SeparatorComponent = MISSING
 

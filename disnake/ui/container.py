@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, TypeAlias, cast
+from typing import TYPE_CHECKING, TypeAlias, cast
 
 from ..colour import Colour
 from ..components import Container as ContainerComponent
 from ..enums import ComponentType
-from ..utils import copy_doc
+from ..utils import copy_doc, make_repr
 from .item import UIComponent, ensure_ui_component
 
 if TYPE_CHECKING:
@@ -32,6 +32,12 @@ if TYPE_CHECKING:
 __all__ = ("Container",)
 
 
+@make_repr(
+    _unpack_="children",
+    _accent_colour=...,
+    spoiler=...,
+    _id=...,
+)
 class Container(UIComponent):
     r"""Represents a UI container.
 
@@ -63,13 +69,6 @@ class Container(UIComponent):
     spoiler: :class:`bool`
         Whether the container is marked as a spoiler.
     """
-
-    __repr_attributes__: ClassVar[tuple[str, ...]] = (
-        "children",
-        "accent_colour",
-        "spoiler",
-        "_id",
-    )
 
     def __init__(
         self,
