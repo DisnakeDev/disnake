@@ -963,6 +963,17 @@ AuditLogAction
         .. versionchanged:: 2.6
             :attr:`~AuditLogDiff.type` for this action is now an :class:`int`.
 
+    .. attribute:: channel_position_update
+
+        A channel's position was updated.
+
+        When this is the action, the type of :attr:`~AuditLogEntry.extra` is
+        set to an unspecified proxy object with one attribute:
+
+        - ``count``: An integer specifying how many channels were reordered.
+
+        .. versionadded:: |vnext|
+
     .. attribute:: kick
 
         A member was kicked.
@@ -1140,6 +1151,17 @@ AuditLogAction
         - :attr:`~AuditLogDiff.permissions`
         - :attr:`~AuditLogDiff.icon`
         - :attr:`~AuditLogDiff.emoji`
+
+    .. attribute:: role_position_update
+
+        A role's position was updated.
+
+        When this is the action, the type of :attr:`~AuditLogEntry.extra` is
+        set to an unspecified proxy object with one attribute:
+
+        - ``count``: An integer specifying how many roles were reordered.
+
+        .. versionadded:: |vnext|
 
     .. attribute:: invite_create
 
