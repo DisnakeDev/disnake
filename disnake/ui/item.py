@@ -7,7 +7,6 @@ from collections.abc import Callable, Coroutine
 from typing import (
     TYPE_CHECKING,
     Any,
-    ClassVar,
     Generic,
     Protocol,
     overload,
@@ -71,17 +70,9 @@ class UIComponent(ABC):
     .. versionadded:: 2.11
     """
 
-    __repr_attributes__: ClassVar[tuple[str, ...]]
-
     @property
     @abstractmethod
     def _underlying(self) -> Component: ...
-
-    def __repr__(self) -> str:
-        attrs = " ".join(
-            f"{key.lstrip('_')}={getattr(self, key)!r}" for key in self.__repr_attributes__
-        )
-        return f"<{self.__class__.__name__} {attrs}>"
 
     @property
     def is_v2(self) -> bool:
@@ -157,8 +148,6 @@ class Item(WrappedComponent, Generic[V_co]):
 
     .. versionadded:: 2.0
     """
-
-    __repr_attributes__: ClassVar[tuple[str, ...]] = ("row",)
 
     def __init__(self) -> None:
         self._view: V_co = None  # pyright: ignore[reportAttributeAccessIssue]

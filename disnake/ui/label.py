@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, ClassVar, TypeAlias, cast
+from typing import TYPE_CHECKING, Any, TypeAlias, cast
 
 from ..components import Label as LabelComponent
 from ..enums import ComponentType
-from ..utils import copy_doc
+from ..utils import copy_doc, make_repr
 from .item import UIComponent, ensure_ui_component
 
 if TYPE_CHECKING:
@@ -26,6 +26,12 @@ if TYPE_CHECKING:
 __all__ = ("Label",)
 
 
+@make_repr(
+    "text",
+    "component",
+    description=...,
+    _id=...,
+)
 class Label(UIComponent):
     """Represents a UI label.
 
@@ -65,13 +71,6 @@ class Label(UIComponent):
     description: :class:`str` | :data:`None`
         The description text for the label.
     """
-
-    __repr_attributes__: ClassVar[tuple[str, ...]] = (
-        "text",
-        "description",
-        "component",
-        "_id",
-    )
 
     def __init__(
         self,

@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING
 
 from ..components import CheckboxGroup as CheckboxGroupComponent, GroupOption, _parse_group_options
 from ..enums import ComponentType
-from ..utils import MISSING
+from ..utils import MISSING, make_repr
 from .item import UIComponent
 
 if TYPE_CHECKING:
@@ -18,6 +18,14 @@ if TYPE_CHECKING:
 __all__ = ("CheckboxGroup",)
 
 
+@make_repr(
+    "options",
+    custom_id=...,
+    min_values=...,
+    max_values=...,
+    required=...,
+    id=...,
+)
 class CheckboxGroup(UIComponent):
     r"""Represents a UI checkbox group.
 
@@ -50,14 +58,6 @@ class CheckboxGroup(UIComponent):
         sequential identifiers to the components in the modal.
     """
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = (
-        "custom_id",
-        "options",
-        "min_values",
-        "max_values",
-        "required",
-        "id",
-    )
     # We have to set this to MISSING in order to overwrite the abstract property from UIComponent
     _underlying: CheckboxGroupComponent = MISSING
 

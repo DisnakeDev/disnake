@@ -5,14 +5,14 @@ from __future__ import annotations
 import inspect
 import os
 from collections.abc import Callable
-from typing import TYPE_CHECKING, Any, ClassVar, overload
+from typing import TYPE_CHECKING, Any, overload
 
 from typing_extensions import Self, TypeVar
 
 from ..components import Button as ButtonComponent
 from ..enums import ButtonStyle, ComponentType
 from ..partial_emoji import PartialEmoji, _EmojiTag
-from ..utils import MISSING
+from ..utils import MISSING, make_repr
 from ._types import P, V_co, V_deco
 from .item import DecoratedItem, Item, ItemCallbackType
 
@@ -25,6 +25,18 @@ if TYPE_CHECKING:
     from ..emoji import Emoji
 
 
+@make_repr(
+    custom_id=...,
+    style=...,
+    url=...,
+    disabled=...,
+    label=...,
+    emoji=...,
+    sku_id=...,
+    id=...,
+    row=...,
+    _cast_to_str_={"style"},
+)
 class Button(Item[V_co]):
     """Represents a UI button.
 
@@ -65,17 +77,6 @@ class Button(Item[V_co]):
         ordering. The row number must be between 0 and 4 (i.e. zero indexed).
     """
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = (
-        "custom_id",
-        "style",
-        "url",
-        "disabled",
-        "label",
-        "emoji",
-        "sku_id",
-        "id",
-        "row",
-    )
     # We have to set this to MISSING in order to overwrite the abstract property from UIComponent
     _underlying: ButtonComponent = MISSING
 

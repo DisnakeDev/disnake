@@ -17,7 +17,7 @@ from ...components import ChannelSelectMenu
 from ...enums import ChannelType, ComponentType, SelectDefaultValueType
 from ...object import Object
 from ...threads import Thread
-from ...utils import MISSING
+from ...utils import MISSING, make_repr
 from .._types import P, V_co, V_deco
 from ..item import DecoratedItem, ItemCallbackType
 from .base import BaseSelect, SelectDefaultValueInputType, _create_decorator
@@ -34,6 +34,17 @@ __all__ = (
 )
 
 
+@make_repr(
+    custom_id=...,
+    placeholder=...,
+    min_values=...,
+    max_values=...,
+    disabled=...,
+    channel_types=...,
+    required=...,
+    id=...,
+    row=...,
+)
 class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
     r"""Represents a UI channel select menu.
 
@@ -90,11 +101,6 @@ class ChannelSelect(BaseSelect[ChannelSelectMenu, "AnyChannel", V_co]):
     values: :class:`list`\[:class:`.abc.GuildChannel` | :class:`.Thread` | :class:`.abc.PrivateChannel` | :class:`.PartialMessageable`]
         A list of channels that have been selected by the user.
     """
-
-    __repr_attributes__: ClassVar[tuple[str, ...]] = (
-        *BaseSelect.__repr_attributes__,
-        "channel_types",
-    )
 
     _default_value_type_map: ClassVar[
         Mapping[SelectDefaultValueType, tuple[type[Snowflake], ...]]

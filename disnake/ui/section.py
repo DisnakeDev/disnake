@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, ClassVar, TypeAlias, cast
+from typing import TYPE_CHECKING, Any, TypeAlias, cast
 
 from ..components import Section as SectionComponent
 from ..enums import ComponentType
-from ..utils import copy_doc
+from ..utils import copy_doc, make_repr
 from .item import UIComponent, ensure_ui_component
 from .text_display import TextDisplay
 
@@ -21,6 +21,11 @@ if TYPE_CHECKING:
 __all__ = ("Section",)
 
 
+@make_repr(
+    _unpack_="children",
+    accessory=...,
+    _id=...,
+)
 class Section(UIComponent):
     r"""Represents a UI section.
 
@@ -47,12 +52,6 @@ class Section(UIComponent):
     accessory: :class:`~.ui.Thumbnail` | :class:`~.ui.Button`
         The accessory component displayed next to the section text.
     """
-
-    __repr_attributes__: ClassVar[tuple[str, ...]] = (
-        "children",
-        "accessory",
-        "_id",
-    )
 
     def __init__(
         self,

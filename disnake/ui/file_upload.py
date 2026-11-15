@@ -4,11 +4,11 @@ from __future__ import annotations
 
 import os
 from collections.abc import Sequence
-from typing import TYPE_CHECKING, ClassVar, Literal
+from typing import TYPE_CHECKING, Literal
 
 from ..components import FileUpload as FileUploadComponent
 from ..enums import ComponentType
-from ..utils import MISSING
+from ..utils import MISSING, make_repr
 from .item import UIComponent
 
 if TYPE_CHECKING:
@@ -17,6 +17,14 @@ if TYPE_CHECKING:
 __all__ = ("FileUpload",)
 
 
+@make_repr(
+    custom_id=...,
+    min_values=...,
+    max_values=...,
+    required=...,
+    file_types=...,
+    id=...,
+)
 class FileUpload(UIComponent):
     r"""Represents a UI file upload.
 
@@ -57,13 +65,6 @@ class FileUpload(UIComponent):
         sequential identifiers to the components in the modal.
     """
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = (
-        "min_values",
-        "max_values",
-        "required",
-        "file_types",
-        "id",
-    )
     # We have to set this to MISSING in order to overwrite the abstract property from UIComponent
     _underlying: FileUploadComponent = MISSING
 

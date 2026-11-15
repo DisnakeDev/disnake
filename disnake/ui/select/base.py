@@ -19,7 +19,7 @@ from typing_extensions import Self, TypeVar
 from ...components import AnySelectMenu, SelectDefaultValue
 from ...enums import ComponentType, SelectDefaultValueType
 from ...object import Object
-from ...utils import MISSING, humanize_list
+from ...utils import MISSING, humanize_list, make_repr
 from .._types import P, V_co, V_deco
 from ..item import DecoratedItem, Item, ItemCallbackType
 
@@ -37,6 +37,16 @@ SelectDefaultValueMultiInputType: TypeAlias = SelectValueT | SelectDefaultValue
 SelectDefaultValueInputType: TypeAlias = SelectDefaultValueMultiInputType[SelectValueT] | Object
 
 
+@make_repr(
+    custom_id=...,
+    placeholder=...,
+    min_values=...,
+    max_values=...,
+    disabled=...,
+    required=...,
+    id=...,
+    row=...,
+)
 class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
     """Represents an abstract UI select menu.
 
@@ -53,16 +63,6 @@ class BaseSelect(Generic[SelectMenuT, SelectValueT, V_co], Item[V_co], ABC):
     .. versionadded:: 2.7
     """
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = (
-        "custom_id",
-        "placeholder",
-        "min_values",
-        "max_values",
-        "disabled",
-        "required",
-        "id",
-        "row",
-    )
     # We have to set this to MISSING in order to overwrite the abstract property from UIComponent
     _underlying: SelectMenuT = MISSING
 

@@ -21,6 +21,7 @@ from collections.abc import (
     AsyncIterator,
     Awaitable,
     Callable,
+    Container,
     Iterable,
     Iterator,
     Mapping,
@@ -29,7 +30,7 @@ from collections.abc import (
 )
 from inspect import getdoc as _getdoc, isawaitable as _isawaitable, signature as _signature
 from operator import attrgetter
-from types import UnionType
+from types import EllipsisType, UnionType
 from typing import (
     TYPE_CHECKING,
     Annotated,
@@ -1552,6 +1553,75 @@ def humanize_list(values: list[str], combine: str) -> str:
         return "<none>"
     else:
         return f" {combine} ".join(values)
+
+
+def make_repr(
+    *positional: str,
+    _unpack_: str = "",
+    _cast_to_str_: Container[str] = (),
+    **kw_params: EllipsisType | str,
+) -> Callable[[type[T]], type[T]]:
+    r"""Decorator that synthesizes a `__repr__` for a class.
+
+    Parameters
+    ----------
+    *positional:
+        Attributes whose values should appear as passed positionally.
+    \_unpack_:
+        A name of a single attribute that corresponds to *args in `__init__`.
+        Its elements will be unpacked.
+    \_cast_to_str_:
+        Set of attribute names whose values should be converted to string via str rather than repr.
+    **kw_params:
+        Attributes to display as `key=value` pairs. Leading `_` is stripped from `key`.
+        Setting the value to `...` will use `key` as `value`.
+    ```
+    @make_repr("a", _unpack_="seq", _h=..., y="z")
+    class Foo:
+        def __init__(a: float, *my_args: int, h: str = "", y: bool = False) -> None:
+            self.a: float = a
+            self.seq: list[int] = list(my_args)
+            self._h: str = h
+            self.z: bool = y
+
+    repr(Foo(3.0, 1, 2, 3, h="h", y=True))  # Foo(3.0, 1, 2, 3, h="h", y=True)
+    ```
+    """
+    args_parts: list[str] = []
+
+    if _unpack_:
+        repr_fn = "str" if _unpack_ in _cast_to_str_ else "repr"
+        args_parts.append(f'{{", ".join(map({repr_fn}, self.{_unpack_}))}}')
+        if positional or kw_params:
+            args_parts.append(f'{{", " if self.{_unpack_} else ""}}')
+    if positional:
+        args_parts.append(
+            ", ".join(
+                f"{{self.{pos}!{'s' if pos in _cast_to_str_ else 'r'}}}" for pos in positional
+            )
+        )
+        if kw_params:
+            args_parts.append(", ")
+    if kw_params:
+        args_parts.append(
+            ", ".join(
+                f"{kw.lstrip('_')}={{self.{kw if val is ... else val}!{'s' if kw in _cast_to_str_ else 'r'}}}"
+                for kw, val in kw_params.items()
+            )
+        )
+
+    source = (
+        "def __repr__(self) -> str:\n"
+        f"    return f'{{self.__class__.__name__}}({''.join(args_parts)})'"
+    )
+    ns: dict[str, Any] = {}
+    exec(source, None, ns)  # noqa: S102
+
+    def inner(cls: type[T], /) -> type[T]:
+        cls.__repr__ = ns["__repr__"]
+        return cls
+
+    return inner
 
 
 # Similar to typing.assert_never, but returns instead of raising (i.e. has no runtime effect).

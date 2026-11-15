@@ -6,7 +6,6 @@ from collections.abc import Generator, Iterator, Mapping, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
-    ClassVar,
     Generic,
     NoReturn,
     SupportsIndex,
@@ -43,7 +42,7 @@ from ..components import (
     UserSelectMenu as UserSelectComponent,
 )
 from ..enums import ButtonStyle, ChannelType, ComponentType, TextInputStyle
-from ..utils import MISSING, SequenceProxy, assert_never, copy_doc
+from ..utils import MISSING, SequenceProxy, assert_never, copy_doc, make_repr
 from ._types import (
     ActionRowChildT,
     ActionRowMessageComponent,
@@ -121,6 +120,7 @@ ActionRowChildDefaultT = TypeVar(
 )
 
 
+@make_repr(_unpack_="_children", _id=...)
 class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
     """Represents a UI action row. Useful for lower level component manipulation.
 
@@ -172,8 +172,6 @@ class ActionRow(UIComponent, Generic[ActionRowChildDefaultT]):
 
         .. versionadded:: 2.11
     """
-
-    __repr_attributes__: ClassVar[tuple[str, ...]] = ("_children", "_id")
 
     def __init__(self, *components: ActionRowChildDefaultT, id: int = 0) -> None:
         self._id: int = id

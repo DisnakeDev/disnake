@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING
 
 from ..components import Thumbnail as ThumbnailComponent, UnfurledMediaItem, handle_media_item_input
 from ..enums import ComponentType
-from ..utils import MISSING
+from ..utils import MISSING, make_repr
 from .item import UIComponent
 
 if TYPE_CHECKING:
@@ -17,6 +17,12 @@ if TYPE_CHECKING:
 __all__ = ("Thumbnail",)
 
 
+@make_repr(
+    "media",
+    "description",
+    spoiler=...,
+    id=...,
+)
 class Thumbnail(UIComponent):
     """Represents a UI thumbnail.
 
@@ -40,12 +46,6 @@ class Thumbnail(UIComponent):
         sequential identifiers to the components in the message.
     """
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = (
-        "media",
-        "description",
-        "spoiler",
-        "id",
-    )
     # We have to set this to MISSING in order to overwrite the abstract property from UIComponent
     _underlying: ThumbnailComponent = MISSING
 

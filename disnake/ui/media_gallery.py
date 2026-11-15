@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING
 
 from ..components import MediaGallery as MediaGalleryComponent, MediaGalleryItem
 from ..enums import ComponentType
-from ..utils import MISSING
+from ..utils import MISSING, make_repr
 from .item import UIComponent
 
 if TYPE_CHECKING:
@@ -16,6 +16,10 @@ if TYPE_CHECKING:
 __all__ = ("MediaGallery",)
 
 
+@make_repr(
+    _unpack_="items",
+    id=...,
+)
 class MediaGallery(UIComponent):
     """Represents a UI media gallery.
 
@@ -34,7 +38,6 @@ class MediaGallery(UIComponent):
         sequential identifiers to the components in the message.
     """
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = ("items", "id")
     # We have to set this to MISSING in order to overwrite the abstract property from UIComponent
     _underlying: MediaGalleryComponent = MISSING
 

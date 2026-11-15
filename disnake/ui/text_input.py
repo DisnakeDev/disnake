@@ -3,13 +3,13 @@
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING, ClassVar, overload
+from typing import TYPE_CHECKING, overload
 
 from disnake import utils
 
 from ..components import TextInput as TextInputComponent
 from ..enums import ComponentType, TextInputStyle
-from ..utils import MISSING
+from ..utils import MISSING, make_repr
 from .item import WrappedComponent
 
 if TYPE_CHECKING:
@@ -18,6 +18,17 @@ if TYPE_CHECKING:
 __all__ = ("TextInput",)
 
 
+@make_repr(
+    custom_id=...,
+    style=...,
+    placeholder=...,
+    value=...,
+    required=...,
+    min_length=...,
+    max_length=...,
+    id=...,
+    _cast_to_str_={"style"},
+)
 class TextInput(WrappedComponent):
     """Represents a UI text input.
 
@@ -58,16 +69,6 @@ class TextInput(WrappedComponent):
         .. versionadded:: 2.11
     """
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = (
-        "style",
-        "custom_id",
-        "placeholder",
-        "value",
-        "required",
-        "min_length",
-        "max_length",
-        "id",
-    )
     # We have to set this to MISSING in order to overwrite the abstract property from UIComponent
     _underlying: TextInputComponent = MISSING
 

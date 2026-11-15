@@ -29,7 +29,7 @@ from .enums import (
 )
 from .flags import UnfurledMediaItemFlags
 from .partial_emoji import PartialEmoji, _EmojiTag
-from .utils import MISSING, _get_as_snowflake, assert_never, get_slots
+from .utils import MISSING, _get_as_snowflake, assert_never, get_slots, make_repr
 
 if TYPE_CHECKING:
     from typing import TypeAlias
@@ -1119,6 +1119,7 @@ class TextDisplay(Component):
         }
 
 
+@make_repr("url")
 class UnfurledMediaItem:
     """Represents an unfurled/resolved media item within a component.
 
@@ -1309,6 +1310,11 @@ class MediaGallery(Component):
         }
 
 
+@make_repr(
+    "media",
+    "description",
+    spoiler=...,
+)
 class MediaGalleryItem:
     """Represents an item inside a :class:`MediaGallery`.
 
@@ -1360,9 +1366,6 @@ class MediaGalleryItem:
             payload["description"] = self.description
 
         return payload
-
-    def __repr__(self) -> str:
-        return f"<MediaGalleryItem media={self.media!r} description={self.description!r} spoiler={self.spoiler}>"
 
 
 class FileComponent(Component):
