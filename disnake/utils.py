@@ -1588,10 +1588,12 @@ def make_repr(
     ```
     """
     __repr__ = _make_init_repr_fn(positional, _unpack_, _cast_to_str_, keywords)
+    __rich_repr__ = _make_rich_repr_fn(positional, _unpack_, keywords, user_repr=True)
 
     def wrapper(cls: type[T], /) -> type[T]:
         # signature of 'Callable[[object], str]' is lacking pos-or-kw 'self' param
         cls.__repr__ = __repr__  # pyright: ignore[reportAttributeAccessIssue]
+        cls.__rich_repr__ = __rich_repr__  # pyright: ignore[reportAttributeAccessIssue]
         return cls
 
     return wrapper
@@ -1635,6 +1637,38 @@ def _make_init_repr_fn(
     ns: dict[str, Any] = {}
     exec(source, None, ns)  # noqa: S102
     return ns["__repr__"]
+
+
+def _make_rich_repr_fn(
+    positional_params: Sequence[str] = (),
+    unpack_param: str = "",
+    keyword_params: Mapping[str, EllipsisType | str] = {},
+    user_repr: bool = False,
+) -> Callable[
+    [object], Iterator[object | tuple[str | None, object] | tuple[str | None, object, object]]
+]:
+    lines: list[str] = []
+
+    if positional_params:
+        for pos_param in positional_params:
+            lines.append(f"    yield self.{pos_param}")
+    if unpack_param:
+        lines.append(f"    yield from self.{unpack_param}")
+    if keyword_params:
+        for kw, val in keyword_params.items():
+            if val is ...:
+                val = kw
+            lines.append(f"    yield {kw.lstrip('_')!r}, self.{val}")
+    if not lines:
+        lines.append("    return iter(())")
+
+    source = "def __rich_repr__(self):\n" + "\n".join(lines)
+    ns: dict[str, Any] = {}
+    exec(source, None, ns)  # noqa: S102
+    fn = ns["__rich_repr__"]
+    if not user_repr:
+        fn.angular = True
+    return fn
 
 
 # Similar to typing.assert_never, but returns instead of raising (i.e. has no runtime effect).
