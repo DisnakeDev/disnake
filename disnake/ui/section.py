@@ -51,6 +51,7 @@ class Section(UIComponent):
     __repr_attributes__: ClassVar[tuple[str, ...]] = (
         "children",
         "accessory",
+        "_id",
     )
 
     def __init__(

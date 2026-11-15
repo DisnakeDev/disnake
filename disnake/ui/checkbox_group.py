@@ -51,10 +51,12 @@ class CheckboxGroup(UIComponent):
     """
 
     __repr_attributes__: ClassVar[tuple[str, ...]] = (
+        "custom_id",
         "options",
         "min_values",
         "max_values",
         "required",
+        "id",
     )
     # We have to set this to MISSING in order to overwrite the abstract property from UIComponent
     _underlying: CheckboxGroupComponent = MISSING
