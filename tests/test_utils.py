@@ -7,9 +7,10 @@ import inspect
 import os
 import sys
 import warnings
-from collections.abc import Callable
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from datetime import timedelta, timezone
+from types import EllipsisType, SimpleNamespace
 from typing import (
     TYPE_CHECKING,
     Annotated,
@@ -1043,3 +1044,76 @@ class _Clazz:
 )
 def test_signature_has_self_param(function, expected) -> None:
     assert utils.signature_has_self_param(function) == expected
+
+
+@pytest.mark.parametrize(
+    (
+        "positional",
+        "keyword",
+        "star_arg",
+        "repr_str",
+        "obj",
+    ),
+    [
+        ((), {}, "", "SimpleNamespace()", SimpleNamespace()),
+        (["a"], {}, "", "SimpleNamespace(1)", SimpleNamespace(a=1)),
+        ((), {"a": ...}, "", "SimpleNamespace(a=1)", SimpleNamespace(a=1)),
+        ((), {"_a": ...}, "", "SimpleNamespace(a=1)", SimpleNamespace(_a=1)),
+        ((), {"a": "b"}, "", "SimpleNamespace(a=1)", SimpleNamespace(b=1)),
+        ((), {}, "star", "SimpleNamespace(1, 2, 3)", SimpleNamespace(star=(1, 2, 3))),
+        ((), {}, "star", "SimpleNamespace()", SimpleNamespace(star=())),
+        (["a"], {}, "star", "SimpleNamespace(0, 1, 2, 3)", SimpleNamespace(a=0, star=(1, 2, 3))),
+        (
+            (),
+            {"b": ...},
+            "star",
+            "SimpleNamespace(1, 2, 3, b=())",
+            SimpleNamespace(star=(1, 2, 3), b=()),
+        ),
+        (
+            ["a"],
+            {"b": ...},
+            "star",
+            "SimpleNamespace(0, 1, 2, 3, b=())",
+            SimpleNamespace(a=0, star=(1, 2, 3), b=()),
+        ),
+        (["a"], {}, "star", "SimpleNamespace(0)", SimpleNamespace(a=0, star=())),
+        ((), {"b": ...}, "star", "SimpleNamespace(b=())", SimpleNamespace(star=(), b=())),
+        (
+            ["a"],
+            {"b": ...},
+            "star",
+            "SimpleNamespace(0, b=())",
+            SimpleNamespace(a=0, star=(), b=()),
+        ),
+    ],
+    ids=[
+        "empty",
+        "single-pos",
+        "single-kw",
+        "internal-kw",
+        "rename-kw",
+        "*args",
+        "empty-*args",
+        "pos+*args",
+        "*args+kw",
+        "pos+*args+kw",
+        "pos+empty-*args",
+        "empty-*args+kw",
+        "pos+empty-*args+kw",
+    ],
+)
+def test_make_repr(
+    positional: Sequence[str],
+    keyword: Mapping[str, EllipsisType | str],
+    star_arg: str,
+    repr_str: str,
+    obj: object,
+) -> None:
+    repr_fn = utils._make_init_repr_fn(
+        positional_params=positional,
+        unpack_param=star_arg,
+        keyword_params=keyword,
+    )
+    result = repr_fn(obj)
+    assert result == repr_str

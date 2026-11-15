@@ -1559,7 +1559,7 @@ def make_repr(
     *positional: str,
     _unpack_: str = "",
     _cast_to_str_: Container[str] = (),
-    **kw_params: EllipsisType | str,
+    **keywords: EllipsisType | str,
 ) -> Callable[[type[T]], type[T]]:
     r"""Decorator that synthesizes a `__repr__` for a class.
 
@@ -1572,7 +1572,7 @@ def make_repr(
         Its elements will be unpacked.
     \_cast_to_str_:
         Set of attribute names whose values should be converted to string via str rather than repr.
-    **kw_params:
+    **keywords:
         Attributes to display as `key=value` pairs. Leading `_` is stripped from `key`.
         Setting the value to `...` will use `key` as `value`.
     ```
@@ -1587,26 +1587,44 @@ def make_repr(
     repr(Foo(3.0, 1, 2, 3, h="h", y=True))  # Foo(3.0, 1, 2, 3, h="h", y=True)
     ```
     """
+    __repr__ = _make_init_repr_fn(positional, _unpack_, _cast_to_str_, keywords)
+
+    def wrapper(cls: type[T], /) -> type[T]:
+        # signature of 'Callable[[object], str]' is lacking pos-or-kw 'self' param
+        cls.__repr__ = __repr__  # pyright: ignore[reportAttributeAccessIssue]
+        return cls
+
+    return wrapper
+
+
+def _make_init_repr_fn(
+    positional_params: Sequence[str] = (),
+    unpack_param: str = "",
+    cast_to_str: Container[str] = (),
+    keyword_params: Mapping[str, EllipsisType | str] = {},
+) -> Callable[[object], str]:
     args_parts: list[str] = []
 
-    if _unpack_:
-        repr_fn = "str" if _unpack_ in _cast_to_str_ else "repr"
-        args_parts.append(f'{{", ".join(map({repr_fn}, self.{_unpack_}))}}')
-        if positional or kw_params:
-            args_parts.append(f'{{", " if self.{_unpack_} else ""}}')
-    if positional:
+    if positional_params:
         args_parts.append(
             ", ".join(
-                f"{{self.{pos}!{'s' if pos in _cast_to_str_ else 'r'}}}" for pos in positional
+                f"{{self.{pos}!{'s' if pos in cast_to_str else 'r'}}}" for pos in positional_params
             )
         )
-        if kw_params:
+        if keyword_params:
             args_parts.append(", ")
-    if kw_params:
+        elif unpack_param:
+            args_parts.append(f'{{", " if self.{unpack_param} else ""}}')
+    if unpack_param:
+        repr_fn = "str" if unpack_param in cast_to_str else "repr"
+        args_parts.append(f'{{", ".join(map({repr_fn}, self.{unpack_param}))}}')
+        if keyword_params:
+            args_parts.append(f'{{", " if self.{unpack_param} else ""}}')
+    if keyword_params:
         args_parts.append(
             ", ".join(
-                f"{kw.lstrip('_')}={{self.{kw if val is ... else val}!{'s' if kw in _cast_to_str_ else 'r'}}}"
-                for kw, val in kw_params.items()
+                f"{kw.lstrip('_')}={{self.{kw if val is ... else val}!{'s' if kw in cast_to_str else 'r'}}}"
+                for kw, val in keyword_params.items()
             )
         )
 
@@ -1616,12 +1634,7 @@ def make_repr(
     )
     ns: dict[str, Any] = {}
     exec(source, None, ns)  # noqa: S102
-
-    def inner(cls: type[T], /) -> type[T]:
-        cls.__repr__ = ns["__repr__"]
-        return cls
-
-    return inner
+    return ns["__repr__"]
 
 
 # Similar to typing.assert_never, but returns instead of raising (i.e. has no runtime effect).
