@@ -27,6 +27,7 @@ __all__ = ("TextInput",)
     min_length=...,
     max_length=...,
     id=...,
+    _cast_to_str_={"style"},
 )
 class TextInput(WrappedComponent):
     """Represents a UI text input.

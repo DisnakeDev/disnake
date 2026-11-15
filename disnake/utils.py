@@ -21,6 +21,7 @@ from collections.abc import (
     AsyncIterator,
     Awaitable,
     Callable,
+    Container,
     Iterable,
     Iterator,
     Mapping,
@@ -1555,7 +1556,10 @@ def humanize_list(values: list[str], combine: str) -> str:
 
 
 def make_repr(
-    *positional: str, _unpack_: str = "", **kw_params: EllipsisType
+    *positional: str,
+    _unpack_: str = "",
+    _cast_to_str_: Container[str] = (),
+    **kw_params: EllipsisType,
 ) -> Callable[[type[T]], type[T]]:
     r"""Decorator that synthesizes a `__repr__` for a class.
 
@@ -1563,32 +1567,47 @@ def make_repr(
     ----------
     *positional:
         Attributes whose values should appear as passed positionally.
-    \_unpack\_:
-        A name of a single attribute that holds an iterable, whose elements should be unpacked:
-        ```
-        @make_repr(_unpack_="seq")
-        class Foo:
-            seq: Sequence[int]
-
-            def __init__(*seq: int) -> None:
-                self.seq = list(seq)
-        repr(Foo(1, 2, 3))  # Foo(1, 2, 3)
-        ```
+    \_unpack_:
+        A name of a single attribute that corresponds to *args in `__init__`.
+        Its elements will be unpacked.
+    \_cast_to_str_:
+        Set of attribute names whose values should be converted to string via str rather than repr.
     **kw_params:
-        Attributes which should appear as `name=value` pairs. Leading `_` are stripped from `name`.
+        Attributes to display as `key=value` pairs. Leading `_` is stripped from `key`.
+
+    ```
+    @make_repr("a", _unpack_="seq", _h=...)
+    class Foo:
+        def __init__(a: float, *my_args: int, h: str = "", y: bool = False) -> None:
+            self.a: float = a
+            self.seq: list[int] = list(my_args)
+            self._h: str = h
+
+    repr(Foo(3.0, 1, 2, 3, h="h"))  # Foo(3.0, 1, 2, 3, h="h")
+    ```
     """
     args_parts: list[str] = []
 
     if _unpack_:
-        args_parts.append(f'{{", ".join(map(repr, self.{_unpack_}))}}')
+        repr_fn = "str" if _unpack_ in _cast_to_str_ else "repr"
+        args_parts.append(f'{{", ".join(map({repr_fn}, self.{_unpack_}))}}')
         if positional or kw_params:
             args_parts.append(f'{{", " if self.{_unpack_} else ""}}')
     if positional:
-        args_parts.append(", ".join(f"{{self.{pos}!r}}" for pos in positional))
+        args_parts.append(
+            ", ".join(
+                f"{{self.{pos}!{'s' if pos in _cast_to_str_ else 'r'}}}" for pos in positional
+            )
+        )
         if kw_params:
             args_parts.append(", ")
     if kw_params:
-        args_parts.append(", ".join(f"{kw.lstrip('_')}={{self.{kw}!r}}" for kw in kw_params))
+        args_parts.append(
+            ", ".join(
+                f"{kw.lstrip('_')}={{self.{kw}!{'s' if kw in _cast_to_str_ else 'r'}}}"
+                for kw in kw_params
+            )
+        )
 
     source = (
         "def __repr__(self) -> str:\n"

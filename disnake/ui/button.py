@@ -35,6 +35,7 @@ if TYPE_CHECKING:
     sku_id=...,
     id=...,
     row=...,
+    _cast_to_str_={"style"},
 )
 class Button(Item[V_co]):
     """Represents a UI button.

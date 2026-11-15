@@ -19,6 +19,7 @@ __all__ = ("Separator",)
     divider=...,
     spacing=...,
     id=...,
+    _cast_to_str_={"spacing"},
 )
 class Separator(UIComponent):
     """Represents a UI separator.

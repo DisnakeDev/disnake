@@ -5,6 +5,7 @@ from collections.abc import Sequence
 
 import pytest
 
+import disnake
 from disnake import ComponentType, components, ui
 
 # note: these may contain duplicates for aliases (Select = StringSelect)
@@ -69,7 +70,7 @@ def test__repr_attributes__(cls) -> None:
     ids=[o.__class__.__name__ for o in all_ui_component_objects],
 )
 def test_ui__repr__(obj: ui.UIComponent) -> None:
-    eval_globals = dict(ui.__dict__)
+    eval_globals = disnake.__dict__ | ui.__dict__
 
     assert obj.__class__.__repr__ is not object.__repr__
     assert not hasattr(obj, "__repr_attributes__")
@@ -78,6 +79,7 @@ def test_ui__repr__(obj: ui.UIComponent) -> None:
         new_obj: ui.UIComponent = eval(repr_str, eval_globals)  # noqa: S307
     except SyntaxError as err:
         pytest.xfail(f"Component cannot be eval'd: {err}")
+    # components don't define __eq__
     assert repr(new_obj) == repr_str
     assert repr(new_obj._underlying) == repr(obj._underlying)
 
