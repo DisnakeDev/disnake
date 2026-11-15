@@ -1559,7 +1559,7 @@ def make_repr(
     *positional: str,
     _unpack_: str = "",
     _cast_to_str_: Container[str] = (),
-    **kw_params: EllipsisType,
+    **kw_params: EllipsisType | str,
 ) -> Callable[[type[T]], type[T]]:
     r"""Decorator that synthesizes a `__repr__` for a class.
 
@@ -1574,16 +1574,17 @@ def make_repr(
         Set of attribute names whose values should be converted to string via str rather than repr.
     **kw_params:
         Attributes to display as `key=value` pairs. Leading `_` is stripped from `key`.
-
+        Setting the value to `...` will use `key` as `value`.
     ```
-    @make_repr("a", _unpack_="seq", _h=...)
+    @make_repr("a", _unpack_="seq", _h=..., y="z")
     class Foo:
         def __init__(a: float, *my_args: int, h: str = "", y: bool = False) -> None:
             self.a: float = a
             self.seq: list[int] = list(my_args)
             self._h: str = h
+            self.z: bool = y
 
-    repr(Foo(3.0, 1, 2, 3, h="h"))  # Foo(3.0, 1, 2, 3, h="h")
+    repr(Foo(3.0, 1, 2, 3, h="h", y=True))  # Foo(3.0, 1, 2, 3, h="h", y=True)
     ```
     """
     args_parts: list[str] = []
@@ -1604,8 +1605,8 @@ def make_repr(
     if kw_params:
         args_parts.append(
             ", ".join(
-                f"{kw.lstrip('_')}={{self.{kw}!{'s' if kw in _cast_to_str_ else 'r'}}}"
-                for kw in kw_params
+                f"{kw.lstrip('_')}={{self.{kw if val is ... else val}!{'s' if kw in _cast_to_str_ else 'r'}}}"
+                for kw, val in kw_params.items()
             )
         )
 
