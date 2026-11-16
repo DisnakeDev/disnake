@@ -1242,11 +1242,14 @@ class SlashCommand(ApplicationCommand):
         self.options: list[Option] = options or []
 
     def __eq__(self, other: object) -> bool:
+        if not isinstance(other, SlashCommand):
+            return False
+
         return (
             super().__eq__(other)
-            and self.description == other.description  # pyright: ignore[reportAttributeAccessIssue]
-            and self.options == other.options  # pyright: ignore[reportAttributeAccessIssue]
-            and self.description_localizations == other.description_localizations  # pyright: ignore[reportAttributeAccessIssue]
+            and self.description == other.description
+            and self.options == other.options
+            and self.description_localizations == other.description_localizations
         )
 
     def add_option(
@@ -1460,11 +1463,14 @@ class EntryPointCommand(ApplicationCommand):
         )
 
     def __eq__(self, other: object) -> bool:
+        if not isinstance(other, EntryPointCommand):
+            return False
+
         return (
             super().__eq__(other)
-            and self.description == other.description  # pyright: ignore[reportAttributeAccessIssue]
-            and self.description_localizations == other.description_localizations  # pyright: ignore[reportAttributeAccessIssue]
-            and self.handler == other.handler  # pyright: ignore[reportAttributeAccessIssue]
+            and self.description == other.description
+            and self.description_localizations == other.description_localizations
+            and self.handler == other.handler
         )
 
     def to_dict(self) -> EditApplicationCommandPayload:
