@@ -1,0 +1,1 @@
+Add :attr:`ApplicationCommandInteractionData.guild_id`, representing the guild the invoked command was registered to.

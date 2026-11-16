@@ -393,7 +393,7 @@ class FFmpegOpusAudio(FFmpegAudio):
         self,
         source: str | io.BufferedIOBase,
         *,
-        bitrate: int = 128,
+        bitrate: int | None = None,
         codec: str | None = None,
         executable: str = "ffmpeg",
         pipe: bool = False,
@@ -414,6 +414,7 @@ class FFmpegOpusAudio(FFmpegAudio):
         args.append("-" if pipe else source)
 
         codec = "copy" if codec in ("opus", "libopus") else "libopus"
+        bitrate = bitrate if bitrate is not None else 128
 
         args.extend(
             (
@@ -505,7 +506,6 @@ class FFmpegOpusAudio(FFmpegAudio):
         """
         executable = kwargs.get("executable")
         codec, bitrate = await cls.probe(source, method=method, executable=executable)
-        assert bitrate is not None
         return cls(source, bitrate=bitrate, codec=codec, **kwargs)
 
     @classmethod
