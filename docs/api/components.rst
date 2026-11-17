@@ -151,6 +151,14 @@ UnfurledMediaItem
     :members:
     :inherited-members:
 
+UnfurledScanMetadata
+~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: UnfurledScanMetadata
+
+.. autoclass:: UnfurledScanMetadata()
+    :members:
+
 Thumbnail
 ~~~~~~~~~
 
@@ -301,4 +309,12 @@ UnfurledMediaItemFlags
 .. attributetable:: UnfurledMediaItemFlags
 
 .. autoclass:: UnfurledMediaItemFlags()
+    :members:
+
+UnfurledScanMetadataFlags
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. attributetable:: UnfurledScanMetadataFlags
+
+.. autoclass:: UnfurledScanMetadataFlags()
     :members:
