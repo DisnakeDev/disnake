@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, NoReturn, overload
+from typing import TYPE_CHECKING
 
-from disnake.flags import BaseFlags, alias_flag_value, all_flags_value, flag_value
+from disnake.flags import BaseFlags, alias_flag_value, flag_value
 from disnake.utils import _generated
 
 if TYPE_CHECKING:
@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 __all__ = ("CommandSyncFlags",)
 
 
-class CommandSyncFlags(BaseFlags):
+class CommandSyncFlags(BaseFlags, default_all_set=True):
     """Controls the library's application command syncing policy.
 
     This allows for finer grained control over what commands are synced automatically and in what cases.
@@ -89,44 +89,29 @@ class CommandSyncFlags(BaseFlags):
 
     __slots__ = ()
 
-    @overload
-    @_generated
-    def __init__(
-        self,
-        *,
-        allow_command_deletion: bool = ...,
-        sync_commands: bool = ...,
-        sync_commands_debug: bool = ...,
-        sync_global_commands: bool = ...,
-        sync_guild_commands: bool = ...,
-        sync_on_cog_actions: bool = ...,
-    ) -> None: ...
+    if TYPE_CHECKING:
 
-    @overload
-    @_generated
-    def __init__(self: NoReturn) -> None: ...
-
-    def __init__(self, **kwargs: bool) -> None:
-        self.value = all_flags_value(self.VALID_FLAGS)
-        for key, value in kwargs.items():
-            if key not in self.VALID_FLAGS:
-                msg = f"{key!r} is not a valid flag name."
-                raise TypeError(msg)
-            setattr(self, key, value)
+        @_generated
+        def __init__(
+            self,
+            *,
+            allow_command_deletion: bool = ...,
+            sync_commands: bool = ...,
+            sync_commands_debug: bool = ...,
+            sync_global_commands: bool = ...,
+            sync_guild_commands: bool = ...,
+            sync_on_cog_actions: bool = ...,
+        ) -> None: ...
 
     @classmethod
     def all(cls) -> Self:
         """A factory method that creates a :class:`CommandSyncFlags` with everything enabled."""
-        self = cls.__new__(cls)
-        self.value = all_flags_value(cls.VALID_FLAGS)
-        return self
+        return cls._from_value(cls.ALL_FLAGS_VALUE)
 
     @classmethod
     def none(cls) -> Self:
         """A factory method that creates a :class:`CommandSyncFlags` with everything disabled."""
-        self = cls.__new__(cls)
-        self.value = self.DEFAULT_VALUE
-        return self
+        return cls._from_value(0)
 
     @classmethod
     def default(cls) -> Self:
