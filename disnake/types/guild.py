@@ -185,3 +185,7 @@ class ChannelPositionUpdate(TypedDict):
 class RolePositionUpdate(TypedDict):
     id: Snowflake
     position: NotRequired[Snowflake | None]
+
+
+class Permissions(TypedDict):
+    permissions: str
