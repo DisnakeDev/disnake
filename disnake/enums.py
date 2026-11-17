@@ -739,81 +739,10 @@ class AuditLogAction(Enum):
     voice_channel_status_delete           = 193
     # fmt: on
 
-    # fmt: off
-    __lookup: ClassVar[dict[int, AuditLogActionCategory | None]] = {
-        guild_update:                          AuditLogActionCategory.update,
-        channel_create:                        AuditLogActionCategory.create,
-        channel_update:                        AuditLogActionCategory.update,
-        channel_delete:                        AuditLogActionCategory.delete,
-        overwrite_create:                      AuditLogActionCategory.create,
-        overwrite_update:                      AuditLogActionCategory.update,
-        overwrite_delete:                      AuditLogActionCategory.delete,
-        channel_position_update:               AuditLogActionCategory.update,
-        kick:                                  None,
-        member_prune:                          None,
-        ban:                                   None,
-        unban:                                 None,
-        member_update:                         AuditLogActionCategory.update,
-        member_role_update:                    AuditLogActionCategory.update,
-        member_move:                           None,
-        member_disconnect:                     None,
-        bot_add:                               None,
-        role_create:                           AuditLogActionCategory.create,
-        role_update:                           AuditLogActionCategory.update,
-        role_delete:                           AuditLogActionCategory.delete,
-        role_position_update:                  AuditLogActionCategory.update,
-        invite_create:                         AuditLogActionCategory.create,
-        invite_update:                         AuditLogActionCategory.update,
-        invite_delete:                         AuditLogActionCategory.delete,
-        webhook_create:                        AuditLogActionCategory.create,
-        webhook_update:                        AuditLogActionCategory.update,
-        webhook_delete:                        AuditLogActionCategory.delete,
-        emoji_create:                          AuditLogActionCategory.create,
-        emoji_update:                          AuditLogActionCategory.update,
-        emoji_delete:                          AuditLogActionCategory.delete,
-        message_delete:                        AuditLogActionCategory.delete,
-        message_bulk_delete:                   AuditLogActionCategory.delete,
-        message_pin:                           None,
-        message_unpin:                         None,
-        integration_create:                    AuditLogActionCategory.create,
-        integration_update:                    AuditLogActionCategory.update,
-        integration_delete:                    AuditLogActionCategory.delete,
-        stage_instance_create:                 AuditLogActionCategory.create,
-        stage_instance_update:                 AuditLogActionCategory.update,
-        stage_instance_delete:                 AuditLogActionCategory.delete,
-        sticker_create:                        AuditLogActionCategory.create,
-        sticker_update:                        AuditLogActionCategory.update,
-        sticker_delete:                        AuditLogActionCategory.delete,
-        thread_create:                         AuditLogActionCategory.create,
-        thread_update:                         AuditLogActionCategory.update,
-        thread_delete:                         AuditLogActionCategory.delete,
-        guild_scheduled_event_create:          AuditLogActionCategory.create,
-        guild_scheduled_event_update:          AuditLogActionCategory.update,
-        guild_scheduled_event_delete:          AuditLogActionCategory.delete,
-        application_command_permission_update: AuditLogActionCategory.update,
-        soundboard_sound_create:               AuditLogActionCategory.create,
-        soundboard_sound_update:               AuditLogActionCategory.update,
-        soundboard_sound_delete:               AuditLogActionCategory.delete,
-        automod_rule_create:                   AuditLogActionCategory.create,
-        automod_rule_update:                   AuditLogActionCategory.update,
-        automod_rule_delete:                   AuditLogActionCategory.delete,
-        automod_block_message:                 None,
-        automod_send_alert_message:            None,
-        automod_timeout:                       None,
-        automod_quarantine_user:               None,
-        creator_monetization_request_created:  None,
-        creator_monetization_terms_accepted:   None,
-        onboarding_prompt_create:              AuditLogActionCategory.create,
-        onboarding_prompt_update:              AuditLogActionCategory.update,
-        onboarding_update:                     AuditLogActionCategory.update,
-        voice_channel_status_create:           AuditLogActionCategory.create,
-        voice_channel_status_delete:           AuditLogActionCategory.delete,
-    }
-    # fmt: on
-
     @property
-    def category(self) -> AuditLogActionCategory | None:
-        return self.__lookup[self.value]
+    def category(self):
+        _, _, suffix = self.name.rpartition("_")
+        return AuditLogActionCategory.__members__.get(suffix)
 
     @property
     def target_type(self) -> str | None:
