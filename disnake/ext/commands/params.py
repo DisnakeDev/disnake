@@ -485,6 +485,7 @@ class LargeInt(int):
 _VERIFY_TYPES: Final[frozenset[OptionType]] = frozenset((OptionType.user, OptionType.mentionable))
 
 
+# TODO(3.0): drop Param() and inject() functions, rename ParamInfo to Param
 class ParamInfo:
     r"""A class that basically connects function params with slash command options.
     The instances of this class are not created manually, but via the functional interface instead.
@@ -667,24 +668,27 @@ class ParamInfo:
     def from_param(
         cls,
         param: inspect.Parameter,
-        type_hints: dict[str, Any],
+        base_param_info: Self | None = None,
         parsed_docstring: dict[str, disnake.utils._DocstringParam] | None = None,
     ) -> Self:
-        # hopefully repeated parsing won't cause any problems
-        parsed_docstring = parsed_docstring or {}
+        default = param.default if param.default is not inspect.Parameter.empty else ...
 
-        if isinstance(param.default, cls):
+        if base_param_info is not None:
             # we copy this ParamInfo instance because it can be used in multiple signatures
-            self = param.default.copy()
+            self = base_param_info.copy()
+
+            # base_param_info can be either from `= Param()` or `: Annotated[T, Param()]`;
+            # to support `arg: Annotated[str, Param(...)] = xyz`, capture the default value in
+            # the latter case
+            if default is not ... and not isinstance(default, cls):
+                self.default = default
         else:
-            default = param.default if param.default is not inspect.Parameter.empty else ...
             self = cls(default)
 
         self.parse_parameter(param)
-        doc = parsed_docstring.get(param.name)
-        if doc:
+        if parsed_docstring and (doc := parsed_docstring.get(param.name)):
             self.parse_doc(doc)
-        self.parse_annotation(type_hints.get(param.name, param.annotation))
+        self.parse_annotation(param.annotation)
 
         return self
 
@@ -878,13 +882,13 @@ class ParamInfo:
             # (we need `__call__` here to get the correct global namespace later, since
             # classes do not have `__globals__`)
             converter_func = converter.__call__
-        _, parameters = isolate_self(converter_func)
+        _, signature = isolate_self(converter_func)
 
-        if len(parameters) != 1:
+        if len(signature.params) != 1:
             msg = "Converters must take precisely two arguments: the interaction and the argument"
             raise TypeError(msg)
 
-        _, parameter = parameters.popitem()
+        _, parameter = signature.params.popitem()
         annotation = parameter.annotation
 
         if parameter.default is not inspect.Parameter.empty and self.required:
@@ -941,7 +945,7 @@ class ParamInfo:
 def safe_call(function: Callable[..., T], /, *possible_args: Any, **possible_kwargs: Any) -> T:
     """Calls a function without providing any extra unexpected arguments"""
     MISSING: Any = object()
-    parameters = get_signature_parameters(function)
+    parameters, _ = get_signature_parameters(function)
 
     kinds = {p.kind for p in parameters.values()}
     arb = {inspect.Parameter.VAR_POSITIONAL, inspect.Parameter.VAR_KEYWORD}
@@ -988,20 +992,20 @@ def safe_call(function: Callable[..., T], /, *possible_args: Any, **possible_kwa
 
 def isolate_self(
     function: Callable[..., Any],
-    parameters: dict[str, inspect.Parameter] | None = None,
-) -> tuple[tuple[inspect.Parameter | None, ...], dict[str, inspect.Parameter]]:
+    signature: utils._SignatureData | None = None,
+) -> tuple[tuple[inspect.Parameter | None, ...], utils._SignatureData]:
     """Create parameters without self and the first interaction.
 
-    Optionally accepts a `{str: inspect.Parameter}` dict as an optimization,
+    Optionally accepts already processed signature data as an optimization,
     calls `get_signature_parameters(function)` if not provided.
     """
-    if parameters is None:
-        parameters = get_signature_parameters(function)
-    if not parameters:
-        return (None, None), {}
+    if signature is None:
+        signature = get_signature_parameters(function)
+    if not signature.params:
+        return (None, None), signature
 
-    parameters = dict(parameters)  # shallow copy
-    parametersl = list(parameters.values())
+    parameters = dict(signature.params)  # shallow copy
+    parametersl = list(signature.params.values())
 
     cog_param: inspect.Parameter | None = None
     inter_param: inspect.Parameter | None = None
@@ -1014,7 +1018,7 @@ def isolate_self(
         if issubclass_(annot, ApplicationCommandInteraction) or annot is inspect.Parameter.empty:
             inter_param = parameters.pop(parametersl[0].name)
 
-    return (cog_param, inter_param), parameters
+    return (cog_param, inter_param), utils._SignatureData(parameters, signature.metadata)
 
 
 def classify_autocompleter(autocompleter: AnyAutocompleter) -> None:
@@ -1052,33 +1056,60 @@ def classify_autocompleter(autocompleter: AnyAutocompleter) -> None:
     autocompleter.__has_cog_param__ = positional_param_count == 3
 
 
+AnyMetadata = ParamInfo | Injection
+_AnyMetadata_tp: tuple[type[AnyMetadata], ...] = AnyMetadata.__args__
+
+
+def find_meta_object(param: inspect.Parameter, metadata: Sequence[Any]) -> AnyMetadata | None:
+    """Find any `ParamInfo` or `Injection` in a parameter's default value or Annotated metadata.
+
+    Raises if >1 object was found, e.g. when `arg: Annotated[T, Param(...)] = Param(...)`.
+    """
+    candidates = list(metadata)
+    if isinstance(param.default, _AnyMetadata_tp):
+        candidates.append(param.default)
+
+    if len(candidates) == 0:
+        return None
+
+    if len(candidates) > 1:
+        msg = f'Found more than one potential `Param` or `Injection` object for "{param.name}" parameter'
+        raise TypeError(msg)
+
+    if not isinstance(candidate := candidates[0], _AnyMetadata_tp):
+        msg = f'Expected `Param` or `Injection` object for "{param.name}" parameter, not {type(candidate)!r}'
+        raise TypeError(msg)
+
+    return candidate
+
+
 def collect_params(
     function: Callable[..., Any],
-    parameters: dict[str, inspect.Parameter] | None = None,
+    signature: utils._SignatureData | None = None,
 ) -> tuple[str | None, str | None, list[ParamInfo], dict[str, Injection]]:
     """Collect all parameters in a function.
 
-    Optionally accepts a `{str: inspect.Parameter}` dict as an optimization.
+    Optionally accepts already processed signature data as an optimization.
 
     Returns: (`cog parameter`, `interaction parameter`, `param infos`, `injections`)
     """
-    (cog_param, inter_param), parameters = isolate_self(function, parameters)
+    (cog_param, inter_param), signature = isolate_self(function, signature)
 
     doc = disnake.utils.parse_docstring(function)["params"]
 
     paraminfos: list[ParamInfo] = []
     injections: dict[str, Injection] = {}
 
-    for parameter in parameters.values():
+    for parameter in signature.params.values():
         if parameter.kind in [parameter.VAR_POSITIONAL, parameter.VAR_KEYWORD]:
             continue
         if parameter.kind is parameter.POSITIONAL_ONLY:
             msg = "Positional-only parameters cannot be used in commands"
             raise TypeError(msg)
 
-        default = parameter.default
-        if isinstance(default, Injection):
-            injections[parameter.name] = default
+        meta = find_meta_object(parameter, signature.metadata.get(parameter.name, ()))
+        if isinstance(meta, Injection):
+            injections[parameter.name] = meta
         elif parameter.annotation in Injection._registered:
             injections[parameter.name] = Injection._registered[parameter.annotation]
         elif issubclass_(parameter.annotation, ApplicationCommandInteraction):
@@ -1094,7 +1125,7 @@ def collect_params(
                 msg = f"Found two candidates for the cog parameter in {function!r}: {cog_param.name} and {parameter.name}"
                 raise TypeError(msg)
         else:
-            paraminfo = ParamInfo.from_param(parameter, {}, doc)
+            paraminfo = ParamInfo.from_param(parameter, meta, doc)
             paraminfos.append(paraminfo)
 
     return (
@@ -1189,10 +1220,10 @@ def expand_params(command: AnySlashCommand) -> list[Option]:
 
     Returns the created options
     """
-    parameters = get_signature_parameters(command.callback)
-    # pass `parameters` down to avoid having to call `get_signature_parameters(func)` another time,
+    signature = get_signature_parameters(command.callback)
+    # pass `signature` down to avoid having to call `get_signature_parameters(func)` another time,
     # which may cause side effects with deferred annotations and warnings
-    _, inter_param, params, injections = collect_params(command.callback, parameters)
+    _, inter_param, params, injections = collect_params(command.callback, signature)
 
     if inter_param is None:
         msg = f"Couldn't find an interaction parameter in {command.callback}"
@@ -1219,7 +1250,7 @@ def expand_params(command: AnySlashCommand) -> list[Option]:
         if param.autocomplete:
             command.autocompleters[param.name] = param.autocomplete
 
-    if issubclass_(parameters[inter_param].annotation, disnake.GuildCommandInteraction):
+    if issubclass_(signature.params[inter_param].annotation, disnake.GuildCommandInteraction):
         command._guild_only = True
 
     return [param.to_option() for param in params]
