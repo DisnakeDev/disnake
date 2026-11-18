@@ -1,0 +1,1 @@
+:class:`DeprecationWarning`\s emitted by the library no longer bypass :ref:`warning filters <py:warning-filter>`. Since they are :ref:`ignored by default <py:default-warning-filter>`, consider setting your filters accordingly to receive these warnings again, e.g. by running Python with ``-Wdefault``.
