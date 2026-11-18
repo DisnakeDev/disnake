@@ -65,12 +65,11 @@ class EventTypings(BaseCodemodCommand):
 
     def create_empty_overload(self, func: cst.FunctionDef) -> cst.FunctionDef:
         return func.with_changes(
-            body=cst.SimpleStatementLine([cst.Expr(cst.Ellipsis())]),
             decorators=[
                 cst.Decorator(cst.Name("overload")),
                 cst.Decorator(cst.Name("_generated")),
             ],
-            leading_lines=[cst.EmptyLine()],
+            leading_lines=[cst.EmptyLine(indent=False)],
         )
 
     def create_literal(self, events: list[Event]) -> cst.BaseExpression:
@@ -83,7 +82,7 @@ class EventTypings(BaseCodemodCommand):
 
     def create_args_list(self, event_data: EventData) -> cst.BaseExpression:
         return cst.parse_expression(
-            f"[{','.join(event_data.arg_types)}]",
+            f"[{', '.join(event_data.arg_types)}]",
             config=self.module.config_for_parsing,
         )
 
@@ -118,7 +117,7 @@ class EventTypings(BaseCodemodCommand):
         elif len(args) == 1:
             new_annotation_str = args[0]
         else:
-            new_annotation_str = f"tuple[{','.join(args)}]"
+            new_annotation_str = f"tuple[{', '.join(args)}]"
         new_annotation = cst.parse_expression(
             f"Coroutine[Any, Any, {new_annotation_str}]",
             config=self.module.config_for_parsing,
