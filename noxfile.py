@@ -418,17 +418,19 @@ def test(session: nox.Session, execution_group: ExecutionGroup) -> None:
     """Run tests."""
     install_deps(session, execution_group=execution_group)
 
-    pytest_args = ["--cov", "--cov-context=test"]
+    pytest_args: list[str] = []
     if execution_group.experimental:
         # don't turn warnings into errors
         # (this will override what we set in pyproject, but not be overridden by the cli)
         pytest_args.append("-Wdefault")
+
     global reset_coverage  # noqa: PLW0603
     if reset_coverage:
         # don't use `--cov-append` for first run
         reset_coverage = False
     else:
         # use `--cov-append` in all subsequent runs
+        # (n.b. while --cov isn't enabled by default, this is still useful when --cov is passed)
         pytest_args.append("--cov-append")
 
     # TODO: only run tests that depend on the different dependencies
@@ -467,14 +469,18 @@ def coverage(session: nox.Session) -> None:
 
 @nox.session(default=False, python=False)
 def dev(session: nox.Session) -> None:
-    """Set up a development environment using pdm.
+    """Set up a development environment using uv.
 
     This will:
-    - lock all dependencies with pdm
-    - create a .venv/ directory, overwriting the existing one,
-    - install all dependencies needed for development.
+    - lock all dependencies with uv
+    - create a .venv/ directory, overwriting the existing one
+    - install all dependencies needed for development
     - install the pre-commit hook (prek)
     """
+    # clear venv-specific variables, otherwise this session will inherit and
+    # use the implicit nox script mode venv, rather than the outer .venv
+    session.env.update({"UV_PROJECT_ENVIRONMENT": None, "VIRTUAL_ENV": None})
+
     session.run("uv", "lock", external=True)
     session.run("uv", "venv", "--clear", external=True)
     session.run("uv", "sync", "--all-extras", external=True)

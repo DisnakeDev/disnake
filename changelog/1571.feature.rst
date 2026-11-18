@@ -1,0 +1,1 @@
+Return :class:`InteractionCallbackResponse` from applicable :class:`InteractionResponse` methods (e.g. :meth:`~InteractionResponse.send_message`), providing information about the affected resource.

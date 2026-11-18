@@ -24,6 +24,7 @@ from collections.abc import (
     Iterable,
     Iterator,
     Mapping,
+    MutableSequence,
     Sequence,
 )
 from inspect import getdoc as _getdoc, isawaitable as _isawaitable, signature as _signature
@@ -134,7 +135,7 @@ class _cached_property:
 
 
 if TYPE_CHECKING:
-    from functools import cached_property as cached_property
+    cached_property: TypeAlias = property
 
     from .abc import Snowflake
     from .asset import AssetBytes
@@ -284,7 +285,7 @@ def warn_deprecated(
         warnings.simplefilter("always", DeprecationWarning)
         warnings.warn(*args, stacklevel=stacklevel + 1, category=DeprecationWarning, **kwargs)
     finally:
-        assert isinstance(warnings.filters, list)
+        assert isinstance(warnings.filters, MutableSequence)
         warnings.filters[:] = old_filters
 
 

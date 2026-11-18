@@ -78,6 +78,14 @@ MessageCall
 .. autoclass:: MessageCall()
     :members:
 
+SharedClientTheme
+~~~~~~~~~~~~~~~~~
+
+.. attributetable:: SharedClientTheme
+
+.. autoclass:: SharedClientTheme
+    :members:
+
 RawTypingEvent
 ~~~~~~~~~~~~~~
 
@@ -177,6 +185,22 @@ AttachmentFlags
 .. autoclass:: AttachmentFlags()
     :members:
 
+EmbedFlags
+~~~~~~~~~~
+
+.. attributetable:: EmbedFlags
+
+.. autoclass:: EmbedFlags()
+    :members:
+
+EmbedMediaFlags
+~~~~~~~~~~~~~~~
+
+.. attributetable:: EmbedMediaFlags
+
+.. autoclass:: EmbedMediaFlags()
+    :members:
+
 AllowedMentions
 ~~~~~~~~~~~~~~~
 
@@ -252,6 +276,12 @@ MessageReferenceType
 ~~~~~~~~~~~~~~~~~~~~
 
 .. autoclass:: MessageReferenceType()
+    :members:
+
+SharedClientThemeBase
+~~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: SharedClientThemeBase()
     :members:
 
 Events

@@ -6,7 +6,6 @@ import types
 from typing import cast
 
 import libcst as cst
-import libcst.codemod.visitors as codevisitors
 import libcst.matchers as m
 from libcst import codemod
 
@@ -116,9 +115,7 @@ class FlagTypings(BaseCodemodCommand):
                 if_block = cast(
                     "cst.If", cst.parse_statement(code, config=self.module.config_for_parsing)
                 )
-                codevisitors.AddImportsVisitor.add_needed_import(
-                    self.context, "typing", "TYPE_CHECKING"
-                )
+                self.add_needed_import("typing", "TYPE_CHECKING")
                 # now we need to add this if_block into the CST of node
                 # find the first function definition and insert it before there
                 for pos, b in enumerate(body):  # noqa: B007
@@ -142,9 +139,7 @@ class FlagTypings(BaseCodemodCommand):
                 decorators=[cst.Decorator(cst.Name("_generated"))],
                 params=old_init.params.with_changes(kwonly_params=kwonly_params, star_kwarg=None),
             )
-            codevisitors.AddImportsVisitor.add_needed_import(
-                self.context, "disnake.utils", "_generated"
-            )
+            self.add_needed_import("disnake.utils", "_generated")
             node = node.deep_replace(old_init, init)  # pyright: ignore[reportAssignmentType]
 
         else:
@@ -166,16 +161,14 @@ class FlagTypings(BaseCodemodCommand):
                 ],
                 params=init.params.with_changes(kwonly_params=kwonly_params, star_kwarg=None),
             )
-            codevisitors.AddImportsVisitor.add_needed_import(self.context, "typing", "overload")
-            codevisitors.AddImportsVisitor.add_needed_import(
-                self.context, "disnake.utils", "_generated"
-            )
+            self.add_needed_import("typing", "overload")
+            self.add_needed_import("disnake.utils", "_generated")
             empty_init = full_init.with_changes(
                 params=cst.Parameters(
                     params=[cst.Param(cst.Name("self"), cst.Annotation(cst.Name("NoReturn")))]
                 )
             )
-            codevisitors.AddImportsVisitor.add_needed_import(self.context, "typing", "NoReturn")
+            self.add_needed_import("typing", "NoReturn")
             pos = body.index(init)
             body.insert(pos, empty_init)
             body.insert(pos, full_init)

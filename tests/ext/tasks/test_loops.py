@@ -41,18 +41,6 @@ class TestLoops:
                 s, m, h = time_tup
                 super().__init__(coro, seconds=s, minutes=m, hours=h)
 
-            def clone(self):
-                instance = type(self)(self.coro, (self._seconds, self._minutes, self._hours))
-                instance._time = self._time
-                instance.count = self.count
-                instance.reconnect = self.reconnect
-                instance.loop = self.loop
-                instance._before_loop = self._before_loop
-                instance._after_loop = self._after_loop
-                instance._error = self._error
-                instance._injected = self._injected
-                return instance
-
         async def callback() -> None:
             pass
 

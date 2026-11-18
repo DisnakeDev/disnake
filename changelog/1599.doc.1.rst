@@ -1,0 +1,1 @@
+Update sections related to privileged intents; these now require applying for a review once the bot reaches 10000 users, rather than requiring verification once the bot reaches 100 guilds.

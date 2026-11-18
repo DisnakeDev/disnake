@@ -1,0 +1,1 @@
+Retain original message's :attr:`~InteractionMessage.flags` when editing an interaction response using :meth:`Interaction.edit_original_response`.

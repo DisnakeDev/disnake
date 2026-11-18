@@ -8,6 +8,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     ClassVar,
+    Literal,
     NamedTuple,
     NoReturn,
     TypeVar,
@@ -75,6 +76,7 @@ __all__ = (
     "MessageReferenceType",
     "SeparatorSpacing",
     "NameplatePalette",
+    "SharedClientThemeBase",
 )
 
 EnumMetaT = TypeVar("EnumMetaT", bound="EnumMeta")
@@ -675,6 +677,7 @@ class AuditLogAction(Enum):
     overwrite_create                      = 13
     overwrite_update                      = 14
     overwrite_delete                      = 15
+    channel_position_update               = 16
     kick                                  = 20
     member_prune                          = 21
     ban                                   = 22
@@ -687,6 +690,7 @@ class AuditLogAction(Enum):
     role_create                           = 30
     role_update                           = 31
     role_delete                           = 32
+    role_position_update                  = 33
     invite_create                         = 40
     invite_update                         = 41
     invite_delete                         = 42
@@ -746,6 +750,7 @@ class AuditLogAction(Enum):
             AuditLogAction.overwrite_create:                      AuditLogActionCategory.create,
             AuditLogAction.overwrite_update:                      AuditLogActionCategory.update,
             AuditLogAction.overwrite_delete:                      AuditLogActionCategory.delete,
+            AuditLogAction.channel_position_update:               AuditLogActionCategory.update,
             AuditLogAction.kick:                                  None,
             AuditLogAction.member_prune:                          None,
             AuditLogAction.ban:                                   None,
@@ -758,6 +763,7 @@ class AuditLogAction(Enum):
             AuditLogAction.role_create:                           AuditLogActionCategory.create,
             AuditLogAction.role_update:                           AuditLogActionCategory.update,
             AuditLogAction.role_delete:                           AuditLogActionCategory.delete,
+            AuditLogAction.role_position_update:                  AuditLogActionCategory.update,
             AuditLogAction.invite_create:                         AuditLogActionCategory.create,
             AuditLogAction.invite_update:                         AuditLogActionCategory.update,
             AuditLogAction.invite_delete:                         AuditLogActionCategory.delete,
@@ -815,12 +821,16 @@ class AuditLogAction(Enum):
             return "all"
         elif v < 10:
             return "guild"
-        elif v < 20:
+        elif v < 16:
             return "channel"
+        elif v < 20:
+            return None
         elif v < 30:
             return "user"
-        elif v < 40:
+        elif v < 33:
             return "role"
+        elif v < 40:
+            return None
         elif v < 50:
             return "invite"
         elif v < 60:
@@ -1377,6 +1387,18 @@ class ApplicationCommandType(Enum):
     """Represents a user command from the context menu."""
     message = 3
     """Represents a message command from the context menu."""
+
+    @property
+    def _command_name(self):
+        # n.b. this currently won't return `None`, but it will once non-invocable command types are added
+        return _COMMAND_NAME_LOOKUP.get(self)
+
+
+_COMMAND_NAME_LOOKUP: dict[ApplicationCommandType, Literal["slash", "user", "message"]] = {
+    ApplicationCommandType.chat_input: "slash",
+    ApplicationCommandType.user: "user",
+    ApplicationCommandType.message: "message",
+}
 
 
 class ApplicationCommandPermissionType(Enum):
@@ -2497,6 +2519,24 @@ class NameplatePalette(Enum):
     """Lemon color palette."""
     white = "white"
     """White color palette."""
+
+
+class SharedClientThemeBase(Enum):
+    """Specifies the base colour scheme used by a :class:`SharedClientTheme`.
+
+    .. versionadded:: |vnext|
+    """
+
+    unset = 0
+    """No base theme. Equivalent to :attr:`dark`."""
+    dark = 1
+    """Dark base theme."""
+    light = 2
+    """Light base theme."""
+    darker = 3
+    """Darker base theme."""
+    midnight = 4
+    """Midnight base theme."""
 
 
 T = TypeVar("T", bound="Enum")

@@ -393,7 +393,7 @@ class FFmpegOpusAudio(FFmpegAudio):
         self,
         source: str | io.BufferedIOBase,
         *,
-        bitrate: int = 128,
+        bitrate: int | None = None,
         codec: str | None = None,
         executable: str = "ffmpeg",
         pipe: bool = False,
@@ -414,6 +414,7 @@ class FFmpegOpusAudio(FFmpegAudio):
         args.append("-" if pipe else source)
 
         codec = "copy" if codec in ("opus", "libopus") else "libopus"
+        bitrate = bitrate if bitrate is not None else 128
 
         args.extend(
             (
@@ -505,7 +506,6 @@ class FFmpegOpusAudio(FFmpegAudio):
         """
         executable = kwargs.get("executable")
         codec, bitrate = await cls.probe(source, method=method, executable=executable)
-        assert bitrate is not None
         return cls(source, bitrate=bitrate, codec=codec, **kwargs)
 
     @classmethod
@@ -728,15 +728,21 @@ class AudioPlayer(threading.Thread):
                 self._resumed.wait()
                 continue
 
-            # are we disconnected from voice?
-            if not self._connected.is_set():
-                # wait until we are connected
-                self._connected.wait()
-                # reset our internal data
-                self._reset_state(speak=self._resumed.is_set())
-
             self.loops += 1
             data = self.source.read()
+
+            # are we disconnected from voice?
+            if not self._connected.is_set():
+                # did the player stop while waiting for data from the source?
+                if self._end.is_set():
+                    return
+
+                # wait until we are connected
+                if not self._connected.wait(timeout=30):
+                    _log.debug(f"Did not reconnect, aborting playback in thread {self.name}")
+                    return
+                # reset our internal data
+                self._reset_state(speak=self._resumed.is_set())
 
             if not data:
                 self.stop()

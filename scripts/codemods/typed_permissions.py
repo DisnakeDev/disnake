@@ -3,7 +3,6 @@
 import itertools
 
 import libcst as cst
-import libcst.codemod.visitors as codevisitors
 import libcst.matchers as m
 
 from disnake import Permissions
@@ -181,9 +180,7 @@ class PermissionTypings(BaseCodemodCommand):
 
         overload = empty_overload.deep_clone().with_changes(params=params)
 
-        codevisitors.AddImportsVisitor.add_needed_import(self.context, "typing", "overload")
-        codevisitors.AddImportsVisitor.add_needed_import(
-            self.context, "disnake.utils", "_generated"
-        )
+        self.add_needed_import("typing", "overload")
+        self.add_needed_import("disnake.utils", "_generated")
 
         return cst.FlattenSentinel([overload, empty_overload, node])
