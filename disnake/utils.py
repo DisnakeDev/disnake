@@ -24,7 +24,6 @@ from collections.abc import (
     Iterable,
     Iterator,
     Mapping,
-    MutableSequence,
     Sequence,
 )
 from inspect import getdoc as _getdoc, isawaitable as _isawaitable, signature as _signature
@@ -280,13 +279,7 @@ def warn_deprecated(
         kwargs["skip_file_prefixes"] = (_root_module_path,)
         stacklevel = 1  # reset stacklevel, assume we just want the first frame outside library code
 
-    old_filters = warnings.filters[:]
-    try:
-        warnings.simplefilter("always", DeprecationWarning)
-        warnings.warn(*args, stacklevel=stacklevel + 1, category=DeprecationWarning, **kwargs)
-    finally:
-        assert isinstance(warnings.filters, MutableSequence)
-        warnings.filters[:] = old_filters
+    warnings.warn(*args, stacklevel=stacklevel + 1, category=DeprecationWarning, **kwargs)
 
 
 # use to mark classes users should no longer use,
