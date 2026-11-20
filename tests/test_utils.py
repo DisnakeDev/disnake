@@ -6,7 +6,6 @@ import functools
 import inspect
 import os
 import sys
-import warnings
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import timedelta, timezone
@@ -104,7 +103,7 @@ def test_deprecated_skip() -> None:
         else:
             func(n - 1)
 
-    with warnings.catch_warnings(record=True) as result:
+    with pytest.warns(DeprecationWarning) as result:
         # show a warning a couple frames deep
         func(10)
 

@@ -138,7 +138,8 @@ class TestDefaultContexts:
         assert c.body.to_dict().get("contexts") == [0]
 
     def test_dm_permission(self, bot: commands.InteractionBot) -> None:
-        with warnings.catch_warnings(record=True):
+        with warnings.catch_warnings():
+            warnings.simplefilter(action="ignore")
 
             @bot.slash_command(dm_permission=False)  # pyright: ignore[reportDeprecated]
             async def c(inter) -> None: ...
