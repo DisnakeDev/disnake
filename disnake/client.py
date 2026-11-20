@@ -26,6 +26,7 @@ import aiohttp
 from . import abc, utils
 from .activity import ActivityTypes, BaseActivity, create_activity
 from .app_commands import (
+    APIEntryPointCommand,
     APIMessageCommand,
     APISlashCommand,
     APIUserCommand,
@@ -76,7 +77,14 @@ if TYPE_CHECKING:
     from typing_extensions import NotRequired
 
     from .abc import GuildChannel, PrivateChannel, Snowflake, SnowflakeTime
-    from .app_commands import APIApplicationCommand, MessageCommand, SlashCommand, UserCommand
+    from .app_commands import (
+        APIApplicationCommand,
+        APIGuildApplicationCommand,
+        EntryPointCommand,
+        MessageCommand,
+        SlashCommand,
+        UserCommand,
+    )
     from .asset import AssetBytes
     from .channel import DMChannel
     from .member import Member
@@ -609,7 +617,7 @@ class Client:
 
     @property
     def global_application_commands(self) -> list[APIApplicationCommand]:
-        r""":class:`list`\[:class:`.APIUserCommand` | :class:`.APIMessageCommand` | :class:`.APISlashCommand`]: The client's global application commands."""
+        r""":class:`list`\[:class:`.APIUserCommand` | :class:`.APIMessageCommand` | :class:`.APISlashCommand` | :class:`.APIEntryPointCommand`]: The client's global application commands."""
         return list(self._connection._global_application_commands.values())
 
     @property
@@ -1545,7 +1553,7 @@ class Client:
         for guild in self.guilds:
             yield from guild.members
 
-    def get_guild_application_commands(self, guild_id: int) -> list[APIApplicationCommand]:
+    def get_guild_application_commands(self, guild_id: int) -> list[APIGuildApplicationCommand]:
         r"""Returns a list of all application commands in the guild with the given ID.
 
         Parameters
@@ -1619,12 +1627,12 @@ class Client:
 
         Returns
         -------
-        :class:`.APIUserCommand` | :class:`.APIMessageCommand` | :class:`.APISlashCommand` | :data:`None`
+        :class:`.APIUserCommand` | :class:`.APIMessageCommand` | :class:`.APISlashCommand` | :class:`.APIEntryPointCommand` | :data:`None`
             The application command.
         """
         return self._connection._get_global_application_command(id)
 
-    def get_guild_command(self, guild_id: int, id: int) -> APIApplicationCommand | None:
+    def get_guild_command(self, guild_id: int, id: int) -> APIGuildApplicationCommand | None:
         """Returns a guild application command with the given guild ID and application command ID.
 
         Parameters
@@ -1655,14 +1663,14 @@ class Client:
 
         Returns
         -------
-        :class:`.APIUserCommand` | :class:`.APIMessageCommand` | :class:`.APISlashCommand` | :data:`None`
+        :class:`.APIUserCommand` | :class:`.APIMessageCommand` | :class:`.APISlashCommand` | :class:`.APIEntryPointCommand` | :data:`None`
             The application command.
         """
         return self._connection._get_global_command_named(name, cmd_type)
 
     def get_guild_command_named(
         self, guild_id: int, name: str, cmd_type: ApplicationCommandType | None = None
-    ) -> APIApplicationCommand | None:
+    ) -> APIGuildApplicationCommand | None:
         """Returns a guild application command matching the given name.
 
         Parameters
@@ -2708,7 +2716,7 @@ class Client:
 
         Returns
         -------
-        :class:`list`\[:class:`.APIUserCommand` | :class:`.APIMessageCommand` | :class:`.APISlashCommand`]
+        :class:`list`\[:class:`.APIUserCommand` | :class:`.APIMessageCommand` | :class:`.APISlashCommand` | :class:`.APIEntryPointCommand`]
             A list of application commands.
         """
         return await self._connection.fetch_global_commands(with_localizations=with_localizations)
@@ -2727,7 +2735,7 @@ class Client:
 
         Returns
         -------
-        :class:`.APIUserCommand` | :class:`.APIMessageCommand` | :class:`.APISlashCommand`
+        :class:`.APIUserCommand` | :class:`.APIMessageCommand` | :class:`.APISlashCommand` | :class:`.APIEntryPointCommand`
             The requested application command.
         """
         return await self._connection.fetch_global_command(command_id)
@@ -2742,6 +2750,11 @@ class Client:
     async def create_global_command(
         self, application_command: MessageCommand
     ) -> APIMessageCommand: ...
+
+    @overload
+    async def create_global_command(
+        self, application_command: EntryPointCommand
+    ) -> APIEntryPointCommand: ...
 
     @overload
     async def create_global_command(
@@ -2764,7 +2777,7 @@ class Client:
 
         Returns
         -------
-        :class:`.APIUserCommand` | :class:`.APIMessageCommand` | :class:`.APISlashCommand`
+        :class:`.APIUserCommand` | :class:`.APIMessageCommand` | :class:`.APISlashCommand` | :class:`.APIEntryPointCommand`
             The application command that was created.
         """
         application_command.localize(self.i18n)
@@ -2784,6 +2797,11 @@ class Client:
     async def edit_global_command(
         self, command_id: int, new_command: MessageCommand
     ) -> APIMessageCommand: ...
+
+    @overload
+    async def edit_global_command(
+        self, command_id: int, new_command: EntryPointCommand
+    ) -> APIEntryPointCommand: ...
 
     @overload
     async def edit_global_command(
@@ -2808,7 +2826,7 @@ class Client:
 
         Returns
         -------
-        :class:`.APIUserCommand` | :class:`.APIMessageCommand` | :class:`.APISlashCommand`
+        :class:`.APIUserCommand` | :class:`.APIMessageCommand` | :class:`.APISlashCommand` | :class:`.APIEntryPointCommand`
             The edited application command.
         """
         new_command.localize(self.i18n)
@@ -2858,7 +2876,7 @@ class Client:
         guild_id: int,
         *,
         with_localizations: bool = True,
-    ) -> list[APIApplicationCommand]:
+    ) -> list[APIGuildApplicationCommand]:
         r"""|coro|
 
         Retrieves a list of guild application commands.
@@ -2883,7 +2901,9 @@ class Client:
             guild_id, with_localizations=with_localizations
         )
 
-    async def fetch_guild_command(self, guild_id: int, command_id: int) -> APIApplicationCommand:
+    async def fetch_guild_command(
+        self, guild_id: int, command_id: int
+    ) -> APIGuildApplicationCommand:
         """|coro|
 
         Retrieves a guild application command.
@@ -2922,11 +2942,11 @@ class Client:
     @overload
     async def create_guild_command(
         self, guild_id: int, application_command: ApplicationCommand
-    ) -> APIApplicationCommand: ...
+    ) -> APIGuildApplicationCommand: ...
 
     async def create_guild_command(
         self, guild_id: int, application_command: ApplicationCommand
-    ) -> APIApplicationCommand:
+    ) -> APIGuildApplicationCommand:
         """|coro|
 
         Creates a guild application command.
@@ -2966,11 +2986,11 @@ class Client:
     @overload
     async def edit_guild_command(
         self, guild_id: int, command_id: int, new_command: ApplicationCommand
-    ) -> APIApplicationCommand: ...
+    ) -> APIGuildApplicationCommand: ...
 
     async def edit_guild_command(
         self, guild_id: int, command_id: int, new_command: ApplicationCommand
-    ) -> APIApplicationCommand:
+    ) -> APIGuildApplicationCommand:
         """|coro|
 
         Edits a guild application command.
@@ -3012,7 +3032,7 @@ class Client:
 
     async def bulk_overwrite_guild_commands(
         self, guild_id: int, application_commands: list[ApplicationCommand]
-    ) -> list[APIApplicationCommand]:
+    ) -> list[APIGuildApplicationCommand]:
         r"""|coro|
 
         Overwrites several guild application commands in one API request.

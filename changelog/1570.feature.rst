@@ -1,0 +1,1 @@
+Add basic support for "entry point" application commands (:class:`EntryPointCommand`), and launching an activity in response to an interaction (:meth:`InteractionResponse.launch_activity`).
