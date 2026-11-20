@@ -19,12 +19,15 @@ Guild
 
 .. autoclass:: Guild()
     :members:
-    :exclude-members: fetch_members, audit_logs
+    :exclude-members: fetch_members, audit_logs, search_messages
 
     .. automethod:: fetch_members
         :async-for:
 
     .. automethod:: audit_logs
+        :async-for:
+
+    .. automethod:: search_messages
         :async-for:
 
 GuildPreview
@@ -170,6 +173,12 @@ OnboardingPromptType
 ~~~~~~~~~~~~~~~~~~~~
 
 .. autoclass:: OnboardingPromptType()
+    :members:
+
+MessageSearchSortMode
+~~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: MessageSearchSortMode()
     :members:
 
 Events
