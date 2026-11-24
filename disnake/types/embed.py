@@ -29,6 +29,13 @@ class EmbedMedia(TypedDict, total=False):
     flags: int
 
 
+class EmbedAudio(TypedDict, total=False):
+    url: str
+    proxy_url: str
+    content_type: str
+    description: str
+
+
 EmbedThumbnail = EmbedImage = EmbedVideo = EmbedMedia
 
 
@@ -44,7 +51,7 @@ class EmbedAuthor(TypedDict):
     proxy_icon_url: NotRequired[str]
 
 
-EmbedType = Literal["rich", "image", "video", "gifv", "article", "link", "poll_result"]
+EmbedType = Literal["rich", "image", "video", "audio", "gifv", "article", "link", "poll_result"]
 
 
 class Embed(TypedDict, total=False):
@@ -58,6 +65,7 @@ class Embed(TypedDict, total=False):
     image: EmbedMedia
     thumbnail: EmbedMedia
     video: EmbedMedia
+    audio: EmbedAudio
     provider: EmbedProvider
     author: EmbedAuthor
     fields: list[EmbedField]
