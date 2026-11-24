@@ -211,12 +211,15 @@ class PartialEmoji(_EmojiTag, AssetMixin):
     def url(self) -> str:
         """:class:`str`: Returns the URL of the emoji, if it is custom.
 
-        If this isn't a custom emoji then an empty string is returned
+        If this isn't a custom emoji, then an empty string is returned.
+
+        .. versionchanged:: |vnext|
+            Animated emojis now use .webp instead of .gif URLs by default.
         """
         if self.is_unicode_emoji():
             return ""
 
-        fmt = "gif" if self.animated else "png"
+        fmt = "webp?animated=true" if self.animated else "png"
         return f"{Asset.BASE}/emojis/{self.id}.{fmt}"
 
     async def read(self) -> bytes:
