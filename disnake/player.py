@@ -728,15 +728,21 @@ class AudioPlayer(threading.Thread):
                 self._resumed.wait()
                 continue
 
-            # are we disconnected from voice?
-            if not self._connected.is_set():
-                # wait until we are connected
-                self._connected.wait()
-                # reset our internal data
-                self._reset_state(speak=self._resumed.is_set())
-
             self.loops += 1
             data = self.source.read()
+
+            # are we disconnected from voice?
+            if not self._connected.is_set():
+                # did the player stop while waiting for data from the source?
+                if self._end.is_set():
+                    return
+
+                # wait until we are connected
+                if not self._connected.wait(timeout=30):
+                    _log.debug(f"Did not reconnect, aborting playback in thread {self.name}")
+                    return
+                # reset our internal data
+                self._reset_state(speak=self._resumed.is_set())
 
             if not data:
                 self.stop()

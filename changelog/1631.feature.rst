@@ -1,0 +1,1 @@
+Add :attr:`~disnake.AuditLogAction.channel_position_update` and :attr:`~disnake.AuditLogAction.role_position_update` to the audit log action enum.
