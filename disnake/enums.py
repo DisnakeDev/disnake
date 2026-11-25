@@ -1809,6 +1809,10 @@ class ThreadLayout(Enum):
     """Display forum threads in a media-focused collection of tiles."""
 
 
+# NOTE: when adding a new event here, it should also be added to:
+# - docs/api/events.rst
+# - scripts/codemods/_event_data.py
+# - the `Events` list of whichever docs/api/*.rst category applies
 class Event(Enum):
     """
     Represents all the events of the library.
