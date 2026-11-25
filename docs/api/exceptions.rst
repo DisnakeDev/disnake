@@ -111,6 +111,11 @@ LocalizationKeyError
 
 .. autoexception:: LocalizationKeyError
 
+MessageSearchIndexUnavailableError
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. autoexception:: MessageSearchIndexUnavailableError
+
 OpusError
 ~~~~~~~~~
 
@@ -146,6 +151,7 @@ Exception Hierarchy
                 - :exc:`NotFound`
                 - :exc:`DiscordServerError`
             - :exc:`LocalizationKeyError`
+            - :exc:`MessageSearchIndexUnavailableError`
             - :exc:`WebhookTokenMissing`
 
 
