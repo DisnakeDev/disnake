@@ -581,8 +581,11 @@ def handle_message_parameters_dict(
 
         payload["embeds"] = embed_data
         if embed_files:
-            # create new list, don't (potentially) modify given files list
-            files = files + embed_files
+            if files:
+                # create new list, don't (potentially) modify given files list
+                files = files + embed_files
+            else:
+                files = embed_files
 
     if files:
         if len(files) > 10:
