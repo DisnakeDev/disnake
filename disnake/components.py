@@ -34,7 +34,7 @@ from .utils import MISSING, _get_as_snowflake, assert_never, get_slots
 if TYPE_CHECKING:
     from typing import TypeAlias
 
-    from typing_extensions import Self
+    from typing_extensions import Self, TypeForm
 
     from .emoji import Emoji
     from .message import Attachment
@@ -291,8 +291,9 @@ class ActionRow(Component, Generic[ActionRowChildComponentT]):
         self.type: Literal[ComponentType.action_row] = ComponentType.action_row
         self.id = data.get("id", 0)
 
-        children = [_component_factory(d) for d in data.get("components", [])]
-        self.children: list[ActionRowChildComponentT] = children  # pyright: ignore[reportAttributeAccessIssue]
+        self.children: list[ActionRowChildComponentT] = [
+            _component_factory(d, type=ActionRowChildComponentT) for d in data.get("components", [])
+        ]
 
     def to_dict(self) -> ActionRowPayload:
         return {
@@ -1065,8 +1066,9 @@ class Section(Component):
             _component_factory(d, type=SectionChildComponent) for d in data.get("components", [])
         ]
 
-        accessory = _component_factory(data["accessory"])
-        self.accessory: SectionAccessoryComponent = accessory  # pyright: ignore[reportAttributeAccessIssue]
+        self.accessory: SectionAccessoryComponent = _component_factory(
+            data["accessory"], type=SectionAccessoryComponent
+        )
 
     def to_dict(self) -> SectionComponentPayload:
         return {
@@ -1514,8 +1516,9 @@ class Container(Component):
         self.type: Literal[ComponentType.container] = ComponentType.container
         self.id = data.get("id", 0)
 
-        components = [_component_factory(d) for d in data.get("components", [])]
-        self.children: list[ContainerChildComponent] = components  # pyright: ignore[reportAttributeAccessIssue]
+        self.children: list[ContainerChildComponent] = [
+            _component_factory(d, type=ContainerChildComponent) for d in data.get("components", [])
+        ]
 
         self.accent_colour: Colour | None = (
             Colour(accent_color) if (accent_color := data.get("accent_color")) is not None else None
@@ -1586,8 +1589,9 @@ class Label(Component):
         self.text: str = data["label"]
         self.description: str | None = data.get("description")
 
-        component = _component_factory(data["component"])
-        self.component: LabelChildComponent = component  # pyright: ignore[reportAttributeAccessIssue]
+        self.component: LabelChildComponent = _component_factory(
+            data["component"], type=LabelChildComponent
+        )
 
     def to_dict(self) -> LabelComponentPayload:
         payload: LabelComponentPayload = {
@@ -1994,8 +1998,7 @@ COMPONENT_LOOKUP: Mapping[ComponentTypeLiteral, type[Component]] = {
 
 
 # NOTE: The type param is purely for type-checking, it has no implications on runtime behavior.
-# FIXME: could be improved with https://peps.python.org/pep-0747/
-def _component_factory(data: ComponentPayload, *, type: type[C] = Component) -> C:
+def _component_factory(data: ComponentPayload, *, type: TypeForm[C] = Component) -> C:
     component_type = data["type"]
 
     try:
