@@ -69,7 +69,7 @@ class GatewayPayload(TypedDict):
 class HeartbeatCommand(TypedDict):
     op: Literal[1, 3]  # normal ws and voice ws have different heartbeat opcodes
     # normal ws uses a plain int seq, voice ws uses {t: <nonce>, seq_ack: <seq>}
-    d: int | None | VoiceHeartbeatData
+    d: VoiceHeartbeatData | int | None
 
 
 # opcode 2

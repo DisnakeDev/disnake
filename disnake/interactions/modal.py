@@ -173,8 +173,8 @@ class ModalInteraction(Interaction[ClientT]):
 
     def _resolve_values(
         self, resolve: Callable[[Snowflake, ComponentType], T]
-    ) -> dict[str, str | bool | None | Sequence[str | T]]:
-        values: dict[str, str | bool | None | Sequence[str | T]] = {}
+    ) -> dict[str, str | bool | Sequence[str | T] | None]:
+        values: dict[str, str | bool | Sequence[str | T] | None] = {}
         for component in self.walk_raw_components():
             match component["type"]:
                 case (

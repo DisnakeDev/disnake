@@ -203,6 +203,8 @@ ignore = [
     "FBT", # at some point we should make booleans keyword only
     ## flake8-commas
     "COM812", # mostly managed by the formatter
+    ## flake8-copyright
+    "CPY001", # copyright header handled by pre-commit, which includes more than just python files
     ## flake8-fixme
     "FIX", # TODO: what the name says!
     ## flake8-no-pep420
