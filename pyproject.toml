@@ -73,7 +73,7 @@ nox = [
     "nox>=2025.5.1",
 ]
 ruff = [
-    "ruff==0.15.16",
+    "ruff==0.17.6",
 ]
 tools = [
     "prek>=0.2.0",
@@ -175,12 +175,12 @@ version_info: VersionInfo = VersionInfo{version_tuple}
 """
 
 
-[tool.ruff]
-line-length = 100
-
 [tool.codespell]
 skip = ['docs/_static/**', '*.po']
 ignore-words-list = ['GroupT', "OT",]
+
+[tool.ruff]
+line-length = 100
 
 [tool.ruff.lint]
 future-annotations = true
