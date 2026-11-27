@@ -84,3 +84,5 @@ from .welcome_screen import *
 from .widget import *
 
 logging.getLogger(__name__).addHandler(logging.NullHandler())
+
+del logging  # avoid polluting namespace
