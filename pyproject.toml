@@ -73,7 +73,7 @@ nox = [
     "nox>=2025.5.1",
 ]
 ruff = [
-    "ruff==0.15.16",
+    "ruff==0.17.6",
 ]
 tools = [
     "prek>=0.2.0",
@@ -175,12 +175,13 @@ version_info: VersionInfo = VersionInfo{version_tuple}
 """
 
 
-[tool.ruff]
-line-length = 100
-
 [tool.codespell]
 skip = ['docs/_static/**', '*.po']
 ignore-words-list = ['GroupT', "OT",]
+
+[tool.ruff]
+line-length = 100
+extend-exclude = ["*.md"]  # don't format python code in markdown files
 
 [tool.ruff.lint]
 future-annotations = true
@@ -203,6 +204,8 @@ ignore = [
     "FBT", # at some point we should make booleans keyword only
     ## flake8-commas
     "COM812", # mostly managed by the formatter
+    ## flake8-copyright
+    "CPY001", # copyright header handled by pre-commit, which includes more than just python files
     ## flake8-fixme
     "FIX", # TODO: what the name says!
     ## flake8-no-pep420
@@ -324,6 +327,12 @@ max-string-length = 0
 [tool.ruff.lint.flake8-pytest-style]
 fixture-parentheses = false
 mark-parentheses = false
+
+[tool.ruff.lint.flake8-import-conventions]
+# FIXME: refactor imports to `import datetime as dt`, see
+# - https://docs.astral.sh/ruff/rules/unconventional-import-alias/
+# - info box at https://docs.python.org/3/library/datetime.html#datetime.timedelta
+extend-aliases = {"datetime" = "datetime"}
 
 [tool.ruff.lint.isort]
 combine-as-imports = true

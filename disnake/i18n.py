@@ -27,7 +27,7 @@ from .errors import LocalizationKeyError
 
 if TYPE_CHECKING:
     LocalizedRequired: TypeAlias = "str | Localized[str]"
-    LocalizedOptional: TypeAlias = "str | None | Localized[str | None]"
+    LocalizedOptional: TypeAlias = "str | Localized[str | None] | None"
 
 
 __all__ = (
@@ -90,7 +90,7 @@ class Localized(Generic[StringT]):
         self,
         string: StringT = None,
         *,
-        data: LocalizationsDict | None | LocalizationValue,
+        data: LocalizationsDict | LocalizationValue | None,
     ) -> None: ...
 
     # note: `data` accepting `LocalizationValue` is intentionally undocumented,
@@ -100,7 +100,7 @@ class Localized(Generic[StringT]):
         string: StringT = None,
         *,
         key: str = MISSING,
-        data: LocalizationsDict | None | LocalizationValue = MISSING,
+        data: LocalizationsDict | LocalizationValue | None = MISSING,
     ) -> None:
         self.string: StringT = string
 
