@@ -1,0 +1,1 @@
+Increase minimum ``typing_extensions`` version requirement to ``v4.5.0``.
