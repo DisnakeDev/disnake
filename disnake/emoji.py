@@ -155,8 +155,13 @@ class Emoji(_EmojiTag, AssetMixin):
 
     @property
     def url(self) -> str:
-        """:class:`str`: Returns the URL of the emoji."""
-        fmt = "gif" if self.animated else "png"
+        """:class:`str`: Returns the URL of the emoji.
+
+        .. versionchanged:: |vnext|
+            Animated emojis now use .webp instead of .gif URLs by default.
+        """
+        # see https://docs.discord.com/developers/resources/emoji#emoji-object-emoji-formats
+        fmt = "webp?animated=true" if self.animated else "png"
         return f"{Asset.BASE}/emojis/{self.id}.{fmt}"
 
     @property

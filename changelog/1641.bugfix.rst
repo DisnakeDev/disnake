@@ -1,0 +1,1 @@
+Change :attr:`Emoji.url` to use `.webp` rather than `.gif` for animated emojis.
