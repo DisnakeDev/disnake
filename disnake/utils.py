@@ -512,6 +512,7 @@ _mime_type_extensions = {
     "image/jpeg": ".jpg",
     "image/gif": ".gif",
     "image/webp": ".webp",
+    "image/avif": ".avif",  # we don't expect to receive avif, but doesn't hurt to include it anyway
     "audio/mpeg": ".mp3",
     "audio/ogg": ".ogg",
 }
@@ -526,6 +527,8 @@ def _get_mime_type_for_data(data: _BytesLike) -> str:
         return "image/gif"
     elif data[0:4] == b"RIFF" and data[8:12] == b"WEBP":
         return "image/webp"
+    elif data[4:12] in (b"ftypavif", b"ftypavis"):
+        return "image/avif"
     elif data[0:3] == b"ID3" or data[0:2] in (b"\xff\xfb", b"\xff\xf3", b"\xff\xf2"):
         # n.b. this doesn't support the unofficial MPEG-2.5 frame header (which starts with 0xFFEx).
         # Discord also doesn't accept it.
