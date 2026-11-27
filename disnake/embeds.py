@@ -83,6 +83,7 @@ if TYPE_CHECKING:
 
     from disnake.types.embed import (
         Embed as EmbedData,
+        EmbedAudio as EmbedAudioPayload,
         EmbedAuthor as EmbedAuthorPayload,
         EmbedField as EmbedFieldPayload,
         EmbedFooter as EmbedFooterPayload,
@@ -113,6 +114,12 @@ if TYPE_CHECKING:
         flags: int | None
 
     _EmbedVideoProxy = _EmbedMediaProxy
+
+    class _EmbedAudioProxy(Sized, Protocol):
+        url: str | None
+        proxy_url: str | None
+        content_type: str | None
+        description: str | None
 
     class _EmbedProviderProxy(Sized, Protocol):
         name: str | None
@@ -195,6 +202,7 @@ class Embed:
         "_image",
         "_thumbnail",
         "_video",
+        "_audio",
         "_provider",
         "_author",
         "_fields",
@@ -234,6 +242,7 @@ class Embed:
 
         self._thumbnail: EmbedMediaPayload | None = None
         self._video: EmbedMediaPayload | None = None
+        self._audio: EmbedAudioPayload | None = None
         self._provider: EmbedProviderPayload | None = None
         self._author: EmbedAuthorPayload | None = None
         self._image: EmbedMediaPayload | None = None
@@ -285,6 +294,7 @@ class Embed:
         self._thumbnail = data.get("thumbnail")
 
         self._video = data.get("video")
+        self._audio = data.get("audio")
         self._provider = data.get("provider")
         self._author = data.get("author")
 
@@ -339,6 +349,7 @@ class Embed:
                 self._image,
                 self._provider,
                 self._video,
+                self._audio,
             )
         )
 
@@ -615,6 +626,23 @@ class Embed:
         return cast("_EmbedMediaProxy", EmbedMediaProxy(self._video))
 
     @property
+    def audio(self) -> _EmbedAudioProxy:
+        """Returns an ``EmbedProxy`` denoting the audio contents.
+
+        Possible attributes include:
+
+        - ``url`` for the audio URL.
+        - ``proxy_url`` for the proxied audio URL.
+        - ``content_type`` for the audio's media type
+        - ``description`` for the audio's description (alt text)
+
+        If an attribute is not set, it will be :data:`None`.
+
+        .. versionadded:: |vnext|
+        """
+        return cast("_EmbedAudioProxy", EmbedProxy(self._audio))
+
+    @property
     def provider(self) -> _EmbedProviderProxy:
         """Returns an ``EmbedProxy`` denoting the provider contents.
 
@@ -858,6 +886,8 @@ class Embed:
             result["thumbnail"] = self._thumbnail
         if self._video is not None:
             result["video"] = self._video
+        if self._audio is not None:
+            result["audio"] = self._audio
         if self._provider is not None:
             result["provider"] = self._provider
         if self._author is not None:
