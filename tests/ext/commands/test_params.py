@@ -2,15 +2,15 @@
 
 import math
 from collections.abc import Callable
-from typing import Any, Optional, Union, cast
+from typing import Annotated, Any, Optional, Union, cast
 from unittest import mock
 
 import pytest
 
 import disnake
-from disnake import Member, OptionType, Role, User
+from disnake import Member, Option, OptionType, Role, User
 from disnake.ext import commands
-from disnake.ext.commands.params import _BaseRange, _Range, _String
+from disnake.ext.commands.params import Injection, Param, _BaseRange, _Range, _String, inject
 
 
 class TestParamInfo:
@@ -261,45 +261,45 @@ class TestIsolateSelf:
     def test_function_simple(self) -> None:
         def func(a: int) -> None: ...
 
-        (cog, inter), params = commands.params.isolate_self(func)
+        (cog, inter), sig = commands.params.isolate_self(func)
         assert cog is None
         assert inter is None
-        assert params.keys() == {"a"}
+        assert sig.params.keys() == {"a"}
 
     def test_function_inter(self) -> None:
         def func(inter: disnake.ApplicationCommandInteraction, a: int) -> None: ...
 
-        (cog, inter), params = commands.params.isolate_self(func)
+        (cog, inter), sig = commands.params.isolate_self(func)
         assert cog is None  # should not be set
         assert inter is not None
-        assert params.keys() == {"a"}
+        assert sig.params.keys() == {"a"}
 
     def test_unbound_method(self) -> None:
         class Cog(commands.Cog):
             def func(self, inter: disnake.ApplicationCommandInteraction, a: int) -> None: ...
 
-        (cog, inter), params = commands.params.isolate_self(Cog.func)
+        (cog, inter), sig = commands.params.isolate_self(Cog.func)
         assert cog is not None  # *should* be set here
         assert inter is not None
-        assert params.keys() == {"a"}
+        assert sig.params.keys() == {"a"}
 
     # I don't think the param parsing logic ever handles bound methods, but testing for regressions anyway
     def test_bound_method(self) -> None:
         class Cog(commands.Cog):
             def func(self, inter: disnake.ApplicationCommandInteraction, a: int) -> None: ...
 
-        (cog, inter), params = commands.params.isolate_self(Cog().func)
+        (cog, inter), sig = commands.params.isolate_self(Cog().func)
         assert cog is None  # should not be set here, since method is already bound
         assert inter is not None
-        assert params.keys() == {"a"}
+        assert sig.params.keys() == {"a"}
 
     def test_generic(self) -> None:
         def func(inter: disnake.ApplicationCommandInteraction[commands.Bot], a: int) -> None: ...
 
-        (cog, inter), params = commands.params.isolate_self(func)
+        (cog, inter), sig = commands.params.isolate_self(func)
         assert cog is None
         assert inter is not None
-        assert params.keys() == {"a"}
+        assert sig.params.keys() == {"a"}
 
     def test_inter_union(self) -> None:
         def func(
@@ -307,7 +307,78 @@ class TestIsolateSelf:
             a: int,
         ) -> None: ...
 
-        (cog, inter), params = commands.params.isolate_self(func)
+        (cog, inter), sig = commands.params.isolate_self(func)
         assert cog is None
         assert inter is not None
-        assert params.keys() == {"a"}
+        assert sig.params.keys() == {"a"}
+
+
+class TestExpandParams:
+    def _collect_params(
+        self, func: Callable[..., Any]
+    ) -> tuple[list[Option], dict[str, commands.Injection], list[commands.ParamInfo]]:
+        _, _, params, injections = commands.params.collect_params(func)
+        return [p.to_option() for p in params], injections, params
+
+    @pytest.mark.parametrize("default_value", [..., 67])
+    def test_param_as_default(self, default_value: Any) -> None:
+        def func(
+            num: int = Param(default_value, description="does stuff", ge=7),
+        ) -> None: ...
+
+        opts, _, _ = self._collect_params(func)
+        assert opts == [
+            Option(
+                "num", "does stuff", OptionType.integer, required=default_value is ..., min_value=7
+            )
+        ]
+
+    @pytest.mark.parametrize("default_value", [..., 67])
+    def test_param_as_annotated(self, default_value: Any) -> None:
+        def func(
+            # setting a default this way is technically supported and fine, it just may result
+            # in the parameter changing positions as required args must go before optional ones
+            num: Annotated[int, Param(default_value, description="does stuff", ge=7)],
+        ) -> None: ...
+
+        opts, _, _ = self._collect_params(func)
+        assert opts == [
+            Option(
+                "num", "does stuff", OptionType.integer, required=default_value is ..., min_value=7
+            )
+        ]
+
+    def test_param_as_annotated_with_default(self) -> None:
+        def func(
+            num: Annotated[int, Param(ge=7)] = 67,
+        ) -> None: ...
+
+        opts, _, params = self._collect_params(func)
+        assert opts == [Option("num", "-", OptionType.integer, required=False, min_value=7)]
+        assert params[0].default == 67
+
+    def test_injection_as_annotated(self) -> None:
+        def inject_func(num: int) -> int:
+            return num + 1
+
+        def func(
+            i: Annotated[int, Injection(inject_func)],
+        ) -> None: ...
+
+        _, inj, params = self._collect_params(func)
+        # collect_params does not flatten injection functions, expand_params does
+        assert params == []
+        assert len(inj) == 1
+
+    def test_multiple_param_injection(self) -> None:
+        def inject_func(num: int) -> int:
+            return num + 1
+
+        def func(
+            # this should not work; Param is not supported for injected args
+            # (in general, more than one Param/Injection object per parameter not supported for obvious reasons)
+            i: Annotated[int, Param()] = inject(inject_func),
+        ) -> None: ...
+
+        with pytest.raises(TypeError, match=r"Found more than one"):
+            self._collect_params(func)
