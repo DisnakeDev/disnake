@@ -31,6 +31,7 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
     "Topic :: Internet",
     "Topic :: Software Development :: Libraries",
     "Topic :: Software Development :: Libraries :: Python Modules",
@@ -101,7 +102,7 @@ codemod = [
 ]
 typing = [
     # this is not pyright itself, but the python wrapper
-    "pyright==1.1.410",
+    "pyright==1.1.414",
     # all type-check only dependencies are defined in noxfile.py.
 ]
 test = [

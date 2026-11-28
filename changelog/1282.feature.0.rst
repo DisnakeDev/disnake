@@ -1,0 +1,4 @@
+Add :class:`EmbedFlags`, :class:`EmbedMediaFlags`, and :attr:`UnfurledMediaItemFlags`, as well as associated attributes:
+- :attr:`Embed.flags` (:class:`EmbedFlags`)
+- ``Embed.image.flags``, ``Embed.thumbnail.flags``, ``Embed.video.flags`` (:class:`EmbedMediaFlags`)
+- :attr:`UnfurledMediaItem.flags` (:attr:`UnfurledMediaItemFlags`)

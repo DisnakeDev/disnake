@@ -1,0 +1,1 @@
+|commands| Correctly handle :func:`~ext.commands.is_nsfw` check in interactions where the bot isn't a guild member.

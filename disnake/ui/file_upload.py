@@ -62,6 +62,7 @@ class FileUpload(UIComponent):
         "max_values",
         "required",
         "file_types",
+        "id",
     )
     # We have to set this to MISSING in order to overwrite the abstract property from UIComponent
     _underlying: FileUploadComponent = MISSING

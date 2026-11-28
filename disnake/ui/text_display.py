@@ -31,7 +31,7 @@ class TextDisplay(UIComponent):
         sequential identifiers to the components in the message.
     """
 
-    __repr_attributes__: ClassVar[tuple[str, ...]] = ("content",)
+    __repr_attributes__: ClassVar[tuple[str, ...]] = ("content", "id")
     # We have to set this to MISSING in order to overwrite the abstract property from UIComponent
     _underlying: TextDisplayComponent = MISSING
 

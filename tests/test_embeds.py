@@ -420,6 +420,7 @@ def test_copy(embed: Embed, file: File) -> None:
     embed.add_field("another field", "woooo")
     embed.set_thumbnail("https://thumbnail.url")
     embed.set_image(file=file)
+    embed._flags = 32
 
     # copying should keep exact dict representation
     copy = embed.copy()
@@ -430,6 +431,7 @@ def test_copy(embed: Embed, file: File) -> None:
     assert embed._files is not copy._files
     assert embed._fields == copy._fields
     assert embed._fields is not copy._fields
+    assert embed._flags == copy._flags
 
 
 def test_copy_empty() -> None:

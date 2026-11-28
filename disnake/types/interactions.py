@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 
 ApplicationCommandType = Literal[1, 2, 3]
 
-InteractionContextType = Literal[1, 2, 3]  # GUILD, BOT_DM, PRIVATE_CHANNEL
+InteractionContextType = Literal[0, 1, 2]  # GUILD, BOT_DM, PRIVATE_CHANNEL
 
 
 class ApplicationCommand(TypedDict):
